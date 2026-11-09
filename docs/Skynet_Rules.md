@@ -197,8 +197,8 @@ Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05)
 will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
 next to the Value Widget it grows from). A Value Widget (Rule 1.23) with two more things: a **Format** (**Number** with Units and
 Decimals, **Time** hh:mm:ss, or **DateTime**) and a **Code** attribute that holds **Process code**. In the Code, **`{value}`**
-stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}` (a Heating Element's Setpoint is its
-`.target`). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
+stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.setpoint = {value}` (a Heating Element's Setpoint is its
+`.setpoint`, Rule 6.19; the older `.target` is the same). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
 value) or the .API (Read & Control). **A Process setting the Value does not run it**, so they can never set each other off in a
 loop, and a Brain restart does not run it. It runs like a short Process with the same words, is **not on the Processes list**,
 prints in the Console as `Name (code)`, and Stop All stops it; a new Value while it is still in a sleep or wait stops the old run.
@@ -1574,11 +1574,11 @@ language. This Rule is for a Windows Brain only, because BruControl runs only on
 
 6.17 **Deadband Device, as in BruControl** (Fritz, 2026-11-05: "Add Deadband", "look at BruControl's Deadband Control"). A
 Deadband is its own control output Device (Type ID **DBand**), next to Duty Cycle, Hysteresis and PID. It reads an Input and,
-every **Calc Time**, steps its output % toward the **Target**:
-- within **± Deadband Offset** of the Target the output is left alone (the whole Deadband is twice the offset);
+every **Calc Time**, steps its output % toward the **Setpoint**:
+- within **± Deadband Offset** of the Setpoint the output is left alone (the whole Deadband is twice the offset);
 - within **± Inner Band Offset** (outside the Deadband) it moves by the **Inner Band Drive**;
 - further out it moves by the **Outer Band Drive**.
-Below the Target the output goes up, above it goes down; **Reversed** turns that round (cooling). It starts at the **Initial
+Below the Setpoint the output goes up, above it goes down; **Reversed** turns that round (cooling). It starts at the **Initial
 Output** when Enabled. On a PWM pin (PWM output on) the pin follows the output %; on an on/off pin it is on for that % of each
 **Output window** (a Duty Cycle). The Skynet way (Rule 15.1): the output is a **%** (0-100), not BruControl's 0-255, so Import
 changes the Initial Output and the two Drives to % and says so. Like the PID it counts as a heater, is On while Enabled
@@ -1604,10 +1604,10 @@ select the heating method via process or on the Device when clicked"). One physi
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**.
 - **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
-  still's column, which a BruControl PID could not hold): a calm PID that holds a Target to 0.1 degree. It shares the PID's
-  Target, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Target; it starts there),
+  still's column, which a BruControl PID could not hold): a calm PID that holds a Setpoint to 0.1 degree. It shares the PID's
+  Setpoint, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Setpoint; it starts there),
   **Smoothing** (seconds it averages the probe over) and an exact Output window (the part of a window too short to switch is
-  carried to the next). Its I part does not grow while the output is at 0 or Max or the reading is already heading for the Target, and its D part works on the smoothed
+  carried to the next). Its I part does not grow while the output is at 0 or Max or the reading is already heading for the Setpoint, and its D part works on the smoothed
   reading. Its Properties say whether its probe can see 0.1 (a DS18B20 sees 0.11 °F steps, a PT100 0.05 °F; a thermistor on an
   analog pin cannot). Every **Temperature Probe** also has a **Two-point calibration** (ice water and boiling water at your
   altitude; the Calibration offset is added after it), and the boards set DS18B20 probes to their finest (12-bit) steps.
@@ -1631,7 +1631,7 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
-  once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
+  once**, the method's main setting with − and + (Duty cycle % or Setpoint), then **Set + ON** (ON for On/Off), **OFF**, **Set**
   and **Cancel**. *Changed 2026-11-08 (Rule 2.33):* one click on the Element itself now turns it ON or OFF at once; the pop-up opens
   from a method spot or its Temperature Probe's SetPoint pop-up (Rule 2.43, **Heating method…**).
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
@@ -1654,9 +1654,17 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
 - **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
   `.DutyC`, `.PID`, `.DeadB`, `.PREC` or `.DO` switches it to that method, the same as `.method =`. Its settings
-  by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
+  by the same names the separate Devices had (`.setpoint`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
   enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): `hE_1 = on` (or `= true`) turns it ON
   in its method. `.value` is a PID, Deadband or Precise output %; `.pv` the smoothed reading Precise holds; `.output` is its pin now (read only).
+- **`.setpoint` is the Setpoint; `.target` is the same** (OakBarn Brewery, 2026-11-09: ".target for backward Compatibilty but
+  .setpoint is perferred. Both do exactly the same. Relabel Target to Setpoint in any Dialog."): the temperature a Heating Element,
+  a Cool / Warm Pump (Rule 6.21) or an older Hysteresis, PID or Deadband Device holds is **`.setpoint`**, read or set by a Process,
+  a Code Value Widget or the .API. The older **`.target`** (BruControl's word, older Processes) does exactly the same and always
+  keeps working, but the Process editor offers `.setpoint` only. Every dialog calls it **Setpoint**, never Target. Help, Rules,
+  examples, Process Templates and the 3 Vessel sample use `.setpoint`. The Schema file keeps the setting under its old key
+  (`target`), so nothing saved before changes. A Stepper Motor's `.target` (where it moves to) is not a Setpoint and stays.
+  **Both programs:** the Importer turns BruControl's Target into the Setpoint and writes a script's `target` as `.setpoint`.
 - **Picking a method never turns it On** (OakBarn Brewery, 2026-11-08: "Selecting a Different Method when a Heating Element does not
   turn it on, On off is By the On Off Button. When a Heating element is On, It simply switches to the new control method and stays
   on"). A method spot, the pop-up's method buttons or a Process `.method` only change the method, with no pop-up; turning it On or
@@ -1688,10 +1696,10 @@ Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A p
 cools a fermenter, or a pump that brings warm water) is **ONE Pump Device on its port** (One Port, One Device, Rule 6.1), never a
 pump plus a separate Hysteresis Device. Its **Device Type ID is CPMP** (Cool / Warm Pump), so its suggested name reads plainly, for
 example `MB_D5_CPMP_Cool~Pump_FR`. It has a **Method** field, as a Heating Element has (Rule 6.19), with a pump's own methods only:
-**On/Off** (a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Target: a **minus On offset cools**, a
-**plus On offset warms**). A Process changes it with `.method` and reads `.target`, `.onoffset` and `.ondelay`, the same words a
+**On/Off** (a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Setpoint: a **minus On offset cools**, a
+**plus On offset warms**). A Process changes it with `.method` and reads `.setpoint`, `.onoffset` and `.ondelay`, the same words a
 Heating Element uses. Methods that switch a motor many times a minute (Duty Cycle, PID, Deadband, Precise) are not offered for it.
-- **Both programs:** the Panel shows the Method, Probe, Target and offsets in the Pump's Properties and the Brain runs it like a
+- **Both programs:** the Panel shows the Method, Probe, Setpoint and offsets in the Pump's Properties and the Brain runs it like a
   Heating Element's Hysteresis. The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port,
   alone or beside its on/off output, one CPMP Pump that starts in that method, with its settings and probe, and lists it in the report.
 
@@ -1716,8 +1724,8 @@ with an **Open wire and a Close wire**, or a motor that turns forward on one rel
 overshoot. Maybe make all the Hysteresis Predictive unless that could hurt a compressor type hardware"). Every Hysteresis (the
 Hysteresis Device, a Heating Element's Hysteresis method, a Cool / Warm Pump's Hysteresis) is **Predictive** unless its **Predictive**
 switch is turned off. After it turns off, the heat (or cold) already on its way keeps the reading going past the OFF point. Skynet
-watches how far it coasts each time (averaging the last runs) and turns off that much **before** the Target, so the reading settles at
-the Target instead of going past it.
+watches how far it coasts each time (averaging the last runs) and turns off that much **before** the Setpoint, so the reading settles at
+the Setpoint instead of going past it.
 - **Safe for a compressor:** the ON point moves down by the same amount, so the swing between ON and OFF, and how often it starts, stay
   the same as without Predictive. The **On delay** (the shortest time off before it may start again) is always kept. The early OFF is
   never more than half the On offset.
@@ -2707,7 +2715,7 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
    **4. Name** and the Suggested Name (Rule 3.1).
 3. With pictures: the **Graphic**, **Path** (and **Path (on)** when it has a second picture), and **Overlay** with **Toggle**
    (an output) and **Database and .API ⬢** on its line. With no pictures: **Database and .API ⬢** on a line of its own.
-4. Its own set (Rule 18.22): what that kind of Device needs (a PID's Input, Target, Kp ...; a sensor's Signal, Units ...).
+4. Its own set (Rule 18.22): what that kind of Device needs (a PID's Input, Setpoint, Kp ...; a sensor's Signal, Units ...).
 5. **Text attributes ⬢** (its Value or On / Off text and its look), **X, Y, Width, Height**, and the **Device Type** last.
 - **A Device built into something** (a Vessel Device's Thermowell, Probe, Heating Element or Valve; a RIMS tube's or an Integrated
   kettle's element and probe, Rule 5.7) gets the same layout, with **3. Built into** (greyed out) in place of the Tab, no Graphic and
@@ -2727,7 +2735,7 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   (built with the Vessel Device Builder, or built and saved on a Tab) its Properties have only **the Universal Properties** (Rule
   1.21: Name with ✏ Change name, Label, Visible, Hidden Locked, Label and place, Tab, X, Y, Lock), its **Type** greyed out, its Out
   flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections are fully editable (Label,
-  Interface, Port or Probe #, Heating method, Temperature Probe, Target, Units, Calibration offset) and each can be **swapped** for
+  Interface, Port or Probe #, Heating method, Temperature Probe, Setpoint, Units, Calibration offset) and each can be **swapped** for
   another existing one or a new one. On Save the old one is taken out of the vessel (2026-11-09: "It needs to go as it is a
   replacement for an exist hardware ... So Delete if replace with a differnt Port"): when the new one is on **another Port** the old
   one is **deleted**; when it is on **the same Port** (the hardware was changed, the wiring was not) the old one stays on the Tab as
@@ -2880,6 +2888,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 ## Change log
 
 - 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.
+- 2026-11-09: Changed Rule 6.19 (OakBarn Brewery: ".target for backward Compatibilty but .setpoint is perferred. Both do exactly the same. Relabel Target to Setpoint in any Dialog."): `.setpoint` is the preferred name of the Setpoint of a Heating Element, Cool / Warm Pump and the older Hysteresis, PID and Deadband Devices; `.target` stays and does exactly the same (read and write); every dialog says Setpoint; Help, Rules, Process Templates and the 3 Vessel sample use `.setpoint`; both programs (the Importer writes BruControl's `target` as `.setpoint`). Answers the open question from Rule 1.27 (PR #278).
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")

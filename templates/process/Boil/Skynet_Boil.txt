@@ -6,7 +6,7 @@ step "Pre-boil gravity"
 ask "Take a pre-boil gravity reading of the wort in the kettle and write it down. Press Done when you have it."
 step "Up to the boil"
 @if Boil_Heater
-{{Boil_Heater}}.target = rcp_Boil_Start_Temp + 5
+{{Boil_Heater}}.setpoint = rcp_Boil_Start_Temp + 5
 {{Boil_Heater}} = on
 @else
 ask "Turn the boil kettle heat on full. Press Done when it is on."

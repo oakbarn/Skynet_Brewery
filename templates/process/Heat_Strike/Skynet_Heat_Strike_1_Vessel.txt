@@ -6,7 +6,7 @@ step "Fill the vessel"
 ask "Put the grain basket in, and fill the vessel with " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of water (all of it for a full volume mash). Press Done when it is in."
 step "Heat the strike water"
 @if HLT_Heater
-{{HLT_Heater}}.target = rcp_Strike_Temp
+{{HLT_Heater}}.setpoint = rcp_Strike_Temp
 {{HLT_Heater}} = on
 @else
 ask "Turn the heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."

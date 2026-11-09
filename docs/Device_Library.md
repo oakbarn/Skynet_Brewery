@@ -282,20 +282,20 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 ### 4.8 Hysteresis (control output)
 - **Add menu:** Devices: control outputs > Hysteresis.
 - **Type ID:** Hys. Counts as heating (PR #108).
-- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, ON offset (positive = heat: on below target minus offset; negative = cool), ON delay (seconds). **Predictive** (on by default, Rule 6.23, Help 168): turns off early by the coast it has learned, so it does not overshoot; never more starts.
+- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Setpoint, ON offset (positive = heat: on below target minus offset; negative = cool), ON delay (seconds). **Predictive** (on by default, Rule 6.23, Help 168): turns off early by the coast it has learned, so it does not overshoot; never more starts.
 
 ### 4.9 PID (control output)
 - **Add menu:** Devices: control outputs > PID (holds a target temperature).
 - **Type ID:** PID. Counts as heating (PR #108).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
-- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, Kp, Ki, Kd, Max output %, Max integral %, Calculation time (s), Output window (s), Reversed (cooling), PWM output (off = time-proportioned on/off).
+- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Setpoint, Kp, Ki, Kd, Max output %, Max integral %, Calculation time (s), Output window (s), Reversed (cooling), PWM output (off = time-proportioned on/off).
 
 ### 4.9.1 Deadband (control output)
 - **Add menu:** Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 126).
 - **Type ID:** DBand (General Type DBAND, proposed). Counts as heating and is On while Enabled (Rule 7.9); can share a heater's port (Rule 6.1).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
-- **How it works:** every Calc Time its output % steps toward the Target: left alone within ± Deadband Offset, by the Inner Band Drive within ± Inner Band Offset, by the Outer Band Drive further out. Below the Target it goes up, above it goes down (Reversed for cooling). Starts at the Initial Output when Enabled.
-- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, Deadband Offset (0.5), Inner Band Offset (2), Initial Output % (0), Inner Band Drive (1), Outer Band Drive (5), Max output % (100), Calc Time (10 s), Output window (2 s), Reversed (cooling), PWM output (off = time-proportioned on/off).
+- **How it works:** every Calc Time its output % steps toward the Setpoint: left alone within ± Deadband Offset, by the Inner Band Drive within ± Inner Band Offset, by the Outer Band Drive further out. Below the Setpoint it goes up, above it goes down (Reversed for cooling). Starts at the Initial Output when Enabled.
+- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Setpoint, Deadband Offset (0.5), Inner Band Offset (2), Initial Output % (0), Inner Band Drive (1), Outer Band Drive (5), Max output % (100), Calc Time (10 s), Output window (2 s), Reversed (cooling), PWM output (off = time-proportioned on/off).
 
 ### 4.10 Digital input
 - **Add menu entries** (Devices: digital inputs), each a preset of the same Device:
@@ -445,7 +445,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
 - **Built-in Devices made:** a heating element (PID, Hysteresis, Duty Cycle, or PWM with Kind = element) named `<Label> Heat`, and a Temperature probe named `<Label> Temp`. Example names: `MB_9_PID_RIMS_Heat`, `MB_700_1W_RIMS_Temp`.
 - A PID or Hysteresis element always holds the temperature its own probe reads (its Input is set for you).
-- **Properties:** Interface; Heating element: Control, Port and all that control's own settings (for a PID: Target, Kp, Ki, Kd, Max output ...); Heating element's thermowell: probe type and Port. Save and both Devices follow.
+- **Properties:** Interface; Heating element: Control, Port and all that control's own settings (for a PID: Setpoint, Kp, Ki, Kd, Max output ...); Heating element's thermowell: probe type and Port. Save and both Devices follow.
 - Put on a Tab from a Template (☰ Menu), it has no Devices yet; set the Interface and Ports in its Properties.
 
 ### 5.1 RIMS tube

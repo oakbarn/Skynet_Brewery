@@ -6,7 +6,7 @@ step "Pitch the yeast"
 ask "Pitch the yeast " + rcp_Yeast_Name + " at " + rcp_Ferment_Temp + rcp_Temp_Units + ". Press Done when it is in."
 step "Hold the fermentation temperature"
 @if Ferment_Heater
-{{Ferment_Heater}}.target = rcp_Ferment_Temp
+{{Ferment_Heater}}.setpoint = rcp_Ferment_Temp
 {{Ferment_Heater}} = on
 @end
 unlock_Equipment
