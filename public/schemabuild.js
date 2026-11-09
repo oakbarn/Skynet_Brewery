@@ -163,7 +163,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     fields.Boil_Timer = timer('Boil timer', 330).name;
   }
   // the fermentors, on their own Tab: each one's probe and its glycol (cooling) valve, one Heating Element on one Port in Hysteresis
-  // that turns on above the Target (a minus On offset cools, Rule 6.19). Fermentor 1 does the Ferment step's jobs.
+  // that turns on above the Setpoint (a minus On offset cools, Rule 6.19). Fermentor 1 does the Ferment step's jobs.
   for (let i = 0; i < nF; i++) {
     const s = `FV${i + 1}`;
     vessels.push({ template: 'Fermenter', role: 'Fermentor', vtype: 'Fermenter', label: `Fermentor ${i + 1}`, short: s, tab: fTab, x: 60 + i * 260, y: 80 });

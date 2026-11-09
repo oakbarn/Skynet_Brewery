@@ -2789,7 +2789,7 @@ function choose(title, buttons, current) {
 }
 
 // main setting of each control element, shown with an Enabled switch in its dialog
-const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'] };
+const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Setpoint'], pid: ['target', 'Setpoint'], deadband: ['target', 'Setpoint'] };
 function controlDialog(t) {
   const v = S.values[t.name] || {};
   const [prop, label] = CONTROL_MAIN[t.type];
@@ -5209,7 +5209,7 @@ const ipLabel = (id, ws) => allIps(ws).find(q => q.id === id)?.label || 'the IP'
 // INT_DEVICES: what each one is called in its dialogs, and its Label to start with
 const INT_DEVICES = { RIMS_Tube: ['RIMS tube', 'RIMS'], Integrated_Electric_Kettle_Basic: ['electric kettle', 'Kettle'] };
 const intWhat = g => INT_DEVICES[g?.template] || (g?.vesselType === 'rims' ? INT_DEVICES.RIMS_Tube : ['electric kettle', 'Kettle']);
-const HEAT_CTL = [['pid', 'PID (holds a target temperature)'], ['hysteresis', 'Hysteresis (on / off around a target)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
+const HEAT_CTL = [['pid', 'PID (holds a setpoint temperature)'], ['hysteresis', 'Hysteresis (on / off around a setpoint)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
 const RIMS_KEYS = ['iface', 'heatCtl', 'heatPin', 'tempKind', 'tempPin', 'tempProbe'];
 // the heating element's own settings for its control (Fritz, 2026-10-26: its Properties are in the item's Properties), as el_<key>.
 // Its Interface and Port are set above them, and its Input is always its own thermowell's probe.
@@ -6276,7 +6276,7 @@ const CAL_ROW = (it, x = {}) => ['_calx', 'More calibrations', 'ro', calSummary(
 const VOLT_TIP = 'Measured volts (Rule 6.24): set the output to a few settings (a PWM output: %), measure the volts with a meter, and write each pair on its own line, e.g. 50, 4.6. A DAC seldom reaches exactly 10 V at 100 %, and each one is different. Skynet then shows about how many volts it gives (≈ V), and a Process can set volts: My_DAC.volts = 7.5.';
 const VOLT_FIELD = (x = {}) => ['voltTable', 'Measured volts (its setting, the volts you measured: one pair per line)', 'pairs', null, false, false, { tip: VOLT_TIP, ...x }];
 // Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
-const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Target, so it settles at the Target instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
+const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
 const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
 const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
@@ -6329,11 +6329,11 @@ const F = {
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
-  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'ON offset (positive = heat: on below setpoint - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
-  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
-    ['deadbandOffset', 'Deadband Offset (± around the Target: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Target: inside it the output moves by the Inner Band Drive)', 'num'],
+  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'],
+    ['deadbandOffset', 'Deadband Offset (± around the Setpoint: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Setpoint: inside it the output moves by the Inner Band Drive)', 'num'],
     ['initialOutput', 'Initial Output % (when Enabled)', 'num'], ['innerBandDrive', 'Inner Band Drive (% change each Calc Time)', 'num'], ['outerBandDrive', 'Outer Band Drive (% change each Calc Time, outside the Inner Band)', 'num'],
     ['maxOutput', 'Max output %', 'num'], ['calcTime', 'Calc Time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Picture Widget (Fritz, 2026-10-27): "Turns on with" picks what turns it on: an on/off Device or Widget, or a heater that is on while Enabled.
@@ -6655,7 +6655,7 @@ const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns
 // method; the settings of the other methods are kept, so switching back finds them as they were.
 // hover help for the Precise settings (Rule 2.38)
 const HEAT_TIPS = {
-  holdOutput: 'Precise: the output % the element needs just to stay at the Target (watch the % once it has settled and put that here). It starts there, so it reaches the Target without a big swing. 0 = it works it out by itself, more slowly.',
+  holdOutput: 'Precise: the output % the element needs just to stay at the Setpoint (watch the % once it has settled and put that here). It starts there, so it reaches the Setpoint without a big swing. 0 = it works it out by itself, more slowly.',
   smoothing: 'Precise: the seconds it averages the probe over, so the probe\'s tiny steps do not make the heater twitch. 10 is a good start; more is calmer but slower to see a change. 0 = no smoothing.',
   outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
 };
@@ -6926,7 +6926,7 @@ const DATAW_TIPS = {
   size: 'Its size on the Tab in pixels.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
-  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.target = {value}. A Process setting the Value does not run it. Problems show in the Console.',
+  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
@@ -7178,13 +7178,13 @@ function vpSections(it, edit = false) {
           ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
             : [[x + 'label', '1. Label', 'text'], [x + 'device', '2. Interface (board)', 'dev', null, true], ow ? [x + 'pidx', 'Probe #', 'probe'] : [x + 'channel', 'Port', 'pin', 'vpx_' + spot],
               ro('n', '4. Name', e.name),
-              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Target', 'num']]
+              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
               [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]])];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
         ro('l', '1. Label', e?.label), ro('i', '2. Interface (board)', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
-        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Target', e?.target)]
+        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Setpoint', e?.target)]
           : [ro('t', 'Probe type', e && probeKindName(e)), ro('u', 'Units', e?.units), ro('o', 'Calibration offset', e && (e.offset ?? 0))]),
         ...(e ? [[k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]] : [])];
     };
@@ -7413,8 +7413,8 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target), Deadband (steps its % toward the Target) or Precise (a calm PID that holds a Target to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
-  heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Target. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
@@ -8152,7 +8152,7 @@ const INFO = {
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
-    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.target = {value} (Rule 1.27).'],
+    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']] },
