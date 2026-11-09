@@ -2180,6 +2180,13 @@ its Alarm still shows On. Set in Alarm Widget Properties > Alarm > **Priority**,
 (`""` puts back its Properties' number). `.waiting` (read only) is how many Chain steps wait. *Replaced:* between two of the same
 Kind the newest one played (PR #24). Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
 
+7.19 **Alarm Digital Outputs: an Alarm can switch 2 Devices** (OakBarn Brewery, 2026-11-09: "Ok, we can add that but add 2 Items to
+contol I assume it was one in BruControl", "And if blank those do nothing"). An Alarm Widget (every kind) has **Digital Output 1** and
+**Digital Output 2** (optional; None to start, Rule 18.33). Each picks a Device with an ON / OFF state (a warning light, a horn, a relay;
+a Duty Cycle, Hysteresis, PID or Deadband by its ON / OFF). It goes **ON while the Alarm is active and OFF when the Alarm stops**. A
+blank slot does nothing; a Device that has no ON / OFF state is skipped with a note in the Console. Both programs: the BruControl Import
+puts BruControl's one Digital Output in slot 1 (an Alarm imported before keeps it there too). Help 178.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3687,5 +3694,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 2.40 point 4 built (OakBarn Brewery's approved wording): gauge settings drawn by Skynet (Dial shape, tick marks, the Skynet Bar, Skynet color styles); the Import maps BruControl gauges to the nearest; Help 152. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 6.27, Board settings and Board Talk (OakBarn Brewery): On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port on each Interface; Board Talk shows every line both ways in plain words and sends a typed line; the Importer keeps Enabled, Baud and Response Timeout; Help 177. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Added Rule 7.19, Alarm Digital Outputs (OakBarn Brewery): 2 optional Devices go ON and OFF with their Alarm; blank does nothing; the Importer puts BruControl's one in slot 1; Help 178. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
