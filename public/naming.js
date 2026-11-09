@@ -34,10 +34,12 @@ const T = {
   // analog inputs and the rest
   AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', PH_Met: 'pH meter', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
   Step: 'Stepper motor',
+  // the Hydrometer Device (OakBarn Brewery, 2026-11-09, Rule 6.25): a Tilt or any other hydrometer, on a virtual port 200, 201 ...
+  Hydro: 'Hydrometer (Tilt, Tilt Pro, iSpindel, RAPT Pill or any other)',
 };
-// IDs kept for Devices Skynet can't read yet, so nothing else takes them: DHT11 and DHT22 need firmware first;
-// Hydro is a Tilt or any other hydrometer (Fritz, 2026-10-23), not built yet (a Tilt is Bluetooth).
-export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity', Hydro: 'Hydrometer (Tilt or any other)' };
+// IDs kept for Devices Skynet can't read yet, so nothing else takes them: DHT11 and DHT22 need firmware first.
+// (Hydro was kept here from 2026-10-23 until the Hydrometer Device was built, Rule 6.25.)
+export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity' };
 export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
@@ -54,6 +56,7 @@ export const TYPE_CODES = {
   hysteresis: list('Hys'),
   pid: list('PID'),
   deadband: list('DBand'),
+  hydrometer: list('Hydro'),
 };
 export const isDevice = el => !!el && Object.hasOwn(TYPE_CODES, el.type);
 export const typeCodes = el => TYPE_CODES[el?.type] ?? [];
@@ -100,7 +103,7 @@ export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filt
   .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
-// so the 1st one is port 200, the 2nd 201 ... (index from 1). Used in its name when Hydro Devices are built.
+// so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).
 export const HYDRO_PORT_BASE = 200;
 export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trunc(Number(index) || 1)) - 1);
 // OneWire (DS18B20) probes share one wire, so each probe number is a virtual port 700-799: probe 1 = 700, probe 2 = 701 ...

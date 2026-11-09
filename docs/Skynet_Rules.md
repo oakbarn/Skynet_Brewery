@@ -78,7 +78,7 @@ OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
 1.10 **Hole** or **Kettle Port** = an opening in a kettle. "Add TC 1.5 Port to the Center Bottom at
 1 inch" means the port's center is 1 inch above the bottom. (2026-10-23)
 
-1.11 **Hydro** = a Tilt or any other hydrometer. (2026-10-23, PR #97)
+1.11 **Hydro** = a Tilt or any other hydrometer: the Hydrometer Device (Rule 6.25). (2026-10-23, PR #97; built 2026-11-09)
 
 1.12 **User Bundled Template** = a Template a user builds (not "User Template"). (2026-10-23, PR #99)
 
@@ -1743,6 +1743,36 @@ bottom (layered, as BruControl's): **Linear Offset**, **Linear Multiplier**, **L
   Places, Prefix, Suffix as Units). A PWM output's BruControl calibrations are not copied (BruControl counts it 0-255, Skynet in %) and
   are listed in the Import notes. Help 169.
 
+6.25 **One Hydrometer Device, a Template for each kind** (OakBarn Brewery, 2026-11-09: "Add all the Hydrometer Types as Hydrometer
+Templates, Tilt, Tilt Pro, ISpindel and I know there or others. Almost all have a Method so you can connect more than 1. Tilt has you
+purchase a difference color. There may be a need to add all the properties of the different Types to the General Hydrometer
+Properties but Grey it if not applicable to the type"). The Hydrometer is one Device (Type ID **Hydro**, a virtual port 200, 201 ...,
+Rule 6.2). Its **Template** (Tilt, Tilt Pro, Tilt Pro Mini, iSpindel, GravityMon, Floaty, BrewBrain Float, RAPT Pill, PLAATO, Other)
+picks which of its settings it uses; every setting is in its Properties and the ones its Template does not use are **greyed out**.
+- **Connection** (not "Method", which is the Control Method of Rule 6.19): Bluetooth, Wi-Fi to Skynet, or the maker's cloud, as its
+  Template allows.
+- **More than one:** a Tilt is told apart by its **Tilt Color**, every other kind by its **Hardware ID** (its Name or chip ID). Both are
+  **mandatory** for their kind (OakBarn Brewery: "for a Tilt Color and Id are mandatory") and never shared: one Hydrometer per Tilt
+  Color (any Tilt kind), one per Hardware ID. **Never by IP address** (OakBarn Brewery: "No tracking by IP Address"): a router may
+  change it. A hydrometer the Brain hears that no Hydrometer has yet is offered in the Hardware ID box, so nobody looks it up.
+- **SG, °Plato and °Brix all the time** (OakBarn Brewery: "List SG, Brix, and Plato all The time and on a graph choose which to display
+  but easy to switch right on the graph"): `.sg`, `.plato`, `.brix`; its Gravity units pick what its value shows. On a Graph a
+  Hydrometer's line has an SG / °P / °Bx switch (each screen keeps its own pick).
+- **Smoothing** (Smoothing weight %, as an Analog Input's): Tilts start at 20 %, the others at 100 % (none). **Lost signal** after a
+  number of minutes (Tilts 15, others 60): it shows No signal and `.lost` is true. Original Gravity (`.og`) gives `.abv`.
+- **Database and .API** as every other Device (OakBarn Brewery: "Database for readings would be handled like any other database").
+  One that talks through the web (Wi-Fi to Skynet or the cloud) has **.API On (Read Only), greyed out** (OakBarn Brewery: ".API may
+  need to be on and greyed out for any that talk via a web interface only").
+- **Read by hand is a Process command, not a Device** (OakBarn Brewery: "Glass and Refractometer Readings are external to the Program,
+  but there could be a command to Take a Reading that acts like a Wait until a Reading Question is answered"): `take_reading Name`
+  (Name: a Hydrometer, a Value Widget or a gGlobal). A pop-up asks **Refractometer** or **Glass** (a tick box each). A Refractometer
+  goes to the SG box and Save at once; a Glass sample first counts down its minutes to cool, then the same SG box pops up. **Send to
+  Database now** is a tick box; unticked, Save is Exit (No Database). **Pause** (only a person) hides it, and it pops up again in 5
+  minutes. The Process waits until it is saved.
+- **Both programs:** the BruControl Importer makes a Hydrometer Input a Tilt with its Tilt Color on the same port, and its
+  Hydrometers page lists the same Templates with Tilt Color and Hardware ID. Bluetooth reading (the Pi's own, or an ESP32) is the next
+  step; the cloud later. Help 170.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2896,6 +2926,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
 - 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
