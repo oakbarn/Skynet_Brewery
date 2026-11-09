@@ -2,8 +2,9 @@
 // Rule 1.24 (Fritz, 2026-11-06): a gGlobal can be made in a Process. new gGlobalValue gV_X = 10, new gV gV_X = 10 and
 // new value gV_X = 10 all make the same gGlobal; declare is the same word as new; a name whose start does not fit is an error.
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
-import { Store } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js';
-import { declareCheck, prefixKind } from '../public/gkinds.js';
+import { Store, attrsOf } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js';
+import { declareCheck, prefixKind, kindValueError } from '../public/gkinds.js';
+import { TimeVal } from '../lib/values.js';
 import { suggest } from '../public/autofill.js';
 
 // 1. the words and the name starts
@@ -78,6 +79,51 @@ assert.ok(at('new ').includes('gGlobalValue gV_')); assert.ok(at('new ').include
 assert.ok(at('declare ').includes('gB gB_'));
 assert.deepEqual(at('new gGlobalString '), ['gS_']);
 assert.deepEqual(at('new gT '), ['gT_']);
+
+// 6. a gGlobal takes only its own Kind of value (OakBarn Brewery, 2026-11-09, Rule 1.30)
+assert.equal(kindValueError('gT_HopDrop_1', 'time', new TimeVal(900)), '');
+assert.match(kindValueError('gT_HopDrop_1', 'time', 'My Hop Drop'), /gT_HopDrop_1 is a Time gGlobal: it only takes a time, such as 00:15:00. It was not changed, because "My Hop Drop" is text/);
+assert.match(kindValueError('gT_HopDrop_1', 'time', 15), /15 is a number.*times 00:01:00/);
+assert.match(kindValueError('gV_X', 'value', 'abc'), /Value gGlobal/); assert.match(kindValueError('gV_X', 'value', true), /true is a true or false/);
+assert.match(kindValueError('gB_X', 'bool', 1), /Boolean gGlobal/); assert.match(kindValueError('gS_X', 'string', 5), /String gGlobal.*"" \+/);
+assert.equal(kindValueError('gD_X', 'datetime', '11/09/2026 07:00:00'), ''); assert.match(kindValueError('gD_X', 'datetime', 'soon'), /Date Time gGlobal/);
+assert.equal(kindValueError('gV_X', 'value', -3), ''); assert.equal(kindValueError('gS_X', 'string', ''), ''); assert.equal(kindValueError('gB_X', 'bool', false), '');
+// the Check finds a value typed on the line, before the Process runs
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'gS_Note', type: 'gGlobal', kind: 'string' }, { name: 'gT_Rest', type: 'gGlobal', kind: 'time' },
+  { name: 'gB_Added', type: 'gGlobal', kind: 'bool' }, { name: 'gV_Strike', type: 'gGlobal', kind: 'value' }] }));
+clearTimeout(s._persistTimer); s = new Store(cfg, path.join(d, 'data6')); s.load();
+const e6 = new Engine(s, path.join(d, 'scripts6'), { logNow() {} });
+c = compile('new gT gT_HopDrop_1 = 00:15:00\ngT_HopDrop_1 = 00:20:00\ngT_HopDrop_1 = "My Hop Drop"\nnew gT gT_HopDrop_2 = "My Hop Drop"\n');
+assert.deepEqual(c.errors.map(e => e.line), [3, 4]); assert.match(c.errors[0].msg, /Time gGlobal/);
+assert.deepEqual(e6.check('gS_Note = "Mashing"\ngS_Note = 5\ngT_Rest = -5\ngB_Added = true\ngB_Added = "yes"\ngV_Strike = 150\n').errors.map(e => e.line), [2, 3, 5]);
+// and the Process stops with the error when it runs (the value comes from somewhere else)
+e6.write('Wrong', 'new value vText = "My Hop Drop"\ngT_Rest = 00:15:00\ngT_Rest = vText\nprint "not here"\n');
+assert.deepEqual(e6.check(e6.read('Wrong')).errors, []);
+e6.start('Wrong'); await wait(300);
+assert.equal(s.getProp('gT_Rest', 'value').toString(), '00:15:00', 'the wrong value was not put in');
+assert.match(e6.status.get('Wrong').error ?? '', /gT_Rest is a Time gGlobal/);
+e6.write('Wrong2', 'new value vNum = 7\nnew gS gS_Fresh = vNum\n');
+e6.start('Wrong2'); await wait(300);
+assert.equal(s.has('gS_Fresh'), false, 'a gGlobal is not made with the wrong first value');
+assert.match(e6.status.get('Wrong2').error ?? '', /gS_Fresh is a String gGlobal/);
+
+// a Time gGlobal's .minute and .seconds: a whole number becomes the whole time, rolling over into minutes and hours
+e6.write('Parts', 'gT_Rest.minute = 5\nprint gT_Rest\n');
+e6.start('Parts'); await wait(300);
+assert.equal(s.getProp('gT_Rest', 'value').toString(), '00:05:00');
+for (const [n, t] of [[45, '00:00:45'], [126, '00:02:06'], [3726, '01:02:06']]) { s.setProp('gT_Rest', 'seconds', n); assert.equal(s.getProp('gT_Rest', 'value').toString(), t); }
+s.setProp('gT_Rest', 'minute', 90); assert.equal(s.getProp('gT_Rest', 'value').toString(), '01:30:00');
+assert.equal(s.getProp('gT_Rest', 'minute'), 90); assert.equal(s.getProp('gT_Rest', 'seconds'), 5400);
+assert.throws(() => s.setProp('gT_Rest', 'minute', 2.5), /only takes a whole number of minutes.*2.5 is not a whole number/);
+assert.throws(() => s.setProp('gT_Rest', 'seconds', '12'), /whole number of seconds.*"12" is text/);
+assert.equal(s.getProp('gT_Rest', 'value').toString(), '01:30:00', 'not changed');
+assert.deepEqual(e6.check('gT_Rest.minute = 5\ngT_Rest.seconds = 126\ngT_Rest.minute = 1.5\ngT_Rest.seconds = "a"\ngT_Rest.minute += 1\n').errors.map(e => e.line), [3, 4]);
+assert.deepEqual(compile('new gT gT_H = 00:00:00\ngT_H.minute = 5\ngT_H.minute = "five"\n').errors.map(e => e.line), [3]);
+e6.write('Parts2', 'gT_Rest.minute = 10\ngT_Rest.minute += 5\n');
+e6.start('Parts2'); await wait(300);
+assert.equal(s.getProp('gT_Rest', 'value').toString(), '00:15:00');
+assert.ok(attrsOf(s.get('gT_Rest')).includes('minute') && attrsOf(s.get('gT_Rest')).includes('seconds'));
+assert.ok(!attrsOf(s.get('gV_Strike')).includes('minute'));
 
 clearTimeout(s._persistTimer);
 console.log('gGlobal declare in a Process test: all passed');
