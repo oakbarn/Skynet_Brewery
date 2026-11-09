@@ -67,7 +67,7 @@ sim.save({ on: false });
 sim.save({ on: true, speed: 10, autoSkip: false, jumps: [{ when: 'timer', name: 'tm_Mash', after: 0.2, jump: '00:09:00' }] });
 hw.start();
 const dev = hw.list()[0];
-assert.equal(dev.type, 'simulator'); assert.equal(dev.simMode, true); assert.equal(dev.realType, 'ethernet');
+assert.equal(dev.connection, 'simulator'); assert.equal(dev.simMode, true); assert.equal(dev.realConnection, 'ethernet');
 assert.ok(clock.active); assert.equal(clock.speed, 10);
 
 // the clock runs 10x and a Process sleep follows it
@@ -122,7 +122,7 @@ await wait(50);
 assert.equal(engine.running.size, 0, 'processes stopped');
 assert.equal(store.getProp('Pump', 'state'), false, 'outputs off');
 assert.equal(clock.active, false); assert.equal(clock.speed, 1);
-assert.notEqual(hw.list()[0].type, 'simulator', 'real board type again');
+assert.notEqual(hw.list()[0].connection, 'simulator', 'real board Connection again');
 t0 = clock.now(); const real0 = Date.now(); await wait(100);
 assert.ok(Math.abs((clock.now() - t0) - (Date.now() - real0)) < 30, 'clock back to real time');
 

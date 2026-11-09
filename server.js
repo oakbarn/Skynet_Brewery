@@ -24,6 +24,7 @@ import { apiNameListError } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { parseWifiReport, hydroFor } from './public/hydrometer.js';
+import { toConnection } from './public/links.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
@@ -561,7 +562,7 @@ async function route(req, res) {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);
     if (!el) return fail(res, 404, `No element "${name}"`);
-    if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
+    if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.connection !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
     runWidgetCode(name, prop, 'user');      // a Code Value Widget runs its Code (Rule 1.27)
     logger.clicked(name, prop);      // "When Clicked" (Rule 6.14): set on its Tab, so it goes to the database now
@@ -635,7 +636,7 @@ async function route(req, res) {
     // the browser already changed what points to a name it renamed; a clone renamed here needs the same done on the Brain
     if (clones.size) for (const g of body.graphics ?? store.config.graphics) renameGraphicRefs(g, clones);
     store.saveLayout({ ...body, renames });
-    if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
+    if (body.devices) { store.config.devices = body.devices.map(d => toConnection({ ...d })); store.writeConfig(); hw.restart(); }
     const out = { ok: true };
     if (renames.size) {
       out.renamed = [...renames].map(([from, to]) => ({ from, to, clone: clones.has(from) }));

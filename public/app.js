@@ -23,7 +23,7 @@ import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
-import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
+import { BOARDS, LINK_NAMES, boardOf, linkOf, toConnection, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
@@ -2559,7 +2559,7 @@ function imgMissing(url, node) {
   im.src = url;
   return false;
 }
-const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
+const simDev = d => !d || S.devices.find(x => x.name === d)?.connection === 'simulator';
 
 // One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
 // only one click to select Duty Cycle or a click somewhere else to select PID", Rule 6.19). A Heating Element shows a small button
@@ -10034,9 +10034,9 @@ function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
     const TYPES = LINK_NAMES;
-    const real = d.type === 'simulator' && d.realType && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
-      if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
-      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
+    const real = d.connection === 'simulator' && d.realConnection && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realConnection]} at ${d.port || d.host}`, onclick: guard(async () => {
+      if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realConnection]} (${d.port || d.host})?`)) return;
+      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realConnection, realType, type, ...rest }) => ({ ...rest, connection: realConnection ?? realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
     const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
@@ -10062,7 +10062,7 @@ function renderDevices() {
         if (!(n >= LOST_LINK.min && n <= LOST_LINK.max)) { ev.target.value = lostLinkSec(cfg); throw new Error(`Lost link delay is ${LOST_LINK.min} to ${LOST_LINK.max} seconds`); }
         await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, lostLinkSec: n } : x) }); await load(); toast(`${d.name}: all outputs OFF after ${n} s without the Brain`);
       }) });
-    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.connection] || d.connection) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realConnection]})` : d.connection === 'simulator' && d.realConnection ? ` (for ${TYPES[d.realConnection]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
       h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its connection (USB, Ethernet, WiFi or Simulator), port or address, board and ID', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
@@ -10141,11 +10141,11 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
   if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
   const old = edit ? S.config.devices.find(d => d.name === start.name) : null;
   const renamable = !old || !ifaceUsers(old.name);      // a name nothing uses yet may still be changed here (a brand-new Interface)
-  const w = { name: '', id: '', board: 'mega', type: 'serial', port: '', host: '', ...clone(old || start) };
+  const w = toConnection({ name: '', id: '', board: 'mega', connection: 'serial', port: '', host: '', ...clone(old || start) });
   let ports = [];
   try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; } catch { /* no USB support on the server */ }
   const fields = o => {
-    const rt = rating({ board: o.board, type: o.type });
+    const rt = rating({ board: o.board, connection: o.connection });
     return [
       ...(intro ? [['_in', intro, 'note']] : []),
       ['_a', 'An Interface is a board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 and the like.', 'note'],
@@ -10154,10 +10154,10 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
       ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note'],
       ...IFACE_ID_NOTES.map((t, i) => ['_id' + i, '• ' + t, 'note']),
       ['board', 'Board', 'sel', BOARDS, true],
-      ['type', 'Connection', 'sel', LINK_CHOICES, true],
+      ['connection', 'Connection', 'sel', LINK_CHOICES, true],
       ...(rt.text ? [['_rt', 'Connection rating: ' + rt.text, 'note']] : []),
-      ...(o.type === 'serial' ? [['port', 'USB port', 'text'], ['_pt', `For example COM3 (Windows) or /dev/ttyACM0 (Pi).${ports.length ? ' Found now: ' + ports.map(p => p.path).join(', ') : ''}`, 'note']] : []),
-      ...(['ethernet', 'esp32'].includes(o.type) ? [['host', 'Network address', 'text'], ['_ht', 'For example 192.168.1.60', 'note']] : []),
+      ...(o.connection === 'serial' ? [['port', 'USB port', 'text'], ['_pt', `For example COM3 (Windows) or /dev/ttyACM0 (Pi).${ports.length ? ' Found now: ' + ports.map(p => p.path).join(', ') : ''}`, 'note']] : []),
+      ...(['ethernet', 'esp32'].includes(o.connection) ? [['host', 'Network address', 'text'], ['_ht', 'For example 192.168.1.60', 'note']] : []),
       ...(S.sim?.on ? [['_sim', '🧪 The panel is in Simulator mode: every Interface is pretend until you switch to Real boards.', 'note']] : []),
     ];
   };
@@ -10176,10 +10176,10 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
         const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
         if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
         if (old?.id && id !== old.id && ifaceUsers(old.name) && !confirm(`Change the Interface ID from ${old.id}_ to ${id}_?\n\n${ifaceUsers(old.name)} Device(s) on this Interface keep ${old.id}_ in their names, so the names will be a mix. It is best to set the ID once and leave it.\n\nOK = change it anyway.  Cancel = keep ${old.id}_.`)) { w.id = old.id; continue; }
-        const d = { ...(old || {}), name, id, type: w.type, board: w.board };
-        delete d.port; delete d.host; delete d.baud; delete d.realType;
-        if (w.type === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
-        if (['esp32', 'ethernet'].includes(w.type)) { d.host = String(w.host ?? '').trim(); d.port = 4100; if (!d.host) throw new Error('Type the network address'); }
+        const d = { ...toConnection({ ...(old || {}) }), name, id, connection: w.connection, board: w.board };
+        delete d.port; delete d.host; delete d.baud; delete d.realConnection;
+        if (w.connection === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
+        if (['esp32', 'ethernet'].includes(w.connection)) { d.host = String(w.host ?? '').trim(); d.port = 4100; if (!d.host) throw new Error('Type the network address'); }
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
         await api('PUT', '/ui/layout', { devices });
         if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
