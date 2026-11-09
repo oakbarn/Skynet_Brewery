@@ -8,6 +8,8 @@
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+; and, only when signing is set up (docs/Code_Signing_Setup.md), -DSIGN_SCRIPT=<tools/sign-exe.sh>: the Setup .exe and the
+; Uninstall .exe inside it are then signed with Azure Artifact Signing as they are made (needs NSIS 3.08 or newer).
 
 Unicode true
 !include "MUI2.nsh"
@@ -24,6 +26,10 @@ Unicode true
 !endif
 !ifndef OUTFILE
   !define OUTFILE "Skynet_Brewer_Setup.exe"
+!endif
+!ifdef SIGN_SCRIPT
+  !uninstfinalize 'bash "${SIGN_SCRIPT}" "%1" "Uninstall Skynet Brewer.exe"'
+  !finalize 'bash "${SIGN_SCRIPT}" "%1" "Setup .exe"'
 !endif
 !define NODE_MIN "22.13.0"
 !define PORT "8080"

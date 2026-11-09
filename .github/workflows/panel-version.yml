@@ -8,6 +8,9 @@
 # built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
 # Never edit version.json by hand or in a pull request: this workflow owns it.
+# Signing: when the Azure Artifact Signing secrets and variables are set (docs/Code_Signing_Setup.md), the Setup .exe and
+# the Uninstall .exe inside it are signed, so Windows Smart App Control lets them run. Until then (or if signing fails)
+# the Setup .exe is built unsigned as before and the release still happens.
 name: Panel version
 
 on:
@@ -19,6 +22,7 @@ on:
 permissions:
   contents: write
   pull-requests: read
+  id-token: write   # lets this workflow sign in to Azure for signing without a stored password (OIDC)
 
 concurrency:
   group: panel-version
@@ -84,6 +88,57 @@ jobs:
           git tag "$VERSION"
           git push origin "$VERSION"
 
+      # ---- Signing (docs/Code_Signing_Setup.md). Every signing step is skipped until all six settings are filled in. ----
+      - name: Is signing set up?
+        id: signcheck
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          E: ${{ vars.SIGNING_ENDPOINT }}
+          A: ${{ vars.SIGNING_ACCOUNT }}
+          P: ${{ vars.SIGNING_PROFILE }}
+        run: |
+          if [ -n "$C" ] && [ -n "$T" ] && [ -n "$S" ] && [ -n "$E" ] && [ -n "$A" ] && [ -n "$P" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"; echo "Signing is set up."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Signing is not set up yet, so the Setup .exe will not be signed (see docs/Code_Signing_Setup.md)."
+          fi
+
+      - name: Sign in to Azure (for signing)
+        id: azlogin
+        if: steps.signcheck.outputs.ready == 'true'
+        continue-on-error: true
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get the signing tool and a signing pass
+        if: steps.signcheck.outputs.ready == 'true' && steps.azlogin.outcome == 'success'
+        continue-on-error: true
+        env:
+          E: ${{ vars.SIGNING_ENDPOINT }}
+          A: ${{ vars.SIGNING_ACCOUNT }}
+          P: ${{ vars.SIGNING_PROFILE }}
+        run: |
+          set -euo pipefail
+          # Jsign signs Windows .exe files on Linux (Apache License 2.0, https://ebourg.github.io/jsign)
+          JAR="$RUNNER_TEMP/jsign-7.6.jar"
+          curl -sSLf -o "$JAR" https://github.com/ebourg/jsign/releases/download/7.6/jsign-7.6.jar
+          echo "6cf58aa080e7ff82656f320cff8d4a3bff30408df8766806dcba3740dd839fa5  $JAR" | sha256sum -c -
+          TOKEN=$(az account get-access-token --resource https://codesigning.azure.net --query accessToken -o tsv)
+          echo "::add-mask::$TOKEN"
+          {
+            echo "SKYNET_SIGN_JAR=$JAR"
+            echo "SKYNET_SIGN_ENDPOINT=$E"
+            echo "SKYNET_SIGN_ACCOUNT=$A"
+            echo "SKYNET_SIGN_PROFILE=$P"
+            echo "SKYNET_SIGN_TOKEN=$TOKEN"
+          } >> "$GITHUB_ENV"
+
       - name: Build the installer and zip
         env:
           VERSION: ${{ steps.v.outputs.version }}
@@ -99,8 +154,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.v.outputs.version }}
         run: |
+          if grep -q "^signed Setup .exe" release/signing.log 2>/dev/null; then
+            WARN="This installer is signed (Microsoft Artifact Signing). For the first few weeks Windows may still say *Windows protected your PC* while it learns the new signature: click **More info**, then **Run anyway**."
+          else
+            WARN="Windows may say *Windows protected your PC*: click **More info**, then **Run anyway** (this installer is not signed)."
+          fi
           cat > notes.md <<NOTES
-          **To install on Windows:** download \`Skynet_Brewer_Setup_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. Windows may say *Windows protected your PC*: click **More info**, then **Run anyway** (the installer isn't signed with a paid certificate).
+          **To install on Windows:** download \`Skynet_Brewer_Setup_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. $WARN
 
           **Mac, Linux, Raspberry Pi or by hand:** download \`Skynet_BrewPanel_$VERSION.zip\` and \`ReadMe.txt\`.
 

@@ -238,7 +238,7 @@ STEP 7. RUN THE FIRST TIME INSTALL FILE
 ---------------------------------------
   [ ] Double-click C:\Brewing\Skynet_First_Install.bat
   [ ] If a blue box says "Windows protected your PC": click "More info", then
-      "Run anyway". (The file is not signed with a paid certificate, that is all.)
+      "Run anyway". (A brand-new or unsigned file does this for a while, that is all.)
   [ ] A black window opens and works through 5 steps:
         [1/5] finds the panel
         [2/5] checks Node.js, and installs it if it is missing or too old
