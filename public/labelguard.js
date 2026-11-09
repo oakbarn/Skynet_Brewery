@@ -51,8 +51,9 @@ function showWarn(field) {
     d.append(w);
   }
   const what = whatOf(field);
-  w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + blankWarn(what) }),
-    Object.assign(document.createElement('span'), { textContent: `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
+  // a field may say it in its own words (data-guard-msg: a Tilt's Color, OakBarn Brewery 2026-11-09)
+  w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (field.dataset?.guardMsg || blankWarn(what)) }),
+    Object.assign(document.createElement('span'), { textContent: what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
   clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 5 seconds
   field.classList.add('labelBlank');
   field.focus();

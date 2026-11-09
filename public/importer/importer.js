@@ -214,10 +214,11 @@ for (const id of ['#back4', '#back4a']) $(id).onclick = () => show(3);
 function ask(title, html, yes, no) {
   return new Promise(ok => {
     const d = $('#ask'); $('#askTitle').textContent = title; $('#askText').innerHTML = html;
-    $('#askYes').textContent = yes; $('#askNo').textContent = no;
+    $('#askYes').textContent = yes; $('#askNo').textContent = no ?? '';
+    $('#askNo').classList.toggle('hidden', no == null);      // no No: a pop-up that only tells (OK)
     $('#askYes').onclick = () => d.close('yes'); $('#askNo').onclick = () => d.close('no');
     d.onclose = () => ok(d.returnValue === 'yes');
-    d.returnValue = ''; d.showModal(); $('#askNo').focus();
+    d.returnValue = ''; d.showModal(); (no == null ? $('#askYes') : $('#askNo')).focus();
   });
 }
 // Rule 15.1: keeping the BruControl names takes two warnings; No (use the Skynet names) is the default both times
@@ -552,8 +553,14 @@ function partState(page) {
   return { p, found };
 }
 function fieldHtml(f, v, attrs, d = {}) {
-  const help = f.help ? ` title="${esc(f.help)}"` : '';
+  // a box mandatory for some rows only (a Hydrometer's Tilt Color or Hardware ID): mandatory where need() is true, greyed where false
+  const need = f.need?.(d ?? {});
+  if (need === true) f = { ...f, optional: false };
+  if (need === false) attrs += ` disabled title="${esc(`Not used by this kind of ${f.k === 'color' ? 'hydrometer: only a Tilt has a Color' : 'hydrometer: a Tilt is told apart by its Color'}`)}"`;
+  if (f.blank && need === true) attrs += ` data-blank="${esc(f.blank)}"`;
+  const help = f.help && need !== false ? ` title="${esc(f.help)}"` : '';
   if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;
+  if (f.text) return `<input type="text" class="pf" maxlength="60" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;      // a Hydrometer's Hardware ID (Rule 6.25)
   // a box OakBarn Brewery has not made mandatory may stay at Pick one… (Rule 18.33)
   return `<select class="pf" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1"' : ''} aria-label="${esc(f.name)}"${help}>${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(!k && f.optional ? 'Pick one… (optional)' : n)}</option>`).join('')}</select>` +
     (v === 'user' ? ` <input type="text" class="pfUser" ${attrs} data-f="${f.k}User" maxlength="60" value="${esc(d[f.k + 'User'] ?? '')}" placeholder="Your words" aria-label="${esc(f.name)}: your own words">` : '');
@@ -660,8 +667,23 @@ function partsPage(box) {
     d[f] = t.value;
     // a pump model made for one voltage fills in its Power
     if (page.kind === 'pump' && f === 'model' && onePower(t.value)) { d.power = onePower(t.value); p = draw(); saveProgress(); return; }
+    // a Hydrometer's type greys its Tilt Color or its Hardware ID; a Tilt goes straight to its Color box
+    if (page.kind === 'hydro' && f === 'hydro') {
+      const key = t.dataset.x != null ? `[data-x="${t.dataset.x}"]` : `[data-i="${CSS.escape(t.dataset.i)}"]`;
+      p = draw(); saveProgress();
+      const c = box.querySelector(`select[data-f="color"]${key}`);
+      if (c && !c.disabled && !c.value) c.focus();
+      return;
+    }
     if (t.tagName === 'SELECT' && (t.value === 'user' || t.nextElementSibling?.classList.contains('pfUser'))) p = draw();      // User defined: its words box
     saveProgress();
+  };
+  // leaving a mandatory box blank (a Tilt's Color, OakBarn Brewery 2026-11-09): a pop-up says so, then back to that box
+  box.onfocusout = async ev => {
+    const t = ev.target;
+    if (!t?.dataset?.blank || !t.isConnected || t.disabled || String(t.value).trim() || $('#ask').open || !document.hasFocus()) return;      // not when the window itself loses the focus
+    await ask('Pick a Color', `<p>${esc(t.dataset.blank)}</p>`, 'OK', null);
+    if (t.isConnected) t.focus();
   };
   state.accept = async () => { if (await noBlanks(box)) forward(); };
 }

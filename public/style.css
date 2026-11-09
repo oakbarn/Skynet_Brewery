@@ -1129,6 +1129,10 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.look-dial .vl .dial .dialVal { font-variant-numeric: tabular-nums; }
 .el.chartW .vl { padding: 0; min-height: 0; font-weight: 400; font-size: 10px; }
 .el.chartW .vl .chartSvg { display: block; }
+/* a Hydrometer line on a Graph: SG / °P / °Bx switch (Rule 6.25) */
+.el.chartW .gravSw { position: absolute; top: 2px; right: 4px; display: flex; gap: 2px; z-index: 2; }
+.el.chartW .gravSw button { font-size: 10px; padding: 0 4px; line-height: 16px; min-height: 0; border: 1px solid #888; border-radius: 3px; background: var(--panel, #fff); color: inherit; opacity: .8; cursor: pointer; }
+.el.chartW .gravSw button.on { opacity: 1; font-weight: 700; outline: 1px solid currentColor; }
 
 /* Click to pick a Brew Process job (Rule 16.3): the items that fit are lit, the rest greyed */
 #ws .jobFit { outline: 3px solid #f5a623; outline-offset: 3px; cursor: crosshair; border-radius: 6px; }

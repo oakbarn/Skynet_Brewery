@@ -130,15 +130,17 @@ The least you need for each kind of device the panel supports, which Mega port i
 
 ### Hydrometers (gravity during fermentation)
 
-**Not built into the panel yet.** Here is how each kind would connect, so you can choose:
+**The Hydrometer Device** (Skynet Rule 6.25, Help 170) has a Template for each kind. How each one connects:
 
-| Hydrometer | How it talks | What it would need | Status |
+| Hydrometer | How it talks | What it needs | Status |
 |---|---|---|---|
-| Tilt | Bluetooth (sends a signal every few seconds) | The Raspberry Pi has Bluetooth built in, so it can read a Tilt directly with no extra board. An ESP32 (for example running TiltBridge) is only needed when the fermenter is out of the Pi's Bluetooth range (about 10-30 ft, less through a fridge or a steel conical). | Not supported yet |
-| iSpindel | WiFi, can send to an MQTT broker | The panel already has MQTT. A small Node-RED or Home Assistant link can copy its gravity into a gGlobal (with .API Get and Put) today; built-in support is not there yet. | Possible today through MQTT, not built in |
-| RAPT Pill | WiFi or Bluetooth | Bluetooth like a Tilt, or its own cloud | Not supported yet |
+| Tilt, Tilt Pro, Tilt Pro Mini | Bluetooth (sends a signal every few seconds) | The Raspberry Pi has Bluetooth built in, so it can read a Tilt directly with no extra board. An ESP32 (for example running TiltBridge) is only needed when the fermenter is out of the Pi's Bluetooth range (about 10-30 ft, less through a fridge or a steel conical). | Device and Templates built; Bluetooth reading is the next step |
+| iSpindel, GravityMon, Floaty, BrewBrain Float | Wi-Fi: it sends its readings to Skynet | Nothing extra: its HTTP setting points at the Brain | Works |
+| RAPT Pill | Bluetooth, or the RAPT cloud | Bluetooth like a Tilt, or its own cloud | Device built; reading comes with Bluetooth, then the cloud |
+| PLAATO | its cloud | its Cloud key | Device built; cloud reading later |
+| Refractometer, Glass hydrometer | read by a person | the Process command `take_reading` | Works |
 
-So a Tilt does not strictly need an ESP32 when the Pi is the Brain, but an ESP32 is a good idea when the fermenters are far from the Pi. Adding Tilt support to the panel is a separate change.
+So a Tilt does not strictly need an ESP32 when the Pi is the Brain, but an ESP32 is a good idea when the fermenters are far from the Pi.
 
 ## What to buy for the boards
 

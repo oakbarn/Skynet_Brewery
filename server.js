@@ -23,6 +23,7 @@ import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi
 import { apiNameListError } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
+import { parseWifiReport, hydroFor } from './public/hydrometer.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
@@ -342,7 +343,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -477,6 +478,17 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
+  // ===== Hydrometers over Wi-Fi (OakBarn Brewery, 2026-11-09, Rule 6.25): an iSpindel, GravityMon, Floaty or BrewBrain Float sends its
+  // readings here (its HTTP setting: this Brain's address, port and /api/hydrometer). It can't sign in, so from your own network it needs
+  // nothing; from anywhere else it needs the API key (?key=...). Its Name or ID picks the Hydrometer Device; it can't change anything else.
+  if (p === '/api/hydrometer' && m === 'POST') {
+    if (!apiKeyOk(req, url) && !isPrivateAddress(ip)) return fail(res, 401, 'Missing or wrong API key (?key=...)');
+    let rep; try { rep = parseWifiReport(await jsonBody(req)); } catch (x) { return fail(res, 400, x.message); }
+    const el = hydroFor(store.list('hydrometer'), rep, 'wifi') ?? hydroFor(store.list('hydrometer'), rep, 'cloud');
+    if (!el) { hw.hydroHeardAdd(rep, 'wifi'); return fail(res, 404, `No Hydrometer has the Hardware ID "${rep.name || rep.id}" with the Connection Wi-Fi yet. Pick it in the Hydrometer's Properties.`); }
+    return ok(res, { ok: true, hydrometer: el.name, ...hw.hydroReport(el, rep) });
+  }
+
   // ===== Public API (Fritz, 2026-10-30): any Device or Widget whose .API is Get only (read) or Get and Put (read and change) =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
@@ -562,6 +574,8 @@ async function route(req, res) {
     return ok(res, r);
   }
   if (p === '/ui/valve/confirm' && m === 'POST') { engine.confirmValve((await jsonBody(req)).name); return ok(res); }
+  if (p === '/ui/hydrometers/heard' && m === 'GET') return ok(res, hw.hydroHeardList());      // Hardware IDs heard but not claimed (Rule 6.25)
+  if (p === '/ui/reading' && m === 'POST') { engine.readingAction(await jsonBody(req), me?.name); return ok(res); }      // take_reading's pop-up (Rule 6.25)
   // the Override button (Fritz, 2026-10-30): every running Process moves on past the wait, sleep or loop that holds it
   if (p === '/ui/override' && m === 'POST') return ok(res, { processes: engine.override(me.name) });
   if (p === '/ui/hold' && m === 'POST') {
