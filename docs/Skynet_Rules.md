@@ -2663,7 +2663,10 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   1.21: Name with ✏ Change name, Label, Visible, Hidden Locked, Label and place, Tab, X, Y, Lock), its **Type** greyed out, its Out
   flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections are fully editable (Label,
   Interface, Port or Probe #, Heating method, Temperature Probe, Target, Units, Calibration offset) and each can be **swapped** for
-  another existing one or a new one: on Save the old one is taken out of the vessel and stays on the Tab as a Device of its own.
+  another existing one or a new one. On Save the old one is taken out of the vessel (2026-11-09: "It needs to go as it is a
+  replacement for an exist hardware ... So Delete if replace with a differnt Port"): when the new one is on **another Port** the old
+  one is **deleted**; when it is on **the same Port** (the hardware was changed, the wiring was not) the old one stays on the Tab as
+  a Device of its own. Anything that used the old one (a Heating Element's Temperature Probe) uses the new one.
   No Size, Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential, Sparge / Steam Slayer or IP rows:
   none of those can change after integration.
 - What a Device already has set is kept (its look, pin settings and so on); only the dialog changed. Every explanation is in the
@@ -2748,11 +2751,16 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    **➕ Add new**, which runs the usual Add dialogs. The one picked is **built into the vessel** (Rule 5.31) and keeps its name and
    Port; its readout sits on the vessel like the Three Vessel sample's HLT and its picture gets a hot spot. Until one is picked the
    spot shows faintly, closed, and its hot spot opens the picker.
-5. *To come, in this order:* the Drain, Tangential and Sparge Arm / Steam Slayer pieces (up to 3 integrated pieces: Valve, Elbow,
-   Tee, Priming Tee; valves picked from the existing ones, ➕ Add new Motorized Valve or ➕ Add Manual Valve Widget; the Steam
-   Slayer adds a 2" to 1.5" Reducer; the Sparge Arm is drawn inside the vessel), **Pick** (double-click a spot on a blank vessel),
-   the crossed HERMS coil choices, the **Integrate** button that saves a **Vessel Device Template** for the Add Vessel list, the
-   standard Templates, and the BruControl Import using the same interview (a prebuilt Template may be picked first).
+5. **The Drain, Tangential and Sparge Arm pieces** (2026-11-09): each one chosen has a row on the Vessel Builder panel; it opens
+   **up to 3 pieces**, from the vessel out: **None, Valve, Elbow, Tee, Priming Tee** (a Tangential Inlet and a Sparge Arm have
+   no Priming Tee). None ends it, so the pieces after it are greyed out. An Elbow turns the run; the Priming Tee always points up,
+   so it goes only in a level run. Each piece is joined to the one before by a short pipe the size of the vessel's opening. A
+   **Valve** is picked from the Motorized valves not on a pipe yet, **➕ Add New Motorized Ball Valve** (the usual Add dialogs),
+   or **➕ Add Manual Valve Widget** (Plain, Manual Ball Valve side view, or Manual Butterfly Valve; turned for an up and down
+   run; a Confirmation Widget, Rule 1.28). Only valves get a hot spot. The **Sparge Arm** is drawn inside the vessel from its
+   IP toward the other side. *To come:* the **Steam Slayer** (its pieces, a 2" to 1.5" Reducer, then the Steam Slayer), the
+   **Integrate** button that saves a **Vessel Device Template** for the Add Vessel list, the standard Templates, and the BruControl
+   Import using the same interview (a prebuilt Template may be picked first).
 6. **Pick** (2026-11-09, Rule 5.31 changed): the Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe and Heating
    Element questions have **Pick (double-click the spot on the vessel)**: a blank vessel opens with small dots on the preset IPs; a
    double-click marks the spot, **↶ Undo** takes it off, **💾 Save** keeps it. Near a preset IP it takes that IP, anywhere else it
@@ -3165,4 +3173,5 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Add a new Ip In Back on The Basic Vessel Template Back Center. ... I have more than one with a Back center Heater"): the Vessel Widget Main Template has a Center Back Element IP (16 IPs); the Vessel Device Builder offers Back Center for the Thermowell / Probe and the Heating Element (Rule 19.5). The Three Vessel sample vessels have the spot Not Placed. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing else changes there. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 18.31 (OakBarn Brewery: "The Properties of the sub devices on a Vessel Device should pop up a Properties Dialog ... just like it was an independent Device ... Also the Properties should be on the Vessels Device Properties in their own section, If there is None ... all those attribute and Properties are greyed out."): a Vessel Device's Heating Element, Thermowell or Probe opens the same Properties as one of its own; the Vessel Device's Properties have a section for each, greyed out when None. Help 133 and 166 updated. Checked against the BruControl Import program: it has no Device dialogs of its own (Rule 18.31), so nothing changes there. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 18.31 again (OakBarn Brewery: "Fix this Dialog" and "It can still have the Universal attributes plus the sub device sections"): an integrated Vessel Device's Properties are the Universal Properties, its Type greyed out, and fully editable Heating Element and Thermowell / Probe sections, each of which can be swapped for another; nothing else. Help 133 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Rule 19.5 item 5 (the Drain, Tangential and Sparge Arm pieces, the Valve picker, the Sparge Arm drawing) and Rule 18.31 changed (OakBarn Brewery: "So Delete if replace with a differnt Port"): a Heating Element or Probe swapped out of an integrated Vessel Device is deleted when the new one is on another Port, kept as a Device of its own when on the same Port. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")

@@ -28,7 +28,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowco
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary } from './vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -621,6 +621,15 @@ function flowPopup(g) {
   ok.onclick = () => { const v = box.querySelector('[data-k="flowColor"]').value; if (v) g.flowColor = v; else delete g.flowColor; box.remove(); renderWs(); toast(`${name}: Out flow color ${v ? flowName(v) : 'None'} (Save layout keeps it)`); };
   document.body.append(box);
 }
+// the Sparge Arm: a pipe from the wall (left end) across the vessel, its end turned down, with spray holes along it
+function spargeArm(w, h, s) {
+  const t = Math.max(3, 6 * s), y = t, holes = Array.from({ length: 5 }, (_, i) => w * (0.25 + i * 0.14));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><g fill="none" stroke-linecap="round">` +
+    `<path d="M0 ${y} H${w - t * 2} q${t * 1.5} 0 ${t * 1.5} ${t * 1.5} V${h - t}" stroke="#8a8f96" stroke-width="${t}"/>` +
+    `<path d="M0 ${y} H${w - t * 2} q${t * 1.5} 0 ${t * 1.5} ${t * 1.5} V${h - t}" stroke="#d6dade" stroke-width="${t * 0.35}"/></g>` +
+    holes.map(x => `<path d="M${x} ${y + t * 0.8} v${t * 1.2}" stroke="#4fa3e0" stroke-width="${Math.max(1, t * 0.3)}" stroke-dasharray="${t * 0.4} ${t * 0.3}"/>`).join('') + '</svg>';
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
 // the pictures of its parts and its HERMS coil, on the vessel (at), s: its scale, W: its picture's width
 function vpParts(g, at, s, W) {
   const out = [];
@@ -634,6 +643,12 @@ function vpParts(g, at, s, W) {
     const [ax, ay] = at(hs[0], g.ports[hs[0]]), [, by] = at(hs[1], g.ports[hs[1]]), right = ax > W / 2, w = 120 * s, top = Math.min(ay, by) - 14 * s, hh = Math.abs(by - ay) + 28 * s;
     out.push(h('div', { class: 'vwPart vpHerms', title: `HERMS coil on ${right ? 'Right' : 'Left'} HERMS In and Out (built in)`,
       style: `left:${right ? ax - w : ax}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${hermsCoil(w, hh, ay - top, by - top, s)}");transform:scaleX(${right ? -1 : 1})` }));
+  }
+  for (const k of Object.keys(g.vbSparge || {})) {      // a Sparge Arm: inside the vessel, from its IP across toward the other wall (Rule 19.5)
+    const p = g.ports?.[k]; if (!p?.installed || !vwClassOf(g).ports[k]) continue;
+    const [px, py] = at(k, p), right = px > W / 2, len = W * 0.55, hh = 26 * s;
+    out.push(h('div', { class: 'vwPart vpSparge', title: `Sparge Arm on the ${p.label || vpName(k)} (built in)`,
+      style: `left:${right ? px - len : px}px;top:${py - 6 * s}px;width:${len}px;height:${hh}px;background-image:url("${spargeArm(len, hh, s)}");transform:scaleX(${right ? -1 : 1})` }));
   }
   for (const [k, kind] of Object.entries(g.vbWant || {})) {      // still to be picked in the Vessel Builder (Rule 19.5): faint, its hotspot opens the picker
     const p = g.ports?.[k]; if (!p?.installed || !vwClassOf(g).ports[k]) continue;
@@ -1402,6 +1417,7 @@ const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
 const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow'],
+  ['Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg', 'Manual Butterfly Valve (level pipe)'], ['Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg', 'Manual Butterfly Valve (up and down pipe)'],
   ['Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg', 'Tap Water Valve (household hose bib; one IP, the hose outlet)']];
 // The Tap Water Valve (Fritz, 2026-11-06, Rule 5.33): a Manual Valve Widget with the household hose bib picture. The house water
 // comes in from the wall, so it has one IP only, on its hose thread, and while open it is a tap water source (flow pushes out).
@@ -5502,7 +5518,7 @@ function vbBuild(t, w) {
     const on0 = vbPlaced(w), mine = (w.userIps || []).filter(u => on0.includes(u.key));      // only the User IPs it uses (Pick)
     if (mine.length) { g.userIps = clone(mine); for (const u of mine) g.ports[u.key] = { installed: true, position: 'VW User ' + u.key, standard: stdShort(g.std || t.std), label: u.name }; }
     const old = clone(g), method = vbSizeMethod(w);
-    Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, volume: +w.volume, x: 40, y: 60, vbOpen: true, vbBuilt: true, vbWant: vbWant(w), probeStyle: w.probe === 'center' ? 'front' : 'thermowell' });
+    Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, volume: +w.volume, x: 240, y: 60, vbOpen: true, vbBuilt: true, vbWant: vbWant(w), vbOpenings: vbOpenings(w), probeStyle: w.probe === 'center' ? 'front' : 'thermowell' });
     if (method === 'diameter') Object.assign(g, { sizeMethod: 'diameter', diameter: +w.diameter, vheight: +w.vheight }); else { delete g.sizeMethod; delete g.diameter; delete g.vheight; }
     [g.w, g.h] = vBox(g, vScaleFor(w.workspace));
     const on = vbPlaced(w);
@@ -5565,12 +5581,129 @@ function renderVbPanel() {
     ...parts.map(e => h('button', { type: 'button', class: 'vbRow vbDone', onclick: () => editItem('el', e.name) }, `✓ ${VP_WHAT[e.vpKind] || e.vpKind} on the ${g.ports?.[e.integratedAs.slice(3)]?.label || vpName(e.integratedAs.slice(3))}: ${e.name}`))];
   // every other open IP it has (the Drain, Tangential, Sparge, a picked one): its pieces come in the next update
   const busy = new Set([...Object.keys(g.vbWant || {}), ...parts.map(e => e.integratedAs.slice(3)), ...(HERMS_SIDES[g.herms] || [])]);
-  const later = Object.entries(g.ports || {}).filter(([k, p]) => p.installed && vwClassOf(g).ports[k]?.vw && !busy.has(k))
-    .map(([k, p]) => h('div', { class: 'vbRow vbLater', title: 'Coming in the next update of the Vessel Device Builder' }, `${p.label || vpName(k)}: its valve and pieces come next`));
+  const spot = k => g.ports?.[k]?.label || vpName(k), done = g.vbChains || {};
+  const later = Object.entries(g.vbOpenings || {}).filter(([k]) => g.ports?.[k]?.installed && !busy.has(k)).map(([k, o]) => done[k]
+    ? h('div', { class: 'vbRow vbDone' }, `✓ ${VB_OPENING_WORD[o]} on the ${spot(k)}: ${done[k].length ? done[k].map(vbPieceWord).join(', ') : 'nothing on it'}`)
+    : h('button', { type: 'button', class: 'vbRow vbTodo', onclick: () => vbChainDlg(g, k, o) }, `⚠ ${VB_OPENING_WORD[o]} on the ${spot(k)}: pick its pieces ▸`));
   document.body.append(h('div', { id: 'vbPanel', class: 'vbPanel' }, h('h3', {}, `🔨 Vessel Builder: ${g.label || g.name}`, ' ', helpIcon(['vessel-device-builder'])),
     ...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nothing to pick.')]), ...later,
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Close the Vessel Builder. The vessel stays on the 🔨 Build Tab; its Properties change it.',
-      onclick: () => { if (Object.keys(g.vbWant || {}).length && !confirm('Something is still not picked. Close the Vessel Builder anyway? Its spot stays closed until you pick it in the vessel\'s Properties.')) return; delete g.vbOpen; renderVbPanel(); } }, '✔ Done'))));
+      onclick: () => { if ((Object.keys(g.vbWant || {}).length || Object.keys(g.vbOpenings || {}).some(k => !g.vbChains?.[k])) && !confirm('Something is still not picked. Close the Vessel Builder anyway? Its spot stays closed until you pick it in the vessel\'s Properties.')) return; delete g.vbOpen; renderVbPanel(); } }, '✔ Done'))));
+}
+// ---- Step 2 (OakBarn Brewery, 2026-11-08, Rule 19.5): the pieces on the Drain, Tangential and Sparge Arm. Up to 3 pieces run out from
+// the vessel, each joined to the last by a short pipe: a Valve (an existing Motorized one, a new Motorized Ball Valve, or a Manual Valve
+// Widget: Ball or Butterfly), an Elbow (it turns the run), a Tee (its run goes on, its branch is left open) or the Priming Tee (always up,
+// so only in a level run). A Sparge Arm is drawn inside the vessel, opposite its IP.
+const VB_GAP = 40, vbDot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const vbPieceWord = k => ({ valve: 'Valve', elbow: 'Elbow', tee: 'Tee', primingTee: 'Priming Tee' }[k] || k);
+const vbIpOf = (g, k) => draft.graphics.find(x => x.kind === 'ip' && x.attachTo === g.id && x.port === k);
+// which way it runs out of the vessel: Left, Right, or down (the Drain, and a picked spot near the middle)
+function vbDirOf(g, k) {
+  if (/^l(Tangential|Sparge)$/.test(k)) return [-1, 0];
+  if (/^r(Tangential|Sparge)$/.test(k)) return [1, 0];
+  const u = (g.userIps || []).find(q => q.key === k); if (u) return u.x < 0.3 ? [-1, 0] : u.x > 0.7 ? [1, 0] : [0, 1];
+  return [0, 1];
+}
+function vbPipe(ws, from, to, a, b, size) {
+  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', flowWhen: [], baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
+  giveName(p, draft.graphics); draft.graphics.push(p); return p;
+}
+// a TC Pipe Fittings Widget with one end at `at`, its other end going on along D (an Elbow: turning to `turn`)
+function vbPlaceFit(kind, ws, at, D, turn, join) {
+  const t = tplOf('fitting', VB_PIECE_TPL[kind]); if (!t) throw new Error(`There is no ${VB_PIECE_TPL[kind]} Template`);
+  const u = placeTabFitting(t, ws, tcName(t, draft.graphics), null); u.labelVisible = false; placeUnitParts(u);
+  let hit = null;
+  for (const r of t.upright ? [0] : [0, 90, 180, 270]) {
+    if (r) u.rot = r; else delete u.rot;
+    const arms = tcArms(u)?.arms || [], inA = arms.find(q => vbDot(q.v, D) < -0.9); if (!inA) continue;
+    const outA = arms.find(q => q !== inA && vbDot(q.v, kind === 'elbow' ? turn : D) > 0.9);
+    if (outA) { hit = [inA.id, outA.id]; break; }
+  }
+  if (!hit) { draft.graphics = draft.graphics.filter(x => x !== u && x.attachTo !== u.id); throw new Error(`The ${vbPieceWord(kind)} can not go that way. Put an Elbow before it.`); }
+  const align = () => { const c0 = tcArms(u).arms.find(q => q.id === hit[0]).c; u.x = +((u.x || 0) + at[0] - c0[0]).toFixed(2); u.y = +((u.y || 0) + at[1] - c0[1]).toFixed(2); placeUnitParts(u); };
+  align(); join(hit[0], at);                     // its pipe from the piece before, then it takes that pipe's size (Rule 5.36) and its end goes back on the pipe
+  if (autoSized(u)) { autoSizeUnit(u); align(); }
+  const arms = tcArms(u).arms;
+  return { u, inA: arms.find(q => q.id === hit[0]), outA: arms.find(q => q.id === hit[1]) };
+}
+// a valve: a Manual Valve Widget (its two ends, Rule 5.24) or a Motorized valve Device (its IN and OUT IPs). Its first end goes on `at`;
+// join makes the pipe to it, then it is lined up again, as a Device is drawn for the size of its pipes (Rule 5.36).
+function vbPlaceValve(v, ws, at, D, join) {
+  let ends, move;
+  if (v.mv !== undefined) {         // an up and down run turns its (level) picture 90; it is drawn 5 x as big as its pipe (sizeFitting)
+    const w = Math.round(5 * pipeSize(ws) * (+v.size || 1.5) / 0.5);
+    const m = { id: newId(), kind: 'ip', fitting: 'manualValve', workspace: ws, x: 0, y: 0, w, h: w, color: '#8a8f96', confirmation: true };
+    if (v.mv) m.image = v.mv;
+    if (D[1]) m.rotate = 90;
+    draft.graphics.push(m); giveName(m, draft.graphics);
+    ends = () => mvEnds(m); move = (dx, dy) => { m.x = Math.round(m.x + dx); m.y = Math.round(m.y + dy); };
+  } else {
+    const e = draft.elements.find(x => x.name === v.dev); if (!e) throw new Error(`${v.dev} is not there`);
+    e.workspace = ws; if (isMbvDev(e) && !e.orientation) e.orientation = D[0] ? 'h' : 'v';
+    ends = () => devIps(e); move = (dx, dy) => { e.x = Math.round((e.x || 0) + dx); e.y = Math.round((e.y || 0) + dy); };
+  }
+  const sorted = () => ends().sort((a, b) => vbDot(a.c, D) - vbDot(b.c, D));
+  const align = () => { const [a] = sorted(); move(at[0] - a.c[0], at[1] - a.c[1]); };
+  align(); join(sorted()[0].id, at); align();
+  const [i, o] = sorted(); return { outId: o.id, outC: o.c, inId: i.id };
+}
+function vbChainBuild(g, k, pieces, valves) {
+  const ws = g.workspace, ip = vbIpOf(g, k); if (!ip) throw new Error('Its IP is not on the vessel');
+  let D = vbDirOf(g, k), prevId = ip.id, prevC = ipCenter(ip);
+  const fx = (prevC[0] - g.x) / (g.w || 1), size = g.std?.size || 1.5;       // its pipes are the size of the vessel's opening
+  pieces.forEach((p, i) => {
+    const at = [prevC[0] + D[0] * VB_GAP, prevC[1] + D[1] * VB_GAP];
+    const from = prevId, fromC = prevC, join = (id, c) => vbPipe(ws, from, id, fromC, c, size);
+    if (p === 'valve') { const r = vbPlaceValve({ ...valves[i], size }, ws, at, D, join); prevId = r.outId; prevC = r.outC; return; }
+    const turn = D[1] ? [fx < 0.45 ? -1 : 1, 0] : [0, 1];      // a level run turns down; a downward one turns away from the middle (from the middle: Right)
+    const r = vbPlaceFit(p, ws, at, D, turn, join);
+    prevId = r.outA.id; prevC = r.outA.c; D = r.outA.v.map(Math.round);
+  });
+}
+// the pieces dialog for one opening; a valve is picked from the existing ones, or added (a Motorized Ball Valve, or a Manual Valve Widget)
+const VB_NEW_MBV = '\0mbv', VB_MV = '\0mv:';
+async function vbChainDlg(g, k, opening) {
+  const list = vbPieceList(opening), start = vbDirOf(g, k)[0] ? 'h' : 'v';
+  const free = () => draft.elements.filter(e => isMbvDev(e) && !e.integratedIn && !draft.graphics.some(p => p.kind === 'pipe' && [p.from, p.to].some(x => String(x).startsWith(`dev:${e.name}:`))));
+  const mvs = MV_PICS.filter(([pic]) => /Ball_Valve_Side|Butterfly_ClosedH/.test(pic) || pic === '');      // level pictures: an up and down run turns them
+  const valveChoices = [...free().map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name} (Motorized)`]), [VB_NEW_MBV, '➕ Add New Motorized Ball Valve…'],
+    ...mvs.map(([pic, word]) => [VB_MV + pic, `➕ Add Manual Valve Widget: ${pic ? word.replace(' (level pipe)', '') : 'Plain manual valve'}`])];
+  const o = { p0: 'none', p1: 'none', p2: 'none', v0: valveChoices[0][0], v1: valveChoices[0][0], v2: valveChoices[0][0], sKind: 'arm' };
+  for (;;) {
+    const r = await dialog(`${g.label || g.name}: the ${VB_OPENING_WORD[opening]} on the ${g.ports?.[k]?.label || vpName(k)}`, w => {
+      const on = n => [0, 1, 2].slice(0, n).every(i => w['p' + i] && w['p' + i] !== 'none');
+      return [['_cn', `Up to 3 pieces, from the vessel out. None ends it. An Elbow turns the run; the Priming Tee always points up, so it goes only in a level run.${opening === 'sparge' ? ' The Sparge Arm is drawn inside the vessel, opposite its IP.' : ''}`, 'note'],
+        ...(opening === 'sparge' ? [['sKind', 'Sparge Arm or Steam Slayer', 'sel', [['arm', 'Sparge Arm'], ['slayer', 'Steam Slayer (its drawing comes next: nothing is made yet)']], true]] : []),
+        ...[0, 1, 2].flatMap(i => on(i) ? [['p' + i, `Piece ${i + 1}`, 'sel', list, true], ...(w['p' + i] === 'valve' ? [['v' + i, `Piece ${i + 1}: which Valve`, 'sel', valveChoices]] : [])]
+          : [['_p' + i, `Piece ${i + 1}`, 'ro', 'None (the piece before it is None)']])];
+    }, o, false, ['vessel-device-builder']);
+    if (r !== 'ok') return;
+    readFields(o, $('#dlgBody'));
+    if (opening === 'sparge' && o.sKind === 'slayer') return toast('The Steam Slayer comes in the next update of the Vessel Device Builder.', true, 7000);
+    const pieces = vbChainClean([o.p0, o.p1, o.p2]), bad = vbChainProblems(pieces, start, opening);
+    if (bad.length) { toast(bad.join(' '), true, 9000); continue; }
+    // the valves: a new Motorized Ball Valve runs the usual Add dialog first
+    const valves = [];
+    for (const [i, p] of pieces.entries()) {
+      if (p !== 'valve') continue;
+      const v = o['v' + i];
+      if (String(v).startsWith(VB_MV)) { valves[i] = { mv: v.slice(VB_MV.length) }; continue; }
+      if (v !== VB_NEW_MBV) { valves[i] = { dev: v }; continue; }
+      let made = null; vbAfterAdd = e => { made = e; };
+      try { await addThing(...MBV.slice(1)); } finally { vbAfterAdd = null; }
+      if (!made) return toast('No valve was added, so nothing was made.', true);
+      valves[i] = { dev: made.name };
+    }
+    const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements) };
+    try {
+      const gg = draft.graphics.find(x => x.id === g.id);
+      vbChainBuild(gg, k, pieces, valves);
+      (gg.vbChains ||= {})[k] = pieces; if (opening === 'sparge') (gg.vbSparge ||= {})[k] = 'arm';
+      wsName = gg.workspace; sel = { kind: 'gfx', id: gg.id }; renderTabs(); renderWs(); renderVbPanel();
+      toast(`${VB_OPENING_WORD[opening]}: ${pieces.length ? pieces.map(vbPieceWord).join(', ') : 'nothing on it'}. Save layout keeps it.`);
+    } catch (err) { Object.assign(draft, keep); renderWs(); renderVbPanel(); toast(err.message, true, 9000); }
+    return;
+  }
 }
 // a pop-up of small icons in groups; one click picks one. Resolves to its key, or undefined for Cancel.
 function pickVessel(title, groups) {
@@ -6796,12 +6929,22 @@ function vpxRelease(g, e) {
   for (const k of ['integratedIn', 'integratedAs', 'vpKind']) delete e[k];
   Object.assign(e, { workspace: g.workspace, x: Math.round((g.x || 0) + (g.w || 200) + 20), y: Math.round(g.y || 0) });
 }
+// the old part after a swap (OakBarn Brewery, 2026-11-09: "Delete if replace with a different Port"): on another Port it is deleted; on the
+// same Interface and Port (the hardware moved, the Port did not) it stays as a Device of its own. Whatever read it now reads the new one.
+const vpSamePort = (a, b) => a.device === b.device && String(a.channel ?? '') === String(b.channel ?? '') && String(a.probeIndex ?? '') === String(b.probeIndex ?? '');
+function vpxRetire(g, old, e) {
+  for (const q of draft.elements) if (q.input === old.name) q.input = e.name;
+  if (vpSamePort(old, e)) { vpxRelease(g, old); return `${old.name} is on the same Port, so it stays as a Device of its own`; }
+  draft.elements = draft.elements.filter(q => q !== old);
+  return `${old.name} was on another Port, so it is deleted`;
+}
 async function vpxSwap(gid, swaps) {
   for (const [k, name, to] of swaps) {
     const g = draft?.graphics.find(q => q.id === gid), old = draft?.elements.find(q => q.name === name); if (!g || !old) continue;
     const kind = old.vpKind; g.vbWant ||= {};
-    if (to !== VPX_NEW) { const e = draft.elements.find(q => q.name === to); if (!e) continue; vpxRelease(g, old); g.vbWant[k] = kind; vbAttach(g, k, kind, e); toast(`${e.name} is built into ${g.label || g.name}; ${old.name} is a Device of its own now (delete it if it is gone). Save layout keeps it.`, false, 8000); continue; }
-    vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); vpxRelease(g, old); g.vbWant[k] = kind; vbAttach(g, k, kind, e); };
+    const swap = e => { const said = vpxRetire(g, old, e); g.vbWant[k] = kind; vbAttach(g, k, kind, e); toast(`${e.name} is built into ${g.label || g.name}; ${said}. Save layout keeps it.`, false, 8000); };
+    if (to !== VPX_NEW) { const e = draft.elements.find(q => q.name === to); if (e) swap(e); continue; }
+    vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); swap(e); };
     try {
       if (kind === 'element') await addThing(...ELEMENT.slice(1));
       else { const rows = amGroup('Devices: temperature'); const i = await choose('Pick the probe type', rows.map((r, n) => [r[0], n])); if (i === undefined) continue; await addThing(...rows[i].slice(1)); }
@@ -6838,7 +6981,7 @@ function vpSections(it, edit = false) {
         const temps = [['', '(none)'], ...(draft || S.config).elements.filter(q => q.type === 'temperature').map(q => [q.name, q.name])];
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
           [x + 'swap', `Built in ${what}`, 'sel', [['', `${e.name} (keep it)`], ...(draft || S.config).elements.filter(vpFits(kind)).map(q => [q.name, `Swap for ${q.label ? q.label + ': ' : ''}${q.name}`]), [VPX_NEW, `➕ Swap for a new ${what}…`]], true],
-          ...(swapping ? [[k + 'sw', `On 💾 Save, ${e.name} is taken out of the vessel (it stays on the Tab as a Device of its own: delete it there if it is gone) and the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'}.`, 'note']]
+          ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
             : [[x + 'label', '1. Label', 'text'], [x + 'device', '2. Interface (board)', 'dev', null, true], ow ? [x + 'pidx', 'Probe #', 'probe'] : [x + 'channel', 'Port', 'pin', 'vpx_' + spot],
               ro('n', '4. Name', e.name),
               ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Target', 'num']]

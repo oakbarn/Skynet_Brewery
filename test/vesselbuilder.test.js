@@ -2,7 +2,7 @@
 // Device's Placed IPs and the Heating Elements and Thermowell still to be picked; plain words say what is wrong.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp } from '../public/vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList } from '../public/vesselbuilder.js';
 
 assert.ok(fs.existsSync(`templates/vessel/${VB_TEMPLATE}.json`), 'it builds from the Vessel Widget Main Template');
 assert.ok(VB_GENERAL.includes('HLT') && VB_GENERAL.includes('Fermentor'));
@@ -61,4 +61,18 @@ assert.ok(app.includes("isVpDrill(item) && item.vpKind === 'element' ? elemTitle
 assert.ok(app.includes("...(vdev ? vpSections(it) : []),"), 'a section per part in the Vessel Device Properties');
 assert.ok(app.includes("`${word}: None`"), 'None: the section is there, greyed out');
 assert.ok(app.includes("const vpPartAt = ev =>") && app.includes("vp ? vpPartOpen(vp)() :"), 'double-click and long press open the part');
+// step 2 (OakBarn Brewery, 2026-11-09, Rule 19.5): the pieces on the Drain, Tangential and Sparge Arm
+assert.deepEqual(vbOpenings(full), { cOutlet: 'drain', rTangential: 'tangential', lSparge: 'sparge' });
+assert.deepEqual(vbOpenings({ ...w, drain: 'none' }), {});
+assert.deepEqual(vbOpenings(pk), { u1: 'drain', lTangential: 'tangential' });
+assert.deepEqual(vbChainClean(['valve', 'none', 'tee']), ['valve']);
+assert.deepEqual(vbChainClean(['valve', 'elbow', 'tee', 'tee']), ['valve', 'elbow', 'tee']);
+assert.ok(vbPieceList('drain').some(([k]) => k === 'primingTee'));
+assert.ok(!vbPieceList('tangential').some(([k]) => k === 'primingTee'), 'no Priming Tee on a Tangential Inlet');
+assert.deepEqual(vbChainProblems(['valve', 'elbow', 'primingTee'], 'v', 'drain'), []);
+assert.match(vbChainProblems(['primingTee'], 'v', 'drain').join(' '), /only goes in a level run/);
+assert.match(vbChainProblems(['primingTee'], 'h', 'tangential').join(' '), /can not have a Priming Tee/);
+assert.deepEqual(vbChainProblems(['elbow', 'elbow', 'tee'], 'h', 'sparge'), []);
+assert.ok(app.includes('function vbChainBuild(') && app.includes("[VB_NEW_MBV, '➕ Add New Motorized Ball Valve…']"), 'the chains and the Valve picker');
+assert.ok(app.includes('const spargeArm = ') || app.includes('function spargeArm('), 'the Sparge Arm drawn inside the vessel');
 console.log('vesselbuilder tests passed');
