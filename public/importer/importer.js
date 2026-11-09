@@ -7,6 +7,7 @@ import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from '
 import { parseLabel, widgetTypeId } from '../naming.js';
 import { vbFromImport } from '../vesselbuilder.js';
 import { BOOL_STYLES } from '../semi.js';
+import { SCRIPT_WIDGET_WORD } from '../scriptwidget.js';
 import { glossBold, GLOSSARY } from './glossary.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -493,6 +494,10 @@ const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['
   ['Chart Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
   ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
   ['Manual Pump Widget', ''], ['Override button Widget', '']];
+// the Script Widget (OakBarn Brewery, 2026-11-09: "A Script Widget", Rule 1.31): a BruControl Script element now becomes a Script Widget,
+// not a Value Widget. Set here on their own lines, so the list above stays as the other open changes have it.
+for (const w of SKYNET_WIDGETS) if (w[0] === 'Value Widget') w[1] = '';
+SKYNET_WIDGETS.splice(SKYNET_WIDGETS.findIndex(w => w[0] === 'Boolean Widget') + 1, 0, [SCRIPT_WIDGET_WORD, 'Script']);
 const widgetKeep = e => (state.keepTabs ?? new Set(state.r.tabs.map(t => t.name))).has(e.tab);
 // only the kinds with a Widget on a Tab being imported get a page, so "(1 of 1)" when there is only one kind (OakBarn Brewery, 2026-11-08:
 // "Your Widget Timers (1of 2) should be Your Widget Timers (1of 1) as there is only 1")

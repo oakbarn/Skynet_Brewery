@@ -39,6 +39,7 @@ export function elementTopic(e) {
     case 'chart': return ['chart-widget'];      // Rule 1.26 (Fritz, 2026-11-08)
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return ['value-time-and-datetime-widgets'];     // Rule 1.23 (Fritz, 2026-11-05)      // Timer Widget Properties (Fritz, 2026-10-29)
     case 'codeValueWidget': return ['code-value-widget'];      // Rule 1.27 (OakBarn Brewery, 2026-11-08)
+    case 'scriptWidget': return ['script-widget'];      // Rule 1.31 (OakBarn Brewery, 2026-11-09)
     case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
       if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];
       return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
