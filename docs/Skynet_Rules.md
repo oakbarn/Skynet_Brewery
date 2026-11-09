@@ -1860,6 +1860,15 @@ settings (three secrets, three variables). The steps are in [Code_Signing_Setup.
 set, or if signing fails, the Setup .exe is built unsigned and the release is still made; the release notes say which.
 (thread "Sign the Setup .exe with Azure")
 
+9.11 **The Setup and its start files stay clear of what virus scanners distrust** (OakBarn Brewery, 2026-11-09, after
+Malwarebytes called the unsigned Setup .exe "Malware.Ransom.Agent.Generic", a guess, not a real find): the Setup .exe has
+its Details filled in (company, description, a version number that goes up with each build, original file name). The
+.bat start files never use PowerShell's `-ExecutionPolicy Bypass` (not needed for a one-line command) and download only
+into the user's own TEMP folder, never the shared Public folder. What Setup and the start files do for the brewer does not
+change. Signing (Rule 9.10) is the real cure; until it is on, a scanner may still guess wrong, and the file can be
+restored and reported to the scanner's maker as a false positive. Both programs (the Importer ships in the same Setup).
+(thread "Stop antivirus flagging the Setup")
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3166,3 +3175,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Changed Rule 18.31 (OakBarn Brewery: "The Properties of the sub devices on a Vessel Device should pop up a Properties Dialog ... just like it was an independent Device ... Also the Properties should be on the Vessels Device Properties in their own section, If there is None ... all those attribute and Properties are greyed out."): a Vessel Device's Heating Element, Thermowell or Probe opens the same Properties as one of its own; the Vessel Device's Properties have a section for each, greyed out when None. Help 133 and 166 updated. Checked against the BruControl Import program: it has no Device dialogs of its own (Rule 18.31), so nothing changes there. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 18.31 again (OakBarn Brewery: "Fix this Dialog" and "It can still have the Universal attributes plus the sub device sections"): an integrated Vessel Device's Properties are the Universal Properties, its Type greyed out, and fully editable Heating Element and Thermowell / Probe sections, each of which can be swapped for another; nothing else. Help 133 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
+- 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
