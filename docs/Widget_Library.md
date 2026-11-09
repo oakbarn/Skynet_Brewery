@@ -196,6 +196,9 @@ Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no ba
 ### Code Value Widget (`codeValueWidget`; 2026-11-08, Rule 1.27, Help 161)
 A Value Widget with a **Format** (Number with Units and Decimals, Time hh:mm:ss, or DateTime) and a **Code** attribute: Process code that runs once each time a person sets the Value (a tap and Set, or the .API), never when a Process sets it. `{value}` in the Code is the Value, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}`. Normal Label (never blank); name `wgt_CV_Label_TabID`. Properties as the Value Widget, plus Format (after 3 Name) and Code (before X). Keeps its value when the Brain restarts; a restart does not run the Code.
 
+### Script Widget (`scriptWidget`; 2026-11-09, Rule 1.31, Help 173)
+Shows one **Process** on a Tab, as BruControl's Script element does: its Label as the title, what the Process is doing (Running, Waiting, Stopped, Stopped on an error; No such Process / No Process picked) and a **▶ Start / ■ Stop** button. **One click** anywhere on it starts the Process when stopped and stops it when running, with no pop-up (Rule 2.44); **Ask before starting or stopping** (off to start) makes it ask first. Properties (Pump drill-down look): 1 Label (never blank, Script_1 to start), Label Visible, 2 Tab, 3 Name, **4 Process** (dropdown of every Process), Ask before starting or stopping, X, Y, Width, Height (200 x 80 to start), Widget Type. Name `wgt_SCR_Label_TabID`. Follows its Process's new name (✏ Change name). No value of its own: no Database or .API; a Process uses `start` / `stop` on the Process itself. The BruControl Importer makes one from each BruControl Script element (BruControl's variable kept in `.bru`; not user controlled = When tapped: none).
+
 ### Skynet Dial (a Look, Rule 2.40, 2026-11-07, Help 152)
 Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the reading in digits under it), drawn by Skynet as SVG. Not a Widget of its own: a **Look** (`look: dial`) a Temperature Probe picks with **Display > Skynet Dial**, and any Device that shows a number picks in its Text attributes ⬢ (analog in, PWM / analog out, Duty Cycle, PID, Deadband, a Heating Element's output %). A Process: `name.valueType = "Dial"`.
 
@@ -516,6 +519,7 @@ These are added from the same list as Devices but need no board pin.
 | Alarm (made before 2026-11-02, no subclass) | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Picture when sounding / quiet |
 | Sound Player | Sound file, Repeat sound. Lowest priority (5): pauses while any alarm sounds. Process: play / stop SoundPlayer |
 | Label | Text box only (no own settings) |
+| Script Widget (Rule 1.31) | Process (dropdown), Ask before starting or stopping. Shows the Process's state with Start / Stop; one click starts or stops it |
 | Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading. The DigiBoil and 65 L Brewzilla Controls (Rule 5.39) also have power, heat2, heat3 and run, and a Process setting them pops up what to do by hand and waits |
 
 ### gGlobal variables (Processes and screen; database and outside programs when its Database and .API box says so)
@@ -566,6 +570,7 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
 - 2026-11-08: Code Value Widget (Rule 1.27, Help 161): a Value Widget in a chosen Format whose Code attribute runs Process code with {value} each time a person sets it. (thread "Build a Code Value Widget")
 - 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")
+- 2026-11-09: Script Widget (`scriptWidget`, Rule 1.31, Help 173): one Process on a Tab with its state and Start / Stop, one click starts or stops it; name `wgt_SCR_Label_TabID`; the BruControl Importer makes one from each Script element.
 - 2026-11-08: Manual Pump Widget (`manualPump`, Rule 5.15a) and the `.confirmation` switch on the Manual Valve Widget (on), Manual valve Devices (on), Switch and LED (off) (Rule 1.28). (thread "Build Confirmation Widgets in the Panel")
 - 2026-11-09: Boolean Widgets (Rule 1.20): Slider, Checkbox and Lighted Button added as their own sub-Widgets with a fixed look; Device controlled shown as Linked Device (acts like a Clone of the Device). (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Chart Widget: a Hydrometer's line has an SG / °P / °Bx switch right on the Graph (Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")

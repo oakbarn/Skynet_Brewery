@@ -7,6 +7,7 @@ import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from '
 import { parseLabel, widgetTypeId } from '../naming.js';
 import { vbFromImport } from '../vesselbuilder.js';
 import { BOOL_STYLES } from '../semi.js';
+import { SCRIPT_WIDGET_WORD } from '../scriptwidget.js';
 import { glossBold, GLOSSARY } from './glossary.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -490,7 +491,7 @@ function tell(title, html) {
 // ---- The Widget pages (OakBarn Brewery, 2026-11-08: "After Your Tabs, add pages for all Widgets, with a category for each Skynet Widget
 // type. Import all BruControl Application Elements ... as Skynet equivalent Widgets"): first every Skynet Widget type and what came in
 // as one, then a page for each kind found, with the same Display Name, tick, Label and Show columns as the items.
-const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
+const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], [SCRIPT_WIDGET_WORD, 'Script'], ['Value Widget', ''],
   ['Graph Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
   ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
   ['Manual Pump Widget', ''], ['Override button Widget', '']];

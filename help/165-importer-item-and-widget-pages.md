@@ -29,7 +29,7 @@ the Skynet Widget that does the same job:
 | Timer | Timer Widget |
 | Alarm | Alarm Widget |
 | Toggle Switch | Switch Widget |
-| Script (shows a Script's value) | Value Widget (joined to its Process when Processes come in) |
+| Script | Script Widget ([Help 173](173-script-widget)): shows its Process with Start / Stop; one click starts or stops it |
 | Chart | Graph Widget ([Help 159](159-graph-widget)) |
 | Inspector | none: it stays a grey Placeholder |
 

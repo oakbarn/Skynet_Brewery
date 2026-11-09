@@ -63,6 +63,7 @@ import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
+import { followProcessRename } from './public/scriptwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -974,6 +975,7 @@ async function route(req, res) {
       engine.rename(from, now);
       const auto = store.config.autostart ?? [];
       if (auto.includes(from)) { store.config.autostart = auto.map(n => n === from ? now : n); store.writeConfig(); }
+      if (followProcessRename(store.config.elements, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Script Widgets follow (Rule 1.31)
       return ok(res, { ok: true, processes: renameInProcesses(engine, new Map([[from, now]])) });
     }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
