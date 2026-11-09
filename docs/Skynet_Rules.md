@@ -267,6 +267,27 @@ anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet reall
 so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
 person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
 
+1.31 **Process Widget** (OakBarn Brewery, 2026-11-09, asked whether a BruControl Script element should come in as a Value Widget or a
+Push Button: "A Script Widget"; then, as Rule 1.4 says a script is a Process: "Process Widget"). A Widget that shows one **Process** on a Tab, as BruControl's Script element does: its **Label** as
+the title, what the Process is doing (**Running**, **Waiting**, **Stopped**, **Stopped on an error**; **No such Process** or **No
+Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
+- **One click** anywhere on it (outside Edit layout) starts the Process when it is stopped and stops it when it runs, at once, with no
+  pop-up (Rule 2.44). **Ask before starting or stopping** (off to start) makes the click ask first. A view only account can't start or
+  stop it; an item set to When tapped: none does nothing. Double-click opens its Properties (Rule 2.9).
+- **Properties** in the Pump's drill-down look (Rule 18.30): 1 Label (never blank; Script_1 to start), Label Visible, 2 Tab, 3 Name,
+  **4 Process** (a dropdown of every Process), Ask before starting or stopping, X, Y, Width, Height (200 x 80 to start), Widget Type.
+- **Name** `wgt_PRC_Label_TabID` (Rule 3.14), for example `wgt_PRC_Mash~Steps_BR`.
+- When its Process gets a new name with ✏ Change name (Rule 3.11), the Widget follows it. If its Process is deleted, the Widget says
+  No such Process until another is picked.
+- It has no value of its own, so it has no Database or .API settings. A Process starts or stops the Process itself (`start Mash`,
+  `stop Mash`) and every Process Widget showing it changes at once.
+- **Its name:** in Skynet a script is a Process (Rule 1.4), so it is the Process Widget (OakBarn Brewery, 2026-11-09: "Process Widget"),
+  type letters **PRC**.
+- **BruControl Import:** checked against both programs. The Importer and the older import in the Panel make each BruControl **Script
+  element** a Process Widget that shows the BruControl Script of the same name (it is that Process once the Processes come in); the
+  Script element's variable is kept with what BruControl had (`.bru`), and one BruControl marked as not user controlled gets When
+  tapped: none (Rule 2.44). The Importer's Widget pages list it as Process Widget. Help 173.
+
 1.29 **Layer Order** (OakBarn Brewery, 2026-11-09: "also missing is a new Univeral .attribute .layer"; ".layer is layer Order";
 "BruControl has that field. Have skynet work the same as BruControl"). Every Device, Widget and Semi_Widgets_Device has a
 **Layer Order** (a Universal Property, Rule 1.21). It works like BruControl's **Z Order** (BruControl Manual v1.3, Element
@@ -734,7 +755,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PRC** Process Widget (Rule 1.31),
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
@@ -2254,7 +2275,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     "tick them all" box, on purpose: each item must be looked at (a code like `M_6_B_1` should become words like HLT).
   - **The Widget pages** come after the Tabs: every Skynet Widget type with how many of the brewer's BruControl Application Elements
     become one, then a page per kind found. A BruControl **Timer** becomes a Timer Widget, an **Alarm** an Alarm Widget, a **Toggle
-    Switch** a Switch Widget, a **Script** element a Value Widget (joined to its Process when Processes come in), a **Chart** a Graph
+    Switch** a Switch Widget, a **Script** element a Process Widget (Rule 1.31), a **Chart** a Graph
     Widget (Rule 1.26). An **Inspector** has no Skynet Widget and stays a Placeholder. They follow the same Display Name, Label and Show columns.
   - **The item pages** (one per kind: Pumps, Heating Elements, Temperature Probes, Valves, Flow Meters, **pH Meters, Pressure Sensors
     (PSI), Hydrometers, Volume Meters, Floats, Digital Inputs**, Other items) each start with How many, have the same Display Name,
@@ -3023,6 +3044,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Connect to your Brewery will use the same Build page as in Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"): Connect your brewery has 🔨 Open the Build page, the Skynet Panel's own Build page on the imported Schema, with no board connected and Processes greyed out; what is built comes into the saved Schema. Help 143 updated. Checked against the Skynet Panel: the Panel gets a Build-page mode used only when the Importer starts it (SKYNET_IMPORT_BUILD); a normal Panel is unchanged. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Globals will be dealt with later. For now, only list them"): the Importer only lists BruControl Globals (name and Tab) on the Boards and Tabs summary; they get no Placeholder and the Beer.xml question on a Globals-only Tab is gone. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Added Rule 1.28, Confirmation Widgets (OakBarn Brewery), and the `.confirmation` attribute that puts a Widget in the class (Help 162): Manual Valves, Manual Pumps and moving a QD Hose ask the person to confirm they did it by hand; a named exception to Rule 2.44's no pop-up to turn anything On, since they turn nothing on. The Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other) start with How many; extra ones added there will become Confirmation Widgets. Checked against both programs: the Panel gets the Widget class (to be built); the Importer makes them. (thread "Import from BruControl .bak backups")
+- 2026-11-09: Added Rule 1.31, the Process Widget (OakBarn Brewery: "A Script Widget", then "Process Widget" to follow Rule 1.4): shows one Process on a Tab with its Label, what it is doing and a Start / Stop button; one click starts or stops it with no pop-up (Rule 2.44); name `wgt_PRC_Label_TabID` (Rule 3.14 gets **PRC**); it follows its Process's new name. It is named Process Widget to follow Rule 1.4; Rule 15.4's Widget pages line says Process Widget. Help 173 new. Checked against both programs: the Panel builds and runs it; the Importer and the Panel's older import make each BruControl Script element a Process Widget instead of a Value Widget (or a picture). (thread "Add a Process Widget for Processes")
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-11-08: Added Rule 2.44 (OakBarn Brewery: "make things act the same. Like Click the Graphic for On or Off ... What you do every day One Click away"): outside Edit layout one click on a picture of something that turns On and Off turns it On or Off at once, wherever it is; one click on a temperature a Heating Element holds opens its SetPoint (Rule 2.43); one click on something set to a number opens its pop-up; double-click still opens Properties. Lists three things that don't follow it yet (a Heating Element on its own on a Tab, a Valve built into a Vessel Device, the older Duty Cycle, Hysteresis, PID and Deadband Devices). Checked against the BruControl Import program: no change, everything it makes gets these clicks in the Panel. (thread "Add the one-click rule to the Rules")
