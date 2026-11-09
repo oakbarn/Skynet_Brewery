@@ -32,16 +32,16 @@ thermal paste so it sees a change quickly.
 
 1. **Smoothing**: it averages the probe over the **Smoothing** seconds (10 to start), so the probe's tiny steps don't make
    the heater twitch.
-2. **Hold output**: the % the element needs **just to stay** at the Target. It starts there, so it doesn't swing far to find it.
-   Watch the % once it has settled at the Target and put that number in. Leave it at 0 and it finds it by itself, more slowly.
+2. **Hold output**: the % the element needs **just to stay** at the Setpoint. It starts there, so it doesn't swing far to find it.
+   Watch the % once it has settled at the Setpoint and put that number in. Leave it at 0 and it finds it by itself, more slowly.
 3. **Less overshoot after a warm-up**: the part that builds up over time (the I part) is held while the element is at 0 % or
-   at its Max output, and while the temperature is already on its way to the Target. That stored-up push is what makes a
+   at its Max output, and while the temperature is already on its way to the Setpoint. That stored-up push is what makes a
    plain PID overshoot when it arrives.
 4. **Exact power**: the element is on for its % of each **Output window**. The bit too short to switch is carried to the next
    window, so over a minute it gets exactly the % asked for, even 12.34 %.
 5. **Max output %**: a big element on a small column overshoots. Limit it, for example to 40 %.
 
-Target, Kp, Ki, Kd and Max output are the **same numbers as its PID**, so switching between PID and Precise carries on.
+Setpoint, Kp, Ki, Kd and Max output are the **same numbers as its PID**, so switching between PID and Precise carries on.
 
 ## Calibrate the probe: two points
 
@@ -60,14 +60,14 @@ only one point filled in, it works like an offset.
 
 - In the Heating Element's Properties, pick **Precise** as the main method, or tick it under **Other methods allowed**.
 - One click on its **Precise** spot, or on the Precise button in its pop-up, switches to it.
-- A Process: `hE_1.method = "Precise"` or the short `hE_1.PREC`. Its settings by name: `.target`, `.kp`, `.ki`, `.kd`,
+- A Process: `hE_1.method = "Precise"` or the short `hE_1.PREC`. Its settings by name: `.setpoint`, `.kp`, `.ki`, `.kd`,
   `.maxoutput`, `.holdoutput`, `.smoothing`, `.calctime`, `.outtime`. `.value` is its output %, `.pv` the smoothed reading.
 
 ## Tuning, plainly
 
 Start with Kp 10, Ki 0.1, Kd 0, Smoothing 10 s, Output window 2 s.
-- It swings up and down around the Target: lower **Kp**, or raise **Smoothing**.
-- It sits a little below the Target: raise **Ki** a little, or set the **Hold output**.
+- It swings up and down around the Setpoint: lower **Kp**, or raise **Smoothing**.
+- It sits a little below the Setpoint: raise **Ki** a little, or set the **Hold output**.
 - It overshoots on arrival: lower **Max output %**, or set the **Hold output**.
 
 ## Coming from BruControl

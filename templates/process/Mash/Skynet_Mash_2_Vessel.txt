@@ -8,7 +8,7 @@
 step "Sparge water"
 ask "While the mash rests, fill the empty kettle with the sparge water. Press Done when it is in."
 @if HLT_Heater
-{{HLT_Heater}}.target = rcp_Sparge_Temp
+{{HLT_Heater}}.setpoint = rcp_Sparge_Temp
 {{HLT_Heater}} = on
 @end
 @each_mash_step
@@ -16,7 +16,7 @@ if rcp_Mash_Steps >= {{n}}
   step "Mash step {{n}}"
   print "Mash step {{n}}: " + rcp_Mash_Step_{{n}}_Name + " at " + rcp_Mash_Step_{{n}}_Temp + rcp_Temp_Units + " for " + rcp_Mash_Step_{{n}}_Time
 @if Mash_Heater
-  {{Mash_Heater}}.target = rcp_Mash_Step_{{n}}_Temp
+  {{Mash_Heater}}.setpoint = rcp_Mash_Step_{{n}}_Temp
   {{Mash_Heater}} = on
 @end
 @if Mash_Probe

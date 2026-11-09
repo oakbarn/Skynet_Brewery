@@ -1,8 +1,8 @@
 # Predictive Hysteresis: no overshoot
 
-A **Hysteresis** turns its output **ON** when the reading drops a set amount (the **On offset**) below the **Target**, and **OFF** when
-the reading gets back to the Target. But a heating element (or a chiller) does not stop the moment it is switched off: the heat
-already in the element keeps going into the liquid, and the reading **overshoots** past the Target.
+A **Hysteresis** turns its output **ON** when the reading drops a set amount (the **On offset**) below the **Setpoint**, and **OFF** when
+the reading gets back to the Setpoint. But a heating element (or a chiller) does not stop the moment it is switched off: the heat
+already in the element keeps going into the liquid, and the reading **overshoots** past the Setpoint.
 
 **Predictive** fixes that (Skynet Rule 6.23). It is **on for every Hysteresis**: the Hysteresis Device, a Heating Element's
 Hysteresis method and a Cool / Warm Pump.
@@ -11,7 +11,7 @@ Hysteresis method and a Cool / Warm Pump.
 
 1. Each time the output turns off, Skynet watches how far the reading keeps going (its **coast**).
 2. It averages the coast of the last runs.
-3. Next time it turns off that much **before** the Target, so the reading coasts up to the Target and stops there.
+3. Next time it turns off that much **before** the Setpoint, so the reading coasts up to the Setpoint and stops there.
 
 The early OFF is never more than half the On offset.
 

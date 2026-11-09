@@ -25,7 +25,7 @@ A **PID** or **Hysteresis** heating element holds the temperature that its own p
 Double-click the RIMS tube in Edit layout. Besides the usual Name, Label, Show label, Flip, Rotate and place settings it has:
 
 - **Interface**: the board it is wired to.
-- **Heating element**: its **Control** (PID, Hysteresis, Duty Cycle or PWM), its Port, and all of that control's own settings (for a PID: Target, Kp, Ki, Kd, Max output and so on). Change the Control and the settings below it change to match.
+- **Heating element**: its **Control** (PID, Hysteresis, Duty Cycle or PWM), its Port, and all of that control's own settings (for a PID: Setpoint, Kp, Ki, Kd, Max output and so on). Change the Control and the settings below it change to match.
 - **Heating element: its thermowell**: the thermowell is part of the heating element. Pick the type of temperature probe in it and its Port. A PID or Hysteresis element holds the temperature this probe reads.
 
 Save, and the heating element and its probe follow. One whose name is still the suggested one gets the new suggested name.
