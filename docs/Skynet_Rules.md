@@ -1670,6 +1670,22 @@ Heating Element uses. Methods that switch a motor many times a minute (Duty Cycl
   Heating Element's Hysteresis. The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port,
   alone or beside its on/off output, one CPMP Pump that starts in that method, with its settings and probe, and lists it in the report.
 
+
+6.22 **Dual Throw: a second Port that is always the opposite** (OakBarn Brewery, 2026-11-09: "Add it", after the BruControl compare;
+as BruControl's Dual Throw output, its DualThrowPortNum and DualThrowDelay). A Digital Out (a plain output, a Motorized valve, a
+Pump; never a Heating Element or a Manual valve) may have a **Dual Throw second Port** on the same Interface and a **Dual Throw
+delay** in milliseconds. **ON** = its own Port on and the second Port off; **OFF** = its own Port off and the second Port on. The
+Port that goes off goes off first; the other one comes on after the delay, so the two are **never on together**. It is for a valve
+with an **Open wire and a Close wire**, or a motor that turns forward on one relay and backward on another.
+- **One Interface Port, one Device (Rule 6.1):** the second Port is taken by its Device. It drops off every Available Ports list, and
+  it can't be the Device's own Port.
+- **Where:** the ⬢ **Pin attributes** pop-up beside the Interface (with Invert and One-shot), on a Digital Out's and a Motorized
+  valve's Properties and in the Add box. None (the default) = no second Port. Invert (Active Low) inverts both Ports.
+- **OFF is a state, not "no power":** when everything is switched off (Rule 6.4, another Schema), a Dual Throw Device goes OFF, so
+  its second Port comes **on** (a valve is driven closed). Only a lost link (the board's own safety) turns both Ports off.
+- **Both programs:** the Panel's Brain switches the two Ports; the BruControl Importer keeps BruControl's DualThrowPortNum (-1 =
+  none) and DualThrowDelay and lists each one in the Import notes. Help 167.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2823,6 +2839,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
