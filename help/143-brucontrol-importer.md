@@ -128,7 +128,7 @@ Then you confirm what comes in, in small steps:
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
 3a. **Your Widgets.** BruControl's Application Elements (the things not wired to a board) become Skynet Widgets: a Timer a
    **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Value Widget**, a Chart
-   a **Chart Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
+   a **Graph Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
    each kind found, with the same Display Name, tick, Label and Show columns as the items below. A BruControl Inspector has no Skynet
    Widget and stays a Placeholder. See [Help 165](165-importer-item-and-widget-pages).
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
@@ -186,7 +186,7 @@ Then you confirm what comes in, in small steps:
 - your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
   swapped in later; your **heating controls** keep their settings (Target, Kp, Ki, Kd ...) and their temperature probe, so a
   click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
-- your **Charts**: each BruControl Chart becomes a Skynet **Chart Widget** ([Help 159](159-chart-widget)) with the same span,
+- your **Charts**: each BruControl Chart becomes a Skynet **Graph Widget** ([Help 159](159-graph-widget)) with the same span,
   refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
 - your **Widgets** (Timers, Alarms, Toggle Switches, Scripts), from the Widget pages; a pump BruControl ran by a temperature control
