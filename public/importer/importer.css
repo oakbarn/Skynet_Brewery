@@ -155,3 +155,6 @@ main input[type=text], main input[type=number], main input:not([type]), main sel
   background: #d9d9d9 !important; color: #000000 !important; border: 1px solid #8a8a8a; }
 main select option { background: #ffffff; color: #000000; }
 main input.blankLabel, main input.blankField, main select.blankField { border: 2px solid #d9534f !important; }
+/* Set every valve: the row at the top of the Valves page */
+.setAll { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.setAll select { margin-left: 4px; }
