@@ -1337,6 +1337,7 @@
   },
   {
    "name": "BM_700_1W_HLT_BR",
+   "typeCode": "1W",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1362,6 +1363,7 @@
   },
   {
    "name": "BM_701_1W_Mash_BR",
+   "typeCode": "1W",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1392,6 +1394,7 @@
   },
   {
    "name": "BM_702_1W_Kettle_BR",
+   "typeCode": "1W",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1427,6 +1430,7 @@
   },
   {
    "name": "BM_8_HE_HLT~element_BR",
+   "typeCode": "HE",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",
@@ -1452,6 +1456,7 @@
   },
   {
    "name": "BM_9_HE_Kettle~element_BR",
+   "typeCode": "HE",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",

@@ -238,7 +238,14 @@ export function portKeys(el) {
 // (named '\0new' while it is being picked) never shares a port, so the Available Ports lists never offer a used port.
 export const SHARED_PORT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
 const NEW = '\0new';
-const mayShare = (a, b) => a.name !== NEW && b.name !== NEW && SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type);
+const mayShare = (a, b) => instanceFamily(a, b) || (a.name !== NEW && b.name !== NEW && SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type));
+// Integrated Instances (OakBarn Brewery, 2026-11-09: "It is not a Clone but an Instance ... An Integrated Device Inherits its Properties
+// and then becomes independent"; "change the Rule to allow an Integrated Instance", Rule 6.1 exception): a Heating Element built into a
+// Vessel Device from one already on a Tab is a copy of it with its own On / Off, methods and settings, on the same Interface Port
+// (instanceOf names the Device it came from; its Port can't be changed). Two Heating Elements may share a Port when either is an Instance.
+const heaterEl = e => e?.type === 'digitalOut' && e.subtype === 'element';
+export const isInstance = e => heaterEl(e) && !!e.instanceOf;
+export const instanceFamily = (a, b) => heaterEl(a) && heaterEl(b) && (!!a.instanceOf || !!b.instanceOf);
 // Devices that share a port with this one (other names)
 export function portSharers(el, elements) {
   const mine = new Set(portKeys(el)); if (!mine.size) return [];

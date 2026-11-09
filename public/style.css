@@ -1051,6 +1051,8 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
   background: #fffbe0; color: #1b232c; border: 1px solid #c9b25a; border-radius: 7px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
   font: 13px/1.4 var(--font); white-space: pre-line; text-align: left; pointer-events: none; }
 .hoverHelp:not([popover]):not(.show) { display: none; }
+.hhMark { color: #d01818; font-weight: 700; }
+.hhIcon { color: #e02424; font-weight: 700; }
 dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .fldPair { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fldPair > select:first-child { flex: 1; min-width: 0; }
