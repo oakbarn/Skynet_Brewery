@@ -208,3 +208,12 @@ await import('./chart.test.js');
   assert.equal(methodName('heater', 'onoff'), 'On/Off Only'); assert.equal(methodName('pump', 'onoff'), 'On/Off'); assert.equal(methodName('heater', 'pid'), 'PID');
   assert.equal(PART_PAGES.find(p => p.kind === 'heater').fields.find(f => f.k === 'watts').optional, true);
 }
+
+// 2026-11-09 (Rule 18.33): on Valves only Connection Type and Size are mandatory; the top of the page sets all three on every line
+{
+  const { PART_PAGES } = await import('../public/importer/connect.js');
+  const v = PART_PAGES.find(p => p.kind === 'valve');
+  assert.deepEqual(v.fields.filter(f => !f.optional).map(f => f.k), ['connection', 'size']);
+  assert.equal(v.fields.find(f => f.k === 'connection').name, 'Connection Type');
+  assert.deepEqual(v.setAll, ['connection', 'size', 'volts']);
+}
