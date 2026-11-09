@@ -74,5 +74,14 @@ assert.equal(store.getProp('gGV_Late', 'value'), 7, 'saved value kept');
 assert.deepEqual([...told], [['vKV_Late', 'gGV_Late']]);
 console.log('gstandard tests passed');
 
-// Shared Variables are gGlobals too (Rule 1.25)
-await import('./sharedvar.test.js');
+
+// The Shared Variable class is gone (Rule 1.25, 2026-11-09): an old one is left out when the Schema loads, the rest loads
+{
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'shr-'));
+  fs.writeFileSync(path.join(d, 'brewery.json'), JSON.stringify({ title: 'x', elements: [{ name: 'shr_Hop', type: 'shared', dataType: 'value' }, { name: 'gV_Hop', type: 'gGlobal', kind: 'value' }] }));
+  const s = new Store(path.join(d, 'brewery.json'), path.join(d, 'data')); s.load();
+  assert.ok(!s.has('shr_Hop')); assert.ok(s.has('gV_Hop'));
+  assert.ok(!s.config.elements.some(e => e.type === 'shared'));
+  fs.rmSync(d, { recursive: true, force: true });
+  console.log('old Shared Variables are left out: passed');
+}
