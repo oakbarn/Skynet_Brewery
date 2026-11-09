@@ -197,6 +197,7 @@ function connect() {
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
+    if (!editing && view === 'workspace' && Object.values(ch).some(p => 'layer' in p)) renderWs();      // a Process changed a Layer Order (Rule 1.29)
     renderPipes(); updateMeters(); updateAlarms(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
@@ -278,10 +279,52 @@ function renderWs() {
   editing = false;
   try { drawWs(); } finally { editing = true; }
 }
+// Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: "Have Skynet work the same as BruControl"). It is BruControl's Z Order
+// (BruControl Manual v1.3, Element Appearance > General): 1 is on top, then 2 under it ...; a new item gets 1 and the rest move down
+// one; the numbers on a Tab always run 1, 2, 3 ... with no gaps. Every item is in the list: pipes, hoses and the IP-kind items (IP
+// markers, IP pipe fittings, Manual Valve Widgets) too (OakBarn Brewery, 2026-11-09: "yes to every item ... it becomes a universal Attribute").
+const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
+// the items of a Tab in Skynet's own drawing order, bottom first (Clones as their Clone graphic): pipes and hoses, vessels, pictures
+// and text, Devices and Widgets, pipe fittings, then the IP-kind items (IP markers, IP pipe fittings, Manual Valve Widgets)
+function tabItems(src, wsName, tabOf = g => g.workspace) {
+  return [...src.graphics.filter(g => g.workspace === wsName && g.kind === 'pipe'),
+    ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'vessel' && !isEqFit(g)),
+    ...src.graphics.filter(g => tabOf(g) === wsName && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind)),
+    ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
+    ...src.graphics.filter(g => g.workspace === wsName && isClone(g)),
+    ...src.graphics.filter(g => g.workspace === wsName && isEqFit(g)),
+    ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'ip')];
+}
+const hasLayer = o => Number.isInteger(o?.layer) && o.layer >= 1;
+// a pipe's or hose's own layer on the Tab: an empty SVG the size of the Tab that renderPipes draws it in
+const pipeLayer = id => { const n = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); n.setAttribute('class', 'pipes pipeL'); n.dataset.pipe = id; return n; };
+// top first: items with no number yet are new, so they are on top (newest first); then the numbered ones, 1, 2, 3 ...
+function layerStack(items) {
+  const set = items.map((o, i) => [o, i]).filter(([o]) => hasLayer(o)).sort((a, b) => a[0].layer - b[0].layer || b[1] - a[1]).map(x => x[0]);
+  return [...items.filter(o => !hasLayer(o)).reverse(), ...set];
+}
+const layerNow = (src, item) => layerStack(tabItems(src, item.workspace)).indexOf(item) + 1;
+// put one item at Layer Order n on its Tab and number the whole Tab again, 1, 2, 3 ... (BruControl's up / down arrows)
+function moveLayer(src, wsName, item, n) {
+  const st = layerStack(tabItems(src, wsName)).filter(o => o !== item);
+  st.splice(Math.max(0, Math.min(st.length, n - 1)), 0, item);
+  st.forEach((o, i) => { o.layer = i + 1; });
+}
+const renumberLayers = src => { for (const w of src.workspaces) layerStack(tabItems(src, w.name)).forEach((o, i) => { o.layer = i + 1; }); };
+// outside Edit layout a Process may have moved an item (Pump_1.layer = 1): it goes to that place and the rest move down one
+function runStack(stack) {
+  if (editing) return stack;
+  const want = o => { const v = !isClone(o) && o.name ? S.values?.[o.name]?.layer : ''; return Number.isInteger(v) && v >= 1 ? v : 0; };
+  const moved = stack.filter(want);
+  if (!moved.length) return stack;
+  const out = stack.filter(o => !moved.includes(o));
+  for (const o of moved.sort((a, b) => want(a) - want(b))) out.splice(Math.min(out.length, want(o) - 1), 0, o);
+  return out;
+}
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
-  ws.querySelectorAll('.el,.gfx,.flowHot').forEach(n => n.remove());
+  ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => n.remove());
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Background Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
@@ -296,16 +339,20 @@ function drawWs() {
   if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
-  const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
-  for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
   if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
-  const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
-  for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e) && !isAvPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
-  for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
-  if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
+  // Layer Order (Rule 1.29): drawn from the bottom of the list up, so Layer Order 1 is on top
+  // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
+  const gfxs = new Set(L().graphics), clones = [];
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
+  for (const o of runStack(layerStack(tabItems(L(), w.name, gTab))).reverse()) {      // a Process can move a Text Widget to another Tab (.tab)
+    if (!gfxs.has(o)) ws.append(buildEl(o));
+    else if (isClone(o)) { const e = cloneEl(o); if (e) { clones.push(e); ws.append(buildEl(e)); } }
+    else if (o.kind === 'vessel') ws.append(buildVessel(o));
+    else if (o.kind === 'pipe') ws.append(pipeLayer(o.id));      // its place; renderPipes draws it in there
+    else if (o.kind === 'ip') { if (!capped.has(o.id)) { const n = buildIp(o); n.style.zIndex = '0'; ws.append(n); } }      // in its place, not always on top
+    else ws.append(buildGfx(o));
+  }
+  if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
@@ -2015,8 +2062,9 @@ function cloneEl(g) {
   // a Method Clone (Rule 4.4, Fritz 2026-11-07): one tile of a Device with more than one Control Method, standing for one of them
   const mk = isMethodClone(g, p) ? heatMethodKey(g.method) : null;
   if (mk) { e.cloneMethod = mk; e.label = g.label || `${p.label || p.name} ${heatMethodWord(mk)}`; }
-  for (const k of ['locked', 'visibility', 'hidden', 'integratedIn', 'integratedAs']) delete e[k];
+  for (const k of ['locked', 'visibility', 'hidden', 'integratedIn', 'integratedAs', 'layer']) delete e[k];
   if (g.locked) e.locked = true;
+  if (g.layer) e.layer = g.layer;          // a Clone has its own Layer Order (Rule 1.29)
   if (g.visibility === 'hidden') e.visibility = 'hidden';
   return e;
 }
@@ -3420,6 +3468,8 @@ function renderPipes() {
   const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
+  const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
+  layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
@@ -3450,8 +3500,9 @@ function renderPipes() {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
-    svg.append(g);
+    const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
   }
+  $('#ws').append(...mine);         // a pipe being drawn has no place yet: on top until the Tab is drawn again
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
     if (all.length > 1) svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));
@@ -3546,7 +3597,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; if (drag?.item) delete drag.item.qdAuto; ev.preventDefault(); return; }
-  const hit = ev.target.closest('#pipes g');
+  const hit = ev.target.closest('.pipes g');
   const pip = ev.target.closest('.devip');
   let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
   if (hit && !node) {
@@ -3714,7 +3765,7 @@ $('#ws').addEventListener('dblclick', ev => {
   if (vpart) return vpPartOpen(vpart)();
   const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
-  const pipe = ev.target.closest('#pipes g');
+  const pipe = ev.target.closest('.pipes g');
   const unit = hitUnit && findItem('gfx', hitUnit);
   if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem(...refOf($(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) || { dataset: { name: pip.dataset.dev } }));
   else if (node && unit && [unit.id, bundleOf(unit)?.id].includes(node.dataset.gid)) editItem('gfx', unit.id);   // the pointer was caught by its vessel
@@ -3780,7 +3831,7 @@ const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '')
 const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
   onclick: ev => { ev.preventDefault(); ev.stopPropagation(); if (!leave || leave() !== false) openHelp(topic); } }, '?');
 function tabItemAt(target) {
-  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('#pipes g');
+  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('.pipes g');
   const [kind, id] = pip ? (pip.dataset.eq ? ['gfx', pip.dataset.eq] : ['el', pip.dataset.dev]) : node ? refOf(node) : pipe ? ['gfx', pipe.dataset.gid] : [null];
   const item = kind === 'el' ? L().elements.find(e => e.name === id) : kind ? L().graphics.find(g => g.id === id) : null;
   return item && { kind, item };
@@ -6053,6 +6104,7 @@ const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
   for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
+  renumberLayers(draft);         // every Tab's Layer Order runs 1, 2, 3 ... with no gaps, new items on top (Rule 1.29)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
   const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
@@ -7071,6 +7123,23 @@ function genDeviceFields(it, item, f) {
     typeF];
 }
 
+// Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: a Universal Property, "Have Skynet work the same as BruControl"): every Device
+// and Widget's Properties have it, right after its Size (or its place, or its Tab, when it has no Size). It is added here, once, so
+// no dialog's own layout changes (Rule 18.10).
+const LAYER_TIP = 'Layer Order, like BruControl\'s Z Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
+// every item is in the Layer Order list, pipes and IP-kind items too (Rule 1.29)
+const inLayers = item => !!item;
+function withLayer(fields, item) {
+  if (!inLayers(item)) return fields;
+  if (typeof fields === 'function') return it => withLayer(fields(it), item);
+  if (!Array.isArray(fields)) return fields;
+  const isF = (f, k) => Array.isArray(f) && f[0] === k && typeof f[2] === 'string';
+  if (fields.some(f => isF(f, 'layer'))) return fields;
+  const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
+  const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
+  const f = ['layer', 'Layer Order (1 = on top)', 'num', null, false, false, { tip: LAYER_TIP, ...same }];
+  return at >= 0 ? [...fields.slice(0, at + 1), f, ...fields.slice(at + 1)] : [...fields, f];
+}
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -7850,9 +7919,9 @@ const INFO = {
     ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
     ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (wgt_ALM_Label_TabID, Rule 3.14).'],
     ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
-    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']],
     attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
-      ['.x'], ['.y'], ['.width'], ['.height'], ['.sound'], ['.fileindex']],
+      ['.x'], ['.y'], ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.sound'], ['.fileindex']],
     example: 'alm_Hops.back = "Red"' },
   text: { title: 'Text Widget', properties: [
     ['Name', ' with a Suggested Name (w_Text_N). A user changes it only with ✏ Change name, and every Process that uses it is updated to the new name.'],
@@ -7860,11 +7929,11 @@ const INFO = {
     ['Text', ' (+ Text in Edit layout), which is its value. Rich Text Embedded Codes work in the Label and the Text (\\b bold, \\n new line, \\c{Red} ...).'],
     ['Visible switch', ' for the Label and for the Widget; Hidden Locked keeps it hidden even when Visible is on.'],
     ['Standard Rich Text properties', ' for the Label and the Text: font, size, bold, fore color, back color, alignment.'],
-    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.'],
     ['Word wrap', ' (always on).']],
     attributes: [['.label'], ['.text'], ['.value', 'only in a Process: the same as .text'], ['.label_visible'], ['.font_label'], ['.size_label'], ['.fore_label'], ['.back_label'], ['.bold_label'], ['.alignment_label'],
       ['.font'], ['.size'], ['.fore'], ['.back'], ['.bold'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'],
-      ['.width'], ['.height'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
+      ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
   override: { title: 'Override Button Widget', properties: [
     ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
@@ -7880,17 +7949,17 @@ const INFO = {
     ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.target = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
-    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']] },
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']] },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
     ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it): Back, Text Fore and Text Back colors, and the Frame (rounded, square, or square top) with its color.'],
     ['Digits', ': hh:mm:ss or hh:mm, and Seconds only in the last minute (a Timer counting down shows just SS when less than a minute is left).'],
     ['No pictures and no background', ' (Fritz, 2026-10-29).'],
-    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.'],
     ['▶ ■ ↺ Set', ' buttons under the digits start, stop, reset and set it.']],
     attributes: [['.value', 'the time, hh:mm:ss; the same as the name alone'], ['.running', 'true / false'], ['.countdown', 'true = counts down'], ['.resetvalue', 'hh:mm:ss'], ['.label'],
-      ['.fore', 'the digits, over its Style'], ['.back', 'the panel, over its Style'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'], ['.width'], ['.height']],
+      ['.fore', 'the digits, over its Style'], ['.back', 'the panel, over its Style'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'], ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top']],
     example: 'tm_Mash.running = true' },
 };
 function infoIcon(kind) {
@@ -8289,6 +8358,8 @@ async function editItem(kind, id) {
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
+  if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
+  const layer0 = work.layer;
   if (kind === 'el') dbToWork(work);
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
@@ -8311,7 +8382,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -8342,6 +8413,11 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
+    if (inLayers(item)) {        // a new Layer Order moves it to that place on its Tab and numbers the Tab again, 1, 2, 3 ... (Rule 1.29)
+      const n = Math.round(Number(work.layer));
+      if (Number.isFinite(n) && n >= 1 && (n !== layer0 || (work.workspace && work.workspace !== item.workspace))) moveLayer(draft, work.workspace || item.workspace, item, n);
+      if (hasLayer(item)) work.layer = item.layer; else delete work.layer;
+    }
     if (kind === 'el') dbFromWork(work, item);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);

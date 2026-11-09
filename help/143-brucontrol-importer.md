@@ -194,6 +194,8 @@ Then you confirm what comes in, in small steps:
 - a **Placeholder** for every other item on a Tab (an Inspector, a Counter port ...). It is a grey box
   with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
   item's Placeholder stays hidden.
+- each item's **Layer Order** (BruControl's Z Order, [Help 114](114-universal-properties)): the first item in each BruControl Workspace
+  is on top (Layer Order 1), the next is 2, and so on, so items that overlap are drawn the way BruControl drew them.
 
 - your **pictures and sounds**: their paths are imported, and **the files stay where they were**, so BruControl continues to
   work normally. BruControl had a Browse box, so they may be in any folder. To see them in the Panel, add their folder (for
