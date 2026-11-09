@@ -6283,7 +6283,7 @@ function displayText(e, v, k, shown) {
     return p ? fmtVal(pe || {}, p.value) + (pe?.units ? ' ' + pe.units : '') : '-';
   };
   switch (k) {
-    case 'target': return `▸ ${fmtVal({}, v.target)}`;
+    case 'setpoint': return `▸ ${fmtVal({}, v.target)}`;
     case 'reading': return probe();
     case 'output': return hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? onOff(v.output) : `${fmtVal({ precision: 0 }, v.value)} %`;
     case 'state': return onOff(v.state);
