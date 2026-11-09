@@ -52,6 +52,7 @@ import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
+import { watchAlarmEmails } from './lib/alarmemail.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
@@ -241,6 +242,12 @@ function hold(name, down) {
 }
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
+// Alarm Email Notification (Rule 7.17): through the mail server picked in Settings > Sending codes; what happened shows in the Console
+watchAlarmEmails(store, {
+  send: (to, subject, text) => { if (!messaging.emailReady()) throw new Error('no mail server is set up (Settings > Sending codes)'); return messaging.sendEmail(to, subject, text); },
+  users: () => auth.listUsers(), title: () => store.config.title || 'Skynet',
+  log: text => { console.log(text); broadcast('print', { script: 'Alarm Email', text, ts: Date.now() }); },
+});
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
