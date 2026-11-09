@@ -23,6 +23,11 @@ const xml = `\uFEFF<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.or
 <Processes><Process><Name>scrMash</Name><Script>sleep 1</Script></Process></Processes></Configuration>`;
 
 const r = importBruControl(xml);
+// Layer Order (Rule 1.29): BruControl's Z Order is the order of a Workspace's Elements list, the first one on top (1)
+{ const ls = r.conv.elements.map(e => [e.name, e.layer]);
+  assert.ok(ls.every(([, l]) => Number.isInteger(l) && l >= 1), 'every item gets a Layer Order');
+  const lamp = r.conv.elements.find(e => /Lamp/i.test(e.name)), wort = r.conv.elements.find(e => /Wort/.test(e.name));
+  assert.equal(lamp.layer, 1, 'the first Element in the file is on top'); assert.equal(wort.layer, 2); }
 const c = r.conv;
 assert.equal(c.devices.length, 1); assert.equal(c.devices[0].port, 'COM5'); assert.equal(c.devices[0].board, 'mega'); assert.equal(c.devices[0].id, 'MB');
 assert.deepEqual(c.workspaces.map(w => [w.name, w.id]), [['Brew House', 'BH']]);
