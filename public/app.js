@@ -280,18 +280,23 @@ function renderWs() {
 }
 // Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: "Have Skynet work the same as BruControl"). It is BruControl's Z Order
 // (BruControl Manual v1.3, Element Appearance > General): 1 is on top, then 2 under it ...; a new item gets 1 and the rest move down
-// one; the numbers on a Tab always run 1, 2, 3 ... with no gaps. Pipes, hoses and the IP-kind items (IP markers, IP pipe fittings,
-// Manual Valve Widgets) are not in the list: pipes stay under everything, the IP-kind items over it.
+// one; the numbers on a Tab always run 1, 2, 3 ... with no gaps. Every item is in the list: pipes, hoses and the IP-kind items (IP
+// markers, IP pipe fittings, Manual Valve Widgets) too (OakBarn Brewery, 2026-11-09: "yes to every item ... it becomes a universal Attribute").
 const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
-// the items of a Tab in Skynet's own drawing order, bottom first (Clones as their Clone graphic)
+// the items of a Tab in Skynet's own drawing order, bottom first (Clones as their Clone graphic): pipes and hoses, vessels, pictures
+// and text, Devices and Widgets, pipe fittings, then the IP-kind items (IP markers, IP pipe fittings, Manual Valve Widgets)
 function tabItems(src, wsName, tabOf = g => g.workspace) {
-  return [...src.graphics.filter(g => g.workspace === wsName && g.kind === 'vessel' && !isEqFit(g)),
+  return [...src.graphics.filter(g => g.workspace === wsName && g.kind === 'pipe'),
+    ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'vessel' && !isEqFit(g)),
     ...src.graphics.filter(g => tabOf(g) === wsName && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind)),
     ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
     ...src.graphics.filter(g => g.workspace === wsName && isClone(g)),
-    ...src.graphics.filter(g => g.workspace === wsName && isEqFit(g))];
+    ...src.graphics.filter(g => g.workspace === wsName && isEqFit(g)),
+    ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'ip')];
 }
 const hasLayer = o => Number.isInteger(o?.layer) && o.layer >= 1;
+// a pipe's or hose's own layer on the Tab: an empty SVG the size of the Tab that renderPipes draws it in
+const pipeLayer = id => { const n = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); n.setAttribute('class', 'pipes pipeL'); n.dataset.pipe = id; return n; };
 // top first: items with no number yet are new, so they are on top (newest first); then the numbered ones, 1, 2, 3 ...
 function layerStack(items) {
   const set = items.map((o, i) => [o, i]).filter(([o]) => hasLayer(o)).sort((a, b) => a[0].layer - b[0].layer || b[1] - a[1]).map(x => x[0]);
@@ -318,7 +323,7 @@ function runStack(stack) {
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
-  ws.querySelectorAll('.el,.gfx,.flowHot').forEach(n => n.remove());
+  ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => n.remove());
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Background Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
@@ -335,15 +340,18 @@ function drawWs() {
   if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
   if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   // Layer Order (Rule 1.29): drawn from the bottom of the list up, so Layer Order 1 is on top
+  // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
   const gfxs = new Set(L().graphics), clones = [];
+  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
   for (const o of runStack(layerStack(tabItems(L(), w.name, gTab))).reverse()) {      // a Process can move a Text Widget to another Tab (.tab)
     if (!gfxs.has(o)) ws.append(buildEl(o));
     else if (isClone(o)) { const e = cloneEl(o); if (e) { clones.push(e); ws.append(buildEl(e)); } }
-    else ws.append(o.kind === 'vessel' ? buildVessel(o) : buildGfx(o));
+    else if (o.kind === 'vessel') ws.append(buildVessel(o));
+    else if (o.kind === 'pipe') ws.append(pipeLayer(o.id));      // its place; renderPipes draws it in there
+    else if (o.kind === 'ip') { if (!capped.has(o.id)) { const n = buildIp(o); n.style.zIndex = '0'; ws.append(n); } }      // in its place, not always on top
+    else ws.append(buildGfx(o));
   }
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
-  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
@@ -3450,6 +3458,8 @@ function renderPipes() {
   const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
+  const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
+  layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
@@ -3480,8 +3490,9 @@ function renderPipes() {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
-    svg.append(g);
+    const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
   }
+  $('#ws').append(...mine);         // a pipe being drawn has no place yet: on top until the Tab is drawn again
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
     if (all.length > 1) svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));
@@ -3576,7 +3587,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; if (drag?.item) delete drag.item.qdAuto; ev.preventDefault(); return; }
-  const hit = ev.target.closest('#pipes g');
+  const hit = ev.target.closest('.pipes g');
   const pip = ev.target.closest('.devip');
   let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
   if (hit && !node) {
@@ -3744,7 +3755,7 @@ $('#ws').addEventListener('dblclick', ev => {
   if (vpart) return vpPartOpen(vpart)();
   const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
-  const pipe = ev.target.closest('#pipes g');
+  const pipe = ev.target.closest('.pipes g');
   const unit = hitUnit && findItem('gfx', hitUnit);
   if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem(...refOf($(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) || { dataset: { name: pip.dataset.dev } }));
   else if (node && unit && [unit.id, bundleOf(unit)?.id].includes(node.dataset.gid)) editItem('gfx', unit.id);   // the pointer was caught by its vessel
@@ -3810,7 +3821,7 @@ const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '')
 const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
   onclick: ev => { ev.preventDefault(); ev.stopPropagation(); if (!leave || leave() !== false) openHelp(topic); } }, '?');
 function tabItemAt(target) {
-  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('#pipes g');
+  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('.pipes g');
   const [kind, id] = pip ? (pip.dataset.eq ? ['gfx', pip.dataset.eq] : ['el', pip.dataset.dev]) : node ? refOf(node) : pipe ? ['gfx', pipe.dataset.gid] : [null];
   const item = kind === 'el' ? L().elements.find(e => e.name === id) : kind ? L().graphics.find(g => g.id === id) : null;
   return item && { kind, item };
@@ -7086,8 +7097,8 @@ function genDeviceFields(it, item, f) {
 // and Widget's Properties have it, right after its Size (or its place, or its Tab, when it has no Size). It is added here, once, so
 // no dialog's own layout changes (Rule 18.10).
 const LAYER_TIP = 'Layer Order, like BruControl\'s Z Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
-// Pipes, hoses and the IP-kind items are not in the Layer Order list (Rule 1.29)
-const inLayers = item => !!item && !['pipe', 'ip'].includes(item.kind);
+// every item is in the Layer Order list, pipes and IP-kind items too (Rule 1.29)
+const inLayers = item => !!item;
 function withLayer(fields, item) {
   if (!inLayers(item)) return fields;
   if (typeof fields === 'function') return it => withLayer(fields(it), item);
