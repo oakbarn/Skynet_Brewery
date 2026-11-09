@@ -283,7 +283,7 @@ setInterval(() => { if (state.page === 6) saveProgress(); }, 15000);      // Con
 // The Tabs step (OakBarn Brewery, 2026-11-08: "Layout the Tab ... different Place Holder type ... a Check box and accept Button"): one row
 // per Tab with its Items and a column for each kind of Placeholder found (Timers, Globals ...), and an Import box. A Tab with items is
 // always imported (its box is ticked and cannot be cleared); an empty one is imported only when ticked. Accept goes on.
-const KIND_NAMES = { Timer: 'Timers', GlobalVariable: 'Globals', Alarm: 'Alarms', Label: 'Labels', Image: 'Pictures', Picture: 'Pictures', Chart: 'Charts',
+const KIND_NAMES = { Timer: 'Timers', GlobalVariable: 'Globals', Alarm: 'Alarms', Label: 'Labels', Image: 'Pictures', Picture: 'Pictures', Chart: 'Graphs',
   Script: 'Scripts', Button: 'Buttons', Switch: 'Switches', Text: 'Text', Gauge: 'Gauges' };
 const kindName = k => KIND_NAMES[k] ?? (/^Device \((.+)\)$/.test(k) ? k.replace(/^Device \((.+)\)$/, (m, x) => x === 'CounterPort' ? 'Counter Devices' : x + ' Devices') : k);
 function tabsHtml(r) {
@@ -359,7 +359,7 @@ async function buildVessel(v, b) {
 // Skynet, its Skynet names and its Tab. An item on a Tab left out on the Tabs step is marked so.
 const TYPE_TEXT = { digitalOut: 'Digital Output', digitalIn: 'Digital Input', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output',
   temperature: 'Temperature Probe', hysteresis: 'Hysteresis', pid: 'PID', dutyCycle: 'Duty Cycle', deadband: 'Deadband', flowMeter: 'Flow Meter',
-  scale: 'Scale', stepper: 'Stepper', switch: 'Switch', chart: 'Chart' };
+  scale: 'Scale', stepper: 'Stepper', switch: 'Switch', chart: 'Graph' };
 const typeText = e => e.subtype === 'pump' ? (/_CPMP_/.test(e.name) ? 'Cool / Warm Pump' : 'Pump') : e.subtype === 'element' ? 'Heating Element' : TYPE_TEXT[e.type] ?? e.type;
 const itemKey = e => e.bruId || `${e.device}|${e.port}|${e.bru}`;
 const shownName = e => e.noDisplay ? e.bru : (e.display || e.bru);      // what the Display Name column shows, and what the tick copies
@@ -490,7 +490,7 @@ function tell(title, html) {
 // type. Import all BruControl Application Elements ... as Skynet equivalent Widgets"): first every Skynet Widget type and what came in
 // as one, then a page for each kind found, with the same Display Name, tick, Label and Show columns as the items.
 const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
-  ['Chart Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
+  ['Graph Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
   ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
   ['Manual Pump Widget', ''], ['Override button Widget', '']];
 const widgetKeep = e => (state.keepTabs ?? new Set(state.r.tabs.map(t => t.name))).has(e.tab);
@@ -820,7 +820,7 @@ function sub5(which) {
         <p>Names: <b>${r.names === 'bru' ? 'your BruControl names (kept after two warnings)' : 'Skynet names'}</b>.
         <b>${r.items}</b> items on a board port come in. <b>${r.placeholders}</b> other items are a <b>Placeholder</b> on their Tab, where
         BruControl had them, until the next steps bring them in. Tab backgrounds are left out for now.</p>
-        ${r.charts ? `<p><b>${r.charts}</b> BruControl Chart(s) are now Skynet <b>Chart Widgets</b>, with the same span, refresh, grid lines, colors and channels.</p>` : ''}</div>
+        ${r.charts ? `<p><b>${r.charts}</b> BruControl Chart(s) are now Skynet <b>Graph Widgets</b>, with the same span, refresh, grid lines, colors and channels.</p>` : ''}</div>
       <div class="cards two"><div><h3>Interfaces (boards)</h3><table><tr><th>Interface</th><th>ID</th><th>Items</th><th>Import</th></tr>
         ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items, state.keepIfs?.has(d.name) ? '✓' : '✗'], ['', '', 'n', 'c'])).join('')}</table>
         <p class="small">✓ is imported, ✗ is left out: you chose this on the first step (The Interfaces we found).</p></div>
