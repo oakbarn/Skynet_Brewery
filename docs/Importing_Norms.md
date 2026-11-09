@@ -231,7 +231,7 @@ picture and text, the import shows the choices above, with the recommended one p
 
 | BruControl | Skynet | Status |
 | --- | --- | --- |
-| A Timer has 2 alarms | The Timer Alarm Chain: as many alarms as you like, each with its own time. The Importer adds BruControl's 2 alarms to the chain when they are used | Planned |
+| A Timer has 2 alarms | The Timer Alarm Chain: as many alarms as you like, each with its own time. The Importer joins BruControl's 2 alarms (when on) to their Alarms: a Hop Alarm on that Timer, the first time its own, a second time a step on its Alarm Chain (Rule 7.16) | Built |
 | 3 pictures on an item, and no way for a Script to show any other picture | Each item still has 3 picture slots (Rule 7.10), and a Process can set `.backpath` (or `.image`) to any picture, so there is no limit | Built |
 | 3 sounds on an Alarm | Each Alarm still has 3 sound slots, and a Process can set `.sound` (or a Sound Player's `.path`) to any sound file, so there is no limit | Built |
 
@@ -257,4 +257,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 9 lists an Alarm's 3 sound files; added section 11, where Skynet has no limit: Timer alarms (Timer Alarm Chain), pictures and sounds set by a Process. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Section 8: Show Secondary Value off becomes the Data Display pick (Rule 6.26).
 - 2026-11-09: Section 7: BruControl's Alarm Email Notification switch is kept (Rule 7.17).
+- 2026-11-09: Section 11: a Timer's 2 alarms are now imported (Timer Alarm Chain, Rule 7.16).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).
