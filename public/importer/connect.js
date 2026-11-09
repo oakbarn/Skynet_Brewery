@@ -114,11 +114,14 @@ export const PART_PAGES = [
     { k: 'volts', name: 'Volts', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER] }] },
   { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
     { k: 'probe', name: 'Probe type', list: PROBES }] },
-  { kind: 'valve', title: 'Valves', one: 'Valve', fields: [
-    { k: 'valve', name: 'Valve type', list: VALVES },
-    { k: 'connection', name: 'Connection', list: CONNECTIONS, help: 'How the valve is built into your manifold: the connection it has to the pipes, not the thread on the valve itself. A BSP valve with a BSP to NPT adapter and a female TC on each end is a TC valve, because it joins the manifold with Tri-Clamps.' },
+  // Only Connection Type and Size must be filled in on a valve: they change how it is drawn; Valve type and Voltage are good to know
+  // (OakBarn Brewery, 2026-11-09: "Connection Type and size mandatory Other Fields not"). The top of the page sets all three on every
+  // line at once (setAll).
+  { kind: 'valve', title: 'Valves', one: 'Valve', setAll: ['connection', 'size', 'volts'], fields: [
+    { k: 'valve', name: 'Valve type', list: VALVES, optional: true },
+    { k: 'connection', name: 'Connection Type', list: CONNECTIONS, help: 'How the valve is built into your manifold: the connection it has to the pipes, not the thread on the valve itself. A BSP valve with a BSP to NPT adapter and a female TC on each end is a TC valve, because it joins the manifold with Tri-Clamps.' },
     { k: 'size', name: 'Size', list: SIZES },
-    { k: 'volts', name: 'Voltage', list: VOLTS }] },
+    { k: 'volts', name: 'Voltage', list: VOLTS, optional: true }] },
   { kind: 'flow', title: 'Flow Meters', one: 'Flow Meter', fields: [
     { k: 'meter', name: 'Meter type', list: FLOW_METERS },
     { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true }] },

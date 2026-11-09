@@ -16,7 +16,7 @@ Every page works the same way, and every answer is kept a moment after you give 
 There is no "tick them all" box, on purpose. Each item must be looked at: a BruControl name is often a code only its builder
 knows, like `M_6_B_1`, while its Label should say what it is in your brewery, like *HLT*.
 
-No box may be left blank (except **Watts**, which is optional). Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
+A box marked **(optional)** may stay blank; every other box must be filled in (OakBarn Brewery decides which, Rule 18.33). Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
 **Accept ▶** marks a blank box in red and tells you how many there are.
 
 ## The Widget pages
@@ -51,7 +51,7 @@ One page each, in this order: **Pumps, Heating Elements, Temperature Probes, Val
 | Pumps | Pump model, Power (filled in for you when the model is made for one voltage, like *Topsflo TD5 (24 V DC)*), Control Type |
 | Heating Elements | Watts (optional), Volts, Control Type |
 | Temperature Probes | Probe type: the Skynet probe types (OneWire, RTD, Thermocouple, the NTC thermistors, LM35, TMP36) |
-| Valves | Valve type (the Skynet valves), Connection, Size, Voltage |
+| Valves | **Connection Type** and **Size** (both needed), Valve type and Voltage (optional) |
 | Flow Meters | Meter type (Hall effect, turbine, oval gear, magnetic, ultrasonic, thermal mass, vortex), Pulses per Gallon or Liter |
 | pH Meters | pH meter type, Signal to the board |
 | Pressure Sensors (PSI) | Sensor type, Highest pressure it reads |
@@ -60,7 +60,11 @@ One page each, in this order: **Pumps, Heating Elements, Temperature Probes, Val
 | Floats | Float type, Normally Open or Normally Closed |
 | Digital Inputs | Input type (the Skynet Digital Input types) |
 
-**Valve Connection** is how the valve is built into your manifold, not the thread on the valve itself. A BSP valve with a BSP to
+**Set every Valve**, at the top of the Valves page, gives every line the same Connection Type, Size and Voltage at once (for
+example TC, 1 1/2 inch, 24 V DC). Each time you change it there, every line follows; then change any line that is different.
+When the Skynet Panel on this computer has a **Default pipe size** set, a valve with no Size starts at it.
+
+**Connection Type** is how the valve is built into your manifold, not the thread on the valve itself. A BSP valve with a BSP to
 NPT adapter and a female TC on each end is a **TC** valve, because it joins the manifold with Tri-Clamps. **Size** goes up to
 4 inch, in inches with millimeters, and the metric sizes, whatever units you picked.
 
