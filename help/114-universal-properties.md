@@ -9,6 +9,7 @@ basic Properties, with the same names everywhere. Learn them once and they work 
 - **Label**: the text shown with the item, with a **Show Label** switch.
 - **Rich Text**: the font, size, bold, fore and back colors and alignment of the Label and of the item's own text. **Rich Text Embedded Codes** (`\b`, `\i`, `\n`, `\c{Red}` ...) work in any text.
 - **Position** (X, Y) and **Size** (Width, Height), in pixels.
+- **Layer Order**: which item is drawn on top where items overlap, the same as BruControl's Z Order. **1 is on top**, 2 is under it, and so on. A **new item gets 1** and the others move down one. The numbers on a Tab always run 1, 2, 3 ... with no gaps. It is right after Height in every Properties dialog.
 - **Visible**, and **HiddenLock**: a HiddenLock item is hidden whenever the Tab is locked (outside Edit layout), even when Visible is on. In Edit layout you see it faded so you can still work on it.
 - **Lock** (Item Lock) 🔓 / 🔒: locks where the item sits, so it can't be moved or resized by accident. You can still double-click it and change its other Properties. **🔒 Lock All** and **🔓 Unlock All** on the Edit layout bar lock or unlock everything on the Tab at once.
 - A hidden **key**, given when the item is first saved. You never see it; it lets Processes follow a renamed item.
@@ -28,6 +29,7 @@ basic Properties, with the same names everywhere. Learn them once and they work 
 | `.visible`, `.hiddenlock` | shown or not; hidden while the Tab is locked |
 | `.x`, `.y` | where it is (`.xh` / `.x_hPosition` and `.yv` / `.y_vPosition` work too) |
 | `.width`, `.height` | its size |
+| `.layer` | its Layer Order (1 is on top) |
 | `.lock` | its Item Lock |
 | `.tab` | the Tab it is on |
 
@@ -37,6 +39,14 @@ Pipe fittings (elbows, tees, reducers ...) have them too, Label included. Most W
 
 ## Clones
 
-A Clone has the same Properties, but most belong to its parent and can't be changed on the Clone. Only its own place (X, Y), Tab, Visible and Lock are its own.
+A Clone has the same Properties, but most belong to its parent and can't be changed on the Clone. Only its own place (X, Y), Tab, Visible, Lock and Layer Order are its own.
+
+## Layer Order, step by step
+
+1. Open **Edit layout** and double-click the item that should be on top.
+2. Its **Layer Order** shows where it is now. Type **1** to put it on top (or 2 to put it just under the top one), then **Save** and **Save layout**. The other items on the Tab are numbered again, with no gaps.
+3. A Process can change it while brewing: `Pump_1.layer = 1` puts the pump on top and the others move down one; `Pump_1.layer = ""` puts back its Properties' number.
+
+A Tab that was never numbered keeps the order it always had; **Save layout** numbers it. Pipes and hoses always stay under the other items, and the IP markers and Manual Valve Widgets always stay over them, so they have no Layer Order. The **BruControl Import** brings BruControl's Z Order across: the first item in each BruControl Workspace is on top (Layer Order 1).
 
 The full standard is in the Skynet document **Universal Properties** (docs/Universal_Properties.md).

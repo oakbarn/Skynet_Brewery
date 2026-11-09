@@ -20,6 +20,7 @@ Rule 1.21 in the [Skynet Rules](Skynet_Rules.md) points here. Help page 114 expl
 | **Embedded Rich Text Codes** | string | `\b`, `\i`, `\n`, `\c{Red}` ... inside any string (Help 90). |
 | **Position** (`.x`, `.y`) | integer | Where it is on its Tab, in pixels. |
 | **Size** (Width, Height) | integer | How big it is, in pixels. |
+| **Layer Order** (`.layer`) | integer | Which item is drawn on top where items overlap, like BruControl's Z Order: 1 is on top; a new item gets 1; the Tab is numbered 1, 2, 3 ... with no gaps (Rule 1.29). |
 | **Visibility** (Visible) | boolean | Shown or not. |
 | **HiddenLock** | boolean | Hidden whenever the **Tab Lock is on** (outside Edit layout), even when Visible is on; seen (faded) only in Edit layout, like BruControl's HiddenLocked. |
 | **Lock** (Item Lock) | boolean | Locks the item's position. See *Item Lock* below. |
@@ -90,6 +91,7 @@ is lost), `tab_lock "Brewhouse" = true` / `false`, and `name.lock = true` / `fal
 | `.y` | integer | Up and down. **`.yv`** and **`.y_vPosition`** work too |
 | `.width` | integer | Width in pixels |
 | `.height` | integer | Height in pixels |
+| `.layer` | integer | Layer Order: 1 is on top; a Process moves it to that place while Processes run; `""` puts back its Properties' number (Rule 1.29) |
 | `.lock` | boolean | Item Lock |
 | `.tab` | string | The Tab it is on (the Tab's Name) |
 
@@ -104,7 +106,7 @@ A Clone (Rule 4.4) has every Universal Property, but **most are not editable on 
 
 | On the Clone | Universal Properties |
 |---|---|
-| **Its own** (editable) | `.visible`, `.x`, `.y`, `.tab` (Tab dropdown in its Properties, not in Processes), `.lock` |
+| **Its own** (editable) | `.visible`, `.x`, `.y`, `.tab` (Tab dropdown in its Properties, not in Processes), `.lock`, Layer Order (in its Properties) |
 | **Made by Skynet** (not editable) | Name (`<Parent_Name>_Clone_N`), its own hidden key (acts through its parent's key) |
 | **The parent's** (shown, not editable) | Label, Show Label, the Rich Text properties, Width, Height, HiddenLock, `.backpath` |
 
