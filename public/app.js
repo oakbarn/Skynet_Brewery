@@ -8376,8 +8376,8 @@ function openTabProps(name) {
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
 const TYPE_TITLE = { valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
-TYPE_TITLE[SCRIPT_WIDGET_TYPE] = SCRIPT_WIDGET_WORD.replace(/ Widget$/, '');      // "Script Widget Properties" (Rule 1.31)
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
+TYPE_TITLE[SCRIPT_WIDGET_TYPE] = SCRIPT_WIDGET_WORD.replace(/ Widget$/, '');      // "Script Widget Properties" (Rule 1.31)
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
