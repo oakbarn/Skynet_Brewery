@@ -331,7 +331,8 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
 - **Anything new** is built to this Rule: before a new Device or Widget is finished, its one click is checked against this list.
 - **BruControl Import:** checked. The Importer has no Tabs that run, so it has no clicks of its own; everything it makes is a Panel
   Device or Widget and gets these clicks in the Panel. One thing it carries over: an item BruControl marked as not user controlled
-  gets **When tapped: none**, so a click on it does nothing. That is the user's own choice for that item and is kept.
+  gets **When tapped: none**, so a click on it does nothing. That is the user's own choice for that item and is kept, except on a
+  Valve or Heating Element, which is always Toggle or Push Button (Rule 2.46).
 - **Made the same on 2026-11-08** (OakBarn Brewery's go): a **Heating Element on its own on a Tab** (and a Picture Widget that follows
   one) turns On or Off with one click (Rule 2.33 changed); a **Valve built into a Vessel Device** opens or closes with one click on
   its picture; a **Method Clone** acts as its parent, all in unison, with no pop-up (Rule 4.4 changed).
@@ -341,6 +342,20 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
   2. PR #276 (not merged yet) makes a **method spot** clicked while the Element is Off open the pop-up (Set + ON). That breaks
      Rule 6.19 ("Picking a method never turns it On", no pop-up), so it is taken out here once #276 is in. (A Method Clone is a Clone,
      not a method pick: one click on it acts as on its parent, Rule 4.4.)
+
+2.46 **Valves and Heating Elements: Toggle or Push Button, never None** (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle
+cannot have None, Default to Toggle"). The **Toggle** box in the Properties of a Valve (a powered one: motorized, solenoid, built into a
+Vessel Device, a Valve Tee or a Supply Manifold) and of a Heating Element (on its own or built in) has two choices only:
+- **Toggle** (the start): one click on the picture turns it On or Off at once (Rules 2.33, 2.44).
+- **Push Button:** **for a Heater**, you can hold and the Heater is Direct On in the On State as long as you hold the Button. **For a
+  Valve**, you can hold and the Valve is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and
+  Off with the Image. **If the Device is already On, the Push Button is reversed:** holding down turns it Off, but only as long as the
+  picture is held down; let go and it is On again.
+- **Process commands ignore this choice:** a Process, the .API and voice turn it On or Off as always.
+- A Valve or Heating Element that had **None** (or nothing set) becomes **Toggle** when its Schema loads. A Manual valve has no power,
+  so it is not one of them. Pumps keep their own Toggle list (Rule 2.33).
+- **Both programs:** the BruControl Import makes a heater BruControl marked as not user controlled a Toggle too (Rule 2.44's
+  "When tapped: none" is not used on them). Help 179.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -1635,7 +1650,9 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 6.19 **One Heating Element, the heating method picked** (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
-is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**.
+is its **heating method**: **Direct**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**. **Direct** is full on or
+off, the method that was called **On/Off** (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct"); a Process that says "On/Off"
+still works.
 - **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
   still's column, which a BruControl PID could not hold): a calm PID that holds a Setpoint to 0.1 degree. It shares the PID's
   Setpoint, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Setpoint; it starts there),
@@ -1654,17 +1671,17 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   different method of control. The hard wiring from the Arduino to the end hardware prevents other hardware from having different
   methods of control"). The Rules about Devices with more than one Control Method (4.4, 6.19, `.method`) stay general, so another
   kind could be added later only if Fritz says so.
-- **Properties (and its Build):** under *Heating method*, its **main method**, the one it **starts with** (On/Off for one that has
+- **Properties (and its Build):** under *Heating method*, its **main method**, the one it **starts with** (Direct for one that has
   none), the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise need one) and that method's settings, then **tick boxes
   for the other methods it may use**. **Only the main method and the ticked ones are allowed** (Fritz, 2026-11-07: "we ask the
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
   its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
-  nothing ticked has one way of control. **On/Off is always allowed and always has its spot; it is not a tick box** (Fritz,
+  nothing ticked has one way of control. **Direct (On/Off) is always allowed and always has its spot; it is not a tick box** (Fritz,
   2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
-  once**, the method's main setting with − and + (Duty cycle % or Setpoint), then **Set + ON** (ON for On/Off), **OFF**, **Set**
+  once**, the method's main setting with − and + (Duty cycle % or Setpoint), then **Set + ON** (ON for Direct), **OFF**, **Set**
   and **Cancel**. *Changed 2026-11-08 (Rule 2.33):* one click on the Element itself now turns it ON or OFF at once; the pop-up opens
   from a method spot or its Temperature Probe's SetPoint pop-up (Rule 2.43, **Heating method…**).
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
@@ -1675,8 +1692,13 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
   Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
   click** on one switches the Element to that method at once; the one in use is **red**, the others **yellow** (Fritz, 2026-11-07).
-  While it is ON a dark **Turn Off** button shows at the end of the row: one click turns it Off (Fritz, 2026-11-08: "it switches
-  between All tree methods fine, but no Turn Off!"). One click on the picture of an Element built into a Vessel Device turns it
+  **The method box** (OakBarn Brewery, 2026-11-09: "an invisible box where the Methods ... can reside ... dynamically resize to how
+  many Ticked"): the buttons sit in an invisible box just below the picture, **only as wide as the methods allowed**, with its middle
+  under the middle of the picture. **Short method names** (OakBarn Brewery, 2026-11-09: "an Option to shorten the Names in the
+  Ballon"): a switch in its Properties, **Short method names on its buttons**, shows **DO** (Direct), **DutyC** (Duty Cycle), **HYS**
+  (Hysteresis), **PID**, **DeadB** (Deadband) and **PREC** (Precise), the same short words a Process uses. **There is no Turn Off
+  button** (OakBarn Brewery, 2026-11-09: "Delete the Turn Off. Clicking the Heater Image does that"): one click on the picture turns it
+  Off. *Replaced:* a dark Turn Off button at the end of the row while it was ON (2026-11-08 to 2026-11-09). One click on the picture of an Element built into a Vessel Device turns it
   ON or OFF at once, like a Pump (Rule 2.33); a click on its box (tile) opens its pop-up (ON, OFF, its method). A spot clicked while the Element is OFF only switches its method: picking a
   method never turns it On, with no pop-up (changed 2026-11-08, OakBarn Brewery: "Selecting a Different Method when a Heating Element
   does not turn it on, On off is By the On Off Buttton"). Any number of Elements may be ON at once (Fritz,
@@ -1684,7 +1706,8 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
-- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC), or the
+- **A Process:** `hE_1.method = "PID"` (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC; the
+  older "On/Off" is Direct), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
   `.DutyC`, `.PID`, `.DeadB`, `.PREC` or `.DO` switches it to that method, the same as `.method =`. Its settings
   by the same names the separate Devices had (`.setpoint`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
@@ -1701,8 +1724,8 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
 - **Picking a method never turns it On** (OakBarn Brewery, 2026-11-08: "Selecting a Different Method when a Heating Element does not
   turn it on, On off is By the On Off Button. When a Heating element is On, It simply switches to the new control method and stays
   on"). A method spot, the pop-up's method buttons or a Process `.method` only change the method, with no pop-up; turning it On or
-  Off is its picture, its On/Off spot or button, a Clone, a Duty cycle % (below) or a Process.
-- **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
+  Off is its picture, a Clone, a Duty cycle % (below) or a Process.
+- **Changing the method while it is ON** goes on at once in the new method, **except to Direct**, which turns it **OFF** first, so it
   never jumps to full power by itself.
 - It is On while ON (Rule 7.9), whatever its pin is doing; it shows what it is doing (60 %, 45 % ▸ 152, ON ▸ 152, idle ▸ 152).
 - **The BruControl Import** (Rule 15.4) makes BruControl's two (or more) heating controls on one port (Duty Cycle, Hysteresis, PID,
@@ -1729,7 +1752,7 @@ Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A p
 cools a fermenter, or a pump that brings warm water) is **ONE Pump Device on its port** (One Port, One Device, Rule 6.1), never a
 pump plus a separate Hysteresis Device. Its **Device Type ID is CPMP** (Cool / Warm Pump), so its suggested name reads plainly, for
 example `MB_D5_CPMP_Cool~Pump_FR`. It has a **Method** field, as a Heating Element has (Rule 6.19), with a pump's own methods only:
-**On/Off** (a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Setpoint: a **minus On offset cools**, a
+**Direct** (On/Off: a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Setpoint: a **minus On offset cools**, a
 **plus On offset warms**). A Process changes it with `.method` and reads `.setpoint`, `.onoffset` and `.ondelay`, the same words a
 Heating Element uses. Methods that switch a motor many times a minute (Duty Cycle, PID, Deadband, Precise) are not offered for it.
 - **Both programs:** the Panel shows the Method, Probe, Setpoint and offsets in the Pump's Properties and the Brain runs it like a
@@ -1870,6 +1893,15 @@ switching from Off to On. Better to use the Overlay in all the sample Schema."):
 shows open (the bolt on a motorized valve, the green ring and tick on a Manual Valve Widget). The sample Schemas and the default
 Schema swap no pictures: pumps, valves and burners keep their Off picture with the bolt overlay, a heating element glows red
 (tint). Help 129.
+**On overlays have no border and are smaller** (OakBarn Brewery, 2026-11-09: "On Overlays no Border and smaller", "# 1 applies to all
+overlays"): a picture with an On overlay shows **no green box** round it while it is On, and the overlay (a bolt, a badge or the
+user's own) is drawn at about half the size of the picture, in its middle. A glow (tint) colors the picture itself and the Green glow
+ring goes round it, so those two stay the picture's size. The same on parts built into a Vessel Device.
+**A Heating Element's Overlay: Glow, None or a picture** (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to
+the Glow (what None was regardless). And Have None as none"): **Glow** is the start (it glows while On: a Skynet element shows its
+glowing on picture, one built into a Vessel Device glows orange). **None** means nothing at all changes on the picture while it is On.
+A bolt or other picture is drawn small on top of the glow. *Replaced:* None glowed anyway, and an Element built into a Vessel Device
+also showed the bolt. Help 179.
 
 7.9 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from Enable to
 Disable (not only while its output fires): its overlay or On picture, a vessel's heater glow and a
@@ -2312,7 +2344,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     to jump to any one reached, and Boards and Tabs has a row of its small steps to jump to; the ID page lists only the Interfaces
     being imported; a Widget page is made only for a kind on a Tab being imported; **one Skynet Name** column, made with the Label
     (it changes as the Label changes; greyed and made with the Display Name until a Label is typed); a pump model made for one voltage
-    fills in its Power; a Heating Element's first Control Type column is **On/Off Only** (ticked: the other methods are greyed);
+    fills in its Power; a Heating Element's first Control Type column is **Direct Only** (ticked: the other methods are greyed; it was
+    **On/Off Only** until 2026-11-09);
     **Watts** may be blank; Next on the Names page never clears the kept answers without asking.
   - **The minor fixes of 2026-11-09** (OakBarn Brewery): only the boxes OakBarn Brewery names are mandatory (Rule 18.33); on Valves
     **Connection Type** (renamed from Connection) and **Size**. **Set every Valve** at the top of the Valves page sets Connection Type,
@@ -2704,7 +2737,7 @@ like Pump", Help 137):
    Element** (its own Path (off) and Path (on)).
 3. The Add box is titled with the element and works as the Pump's and the Motorized Ball Valve's (Rules 4.2, 18.13, 18.15-18.17,
    18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
-   **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
+   **Orientation** (Right / Left) with **Toggle** (Toggle or Push Button, Rule 2.46) on its line, **Overlay** (Glow to start; None shows nothing, Rule 7.8) with **Database and
    .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**HE**, Rule 3.1). **No Cover.** One click on it turns it
    ON or OFF at once (Rule 2.33, changed 2026-11-08). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in as **hE_n** (**hE_1**, hE_2 ...), with no
    method in it, since its method can change (Rule 6.19, 2026-11-07); a heating PWM is **hE_PWM_1**, and the older control Devices
@@ -3432,6 +3465,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
+- 2026-11-09: Heating Element on-screen look (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 7.8, On overlays have no border and are drawn smaller (every overlay); a Heating Element's Overlay is Glow (the start), None (truly nothing) or a picture. Rule 6.19: On/Off is now **Direct** (the old word still works in a Process); the method buttons sit in an invisible box sized to the methods allowed, centred under the picture; **Short method names** switch (DO, DutyC, HYS, PID, DeadB, PREC); the Turn Off button is gone (one click on the picture). Added Rule 2.46: Valves and Heating Elements are Toggle (the start) or Push Button, never None; a Push Button is reversed when it is already On; Processes ignore it. Importer: Direct Only column; a not user controlled heater is a Toggle. Help 179 (175-178 are taken by other work); next free Help 180.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")

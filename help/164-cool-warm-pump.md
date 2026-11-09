@@ -20,7 +20,7 @@ Its Device Type ID is **CPMP**, so its suggested name reads plainly, for example
 
 Double-click the pump. Under **Cool / Warm Pump: its Method** pick how it runs:
 
-- **On/Off**: a click or a Process turns it on and off.
+- **Direct** (was On/Off): a click or a Process turns it on and off.
 - **Hysteresis**: it runs by its **Temperature Probe** to hold a **Setpoint**. A **minus On offset cools** (it turns on above the
   Setpoint, for a glycol pump); a **plus On offset warms** (it turns on below the Setpoint). **On delay** waits that many seconds before
   it turns on again.

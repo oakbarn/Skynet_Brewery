@@ -110,7 +110,8 @@ const PUMP_WHY = 'A pump is not run this way. This method switches the pump on a
 // the On/Off column's name: a Heating Element always has its On/Off button (Rule 6.19), so for it the column is "On/Off Only", a heater
 // controlled by nothing else (OakBarn Brewery, 2026-11-08: "On/Off column should be On/Off Only ... Every heater has on off as the means
 // to turn it on")
-export const methodName = (kind, k) => kind === 'heater' && k === 'onoff' ? 'On/Off Only' : METHOD_COLS.find(m => m[0] === k)?.[1] ?? k;
+// a Heating Element's full on / off is Direct (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct", Rule 6.19); a pump's stays On/Off
+export const methodName = (kind, k) => kind === 'heater' && k === 'onoff' ? 'Direct Only' : METHOD_COLS.find(m => m[0] === k)?.[1] ?? k;
 export const NOT_RECOMMENDED = {
   pump: { dutyCycle: PUMP_WHY, pid: PUMP_WHY, deadband: PUMP_WHY, precise: PUMP_WHY },
   heater: { pwm: 'A heating element has no speed. Speed (PWM) is for a pump, a fan or a motor. A heater on a PWM pin is run by Duty Cycle, PID, Deadband or Precise, which work out its % for you.' },

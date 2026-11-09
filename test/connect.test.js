@@ -205,7 +205,7 @@ await import('./chart.test.js');
   assert.equal(onePower('td5'), 'dc24'); assert.equal(onePower('hbmp20'), 'dc12'); assert.equal(onePower('gf30'), 'dc12');
   assert.equal(onePower('march809dc'), '', '12 or 24 V DC is left to pick'); assert.equal(onePower('chugger'), '', 'AC can be 120 or 240 V');
   assert.equal(guessPartDetails({ name: 'x', label: 'Topsflo pump', type: 'digitalOut', bru: { name: 'Topsflo pump' } }, 'pump').power, 'dc24');
-  assert.equal(methodName('heater', 'onoff'), 'On/Off Only'); assert.equal(methodName('pump', 'onoff'), 'On/Off'); assert.equal(methodName('heater', 'pid'), 'PID');
+  assert.equal(methodName('heater', 'onoff'), 'Direct Only'); assert.equal(methodName('pump', 'onoff'), 'On/Off'); assert.equal(methodName('heater', 'pid'), 'PID');
   assert.equal(PART_PAGES.find(p => p.kind === 'heater').fields.find(f => f.k === 'watts').optional, true);
 }
 
