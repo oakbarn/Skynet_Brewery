@@ -16,7 +16,7 @@ const t = cleanVessel(JSON.parse(read('templates/vessel/Skynet_Vessel_Widget.jso
 assert.equal(t.vwidget, true, 'a Vessel Widget');
 assert.equal(t.probeStyle, 'front', 'the Probe sits on the Center Probe spot');
 // Fritz's Vessel IP Template drawing (2026-11-05): 15 IPs, the Right side repeated on the Left, plus the Probe and the Element Port
-const ipSpots = ['rSparge', 'rHermsIn', 'rHermsOut', 'rElement', 'lSparge', 'lHermsIn', 'lHermsOut', 'lElement', 'lBackElement', 'rBackElement',
+const ipSpots = ['rSparge', 'rHermsIn', 'rHermsOut', 'rElement', 'lSparge', 'lHermsIn', 'lHermsOut', 'lElement', 'lBackElement', 'rBackElement', 'cBackElement',
   'cProbe', 'lTangential', 'rTangential', 'cOutlet', 'cBottomOutlet'];
 const spots = [...ipSpots, 'thermowell', 'element'];
 assert.deepEqual(Object.keys(t.ports).sort(), [...spots].sort(), 'every spot');
@@ -30,7 +30,7 @@ assert.ok(app.includes("['VW Front', 0.5, 0.8]"), 'the older Front probe spot');
 assert.ok(app.includes("const VW_PROBE_POS = { thermowell: 'VW Left Thermowell', front: 'VW Center Probe' };"), 'a Front probe sits on the Center Probe spot');
 // every IP spot: a Vessel Widget IP named as Fritz drew it, the Left a mirror of the Right
 const names = { rSparge: 'Right Sparge', rHermsIn: 'Right HERMS In', rHermsOut: 'Right HERMS Out', rElement: 'Right Element', cProbe: 'Center Probe',
-  lBackElement: 'Left Back Element', rTangential: 'Right Tangential', cOutlet: 'Center Outlet', cBottomOutlet: 'Center Bottom Outlet' };
+  lBackElement: 'Left Back Element', cBackElement: 'Center Back Element', rTangential: 'Right Tangential', cOutlet: 'Center Outlet', cBottomOutlet: 'Center Bottom Outlet' };
 for (const [k, n] of Object.entries(names)) assert.ok(app.includes(`${k}: vwPt('${n}', `), `${k} is ${n}`);
 const xy = k => { const m = app.match(new RegExp(`${k}: vwPt\\('[^']+', '[^']+', ([\\d.]+), ([\\d.]+)\\)`)); assert.ok(m, k); return [+m[1], +m[2]]; };
 for (const s of ['Sparge', 'HermsIn', 'HermsOut', 'Element', 'BackElement', 'Tangential']) {
@@ -41,7 +41,8 @@ for (const s of ['Sparge', 'HermsIn', 'HermsOut', 'Element']) assert.ok(xy('r' +
 assert.ok(xy('rSparge')[1] < xy('rHermsIn')[1] && xy('rHermsIn')[1] < xy('rHermsOut')[1] && xy('rHermsOut')[1] < xy('rElement')[1], 'top to bottom');
 assert.ok(xy('cProbe')[1] < xy('cOutlet')[1] && xy('cOutlet')[1] < xy('cBottomOutlet')[1], 'center spots top to bottom');
 // only a Vessel Widget has them; each IP's Label starts the same as its Name and can be changed
-assert.ok(app.includes("const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? EQ_VW : EQ[t.vesselType] || EQ.vessel;"));
+assert.ok(app.includes("const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? vwClassOf(t) : EQ[t.vesselType] || EQ.vessel;"));
+assert.ok(app.includes("if (!t.userIps?.length) return EQ_VW;"), 'the Main Template IPs, plus a picked User IP (Rule 5.31, 2026-11-09)');
 assert.ok(app.includes("if (d.vw) g.ports[k].label = q.label || d.name;"), 'Label starts as the Name');
 assert.ok(app.includes("work.ports[k].label = lbl[k] || d.name;"), 'an empty Label goes back to the Name');
 assert.equal(cleanVessel({ ports: { rSparge: { installed: true, label: 'Whirlpool' } } }).ports.rSparge.label, 'Whirlpool', 'a Template keeps IP Labels');
@@ -87,7 +88,7 @@ console.log('vessel widget ok');
 // way back once built and saved
 assert.ok(app.includes("if (t.vwidget && !t.integrated) g.vdevice = true;"), 'built from a Vessel Widget Template: a Vessel Device');
 for (const k of ['element', 'probe', 'thermowell', 'valve']) assert.ok(app.includes(`['${k}', `), `a ${k} can go on an IP`);
-assert.ok(app.includes("const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'] };"), 'HERMS coil Left or Right');
+assert.ok(app.includes("const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'], crossRL: ['lHermsIn', 'rHermsOut'], crossLR: ['rHermsIn', 'lHermsOut'] };"), 'HERMS coil Left, Right or crossed (Rule 5.31, 2026-11-09)');
 assert.ok(app.includes("if (vpHermsOn(v, k)) return { key: `eq:${v.id}:herms`, pass: true };"), 'the coil joins its two IPs');
 assert.ok(app.includes("return e.vpKind === 'valve' && isOn(e.name) ? null : { closed: true };"), 'a part fills its IP; a valve passes flow only while on');
 assert.ok(app.includes("const vpLocked = g => !!S.config.graphics.find(x => x.id === g.id && x.workspace && !S.config.workspaces.find(w => w.name === x.workspace)?.build);"), 'locked once built and saved');

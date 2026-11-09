@@ -55,6 +55,10 @@
       "installed": true,
       "position": "VW R Back Element"
     },
+    "cBackElement": {
+      "installed": true,
+      "position": "VW C Back Element"
+    },
     "cProbe": {
       "installed": true,
       "position": "VW C Probe"

@@ -1171,7 +1171,8 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   the Three Vessel sample's tank (260 x 320) drawn the Skynet way (Rule 7.4, 5.12: Images/Skynet/Vessels/Skynet_Vessel_Widget.svg).
   Its spots (*changed* by Fritz's **Vessel IP Template** drawing, 2026-11-05, thread "Lay out Vessel Master Template IPs"): **15 IPs**.
   **Right side, top to bottom: Sparge, HERMS In, HERMS Out, Element; the Right side is repeated on the Left** (Left Sparge ... Left
-  Element). **Left and Right Back Element** (face-on, level with the side Elements). **Center Probe**, **Left and Right Tangential**,
+  Element). **Left and Right Back Element** (face-on, level with the side Elements). *Added (OakBarn Brewery, 2026-11-09: "Add a
+  new Ip In Back on The Basic Vessel Template Back Center"):* a **Center Back Element** between them, so **16 IPs** now. **Center Probe**, **Left and Right Tangential**,
   **Center Outlet** and the **Center Bottom Outlet** (on the bottom). Plus **one Temperature Probe**, **Front** (seen from the front,
   on the Center Probe spot; the Template's choice) or a **Thermowell** (in from the side), and **one Element Port** (on the Right
   Element spot). **Every Place slider is on** on this Template.
@@ -1195,6 +1196,9 @@ Template"; thread "Build the Vessel Widget class", Help 133).
     Element** is a plug. Its IP is hidden and nothing (a pipe, a hose, a fitting) can join it. A built in Valve passes flow, so
     its IP still shows. The same in both programs: the BruControl Import's Vessel questions ask about every other opening
     (Not there, Open, or Plugged with a Thermowell, End Cap or Heating Element; docs/BruControl_Importer_Plan.md section 9).
+  - *Changed (OakBarn Brewery, 2026-11-09: "there are Cross Herms out there so that get changed as well"):* a HERMS coil may also be
+    **crossed**: **Outlet Right & Inlet Left** (in at Left HERMS In, out at Right HERMS Out) or **Outlet Left & Inlet Right** (in at
+    Right HERMS In, out at Left HERMS Out), drawn across the vessel from wall to wall. The rest of this item holds for it too.
   - **HERMS coil:** Left or Right. It goes on that side's HERMS In and HERMS Out IPs as **a layer under them**, drawn to fit them
     (the coil's look follows the Template's IPs), and the coil's ends **are** those two IPs, locked together: flow in one comes out
     the other.
@@ -1211,6 +1215,11 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   is hidden even on the Build Tab and in Edit layout; **👁 Show All** in the Vessel's Properties shows it.
   *Replaced:* "only in Edit layout a faint mark shows where it would go."
 - **The spots are set by the Template and locked:** a user can't move an IP, the Probe or the Element Port.
+  *Changed (OakBarn Brewery, 2026-11-09: "Rule Change OK but Only during the Initial Build"):* **only during the initial build** in the
+  Vessel Device Builder (Rule 19.5), **Pick** lets the user double-click the spot of a Drain, Tangential Inlet, Sparge Arm / Steam
+  Slayer, Thermowell / Probe or Heating Element on the blank vessel. Near a preset IP it takes that IP; anywhere else it makes a
+  **User IP** on that one vessel (Picked Drain ...). After the initial build no IP can be added or moved; once built and saved it is
+  locked like every other IP.
 - **IPs on a vessel** (Fritz, 2026-11-05): an IP is a TC, NPT or BSP outlet or inlet; the type does not matter, it is a place to
   connect another Device or Widget with its own IP (a Pipe, Hose, Fitting or anything with an IP).
 - **The plan** (Fritz, 2026-11-05): more kettle Templates are built from the Main one with their Place sliders set to match real
@@ -2704,8 +2713,8 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Fermentor, Bright Tank; **Other** lets the user type one, kept in the list as **USER: Hop Pot Strainer**), the Tab, Units,
    **Volume**, **Height** and **Diameter** (both empty = the plain vessel shape, Rule 19.2), **Bottom Drain** (None, Center Low,
    Center Bottom Drain), **Tangential Inlet** (None, Left, Right), **Sparge Arm / Steam Slayer** (None, Right (High), Left (High)),
-   **Thermowell / Probe** (None, Center, Left, Right, Back Left, Back Right), **Heating Element** (None, Left, Right, Back Left,
-   Back Right; a second one may be added) and **HERMS Coil** (None, Left, Right).
+   **Thermowell / Probe** (None, Center, Left, Right, Back Left, Back Center, Back Right), **Heating Element** (None, Left, Right,
+   Back Left, Back Center, Back Right; a second one may be added) and **HERMS Coil** (None, Left, Right).
 2. A Thermowell / Probe and a Heating Element **make no IP of their own**: they go on a spot, and on an IP they close it like an
    End Cap (its IP is hidden). Two can't share a spot.
 3. **🔨 Build** puts the vessel on **one side of the 🔨 Build Tab** with its Heating Element, Thermowell and HERMS coil shown and
@@ -2720,6 +2729,13 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Slayer adds a 2" to 1.5" Reducer; the Sparge Arm is drawn inside the vessel), **Pick** (double-click a spot on a blank vessel),
    the crossed HERMS coil choices, the **Integrate** button that saves a **Vessel Device Template** for the Add Vessel list, the
    standard Templates, and the BruControl Import using the same interview (a prebuilt Template may be picked first).
+6. **Pick** (2026-11-09, Rule 5.31 changed): the Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe and Heating
+   Element questions have **Pick (double-click the spot on the vessel)**: a blank vessel opens with small dots on the preset IPs; a
+   double-click marks the spot, **↶ Undo** takes it off, **💾 Save** keeps it. Near a preset IP it takes that IP, anywhere else it
+   makes a User IP. The HERMS Coil has no Pick but has the two crossed choices (Rule 5.31).
+7. **The Priming Tee** (2026-11-09: "Basically an Instrument Tee with a Manual Valve on the Short side always pointing up"): a TC Pipe
+   Fittings Widget (Elbows, Tees ...), openings at the run ends only; it can Flip Horizontal but never turns or flips upside down.
+   The Drain and Tangential pieces will offer it.
 Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 ## Open questions (not Rules yet)
@@ -3121,3 +3137,5 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
   by hand", used by the OakBarn Template. Rule 11.1 next free Help is 159. Help 158 new; Help 100, 157, 62 updated. Checked against
   the BruControl Import program: no change (BruControl has no such items). (thread "Add DigiBoil manual vessel widget")
 - 2026-11-08: Added Rule 19.5, the Vessel Device Builder (OakBarn Brewery): the Question Dialog (General Type with USER: types, Volume, Height, Diameter, Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe, Heating Element, HERMS Coil), then the vessel on the 🔨 Build Tab with the Vessel Builder panel beside it and its Heater and Probe pickers. It replaces the BruControl Import's Vessels interview (the same look and feel in both programs; the Importer side comes later). Help 166; next free Help number 167. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Rule Change OK but Only during the Initial Build and there are Cross Herms out there so that get changed as well"): Pick may make a User IP on a vessel only during the initial build in the Vessel Device Builder; a HERMS coil may be crossed (Outlet Right & Inlet Left, Outlet Left & Inlet Right). Rule 19.5 items 6 and 7 (Pick, the Priming Tee). Help 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing changes there yet. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Add a new Ip In Back on The Basic Vessel Template Back Center. ... I have more than one with a Back center Heater"): the Vessel Widget Main Template has a Center Back Element IP (16 IPs); the Vessel Device Builder offers Back Center for the Thermowell / Probe and the Heating Element (Rule 19.5). The Three Vessel sample vessels have the spot Not Placed. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing else changes there. (thread "Build the Vessel Device Builder")
