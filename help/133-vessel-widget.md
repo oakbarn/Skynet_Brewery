@@ -76,8 +76,9 @@ button to the part's own Properties. When the vessel has none, that section is e
 or saved on a Tab) its Properties show its Name (✏ Change name), its Type (greyed out), its Label, Visible, Hidden Locked, Label and
 place, and the Heating Element and Thermowell / Probe sections. Those you can change: Label, Interface, Port, Heating method, Target,
 Units and so on. If you put a different Heating Element or Probe in the vessel, pick **Swap for ...** (an existing one, or a new
-one) in its section and press 💾 Save: the old one is taken out of the vessel and stays on the Tab as a Device of its own (delete it
-if it is gone). Its size, IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
+one) in its section and press 💾 Save: the old one is taken out of the vessel. If the new one is on **another Port**, the old one is
+**deleted**. If it is on **the same Port** (you changed the hardware, not the wiring), the old one stays on the Tab as a Device of
+its own. Its size, IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
 
 **Plugged openings hide their IP.** An Element, Probe or Thermowell plugs its opening, just like an End Cap, so its IP is
 hidden and no pipe or hose can join it. Only the open IPs show. A Valve's IP still shows, because flow goes through it.
