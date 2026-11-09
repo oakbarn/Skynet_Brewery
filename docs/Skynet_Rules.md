@@ -1948,7 +1948,9 @@ each have a **time on its timer**: when the timer reaches it, the Alarm goes to 
 Chain is kept in the order its steps go On** (a count-down timer: the most time left first), and a **new step is put into its
 place** as soon as it is saved (OakBarn Brewery, 2026-11-09: "Auto Order the Alarm Chain of a Timer by when the Alarm is set to On
 or Active", "if a new alarm is enetered in the chain auto reorder takes place"). Steps with no time keep their order after them.
-Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand).
+Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand). A BruControl Timer's 2 alarms that are on are joined to their
+Alarms: the Alarm becomes a Hop Alarm on that Timer, the first time is its own time, and a second time is a step on its Alarm
+Chain (in Skynet one Alarm can hold up to 20 timed steps).
 Help 172.
 
 7.17 **Alarm Email Notification: an Alarm can send an email** (OakBarn Brewery, 2026-11-09: "Alarm e mail notification could be
@@ -3445,5 +3447,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
