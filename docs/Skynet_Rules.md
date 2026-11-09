@@ -277,6 +277,23 @@ top while Processes run, the others move down one on the screen; a whole number 
 Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
 the order of each Workspace's Elements list, the first one on top (Layer Order 1) (Rule 15.4). Help 114.
 
+1.30 **A gGlobal takes only its own Kind of value** (OakBarn Brewery, 2026-11-09: "A gGlobal accepts a value that is only its
+type. An error is thrown if you try to put the wrong type of data"). `gT_HopDrop_1 = 00:15:00` works; `gT_HopDrop_1 = "My Hop
+Drop"` is an **error**, and so is `new gT gT_HopDrop_1 = "My Hop Drop"` (making it with a value works the same way, Rule 1.24).
+A **Value** (gV_) takes a number, a **String** (gS_) text in quotes, a **Boolean** (gB_) true or false (on or off), a **Time** (gT_)
+a time such as 00:15:00, and a **Date Time** (gD_) a date and time (`now`, `now + 01:00:00`, or text that reads as a date and time,
+such as "11/09/2026 07:00:00", because a date can't be typed any other way). Nothing is turned into another Kind on the quiet: the
+gGlobal **keeps its old value**, the Process stops, and the error says in plain words what the gGlobal takes and what it was given
+(a number into a String: put it after `"" +`, such as `"" + 152`). A value typed right on the line is found by the **Check**, before
+the Process runs; one that comes from somewhere else (a variable, a Device, a sum) is found when the line runs. The Kind is the one
+the gGlobal was made with (Rule 1.19), whatever its name starts with. A Time gGlobal also has **`.minute`** and **`.seconds`**
+(OakBarn Brewery, 2026-11-09: "where an Integer is the value", "gT_HopDrop_1.seconds = 126 would translate as 00:02:06", "or
+maybe even hours if enough seconds are added"): they take **a whole number only**, which is turned into a time and becomes the
+**whole value**, rolling over into minutes and hours: `gT_HopDrop_1.minute = 5` is 00:05:00, `.seconds = 45` is 00:00:45,
+`.seconds = 126` is 00:02:06 and `.seconds = 3726` is 01:02:06. Read, they give the whole time in minutes or seconds (01:02:06 reads
+62 and 3726), so `gT_HopDrop_1.minute += 5` adds five minutes. 2.5 or text is an error. Both programs follow this: a Process brought
+in by the **BruControl Import** is checked the same way. Help 145.
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -3255,5 +3272,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: The Three Vessel sample's Brewhouse Tab now has a Master Vessel Sizer (the HLT, Rule 19.3), so a vessel built for that Tab is drawn at the same scale as the sample's vessels (OakBarn Brewery: "It did not adjust size to the other Vessels"). No Rule changed. Checked against both programs: the Importer's Build page is the same Panel. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rules 19.2 and 18.31 (OakBarn Brewery: "Both", "if we use the size rather than the gallons it will draw better in proportion", "Advertized gallons could also be wrong", "add that as a Field (Read and Display Only)", "Also missing is Deadspace and Safe Element Volume"): a Diameter vessel is drawn by its real size; read only Calculated Volume; Dead space and Safe Element Volume on every Vessel; an integrated Vessel Device's Properties have its Size again. Number boxes take decimals (15.5). Help 133 and 135 updated. Checked against both programs (the Importer's Build page is the same Panel; its Vessels step passes Height and Diameter to the builder). (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
+- 2026-11-09: Added Rule 1.30 (OakBarn Brewery): a gGlobal takes only its own Kind of value; a wrong one is an error in plain words (found by the Check when it is typed on the line) and the gGlobal keeps its old value. A Time gGlobal gets .minute and .seconds, which take a whole number that becomes the whole time (126 seconds is 00:02:06). Help 145.
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
