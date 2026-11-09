@@ -3,7 +3,7 @@ import { Store } from '../lib/store.js'; import { Engine, compile } from '../lib
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bp'));
 fs.writeFileSync(path.join(d,'c.json'), JSON.stringify({elements:[
  {name:'gblS_Msg',type:'gKonstant',kind:'string'},{name:'gblV_N',type:'gKonstant',kind:'value'},
- {name:'tm_T',type:'timer',timerType:'countdown'},{name:'sw_X',type:'switch'},{name:'shr',type:'shared',dataType:'value'}]}));
+ {name:'tm_T',type:'timer',timerType:'countdown'},{name:'sw_X',type:'switch'},{name:'gV_Pass',type:'gGlobal',kind:'value'}]}));
 const store = new Store(path.join(d,'c.json'), path.join(d,'data')); store.load();
 const eng = new Engine(store, path.join(d,'scripts'), {logNow(){}});
 eng.on('print', p=>console.log('PRINT', p.script, JSON.stringify(p.text)));
@@ -50,8 +50,8 @@ if vA < 3
  goto "Loop"
 endif
 print "loops " + vA
-"shr" value = 7
-"gblV_N" value = "shr" value * 2
+"gV_Pass" value = 7
+"gblV_N" value = "gV_Pass" value * 2
 print "gblV_N" value
 start "child"
 sleep 200
