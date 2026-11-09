@@ -28,7 +28,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowco
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, vbStart, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary } from './vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -421,7 +421,7 @@ const EQ = {
 // ---- Fritz's Vessel IP Template (2026-11-05, "Vessel IP Template.png"; Rule 5.31): the IP spots of the Vessel Widget Main Template,
 // on its 260 x 320 picture (Skynet_Vessel_Widget.svg). Right side top to bottom Sparge, HERMS In, HERMS Out, Element, the same
 // on the Left; lower body Tangential left and right, Center Probe, Center Outlet, Center Bottom Outlet; Back Element left and
-// right (the green spots). The names are only general: anything with an IP (an Element too) can go on any of them. Each IP
+// right (the green spots), and Back Center (2026-11-09). The names are only general: anything with an IP (an Element too) can go on any of them. Each IP
 // has a Label that starts the same as its Name and can be changed. `vw`: a Vessel Widget spot only.
 const vwPt = (name, pos, x, y) => pt(name, [[pos, x, y]], { vw: true });
 const VW_IPS = {
@@ -430,6 +430,8 @@ const VW_IPS = {
   lSparge: vwPt('Left Sparge', 'VW L Sparge', 0.077, 0.19), lHermsIn: vwPt('Left HERMS In', 'VW L HERMS In', 0.077, 0.313),
   lHermsOut: vwPt('Left HERMS Out', 'VW L HERMS Out', 0.077, 0.443), lElement: vwPt('Left Element', 'VW L Element', 0.077, 0.644),
   lBackElement: vwPt('Left Back Element', 'VW L Back Element', 0.292, 0.644), rBackElement: vwPt('Right Back Element', 'VW R Back Element', 0.708, 0.644),
+  // Back Center (OakBarn Brewery, 2026-11-09: "I have more than one with a Back center Heater"), level with the Back Elements
+  cBackElement: vwPt('Center Back Element', 'VW C Back Element', 0.5, 0.644),
   cProbe: vwPt('Center Probe', 'VW C Probe', 0.5, 0.731),
   lTangential: vwPt('Left Tangential', 'VW L Tangential', 0.205, 0.807), rTangential: vwPt('Right Tangential', 'VW R Tangential', 0.795, 0.807),
   cOutlet: vwPt('Center Outlet', 'VW C Outlet', 0.5, 0.881), cBottomOutlet: vwPt('Center Bottom Outlet', 'VW C Bottom Outlet', 0.5, 0.931),
@@ -449,7 +451,11 @@ const VP_KINDS = [['', 'Nothing: an open IP'], ['element', 'Heating Element'], [
 const VP_PICS = { element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg',
   front: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg', valveH: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg',
   valveF: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedFront.svg' };
-const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'] };
+// [inlet, outlet]. Crossed coils (OakBarn Brewery, 2026-11-09, Rule 5.31: "there are Cross Herms out there"): in on one side, out the other
+const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'], crossRL: ['lHermsIn', 'rHermsOut'], crossLR: ['rHermsIn', 'lHermsOut'] };
+const HERMS_WORDS = { left: 'Left', right: 'Right', crossRL: 'Outlet Right and Inlet Left', crossLR: 'Outlet Left and Inlet Right' };
+const HERMS_PICKS = [['', 'None'], ['left', 'Left: on Left HERMS In and Left HERMS Out'], ['right', 'Right: on Right HERMS In and Right HERMS Out'],
+  ['crossRL', 'Outlet Right and Inlet Left (crossed: in at Left HERMS In, out at Right HERMS Out)'], ['crossLR', 'Outlet Left and Inlet Right (crossed: in at Right HERMS In, out at Left HERMS Out)']];
 const VP_KEYS = /_(part|pin|ptk|pidx)$/;
 const isVDev = g => !!g?.vdevice && isVW(g);
 const isVPart = e => String(e?.integratedAs || '').startsWith('ip:');
@@ -462,7 +468,7 @@ const vpText = (g, k) => { const e = vpEl(g, k, (draft || S.config).elements); r
 // the Properties: what each IP holds now
 function vpWork(g) {
   const out = { vHerms: g.herms || '' }, devs = S.config.devices || [];
-  for (const [k, d] of Object.entries(EQ_VW.ports)) {
+  for (const [k, d] of Object.entries(vwClassOf(g).ports)) {
     if (!d.vw) continue;
     const e = vpEl(g, k, draft.elements);
     Object.assign(out, { [k + '_part']: e?.vpKind || '', [k + '_pin']: e?.channel ?? '', [k + '_ptk']: e?.type === 'temperature' ? tempKey(e) : tempKinds()[0][0], [k + '_pidx']: e?.probeIndex ?? '' });
@@ -483,10 +489,10 @@ function vpFields(it, k, d) {
 // the Available Ports lists of its parts: the free pins on its Interface that fit each one (two parts can't share a pin)
 function vpPinLists(w, g) {
   const own = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), els = draft.elements.filter(e => !own.includes(e));
-  for (const [k, d] of Object.entries(EQ_VW.ports)) {
+  for (const [k, d] of Object.entries(vwClassOf(g).ports)) {
     if (!d.vw) continue;
     const kind = w[k + '_part'], proto = kind ? vpProto(kind, w[k + '_ptk']) : null;
-    const taken = Object.keys(EQ_VW.ports).filter(x => x !== k && w[x + '_part'] && w[x + '_pin'] !== '' && w[x + '_pin'] !== undefined).map(x => String(w[x + '_pin']));
+    const taken = Object.keys(vwClassOf(g).ports).filter(x => x !== k && w[x + '_part'] && w[x + '_pin'] !== '' && w[x + '_pin'] !== undefined).map(x => String(w[x + '_pin']));
     const pins = proto && w.vpIface ? freePins({ ...proto, device: w.vpIface, name: '\0new' }, els, S.config.devices, proto.type === 'temperature' && ANALOG_TEMP.includes(proto.sensor)).filter(p => !taken.includes(String(p))) : [];
     $('#pins-vp_' + k)?.remove();
     document.body.append(h('datalist', { id: 'pins-vp_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.vpIface }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
@@ -495,7 +501,7 @@ function vpPinLists(w, g) {
 // make its parts (or bring them up to date) from vp (its Properties). Nothing changes when something is wrong (the error is thrown).
 function applyVParts(g, vp, tab, label) {
   const old = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), made = [], none = v => v === undefined || v === null || v === '';
-  const want = Object.entries(EQ_VW.ports).filter(([k, d]) => d.vw && vp[k + '_part'] && !vpHermsOn({ herms: vp.vHerms }, k));
+  const want = Object.entries(vwClassOf(g).ports).filter(([k, d]) => d.vw && vp[k + '_part'] && !vpHermsOn({ herms: vp.vHerms }, k));
   if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface (board) the parts on its IPs are wired to');
   for (const [k, d] of want) {
     const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k);
@@ -542,6 +548,15 @@ function hermsCoil(w, hh, y1, y2, s) {
   const cx = w * 0.58, rx = w * 0.36, ry = 6 * s, top = Math.min(y1, y2), bot = Math.max(y1, y2);
   const n = Math.max(3, Math.round((bot - top) / (9 * s))), step = (bot - top) / (n - 1), x1 = cx - rx;
   const leads = `M0 ${top}H${x1}M0 ${bot}H${x1}`, turns = Array.from({ length: n }, (_, i) => `<ellipse cx="${cx}" cy="${top + i * step}" rx="${rx}" ry="${ry}"/>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${hh}" viewBox="0 0 ${w} ${hh}"><g fill="none" stroke-linecap="round">`
+    + `<g stroke="#3b4148" stroke-width="${6 * s}"><path d="${leads}"/>${turns}</g><g stroke="#c9ced3" stroke-width="${3 * s}"><path d="${leads}"/>${turns}</g></g></svg>`;
+  return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27');
+}
+// a crossed HERMS coil (Rule 5.31): a lead in from the Left wall at yl and from the Right wall at yr, the coil's turns in the middle
+function hermsCoilCross(w, hh, yl, yr, s) {
+  const cx = w / 2, rx = Math.min(w * 0.22, 60 * s), ry = 6 * s, top = Math.min(yl, yr), bot = Math.max(yl, yr);
+  const n = Math.max(3, Math.round((bot - top) / (9 * s))), step = (bot - top) / (n - 1);
+  const leads = `M0 ${yl}H${cx - rx}M${w} ${yr}H${cx + rx}`, turns = Array.from({ length: n }, (_, i) => `<ellipse cx="${cx}" cy="${top + i * step}" rx="${rx}" ry="${ry}"/>`).join('');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${hh}" viewBox="0 0 ${w} ${hh}"><g fill="none" stroke-linecap="round">`
     + `<g stroke="#3b4148" stroke-width="${6 * s}"><path d="${leads}"/>${turns}</g><g stroke="#c9ced3" stroke-width="${3 * s}"><path d="${leads}"/>${turns}</g></g></svg>`;
   return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27');
@@ -600,13 +615,18 @@ function flowPopup(g) {
 function vpParts(g, at, s, W) {
   const out = [];
   const hs = HERMS_SIDES[g.herms];
-  if (hs && g.ports?.[hs[0]]?.installed && g.ports?.[hs[1]]?.installed) {        // the coil: a layer under its two IPs, stretched to fit them
+  if (hs && g.ports?.[hs[0]]?.installed && g.ports?.[hs[1]]?.installed && hs[0][0] !== hs[1][0]) {        // a crossed coil: across the vessel, wall to wall
+    const [ax, ay] = at(hs[0], g.ports[hs[0]]), [bx, by] = at(hs[1], g.ports[hs[1]]), x0 = Math.min(ax, bx), w = Math.abs(bx - ax), top = Math.min(ay, by) - 14 * s, hh = Math.abs(by - ay) + 28 * s;
+    const [yl, yr] = ax < bx ? [ay - top, by - top] : [by - top, ay - top];
+    out.push(h('div', { class: 'vwPart vpHerms', title: `HERMS coil, ${HERMS_WORDS[g.herms]} (built in)`,
+      style: `left:${x0}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${hermsCoilCross(w, hh, yl, yr, s)}")` }));
+  } else if (hs && g.ports?.[hs[0]]?.installed && g.ports?.[hs[1]]?.installed) {        // the coil: a layer under its two IPs, stretched to fit them
     const [ax, ay] = at(hs[0], g.ports[hs[0]]), [, by] = at(hs[1], g.ports[hs[1]]), right = ax > W / 2, w = 120 * s, top = Math.min(ay, by) - 14 * s, hh = Math.abs(by - ay) + 28 * s;
     out.push(h('div', { class: 'vwPart vpHerms', title: `HERMS coil on ${right ? 'Right' : 'Left'} HERMS In and Out (built in)`,
       style: `left:${right ? ax - w : ax}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${hermsCoil(w, hh, ay - top, by - top, s)}");transform:scaleX(${right ? -1 : 1})` }));
   }
   for (const [k, kind] of Object.entries(g.vbWant || {})) {      // still to be picked in the Vessel Builder (Rule 19.5): faint, its hotspot opens the picker
-    const p = g.ports?.[k]; if (!p?.installed || !EQ_VW.ports[k]) continue;
+    const p = g.ports?.[k]; if (!p?.installed || !vwClassOf(g).ports[k]) continue;
     const [px, py] = at(k, p), side = Math.abs(px - W / 2) > W * 0.4, right = px > W / 2;
     const el = kind === 'element', w = side ? (el ? 110 : 66) * s : (el ? 56 : 40) * s, hh = side ? (el ? 52 : 44) * s : (el ? 26 : 40) * s;
     const left = side ? (right ? px + (el ? 5 : 8) * s - w : px - (el ? 5 : 8) * s) : px - w / 2, top = py - hh / 2;
@@ -616,7 +636,7 @@ function vpParts(g, at, s, W) {
     if (editing) out.push(propsHotspot('vpHot vbWaitHot', `Pick or add the ${VB_WHAT[kind]} for this spot`, () => vbPickPart(g, k), `left:${left + w / 2 - 9}px;top:${top - 9}px`));
   }
   for (const e of L().elements.filter(e => e.integratedIn === g.id && isVPart(e))) {
-    const k = e.integratedAs.slice(3), p = g.ports?.[k]; if (!p?.installed || !EQ_VW.ports[k]) continue;
+    const k = e.integratedAs.slice(3), p = g.ports?.[k]; if (!p?.installed || !vwClassOf(g).ports[k]) continue;
     const [px, py] = at(k, p), side = Math.abs(px - W / 2) > W * 0.4, right = px > W / 2;
     let pic, w, hh, left, top, fl = 1;
     if (e.vpKind === 'element' && side) { pic = VP_PICS.element; w = 110 * s; hh = 52 * s; left = right ? px + 5 * s - w : px - 5 * s; fl = right ? 1 : -1; }
@@ -1022,7 +1042,16 @@ const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'St
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
 const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass(g) : vClassOf(g)) : null;
 // a Vessel Widget has the spots of Fritz's Vessel IP Template too (Rule 5.31); every other vessel keeps the plain vessel's ports
-const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? EQ_VW : EQ[t.vesselType] || EQ.vessel;
+const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? vwClassOf(t) : EQ[t.vesselType] || EQ.vessel;
+// Pick (OakBarn Brewery, 2026-11-09, Rule 5.31 changed: only during the initial build in the Vessel Device Builder): a spot double-clicked
+// away from every preset IP becomes a User IP of that one vessel, { key, name, x, y } (x, y: parts of its picture's width and height)
+const vwUserCache = new Map();
+function vwClassOf(t) {
+  if (!t.userIps?.length) return EQ_VW;
+  const id = JSON.stringify(t.userIps);
+  if (!vwUserCache.has(id)) vwUserCache.set(id, { ...EQ_VW, ports: { ...EQ_VW.ports, ...Object.fromEntries(t.userIps.map(u => [u.key, vwPt(u.name, 'VW User ' + u.key, +u.x, +u.y)])) } });
+  return vwUserCache.get(id);
+}
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
@@ -1437,7 +1466,7 @@ function sizeFitting(g) {
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
 // its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
-const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', qd: 'QD', cap: 'Cap' };
+const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', primingTee: 'PrimingTee', coupling: 'Coupling', qd: 'QD', cap: 'Cap' };
 const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'w_Text' : null;
 function giveName(g, all) {
   // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
@@ -3763,7 +3792,7 @@ function autoFit(g) {
 // ended on its IPs. A pipe drawn to the bend of one (where its pipes' center lines meet) turns it back into a joint, so an elbow
 // can become a tee. They are also added by hand (Add Widget > TC Pipe Fittings, and Elbows, Tees ... on the Edit layout bar).
 const TC_FIT_TPL = { elbow90: 'Elbow_90', elbow45: 'Elbow_45', tee: 'Tee', cross: 'Cross' };
-const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'Sight_Glass', 'Sight_Glass_Caged', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
+const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'Priming_Tee', 'Sight_Glass', 'Sight_Glass_Caged', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
 const isTcFit = g => isPlainUnit(g);
 const tcBend = (g, t = tplOf('fitting', g.template)) => { const q = fracPos(t?.bend); return q ? unitPoint(g, q[1], q[2]) : null; };
 const tcName = (t, all) => { const k = (t.fittings || []).map(f => f.kind).find(k => k !== 'none'); const p = (t.name === 'Cross' ? 'Cross' : k === 'sightGlass' && t.fittings.some(f => f.caged) ? 'SightGlassCaged' : NAME_PREFIX[k]) || t.name;
@@ -5196,7 +5225,8 @@ function updLockBtn() {
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
 // Properties), or an IP fitting (turn only: its shape is the same flipped).
-const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isSkyV(g) && isKettle(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
+const isUprightFit = g => isUnit(g) && !!tplOf('fitting', g.template)?.upright;      // a Priming Tee's valve always points up
+const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : (isSkyV(g) && isKettle(g)) || isUprightFit(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
 function updTurnBar(item) {
   const k = editing && !previewing ? turnKind(item) : '';
   $('#turnBar').classList.toggle('hidden', !k);
@@ -5207,7 +5237,7 @@ function updTurnBar(item) {
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
   if (!k) return;
-  if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
+  if (k === 'kettle' && op !== 'h') return toast(isUprightFit(g) ? 'A Priming Tee\'s valve always points up: it can Flip Horizontal, never Flip Vertical or turn.' : 'A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
   if (isMf(g)) {         // Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90"
     delete g.turn;
@@ -5357,6 +5387,8 @@ function vesselToBuild(t) {
 const VB_WHAT = { element: 'Heating Element', thermowell: 'Thermowell', probe: 'Probe' };
 const vbFields = w => {
   const metric = w.units === 'Metric', unit = metric ? 'cm' : 'inches';
+  // a Picked spot shows as its own choice; picking Pick again opens the vessel again
+  const pk = (k, list) => { const ip = vbPicked(w[k]); return ip ? [...list, [w[k], `Picked: ${vbSpotName(w, ip)}`]] : list; };
   return [['_vbq', 'Answer what your vessel has. 🔨 Build puts it on the 🔨 Build Tab; the dialogs for what you picked are then beside it.', 'note'],
     ['label', '1. Label (shown on the Tab, for example HLT; never blank)', 'text'],
     ['vtype', '2. General Type (Other lets you type your own)', 'vlist', 'vbTypes'],
@@ -5364,13 +5396,50 @@ const vbFields = w => {
     ['units', '4. Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true],
     ['volume', `5. Volume (${metric ? 'Liters' : 'Gallons'})`, 'num'],
     ['vheight', `6. Height (${unit}; empty = the plain vessel shape)`, 'num'], ['diameter', `7. Diameter (${unit}; empty = the plain vessel shape)`, 'num'],
-    ['drain', '8. Bottom Drain', 'sel', VB_DRAIN], ['tangential', '9. Tangential Inlet', 'sel', VB_TANGENTIAL],
-    ['sparge', '10. Sparge Arm / Steam Slayer', 'sel', VB_SPARGE],
-    ['probe', '11. Thermowell / Probe (no IP of its own; on an IP it closes it like an End Cap)', 'sel', VB_PROBE_SPOTS],
-    ['heater', '12. Heating Element (no IP of its own; on an IP it closes it like an End Cap)', 'sel', VB_HEAT_SPOTS, true],
-    ...(w.heater !== 'none' ? [['heater2', '12a. Second Heating Element (more than one is fine)', 'sel', VB_HEAT_SPOTS]] : []),
+    ['drain', '8. Bottom Drain', 'sel', pk('drain', VB_DRAIN)], ['tangential', '9. Tangential Inlet', 'sel', pk('tangential', VB_TANGENTIAL)],
+    ['sparge', '10. Sparge Arm / Steam Slayer', 'sel', pk('sparge', VB_SPARGE)],
+    ['probe', '11. Thermowell / Probe (no IP of its own; on an IP it closes it like an End Cap)', 'sel', pk('probe', VB_PROBE_SPOTS)],
+    ['heater', '12. Heating Element (no IP of its own; on an IP it closes it like an End Cap)', 'sel', pk('heater', VB_HEAT_SPOTS), true],
+    ...(w.heater !== 'none' ? [['heater2', '12a. Second Heating Element (more than one is fine)', 'sel', pk('heater2', VB_HEAT_SPOTS)]] : []),
     ['herms', '13. HERMS Coil', 'sel', VB_HERMS]];
 };
+// a spot's name: a preset IP's, or the User IP's made by Pick
+const vbSpotName = (w, k) => (w.userIps || []).find(u => u.key === k)?.name || EQ_VW.ports[k]?.name || k;
+// Pick: a blank vessel; a double-click marks the spot (Undo takes it off), 💾 Save keeps it. Near a preset IP (one not used by another
+// answer) it takes that IP; anywhere else it makes a User IP. Resolves to the IP key, or null for Cancel.
+const VB_SNAP = 0.07;
+function vbPickSpot(t, w, field) {
+  return new Promise(res => {
+    const used = new Set(Object.keys(VB_PICKABLE).filter(k => k !== field).map(k => vbPicked(w[k])).filter(Boolean));
+    const presets = Object.entries(EQ_VW.ports).filter(([k, d]) => d.vw && !used.has(k)).map(([k, d]) => ({ k, name: d.name, x: d.pos[0][1], y: d.pos[0][2] }));
+    const box = h('div', { class: 'vbPickBox', title: 'Double-click where it is on your vessel' }, h('img', { src: media(t.image || EQ_VW.image), alt: 'The vessel', draggable: 'false' }));
+    for (const q of presets) box.append(h('span', { class: 'vbPreset', title: q.name, style: `left:${q.x * 100}%;top:${q.y * 100}%` }));
+    const mark = h('span', { class: 'vbMark hidden' }), info = h('p', { class: 'vbPickInfo' }, 'Double-click the spot. Small dots are the preset IPs; a spot near one takes it.');
+    box.append(mark);
+    let at = null;
+    box.ondblclick = ev => {
+      const r = box.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height;
+      const aspect = r.height / r.width, near = presets.map(q => [q, Math.hypot(q.x - x, (q.y - y) * aspect)]).sort((a, b) => a[1] - b[1])[0];
+      at = near && near[1] <= VB_SNAP ? { key: near[0].k, x: near[0].x, y: near[0].y, name: near[0].name } : { x: +x.toFixed(3), y: +y.toFixed(3) };
+      mark.style.left = at.x * 100 + '%'; mark.style.top = at.y * 100 + '%'; mark.classList.remove('hidden');
+      info.textContent = at.key ? `It takes the preset ${at.name} IP. 💾 Save keeps it, ↶ Undo takes it off.` : 'A new User IP goes here. 💾 Save keeps it, ↶ Undo takes it off.';
+      save.disabled = false;
+    };
+    const close = v => { d.close(); d.remove(); res(v); };
+    const undo = h('button', { type: 'button', onclick: () => { at = null; mark.classList.add('hidden'); save.disabled = true; info.textContent = 'Double-click the spot.'; } }, '↶ Undo');
+    const save = h('button', { type: 'button', class: 'primary', disabled: true, onclick: () => {
+      if (!at) return;
+      if (at.key) return close(at.key);
+      w.userIps ||= []; let n = 1; while (w.userIps.some(u => u.key === 'u' + n)) n++;
+      w.userIps.push({ key: 'u' + n, name: VB_PICKABLE[field], x: at.x, y: at.y });
+      close('u' + n);
+    } }, '💾 Save');
+    const d = h('dialog', { class: 'vbPickDlg', 'data-nomenu': '' }, h('h3', {}, `Pick: ${VB_PICKABLE[field].replace(/^Picked /, '')}`, ' ', helpIcon(['vessel-device-builder'], () => close(null))),
+      info, box, h('div', { class: 'bar' }, undo, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(null) }, '✖ Cancel'), save));
+    d.oncancel = ev => { ev.preventDefault(); close(null); };
+    document.body.append(d); d.showModal();
+  });
+}
 const vbTabs = () => draft.workspaces.filter(x => !x.build).map(x => [x.name, x.id ? `${x.id}: ${x.name}` : x.name]);
 async function vesselBuilder() {
   if (!TPL) await loadTemplates();
@@ -5379,7 +5448,17 @@ async function vesselBuilder() {
   if (!editing) setEditing(true);
   const tabs = vbTabs(), from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
   const w = vbStart({ workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
-  const oks = $$('#dlg button[value="ok"]'), tips = oks.map(b => b.title);
+  const oks = $$('#dlg button[value="ok"]'), tips = oks.map(b => b.title), body = $('#dlgBody');
+  const onPick = async ev => {
+    const k = ev.target.dataset?.k; if (!VB_PICKABLE[k] || ev.target.value !== 'pick') return;
+    const was = w[k]; try { readFields(w, body); } catch { }
+    const ip = await vbPickSpot(t, w, k), v = ip ? 'ip:' + ip : was === 'pick' ? 'none' : was;
+    w[k] = v;
+    const sel = body.querySelector(`[data-k="${k}"]`); if (!sel) return;
+    if (ip && ![...sel.options].some(o => o.value === v)) sel.append(h('option', { value: v }, `Picked: ${vbSpotName(w, ip)}`));
+    sel.value = v;
+  };
+  body.addEventListener('change', onPick);
   try {
     for (;;) {
       for (const b of oks) { b.textContent = '🔨 Build'; b.title = 'Put the vessel on the 🔨 Build Tab, with the dialogs for what you picked beside it'; }
@@ -5390,7 +5469,7 @@ async function vesselBuilder() {
       const bad = vbProblems(w); if (bad.length) { toast(bad.join(' '), true, 9000); continue; }
       if (vbBuild(t, w)) return;
     }
-  } finally { oks.forEach((b, n) => { b.textContent = 'Save'; b.title = tips[n]; }); }
+  } finally { body.removeEventListener('change', onPick); oks.forEach((b, n) => { b.textContent = 'Save'; b.title = tips[n]; }); }
 }
 // 🔨 Build: the vessel on the left of the 🔨 Build Tab. Nothing is left behind when something is wrong.
 function vbBuild(t, w) {
@@ -5402,6 +5481,8 @@ function vbBuild(t, w) {
     addTemplateToTab('vessel', t, w.workspace, name);
     const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
     if (!g || !isVDev(g)) throw new Error('The Vessel Device could not be made');
+    const on0 = vbPlaced(w), mine = (w.userIps || []).filter(u => on0.includes(u.key));      // only the User IPs it uses (Pick)
+    if (mine.length) { g.userIps = clone(mine); for (const u of mine) g.ports[u.key] = { installed: true, position: 'VW User ' + u.key, standard: stdShort(g.std || t.std), label: u.name }; }
     const old = clone(g), method = vbSizeMethod(w);
     Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, volume: +w.volume, x: 40, y: 60, vbOpen: true, vbWant: vbWant(w), probeStyle: w.probe === 'center' ? 'front' : 'thermowell' });
     if (method === 'diameter') Object.assign(g, { sizeMethod: 'diameter', diameter: +w.diameter, vheight: +w.vheight }); else { delete g.sizeMethod; delete g.diameter; delete g.vheight; }
@@ -5464,8 +5545,10 @@ function renderVbPanel() {
   const rows = [...Object.entries(g.vbWant || {}).map(([k, kind]) => h('button', { type: 'button', class: 'vbRow vbTodo', onclick: () => vbPickPart(g, k) },
       `⚠ ${VB_WHAT[kind]} on the ${g.ports?.[k]?.label || vpName(k)}: pick or add one ▸`)),
     ...parts.map(e => h('button', { type: 'button', class: 'vbRow vbDone', onclick: () => editItem('el', e.name) }, `✓ ${VP_WHAT[e.vpKind] || e.vpKind} on the ${g.ports?.[e.integratedAs.slice(3)]?.label || vpName(e.integratedAs.slice(3))}: ${e.name}`))];
-  const later = [['cOutlet', 'Drain'], ['cBottomOutlet', 'Drain'], ['lTangential', 'Tangential Inlet'], ['rTangential', 'Tangential Inlet'], ['lSparge', 'Sparge Arm / Steam Slayer'], ['rSparge', 'Sparge Arm / Steam Slayer']]
-    .filter(([k]) => g.ports?.[k]?.installed).map(([k, t]) => h('div', { class: 'vbRow vbLater', title: 'Coming in the next update of the Vessel Device Builder' }, `${t} (${g.ports[k].label || vpName(k)}): its valve and pieces come next`));
+  // every other open IP it has (the Drain, Tangential, Sparge, a picked one): its pieces come in the next update
+  const busy = new Set([...Object.keys(g.vbWant || {}), ...parts.map(e => e.integratedAs.slice(3)), ...(HERMS_SIDES[g.herms] || [])]);
+  const later = Object.entries(g.ports || {}).filter(([k, p]) => p.installed && vwClassOf(g).ports[k]?.vw && !busy.has(k))
+    .map(([k, p]) => h('div', { class: 'vbRow vbLater', title: 'Coming in the next update of the Vessel Device Builder' }, `${p.label || vpName(k)}: its valve and pieces come next`));
   document.body.append(h('div', { id: 'vbPanel', class: 'vbPanel' }, h('h3', {}, `🔨 Vessel Builder: ${g.label || g.name}`, ' ', helpIcon(['vessel-device-builder'])),
     ...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nothing to pick.')]), ...later,
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Close the Vessel Builder. The vessel stays on the 🔨 Build Tab; its Properties change it.',
@@ -12128,10 +12211,10 @@ F.skynetFitting = it => {
 
 // Show All: a Not Placed spot is listed only while 👁 Show All is on (one switched off now stays listed until the dialog closes)
 // a Vessel Device's Properties: its Interface and HERMS coil, or that it is locked (built and saved)
-const vdevHead = it => vpLocked(it) ? [['_vdl', `Vessel Device, built and saved: its IPs, the parts built into them${it.herms ? ' and its HERMS coil (' + (it.herms === 'left' ? 'Left' : 'Right') + ')' : ''} are locked for good. The Labels can still change.`, 'note']]
+const vdevHead = it => vpLocked(it) ? [['_vdl', `Vessel Device, built and saved: its IPs, the parts built into them${it.herms ? ' and its HERMS coil (' + (HERMS_WORDS[it.herms] || it.herms) + ')' : ''} are locked for good. The Labels can still change.`, 'note']]
   : [['_vdn', 'Vessel Device: an Element, Temperature Probe, Thermowell or Valve put on an IP is built into it (like the RIMS tube). Once it is built and saved on a Tab, its IPs, parts and HERMS coil are locked for good.', 'note'],
     ['vpIface', 'Interface (board) the parts on its IPs are wired to', 'dev'],
-    ['vHerms', 'HERMS coil', 'sel', [['', 'None'], ['left', 'Left: on Left HERMS In and Left HERMS Out'], ['right', 'Right: on Right HERMS In and Right HERMS Out']], true]];
+    ['vHerms', 'HERMS coil', 'sel', HERMS_PICKS, true]];
 const vwPlacedNow = (it, k) => k + '_on' in it ? !!it[k + '_on'] : !!it.ports?.[k]?.installed;
 const vwShows = (it, k) => !!it.vwShowAll || vwPlacedNow(it, k) || !!it.ports?.[k]?.installed;
 const hidN = it => Object.keys(it.ports || {}).filter(k => !vwShows(it, k)).length;
