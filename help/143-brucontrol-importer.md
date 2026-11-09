@@ -83,6 +83,14 @@ picked, so you do not type them twice.
 the same config file: the Names page then offers **▶ Carry on where I left off**, or **Start again** (it asks first). Clicking
 **Next ▶** instead never wipes your answers out: it asks whether to carry on, and asks again before starting over.
 
+**Clear Page and Restart Fresh.** Two buttons sit at the top of every page:
+- **🧹 Clear Page** puts every answer on this page back to how it started (on Boards and Tabs: the small step you are on). The other
+  pages keep their answers. It is greyed on a page with no answers, like Welcome.
+- **↺ Restart Fresh** clears every answer the Importer kept for the config file you are working on (your other config files keep
+  theirs), and takes you back to Welcome.
+
+Each one asks first; **No** changes nothing. Your BruControl config file and the Schemas you saved are never touched.
+
 **Jump to a topic.** The topics along the top (Welcome, BruControl and Skynet ... Save the Schema) can be clicked to go back to
 any you have reached. Under **Boards and Tabs** a second row lists its small steps (Interfaces, IDs, Tabs, the Widget pages, Items,
 each item page, Vessels, Summary): click any one you have reached to jump there.
@@ -127,7 +135,7 @@ Then you confirm what comes in, in small steps:
    (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
 3a. **Your Widgets.** BruControl's Application Elements (the things not wired to a board) become Skynet Widgets: a Timer a
-   **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Script Widget** ([Help 173](173-script-widget)), a Chart
+   **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Process Widget** ([Help 173](173-process-widget)), a Chart
    a **Graph Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
    each kind found, with the same Display Name, tick, Label and Show columns as the items below. A BruControl Inspector has no Skynet
    Widget and stays a Placeholder. See [Help 165](165-importer-item-and-widget-pages).
@@ -184,7 +192,8 @@ Then you confirm what comes in, in small steps:
 - your **Globals** are **only listed** for now, on the summary (each Global with its Tab). They are not imported, they get no
   Placeholder, and nothing is asked about them: Globals will be dealt with in a later step;
 - your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
-  swapped in later; your **heating controls** keep their settings (Target, Kp, Ki, Kd ...) and their temperature probe, so a
+  swapped in later; your **heating controls** keep their settings (BruControl's Target becomes the Setpoint, Kp, Ki, Kd ...; a script's `target` is written `.setpoint`, and an old
+  `.target` line still works) and their temperature probe, so a
   click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
 - your **Charts**: each BruControl Chart becomes a Skynet **Graph Widget** ([Help 159](159-graph-widget)) with the same span,
   refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
@@ -293,9 +302,8 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 
 The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Under the question it says: "If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the **Skynet BruControl
 Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has two tick boxes, **Start Skynet Brewer now** (ticked) and **Start the BruControl
-Importer now**: only one can be ticked, so only one program starts. When you update and the Importer has kept answers, the update
-page has a tick box, **Also clear the BruControl Importer's saved answers**: tick it to start the Import fresh (your config files,
-Import Copies and saved Schema files are kept). Setup
+Importer now**: only one can be ticked, so only one program starts. Setup never clears the Importer's answers: use **Restart Fresh**
+in the Importer. Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)

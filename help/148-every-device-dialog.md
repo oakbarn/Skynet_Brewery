@@ -12,7 +12,7 @@ follow the Pump Drill down sample"). Once you know the Pump's dialog, you know t
 4. **3. Tab** and **4. Name**, with the Suggested Name under it.
 5. A Device with pictures: the **Graphic**, its **Path**, and the **Overlay** with **Toggle** (outputs) and **Database and .API ⬢**
    on the same line. A Device with no pictures has **Database and .API ⬢** on a line of its own.
-6. Its own settings: only what that kind of Device needs (a PID's Input, Target, Kp ...; a sensor's Signal and Units ...).
+6. Its own settings: only what that kind of Device needs (a PID's Input, Setpoint, Kp ...; a sensor's Signal and Units ...).
 7. **Text attributes ⬢** (the look of its value or On / Off text), **X**, **Y**, **Width**, **Height**, and the **Device Type** last.
 
 Rest the mouse on any field name to see what it is for (Help 147).

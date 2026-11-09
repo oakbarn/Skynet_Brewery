@@ -21,8 +21,8 @@ Its Device Type ID is **CPMP**, so its suggested name reads plainly, for example
 Double-click the pump. Under **Cool / Warm Pump: its Method** pick how it runs:
 
 - **On/Off**: a click or a Process turns it on and off.
-- **Hysteresis**: it runs by its **Temperature Probe** to hold a **Target**. A **minus On offset cools** (it turns on above the
-  Target, for a glycol pump); a **plus On offset warms** (it turns on below the Target). **On delay** waits that many seconds before
+- **Hysteresis**: it runs by its **Temperature Probe** to hold a **Setpoint**. A **minus On offset cools** (it turns on above the
+  Setpoint, for a glycol pump); a **plus On offset warms** (it turns on below the Setpoint). **On delay** waits that many seconds before
   it turns on again.
 
 Tick **Hysteresis allowed too** to switch between the two with one click on the Tab, or from a Process. A pump is never run by
@@ -34,7 +34,7 @@ The words are the same as a Heating Element's:
 
 ```
 MB_D5_CPMP_Cool~Pump_FR.method = "Hysteresis"
-MB_D5_CPMP_Cool~Pump_FR.target = 66
+MB_D5_CPMP_Cool~Pump_FR.setpoint = 66
 MB_D5_CPMP_Cool~Pump_FR.onoffset = -1
 MB_D5_CPMP_Cool~Pump_FR = On
 ```
@@ -42,6 +42,6 @@ MB_D5_CPMP_Cool~Pump_FR = On
 ## From BruControl
 
 The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port, alone or beside its on/off
-output, one Cool / Warm Pump that starts in that method, with its Target, offsets and probe. The report lists each one.
+output, one Cool / Warm Pump that starts in that method, with its Setpoint, offsets and probe. The report lists each one.
 
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.

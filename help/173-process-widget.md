@@ -1,8 +1,8 @@
-# Script Widget
+# Process Widget
 
-A **Script Widget** puts one **Process** on a Tab, so you can see what it is doing and start or stop it with one click
+A **Process Widget** puts one **Process** on a Tab, so you can see what it is doing and start or stop it with one click
 (Skynet Rule 1.31, OakBarn Brewery 2026-11-09). It is BruControl's **Script element**: in Skynet a script is called a
-**Process**, and the Widget keeps the name BruControl users know.
+**Process** (Rule 1.4), so this is the Process Widget.
 
 It shows three things:
 
@@ -10,9 +10,9 @@ It shows three things:
 - what its Process is doing: **Running**, **Waiting** (held at a `wait` or `ask`), **Stopped**, or **Stopped on an error**,
 - a **▶ Start** button while the Process is stopped, or a **■ Stop** button while it runs.
 
-Add one in **Edit layout > Add Widget > Widgets (app only, no board pin) > Script Widget**. Like every Widget it is made on the
-🔨 Build Tab first and lives only in the app (no Interface or Port). Its Name follows `wgt_SCR_` + the Label + the Tab ID, for
-example `wgt_SCR_Mash~Steps_BR` (Rule 3.14).
+Add one in **Edit layout > Add Widget > Widgets (app only, no board pin) > Process Widget**. Like every Widget it is made on the
+🔨 Build Tab first and lives only in the app (no Interface or Port). Its Name follows `wgt_PRC_` + the Label + the Tab ID, for
+example `wgt_PRC_Mash~Steps_BR` (Rule 3.14).
 
 ## One click starts or stops it
 
@@ -38,15 +38,15 @@ Hover over a field's name for a short explanation.
 ## When the Process changes
 
 - When you give the Process a new name with **✏ Change name**, the Widget follows it by itself.
-- When a Process starts or stops the Process (`start Mash`, `stop Mash`), every Script Widget showing it changes at once.
+- When a Process starts or stops the Process (`start Mash`, `stop Mash`), every Process Widget showing it changes at once.
 - If the Process is deleted, the Widget says **No such Process** until you pick another one. With no Process picked it says
   **No Process picked**.
 
-A Script Widget has no value of its own, so it has no Database or .API settings.
+A Process Widget has no value of its own, so it has no Database or .API settings.
 
 ## From BruControl
 
-The **BruControl Import** makes each BruControl **Script element** a Script Widget (it used to make a Value Widget). It shows the
+The **BruControl Import** makes each BruControl **Script element** a Process Widget (it used to make a Value Widget). It shows the
 BruControl Script of the same name, which becomes that Process when your Scripts come into Skynet. The variable the Script
 element showed in BruControl is kept with what BruControl had. A Script element BruControl marked as **not user controlled**
 comes in with **When tapped: none**, so a click on it does nothing, as before. See [Help 143](143-brucontrol-importer) and

@@ -12,9 +12,9 @@ Programs send the **API key** from **Settings** in the header `X-API-Key: <key>`
 |---|---|
 | `GET /api/items` | Everything whose .API is on, with its main value |
 | `GET /api/items/<name>` | One item: its main value and all its attributes |
-| `GET /api/items/<name>/<attribute>` | One attribute, for example `/api/items/HLT_PID/target` |
+| `GET /api/items/<name>/<attribute>` | One attribute, for example `/api/items/HLT_PID/setpoint` |
 | `PUT /api/items/<name>` with `152` or `{"value": 152}` | Change its main value (Get and Put only) |
-| `PUT /api/items/<name>` with `{"target": 152, "enabled": true}` | Change several attributes |
+| `PUT /api/items/<name>` with `{"setpoint": 152, "enabled": true}` | Change several attributes |
 | `PUT /api/items/<name>/<attribute>` with `152` | Change one attribute |
 | `POST /api/items` with `{"name1": v1, "name2": v2}` | Change several main values |
 | `POST /api/import/beerxml` with the XML file | Import a recipe |

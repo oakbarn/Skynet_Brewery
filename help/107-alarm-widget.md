@@ -46,6 +46,8 @@ The dialog follows the General Dialog Rules (Skynet Rules section 18):
 - **Alarm**: the Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, and the sound
   and Repeat. These work as before (see Alarms and sound).
 - **Graphic**: the layers above.
+- **Alarm Chain**: steps that change its colors, pictures and sound, so one Alarm does the work of many stacked ones. Every
+  choice starts on **No Change**. See [The Alarm Chain](172-alarm-chain).
 - **Properties**: Visible, Hidden Locked, Tab, X, Y, Width, Height and Lock.
 - **COPY** saves it and makes a copy on the 🔨 Build Tab. The orange **?** lists its Properties and Attributes.
 - **✖ Cancel** in the ⬆ and ⬢ pop-ups asks first when something was changed: discard the changes, or go back (Rule 18.11).
@@ -57,4 +59,6 @@ alm_Hops.active = true        // sound it
 alm_Hops.back = "Red"         // Layer 4 of a Basic Skynet Alarm (the color behind a User Alarm)
 alm_Hops.fore = "Yellow"      // Layer 3: the bell
 alm_Hops.back = ""            // back to what its Properties say
+alm_Hops.step = 2             // step 2 of its Alarm Chain (or alm_Hops.step = "Aroma")
+alm_Hops = On                 // the same as alm_Hops = true
 ```

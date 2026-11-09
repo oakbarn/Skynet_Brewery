@@ -15,7 +15,7 @@ assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'sounds/a b.wav'
 
 const conv = convertBruControl(xml, { simulate: true });
 const el = n => conv.elements.find(e => e.name === n);
-assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 1, pid: 1, pwmOut: 1, dutyCycle: 1, temperature: 1, gGlobal: 3, switch: 2, timer: 1, alarm: 1, scriptWidget: 1 });      // a Script element is a Script Widget (Rule 1.31)
+assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 1, pid: 1, pwmOut: 1, dutyCycle: 1, temperature: 1, gGlobal: 3, switch: 2, timer: 1, alarm: 1, processWidget: 1 });      // a Script element is a Process Widget (Rule 1.31)
 assert.equal(conv.devices[0].connection, 'simulator'); assert.equal(conv.devices[0].realConnection, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
 assert.equal(conv.devices[1].realConnection, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
 assert.deepEqual(conv.autostart, ['looper_Sample']);
@@ -40,7 +40,7 @@ assert.equal(el('gblS_Msg').initial, 'Hello & welcome'); assert.equal(el('gblS_M
 assert.equal(el('gblT_Delay').type, 'gGlobal'); assert.equal(el('gblT_Delay').kind, 'time'); assert.equal(el('gblT_Delay').initial, '00:01:30');
 assert.equal(el('tm_Boil').timerType, 'countdown'); assert.equal(el('tm_Boil').resetValue, '01:00:00');
 assert.deepEqual(el('alm_Done').sounds, ['sounds/Done.wav', 'sounds/Hops.wav', '']);
-assert.equal(el('insp_Start').type, 'scriptWidget'); assert.equal(el('insp_Start').process, 'looper_Sample', 'a Script element is a Script Widget that shows its Process (Rule 1.31)');
+assert.equal(el('insp_Start').type, 'processWidget'); assert.equal(el('insp_Start').process, 'looper_Sample', 'a Script element is a Process Widget that shows its Process (Rule 1.31)');
 assert.equal(el('insp_Start').tap, undefined, 'UserControl on: one click starts or stops it'); assert.equal(el('insp_Start').bru.variable, 'vV');
 assert.equal(conv.workspaces[0].bgW, 1900); assert.equal(conv.workspaces[0].width, 1920);
 
