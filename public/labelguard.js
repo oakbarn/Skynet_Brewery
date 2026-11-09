@@ -19,7 +19,8 @@ export function guardingField(t) {
   const d = t?.closest?.('dialog[open]'); if (!d) return null;
   const label = [...d.querySelectorAll('input[data-k="label"], textarea[data-k="label"]')].find(showing);
   if (label && isBlank(label.value)) return label;
-  return [...d.querySelectorAll('[data-guard]')].find(i => i.dataset.visited && showing(i) && isBlank(i.value)) || null;
+  // a box the program needs (data-guard-now, Rule 18.33) guards at once; the others once the user has been on them
+  return [...d.querySelectorAll('[data-guard]')].find(i => (i.dataset.visited || i.dataset.guardNow) && showing(i) && isBlank(i.value)) || null;
 }
 
 // may this be clicked while the field is blank? The field itself, its own ⬆ / ⬢ (they are for typing it), the fields it may go back
@@ -53,7 +54,7 @@ function showWarn(field) {
   const what = whatOf(field);
   // a field may say it in its own words (data-guard-msg: a Tilt's Color, OakBarn Brewery 2026-11-09)
   w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (field.dataset?.guardMsg || blankWarn(what)) }),
-    Object.assign(document.createElement('span'), { textContent: what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
+    Object.assign(document.createElement('span'), { textContent: what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
   clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 5 seconds
   field.classList.add('labelBlank');
   field.focus();
