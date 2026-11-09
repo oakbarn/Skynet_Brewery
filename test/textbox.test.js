@@ -95,5 +95,20 @@ assert.equal(s.getProp('w_Text_1', 'tab'), 'Main');
 s.saveLayout({ graphics: [...s.config.graphics, { id: 'c', kind: 'text', text: 'New' }] });
 assert.equal(s.config.graphics[2].name, 'w_Text_2');
 assert.equal(s.getProp('w_Text_1', 'text'), 'Hello');
+// Layer Order (Rule 1.29, BruControl's Z Order): .layer reads its Properties' number (0 until its Tab's layout is first saved),
+// a Process sets a whole number from 1 (on top), "" puts it back
+assert.equal(s.getProp('Pump_1', 'layer'), 0, 'not numbered yet: 0');
+s.setProp('Pump_1', 'layer', 3);
+assert.equal(s.getProp('Pump_1', 'layer'), 3);
+s.setProp('Pump_1', 'layer', '1');
+assert.equal(s.getProp('Pump_1', 'layer'), 1, '1 is on top');
+assert.throws(() => s.setProp('Pump_1', 'layer', 0), /from 1 up/);
+assert.throws(() => s.setProp('Pump_1', 'layer', 1.5), /whole number/);
+assert.throws(() => s.setProp('Pump_1', 'layer', 'top'), /whole number/);
+s.config.elements[0].layer = 7; s.setProp('Pump_1', 'layer', '');
+assert.equal(s.getProp('Pump_1', 'layer'), 7, '"" puts back the Layer Order in its Properties');
+s.setProp('w_Text_1', 'layer', 2);
+assert.equal(s.getProp('w_Text_1', 'layer'), 2, 'a Text Widget has .layer too');
+assert.ok(attrsOf(s.get('Pump_1')).includes('layer') && attrsOf(s.get('w_Text_1')).includes('layer'), 'predictive text lists .layer');
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('textbox tests passed');

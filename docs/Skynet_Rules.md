@@ -154,7 +154,7 @@ that Device is Get and Put too. (thread "Create the Semi_Widgets_Devices class",
 
 1.21 **Universal Properties** (Fritz, 2026-11-02): every Device, Widget and Semi_Widgets_Device has the same Properties and
 Process attributes: Name (Suggested Name, user may edit), Label, Show Label, Rich Text properties, Embedded Rich Text Codes,
-Position (`.x`, `.y`), Size (`.width`, `.height`), Visible, HiddenLock (hidden while the Tab Lock is on), Item Lock (`.lock`)
+Position (`.x`, `.y`), Size (`.width`, `.height`), Layer Order (`.layer`, Rule 1.29), Visible, HiddenLock (hidden while the Tab Lock is on), Item Lock (`.lock`)
 and the hidden key. Label attributes `.label`, `.label_visible`, `.font_label`, `.size_label`, `.fore_label`, `.back_label`,
 `.bold_label`, `.alignment_label`; string attributes `.font`, `.font_size`, `.fore`, `.back`, `.bold`, `.backpath`,
 `.alignment`, `.visible`; item attributes `.hiddenlock`, `.x`, `.y`, `.width`, `.height`, `.lock`, `.tab`. **Item Lock** locks
@@ -251,6 +251,20 @@ until a person confirms. More Widgets may join this class later, only when OakBa
 anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet really turns on; a Confirmation Widget turns nothing on,
 so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
 person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
+
+1.29 **Layer Order** (OakBarn Brewery, 2026-11-09: "also missing is a new Univeral .attribute .layer"; ".layer is layer Order";
+"BruControl has that field. Have skynet work the same as BruControl"). Every Device, Widget and Semi_Widgets_Device has a
+**Layer Order** (a Universal Property, Rule 1.21). It works like BruControl's **Z Order** (BruControl Manual v1.3, Element
+Appearance > General: "Lower Z Order numbers indicate higher priority"): where items overlap on a Tab, **1 is on top**, 2 is under
+it, and so on. A **new item gets 1** (on top) and the others move down one. Typing a new number in its Properties moves the item to
+that place and **numbers the whole Tab again, 1, 2, 3 ... with no gaps** (BruControl's up / down arrows). It sits in every
+Properties dialog right after Height (after Y or Tab when the item has no size); a Clone has its own. A Tab that was never numbered
+keeps the order Skynet always drew it in (vessels, then pictures and text, then Devices and Widgets, then pipe fittings), and
+**Save layout** numbers it. A Process reads and sets it with **`.layer`** (`Pump_1.layer = 1` puts it on top while Processes run,
+the others move down one on the screen; a whole number from 1; `""` puts back its Properties' number). Not in the list: **pipes
+and hoses** always stay under the other items, and the **IP-kind items** (IP markers, IP pipe fittings, Manual Valve Widgets) stay
+over them. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
+the order of each Workspace's Elements list, the first one on top (Layer Order 1) (Rule 15.4). Help 114.
 
 ## 2. Screen design and clicks
 
@@ -3178,6 +3192,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
   by hand", used by the OakBarn Template. Rule 11.1 next free Help is 159. Help 158 new; Help 100, 157, 62 updated. Checked against
   the BruControl Import program: no change (BruControl has no such items). (thread "Add DigiBoil manual vessel widget")
 - 2026-11-08: Added Rule 19.5, the Vessel Device Builder (OakBarn Brewery): the Question Dialog (General Type with USER: types, Volume, Height, Diameter, Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe, Heating Element, HERMS Coil), then the vessel on the 🔨 Build Tab with the Vessel Builder panel beside it and its Heater and Probe pickers. It replaces the BruControl Import's Vessels interview (the same look and feel in both programs; the Importer side comes later). Help 166; next free Help number 167. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Added Rule 1.29, Layer Order (`.layer`), BruControl's Z Order (1 on top, a new item gets 1, the Tab numbered again with no gaps), and added it to Rule 1.21's Universal Properties (OakBarn Brewery: ".layer is layer Order"; "Have skynet work the same as BruControl"): every Device and Widget's Properties, the drawing order on the Tabs, Processes and predictive text, and the BruControl Import (both programs). Pipes, hoses and IP-kind items are not in the list. Help 114 updated. (thread "Add Layer Order to all Devices")
 - 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Rule Change OK but Only during the Initial Build and there are Cross Herms out there so that get changed as well"): Pick may make a User IP on a vessel only during the initial build in the Vessel Device Builder; a HERMS coil may be crossed (Outlet Right & Inlet Left, Outlet Left & Inlet Right). Rule 19.5 items 6 and 7 (Pick, the Priming Tee). Help 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing changes there yet. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Add a new Ip In Back on The Basic Vessel Template Back Center. ... I have more than one with a Back center Heater"): the Vessel Widget Main Template has a Center Back Element IP (16 IPs); the Vessel Device Builder offers Back Center for the Thermowell / Probe and the Heating Element (Rule 19.5). The Three Vessel sample vessels have the spot Not Placed. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing else changes there. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 18.31 (OakBarn Brewery: "The Properties of the sub devices on a Vessel Device should pop up a Properties Dialog ... just like it was an independent Device ... Also the Properties should be on the Vessels Device Properties in their own section, If there is None ... all those attribute and Properties are greyed out."): a Vessel Device's Heating Element, Thermowell or Probe opens the same Properties as one of its own; the Vessel Device's Properties have a section for each, greyed out when None. Help 133 and 166 updated. Checked against the BruControl Import program: it has no Device dialogs of its own (Rule 18.31), so nothing changes there. (thread "Build the Vessel Device Builder")
