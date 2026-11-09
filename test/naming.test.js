@@ -203,5 +203,5 @@ console.log('naming tests passed');
   assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }), 'MV'); assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }, true), 'TWV');
   assert.equal(widgetTypeId({ type: 'digitalOut' }), '', 'a Device is named by Rule 3.1');
   assert.equal(widgetTypeId({ type: 'switch', cloneOf: 'sw_1' }), '', 'a Clone keeps its own name');
-  assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 17); assert.equal(widgetTypeId({ type: 'chart' }), 'CHT', 'Chart Widget (Rule 1.26)');
+  assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 17); assert.equal(widgetTypeId({ type: 'chart' }), 'GPH', 'Graph Widget, was Chart (Rule 1.26)');
 }
