@@ -49,7 +49,7 @@ console.log('mbvdialog tests passed');
 }
 // Fritz, 2026-11-05: in Edit layout a saved Orientation turns the picture on the Tab at once (not after Save layout)
 {
-  assert.match(app, /const v = editing \? \{ \.\.\.v0, image: e0\.backpath \?\? '', imageon: e0\.imageOn \?\? '', imageoff: e0\.imageOff \?\? '', imageoverlay: e0\.imageOverlay \?\? '' \} : v0/);
+  assert.match(app, /const v = editing \? \{ \.\.\.v0, image: e0\.backpath \?\? '', imageon: e0\.imageOn \?\? '', imageoff: e0\.imageOff \?\? '', imageoverlay: e0\.imageOverlay \?\? '', setgraphic: '' \} : v0/);
   console.log('edit layout picture tests passed');
 }
 // Fritz, 2026-11-05 (Rule 18.15 changed): a new valve's Label starts as mBV_n; Pumps don't auto fill

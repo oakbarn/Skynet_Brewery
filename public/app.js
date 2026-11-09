@@ -22,7 +22,7 @@ import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
-import { SCRIPT_WIDGET_TYPE, SCRIPT_WIDGET_WORD, SCRIPT_WIDGET_SIZE, SCRIPT_TIPS, isScriptWidget, scriptState, scriptButton } from './scriptwidget.js';
+import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, toConnection, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -267,7 +267,7 @@ function connect() {
     if (!editing && view === 'workspace' && Object.values(ch).some(p => 'layer' in p)) renderWs();      // a Process changed a Layer Order (Rule 1.29)
     renderPipes(); updateMeters(); updateAlarms(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
-  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshScriptWidgets(); if (menuTab === 'schema') renderMenuPane(); });
+  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
@@ -1164,7 +1164,7 @@ const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 
   blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
-// the red and yellow bolt (Fritz, 2026-11-04, Rule 7.15): the steady one is the On overlay every powered valve and pump starts
+// the red and yellow bolt (Fritz, 2026-11-04, Rule 7.16): the steady one is the On overlay every powered valve and pump starts
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
 const OVERLAY_GRAPHICS = [['Lightning bolt, red and yellow (valves and pumps)', BOLT], ['Lightning bolt, flashing red and yellow', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
@@ -1492,7 +1492,7 @@ const pressOverride = guard(async () => {
   toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
 });
 
-// variable class: gGlobal (Shared Variables became gGlobals on 2026-11-07, Fritz; gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
+// variable class: gGlobal (the Shared Variable class was removed on 2026-11-07 and 2026-11-09, Rule 1.25; gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => e?.type === 'gGlobal';
 // Value, Time and DateTime Widgets (Fritz, 2026-11-05, Rule 1.23): one value on a Tab, set by a tap; its data type comes from its type
 const DATA_W = { valueWidget: { dt: 'value', word: 'Value', w: 170, h: 56 }, timeWidget: { dt: 'time', word: 'Time', w: 170, h: 56 }, dateTimeWidget: { dt: 'datetime', word: 'DateTime', w: 230, h: 56 } };
@@ -2221,7 +2221,7 @@ function almLayers(n, e, v) {
     L.children[0].style.backgroundColor = firstSet(v.backcolor, e.backColor, ALM_COLORS.back);
     L.children[1].style.backgroundColor = firstSet(v.forecolor, e.foreColor, ALM_COLORS.fore);
   }
-  const set = e.setGraphic || '';
+  const set = v.setgraphic === 'none' ? '' : v.setgraphic || e.setGraphic || '';      // an Alarm Chain step can change it (Rule 7.16)
   if (L._set !== set) { L._set = set; L.children[3].style.backgroundImage = set ? cssUrl(set) : ''; }
 }
 
@@ -2338,7 +2338,7 @@ function fillEl(n, e0) {
   // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
   // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
   // (as the Brain makes them, lib/store.js), as shownName does for the Label
-  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '' } : v0, e = withLook(e0, v);
+  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '', setgraphic: '' } : v0, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -2402,7 +2402,7 @@ function fillEl(n, e0) {
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'chart': fillChart(n, e0, editing ? {} : v); break;          // the Chart Widget (Rule 1.26): its line graph, not a text
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
-    case SCRIPT_WIDGET_TYPE: { on = fillScriptWidget(n, e); text = ''; break; }      // the Script Widget (Rule 1.31): its Process, what it does, Start / Stop
+    case PROCESS_WIDGET_TYPE: { on = fillProcessWidget(n, e); text = ''; break; }      // the Process Widget (Rule 1.31): its Process, what it does, Start / Stop
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
       if (e.follow) { on = turnsOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
@@ -2428,7 +2428,7 @@ function fillEl(n, e0) {
     if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
-  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
+  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay === 'none' ? '' : v.imageoverlay || e.imageOverlay);      // 'none': an Alarm Chain step took it off (Rule 7.16)
   if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
   let ov = n.querySelector(':scope > .onov');
   if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
@@ -2446,7 +2446,7 @@ function fillEl(n, e0) {
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  if (e.type === 'chart' || isScriptWidget(e)) { /* drawn by fillChart, fillScriptWidget */ }
+  if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
@@ -2638,7 +2638,7 @@ function tapAction(e) {
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
     case 'manual': return 'manual';
-    case SCRIPT_WIDGET_TYPE: return 'startStop';      // the Script Widget (Rule 1.31): one click starts or stops its Process
+    case PROCESS_WIDGET_TYPE: return 'startStop';      // the Process Widget (Rule 1.31): one click starts or stops its Process
     case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': case 'deadband': return 'dialog';
     default: return 'none';
   }
@@ -2684,7 +2684,7 @@ async function doTap(e) {
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
   if (act === 'manual') return manualDialog(elByName(targetName) || e);
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
-  if (act === 'startStop') return scriptWidgetTap(e);
+  if (act === 'startStop') return processWidgetTap(e);
   if (act === 'script') {
     if (e.confirm && !(await choose(`Start process ${targetName}?`, [['Start', true]]))) return;
     try { const r = await api('POST', `/ui/scripts/${encodeURIComponent(targetName)}/start`); if (!r.ok) toast(r.msg, true); else toast(`Started ${targetName}`); } catch (x) { toast(x.message, true); }
@@ -2793,7 +2793,7 @@ function choose(title, buttons, current) {
 }
 
 // main setting of each control element, shown with an Enabled switch in its dialog
-const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'] };
+const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Setpoint'], pid: ['target', 'Setpoint'], deadband: ['target', 'Setpoint'] };
 function controlDialog(t) {
   const v = S.values[t.name] || {};
   const [prop, label] = CONTROL_MAIN[t.type];
@@ -2931,22 +2931,22 @@ function setpointDialog(p, t) {
   d.showModal(); if (m) setTimeout(() => { inp.focus(); inp.select(); }, 50);
 }
 
-// ---- Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/scriptwidget.js, Help 173) ----
+// ---- Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/processwidget.js, Help 173) ----
 // Its Label is the title; under it what its Process is doing (Running, Waiting, Stopped, Stopped on an error) and a Start / Stop
 // button. The whole Widget is the button: one click starts the Process when it is stopped and stops it when it runs, with no pop-up
 // (Rule 2.44). An item set to Ask before changing asks first. What it shows comes from the Processes list, so it follows every change.
-const scriptStatusOf = name => (S.scripts || []).find(x => x.name === String(name ?? '').trim()) ?? null;
-function fillScriptWidget(n, e) {
-  const st = scriptState(e.process, scriptStatusOf(e.process)), vl = n.querySelector('.vl');
-  n.classList.add('scriptw');
+const processStatusOf = name => (S.scripts || []).find(x => x.name === String(name ?? '').trim()) ?? null;
+function fillProcessWidget(n, e) {
+  const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
+  n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
-  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : scriptButton(st)));
+  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
   n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
-async function scriptWidgetTap(e) {
+async function processWidgetTap(e) {
   const name = String(e.process ?? '').trim();
-  const st = scriptState(name, scriptStatusOf(name));
+  const st = processState(name, processStatusOf(name));
   if (st.missing) return toast(`${e.label || e.name}: ${st.word}. Double-click it to pick its Process.`, true);
   if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? 'Stop' : 'Start', true]]))) return;
   try {
@@ -2954,9 +2954,9 @@ async function scriptWidgetTap(e) {
     if (!st.running && !r.ok) toast(r.msg ? `${name}: ${r.msg}` : `${name} did not start`, true);
   } catch (x) { toast(x.message, true); }
 }
-// the Processes list changed (one started, stopped, was renamed ...): every Script Widget on the screen shows it
-function refreshScriptWidgets() {
-  for (const n of document.querySelectorAll('#ws .el.scriptw')) { const e = elNamed(n.dataset.name); if (e) fillEl(n, e); }
+// the Processes list changed (one started, stopped, was renamed ...): every Process Widget on the screen shows it
+function refreshProcessWidgets() {
+  for (const n of document.querySelectorAll('#ws .el.procw')) { const e = elNamed(n.dataset.name); if (e) fillEl(n, e); }
 }
 
 // Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
@@ -4443,7 +4443,7 @@ const ADD_MENU = [
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Graph (a line graph of recorded readings)', 'chart', 'Graph'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
-    [`${SCRIPT_WIDGET_WORD} (shows a Process; one click starts or stops it)`, SCRIPT_WIDGET_TYPE, 'Script'],      // Rule 1.31
+    [`${PROCESS_WIDGET_WORD} (shows a Process; one click starts or stops it)`, PROCESS_WIDGET_TYPE, 'Script'],      // Rule 1.31
   ]],
 ];
 // make one new Device or Widget of a type list on the Edit layout bar on the Build Tab and open its Properties
@@ -4487,7 +4487,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
     if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
   }
-  if (type === SCRIPT_WIDGET_TYPE) { Object.assign(e, SCRIPT_WIDGET_SIZE); e.label = 'Script_' + i; e.process = ''; }     // the Script Widget (Rule 1.31): a Label from the start
+  if (type === PROCESS_WIDGET_TYPE) { Object.assign(e, PROCESS_WIDGET_SIZE); e.label = 'Process_' + i; e.process = ''; }     // the Process Widget (Rule 1.31): a Label from the start
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
@@ -5243,7 +5243,7 @@ const ipLabel = (id, ws) => allIps(ws).find(q => q.id === id)?.label || 'the IP'
 // INT_DEVICES: what each one is called in its dialogs, and its Label to start with
 const INT_DEVICES = { RIMS_Tube: ['RIMS tube', 'RIMS'], Integrated_Electric_Kettle_Basic: ['electric kettle', 'Kettle'] };
 const intWhat = g => INT_DEVICES[g?.template] || (g?.vesselType === 'rims' ? INT_DEVICES.RIMS_Tube : ['electric kettle', 'Kettle']);
-const HEAT_CTL = [['pid', 'PID (holds a target temperature)'], ['hysteresis', 'Hysteresis (on / off around a target)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
+const HEAT_CTL = [['pid', 'PID (holds a setpoint temperature)'], ['hysteresis', 'Hysteresis (on / off around a setpoint)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
 const RIMS_KEYS = ['iface', 'heatCtl', 'heatPin', 'tempKind', 'tempPin', 'tempProbe'];
 // the heating element's own settings for its control (Fritz, 2026-10-26: its Properties are in the item's Properties), as el_<key>.
 // Its Interface and Port are set above them, and its Input is always its own thermowell's probe.
@@ -6304,13 +6304,15 @@ const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${
 // "  ≈ 4.6 V" after a PWM or Analog output's value, from its Measured volts table (Rule 6.24); nothing without one
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
+const SMOOTH_TIP = 'Smoothing (Rule 6.24, BruControl\'s Avg Weight): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
+const SMOOTH_FIELD = ['avgWeight', 'Smoothing % (100 = none)', 'num', null, false, false, { tip: SMOOTH_TIP }];
 const CAL_FIELD = ['calibrations', 'Calibrations (top to bottom)', 'calchain', null, false, false, { tip: CAL_TIP }];
 const CAL_POP = { title: 'Calibrations', fields: [CAL_FIELD] };
 const CAL_ROW = (it, x = {}) => ['_calx', 'More calibrations', 'ro', calSummary(it.calibrations), false, false, { tip: CAL_TIP, attr: CAL_POP, ...x }];
 const VOLT_TIP = 'Measured volts (Rule 6.24): set the output to a few settings (a PWM output: %), measure the volts with a meter, and write each pair on its own line, e.g. 50, 4.6. A DAC seldom reaches exactly 10 V at 100 %, and each one is different. Skynet then shows about how many volts it gives (≈ V), and a Process can set volts: My_DAC.volts = 7.5.';
 const VOLT_FIELD = (x = {}) => ['voltTable', 'Measured volts (its setting, the volts you measured: one pair per line)', 'pairs', null, false, false, { tip: VOLT_TIP, ...x }];
 // Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
-const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Target, so it settles at the Target instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
+const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
 const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
 const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
@@ -6343,7 +6345,9 @@ const F = {
     ['pulse', 'Pulse: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
-    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
+    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds, empty = 1)', 'num', null, false, false, { tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, as BruControl\'s Counter Input, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
+    ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
     ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
@@ -6360,14 +6364,14 @@ const F = {
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
-    ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+    ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
-  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'ON offset (positive = heat: on below setpoint - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
-  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
-    ['deadbandOffset', 'Deadband Offset (± around the Target: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Target: inside it the output moves by the Inner Band Drive)', 'num'],
+  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'],
+    ['deadbandOffset', 'Deadband Offset (± around the Setpoint: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Setpoint: inside it the output moves by the Inner Band Drive)', 'num'],
     ['initialOutput', 'Initial Output % (when Enabled)', 'num'], ['innerBandDrive', 'Inner Band Drive (% change each Calc Time)', 'num'], ['outerBandDrive', 'Outer Band Drive (% change each Calc Time, outside the Inner Band)', 'num'],
     ['maxOutput', 'Max output %', 'num'], ['calcTime', 'Calc Time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Picture Widget (Fritz, 2026-10-27): "Turns on with" picks what turns it on: an on/off Device or Widget, or a heater that is on while Enabled.
@@ -6466,7 +6470,7 @@ F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
-const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD];
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD, SMOOTH_FIELD];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
@@ -6563,9 +6567,68 @@ function alarmWidgetFields(it) {
       ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
       : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
         ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
+    ...chainFields(it),
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
 }
+// The Alarm Chain (Rule 7.16, OakBarn Brewery 2026-11-09): one Alarm does the work of many stacked ones. Each step can change the
+// Fore color, Back color, Set Graphic (Layer 2), Active overlay (Layer 1), the sound and (a User Alarm) its picture. Every choice
+// starts on No Change, which skips it: the Alarm keeps what it has. A Process picks a step: alm_Brew.step = 2 (or its name).
+// In the dialog each step is ch<N>_<key>; on Save they become .chain = [{ label, foreColor ... }] (a No Change choice is left out).
+const CHAIN_KEEP = '__keep__', CHAIN_MAX = 20, CHAIN_RE = /^ch(\d+)_(\w+)$/;
+const CHAIN_KEYS = ['label', 'foreColor', 'backColor', 'setGraphic', 'imageOverlay', 'sound', 'backpath'];
+const CHAIN_TIP = 'The Alarm Chain (Rule 7.16): one Alarm can do the work of many stacked ones. Each step can change its colors, pictures and sound; whatever a step leaves on No Change stays as it is. A Process picks a step: alm_Brew.step = 2, or by its name: alm_Brew.step = "Strike". alm_Brew.step = 0 puts back what these Properties say.';
+const chainChoices = list => [[CHAIN_KEEP, 'No Change'], ...list];
+function chainStepPop(it, n) {
+  const basic = isAlmBasic(it), k = x => `ch${n}_${x}`, keep = { keep: true };
+  return { title: `Alarm Chain: Step ${n}`, fields: [[k('label'), 'Step name (a Process can use it: .step = "its name")', 'text', null, false, 'b'],
+    ['_' + k('n'), 'No Change (the first choice in every list) skips that adjustment for this step: the Alarm keeps what it has.', 'note'],
+    [k('foreColor'), basic ? 'Fore color (Layer 3, the bell)' : 'Fore color (its text)', 'color', 'keep'],
+    [k('backColor'), basic ? 'Back color (Layer 4)' : 'Back color (behind the pictures)', 'color', 'keep'],
+    ...(basic ? [[k('setGraphic'), 'Set Graphic (Layer 2, on the bell)', 'sel', chainChoices(almChoices(ALM_SET_RE))], [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'sel', chainChoices(almChoices(ALM_ACTIVE_RE))]]
+      : [[k('backpath'), 'Background picture (Image Path 1)', 'gpick', 'pictures', false, false, keep], [k('setGraphic'), 'Set Graphic (Layer 2)', 'gpick', 'pictures', false, false, keep],
+        [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays', false, false, keep]]),
+    [k('sound'), 'Sound file', 'gpick', 'sounds', false, false, keep],
+    ...(it.kind === 'hop' ? [[k('at'), 'At this time on the timer (hh:mm:ss)', 'text', null, false, false, { tip: 'When its timer reaches this time the Alarm goes to this step and sounds. The steps are kept in the order they go On, and a new step goes into its place. Empty = only from a Process (.step).' }]] : [])] };
+}
+function chainFields(it) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +it.chainSteps || 0));
+  chainNewSteps(it);
+  return [['_cb', 'Alarm Chain', 'box'], ['chainSteps', 'Steps in the Alarm Chain', 'sel', Array.from({ length: CHAIN_MAX + 1 }, (_, i) => [String(i), i ? String(i) : 'None']), true, 'b', { tip: CHAIN_TIP }],
+    ...Array.from({ length: n }, (_, i) => [`ch${i + 1}_label`, `Step ${i + 1}`, 'text', null, false, false, { attr: chainStepPop(it, i + 1) }])];
+}
+// .chain -> the dialog's boxes (every choice a step has not got is No Change)
+function chainToWork(work) {
+  const steps = Array.isArray(work.chain) ? work.chain.slice(0, CHAIN_MAX) : [];
+  work.chainSteps = String(steps.length);
+  steps.forEach((s, i) => { work[`ch${i + 1}_made`] = true; work[`ch${i + 1}_at`] = s.at ?? ''; for (const x of CHAIN_KEYS) work[`ch${i + 1}_${x}`] = x === 'label' ? s.label ?? `Step ${i + 1}` : x in s ? s[x] ?? '' : CHAIN_KEEP; });
+}
+// the dialog's boxes -> .chain (a step's empty name is Step N; No Change choices are left out)
+function chainFromWork(work) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +work.chainSteps || 0)), chain = [];
+  for (let i = 1; i <= n; i++) {
+    const s = { label: String(work[`ch${i}_label`] ?? '').trim() || `Step ${i}` };
+    // a box the dialog left empty (None, Default, or no picture) is "" (readFields drops empty boxes); No Change is left out
+    for (const x of CHAIN_KEYS.slice(1)) { const v = work[`ch${i}_${x}`]; if (v !== CHAIN_KEEP) s[x] = v ?? ''; }
+    const at = String(work[`ch${i}_at`] ?? '').trim();
+    if (at && work.kind === 'hop') { if (!/^\d+(:\d{1,2}){0,2}$/.test(at)) throw new Error(`Alarm Chain Step ${i}: its time "${at}" must be hh:mm:ss (for example 00:15:00)`); s.at = at; }
+    chain.push(s);
+  }
+  // a timer's Alarm Chain is kept in the order its steps go On, and a new step goes into its place (OakBarn Brewery 2026-11-09)
+  const tm = S.config.elements.find(e => e.name === work.timer), down = (tm?.timerType ?? 'countdown') === 'countdown';
+  const secs = s => String(s.at).split(':').reduce((t, x) => t * 60 + +x, 0);
+  const timed = chain.filter(s => s.at).sort((a, b) => down ? secs(b) - secs(a) : secs(a) - secs(b));
+  chain.splice(0, chain.length, ...timed, ...chain.filter(s => !s.at));
+  for (const k of Object.keys(work)) if (CHAIN_RE.test(k)) delete work[k];
+  delete work.chainSteps;
+  if (chain.length) work.chain = chain; else delete work.chain;
+}
+// a new step's boxes start on No Change
+function chainNewSteps(work) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +work.chainSteps || 0));
+  for (let i = 1; i <= n; i++) if (!work[`ch${i}_made`]) { work[`ch${i}_made`] = true; work[`ch${i}_label`] = `Step ${i}`; for (const x of CHAIN_KEYS.slice(1)) work[`ch${i}_${x}`] = CHAIN_KEEP; }
+}
+
 // Pump Device Properties, the drill-down (Fritz's drawing, 2026-11-03, Rule 18.12): the standard for every Device. The most
 // used fields are on the opening dialog; each red hexagon ⬢ opens a pop-up with the rest, each red up arrow ⬆ a String Entry
 // Dialog. "Pump Properties ⬢" holds Visible, Hidden Locked, the lock, Tab, X, Y, Width, Height and Delete.
@@ -6622,7 +6685,7 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
   return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color', null, false, false, x]] : [])]
     : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
 };
-// the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.15)
+// the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
 const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
@@ -6689,7 +6752,7 @@ const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns
 // method; the settings of the other methods are kept, so switching back finds them as they were.
 // hover help for the Precise settings (Rule 2.38)
 const HEAT_TIPS = {
-  holdOutput: 'Precise: the output % the element needs just to stay at the Target (watch the % once it has settled and put that here). It starts there, so it reaches the Target without a big swing. 0 = it works it out by itself, more slowly.',
+  holdOutput: 'Precise: the output % the element needs just to stay at the Setpoint (watch the % once it has settled and put that here). It starts there, so it reaches the Setpoint without a big swing. 0 = it works it out by itself, more slowly.',
   smoothing: 'Precise: the seconds it averages the probe over, so the probe\'s tiny steps do not make the heater twitch. 10 is a good start; more is calmer but slower to see a change. 0 = no smoothing.',
   outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
 };
@@ -6869,7 +6932,7 @@ const TWO_POINT_FIELDS = [['_c2', 'Put the probe in ice water (stirred, 32 °F /
 const TWO_POINT_KEYS = ['calLowRead', 'calLowTrue', 'calHighRead', 'calHighTrue'];
 const TWO_POINT_POP = { title: 'Two-point calibration', fields: TWO_POINT_FIELDS };
 const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
-const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', ...TWO_POINT_KEYS];
+const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', 'avgWeight', ...TWO_POINT_KEYS];
 const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
 const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
 function flipFrom(w) { if (w._flip === undefined) return; w.flipH = w._flip.includes('h'); w.flipV = w._flip.includes('v'); if (!w.flipH) delete w.flipH; if (!w.flipV) delete w.flipV; delete w._flip; }
@@ -6882,6 +6945,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }],
   ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
   CAL_ROW(it, x),
+  [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
 function probeDeviceFields(it, item) {
@@ -6960,7 +7024,7 @@ const DATAW_TIPS = {
   size: 'Its size on the Tab in pixels.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
-  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.target = {value}. A Process setting the Value does not run it. Problems show in the Console.',
+  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
@@ -7068,13 +7132,13 @@ const SND_TIPS = {
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
   ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
   ...wgtPlace(), wgtType('Sound Player')];
-// Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
-const scriptWidgetFields = it => {
+// Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
+const processWidgetFields = it => {
   const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
-  return [...wgtHead(SCRIPT_TIPS),
-    ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: SCRIPT_TIPS.process }],
+  return [...wgtHead(PROCESS_TIPS),
+    ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
-    ...wgtPlace(), wgtType(SCRIPT_WIDGET_WORD, SCRIPT_TIPS.type)];
+    ...wgtPlace(), wgtType(PROCESS_WIDGET_WORD, PROCESS_TIPS.type)];
 };
 // Boolean Widgets (Semi_Widgets_Devices, Rule 1.20): the Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED
 const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on', 'path']] };
@@ -7220,13 +7284,13 @@ function vpSections(it, edit = false) {
           ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
             : [[x + 'label', '1. Label', 'text'], [x + 'device', '2. Interface (board)', 'dev', null, true], ow ? [x + 'pidx', 'Probe #', 'probe'] : [x + 'channel', 'Port', 'pin', 'vpx_' + spot],
               ro('n', '4. Name', e.name),
-              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Target', 'num']]
+              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
               [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]])];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
         ro('l', '1. Label', e?.label), ro('i', '2. Interface (board)', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
-        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Target', e?.target)]
+        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Setpoint', e?.target)]
           : [ro('t', 'Probe type', e && probeKindName(e)), ro('u', 'Units', e?.units), ro('o', 'Calibration offset', e && (e.offset ?? 0))]),
         ...(e ? [[k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]] : [])];
     };
@@ -7325,7 +7389,7 @@ function fieldsOf(item) {
     return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
-      ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
+      ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
       ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
@@ -7455,8 +7519,8 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target), Deadband (steps its % toward the Target) or Precise (a calm PID that holds a Target to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
-  heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Target. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
@@ -7487,7 +7551,7 @@ const DEVICE_TIPS = {
   vOrient: 'How the valve stands: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The Graphic here and the valve on the Tab follow, and its IPs too.',
   vOrientUser: 'Where the two pipe ends of your picture are: Horizontal, Vertical, or turned 45 degrees Left or Right. Its IPs follow.',
   vToggle: 'What a tap on the valve does: On/Off opens or closes it with one click; Push button is open only while held.',
-  vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.15); the flashing bolt and others are choices, None for no overlay.',
+  vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.16); the flashing bolt and others are choices, None for no overlay.',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
@@ -7505,7 +7569,7 @@ const DEVICE_TIPS = {
   // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
   pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
   pPath: 'The picture file (optional). It is the same picture when on and off; the Overlay shows it is running.',
-  pOverlay: 'Drawn on top of the picture while the output is above 0 %: the steady red and yellow lightning bolt to start (Rule 7.15); None for no overlay.',
+  pOverlay: 'Drawn on top of the picture while the output is above 0 %: the steady red and yellow lightning bolt to start (Rule 7.16); None for no overlay.',
   pStart: 'The output in % when the Brain starts (0 = off).',
   pDec: 'How many decimals its value shows.',
   pSignal: 'What the module on this pin puts out: 0-10 V, 4-20 mA or 0-5 V.',
@@ -7519,7 +7583,7 @@ const DEVICE_TIPS = {
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
   eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off at once, in the method it is in; Push button is on only while held.',
-  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.15).',
+  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.16).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -7687,7 +7751,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
-    const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
+    const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
     const cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa'), known = cols.find(c => c[1] === cur);
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') + (cur === 'transparent' ? ' none' : '') }); sw.style.background = cur;
@@ -7706,8 +7770,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
-    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
-    const pv = h('img', { class: 'gprev' + (v && pic && !isTint(v) ? '' : ' hidden'), ...(v && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
+    const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
+    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
+    const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
     const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
@@ -7715,14 +7780,14 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     let src = gk === 'sounds' ? 'both' : srcPick();
     const fill = () => {
       const cur = s.value || v || '';
-      s.replaceChildren(h('option', { value: '' }, '(none)'),
+      s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
         ...os.filter(p => p === cur || isTint(p) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
       s.value = cur;
     };
     fill();
     const gs = groups.length ? h('select', { class: 'gpickGroup', title: 'Show the pictures of one group, or All', onchange: ev => { ev.stopPropagation(); g = gs.value; keepGroup(gk, g); fill(); } },
       h('option', { value: '' }, 'All groups'), ...groups.map(([n, l]) => h('option', { value: n, ...(n === g ? { selected: true } : {}) }, l))) : null;
-    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value || isTint(s.value)); if (s.value && !isTint(s.value)) pv.src = media(s.value); } });
+    s.addEventListener('change', () => { const sv = s.value === CHAIN_KEEP ? '' : s.value; if (pic && sv !== '__add__') { pv.classList.toggle('hidden', !sv || isTint(sv)); if (sv && !isTint(sv)) pv.src = media(sv); } });
     const ss = gk === 'sounds' ? null : h('select', { class: 'gpickGroup', title: 'Show the Skynet pictures, your own, or both', onchange: ev => { ev.stopPropagation(); src = ss.value; keepGroup('src', src); fill(); } },
       ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
@@ -8194,7 +8259,7 @@ const INFO = {
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
-    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.target = {value} (Rule 1.27).'],
+    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']] },
@@ -8570,7 +8635,7 @@ function openTabProps(name) {
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
 const TYPE_TITLE = { hydrometer: 'Hydrometer', valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
-TYPE_TITLE[SCRIPT_WIDGET_TYPE] = SCRIPT_WIDGET_WORD.replace(/ Widget$/, '');      // "Script Widget Properties" (Rule 1.31)
+TYPE_TITLE[PROCESS_WIDGET_TYPE] = PROCESS_WIDGET_WORD.replace(/ Widget$/, '');      // "Process Widget Properties" (Rule 1.31)
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -8595,7 +8660,7 @@ async function editItem(kind, id) {
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);
-    if (isScriptWidget(it)) return scriptWidgetFields(it);      // the Script Widget (Rule 1.31)
+    if (isProcessWidget(it)) return processWidgetFields(it);      // the Process Widget (Rule 1.31)
     if (it.type === 'soundPlayer') return soundPlayerFields();      // the other Widgets: the Pump's drill-down look (Rule 18.30)
     if (SEMI_KINDS[it.type] && !it.cloneId) return semiWidgetFields(it.type, it);
     if (isManualPump(it)) return manualPumpFields(it);       // the Manual Pump Widget (Rule 1.28)
@@ -8608,6 +8673,7 @@ async function editItem(kind, id) {
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
+  if (kind === 'el' && item.type === 'alarm' && item.alarmClass) chainToWork(work);      // the Alarm Chain's steps as boxes (Rule 7.16)
   if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
   const layer0 = work.layer;
   if (kind === 'el') dbToWork(work);
@@ -8837,6 +8903,7 @@ async function editItem(kind, id) {
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
     const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
+    if (work.type === 'alarm' && work.alarmClass) chainFromWork(work);      // the boxes back to .chain (Rule 7.16)
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
       const frozen = profileFrozen(item);
@@ -11289,7 +11356,7 @@ function otherDefaults() {
     ['Pump size', 'The Pump Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The pump\'s Width and Height', 'Rules 5.27, 5.36'],
     ['Valve size', 'The Valve Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The valve\'s Width and Height', 'Rules 5.29, 5.36'],
     ['Pipe fittings', 'Autosize to pipe on', 'Each fitting\'s Properties', 'Rule 5.14'],
-    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.15'],
+    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.16'],
     ['Glow ring on a new pump', 'Green', 'The pump\'s Properties', 'Rules 7.15, 18.13'],
     ['Pump cover color', 'None', 'The pump\'s Properties', 'Rule 7.13'],
     ['Flow color (In and Out)', 'None', 'Each vessel, pipe and hose', 'Rule 5.21'],

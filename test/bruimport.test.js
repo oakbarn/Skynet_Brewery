@@ -138,5 +138,5 @@ console.log('bruimport tests passed');
   assert.ok(q.report.globals.some(g => g.name === 'gMashTemp'), 'the Global is listed');
   assert.ok(!q.conv.graphics.some(g => g.placeholder?.bruName === 'gMashTemp'), '... and gets no Placeholder'); }
 
-// the Script Widget (Rule 1.31): its own checks, run from here
-await import('./scriptwidget.test.js');
+// the Process Widget (Rule 1.31): its own checks, run from here
+await import('./processwidget.test.js');

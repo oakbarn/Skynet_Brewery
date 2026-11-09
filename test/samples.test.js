@@ -20,7 +20,7 @@ assert.deepEqual(simulated([{ name: 'M', type: 'serial', port: 'COM3' }, { name:
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));
   fs.mkdirSync(path.join(d, 'config')); fs.mkdirSync(path.join(d, 'scripts'));
-  fs.writeFileSync(path.join(d, 'config', 'brewery.json'), JSON.stringify({ title: 'x', mediaRoots: [path.join(ROOT, 'media')], chooseSample: true, elements: [{ name: 'Old', type: 'shared' }] }));
+  fs.writeFileSync(path.join(d, 'config', 'brewery.json'), JSON.stringify({ title: 'x', mediaRoots: [path.join(ROOT, 'media')], chooseSample: true, elements: [{ name: 'Old', type: 'gGlobal', kind: 'value' }] }));
   const store = new Store(path.join(d, 'config', 'brewery.json'), path.join(d, 'data')); store.load();
   const engine = new Engine(store, path.join(d, 'scripts'), { logNow() { }, scriptStarted() { } });
   const hw = new Hardware(store);
