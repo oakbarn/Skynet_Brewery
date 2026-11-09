@@ -110,4 +110,6 @@ assert.equal(sw.deviceControlled, 'Pump_Wort');
 
 eng.stopAll?.();
 console.log('semi ok');
+// the Boolean Widgets (Rule 1.20, 2026-11-09) run here, so package.json's one-line test list is left alone beside other open changes
+await import('./boolwidget.test.js');
 process.exit(0);

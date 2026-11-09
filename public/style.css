@@ -240,6 +240,11 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el .ledbtn { flex: 1; align-self: center; aspect-ratio: 1; max-height: 70%; min-height: 24px; margin: 2px 0 6px; border-radius: 50%; border: 3px solid #444; background: radial-gradient(circle at 35% 30%, #6a2b2b, #2a0d0d 70%); box-shadow: 0 3px 0 #111; }
 .el.on .ledbtn { background: radial-gradient(circle at 35% 30%, #ffb3a8, #ff3b2a 45%, #a3150b 80%); box-shadow: 0 0 14px 4px rgba(255, 59, 42, .7); }
 .el.pressed .ledbtn { transform: translateY(2px); box-shadow: 0 1px 0 #111, 0 0 14px 4px rgba(255, 59, 42, .7); }
+/* Boolean Widget Styles (Rule 1.20): Slider and Lighted Button reuse the slider and the lamp above; the Checkbox is a tick box */
+.el.bs-slider .vl, .el.bs-checkbox .vl, .el.bs-lighted .vl { font-size: 13px; flex: none; }
+.el .bschk { flex: none; align-self: center; width: 26px; height: 26px; margin: 2px 0 6px; border: 3px solid #555d66; border-radius: 4px; background: #FAFAFA; position: relative; }
+.el.on .bschk { border-color: var(--ok); background: var(--ok); }
+.el.on .bschk::after { content: "\2713"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #FAFAFA; font-weight: 700; font-size: 18px; }
 .el.k-pushbutton { touch-action: none; }
 /* BruControl-style elements */
 .el.stretch { background-size: 100% 100%; }
