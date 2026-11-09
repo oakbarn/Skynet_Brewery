@@ -7456,7 +7456,7 @@ function hydroFields(it) {
   const m = hydroModel(it), conn = hydroConnection(it), g = k => { const why = hydroGrey(it, k); return why ? { grey: why } : {}; };
   const wifiAt = `${location.origin}/api/hydrometer`;
   if (hydroWeb(it)) it.api = 'get';      // through the web: .API on (Read only), shown greyed out in its Database and .API
-  return [['device', 'Interface (board: the Brain, or the ESP32 that hears it)', 'dev'], ['channel', 'Port (virtual: 200, 201 …)', 'sel', hydroPorts(it)],
+  return [['device', 'Interface (any one: its readings come over Wi-Fi or from a Bluetooth listener. On a Simulator Interface it shows a pretend fermentation until a real reading comes)', 'dev'], ['channel', 'Port (virtual: 200, 201 …)', 'sel', hydroPorts(it)],
     ['_hy', 'Hydrometer', 'head'],
     ['model', 'Template (the kind of hydrometer)', 'sel', HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), true, false, { tip: m.about }],
     ['_about', m.about, 'note'],
@@ -7467,7 +7467,7 @@ function hydroFields(it) {
     ['hwId', 'Hardware ID (mandatory)', 'hwid', null, false, false, { tip: 'Its Name or chip ID, as it sends them (an iSpindel: the Name on its setup page, iSpindel000 to start). Type it, or pick one the Brain heard that no Hydrometer has yet. Never its IP address: a router may change that.', ...g('hwId') }],
     ['cloudKey', 'Cloud key (the maker\'s cloud only)', 'text', null, false, false, { tip: 'The key (token) from the maker\'s app, for the Connection "The maker\'s cloud". Reading through the cloud comes in a later step.', ...g('cloudKey') }],
     ...(conn === 'wifi' ? [['_wifi', `Wi-Fi: on its setup page pick HTTP and send to ${wifiAt} (from your own network; from anywhere else add ?key= and the API key).`, 'note', null, false, false, { keep: true }]]
-      : conn === 'bluetooth' ? [['_bt', 'Bluetooth: the Brain reads it with its own Bluetooth, or an ESP32 near the fermenter does. Reading Bluetooth comes in the next step (until then, the Simulator shows a pretend fermentation).', 'note', null, false, false, { keep: true }]]
+      : conn === 'bluetooth' ? [['_bt', 'Bluetooth: a listener near the fermenter hears it and sends its readings to the Brain: an ESP32 with the ESP32_Hydrometer sketch, or a Raspberry Pi\'s own Bluetooth (firmware/Pi_Bluetooth). A Tilt is found by its Color, a RAPT Pill by its Hardware ID (it shows up in the list once a listener has heard it). Help 170 tells how.', 'note', null, false, false, { keep: true }]]
         : [['_cl', 'The maker\'s cloud: reading through the cloud comes in a later step. Its Cloud key is kept until then.', 'note', null, false, false, { keep: true }]]),
     ['_rd', 'Readings', 'head'],
     ['gravityUnits', 'Gravity units', 'sel', Object.entries(GRAVITY_UNITS)], ['precision', 'Gravity decimals (empty = its Template\'s)', 'num'],
