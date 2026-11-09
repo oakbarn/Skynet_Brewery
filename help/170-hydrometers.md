@@ -32,11 +32,27 @@ On the hydrometer's own setup page, pick **HTTP** and send to the address shown 
 `http://<the Brain's address>:<port>/api/hydrometer`. From your home network nothing else is needed. From anywhere else, add
 `?key=` and the API key (☰ Menu > Settings).
 
-## Bluetooth and the cloud
+## Bluetooth (Tilt, Tilt Pro, Tilt Pro Mini, RAPT Pill)
 
-Reading Tilts and other Bluetooth hydrometers with the Brain's own Bluetooth (or an ESP32 near the fermenter) comes in the next
-step, and the makers' clouds after that. Until then, a Hydrometer on a Simulator Interface shows a pretend fermentation (Simulator
-settings: `{"og":1.056,"fg":1.012,"hours":96,"tempF":66}`).
+A Bluetooth hydrometer is heard by a **listener** near the fermenter, which sends what it heard to the Brain. Pick one:
+
+- **An ESP32** (any ESP32 with Bluetooth, a few dollars). Open `firmware/ESP32_Hydrometer/ESP32_Hydrometer.ino` in the Arduino IDE,
+  type your Wi-Fi name and password and the Brain's address and port at the top, pick **Tools > Partition Scheme > Huge APP**, and
+  Upload. This works whatever the Brain runs on, Windows too.
+- **A Raspberry Pi's own Bluetooth** (the Brain itself, or another Pi). Copy the `firmware/Pi_Bluetooth` folder to the Pi and run
+  `sudo bash install.sh`. On another Pi, put the Brain's address in its `settings.json`.
+
+Then set the Hydrometer's **Connection** to **Bluetooth**. A Tilt is found by its **Tilt Color**. A RAPT Pill is found by its
+**Hardware ID** (its Bluetooth address): once a listener has heard it, the Hardware ID box offers it.
+
+You can have more than one listener (one in each fermentation room). Bluetooth goes a few meters through a steel fermenter, more
+through plastic or glass.
+
+## Before a reading comes, and the cloud
+
+A Hydrometer on a Simulator Interface shows a pretend fermentation (Simulator settings:
+`{"og":1.056,"fg":1.012,"hours":96,"tempF":66}`). Once a real reading comes, the pretend one stops for it. Reading through the makers'
+clouds (RAPT, BrewBrain, PLAATO) comes in a later step.
 
 ## What it reads
 
