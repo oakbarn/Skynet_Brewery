@@ -6331,6 +6331,11 @@ function displayText(e, v, k, shown) {
   return shown;
 }
 const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device shows on the Tab. The first choice shows them all, as before. A Process can change it while it runs: Flow_1.display = "Total" ("" puts back this setting). For a Flow meter it is also its Value (BruControl\'s Primary Value): Flow_1.value is its Total when Total is picked.';
+// Alarm Email Notification (OakBarn Brewery, 2026-11-09, Rule 7.17): one email each time the Alarm goes off, through the mail server
+// picked in Settings > Sending codes (Gmail, Outlook.com or any other)
+const EMAIL_TIP = 'Email Notification (Rule 7.17): an email each time this Alarm goes off (at most one a minute). It goes through the mail server you picked in Settings > Sending codes: Gmail, Outlook.com or any other, never a built-in one. Gmail needs an app password there. A Process turns it on or off: alm_Boil.email = true.';
+const EMAIL_FIELDS = [['emailNotify', 'Email Notification (an email when it goes off)', 'bool', null, false, false, { tip: EMAIL_TIP }],
+  ['emailTo', 'Email to (commas between; empty = every user with an email in My account)', 'text', null, false, false, { tip: EMAIL_TIP }]];
 const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display (what it shows)', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
@@ -6464,6 +6469,7 @@ const F = {
 };
 // Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
 for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
+F.alarm.push(...EMAIL_FIELDS);      // Alarm Email (Rule 7.17)
 // A pipe or hose has a Label like everything else (Rule 1.21), but no editable Position or Size (Fritz, 2026-11-03, Rule 5.21):
 // its place and size come from where it is drawn, so X, Y, Width and Height are hidden. Its Name is given by Skynet (Pipe_1, Hose_1).
 const PIPE_HIDE_FIXED = true;       // false: show X, Y, Width and Height greyed out instead of hiding them
@@ -6597,6 +6603,7 @@ function alarmWidgetFields(it) {
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
     A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
+    ...EMAIL_FIELDS,
     ['_gb', 'Graphic', 'box'],
     ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
       ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],

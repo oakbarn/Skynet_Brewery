@@ -1951,6 +1951,17 @@ or Active", "if a new alarm is enetered in the chain auto reorder takes place").
 Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand).
 Help 172.
 
+7.17 **Alarm Email Notification: an Alarm can send an email** (OakBarn Brewery, 2026-11-09: "Alarm e mail notification could be
+built in but have user what e mail server on his computer he wants to use. The almost always default to the Microsoft internal
+server when I only use gmail"). An Alarm Widget (Basic Skynet or User) has **Email Notification** (a switch, Off to start) and
+**Email to** (in the Alarm Widget Properties, below the Sound boxes). With it On, each time the Alarm goes off Skynet sends one email (at most one a
+minute for each Alarm). **Email to** takes one or more addresses with commas between them; left empty, the email goes to every
+user who has an email in My account. The email is sent through the **mail server the user picks** in Settings > Sending codes and
+Alarm emails (Gmail, Outlook.com or any other, with an app password); Skynet never uses a built-in or Microsoft one. A Process can
+turn it on or off with **`alm_Brew.email = true`** / **`false`**. If no mail server is set up or the email fails, the Process log
+says so in plain words. Both programs: the BruControl Import keeps each Alarm's Email Notification switch (BruControl's own mail
+settings are not copied; the user picks the mail server in Skynet). Help 175.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3433,5 +3444,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
+- 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
