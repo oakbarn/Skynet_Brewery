@@ -36,7 +36,10 @@ An Instance is more like **Bob** of the Bobiverse (*We Are Legion*) than a Clone
 
 ## In a Process
 
-An Instance's name is the vessel's name, a dot and the Heating Element's name. Capitals don't matter.
+Every Device built into a Vessel Device (a Heating Element, Probe or Thermowell) is called by the vessel's name, a dot and its own
+name: `HLT_Vessel.BM_8_HE_HLT~element_BR = On` (Skynet Rule 5.31). Its plain name alone is refused, so a Process always says which
+vessel it means. An Instance's own name already is the vessel's name, a dot and the Heating Element's name. Capitals don't matter.
+When a Device or a vessel is renamed, every Process is changed for you.
 
 | Line | What it does |
 |---|---|

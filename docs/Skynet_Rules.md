@@ -1341,6 +1341,13 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   - **Once it is built and saved** (on a Tab, not the 🔨 Build Tab, and the layout saved), **its IPs (Place), parts and HERMS coil
     can't be changed and it can't be un-bundled: there is no way back** (Fritz: "No Way to Back Out Once Built and Saved"). Its
     Name, Labels, Gallons, Tab and place can still change.
+  - **A heater integrated into a Vessel Device becomes an inseparable part of that Device** (OakBarn Brewery, 2026-11-09). It has its
+    own Properties that are first inherited from its Template, but once on a Vessel Device those Properties are unique to the Vessel
+    Device and never have any connection with any other Instance of that heater, EXCEPT: **Last One Rules!** See Rule 6.28. You can
+    only look at and edit its Properties on its Vessel Device. **In a Process it is VesselDeviceName.IntegratedDeviceName**
+    (`HLT_Vessel.BM_8_HE_HLT~element_BR = On`, `HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 152`, any capitals), and so is a Probe
+    or Thermowell built into it; its plain name alone is refused in a Process. A rename of the Device or the vessel changes every
+    Process for you. Its Interface and Port are greyed out in the Vessel Device's Properties too (Rule 6.1).
   - The **RIMS tube Template is a kind of Vessel Device Template** (Fritz, 2026-11-05: "the Element and Probe are set and Locked.
     Just the shape and # of available IPs are fixed and shown"); it keeps its own Properties (Rules 5.3, 18.10).
   - *Replaced for a Vessel Device:* "a user can change the Place sliders on their copy" and "A Placed Probe or Element links a
@@ -1544,24 +1551,20 @@ Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
-Major difference from BruControl"). No two Devices share a port on an Interface, whatever their Device Types. A heater's ways of
-control are one Heating Element's heating methods (Rule 6.19), not more Devices. The Available Ports lists never offer a port in
-use, and saving a Device on a used port is refused and says which Device has it.
-- **Once a Port is picked, it is taken** (Fritz, 2026-11-07: "Once a Port Is Selected, it is taken. So the method of choosing a
-  Port has to be addressed as well"): every way of choosing a Port (the Add box, Properties, a Vessel Device's or a Valve Tee's
-  parts, a RIMS tube, and the older typed Pin boxes, whose list now holds only free Ports) offers only the free Ports on that
-  Interface that fit the Device, plus the Device's own. A Port picked by one Device drops off every other list.
+Major difference from BruControl"; reworded by OakBarn Brewery, 2026-11-09). **No two Devices ever share a Port on an Interface,**
+whatever their Device Types. A heater's ways of control are one Heating Element's heating methods (Rule 6.19), not more Devices. The
+Available Ports lists never offer a Port that is assigned, and saving a Device on a used Port is refused and says which Device has it.
+- **Once a Port is picked, it is taken:** it can never be picked again. It never shows up on a list to be picked, because only free,
+  fitting Ports fill any pick list.
+- **A Template, Device or Integrated Device can NEVER change its Interface or Port.** Once set, they still show in its Properties,
+  greyed out: you can see them but not change them.
+- **Quibbling exception: Integrated Instances and Clones:**
+  1. An Integrated Device inherits its Properties from the Template and then becomes independent, but it still follows this Rule. As
+     long as a Template, a Device or an Integrated Device uses an Interface and Port, that Port is never available to be used ANYWHERE.
+     See Rule 6.28, Last One Rules.
+  2. Clones are simply duplicates of the Parent, except: see Rule 6.28, Last One Rules.
 - **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
   (for example a pump's on/off and its PWM speed) is listed in the Import notes so the brewer can keep one.
-- **Exception: Integrated Instances** (OakBarn Brewery, 2026-11-09: "It is not a Clone but an Instance ... An Integrated Device
-  Inherits it Properties from the Template and then becomes independent"; "change the Rule to allow an Integrated Instance (And there
-  could be more than a Single Integrated Instance ... none of them can change the Interface Port"; "last one on or off Rules").
-  Building a Heating Element that is already on a Tab into a Vessel Device makes an **Integrated Instance** of it: a copy of its
-  Properties on **the same Interface Port**, independent from then on (its own On / Off, heating method, Setpoint and look). The one on
-  its Tab stays. There can be more than one Instance. An Instance's Interface and Port are greyed out for good. Its name is
-  `VesselName.DeviceName` (`HLT_Vessel.hE_1`), and a Process uses it so: `HLT_Vessel.hE_1 = on`, `HLT_Vessel.hE_1.setpoint = 152`
-  (any capitals); the one on the Tab keeps its plain name (`hE_1 = off`). Which one has the Port follows the **Last One Rules**
-  (Rule 6.28). Nothing else may share that Port. Help 180.
 *Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
 one heater). The last one turned on wins and the others turn off."
 
@@ -3578,6 +3581,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off. Reworded the same day (OakBarn Brewery: "Old Ways will never be depreciated in any Update ... An update may change things but never require old methods be updated to a new standard"): nothing old until the first Public Production (trial productions count as before it); after it, an update never takes away an old way or forces an old item up to a new standard, and an item left alone works as before.
 - 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
+- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")

@@ -65,5 +65,13 @@ store.setProp('BK_Vessel.hE_1', 'hidden', true, 'script');
 assert.equal(store.getProp('BK_Vessel.hE_1', 'hidden'), false, 'name.hidden = true does nothing to it');
 store.setProp('hE_1', 'hidden', true, 'script');
 assert.equal(store.getProp('hE_1', 'hidden'), true, 'the one on its Tab still has it');
+// Rule 5.31: a Device built into a Vessel Device is VesselName.DeviceName in a Process; its plain name alone is refused
+store.config.graphics = [{ id: 'v1', name: 'HLT_Vessel', vdevice: true }, { id: 'v2', name: 'BK_Vessel', vdevice: true }];
+const plain = { name: 'BI_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 44, integratedIn: 'v1', integratedAs: 'ip:lElement', vpKind: 'element' };
+store.els.set('BI_1', plain); store.rt.set('BI_1', { state: false, visibility: 'visible' });
+assert.equal(store.now('hlt_vessel.bi_1'), 'BI_1');
+assert.ok(eng.check('BI_1 = on').errors[0]?.msg.includes('HLT_Vessel.BI_1'), 'the plain name is refused');
+assert.deepEqual(eng.check('HLT_Vessel.BI_1 = On\nHLT_Vessel.BI_1.setpoint = 150').errors, []);
+assert.ok(eng.check('BK_Vessel.BI_1 = on').errors.length, 'not built into that vessel');
 clearTimeout(store._persistTimer);
 console.log('integrated instance tests passed');
