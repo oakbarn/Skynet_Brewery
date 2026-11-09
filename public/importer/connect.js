@@ -89,6 +89,8 @@ const SIGNALS = [PICK, ['v5', 'Analog 0-5 V'], ['v33', 'Analog 0-3.3 V'], ['v10'
 const PRESSURE = [PICK, ['transducer', 'Pressure transducer (0.5-4.5 V)'], ['transmitter', 'Pressure transmitter (4-20 mA)'], ['i2c', 'I2C pressure sensor'], ['switch', 'Pressure switch (on / off)'], ['spunding', 'Spunding valve with a sensor'], USER];
 // the Panel's Hydrometer Templates (Rule 6.25, public/hydrometer.js). A Glass hydrometer or a Refractometer is read by hand: in Skynet that
 // is the Process command take_reading, not a Device (OakBarn Brewery, 2026-11-09: "Glass and Refractometer Readings are external")
+// a Tilt, Tilt Pro or Tilt Pro Mini: told apart by its Color (Rule 6.25)
+export const isTiltKind = k => HYDRO_MODELS[k]?.idBy === 'color';
 const HYDROS = [PICK, ...HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), USER];
 const TILT_COLORS = [PICK, ...TILT_COLOR_NAMES.map(c => [c, c])];
 const VOLUMES = [PICK, ['scale', 'Load cells (a scale)'], ['ultrasonic', 'Ultrasonic level sensor'], ['pressureLevel', 'Pressure (liquid height) sensor'], ['float', 'Float level sensor (many steps)'], ['flowTotal', 'Flow meter total'], ['sight', 'Sight glass (read by hand)'], USER];
@@ -136,8 +138,12 @@ export const PART_PAGES = [
     { k: 'sensor', name: 'Sensor type', list: PRESSURE },
     { k: 'range', name: 'Highest pressure it reads (psi or bar)', number: true }] },
   { kind: 'hydro', title: 'Hydrometers', one: 'Hydrometer', fields: [
-    { k: 'hydro', name: 'Hydrometer type', list: HYDROS }, { k: 'color', name: 'Tilt Color (a Tilt only)', list: TILT_COLORS, optional: true },
-    { k: 'hwId', name: 'Hardware ID (not a Tilt: its Name or ID)', text: true, optional: true }] },
+    { k: 'hydro', name: 'Hydrometer type', list: HYDROS },
+    // Tilt Color and Hardware ID are mandatory (OakBarn Brewery, 2026-11-09): a Tilt must have its Color, every other kind its
+    // Hardware ID; the one its type does not use is greyed out. need(row): true = mandatory, false = greyed, undefined = no type yet
+    { k: 'color', name: 'Tilt Color (a Tilt only)', list: TILT_COLORS, optional: true, need: d => d.hydro ? isTiltKind(d.hydro) : undefined,
+      blank: 'The Color for a Tilt cannot be left blank. Choose a Color.' },
+    { k: 'hwId', name: 'Hardware ID (not a Tilt: its Name or ID)', text: true, optional: true, need: d => d.hydro ? !isTiltKind(d.hydro) : undefined }] },
   { kind: 'volume', title: 'Volume Meters', one: 'Volume Meter', fields: [
     { k: 'meter', name: 'How it measures', list: VOLUMES },
     { k: 'most', name: 'Most it reads (Gallons or Liters)', number: true }] },

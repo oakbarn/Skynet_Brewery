@@ -20,6 +20,9 @@ A Tilt's **Tilt Color** must be picked, and every other kind's **Hardware ID** m
 Hydrometer, so two Hydrometers can never have the same one: one Tilt of each color (a Red Tilt and a Red Tilt Pro would look the
 same), and a different Name on each iSpindel. Skynet never goes by a hydrometer's IP address, because your router may change it.
 
+Leave a Tilt's **Tilt Color** blank and a pop-up says **The Color for a Tilt cannot be left blank**, then takes you back to the
+Color box. The Importer's Hydrometers page does the same, and it greys out the box a type does not use.
+
 You don't have to look a Hardware ID up. Turn the hydrometer on and wait for its first reading. The **Hardware ID** box then offers
 every one the Brain heard that no Hydrometer has yet.
 
