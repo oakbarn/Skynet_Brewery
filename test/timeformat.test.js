@@ -59,3 +59,4 @@ const g = Object.fromEntries(find(r).map(x => [x.name, x]));
 assert.deepEqual([g.gblT_Left.widget, g.gblT_Left.showAs], ['timeWidget', 'mm'], 'a Time Global will be a Time Widget with its Format');
 assert.deepEqual([g.Clock.widget, g.Clock.showAs], ['dateTimeWidget', undefined]);
 console.log('time format tests passed');
+await import('./gaugesettings.test.js');

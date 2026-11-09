@@ -655,8 +655,21 @@ JustGage) and Fritz picked **Skynet's own drawings** (SVG), from his own idea pi
    **Frame**: Fritz's own Timer frames (Timer_Overlay pictures, made by him in Paint), drawn by Skynet in his 3 shapes (**Rounded
    corners**, **Square corners**, **Square top, rounded bottom**) with a **Frame color**. Each Timer has **Digits** (hh:mm:ss or
    hh:mm) and **Seconds only in the last minute** (counting down, it shows just SS once under one minute is left).
-3. **The BruControl Import** gives each gauge the closest look: a round or bar gauge becomes the Skynet Dial with BruControl's lowest
+3. **The BruControl Import** gives each gauge the closest look: a round gauge becomes the Skynet Dial (a bar gauge the Skynet Bar, point 4) with BruControl's lowest
    and highest numbers and decimals, a digit gauge LCD digits; the DevExpress style name is kept only as a record.
+4. **Gauge settings like BruControl's, drawn by Skynet**. BruControl's gauges are
+   DevExpress pictures, which are not public. Skynet **never copies DevExpress pictures, code or style names**. Every gauge and
+   style is Skynet's own drawing, or comes from a free open gauge design. **The BruControl Import** sets each gauge to the closest
+   Skynet look and style, keeps the lowest, highest and tick numbers, and saves the DevExpress style name only as a record.
+   Skynet offers the same kinds of gauge settings BruControl has: the **lowest and highest number**, the number of **large and
+   small tick marks**, a **full or half round dial**, a **straight bar** (up and down, or side to side), and a few **color
+   styles**. These settings are common to most gauge programs and are not anyone's own. Gauge pictures on computers are made to
+   look like real hardware gauges, and those looks have become generic stock pictures: a clock can look like a clock, and nobody
+   owns that idea. In some cases Skynet uses CC0 files, which are free for public use. Under Skynet's MIT License, you are free
+   to use Skynet's pictures in any way you choose. Skynet is Open Source! 😀
+   *Built (2026-11-09):* Dial shape (Standard, Full round, Half round), Large and Small tick marks, the **Skynet Bar** (`bar`;
+   up and down or side to side) and 8 Skynet color styles (also for LCD and LED digits), in the Dial ⬢; `name.valueType = "Bar"`.
+   The Import maps each BruControl gauge's settings and style to the nearest (thread "Find BruControl properties missing in Skynet").
 (thread "Build our own temperature gauge and timer looks", Help 152)
 
 2.41 **Properties hotspots on a Vessel Device** (Fritz, 2026-11-07: "A Hotspot on a Vessel device to bring up its property dialog";
@@ -3608,6 +3621,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 2.45, Time and DateTime formats (OakBarn Brewery): Shows as on Time, DateTime and Code Value Widgets, more Digits on a Timer, `.showas` takes any format; the Importer keeps a Timer's Format and a time Global's Format; Help 176. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Rule 2.40 point 4 built (OakBarn Brewery's approved wording): gauge settings drawn by Skynet (Dial shape, tick marks, the Skynet Bar, Skynet color styles); the Import maps BruControl gauges to the nearest; Help 152. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
