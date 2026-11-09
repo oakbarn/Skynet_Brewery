@@ -3,10 +3,10 @@
 The **Vessel Widget** is a class of vessel (Skynet Rule 5.31). It starts from **one Skynet Template, Skynet_Vessel_Widget**, that
 has every spot a brew vessel can have, each with a **Place** slider:
 
-- **15 IPs**, laid out from Fritz's Vessel IP Template drawing (2026-11-05):
+- **16 IPs**, laid out from Fritz's Vessel IP Template drawing (2026-11-05):
   - **Right side**, top to bottom: **Right Sparge**, **Right HERMS In**, **Right HERMS Out**, **Right Element**
   - **Left side**, the same: **Left Sparge**, **Left HERMS In**, **Left HERMS Out**, **Left Element**
-  - **Left Back Element** and **Right Back Element** (seen from the front, level with the side Elements)
+  - **Left Back Element**, **Center Back Element** and **Right Back Element** (seen from the front, level with the side Elements)
   - **Center Probe**, **Left Tangential** and **Right Tangential**, **Center Outlet**, and the **Center Bottom Outlet** on the
     bottom
 - **one Temperature Probe**, seen from the **Front** (on the Center Probe spot) or as a **Thermowell** (in from the side)

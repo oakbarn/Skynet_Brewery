@@ -1132,3 +1132,10 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .vbPanel .vbTodo { border: 2px solid #e8a33a; }
 .vbPanel .vbLater { opacity: .55; font-size: 13px; }
 .vwPart.vbWait { opacity: .45; }
+/* Pick (Rule 19.5): double-click the spot on a blank vessel */
+.vbPickDlg { max-width: min(460px, calc(100vw - 32px)); }
+.vbPickDlg .vbPickBox { position: relative; width: 300px; max-width: 100%; margin: 8px auto; cursor: crosshair; user-select: none; }
+.vbPickDlg .vbPickBox img { width: 100%; display: block; pointer-events: none; }
+.vbPickDlg .vbPreset { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #e8a33a; opacity: .6; pointer-events: none; }
+.vbPickDlg .vbMark { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid #1D56B0; background: rgba(29,86,176,.35); pointer-events: none; }
+.vbPickDlg .vbMark.hidden { display: none; }

@@ -463,7 +463,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 ### 5.3 Vessel Device (built from a Vessel Widget Template)
 - **Made by:** placing a Vessel Widget Template (Skynet_Vessel_Widget, or a kettle Template built from it). It goes on the Build Tab as a Vessel Device (Skynet Rule 5.31, one exception to Rule 5.7; Help 133).
 - **Or step by step:** Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds it on the Build Tab (Skynet Rule 19.5, Help 166).
-- **Picture:** the Template's (Skynet_Vessel_Widget.svg: 15 IPs from Fritz's Vessel IP Template drawing).
+- **Picture:** the Template's (Skynet_Vessel_Widget.svg: 16 IPs: 15 from the Vessel IP Template drawing, plus Center Back Element).
 - **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
 - **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge_BH`.
 - **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.

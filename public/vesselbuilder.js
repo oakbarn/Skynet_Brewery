@@ -9,16 +9,24 @@ export const VB_TEMPLATE = 'Skynet_Vessel_Widget';
 export const VB_GENERAL = ['HLT', 'Mash Tun', 'Brew Kettle', 'All In One', 'Whirlpool', 'Fermentor', 'Bright Tank'];
 export const vbUserType = t => { const s = String(t ?? '').trim().replace(/^user:\s*/i, ''); return s ? 'USER: ' + s : ''; };
 
-export const VB_DRAIN = [['none', 'None'], ['cOutlet', 'Center Low'], ['cBottomOutlet', 'Center Bottom Drain']];
-export const VB_TANGENTIAL = [['none', 'None'], ['left', 'Left'], ['right', 'Right']];
-export const VB_SPARGE = [['none', 'None'], ['right', 'Right (High)'], ['left', 'Left (High)']];
+// Pick (OakBarn Brewery, 2026-11-09, Rule 5.31 changed, only during the initial build): double-click the spot on a blank vessel. Near a
+// preset IP it takes that IP; anywhere else it makes a User IP on this vessel. A picked spot is kept as 'ip:<its IP key>'.
+export const VB_PICK = ['pick', 'Pick (double-click the spot on the vessel)'];
+export const VB_DRAIN = [['none', 'None'], ['cOutlet', 'Center Low'], ['cBottomOutlet', 'Center Bottom Drain'], VB_PICK];
+export const VB_TANGENTIAL = [['none', 'None'], ['left', 'Left'], ['right', 'Right'], VB_PICK];
+export const VB_SPARGE = [['none', 'None'], ['right', 'Right (High)'], ['left', 'Left (High)'], VB_PICK];
 // where the Thermowell / Probe and the Heating Element go. They make no IP of their own; on an IP they close it like an End Cap.
-export const VB_PROBE_SPOTS = [['none', 'None'], ['center', 'Center'], ['left', 'Left'], ['right', 'Right'], ['backLeft', 'Back Left'], ['backRight', 'Back Right']];
+export const VB_PROBE_SPOTS = [['none', 'None'], ['center', 'Center'], ['left', 'Left'], ['right', 'Right'], ['backLeft', 'Back Left'], ['backCenter', 'Back Center'], ['backRight', 'Back Right'], VB_PICK];
 export const VB_HEAT_SPOTS = VB_PROBE_SPOTS.filter(([k]) => k !== 'center');
-export const VB_HERMS = [['none', 'None'], ['left', 'Left'], ['right', 'Right']];
-const SPOT_IP = { center: 'cProbe', left: 'lElement', right: 'rElement', backLeft: 'lBackElement', backRight: 'rBackElement' };
+// HERMS Coil (no Pick); a crossed coil goes in on one side and out the other (OakBarn Brewery, 2026-11-09, Rule 5.31 changed)
+export const VB_HERMS = [['none', 'None'], ['left', 'Left'], ['right', 'Right'], ['crossRL', 'Outlet Right & Inlet Left'], ['crossLR', 'Outlet Left & Inlet Right']];
+const HERMS_IPS = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'], crossRL: ['lHermsIn', 'rHermsOut'], crossLR: ['rHermsIn', 'lHermsOut'] };
+// the questions that can be Picked, with the name a new User IP gets
+export const VB_PICKABLE = { drain: 'Picked Drain', tangential: 'Picked Tangential Inlet', sparge: 'Picked Sparge', probe: 'Picked Probe spot', heater: 'Picked Element spot', heater2: 'Picked Element spot 2' };
+export const vbPicked = v => typeof v === 'string' && v.startsWith('ip:') ? v.slice(3) : '';
+const SPOT_IP = { center: 'cProbe', left: 'lElement', right: 'rElement', backLeft: 'lBackElement', backCenter: 'cBackElement', backRight: 'rBackElement' };
 const SIDE = { left: 'l', right: 'r' };
-const spotWord = k => VB_PROBE_SPOTS.find(([x]) => x === k)?.[1] || k;
+const spotWord = k => vbPicked(k) ? 'picked spot' : VB_PROBE_SPOTS.find(([x]) => x === k)?.[1] || k;
 
 // a new interview's answers: a 10 gallon vessel (Rule 19.1) with nothing chosen yet but a Center Bottom Drain
 export function vbStart(over = {}) {
@@ -26,23 +34,22 @@ export function vbStart(over = {}) {
     probe: 'none', heater: 'none', heater2: 'none', herms: 'none', ...over };
 }
 // the IP a spot is on
-export const vbSpotIp = k => SPOT_IP[k] || '';
+export const vbSpotIp = k => SPOT_IP[k] || vbPicked(k);
 // Proportional unless both a Height and a Diameter are typed (Rule 19.2)
 export const vbSizeMethod = w => +w.vheight > 0 && +w.diameter > 0 ? 'diameter' : 'proportional';
 // what the Build Tab still needs picked for this vessel: { IP: 'element' | 'thermowell' | 'probe' }
 export function vbWant(w) {
   const out = {};
-  if (w.probe !== 'none' && SPOT_IP[w.probe]) out[SPOT_IP[w.probe]] = w.probe === 'center' ? 'probe' : 'thermowell';
-  for (const k of [w.heater, w.heater2]) if (k && k !== 'none' && SPOT_IP[k] && !out[SPOT_IP[k]]) out[SPOT_IP[k]] = 'element';
+  if (w.probe !== 'none' && vbSpotIp(w.probe)) out[vbSpotIp(w.probe)] = w.probe === 'center' || vbSpotIp(w.probe) === 'cProbe' ? 'probe' : 'thermowell';
+  for (const k of [w.heater, w.heater2]) if (k && k !== 'none' && vbSpotIp(k) && !out[vbSpotIp(k)]) out[vbSpotIp(k)] = 'element';
   return out;
 }
 // the IPs that are Placed; every other spot is Not Placed (Rule 19.4)
 export function vbPlaced(w) {
   const on = new Set(Object.keys(vbWant(w)));
-  if (w.drain && w.drain !== 'none') on.add(w.drain);
-  if (SIDE[w.tangential]) on.add(SIDE[w.tangential] + 'Tangential');
-  if (SIDE[w.sparge]) on.add(SIDE[w.sparge] + 'Sparge');
-  if (SIDE[w.herms]) { on.add(SIDE[w.herms] + 'HermsIn'); on.add(SIDE[w.herms] + 'HermsOut'); }
+  if (w.drain && w.drain !== 'none' && w.drain !== 'pick') on.add(vbPicked(w.drain) || w.drain);
+  for (const [q, word] of [['tangential', 'Tangential'], ['sparge', 'Sparge']]) { const v = w[q]; if (SIDE[v]) on.add(SIDE[v] + word); else if (vbPicked(v)) on.add(vbPicked(v)); }
+  for (const k of HERMS_IPS[w.herms] || []) on.add(k);
   return [...on];
 }
 // what is wrong (plain words), or [] when it can be built
@@ -55,6 +62,11 @@ export function vbProblems(w, { metric = w.units === 'Metric' } = {}) {
   if (w.probe !== 'none' && (w.probe === w.heater || w.probe === w.heater2)) out.push(`The Thermowell / Probe and a Heating Element are both on the ${spotWord(w.probe)}. Pick another spot for one of them.`);
   if (w.heater !== 'none' && w.heater === w.heater2) out.push(`Both Heating Elements are on the ${spotWord(w.heater)}. Pick another spot for the second one.`);
   if (w.heater === 'none' && w.heater2 !== 'none') out.push('Pick the first Heating Element before a second one.');
+  for (const k of Object.keys(VB_PICKABLE)) if (w[k] === 'pick') out.push('Double-click the spot for each Pick (choose Pick again to open the vessel).');
+  const ipOf = k => { const v = w[k]; if (!v || v === 'none' || v === 'pick') return ''; if (vbPicked(v)) return vbPicked(v);
+    return k === 'drain' ? v : k === 'tangential' || k === 'sparge' ? (SIDE[v] || '') + (k === 'sparge' ? 'Sparge' : 'Tangential') : vbSpotIp(v); };
+  const used = Object.keys(VB_PICKABLE).map(ipOf).filter(Boolean);
+  if (new Set(used).size < used.length && !out.some(t => /both on/i.test(t))) out.push('Two things are on the same spot. Pick another spot for one of them.');
   return out;
 }
 // one line for each thing chosen
@@ -62,9 +74,10 @@ export function vbSummary(w, { metric = w.units === 'Metric' } = {}) {
   const word = (list, k) => list.find(([x]) => x === k)?.[1] || k, L = [];
   L.push(`${w.label || '(no Label)'}: ${w.vtype}, ${+w.volume || 0} ${metric ? 'Liters' : 'Gallons'}` +
     (vbSizeMethod(w) === 'diameter' ? `, ${w.diameter} ${metric ? 'cm' : 'in'} across and ${w.vheight} ${metric ? 'cm' : 'in'} high` : ', the plain vessel shape'));
-  if (w.drain !== 'none') L.push(`Drain: ${word(VB_DRAIN, w.drain)}`);
-  if (w.tangential !== 'none') L.push(`Tangential Inlet: ${word(VB_TANGENTIAL, w.tangential)}`);
-  if (w.sparge !== 'none') L.push(`Sparge Arm / Steam Slayer: ${word(VB_SPARGE, w.sparge)}`);
+  const say = (list, k) => vbPicked(k) ? 'a picked spot' : word(list, k);
+  if (w.drain !== 'none') L.push(`Drain: ${say(VB_DRAIN, w.drain)}`);
+  if (w.tangential !== 'none') L.push(`Tangential Inlet: ${say(VB_TANGENTIAL, w.tangential)}`);
+  if (w.sparge !== 'none') L.push(`Sparge Arm / Steam Slayer: ${say(VB_SPARGE, w.sparge)}`);
   if (w.probe !== 'none') L.push(`${w.probe === 'center' ? 'Probe' : 'Thermowell'}: ${spotWord(w.probe)}`);
   for (const k of [w.heater, w.heater2]) if (k !== 'none') L.push(`Heating Element: ${spotWord(k)}`);
   if (w.herms !== 'none') L.push(`HERMS Coil: ${word(VB_HERMS, w.herms)}`);
