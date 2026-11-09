@@ -45,3 +45,4 @@ assert.equal(els.find(e => e.bru?.name === 'Other Alarm').emailNotify, undefined
 assert.ok(JSON.stringify(r).includes('Email Notification on'), 'the Import notes list it');
 clearTimeout(store._persistTimer);
 console.log('alarm email tests passed');
+await import('./timeralarm.test.js');
