@@ -1097,7 +1097,7 @@ const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 
   blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
-// the red and yellow bolt (Fritz, 2026-11-04, Rule 7.15): the steady one is the On overlay every powered valve and pump starts
+// the red and yellow bolt (Fritz, 2026-11-04, Rule 7.16): the steady one is the On overlay every powered valve and pump starts
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
 const OVERLAY_GRAPHICS = [['Lightning bolt, red and yellow (valves and pumps)', BOLT], ['Lightning bolt, flashing red and yellow', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
@@ -2154,7 +2154,7 @@ function almLayers(n, e, v) {
     L.children[0].style.backgroundColor = firstSet(v.backcolor, e.backColor, ALM_COLORS.back);
     L.children[1].style.backgroundColor = firstSet(v.forecolor, e.foreColor, ALM_COLORS.fore);
   }
-  const set = e.setGraphic || '';
+  const set = v.setgraphic === 'none' ? '' : v.setgraphic || e.setGraphic || '';      // an Alarm Chain step can change it (Rule 7.16)
   if (L._set !== set) { L._set = set; L.children[3].style.backgroundImage = set ? cssUrl(set) : ''; }
 }
 
@@ -2271,7 +2271,7 @@ function fillEl(n, e0) {
   // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
   // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
   // (as the Brain makes them, lib/store.js), as shownName does for the Label
-  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '' } : v0, e = withLook(e0, v);
+  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '', setgraphic: '' } : v0, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -2358,7 +2358,7 @@ function fillEl(n, e0) {
     if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
-  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
+  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay === 'none' ? '' : v.imageoverlay || e.imageOverlay);      // 'none': an Alarm Chain step took it off (Rule 7.16)
   if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
   let ov = n.querySelector(':scope > .onov');
   if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
@@ -6431,9 +6431,68 @@ function alarmWidgetFields(it) {
       ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
       : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
         ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
+    ...chainFields(it),
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
 }
+// The Alarm Chain (Rule 7.16, OakBarn Brewery 2026-11-09): one Alarm does the work of many stacked ones. Each step can change the
+// Fore color, Back color, Set Graphic (Layer 2), Active overlay (Layer 1), the sound and (a User Alarm) its picture. Every choice
+// starts on No Change, which skips it: the Alarm keeps what it has. A Process picks a step: alm_Brew.step = 2 (or its name).
+// In the dialog each step is ch<N>_<key>; on Save they become .chain = [{ label, foreColor ... }] (a No Change choice is left out).
+const CHAIN_KEEP = '__keep__', CHAIN_MAX = 20, CHAIN_RE = /^ch(\d+)_(\w+)$/;
+const CHAIN_KEYS = ['label', 'foreColor', 'backColor', 'setGraphic', 'imageOverlay', 'sound', 'backpath'];
+const CHAIN_TIP = 'The Alarm Chain (Rule 7.16): one Alarm can do the work of many stacked ones. Each step can change its colors, pictures and sound; whatever a step leaves on No Change stays as it is. A Process picks a step: alm_Brew.step = 2, or by its name: alm_Brew.step = "Strike". alm_Brew.step = 0 puts back what these Properties say.';
+const chainChoices = list => [[CHAIN_KEEP, 'No Change'], ...list];
+function chainStepPop(it, n) {
+  const basic = isAlmBasic(it), k = x => `ch${n}_${x}`, keep = { keep: true };
+  return { title: `Alarm Chain: Step ${n}`, fields: [[k('label'), 'Step name (a Process can use it: .step = "its name")', 'text', null, false, 'b'],
+    ['_' + k('n'), 'No Change (the first choice in every list) skips that adjustment for this step: the Alarm keeps what it has.', 'note'],
+    [k('foreColor'), basic ? 'Fore color (Layer 3, the bell)' : 'Fore color (its text)', 'color', 'keep'],
+    [k('backColor'), basic ? 'Back color (Layer 4)' : 'Back color (behind the pictures)', 'color', 'keep'],
+    ...(basic ? [[k('setGraphic'), 'Set Graphic (Layer 2, on the bell)', 'sel', chainChoices(almChoices(ALM_SET_RE))], [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'sel', chainChoices(almChoices(ALM_ACTIVE_RE))]]
+      : [[k('backpath'), 'Background picture (Image Path 1)', 'gpick', 'pictures', false, false, keep], [k('setGraphic'), 'Set Graphic (Layer 2)', 'gpick', 'pictures', false, false, keep],
+        [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays', false, false, keep]]),
+    [k('sound'), 'Sound file', 'gpick', 'sounds', false, false, keep],
+    ...(it.kind === 'hop' ? [[k('at'), 'At this time on the timer (hh:mm:ss)', 'text', null, false, false, { tip: 'When its timer reaches this time the Alarm goes to this step and sounds. The steps are kept in the order they go On, and a new step goes into its place. Empty = only from a Process (.step).' }]] : [])] };
+}
+function chainFields(it) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +it.chainSteps || 0));
+  chainNewSteps(it);
+  return [['_cb', 'Alarm Chain', 'box'], ['chainSteps', 'Steps in the Alarm Chain', 'sel', Array.from({ length: CHAIN_MAX + 1 }, (_, i) => [String(i), i ? String(i) : 'None']), true, 'b', { tip: CHAIN_TIP }],
+    ...Array.from({ length: n }, (_, i) => [`ch${i + 1}_label`, `Step ${i + 1}`, 'text', null, false, false, { attr: chainStepPop(it, i + 1) }])];
+}
+// .chain -> the dialog's boxes (every choice a step has not got is No Change)
+function chainToWork(work) {
+  const steps = Array.isArray(work.chain) ? work.chain.slice(0, CHAIN_MAX) : [];
+  work.chainSteps = String(steps.length);
+  steps.forEach((s, i) => { work[`ch${i + 1}_made`] = true; work[`ch${i + 1}_at`] = s.at ?? ''; for (const x of CHAIN_KEYS) work[`ch${i + 1}_${x}`] = x === 'label' ? s.label ?? `Step ${i + 1}` : x in s ? s[x] ?? '' : CHAIN_KEEP; });
+}
+// the dialog's boxes -> .chain (a step's empty name is Step N; No Change choices are left out)
+function chainFromWork(work) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +work.chainSteps || 0)), chain = [];
+  for (let i = 1; i <= n; i++) {
+    const s = { label: String(work[`ch${i}_label`] ?? '').trim() || `Step ${i}` };
+    // a box the dialog left empty (None, Default, or no picture) is "" (readFields drops empty boxes); No Change is left out
+    for (const x of CHAIN_KEYS.slice(1)) { const v = work[`ch${i}_${x}`]; if (v !== CHAIN_KEEP) s[x] = v ?? ''; }
+    const at = String(work[`ch${i}_at`] ?? '').trim();
+    if (at && work.kind === 'hop') { if (!/^\d+(:\d{1,2}){0,2}$/.test(at)) throw new Error(`Alarm Chain Step ${i}: its time "${at}" must be hh:mm:ss (for example 00:15:00)`); s.at = at; }
+    chain.push(s);
+  }
+  // a timer's Alarm Chain is kept in the order its steps go On, and a new step goes into its place (OakBarn Brewery 2026-11-09)
+  const tm = S.config.elements.find(e => e.name === work.timer), down = (tm?.timerType ?? 'countdown') === 'countdown';
+  const secs = s => String(s.at).split(':').reduce((t, x) => t * 60 + +x, 0);
+  const timed = chain.filter(s => s.at).sort((a, b) => down ? secs(b) - secs(a) : secs(a) - secs(b));
+  chain.splice(0, chain.length, ...timed, ...chain.filter(s => !s.at));
+  for (const k of Object.keys(work)) if (CHAIN_RE.test(k)) delete work[k];
+  delete work.chainSteps;
+  if (chain.length) work.chain = chain; else delete work.chain;
+}
+// a new step's boxes start on No Change
+function chainNewSteps(work) {
+  const n = Math.max(0, Math.min(CHAIN_MAX, +work.chainSteps || 0));
+  for (let i = 1; i <= n; i++) if (!work[`ch${i}_made`]) { work[`ch${i}_made`] = true; work[`ch${i}_label`] = `Step ${i}`; for (const x of CHAIN_KEYS.slice(1)) work[`ch${i}_${x}`] = CHAIN_KEEP; }
+}
+
 // Pump Device Properties, the drill-down (Fritz's drawing, 2026-11-03, Rule 18.12): the standard for every Device. The most
 // used fields are on the opening dialog; each red hexagon ⬢ opens a pop-up with the rest, each red up arrow ⬆ a String Entry
 // Dialog. "Pump Properties ⬢" holds Visible, Hidden Locked, the lock, Tab, X, Y, Width, Height and Delete.
@@ -6490,7 +6549,7 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
   return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color', null, false, false, x]] : [])]
     : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
 };
-// the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.15)
+// the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
 const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
@@ -7296,7 +7355,7 @@ const DEVICE_TIPS = {
   vOrient: 'How the valve stands: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The Graphic here and the valve on the Tab follow, and its IPs too.',
   vOrientUser: 'Where the two pipe ends of your picture are: Horizontal, Vertical, or turned 45 degrees Left or Right. Its IPs follow.',
   vToggle: 'What a tap on the valve does: On/Off opens or closes it with one click; Push button is open only while held.',
-  vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.15); the flashing bolt and others are choices, None for no overlay.',
+  vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.16); the flashing bolt and others are choices, None for no overlay.',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
@@ -7314,7 +7373,7 @@ const DEVICE_TIPS = {
   // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
   pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
   pPath: 'The picture file (optional). It is the same picture when on and off; the Overlay shows it is running.',
-  pOverlay: 'Drawn on top of the picture while the output is above 0 %: the steady red and yellow lightning bolt to start (Rule 7.15); None for no overlay.',
+  pOverlay: 'Drawn on top of the picture while the output is above 0 %: the steady red and yellow lightning bolt to start (Rule 7.16); None for no overlay.',
   pStart: 'The output in % when the Brain starts (0 = off).',
   pDec: 'How many decimals its value shows.',
   pSignal: 'What the module on this pin puts out: 0-10 V, 4-20 mA or 0-5 V.',
@@ -7328,7 +7387,7 @@ const DEVICE_TIPS = {
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
   eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off at once, in the method it is in; Push button is on only while held.',
-  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.15).',
+  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.16).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -7467,7 +7526,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
-    const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
+    const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
     const cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa'), known = cols.find(c => c[1] === cur);
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') + (cur === 'transparent' ? ' none' : '') }); sw.style.background = cur;
@@ -7486,8 +7545,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
-    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
-    const pv = h('img', { class: 'gprev' + (v && pic && !isTint(v) ? '' : ' hidden'), ...(v && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
+    const keep = CHAIN_RE.test(key), real = v && v !== CHAIN_KEEP;      // an Alarm Chain step: No Change first (Rule 7.16)
+    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (real && !os.includes(v)) os.push(v);
+    const pv = h('img', { class: 'gprev' + (real && pic && !isTint(v) ? '' : ' hidden'), ...(real && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
     // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
     const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
@@ -7495,14 +7555,14 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     let src = gk === 'sounds' ? 'both' : srcPick();
     const fill = () => {
       const cur = s.value || v || '';
-      s.replaceChildren(h('option', { value: '' }, '(none)'),
+      s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
         ...os.filter(p => p === cur || isTint(p) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
       s.value = cur;
     };
     fill();
     const gs = groups.length ? h('select', { class: 'gpickGroup', title: 'Show the pictures of one group, or All', onchange: ev => { ev.stopPropagation(); g = gs.value; keepGroup(gk, g); fill(); } },
       h('option', { value: '' }, 'All groups'), ...groups.map(([n, l]) => h('option', { value: n, ...(n === g ? { selected: true } : {}) }, l))) : null;
-    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value || isTint(s.value)); if (s.value && !isTint(s.value)) pv.src = media(s.value); } });
+    s.addEventListener('change', () => { const sv = s.value === CHAIN_KEEP ? '' : s.value; if (pic && sv !== '__add__') { pv.classList.toggle('hidden', !sv || isTint(sv)); if (sv && !isTint(sv)) pv.src = media(sv); } });
     const ss = gk === 'sounds' ? null : h('select', { class: 'gpickGroup', title: 'Show the Skynet pictures, your own, or both', onchange: ev => { ev.stopPropagation(); src = ss.value; keepGroup('src', src); fill(); } },
       ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
@@ -8371,6 +8431,7 @@ async function editItem(kind, id) {
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
+  if (kind === 'el' && item.type === 'alarm' && item.alarmClass) chainToWork(work);      // the Alarm Chain's steps as boxes (Rule 7.16)
   if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
   const layer0 = work.layer;
   if (kind === 'el') dbToWork(work);
@@ -8594,6 +8655,7 @@ async function editItem(kind, id) {
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
     const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
+    if (work.type === 'alarm' && work.alarmClass) chainFromWork(work);      // the boxes back to .chain (Rule 7.16)
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
       const frozen = profileFrozen(item);
@@ -11046,7 +11108,7 @@ function otherDefaults() {
     ['Pump size', 'The Pump Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The pump\'s Width and Height', 'Rules 5.27, 5.36'],
     ['Valve size', 'The Valve Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The valve\'s Width and Height', 'Rules 5.29, 5.36'],
     ['Pipe fittings', 'Autosize to pipe on', 'Each fitting\'s Properties', 'Rule 5.14'],
-    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.15'],
+    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.16'],
     ['Glow ring on a new pump', 'Green', 'The pump\'s Properties', 'Rules 7.15, 18.13'],
     ['Pump cover color', 'None', 'The pump\'s Properties', 'Rule 7.13'],
     ['Flow color (In and Out)', 'None', 'Each vessel, pipe and hose', 'Rule 5.21'],
