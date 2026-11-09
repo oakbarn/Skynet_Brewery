@@ -76,7 +76,8 @@ file…**; **⌂ Documents\BruControl** goes back to BruControl's own folder.
 
 **Units** come first: **US** (Gallons, °F, inches, pounds) or **Metric** (Liters, °C, centimeters, kilograms). Every temperature,
 size and volume in the next steps uses them. When your BruControl probes show which one BruControl used (°F or °C), it is picked
-for you and the question asks you to confirm it.
+for you and the question asks you to confirm it. When BruControl does not say, the Units of the Skynet Panel on this computer are
+picked, so you do not type them twice.
 
 **Coming back later.** Every answer you give is kept a moment after you give it. If you close the Importer and come back, pick
 the same config file: the Names page then offers **▶ Carry on where I left off**, or **Start again** (it asks first). Clicking
@@ -288,7 +289,9 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 
 The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Under the question it says: "If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the **Skynet BruControl
 Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has two tick boxes, **Start Skynet Brewer now** (ticked) and **Start the BruControl
-Importer now**: only one can be ticked, so only one program starts. Setup
+Importer now**: only one can be ticked, so only one program starts. When you update and the Importer has kept answers, the update
+page has a tick box, **Also clear the BruControl Importer's saved answers**: tick it to start the Import fresh (your config files,
+Import Copies and saved Schema files are kept). Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)

@@ -1107,6 +1107,9 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 /* the Skynet Dial (Fritz, 2026-11-07, Rule 2.40): an arc with a needle and the reading in digits under it */
 /* Fritz, 2026-11-08: "Have the Dial take up most of the Black Box". The Label floats in the top left corner over the box, so the
    Dial gets the whole box (no row kept for the Label and no padding); a round Dial's corners are empty, so the Label fits there */
+/* Fritz, 2026-11-09: "It does not need a Box to be in. Just have it displayed": no box, no edge, no shadow round the Dial, in
+   every Panel look (Rule 2.39) and even when a Back color was set; Edit layout still shows its dashed edge */
+#ws .el.look-dial, .el.look-dial { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
 .el.look-dial > .nm { position: absolute; top: 0; left: 0; max-width: 100%; z-index: 1; box-sizing: border-box; pointer-events: none; }
 .el.look-dial .vl { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 1px; }
 .el.look-dial .vl .dial { width: 100%; height: 100%; font-family: var(--font); overflow: visible; }

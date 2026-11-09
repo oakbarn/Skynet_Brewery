@@ -595,7 +595,10 @@ Help 155).
 - Then the **Order of the Menu**, as before.
 - **BruControl Import:** checked. It makes Schemas; these settings are the panel's, so an imported Schema loaded in the Panel uses
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
-  sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39).
+  sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39). On the same computer
+  the Import **reads** the Panel's Default settings so nothing is typed twice (OakBarn Brewery, 2026-11-09): the **Units** are picked
+  for it when the BruControl file does not say, and a valve with no Size starts at the **Default pipe size** when one is set. It never
+  changes the Panel's settings.
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -2005,6 +2008,10 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
   last answer is the default. When the answer was Yes, the last Setup page has **Start Skynet Brewer now** (ticked) and **Start the
   BruControl Importer now**: only one can be ticked, so only one program starts (OakBarn Brewery, 2026-11-08: "only one Skynet or Importer start").
+  On an update, when the Importer has kept answers, the update page also has **Also clear the BruControl Importer's saved answers**
+  (unticked, with a warning; OakBarn Brewery, 2026-11-09: "a Choice on the Installer to remove saved importer data and start Fresh").
+  It deletes only `Import\progress.json` and `Import\build`; config files, Import Copies and Schema files are kept. Start Fresh alone
+  never touches the Import folder.
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall never deletes it.
@@ -2112,6 +2119,10 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     (it changes as the Label changes; greyed and made with the Display Name until a Label is typed); a pump model made for one voltage
     fills in its Power; a Heating Element's first Control Type column is **On/Off Only** (ticked: the other methods are greyed);
     **Watts** may be blank; Next on the Names page never clears the kept answers without asking.
+  - **The minor fixes of 2026-11-09** (OakBarn Brewery): only the boxes OakBarn Brewery names are mandatory (Rule 18.33); on Valves
+    **Connection Type** (renamed from Connection) and **Size**. **Set every Valve** at the top of the Valves page sets Connection Type,
+    Size and Voltage on every line at once; a later change at the top sets them all again, and any line can then differ. The Import
+    reads the Panel's Units and Default pipe size on the same computer (Rule 2.42). Setup can clear the Importer's saved answers.
   - **The Importer has its own icon**, clinking beer mugs (listed as CC0 on SVG Repo), in its window and on its shortcuts; the Panel keeps its own.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
@@ -2670,6 +2681,16 @@ BrewZilla 3 pump is a Pump Widget, built in its own thread.
 - **BruControl Import:** it shares the Pump; an imported Pump starts On/Off only with no Model. Guessing a Cold pump from its name
   ("Cool", "Glycol") and joining a BruControl pump's on/off and PWM speed on one Port into one PWM Pump wait for the Importer review.
 
+18.33 **OakBarn Brewery decides which boxes are mandatory** (OakBarn Brewery, 2026-11-09: "Fritz decides what is mandatory and cannot
+be left as pick one or blank ... Volts is just good information to have but would not affect a drawing while Connection Type and size
+might"; "label is always mandatory in any dialog"). In the Panel **and the BruControl Import**:
+- A box is **mandatory** (it cannot be left blank or at **Pick one…**) only when OakBarn Brewery says so. A new box starts **optional**
+  until OakBarn Brewery decides; a box is never made mandatory without asking.
+- The **Label** is always mandatory, in every dialog (Rule 18.28). So are the Name (Rule 18.4) and the Port (Rule 18.28).
+- An optional dropdown reads **Pick one… (optional)**, an optional number box *(optional)*; only a blank mandatory box is marked red.
+- Mandatory now in the Importer's item pages: the Labels; on **Valves** only **Connection Type** and **Size** (Valve type and Voltage are
+  optional); **Watts** is optional (2026-11-08). The other item page boxes stay as they are until OakBarn Brewery reviews them.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -2770,6 +2791,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
 - 2026-11-08: Rule 15.4, the Importer fix list (OakBarn Brewery): answers kept to come back later, Interfaces Import box, no blank boxes, Show and the two Skynet Name columns, the Widget pages (BruControl Timers, Alarms, Toggle Switches, Scripts become Skynet Widgets), new item pages (pH, Pressure, Hydrometers, Volume, Floats, Digital Inputs), no "Not sure", User defined, valve Connection, Sizes and Voltage, more flow meters, Control Type columns with Primary, Heater Element and the Panel's HERMS Coil choices, the clinking beer mugs icon. Help 143 updated, Help 165. Checked against the Skynet Panel: the CPMP Type ID and the Pump's Method (Rule 6.21) are the only Panel changes. (thread "Fix the Importer pages")

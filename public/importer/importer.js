@@ -133,8 +133,10 @@ async function next() {
     $('#unitsNote').textContent = '';
     try {
       const u = (await api('GET', '/api/peek?file=' + encodeURIComponent(state.sel))).units ?? {};
-      if (u.guess) document.querySelector(`input[name=units][value=${u.guess}]`).checked = true;
+      const pu = state.panel?.units;      // the Panel's Units on this computer, when BruControl does not say (no need to type it twice)
+      if (u.guess || pu) document.querySelector(`input[name=units][value=${u.guess || pu}]`).checked = true;
       $('#unitsNote').textContent = u.guess ? `Your BruControl probes use ${u.guess === 'US' ? '°F (Fahrenheit)' : '°C (Celsius)'}, so ${u.guess} is picked. Please confirm it, or change it.`
+        : pu ? `Your BruControl file does not say which units it used, so the Skynet Panel's Units on this computer (${pu}) are picked. Please confirm it, or change it.`
         : 'Your BruControl file does not say which units it used. Please pick one.';
     } catch { /* the question still stands */ }
     // answers kept from last time for this file: offered on top of the page (come back later)
@@ -163,6 +165,7 @@ async function init() {
     state.start = await api('GET', '/api/start');
     $('#ver').textContent = state.start.version ? 'Panel version ' + state.start.version : '';
     state.sel = state.start.file || '';
+    state.panel = await api('GET', '/api/panel-defaults').catch(() => ({}));      // the Panel's own Default settings on this computer
     if (!state.start.windows) $('#pickBtn').title = 'Change folder works on Windows. Type the folder in the box instead.';
   } catch (e) { toast(e.message); }
   show(1);
@@ -398,7 +401,7 @@ async function noBlanks(box) {
   labels.forEach(b => b.classList.add('blankLabel')); fields.forEach(b => b.classList.add('blankField'));
   if (!labels.length && !fields.length) return true;
   await tell('Some boxes are blank', `<p>${labels.length ? `${labels.length} Label${labels.length === 1 ? ' is' : 's are'} blank. Every item needs a Label, because it is part of its suggested Skynet name: type one, or tick the box to copy the Display Name.` : ''}
-    ${fields.length ? `${fields.length} other box${fields.length === 1 ? ' is' : 'es are'} blank or still say <b>Pick one…</b>. Every answer is needed: if none fits, pick <b>User defined</b> and type your own words.` : ''}</p>
+    ${fields.length ? `${fields.length} other box${fields.length === 1 ? ' is' : 'es are'} blank or still say <b>Pick one…</b>. These answers must be filled in: if none fits, pick <b>User defined</b> and type your own words. A box marked <i>(optional)</i> may stay blank.` : ''}</p>
     <p>The blank boxes are marked in red.</p>`);
   (labels[0] ?? fields[0]).focus();
   return false;
@@ -503,12 +506,18 @@ function partState(page) {
   const p = state.parts[page.kind] ??= { items: {}, extras: [] };
   for (const e of found) p.items[itemKey(e)] ??= structuredClone(e.kind === page.kind ? e.guess ?? {} : {});
   if (page.methods) for (const e of found) { const d = p.items[itemKey(e)]; d.methods ??= ['onoff']; d.primary ??= 'onoff'; }
+  // a valve with no Size starts at the Panel's Default pipe size, when one is set on this computer (Rule 2.42: not typed twice)
+  if (page.kind === 'valve' && state.panel?.pipeSize && page.fields.find(f => f.k === 'size').list.some(([k]) => k === state.panel.pipeSize)) {
+    p.setAll ??= { size: state.panel.pipeSize };
+    for (const e of found) { const d = p.items[itemKey(e)]; if (!d.size) d.size = state.panel.pipeSize; }
+  }
   return { p, found };
 }
 function fieldHtml(f, v, attrs, d = {}) {
   const help = f.help ? ` title="${esc(f.help)}"` : '';
   if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;
-  return `<select class="pf" ${attrs} data-f="${f.k}" aria-label="${esc(f.name)}"${help}>${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>` +
+  // a box OakBarn Brewery has not made mandatory may stay at Pick one… (Rule 18.33)
+  return `<select class="pf" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1"' : ''} aria-label="${esc(f.name)}"${help}>${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(!k && f.optional ? 'Pick one… (optional)' : n)}</option>`).join('')}</select>` +
     (v === 'user' ? ` <input type="text" class="pfUser" ${attrs} data-f="${f.k}User" maxlength="60" value="${esc(d[f.k + 'User'] ?? '')}" placeholder="Your words" aria-label="${esc(f.name)}: your own words">` : '');
 }
 // the Control Type columns (OakBarn Brewery, 2026-11-08: "Speed becomes Control Type"): a tick box per method, then the Primary by number
@@ -541,15 +550,20 @@ function partsPage(box) {
       ...page.fields.map(f => fieldHtml(f, x[f.k], `data-x="${i}"`, x)), ...(page.methods ? methodCells(x, `data-x="${i}"`, page.kind) : [])], ['n']));
     box.innerHTML = `<div class="card"><p>Every <b>${esc(page.one)}</b> found on the ports of your Interfaces (boards), on the Tabs you are importing.
         Check each line: give it a <b>Label</b> (or tick to copy its Display Name), and pick every detail. The ones filled in are guesses from
-        the names, so change any that are wrong. Nothing can be left at <b>Pick one…</b>: if no choice fits, pick <b>User defined</b> and type
+        the names, so change any that are wrong. Only a box marked <i>(optional)</i> may stay at <b>Pick one…</b>: for the others, if no choice fits, pick <b>User defined</b> and type
         your own words. An item on the wrong page can be moved with <b>Belongs on</b>. Then <b>Accept</b>.</p>
       ${page.methods ? `<p><b>Control Type:</b> each numbered column is a way to control it; tick every one it may use${page.kind === 'heater'
         ? ' (every Heating Element has its On/Off button to turn it on; tick <b>On/Off Only</b> when nothing else controls it, and the other columns are greyed)'
         : ' (On/Off is always allowed)'}, then pick the <b>Primary</b> one, the method it starts with, by its column number. A method that is not recommended for
         a ${esc(page.one)} unticks itself and says why.</p>` : ''}
-      ${page.kind === 'valve' ? `<p><b>Connection</b> is how the valve is built into your manifold, not the thread on the valve itself. For
+      ${page.kind === 'valve' ? `<p>Only <b>Connection Type</b> and <b>Size</b> must be filled in: they change how the valve is drawn. Use
+        <b>Set every Valve</b> to give every line the same Connection Type, Size and Voltage at once, then change any line that differs.</p>
+        <p><b>Connection Type</b> is how the valve is built into your manifold, not the thread on the valve itself. For
         example, a BSP valve with a BSP to NPT adapter and a female TC on each end is a <b>TC</b> valve, because it joins the manifold with
         Tri-Clamps. <b>Size</b> is the pipe size it joins (any size up to 4 inch, in inches or millimeters, whatever units you picked).</p>` : ''}
+      ${page.setAll ? `<p class="setAll"><b>Set every ${esc(page.one)}:</b> ${page.setAll.map(k => { const f = page.fields.find(x => x.k === k);
+        return `<label>${esc(f.name)} <select class="setAllPick" data-f="${k}" aria-label="${esc(f.name)} for every ${esc(page.one)}">${f.list.filter(([v]) => v !== 'user').map(([v, n]) => `<option value="${esc(v)}"${(p.setAll?.[k] ?? '') === v ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select></label>`; }).join(' ')}
+        <span class="small muted">Every line follows a change here; any line can then be set differently.</span></p>` : ''}
       <p class="howMany"><label><b>How many ${esc(page.title)} do you have?</b> <input type="number" id="howMany" min="${found.length}" max="${found.length + 100}" step="1" value="${found.length + p.extras.length}"></label>
         <span class="small muted">We found ${found.length}. If you have more, type how many: an empty line is added for each one${found.length ? ', named ' + esc(page.one) + ' ' + (found.length + 1) + ' and so on' : ''}. An empty line can be filled with an item from Other items.</span></p></div>
       <div class="card">${found.length || p.extras.length ? `<div class="vesWrap"><table class="itemTable partTable"><tr><th>#</th><th>BruControl name</th>${pickHeads}<th>Belongs on</th><th>Interface and Port</th>${page.fields.map(f => `<th${f.help ? ` title="${esc(f.help)}"` : ''}>${esc(f.name)}</th>`).join('')}${page.methods ? methodHeads(page.kind) : ''}${nameHeads}</tr>
@@ -572,6 +586,13 @@ function partsPage(box) {
     }
     if (ev.type !== 'change' && !t.matches('input[type=text], input[type=number]')) return;
     // move an item to the page it belongs on, or fill an empty line with a free item
+    // Set every valve (OakBarn Brewery, 2026-11-09: "Anytime the top is changed, all the entries follow, but then can individually be different")
+    if (t.classList.contains('setAllPick')) {
+      if (ev.type !== 'change') return;
+      (p.setAll ??= {})[t.dataset.f] = t.value;
+      for (const d of [...Object.values(p.items), ...p.extras]) { d[t.dataset.f] = t.value; delete d[t.dataset.f + 'User']; }
+      p = draw(); saveProgress(); return;
+    }
     if (t.classList.contains('pBelongs')) { (state.kindOf ??= {})[t.dataset.i] = t.value; p = draw(); saveProgress(); return; }
     if (t.classList.contains('pFill')) { if (!t.value) return; (state.kindOf ??= {})[t.value] = page.kind; p.extras.splice(Number(t.dataset.x), 1); p = draw(); saveProgress(); return; }
     const d = target(t); if (!d) return;
