@@ -31,12 +31,16 @@ note private anyway.
 4. Finish the sign-up with a credit card. When it's done you land on the **Azure portal** (<https://portal.azure.com>).
 
 ### Step 2. Turn on code signing for your subscription
-1. In the search box at the top of the portal, type **Subscriptions** and open it.
-2. Click your subscription (it's usually called *Azure subscription 1* or *Pay-As-You-Go*).
-3. **Copy the Subscription ID** into your note. (Label it: *Subscription ID*.)
-4. In the left list, open **Settings > Resource providers**.
-5. Search for **Microsoft.CodeSigning**, tick it, and click **Register**. Wait until it says *Registered* (a minute or two;
-   click **Refresh**).
+1. In the search box at the top of the portal, type **Subscriptions** and open it. You see a list with one row,
+   usually called **Azure subscription** (or *Azure subscription 1* or *Pay-As-You-Go*).
+2. **Copy the Subscription ID** from that row into your note (the long code in the **Subscription ID** column; label it
+   *Subscription ID*).
+3. **Click the blue subscription name** (for example **Azure subscription**). A new page opens with the subscription's
+   own list on the left.
+4. In that left list, click **Settings** to open it, then click **Resource providers**.
+   (Can't find it? Type `Resource providers` in the small **Search** box at the top of the left list.)
+5. In the **Filter by name** box, type `CodeSigning`. Click the row **Microsoft.CodeSigning** so it is ticked, then click
+   **Register** at the top. Wait until its Status says **Registered** (a minute or two; click **Refresh**).
 
 ### Step 3. Make the signing account
 1. In the top search box, type **Artifact Signing Accounts** and open it. Click **+ Create**.
