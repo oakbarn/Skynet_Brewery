@@ -103,8 +103,6 @@ Var Stamp
 Var BrewDir
 Var ImporterAdded
 Var OpenImporter
-Var ClearImportBox
-Var ClearImport
 
 ; ---------------------------------------------------------------- Node.js
 ; Puts 1 in $R9 when a new enough Node.js is on this computer.
@@ -202,8 +200,6 @@ FunctionEnd
 ; The page only records the choice in $Choice. Nothing is deleted until the panel is stopped (Section SecMain).
 Function UpdateChoicePage
   StrCpy $Choice "keep"
-  StrCpy $ClearImport 0
-  StrCpy $ClearImportBox ""
   ${IfNot} ${FileExists} "$INSTDIR\server.js"
     Abort   ; a new install: nothing to choose
   ${EndIf}
@@ -232,15 +228,6 @@ Function UpdateChoicePage
   ${NSD_CreateLabel} 12u 107u 96% 18u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are. This is the one already picked."
   Pop $0
 
-  ; The BruControl Importer's saved answers (OakBarn Brewery, 2026-11-09: "a Choice on the Installer to remove saved importer data and
-  ; start Fresh"): a tick box of its own, unticked, shown only when the Importer has kept answers. It works with any of the three
-  ; choices; Start Fresh alone never touches the Import folder.
-  ${If} ${FileExists} "$BrewDir\Import\progress.json"
-  ${OrIf} ${FileExists} "$BrewDir\Import\build\*.*"
-    ${NSD_CreateCheckbox} 0 128u 100% 12u "Also clear the BruControl Importer's saved answers (the Import starts fresh)"
-    Pop $ClearImportBox
-  ${EndIf}
-
   ${NSD_Check} $RadioKeep
   nsDialogs::Show
 FunctionEnd
@@ -255,25 +242,7 @@ Function FindBrewDir
   ${EndIf}
 FunctionEnd
 
-; Clears only what the Importer kept for coming back later: its answers (progress.json) and its Build page work (build).
-; Your config files, Import Copies and saved Schema files in the Import folder are never deleted.
-Function ClearImporterAnswers
-  Delete "$BrewDir\Import\progress.json"
-  Delete "$BrewDir\Import\progress.json.tmp"
-  RMDir /r "$BrewDir\Import\build"
-  DetailPrint "The BruControl Importer's saved answers are cleared: the Import starts fresh."
-FunctionEnd
-
 Function UpdateChoiceLeave
-  StrCpy $ClearImport 0
-  ${If} $ClearImportBox != ""
-    ${NSD_GetState} $ClearImportBox $0
-    ${If} $0 == ${BST_CHECKED}
-      MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Clear the BruControl Importer's saved answers?$\r$\n$\r$\nEvery answer the Importer kept so you could come back later is deleted, with its Build page work. The next Import starts from its first guesses.$\r$\n$\r$\nKept: your config files, Import Copies and saved Schema files in the Import folder.$\r$\n$\r$\nYes: clear them.$\r$\nNo: go back. Nothing is deleted." IDYES +2
-        Abort
-      StrCpy $ClearImport 1
-    ${EndIf}
-  ${EndIf}
   ${NSD_GetState} $RadioUsers $0
   ${If} $0 == ${BST_CHECKED}
     MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Reset all users?$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every user and password$\r$\n   - every sign-in, on every computer and phone$\r$\n   - the recovery code$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your Schemas and settings (config), brew log and saved values (data), Processes (scripts), pictures and sounds (media).$\r$\n$\r$\nThe panel then asks you to make the admin account again.$\r$\n$\r$\nYes: reset all users.$\r$\nNo: go back. Nothing is deleted." IDYES +2
@@ -346,9 +315,6 @@ Section "Skynet Brew Panel" SecMain
   ${If} ${FileExists} "$INSTDIR\server.js"
     StrCpy $Upgrade 1
     StrCpy $Fresh 0
-    ${If} $ClearImport == 1
-      Call ClearImporterAnswers
-    ${EndIf}
     ${If} $Choice == "fresh"
       Call StartFresh
     ${ElseIf} $Choice == "users"

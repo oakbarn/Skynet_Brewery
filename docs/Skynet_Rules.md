@@ -2079,10 +2079,9 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
   last answer is the default. When the answer was Yes, the last Setup page has **Start Skynet Brewer now** (ticked) and **Start the
   BruControl Importer now**: only one can be ticked, so only one program starts (OakBarn Brewery, 2026-11-08: "only one Skynet or Importer start").
-  On an update, when the Importer has kept answers, the update page also has **Also clear the BruControl Importer's saved answers**
-  (unticked, with a warning; OakBarn Brewery, 2026-11-09: "a Choice on the Installer to remove saved importer data and start Fresh").
-  It deletes only `Import\progress.json` and `Import\build`; config files, Import Copies and Schema files are kept. Start Fresh alone
-  never touches the Import folder.
+  Setup never clears the Importer's kept answers (Start Fresh never touches the Import folder): that is done in the Importer itself,
+  with **Clear Page** and **Restart Fresh** (OakBarn Brewery, 2026-11-09: "In the Fresh start of the importer, that is not the [way] it
+  should be done").
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall never deletes it.
@@ -2193,7 +2192,13 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   - **The minor fixes of 2026-11-09** (OakBarn Brewery): only the boxes OakBarn Brewery names are mandatory (Rule 18.33); on Valves
     **Connection Type** (renamed from Connection) and **Size**. **Set every Valve** at the top of the Valves page sets Connection Type,
     Size and Voltage on every line at once; a later change at the top sets them all again, and any line can then differ. The Import
-    reads the Panel's Units and Default pipe size on the same computer (Rule 2.42). Setup can clear the Importer's saved answers.
+    reads the Panel's Units and Default pipe size on the same computer (Rule 2.42).
+  - **Clear Page and Restart Fresh** (OakBarn Brewery, 2026-11-09: "At the Top of the Every Page in the Importer Program a Clear Page
+    that will reset all the answers on that page only and a Restart Fresh that will take you back to the Intro Page and clear all data.
+    A second Chance with both before doing it"): two buttons at the top of every Importer page. **🧹 Clear Page** puts every answer on
+    that page (or that small step of Boards and Tabs) back to how it started, and the other pages keep theirs; it is greyed on a page with
+    no answers. **↺ Restart Fresh** clears every kept answer, for every config file, and goes back to Welcome. Each asks first (**No**
+    changes nothing). BruControl's config file and saved Schema files are never touched.
   - **The Importer has its own icon**, clinking beer mugs (listed as CC0 on SVG Repo), in its window and on its shortcuts; the Panel keeps its own.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
@@ -2881,6 +2886,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 - 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
+- 2026-11-09: Rule 15.4 (OakBarn Brewery): Clear Page and Restart Fresh at the top of every Importer page, each asking first; the Setup tick box that cleared the Importer's saved answers is taken out (it is done in the Importer). Checked against the Panel: no change (Importer only; Setup's Start Fresh still never touches the Import folder). Help 143 updated. (thread "Fix the Importer pages")
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.

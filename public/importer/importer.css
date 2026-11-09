@@ -158,3 +158,6 @@ main input.blankLabel, main input.blankField, main select.blankField { border: 2
 /* Set every valve: the row at the top of the Valves page */
 .setAll { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
 .setAll select { margin-left: 4px; }
+/* Clear Page and Restart Fresh, at the top of every page */
+.pageTools { display: flex; justify-content: flex-end; gap: 8px; padding: 6px 14px 0; }
+.pageTools button { font-size: 0.85rem; padding: 3px 10px; }
