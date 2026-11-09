@@ -5,6 +5,7 @@
 import { startConnect, connectState } from './connectpage.js';
 import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from './connect.js';
 import { parseLabel } from '../naming.js';
+import { vbFromImport } from '../vesselbuilder.js';
 import { glossBold, GLOSSARY } from './glossary.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -299,6 +300,8 @@ function tabsHtml(r) {
 }
 // The Vessels step (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it in columns, and a Manual
 // Valves column the import cannot know (None to start). The answers go with the vessel into the Schema file.
+// 🔨 Build (OakBarn Brewery, 2026-11-09: "go ahead and create it in the Importer"): each vessel is built with the Panel's own Vessel
+// Device Builder on the Build page, starting from these answers; its pickers list the imported Heating Elements and Probes.
 const SPARGE = [['none', 'None'], ['left', 'Upper Left'], ['right', 'Upper Right']];
 const OUTLET = [['none', 'None'], ['low', 'Center Low'], ['bottom', 'Bottom Drain']];
 const MANUAL = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
@@ -313,13 +316,17 @@ function vesselsHtml() {
   return `<div class="card"><p>These are the vessels the Importer found in your BruControl names and Scripts, with what it could tell about each one.
       Type each vessel's <b>Volume</b>, and measure its <b>Height</b> and <b>Diameter</b> (in ${state.units === 'Metric' ? 'Liters and centimeters' : 'Gallons and inches'}).
       Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in
-      BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None. Then <b>Accept</b>.</p>
-    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th></th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater Element</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
+      BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None.</p>
+    <p><b>🔨 Build</b> on a vessel opens the Skynet Panel's own <b>Vessel Device Builder</b> on the Build page, starting from that row's
+      answers. Its Heating Element and Probe pickers list the ones imported from your BruControl file (the row's own are picked first).
+      Build each vessel there, press <b>Save layout</b>, then come back and <b>Accept</b>. <span id="vbNote" class="small muted"></span></p>
+    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th></th><th>Vessel Device Builder</th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater Element</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
     ${vs.map(v => row([
       // the start of this page is the old Your vessels table (OakBarn Brewery, 2026-11-08): rename, Side, remove, Add a vessel
       `<input class="vd vName" data-v="${esc(v.key)}" data-k="name" value="${esc(v.name)}" maxlength="40" title="The vessel's name" aria-label="Vessel name">`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="side" title="Hot Side vessels are joined on Connect your brewery; a Fermenter (Cold Side) has its own questions"><option value="hot"${v.side !== 'cold' ? ' selected' : ''}>Hot Side</option><option value="cold"${v.side === 'cold' ? ' selected' : ''}>Cold Side (Fermenter)</option></select>`,
       `<button type="button" class="vDel" data-v="${esc(v.key)}" title="Remove this vessel (the guess was wrong)" aria-label="Remove ${esc(v.name)}">✖</button>`,
+      `<button type="button" class="vBuild primary" data-v="${esc(v.key)}" title="Build ${esc(v.name)} in the Vessel Device Builder on the Build page, starting from this row's answers">🔨 Build</button>`,
       // the vessel's size (OakBarn Brewery, 2026-11-08): its Volume, and its Height and Diameter measured, in the units picked at the start
       ...[['volume', 'How much it holds'], ['vheight', 'Its height, measured'], ['diameter', 'Its diameter (across), measured']].map(([k, tip]) =>
         `<input type="number" class="vd num" data-v="${esc(v.key)}" data-k="${k}" min="0" step="any" value="${esc(v.details?.[k] ?? '')}" title="${tip}, in ${k === 'volume' ? (state.units === 'Metric' ? 'Liters' : 'Gallons') : (state.units === 'Metric' ? 'centimeters' : 'inches')}" aria-label="${esc(v.name)} ${k === 'vheight' ? 'height' : k}">`),
@@ -335,6 +342,16 @@ function vesselsHtml() {
       `<select class="vd" data-v="${esc(v.key)}" data-k="herms" title="Where this vessel's HERMS coil joins it, as in the Panel${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} HERMS coil">${HERMS.map(([k, n]) => `<option value="${k}"${hermsOf(v) === k ? ' selected' : ''}>${n}</option>`).join('')}</select>${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="motorValve" title="The motorized ball valve on this vessel, from every motorized valve found${v.details?.found?.motorValve ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.parts?.valves ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.motorValve === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.motorValve === x.id && v.details?.found?.motorValve ? ' (found)' : ''}</option>`).join('')}</select>`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div>${add}</div>`;
+}
+// open the Build page with the Vessel Device Builder for one vessel (its answers ride in the address, #vb=)
+async function buildVessel(v, b) {
+  if (!v) return;
+  const note = $('#vbNote'); b.disabled = true; if (note) note.textContent = 'Starting the Build page…';
+  try {
+    const r = await api('POST', '/api/build/open', { keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
+    const w = window.open(`${r.url}&vb=${encodeURIComponent(JSON.stringify(vbFromImport(v, state.units)))}`, 'skynetBuild');
+    if (note) note.textContent = w ? `${v.name}: the Vessel Device Builder is open in its own window.` : 'Your browser blocked the window: allow pop-ups for the Importer, then click again.';
+  } catch (e) { if (note) note.textContent = e.message; } finally { b.disabled = false; }
 }
 // The items on each Interface (OakBarn Brewery, 2026-11-08: "Insert a New Page after the Tab Page for the Elements associated with an
 // Interface are all Listed"): one table per Interface (board), each item by its port, with its BruControl name, what it becomes in
@@ -761,6 +778,8 @@ function sub5(which) {
     };
     box.onclick = e => {
       const vs = state.connect.parts.vessels;
+      const vb = e.target.closest('.vBuild');
+      if (vb) { buildVessel(vs.find(v => v.key === vb.dataset.v), vb); return; }
       if (e.target.closest('#vAdd')) {
         let n = vs.length + 1; while (vs.some(v => v.key === 'V' + n)) n++;
         vs.push({ key: 'V' + n, name: 'Vessel ' + n, side: 'hot', details: { outlet: 'bottom', sparge: 'none', tangential: 'no', herms: 'none', manualValve: 'none', motorValve: '', heater: null, probe: null, found: {} } });

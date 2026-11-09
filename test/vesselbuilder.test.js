@@ -2,7 +2,7 @@
 // Device's Placed IPs and the Heating Elements and Thermowell still to be picked; plain words say what is wrong.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList } from '../public/vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList, vbFromImport, vbRealGallons } from '../public/vesselbuilder.js';
 
 assert.ok(fs.existsSync(`templates/vessel/${VB_TEMPLATE}.json`), 'it builds from the Vessel Widget Main Template');
 assert.ok(VB_GENERAL.includes('HLT') && VB_GENERAL.includes('Fermentor'));
@@ -56,6 +56,7 @@ assert.equal(pt.upright, true); assert.deepEqual(Object.keys(pt.ipPos), ['start'
 // a Vessel Device's parts (OakBarn Brewery, 2026-11-09, Rule 18.31): their own Properties like an independent Device; a section each
 // in the vessel's Properties, greyed out when None; a double-click or long press on the part opens the part, never the vessel
 const app = fs.readFileSync('public/app.js', 'utf8');
+assert.ok(app.includes('(the Three Vessel sample\'s too) is not listed'), 'built-in parts are never offered');
 assert.ok(app.includes("if (isVpDrill(it)) return vpPartFields(it, item);"), 'the part opens its own Device Properties');
 assert.ok(app.includes("isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item)"), 'titled like a Heating Element of its own');
 assert.ok(app.includes("...(vdev ? vpSections(it) : []),"), 'a section per part in the Vessel Device Properties');
@@ -75,4 +76,18 @@ assert.match(vbChainProblems(['primingTee'], 'h', 'tangential').join(' '), /can 
 assert.deepEqual(vbChainProblems(['elbow', 'elbow', 'tee'], 'h', 'sparge'), []);
 assert.ok(app.includes('function vbChainBuild(') && app.includes("[VB_NEW_MBV, '➕ Add New Motorized Ball Valve…']"), 'the chains and the Valve picker');
 assert.ok(app.includes('const spargeArm = ') || app.includes('function spargeArm('), 'the Sparge Arm drawn inside the vessel');
+// the BruControl Import (2026-11-09): the Vessels step opens the same builder, starting from what the import found
+const imp = vbFromImport({ key: 'MLT', name: 'Mash Tun', details: { volume: '15', outlet: 'low', tangential: 'yes', sparge: 'left', herms: 'outRightInLeft', heater: { id: 'MB_25_HE_Mash_BR' }, probe: { id: 'MB_A0_10KNTC_Mash_BR' } } }, 'US');
+assert.equal(imp.vtype, 'Mash Tun'); assert.equal(imp.volume, 15); assert.equal(imp.drain, 'cOutlet'); assert.equal(imp.tangential, 'right');
+assert.equal(imp.sparge, 'left'); assert.equal(imp.herms, 'crossRL'); assert.equal(imp.heaterPart, 'MB_25_HE_Mash_BR'); assert.equal(imp.probePart, 'MB_A0_10KNTC_Mash_BR');
+assert.deepEqual(vbProblems({ ...imp, workspace: 'Brewhouse' }), []);
+assert.equal(vbFromImport({ key: 'V5', name: 'Hop Pot', details: {} }, 'Metric').units, 'Metric');
+assert.ok(app.includes("have.find(e => e.name === g.vbPre?.[k])"), 'the imported Heater or Probe is picked first');
+const impPage = fs.readFileSync('public/importer/importer.js', 'utf8');
+assert.ok(impPage.includes("import { vbFromImport } from '../vesselbuilder.js';") && impPage.includes('class="vBuild primary"'), 'the Importer opens the same builder');
+// drawn by its real size (2026-11-09): the real volume from Diameter and Height, never the advertised Gallons
+assert.equal(Math.round(vbRealGallons(15.5, 19) * 10) / 10, 15.5);
+assert.equal(Math.round(vbRealGallons(15.5 * 2.54, 19 * 2.54, true) * 10) / 10, 15.5);
+assert.equal(vbRealGallons('', 19), 0);
+assert.ok(app.includes('...vSizeFields(it),       // Gallons and Size'), 'Gallons and Size on an integrated Vessel Device');
 console.log('vesselbuilder tests passed');

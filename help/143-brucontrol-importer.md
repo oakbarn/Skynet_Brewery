@@ -169,6 +169,8 @@ Then you confirm what comes in, in small steps:
    during these steps, so you know each one; the Skynet names are still what is saved (Rule 15.1). **Manual Valves** are not in
    BruControl, so pick None, Manual Ball Valve or Manual Butterfly Valve (None to start). **Accept ▶** goes on; the answers are saved
    with each vessel, and the next page uses them to build each vessel into a Vessel Device.
+   **🔨 Build** on a vessel opens the Skynet Panel's own **Vessel Device Builder** on the Build page, starting from that row's
+   answers; its Heating Element and Probe pickers list the ones imported from your file (Help: Vessel Device Builder).
 7. **Boards and Tabs:** everything else that comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
