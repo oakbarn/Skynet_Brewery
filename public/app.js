@@ -17,10 +17,10 @@ import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, fa
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
+import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
@@ -7253,14 +7253,14 @@ const TIMER_TIPS = {
 };
 // the Timer's Digits (Rule 2.40) and the other Time formats (Rule 2.45)
 const TIMER_FORMATS = [['', 'hh:mm:ss'], ['hm', 'hh:mm'], ...TIME_FORMATS.filter(([k]) => k && k !== 'hh:mm')];
-function timerWidgetFields(it = {}) {
+function timerWidgetFields() {
   const T = TIMER_TIPS;
   return [...wgtHead(T),
     ['timerType', 'Count', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, false, { tip: T.type }],
     ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
     ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
-    ['timerFormat', 'Digits', 'sel', formatChoices(TIMER_FORMATS, it.timerFormat), false, false, { tip: T.format }],
+    ['timerFormat', 'Digits', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
     ...wgtPlace()];
 }
@@ -8724,7 +8724,7 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(it), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
+    if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
     if (it.type === 'chart') return chartWidgetFields();       // Graph Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
