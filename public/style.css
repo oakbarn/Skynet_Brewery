@@ -1184,3 +1184,14 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 
 /* Alarm Chain steps waiting their turn (Rule 7.18): a small badge in the top right corner of the Alarm */
 #ws .el .almWait { position: absolute; top: 2px; right: 2px; z-index: 5; min-width: 18px; padding: 1px 5px; border-radius: 9px; background: #e74c3c; color: #fafafa; font: 700 12px/16px var(--font, sans-serif); text-align: center; pointer-events: none; }
+/* Board Talk (Rule 6.27): every line to and from a board, in plain words */
+dialog.boardTalk { width: min(900px, 96vw); }
+.boardTalk .btList { height: min(55vh, 460px); overflow-y: auto; border: 1px solid var(--line, #444); border-radius: 6px; padding: 4px 6px; margin: 6px 0; font-size: 13px; }
+.boardTalk .btRow { display: grid; grid-template-columns: 6.5em 1.4em minmax(8em, 16em) 1fr; gap: 6px; align-items: baseline; padding: 1px 0; border-bottom: 1px dotted rgba(127, 127, 127, .25); }
+.boardTalk .btRow code { white-space: pre-wrap; word-break: break-all; }
+.boardTalk .btTime { opacity: .6; font-variant-numeric: tabular-nums; }
+.boardTalk .bt-out .btArrow { color: #1e6fd9; } .boardTalk .bt-in .btArrow { color: #1f9d55; }
+.boardTalk .bt-held { opacity: .55; } .boardTalk .bt-note { color: var(--bad, #d93a26); }
+.boardTalk .btWords { opacity: .85; }
+.boardTalk .btLine { width: min(520px, 60vw); font-family: var(--mono); }
+@media (max-width: 600px) { .boardTalk .btRow { grid-template-columns: 5.5em 1.2em 1fr; } .boardTalk .btWords { grid-column: 3; } }
