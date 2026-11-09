@@ -54,6 +54,7 @@ import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { watchAlarmEmails } from './lib/alarmemail.js';
 import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
+import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
@@ -254,6 +255,8 @@ watchAlarmEmails(store, {
   users: () => auth.listUsers(), title: () => store.config.title || 'Skynet',
   log: text => { console.log(text); broadcast('print', { script: 'Alarm Email', text, ts: Date.now() }); },
 });
+// Alarm Digital Outputs (Rule 7.19): up to 2 Devices go ON and OFF with their Alarm
+watchAlarmOutputs(store, { log: text => { console.log(text); broadcast('print', { script: 'Alarm', text, ts: Date.now() }); } });
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
