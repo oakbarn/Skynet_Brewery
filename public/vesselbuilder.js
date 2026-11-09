@@ -113,3 +113,23 @@ export function vbChainProblems(pieces, start, opening) {
   }
   return out;
 }
+// ---- The BruControl Import (OakBarn Brewery, 2026-11-09: "go ahead and create it in the Importer"; "When updating the Vessel Device
+// builder do both unless I say only for Importer or Only for Skynet"). The Importer's Vessels step opens this same builder on its Build
+// page, starting from what the import found for that vessel. Its Heating Element and Probe are the imported ones (heaterPart, probePart:
+// their Skynet names), picked first in the pickers. BruControl does not know which side a Tangential Inlet is on, or where the Heating
+// Element and Probe sit, so those start on a usual spot and are changed in the questions.
+const IMPORT_TYPE = { HLT: 'HLT', MLT: 'Mash Tun', BK: 'Brew Kettle', FV: 'Fermentor' };
+const IMPORT_DRAIN = { none: 'none', low: 'cOutlet', bottom: 'cBottomOutlet' };
+const IMPORT_HERMS = { left: 'left', right: 'right', outLeftInRight: 'crossLR', outRightInLeft: 'crossRL' };
+export function vbFromImport(v, units) {
+  const d = v?.details || {}, name = String(v?.name ?? '').trim();
+  const w = vbStart({ label: name, vtype: IMPORT_TYPE[v?.key] || (VB_GENERAL.includes(name) ? name : 'HLT'), units: units === 'Metric' ? 'Metric' : 'US' });
+  for (const k of ['volume', 'vheight', 'diameter']) if (+d[k] > 0) w[k] = +d[k];
+  if (IMPORT_DRAIN[d.outlet]) w.drain = IMPORT_DRAIN[d.outlet];
+  if (d.tangential === 'yes') w.tangential = 'right';
+  if (d.sparge === 'left' || d.sparge === 'right') w.sparge = d.sparge;
+  w.herms = IMPORT_HERMS[d.herms] || 'none';
+  if (d.heater?.id) Object.assign(w, { heater: 'backCenter', heaterPart: String(d.heater.id) });
+  if (d.probe?.id) Object.assign(w, { probe: 'left', probePart: String(d.probe.id) });
+  return w;
+}

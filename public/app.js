@@ -28,7 +28,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowco
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -173,7 +173,7 @@ async function load() {
   if (S.importBuild && !load.hashTab) {
     load.hashTab = true;
     const pick = () => { const n = decodeURIComponent((location.hash.match(/^#tab=(.+)$/) ?? [])[1] ?? ''); if (n && S.config.workspaces.some(w => w.name === n)) { wsName = n; return true; } return false; };
-    pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } });
+    pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } else vbFromHash(); });
   }
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
@@ -182,6 +182,7 @@ async function load() {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
   startupView();
+  if (S.importBuild) vbFromHash();      // the BruControl Import's Vessels step: build this vessel
 }
 function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
@@ -5475,13 +5476,22 @@ function vbPickSpot(t, w, field) {
   });
 }
 const vbTabs = () => draft.workspaces.filter(x => !x.build).map(x => [x.name, x.id ? `${x.id}: ${x.name}` : x.name]);
-async function vesselBuilder() {
+// the BruControl Import's Vessels step opens the Build page with #vb=<answers> (one vessel): the builder starts from them
+function vbFromHash() {
+  const m = location.hash.match(/^#vb=(.+)$/); if (!m) return;
+  let pre = null; try { pre = JSON.parse(decodeURIComponent(m[1])); } catch { return; }
+  history.replaceState(null, '', location.pathname);
+  if (pre && typeof pre === 'object') vesselBuilder(pre);
+}
+// pre: answers to start from (the BruControl Import's Vessels step: vbFromImport), with heaterPart / probePart, the imported ones
+async function vesselBuilder(pre = null) {
   if (!TPL) await loadTemplates();
   const t = tplOf('vessel', VB_TEMPLATE); if (!t) return toast(`The Skynet Template ${VB_TEMPLATE} is missing`, true);
   if (menuTab) leaveMenuTab();
   if (!editing) setEditing(true);
-  const tabs = vbTabs(), from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
-  const w = vbStart({ workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
+  const tabs = vbTabs(), part = pre && draft.elements.find(e => e.name === pre.heaterPart || e.name === pre.probePart);
+  const from = part?.workspace && tabs.some(([n]) => n === part.workspace) ? part.workspace : buildWs()?.name === wsName ? buildWs().from || wsName : wsName;      // an imported vessel goes on its Heater's or Probe's Tab
+  const w = vbStart({ ...(pre || {}), workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
   const oks = $$('#dlg button[value="ok"]'), tips = oks.map(b => b.title), body = $('#dlgBody');
   const onPick = async ev => {
     const k = ev.target.dataset?.k; if (!VB_PICKABLE[k] || ev.target.value !== 'pick') return;
@@ -5518,6 +5528,8 @@ function vbBuild(t, w) {
     const on0 = vbPlaced(w), mine = (w.userIps || []).filter(u => on0.includes(u.key));      // only the User IPs it uses (Pick)
     if (mine.length) { g.userIps = clone(mine); for (const u of mine) g.ports[u.key] = { installed: true, position: 'VW User ' + u.key, standard: stdShort(g.std || t.std), label: u.name }; }
     const old = clone(g), method = vbSizeMethod(w);
+    const pre = {}; for (const [q, part] of [['heater', 'heaterPart'], ['probe', 'probePart']]) if (w[part] && vbSpotIp(w[q])) pre[vbSpotIp(w[q])] = w[part];      // the imported Heater and Probe, picked first
+    if (Object.keys(pre).length) g.vbPre = pre; else delete g.vbPre;
     Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, volume: +w.volume, x: 240, y: 60, vbOpen: true, vbBuilt: true, vbWant: vbWant(w), vbOpenings: vbOpenings(w), probeStyle: w.probe === 'center' ? 'front' : 'thermowell' });
     if (method === 'diameter') Object.assign(g, { sizeMethod: 'diameter', diameter: +w.diameter, vheight: +w.vheight }); else { delete g.sizeMethod; delete g.diameter; delete g.vheight; }
     [g.w, g.h] = vBox(g, vScaleFor(w.workspace));
@@ -5541,7 +5553,7 @@ function vbAttach(g, k, kind, e) {
   const n = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x) && x.vpKind === 'element').length;
   Object.assign(e, { integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind, workspace: g.workspace }, VB_LOOK[kind === 'element' ? 'element' : 'probe']);
   e.x = Math.round(g.x + g.w * 0.17); e.y = Math.round(g.y + (kind === 'element' ? g.h * 0.36 + n * 70 : g.h * 0.12));
-  delete g.vbWant[k];
+  delete g.vbWant[k]; if (g.vbPre) { delete g.vbPre[k]; if (!Object.keys(g.vbPre).length) delete g.vbPre; }
   const parts = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x)), probe = parts.find(x => x.type === 'temperature');
   if (probe) for (const x of parts) if (x.vpKind === 'element' && !x.input) x.input = probe.name;      // its Heating Element holds the temperature of its probe
   syncVesselPorts(g, null); renderWs(); renderVbPanel();
@@ -5553,7 +5565,7 @@ async function vbPickPart(g, k) {
   const kind = g.vbWant?.[k]; if (!kind) return;
   const what = VB_WHAT[kind], fits = e => !e.integratedIn && !isMfPart(e) && (kind === 'element' ? isHeatElem(e) : e.type === 'temperature');
   const have = draft.elements.filter(fits), NEW = '\0new';
-  const o = { pick: have[0]?.name ?? NEW };
+  const o = { pick: have.find(e => e.name === g.vbPre?.[k])?.name ?? have[0]?.name ?? NEW };      // the imported one first (BruControl Import)
   const r = await dialog(`${g.label || g.name}: the ${what} on the ${g.ports?.[k]?.label || vpName(k)}`, () => [
     ['_p', `Pick an existing ${what}: it is built into the vessel and keeps its name and Port. Or add a new one. One already built into a vessel (the Three Vessel sample's too) is not listed: it stays in its own vessel.`, 'note'],
     ['pick', what, 'sel', [...have.map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`]), [NEW, `➕ Add new ${what}…`]]]], o, false, ['vessel-device-builder']);
