@@ -232,7 +232,7 @@ assert.equal(f.report[0].hidesDropped, 2);
 // the import's choice of style (Rule 16.9): alm = true (default), alm = On, or keep the old "alm" active = true
 assert.equal(rewriteAlarmLines('"alm_X" active = true\nwait "alm_X" active == false', ['alm_X'], 'on').text, 'alm_X = On\nwait alm_X == Off');
 assert.equal(rewriteAlarmLines('"alm_X" active = true', ['alm_X'], 'true').text, 'alm_X = true');
-assert.equal(rewriteAlarmLines('"alm_X" active = true', ['alm_X'], 'keep').text, '"alm_X" active = true');
+assert.equal(rewriteAlarmLines('"alm_X" active = true', ['alm_X'], 'keep').text, 'alm_X = true', 'the old style is never kept');
 
 console.log('alarms tests passed');
 process.exit(0);

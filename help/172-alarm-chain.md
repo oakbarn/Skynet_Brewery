@@ -55,9 +55,8 @@ you can then add more steps (up to 20). The import notes list each one it joined
 
 ## On, Off, true and false
 
-Anything that is true or false can be written either way: `alm_Brew = On` is the same as `alm_Brew = true`. The old BruControl
-`"alm_Brew" active = true` (and `alm_Brew.active = true`) still works, but **only so older Processes keep running**: use the new
-style in new ones. When the BruControl Import turns a Script into a Process it offers to write `alm_Brew = true`, `alm_Brew = On`,
-or keep the old `.active`, and strongly suggests one of the new styles.
+Anything that is true or false can be written either way: `alm_Brew = On` is the same as `alm_Brew = true`. A Process never
+writes `.active`. When the BruControl Import turns a BruControl Script into a Process, it always changes BruControl's
+`"alm_Brew" active = true` into `alm_Brew = true` or `alm_Brew = On`, whichever you pick.
 
 See also [The Alarm Widget](107-alarm-widget) and [Alarms and sound](21-alarms-and-sound).

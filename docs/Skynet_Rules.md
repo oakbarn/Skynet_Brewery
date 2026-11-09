@@ -2487,11 +2487,12 @@ the backup. Help 100 and 157.
 
 16.9 **A true / false choice is written `= true` or `= On`** (OakBarn Brewery, 2026-11-09: "Any Boolean Choice ... alarm.active =
 true can be ... Alarm = On the .active is only for backward compatibilty"). In a Process every true / false item takes
-**`alm_Hops = true`** or **`alm_Hops = On`** (false or Off to turn it off), and `wait alm_Hops == Off` reads it. The old
-**`"alm_Hops" active = true`** and **`alm_Hops.active = true`** keep working **only so older Processes still run**; new Processes
-and Process Templates use the new style. **The BruControl Import** offers, when it turns a BruControl Script into a Process:
-**alm_Hops = true** (the default), **alm_Hops = On**, or **keep the old .active**, and **strongly suggests the new style**
-(lib/fold.js rewriteAlarmLines). The choice is shown on the Importer's Script page once that page is built.
+**`alm_Hops = true`** or **`alm_Hops = On`** (false or Off to turn it off), and `wait alm_Hops == Off` reads it. **`.active` is not written in a Process** (OakBarn
+Brewery, 2026-11-09: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production"): Skynet
+Processes, Process Templates and Help use only the new style. **The BruControl Import** always turns BruControl's
+`"alm_Hops" active = true` into the new style, and offers **alm_Hops = true** (the default) or **alm_Hops = On** (lib/fold.js
+rewriteAlarmLines); the choice is shown on the Importer's Script page once that page is built. *Replaced (2026-11-09):* a third
+choice kept the old `.active`.
 
 ---
 
@@ -3123,7 +3124,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 7.16, the Alarm Chain (OakBarn Brewery): up to 20 steps on one Alarm, each changing Fore, Back, Set
   Graphic (Layer 2), Active overlay, Sound (and a User Alarm's picture), every choice No Change to start; `.step` and `.setgraphic`
   in a Process; a Hop Alarm's steps can have times on its timer and are kept in the order they go On. Added Rule 16.9 (true / false
-  written `= true` or `= On`; `.active` only for older Processes; the Import offers the new style). Help 172. Checked against both
+  written `= true` or `= On`; `.active` is not written in a Process; the Import always writes the new style). Help 172. Checked against both
   programs. (thread "Add look options to Alarm Chain steps")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
