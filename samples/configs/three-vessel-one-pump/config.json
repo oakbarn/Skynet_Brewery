@@ -1517,10 +1517,10 @@
    "device": "Brewery Mega",
    "channel": 24,
    "label": "HLT out",
-   "x": 678,
-   "y": 410,
-   "w": 64,
-   "h": 55,
+   "x": 635,
+   "y": 363,
+   "w": 150,
+   "h": 150,
    "ipIn": "top",
    "ipOut": "bottom",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
@@ -1539,10 +1539,10 @@
    "device": "Brewery Mega",
    "channel": 25,
    "label": "Mash tun out",
-   "x": 1038,
-   "y": 410,
-   "w": 64,
-   "h": 55,
+   "x": 995,
+   "y": 363,
+   "w": 150,
+   "h": 150,
    "ipIn": "top",
    "ipOut": "bottom",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
@@ -1561,10 +1561,10 @@
    "device": "Brewery Mega",
    "channel": 26,
    "label": "Kettle out",
-   "x": 1398,
-   "y": 410,
-   "w": 64,
-   "h": 55,
+   "x": 1355,
+   "y": 363,
+   "w": 150,
+   "h": 150,
    "ipIn": "top",
    "ipOut": "bottom",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
@@ -1583,10 +1583,10 @@
    "device": "Brewery Mega",
    "channel": 27,
    "label": "To mash tun",
-   "x": 858,
-   "y": 450,
-   "w": 64,
-   "h": 55,
+   "x": 815,
+   "y": 363,
+   "w": 150,
+   "h": 150,
    "ipIn": "top",
    "ipOut": "bottom",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
@@ -1605,10 +1605,10 @@
    "device": "Brewery Mega",
    "channel": 28,
    "label": "To kettle",
-   "x": 1228,
-   "y": 450,
-   "w": 64,
-   "h": 55,
+   "x": 1185,
+   "y": 363,
+   "w": 150,
+   "h": 150,
    "ipIn": "top",
    "ipOut": "bottom",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg",
@@ -1627,10 +1627,10 @@
    "device": "Brewery Mega",
    "channel": 29,
    "label": "To fermenter",
-   "x": 1428,
-   "y": 653,
-   "w": 64,
-   "h": 55,
+   "x": 1385,
+   "y": 606,
+   "w": 150,
+   "h": 150,
    "ipIn": "left",
    "ipOut": "right",
    "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
@@ -2341,7 +2341,7 @@
     ],
     [
      710,
-     410
+     363
     ]
    ],
    "width": 10,
@@ -2361,7 +2361,7 @@
     ],
     [
      1070,
-     410
+     363
     ]
    ],
    "width": 10,
@@ -2381,7 +2381,7 @@
     ],
     [
      1430,
-     410
+     363
     ]
    ],
    "width": 10,
@@ -2397,7 +2397,7 @@
    "points": [
     [
      710,
-     465
+     513
     ],
     [
      710,
@@ -2439,7 +2439,7 @@
    "points": [
     [
      1070,
-     465
+     513
     ],
     [
      1070,
@@ -2459,11 +2459,11 @@
    "points": [
     [
      1430,
-     465
+     513
     ],
     [
      1430,
-     482
+     522
     ]
    ],
    "width": 10,
@@ -2479,11 +2479,11 @@
    "points": [
     [
      1448,
-     500
+     540
     ],
     [
      1502,
-     500
+     540
     ]
    ],
    "width": 10,
@@ -2501,7 +2501,7 @@
    "points": [
     [
      1520,
-     518
+     558
     ],
     [
      1520,
@@ -2733,7 +2733,7 @@
     ],
     [
      890,
-     505
+     513
     ]
    ],
    "width": 10,
@@ -2751,7 +2751,7 @@
    "points": [
     [
      890,
-     450
+     363
     ],
     [
      890,
@@ -2817,7 +2817,7 @@
     ],
     [
      1260,
-     505
+     513
     ]
    ],
    "width": 10,
@@ -2835,7 +2835,7 @@
    "points": [
     [
      1260,
-     450
+     363
     ],
     [
      1260,
@@ -3432,7 +3432,7 @@
     "end": "1,0.29"
    },
    "x": 1422,
-   "y": 482,
+   "y": 522,
    "bundled": true,
    "rot": 270
   },
@@ -3449,7 +3449,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1433,
-   "y": 485,
+   "y": 525,
    "label": "Start (vessel side) (TC 1.5)"
   },
   {
@@ -3465,7 +3465,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1415,
-   "y": 467,
+   "y": 507,
    "label": "End (TC 1.5)"
   },
   {
@@ -3517,7 +3517,7 @@
     "end": "1,0.29"
    },
    "x": 1502,
-   "y": 492,
+   "y": 532,
    "bundled": true,
    "rot": 90
   },
@@ -3534,7 +3534,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1487,
-   "y": 485,
+   "y": 525,
    "label": "Start (vessel side) (TC 1.5)"
   },
   {
@@ -3550,7 +3550,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1505,
-   "y": 503,
+   "y": 543,
    "label": "End (TC 1.5)"
   },
   {

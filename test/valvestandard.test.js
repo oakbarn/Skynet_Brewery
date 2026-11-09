@@ -23,3 +23,20 @@ for (const f of fs.readdirSync(path.join(ROOT, 'templates', 'device'))) {
 const store = fs.readFileSync(path.join(ROOT, 'lib', 'store.js'), 'utf8');
 assert.ok(store.includes('if (!c.valveStandard) {'), 'older Schemas make their valves square once');
 console.log('valve standard ok');
+// The 3 Vessel sample (the test bed, Rule 16.8) shows every valve at the full Valve Standard size, 150 x 150, in proportion with its
+// pipes (OakBarn Brewery, 2026-11-09: "the entire Valve Picture is out of proportion to the Pipes"); each pipe joined to a valve is
+// long enough that the once-per-Schema step never has to make it smaller.
+{
+  const smp = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
+  const sv = smp.elements.filter(e => e.subtype === 'valve');
+  assert.ok(sv.length >= 6, 'the sample has its valves');
+  for (const e of sv) {
+    assert.ok(e.w === 150 && e.h === 150, `${e.name} is 150 x 150`);
+    const cx = e.x + 75, cy = e.y + 75;
+    for (const p of smp.graphics.filter(g => g.kind === 'pipe' && [`dev:${e.name}:in`, `dev:${e.name}:out`].some(k => k === g.from || k === g.to))) {
+      const far = [`dev:${e.name}:in`, `dev:${e.name}:out`].includes(p.from) ? p.points.at(-1) : p.points[0];
+      assert.ok(Math.hypot(far[0] - cx, far[1] - cy) >= 81, `${p.id} is long enough for ${e.name} at full size`);
+    }
+  }
+}
+console.log('valve standard sample ok');
