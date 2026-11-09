@@ -37,7 +37,10 @@ if defined NODEOK goto installed
 :msi
 :: No winget, or it did not work: download the Node.js installer from nodejs.org and run it
 echo  Downloading Node.js from nodejs.org...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $all=Invoke-RestMethod 'https://nodejs.org/dist/index.json'; $v=($all | Where-Object { $_.lts } | Select-Object -First 1).version; $n='node-'+$v+'-x64.msi'; $f=Join-Path $env:PUBLIC $n; Invoke-WebRequest ('https://nodejs.org/dist/'+$v+'/'+$n) -OutFile $f -UseBasicParsing; $s=(Invoke-WebRequest ('https://nodejs.org/dist/'+$v+'/SHASUMS256.txt') -UseBasicParsing).Content; $h=(Get-FileHash $f -Algorithm SHA256).Hash.ToLower(); if (-not $s.Contains($h+'  '+$n)) { Remove-Item $f; throw 'The download was damaged.' }; Write-Host (' Installing Node.js '+$v+'...'); $p=Start-Process msiexec.exe -ArgumentList ('/i '+$f+' /passive /norestart') -Wait -PassThru; Remove-Item $f; exit $p.ExitCode"
+:: PowerShell runs only this one line, so Windows' script setting (execution policy) is left as it is. The download goes
+:: in your own TEMP folder, is checked against nodejs.org's list, and is deleted after. (Virus scanners distrust
+:: -ExecutionPolicy Bypass and downloads into the shared Public folder, so neither is used. Rule 9.11)
+powershell -NoProfile -Command "$ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $all=Invoke-RestMethod 'https://nodejs.org/dist/index.json'; $v=($all | Where-Object { $_.lts } | Select-Object -First 1).version; $n='node-'+$v+'-x64.msi'; $f=Join-Path $env:TEMP $n; Invoke-WebRequest ('https://nodejs.org/dist/'+$v+'/'+$n) -OutFile $f -UseBasicParsing; $s=(Invoke-WebRequest ('https://nodejs.org/dist/'+$v+'/SHASUMS256.txt') -UseBasicParsing).Content; $h=(Get-FileHash $f -Algorithm SHA256).Hash.ToLower(); if (-not $s.Contains($h+'  '+$n)) { Remove-Item $f; throw 'The download was damaged.' }; Write-Host (' Installing Node.js '+$v+'...'); $p=Start-Process msiexec.exe -ArgumentList ('/i '+$f+' /passive /norestart') -Wait -PassThru; Remove-Item $f; exit $p.ExitCode"
 call :checknode
 if not defined NODEOK goto nonode
 
