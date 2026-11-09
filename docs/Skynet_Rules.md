@@ -229,15 +229,17 @@ it is **never on a Tab**, and its **Database and .API are Off**, so it still onl
 between Processes now, make a gGlobal with Database and .API Off. Imported BruControl Globals are set one by one in the Importer's
 globals interview later (Fritz). (thread "Explain the Shared Variable Widget", Help 149)
 
-1.26 **Chart Widget** (Fritz, 2026-11-08: "build a chart method so we can import BruControl charts"; "Closely match BruControl Chart
-properties as attributes"). A Chart Widget (Type ID `CHT`, Rule 3.14, `wgt_CHT_Label_TabID`) draws a line graph over time of
+1.26 **Graph Widget** (was the Chart Widget; Fritz, 2026-11-08: "build a chart method so we can import BruControl charts"; "Closely
+match BruControl Chart properties as attributes"; OakBarn Brewery, 2026-11-09: "We will call the Chart a Graph"). Everywhere a person
+reads it, in both programs, it is a **Graph**; only BruControl's own item is still called a Chart. A Graph Widget (Type ID `GPH`,
+Rule 3.14, `wgt_GPH_Label_TabID`; one made before the rename keeps its `wgt_CHT_` name, Rule 3.5) draws a line graph over time of
 readings in the brew database (Rule 6.14) for up to **two** Devices or Widgets: **Channel 1** on the left axis, **Channel 2** on the
 right axis. Its settings are BruControl's Chart properties, and each is a Process attribute: **Span** (`.spanseconds`), **Refresh
 interval** (`.refreshinterval`), **Grid lines across** (`.hgridlines`) and **up and down** (`.vgridlines`), **Time axis color**
 (`.xaxiscolor`), and for each Channel n: the **Device or Widget** (`.chNelement`), **Auto scale** (`.chNautoscale`), **Axis lowest**
 and **highest** (`.chNymin`, `.chNymax`), **Line color** (`.chNlinecolor`) and **Axis color** (`.chNaxiscolor`). Properties follow
-the Widget drill-down look (Rule 18.30). A Device or Widget drawn must be sent to the database, or its line stays empty (the Chart
-says so). The **BruControl Import** turns each BruControl Chart into a Chart Widget with the same settings, names each Channel's
+the Widget drill-down look (Rule 18.30). A Device or Widget drawn must be sent to the database, or its line stays empty (the Graph
+says so). The **BruControl Import** turns each BruControl Chart into a Graph Widget with the same settings, names each Channel's
 item by its Skynet name, and sets each item drawn that has no Database setting to send its reading every Refresh interval
 (Rule 15.4). Skynet draws its own lines (SVG); nothing is copied from BruControl's DevExpress charts. Help 159.
 
@@ -731,7 +733,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
 **PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
-**OVR** Override, **CHT** Chart (Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
+**OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
 > To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
@@ -2115,7 +2117,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     A **Tab with no items** is **not** imported, with its Placeholders, unless its box is ticked (Fritz, 2026-11-08); a Tab with
     items starts ticked and comes in unless the brewer unticks it (then it stays out with its items). BruControl **Globals are only listed** for now (OakBarn Brewery, 2026-11-08: "Globals will be dealt with later. For now, only
     list them"): each with its Tab, on the summary and in the import report; no Placeholder, no import and no question.
-    Each BruControl **Chart** becomes a Chart Widget (Rule 1.26). An imported Schema follows the newest standard (Fritz,
+    Each BruControl **Chart** becomes a Graph Widget (Rule 1.26). An imported Schema follows the newest standard (Fritz,
     2026-11-08): a pump is a Skynet Pump Device (Rule 5.27); a control keeps its settings and its probe (.input, Rules 6.19, 2.43);
     an item BruControl marked not user controlled gets When tapped: none (Rule 2.44), except a probe.
   - **Pictures and Sounds** (Fritz, 2026-11-06: "The Picture Paths and Sounds are imported. The files stay where they were so
@@ -2168,7 +2170,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     "tick them all" box, on purpose: each item must be looked at (a code like `M_6_B_1` should become words like HLT).
   - **The Widget pages** come after the Tabs: every Skynet Widget type with how many of the brewer's BruControl Application Elements
     become one, then a page per kind found. A BruControl **Timer** becomes a Timer Widget, an **Alarm** an Alarm Widget, a **Toggle
-    Switch** a Switch Widget, a **Script** element a Value Widget (joined to its Process when Processes come in), a **Chart** a Chart
+    Switch** a Switch Widget, a **Script** element a Value Widget (joined to its Process when Processes come in), a **Chart** a Graph
     Widget (Rule 1.26). An **Inspector** has no Skynet Widget and stays a Placeholder. They follow the same Display Name, Label and Show columns.
   - **The item pages** (one per kind: Pumps, Heating Elements, Temperature Probes, Valves, Flow Meters, **pH Meters, Pressure Sensors
     (PSI), Hydrometers, Volume Meters, Floats, Digital Inputs**, Other items) each start with How many, have the same Display Name,
@@ -3257,3 +3259,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
+- 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
