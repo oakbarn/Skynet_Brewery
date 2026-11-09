@@ -19,7 +19,9 @@
   {
    "name": "Brewhouse",
    "width": 1720,
-   "height": 745
+   "height": 745,
+   "vSizer": "v_HLT",
+   "vScale": 128.3514
   },
   {
    "name": "Recipe",
