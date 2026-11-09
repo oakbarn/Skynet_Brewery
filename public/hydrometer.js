@@ -46,7 +46,7 @@ export const HYDRO_MODELS = {
 export const HYDRO_MODEL_KEYS = Object.keys(HYDRO_MODELS);
 export const hydroModel = el => HYDRO_MODELS[el?.model] ?? HYDRO_MODELS.tilt;
 
-// The 8 Tilt colors; each has its own Bluetooth ID (the Bluetooth reading comes in the second PR)
+// The 8 Tilt colors; each has its own Bluetooth ID (an iBeacon ID: every Tilt of that color sends it)
 export const TILT_COLORS = {
   Red: 'a495bb10c5b14b44b5121370f02d74de', Green: 'a495bb20c5b14b44b5121370f02d74de', Black: 'a495bb30c5b14b44b5121370f02d74de',
   Purple: 'a495bb40c5b14b44b5121370f02d74de', Orange: 'a495bb50c5b14b44b5121370f02d74de', Blue: 'a495bb60c5b14b44b5121370f02d74de',
@@ -138,6 +138,59 @@ export function parseWifiReport(b) {
 export function hydroFor(elements, rep, conn = 'wifi') {
   const keys = [rep?.name, rep?.id].filter(Boolean).map(s => String(s).trim().toLowerCase());
   return (elements ?? []).find(e => e.type === 'hydrometer' && hydroConnection(e) === conn && hydroModel(e).idBy === 'id' && keys.includes(String(e.hwId ?? '').trim().toLowerCase()));
+}
+
+// ---- Bluetooth (OakBarn Brewery, 2026-11-09: PR 2). A listener (an ESP32 near the fermenter, or the Raspberry Pi's own Bluetooth)
+// hears the hydrometers' Bluetooth adverts and sends them as they are to POST /api/hydrometer/bluetooth:
+//   { from: 'its name', ads: [{ address: 'aa:bb:cc:dd:ee:ff', rssi: -70, mfg: { '76': 'hex', '16722': 'hex' } }] }
+// mfg = the advert's manufacturer data, by company number (decimal), its bytes after the company number in hex.
+// The Brain reads them here, so the listeners stay simple and every kind is read the same way.
+const TILT_BY_ID = Object.fromEntries(Object.entries(TILT_COLORS).map(([c, id]) => [id, c]));
+const hexBytes = h => { const s = String(h ?? '').replace(/[^0-9a-f]/gi, ''); const b = new Uint8Array(s.length >> 1); for (let i = 0; i < b.length; i++) b[i] = parseInt(s.substr(i * 2, 2), 16); return b; };
+// A Tilt is an Apple iBeacon (company 76 = 0x004C): 02 15, its 16 byte ID (its color), major (temperature °F) and minor (gravity x 1000).
+// A Tilt Pro (and Pro Mini) sends ten times more: major = °F x 10, minor = gravity x 10000.
+export function decodeTilt(hex) {
+  const b = hexBytes(hex);
+  if (b.length < 23 || b[0] !== 0x02 || b[1] !== 0x15) return null;
+  const id = [...b.slice(2, 18)].map(x => x.toString(16).padStart(2, '0')).join(''), color = TILT_BY_ID[id];
+  if (!color) return null;
+  const major = (b[18] << 8) | b[19], minor = (b[20] << 8) | b[21], pro = minor > 5000;
+  if (major === 999) return null;      // a Tilt says 999 while it starts up or is being set up: not a reading
+  const sg = pro ? minor / 10000 : minor / 1000, tempF = pro ? major / 10 : major;
+  if (!(sg > 0.98 && sg < 1.2)) return null;
+  return { kind: 'tilt', color, pro, sg, tempF };
+}
+// A RAPT Pill (company 16722 = 0x4152, "RA"): "PT", version, 6 bytes (its MAC in version 1), temperature (uint16, / 128 - 273.15 °C),
+// gravity (float32, / 1000), x, y, z (int16, / 16), battery (int16, / 256 %), all big-endian: 23 bytes with "PT" (as the rapt-ble
+// project reads it). Its Hardware ID is its Bluetooth address (the MAC), shown in the RAPT app.
+export function decodeRapt(hex, address = '') {
+  const b = hexBytes(hex);
+  if (b.length !== 23 || b[0] !== 0x50 || b[1] !== 0x54) return null;      // "PT"
+  const v = new DataView(b.buffer), version = b[2];
+  if (version !== 1 && version !== 2) return null;
+  const mac = version === 1 ? [...b.slice(3, 9)].map(x => x.toString(16).padStart(2, '0')).join(':') : '';
+  const tempC = v.getUint16(9) / 128 - 273.15, sg = v.getFloat32(11) / 1000;
+  const x = v.getInt16(15) / 16, y = v.getInt16(17) / 16, z = v.getInt16(19) / 16, battery = Math.round(v.getInt16(21) / 256);
+  const len = Math.hypot(x, y, z), angle = len ? Math.round(Math.acos(Math.min(1, Math.abs(z) / len)) * 1800 / Math.PI) / 10 : undefined;
+  if (!(sg > 0.98 && sg < 1.2)) return null;
+  const id = (String(address || '').trim() || mac).toLowerCase();
+  if (!id) return null;
+  return { kind: 'rapt', id, sg, tempF: tempC * 9 / 5 + 32, battery, angle };
+}
+// every hydrometer reading in one advert: [{ kind, color | id, sg, tempF, battery?, angle?, rssi }]
+export function decodeBle(ad) {
+  const out = [], mfg = ad?.mfg ?? {}, rssi = Number.isFinite(Number(ad?.rssi)) ? Number(ad.rssi) : undefined;
+  if (mfg['76']) { const t = decodeTilt(mfg['76']); if (t) out.push({ ...t, rssi }); }
+  if (mfg['16722']) { const r = decodeRapt(mfg['16722'], ad?.address); if (r) out.push({ ...r, rssi }); }
+  return out;
+}
+// the Hydrometer a Bluetooth reading is for: a Tilt (any Tilt kind) by its Color, a RAPT Pill (or another) by its Hardware ID; only those
+// whose Connection is Bluetooth
+export function hydroForBle(elements, rep) {
+  const bt = (elements ?? []).filter(e => e.type === 'hydrometer' && hydroConnection(e) === 'bluetooth');
+  if (rep?.kind === 'tilt') return bt.find(e => hydroModel(e).idBy === 'color' && e.color === rep.color);
+  const id = String(rep?.id ?? '').trim().toLowerCase(), bare = id.replace(/[^0-9a-f]/g, '');
+  return bt.find(e => { const h = String(e.hwId ?? '').trim().toLowerCase(); return hydroModel(e).idBy === 'id' && h && (h === id || (bare.length === 12 && h.replace(/[^0-9a-f]/g, '') === bare)); });
 }
 
 // The Simulator: a pretend fermentation. sim: { og (SG, else the Device's Original Gravity, else 1.050), fg (1.010), hours (to go from

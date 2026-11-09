@@ -23,7 +23,7 @@ import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi
 import { apiNameListError } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
-import { parseWifiReport, hydroFor } from './public/hydrometer.js';
+import { parseWifiReport, hydroFor, decodeBle, hydroForBle } from './public/hydrometer.js';
 import { toConnection } from './public/links.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
@@ -488,7 +488,24 @@ async function route(req, res) {
     let rep; try { rep = parseWifiReport(await jsonBody(req)); } catch (x) { return fail(res, 400, x.message); }
     const el = hydroFor(store.list('hydrometer'), rep, 'wifi') ?? hydroFor(store.list('hydrometer'), rep, 'cloud');
     if (!el) { hw.hydroHeardAdd(rep, 'wifi'); return fail(res, 404, `No Hydrometer has the Hardware ID "${rep.name || rep.id}" with the Connection Wi-Fi yet. Pick it in the Hydrometer's Properties.`); }
-    return ok(res, { ok: true, hydrometer: el.name, ...hw.hydroReport(el, rep) });
+    return ok(res, { ok: true, hydrometer: el.name, ...hw.hydroReport(el, rep, undefined, true) });
+  }
+
+  // ===== Hydrometers over Bluetooth (OakBarn Brewery, 2026-11-09, Rule 6.25, PR 2): a listener (an ESP32 near the fermenter, or the
+  // Raspberry Pi's own Bluetooth, firmware/) sends what it heard: { from, ads: [{ address, rssi, mfg: { company: hex } }] }. The Brain
+  // reads each advert (public/hydrometer.js decodeBle): a Tilt by its Color, a RAPT Pill by its Hardware ID. Same rules as Wi-Fi: from
+  // your own network it needs nothing, from anywhere else the API key. It can't change anything but the Hydrometers' readings.
+  if (p === '/api/hydrometer/bluetooth' && m === 'POST') {
+    if (!apiKeyOk(req, url) && !isPrivateAddress(ip)) return fail(res, 401, 'Missing or wrong API key (?key=...)');
+    let body; try { body = await jsonBody(req); } catch (x) { return fail(res, 400, x.message); }
+    const ads = Array.isArray(body?.ads) ? body.ads.slice(0, 200) : [];
+    const read = [], unknown = [];
+    for (const ad of ads) for (const rep of decodeBle(ad)) {
+      const el = hydroForBle(store.list('hydrometer'), rep);
+      if (!el) { if (rep.kind === 'tilt') unknown.push(`${rep.color} Tilt`); else { hw.hydroHeardAdd(rep, 'bluetooth'); unknown.push(rep.id); } continue; }
+      hw.hydroReport(el, rep, undefined, true); read.push(el.name);
+    }
+    return ok(res, { ok: true, from: String(body?.from ?? ''), read: [...new Set(read)], notSetUp: [...new Set(unknown)] });
   }
 
   // ===== Public API (Fritz, 2026-10-30): any Device or Widget whose .API is Get only (read) or Get and Put (read and change) =====

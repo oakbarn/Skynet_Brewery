@@ -1,0 +1,14 @@
+# systemd service for Skynet Bluetooth Hydrometers (install.sh puts it in place)
+[Unit]
+Description=Skynet Bluetooth Hydrometers (the Pi's Bluetooth hears Tilts and RAPT Pills for the Brain)
+After=network-online.target bluetooth.target
+Wants=bluetooth.target
+
+[Service]
+WorkingDirectory=/opt/skynet-bt-hydrometer
+ExecStart=/usr/bin/python3 /opt/skynet-bt-hydrometer/skynet_bt_hydrometer.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
