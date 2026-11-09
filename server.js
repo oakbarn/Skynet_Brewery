@@ -356,7 +356,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -586,6 +586,14 @@ async function route(req, res) {
     return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
+  // a screen played an Alarm's sound to its end (Rule 7.18): one that does not repeat lets the next Alarm in line play
+  if (p === '/ui/sound/finished' && m === 'POST') {
+    const { name } = await jsonBody(req);
+    const el = store.get(name);
+    if (el?.type !== 'alarm') return fail(res, 404, `No Alarm "${name}"`);
+    if (store.getProp(name, 'active') && !store.getProp(name, 'loop')) store.setProp(name, 'finished', true, 'sound');
+    return ok(res);
+  }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);

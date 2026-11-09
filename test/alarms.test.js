@@ -83,14 +83,38 @@ store.setProp('alm_PreHop1', 'active', false); store.setProp('alm_Note', 'active
 assert.deepEqual(playing(), [SOUND_PLAYER], 'the music goes on when nothing higher is left');
 await run('e', 'stop SoundPlayer');
 assert.deepEqual(playing(), []);
-// same priority: the newest one plays
-store.setProp('alm_Boil', 'active', true); store.setProp('alm_Note', 'active', true);
-store.setProp(SOUND_PLAYER, 'active', true);
-const g2 = store.list().find(e => e.name === 'alm_Note'); g2.kind = 'brewflow';
-store.setProp('alm_Note', 'active', false); store.setProp('alm_Note', 'active', true);
-assert.deepEqual(playing(), ['alm_Note'], 'newest of the same priority');
+// Alarm Priority (Rule 7.18): the same Priority never cuts in; the one playing goes on, and the other follows
+assert.equal(store.getProp('alm_Note', 'priority'), 4, 'its Kind\'s number to start'); assert.equal(store.getProp('alm_Hop1', 'priority'), 1);
+store.setProp('alm_Boil', 'active', true); store.setProp(SOUND_PLAYER, 'active', true);
+store.rt.get('alm_Boil')._on -= 5000;      // Boil went On 5 seconds ago (not "at the same time")
+store.setProp('alm_Note', 'priority', 2); store.setProp('alm_Note', 'active', true);
+assert.deepEqual(playing(), ['alm_Boil'], 'the same Priority: the one already playing goes on');
+store.setProp('alm_Boil', 'active', false); assert.deepEqual(playing(), ['alm_Note'], 'then the other follows');
+store.setProp('alm_Boil', 'active', true); store.setProp('alm_Boil', 'priority', 1.9);
+assert.deepEqual(playing(), ['alm_Boil'], '1.9 goes before 2.0');
+store.setProp('alm_Boil', 'priority', 1.954); assert.equal(store.getProp('alm_Boil', 'priority'), 1.95, 'two decimal places');
+assert.deepEqual(playing(), ['alm_Boil'], '1.95 slots in before 2 without renumbering');
+assert.throws(() => store.setProp('alm_Boil', 'priority', 'high'), /two decimal places/);
+store.setProp('alm_Boil', 'priority', ''); assert.equal(store.getProp('alm_Boil', 'priority'), 2, '"" puts back its Kind\'s number');
+// a sound that does not repeat and has played to its end lets the next one play
+store.setProp('alm_Boil', 'priority', 1); assert.deepEqual(playing(), ['alm_Boil']);
+store.setProp('alm_Boil', 'finished', true, 'ui'); assert.deepEqual(playing(), ['alm_Note'], 'Boil played to its end: Note plays while Boil still shows');
+assert.throws(() => store.setProp('alm_Boil', 'finished', true), /set by the panel/);
 for (const n of ['alm_Boil', 'alm_Note', SOUND_PLAYER, 'alm_Quiet']) store.setProp(n, 'active', false);
-g2.kind = 'general';
+store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
+// two of the same Priority at the same moment: one is picked at random, then the other
+{
+  const won = new Set();
+  for (let i = 0; i < 40; i++) {
+    store.setProp('alm_Boil', 'priority', 2); store.setProp('alm_Note', 'priority', 2);
+    store.setProp('alm_Boil', 'active', true); store.setProp('alm_Note', 'active', true);
+    const first = playing()[0]; won.add(first);
+    store.setProp(first, 'active', false); assert.deepEqual(playing(), [first === 'alm_Boil' ? 'alm_Note' : 'alm_Boil'], 'the other follows');
+    for (const n of ['alm_Boil', 'alm_Note']) store.setProp(n, 'active', false);
+  }
+  assert.equal(won.size, 2, 'either one can be picked');
+  store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
+}
 
 // ---- Hop Alarm on the boil timer at 15:00 left; its Pre-Hop Alarm 10 minutes earlier (25:00 left)
 store.setProp('tm_Boil', 'value', new TimeVal(26 * 60)); store.setProp('tm_Boil', 'running', true);
@@ -199,7 +223,11 @@ assert.equal(f.report[0].hidesDropped, 2);
   hs.tickTimers(59); assert.equal(hs.getProp('alm_Hops', 'active'), false, '20:01 left');
   hs.tickTimers(2); assert.deepEqual([hs.getProp('alm_Hops', 'active'), hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'forecolor')], [true, 1, '#e74c3c'], '19:59 left: Bittering');
   hs.setProp('alm_Hops', 'active', false, 'ui'); hs.tickTimers(5); assert.equal(hs.getProp('alm_Hops', 'active'), false, 'once');
-  hs.tickTimers(15 * 60); assert.deepEqual([hs.getProp('alm_Hops', 'active'), hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'forecolor')], [true, 2, '#f1c40f'], '05:00 left: Aroma');
+  // a step that comes due while the last one still sounds waits its turn (Rule 7.18)
+  hs.setProp('alm_Hops', 'active', true, 'ui');
+  hs.tickTimers(15 * 60); assert.deepEqual([hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'waiting')], [1, 1], '05:00 left: Aroma waits, Bittering still sounds');
+  hs.setProp('alm_Hops', 'active', false, 'ui');
+  assert.deepEqual([hs.getProp('alm_Hops', 'active'), hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'forecolor'), hs.getProp('alm_Hops', 'waiting')], [true, 2, '#f1c40f', 0], 'tapped off: Aroma follows at once');
 }
 // the import's choice of style (Rule 16.9): alm = true (default), alm = On, or keep the old "alm" active = true
 assert.equal(rewriteAlarmLines('"alm_X" active = true\nwait "alm_X" active == false', ['alm_X'], 'on').text, 'alm_X = On\nwait alm_X == Off');
