@@ -2401,7 +2401,7 @@ function fillEl(n, e0) {
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
-    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || v.finished || !hasSoundNow(e, v) ? '' : '  (waiting)') + (v.waiting ? `  (+${v.waiting} step${v.waiting === 1 ? '' : 's'} waiting)` : '') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
+    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
       if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
       almLayers(n, e, v); break;
@@ -2417,6 +2417,12 @@ function fillEl(n, e0) {
   }
   // Data Display (Rule 6.26): a Device with more than one value shows the one picked (a Process: Flow_1.display = "Total")
   { const dk = v.display || e.display; if (dk && dk !== 'both' && displayChoices(e)) text = displayText(e, v, dk, text); }
+  if (e.type === 'alarm') {      // Rule 7.18: a sound played to its end is not "waiting"; Alarm Chain steps waiting show as a badge, also on a Basic Skynet Alarm
+    if (v.finished) text = String(text).replace('  (waiting)', '');
+    let bd = n.querySelector(':scope > .almWait');
+    if (v.waiting && !bd) n.append(bd = h('div', { class: 'almWait' }));
+    if (bd) { bd.classList.toggle('hidden', !v.waiting); bd.textContent = `+${v.waiting || 0}`; bd.title = `${v.waiting} Alarm Chain step${v.waiting === 1 ? '' : 's'} waiting their turn (Rule 7.18)`; }
+  }
   // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
   if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn || (isPwmDev(e) ? v.imageoff || e.imageOff : '')) : (v.imageoff || e.imageOff)) || pic;     // a PWM / Analog out: one picture, on and off (Rule 18.25)
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
