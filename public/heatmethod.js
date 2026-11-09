@@ -7,9 +7,10 @@
 // click on the Element while running. Used by the Brain (lib/store.js, lib/control.js, lib/hardware.js), the Panel and the
 // BruControl Importer, so all three mean the same thing.
 
-// [key, the word shown and read back, the short code used in Labels (Rule 18.24), what it does]
+// [key, the word shown and read back, the short code used in Labels (Rule 18.24) and on short method buttons, what it does]
+// Direct is the old On/Off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct"): "On/Off" is still read as Direct (heatMethodKey).
 export const HEAT_METHODS = [
-  ['onoff', 'On/Off', 'DO', 'full on or off, by a click or a Process'],
+  ['onoff', 'Direct', 'DO', 'full on or off, by a click or a Process'],
   ['dutyCycle', 'Duty Cycle', 'DutyC', 'on for a % of each cycle'],
   ['hysteresis', 'Hysteresis', 'HYS', 'on below the setpoint, off at it'],
   ['pid', 'PID', 'PID', 'holds a setpoint temperature'],
@@ -23,6 +24,9 @@ export const NEEDS_PROBE = ['hysteresis', 'pid', 'deadband', 'precise'];
 export const PERCENT_METHODS = ['pid', 'deadband', 'precise'];
 
 export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'element';
+// Valves and Heating Elements always have a Toggle (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle cannot have None, Default to
+// Toggle", Rule 2.46): Toggle or Push Button, never None. A Manual valve has no power, so it is not one of them.
+export const noNoneTap = el => isHeatElem(el) || (el?.type === 'digitalOut' && el.subtype === 'valve' && el.valveType !== 'manual');
 // The Cool / Warm Pump (OakBarn Brewery, 2026-11-08, Rule 6.21): a pump that a temperature switches (a glycol pump that cools a
 // fermenter, or a pump that brings warm water) is ONE Device on its port too (One Port, One Device), a Pump with a Method field,
 // Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (- On offset) or warms
@@ -37,7 +41,7 @@ export const isMethodDevice = el => isHeatElem(el) || isCoolPump(el);
 // where it moves to, not a Setpoint).
 export const hasSetpoint = el => isMethodDevice(el) || ['hysteresis', 'pid', 'deadband'].includes(el?.type);
 
-// "PID", "pid", "Duty Cycle", "dutycycle", "DutyC", "HYS", "On/Off", "on off", "DO" ... -> the key (null when it is none of them)
+// "PID", "pid", "Duty Cycle", "dutycycle", "DutyC", "HYS", "Direct", "On/Off" (the older word), "on off", "DO" ... -> the key (null when it is none of them)
 const squash = s => String(s ?? '').toLowerCase().replace(/[\s_/\-]+/g, '');
 export function heatMethodKey(v) {
   const s = squash(v);
@@ -45,9 +49,12 @@ export function heatMethodKey(v) {
   for (const [k, word, code] of HEAT_METHODS) if ([k, word, code].some(x => squash(x) === s)) return k;
   return { onoff: 'onoff', on: 'onoff', digital: 'onoff', digitalout: 'onoff', duty: 'dutyCycle', hyst: 'hysteresis', dband: 'deadband', prec: 'precise', precisepid: 'precise' }[s] ?? null;
 }
-export const heatMethodWord = k => HEAT_METHODS.find(m => m[0] === k)?.[1] ?? 'On/Off';
+export const heatMethodWord = k => HEAT_METHODS.find(m => m[0] === k)?.[1] ?? 'Direct';
+// the word on a method button (OakBarn Brewery, 2026-11-09: "an Option to shorten the Names in the Ballon": Direct DO, Duty Cycle DutyC,
+// PID, Hysteresis HYS, PWM; Deadband DeadB and Precise PREC as in their Labels). short = the Element's "Short method names" (methodShort).
+export const methodButtonWord = (k, short) => short ? heatMethodCode(k) : heatMethodWord(k);
 export const heatMethodCode = k => HEAT_METHODS.find(m => m[0] === k)?.[2] ?? 'DO';
-// the method a Heating Element starts with (its Properties); On/Off when none is set
+// the method a Heating Element starts with (its Properties); Direct when none is set
 export const startMethod = el => heatMethodKey(el?.heatMethod) ?? 'onoff';
 export const methodChoices = () => HEAT_METHODS.map(m => [m[0], `${m[1]} (${m[3]})`]);
 export const methodWords = () => HEAT_METHODS.map(m => m[1]).join(', ');
@@ -57,7 +64,7 @@ export const methodWords = () => HEAT_METHODS.map(m => m[1]).join(', ');
 // Only the methods its Build allows (Fritz, 2026-11-07: "we ask the primary Control Method, and then have check boxes of other
 // available Methods. Only Checked Methods are allowed. If a Method is Checked, it needs a Hot Spot or Icon on the Screen Display of
 // the device to switch between methods"): its starting method (heatMethod) and every method ticked in its Build (methodSpot_<key>).
-// On/Off (full power) is always allowed and always has its spot: it is not a choice (Fritz, 2026-11-08: "It should not be a choice.
+// Direct (full power, the old On/Off) is always allowed and always has its spot: it is not a choice (Fritz, 2026-11-08: "It should not be a choice.
 // Always displayed").
 export const allowedMethods = el => isMethodDevice(el) ? (isCoolPump(el) ? PUMP_METHOD_KEYS : HEAT_KEYS).filter(k => k === 'onoff' || k === startMethod(el) || el['methodSpot_' + k]) : [];
 export const allowedWords = el => allowedMethods(el).map(heatMethodWord).join(', ');

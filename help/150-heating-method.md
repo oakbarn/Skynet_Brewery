@@ -8,7 +8,7 @@ via process or on the Device when clicked").
 
 | Heating method | What it does | Needs a Temperature Probe |
 |---|---|---|
-| **On/Off** | Full on or off. | No |
+| **Direct** (was On/Off) | Full on or off. | No |
 | **Duty Cycle** | On for a % of each cycle (for example 60 % for a rolling boil). | No |
 | **Hysteresis** | On below the Setpoint, off when it gets there. | Yes |
 | **PID** | Holds a Setpoint temperature by working out its own %. | Yes |
@@ -24,7 +24,7 @@ via process or on the Device when clicked").
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
    **Temperature Probe** (in its Properties).
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Setpoint**.
-3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
+3. **Set + ON** (or **ON** for Direct), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
 Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one exception: in **Duty Cycle** the % is its On and
 Off too. A Duty cycle % of **0 turns the Element Off**, and **above 0 turns it On** if it was Off, whether you set it here or a
@@ -40,13 +40,13 @@ How the element is wired decides which methods make sense (the hover help on the
 | Wired to | What it does | Good methods |
 |---|---|---|
 | **SSR** (solid state relay) | Switches the element fully on or off, as fast as needed | All of them |
-| **Contactor** (a switch that clicks) | Switches it on or off, but wears out if switched quickly | On/Off, Hysteresis (or a long cycle time) |
+| **Contactor** (a switch that clicks) | Switches it on or off, but wears out if switched quickly | Direct, Hysteresis (or a long cycle time) |
 | **DAC** (0-10 V signal to a power controller) | Sets the power anywhere from 0 to 100 % | PID, Deadband, Precise |
 
 ## Its main method and the other methods allowed
 
 When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
-methods allowed**, tick each other method it may use. **On/Off** (full power) is always allowed and always has its spot, so it
+methods allowed**, tick each other method it may use. **Direct** (full power, was On/Off) is always allowed and always has its spot, so it
 has no switch there. **Only the main method and the ticked ones can be used**: the pop-up, the
 spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
 
@@ -58,7 +58,7 @@ are changed to a Heating Element when they load, keeping its name and settings.
 
 When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
 a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is **red**, the others
-**yellow**. While it is ON, a dark **Turn Off** button shows at the end of the row: one click turns it Off.
+**yellow**. There is no Turn Off button: one click on the picture turns it Off. The buttons sit in an invisible box only as wide as the methods allowed, centred under the picture, and can show short names ([Heating Elements and Valves on the screen](179-heating-element-look)).
 **One click on the Element's picture** on its Vessel Device turns it **On or Off** at once, in the method it is in, like a Pump.
 A click on its **box** (the tile with its reading) opens its pop-up, with **ON**, **OFF** and its method.
 When the Element is **Off**, a click on a method spot only switches its method; it stays Off until you turn it On.
@@ -96,19 +96,19 @@ MB_25_HE_HLT_BR.HYS
 MB_25_HE_HLT_BR.DutyC
 ```
 
-The codes are **DO** (On/Off), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** and **DeadB** (Deadband). The Process editor offers them after the name.
+The codes are **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** and **DeadB** (Deadband). The Process editor offers them after the name.
 
 ## Its name
 
 A Heating Element's Device Type is **HE**, so its name reads like `MB_25_HE_HLT_BR` (Interface, Port, HE, Label, Tab), whatever method it is using.
 It is wired straight to its port, going to an SSR or contactor, or to a DAC. Elements named before keep DO in their names.
 
-- `.method` is **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
+- `.method` is **Direct** (the older **On/Off** still works), **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` turns it **On** in its method; `hE_HLT_1 = off` turns it **Off**. Every method works this way, Hysteresis and PID too. (BruControl used *Enabled* for this; an old `.enabled` line still works, but Skynet says On and Off.)
 - **Picking a method never turns it On**: a method spot, the pop-up's method buttons or a Process only change the method. Turning
-  it On or Off is its picture, its On/Off button or spot, a Clone, or a Duty cycle % (Skynet Rule 6.19).
-- Changing the method **while it is ON** goes on at once in the new method, **except** to **On/Off**: that turns it OFF first, so
+  it On or Off is its picture, a Clone, or a Duty cycle % (Skynet Rule 6.19).
+- Changing the method **while it is ON** goes on at once in the new method, **except** to **Direct**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
 - Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset`, `.ondelay` (Hysteresis);
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.setpoint`, `.deadbandoffset`,

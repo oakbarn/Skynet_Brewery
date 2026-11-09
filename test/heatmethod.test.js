@@ -69,8 +69,8 @@ sent.length = 0;
 store.setProp('hE_PID_1', 'state', true);
 assert.deepEqual(sent, ['DO 42 1'], 'On/Off: the pin is .state');
 store.setProp('hE_PID_1', 'state', false);
-assert.throws(() => store.setProp('hE_PID_1', 'method', 'Steam'), /On\/Off, Duty Cycle, Hysteresis, PID, Deadband/);
-assert.throws(() => store.setProp('hE_PID_1', 'method', 'Deadband'), /may only use On\/Off, Duty Cycle, Hysteresis, PID \(tick Deadband/, 'Deadband is not ticked');
+assert.throws(() => store.setProp('hE_PID_1', 'method', 'Steam'), /Direct, Duty Cycle, Hysteresis, PID, Deadband/);
+assert.throws(() => store.setProp('hE_PID_1', 'method', 'Deadband'), /may only use Direct, Duty Cycle, Hysteresis, PID \(tick Deadband/, 'Deadband is not ticked');
 
 // the old names merged into it (Rule 6.19): HLT_PID = true switches it to PID and turns it ON
 assert.ok(store.has('HLT_PID'));
@@ -132,18 +132,18 @@ console.log('heatmethod import tests passed');
   const { controlMethods } = await import('../public/heatmethod.js');
   const { attrsOf } = await import('../lib/store.js');
   const el = { type: 'digitalOut', subtype: 'element', name: 'hE_HLT_1', heatMethod: 'dutyCycle', methodSpot_onoff: true, methodSpot_hysteresis: true, methodSpot_pid: true, methodSpot_deadband: true };
-  assert.deepEqual(controlMethods(el), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID', 'Deadband']);
+  assert.deepEqual(controlMethods(el), ['Direct', 'Duty Cycle', 'Hysteresis', 'PID', 'Deadband']);
   // only the main method and the ticked ones are allowed (Fritz, 2026-11-07: "Only Checked Methods are allowed")
-  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid', methodSpot_dutyCycle: true }), ['On/Off', 'Duty Cycle', 'PID']);
-  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), ['On/Off', 'PID'], 'On/Off is always allowed, not a choice (Fritz, 2026-11-08)');
-  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'element' }), null, 'On/Off only: one way of control');
+  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid', methodSpot_dutyCycle: true }), ['Direct', 'Duty Cycle', 'PID']);
+  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), ['Direct', 'PID'], 'Direct is always allowed, not a choice (Fritz, 2026-11-08)');
+  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'element' }), null, 'Direct only: one way of control');
   assert.equal(controlMethods({ type: 'digitalOut', subtype: 'pump' }), null, 'a Pump has one way of control');
   assert.ok(attrsOf(el).includes('method'));
   const words = { elements: [{ name: 'hE_HLT_1', type: 'digitalOut', main: 'state', attrs: attrsOf(el), bools: [''], methods: controlMethods(el) }], processes: [], tabs: [] };
   const list = suggest('hE_HLT_1.method = ', words, 'hE_HLT_1.method = ', 'hE_HLT_1.method = ', false)?.list.map(i => i.text);
-  assert.deepEqual(list, ['"On/Off"', '"Duty Cycle"', '"Hysteresis"', '"PID"', '"Deadband"']);
+  assert.deepEqual(list, ['"Direct"', '"Duty Cycle"', '"Hysteresis"', '"PID"', '"Deadband"']);
   const m = suggest('hE_HLT_1 ', words, 'hE_HLT_1 ', 'hE_HLT_1 ', true)?.list.find(i => i.text === '.method = ');
-  assert.ok(m, '.method = is offered after the name'); assert.match(m.hint, /how it is controlled: On\/Off, Duty Cycle/);
+  assert.ok(m, '.method = is offered after the name'); assert.match(m.hint, /how it is controlled: Direct, Duty Cycle/);
 }
 console.log('heatmethod Process editor tests passed');
 
@@ -163,7 +163,9 @@ console.log('one port one Device tests passed');
   const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /return l\.length > 1 \? l : \[\];/, 'spots only when more than one method is ticked');
   assert.match(app, /\n  setProp\(name, 'method', heatMethodWord\(k\)\);\n\}, true\);/, 'one click switches the method, nothing more');
-  assert.match(app, /if \(k === 'off'\) return setProp\(name, 'state', false\);/, 'the Turn Off spot turns it Off');
+  assert.doesNotMatch(app, /'Turn Off'\)/, 'no Turn Off button: one click on the picture turns it Off (2026-11-09)');
+  assert.match(app, /methodButtonWord\(k, !!e\.methodShort\)/, 'short method names when its Properties say so');
+  assert.match(app, /box\.style\.left = `\$\{\(e\.x \?\? 0\) \+ \(e\.w \?\? 60\) \/ 2\}px`/, 'the method box is centred under the picture');
   assert.doesNotMatch(app, /wasOn && e\)[^\n]*heatDialog/, 'a spot clicked while Off does not open a pop-up or turn it ON (Rule 6.19)');
   assert.match(app, /const isMethodClone = \(g, p = [^\n]+controlMethods\(p\)/, 'Method Clones only for Devices with more than one Control Method');
   assert.match(app, /state: !!v0\.state && heatMethodKey\(v0\.method\) === e0\.cloneMethod/, 'a Method Clone is ON only in its method');
@@ -175,7 +177,7 @@ console.log('method spots tests passed');
   const { compile } = await import('../lib/engine.js');
   const st = compile('MB_25_HE_HLT_BR.HYS\nMB_25_HE_HLT_BR.DutyC\n"MB_25_HE_HLT_BR".PID\nMB_25_HE_HLT_BR.Deadband\nMB_25_HE_HLT_BR.DO').stmts.filter(s => s.op === 'assign');
   assert.deepEqual(st.map(s => [s.target.name, s.target.prop, s.expr.v]), [['MB_25_HE_HLT_BR', 'method', 'Hysteresis'], ['MB_25_HE_HLT_BR', 'method', 'Duty Cycle'],
-    ['MB_25_HE_HLT_BR', 'method', 'PID'], ['MB_25_HE_HLT_BR', 'method', 'Deadband'], ['MB_25_HE_HLT_BR', 'method', 'On/Off']]);
+    ['MB_25_HE_HLT_BR', 'method', 'PID'], ['MB_25_HE_HLT_BR', 'method', 'Deadband'], ['MB_25_HE_HLT_BR', 'method', 'Direct']]);
   assert.match(compile('MB_25_HE_HLT_BR.Steam').errors[0].msg, /Do not understand/);
 }
 
@@ -195,7 +197,7 @@ console.log('method spots tests passed');
   const { readFileSync } = await import('node:fs');
   const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_HE_HLT~element_BR', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
   const hlt = s.elements.find(e => e.name === 'HLT_Heat');
-  assert.deepEqual(controlMethods(hlt), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
+  assert.deepEqual(controlMethods(hlt), ['Direct', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
 console.log('built in Element upgrade tests passed');
 
@@ -227,3 +229,16 @@ console.log('built in Element upgrade tests passed');
 
 // .setpoint and .target, the one Setpoint (Rule 6.19, 2026-11-09)
 await import('./setpoint.test.js');
+
+// On-screen look (OakBarn Brewery, 2026-11-09): On/Off is Direct (the old word still read), short names on the buttons,
+// Valves and Heating Elements are Toggle or Push Button (never None)
+{
+  const { heatMethodWord, methodButtonWord, noNoneTap } = await import('../public/heatmethod.js');
+  assert.equal(heatMethodWord('onoff'), 'Direct');
+  assert.equal(heatMethodKey('Direct'), 'onoff'); assert.equal(heatMethodKey('On/Off'), 'onoff', 'older Processes keep working');
+  assert.deepEqual(['onoff', 'dutyCycle', 'pid', 'hysteresis', 'deadband', 'precise'].map(k => methodButtonWord(k, true)), ['DO', 'DutyC', 'PID', 'HYS', 'DeadB', 'PREC']);
+  assert.equal(methodButtonWord('dutyCycle', false), 'Duty Cycle');
+  assert.ok(noNoneTap({ type: 'digitalOut', subtype: 'element' }) && noNoneTap({ type: 'digitalOut', subtype: 'valve' }));
+  assert.ok(!noNoneTap({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }) && !noNoneTap({ type: 'digitalOut', subtype: 'pump' }));
+  console.log('on-screen look tests passed');
+}
