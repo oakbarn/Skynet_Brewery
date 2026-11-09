@@ -408,7 +408,7 @@ const server = http.createServer(async (req, res) => {
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
     if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });

@@ -21,10 +21,15 @@ User Templates alike, and the number can be changed.
 
 ## Method: Proportional or Diameter
 
-- **Proportional:** the shape is Fritz's plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
+- **Proportional:** the shape is OakBarn Brewery's plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
   that Width to Height.
-- **Diameter:** type its **Diameter** and **Height** (inches, or cm for Metric). They give the shape (a vessel as wide as it is tall
-  is drawn square); the Gallons still set how big it is.
+- **Diameter:** type its **Diameter** and **Height** (inches, or cm for Metric). It is drawn by its **real size**: they give its
+  shape (a vessel as wide as it is tall is drawn square) and how big it is. Advertised gallons can be wrong, so the Gallons you type
+  are kept as what it holds but never change the drawing. **Calculated Volume** (read only) shows what a vessel of that Diameter
+  and Height really holds.
+
+**Dead space** (what is left in the bottom) and **Safe Element Volume** (the least liquid that covers its Heating Element) are
+kept with the vessel too.
 
 ## Master Vessel Sizer
 

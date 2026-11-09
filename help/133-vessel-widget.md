@@ -78,7 +78,8 @@ place, and the Heating Element and Thermowell / Probe sections. Those you can ch
 Units and so on. If you put a different Heating Element or Probe in the vessel, pick **Swap for ...** (an existing one, or a new
 one) in its section and press 💾 Save: the old one is taken out of the vessel. If the new one is on **another Port**, the old one is
 **deleted**. If it is on **the same Port** (you changed the hardware, not the wiring), the old one stays on the Tab as a Device of
-its own. Its size, IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
+its own. Its **Size** can still change: Gallons, Method, Diameter and Height, with the read only **Calculated Volume**, Dead space and Safe
+Element Volume (Help: Vessel sizing). Its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
 
 **Plugged openings hide their IP.** An Element, Probe or Thermowell plugs its opening, just like an End Cap, so its IP is
 hidden and no pipe or hose can join it. Only the open IPs show. A Valve's IP still shows, because flow goes through it.
