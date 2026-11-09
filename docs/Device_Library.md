@@ -108,6 +108,8 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 
 **Calibrations (Rule 6.24, Help 169):** every Temperature Probe, Analog In and Flow meter has a layered Calibrations list in plain boxes (Offset, Multiplier, Divider, Floor, Ceiling, Thermistor Steinhart-Hart, °C / °F / K conversions, Lookup Table).
 
+**Smoothing (Rule 6.24, Help 171):** every Temperature Probe, Analog In, Flow meter (rate), Scale and Counter has **Smoothing %** (BruControl's Avg Weight; 100 = none; empty = 25 % on a thermistor probe, else 100). `.raw` is the reading before smoothing. A Counter also has a **Rate** (counts per second over its Sampling Period, 1-10 s).
+
 | Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
 | Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
