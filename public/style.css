@@ -1149,3 +1149,11 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .vbPickDlg .vbPreset { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #e8a33a; opacity: .6; pointer-events: none; }
 .vbPickDlg .vbMark { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid #1D56B0; background: rgba(29,86,176,.35); pointer-events: none; }
 .vbPickDlg .vbMark.hidden { display: none; }
+/* the Script Widget (Rule 1.31): its Label, what its Process is doing, and a Start / Stop button (the whole Widget is the button) */
+.el.scriptw { cursor: pointer; }
+.el.scriptw .vl { flex-direction: column; gap: 4px; font-size: 15px; }
+.el.scriptw .scrBtn { padding: 2px 12px; border-radius: 6px; border: 1px solid var(--muted); background: #164d2a; color: #b6ffcc; font-size: 13px; }
+.el.scriptw .scrBtn.stop { background: #5a1c16; color: #ffd0c8; }
+.el.scriptw .scrBtn:empty { display: none; }
+.el.scriptw.scr-error .scrState { color: var(--bad); }
+.el.scriptw.scr-missing .scrState { color: var(--muted); font-weight: 400; font-style: italic; }

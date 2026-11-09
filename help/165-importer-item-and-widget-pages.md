@@ -33,6 +33,9 @@ the Skynet Widget that does the same job:
 | Chart | Chart Widget ([Help 159](159-chart-widget)) |
 | Inspector | none: it stays a grey Placeholder |
 
+**Since 2026-11-09 a Script element becomes a Script Widget** ([Help 172](172-script-widget)), not a Value Widget: it shows the
+Script (a Process in Skynet) with Start / Stop, and one click starts or stops it.
+
 The first page lists every kind of Skynet Widget and how many of yours become one. Then there is one page for each kind found on
 the Tabs you are importing, so *Timers (1 of 1)* when Timers are the only kind.
 A Widget's suggested name is `wgt_`, its kind, the Label and the Tab ID, for example `wgt_TMR_Mash~Timer_BR`.

@@ -131,6 +131,8 @@ Then you confirm what comes in, in small steps:
    a **Chart Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
    each kind found, with the same Display Name, tick, Label and Show columns as the items below. A BruControl Inspector has no Skynet
    Widget and stays a Placeholder. See [Help 165](165-importer-item-and-widget-pages).
+   **Since 2026-11-09 a Script element becomes a Script Widget** ([Help 172](172-script-widget)), not a Value Widget: it shows
+   its Process with Start / Stop, and one click starts or stops it.
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
    BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
    a **Show** box (ticked when BruControl showed the name), what it becomes in Skynet (Pump, Cool / Warm Pump, Heating Element, Analog
