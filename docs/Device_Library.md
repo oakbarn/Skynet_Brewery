@@ -36,7 +36,7 @@ Example: `MB_25_eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Labe
 - **Older Schemas** made under the old exception (outputs of different Device Types on one port, for example `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR`) keep working: the one turned on or enabled last wins. No new sharing can be made.
 - **Virtual ports** (no real pin):
   - **OneWire probes (DS18B20): 700 to 799.** Probe number 1 = port 700, probe 2 = 701 ... One Device per probe number.
-  - **Hydrometers (Tilt or any other): 200, 201 ...** Reserved; Hydro Devices are not built yet.
+  - **Hydrometers (Tilt or any other): 200, 201 ...** The Hydrometer Device's Port (section 4.17, Rule 6.25).
 
 ### Arduino Mega pin rules
 | Pins | Kept for | Notes |
@@ -116,8 +116,9 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 | Flow meter | FlowM |
 | Scale | Scale |
 | Stepper motor | Step |
+| Hydrometer | Hydro |
 | Heating control | PID, DutyCy, Hys, DBand |
-| Reserved (not built) | DHT11, DHT22, Hydro |
+| Reserved (not built) | DHT11, DHT22 |
 
 What each ID means:
 
@@ -151,7 +152,7 @@ What each ID means:
 | Level | Level | Count | Pulse counter |
 | Vol | Volume | FlowM | Flow meter |
 | PH_Met | pH meter | Scale | Scale (load cells) |
-| Step | Stepper motor | Hydro | Hydrometer, Tilt or other (reserved) |
+| Step | Stepper motor | Hydro | Hydrometer (Tilt, Tilt Pro, iSpindel, RAPT Pill or any other) |
 | DHT11 / DHT22 | Temperature / humidity (reserved, needs firmware) | | |
 
 ---
@@ -435,6 +436,42 @@ Since Rule 5.30 (2026-11-05): the same size as the TC Pipe Fittings Widget tee o
 
 ---
 
+### 4.17 Hydrometer (Skynet Rule 6.25, Help 170)
+One Device for every kind of hydrometer. Its **Template** picks which settings it uses; the others are shown **greyed out**.
+- **Type ID:** Hydro. **Port:** a virtual port, 200, 201 ... on its Interface (the Brain, or the ESP32 that hears it). Name example
+  `PI_200_Hydro_Red~Tilt_FE`.
+- **Templates:**
+
+| Template | Connection | Told apart by | Gravity decimals | Sends |
+|---|---|---|---|---|
+| Tilt | Bluetooth | Tilt Color | 0.001 | gravity, temperature, signal |
+| Tilt Pro | Bluetooth | Tilt Color | 0.0001 | gravity, temperature (0.1 °F), signal |
+| Tilt Pro Mini | Bluetooth | Tilt Color | 0.0001 | as the Tilt Pro |
+| iSpindel | Wi-Fi to Skynet | Hardware ID (its Name or ID) | 0.001 | gravity, temperature, battery, signal, tilt angle |
+| GravityMon | Wi-Fi or Bluetooth | Hardware ID | 0.0001 | as the iSpindel |
+| Floaty | Wi-Fi to Skynet | Hardware ID | 0.001 | as the iSpindel |
+| BrewBrain Float | Wi-Fi or its cloud | Hardware ID | 0.001 | as the iSpindel |
+| RAPT Pill | Bluetooth or the RAPT cloud | Hardware ID | 0.0001 | as the iSpindel |
+| PLAATO | its cloud | Hardware ID | 0.001 | gravity (worked out from the bubbles), temperature |
+| Other hydrometer | any | Hardware ID | 0.001 | iSpindel-style readings |
+
+- **Settings (Properties):** Interface, Port, Template, Connection (greyed when its Template has one), **Tilt Color** (mandatory for
+  a Tilt, greyed for the rest), **Hardware ID** (mandatory for the rest, greyed for a Tilt; type it or pick one the Brain heard),
+  Cloud key (the maker's cloud only), Gravity units (SG, °Plato, °Brix), Gravity decimals, Temperature units, Gravity offset,
+  Temperature offset, Smoothing weight % (Tilts start at 20, the rest at 100), Lost signal after (minutes; Tilts 15, the rest 60),
+  Original Gravity (SG), Simulator settings, Database and .API (.API is On, Read Only and greyed out for Wi-Fi and cloud ones).
+- **No two the same:** one Hydrometer per Tilt Color (any Tilt kind), one per Hardware ID. Never matched by IP address.
+- **Attributes:** its gravity is its value (in its Gravity units); `.sg`, `.plato`, `.brix` always; `.temperature`, `.battery`,
+  `.rssi`, `.angle`, `.lost` (true after its Lost signal minutes), `.lastseen`, `.og` (a Process may set it) and `.abv`.
+- **Wi-Fi:** it sends its readings to `http://<the Brain>:<port>/api/hydrometer` (from the home network; from anywhere else add
+  `?key=` and the API key).
+- **Bluetooth** reading (the Pi's own, or an ESP32) comes in the next PR; the cloud later. Until then the Simulator shows a pretend
+  fermentation.
+- **Read by hand** (a Refractometer or a Glass hydrometer) is not a Device: the Process command `take_reading Name` asks for it.
+- **BruControl Import:** a Hydrometer Input becomes a Tilt with the same Tilt Color on the same port.
+
+---
+
 ## 5. Skynet_Integrated_Devices
 
 One item with Devices built into it. What is built in can never be taken out (un-bundled), and the built-in Devices can't be deleted by themselves; deleting the item deletes them. Integrated Devices have no Bundled switch.
@@ -491,7 +528,6 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
 ## 6. Reserved, not built yet
 - **DHT11 / DHT22** (temperature and humidity): Type IDs kept; needs firmware first.
-- **Hydro** (Tilt or any other hydrometer): Type ID kept; virtual ports 200, 201 ...; a Tilt is Bluetooth.
 
 ---
 
@@ -523,3 +559,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-07: 5.4 Valve Tee and Supply Manifolds: Flip added on the Orientation line (valves on top or bottom). (thread "Let Supply Manifolds flip valves top or bottom")
 - 2026-11-08: 4.2 Pump: Model with Pump facts, Power, Use, Speed control and Speed % (PWM), hover facts (Rule 18.32, Help 163). (thread "List DC brewing pumps for the Panel")
 - 2026-11-08: 5.3 Vessel Device: can be made step by step with the Vessel Device Builder (Skynet Rule 19.5, Help 166).
+- 2026-11-09: Added 4.17 Hydrometer (Type ID Hydro, virtual ports 200+), with its Templates; Hydro taken off Reserved (Skynet Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")

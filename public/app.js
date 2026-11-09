@@ -29,6 +29,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowco
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
+import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -94,7 +95,8 @@ function alertBar(text) {
 const mvAsked = g => (S?.valves || []).some(a => a.widget && a.name === g.name);
 function renderValves(all = []) {
   renderMvAsks(all.filter(a => a.widget));
-  const list = all.filter(a => !a.widget);
+  renderReadings(all.filter(a => a.reading));
+  const list = all.filter(a => !a.widget && !a.reading);
   for (const n of $$('#ws .gfx.ip[data-fit="manualValve"]')) { const g = L().graphics.find(x => x.id === n.dataset.gid); n.classList.toggle('mvAsk', !!g && mvAsked(g)); }
   let d = $('#valveDlg');
   if (!list.length) { if (d?.open) d.close(); return; }
@@ -120,6 +122,69 @@ function renderValves(all = []) {
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
       ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, `Done: it is ${a.is || (a.open ? 'open' : 'closed')}`)
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.')))));
+  if (!d.open) d.showModal();
+}
+// take_reading Name in a Process (OakBarn Brewery, 2026-11-09, Rule 6.25): a gravity read by hand. 1 Refractometer or Glass (a tick box
+// each); a Glass has a wait in minutes for the sample to cool, counted down by the Brain (a bar at the top shows it), then the SG box
+// pops up; a Refractometer goes to the SG box at once. 2 the SG and Save, with "Send to Database now" ticked, or unticked: Exit (No
+// Database). Pause (only a person) hides it; it pops up again in 5 minutes. The Process waits until it is saved.
+let readAsks = [], readKey = null, barKey = null, readTimer = null;
+const readNow = a => Date.now() + (a._off ?? 0);       // the Brain's clock
+const readView = a => readNow(a) < (a.paused || 0) ? 'paused' : a.stage === 'cooling' && readNow(a) < a.until ? 'cooling' : a.stage === 'cooling' ? 'enter' : a.stage;
+const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+function renderReadings(list) {
+  for (const a of list) a._off = a.now - Date.now();
+  readAsks = list;
+  if (list.length && !readTimer) readTimer = setInterval(() => drawReadings(), 1000);
+  if (!list.length && readTimer) { clearInterval(readTimer); readTimer = null; }
+  readKey = null; barKey = null; drawReadings();
+}
+function drawReadings() {
+  const list = readAsks, send = (a, body) => guard(() => api('POST', '/ui/reading', { name: a.name, ...body }))();
+  // the cooling bar: only its time changes each second
+  const cool = list.filter(a => readView(a) === 'cooling');
+  let bar = $('#readBar');
+  const bk = cool.map(a => a.name).join('|');
+  if (!cool.length) { bar?.remove(); barKey = null; }
+  else if (bk !== barKey || !bar) {
+    barKey = bk;
+    if (!bar) { bar = h('div', { id: 'readBar', class: 'mvAskBar', role: 'status' }); document.body.append(bar); }
+    bar.replaceChildren(...cool.map(a => h('div', { class: 'mvAskRow' }, h('span', { class: 'valveDo' }, `🧪 Glass sample for ${a.label} cooling: `, h('b', { 'data-left': a.name }, mmss(a.until - readNow(a))), ' left'),
+      h('span', {}, ` Then the gravity box pops up. The Process ${a.process} waits.`),
+      can('operator') ? h('button', { onclick: () => send(a, { action: 'readnow' }) }, 'Read it now') : '')));
+  } else for (const a of cool) { const t = bar.querySelector(`[data-left="${CSS.escape(a.name)}"]`); if (t) t.textContent = mmss(a.until - readNow(a)); }      // only its time changes
+  const show = list.filter(a => ['pick', 'enter'].includes(readView(a)));
+  const key = show.map(a => a.name + ':' + readView(a)).join('|');
+  if (key === readKey) return;
+  readKey = key;
+  let d = $('#readDlg');
+  if (!show.length) { if (d?.open) d.close(); return; }
+  if (!d) { d = h('dialog', { id: 'readDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
+  d.innerHTML = '';
+  const who = can('operator'), noOne = h('span', { class: 'muted' }, 'An operator or admin must answer it.');
+  d.append(h('h3', {}, '🧪 Take a Reading'), ...show.map(a => {
+    const pause = who ? h('button', { title: 'Hide it for 5 minutes so you can do other things; it pops up again by itself', onclick: () => send(a, { action: 'pause' }) }, '⏸ Pause (5 minutes)') : '';
+    if (readView(a) === 'pick') {
+      const ref = h('input', { type: 'checkbox' }), gl = h('input', { type: 'checkbox' }), min = h('input', { type: 'number', min: 0, max: 240, step: 1, value: 10, style: 'width:5em' });
+      const minRow = h('div', { class: 'hidden' }, 'Let it cool for ', min, ' minutes, then it pops up for the gravity.');
+      ref.onchange = () => { if (ref.checked) gl.checked = false; minRow.classList.toggle('hidden', !gl.checked); };
+      gl.onchange = () => { if (gl.checked) ref.checked = false; minRow.classList.toggle('hidden', !gl.checked); };
+      return h('div', { class: 'valveAsk' }, h('div', { class: 'valveDo' }, `Take a gravity reading for ${a.label}`),
+        h('div', {}, h('label', {}, ref, ' Refractometer (read right away)')), h('div', {}, h('label', {}, gl, ' Glass hydrometer (the sample may need to cool first)')), minRow,
+        h('div', { class: 'muted' }, `The Process ${a.process} waits until the reading is saved.`),
+        h('div', { class: 'bar' }, pause, h('span', { class: 'spacer' }), who ? h('button', { class: 'primary', onclick: () => {
+          if (ref.checked) send(a, { action: 'refract' }); else if (gl.checked) send(a, { action: 'glass', minutes: Number(min.value) || 0 }); else toast('Tick Refractometer or Glass first', true);
+        } }, 'Next ▶') : noOne));
+    }
+    const sg = h('input', { type: 'text', inputmode: 'decimal', placeholder: '1.050', style: 'width:7em' }), db = h('input', { type: 'checkbox', checked: true });
+    const save = h('button', { class: 'primary', onclick: () => { try { readSg(sg.value); } catch (x) { return toast(x.message, true); } send(a, { action: 'save', sg: sg.value, db: db.checked }); } }, '💾 Save');
+    db.onchange = () => { save.textContent = db.checked ? '💾 Save' : '💾 Save, Exit (No Database)'; };
+    setTimeout(() => sg.focus(), 0);
+    return h('div', { class: 'valveAsk' }, h('div', { class: 'valveDo' }, `${a.by || 'Reading'}: the gravity of ${a.label}`),
+      h('div', {}, 'SG ', sg), h('div', {}, h('label', {}, db, ' Send to Database now (untick: Exit, No Database)')),
+      h('div', { class: 'muted' }, `The Process ${a.process} goes on once it is saved.`),
+      h('div', { class: 'bar' }, who ? h('button', { onclick: () => send(a, { action: 'back' }) }, '◀ Back') : '', pause, h('span', { class: 'spacer' }), who ? save : noOne));
+  }));
   if (!d.open) d.showModal();
 }
 function renderMvAsks(list) {
@@ -2316,6 +2381,8 @@ function fillEl(n, e0) {
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
+    // a Hydrometer (Rule 6.25): its gravity and temperature, or No signal
+    case 'hydrometer': text = v.lost ? '⚠ No signal' : `${fmtVal(hydroDec(e), v.value)} ${hydroUnitWord(e)} · ${fmtVal({ precision: 1 }, v.temperature)} ${e.tempUnits || '°F'}`; on = !v.lost; break;
     case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
       const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
@@ -2428,6 +2495,10 @@ function fillEl(n, e0) {
 // The Chart Widget (Fritz, 2026-11-08, Rule 1.26): its lines come from the brew database (/ui/chart), fetched again every
 // Refresh interval seconds; in between the picture is drawn from the readings it already has.
 const chartData = new Map();      // name -> { at, key, series, busy }
+// a Hydrometer's line on a Graph: SG, °Plato or °Brix, picked by a click on the Graph (Rule 6.25). Each screen keeps its own pick.
+const GRAV_KEY = 'skynet.graphGravity';
+let gravPick = {}; try { gravPick = JSON.parse(localStorage.getItem(GRAV_KEY) || '{}') || {}; } catch { gravPick = {}; }
+const gravShown = (chart, ch, hy) => GRAVITY_UNITS[gravPick[`${chart}|${ch}`]] ? gravPick[`${chart}|${ch}`] : hy.gravityUnits || 'SG';
 function fillChart(n, e, v) {
   const vl = n.querySelector('.vl'); n.classList.add('chartW');
   const s = chartSettings(e, v), names = s.channels.map(c => c.element).filter(Boolean);
@@ -2436,7 +2507,16 @@ function fillChart(n, e, v) {
     const gm = elGeom(e), w = Math.max(80, (gm.w || 400)), hh = Math.max(60, (gm.h || 200) - (n.querySelector('.nm')?.offsetHeight || 0));
     const missing = names.filter(x => !L().elements.some(el => el.name === x));
     const empty = d.series && names.length && names.every(x => !(d.series[x] ?? []).length);
-    vl.innerHTML = chartSvg(e, v, d.series || {}, { now: d.at || now, w, h: hh,
+    // a Hydrometer's line in the units picked on the Graph, and the SG / °P / °Bx switch for it
+    const hyd = s.channels.map(c => [c, L().elements.find(x => x.name === c.element && x.type === 'hydrometer')]).filter(([, x]) => x);
+    const series = { ...(d.series || {}) };
+    for (const [c, x] of hyd) if (series[c.element]) series[c.element] = gravitySeries(series[c.element], x.gravityUnits || 'SG', gravShown(e.name, c.n, x));
+    n.querySelector('.gravSw')?.remove();
+    if (hyd.length) n.append(h('div', { class: 'gravSw', title: 'Show the hydrometer\'s gravity in SG, °Plato or °Brix (this screen only)' }, ...hyd.flatMap(([c, x]) => GRAPH_GRAVITY.map(([u, w]) =>
+      h('button', { type: 'button', class: gravShown(e.name, c.n, x) === u ? 'on' : '', style: hyd.length > 1 ? `border-color:${c.lineColor}` : '', onclick: ev => {
+        ev.stopPropagation(); gravPick[`${e.name}|${c.n}`] = u; try { localStorage.setItem(GRAV_KEY, JSON.stringify(gravPick)); } catch { } draw();
+      } }, w)))));
+    vl.innerHTML = chartSvg(e, v, series, { now: d.at || now, w, h: hh,
       note: missing.length ? `Not in this Schema: ${missing.join(', ')}` : empty ? `No readings in the last ${spanText(s.spanSeconds)}: send it to the database (its Database box)` : '' });
   };
   if (!d.busy && names.length && (d.key !== key || !d.at || now - d.at >= s.refreshInterval * 1000)) {
@@ -4312,6 +4392,10 @@ const ADD_MENU = [
     ['Stepper motor on a STEP / DIR driver (A4988, DRV8825, TMC2209, TB6600, DM542)', 'stepper', 'Stepper', { driver: 'A4988', wiring: 'stepDir', stepsPerRev: 200, microsteps: 16, units: 'rev', maxSpeed: 2, accel: 4, precision: 2 }],
     ['Stepper motor 28BYJ-48 on a ULN2003 board (4 pins)', 'stepper', 'Stepper', { driver: 'ULN2003 + 28BYJ-48', wiring: 'fourWire', stepsPerRev: 2048, microsteps: 2, units: 'deg', maxSpeed: 60, accel: 120, precision: 1 }],
   ]],
+  // the Hydrometer Templates (OakBarn Brewery, 2026-11-09, Rule 6.25, public/hydrometer.js): one Hydrometer Device, its Template picks
+  // which of its settings it uses (the rest are greyed out); on a virtual port 200, 201 ...
+  ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
+    { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°F', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
@@ -4541,6 +4625,7 @@ const DEV_TYPES = () => [
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
   ['motors', 'Motors', amGroup('Devices: motors')],
   ['weight', 'Weight', amGroup('Devices: weight')],
+  ['hydro', 'Hydrometers (Tilt, iSpindel, RAPT Pill …)', amGroup('Devices: hydrometers')],
 ].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], typeof r[1] === 'function' ? r[1] : () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
@@ -4721,12 +4806,14 @@ function pickNoPwm(iface, pseudo) {
 }
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
+  if (e.type === 'hydrometer' && (e.channel === undefined || e.channel === '')) e.channel = hydroPorts({ ...e, device: e.device ?? defaultIface(devs) })[0]?.[0];      // the next free virtual port (Rule 6.2)
   const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const pr = isProbeDev(e);      // a Temperature Probe: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26)
   if (pr) for (const k of PROBE_SETTING_KEYS) if (e[k] !== undefined) work[k] = e[k];
   const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
+        : e.type === 'hydrometer' ? ['channel', 'Port (virtual: 200, 201 …)', 'sel', hydroPorts(e)]
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
   // Fritz, 2026-10-28: the Add Device box asks 1 Interface, 2 Available Pin, 3 Suggested Name, 4 Label (or Show label off), then
   // its size (150 x 150 to start). The Device Type comes from the list it was picked in; it is only asked when that kind has
@@ -7190,6 +7277,7 @@ function fieldsOf(item) {
       ...(isThermowell(item) ? [['_tw', `Thermowell (${item.front ? 'seen from the front, on a front facing IP' : item.thermowell || 'Short'}): a Temperature Device. Its one IP is the face of its TC cap; drop it on an IP (a tee's branch, a vessel port) and it snaps on. On a front facing IP it shows from the front (Rule 5.30).`, 'note'],
         ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
+  if (item.type === 'hydrometer') return hydroFields(item);
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
     return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
@@ -7199,6 +7287,47 @@ function fieldsOf(item) {
       ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
+}
+
+// ---- the Hydrometer Device (OakBarn Brewery, 2026-11-09, Rule 6.25, public/hydrometer.js) ----
+// "add all the properties of the different Types to the General Hydrometer Properties but Grey it if not applicable to the type"
+// a Hydrometer that talks to Skynet through the web (Wi-Fi to Skynet, or the maker's cloud): its .API is on (Read only) and greyed out
+const hydroWeb = e => e?.type === 'hydrometer' && ['wifi', 'cloud'].includes(hydroConnection(e));
+// its gravity decimals: its own, or its Template's (SG) or 1 (°Plato, °Brix)
+const hydroDec = e => ({ ...e, precision: e.precision !== undefined && e.precision !== '' && e.precision !== null ? e.precision : (e.gravityUnits || 'SG') === 'SG' ? hydroModel(e).decimals : 1 });
+const hydroUnitWord = e => (e.gravityUnits === 'Plato' ? '°P' : e.gravityUnits === 'Brix' ? '°Bx' : 'SG');
+// the virtual ports 200-299 free on its Interface (its own stays in the list)
+function hydroPorts(e) {
+  const used = new Set((draft || S.config).elements.filter(x => x !== e && x.name !== e.name && x.device === e.device && x.channel !== undefined).map(x => String(x.channel)));
+  const out = []; for (let p = 200; p < 300 && out.length < 40; p++) if (!used.has(String(p)) || String(p) === String(e.channel ?? '')) out.push([String(p), String(p)]);
+  return out;
+}
+function hydroFields(it) {
+  const m = hydroModel(it), conn = hydroConnection(it), g = k => { const why = hydroGrey(it, k); return why ? { grey: why } : {}; };
+  const wifiAt = `${location.origin}/api/hydrometer`;
+  if (hydroWeb(it)) it.api = 'get';      // through the web: .API on (Read only), shown greyed out in its Database and .API
+  return [['device', 'Interface (board: the Brain, or the ESP32 that hears it)', 'dev'], ['channel', 'Port (virtual: 200, 201 …)', 'sel', hydroPorts(it)],
+    ['_hy', 'Hydrometer', 'head'],
+    ['model', 'Template (the kind of hydrometer)', 'sel', HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), true, false, { tip: m.about }],
+    ['_about', m.about, 'note'],
+    ['connection', 'Connection', 'sel', Object.entries(HYDRO_CONNECTIONS).filter(([k]) => m.conns.includes(k)).map(([k, l]) => [k, l]), true, false, { tip: 'How it sends its readings. Greyed out when its Template has only one way.', ...g('connection') }],
+    ['color', 'Tilt Color (mandatory for a Tilt)', 'sel', [['', 'Pick one…'], ...TILT_COLOR_NAMES.map(c => [c, c])], false, false, { tip: 'A Tilt is told apart by its color: one Tilt (of any kind) per color.', ...g('color'),
+      // left blank on a Tilt, a pop-up says so and it keeps the focus (OakBarn Brewery, 2026-11-09; the Rule 18.28 guard)
+      ...(m.idBy === 'color' ? { guard: 'Tilt Color', guardMsg: 'The Color for a Tilt cannot be left blank.', guardAllow: 'model label device channel' } : {}) }],
+    ['hwId', 'Hardware ID (mandatory)', 'hwid', null, false, false, { tip: 'Its Name or chip ID, as it sends them (an iSpindel: the Name on its setup page, iSpindel000 to start). Type it, or pick one the Brain heard that no Hydrometer has yet. Never its IP address: a router may change that.', ...g('hwId') }],
+    ['cloudKey', 'Cloud key (the maker\'s cloud only)', 'text', null, false, false, { tip: 'The key (token) from the maker\'s app, for the Connection "The maker\'s cloud". Reading through the cloud comes in a later step.', ...g('cloudKey') }],
+    ...(conn === 'wifi' ? [['_wifi', `Wi-Fi: on its setup page pick HTTP and send to ${wifiAt} (from your own network; from anywhere else add ?key= and the API key).`, 'note', null, false, false, { keep: true }]]
+      : conn === 'bluetooth' ? [['_bt', 'Bluetooth: the Brain reads it with its own Bluetooth, or an ESP32 near the fermenter does. Reading Bluetooth comes in the next step (until then, the Simulator shows a pretend fermentation).', 'note', null, false, false, { keep: true }]]
+        : [['_cl', 'The maker\'s cloud: reading through the cloud comes in a later step. Its Cloud key is kept until then.', 'note', null, false, false, { keep: true }]]),
+    ['_rd', 'Readings', 'head'],
+    ['gravityUnits', 'Gravity units', 'sel', Object.entries(GRAVITY_UNITS)], ['precision', 'Gravity decimals (empty = its Template\'s)', 'num'],
+    ['tempUnits', 'Temperature units', 'sel', ['°F', '°C']],
+    ['gravityOffset', 'Gravity offset (+ or -, in its gravity units)', 'num'], ['tempOffset', 'Temperature offset (+ or -)', 'num'],
+    ['avgWeight', 'Smoothing weight % (100 = none)', 'num'],
+    ['lostMinutes', `Lost signal after (minutes; empty = ${m.lostMin})`, 'num', null, false, false, { tip: 'No reading for this long: it shows No signal and its .lost is true, so a Process can warn you.' }],
+    ['og', 'Original Gravity (SG, for its ABV; a Process can set .og)', 'num'],
+    ['_sends', `It sends: gravity, ${m.reads.map(r => ({ temperature: 'temperature', rssi: 'signal strength', battery: 'battery', angle: 'tilt angle' })[r]).join(', ')}.`, 'note'],
+    ['sim', 'Simulator settings (JSON), e.g. {"og":1.056,"fg":1.012,"hours":96,"tempF":66}', 'json'], ['info', 'Reading now', 'info']];
 }
 
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
@@ -7256,6 +7385,14 @@ function field(f, obj) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
     if (out[1].matches?.('select, input')) out[1].disabled = true;
   }
+  if (x?.guard && out[1]) {       // a box that can't be left blank once the user is on it (Rule 18.28's pop-up)
+    const i = out[1].matches?.('select, input, textarea') ? out[1] : out[1].querySelector?.('select, input, textarea');
+    if (i) Object.assign(i.dataset, { guard: x.guard, ...(x.guardAllow ? { guardAllow: x.guardAllow } : {}), ...(x.guardMsg ? { guardMsg: x.guardMsg } : {}) });
+  }
+  if (x?.grey && out[1]) {        // a setting this kind does not use: shown greyed out, never changed (a Hydrometer's Template, Rule 6.25)
+    out[0]?.classList.add('greyed'); if (out[0]) out[0].title = x.grey;
+    for (const i of [out[1], ...(out[1].querySelectorAll?.('select, button, input') ?? [])]) if ('disabled' in i) { i.disabled = true; i.title = x.grey; }
+  }
   if (greyedPic(f[0], obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Pick what it turns on with first (Turns on with is None)';
     for (const x of out[1].querySelectorAll?.('select, button, input') ?? []) x.disabled = true;
@@ -7265,7 +7402,7 @@ function field(f, obj) {
 }
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. Only shown; the Device
 // keeps its type (digitalOut ...) and Device Type ID (Pump) as they are saved.
-const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND' };
+const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND', hydrometer: 'HYDRO' };
 const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
@@ -7409,7 +7546,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const r = S.values[obj.name] || {};
     const spu = obj.type === 'stepper' ? (obj.units === 'steps' ? 1 : (+obj.stepsPerRev || 200) * (+obj.microsteps || 1) * (+obj.gearRatio || 1) / (+obj.unitsPerRev || (obj.units === 'deg' ? 360 : obj.units === '%' ? 100 : 1))) : 0;
     if (spu) return [h('label', {}, label), h('span', { class: 'info' }, `${fmtVal(obj, r.position)} ${obj.units || ''} = ${r.steps ?? 0} steps${r.moving ? ', moving' : ''}${r.homed ? ', homed' : ''}.  ${+spu.toFixed(3)} steps per ${obj.units || 'unit'} (from the settings above, after Save)`)];
-    const txt = obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
+    const txt = obj.type === 'hydrometer' ? (r.lost ? `No signal${r.lastseen ? ' since ' + new Date(r.lastseen).toLocaleString() : ' yet'}` : `${fmtVal(hydroDec(obj), r.value)} ${hydroUnitWord(obj)}, ${r.temperature} ${obj.tempUnits || '°F'}${r.battery ? ', battery ' + r.battery : ''}${r.rssi ? ', signal ' + r.rssi : ''}${r.angle ? ', angle ' + r.angle + '°' : ''}${r.og ? ', ABV ' + r.abv + ' %' : ''}`) : obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
     return [h('label', {}, label), h('span', { class: 'info' }, txt)];
   }
   if (kind === 'pin') {      // free text with a list of Mega 2560 pins: A0-A15 and their BruControl numbers 54-69 mean the same pin
@@ -7672,6 +7809,10 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
     input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8, title: 'Double-click a name to open its Properties' }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
+  } else if (kind === 'hwid') {     // a Hydrometer's Hardware ID (Rule 6.25): typed, or picked from the ones the Brain heard that no Hydrometer has yet
+    const id = 'hwids_' + Math.random().toString(36).slice(2);
+    input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
+    api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   const full = kind === 'multi' || kind === 'area';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
@@ -8385,7 +8526,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
+const TYPE_TITLE = { hydrometer: 'Hydrometer', valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -8616,6 +8757,12 @@ async function editItem(kind, id) {
         applyDeviceTemplate(work, devTemplate(work));
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
+      if (work.type === 'hydrometer') {      // a Tilt's Color, every other type's Hardware ID: mandatory and never shared (Rule 6.25)
+        work.connection = hydroConnection(work);
+        if (hydroWeb(work)) work.api = 'get';      // it talks through the web: .API on, Read only, greyed out (OakBarn Brewery, 2026-11-09)
+        const miss = hydroMissing(work); if (miss) throw new Error(miss);
+        const other = hydroClash(work, draft.elements.filter(x => x !== item)); if (other) throw new Error(`${other} already has this ${hydroModel(work).idBy === 'color' ? 'Color' : 'Hardware ID'}. Each Hydrometer needs its own, so Skynet knows which one a reading is from.`);
+      }
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       if ((isDrillDev(item) || isDataW(item) || isPicW(item) || item.type === 'chart') && !String(work.label ?? '').trim()) work.label = work.name || item.name;
       if (isGenDrill(item) && !String(work.label ?? '').trim()) work.label = item.label || work.name || item.name;      // every Device (Rule 18.31)     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
@@ -9447,7 +9594,7 @@ function dbFields(it) {
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]],
       ['db_groups', 'Database Groups (optional): in a Group, it is sent by the setting above only while one of its Groups is started. On demand always works.', 'dbgroups']] : []),
-    ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
+    ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL), false, false, hydroWeb(it) ? { grey: 'This Hydrometer talks to Skynet through the web, so its .API is always on (Read only): Rule 6.25' } : undefined],
     // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
     ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],
     ...(cleanApiName(it.apiName) ? [] : [['_apiw', '⚠ API_Name is blank: a Voice Command can\'t be used for this item.', 'note']]),
