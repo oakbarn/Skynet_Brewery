@@ -16,6 +16,7 @@ import { loadSnippet } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
+import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2406,6 +2407,8 @@ function fillEl(n, e0) {
       if (e.follow) { on = turnsOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
       text = e.text ?? ''; break;
   }
+  // Data Display (Rule 6.26): a Device with more than one value shows the one picked (a Process: Flow_1.display = "Total")
+  { const dk = v.display || e.display; if (dk && dk !== 'both' && displayChoices(e)) text = displayText(e, v, dk, text); }
   // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
   if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn || (isPwmDev(e) ? v.imageoff || e.imageOff : '')) : (v.imageoff || e.imageOff)) || pic;     // a PWM / Analog out: one picture, on and off (Rule 18.25)
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
@@ -6268,6 +6271,33 @@ const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${
 // Calibrations on every reading (OakBarn Brewery, 2026-11-09, Rule 6.24), in plain boxes: a list, each one working on the result of the
 // one before (public/calibrations.js). A PWM or Analog output's Measured volts: pairs of output % and the volts measured there
 // "  ≈ 4.6 V" after a PWM or Analog output's value, from its Measured volts table (Rule 6.24); nothing without one
+// Data Display (OakBarn Brewery, 2026-11-09, Rule 6.26): the text for the value picked; what it showed before while it is switched off
+function displayText(e, v, k, shown) {
+  const isHeat = isHeatElem(e), hm = isHeat ? heatMethodKey(v.method) : '';
+  const off = isHeat ? !v.state : ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'pwmOut'].includes(e.type) && !v.enabled;
+  if (off) return shown;
+  if (isHeat && k === 'state') k = 'output';      // a Hysteresis imported, now a Heating Element's method
+  const onOff = st => st ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
+  const probe = () => {
+    const p = e.input && S.values[e.input], pe = e.input && S.config.elements.find(x => x.name === e.input);
+    return p ? fmtVal(pe || {}, p.value) + (pe?.units ? ' ' + pe.units : '') : '-';
+  };
+  switch (k) {
+    case 'target': return `▸ ${fmtVal({}, v.target)}`;
+    case 'reading': return probe();
+    case 'output': return hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? onOff(v.output) : `${fmtVal({ precision: 0 }, v.value)} %`;
+    case 'state': return onOff(v.state);
+    case 'rate': return `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min`;
+    case 'total': return `${fmtVal(e, v.total)} ${e.units || 'gal'}`;
+    case 'volume': return `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'}`;
+    case 'weight': return `${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`;
+    case 'value': return e.type === 'pwmOut' ? fmtVal(e, v.value) + ' %' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+    case 'volts': { const x = pwmVolts(e, v.value); return x === null || !Number.isFinite(x) ? shown : `${x.toFixed(1)} V`; }
+  }
+  return shown;
+}
+const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device shows on the Tab. The first choice shows them all, as before. A Process can change it while it runs: Flow_1.display = "Total" ("" puts back this setting). For a Flow meter it is also its Value (BruControl\'s Primary Value): Flow_1.value is its Total when Total is picked.';
+const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display (what it shows)', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
 const SMOOTH_TIP = 'Smoothing (Rule 6.24, BruControl\'s Avg Weight): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
@@ -6394,6 +6424,8 @@ const F = {
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
+// Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
+for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
 // A pipe or hose has a Label like everything else (Rule 1.21), but no editable Position or Size (Fritz, 2026-11-03, Rule 5.21):
 // its place and size come from where it is drawn, so X, Y, Width and Height are hidden. Its Name is given by Skynet (Pipe_1, Hose_1).
 const PIPE_HIDE_FIXED = true;       // false: show X, Y, Width and Height greyed out instead of hiding them
@@ -6732,6 +6764,7 @@ function heatFields(it, x = {}) {
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
     ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
+    ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', x)] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
@@ -6849,8 +6882,8 @@ const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_
 const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
   ? [['signal', 'Signal', 'sel', PWM_SIGNALS, false, false, { tip: DEVICE_TIPS.pSignal, with: ['units', 'Units', 'text', null, false, false, { tip: DEVICE_TIPS.pUnits }], ...x }],
     ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
-    ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }], VOLT_FIELD(x)]
-  : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }], VOLT_FIELD(x)];
+    ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)]
+  : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)];
 const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: DEVICE_TIPS.type }];
 function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;

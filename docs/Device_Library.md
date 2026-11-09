@@ -110,6 +110,8 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 
 **Smoothing (Rule 6.24, Help 171):** every Temperature Probe, Analog In, Flow meter (rate), Scale and Counter has **Smoothing %** (BruControl's Avg Weight; 100 = none; empty = 25 % on a thermistor probe, else 100). `.raw` is the reading before smoothing. A Counter also has a **Rate** (counts per second over its Sampling Period, 1-10 s).
 
+**Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
+
 | Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
 | Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
