@@ -1,11 +1,16 @@
 // Connection ratings by board (public/links.js): node test/links.test.js
 import assert from 'node:assert/strict';
-import { boardOf, linkOf, isHeating, rating, heatingLinkWarning, lostLinkSec } from '../public/links.js';
+import { boardOf, linkOf, toConnection, isHeating, rating, heatingLinkWarning, lostLinkSec } from '../public/links.js';
 
 assert.equal(boardOf({ name: 'Main Brewery Mega USB' }), 'mega', 'an older Interface with no board: a Mega');
 assert.equal(boardOf({ name: 'Garage ESP32' }), 'esp32', 'an "ESP" name is an ESP32');
 assert.equal(boardOf({ name: 'x', board: 'other' }), 'other');
-assert.equal(linkOf({ type: 'simulator', realType: 'ethernet' }), 'ethernet', 'a simulated board keeps its real link');
+assert.equal(linkOf({ type: 'simulator', realType: 'ethernet' }), 'ethernet', 'a simulated board keeps its real link (an old Schema)');
+assert.equal(linkOf({ connection: 'simulator', realConnection: 'esp32' }), 'esp32', 'a simulated board keeps its real Connection');
+assert.equal(linkOf({ connection: 'serial' }), 'serial');
+// an Interface's .type / .realType move to .connection / .realConnection (OakBarn Brewery, 2026-11-09)
+assert.deepEqual(toConnection({ name: 'M', type: 'simulator', realType: 'serial', port: 'COM3' }), { name: 'M', port: 'COM3', connection: 'simulator', realConnection: 'serial' });
+assert.deepEqual(toConnection({ name: 'N', connection: 'ethernet' }), { name: 'N', connection: 'ethernet' }, 'a new one is left as it is');
 
 assert.equal(rating({ board: 'mega', type: 'serial' }).level, 'best');
 assert.equal(rating({ board: 'mega', type: 'ethernet' }).level, 'ok');

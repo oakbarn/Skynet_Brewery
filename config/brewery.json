@@ -8,8 +8,8 @@
  "devices": [
   {
    "name": "Brewery Mega",
-   "type": "simulator",
-   "realType": "serial",
+   "connection": "simulator",
+   "realConnection": "serial",
    "port": "/dev/ttyACM0",
    "baud": 115200,
    "ambient": 64

@@ -15,7 +15,7 @@ assert.deepEqual(list.map(s => s.id), ['three-vessel-one-pump']);
 
 // a sample's Interfaces always come in on the simulator, keeping the real connection to switch to later (Fritz, 2026-10-28)
 assert.deepEqual(simulated([{ name: 'M', type: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]),
-  [{ name: 'M', type: 'simulator', realType: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]);
+  [{ name: 'M', connection: 'simulator', realConnection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }], 'old .type / .realType come out as .connection / .realConnection');
 
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));
@@ -35,7 +35,7 @@ for (const sm of list) {
   assert.equal(c.sample, sm.id); assert.equal(c.chooseSample, false);
   assert.ok(fs.existsSync(path.join(d, r.backup)), 'old config backed up');
   assert.ok(!store.has('Old'));
-  assert.ok(c.devices.every(x => x.type === 'simulator'), 'nothing real is switched by a sample');
+  assert.ok(c.devices.every(x => x.connection === 'simulator'), 'nothing real is switched by a sample');
   // 897 imported, 2 x 3 stacked look-alikes folded into 2, plus the built-in SoundPlayer and the Start Brew Day button
   if (sm.brucontrol) {
     // the brew day starts from a button; scrStart0_0's call to a Process BruControl never had is now a comment
@@ -43,7 +43,7 @@ for (const sm of list) {
     assert.deepEqual(engine.check(engine.read('scrStart0_0')).errors, []);
     assert.match(engine.read('scrStart0_0'), /\/\/ skipped, no such Process in BruControl either: start "strt_scrEndAllscripts"/);
   }
-  if (sm.brucontrol) { assert.equal(c.elements.length, 895); assert.ok(!c.elements.some(e => e.type === 'global')); assert.ok(c.devices.every(x => x.type === 'simulator')); continue; }
+  if (sm.brucontrol) { assert.equal(c.elements.length, 895); assert.ok(!c.elements.some(e => e.type === 'global')); assert.ok(c.devices.every(x => x.connection === 'simulator')); continue; }
   assert.deepEqual(r.problems, [], `${sm.id}: script errors ${JSON.stringify(r.problems)}`);
   // every pipe joins two IPs, every picture exists
   const ips = new Set(c.graphics.filter(g => g.kind === 'ip').map(g => g.id));

@@ -16,8 +16,8 @@ assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'sounds/a b.wav'
 const conv = convertBruControl(xml, { simulate: true });
 const el = n => conv.elements.find(e => e.name === n);
 assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 1, pid: 1, pwmOut: 1, dutyCycle: 1, temperature: 1, gGlobal: 3, switch: 2, timer: 1, alarm: 1, scriptWidget: 1 });      // a Script element is a Script Widget (Rule 1.31)
-assert.equal(conv.devices[0].type, 'simulator'); assert.equal(conv.devices[0].realType, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
-assert.equal(conv.devices[1].realType, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
+assert.equal(conv.devices[0].connection, 'simulator'); assert.equal(conv.devices[0].realConnection, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
+assert.equal(conv.devices[1].realConnection, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
 assert.deepEqual(conv.autostart, ['looper_Sample']);
 assert.equal(conv.devices[0].board, 'mega'); assert.equal(conv.devices[1].board, 'esp32');   // board from BruControl's TypeName, for the connection rating
 assert.match(conv.scripts[0].text, /^\/\/ sample & "quoted"\nnew value vV\n/);
