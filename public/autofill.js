@@ -34,6 +34,7 @@ const COMMANDS = [
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
+  ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
 ];
 // words that fit anywhere on a line, not only at its start
 const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['and', ''], ['or', ''], ['not', '']];
@@ -60,7 +61,7 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
+const TAKES = new Set(['take_reading', 'if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];

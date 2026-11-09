@@ -72,4 +72,5 @@ assert.deepEqual(by('Level').calibrations[0].rows, [[8.9, 29], [200, 175]]);
 assert.equal(by('Fan PWM').calibrations, undefined, 'a PWM output (0-255) is not copied');
 assert.ok(JSON.stringify(r).includes('kept their BruControl calibrations') && JSON.stringify(r).includes('0-255'));
 console.log('calibration tests passed');
+await import('./smoothing.test.js');      // Smoothing (Rule 6.24); keeps package.json untouched
 process.exit(0);

@@ -13,6 +13,8 @@ export function connectState() {
   return S ? { vessels: S.parts.vessels, chains: S.chains, fermenters: S.fermenters, places: S.places } : null;
 }
 
+// Clear Page and Restart Fresh (OakBarn Brewery, 2026-11-09): the connections go back to the first guesses (none for a Restart)
+export function resetConnect(data, opts = {}) { S = null; if (data) startConnect(data, opts); }
 export function startConnect(data, { toast, saved = null } = {}) {
   say = toast || say;
   if (!data) return;

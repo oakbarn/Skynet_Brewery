@@ -1,5 +1,6 @@
 // MIT License Granted
 // Copyright (c) OakBarn Brewery 2026
+import { HYDRO_MODELS, HYDRO_MODEL_KEYS, TILT_COLOR_NAMES } from '../hydrometer.js';
 // Connect your brewery (Rule 15.4, Fritz 2026-11-07): how the valves and pumps join the vessels. Used by the Importer's page
 // (public/importer/importer.js) and its server (importer.js), so both work the same way (one source). No AI is used here: the
 // guesses come from the item names, the BruControl Scripts and where BruControl had each item; the brewer checks every one.
@@ -86,7 +87,12 @@ const FLOW_METERS = [PICK, ['hall', 'Hall effect (paddle wheel, like the YF-S201
 const PH_METERS = [PICK, ['ph4502', 'Analog pH board (PH-4502C or similar)'], ['gravity', 'DFRobot Gravity pH'], ['atlas', 'Atlas Scientific EZO pH (I2C or serial)'], ['handheld', 'Hand-held pH meter (read by hand)'], USER];
 const SIGNALS = [PICK, ['v5', 'Analog 0-5 V'], ['v33', 'Analog 0-3.3 V'], ['v10', 'Analog 0-10 V'], ['ma', '4-20 mA'], ['i2c', 'I2C'], ['serial', 'Serial (UART)'], ['none', 'None (read by hand)'], USER];
 const PRESSURE = [PICK, ['transducer', 'Pressure transducer (0.5-4.5 V)'], ['transmitter', 'Pressure transmitter (4-20 mA)'], ['i2c', 'I2C pressure sensor'], ['switch', 'Pressure switch (on / off)'], ['spunding', 'Spunding valve with a sensor'], USER];
-const HYDROS = [PICK, ['tilt', 'Tilt'], ['ispindel', 'iSpindel'], ['rapt', 'RAPT Pill'], ['plaato', 'Plaato'], ['floatH', 'Glass hydrometer (read by hand)'], ['refract', 'Refractometer (read by hand)'], USER];
+// the Panel's Hydrometer Templates (Rule 6.25, public/hydrometer.js). A Glass hydrometer or a Refractometer is read by hand: in Skynet that
+// is the Process command take_reading, not a Device (OakBarn Brewery, 2026-11-09: "Glass and Refractometer Readings are external")
+// a Tilt, Tilt Pro or Tilt Pro Mini: told apart by its Color (Rule 6.25)
+export const isTiltKind = k => HYDRO_MODELS[k]?.idBy === 'color';
+const HYDROS = [PICK, ...HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), USER];
+const TILT_COLORS = [PICK, ...TILT_COLOR_NAMES.map(c => [c, c])];
 const VOLUMES = [PICK, ['scale', 'Load cells (a scale)'], ['ultrasonic', 'Ultrasonic level sensor'], ['pressureLevel', 'Pressure (liquid height) sensor'], ['float', 'Float level sensor (many steps)'], ['flowTotal', 'Flow meter total'], ['sight', 'Sight glass (read by hand)'], USER];
 const FLOATS = [PICK, ['floatTop', 'Float switch, high level'], ['floatLow', 'Float switch, low level'], ['capacitive', 'Capacitive level switch'], ['optical', 'Optical level switch'], USER];
 const CONTACT = [PICK, ['no', 'Normally Open (closes when it is made)'], ['nc', 'Normally Closed (opens when it is made)']];
@@ -132,7 +138,12 @@ export const PART_PAGES = [
     { k: 'sensor', name: 'Sensor type', list: PRESSURE },
     { k: 'range', name: 'Highest pressure it reads (psi or bar)', number: true }] },
   { kind: 'hydro', title: 'Hydrometers', one: 'Hydrometer', fields: [
-    { k: 'hydro', name: 'Hydrometer type', list: HYDROS }] },
+    { k: 'hydro', name: 'Hydrometer type', list: HYDROS },
+    // Tilt Color and Hardware ID are mandatory (OakBarn Brewery, 2026-11-09): a Tilt must have its Color, every other kind its
+    // Hardware ID; the one its type does not use is greyed out. need(row): true = mandatory, false = greyed, undefined = no type yet
+    { k: 'color', name: 'Tilt Color (a Tilt only)', list: TILT_COLORS, optional: true, need: d => d.hydro ? isTiltKind(d.hydro) : undefined,
+      blank: 'The Color for a Tilt cannot be left blank. Choose a Color.' },
+    { k: 'hwId', name: 'Hardware ID (not a Tilt: its Name or ID)', text: true, optional: true, need: d => d.hydro ? !isTiltKind(d.hydro) : undefined }] },
   { kind: 'volume', title: 'Volume Meters', one: 'Volume Meter', fields: [
     { k: 'meter', name: 'How it measures', list: VOLUMES },
     { k: 'most', name: 'Most it reads (Gallons or Liters)', number: true }] },
@@ -155,7 +166,7 @@ export function itemKind(e) {
   if (VALVE.test(t) && !NOT_VALVE.test(t) && VALVE_TYPES.has(e.type)) return 'valve';
   if (e.type === 'analogIn' && PH.test(t)) return 'ph';
   if (e.type === 'analogIn' && PRESS.test(t)) return 'pressure';
-  if (HYDRO.test(t) && /analogIn|digitalIn/.test(e.type)) return 'hydro';
+  if (e.type === 'hydrometer' || (HYDRO.test(t) && /analogIn|digitalIn/.test(e.type))) return 'hydro';
   if ((e.type === 'analogIn' || e.type === 'scale') && VOLW.test(t)) return 'volume';
   if (e.type === 'digitalIn' && FLOATW.test(t)) return 'float';
   if (e.type === 'digitalIn') return 'din';
@@ -182,7 +193,8 @@ export function guessPartDetails(e, kind) {
   if (kind === 'flow') return { meter: /hall|yf-?s/i.test(t) ? 'hall' : '', pulses: '' };
   if (kind === 'ph') return { meter: /atlas|ezo/i.test(t) ? 'atlas' : '', signal: e.type === 'analogIn' ? 'v5' : '' };
   if (kind === 'pressure') return { sensor: e.type === 'analogIn' ? 'transducer' : e.type === 'digitalIn' ? 'switch' : '', range: '' };
-  if (kind === 'hydro') return { hydro: /tilt/i.test(t) ? 'tilt' : /ispindel/i.test(t) ? 'ispindel' : /rapt/i.test(t) ? 'rapt' : '' };
+  if (kind === 'hydro') return { hydro: e.model || (/tilt ?pro/i.test(t) ? 'tiltPro' : /tilt/i.test(t) ? 'tilt' : /ispindel/i.test(t) ? 'ispindel' : /gravitymon/i.test(t) ? 'gravitymon' : /rapt/i.test(t) ? 'raptPill' : /plaato/i.test(t) ? 'plaato' : ''),
+    color: e.color || TILT_COLOR_NAMES.find(c => new RegExp(`\\b${c}\\b`, 'i').test(t)) || '', hwId: e.hwId || '' };
   if (kind === 'volume') return { meter: e.type === 'scale' || /scale|load/i.test(t) ? 'scale' : '', most: '' };
   if (kind === 'float') return { float: /low|bottom/i.test(t) ? 'floatLow' : /high|top/i.test(t) ? 'floatTop' : '', contact: '' };
   if (kind === 'din') return { input: { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[e.mode] ?? (FLOATW.test(t) ? '' : '') };
@@ -194,6 +206,7 @@ export function cleanPartDetails(kind, d) {
   for (const f of page?.fields ?? []) {
     const v = d?.[f.k];
     if (f.number) { const n = Number(v); if (v !== '' && v != null && Number.isFinite(n) && n >= 0 && n < 1e6) out[f.k] = n; }
+    else if (f.text) { const w = String(v ?? '').trim().slice(0, 60); if (w) out[f.k] = w; }
     else if (v && f.list.some(([k]) => k === v)) {
       out[f.k] = v;
       if (v === 'user') { const w = String(d?.[f.k + 'User'] ?? '').trim().slice(0, 60); if (w) out[f.k + 'User'] = w; }

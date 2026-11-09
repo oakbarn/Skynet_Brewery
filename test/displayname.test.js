@@ -9,8 +9,8 @@ fs.mkdirSync(path.join(d, 'media', 'Images'), { recursive: true }); fs.mkdirSync
 fs.writeFileSync(path.join(d, 'media', 'Images', 'Pump.png'), 'x'); fs.writeFileSync(path.join(d, 'media', 'sounds', 'Bell.wav'), 'x');
 const els = [];
 for (const t of ELEMENT_TYPES) {
-  const kinds = t === 'gGlobal' ? Object.keys(G_KINDS) : t === 'shared' ? ['value', 'string', 'time', 'bool'] : [null];
-  for (const k of kinds) els.push(k === null ? { name: `x_${t}`, type: t } : t === 'shared' ? { name: `x_${t}_${k}`, type: t, dataType: k } : { name: `x_${t}_${k}`, type: t, kind: k });
+  const kinds = t === 'gGlobal' ? Object.keys(G_KINDS) : [null];
+  for (const k of kinds) els.push(k === null ? { name: `x_${t}`, type: t } : { name: `x_${t}_${k}`, type: t, kind: k });
 }
 const cfg = path.join(d, 'config', 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ mediaRoots: ['./media'], elements: els }));

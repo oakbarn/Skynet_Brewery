@@ -10,10 +10,10 @@ via process or on the Device when clicked").
 |---|---|---|
 | **On/Off** | Full on or off. | No |
 | **Duty Cycle** | On for a % of each cycle (for example 60 % for a rolling boil). | No |
-| **Hysteresis** | On below the Target, off when it gets there. | Yes |
-| **PID** | Holds a Target temperature by working out its own %. | Yes |
-| **Deadband** | Steps its % up or down toward the Target. | Yes |
-| **Precise** | A calm PID that holds a Target to 0.1 degree, for a still's column or a water bath (see Precise heating). | Yes, a fine one |
+| **Hysteresis** | On below the Setpoint, off when it gets there. | Yes |
+| **PID** | Holds a Setpoint temperature by working out its own %. | Yes |
+| **Deadband** | Steps its % up or down toward the Setpoint. | Yes |
+| **Precise** | A calm PID that holds a Setpoint to 0.1 degree, for a still's column or a water bath (see Precise heating). | Yes, a fine one |
 
 ## Click it while brewing
 
@@ -23,7 +23,7 @@ via process or on the Device when clicked").
 1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
    **Temperature Probe** (in its Properties).
-2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
+2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Setpoint**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
 Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one exception: in **Duty Cycle** the % is its On and
@@ -82,7 +82,7 @@ Properties pick the **Control Method** it stands for and, if you like, its own *
 
 ```
 hE_HLT_1.method = "PID"
-hE_HLT_1.target = 152
+hE_HLT_1.setpoint = 152
 hE_HLT_1 = true
 ...
 hE_HLT_1.method = "Duty Cycle"
@@ -110,10 +110,13 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
   it On or Off is its picture, its On/Off button or spot, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **On/Off**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
-- Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.target`, `.onoffset`, `.ondelay` (Hysteresis);
-  `.target`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.target`, `.deadbandoffset`,
+- Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset`, `.ondelay` (Hysteresis);
+  `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband); the PID's own plus `.holdoutput`, `.smoothing` (Precise).
   The same names the old separate Duty Cycle, Hysteresis, PID and Deadband Devices had.
+- **`.setpoint` is the Setpoint** (the temperature it holds). The older name **`.target`** still works and is exactly the same
+  thing, read or set, so older Processes and BruControl lines keep working. New Processes, Templates and Help use `.setpoint`.
+  Dialogs call it **Setpoint** (Skynet Rule 6.19).
 - `.value` is the output % a PID, Deadband or Precise works out (`.pv` is the smoothed reading Precise holds). `.output` is its pin right now (read only).
 - **`.method` is the word for every Device with more than one method of control** (today the Heating Element). In the Process
   editor, type `hE_HLT_1.method =` and the list shows its methods to pick from, in quotes. A Device with only one way of control

@@ -5,10 +5,10 @@ A **Code Value Widget** is a Value Widget that **does something** when you set i
 holds a few lines of **Process code** in its **Code** attribute. Each time you set the Value, that code runs once.
 
 For example, a Code Value Widget for the Brew Kettle's temperature Setpoint. The Setpoint belongs to the Kettle's **Heating
-Element** (its `.target`), the one that reads the Kettle's Temperature Probe:
+Element** (its `.setpoint`; the older `.target` is the same), the one that reads the Kettle's Temperature Probe:
 
 ```
-MB_25_HE_Brew~Kettle_BR.target = {value}
+MB_25_HE_Brew~Kettle_BR.setpoint = {value}
 ```
 
 Tap the Widget, type **152**, press **Set**: the Widget shows 152 and the Brew Kettle's Setpoint becomes 152.
@@ -22,7 +22,7 @@ its Properties. Its Name follows `wgt_CV_` + the Label + the Tab ID, for example
 In the Code, **`{value}`** stands for the Value of the Widget just set. Use it as often as you like, in any line:
 
 ```
-MB_25_HE_Brew~Kettle_BR.target = {value}
+MB_25_HE_Brew~Kettle_BR.setpoint = {value}
 gV_Strike_Temp = {value} + 2
 print "Kettle Setpoint is now " + {value}
 ```

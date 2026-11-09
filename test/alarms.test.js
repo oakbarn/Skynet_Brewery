@@ -3,7 +3,7 @@
 // and the importer folding stacked look-alikes (gblS_Brewery_Top_1/2/3) into one.
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import assert from 'node:assert/strict';
-import { Store, SOUND_PLAYER } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js';
+import { Store, SOUND_PLAYER, orderChain } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js';
 import { TimeVal } from '../lib/values.js';
 import { foldStacked, guessAlarmKind, rewriteAlarmLines } from '../lib/fold.js';
 
@@ -162,6 +162,49 @@ assert.equal(f.scripts[0].text, [
   'new value vNum',
 ].join('\n'));
 assert.equal(f.report[0].hidesDropped, 2);
+
+// ---- the Alarm Chain (Rule 7.16): .step gives the Alarm a step's look and sound; No Change (left out) skips that choice
+{
+  const cd = fs.mkdtempSync(path.join(os.tmpdir(), 'almch'));
+  fs.writeFileSync(path.join(cd, 'c.json'), JSON.stringify({ elements: [
+    { name: 'alm_Brew', type: 'alarm', kind: 'brewflow', alarmClass: 'basic', sound: 'sounds/a.wav', foreColor: '#8bcf18', setGraphic: 'Images/Skynet/Alarms/Alarm_Set_Hop.svg',
+      chain: [{ label: 'Strike', backColor: '#e74c3c', sound: 'sounds/strike.wav' }, { label: 'Mash', foreColor: '#f1c40f', setGraphic: '' }, { imageOverlay: 'Images/Skynet/Alarms/Alarm_Active_Red.svg' }] },
+    { name: 'alm_Plain', type: 'alarm', kind: 'general' },
+  ] }));
+  const st = new Store(path.join(cd, 'c.json'), path.join(cd, 'data')); st.load();
+  const g = p => st.getProp('alm_Brew', p);
+  assert.equal(g('step'), 0); assert.equal(g('setgraphic'), '');
+  st.setProp('alm_Brew', 'step', 1);
+  assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('soundmode'), g('setgraphic')], [1, '#e74c3c', '', 'sounds/strike.wav', 'custom', '']);
+  st.setProp('alm_Brew', 'step', 'mash');      // by its name; Back color and sound were No Change, so they stay
+  assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('setgraphic')], [2, '#e74c3c', '#f1c40f', 'sounds/strike.wav', 'none']);
+  st.setProp('alm_Brew', 'step', 'Step 3');    // a step with no name is Step 3
+  assert.equal(g('imageoverlay'), 'Images/Skynet/Alarms/Alarm_Active_Red.svg'); assert.equal(g('forecolor'), '#f1c40f');
+  st.setProp('alm_Brew', 'step', 0);           // back to its Properties
+  assert.deepEqual([g('step'), g('backcolor'), g('forecolor'), g('sound'), g('setgraphic'), g('imageoverlay')], [0, '', '', 'sounds/a.wav', '', '']);
+  assert.throws(() => st.setProp('alm_Brew', 'step', 4), /0 to 3/);
+  assert.throws(() => st.setProp('alm_Brew', 'step', 'Boil'), /no Alarm Chain step named "Boil"/);
+  assert.throws(() => st.setProp('alm_Plain', 'step', 1), /0 to 0/);
+  st.setProp('alm_Brew', 'setgraphic', 'Images/Skynet/Alarms/Alarm_Set_Hop.svg'); assert.equal(g('setgraphic'), 'Images/Skynet/Alarms/Alarm_Set_Hop.svg');
+  // a timer's Alarm Chain: ordered by when each step goes On; a timed step goes to that step and sounds the Alarm
+  assert.deepEqual(orderChain([{ label: 'a', at: '00:05:00' }, { label: 'b' }, { label: 'c', at: '01:00:00' }]).map(x => x.label), ['c', 'a', 'b']);
+  assert.deepEqual(orderChain([{ label: 'a', at: '00:05:00' }, { label: 'c', at: '01:00:00' }], false).map(x => x.label), ['a', 'c']);
+  const hd = fs.mkdtempSync(path.join(os.tmpdir(), 'almht'));
+  fs.writeFileSync(path.join(hd, 'c.json'), JSON.stringify({ elements: [
+    { name: 'alm_Hops', type: 'alarm', kind: 'hop', alarmClass: 'basic', timer: 'tm_B', chain: [{ label: 'Bittering', at: '00:20:00', foreColor: '#e74c3c' }, { label: 'Aroma', at: '00:05:00', foreColor: '#f1c40f' }] },
+    { name: 'tm_B', type: 'timer', timerType: 'countdown', initial: '00:21:00' },
+  ] }));
+  const hs = new Store(path.join(hd, 'c.json'), path.join(hd, 'data')); hs.load();
+  hs.setProp('tm_B', 'running', true); hs.tickTimers(0);
+  hs.tickTimers(59); assert.equal(hs.getProp('alm_Hops', 'active'), false, '20:01 left');
+  hs.tickTimers(2); assert.deepEqual([hs.getProp('alm_Hops', 'active'), hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'forecolor')], [true, 1, '#e74c3c'], '19:59 left: Bittering');
+  hs.setProp('alm_Hops', 'active', false, 'ui'); hs.tickTimers(5); assert.equal(hs.getProp('alm_Hops', 'active'), false, 'once');
+  hs.tickTimers(15 * 60); assert.deepEqual([hs.getProp('alm_Hops', 'active'), hs.getProp('alm_Hops', 'step'), hs.getProp('alm_Hops', 'forecolor')], [true, 2, '#f1c40f'], '05:00 left: Aroma');
+}
+// the import's choice of style (Rule 16.9): alm = true (default), alm = On, or keep the old "alm" active = true
+assert.equal(rewriteAlarmLines('"alm_X" active = true\nwait "alm_X" active == false', ['alm_X'], 'on').text, 'alm_X = On\nwait alm_X == Off');
+assert.equal(rewriteAlarmLines('"alm_X" active = true', ['alm_X'], 'true').text, 'alm_X = true');
+assert.equal(rewriteAlarmLines('"alm_X" active = true', ['alm_X'], 'keep').text, '"alm_X" active = true');
 
 console.log('alarms tests passed');
 process.exit(0);
