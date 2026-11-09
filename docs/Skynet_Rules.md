@@ -1560,8 +1560,8 @@ use, and saving a Device on a used port is refused and says which Device has it.
   Properties on **the same Interface Port**, independent from then on (its own On / Off, heating method, Setpoint and look). The one on
   its Tab stays. There can be more than one Instance. An Instance's Interface and Port are greyed out for good. Its name is
   `VesselName.DeviceName` (`HLT_Vessel.hE_1`), and a Process uses it so: `HLT_Vessel.hE_1 = on`, `HLT_Vessel.hE_1.setpoint = 152`
-  (any capitals); the one on the Tab keeps its plain name (`hE_1 = off`). **The last one turned On takes the Port** and the others on
-  it go Off; **the last one turned Off turns the Port Off**, so every one on it is Off. Nothing else may share that Port. Help 180.
+  (any capitals); the one on the Tab keeps its plain name (`hE_1 = off`). Which one has the Port follows the **Last One Rules**
+  (Rule 6.28). Nothing else may share that Port. Help 180.
 *Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
 one heater). The last one turned on wins and the others turn off."
 
@@ -1931,6 +1931,27 @@ a Primary Value and a Show Secondary Value switch; Skynet lists every value. A P
 or its words, any capitals; `""` puts back its Properties' pick). A Flow meter's `.value` follows it (BruControl's Primary Value: its
 Total when Total is picked), so BruControl scripts work either way. **Both programs:** the Importer turns Show Secondary Value off into
 the main value's pick and lists it in the notes. Help 174.
+
+6.28 **Last One Rules** (OakBarn Brewery, 2026-11-09, its own draft: "All for One, One For All"): **The last Device with the same
+Interface and Port controls the action.** How can there be more than one Device with the same Interface and Port (Rule 6.1)? There
+cannot be, but there are two cases that may look like more than one:
+1. **A Clone** (Rule 4.4).
+   a. A Clone is an exact copy of its Device and is like the Borg.
+   b. A Clone and its Parent have one set of Properties. Change one and it changes the other. They are **totally dependent** and just
+      a reflection of each other. You can consider them one, except for the **Last One Rules!** Whoever in this group turns something
+      On, all of the group turn On. Because of this, think of the Device and its Clones as ONE. In this Rule, **Device** means the
+      Device and all its Clones, unless a Clone is the topic (**Last One Rules!**).
+2. **An Integrated Instance** on a Vessel Device (Rule 6.1).
+   a. It has the Properties it inherited from where it was made, but unlike a Clone it becomes totally independent, except for the
+      **Last One Rules!** It is more like Bob of the Bobiverse (We Are Legion) than the Borg.
+   b. An Integrated Instance of a Device has its own independent Properties that have no link to the original Device or Template,
+      except that they share the same Interface and Port.
+3. In both cases the Interface and Port cannot be used to make a new Device, and neither one can change its Interface or Port.
+4. **LAST One Rules!** And most important for the On or method action of something like a Heater: whenever a Device commands
+   something to turn On, all its Instances are turned Off. Whenever an Instance commands something to turn On, the Device and the
+   other Instances are all turned Off. **Only one, the Device or one Instance of the same Interface and Port, can be On at one time**
+   (that is really why they are not truly independent and not really separate: all just one happy family). The last one turned Off
+   turns the Port Off, so every one on it is Off. Help 180.
 
 ## 7. Pictures
 
@@ -3556,6 +3577,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Integrated Instances and the built-in heater's Properties (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 6.1 gets the Integrated Instance exception (a Heating Element built into a Vessel Device from one on a Tab is an independent copy on the same Port; the last one turned On or Off has the Port; a Process calls it `VesselName.DeviceName`); Rule 4.4 notes an Instance is not a Clone. Added Rule 2.47 (no Hidden Lock on any Integrated Item; the title line's lock, Visible and Hidden Locked get help balloons) and Rule 3.16 (the Suggested Name follows the Label at once, always has its Device Type ID, every Name Change pop-up has Update to Suggested, the Label's balloon shows its own Suggested Name). Rule 3.11 lists the new button. A built-in Heating Element's Properties are titled Integrated Heating Element Device. The Three Vessel sample's built-in heaters and probes get their Device Type IDs. Help 180; next free Help 181.
 - 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off. Reworded the same day (OakBarn Brewery: "Old Ways will never be depreciated in any Update ... An update may change things but never require old methods be updated to a new standard"): nothing old until the first Public Production (trial productions count as before it); after it, an update never takes away an old way or forces an old item up to a new standard, and an item left alone works as before.
 - 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
+- 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")

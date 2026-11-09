@@ -1,6 +1,6 @@
 # Heating Elements built into a vessel
 
-What happens when a Heating Element is built into a Vessel Device, and how its Properties work (Skynet Rules 2.47, 3.16 and 6.1).
+What happens when a Heating Element is built into a Vessel Device, and how its Properties work (Skynet Rules 2.47, 3.16, 6.1 and 6.28).
 
 ## An Integrated Instance
 
@@ -14,7 +14,7 @@ There can be more than one Instance of the same Heating Element, for example one
 **They all use the same Interface Port**, the Port of the Heating Element they came from. An Instance can't change its Interface or
 Port (they are greyed out). Nothing else may use that Port.
 
-**The last one turned On or Off has the Port:**
+**Last One Rules** (Rule 6.28, "All for One, One For All"): only one of them can be On at a time.
 
 - Turning one On takes the Port. The others on it go Off.
 - Turning one Off turns the Port Off. Every one on it is then Off.
