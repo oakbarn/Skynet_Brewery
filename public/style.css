@@ -1124,3 +1124,11 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.manual .mvRow.mvHead { justify-content: center; }
 .el.manual .mvRun { margin-top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--muted); background: #20262d; color: #cfe8ff; cursor: pointer; font-size: 12px; }
 .el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }
+/* the Vessel Device Builder (Rule 19.5): the Vessel Builder panel beside the vessel on the Build Tab, and a part still to be picked */
+.vbPanel { position: fixed; right: 16px; top: 190px; width: 340px; max-width: calc(100vw - 32px); max-height: calc(100vh - 220px); overflow: auto; z-index: 40;
+  background: var(--panel, #222); color: var(--fg, #eee); border: 2px solid #1D56B0; border-radius: 12px; padding: 10px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+.vbPanel h3 { margin: 0 0 8px; font-size: 16px; }
+.vbPanel .vbRow { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 6px 8px; border-radius: 8px; }
+.vbPanel .vbTodo { border: 2px solid #e8a33a; }
+.vbPanel .vbLater { opacity: .55; font-size: 13px; }
+.vwPart.vbWait { opacity: .45; }
