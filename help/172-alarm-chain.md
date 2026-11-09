@@ -44,6 +44,10 @@ step **and sounds**, once. One Hop Alarm can now call every hop drop of the boil
 The steps are kept **in the order they go On**: on a count-down timer the one with the most time left comes first. When you
 add a new step, it is put into its place as soon as you save. Steps with no time stay after them, in your order.
 
+**From BruControl:** a BruControl Timer had 2 alarms. The import joins each one that was on to its Alarm: the Alarm becomes a
+Hop Alarm on that Timer, the first time is the Alarm's own time, and a second time becomes a step on its Alarm Chain. In Skynet
+you can then add more steps (up to 20). The import notes list each one it joined.
+
 ## On, Off, true and false
 
 Anything that is true or false can be written either way: `alm_Brew = On` is the same as `alm_Brew = true`. The old BruControl
