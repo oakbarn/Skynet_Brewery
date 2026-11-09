@@ -2,7 +2,7 @@
 // Copyright (c) OakBarn Brewery 2026
 // Skynet BruControl Importer, in the window (Rule 15.4): 1 Welcome, 2 BruControl and Skynet, 3 pick the config file, 4 Names,
 // 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
-import { startConnect, connectState } from './connectpage.js';
+import { startConnect, connectState, resetConnect } from './connectpage.js';
 import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from './connect.js';
 import { parseLabel, widgetTypeId } from '../naming.js';
 import { vbFromImport } from '../vesselbuilder.js';
@@ -49,6 +49,7 @@ function show(n) {
     li.classList.toggle('jump', k !== n && canJump(k));
     li.title = k !== n && canJump(k) ? `Go to ${li.textContent}` : '';
   }
+  pageTools();
   window.scrollTo(0, 0);
 }
 // The major topics at the top can be clicked to jump there (OakBarn Brewery, 2026-11-08: "Have the major topic at the top where you can
@@ -136,6 +137,7 @@ async function next() {
     try {
       const u = (await api('GET', '/api/peek?file=' + encodeURIComponent(state.sel))).units ?? {};
       const pu = state.panel?.units;      // the Panel's Units on this computer, when BruControl does not say (no need to type it twice)
+      state.unitsGuess = u.guess || pu || '';      // what Clear Page goes back to
       if (u.guess || pu) document.querySelector(`input[name=units][value=${u.guess || pu}]`).checked = true;
       $('#unitsNote').textContent = u.guess ? `Your BruControl probes use ${u.guess === 'US' ? '°F (Fahrenheit)' : '°C (Celsius)'}, so ${u.guess} is picked. Please confirm it, or change it.`
         : pu ? `Your BruControl file does not say which units it used, so the Skynet Panel's Units on this computer (${pu}) are picked. Please confirm it, or change it.`
@@ -260,6 +262,7 @@ async function convert(again = null) {
     state.converted = true;
     // the Vessels step answers are kept when the names are made again (and when coming back later)
     const oldVessels = d?.vessels ?? (again ? state.connect?.parts?.vessels : null);
+    state.firstVessels = structuredClone(r.connect?.parts?.vessels ?? []);      // the first guesses, for Clear Page on the Vessels step
     if (Array.isArray(oldVessels) && r.connect?.parts) r.connect.parts.vessels = oldVessels;
     state.connect = r.connect;
     state.r = r; exampleName();
@@ -739,7 +742,7 @@ function sub5(which) {
   for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ACCEPTS.includes(which) ? 'Accept ▶' : 'Next ▶'; }
   $('#next5a').classList.toggle('hidden', which === 'busy' || which === 'items');      // the items page: Accept at the bottom, after the Labels
   $('#step5 h1').textContent = stepTitle(which);
-  drawJump5();
+  drawJump5(); pageTools();
   if (which === 'busy') return;
   saveProgress();
   const r = state.r, box = $('#convBody');
@@ -922,6 +925,76 @@ $('#closeBtn').onclick = async () => {
   try { await api('POST', '/api/close'); } catch { /* it is closing */ }
   document.body.innerHTML = '<main><h1>The Importer is closed.</h1><p>You can close this window.</p></main>';
 };
+// ---- Clear Page and Restart Fresh, at the top of every page (OakBarn Brewery, 2026-11-09: "At the Top of the Every Page in the Importer
+// Program a Clear Page that will reset all the answers on that page only and a Restart Fresh that will take you back to the Intro Page
+// and clear all data. A second Chance with both before doing it."). Each asks first; No changes nothing.
+const NOTHING = 'There are no answers on this page to clear';
+function pageClearable() {
+  const n = state.page;
+  if (n === 3) return !!state.sel;
+  if (n === 4 || n === 8) return true;
+  if (n === 5) return !!state.r && !['busy', 'sum'].includes(state.sub5);
+  if (n === 6) return !!state.connect;
+  return false;
+}
+function pageTools() {
+  const b = $('#clearPage'); if (!b) return;
+  b.disabled = !pageClearable();
+  b.title = b.disabled ? NOTHING : 'Puts every answer on this page back to how it started. The other pages keep theirs.';
+}
+// the items and Widgets shown on this step, by their key (their Label, tick and Show are answers on this page)
+function keysOnStep() {
+  const s = state.sub5, r = state.r;
+  if (s === 'items') return (r.portItems ?? []).filter(e => ifOn(e.device)).map(itemKey);
+  if (s === 'widgets') { const page = widgetPages()[(state.wPage ?? 1) - 1]; return (r.appItems ?? []).filter(e => e.page === page).map(itemKey); }
+  if (s === 'parts') return pageItems(PART_PAGES[state.partPage ?? 0].kind).map(itemKey);
+  return [];
+}
+async function clearPage() {
+  if (!pageClearable()) return;
+  const title = state.page === 5 ? stepTitle(state.sub5) : document.querySelector(`#steps li[data-step="${state.page}"]`)?.textContent ?? 'this page';
+  if (!await ask('Clear this page?', `<p>Every answer on <b>${esc(title)}</b> goes back to how it started. The answers on the other pages are kept.</p>`, 'Yes, clear this page', 'No, keep my answers')) return;
+  const n = state.page;
+  if (n === 3) { state.sel = ''; $('#peek').classList.add('hidden'); for (const tr of document.querySelectorAll('#files tbody tr[data-i]')) { tr.classList.remove('sel'); tr.querySelector('input').checked = false; } setNext(); }
+  if (n === 4) {
+    for (const r of document.querySelectorAll('input[name=units]')) r.checked = r.value === state.unitsGuess;
+    for (const r of document.querySelectorAll('input[name=names]')) r.checked = r.value === 'skynet';
+  }
+  if (n === 8) { const f = state.files.find(x => x.path === state.sel); $('#schemaName').value = (f?.base || f?.name || 'Imported_Schema').replace(/\.(brucfg|config)$/i, '').replace(/\s+/g, '_'); }
+  if (n === 6) { resetConnect(state.connect, { toast }); state.buildPage = 0; drawBuildPages(); }
+  if (n === 5) {
+    const s = state.sub5;
+    for (const k of keysOnStep()) delete state.itemPicks?.[k];
+    if (s === 'if') state.keepIfs = null;
+    if (s === 'tabs') state.keepTabs = null;
+    if (s === 'parts') {
+      const kind = PART_PAGES[state.partPage ?? 0].kind;
+      delete state.parts?.[kind];
+      for (const [k, v] of Object.entries(state.kindOf ?? {})) if (v === kind) delete state.kindOf[k];      // moved here with Belongs on: back to its own page
+    }
+    if (s === 'vessels' && state.connect?.parts) { state.connect.parts.vessels = structuredClone(state.firstVessels ?? []); state.connect.vv = (state.connect.vv ?? 0) + 1; }
+    if (s === 'id' && state.ids) { state.ids = null; saveProgress(); return convert({ to: 'id' }); }
+    sub5(s);
+  }
+  saveProgress();
+  toast('This page is cleared.');
+}
+async function restartFresh() {
+  if (!await ask('Restart Fresh?', '<p>Every answer you gave for this config file, on every page, is cleared, and you go back to the first page (Welcome). Your BruControl config file, the answers kept for your other config files and any Schema you saved are not touched.</p>', 'Yes, restart fresh', 'No, keep my answers')) return;
+  clearTimeout(saveTimer);
+  // only the config file being worked on (OakBarn Brewery, 2026-11-09: "Clear and Start Fresh, Only on the one you are working On")
+  if (state.sel) await api('POST', '/api/progress', { file: state.sel, clear: true }).catch(e => toast(e.message));
+  Object.assign(state, { sel: '', resume: null, r: null, connect: null, converted: false, keepIfs: null, keepTabs: null, ids: null, itemPicks: null, parts: null, kindOf: null,
+    partPage: 0, wPage: 0, max5: 0, sub5: null, savedConnect: null, sentSig: null, buildPage: 0, reached: 1, firstVessels: null });
+  resetConnect(null);
+  $('#resume').classList.add('hidden'); $('#peek').classList.add('hidden'); $('#saveResult').classList.add('hidden');
+  for (const r of document.querySelectorAll('input[name=names]')) r.checked = r.value === 'skynet';
+  $('#convBody').innerHTML = '';
+  show(1);
+  toast('Every answer is cleared. The Import starts fresh.');
+}
+$('#clearPage').onclick = clearPage;
+$('#restartFresh').onclick = restartFresh;
 init();
 
 // The Build Tab pages (OakBarn Brewery, 2026-11-08: "Build Page is actually a Build Tab Page. So we would need to build for every
