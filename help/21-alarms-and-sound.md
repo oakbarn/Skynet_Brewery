@@ -12,6 +12,18 @@ Only **one sound plays at a time**. When two want to play, the one with the lowe
 
 Brew Flow is priority 2 because it beats a Pre-Hop Alarm. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
 
+### Priority: your own order
+
+Every Alarm has a **Priority** (Alarm Widget Properties > Alarm > Priority). It starts as its Kind's number above, and you can set
+your own with **up to two decimal places**: 1, 1.1, 1.15, 2 ... **The lower one plays first.** All the 1s play before the first 2,
+and 1.1 before 1.15 before 1.2, so you can put an Alarm in between two others without renumbering them.
+
+- **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the same Priority.
+- **Two at the same moment** (within a second) with the same Priority: one is **picked at random**, then the other follows.
+- **A sound that doesn't Repeat** lets the next one play as soon as it has played to its end, even while its Alarm still shows On.
+- **Alarm Chain steps wait their turn**: see [The Alarm Chain](172-alarm-chain).
+- A Process can change it: `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` puts back its Properties' number).
+
 ## Add one
 
 **Tabs > ☰ Menu > Edit layout > Add Widget > On-screen controls > Alarm**, then pick its **Kind** first. The settings below it change with the kind:

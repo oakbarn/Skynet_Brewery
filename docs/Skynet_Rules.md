@@ -2001,6 +2001,22 @@ turn it on or off with **`alm_Brew.email = true`** / **`false`**. If no mail ser
 says so in plain words. Both programs: the BruControl Import keeps each Alarm's Email Notification switch (BruControl's own mail
 settings are not copied; the user picks the mail server in Skynet). Help 175.
 
+7.18 **Alarm Priority: every Alarm in one logical line** (OakBarn Brewery, 2026-11-09: "We could set a priority attributes on
+Alarms ... All 1 go before the first 2. Then within all the 1s, 1.0 goes before 1.1 goes before 1.2 ... If there is a Conflict
+between two (two 1.1 random pick one then follow with the other)", "and maybe 2 decimals as you could then insert without
+renumbering"). Only one sound plays at a time. Every Alarm has a **Priority**, a number from 0 to 99 with **up to two decimal
+places** (1, 1.1, 1.15, 2 ...): **the lower one plays first**, and an Alarm can go in between two others without renumbering. An
+Alarm with no Priority of its own has **its Kind's number** (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5; the Sound
+Player is 5). **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the
+same Priority; **two that go On at the same moment** (within a second) are **picked at random, then the other follows**. A lower
+Priority still cuts in at once (a Hop Alarm stops the music). It is the same whether an Alarm was set On by a Process, by its
+Alarm Chain (Rule 7.16) or by both. **Alarm Chain steps wait their turn:** a timer step that comes due while the Alarm still
+sounds the last step waits (the Alarm shows "+1 step waiting") and follows as soon as the last one is tapped off; a Process's
+`.step` still changes it at once. **A sound that does not Repeat lets the next one play** once it has played to its end, while
+its Alarm still shows On. Set in Alarm Widget Properties > Alarm > **Priority**, or by a Process: **`alm_Brew.priority = 1.15`**
+(`""` puts back its Properties' number). `.waiting` (read only) is how many Chain steps wait. *Replaced:* between two of the same
+Kind the newest one played (PR #24). Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3092,6 +3108,10 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 7.18, Alarm Priority (OakBarn Brewery): a number with up to two decimal places, the lower plays first,
+  its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the
+  other; Alarm Chain steps wait their turn; a sound without Repeat lets the next one play when it ends. Help 21 and 172. Checked
+  against both programs. (thread "Add look options to Alarm Chain steps")
 - 2026-11-09: Rule 18.33 gets OakBarn Brewery's test: a box is mandatory when the program or the board needs it to work; handy information (Volts, Amps, Watts) is optional; a box needed by some types only is greyed for the others and has a fill-it-or-abandon pop-up. The list of mandatory boxes is written in the Rule. Checked against both programs: the Importer's item pages follow the list, and the Panel's Flow Meter Pulses per unit and Analog input Value at highest signal can no longer be left blank (the Panel's other boxes on the list are never blank). Help 165 updated. (thread "Set which Importer boxes are mandatory")
 - 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.

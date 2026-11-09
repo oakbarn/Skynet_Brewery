@@ -41,6 +41,11 @@ alm_Brew.setgraphic = "Images/Skynet/Alarms/Alarm_Set_Hop.svg"
 A **Hop Alarm** has a timer. Give a step a **time on that timer** (hh:mm:ss) and when the timer gets there, the Alarm goes to that
 step **and sounds**, once. One Hop Alarm can now call every hop drop of the boil, each with its own picture and sound.
 
+**A step waits its turn.** If a step comes due while the Alarm is still sounding the last one, it waits, and the Alarm shows
+"+1 step waiting". As soon as the last one is tapped off, the Alarm moves on to the waiting step and sounds. (A Process's
+`.step` still changes it at once.) When several Alarms sound together, their **Priority** sets the order: see
+[Alarms and sound](21-alarms-and-sound).
+
 The steps are kept **in the order they go On**: on a count-down timer the one with the most time left comes first. When you
 add a new step, it is put into its place as soon as you save. Steps with no time stay after them, in your order.
 
