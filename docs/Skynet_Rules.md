@@ -1726,6 +1726,23 @@ the Target instead of going past it.
 - **Both programs:** the Panel's Brain runs it; the BruControl Importer leaves every imported Hysteresis Predictive (BruControl's own
   Predictive Hysteresis switch is not copied: Skynet's way is on). Help 168.
 
+
+6.24 **Calibrations on every reading, in plain boxes** (OakBarn Brewery, 2026-11-09: "adding those calibrations are good as they are
+similar to other programs and not proprietary to BruControl"; "build a Calibration with Measured Voltage vs PWM %"). A Temperature
+Probe, an Analog In and a Flow meter have a **Calibrations** list. Each calibration works on the result of the one before, top to
+bottom (layered, as BruControl's): **Linear Offset**, **Linear Multiplier**, **Linear Divider**, **Floor**, **Ceiling**, **Thermistor
+(Steinhart-Hart)**, **Celsius / Fahrenheit / Kelvin** conversions and a **Lookup Table** (reading, value pairs).
+- **Plain boxes, never typed code:** ➕ Add calibration, a dropdown for its kind, a box for each number, ↑ ↓ to change the order, ✕ to
+  remove, and a switch to turn one off without losing it. A probe's Properties show them as one line (More calibrations) with the ⬢.
+- **Where they start:** a probe and a flow meter (its rate) start from their own reading (after the probe type's formula and its
+  offsets); an Analog In with calibrations starts from its raw 0-1023 reading (instead of its Signal settings), as in BruControl.
+- **Measured volts** on a PWM output and an Analog output: pairs of its setting (a PWM output's %) and the volts measured there with a
+  meter, because a DAC seldom gives exactly 10 V at full and each one is different. It shows `≈ 7.0 V` beside the value, a Process
+  reads `.volts` and sets one: `My_DAC.volts = 7.5` sets the % the pairs say gives 7.5 V.
+- **Both programs:** the BruControl Importer keeps each Analog In's and probe's calibrations in order, with its Text Format (Decimal
+  Places, Prefix, Suffix as Units). A PWM output's BruControl calibrations are not copied (BruControl counts it 0-255, Skynet in %) and
+  are listed in the Import notes. Help 169.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2879,6 +2896,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
 - 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")

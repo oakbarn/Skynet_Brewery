@@ -105,6 +105,9 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 | Group | Type IDs |
 |---|---|
 | Temperature | 1W, RTD, TC, 10KNTC, 5KNTC, 50KNTC, 100KNT, NTC, LM35, TMP36 |
+
+**Calibrations (Rule 6.24, Help 169):** every Temperature Probe, Analog In and Flow meter has a layered Calibrations list in plain boxes (Offset, Multiplier, Divider, Floor, Ceiling, Thermistor Steinhart-Hart, °C / °F / K conversions, Lookup Table).
+
 | Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
 | Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
@@ -242,14 +245,14 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
 - **Type IDs:** PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED.
 - **Port:** PWM pins only (Mega 2-13, 44-46).
-- **Settings:** Interface, PWM pin, Start value (%), Decimals.
+- **Settings:** Interface, PWM pin, Start value (%), Decimals, **Measured volts** (Rule 6.24, Help 169: pairs of % and the volts measured; shows ≈ V, `.volts` reads and sets).
 - **Value:** 0-100 % on screen; the board gets 0-255. Board line `PWM <pin> <0-255>`.
 
 ### 4.5 Analog output (0-10 V / 4-20 mA)
 - **Add menu:** Devices: outputs > Analog output 0-10 V, or Analog output 4-20 mA.
 - **Type IDs:** AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr.
 - **Port:** a PWM pin feeding a PWM-to-0-10 V or 4-20 mA module.
-- **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals.
+- **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals, **Measured volts** (Rule 6.24).
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).
 
 ### 4.6 User Defined Proportional Valve (0-100 %)
