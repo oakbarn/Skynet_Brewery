@@ -282,7 +282,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 ### 4.8 Hysteresis (control output)
 - **Add menu:** Devices: control outputs > Hysteresis.
 - **Type ID:** Hys. Counts as heating (PR #108).
-- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, ON offset (positive = heat: on below target minus offset; negative = cool), ON delay (seconds).
+- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, ON offset (positive = heat: on below target minus offset; negative = cool), ON delay (seconds). **Predictive** (on by default, Rule 6.23, Help 168): turns off early by the coast it has learned, so it does not overshoot; never more starts.
 
 ### 4.9 PID (control output)
 - **Add menu:** Devices: control outputs > PID (holds a target temperature).

@@ -195,6 +195,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | PWM output named `VGC...` | Proportional valve | Built |
 | OneWire probe numbered by bus position | the probe has to be picked on the Devices page (Skynet uses each probe's ROM id) | Built (warning) |
 | Digital output with a Dual Throw port (DualThrowPortNum, DualThrowDelay) | Dual Throw second Port and delay (Rule 6.22) | Built |
+| Hysteresis port, PredictiveHysteresis on or off | always Skynet Predictive (Rule 6.23), the switch is not copied | Built |
 | Port types Skynet does not have yet | skipped, with a warning | Built |
 
 ## 9. Pictures and sounds
@@ -237,3 +238,4 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-02: Section 6c: BruControl Globals go to the gGlobal Kind of their Type (a String with a picture becomes gG_Global_Graphic, or the user is asked); a gGlobal is never on a Tab, so a Text, Picture, Value, Time or DateTime Widget takes the Global's spot; user input needed. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: The 3 background pictures are .backpath, .backpath_2, .backpath_3 (Rule 7.10). (thread "Rename image paths to backpath")
 - 2026-11-09: Section 8: BruControl Dual Throw (DualThrowPortNum, DualThrowDelay) is kept as the Skynet Dual Throw (Rule 6.22). (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Section 8: every imported Hysteresis is Predictive (Rule 6.23); BruControl's PredictiveHysteresis switch is not copied.

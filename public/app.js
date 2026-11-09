@@ -6116,6 +6116,9 @@ const SEMI_TIP = {
 const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are turned by hand or by their board, so they are not.`, 'note'],
   ['deviceControlled', 'Device controlled', 'devctl'],
   ...(type === 'led' ? [] : [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path']]), ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']];
+// Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
+const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Target, so it settles at the Target instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
+const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
 const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
@@ -6167,7 +6170,7 @@ const F = {
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
   deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
@@ -6506,6 +6509,7 @@ function heatFields(it, x = {}) {
     ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
+    ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
@@ -6522,7 +6526,7 @@ function pumpMethodFields(it, x = {}) {
     ['heatMethod', 'Method (it starts with)', 'sel', HEAT_METHODS.filter(([k]) => PUMP_METHOD_KEYS.includes(k)).map(([k, w, , d]) => [k, `${w} (${d})`]), true, false,
       { tip: 'One pump, one Device (Rule 6.21): On/Off runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a minus On offset, a glycol pump) or to warm (a plus On offset). A Process changes it with .method.', ...x }],
     ...(m === 'hysteresis' ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }],
-      ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'On offset (- cools, + warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x])] : []),
+      ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'On offset (- cools, + warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]), PREDICTIVE_FIELD(x)] : []),
     ['methodSpot_hysteresis', 'Hysteresis allowed too (a one-click spot on the Tab)', 'bool', null, false, false, { tip: T.methodSpot, ...x }]];
 }
 function elemDeviceFields(it, item) {
