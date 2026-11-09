@@ -96,3 +96,18 @@ export const pwmForVolts = (el, v) => {
   const p = lookupBack(el.voltTable, Number(v) || 0);
   return p === null ? null : el.type === 'pwmOut' ? Math.max(0, Math.min(100, p)) : p;
 };
+
+// Smoothing (OakBarn Brewery, 2026-11-09, Rule 6.24: "Smoothing might be added to more things than a Counter"; "my 10K NTC would be
+// better with smoothing as they sometimes jump"): BruControl's Avg Weight. Each new reading counts this many % and the shown value
+// the rest, so 100 = no smoothing and 25 = calm. A thermistor probe starts at 25 % (BruControl's default), anything else at 100.
+export const SMOOTH_TYPES = new Set(['temperature', 'analogIn', 'flowMeter', 'scale', 'digitalIn']);
+export const isThermistor = el => el?.type === 'temperature' && el.sensor === 'ntc';
+export function smoothWeight(el) {
+  const w = el?.avgWeight;
+  if (w !== undefined && w !== null && w !== '' && Number.isFinite(+w)) return Math.max(1, Math.min(100, +w));
+  return isThermistor(el) ? 25 : 100;
+}
+// the next shown value: old + (new - old) * weight %
+export const smoothStep = (old, v, weight) => Number.isFinite(old) && Number.isFinite(v) && weight < 100 ? old + (v - old) * weight / 100 : v;
+// a Counter's Sampling Period (1 to 10 seconds, as BruControl): its Rate is the counts per second over that window
+export const samplingPeriod = el => Math.max(1, Math.min(10, Number(el?.samplingPeriod) || 1));

@@ -1740,7 +1740,7 @@ the Setpoint instead of going past it.
   Predictive Hysteresis switch is not copied: Skynet's way is on). Help 168.
 
 
-6.24 **Calibrations on every reading, in plain boxes** (OakBarn Brewery, 2026-11-09: "adding those calibrations are good as they are
+6.24 **Calibrations and Smoothing on every reading, in plain boxes** (OakBarn Brewery, 2026-11-09: "adding those calibrations are good as they are
 similar to other programs and not proprietary to BruControl"; "build a Calibration with Measured Voltage vs PWM %"). A Temperature
 Probe, an Analog In and a Flow meter have a **Calibrations** list. Each calibration works on the result of the one before, top to
 bottom (layered, as BruControl's): **Linear Offset**, **Linear Multiplier**, **Linear Divider**, **Floor**, **Ceiling**, **Thermistor
@@ -1749,6 +1749,13 @@ bottom (layered, as BruControl's): **Linear Offset**, **Linear Multiplier**, **L
   remove, and a switch to turn one off without losing it. A probe's Properties show them as one line (More calibrations) with the ⬢.
 - **Where they start:** a probe and a flow meter (its rate) start from their own reading (after the probe type's formula and its
   offsets); an Analog In with calibrations starts from its raw 0-1023 reading (instead of its Signal settings), as in BruControl.
+- **Smoothing** (OakBarn Brewery, 2026-11-09: "Smoothing might be added to more things than a Counter"; "my 10K NTC would be better
+  with smoothing as they sometimes jump"; BruControl's Avg Weight): **Smoothing %** (`avgWeight`) is how much each new reading counts;
+  the shown value moves that many % of the way to it, 100 = none. On every Temperature Probe, Analog In, Flow meter (the rate; the
+  Total never), Scale (weight and volume; Auto tare still works) and Counter. Empty = **25 % for a thermistor (NTC) probe**
+  (BruControl's default), 100 % for everything else. A Counter gets a **Rate** (`.rate`): counts per second over its **Sampling
+  Period** (1 to 10 seconds, empty = 1, as BruControl's Counter Input), then smoothed; the Count never is. A Process, an Alarm and the
+  Tab see the smoothed number; `.raw` is the reading before smoothing. The Importer keeps Avg Weight as Smoothing %. Help 171.
 - **Measured volts** on a PWM output and an Analog output: pairs of its setting (a PWM output's %) and the volts measured there with a
   meter, because a DAC seldom gives exactly 10 V at full and each one is different. It shows `≈ 7.0 V` beside the value, a Process
   reads `.volts` and sets one: `My_DAC.volts = 7.5` sets the % the pairs say gives 7.5 V.
@@ -3360,5 +3367,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Changed Rules 19.2 and 18.31 (OakBarn Brewery: "Both", "if we use the size rather than the gallons it will draw better in proportion", "Advertized gallons could also be wrong", "add that as a Field (Read and Display Only)", "Also missing is Deadspace and Safe Element Volume"): a Diameter vessel is drawn by its real size; read only Calculated Volume; Dead space and Safe Element Volume on every Vessel; an integrated Vessel Device's Properties have its Size again. Number boxes take decimals (15.5). Help 133 and 135 updated. Checked against both programs (the Importer's Build page is the same Panel; its Vessels step passes Height and Diameter to the builder). (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
+- 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
