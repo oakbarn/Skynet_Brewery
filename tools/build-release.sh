@@ -45,8 +45,22 @@ cp -p help/27-minimum-equipment.md "$OUT/Minimum_Equipment_and_Limitations.txt"
 
 if command -v makensis >/dev/null; then
   EXE="Skynet_Brewer_Setup_$VERSION.exe"
-  makensis -V2 -DSRC="$(pwd)/$STAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" install/windows/SkynetBrewer.nsi
+  # Signing (docs/Code_Signing_Setup.md): only when the release workflow has set everything tools/sign-exe.sh needs.
+  # Otherwise the Setup .exe is built unsigned, as before.
+  SIGN=()
+  rm -f "$OUT/signing.log"
+  if [ -n "${SKYNET_SIGN_JAR:-}" ] && [ -n "${SKYNET_SIGN_ENDPOINT:-}" ] && [ -n "${SKYNET_SIGN_ACCOUNT:-}" ] \
+     && [ -n "${SKYNET_SIGN_PROFILE:-}" ] && [ -n "${SKYNET_SIGN_TOKEN:-}" ]; then
+    export SKYNET_SIGN_LOG="$(pwd)/$OUT/signing.log"
+    : > "$SKYNET_SIGN_LOG"
+    SIGN=(-DSIGN_SCRIPT="$(pwd)/tools/sign-exe.sh")
+    echo "Signing is set up: the Setup .exe and its Uninstall .exe will be signed."
+  else
+    echo "Signing is not set up, so the Setup .exe is not signed (see docs/Code_Signing_Setup.md)."
+  fi
+  makensis -V2 -DSRC="$(pwd)/$STAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$EXE"
+  [ -f "$OUT/signing.log" ] && cat "$OUT/signing.log"
 else
   echo "NSIS (makensis) is not installed, so no Windows installer was built. On Linux: sudo apt install nsis"
 fi

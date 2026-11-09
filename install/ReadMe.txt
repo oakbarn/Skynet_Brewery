@@ -63,7 +63,7 @@ WINDOWS, THE EASY WAY (INSTALLER)
 1. Close the panel if it is running (Ctrl+C in its black window, then close it).
 2. Double-click Skynet_Brewer_Setup_<date>.exe.
    Windows may say "Windows protected your PC". Click "More info", then "Run anyway".
-   (The installer is not signed with a paid certificate, that is all.)
+   (A brand-new or unsigned installer does this for a while, that is all.)
 3. Keep the folder C:\Brewing\BrewPanel and click Install.
    If Node.js is missing it offers to install it (Windows asks for permission).
    If you had the panel straight in C:\Brewing before, it offers to copy your data across.
