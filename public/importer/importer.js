@@ -4,8 +4,9 @@
 // 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
 import { startConnect, connectState } from './connectpage.js';
 import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from './connect.js';
-import { parseLabel } from '../naming.js';
+import { parseLabel, widgetTypeId } from '../naming.js';
 import { vbFromImport } from '../vesselbuilder.js';
+import { BOOL_STYLES } from '../semi.js';
 import { glossBold, GLOSSARY } from './glossary.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -365,7 +366,9 @@ const shownName = e => e.noDisplay ? e.bru : (e.display || e.bru);      // what 
 // The name column (first asked as two columns, OakBarn Brewery, 2026-11-08: "Skynet Name should read Skynet Name with DisplayName and a new Column Skynet Name
 // with Label that is updated every time a Label is populated (and updated if change)"): the suggested name with the Label part made
 // from the Display Name, and with the Label typed (a space becomes ~, public/naming.js parseLabel, the Panel's own rule)
-const nameWith = (e, label) => e.pre && e.tabId && state.names !== 'bru' ? `${e.pre}_${parseLabel(label) || '…'}_${e.tabId}` : e.name;
+// a Boolean Widget's kind letters follow the Style picked on its page (SW, PB, PL, LED, Rule 3.14)
+const preOf = e => { const st = 'style' in e && pickOf(e)?.style, s = st && BOOL_STYLES.find(x => x[0] === st); return s ? 'wgt_' + widgetTypeId({ type: s[2], boolStyle: st }) : e.pre; };
+const nameWith = (e, label) => e.pre && e.tabId && state.names !== 'bru' ? `${preOf(e)}_${parseLabel(label) || '…'}_${e.tabId}` : e.name;
 const pickOf = e => state.itemPicks?.[itemKey(e)];
 const showOf = e => pickOf(e)?.show ?? e.show !== false;
 // One Skynet Name column (OakBarn Brewery, 2026-11-08: "Update the SkyNet Name After the label is filled so always use just the label
@@ -389,7 +392,7 @@ const allItems = () => [...(state.r?.portItems ?? []), ...(state.r?.appItems ?? 
 // the tick box, the Label box and the Show box, the same on every page
 function pickInput(ev) {
   const t = ev.target, k = t.dataset?.item;
-  if (!k || !t.matches?.('.itemTick, .itemLabel, .itemShow')) return false;
+  if (!k || !t.matches?.('.itemTick, .itemLabel, .itemShow, .itemStyle, .itemLink')) return false;
   state.itemPicks ??= {};
   const e = allItems().find(x => itemKey(x) === k);
   const p = state.itemPicks[k] ??= { tick: false, label: '' };
@@ -400,16 +403,30 @@ function pickInput(ev) {
   }
   if (t.classList.contains('itemLabel')) { p.label = t.value; if (t.value.trim()) t.classList.remove('blankLabel'); }
   if (t.classList.contains('itemShow')) p.show = t.checked;
+  if (t.classList.contains('itemStyle')) p.style = t.value;      // the name column follows its kind letters
+  if (t.classList.contains('itemLink')) p.link = t.value;
   if (e) for (const n of document.querySelectorAll(`.nmLabel[data-item="${CSS.escape(k)}"]`)) n.innerHTML = nmLabel(e, p.label);
   saveProgress();
   return true;
 }
 // the Labels and Show boxes as the convert gets them (by BruControl element ID)
 const picksSent = () => {
-  const labels = {}, shows = {};
-  for (const [k, p] of Object.entries(state.itemPicks ?? {})) { if (p.label?.trim()) labels[k] = p.label.trim(); if (typeof p.show === 'boolean') shows[k] = p.show; }
-  return { labels, shows };
+  const labels = {}, shows = {}, styles = {}, links = {};
+  for (const [k, p] of Object.entries(state.itemPicks ?? {})) {
+    if (p.label?.trim()) labels[k] = p.label.trim(); if (typeof p.show === 'boolean') shows[k] = p.show;
+    if (p.style) styles[k] = p.style; if (p.link) links[k] = p.link;
+  }
+  return { labels, shows, styles, links };
 };
+// A Boolean Widget's Style and Linked Device (Rule 1.20, OakBarn Brewery 2026-11-09: "Think of it like a clone in the action but a
+// Switch, slider or Led in appearance"): the same choices as its Properties in the Panel (public/semi.js)
+const BOOL_HEADS = '<th title="Which Boolean Widget it becomes: how it looks and how a tap works. It can\'t be changed after the import.">Becomes</th><th title="It acts like a Clone of this Device: the two turn ON and OFF together. None: it only shows its own ON / OFF.">Linked Device</th>';
+function boolCells(e) {
+  const k = esc(itemKey(e)), pick = pickOf(e), st = pick?.style || e.style || 'switch', ln = pick?.link ?? e.link ?? '';
+  const devs = (state.r?.linkable ?? []).map(d => [d.key, `${d.label || d.bru} (${d.tab})`]).sort((a, b) => a[1].localeCompare(b[1]));
+  return [`<select class="itemStyle" data-item="${k}" aria-label="What ${esc(e.bru)} becomes">${BOOL_STYLES.map(([key, word, , tip]) => `<option value="${esc(key)}" title="${esc(tip)}"${key === st ? ' selected' : ''}>${esc(word)}</option>`).join('')}</select>`,
+    `<select class="itemLink" data-item="${k}" aria-label="Linked Device of ${esc(e.bru)}"><option value="">None</option>${devs.map(([key, word]) => `<option value="${esc(key)}"${key === ln ? ' selected' : ''}>${esc(word)}</option>`).join('')}</select>`];
+}
 // No box may be blank (OakBarn Brewery, 2026-11-08: "Fields cannot be blank"): the blank ones are marked red and named in a message
 async function noBlanks(box) {
   const labels = [...box.querySelectorAll('.itemLabel:not([data-out])')].filter(b => !b.value.trim());
@@ -472,8 +489,8 @@ function tell(title, html) {
 // ---- The Widget pages (OakBarn Brewery, 2026-11-08: "After Your Tabs, add pages for all Widgets, with a category for each Skynet Widget
 // type. Import all BruControl Application Elements ... as Skynet equivalent Widgets"): first every Skynet Widget type and what came in
 // as one, then a page for each kind found, with the same Display Name, tick, Label and Show columns as the items.
-const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Switch Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
-  ['Chart Widget', 'Chart'], ['Push Button Widget', ''], ['Pulse Button Widget', ''], ['LED Widget', ''], ['Time Widget', ''], ['DateTime Widget', ''],
+const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
+  ['Chart Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
   ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
   ['Manual Pump Widget', ''], ['Override button Widget', '']];
 const widgetKeep = e => (state.keepTabs ?? new Set(state.r.tabs.map(t => t.name))).has(e.tab);
@@ -499,12 +516,16 @@ function widgetsPage(box) {
     state.accept = forward;
     return;
   }
-  const page = pages[i - 1], list = all.filter(e => e.page === page && widgetKeep(e));
+  const page = pages[i - 1], list = all.filter(e => e.page === page && widgetKeep(e)), bool = list.some(e => 'style' in e);
   box.innerHTML = `<div class="card"><p>Your BruControl <b>${esc(page)}</b>, each now a Skynet <b>${esc(list[0]?.widget ?? 'Widget')}</b>. Give each one a
       <b>Label</b> (tick the box to copy its Display Name), and keep <b>Show</b> ticked to show the Label on the Tab. A Widget's suggested
-      Skynet name is <code>wgt_</code>, its kind, the Label and the Tab ID (Rule 3.14). No Label may be blank. Then <b>Accept</b>.</p></div>
-    <div class="card"><div class="vesWrap"><table class="itemTable"><tr><th>#</th><th>BruControl name</th>${pickHeads}<th>Skynet Widget</th>${nameHeads}<th>Tab</th></tr>
-    ${list.map((e, n) => row([`${n + 1}`, esc(e.bru), ...pickCells(e), esc(e.widget), nameCell(e), esc(e.tab)], ['n'])).join('')}</table></div></div>`;
+      Skynet name is <code>wgt_</code>, its kind, the Label and the Tab ID (Rule 3.14). No Label may be blank. Then <b>Accept</b>.</p>
+      ${bool ? `<p>Each one becomes a Skynet <b>Boolean Widget</b> (Rule 1.20). Pick <b>Becomes</b>: which Boolean Widget it is (Switch, Slider, Checkbox,
+      Lighted Button, Push Button, Pulse Button or LED). Each is its own Widget, so once imported a Slider stays a Slider. Pick a <b>Linked
+      Device</b> to make it act like a Clone of that Device: turn one ON and the other turns ON too, on any Tab, with no Process. Only your
+      imported Devices with an ON / OFF state are listed. The Linked Device can be changed later in its Properties.</p>` : ''}</div>
+    <div class="card"><div class="vesWrap"><table class="itemTable"><tr><th>#</th><th>BruControl name</th>${pickHeads}<th>Skynet Widget</th>${bool ? BOOL_HEADS : ''}${nameHeads}<th>Tab</th></tr>
+    ${list.map((e, n) => row([`${n + 1}`, esc(e.bru), ...pickCells(e), esc(e.widget), ...(bool ? boolCells(e) : []), nameCell(e), esc(e.tab)], ['n'])).join('')}</table></div></div>`;
   box.oninput = box.onchange = pickInput;
   state.accept = async () => { if (await noBlanks(box)) forward(); };
 }

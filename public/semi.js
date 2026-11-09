@@ -57,3 +57,42 @@ export function checkControlled(elements) {
   }
   return { errors, cleared };
 }
+
+// ---- The Boolean Widgets (OakBarn Brewery, 2026-11-09: "Boolean Widgets would include sub classes: Switches, Sliders, LEDs and maybe
+// others ... Think of it like a clone in the action but a Switch, slider or Led in appearance ... I like the subclass as it fits more":
+// "a Slider Widget can Only be a Slider Widget"). Every ON / OFF Semi_Widgets_Device above is a Boolean Widget, and each sub-Widget is
+// its own Widget, picked from Boolean ➕: its look is fixed when it is made and can't be changed in its Properties. With a Linked
+// Device (device_controlled) any of them acts like a Clone of that Device. The Slider, Checkbox and Lighted Button work as a Switch
+// (a tap turns it ON, another OFF), so inside they are a Switch with a boolStyle that is never changed; their own name letters (Rule
+// 3.14) are in public/naming.js. [key, what it is called, its element type, a short tip]
+export const BOOL_CLASS = 'Boolean Widget';
+export const BOOL_STYLES = [
+  ['switch', 'Switch', 'switch', 'A tap turns it ON, another tap turns it OFF.'],
+  ['slider', 'Slider', 'switch', 'A sliding ON / OFF switch: the knob slides right and turns green for ON, left for OFF. A tap slides it.'],
+  ['checkbox', 'Checkbox', 'switch', 'A tick box: ticked is ON. A tap ticks or unticks it.'],
+  ['lighted', 'Lighted Button', 'switch', 'A button with a lamp that stays lit while ON. A tap turns it ON or OFF.'],
+  ['pushButton', 'Push Button', 'pushButton', 'ON only while it is held down; OFF when let go.'],
+  ['pulseButton', 'Pulse Button', 'pulseButton', 'Each tap gives one 100 ms ON.'],
+  ['led', 'LED', 'led', 'A light that only shows ON or OFF. A tap does nothing.'],
+];
+const STYLE_BY_KEY = new Map(BOOL_STYLES.map(s => [s[0], s]));
+// the Switch sub-Widgets drawn by Skynet (the plain Switch is the ON / OFF button it always was)
+export const SWITCH_LOOKS = ['slider', 'checkbox', 'lighted'];
+// which Boolean Widget it is: a Switch's own boolStyle, or its type ('' when it is not a Boolean Widget)
+export function boolStyleOf(el) {
+  if (!hasDeviceControlled(el)) return '';
+  if (el.type === 'switch' && SWITCH_LOOKS.includes(el.boolStyle)) return el.boolStyle;
+  return el.type;
+}
+export const boolStyleName = key => STYLE_BY_KEY.get(key)?.[1] ?? '';
+export const boolStyleTip = key => STYLE_BY_KEY.get(key)?.[3] ?? '';
+export const isBoolStyle = key => STYLE_BY_KEY.has(key);
+// Makes a new element (an import) the Boolean Widget named by key: its element type and boolStyle. Only used when it is made.
+export function setBoolStyle(el, key) {
+  const s = STYLE_BY_KEY.get(key);
+  if (!s || !el) return el;
+  el.type = s[2];
+  if (el.type === 'switch' && SWITCH_LOOKS.includes(key)) el.boolStyle = key; else delete el.boolStyle;
+  if (el.type === 'led') el.look = 'indicator';
+  return el;
+}
