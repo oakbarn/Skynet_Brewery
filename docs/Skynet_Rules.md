@@ -1686,6 +1686,21 @@ with an **Open wire and a Close wire**, or a motor that turns forward on one rel
 - **Both programs:** the Panel's Brain switches the two Ports; the BruControl Importer keeps BruControl's DualThrowPortNum (-1 =
   none) and DualThrowDelay and lists each one in the Import notes. Help 167.
 
+
+6.23 **Predictive Hysteresis: no overshoot, never more starts** (OakBarn Brewery, 2026-11-09: "I think of it as smoothing the
+overshoot. Maybe make all the Hysteresis Predictive unless that could hurt a compressor type hardware"). Every Hysteresis (the
+Hysteresis Device, a Heating Element's Hysteresis method, a Cool / Warm Pump's Hysteresis) is **Predictive** unless its **Predictive**
+switch is turned off. After it turns off, the heat (or cold) already on its way keeps the reading going past the OFF point. Skynet
+watches how far it coasts each time (averaging the last runs) and turns off that much **before** the Target, so the reading settles at
+the Target instead of going past it.
+- **Safe for a compressor:** the ON point moves down by the same amount, so the swing between ON and OFF, and how often it starts, stay
+  the same as without Predictive. The **On delay** (the shortest time off before it may start again) is always kept. The early OFF is
+  never more than half the On offset.
+- **What it costs:** the low point of each swing is lower by the same amount (for cooling: the high point is higher).
+- It learns again after its method changes. Switch it off for the plain BruControl way (`predictive` off in its Properties).
+- **Both programs:** the Panel's Brain runs it; the BruControl Importer leaves every imported Hysteresis Predictive (BruControl's own
+  Predictive Hysteresis switch is not copied: Skynet's way is on). Help 168.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2839,6 +2854,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
