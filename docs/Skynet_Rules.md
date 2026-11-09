@@ -1823,8 +1823,13 @@ picks which of its settings it uses; every setting is in its Properties and the 
   Database now** is a tick box; unticked, Save is Exit (No Database). **Pause** (only a person) hides it, and it pops up again in 5
   minutes. The Process waits until it is saved.
 - **Both programs:** the BruControl Importer makes a Hydrometer Input a Tilt with its Tilt Color on the same port, and its
-  Hydrometers page lists the same Templates with Tilt Color and Hardware ID. Bluetooth reading (the Pi's own, or an ESP32) is the next
-  step; the cloud later. Help 170.
+  Hydrometers page lists the same Templates with Tilt Color and Hardware ID. Help 170.
+- **Bluetooth** (OakBarn Brewery, 2026-11-09: "Two PRs", Bluetooth the second): a **listener** near the fermenter hears the adverts
+  and sends them as they are to `POST /api/hydrometer/bluetooth` (same rules as Wi-Fi: your own network, or the API key). Two
+  listeners: an ESP32 with `firmware/ESP32_Hydrometer` (works with any Brain, Windows too), or a Raspberry Pi's own Bluetooth
+  (`firmware/Pi_Bluetooth`). The Brain reads the adverts itself: a Tilt (any Tilt kind) by its Tilt Color, a RAPT Pill by its Hardware ID
+  (its Bluetooth address, offered in the Hardware ID box once heard). Only Hydrometers whose Connection is Bluetooth take them. A real
+  reading stops the Simulator's pretend one for 10 minutes. The makers' clouds come later.
 
 ## 7. Pictures
 
@@ -3424,3 +3429,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
+- 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")

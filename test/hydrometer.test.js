@@ -11,7 +11,7 @@ import { TYPE_CODES, RESERVED_TYPE_IDS, defaultCode, suggestName, portKeys } fro
 import { itemKind, guessPartDetails, cleanPartDetails } from '../public/importer/connect.js';
 import {
   HYDRO_MODELS, HYDRO_MODEL_KEYS, TILT_COLOR_NAMES, hydroGrey, hydroMissing, hydroClash, hydroConnection, sgToPlato, platoToSg, abv, readSg,
-  hydroReadings, parseWifiReport, hydroFor, simReport, gravitySeries, convertGravity,
+  hydroReadings, parseWifiReport, hydroFor, simReport, gravitySeries, convertGravity, decodeTilt, decodeRapt, decodeBle, hydroForBle,
 } from '../public/hydrometer.js';
 
 // the Templates
@@ -138,6 +138,36 @@ assert.ok(await until(() => store.getProp('Step', 'value') === 2));
 assert.equal(store.getProp('PI_200_Hydro_Red_FE', 'value'), 1.012, 'a hand reading goes into a Hydrometer too');
 assert.equal(store.getProp('PI_200_Hydro_Red_FE', 'abv'), 6.3);
 assert.deepEqual(logged, ['OG_Value'], 'Exit (No Database)');
+
+// ---- Bluetooth (PR 2): the adverts a listener (ESP32_Hydrometer or the Pi's Bluetooth) sends, read by the Brain
+const h4 = n => n.toString(16).padStart(4, '0');
+const tiltAd = (id, major, minor) => '0215' + id + h4(major) + h4(minor) + 'c5';
+assert.deepEqual(decodeTilt(tiltAd('a495bb10c5b14b44b5121370f02d74de', 68, 1050)), { kind: 'tilt', color: 'Red', pro: false, sg: 1.05, tempF: 68 });
+assert.deepEqual(decodeTilt(tiltAd('a495bb60c5b14b44b5121370f02d74de', 675, 10512)), { kind: 'tilt', color: 'Blue', pro: true, sg: 1.0512, tempF: 67.5 }, 'a Tilt Pro sends ten times more');
+assert.equal(decodeTilt(tiltAd('a495bb10c5b14b44b5121370f02d74de', 999, 1050)), null, '999 = starting up, not a reading');
+assert.equal(decodeTilt(tiltAd('0000bb10c5b14b44b5121370f02d74de', 68, 1050)), null, 'another iBeacon is not a Tilt');
+{
+  const b = new DataView(new ArrayBuffer(23)); b.setUint8(0, 0x50); b.setUint8(1, 0x54); b.setUint8(2, 1);
+  [0x78, 0xe3, 0x6d, 0x01, 0x02, 0x03].forEach((x, i) => b.setUint8(3 + i, x));
+  b.setUint16(9, Math.round((20 + 273.15) * 128)); b.setFloat32(11, 1048.5); b.setInt16(15, 0); b.setInt16(17, 0); b.setInt16(19, 16 * 16); b.setInt16(21, 87 * 256);
+  const hex = [...new Uint8Array(b.buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
+  const r = decodeRapt(hex);
+  assert.equal(r.id, '78:e3:6d:01:02:03', 'version 1 carries its MAC'); assert.equal(r.sg, 1.0485); assert.equal(Math.round(r.tempF * 10) / 10, 68);
+  assert.equal(r.battery, 87); assert.equal(r.angle, 0, 'standing straight up');
+  assert.equal(decodeRapt(hex, 'AA:BB:CC:DD:EE:FF').id, 'aa:bb:cc:dd:ee:ff', 'the Bluetooth address the listener heard comes first');
+  const both = decodeBle({ address: '78:E3:6D:01:02:03', rssi: -81, mfg: { 76: tiltAd('a495bb20c5b14b44b5121370f02d74de', 64, 1012), 16722: hex } });
+  assert.deepEqual(both.map(x => x.kind + (x.color ?? '') + x.rssi), ['tiltGreen-81', 'rapt-81']);
+  const els = [{ type: 'hydrometer', model: 'tiltPro', color: 'Green', name: 'G' }, { type: 'hydrometer', model: 'raptPill', connection: 'bluetooth', hwId: '78E36D010203', name: 'R' },
+    { type: 'hydrometer', model: 'raptPill', connection: 'cloud', hwId: 'aa:bb:cc:dd:ee:ff', name: 'Cloud' }];
+  assert.equal(hydroForBle(els, both[0]).name, 'G', 'any Tilt kind, by its Color');
+  assert.equal(hydroForBle(els, both[1]).name, 'R', 'a RAPT Pill by its Hardware ID, with or without the colons');
+  assert.equal(hydroForBle(els, { kind: 'rapt', id: 'aa:bb:cc:dd:ee:ff' }), undefined, 'only Hydrometers whose Connection is Bluetooth');
+  // the Brain: a real reading, and the Simulator stops pretending for that Hydrometer
+  const red = store.get('PI_200_Hydro_Red_FE'), t1 = Date.now();
+  hw.hydroReport(red, decodeTilt(tiltAd('a495bb10c5b14b44b5121370f02d74de', 65, 1031)), t1, true);
+  assert.equal(store.getProp(red.name, 'sg'), 1.031); assert.equal(store.getProp(red.name, 'lost'), false);
+  assert.ok(hw.hydroReal.get(red.name) === t1, 'a real reading is remembered, so the Simulator leaves it alone for 10 minutes');
+}
 hw.stop?.();
 clearTimeout(store._persistTimer);
 console.log('hydrometer tests passed');

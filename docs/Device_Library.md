@@ -467,8 +467,10 @@ One Device for every kind of hydrometer. Its **Template** picks which settings i
   `.rssi`, `.angle`, `.lost` (true after its Lost signal minutes), `.lastseen`, `.og` (a Process may set it) and `.abv`.
 - **Wi-Fi:** it sends its readings to `http://<the Brain>:<port>/api/hydrometer` (from the home network; from anywhere else add
   `?key=` and the API key).
-- **Bluetooth** reading (the Pi's own, or an ESP32) comes in the next PR; the cloud later. Until then the Simulator shows a pretend
-  fermentation.
+- **Bluetooth:** a listener near the fermenter sends what it hears to `/api/hydrometer/bluetooth`: an ESP32 with
+  `firmware/ESP32_Hydrometer`, or a Raspberry Pi's own Bluetooth (`firmware/Pi_Bluetooth`). A Tilt is found by its Tilt Color, a RAPT
+  Pill by its Hardware ID (its Bluetooth address). The cloud comes later. On a Simulator Interface it shows a pretend fermentation until
+  a real reading comes.
 - **Read by hand** (a Refractometer or a Glass hydrometer) is not a Device: the Process command `take_reading Name` asks for it.
 - **BruControl Import:** a Hydrometer Input becomes a Tilt with the same Tilt Color on the same port.
 
@@ -562,3 +564,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-08: 4.2 Pump: Model with Pump facts, Power, Use, Speed control and Speed % (PWM), hover facts (Rule 18.32, Help 163). (thread "List DC brewing pumps for the Panel")
 - 2026-11-08: 5.3 Vessel Device: can be made step by step with the Vessel Device Builder (Skynet Rule 19.5, Help 166).
 - 2026-11-09: Added 4.17 Hydrometer (Type ID Hydro, virtual ports 200+), with its Templates; Hydro taken off Reserved (Skynet Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
+- 2026-11-09: 4.17 Hydrometer reads Bluetooth: Tilts by Tilt Color, RAPT Pills by Hardware ID, heard by an ESP32 (ESP32_Hydrometer) or a Raspberry Pi's own Bluetooth (Pi_Bluetooth) (Skynet Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
