@@ -37,8 +37,8 @@ store.setProp('Flow', 'display', '');
 assert.equal(store.getProp('Flow', 'value'), 2, '"" puts back its Properties pick');
 assert.throws(() => store.setProp('Flow', 'display', 'Volts'), /display must be one of/);
 assert.throws(() => store.setProp('Probe', 'display', 'Total'), /only one value/);
-store.setProp('PID', 'display', 'Target');
-assert.equal(store.getProp('PID', 'display'), 'target');
+store.setProp('PID', 'display', 'Target');      // the old word still works
+assert.equal(store.getProp('PID', 'display'), 'setpoint');
 
 // the Importer: Show Secondary Value off -> only the Primary Value
 const xml = `<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.org/2001/XMLSchema-instance">

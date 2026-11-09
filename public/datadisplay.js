@@ -4,15 +4,15 @@
 import { isHeatElem } from './heatmethod.js';
 
 // [key, the words shown]; the first is the default (what it showed before)
-const CTL = [['both', 'Output % and Target'], ['output', 'Output %'], ['reading', 'Reading (its probe)'], ['target', 'Target']];
+const CTL = [['both', 'Output % and Setpoint'], ['output', 'Output %'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']];
 export const DISPLAY_CHOICES = {
   pid: CTL, deadband: CTL,
-  hysteresis: [['both', 'ON / OFF and Target'], ['state', 'ON / OFF'], ['reading', 'Reading (its probe)'], ['target', 'Target']],
+  hysteresis: [['both', 'ON / OFF and Setpoint'], ['state', 'ON / OFF'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']],
   dutyCycle: [['both', 'Duty cycle %'], ['state', 'ON / OFF now']],
   flowMeter: [['both', 'Rate and Total'], ['rate', 'Rate'], ['total', 'Total']],
   scale: [['both', 'Volume and Weight'], ['volume', 'Volume'], ['weight', 'Weight']],
   pwmOut: [['both', 'Value and Volts'], ['value', 'Value'], ['volts', 'Volts (Measured volts)']],
-  heat: [['both', 'What it is doing and its Target'], ['output', 'Output % or ON / OFF'], ['reading', 'Reading (its probe)'], ['target', 'Target']],
+  heat: [['both', 'What it is doing and its Setpoint'], ['output', 'Output % or ON / OFF'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']],
 };
 DISPLAY_CHOICES.analogOut = DISPLAY_CHOICES.pwmOut;
 const kindOf = el => isHeatElem(el) ? 'heat' : el?.type;
@@ -25,9 +25,10 @@ export function displayChoices(el) {
 }
 // the key a Process or the Properties gave, by key or by its words (any capitals); throws on a word it doesn't have
 export function displayKey(el, v) {
-  const t = String(v ?? '').trim().toLowerCase(); if (!t) return '';
+  let t = String(v ?? '').trim().toLowerCase(); if (!t) return '';
+  if (t === 'target') t = 'setpoint';      // the old word (Setpoint is the word now)
   const c = displayChoices(el) ?? DISPLAY_CHOICES[kindOf(el)] ?? [];
-  const hit = c.find(([k, w]) => k === t || w.toLowerCase() === t || w.toLowerCase().replace(/\s*\(.*\)$/, '') === t);
+  const hit = c.find(([k, w]) => k === t ||  w.toLowerCase() === t || w.toLowerCase().replace(/\s*\(.*\)$/, '') === t);
   if (!hit) throw new Error(`"${el?.name}": display must be one of ${c.map(([, w]) => w.replace(/\s*\(.*\)$/, '')).join(', ') || '(nothing: it has one value)'}`);
   return hit[0];
 }

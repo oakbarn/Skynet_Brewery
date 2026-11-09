@@ -1,6 +1,6 @@
 # Data Display: pick which value shows
 
-Some Devices have more than one value. A Flow meter has its Rate and its Total, and a PID has its Output % and its Target.
+Some Devices have more than one value. A Flow meter has its Rate and its Total, and a PID has its Output % and its Setpoint.
 **Data Display** (Skynet Rule 6.26) picks which of them shows on the Tab. BruControl had a Primary Value and a Show Secondary
 Value switch; Skynet lists every value the Device has.
 
@@ -8,10 +8,10 @@ Value switch; Skynet lists every value the Device has.
 
 | Device | Data Display choices (the first shows them all, as before) |
 |---|---|
-| PID, Deadband | Output % and Target, Output %, Reading (its probe), Target |
-| Hysteresis | ON / OFF and Target, ON / OFF, Reading (its probe), Target |
+| PID, Deadband | Output % and Setpoint, Output %, Reading (its probe), Setpoint |
+| Hysteresis | ON / OFF and Setpoint, ON / OFF, Reading (its probe), Setpoint |
 | Duty Cycle | Duty cycle %, ON / OFF now |
-| Heating Element (run by a method) | What it is doing and its Target, Output % or ON / OFF, Reading (its probe), Target |
+| Heating Element (run by a method) | What it is doing and its Setpoint, Output % or ON / OFF, Reading (its probe), Setpoint |
 | Flow meter | Rate and Total, Rate, Total |
 | Scale | Volume and Weight, Volume, Weight |
 | PWM or Analog output with Measured volts | Value and Volts, Value, Volts |
