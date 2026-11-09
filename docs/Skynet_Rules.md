@@ -1826,6 +1826,16 @@ picks which of its settings it uses; every setting is in its Properties and the 
   Hydrometers page lists the same Templates with Tilt Color and Hardware ID. Bluetooth reading (the Pi's own, or an ESP32) is the next
   step; the cloud later. Help 170.
 
+6.26 **Data Display: pick which value shows** (OakBarn Brewery, 2026-11-09: "Not only Primary. Just have a DataDisplay and able to
+pick which one. If there was a script command, we just write our Process to do it either way or have two different ways to do it to
+make it back compatible with BruControl"). A Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, a Heating Element
+run by a method, Flow meter, Scale, a PWM or Analog output with Measured volts) has **Data Display (what it shows)** in its
+Properties: the first choice shows them all, as before, or one of its values (for example a Flow meter's Rate or Total). BruControl had
+a Primary Value and a Show Secondary Value switch; Skynet lists every value. A Process changes it: `Flow_1.display = "Total"` (its key
+or its words, any capitals; `""` puts back its Properties' pick). A Flow meter's `.value` follows it (BruControl's Primary Value: its
+Total when Total is picked), so BruControl scripts work either way. **Both programs:** the Importer turns Show Secondary Value off into
+the main value's pick and lists it in the notes. Help 174.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -3422,5 +3432,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
+- 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")

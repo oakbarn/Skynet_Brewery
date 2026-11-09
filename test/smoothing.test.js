@@ -69,4 +69,5 @@ assert.equal(a.avgWeight, 25);
 assert.ok(JSON.stringify(r).includes('Avg Weight'), 'the Import notes list it');
 clearTimeout(store._persistTimer);
 console.log('smoothing tests passed');
+await import('./datadisplay.test.js');      // Data Display (Rule 6.26); keeps package.json untouched
 process.exit(0);
