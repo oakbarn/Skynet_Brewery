@@ -20,7 +20,7 @@ import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, su
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
-import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
+import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
@@ -2093,6 +2093,13 @@ function buildEl(e) {
     facts(); n.addEventListener('mouseenter', facts);      // the Speed % as it is now (a Process may change it)
   }
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
+  // a Boolean Widget's drawn Style (Rule 1.20), when it has no picture of its own: a Slider (the green sliding switch), a Checkbox,
+  // or a Lighted Button (a button with a lamp lit while ON)
+  const bst = SEMI_KINDS[e.type] && !e.imageOff && !e.imageOn ? boolStyleOf(e) : '';
+  if (SWITCH_LOOKS.includes(bst)) n.classList.add('bs-' + bst);
+  if (bst === 'slider') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
+  if (bst === 'checkbox') n.append(h('div', { class: 'bschk' }));
+  if (bst === 'lighted') n.append(h('div', { class: 'ledbtn' }));
   if (btnKind(e) === 'pushbutton' || btnKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   if (vkKind(e) === 'list') {        // gGlobal List: pick the Text, the element gets that choice's Value
     const s = h('select', { class: 'vksel', ...(editing || e.readOnly ? { disabled: true } : {}) }, ...(e.items || []).map(i => h('option', { value: String(i.value) }, i.text || String(i.value))));
@@ -4309,8 +4316,10 @@ const ADD_MENU = [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Widgets with an ON / OFF state that can switch a Device (device_controlled)
-  [`Semi_Widgets_Devices (a Widget with an ON / OFF state; it can switch a Device)`, [
-    ['Switch (slide ON, slide OFF)', 'switch', 'sw_'], ['Push Button (ON only while held)', 'pushButton', 'pb_'],
+  [`Boolean Widgets (a Widget with an ON / OFF state; with a Linked Device it acts like a Clone of it)`, [
+    ['Switch (slide ON, slide OFF)', 'switch', 'sw_'], ['Slider (a sliding ON / OFF switch)', 'switch', 'sw_', { boolStyle: 'slider' }],
+    ['Checkbox (ticked is ON)', 'switch', 'sw_', { boolStyle: 'checkbox' }], ['Lighted Button (its lamp is lit while ON)', 'switch', 'sw_', { boolStyle: 'lighted' }],
+    ['Push Button (ON only while held)', 'pushButton', 'pb_'],
     ['Pulse Button (one 100 ms ON per tap)', 'pulseButton', 'pl_'], ['LED (a light that shows ON or OFF)', 'led', 'led_', { look: 'indicator', hideName: false }],
   ]],
   ['Widgets (app only, no board pin)', [
@@ -4537,7 +4546,7 @@ const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
   ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [d.menu ?? `${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + (d.lbl ?? d.word))])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
-  ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
+  ['semi', 'Boolean Widgets (Switch, Slider, Checkbox, buttons, LED) and the Manual Valve', [...amGroup('Boolean Widgets').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
     ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')], MANUAL_PUMP_ROW,
     ['Tap Water Valve (household hose bib Manual Valve Widget)', () => addIpFit('manualValve', 'tap')]]],
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
@@ -4573,7 +4582,7 @@ function fillAddType() {
   const adds = (sel, head, list, k) => fillPick(sel, head, k ? [['', list.find(x => x[0] === k)?.[2] || []]] : list.map(([, t, rows]) => [t, rows]));
   adds($('#devAdd'), 'Add Device', dev, $('#devKind').value); adds($('#wgtAdd'), 'Add Widget', wgt, $('#wgtKind').value);
   for (const s of $$('#editBar select[data-dev]')) fillPick(s, s.dataset.head, [['', dev.find(x => x[0] === s.dataset.dev)[2]]]);
-  fillPick($('#addBoolean'), 'Boolean ➕', [['', amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])])]]);     // Rule 4.5: the list first, like Probe
+  fillPick($('#addBoolean'), 'Boolean ➕', [['', amGroup('Boolean Widgets').map(r => [r[0], () => addThing(r[1], r[2], r[3])])]]);     // Rule 4.5: the list first, like Probe
   fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
   fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
   fillPick($('#addIpType'), 'Elbows, Tees …', [['TC Pipe Fittings', TC_FIT_ROWS()], ['Valve Tees and Supply Manifolds (Rule 5.35)', MF_ROWS()], ['IPs, couplings and caps', FIT_ROWS()]]);
@@ -5258,7 +5267,7 @@ function useTabProfile(e) {
   const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
   for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
   if (!p.valueType || hasIps(e) || isPropValve(e) || (!hasStateEl(e) && !hasValueEl(e))) return;    // pumps and valves show their pictures
-  if (['pushButton', 'pulseButton', 'led'].includes(e.type)) return;      // Semi_Widgets_Devices keep their own look (a button, a light)
+  if (['pushButton', 'pulseButton', 'led'].includes(e.type) || e.boolStyle) return;      // Boolean Widgets keep their own look (a button, a light, a Slider ...)
   const type = p.valueType === 'gauge' && hasStateEl(e) ? 'text' : p.valueType;
   e.look = lookFor(type, e);
   if (type === 'led' && hasStateEl(e) && ['digitalOut', 'switch'].includes(e.type)) e.tap = p.ledMode === 'momentary' ? 'hold' : 'toggle';
@@ -6167,7 +6176,7 @@ const SEMI_TIP = {
   led: 'It shows the Device ON or OFF. A Process that sets it switches the Device too. A tap does nothing.',
 };
 const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are turned by hand or by their board, so they are not.`, 'note'],
-  ['deviceControlled', 'Device controlled', 'devctl'],
+  ['deviceControlled', 'Linked Device', 'devctl'],
   ...(type === 'led' ? [] : [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path']]), ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']];
 // Calibrations on every reading (OakBarn Brewery, 2026-11-09, Rule 6.24), in plain boxes: a list, each one working on the result of the
 // one before (public/calibrations.js). A PWM or Analog output's Measured volts: pairs of output % and the volts measured there
@@ -6938,17 +6947,17 @@ const SND_TIPS = {
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
   ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
   ...wgtPlace(), wgtType('Sound Player')];
-// Semi_Widgets_Devices (Rule 1.20): the Switch, Push Button, Pulse Button and LED
+// Boolean Widgets (Semi_Widgets_Devices, Rule 1.20): the Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED
 const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on', 'path']] };
 const SEMI_TEXT_POP = { title: 'Text when off', fields: [['offText', 'Text when off', 'text']] };
 const semiWidgetFields = (type, it) => {
-  const k = SEMI_KINDS[type], led = type === 'led';
+  const k = SEMI_KINDS[type], led = type === 'led', bs = boolStyleOf(it), drawn = SWITCH_LOOKS.includes(bs);      // a Slider, Checkbox or Lighted Button is drawn by Skynet
   return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BR'}.state = true. It must be unique.` }),
-    ['deviceControlled', 'Device controlled', 'devctl', null, false, false, { tip: `${k.title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
-    ...(led ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
+    ['deviceControlled', 'Linked Device', 'devctl', null, false, false, { tip: `${k.title}: a ${BOOL_CLASS} (a Widget with an ON / OFF state). With a Linked Device it acts like a Clone of that Device: the two follow each other. ${drawn ? boolStyleTip(bs) : SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
+    ...(led || drawn ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
     ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
     ...(['switch', 'led'].includes(type) ? [['confirmation', '.confirmation (done by hand, then Done)', 'bool', false, false, false, { tip: CONFIRM_TIP }]] : []),
-    ...wgtPlace(), wgtType(k.title.replace(/ \(.*$/, ''))];
+    ...wgtPlace(), wgtType(`${boolStyleName(bs) || k.title} (a ${BOOL_CLASS})`, `Which ${BOOL_CLASS} it is. Each one is its own Widget, so its look is fixed: a Slider is always a Slider. To have another look, add that one from Boolean ➕.`)];
 };
 // the Label Widget: words on a Tab, nothing else
 const LBL_LOOK_POP = { title: 'Label look', fields: [['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px; empty = Default)', 'num']] };
