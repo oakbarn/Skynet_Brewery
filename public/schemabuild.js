@@ -69,7 +69,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   const fTab = hot ? (String(a.tab || '').trim().toLowerCase() === 'fermentor' ? 'Fermentors' : 'Fermentor') : 'Fermentor';
   const tab = hot ? String(a.tab || 'Brewhouse').trim() : fTab, tabId = defaultTabId(tab, []);
   const fTabId = hot ? defaultTabId(fTab, [tabId]) : tabId;
-  const dev = iface ?? { name: 'New_Mega_2560_1', id: 'NM', type: 'simulator', board: 'mega' };
+  const dev = iface ?? { name: 'New_Mega_2560_1', id: 'NM', connection: 'simulator', board: 'mega' };
   const devices = [dev], elements = [], used = new Set(taken.map(n => String(n).toLowerCase()));
   const isTaken = n => used.has(String(n).toLowerCase());
   let probeN = 0;

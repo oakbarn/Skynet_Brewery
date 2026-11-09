@@ -762,6 +762,13 @@ alm_Hops, sw_1 ... keep working. The **BruControl Import** uses the same pattern
 *Replaced:* pic_ + Label (Picture Widget, Rule 18.27), w_Text_N (Text Widget), alm_ + Label (Alarm), w_Value_N, w_Time_N,
 w_DateTime_N, and the sw_, pb_, pl_, led_ hints. (thread "Add hover help to clean dialogs")
 
+3.15 **Hidden names match what is shown.** (OakBarn Brewery, 2026-11-09: "if a Developer was using Skynet as Open Source, it might
+be better to have all hidden names correspond in some what to a shown counter point or have their own meaningful name.") A setting's
+hidden name (the one saved in the Schema, used by the code) is the name shown on screen, or a name that says what it is. First one:
+an Interface's **Connection** (USB, Ethernet, WiFi or Simulator) is saved as `connection`, and the real Connection of a board in the
+Simulator as `realConnection` (they were `type` and `realType`). An old Schema is changed over by itself when it is opened; nothing
+else changes for the user. Both programs: the BruControl Importer writes `connection` too.
+
 ## 4. Making things: the Build Tab
 
 4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
@@ -3336,3 +3343,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
+- 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
