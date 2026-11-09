@@ -18,6 +18,7 @@ import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwind
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
 import { isHeatElem, isCoolPump, HEAT_KEYS, PUMP_METHOD_KEYS } from './public/heatmethod.js';
+import { HYDRO_MODELS } from './public/hydrometer.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -192,6 +193,17 @@ function applyMethods(elements, details) {
     for (const k of keys) if (k !== 'onoff') { if (it.methods.includes(k)) el['methodSpot_' + k] = true; else delete el['methodSpot_' + k]; }
   }
 }
+// the Hydrometers page (Rule 6.25): a BruControl Hydrometer Input is a Skynet Hydrometer Device; the Template, Tilt Color and Hardware
+// ID picked on the page go onto it (the Panel's Properties show the same three)
+function applyHydros(elements, details) {
+  const by = new Map((elements ?? []).map(e => [e.name, e]));
+  for (const it of details?.hydro?.items ?? []) {
+    const el = by.get(it.name); if (el?.type !== 'hydrometer') continue;
+    if (HYDRO_MODELS[it.hydro]) { el.model = it.hydro; el.connection = HYDRO_MODELS[it.hydro].conns[0]; el.precision = HYDRO_MODELS[it.hydro].decimals; }
+    if (it.color) el.color = it.color;
+    if (it.hwId) el.hwId = it.hwId;
+  }
+}
 async function api(req, res, p, q) {
   const m = req.method;
   if (p === '/api/ping' && m === 'GET') return json(res, 200, { ok: true });     // the window checks the Importer is still running
@@ -356,6 +368,7 @@ async function api(req, res, p, q) {
     // the item pages' answers (OakBarn Brewery, 2026-11-08): per kind, how many, each found item's details, and the empty slots added
     out.itemDetails = partsAnswers(parts, conv);      // US or Metric, asked at the start: the vessels' sizes use it
     applyMethods(out.schema.elements, out.itemDetails);
+    applyHydros(out.schema.elements, out.itemDetails);
     const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
     if (tabsOut.length) out.warnings = [...out.warnings, `${tabsOut.length} Tab(s) were left unticked and not imported${itemsDropped ? `, with their ${itemsDropped} item(s)` : ''}${holdersDropped ? `${itemsDropped ? ' and' : ', with their'} ${holdersDropped} Placeholder(s)` : ''}: ${tabsOut.join(', ')}.`];
     if (dropped.length) out.warnings = [...out.warnings, `${dropped.length} Interface(s) (board(s)) with no items were not imported: ${dropped.join(', ')}.`];
@@ -411,7 +424,7 @@ const server = http.createServer(async (req, res) => {
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
     if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/semi.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/semi.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/hydrometer.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });

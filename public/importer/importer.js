@@ -554,6 +554,7 @@ function partState(page) {
 function fieldHtml(f, v, attrs, d = {}) {
   const help = f.help ? ` title="${esc(f.help)}"` : '';
   if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;
+  if (f.text) return `<input type="text" class="pf" maxlength="60" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;      // a Hydrometer's Hardware ID (Rule 6.25)
   // a box OakBarn Brewery has not made mandatory may stay at Pick one… (Rule 18.33)
   return `<select class="pf" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1"' : ''} aria-label="${esc(f.name)}"${help}>${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(!k && f.optional ? 'Pick one… (optional)' : n)}</option>`).join('')}</select>` +
     (v === 'user' ? ` <input type="text" class="pfUser" ${attrs} data-f="${f.k}User" maxlength="60" value="${esc(d[f.k + 'User'] ?? '')}" placeholder="Your words" aria-label="${esc(f.name)}: your own words">` : '');
