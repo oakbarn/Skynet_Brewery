@@ -48,7 +48,7 @@ alm_Hops_1 = false           turn it off
 "alm_PreHop_1" before = 00:05:00
 ```
 
-`alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false. `"alm_Hops_1" active = true` (the BruControl way) still works, but only so older Processes keep running: use the new style in new ones (Rule 16.9). One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
+`alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`: the BruControl Import changes BruControl's `"alm_Hops_1" active = true` into the new style. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
 
 ## Sound Player
 

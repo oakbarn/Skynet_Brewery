@@ -6621,7 +6621,7 @@ function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
     ['name', 'Name', 'text', null, false, 'b'],
-    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'}.active = true sounds it.`, 'infonote', 'alarm'],
+    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
     ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
