@@ -30,7 +30,7 @@ the Skynet Widget that does the same job:
 | Alarm | Alarm Widget |
 | Toggle Switch | Switch Widget |
 | Script (shows a Script's value) | Value Widget (joined to its Process when Processes come in) |
-| Chart | Chart Widget ([Help 159](159-chart-widget)) |
+| Chart | Graph Widget ([Help 159](159-graph-widget)) |
 | Inspector | none: it stays a grey Placeholder |
 
 **Since 2026-11-09 a Script element becomes a Script Widget** ([Help 172](172-script-widget)), not a Value Widget: it shows the
