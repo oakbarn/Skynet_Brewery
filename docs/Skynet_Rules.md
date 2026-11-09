@@ -2892,8 +2892,31 @@ might"; "label is always mandatory in any dialog"). In the Panel **and the BruCo
   until OakBarn Brewery decides; a box is never made mandatory without asking.
 - The **Label** is always mandatory, in every dialog (Rule 18.28). So are the Name (Rule 18.4) and the Port (Rule 18.28).
 - An optional dropdown reads **Pick one… (optional)**, an optional number box *(optional)*; only a blank mandatory box is marked red.
-- Mandatory now in the Importer's item pages: the Labels; on **Valves** only **Connection Type** and **Size** (Valve type and Voltage are
-  optional); **Watts** is optional (2026-11-08). The other item page boxes stay as they are until OakBarn Brewery reviews them.
+- **The test** (OakBarn Brewery, 2026-11-09: "If something is needed for something to work (like a Hall Effect Flow Meter), that field
+  cannot become blank ... Watts do not help the Program or Arduino to work, so it is just Handy Information. Volts, Amps, Watts might
+  be good info for a User to look at, but they do not affect the Program or an Arduino"): a box is mandatory when the program or the
+  board needs it to work. Handy information (Volts, Amps, Watts, a model) is optional. OakBarn Brewery still OKs each one.
+- A box needed by **some types only** (like a Tilt's Color) is greyed out for the types that don't use it. For a type that needs it,
+  leaving it blank brings up a pop-up, so the box is filled in or the Build is abandoned (Cancel, or ◀ Back in the Importer).
+- **The Panel and the Importer follow the same list** (OakBarn Brewery, 2026-11-09: "They would also be mandatory in the Skynet Panel").
+  The Importer may be more flexible only where it must be to import something, and only as an Importer exception written here.
+- **Mandatory now** (2026-11-09), in the Importer's item pages and in the Panel wherever the Panel has the same box:
+  - every **Label** (and Name and Port);
+  - Temperature Probes: **Probe type**;
+  - Valves: **Connection Type** and **Size**;
+  - Flow Meters: **Meter type**, and **Pulses per Gallon or Liter** for a meter that counts pulses (Hall effect, Turbine, Oval gear).
+    Panel: a Flow Meter's **Pulses per unit**;
+  - pH Meters: **Signal to the board**;
+  - Pressure Sensors: **Sensor type**, and **Highest pressure it reads** (not for a Pressure switch). Panel: an Analog input's **Value at
+    highest signal**;
+  - Hydrometers: **Hydrometer type**, and a Tilt's **Color** or any other kind's **Hardware ID** (Rule 6.25);
+  - Volume Meters: **How it measures**, and **Most it reads** for an Ultrasonic, Pressure or Float level sensor;
+  - Floats: **Contact** (Normally Open or Normally Closed);
+  - Digital Inputs: **Input type**.
+- **Optional** (handy information): Pump model and Power; Watts and Volts; Valve type and Voltage; pH meter type; Float type.
+- In the Panel a mandatory number box that is blank gets Rule 18.28's pop-up as soon as anything else but its Label, Interface or Port
+  is clicked (fill it in or Cancel). The Panel's other boxes on this list are dropdowns or switches that are never blank, or are picked
+  when the Device is added.
 
 ## 19. Vessel Rules
 
@@ -3008,6 +3031,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Rule 18.33 gets OakBarn Brewery's test: a box is mandatory when the program or the board needs it to work; handy information (Volts, Amps, Watts) is optional; a box needed by some types only is greyed for the others and has a fill-it-or-abandon pop-up. The list of mandatory boxes is written in the Rule. Checked against both programs: the Importer's item pages follow the list, and the Panel's Flow Meter Pulses per unit and Analog input Value at highest signal can no longer be left blank (the Panel's other boxes on the list are never blank). Help 165 updated. (thread "Set which Importer boxes are mandatory")
 - 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
 - 2026-11-09: Added Rule 6.23, Predictive Hysteresis (OakBarn Brewery: "smoothing the overshoot ... all the Hysteresis Predictive unless that could hurt a compressor"): on for every Hysteresis, learns the coast after OFF and turns off that much early, the ON point moves the same amount so it never starts more often; Help 168.

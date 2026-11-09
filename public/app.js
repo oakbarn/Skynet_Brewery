@@ -6314,6 +6314,10 @@ const VOLT_FIELD = (x = {}) => ['voltTable', 'Measured volts (its setting, the v
 // Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
 const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
 const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
+// A box the program or the board needs to work can't be left blank (Rule 18.33, OakBarn Brewery 2026-11-09: "If something is needed
+// for something to work, like a Hall Effect Flow Meter, that field cannot become blank"): blank, it gets Rule 18.28's pop-up at once,
+// so it is filled in or the dialog is Cancelled. The Label, Interface and Port may still be used.
+const MUST = (what, msg) => ({ guard: what, guardMsg: msg, guardNow: true, guardAllow: 'label device channel' });
 const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
@@ -6365,7 +6369,7 @@ const F = {
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'ON offset (positive = heat: on below setpoint - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -6483,7 +6487,7 @@ const SENSOR_FIELDS = {
 const SIGNAL_FIELDS = {
   raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
   twoPoint: [['cal1Raw', 'Point 1: raw reading', 'num'], ['cal1Value', 'Point 1: real value (e.g. pH 7)', 'num'], ['cal2Raw', 'Point 2: raw reading', 'num'], ['cal2Value', 'Point 2: real value (e.g. pH 4)', 'num'], ['offset', 'Extra offset', 'num']],
-  range: [['rangeLow', 'Value at lowest signal', 'num'], ['rangeHigh', 'Value at highest signal', 'num'], ['offset', 'Calibration offset', 'num']],
+  range: [['rangeLow', 'Value at lowest signal', 'num'], ['rangeHigh', 'Value at highest signal', 'num', null, false, false, MUST('Value at highest signal', 'The Value at highest signal cannot be left blank: the program needs it to turn the signal into a reading (the highest pressure, level ... it reads).')], ['offset', 'Calibration offset', 'num']],
 };
 // Stepper motors: the lists can be added to ("Add new ..."); a driver picked from the list fills in its usual settings
 // unit -> [shown on the tab, shown in the list]
@@ -7493,7 +7497,7 @@ function field(f, obj) {
   }
   if (x?.guard && out[1]) {       // a box that can't be left blank once the user is on it (Rule 18.28's pop-up)
     const i = out[1].matches?.('select, input, textarea') ? out[1] : out[1].querySelector?.('select, input, textarea');
-    if (i) Object.assign(i.dataset, { guard: x.guard, ...(x.guardAllow ? { guardAllow: x.guardAllow } : {}), ...(x.guardMsg ? { guardMsg: x.guardMsg } : {}) });
+    if (i) Object.assign(i.dataset, { guard: x.guard, ...(x.guardAllow ? { guardAllow: x.guardAllow } : {}), ...(x.guardMsg ? { guardMsg: x.guardMsg } : {}), ...(x.guardNow ? { guardNow: '1' } : {}) });
   }
   if (x?.grey && out[1]) {        // a setting this kind does not use: shown greyed out, never changed (a Hydrometer's Template, Rule 6.25)
     out[0]?.classList.add('greyed'); if (out[0]) out[0].title = x.grey;
