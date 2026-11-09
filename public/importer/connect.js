@@ -95,6 +95,10 @@ const HYDROS = [PICK, ...HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), 
 const TILT_COLORS = [PICK, ...TILT_COLOR_NAMES.map(c => [c, c])];
 const VOLUMES = [PICK, ['scale', 'Load cells (a scale)'], ['ultrasonic', 'Ultrasonic level sensor'], ['pressureLevel', 'Pressure (liquid height) sensor'], ['float', 'Float level sensor (many steps)'], ['flowTotal', 'Flow meter total'], ['sight', 'Sight glass (read by hand)'], USER];
 const FLOATS = [PICK, ['floatTop', 'Float switch, high level'], ['floatLow', 'Float switch, low level'], ['capacitive', 'Capacitive level switch'], ['optical', 'Optical level switch'], USER];
+// the boxes a type needs, or not (Rule 18.33): a meter that counts pulses needs its Pulses; a level sensor that sends a signal needs
+// the Most it reads to scale it
+const PULSE_METERS = new Set(['hall', 'turbine', 'ovalGear']);
+const SCALED_LEVELS = new Set(['ultrasonic', 'pressureLevel', 'float']);
 const CONTACT = [PICK, ['no', 'Normally Open (closes when it is made)'], ['nc', 'Normally Closed (opens when it is made)']];
 const DIN_TYPES = [PICK, ['DI', 'Direct Input (plain)'], ['DIN', 'DIN momentary push button (one trigger per press)'], ['PB', 'Push button (ON only while held)'], ['Toggle', 'Toggle button (press ON, press again OFF)'],
   ['Latch', 'Latching input (ON until reset)'], ['FlowSw', 'Flow switch'], ['Intlk', 'Door / lid / safety interlock'], ['EStop', 'Emergency stop'], ['Leak', 'Leak sensor'], ['Count', 'Pulse counter'], USER];
@@ -111,13 +115,17 @@ export const NOT_RECOMMENDED = {
   pump: { dutyCycle: PUMP_WHY, pid: PUMP_WHY, deadband: PUMP_WHY, precise: PUMP_WHY },
   heater: { pwm: 'A heating element has no speed. Speed (PWM) is for a pump, a fan or a motor. A heater on a PWM pin is run by Duty Cycle, PID, Deadband or Precise, which work out its % for you.' },
 };
+// Which boxes are mandatory (Rule 18.33, OakBarn Brewery 2026-11-09: "If something is needed for something to work, like a Hall Effect
+// Flow Meter, that field cannot become blank ... Volts, Amps, Watts might be good info for a User to look at, but they do not affect the
+// Program or an Arduino"): a box the program or the board needs is mandatory; handy information is optional. A box needed by some types
+// only has need(row): true = mandatory (blank = a pop-up, fill it or leave the page), false = greyed (notUsed says why), undefined = no type yet.
 export const PART_PAGES = [
   { kind: 'pump', title: 'Pumps', one: 'Pump', methods: true, fields: [
-    { k: 'model', name: 'Pump model', list: PUMP_MODELS },
-    { k: 'power', name: 'Power', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], USER] }] },
+    { k: 'model', name: 'Pump model', list: PUMP_MODELS, optional: true },
+    { k: 'power', name: 'Power', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], USER], optional: true }] },
   { kind: 'heater', title: 'Heating Elements', one: 'Heating Element', methods: true, fields: [
     { k: 'watts', name: 'Watts', number: true, optional: true },      // may be left blank (OakBarn Brewery, 2026-11-08: "Wattage Optional No Red Boxes")
-    { k: 'volts', name: 'Volts', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER] }] },
+    { k: 'volts', name: 'Volts', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER], optional: true }] },
   { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
     { k: 'probe', name: 'Probe type', list: PROBES }] },
   // Only Connection Type and Size must be filled in on a valve: they change how it is drawn; Valve type and Voltage are good to know
@@ -130,25 +138,29 @@ export const PART_PAGES = [
     { k: 'volts', name: 'Voltage', list: VOLTS, optional: true }] },
   { kind: 'flow', title: 'Flow Meters', one: 'Flow Meter', fields: [
     { k: 'meter', name: 'Meter type', list: FLOW_METERS },
-    { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true }] },
+    { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true, optional: true, need: d => d.meter ? PULSE_METERS.has(d.meter) : undefined,
+      notUsed: 'Not used by this kind of meter: only a meter that counts pulses has it', blank: 'The Pulses per Gallon or Liter cannot be left blank: the program needs it to count the flow.' }] },
   { kind: 'ph', title: 'pH Meters', one: 'pH Meter', fields: [
-    { k: 'meter', name: 'pH meter type', list: PH_METERS },
+    { k: 'meter', name: 'pH meter type', list: PH_METERS, optional: true },
     { k: 'signal', name: 'Signal to the board', list: SIGNALS }] },
   { kind: 'pressure', title: 'Pressure Sensors (PSI)', one: 'Pressure Sensor', fields: [
     { k: 'sensor', name: 'Sensor type', list: PRESSURE },
-    { k: 'range', name: 'Highest pressure it reads (psi or bar)', number: true }] },
+    { k: 'range', name: 'Highest pressure it reads (psi or bar)', number: true, optional: true, need: d => d.sensor ? d.sensor !== 'switch' : undefined,
+      notUsed: 'Not used by a Pressure switch: it is only on or off', blank: 'The Highest pressure it reads cannot be left blank: the program needs it to turn the signal into psi or bar.' }] },
   { kind: 'hydro', title: 'Hydrometers', one: 'Hydrometer', fields: [
     { k: 'hydro', name: 'Hydrometer type', list: HYDROS },
     // Tilt Color and Hardware ID are mandatory (OakBarn Brewery, 2026-11-09): a Tilt must have its Color, every other kind its
     // Hardware ID; the one its type does not use is greyed out. need(row): true = mandatory, false = greyed, undefined = no type yet
     { k: 'color', name: 'Tilt Color (a Tilt only)', list: TILT_COLORS, optional: true, need: d => d.hydro ? isTiltKind(d.hydro) : undefined,
-      blank: 'The Color for a Tilt cannot be left blank. Choose a Color.' },
-    { k: 'hwId', name: 'Hardware ID (not a Tilt: its Name or ID)', text: true, optional: true, need: d => d.hydro ? !isTiltKind(d.hydro) : undefined }] },
+      notUsed: 'Not used by this kind of hydrometer: only a Tilt has a Color', blank: 'The Color for a Tilt cannot be left blank. Choose a Color.' },
+    { k: 'hwId', name: 'Hardware ID (not a Tilt: its Name or ID)', text: true, optional: true, need: d => d.hydro ? !isTiltKind(d.hydro) : undefined,
+      notUsed: 'Not used by this kind of hydrometer: a Tilt is told apart by its Color' }] },
   { kind: 'volume', title: 'Volume Meters', one: 'Volume Meter', fields: [
     { k: 'meter', name: 'How it measures', list: VOLUMES },
-    { k: 'most', name: 'Most it reads (Gallons or Liters)', number: true }] },
+    { k: 'most', name: 'Most it reads (Gallons or Liters)', number: true, optional: true, need: d => d.meter ? SCALED_LEVELS.has(d.meter) : undefined,
+      notUsed: 'Not used by this way of measuring: only an Ultrasonic, Pressure or Float level sensor needs it', blank: 'The Most it reads cannot be left blank: the program needs it to turn the signal into Gallons or Liters.' }] },
   { kind: 'float', title: 'Floats', one: 'Float', fields: [
-    { k: 'float', name: 'Float type', list: FLOATS },
+    { k: 'float', name: 'Float type', list: FLOATS, optional: true },
     { k: 'contact', name: 'Contact', list: CONTACT }] },
   { kind: 'din', title: 'Digital Inputs (DIN)', one: 'Digital Input', fields: [
     { k: 'input', name: 'Input type', list: DIN_TYPES }] },
@@ -204,6 +216,7 @@ export function guessPartDetails(e, kind) {
 export function cleanPartDetails(kind, d) {
   const page = PART_PAGES.find(x => x.kind === kind), out = {};
   for (const f of page?.fields ?? []) {
+    if (f.need?.(d ?? {}) === false) continue;      // greyed for this type: not kept
     const v = d?.[f.k];
     if (f.number) { const n = Number(v); if (v !== '' && v != null && Number.isFinite(n) && n >= 0 && n < 1e6) out[f.k] = n; }
     else if (f.text) { const w = String(v ?? '').trim().slice(0, 60); if (w) out[f.k] = w; }
