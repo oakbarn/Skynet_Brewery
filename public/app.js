@@ -5555,7 +5555,7 @@ async function vbPickPart(g, k) {
   const have = draft.elements.filter(fits), NEW = '\0new';
   const o = { pick: have[0]?.name ?? NEW };
   const r = await dialog(`${g.label || g.name}: the ${what} on the ${g.ports?.[k]?.label || vpName(k)}`, () => [
-    ['_p', `Pick an existing ${what}: it is built into the vessel and keeps its name and Port. Or add a new one.`, 'note'],
+    ['_p', `Pick an existing ${what}: it is built into the vessel and keeps its name and Port. Or add a new one. One already built into a vessel (the Three Vessel sample's too) is not listed: it stays in its own vessel.`, 'note'],
     ['pick', what, 'sel', [...have.map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`]), [NEW, `➕ Add new ${what}…`]]]], o, false, ['vessel-device-builder']);
   if (r !== 'ok') return;
   readFields(o, $('#dlgBody'));
