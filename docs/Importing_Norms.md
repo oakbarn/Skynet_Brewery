@@ -186,6 +186,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | Several copies stacked on one spot (`gblS_Brewery_Top_1`, `_2`, `_3`) because BruControl allows only 3 pictures each | folded into ONE item with all the pictures; Processes follow | Built |
 | Stacked timers | never folded (long mash timer, short delay timer, sub-process timer are kept on purpose) | Built |
 | Same-spot items with different names | not folded; listed so they can be sorted by hand | Built |
+| Alarm Email Notification switch (EmailNotification) | kept as the Alarm's Email Notification (Rule 7.17); BruControl's mail settings are not copied, the user picks the mail server in Skynet's Settings | Built |
 
 ## 8. Devices
 
@@ -255,4 +256,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 8: BruControl calibrations and Text Format kept on Analog Ins and probes (Rule 6.24); PWM output calibrations not copied.
 - 2026-11-09: Section 9 lists an Alarm's 3 sound files; added section 11, where Skynet has no limit: Timer alarms (Timer Alarm Chain), pictures and sounds set by a Process. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Section 8: Show Secondary Value off becomes the Data Display pick (Rule 6.26).
+- 2026-11-09: Section 7: BruControl's Alarm Email Notification switch is kept (Rule 7.17).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).

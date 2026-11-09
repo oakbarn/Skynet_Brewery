@@ -54,3 +54,4 @@ assert.equal(els.find(e => e.bru?.name === 'Fan2').display, undefined, 'Show Sec
 assert.ok(JSON.stringify(r).includes('Show Secondary Value off'), 'the Import notes list it');
 clearTimeout(store._persistTimer);
 console.log('data display tests passed');
+await import('./alarmemail.test.js');
