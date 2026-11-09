@@ -1,0 +1,11 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "primingTee" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Priming_Tee.svg",
+  "size": [160, 122],
+  "body": 0.183,
+  "ipPos": { "start": "0,0.819", "end": "1,0.819" },
+  "bend": "0.5,0.819",
+  "upright": true,
+  "notes": "A Priming Tee (OakBarn Brewery, 2026-11-09): an Instrument Tee with a Manual Valve on its short side, always pointing up, to let the air out when priming a pump. Openings at the left and the right; the valve is opened by hand. It can Flip Horizontal but never turns or flips upside down. A TC Pipe Fittings Widget."
+}

@@ -1792,6 +1792,12 @@
      "standard": "TC 1.5",
      "label": "Right Back Element"
     },
+    "cBackElement": {
+     "installed": false,
+     "position": "VW C Back Element",
+     "standard": "TC 1.5",
+     "label": "Center Back Element"
+    },
     "cProbe": {
      "installed": false,
      "position": "VW C Probe",
@@ -1971,6 +1977,12 @@
      "standard": "TC 1.5",
      "label": "Right Back Element"
     },
+    "cBackElement": {
+     "installed": false,
+     "position": "VW C Back Element",
+     "standard": "TC 1.5",
+     "label": "Center Back Element"
+    },
     "cProbe": {
      "installed": false,
      "position": "VW C Probe",
@@ -2149,6 +2161,12 @@
      "position": "VW R Back Element",
      "standard": "TC 1.5",
      "label": "Right Back Element"
+    },
+    "cBackElement": {
+     "installed": false,
+     "position": "VW C Back Element",
+     "standard": "TC 1.5",
+     "label": "Center Back Element"
     },
     "cProbe": {
      "installed": false,

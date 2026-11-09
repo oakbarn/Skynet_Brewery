@@ -21,6 +21,7 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 // a new kind is added here, through GitHub.
 export const FITTING_KINDS = {
   none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer', cap: 'End Cap',
+  primingTee: 'Priming Tee',      // an Instrument Tee with a Manual Valve on its short side, always up (OakBarn Brewery, 2026-11-09)
   check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature', sightGlass: 'Sight Glass',
   valveTee: 'Long Tee with a Valve',      // a Valve Tee or a Supply Manifold (Fritz, 2026-11-06, Rule 5.35): a valve built into the branch
 };
@@ -84,6 +85,7 @@ export function cleanFitting(b = {}) {
   if (Number.isFinite(+b.body) && +b.body >= 0.05 && +b.body <= 1 && b.body !== null && b.body !== '') out.body = +b.body;
   // TC Pipe Fittings (Fritz, 2026-11-04): where the pipes' center lines meet on the picture ("x,y"), so Skynet can put the fitting
   // where two pipes meet, and Autosize to pipe grows it about that point
+  if (b.upright === true) out.upright = true;       // it never turns or flips upside down: Flip Horizontal only (the Priming Tee, OakBarn Brewery 2026-11-09)
   if (/^\s*(0(\.\d+)?|1(\.0+)?)\s*,\s*(0(\.\d+)?|1(\.0+)?)\s*$/.test(String(b.bend ?? ''))) out.bend = String(b.bend).replace(/\s/g, '');
   return out;
 }

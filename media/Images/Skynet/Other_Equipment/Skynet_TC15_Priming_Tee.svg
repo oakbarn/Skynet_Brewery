@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 160">
+  <!-- Skynet TC 1.5 Priming Tee (OakBarn Brewery, 2026-11-09: "Basically an Instrument Tee with a Manual Valve on the Short side always
+       pointing up (on the Top side)"). The Instrument Tee turned over, its short branch up, with a manual ball valve on it to let the air
+       out when priming. IPs only at the run ends: left (0, 0.819) and right (1, 0.819). -->
+  <g stroke="#505050" stroke-width="1.6" stroke-linejoin="round" fill="#808080">
+    <path d="M16.5 150.2 H193.5 V111.8 H134.9 A10.7 10.7 0 0 1 124.2 101.1 V85.3 H85.8 V101.1 A10.7 10.7 0 0 1 75.1 111.8 H16.5 Z"/>
+    <rect x="1" y="103" width="16.5" height="56" rx="5"/>
+    <rect x="192.5" y="103" width="16.5" height="56" rx="5"/>
+    <rect x="77" y="69.8" width="56" height="16.5" rx="5"/>
+    <rect x="77" y="54.3" width="56" height="16.5" rx="5"/>
+    <rect x="89" y="18" width="32" height="38"/>
+    <rect x="70" y="26" width="70" height="26" rx="8"/>
+    <rect x="84" y="12" width="42" height="8" rx="3"/>
+    <rect x="101" y="4" width="8" height="24"/>
+    <rect x="101" y="2" width="92" height="9" rx="4.5"/>
+  </g>
+</svg>
