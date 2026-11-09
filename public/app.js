@@ -6183,6 +6183,8 @@ const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${
 // "  ≈ 4.6 V" after a PWM or Analog output's value, from its Measured volts table (Rule 6.24); nothing without one
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
+const SMOOTH_TIP = 'Smoothing (Rule 6.24, BruControl\'s Avg Weight): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
+const SMOOTH_FIELD = ['avgWeight', 'Smoothing % (100 = none)', 'num', null, false, false, { tip: SMOOTH_TIP }];
 const CAL_FIELD = ['calibrations', 'Calibrations (top to bottom)', 'calchain', null, false, false, { tip: CAL_TIP }];
 const CAL_POP = { title: 'Calibrations', fields: [CAL_FIELD] };
 const CAL_ROW = (it, x = {}) => ['_calx', 'More calibrations', 'ro', calSummary(it.calibrations), false, false, { tip: CAL_TIP, attr: CAL_POP, ...x }];
@@ -6222,7 +6224,9 @@ const F = {
     ['pulse', 'Pulse: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
-    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
+    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds, empty = 1)', 'num', null, false, false, { tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, as BruControl\'s Counter Input, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
+    ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
     ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
@@ -6239,8 +6243,8 @@ const F = {
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
-    ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+    ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -6345,7 +6349,7 @@ F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
-const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD];
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD, SMOOTH_FIELD];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
@@ -6748,7 +6752,7 @@ const TWO_POINT_FIELDS = [['_c2', 'Put the probe in ice water (stirred, 32 °F /
 const TWO_POINT_KEYS = ['calLowRead', 'calLowTrue', 'calHighRead', 'calHighTrue'];
 const TWO_POINT_POP = { title: 'Two-point calibration', fields: TWO_POINT_FIELDS };
 const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
-const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', ...TWO_POINT_KEYS];
+const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', 'avgWeight', ...TWO_POINT_KEYS];
 const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
 const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
 function flipFrom(w) { if (w._flip === undefined) return; w.flipH = w._flip.includes('h'); w.flipV = w._flip.includes('v'); if (!w.flipH) delete w.flipH; if (!w.flipV) delete w.flipV; delete w._flip; }
@@ -6761,6 +6765,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }],
   ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
   CAL_ROW(it, x),
+  [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
 function probeDeviceFields(it, item) {
@@ -7195,7 +7200,7 @@ function fieldsOf(item) {
     return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
-      ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
+      ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
       ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
