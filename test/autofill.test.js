@@ -104,7 +104,7 @@ assert.deepEqual(attrsAfterDot('n', real, new Set(['n'])), ['precision']);
 console.log('dot attributes ok');
 
 // names narrow by their first letters, only among what an if can take, each kind A to Z (Fritz, 2026-10-28)
-const vars = { elements: ['vV_Boil', 'vV_Amount', 'vV_Alpha'].map(name => ({ name, type: 'shared', main: 'value', attrs: [], bools: [] })).concat([{ name: 'MB_07_Valve', type: 'digitalOut', main: 'state', attrs: [], bools: [''] }]), processes: [] };
+const vars = { elements: ['vV_Boil', 'vV_Amount', 'vV_Alpha'].map(name => ({ name, type: 'gGlobal', main: 'value', attrs: [], bools: [] })).concat([{ name: 'MB_07_Valve', type: 'digitalOut', main: 'state', attrs: [], bools: [''] }]), processes: [] };
 const v = l => suggest(l, vars, l, l)?.list.map(i => i.text.trim());
 assert.deepEqual(v('if vV_'), ['vV_Alpha', 'vV_Amount', 'vV_Boil']);
 assert.deepEqual(v('if vV_A'), ['vV_Alpha', 'vV_Amount']);
