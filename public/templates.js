@@ -125,7 +125,7 @@ export function cleanVessel(b = {}) {
   const vesselType = VESSEL_KINDS[b.vesselType] ? b.vesselType : 'vessel';
   const t = { vesselType, units: b.units === 'Metric' ? 'Metric' : undefined, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
-  for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
+  for (const k of ['volume', 'deadspace', 'safeVolume', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
   // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
   const size = cleanSize(b.size); if (size) t.size = size;
   if (INTEGRATED[b.integrated]) t.integrated = b.integrated;

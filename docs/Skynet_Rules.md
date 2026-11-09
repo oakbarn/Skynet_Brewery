@@ -2676,8 +2676,9 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   replacement for an exist hardware ... So Delete if replace with a differnt Port"): when the new one is on **another Port** the old
   one is **deleted**; when it is on **the same Port** (the hardware was changed, the wiring was not) the old one stays on the Tab as
   a Device of its own. Anything that used the old one (a Heating Element's Temperature Probe) uses the new one.
-  No Size, Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential, Sparge / Steam Slayer or IP rows:
-  none of those can change after integration.
+  Its **Size** stays (2026-11-09, OakBarn Brewery: "Both"): Gallons, Method, Diameter, Height, Calculated Volume (read only), Dead
+  space and Safe Element Volume (Rule 19.2). No Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential,
+  Sparge / Steam Slayer or IP rows: none of those can change after integration.
 - What a Device already has set is kept (its look, pin settings and so on); only the dialog changed. Every explanation is in the
   hover help (Rule 2.38).
 - **BruControl Import:** it has no Device dialogs of its own; the Devices it brings in open in these Properties in the Panel.
@@ -2723,8 +2724,11 @@ Template** (right after the Label in the Properties that open on the Build Tab).
 19.2 **Size follows the Method: Proportional or Diameter.**
 - **Proportional:** Fritz's plain vessel is the **One Gallon start: 197 x 237 pixels** (Fritz, 2026-11-05). Its Width to Height is
   the shape, and the Gallons field sizes it in proportion to that 1 gallon start.
-- **Diameter:** a **Diameter** and a **Height** field (inches; cm for Metric). They give the shape as if the vessel were 1 gallon;
-  then the Gallons size it.
+- **Diameter:** a **Diameter** and a **Height** field (inches; cm for Metric). It is drawn by its **real size** (OakBarn Brewery,
+  2026-11-09: "if we use the size rather than the gallons it will draw better in proportion"; "Advertized gallons could also be
+  wrong"): the volume a cylinder of that Diameter and Height holds sizes it, never the Gallons typed. **Calculated Volume** shows that
+  volume, read only. Every Vessel also keeps **Dead space** and **Safe Element Volume** (the least liquid that covers its Heating
+  Element).
 - **Size follows volume:** twice the gallons is the cube root of 2 (about 1.26) times as wide and as tall. 10 gallons is 424 x 511.
   (Fritz, 2026-11-05: "I think the way you have done it will work.")
 
@@ -3190,5 +3194,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 19.5 item 5 (the Drain, Tangential and Sparge Arm pieces, the Valve picker, the Sparge Arm drawing) and Rule 18.31 changed (OakBarn Brewery: "So Delete if replace with a differnt Port"): a Heating Element or Probe swapped out of an integrated Vessel Device is deleted when the new one is on another Port, kept as a Device of its own when on the same Port. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Rule 19.5 item 8 (OakBarn Brewery: "go ahead and create it in the Importer"; "do both unless I say only for Importer or Only for Skynet"): the Importer's Your vessels step opens the same Vessel Device Builder for each vessel, filled in from its row; the pickers list the imported Heating Elements and Probes and never a part already built into a vessel. Help 143 and 166 updated. Checked against both programs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: The Three Vessel sample's Brewhouse Tab now has a Master Vessel Sizer (the HLT, Rule 19.3), so a vessel built for that Tab is drawn at the same scale as the sample's vessels (OakBarn Brewery: "It did not adjust size to the other Vessels"). No Rule changed. Checked against both programs: the Importer's Build page is the same Panel. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Changed Rules 19.2 and 18.31 (OakBarn Brewery: "Both", "if we use the size rather than the gallons it will draw better in proportion", "Advertized gallons could also be wrong", "add that as a Field (Read and Display Only)", "Also missing is Deadspace and Safe Element Volume"): a Diameter vessel is drawn by its real size; read only Calculated Volume; Dead space and Safe Element Volume on every Vessel; an integrated Vessel Device's Properties have its Size again. Number boxes take decimals (15.5). Help 133 and 135 updated. Checked against both programs (the Importer's Build page is the same Panel; its Vessels step passes Height and Diameter to the builder). (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
