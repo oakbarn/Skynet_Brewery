@@ -302,9 +302,7 @@ async function api(req, res, p, q) {
     return json(res, 200, all[f.toLowerCase()] ?? {});
   }
   if (p === '/api/progress' && m === 'POST') {
-    const { file, data, clear, clearAll } = await body(req);
-    // Restart Fresh (OakBarn Brewery, 2026-11-09: "clear all data"): every config file's kept answers go
-    if (clearAll === true) { try { fs.rmSync(PROGRESS, { force: true }); } catch (e) { return json(res, 500, { error: e.message }); } return json(res, 200, { ok: true }); }
+    const { file, data, clear } = await body(req);
     if (typeof file !== 'string' || !isConfig(file)) return json(res, 400, { error: 'No config file given.' });
     const all = readProgress(), key = file.toLowerCase();
     if (clear) delete all[key];

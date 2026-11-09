@@ -86,7 +86,8 @@ the same config file: the Names page then offers **▶ Carry on where I left off
 **Clear Page and Restart Fresh.** Two buttons sit at the top of every page:
 - **🧹 Clear Page** puts every answer on this page back to how it started (on Boards and Tabs: the small step you are on). The other
   pages keep their answers. It is greyed on a page with no answers, like Welcome.
-- **↺ Restart Fresh** clears every answer the Importer kept, for every config file, and takes you back to Welcome.
+- **↺ Restart Fresh** clears every answer the Importer kept for the config file you are working on (your other config files keep
+  theirs), and takes you back to Welcome.
 
 Each one asks first; **No** changes nothing. Your BruControl config file and the Schemas you saved are never touched.
 

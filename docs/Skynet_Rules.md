@@ -2197,7 +2197,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     that will reset all the answers on that page only and a Restart Fresh that will take you back to the Intro Page and clear all data.
     A second Chance with both before doing it"): two buttons at the top of every Importer page. **🧹 Clear Page** puts every answer on
     that page (or that small step of Boards and Tabs) back to how it started, and the other pages keep theirs; it is greyed on a page with
-    no answers. **↺ Restart Fresh** clears every kept answer, for every config file, and goes back to Welcome. Each asks first (**No**
+    no answers. **↺ Restart Fresh** clears every kept answer for the config file being worked on (only that one: OakBarn Brewery, 2026-11-09:
+    "Clear and Start Fresh, Only on the one you are working On") and goes back to Welcome. Each asks first (**No**
     changes nothing). BruControl's config file and saved Schema files are never touched.
   - **The Importer has its own icon**, clinking beer mugs (listed as CC0 on SVG Repo), in its window and on its shortcuts; the Panel keeps its own.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
