@@ -235,7 +235,7 @@ async function api(req, res, p, q) {
   // Make the Import Copy of the config file and convert the copy (Fritz, 2026-11-06). The first pass brings in the items on a
   // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
   if (p === '/api/convert' && m === 'POST') {
-    const { file, names, copyMedia, ids, units, labels, shows } = await body(req);
+    const { file, names, copyMedia, ids, units, labels, shows, styles, links } = await body(req);
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) or backup (.bak) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
     // any .bak can be picked, so check it really is a BruControl config file inside before the Import Copy is made
@@ -259,7 +259,10 @@ async function api(req, res, p, q) {
       // the user's own Labels from the items page, by BruControl element ID (OakBarn Brewery, 2026-11-08)
       labels: labels && typeof labels === 'object' ? Object.fromEntries(Object.entries(labels).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.trim().slice(0, 40)]).slice(0, 2000)) : {},
       // the Show boxes (OakBarn Brewery, 2026-11-08): ticked = the Label is shown on the Tab, by BruControl element ID
-      shows: shows && typeof shows === 'object' ? Object.fromEntries(Object.entries(shows).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'boolean').slice(0, 2000)) : {} });
+      shows: shows && typeof shows === 'object' ? Object.fromEntries(Object.entries(shows).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'boolean').slice(0, 2000)) : {},
+      // a Boolean Widget's Style and Linked Device from the Switches page (Rule 1.20), by BruControl element ID
+      styles: styles && typeof styles === 'object' ? Object.fromEntries(Object.entries(styles).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'string' && /^\w{1,20}$/.test(v)).slice(0, 2000)) : {},
+      links: links && typeof links === 'object' ? Object.fromEntries(Object.entries(links).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'string' && /^[\w-]{1,64}$/.test(v)).slice(0, 2000)) : {} });
     // the Look (Rule 2.39): the Skynet Look closest to the BruControl theme, Office Black when it is not found
     const bt = findBruControlTheme([...CANDIDATES, path.dirname(file)]);
     const look = themeOf(bruThemeToLook(bt?.theme));
@@ -408,7 +411,7 @@ const server = http.createServer(async (req, res) => {
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
     if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/semi.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });
