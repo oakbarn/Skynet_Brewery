@@ -10,7 +10,7 @@ if rcp_Mash_Steps >= {{n}}
   step "Mash step {{n}}"
   print "Mash step {{n}}: " + rcp_Mash_Step_{{n}}_Name + " at " + rcp_Mash_Step_{{n}}_Temp + rcp_Temp_Units + " for " + rcp_Mash_Step_{{n}}_Time
 @if Mash_Heater
-  {{Mash_Heater}}.target = rcp_Mash_Step_{{n}}_Temp
+  {{Mash_Heater}}.setpoint = rcp_Mash_Step_{{n}}_Temp
   {{Mash_Heater}} = on
 @end
 @if Mash_Probe
@@ -32,7 +32,7 @@ endif
 step "Mash out"
 if rcp_Mash_Out_Temp > 0
 @if Mash_Heater
-  {{Mash_Heater}}.target = rcp_Mash_Out_Temp
+  {{Mash_Heater}}.setpoint = rcp_Mash_Out_Temp
 @end
 @if Mash_Probe
   wait {{Mash_Probe}} >= rcp_Mash_Out_Temp - 1

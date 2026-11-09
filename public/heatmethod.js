@@ -11,10 +11,10 @@
 export const HEAT_METHODS = [
   ['onoff', 'On/Off', 'DO', 'full on or off, by a click or a Process'],
   ['dutyCycle', 'Duty Cycle', 'DutyC', 'on for a % of each cycle'],
-  ['hysteresis', 'Hysteresis', 'HYS', 'on below the target, off at it'],
-  ['pid', 'PID', 'PID', 'holds a target temperature'],
-  ['deadband', 'Deadband', 'DeadB', 'steps its % toward the target'],
-  ['precise', 'Precise', 'PREC', 'holds a target to 0.1 degree'],
+  ['hysteresis', 'Hysteresis', 'HYS', 'on below the setpoint, off at it'],
+  ['pid', 'PID', 'PID', 'holds a setpoint temperature'],
+  ['deadband', 'Deadband', 'DeadB', 'steps its % toward the setpoint'],
+  ['precise', 'Precise', 'PREC', 'holds a setpoint to 0.1 degree'],
 ];
 export const HEAT_KEYS = HEAT_METHODS.map(m => m[0]);
 // Hysteresis, PID, Deadband and Precise read a temperature probe (the Element's Probe, .input)
@@ -26,11 +26,16 @@ export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'ele
 // The Cool / Warm Pump (OakBarn Brewery, 2026-11-08, Rule 6.21): a pump that a temperature switches (a glycol pump that cools a
 // fermenter, or a pump that brings warm water) is ONE Device on its port too (One Port, One Device), a Pump with a Method field,
 // Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (- On offset) or warms
-// (+ On offset) to a Target read by its Probe. The same .method, Target and spots as a Heating Element, so a Process reads the same.
+// (+ On offset) to a Setpoint read by its Probe. The same .method, Setpoint and spots as a Heating Element, so a Process reads the same.
 export const isCoolPump = el => el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP');
 export const PUMP_METHOD_KEYS = ['onoff', 'hysteresis'];
 // a Device whose control is picked by .method: the Heating Element and the Cool / Warm Pump
 export const isMethodDevice = el => isHeatElem(el) || isCoolPump(el);
+// .setpoint is the preferred name of the temperature it holds (OakBarn Brewery, 2026-11-09, Rule 6.19): the same thing as the
+// older .target, which still works for older Processes and BruControl. Read or set either one: both are the one Setpoint.
+// It is on a Heating Element, a Cool / Warm Pump and the older Hysteresis, PID and Deadband Devices (a stepper's .target is
+// where it moves to, not a Setpoint).
+export const hasSetpoint = el => isMethodDevice(el) || ['hysteresis', 'pid', 'deadband'].includes(el?.type);
 
 // "PID", "pid", "Duty Cycle", "dutycycle", "DutyC", "HYS", "On/Off", "on off", "DO" ... -> the key (null when it is none of them)
 const squash = s => String(s ?? '').toLowerCase().replace(/[\s_/\-]+/g, '');
@@ -60,22 +65,22 @@ export const allowedWords = el => allowedMethods(el).map(heatMethodWord).join(',
 export const controlMethods = el => { const l = allowedMethods(el); return l.length > 1 ? l.map(heatMethodWord) : null; };
 
 // The settings each method uses: [runtime name, Properties key, label, starting value]. The runtime names are the ones the
-// separate Duty Cycle, Hysteresis, PID and Deadband Devices have, so a Process line reads the same (hE_1.target = 152).
+// separate Duty Cycle, Hysteresis, PID and Deadband Devices have, so a Process line reads the same (hE_1.setpoint = 152; the older hE_1.target is the same).
 export const HEAT_SETTINGS = {
   onoff: [],
   dutyCycle: [['dutycycle', 'dutyCycle', 'Duty cycle %', 0], ['interval', 'interval', 'Cycle time (ms)', 1000]],
-  hysteresis: [['target', 'target', 'Target', 0], ['onoffset', 'onOffset', 'On offset (+ heats, - cools)', 1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
-  pid: [['target', 'target', 'Target', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
+  hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'On offset (+ heats, - cools)', 1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
+  pid: [['target', 'target', 'Setpoint', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
     ['maxintegral', 'maxIntegral', 'Max integral', 100], ['calctime', 'calcTime', 'Calc time (s)', 1], ['outtime', 'outTime', 'Output window (s)', 1]],
-  deadband: [['target', 'target', 'Target', 0], ['deadbandoffset', 'deadbandOffset', 'Deadband offset', 0.5], ['innerbandoffset', 'innerBandOffset', 'Inner band offset', 2],
+  deadband: [['target', 'target', 'Setpoint', 0], ['deadbandoffset', 'deadbandOffset', 'Deadband offset', 0.5], ['innerbandoffset', 'innerBandOffset', 'Inner band offset', 2],
     ['initialoutput', 'initialOutput', 'Initial output %', 0], ['innerbanddrive', 'innerBandDrive', 'Inner band drive %', 1], ['outerbanddrive', 'outerBandDrive', 'Outer band drive %', 5],
     ['maxoutput', 'maxOutput', 'Max output %', 100], ['calctime', 'calcTime', 'Calc time (s)', 10], ['outtime', 'outTime', 'Output window (s)', 2]],
   // Precise (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C", Rule 6.19): a
-  // PID made calm for a still's column or anything that must hold to 0.1 degree. Target, Kp, Ki, Kd and Max output are the PID's own
-  // (switching between the two carries on with the same numbers); Hold output is the % it needs to just stay at the Target (it starts
+  // PID made calm for a still's column or anything that must hold to 0.1 degree. Setpoint, Kp, Ki, Kd and Max output are the PID's own
+  // (switching between the two carries on with the same numbers); Hold output is the % it needs to just stay at the Setpoint (it starts
   // there, so it does not have to build it up), Smoothing the seconds it averages the probe over. See lib/control.js _precise.
-  precise: [['target', 'target', 'Target', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
-    ['holdoutput', 'holdOutput', 'Hold output % (what it needs to stay at the Target)', 0], ['smoothing', 'smoothing', 'Smoothing (s, averages the probe)', 10],
+  precise: [['target', 'target', 'Setpoint', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
+    ['holdoutput', 'holdOutput', 'Hold output % (what it needs to stay at the Setpoint)', 0], ['smoothing', 'smoothing', 'Smoothing (s, averages the probe)', 10],
     ['calctime', 'calcTime', 'Calc time (s)', 1], ['outtime', 'outTime', 'Output window (s)', 2]],
 };
 // every setting once (the first starting value wins; PID's Calc time 1 s is overridden by Deadband's own when it runs)
@@ -85,7 +90,7 @@ export const ALL_HEAT_SETTINGS = (() => {
   return [...m.values()];
 })();
 // The main setting of each method, shown on the click pop-up with + and -
-export const HEAT_MAIN = { dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'], precise: ['target', 'Target'] };
+export const HEAT_MAIN = { dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Setpoint'], pid: ['target', 'Setpoint'], deadband: ['target', 'Setpoint'], precise: ['target', 'Setpoint'] };
 
 // How fine a probe can see (Fritz, 2026-11-07: a precise method "to get to .1 F or .1 C"). Precise can only hold as close as its
 // probe sees, so its Properties warn when the probe is too coarse. Returns { step (in the probe's own units), ok, text }.

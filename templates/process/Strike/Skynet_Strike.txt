@@ -13,7 +13,7 @@ ask "Set the valves so the mash pump recirculates the mash tun (through the HERM
 step "Dough in"
 ask "Add the grain slowly: add, stir, add, stir, and stir out every dough ball with the mash paddle. Press Done when it is all in."
 @if HLT_Heater
-{{HLT_Heater}}.target = rcp_Sparge_Temp
+{{HLT_Heater}}.setpoint = rcp_Sparge_Temp
 @end
 step "Vorlauf"
 ask "Recirculate the first cloudy runnings back on top of the mash until they run clear: this sets the grain bed. Press Done when it runs clear."

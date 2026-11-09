@@ -224,3 +224,6 @@ console.log('built in Element upgrade tests passed');
   assert.throws(() => s2.setProp('MB_5_CPMP_Cool~Pump_FR', 'method', 'PID'), /may only use/, 'a pump is never run by PID');
   console.log('cool / warm pump ok');
 }
+
+// .setpoint and .target, the one Setpoint (Rule 6.19, 2026-11-09)
+await import('./setpoint.test.js');
