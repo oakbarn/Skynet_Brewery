@@ -1,6 +1,7 @@
+import { formatTime } from './timeformat.js';
 // Styles (Fritz, 2026-10-29): a Style is a named look a Widget picks from a list. Skynet Styles come with Skynet and can
 // never be changed by a user; a user makes a User Style (➕ Add new User Style…) and can change or delete only those.
-// A Timer has no pictures: its look is only its Style (and its Label colors). No imports, so node can load it too.
+// A Timer has no pictures: its look is only its Style (and its Label colors). It imports only timeformat.js (which imports nothing), so node can load it too.
 // Tab Styles (Fritz, 2026-10-30): a Tab's Style is the look of the Devices and Widgets on it that have none of their own:
 //   labelFore / labelBack / labelFont / labelSize / labelAlign: their Label (title)   fore / back / font / size / align: the item itself
 //   (align = Left, Center or Right)
@@ -74,6 +75,7 @@ export function timerDigits(text, { format = 'hms', ssLastMinute = false, countd
   if (!m) return t || (format === 'hm' ? '00:00' : '00:00:00');
   const secs = (+m[2]) * 3600 + (+m[3]) * 60 + (+m[4]);
   if (ssLastMinute && countdown && !m[1] && secs < 60) return String(secs).padStart(2, '0');
+  if (format && !['hms', 'hm'].includes(format)) return formatTime(t, format);      // any other format (Rule 2.45)
   const hh = m[2].padStart(2, '0'), mm = m[3].padStart(2, '0'), ss = m[4].padStart(2, '0');
   return m[1] + (format === 'hm' ? `${hh}:${mm}` : `${hh}:${mm}:${ss}`);
 }

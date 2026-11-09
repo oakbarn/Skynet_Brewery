@@ -17,6 +17,7 @@ import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, fa
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
+import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2375,7 +2376,10 @@ function fillEl(n, e0) {
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
     case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget':
-      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      { const f = v.showas || e.showAs, dt = f && e.type !== 'valueWidget' ? dataWDt(e) : '';      // its format (Rule 2.45)
+        if (dt === 'time') text = formatTime(v.value, f); else if (dt === 'datetime') text = formatDateTime(v.value, f); }
+      break;
     case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led': case MANUAL_PUMP_TYPE:
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
@@ -2400,7 +2404,7 @@ function fillEl(n, e0) {
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
+    case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: v.showas || e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
       if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
@@ -7097,6 +7101,7 @@ const DATAW_TIPS = {
 const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
+const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BR.showas = "mm:ss" or wgt_DT_Clock_BR.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
   const cv = isCodeValue(it), dt = dataWDt(it), val = dt === 'value', T = DATAW_TIPS;
   const start = { value: 'Start value', time: 'Start value (hh:mm:ss)', datetime: 'Start value (mm/dd/yyyy hh:mm:ss)' }[dt];
@@ -7106,6 +7111,7 @@ function dataWidgetFields(it) {
     ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
     ...(cv ? [['format', 'Format', 'sel', CV_FORMATS, true, false, { tip: T.format }]] : []),      // a Code Value Widget (Rule 1.27)
     ['initial', start, val ? 'num' : 'text', null, false, false, { tip: T.start }],
+    ...(dt === 'time' || dt === 'datetime' ? [['showAs', 'Shows as', 'sel', formatChoices(dt === 'time' ? TIME_FORMATS : DATETIME_FORMATS, it.showAs), false, false, { tip: SHOWAS_TIP }]] : []),      // Rule 2.45
     ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
     ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
     ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
@@ -7242,17 +7248,19 @@ const TIMER_TIPS = {
   reset: 'The time a reset puts it back to, in hh:mm:ss.',
   running: 'On: it is already counting when the Brain starts.',
   style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own, with its Back, Text Fore and Text Back colors and its Frame (shape and color).',
-  format: 'How the time shows: hours, minutes and seconds (01:30:00), or just hours and minutes (01:30).',
+  format: 'How the time shows: hours, minutes and seconds (01:30:00), just hours and minutes (01:30), all minutes (90:00) and more (Rule 2.45). A Process can set any format with .showas, for example tm_Boil.showas = "mm:ss"; "" puts back this pick.',
   ss: 'On: a Timer counting down shows only the seconds (45) once less than one minute is left.',
 };
-function timerWidgetFields() {
+// the Timer's Digits (Rule 2.40) and the other Time formats (Rule 2.45)
+const TIMER_FORMATS = [['', 'hh:mm:ss'], ['hm', 'hh:mm'], ...TIME_FORMATS.filter(([k]) => k && k !== 'hh:mm')];
+function timerWidgetFields(it = {}) {
   const T = TIMER_TIPS;
   return [...wgtHead(T),
     ['timerType', 'Count', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, false, { tip: T.type }],
     ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
     ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
-    ['timerFormat', 'Digits', 'sel', [['', 'hh:mm:ss'], ['hm', 'hh:mm']], false, false, { tip: T.format }],
+    ['timerFormat', 'Digits', 'sel', formatChoices(TIMER_FORMATS, it.timerFormat), false, false, { tip: T.format }],
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
     ...wgtPlace()];
 }
@@ -8716,7 +8724,7 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
+    if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(it), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
     if (it.type === 'chart') return chartWidgetFields();       // Graph Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
