@@ -49,9 +49,15 @@ The **Vessel Builder** panel is on the right. It has a line for each thing you s
 - **Heating Element** or **Thermowell / Probe**: click the line (or the small hot spot on its faint picture) and pick an
   existing one from the list, or **➕ Add new …**, which opens the usual Add dialog. The one you pick is built into the vessel
   and keeps its name and Port. Its readout goes on the vessel, like the HLT's on the Three Vessel sample.
-- **Drain, Tangential Inlet, Sparge Arm / Steam Slayer**: their valves and pieces come in the next update. They will offer the
-  new **Priming Tee** (an Instrument Tee with a Manual Valve on its short side, always pointing up). You can already add it from
-  **Elbows, Tees**; it can be flipped left to right but never turned or turned upside down.
+- **Drain, Tangential Inlet, Sparge Arm**: click its line and pick **up to 3 pieces**, from the vessel out: **None, Valve,
+  Elbow, Tee** or **Priming Tee** (only on the Drain). None ends the list, so the pieces after it are greyed out. An Elbow turns
+  the run. The Priming Tee (an Instrument Tee with a Manual Valve on its short side) always points up, so it only goes where the
+  run is level: on a Drain, put an Elbow before it. Each piece is joined to the one before by a short pipe.
+- **Which Valve:** a Motorized valve you already have (one not on a pipe yet), **➕ Add New Motorized Ball Valve** (the usual Add
+  dialogs), or **➕ Add Manual Valve Widget**: Plain, Manual Ball Valve (side view) or Manual Butterfly Valve. A Manual Valve is
+  turned to fit an up and down run, and you confirm it by hand (Confirmation Widget).
+- The **Sparge Arm** is drawn inside the vessel, from its opening toward the other side. The **Steam Slayer** comes in the next
+  update.
 
 Double-click a part's picture on the vessel to open its own Properties (a faint one opens its picker). The vessel's Properties
 show a section for each Heating Element and the Thermowell / Probe (Help: Vessel Widget).
