@@ -16,7 +16,10 @@ Every page works the same way, and every answer is kept a moment after you give 
 There is no "tick them all" box, on purpose. Each item must be looked at: a BruControl name is often a code only its builder
 knows, like `M_6_B_1`, while its Label should say what it is in your brewery, like *HLT*.
 
-A box marked **(optional)** may stay blank; every other box must be filled in (OakBarn Brewery decides which, Rule 18.33). Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
+A box marked **(optional)** may stay blank; every other box must be filled in (Rule 18.33). A box is needed only when the
+program or the board needs it to work, like the Pulses of a Hall effect flow meter. Handy information, like Volts, Amps or Watts,
+is optional. A box needed by some types only is greyed out for the others; for a type that needs it, leaving it blank brings up a
+pop-up, so you fill it in or leave the page with **◀ Back**. Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
 **Accept ▶** marks a blank box in red and tells you how many there are.
 
 ## The Widget pages
@@ -48,17 +51,17 @@ One page each, in this order: **Pumps, Heating Elements, Temperature Probes, Val
 
 | Page | It asks |
 |---|---|
-| Pumps | Pump model, Power (filled in for you when the model is made for one voltage, like *Topsflo TD5 (24 V DC)*), Control Type |
-| Heating Elements | Watts (optional), Volts, Control Type |
-| Temperature Probes | Probe type: the Skynet probe types (OneWire, RTD, Thermocouple, the NTC thermistors, LM35, TMP36) |
+| Pumps | Pump model and Power, both optional (Power is filled in for you when the model is made for one voltage, like *Topsflo TD5 (24 V DC)*), Control Type |
+| Heating Elements | Watts and Volts (both optional), Control Type |
+| Temperature Probes | **Probe type** (needed): the Skynet probe types (OneWire, RTD, Thermocouple, the NTC thermistors, LM35, TMP36) |
 | Valves | **Connection Type** and **Size** (both needed), Valve type and Voltage (optional) |
-| Flow Meters | Meter type (Hall effect, turbine, oval gear, magnetic, ultrasonic, thermal mass, vortex), Pulses per Gallon or Liter |
-| pH Meters | pH meter type, Signal to the board |
-| Pressure Sensors (PSI) | Sensor type, Highest pressure it reads |
-| Hydrometers | Tilt, iSpindel, RAPT Pill, Plaato, read by hand |
-| Volume Meters | How it measures, Most it reads |
-| Floats | Float type, Normally Open or Normally Closed |
-| Digital Inputs | Input type (the Skynet Digital Input types) |
+| Flow Meters | Meter type (Hall effect, turbine, oval gear, magnetic, ultrasonic, thermal mass, vortex) (needed), **Pulses per Gallon or Liter** (needed for a Hall effect, turbine or oval gear meter, greyed for the others) |
+| pH Meters | **Signal to the board** (needed), pH meter type (optional) |
+| Pressure Sensors (PSI) | **Sensor type** (needed), **Highest pressure it reads** (needed, greyed for a Pressure switch) |
+| Hydrometers | **Hydrometer type** (needed: Tilt, iSpindel, RAPT Pill, Plaato ...), a Tilt's **Color** or any other kind's **Hardware ID** (needed) |
+| Volume Meters | **How it measures** (needed), **Most it reads** (needed for an Ultrasonic, Pressure or Float level sensor, greyed for the others) |
+| Floats | **Contact**: Normally Open or Normally Closed (needed), Float type (optional) |
+| Digital Inputs | **Input type** (needed): the Skynet Digital Input types |
 
 **Set every Valve**, at the top of the Valves page, gives every line the same Connection Type, Size and Voltage at once (for
 example TC, 1 1/2 inch, 24 V DC). Each time you change it there, every line follows; then change any line that is different.
