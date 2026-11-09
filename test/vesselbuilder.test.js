@@ -53,4 +53,12 @@ assert.match(vbSummary({ ...w, herms: 'crossRL' }).join('\n'), /HERMS Coil: Outl
 // the Priming Tee (2026-11-09): an Instrument Tee with a Manual Valve always up, openings at the run ends only
 const pt = JSON.parse(fs.readFileSync('templates/fitting/Priming_Tee.json', 'utf8'));
 assert.equal(pt.upright, true); assert.deepEqual(Object.keys(pt.ipPos), ['start', 'end']); assert.ok(fs.existsSync('media/' + pt.image));
+// a Vessel Device's parts (OakBarn Brewery, 2026-11-09, Rule 18.31): their own Properties like an independent Device; a section each
+// in the vessel's Properties, greyed out when None; a double-click or long press on the part opens the part, never the vessel
+const app = fs.readFileSync('public/app.js', 'utf8');
+assert.ok(app.includes("if (isVpDrill(it)) return vpPartFields(it, item);"), 'the part opens its own Device Properties');
+assert.ok(app.includes("isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item)"), 'titled like a Heating Element of its own');
+assert.ok(app.includes("...(vdev ? vpSections(it) : []),"), 'a section per part in the Vessel Device Properties');
+assert.ok(app.includes("`${word}: None`"), 'None: the section is there, greyed out');
+assert.ok(app.includes("const vpPartAt = ev =>") && app.includes("vp ? vpPartOpen(vp)() :"), 'double-click and long press open the part');
 console.log('vesselbuilder tests passed');

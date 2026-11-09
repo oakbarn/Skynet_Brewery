@@ -13,7 +13,8 @@ assert.match(gen, /'3\. Built into', 'ro'/, 'a built in Device shows what it is 
 assert.match(gen, /dbPop: true/, 'Database and .API on the Overlay line');
 assert.match(app, /if \(isBuiltIn\(it\) && isGenDrill\(it\)\) return genDeviceFields/, 'built in parts use it before the other dialogs');
 assert.match(app, /if \(isGenDrill\(it\)\) return genDeviceFields\(it, item, oldF\(\)\)/, 'every other Device uses it');
-assert.match(app, /const vpart = ev\.target\.closest\('\.vpPart\[data-dev\]'\);[\s\S]{0,200}editItem\('el', vpart\.dataset\.dev\)/, 'double-click a Vessel Device part opens it');
+assert.match(app, /const vpart = vpPartAt\(ev\);[\s\S]{0,200}if \(vpart\) return vpPartOpen\(vpart\)\(\);/, 'double-click a Vessel Device part opens it');
+assert.ok(app.includes("const vpPartOpen = vp => () => { if (vp.dev) return editItem('el', vp.dev);"), 'its own Properties');
 assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /\.vwPart\.vpPart \{ pointer-events: auto/);
 assert.ok(fs.existsSync(new URL('../help/148-every-device-dialog.md', import.meta.url)), 'Help 148');
 console.log('devicedrill ok');

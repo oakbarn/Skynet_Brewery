@@ -66,10 +66,23 @@ of the vessel, it shows on the vessel at its IP, and it gets a small reading (On
 way the RIMS tube's do. It can't be deleted on its own. An Element, Probe or Thermowell fills its IP, so no flow goes through it;
 a Valve lets flow through only while it is on.
 
+**Each part has its own Properties.** In Edit layout, double-click a built in Heating Element, Thermowell or Probe on the vessel
+(on a phone or tablet, hold a finger on it). Its own Properties open, the same as a Heating Element's or a Temperature Probe's of its
+own: Label, Interface and Port, Name, Toggle, Overlay, Heating method and so on. Its Tab shows as **Built into** (the vessel). The
+vessel's own Properties also have a **Heating Element** section and a **Thermowell / Probe** section with the main settings and a
+button to the part's own Properties. When the vessel has none, that section is empty and greyed out.
+
+**After it is built, only what can really change is in its Properties.** Once the vessel is built (with the Vessel Device Builder,
+or saved on a Tab) its Properties show its Name (✏ Change name), its Type (greyed out), its Label, Visible, Hidden Locked, Label and
+place, and the Heating Element and Thermowell / Probe sections. Those you can change: Label, Interface, Port, Heating method, Target,
+Units and so on. If you put a different Heating Element or Probe in the vessel, pick **Swap for ...** (an existing one, or a new
+one) in its section and press 💾 Save: the old one is taken out of the vessel and stays on the Tab as a Device of its own (delete it
+if it is gone). Its size, IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
+
 **Plugged openings hide their IP.** An Element, Probe or Thermowell plugs its opening, just like an End Cap, so its IP is
 hidden and no pipe or hose can join it. Only the open IPs show. A Valve's IP still shows, because flow goes through it.
 
-**HERMS coil:** pick **Left** or **Right**. The coil is drawn under that side's **HERMS In** and **HERMS Out** IPs, shaped to fit
+**HERMS coil:** pick **Left**, **Right**, or a crossed coil (**Outlet Right & Inlet Left**, **Outlet Left & Inlet Right**). The coil is drawn under that side's **HERMS In** and **HERMS Out** IPs, shaped to fit
 them, and the two IPs become the coil's two ends: flow that goes in one comes out of the other.
 
 **Once it is built and saved there is no way back.** After 💾 Save Build ... > To a Tab and Save layout, its IPs, the parts built

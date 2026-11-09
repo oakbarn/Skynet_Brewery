@@ -13,7 +13,7 @@ assert.match(app, /if \(editing && isVDev\(g\)\) n\.append\(propsHotspot\('vdHot
 const parts = app.slice(app.indexOf('function vpParts('), app.indexOf('// ---- Valve Tees and Supply Manifolds'));
 assert.match(parts, /if \(editing\) out\.push\(propsHotspot\('vpHot vpHot-' \+ e\.vpKind[^\n]*editItem\('el', e\.name\)/, 'every built in part has its own hotspot');
 assert.match(css, /#ws \.propsHot \{[^}]*pointer-events: auto/, 'hotspots can be clicked');
-assert.match(app, /const vpart = ev\.target\.closest\('\.vpPart\[data-dev\]'\)/, 'double-click on a part still opens it (Rule 2.9)');
+assert.match(app, /const vpart = vpPartAt\(ev\)/, 'double-click on a part still opens it (Rule 2.9)');
 assert.ok(fs.existsSync(new URL('../help/154-properties-hotspots.md', import.meta.url)), 'Help 154');
 console.log('propshot ok');
 // the Flow Color hotspot where a pipe begins at a vessel opening, and the On Overlay on built in Elements and Valves
