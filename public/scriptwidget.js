@@ -1,6 +1,6 @@
 // MIT License Granted
 // Copyright (c) OakBarn Brewery 2026
-// Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, Help 172): shows one Process on a Tab with its name, what it is doing
+// Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, Help 173): shows one Process on a Tab with its name, what it is doing
 // (Running, Waiting, Stopped or Stopped on an error) and a Start / Stop button. One click anywhere on it starts the Process when it
 // is stopped and stops it when it runs (Rule 2.44: no pop-up to start it). It is BruControl's Script element: the BruControl Import
 // makes each Script element a Script Widget (Rule 15.4). In Skynet a script is called a Process (Rule 1.4); the Widget keeps the

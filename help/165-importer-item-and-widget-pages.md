@@ -29,12 +29,9 @@ the Skynet Widget that does the same job:
 | Timer | Timer Widget |
 | Alarm | Alarm Widget |
 | Toggle Switch | Switch Widget |
-| Script (shows a Script's value) | Value Widget (joined to its Process when Processes come in) |
+| Script | Script Widget ([Help 173](173-script-widget)): shows its Process with Start / Stop; one click starts or stops it |
 | Chart | Graph Widget ([Help 159](159-graph-widget)) |
 | Inspector | none: it stays a grey Placeholder |
-
-**Since 2026-11-09 a Script element becomes a Script Widget** ([Help 172](172-script-widget)), not a Value Widget: it shows the
-Script (a Process in Skynet) with Start / Stop, and one click starts or stops it.
 
 The first page lists every kind of Skynet Widget and how many of yours become one. Then there is one page for each kind found on
 the Tabs you are importing, so *Timers (1 of 1)* when Timers are the only kind.

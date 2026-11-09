@@ -1,4 +1,4 @@
-// The Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, Help 172): shows one Process with its state and Start / Stop, and the
+// The Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, Help 173): shows one Process with its state and Start / Stop, and the
 // BruControl Import makes each Script element one. Run from test/bruimport.test.js (or: node --no-warnings test/scriptwidget.test.js).
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -23,7 +23,7 @@ assert.equal(scriptButton(scriptState('Mash', { state: 'stopped' })), '▶ Start
 assert.equal(widgetTypeId({ type: SCRIPT_WIDGET_TYPE }), 'SCR');
 assert.equal(suggestWidgetName({ code: widgetTypeId({ type: SCRIPT_WIDGET_TYPE }), label: 'Mash~Steps', tab: 'BR' }), 'wgt_SCR_Mash~Steps_BR');
 assert.ok(!Object.keys(WIDGET_TYPE_IDS).includes(SCRIPT_WIDGET_TYPE));
-assert.deepEqual(elementTopic({ type: SCRIPT_WIDGET_TYPE }), ['script-widget'], 'right-click Help: Help 172');
+assert.deepEqual(elementTopic({ type: SCRIPT_WIDGET_TYPE }), ['script-widget'], 'right-click Help: Help 173');
 
 // a Process renamed with Change name: its Script Widgets follow
 const els = [{ type: SCRIPT_WIDGET_TYPE, process: 'Mash' }, { type: SCRIPT_WIDGET_TYPE, process: 'Boil' }, { type: 'valueWidget', process: 'Mash' }];

@@ -2851,7 +2851,7 @@ function setpointDialog(p, t) {
   d.showModal(); if (m) setTimeout(() => { inp.focus(); inp.select(); }, 50);
 }
 
-// ---- Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/scriptwidget.js, Help 172) ----
+// ---- Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/scriptwidget.js, Help 173) ----
 // Its Label is the title; under it what its Process is doing (Running, Waiting, Stopped, Stopped on an error) and a Start / Stop
 // button. The whole Widget is the button: one click starts the Process when it is stopped and stops it when it runs, with no pop-up
 // (Rule 2.44). An item set to Ask before changing asks first. What it shows comes from the Processes list, so it follows every change.
