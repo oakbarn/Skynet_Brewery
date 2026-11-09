@@ -7311,7 +7311,9 @@ function hydroFields(it) {
     ['model', 'Template (the kind of hydrometer)', 'sel', HYDRO_MODEL_KEYS.map(k => [k, HYDRO_MODELS[k].label]), true, false, { tip: m.about }],
     ['_about', m.about, 'note'],
     ['connection', 'Connection', 'sel', Object.entries(HYDRO_CONNECTIONS).filter(([k]) => m.conns.includes(k)).map(([k, l]) => [k, l]), true, false, { tip: 'How it sends its readings. Greyed out when its Template has only one way.', ...g('connection') }],
-    ['color', 'Tilt Color (mandatory for a Tilt)', 'sel', [['', 'Pick one…'], ...TILT_COLOR_NAMES.map(c => [c, c])], false, false, { tip: 'A Tilt is told apart by its color: one Tilt (of any kind) per color.', ...g('color') }],
+    ['color', 'Tilt Color (mandatory for a Tilt)', 'sel', [['', 'Pick one…'], ...TILT_COLOR_NAMES.map(c => [c, c])], false, false, { tip: 'A Tilt is told apart by its color: one Tilt (of any kind) per color.', ...g('color'),
+      // left blank on a Tilt, a pop-up says so and it keeps the focus (OakBarn Brewery, 2026-11-09; the Rule 18.28 guard)
+      ...(m.idBy === 'color' ? { guard: 'Tilt Color', guardMsg: 'The Color for a Tilt cannot be left blank.', guardAllow: 'model label device channel' } : {}) }],
     ['hwId', 'Hardware ID (mandatory)', 'hwid', null, false, false, { tip: 'Its Name or chip ID, as it sends them (an iSpindel: the Name on its setup page, iSpindel000 to start). Type it, or pick one the Brain heard that no Hydrometer has yet. Never its IP address: a router may change that.', ...g('hwId') }],
     ['cloudKey', 'Cloud key (the maker\'s cloud only)', 'text', null, false, false, { tip: 'The key (token) from the maker\'s app, for the Connection "The maker\'s cloud". Reading through the cloud comes in a later step.', ...g('cloudKey') }],
     ...(conn === 'wifi' ? [['_wifi', `Wi-Fi: on its setup page pick HTTP and send to ${wifiAt} (from your own network; from anywhere else add ?key= and the API key).`, 'note', null, false, false, { keep: true }]]
@@ -7382,6 +7384,10 @@ function field(f, obj) {
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
     if (out[1].matches?.('select, input')) out[1].disabled = true;
+  }
+  if (x?.guard && out[1]) {       // a box that can't be left blank once the user is on it (Rule 18.28's pop-up)
+    const i = out[1].matches?.('select, input, textarea') ? out[1] : out[1].querySelector?.('select, input, textarea');
+    if (i) Object.assign(i.dataset, { guard: x.guard, ...(x.guardAllow ? { guardAllow: x.guardAllow } : {}), ...(x.guardMsg ? { guardMsg: x.guardMsg } : {}) });
   }
   if (x?.grey && out[1]) {        // a setting this kind does not use: shown greyed out, never changed (a Hydrometer's Template, Rule 6.25)
     out[0]?.classList.add('greyed'); if (out[0]) out[0].title = x.grey;

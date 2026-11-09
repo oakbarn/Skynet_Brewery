@@ -1757,6 +1757,11 @@ picks which of its settings it uses; every setting is in its Properties and the 
   **mandatory** for their kind (OakBarn Brewery: "for a Tilt Color and Id are mandatory") and never shared: one Hydrometer per Tilt
   Color (any Tilt kind), one per Hardware ID. **Never by IP address** (OakBarn Brewery: "No tracking by IP Address"): a router may
   change it. A hydrometer the Brain hears that no Hydrometer has yet is offered in the Hardware ID box, so nobody looks it up.
+  **A Tilt's Color can't be left blank** (OakBarn Brewery, 2026-11-09: "if you select Tilt as type, and you leave color null and exit
+  the field A Pop up that states Color for a Tilt cannot be left blank, choose a Color"): leaving the Tilt Color box blank pops up
+  "The Color for a Tilt cannot be left blank." and goes back to the box, in the Panel's Properties (the Rule 18.28 pop-up) and on the
+  Importer's Hydrometers page. The Color is a drop-down list. On the Importer page, picking a Tilt type goes straight to its Color, and the
+  box a type does not use (Tilt Color or Hardware ID) is greyed out.
 - **SG, °Plato and °Brix all the time** (OakBarn Brewery: "List SG, Brix, and Plato all The time and on a graph choose which to display
   but easy to switch right on the graph"): `.sg`, `.plato`, `.brix`; its Gravity units pick what its value shows. On a Graph a
   Hydrometer's line has an SG / °P / °Bx switch (each screen keeps its own pick).
