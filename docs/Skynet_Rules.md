@@ -704,6 +704,18 @@ allowed method that does. A Tap set by hand (When tapped) still wins. Operators 
   Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
   temperature widgets", Help 160)
 
+2.45 **Time and DateTime formats: pick how a time shows** (OakBarn Brewery, 2026-11-09: BruControl's time Globals become Time or
+DateTime Widgets, with more than one format, and the Importer carries the format over). A **Time Widget** and a **DateTime
+Widget** (and a Code Value Widget holding a Time or DateTime) have **Shows as** in their Properties; a **Timer** has the same Time
+formats in its **Digits** box (Rule 2.40). Time: hh:mm:ss (the standard look), hh:mm, h:mm:ss, mm:ss (all minutes, 90:00), Minutes
+only, Seconds only, Days too. DateTime: mm/dd/yyyy hh:mm:ss (the standard look), with AM / PM, Date only, Nov 9, 2026, Monday,
+November 9, 2026, Clock (2:30 PM), 24-hour clock, Day and clock, 2026-11-09 14:30:00. The letters are the same ones BruControl
+and Windows use (yyyy MMM dd ddd HH hh mm ss tt; for a Time the biggest unit holds the whole time), so a Process can set **any**
+format with **`.showas`** (`wgt_TM_Boil_BR.showas = "mm:ss"`, `tm_Boil.showas = "mm' min'"`); `""` puts back the Properties'
+pick. Only how it shows changes: the value a Process reads is the same. Both programs: the BruControl Import keeps a Timer's
+Format, and a Time or DateTime Global's Format rides along in its Globals list for when Globals are imported (each becomes a
+Time or DateTime Widget with that format). Help 176.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2030,7 +2042,9 @@ each have a **time on its timer**: when the timer reaches it, the Alarm goes to 
 Chain is kept in the order its steps go On** (a count-down timer: the most time left first), and a **new step is put into its
 place** as soon as it is saved (OakBarn Brewery, 2026-11-09: "Auto Order the Alarm Chain of a Timer by when the Alarm is set to On
 or Active", "if a new alarm is enetered in the chain auto reorder takes place"). Steps with no time keep their order after them.
-Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand).
+Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand). A BruControl Timer's 2 alarms that are on are joined to their
+Alarms: the Alarm becomes a Hop Alarm on that Timer, the first time is its own time, and a second time is a step on its Alarm
+Chain (in Skynet one Alarm can hold up to 20 timed steps).
 Help 172.
 
 7.17 **Alarm Email Notification: an Alarm can send an email** (OakBarn Brewery, 2026-11-09: "Alarm e mail notification could be
@@ -3531,6 +3545,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Integrated Instances and the built-in heater's Properties (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 6.1 gets the Integrated Instance exception (a Heating Element built into a Vessel Device from one on a Tab is an independent copy on the same Port; the last one turned On or Off has the Port; a Process calls it `VesselName.DeviceName`); Rule 4.4 notes an Instance is not a Clone. Added Rule 2.47 (no Hidden Lock on any Integrated Item; the title line's lock, Visible and Hidden Locked get help balloons) and Rule 3.16 (the Suggested Name follows the Label at once, always has its Device Type ID, every Name Change pop-up has Update to Suggested, the Label's balloon shows its own Suggested Name). Rule 3.11 lists the new button. A built-in Heating Element's Properties are titled Integrated Heating Element Device. The Three Vessel sample's built-in heaters and probes get their Device Type IDs. Help 180; next free Help 181.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Added Rule 2.45, Time and DateTime formats (OakBarn Brewery): Shows as on Time, DateTime and Code Value Widgets, more Digits on a Timer, `.showas` takes any format; the Importer keeps a Timer's Format and a time Global's Format; Help 176. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
