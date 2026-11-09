@@ -1891,6 +1891,21 @@ so it has none. New pumps from the pump picker keep the Green glow ring (Rule 18
 go into Panel Defaults).
 *Replaced:* the flashing bolt was the default (2026-11-04, PR #179).
 
+7.16 **The Alarm Chain: one Alarm does the work of many stacked ones** (OakBarn Brewery, 2026-11-09: "Since we can Change the
+Path of an Alarm as well as the audio file One Alarm could do what all the alarms did. I had to Stack Them and it was a pain to
+work with so many"). An Alarm Widget (Basic Skynet or User) has an **Alarm Chain** of up to 20 **steps** (Alarm Widget
+Properties > Alarm Chain; each step's red ⬢ opens its pop-up). Each step has a **Step name** and can change the **Fore color**,
+**Back color**, the **Set Graphic (Layer 2)**, the **Active overlay (Layer 1)** and the **Sound file** (a User Alarm also its
+**Background picture**, Image Path 1). **Every choice starts on No Change, which skips that adjustment** for that step: the Alarm
+keeps what it has. A Process picks a step with **`alm_Brew.step = 2`** or by its name, **`alm_Brew.step = "Strike"`**;
+**`alm_Brew.step = 0`** puts back what its Properties say. `.setgraphic` changes Layer 2 from a Process. A Hop Alarm's steps can
+each have a **time on its timer**: when the timer reaches it, the Alarm goes to that step and sounds (once). **A Timer's Alarm
+Chain is kept in the order its steps go On** (a count-down timer: the most time left first), and a **new step is put into its
+place** as soon as it is saved (OakBarn Brewery, 2026-11-09: "Auto Order the Alarm Chain of a Timer by when the Alarm is set to On
+or Active", "if a new alarm is enetered in the chain auto reorder takes place"). Steps with no time keep their order after them.
+Both programs: the BruControl Import makes Alarms with no chain (its stacked alarms are listed for the user to join by hand).
+Help 172.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -2357,6 +2372,14 @@ the backup. Help 100 and 157.
   [docs/OakBarn_Scripts](OakBarn_Scripts/README.md). **They are read only when OakBarn Brewery says so, or after asking
   permission.** The one standing exception: a Process Template that is not finished yet is built on them.
 (thread "Keep templates and test bed to new Rules")
+
+16.9 **A true / false choice is written `= true` or `= On`** (OakBarn Brewery, 2026-11-09: "Any Boolean Choice ... alarm.active =
+true can be ... Alarm = On the .active is only for backward compatibilty"). In a Process every true / false item takes
+**`alm_Hops = true`** or **`alm_Hops = On`** (false or Off to turn it off), and `wait alm_Hops == Off` reads it. The old
+**`"alm_Hops" active = true`** and **`alm_Hops.active = true`** keep working **only so older Processes still run**; new Processes
+and Process Templates use the new style. **The BruControl Import** offers, when it turns a BruControl Script into a Process:
+**alm_Hops = true** (the default), **alm_Hops = On**, or **keep the old .active**, and **strongly suggests the new style**
+(lib/fold.js rewriteAlarmLines). The choice is shown on the Importer's Script page once that page is built.
 
 ---
 
@@ -2957,6 +2980,11 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 6.22, Dual Throw (OakBarn Brewery: "Add it"): a Digital Out's second Port on the same Interface is always its opposite, with a delay between, for valves with an Open and a Close wire; in the ⬢ Pin attributes (Panel) and kept by the BruControl Importer; Help 167.
 - 2026-11-09: Rule 15.4 (OakBarn Brewery): Clear Page and Restart Fresh at the top of every Importer page, each asking first; the Setup tick box that cleared the Importer's saved answers is taken out (it is done in the Importer). Checked against the Panel: no change (Importer only; Setup's Start Fresh still never touches the Import folder). Help 143 updated. (thread "Fix the Importer pages")
 - 2026-11-09: Added Rule 18.33 (OakBarn Brewery decides which boxes are mandatory; the Label always is). Rules 2.42 and 15.4: the Importer's Valves page has Set every Valve (Connection Type, Size, Voltage) and only Connection Type and Size are mandatory there; the Import reads the Panel's Units and Default pipe size on the same computer; Setup's update page can clear the Importer's saved answers. Checked against the Panel: Rule 18.33 changes no Panel box today (Label, Name and Port were already mandatory); its Default settings are only read. Help 143 and 165 updated. (thread "Fix the Importer pages")
+- 2026-11-09: Added Rule 7.16, the Alarm Chain (OakBarn Brewery): up to 20 steps on one Alarm, each changing Fore, Back, Set
+  Graphic (Layer 2), Active overlay, Sound (and a User Alarm's picture), every choice No Change to start; `.step` and `.setgraphic`
+  in a Process; a Hop Alarm's steps can have times on its timer and are kept in the order they go On. Added Rule 16.9 (true / false
+  written `= true` or `= On`; `.active` only for older Processes; the Import offers the new style). Help 172. Checked against both
+  programs. (thread "Add look options to Alarm Chain steps")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
 - 2026-11-08: Rule 15.4, the Importer fix list (OakBarn Brewery): answers kept to come back later, Interfaces Import box, no blank boxes, Show and the two Skynet Name columns, the Widget pages (BruControl Timers, Alarms, Toggle Switches, Scripts become Skynet Widgets), new item pages (pH, Pressure, Hydrometers, Volume, Floats, Digital Inputs), no "Not sure", User defined, valve Connection, Sizes and Voltage, more flow meters, Control Type columns with Primary, Heater Element and the Panel's HERMS Coil choices, the clinking beer mugs icon. Help 143 updated, Help 165. Checked against the Skynet Panel: the CPMP Type ID and the Pump's Method (Rule 6.21) are the only Panel changes. (thread "Fix the Importer pages")
