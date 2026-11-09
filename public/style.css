@@ -509,6 +509,12 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .vkitems table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
 .vkitems th { text-align: left; font-weight: 600; padding: 2px 4px; }
 .vkitems td { padding: 2px 4px; }
+/* Calibrations in plain boxes (Rule 6.24) */
+.calchain .calRow { border: 1px solid var(--line, #ccc); border-radius: 6px; padding: 6px; margin-bottom: 6px; }
+.calchain .calHead { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.calchain .calHead select { flex: 1 1 200px; min-width: 0; }
+.calchain .calBody { display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; margin-top: 6px; align-items: center; }
+.calchain .calBody textarea { grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
 .vkitems .vkv { width: 6em; }
 .vkitems .vkt { width: 100%; }
 #ws .el .vksel { position: absolute; left: 6px; right: 6px; bottom: 6px; font-size: 16px; padding: 4px; }
