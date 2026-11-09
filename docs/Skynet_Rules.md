@@ -2642,6 +2642,24 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   kettle's element and probe, Rule 5.7) gets the same layout, with **3. Built into** (greyed out) in place of the Tab, no Graphic and
   no X, Y, Width, Height (it moves with what it is built into); a built in probe shows its Probe type ⬢, Units, Calibration offset and
   Reading now as a Temperature Probe does (Rule 18.26). Double-clicking the part's picture on the Vessel or its reading opens it.
+  *Changed (OakBarn Brewery, 2026-11-09: "If I double Tap on a Heater Image on a Saved Template, in edit mode, the Properties and
+  attributes of a Heater show be display just like it was an independent Device"):* a **Vessel Device's** Heating Element,
+  Thermowell or Probe opens **the same Properties as one of its own** (the Heating Element's or the Temperature Probe's, with its
+  title, Toggle, Overlay, Heating method and so on), with **3. Built into** in place of the Tab and no Graphic, Orientation, X, Y,
+  Width or Height (the vessel draws it). A double-click or a long press on its picture always opens the part, never the vessel.
+  **The Vessel Device's own Properties** have a section for each **Heating Element** and for the **Thermowell / Probe**, showing
+  its Label, Interface, Port, Name and main settings, with a button to its own Properties. With none built in, the section is
+  still there, empty and greyed out.
+  *Changed (OakBarn Brewery, 2026-11-09: "Fix this Dialog"; "It can still have the Universal attributes plus the sub device
+  sections (Heater, Probe just things you might change ... those fully editable include a whole different choice of Probe or
+  Heating Element as those could be Physically changed on the Vessel after it was built"):* once a Vessel Device is **integrated**
+  (built with the Vessel Device Builder, or built and saved on a Tab) its Properties have only **the Universal Properties** (Rule
+  1.21: Name with ✏ Change name, Label, Visible, Hidden Locked, Label and place, Tab, X, Y, Lock), its **Type** greyed out, its Out
+  flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections are fully editable (Label,
+  Interface, Port or Probe #, Heating method, Temperature Probe, Target, Units, Calibration offset) and each can be **swapped** for
+  another existing one or a new one: on Save the old one is taken out of the vessel and stays on the Tab as a Device of its own.
+  No Size, Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential, Sparge / Steam Slayer or IP rows:
+  none of those can change after integration.
 - What a Device already has set is kept (its look, pin settings and so on); only the dialog changed. Every explanation is in the
   hover help (Rule 2.38).
 - **BruControl Import:** it has no Device dialogs of its own; the Devices it brings in open in these Properties in the Panel.
@@ -3139,3 +3157,5 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-08: Added Rule 19.5, the Vessel Device Builder (OakBarn Brewery): the Question Dialog (General Type with USER: types, Volume, Height, Diameter, Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe, Heating Element, HERMS Coil), then the vessel on the 🔨 Build Tab with the Vessel Builder panel beside it and its Heater and Probe pickers. It replaces the BruControl Import's Vessels interview (the same look and feel in both programs; the Importer side comes later). Help 166; next free Help number 167. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Rule Change OK but Only during the Initial Build and there are Cross Herms out there so that get changed as well"): Pick may make a User IP on a vessel only during the initial build in the Vessel Device Builder; a HERMS coil may be crossed (Outlet Right & Inlet Left, Outlet Left & Inlet Right). Rule 19.5 items 6 and 7 (Pick, the Priming Tee). Help 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing changes there yet. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rule 5.31 (OakBarn Brewery: "Add a new Ip In Back on The Basic Vessel Template Back Center. ... I have more than one with a Back center Heater"): the Vessel Widget Main Template has a Center Back Element IP (16 IPs); the Vessel Device Builder offers Back Center for the Thermowell / Probe and the Heating Element (Rule 19.5). The Three Vessel sample vessels have the spot Not Placed. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder; nothing else changes there. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Changed Rule 18.31 (OakBarn Brewery: "The Properties of the sub devices on a Vessel Device should pop up a Properties Dialog ... just like it was an independent Device ... Also the Properties should be on the Vessels Device Properties in their own section, If there is None ... all those attribute and Properties are greyed out."): a Vessel Device's Heating Element, Thermowell or Probe opens the same Properties as one of its own; the Vessel Device's Properties have a section for each, greyed out when None. Help 133 and 166 updated. Checked against the BruControl Import program: it has no Device dialogs of its own (Rule 18.31), so nothing changes there. (thread "Build the Vessel Device Builder")
+- 2026-11-09: Changed Rule 18.31 again (OakBarn Brewery: "Fix this Dialog" and "It can still have the Universal attributes plus the sub device sections"): an integrated Vessel Device's Properties are the Universal Properties, its Type greyed out, and fully editable Heating Element and Thermowell / Probe sections, each of which can be swapped for another; nothing else. Help 133 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")

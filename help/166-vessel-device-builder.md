@@ -53,6 +53,9 @@ The **Vessel Builder** panel is on the right. It has a line for each thing you s
   new **Priming Tee** (an Instrument Tee with a Manual Valve on its short side, always pointing up). You can already add it from
   **Elbows, Tees**; it can be flipped left to right but never turned or turned upside down.
 
+Double-click a part's picture on the vessel to open its own Properties (a faint one opens its picker). The vessel's Properties
+show a section for each Heating Element and the Thermowell / Probe (Help: Vessel Widget).
+
 Press **✔ Done** to close the panel. Then press **💾 Save Build ... > To a Tab** to put the vessel on its Tab.
 
 **Once it is on a Tab and the layout is saved, its openings and built in parts are locked for good.** Its Name, Labels, Volume,
