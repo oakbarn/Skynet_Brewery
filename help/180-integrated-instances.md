@@ -2,6 +2,13 @@
 
 What happens when a Heating Element is built into a Vessel Device, and how its Properties work (Skynet Rules 2.47, 3.16, 6.1 and 6.28).
 
+## A Clone: one Device, many places
+
+A Clone (Skynet Rule 4.4) is not a new Device. It and its Device have **one set of Properties**: change one and the other changes.
+Turn one On and they are all On. Think of a Device and its Clones as ONE.
+
+![A Device and its Clones are one](help_pictures/Clone_Hive_Cube.svg)
+
 ## An Integrated Instance
 
 When you build a Heating Element that is already on a Tab into a Vessel Device, Skynet makes an **Integrated Instance** of it. It
@@ -14,7 +21,15 @@ There can be more than one Instance of the same Heating Element, for example one
 **They all use the same Interface Port**, the Port of the Heating Element they came from. An Instance can't change its Interface or
 Port (they are greyed out). Nothing else may use that Port.
 
+An Instance is more like **Bob** of the Bobiverse (*We Are Legion*) than a Clone: it starts as a copy and then goes its own way.
+
+![Bob of the Bobiverse](help_pictures/Bobiverse_Bob.png)
+
+*Picture: the [Bob page of the Bobiverse Wiki](https://bobiverse.fandom.com/wiki/Bob) (Fandom, CC BY-SA).*
+
 **Last One Rules** (Rule 6.28, "All for One, One For All"): only one of them can be On at a time.
+
+![All for One, One For All](help_pictures/Three_Musketeers.png)
 
 - Turning one On takes the Port. The others on it go Off.
 - Turning one Off turns the Port Off. Every one on it is then Off.
