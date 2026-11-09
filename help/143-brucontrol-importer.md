@@ -127,7 +127,7 @@ Then you confirm what comes in, in small steps:
    (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
 3a. **Your Widgets.** BruControl's Application Elements (the things not wired to a board) become Skynet Widgets: a Timer a
-   **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Script Widget** ([Help 173](173-script-widget)), a Chart
+   **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Process Widget** ([Help 173](173-process-widget)), a Chart
    a **Graph Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
    each kind found, with the same Display Name, tick, Label and Show columns as the items below. A BruControl Inspector has no Skynet
    Widget and stays a Placeholder. See [Help 165](165-importer-item-and-widget-pages).
