@@ -958,9 +958,10 @@ async function clearPage() {
   toast('This page is cleared.');
 }
 async function restartFresh() {
-  if (!await ask('Restart Fresh?', '<p>Every answer you gave in the Importer, on every page and for every config file, is cleared, and you go back to the first page (Welcome). Your BruControl config file and any Schema you saved are not touched.</p>', 'Yes, restart fresh', 'No, keep my answers')) return;
+  if (!await ask('Restart Fresh?', '<p>Every answer you gave for this config file, on every page, is cleared, and you go back to the first page (Welcome). Your BruControl config file, the answers kept for your other config files and any Schema you saved are not touched.</p>', 'Yes, restart fresh', 'No, keep my answers')) return;
   clearTimeout(saveTimer);
-  await api('POST', '/api/progress', { clearAll: true }).catch(e => toast(e.message));
+  // only the config file being worked on (OakBarn Brewery, 2026-11-09: "Clear and Start Fresh, Only on the one you are working On")
+  if (state.sel) await api('POST', '/api/progress', { file: state.sel, clear: true }).catch(e => toast(e.message));
   Object.assign(state, { sel: '', resume: null, r: null, connect: null, converted: false, keepIfs: null, keepTabs: null, ids: null, itemPicks: null, parts: null, kindOf: null,
     partPage: 0, wPage: 0, max5: 0, sub5: null, savedConnect: null, sentSig: null, buildPage: 0, reached: 1, firstVessels: null });
   resetConnect(null);
