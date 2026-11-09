@@ -196,6 +196,8 @@ picture and text, the import shows the choices above, with the recommended one p
 | OneWire probe numbered by bus position | the probe has to be picked on the Devices page (Skynet uses each probe's ROM id) | Built (warning) |
 | Digital output with a Dual Throw port (DualThrowPortNum, DualThrowDelay) | Dual Throw second Port and delay (Rule 6.22) | Built |
 | Hysteresis port, PredictiveHysteresis on or off | always Skynet Predictive (Rule 6.23), the switch is not copied | Built |
+| Analog In / OneWire probe calibrations (CalValue: layers, Precision, Prefix, Suffix) | Calibrations list in order, Decimals, Prefix, Units (Rule 6.24) | Built |
+| PWM output calibrations (0-255) | not copied, listed in the notes (Skynet counts %) | Built |
 | Port types Skynet does not have yet | skipped, with a warning | Built |
 
 ## 9. Pictures and sounds
@@ -206,6 +208,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | `C:\BruControl\Media\wave\x.wav` (any sound) | `media/sounds/x.wav` | Built |
 | The 3 background pictures | `.backpath`, `.backpath_2`, `.backpath_3`, all editable; `.background` 1-3 picks one, 0 / blank / over 3 = none (Rule 7.10). A Process line with `imagepath_1` becomes `.backpath` | Built |
 | A Tab's background picture | the Tab's picture, with its width and height | Built |
+| An Alarm's 3 sound files | `.sounds` 1-3, `.fileindex` picks one; a Process can also set `.sound` (or a Sound Player's `.path`) to any sound file | Built |
 
 ## 10. Recipes (BeerSmith .bsmx and BeerXML)
 
@@ -220,6 +223,14 @@ picture and text, the import shows the choices above, with the recommended one p
   Whirlpool. BeerXML Aroma also becomes Whirlpool; its dry hop TIME is minutes and becomes days.
 - **Global mapping** (gblV_Hop1_Oz_R1 ...): kept for a BeerXML file only when Settings > BeerXML mapping names Globals.
 - The boxes on the Recipe tab start filled in, as **Calculate** does.
+
+## 11. Where Skynet has no limit (BruControl did)
+
+| BruControl | Skynet | Status |
+| --- | --- | --- |
+| A Timer has 2 alarms | The Timer Alarm Chain: as many alarms as you like, each with its own time. The Importer adds BruControl's 2 alarms to the chain when they are used | Planned |
+| 3 pictures on an item, and no way for a Script to show any other picture | Each item still has 3 picture slots (Rule 7.10), and a Process can set `.backpath` (or `.image`) to any picture, so there is no limit | Built |
+| 3 sounds on an Alarm | Each Alarm still has 3 sound slots, and a Process can set `.sound` (or a Sound Player's `.path`) to any sound file, so there is no limit | Built |
 
 ## Still to decide
 
@@ -239,3 +250,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-02: The 3 background pictures are .backpath, .backpath_2, .backpath_3 (Rule 7.10). (thread "Rename image paths to backpath")
 - 2026-11-09: Section 8: BruControl Dual Throw (DualThrowPortNum, DualThrowDelay) is kept as the Skynet Dual Throw (Rule 6.22). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Section 8: every imported Hysteresis is Predictive (Rule 6.23); BruControl's PredictiveHysteresis switch is not copied.
+- 2026-11-09: Section 8: BruControl calibrations and Text Format kept on Analog Ins and probes (Rule 6.24); PWM output calibrations not copied.
+- 2026-11-09: Section 9 lists an Alarm's 3 sound files; added section 11, where Skynet has no limit: Timer alarms (Timer Alarm Chain), pictures and sounds set by a Process. (thread "Find BruControl properties missing in Skynet")

@@ -15,6 +15,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from '
 import { loadSnippet } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
+import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2313,8 +2314,8 @@ function fillEl(n, e0) {
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
-    case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' : (e.offText ?? 'OFF'); break;
-    case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
+    case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
+    case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
     case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
@@ -4356,7 +4357,7 @@ const ADD_MENU = [
   ['Widgets (app only, no board pin)', [
     ['Picture Widget', 'picture'],
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
-    ['Chart (a line graph of recorded readings)', 'chart', 'Chart'],
+    ['Graph (a line graph of recorded readings)', 'chart', 'Graph'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
     [`${SCRIPT_WIDGET_WORD} (shows a Process; one click starts or stops it)`, SCRIPT_WIDGET_TYPE, 'Script'],      // Rule 1.31
   ]],
@@ -4397,7 +4398,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
-  if (type === 'chart') { e.w = 610; e.h = 190; e.label = 'Chart_' + i; Object.assign(e, { spanSeconds: CHART_DEFAULTS.spanSeconds, refreshInterval: CHART_DEFAULTS.refreshInterval, hGridLines: CHART_DEFAULTS.hGridLines, vGridLines: 0 }); }     // Rule 1.26
+  if (type === 'chart') { e.w = 610; e.h = 190; e.label = 'Graph_' + i; Object.assign(e, { spanSeconds: CHART_DEFAULTS.spanSeconds, refreshInterval: CHART_DEFAULTS.refreshInterval, hGridLines: CHART_DEFAULTS.hGridLines, vGridLines: 0 }); }     // Rule 1.26
   if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
     if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
@@ -4912,7 +4913,7 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
           for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
@@ -6211,6 +6212,16 @@ const SEMI_TIP = {
 const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are turned by hand or by their board, so they are not.`, 'note'],
   ['deviceControlled', 'Linked Device', 'devctl'],
   ...(type === 'led' ? [] : [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path']]), ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']];
+// Calibrations on every reading (OakBarn Brewery, 2026-11-09, Rule 6.24), in plain boxes: a list, each one working on the result of the
+// one before (public/calibrations.js). A PWM or Analog output's Measured volts: pairs of output % and the volts measured there
+// "  ≈ 4.6 V" after a PWM or Analog output's value, from its Measured volts table (Rule 6.24); nothing without one
+const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
+const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
+const CAL_FIELD = ['calibrations', 'Calibrations (top to bottom)', 'calchain', null, false, false, { tip: CAL_TIP }];
+const CAL_POP = { title: 'Calibrations', fields: [CAL_FIELD] };
+const CAL_ROW = (it, x = {}) => ['_calx', 'More calibrations', 'ro', calSummary(it.calibrations), false, false, { tip: CAL_TIP, attr: CAL_POP, ...x }];
+const VOLT_TIP = 'Measured volts (Rule 6.24): set the output to a few settings (a PWM output: %), measure the volts with a meter, and write each pair on its own line, e.g. 50, 4.6. A DAC seldom reaches exactly 10 V at 100 %, and each one is different. Skynet then shows about how many volts it gives (≈ V), and a Process can set volts: My_DAC.volts = 7.5.';
+const VOLT_FIELD = (x = {}) => ['voltTable', 'Measured volts (its setting, the volts you measured: one pair per line)', 'pairs', null, false, false, { tip: VOLT_TIP, ...x }];
 // Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
 const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Target, so it settles at the Target instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
 const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
@@ -6253,7 +6264,7 @@ const F = {
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
     ['_mnote', 'Processes set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
-  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
+  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num'], VOLT_FIELD()],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
   scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
@@ -6263,7 +6274,7 @@ const F = {
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -6368,7 +6379,7 @@ F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
-const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
@@ -6722,8 +6733,8 @@ const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_
 const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
   ? [['signal', 'Signal', 'sel', PWM_SIGNALS, false, false, { tip: DEVICE_TIPS.pSignal, with: ['units', 'Units', 'text', null, false, false, { tip: DEVICE_TIPS.pUnits }], ...x }],
     ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
-    ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }]]
-  : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }]];
+    ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }], VOLT_FIELD(x)]
+  : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }], VOLT_FIELD(x)];
 const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: DEVICE_TIPS.type }];
 function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -6771,7 +6782,7 @@ const TWO_POINT_FIELDS = [['_c2', 'Put the probe in ice water (stirred, 32 °F /
 const TWO_POINT_KEYS = ['calLowRead', 'calLowTrue', 'calHighRead', 'calHighTrue'];
 const TWO_POINT_POP = { title: 'Two-point calibration', fields: TWO_POINT_FIELDS };
 const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
-const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', ...TWO_POINT_KEYS];
+const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', ...TWO_POINT_KEYS];
 const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
 const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
 function flipFrom(w) { if (w._flip === undefined) return; w.flipH = w._flip.includes('h'); w.flipV = w._flip.includes('v'); if (!w.flipH) delete w.flipH; if (!w.flipV) delete w.flipV; delete w._flip; }
@@ -6783,6 +6794,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   ['units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']], false, false, { tip: DEVICE_TIPS.tpUnits, with: ['precision', 'Decimals', 'num'], ...x }],
   ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }],
   ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
+  CAL_ROW(it, x),
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
 function probeDeviceFields(it, item) {
@@ -6925,10 +6937,10 @@ function textWidgetFields() {
     ['color', 'Fore color', 'color', null, false, false, { tip: T.color }],
     ...wgtPlace(), wgtType('Text')];
 }
-// Chart Widget (Fritz, 2026-11-08, Rule 1.26): a BruControl Chart's properties, in the Widget drill-down look (Rule 18.30)
+// Graph Widget (was Chart Widget; OakBarn Brewery, 2026-11-08/09, Rule 1.26): a BruControl Chart's properties, in the Widget drill-down look (Rule 18.30)
 const CHART_TIPS = {
   label: 'The title over the graph, for example Conical 5 Day. The ⬢ beside it sets its font, size and colors.',
-  name: 'Made from the Label and the Tab: wgt_CHT_ + the Label + the Tab ID. A Process uses it, for example wgt_CHT_Conical_CT.spanseconds = 86400. It must be unique.',
+  name: 'Made from the Label and the Tab: wgt_GPH_ + the Label + the Tab ID. A Process uses it, for example wgt_GPH_Conical_CT.spanseconds = 86400. It must be unique.',
   ch: n => `The Device or Widget whose readings Channel ${n} draws (Channel 1 on the left axis, Channel 2 on the right axis). It must be sent to the database (its Database box), or its line stays empty. The ⬢ beside it sets Auto scale, the axis lowest and highest, the Line color and the Axis color.`,
   span: 'How far back the graph goes, in seconds, like BruControl\'s Span: 3600 = 1 hour, 86400 = 1 day, 432000 = 5 days. The ⬢ beside it sets the grid lines and the time axis color.',
   refresh: 'How often the graph is drawn again with the newest readings, in seconds, like BruControl\'s Refresh interval.',
@@ -6943,7 +6955,7 @@ function chartWidgetFields() {
     ['ch2Element', 'Channel 2 (right axis)', 'elem', null, false, false, { tip: T.ch(2), attr: CHART_CH_POP(2) }],
     ['spanSeconds', 'Span (seconds)', 'num', null, false, false, { tip: T.span, attr: CHART_GRID_POP }],
     ['refreshInterval', 'Refresh interval (seconds)', 'num', null, false, false, { tip: T.refresh }],
-    ...wgtPlace(), wgtType('Chart')];
+    ...wgtPlace(), wgtType('Graph')];
 }
 // Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
 const OVR_TIPS = {
@@ -7225,7 +7237,7 @@ function fieldsOf(item) {
     return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
-      ['calibrations', 'BruControl calibrations (JSON list, used instead of the settings above)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
+      ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
       ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
@@ -7480,6 +7492,35 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'bool' || kind === 'yn') {     // a simple true / false is a switch (Fritz); choices with more options are dropdowns
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'bool', ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) }), h('span', { class: 'swk' }));
   }
+  else if (kind === 'pairs') {     // pairs of numbers, one per line (Rule 6.24: a Lookup Table, a PWM output's Measured volts)
+    input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false', rows: 4, placeholder: '0, 0\n50, 4.6\n100, 9.4' }, pairsText(v));
+    return [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)];
+  }
+  else if (kind === 'calchain') {  // Calibrations in plain boxes (Rule 6.24): one row each, in order, ➕ adds, ↑ ↓ move, ✕ removes
+    const list = h('div', { class: 'calList' });
+    const row = (c = { type: 'offset' }) => {
+      const box = h('div', { class: 'calRow' }), body = h('div', { class: 'calBody' });
+      const typeSel = h('select', { class: 'calType' }, ...CAL_TYPES.map(t => h('option', { value: t, ...(t === c.type ? { selected: true } : {}) }, CAL_KINDS[t][0])),
+        ...(CAL_KINDS[c.type] ? [] : [h('option', { value: c.type, selected: true }, `${c.type} (not used by Skynet)`)]));
+      const on = h('input', { type: 'checkbox', class: 'calOn', ...(c.enabled === false ? {} : { checked: true }) });
+      const fill = () => {
+        const t = typeSel.value, k = CAL_KINDS[t];
+        body.replaceChildren(...(t === 'lookupTable' ? [h('label', {}, 'Pairs: reading, value (one per line)'), h('textarea', { class: 'calRows', rows: 4, spellcheck: 'false', placeholder: '8.9, 29\n200, 175' }, pairsText(c.rows))]
+          : (k?.[1] ?? []).flatMap(([f, l, d]) => [h('label', {}, l), h('input', { class: 'calNum', 'data-f': f, type: 'number', step: 'any', value: c.type === t && c[f] !== undefined ? c[f] : d })])));
+      };
+      typeSel.onchange = () => { c = { type: typeSel.value }; fill(); };
+      fill();
+      const btn = (t, title, f) => h('button', { type: 'button', title, onclick: f }, t);
+      box.append(h('div', { class: 'calHead' }, typeSel, h('label', { class: 'sw', title: 'On (off = skipped, not lost)' }, on, h('span', { class: 'swk' })),
+        btn('↑', 'Move up (works earlier)', () => box.previousSibling && list.insertBefore(box, box.previousSibling)),
+        btn('↓', 'Move down (works later)', () => box.nextSibling && list.insertBefore(box.nextSibling, box)),
+        btn('✕', 'Remove this calibration', () => box.remove())), body);
+      list.append(box);
+    };
+    (Array.isArray(v) ? v : []).forEach(row);
+    input = h('div', { class: 'calchain', 'data-k': key, 'data-kind': kind }, list, h('button', { type: 'button', onclick: () => row() }, '➕ Add calibration'));
+    return [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)];
+  }
   else if (kind === 'vkitems') {   // two columns: Value | Text, with rows to add and remove
     const tb = h('tbody');
     const row = (it = {}) => {
@@ -7732,6 +7773,17 @@ function readFields(obj, root = $('#dlgBody')) {
     if (kind === 'bool') v = inp.checked;
     else if (kind === 'vis') v = inp.checked ? undefined : 'hidden';
     else if (kind === 'show') v = inp.checked ? undefined : true;
+    else if (kind === 'pairs') { v = pairsFrom(inp.value); if (!v.length) v = undefined; }
+    else if (kind === 'calchain') {
+      v = [...inp.querySelectorAll('.calRow')].map(box => {
+        const c = { type: box.querySelector('.calType').value };
+        if (!box.querySelector('.calOn').checked) c.enabled = false;
+        for (const n of box.querySelectorAll('.calNum')) { if (n.value === '' || !Number.isFinite(+n.value)) throw new Error(`${CAL_KINDS[c.type]?.[0] ?? c.type}: type a number in every box`); c[n.dataset.f] = +n.value; }
+        const rows = box.querySelector('.calRows'); if (rows) { c.rows = pairsFrom(rows.value); if (!c.rows.length) throw new Error('Lookup Table: write at least one pair, a reading and its value'); }
+        return c;
+      });
+      if (!v.length) v = undefined;
+    }
     else if (kind === 'vkitems') {
       v = [...inp.querySelectorAll('.vkrow')].map(tr => ({ value: tr.querySelector('.vkv').value.trim(), text: tr.querySelector('.vkt').value.trim() })).filter(r => r.value !== '' || r.text);
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
@@ -8391,7 +8443,7 @@ async function editItem(kind, id) {
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
-    if (it.type === 'chart') return chartWidgetFields();       // Chart Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
+    if (it.type === 'chart') return chartWidgetFields();       // Graph Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
