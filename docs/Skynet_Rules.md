@@ -7,6 +7,9 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 
 ## How Rules work
 
+- **No old ways** (OakBarn Brewery, 2026-11-09: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first
+  production."): a Rule does not keep or explain an older way of doing something (an older Schema, an older word). Change log lines
+  and *Replaced:* notes stay as history.
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -1536,8 +1539,6 @@ use, and saving a Device on a used port is refused and says which Device has it.
   Port has to be addressed as well"): every way of choosing a Port (the Add box, Properties, a Vessel Device's or a Valve Tee's
   parts, a RIMS tube, and the older typed Pin boxes, whose list now holds only free Ports) offers only the free Ports on that
   Interface that fit the Device, plus the Device's own. A Port picked by one Device drops off every other list.
-- **Older Schemas:** two Devices that already shared a port in a saved Schema (made under the old exception below) keep working
-  as before, the last one turned on wins and the others turn off, and can still be saved; no new sharing can be made.
 - **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
   (for example a pump's on/off and its PWM speed) is listed in the Import notes so the brewer can keep one.
 - **Exception: Integrated Instances** (OakBarn Brewery, 2026-11-09: "It is not a Clone but an Instance ... An Integrated Device
@@ -1708,8 +1709,7 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **Direct**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**. **Direct** is full on or
-off, the method that was called **On/Off** (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct"); a Process that says "On/Off"
-still works.
+off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
   still's column, which a BruControl PID could not hold): a calm PID that holds a Setpoint to 0.1 degree. It shares the PID's
   Setpoint, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Setpoint; it starts there),
@@ -1734,7 +1734,7 @@ still works.
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
   its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
-  nothing ticked has one way of control. **Direct (On/Off) is always allowed and always has its spot; it is not a tick box** (Fritz,
+  nothing ticked has one way of control. **Direct is always allowed and always has its spot; it is not a tick box** (Fritz,
   2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
@@ -1763,8 +1763,7 @@ still works.
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
-- **A Process:** `hE_1.method = "PID"` (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC; the
-  older "On/Off" is Direct), or the
+- **A Process:** `hE_1.method = "PID"` (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
   `.DutyC`, `.PID`, `.DeadB`, `.PREC` or `.DO` switches it to that method, the same as `.method =`. Its settings
   by the same names the separate Devices had (`.setpoint`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
@@ -3543,6 +3542,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Heating Element on-screen look (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 7.8, On overlays have no border and are drawn smaller (every overlay); a Heating Element's Overlay is Glow (the start), None (truly nothing) or a picture. Rule 6.19: On/Off is now **Direct** (the old word still works in a Process); the method buttons sit in an invisible box sized to the methods allowed, centred under the picture; **Short method names** switch (DO, DutyC, HYS, PID, DeadB, PREC); the Turn Off button is gone (one click on the picture). Added Rule 2.46: Valves and Heating Elements are Toggle (the start) or Push Button, never None; a Push Button is reversed when it is already On; Processes ignore it. Importer: Direct Only column; a not user controlled heater is a Toggle. Help 179 (175-178 are taken by other work); next free Help 180.
 - 2026-11-09: Integrated Instances and the built-in heater's Properties (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 6.1 gets the Integrated Instance exception (a Heating Element built into a Vessel Device from one on a Tab is an independent copy on the same Port; the last one turned On or Off has the Port; a Process calls it `VesselName.DeviceName`); Rule 4.4 notes an Instance is not a Clone. Added Rule 2.47 (no Hidden Lock on any Integrated Item; the title line's lock, Visible and Hidden Locked get help balloons) and Rule 3.16 (the Suggested Name follows the Label at once, always has its Device Type ID, every Name Change pop-up has Update to Suggested, the Label's balloon shows its own Suggested Name). Rule 3.11 lists the new button. A built-in Heating Element's Properties are titled Integrated Heating Element Device. The Three Vessel sample's built-in heaters and probes get their Device Type IDs. Help 180; next free Help 181.
+- 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
