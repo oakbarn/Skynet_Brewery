@@ -198,6 +198,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | Hysteresis port, PredictiveHysteresis on or off | always Skynet Predictive (Rule 6.23), the switch is not copied | Built |
 | Analog In / OneWire probe calibrations (CalValue: layers, Precision, Prefix, Suffix) | Calibrations list in order, Decimals, Prefix, Units (Rule 6.24) | Built |
 | AvgWeight (Analog In, temperature ports) | Smoothing % (Rule 6.24) | Built |
+| ShowSecondaryValue false | Data Display shows only the main value (Output %, ON / OFF, Rate, Value) (Rule 6.26) | Built |
 | PWM output calibrations (0-255) | not copied, listed in the notes (Skynet counts %) | Built |
 | Port types Skynet does not have yet | skipped, with a warning | Built |
 
@@ -253,4 +254,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 8: every imported Hysteresis is Predictive (Rule 6.23); BruControl's PredictiveHysteresis switch is not copied.
 - 2026-11-09: Section 8: BruControl calibrations and Text Format kept on Analog Ins and probes (Rule 6.24); PWM output calibrations not copied.
 - 2026-11-09: Section 9 lists an Alarm's 3 sound files; added section 11, where Skynet has no limit: Timer alarms (Timer Alarm Chain), pictures and sounds set by a Process. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Section 8: Show Secondary Value off becomes the Data Display pick (Rule 6.26).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).
