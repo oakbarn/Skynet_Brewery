@@ -31,8 +31,19 @@ const onThisComputer = d => /^(127\.\d+\.\d+\.\d+|localhost|::1)$/i.test(String(
 
 // An Interface saved before boards were asked: guess from its name (an "ESP..." name is an ESP32, anything else a Mega)
 export const boardOf = d => d?.board || (/esp/i.test(d?.name || '') ? 'esp32' : 'mega');
+// An Interface's Connection (USB, Ethernet, WiFi or Simulator) is kept as .connection, and the real one of a board in the simulator
+// as .realConnection. Older Schemas called them .type and .realType (OakBarn Brewery, 2026-11-09: hidden names should match what is
+// shown, for anyone reading Skynet's open source). connOf and realConnOf read either; toConnection moves the old names over.
+export const connOf = d => d?.connection ?? d?.type ?? '';
+export const realConnOf = d => d?.realConnection ?? d?.realType ?? '';
+export function toConnection(d) {
+  if (!d || typeof d !== 'object') return d;
+  if ('type' in d) { d.connection ??= d.type; delete d.type; }
+  if ('realType' in d) { d.realConnection ??= d.realType; delete d.realType; }
+  return d;
+}
 // The real link: a board in the simulator keeps the link it will have on real hardware
-export const linkOf = d => d?.type === 'simulator' ? d.realType || '' : d?.type || '';
+export const linkOf = d => connOf(d) === 'simulator' ? realConnOf(d) : connOf(d);
 
 // Devices that heat: electric elements, burner gas valves and igniters, heat pads, and the outputs of PID, Hysteresis and Duty Cycle
 const HEAT_CODES = new Set(['H_PWM', 'H_AO', 'HtPad', 'Ignit', 'G_Vlv']);
