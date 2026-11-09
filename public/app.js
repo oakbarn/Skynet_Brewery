@@ -7322,13 +7322,17 @@ const isBuiltIn = e => !!e?.integratedIn;
 // displayed just like it was an independent Device"): the Heating Element's or Temperature Probe's own Properties, with 3. Built into
 // (greyed out) in place of the Tab and no picture, X, Y, Width or Height (the vessel draws it and it moves with the vessel)
 const isVpDrill = e => isVPart(e) && ['element', 'probe', 'thermowell'].includes(e.vpKind);
+// the Process name of a Device built into a Vessel Device: VesselName.DeviceName (Rule 5.31); an Integrated Instance's name already is
+const builtInProcName = e => { if (String(e?.name).includes('.')) return e.name; const g = (draft || S.config).graphics.find(x => x.id === e?.integratedIn); return g ? `${vesselProcName(g)}.${e.name}` : e?.name; };
+// Built into's balloon (OakBarn Brewery, 2026-11-09, Rule 5.31)
+const builtInTip = e => `It is built (Integrated) into this Vessel Device and moves with it. The Integrated Device is part and parcel of the Vessel Device. It cannot be separated, and you can only look at and edit its Properties on this Vessel Device. It has its own Process name: to command it or change an .attribute in the Process Editor, you must use VesselDeviceName.IntegratedDeviceName.\nExample: ${builtInProcName(e)} = On`;
 const VP_DRILL_SKIP = new Set(['_pv', 'imageOff', 'imageOn', '_ppath', 'rot', 'x', 'y', 'w', 'h']);
 function vpPartFields(it, item) {
   const T = DEVICE_TIPS, base = it.vpKind === 'element' ? elemDeviceFields(it, item) : probeDeviceFields(it, item);
   const inst = isInstance(it) ? f => f[0] !== 'device' ? f      // an Integrated Instance: its Device's Interface and Port, greyed for good (Rule 6.1)
     : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: T.iface }] : f => f;
   return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(inst).map(f => f[0] !== 'workspace' ? f
-    : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: 'It is built into this Vessel Device and moves with it. It can only be taken out by deleting the vessel (Rule 5.31).' }]),
+    : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
     ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }]];
 }
 // an integrated Vessel Device's part sections, saved onto the parts; the swaps to do once the dialog is closed: [spot, part, new]
@@ -7338,11 +7342,7 @@ function vpxApply(g, x) {
     const k = e.integratedAs.slice(3), p = `vpx_${k}_`; if (!(p + 'label' in x) && !x[p + 'swap']) continue;
     if (x[p + 'swap']) { swaps.push([k, e.name, x[p + 'swap']]); continue; }
     const lab = String(x[p + 'label'] ?? '').trim(); if (!lab) throw new Error(`${e.name}: its Label can not be blank (Rule 18.15)`);
-    e.label = lab;
-    if (!isInstance(e)) {      // an Integrated Instance's Interface and Port are its Device's and can't be changed (Rule 6.1)
-      if (!none(x[p + 'device'])) e.device = x[p + 'device'];
-      if (p + 'pidx' in x) { if (!none(x[p + 'pidx'])) e.probeIndex = +x[p + 'pidx']; } else if (!none(x[p + 'channel'])) e.channel = x[p + 'channel'];
-    }
+    e.label = lab;      // its Interface and Port are never changed (OakBarn Brewery, 2026-11-09, Rule 6.1)
     if (e.vpKind === 'element') { if (!none(x[p + 'heatMethod'])) e.heatMethod = x[p + 'heatMethod']; if (none(x[p + 'input'])) delete e.input; else e.input = x[p + 'input']; if (none(x[p + 'target'])) delete e.target; else e.target = +x[p + 'target']; }
     else { if (!none(x[p + 'units'])) e.units = x[p + 'units']; if (none(x[p + 'offset'])) delete e.offset; else e.offset = +x[p + 'offset']; }
   }
@@ -7406,7 +7406,7 @@ function vpSections(it, edit = false) {
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
           [x + 'swap', `Built in ${what}`, 'sel', [['', `${e.name} (keep it)`], ...(draft || S.config).elements.filter(vpFits(kind)).map(q => [q.name, `Swap for ${q.label ? q.label + ': ' : ''}${q.name}`]), [VPX_NEW, `➕ Swap for a new ${what}…`]], true],
           ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
-            : [[x + 'label', '1. Label', 'text'], [x + 'device', '2. Interface (board)', 'dev', null, true], ow ? [x + 'pidx', 'Probe #', 'probe'] : [x + 'channel', 'Port', 'pin', 'vpx_' + spot],
+            : [[x + 'label', '1. Label', 'text'], ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
               ro('n', '4. Name', e.name),
               ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
