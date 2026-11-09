@@ -164,6 +164,7 @@ What each ID means:
   - Interface, Pin (for example 22, or A5 = 59)
   - Invert (pin LOW = on): on / off
   - One-shot time in ms (0 = off); One-shot pulses OFF (off = pulses ON)
+  - **Dual Throw** (Rule 6.22, Help 167): a second Port on the same Interface, always the opposite (ON = own Port on, second off; OFF = own Port off, second on), and a delay in ms between them; for a valve with Open and Close wires. In the ⬢ Pin attributes.
   - Pictures and texts when on / off
 - **Board sends:** `DO <pin> <0|1>`.
 - **Heating Element (Kind = element): one Device, the heating method picked** (Rule 6.19, Fritz 2026-11-07, Help 150). Its
@@ -208,7 +209,7 @@ What each ID means:
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
   Look normal, Ask before changing, background / .backpath, _2, _3, Digits, Hide value.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
-  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
+  Interface, Pin, Invert, One-shot, Dual Throw (Rule 6.22), **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
