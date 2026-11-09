@@ -202,6 +202,14 @@ export function checkIds(list, what) {
   return list;
 }
 
+// ---- Dual Throw (OakBarn Brewery, 2026-11-09, Rule 6.22, as BruControl's Dual Throw output) ----
+// A Digital Out can drive a second Port on the same Interface as its opposite: ON = its own Port on and the second Port off, OFF = its
+// own Port off and the second Port on. For a valve with an Open wire and a Close wire, or a motor that turns forward and backward.
+// The Dual Throw delay (ms) is how long both Ports stay off before the other one turns on, so the two are never on together.
+export const hasDualThrow = el => el?.type === 'digitalOut' && el.subtype !== 'element' && el.dualThrowChannel !== undefined && el.dualThrowChannel !== null && String(el.dualThrowChannel).trim() !== '';
+export const dualThrowDelay = el => Math.max(0, Math.round(Number(el?.dualThrowDelay) || 0));
+export const samePin = (a, b) => pinKey(a) !== '' && pinKey(a) === pinKey(b);
+
 // ---- one Device per Interface port ----
 // Every board pin a Device uses, as "Interface|pin" (A5 and 59 are the same Mega pin). DS18B20 probes share one wire, so they use
 // their probe number instead (virtual port 700 + number - 1), on any Interface: one Device per probe.
@@ -216,7 +224,8 @@ export function portKeys(el) {
   if (!el.device && !(el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20'))) return [];
   if (el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20')) return el.probeIndex ? [`OneWire|${oneWirePort(el.probeIndex) || el.probeIndex}`] : [];
   if (el.type === 'analogIn' && el.adc === 'ads1115') return el.channel === undefined || el.channel === '' ? [] : [`${el.device}|ADS${el.channel}`];
-  const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin] : [el.channel];
+  const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin]
+    : hasDualThrow(el) ? [el.channel, el.dualThrowChannel] : [el.channel];      // Dual Throw (Rule 6.22): its second Port is taken too
   return [...new Set(pins.map(pinKey).filter(Boolean))].map(p => `${el.device}|${p}`);
 }
 // One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1: "a Limit of One Interface Port to one Device. Another Major

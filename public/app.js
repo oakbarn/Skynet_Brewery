@@ -15,7 +15,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from '
 import { loadSnippet } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
-import { canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -961,7 +961,7 @@ function applyMf(g, w, tab, label, loose = false) {
       if (!none(w.mfIface)) e.device = w.mfIface; else delete e.device;
       if (!none(w[k + '_mfpin'])) e.channel = /^\d+$/.test(String(w[k + '_mfpin'])) ? +w[k + '_mfpin'] : w[k + '_mfpin']; else delete e.channel;
       e.imageOverlay = BOLT;
-    } else { for (const x of ['device', 'channel', 'imageOverlay', 'activeLow', 'oneShot', 'oneShotDirection']) delete e[x]; }
+    } else { for (const x of ['device', 'channel', 'imageOverlay', 'activeLow', 'oneShot', 'oneShotDirection', 'dualThrowChannel', 'dualThrowDelay']) delete e[x]; }
     e.typeCode = o?.typeCode && o.valveType === e.valveType ? o.typeCode : defaultCode(e);
     const follow = !o || o.name === deviceSuggestion(o, o) || o.valveType !== e.valveType;       // a name typed by hand stays, unless the valve changed kind
     e.name = follow ? deviceSuggestion(e, o || e) : o.name;
@@ -4577,12 +4577,15 @@ const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceI
 // and Save Build ... > To a Tab adds it, as for a Device
 const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace)) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
+// the Pin attributes pop-up's settings (DEV_PORT_POP), kept when a Device is added
+const PORT_POP_KEYS = ['activeLow', 'oneShot', 'oneShotDirection', 'dualThrowChannel', 'dualThrowDelay'];
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
 const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
 const pinsOf = e => portKeys(e).map(k => k.split('|')[1]);
 function portError(e, self) {
+  if (hasDualThrow(e) && samePin(e.channel, e.dualThrowChannel)) return `The Dual Throw second Port can't be the Device's own Port ${e.channel}. Pick another Port, or None (Rule 6.22).`;
   const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
   const iface = d => `${ifaceIdOf(d) ? ifaceIdOf(d) + '_ ' : ''}${d}`;
   if (c) return `Port ${c.pin} on ${iface(c.device)} is already used by ${c.other}. One Interface Port, one Device (Rule 6.1).`;
@@ -4804,7 +4807,7 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
           ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
@@ -6352,7 +6355,12 @@ function alarmWidgetFields(it) {
 const isPumpDev = e => e?.type === 'digitalOut' && e.subtype === 'pump' && !skyDev(e) && !e.kind;
 const DEV_PROPS_POP = what => ({ title: `${what} Properties`, canDelete: true, fields: [['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
   ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']] });
-const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool']] };
+// Dual Throw (OakBarn Brewery, 2026-11-09, Rule 6.22, as BruControl's Dual Throw output): a second Port on the same Interface that is
+// always the opposite of this one, e.g. the Close wire of a valve whose Port is its Open wire
+const DUAL_THROW_TIP = 'Dual Throw (Rule 6.22): a second Port on the same Interface that is always the opposite of this one. ON = this Port on and the second Port off; OFF = this Port off and the second Port on. For a valve with an Open wire and a Close wire, or a motor that turns forward and backward. None = no second Port.';
+const DUAL_DELAY_TIP = 'How long both Ports stay off before the other one turns on, in milliseconds (1000 = 1 second), so the two are never on together. Empty = 0.';
+const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'],
+  ['dualThrowChannel', 'Dual Throw: second Port (optional)', 'pinsel', 'digital', false, false, { tip: DUAL_THROW_TIP }], ['dualThrowDelay', 'Dual Throw delay (ms)', 'num', null, false, false, { tip: DUAL_DELAY_TIP }]] };
 const DEV_PIC_POP = { title: 'Picture attributes', fields: [['imageOverlay', 'On overlay (on top while it is on)', 'gpick', 'overlays'], ['imageOn', 'Picture when on (a second picture, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 const DEV_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
@@ -6571,7 +6579,8 @@ function mbvDeviceFields(it, item) {
   }
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    // the ⬢ Pin attributes (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'], attr: DEV_PORT_POP }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Valve follows it until you type a name of your own)' : ''), 'note'],
@@ -7016,7 +7025,7 @@ function genDeviceFields(it, item, f) {
   const pics = !part && f.some(x => x[0] === 'imageOff'), onPic = pics && f.some(x => x[0] === 'imageOn');
   const out = it.type === 'digitalOut' && (!skyDev(it) || f.some(x => x[0] === 'tap'));      // a Skynet Template's Toggle only where it lets you set it (Rule 5.16)
   const pinPop = f.some(x => x[0] === 'activeLow') && f.some(x => x[0] === 'oneShot');      // Invert and One-shot in the Interface's ⬢ (the Pump's Pin attributes)
-  const skip = new Set([...GEN_SHOWN, ...dbKeys, ...(pinPop ? ['activeLow', 'oneShot', 'oneShotDirection'] : []), ...(part ? ['subtype', 'valveType', 'sensor', 'flipH', 'flipV', 'rot', 'orientation', '_orient', 'inline'] : [])]);
+  const skip = new Set([...GEN_SHOWN, ...dbKeys, ...(pinPop ? PORT_POP_KEYS : []), ...(part ? ['subtype', 'valveType', 'sensor', 'flipH', 'flipV', 'rot', 'orientation', '_orient', 'inline'] : [])]);
   const own = part && it.type === 'temperature' ? [...PROBE_OWN(it), ['info', 'Reading now', 'info']]
     : f.filter(x => !skip.has(x[0]) && !['box', 'boxend'].includes(x[2]) && !(x[2] === 'note' && /^_(sky|sug|hint|ovn)$/.test(x[0])));
   const dbLine = !dbKeys.size || pics || own.some(x => x[6]?.dbPop) ? [] : [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP }]];
@@ -7492,9 +7501,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'pinsel') {      // Available Ports: the free pins on the Interface that fit this Device, and its own pin
     input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' });
     input._fill = dev => {
-      const w = { ...obj, device: dev, name: '\0new' }, ps = dev ? freePins(w, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog') : [];
+      // the Dual Throw second Port (Rule 6.22): any free Port on the Interface but the Device's own; empty = None
+      const dual = key === 'dualThrowChannel';
+      const w = { ...obj, device: dev, name: '\0new', ...(dual ? { dualThrowChannel: undefined } : {}) };
+      const ps = !dev ? [] : freePins(w, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog').filter(p => !dual || !samePin(p, obj.channel));
       const cur = input.value || String(v ?? ''), b = boardOfDevice(w, S.config.devices);
-      input.replaceChildren(h('option', { value: '' }, !dev ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(p => { const t = pinLabel(p, b); return h('option', { value: p, label: t }, t); }),
+      input.replaceChildren(h('option', { value: '' }, dual ? 'None (no second Port)' : !dev ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(p => { const t = pinLabel(p, b); return h('option', { value: p, label: t }, t); }),
         ...(cur && !ps.map(String).includes(cur) ? [h('option', { value: cur }, cur)] : []));
       input.value = cur;
     };
