@@ -357,6 +357,12 @@ Vessel Device, a Valve Tee or a Supply Manifold) and of a Heating Element (on it
 - **Both programs:** the BruControl Import makes a heater BruControl marked as not user controlled a Toggle too (Rule 2.44's
   "When tapped: none" is not used on them). Help 179.
 
+2.47 **No Hidden Lock on any Integrated Item** (OakBarn Brewery, 2026-11-09: "Rule All: No Hidden Lock on any Integrated Item.
+Ignore the Hidden Lock Setting if there is one."). An item built into a Vessel Device, RIMS tube, kettle or any other Integrated item
+has no **Hidden Locked** switch in its Properties. A Hidden Locked setting it already has (an older Schema) is ignored, and a
+Process's `Name.hidden = true` does nothing to it. **Visible** still works. The lock, **Visible** and **Hidden Locked** in a dialog's
+title line each have a help balloon (Rule 2.38). Help 180.
+
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
 
@@ -749,7 +755,8 @@ how the Graphic Picker handles a path. (2026-10-27)
 
 3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
 name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
-the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
+the new name, the **Suggested Name**, ✖ Cancel, 💾 Save and **💾 Update to Suggested** (Rule 3.16). The same pop-up renames
+Processes and Schemas. (2026-10-27)
 **All names are treated the same** (Fritz, 2026-10-29): a name is only there to find the item on the screen and, in the Process
 Editor, to set its `.attribute`. **Skynet names are fixed** and are never changed (only while building Skynet). **Any name a Process
 could use changes only with ✏ Change name** (Rule 3.6: the Processes follow). Exceptions: **User Template names** (only for picking
@@ -786,6 +793,18 @@ hidden name (the one saved in the Schema, used by the code) is the name shown on
 an Interface's **Connection** (USB, Ethernet, WiFi or Simulator) is saved as `connection`, and the real Connection of a board in the
 Simulator as `realConnection` (they were `type` and `realType`). An old Schema is changed over by itself when it is opened; nothing
 else changes for the user. Both programs: the BruControl Importer writes `connection` too.
+
+3.16 **The Suggested Name follows the Label** (OakBarn Brewery, 2026-11-09: "Rule All: A change in the Label Updates the Suggest
+Name"; "All Change Name Dialog gets new Button").
+- In every Properties box, typing a **Label** (or picking another Interface, Port, Device Type or Tab) changes the **Suggested Name**
+  line at once. The Name itself stays as it is until it is changed (Rule 3.11).
+- The Suggested Name always has its Device Type ID: a Device saved without one (the Three Vessel sample's built-in heaters and probes
+  were) gets its usual one (HE for a Heating Element), so `BM_8_HE_HLT~element_BR`, not `BM_8_HLT~element_BR`.
+- **Every Name Change pop-up** shows the Suggested Name and has **💾 Update to Suggested** beside ✖ Cancel and 💾 Save: one click
+  saves the Suggested Name. A Process or a Schema has no Suggested Name, so there the button is greyed out.
+- **The Label's help balloon is made for where it is:** it names its own Label, shows its own Suggested Name with the Label part in
+  red (`MB_22_HE_`**`HLT~Element`**`_BR`), says spaces become ~, and says what the ⬢ (font, size and colors) and ⬆ (a 2 line Text
+  Box) beside it do. Help 180.
 
 ## 4. Making things: the Build Tab
 
@@ -837,7 +856,7 @@ a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar;
 **the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
 already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
 be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). The name is only for reference in its
-Properties. **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
+Properties. (An **Integrated Instance** is not a Clone: it is a copy that becomes independent, Rule 6.1.) **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
 (the key link is built once PR #114 is in; until then a Clone points at its parent by name). Only **.visible, .x, .y and its Tab** (a
 Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
 Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
@@ -1492,6 +1511,15 @@ use, and saving a Device on a used port is refused and says which Device has it.
   as before, the last one turned on wins and the others turn off, and can still be saved; no new sharing can be made.
 - **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
   (for example a pump's on/off and its PWM speed) is listed in the Import notes so the brewer can keep one.
+- **Exception: Integrated Instances** (OakBarn Brewery, 2026-11-09: "It is not a Clone but an Instance ... An Integrated Device
+  Inherits it Properties from the Template and then becomes independent"; "change the Rule to allow an Integrated Instance (And there
+  could be more than a Single Integrated Instance ... none of them can change the Interface Port"; "last one on or off Rules").
+  Building a Heating Element that is already on a Tab into a Vessel Device makes an **Integrated Instance** of it: a copy of its
+  Properties on **the same Interface Port**, independent from then on (its own On / Off, heating method, Setpoint and look). The one on
+  its Tab stays. There can be more than one Instance. An Instance's Interface and Port are greyed out for good. Its name is
+  `VesselName.DeviceName` (`HLT_Vessel.hE_1`), and a Process uses it so: `HLT_Vessel.hE_1 = on`, `HLT_Vessel.hE_1.setpoint = 152`
+  (any capitals); the one on the Tab keeps its plain name (`hE_1 = off`). **The last one turned On takes the Port** and the others on
+  it go Off; **the last one turned Off turns the Port Off**, so every one on it is Off. Nothing else may share that Port. Help 180.
 *Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
 one heater). The last one turned on wins and the others turn off."
 
@@ -3482,6 +3510,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Heating Element on-screen look (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 7.8, On overlays have no border and are drawn smaller (every overlay); a Heating Element's Overlay is Glow (the start), None (truly nothing) or a picture. Rule 6.19: On/Off is now **Direct** (the old word still works in a Process); the method buttons sit in an invisible box sized to the methods allowed, centred under the picture; **Short method names** switch (DO, DutyC, HYS, PID, DeadB, PREC); the Turn Off button is gone (one click on the picture). Added Rule 2.46: Valves and Heating Elements are Toggle (the start) or Push Button, never None; a Push Button is reversed when it is already On; Processes ignore it. Importer: Direct Only column; a not user controlled heater is a Toggle. Help 179 (175-178 are taken by other work); next free Help 180.
+- 2026-11-09: Integrated Instances and the built-in heater's Properties (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 6.1 gets the Integrated Instance exception (a Heating Element built into a Vessel Device from one on a Tab is an independent copy on the same Port; the last one turned On or Off has the Port; a Process calls it `VesselName.DeviceName`); Rule 4.4 notes an Instance is not a Clone. Added Rule 2.47 (no Hidden Lock on any Integrated Item; the title line's lock, Visible and Hidden Locked get help balloons) and Rule 3.16 (the Suggested Name follows the Label at once, always has its Device Type ID, every Name Change pop-up has Update to Suggested, the Label's balloon shows its own Suggested Name). Rule 3.11 lists the new button. A built-in Heating Element's Properties are titled Integrated Heating Element Device. The Three Vessel sample's built-in heaters and probes get their Device Type IDs. Help 180; next free Help 181.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
