@@ -42,13 +42,29 @@ RequestExecutionLevel user
 SetCompressor /SOLID lzma
 BrandingText "Skynet Brewer ${VERSION}"
 
-VIProductVersion "1.0.0.0"
+; The file's Details (right-click > Properties > Details). Virus scanners trust a Setup more when these are filled in and
+; the version is a real number that goes up with each build, so it is the build date and time: 2026.11.9.324 is
+; 2026-11-09 03:24 (UTC on the release build). The release name (PR295_Skynet-v...) is the Product version. Rule 9.11
+; (%-m and the like have no leading zero: NSIS would read 09 as a broken octal number. The Setup is built on Linux.)
+!define /date VI_Y "%Y"
+!define /date VI_M "%-m"
+!define /date VI_D "%-d"
+!define /date VI_H "%-H"
+!define /date VI_MIN "%-M"
+!define /math VI_H100 ${VI_H} * 100
+!define /math VI_HM ${VI_H100} + ${VI_MIN}
+!define VI_NUM "${VI_Y}.${VI_M}.${VI_D}.${VI_HM}"
+VIProductVersion "${VI_NUM}"
+VIFileVersion "${VI_NUM}"
 VIAddVersionKey "ProductName" "Skynet Brewer"
 VIAddVersionKey "CompanyName" "OakBarn Brewery"
 VIAddVersionKey "LegalCopyright" "Copyright (c) OakBarn Brewery 2026, MIT License"
-VIAddVersionKey "FileDescription" "Skynet Brewer installer"
-VIAddVersionKey "FileVersion" "${VERSION}"
+VIAddVersionKey "FileDescription" "Skynet Brewer Setup"
+VIAddVersionKey "FileVersion" "${VI_NUM}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
+VIAddVersionKey "InternalName" "SkynetBrewerSetup"
+VIAddVersionKey "OriginalFilename" "Skynet_Brewer_Setup_${VERSION}.exe"
+VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https://github.com/oakbarn/Skynet_Brewery)"
 
 !define MUI_ICON "skynet.ico"
 !define MUI_UNICON "skynet.ico"
