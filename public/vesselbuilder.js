@@ -133,3 +133,10 @@ export function vbFromImport(v, units) {
   if (d.probe?.id) Object.assign(w, { probe: 'left', probePart: String(d.probe.id) });
   return w;
 }
+// the real volume a vessel holds from its Diameter and Height (OakBarn Brewery, 2026-11-09: "Advertized gallons could also be wrong. Easy
+// to calculate the real Volume based on the height and diameter"): a cylinder, in US gallons (231 cubic inches each); 0 when either is
+// missing. Metric: both in cm. A Diameter vessel is drawn by this, never by the Gallons typed (Rule 19.2).
+export function vbRealGallons(diameter, height, metric = false) {
+  const k = metric ? 1 / 2.54 : 1, d = +diameter * k, hh = +height * k;
+  return d > 0 && hh > 0 ? Math.PI / 4 * d * d * hh / 231 : 0;
+}

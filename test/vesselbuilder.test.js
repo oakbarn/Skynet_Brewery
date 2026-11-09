@@ -2,7 +2,7 @@
 // Device's Placed IPs and the Heating Elements and Thermowell still to be picked; plain words say what is wrong.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList, vbFromImport } from '../public/vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList, vbFromImport, vbRealGallons } from '../public/vesselbuilder.js';
 
 assert.ok(fs.existsSync(`templates/vessel/${VB_TEMPLATE}.json`), 'it builds from the Vessel Widget Main Template');
 assert.ok(VB_GENERAL.includes('HLT') && VB_GENERAL.includes('Fermentor'));
@@ -85,4 +85,9 @@ assert.equal(vbFromImport({ key: 'V5', name: 'Hop Pot', details: {} }, 'Metric')
 assert.ok(app.includes("have.find(e => e.name === g.vbPre?.[k])"), 'the imported Heater or Probe is picked first');
 const impPage = fs.readFileSync('public/importer/importer.js', 'utf8');
 assert.ok(impPage.includes("import { vbFromImport } from '../vesselbuilder.js';") && impPage.includes('class="vBuild primary"'), 'the Importer opens the same builder');
+// drawn by its real size (2026-11-09): the real volume from Diameter and Height, never the advertised Gallons
+assert.equal(Math.round(vbRealGallons(15.5, 19) * 10) / 10, 15.5);
+assert.equal(Math.round(vbRealGallons(15.5 * 2.54, 19 * 2.54, true) * 10) / 10, 15.5);
+assert.equal(vbRealGallons('', 19), 0);
+assert.ok(app.includes('...vSizeFields(it),       // Gallons and Size'), 'Gallons and Size on an integrated Vessel Device');
 console.log('vesselbuilder tests passed');
