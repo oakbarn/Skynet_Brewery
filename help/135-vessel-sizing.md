@@ -21,7 +21,7 @@ User Templates alike, and the number can be changed.
 
 ## Method: Proportional or Diameter
 
-- **Proportional:** the shape is OakBarn Brewery's plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
+- **Proportional:** the shape is the Skynet plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
   that Width to Height.
 - **Diameter:** type its **Diameter** and **Height** (inches, or cm for Metric). It is drawn by its **real size**: they give its
   shape (a vessel as wide as it is tall is drawn square) and how big it is. Advertised gallons can be wrong, so the Gallons you type
