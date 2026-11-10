@@ -2121,6 +2121,18 @@ const isClone = g => g?.kind === 'clone';
 // and opens the pop-up; it shows ON only while the parent is ON in its method. It has its own Label.
 const isMethodClone = (g, p = L().elements.find(e => e.name === g?.of)) => isClone(g) && !!controlMethods(p) && !!heatMethodKey(g.method);
 const clonesOf = (name, gs = L().graphics) => gs.filter(g => isClone(g) && g.of === name);
+// A Clone becomes the Device (OakBarn Brewery, 2026-11-10: "User Picks the Clone be the Device"): the Device moves to the Clone's Tab
+// and place and the Clone goes. It keeps its name, hidden key, Port and Processes; pipes on the Clone's IPs now end on it, and pipes
+// on its old place are left open. Its other Clones stay its Clones.
+function promoteClone(dev, cl) {
+  const mine = [`dev:${dev.name}:in`, `dev:${dev.name}:out`];
+  for (const g of draft.graphics) for (const k of ['from', 'to']) if (mine.includes(g[k])) delete g[k];
+  for (const g of draft.graphics) for (const k of ['from', 'to']) if (g[k] === `dev:${cl.name}:in` || g[k] === `dev:${cl.name}:out`) g[k] = g[k].replace(`dev:${cl.name}:`, `dev:${dev.name}:`);
+  Object.assign(dev, { workspace: cl.workspace, x: cl.x, y: cl.y });
+  if (cl.visibility === 'hidden') dev.visibility = 'hidden'; else delete dev.visibility;
+  draft.graphics = draft.graphics.filter(g => g !== cl);
+  toast(`${dev.name} is now where ${cl.name} was; ${cl.name} is gone. Save layout keeps it.`);
+}
 function cloneEl(g) {
   const p = isClone(g) && L().elements.find(e => e.name === g.of);
   if (!p) return null;
@@ -8802,7 +8814,15 @@ async function editItem(kind, id) {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
       if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
       const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
-      if (!confirm(kids.length ? `Delete ${item.name}? Its ${kids.length === 1 ? 'Clone' : kids.length + ' Clones'} (${kids.map(g => g.name).join(', ')}) go too.` : 'Delete this item?')) return;
+      // a Device with Clones (OakBarn Brewery, 2026-11-10, Rule 4.4): 1. delete it and all its Clones, or 2. / 3. a Clone the user picks
+      // becomes the Device (the Parent) where that Clone is; the other Clones stay its Clones
+      if (kids.length) {
+        const tabOf = g => draft.workspaces.find(w => w.name === g.workspace)?.label || g.workspace || 'no Tab';
+        const pick = await choose(`Delete ${item.name}? It has ${kids.length === 1 ? 'a Clone' : kids.length + ' Clones'}.`,
+          [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
+        if (pick === undefined) return;
+        if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
+      } else if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);

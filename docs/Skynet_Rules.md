@@ -905,8 +905,11 @@ Properties. (An **Integrated Instance** is not a Clone: it is a copy that become
 Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
 Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
-rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
-per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+rename. **Deleting the parent** (OakBarn Brewery, 2026-11-10) asks which of these the user wants: **1. all killed:** the Device and
+all its Clones are deleted; **2. one Clone:** the user picks that Clone to be the Device; **3. several Clones:** the user picks which
+Clone becomes the Device and Parent, and the others stay its Clones. The Device moves to that Clone's Tab and place and the Clone
+goes; it keeps its name, hidden key, Port and Processes, and pipes on that Clone's IPs now end on it. *Replaced:* "deleting the parent
+deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 - **Method Clones: Devices with more than one Control Method** (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the
   Device displayed like Tartan has one"; "Make it part of the Rule for Devices that have more than One Control Method"). A Clone of
   a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
@@ -3593,6 +3596,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
 - 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
+- 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
