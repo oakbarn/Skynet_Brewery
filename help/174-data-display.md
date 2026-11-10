@@ -10,7 +10,7 @@ Some Devices have more than one value. A Flow meter has its Rate and its Total, 
 | PID, Deadband | Output % and Setpoint, Output %, Reading, Setpoint |
 | Hysteresis | ON / OFF and Setpoint, ON / OFF, Reading, Setpoint |
 | Duty Cycle | Duty cycle %, ON / OFF |
-| Heating Element (run by a method) | Status and Setpoint, Output, Reading, Setpoint |
+| Heating Element (run by a method) | Status and Setpoint, Output, Temperature, Setpoint |
 | Flow meter | Rate and Total, Rate, Total |
 | Scale | Volume and Weight, Volume, Weight |
 | PWM or Analog output with Measured volts | Value and Volts, Value, Volts |

@@ -605,7 +605,11 @@ Import** (they share these Rules, Rule 15.4):
 1. A dialog shows **short field names and the fields themselves**. Sentences that explain what a field or the dialog does are
    **not** written on the dialog.
    **Dropdown choices are short and in plain English too** (OakBarn Brewery, 2026-11-10: "Keep Choices in DDLB in Plain English
-   when Possible and Short"): **On = Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
+   when Possible and Short"): **Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
+   **Each choice in a dropdown starts with its own first letter** (OakBarn Brewery, 2026-11-10, for typing ahead: "Do this for all
+   DDLB choices as a Rule for Predictive Text"): with the list open, typing that letter picks it. The word that sets a choice apart
+   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. Lists that break this are brought to it
+   before the first Public Production.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
@@ -1798,6 +1802,24 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
   the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
   is in now. The explanations are in hover help, so the dialog stays clean.
+- **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4): **Temperature Probe** and **Setpoint** on one line; **Direction**
+  (Heating, greyed) with **Offset** beside it, picked from a list of every half degree its Hardware Controller allows (Rule 6.29);
+  **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
+  Setpoint (blue) and the Offset (yellow). Data Display calls the probe reading **Temperature**. A Device built into a Vessel Device
+  shows its layer as **Inside Vessel Device Layer**.
+- **Direction and the sign of the Offset** (OakBarn Brewery, 2026-11-10: "Plain English and not a Who's on First Confusion where
+  + = - and - = +"): the Direction is greyed and says which way the Hysteresis works. The sign of the Offset says where it turns On:
+  **On at Setpoint + Offset**, every time. A Heating Element is **Heating** with **Offset (-)** (the HLT element: -1, On at 149 °F with
+  a Setpoint of 150 °F); anything that only cools is **Cool** with **Offset (+)**; the Fermentor Control (Rule 6.30) is
+  **Bi-Directional** with **Heat Offset (-)** and **Cool Offset (+)**. Dialogs show and take these signs; the Rule 6.29 ranges are
+  shown with the same sign (Optical SSR -0.5 to -3 °F). The saved number and a Process's `.onoffset` stay as before (plus heats).
+- **Overlay colors follow the Direction** (OakBarn Brewery, 2026-11-10): the Overlay choices are None, Lightning Bolt, Flashing
+  Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Red Glow, Orange Glow and Blue Glow. Something that
+  **heats** (a Heating Element, the Heat of a Fermentor Control, a Cool / Warm Pump with a plus On offset) has no Blue Glow and no Green
+  Glow Ring. Something whose Direction is **Cool** (the Cooling of a Fermentor Control, a Cool / Warm Pump with a minus On offset) has
+  no Red Glow and no Orange Glow, and has Blue Glow and Green Glow Ring. Anything else has every choice but Blue Glow (**Blue is kept
+  for cooling**). A choice already saved always stays in its list. A Heating Element starts with **Red Glow** (saved as no overlay), so
+  the other Red Glow is not in its list.
 - **Its own On / Off in its Properties** (OakBarn Brewery, 2026-11-10: "There are 2 On Off Type on offs ... we need something to
   correspond on the Property Dialog. A small Icon of the Element as a Toggle"): on the Current Method line, a small picture of the
   Element is a Toggle. One click turns the Device **On or Off** at once, the same as one click on it on the Tab (Rule 2.33). On / Off is
@@ -2021,18 +2043,22 @@ cannot be, but there are two cases that may look like more than one:
 
 6.29 **Heat Hysteresis by what switches it** (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed
 for heating elements with Optical SSRs"; for a Contactor, OakBarn Brewery OK'd the suggestion of 2 to 5 with an On delay of at least
-60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Switched by**: **Optical
+60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Hardware Controller**: **Optical
 SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its **Hysteresis that heats** (a plus On offset) may only use:
 
-| Switched by | On offset | On delay |
+| Hardware Controller | On offset | On delay |
 |---|---|---|
 | Optical SSR | 0.5 to 3 °F | any |
-| Contactor | 2 to 5 °F | at least 60 seconds |
-| Mechanical relay | 2 to 5 °F | at least 60 seconds |
+| Contactor | 1 to 5 °F | at least 10 seconds |
+| Mechanical relay | 1 to 5 °F | at least 10 seconds |
 
-With a °C probe the numbers are converted (0.3 to 1.7 °C; 1.1 to 2.8 °C). A Contactor's contacts wear each time they close, so it
+With a °C probe the numbers are converted (0.3 to 1.7 °C; 0.6 to 2.8 °C). A Contactor's contacts wear each time they close, so it
 heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
-- **Properties:** Switched by is under Heating method, with a line giving its range; when Hysteresis is Enabled but is not the Current
+- **Picking a Hardware Controller sets the On offset and the On delay** (OakBarn Brewery, 2026-11-10, with a table): Optical SSR
+  **0.5 °F and 0 seconds**, Contactor **1 °F and 10 seconds**, Mechanical relay **1 °F and 10 seconds** (the offset converted for a °C probe).
+  So a Contactor or Mechanical relay may hold 1 to 5 °F with an On delay of at least 10 seconds. The reason is in the balloons of Hardware Controller and On offset; no
+  range line is written in the dialog.
+- **Properties:** Hardware Controller is under Heating method, its range in its balloon; when Hysteresis is Enabled but is not the Current
   Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
 - **A Process or the .API** setting `.onoffset` or `.ondelay` outside the range gets the same plain error. The Brain never runs a heat
   Hysteresis outside its range, whatever was saved.
@@ -2055,7 +2081,7 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
    each side's On delay, so a freezer just plugged in is never started at once. The Mode or Off stops a side at once.
 5. **Mode:** Heat & Cool, Heat only, Cool only. Heat and Cool are equal (fermentation makes heat at the start, needs heat at the end).
 6. A Heating Element as its Heat runs in **Direct** while the Fermentor Control is On; its offset and On delay are kept to its
-   **Switched by** range (Rule 6.29).
+   **Hardware Controller** range (Rule 6.29).
 7. **No reading:** both Off, and it shows No reading.
 8. **Built into a Fermentor Vessel Device** (Rule 5.31) by the Vessel Device Builder (Rule 19.5, question 14): the Heat and Cooling
    are built in **without a spot** and keep their own names, called VesselName.DeviceName in a Process (Rule 5.31, Help 180);
@@ -3395,10 +3421,18 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Offset's sign says where it turns On, Setpoint + Offset: Heating is Offset (-), Cool is Offset (+), the Fermentor Control has Heat Offset (-) and Cool Offset (+). Dialogs show and take the sign; the saved number and a Process's .onoffset are unchanged. Help 150, 182. Checked against the BruControl Import program: it saves the same numbers, no change. (thread "Build Integrated Instances")
+- 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")
+- 2026-11-10: Rule 6.19 (OakBarn Brewery): Blue is kept for cooling: the Blue Tint overlay is offered only when the Direction is Cool; a Heating Element's Overlay list has no Red Tint (On = Red Glow is the same). Help 58. Checked against the BruControl Import program: it sets no tints. (thread "Build Integrated Instances")
+- 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Direction (greyed) says which way a Hysteresis works and the Offset's name says its sign: Heating with Offset (+), Cool with Offset (-), and the Fermentor Control Bi-Directional with Heat Offset (+) and Cool Offset (-); the user types plain numbers and Skynet signs them. Help 150, 182. Checked against the BruControl Import program: it already turns BruControl's minus offsets into the Cool side. (thread "Build Integrated Instances")
+- 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate_4): Temperature Probe + Setpoint on one line; Direction (Heating) + Offset list + wave drawing; Predictive + Delay + wave drawing; Data Display Temperature; Inside Vessel Device Layer. Help 150. Checked against the BruControl Import program: same Properties, no change. (thread "Build Integrated Instances")
+- 2026-11-10: Rule 6.29 changed (OakBarn Brewery, with a table): picking a Hardware Controller sets the On offset and On delay: Optical SSR 0.5 °F and 0 s, Contactor and Mechanical relay 1 °F and 10 s; a Contactor or relay's range is now 1 to 5 °F with an On delay of at least 10 s (was 2 to 5 °F and 60 s). Help 137, 181. Checked against the BruControl Import program: it brings imported offsets into the new range. (thread "Build Integrated Instances")
+- 2026-11-10: Rule 6.29: picking a Hardware Controller sets the On offset (Optical SSR 0.5, Contactor 3, Mechanical relay 3) and, on a Contactor or relay, an On delay of at least 60 s; the range line left the dialog for the balloons. Help 181. Checked against the BruControl Import program: it already brings offsets into range; no change. (thread "Build Integrated Instances")
+- 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
 - 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
 - 2026-11-10: Rule 11.8 point 7 (OakBarn Brewery): the Hysteresis Help (Hover Help, then the technical side) is the model for all Help. Rule 6.20: every "⚠ Electricity can kill" in a Help page shows in red bold under the red triangle, as in the balloons, and keeps its OakBarn Brewery words. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and its balloons already show the warning in red (shared public/hoverhelp.js). (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
-- 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Vessel Layer Order** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
+- 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Inside Vessel Device Layer** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
 - 2026-11-10: Rule 11.6 (OakBarn Brewery): another user's Schema added with permission may be named in Help about that Schema, like the OakBarn Schema. Checked against both programs: Help only. (thread "Set the Help format rules")
 - 2026-11-10: Rule 11.6 (OakBarn Brewery): OakBarn Brewery may be named in Help only where it is specifically about the OakBarn Schema (Help 85, 157, 158); Help 135 now says the Skynet plain vessel and Help 99 drops the OakBarn Hop Warnings; a Tartan Schema sample may be added with permission. Checked against both programs: Help only; nothing changes in the BruControl Import. (thread "Set the Help format rules")

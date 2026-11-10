@@ -12,8 +12,9 @@ Electrician.
 
 ## How it works
 
-- **Heat comes on** when the beer is the **Heat On offset** below the Setpoint. **Cooling comes on** when it is the **Cool On
-  offset** above it. Both stop at the Setpoint, or a little before it when Predictive Hysteresis is on (Help 168).
+- Its **Direction** is **Bi-Directional** (greyed). Each Offset says where that side comes on, as Setpoint + Offset.
+  **Heat comes on** at the **Heat Offset (-)**, below the Setpoint (Setpoint 66 and -1: at 65). **Cooling comes on** at the **Cool Offset (+)**,
+  above it (Setpoint 66 and 1: at 67). Both stop at the Setpoint, or a little before it when Predictive Hysteresis is on (Help 168).
 - **Heat and Cooling are never On together.** One must have been Off for the **Changeover wait** (5 minutes to start) before the
   other may start, so they never fight. A small dip after cooling does not start the heat right away. (Just after
   the Fermentor Control is turned On nothing has run yet, so each side waits only its own On delay.)
@@ -23,7 +24,7 @@ Electrician.
   - **Shortest run:** once on, it stays on at least this long (Heat 1 minute, Cool 2 minutes to start).
 - **Fermentation makes heat** at the start and needs heat at the end, so Heat and Cooling are equal.
 - A **Heating Element** used as the Heat is run in **Direct** (the Fermentor Control turns it on and off), and its offset and On
-  delay are kept to what its **Switched by** allows (Help 181).
+  delay are kept to what its **Hardware Controller** allows (Help 181).
 - **Mode:** **Heat & Cool**, **Heat only** or **Cool only**.
 - **No reading** from the probe: both are turned Off until it reads again.
 
