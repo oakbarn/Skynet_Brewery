@@ -37,6 +37,10 @@ The same folder, `BrewPanel/sample_schemas`, is where a brewery another brewer s
 
 Put the folder in `sample_schemas` and press **F5**. It comes in exactly like a Skynet sample: as a new Schema, on the simulator. The `ReadMe.txt` in that folder says the same.
 
+Most of the time another brewer will send you a single `.json` file instead (made with **Export to share ...**). Put it in the Import folder and use **Import a brewer's Schema ...** in the Schema list (see [Schema.json](44-schema-json)).
+
+> **Skynet does not check what is in a shared Schema.** The pictures, sounds, names and anything else in it, and any copyright on them, are between the brewers.
+
 ## Good to know
 
 - Updating the panel never touches `sample_schemas`. Your own Schemas are never touched either.

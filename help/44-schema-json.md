@@ -32,6 +32,17 @@ name but different text is already there, the old one is kept as a backup first.
 import notes. A file marked **first draft** came from the Importer before its question steps were built: check it before you
 brew with it.
 
+## Sharing a Schema with another brewer
+
+The Schema list has the same two things, so you don't need the Schema.json page to share:
+
+- **Export to share ...** (Schema dropdown, or ☰ Menu > 🗂 Schema > **📤 Export to share**) saves a Schema as a `.json` file, the same as Save as .json file. Send that file to the other brewer.
+- **Import a brewer's Schema ...** (Schema dropdown, or ☰ Menu > 🗂 Schema > **📥 Import a brewer's Schema**) adds a Schema file another brewer gave you, the same as Open a Schema file. **The place to put it is the Import folder** (`C:\Brewing\Import`), or pick it anywhere on your computer. It always comes in as a new Schema: none of yours is written over.
+
+> **Skynet does not check what is in a Schema file, going out or coming in.** The pictures, sounds, names and anything else in it, and any copyright on them, are between the brewers.
+
+Pictures and sounds are not inside the file, only their names. If the other brewer used pictures you don't have, those show as missing until you add them.
+
 ## What is in the file
 
 - The Schema's Tabs, Devices, Widgets, pictures, text, pipes and hoses, probes and the Processes it starts by itself (autostart list).
