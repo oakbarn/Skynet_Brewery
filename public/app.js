@@ -6965,7 +6965,8 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 };
 // A Heating Element's Overlay (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to the Glow (what None was
 // regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
-const ELEM_OVERLAY_CHOICES = v => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v).slice(1)];
+// a Heating Element: On = Red Glow already glows red, so the Red Tint (the same look on it) is left off its list (OakBarn Brewery, 2026-11-10)
+const ELEM_OVERLAY_CHOICES = v => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v).slice(1).filter(([p]) => p !== 'tint:red' || v === 'tint:red')];
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a

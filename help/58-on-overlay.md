@@ -26,7 +26,7 @@ The **On overlay** dropdown has:
 - **Corner Bolt**: a small yellow bolt in the top right corner.
 - **Big Bolt**: a large half see-through bolt over the middle.
 - **Green Glow Ring**: a green glow around the picture.
-- **Red Tint**, **Orange Tint** and **Blue Tint**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
+- **Red Tint**, **Orange Tint** and **Blue Tint** (a Heating Element has no Red Tint: its **On = Red Glow** is the same): no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
 - Your own overlays from the **On Off** picture group (`media/Images/On_Off`), listed next.
 - Then every other picture in `media/Images`, and **Add new ...** to type the name of your own.
 
