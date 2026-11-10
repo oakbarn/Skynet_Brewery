@@ -1118,8 +1118,13 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 /* an invisible box only as wide as the methods ticked, its middle under the middle of the picture (OakBarn Brewery, 2026-11-09) */
 #ws .hmSpots { position: absolute; display: flex; justify-content: center; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; transform: translateX(-50%); background: transparent; border: 0; }
 /* Fritz, 2026-11-07: the method in use is Red, the others Yellow (orange is the Element's own glow while on) */
-#ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
-#ws .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
+#ws .hmBtn, .mBalloons .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
+/* Integrate 5 (OakBarn Brewery, 2026-11-10): the Enabled switches under each method's name, and the Control Method balloons in the dialog */
+.mRow { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: flex-end; }
+.mCol { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; }
+.mBalloons { display: flex; flex-wrap: wrap; gap: 4px; }
+.mBalloons .hmBtn { font-size: 13px; padding: 3px 10px; }
+#ws .hmBtn.cur, .mBalloons .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
 
 /* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
 .lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }

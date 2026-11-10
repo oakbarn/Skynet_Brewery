@@ -1769,6 +1769,12 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
+- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5): **Current Method** (a dropdown) and **Short Label** (a
+  switch) on one line; then **Enabled**, a switch under each method's name: **a method must be enabled to be used** (the Current Method
+  and Direct are always on, greyed); then **Control Method**, a balloon for each enabled method, the Current Method **Red** and the others
+  **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
+  the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
+  is in now. The explanations are in hover help, so the dialog stays clean.
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
@@ -3196,6 +3202,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")
 - 2026-11-09: Rule 18.33 gets OakBarn Brewery's test: a box is mandatory when the program or the board needs it to work; handy information (Volts, Amps, Watts) is optional; a box needed by some types only is greyed for the others and has a fill-it-or-abandon pop-up. The list of mandatory boxes is written in the Rule. Checked against both programs: the Importer's item pages follow the list, and the Panel's Flow Meter Pulses per unit and Analog input Value at highest signal can no longer be left blank (the Panel's other boxes on the list are never blank). Help 165 updated. (thread "Set which Importer boxes are mandatory")
 - 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
