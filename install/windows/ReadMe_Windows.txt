@@ -46,6 +46,9 @@ see Minimum_Equipment_and_Limitations.txt, or Help > Minimum equipment in the pa
       Most home PCs are set up this way.
   [ ] The panel zip file: Skynet_BrewPanel_<date>.zip  (<date> is the release date,
       for example Skynet_BrewPanel_2026-10-19.zip)
+  [ ] The pictures and sounds zip: Skynet_Media_<date>.zip  (on the same download page,
+      https://github.com/oakbarn/Skynet_Brewery/releases/latest). It only ever ADDS
+      pictures and sounds: one you already have is never changed or deleted.
   [ ] These two files that come with this ReadMe:
         Skynet_First_Install.bat   runs once, the first time
         Skynet_Brewer.bat          starts the panel every day
@@ -225,6 +228,11 @@ STEP 6. UNZIP THE PANEL
       named server.js (Windows may show it as just "server").
       If you got C:\Brewing\Skynet_BrewPanel_<date>\BrewPanel instead, move the
       BrewPanel folder up into C:\Brewing and delete the empty one.
+  [ ] Copy Skynet_Media_<date>.zip into C:\Brewing too, right-click it, choose
+      "Extract All...", change the box to C:\Brewing again and click Extract.
+      It adds BrewPanel\defaults\media. The panel copies the pictures and sounds into
+      place when it starts. (If Windows ever asks to replace files, choose
+      "Skip these files": you keep what you have.)
 
   C:\Brewing should now look like this:
       C:\Brewing\

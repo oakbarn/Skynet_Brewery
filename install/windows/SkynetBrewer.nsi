@@ -7,7 +7,7 @@
 ; or 3 update and keep everything (the default, the original No). With 2 or 3 you can still replace one of your folders.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
-;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+;   -DSRC=<the BrewPanel folder of the release (config and scripts samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
 ; and, only when signing is set up (docs/Code_Signing_Setup.md), -DSIGN_SCRIPT=<tools/sign-exe.sh>: the Setup .exe and the
 ; Uninstall .exe inside it are then signed with Azure Artifact Signing as they are made (needs NSIS 3.08 or newer).
 
@@ -78,6 +78,9 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\install\ReadMe.txt"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+; The pictures and sounds are in their own Setup, the Skynet Media Setup (Rule 9.12): the Finish page links to where it is
+!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds (Skynet Media Setup)"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
@@ -175,10 +178,6 @@ Function AskReplaceFolders
   StrCpy $R0 "config"
   StrCpy $R1 "layout, tabs, devices and settings"
   MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your config folder ($R1) with the sample layout?$\r$\n$\r$\nYes moves yours to backups\config_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
-    Call MoveToBackups
-  StrCpy $R0 "media"
-  StrCpy $R1 "pictures and sounds"
-  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your media folder ($R1) with the sample pictures and sounds?$\r$\n$\r$\nYes moves yours to backups\media_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
     Call MoveToBackups
   StrCpy $R0 "scripts"
   StrCpy $R1 "Processes"
@@ -366,6 +365,12 @@ Section "Skynet Brew Panel" SecMain
     CopyFiles /SILENT "$OldPanel\scripts\*.*" "$INSTDIR\scripts"
     CopyFiles /SILENT "$OldPanel\media\*.*" "$INSTDIR\media"
     CopyFiles /SILENT "$OldPanel\help\*.*" "$INSTDIR\help"
+  ${EndIf}
+
+  ; The pictures and sounds come with the Skynet Media Setup (Rule 9.12): say so when this panel has none yet
+  ${IfNot} ${FileExists} "$INSTDIR\media\Images\Skynet\*.*"
+    DetailPrint "No Skynet pictures and sounds yet: get the Skynet Media Setup (the link on the last page, or the Releases page:"
+    DetailPrint "https://github.com/oakbarn/Skynet_Brewery/releases/latest) and run it after this."
   ${EndIf}
 
   ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
