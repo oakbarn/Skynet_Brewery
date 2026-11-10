@@ -2391,7 +2391,11 @@ code comments). Where Help needs to say whose a drawing is, it says **Skynet** (
 "OakBarn Brewery" is written in Help or a balloon only where OakBarn Brewery has approved it. A dated "(OakBarn Brewery, date)" note is
 not written in Help (as in Rule 11.5). Approved so far: the electrical warning (Rule 6.20) and the GitHub address (github.com/oakbarn). **The one exception to Rule 11.5
 "for now":** the beer money button keeps its words **"Buy Fritz a beer"** (OakBarn Brewery, 2026-11-10: "\"Buy Fritz a beer\" is the one
-exceotion for now"); Help 17 still names no person.
+exceotion for now"); Help 17 still names no person. **OakBarn Brewery may also be named where the Help is specifically about the OakBarn
+Schema** (OakBarn Brewery, 2026-11-10: "All of those can remain when we are specifically dealing with the OakBarn Schema"): the OakBarn
+Brewery Schema Template (Help 157, 158) and the OakBarn Brewery sample (Help 85). Anywhere else it says Skynet (Help 135: the Skynet
+plain vessel; Help 99: no OakBarn Hop Warnings). **A Tartan Schema sample** may be added the same way, with permission ("With
+permission, we may add Tartan Schema as well as a sample"); it is not added until that permission is given.
 The others found on 2026-11-10 wait for OakBarn Brewery's word (thread "Set the Help format rules").
 
 11.7 **Hover Help examples use the entries of their own dialog in the 3 Vessel 1 Pump sample** (OakBarn Brewery, 2026-11-10: "Have the
@@ -3346,6 +3350,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rule 11.6 (OakBarn Brewery): OakBarn Brewery may be named in Help only where it is specifically about the OakBarn Schema (Help 85, 157, 158); Help 135 now says the Skynet plain vessel and Help 99 drops the OakBarn Hop Warnings; a Tartan Schema sample may be added with permission. Checked against both programs: Help only; nothing changes in the BruControl Import. (thread "Set the Help format rules")
 - 2026-11-10: Rule 11.6 (OakBarn Brewery): "Buy Fritz a beer" on the beer money button is the one exception to Rule 11.5 for now. Checked against both programs: the button is in the Panel only; nothing changes. (thread "Set the Help format rules")
 - 2026-11-10: Added Rules 11.3 to 11.7, the General Help Format (OakBarn Brewery): BruControl differences only in the Importer Help, and every BruControl sentence taken out of the Skynet Panel Help and Hover Help kept in Sandbox/help/BruControl_Help_Extract.md; Hover Help the same as the Panel Help; never mention Fritz in any Help; OakBarn Brewery entries few and approved; Hover Help examples use their own dialog's entries in the 3 Vessel 1 Pump sample, the Heater Properties (the HLT element of HLT_Vessel) first. Added Rule 14.3 (the Importer Help and a BruControl Read Me wait). Help 110 renamed "Pipe Widgets from the Skynet drawings". Checked against both programs: the Panel's Help and balloons change; the BruControl Import program's pages, Help 143 and 165 are not changed (on hold), and the one shared word list it uses (public/naming.js, the 10K NTC type) no longer says BruControl. (thread "Set the Help format rules")
 - 2026-11-10: Added Rule 6.30, the Fermentor Control (OakBarn Brewery: "an integrated Fermentor control that heats and Cools with Hysteresis"): one Setpoint, Heat below and Cooling above it, never both On, a Changeover wait, an On delay and a Shortest run on each side, Mode Heat & Cool / Heat only / Cool only; built into a Fermentor by the Vessel Device Builder (Rule 19.5 question 14). Help 182. Checked against both programs: the Panel's Properties, Builder and Brain run it; the BruControl Import joins a heating and a cooling Hysteresis on the same probe into one. (thread "Build integrated Fermentor heat and cool control")
