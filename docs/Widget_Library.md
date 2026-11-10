@@ -522,6 +522,7 @@ These are added from the same list as Devices but need no board pin.
 | Alarm Widget: **User Alarm** (2026-11-02) | The same dialog, but **Graphic:** Background picture (Image Path 1, any picture or a typed path; ⬢ Graphic Dialog with Background #, Image Path 2 and 3, Back Colour), Set Graphic (Layer 2, any picture), Active overlay (Layer 1), Back color (`.back`, behind the pictures). Its Alarm Chain steps can also change its Background picture. |
 | Alarm (made before 2026-11-02, no subclass) | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Picture when sounding / quiet |
 | Alarm Widget: **Email** (2026-11-09, both kinds) | **Email Notification** (switch, Off to start) and **Email to** (addresses with commas; empty = every user with an email in My account). Sent through the mail server picked in Settings (Rule 7.17, Help 175). Attribute `.email` (true / false). |
+| Alarm Widget: **Digital Outputs** (2026-11-09, every kind) | **Digital Output 1** and **Digital Output 2** (optional, None to start): a Device with an ON / OFF state that goes ON while the Alarm is active and OFF when it stops (Rule 7.19, Help 178). |
 | Sound Player | Sound file, Repeat sound. Lowest priority (5): pauses while any alarm sounds. Process: play / stop SoundPlayer |
 | Label | Text box only (no own settings) |
 | Process Widget (Rule 1.31) | Process (dropdown), Ask before starting or stopping. Shows the Process's state with Start / Stop; one click starts or stops it |
@@ -581,4 +582,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-09: Alarm Widget gets Email Notification and Email to (Rule 7.17, Help 175). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Time and DateTime Widgets get Shows as; a Timer's Digits get the same Time formats (Rule 2.45, Help 176). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Skynet Dial gets Gauge settings (shape, tick marks, color styles) and the Skynet Bar look (Rule 2.40 point 4, Help 152). (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Alarm Widget gets Digital Output 1 and 2 (Rule 7.19, Help 178). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Chart Widget: a Hydrometer's line has an SG / °P / °Bx switch right on the Graph (Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")

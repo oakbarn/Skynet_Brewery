@@ -935,6 +935,22 @@ Each entry says where the text was, what was taken out, and what is there now.
 
 **Now:** removed
 
+### help/178-alarm-digital-outputs.md
+
+**Taken out (a sentence):**
+
+> BruControl had one; Skynet has two.
+
+**Now:** removed
+
+**Taken out (the whole section "From BruControl"):**
+
+> ## From BruControl
+>
+> The BruControl Import puts a BruControl Alarm's one **Digital Output** in **Digital Output 1**.
+
+**Now:** removed
+
 ### help/182-fermentor-control.md
 
 **Taken out (the whole section "The BruControl Import"):**
@@ -1138,3 +1154,11 @@ Each entry says where the text was, what was taken out, and what is there now.
 **Taken out:**
 
 > (BruControl: Response Timeout)
+
+### public/app.js: the Alarm Digital Output balloon
+
+**Taken out:**
+
+> BruControl had one; Skynet has 2.
+
+**Now:** removed

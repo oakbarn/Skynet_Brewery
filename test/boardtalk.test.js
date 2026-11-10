@@ -67,3 +67,4 @@ const r = importBruControl(xml), b = r.conv.devices[0];
 assert.equal(b.answerSec, 3); assert.equal(b.baud, 57600); assert.equal(b.logging, undefined);
 assert.ok(JSON.stringify(r).includes('BruControl logging was on for Brewery'));
 console.log('board talk tests passed');
+await import('./alarmoutputs.test.js');
