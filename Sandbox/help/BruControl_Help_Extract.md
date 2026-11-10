@@ -935,6 +935,18 @@ Each entry says where the text was, what was taken out, and what is there now.
 
 **Now:** removed
 
+### help/182-fermentor-control.md
+
+**Taken out (the whole section "The BruControl Import"):**
+
+> ## The BruControl Import
+>
+> BruControl holds a fermentor as two Hysteresis controls on the same probe, one that heats (a plus On offset) and one that cools (a
+> minus On offset). The Import makes them ONE Fermentor Control with the same Setpoint and offsets. The two outputs keep their names
+> and Ports. Each is listed in the Import notes.
+
+**Now:** removed
+
 ## Hover Help and screen text
 
 ### public/app.js: hover help or screen text
