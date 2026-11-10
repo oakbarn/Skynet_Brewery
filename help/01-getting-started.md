@@ -41,7 +41,7 @@ What you can see depends on your role. An **Admin** sees everything; an **Operat
 
 The [Glossary](13-glossary) explains every special word. The three you will meet most:
 
-- **Tab**: one brewery screen (BruControl calls these workspaces).
+- **Tab**: one brewery screen.
 - **Device**: anything tied to a port or pin on a board (a pump relay, a probe, a valve).
 - **Widget**: something that lives only in the app and is not tied to any board (a pipe fitting, a note, a timer).
 

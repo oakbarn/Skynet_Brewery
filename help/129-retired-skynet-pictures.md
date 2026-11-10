@@ -1,6 +1,6 @@
 # Retired and renamed Skynet pictures
 
-Fritz cleaned up the Skynet pictures on 2026-11-05 (Skynet Rules 7.8 and 15.3). Retired pictures are moved to the **Delete**
+The Skynet pictures were cleaned up (Skynet Rules 7.8 and 15.3). Retired pictures are moved to the **Delete**
 folder in the GitHub repo, never thrown away, and everything that came with Skynet now uses the picture that replaced them.
 
 ## Valves show open with an Overlay

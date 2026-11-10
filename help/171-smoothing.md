@@ -1,7 +1,7 @@
 # Smoothing a jumpy reading
 
 Some readings jump about: a thermistor (NTC) probe on a long wire, a flow meter that counts pulses, a scale with a stirrer
-running. **Smoothing** (Skynet Rule 6.24) calms them. It is the same idea as BruControl's **Avg Weight**.
+running. **Smoothing** (Skynet Rule 6.24) calms them.
 
 ## How it works
 
@@ -29,7 +29,7 @@ Open the Device's **Properties** and set **Smoothing %**. It is on:
 ## A Counter's Rate
 
 A Digital In set to **Counter** now also has a **Rate**: the counts per second over its **Sampling Period** (1 to 10 seconds,
-empty = 1), the same as BruControl's Counter Input. The Rate is then smoothed. The **Count** itself is never smoothed.
+empty = 1). The Rate is then smoothed. The **Count** itself is never smoothed.
 
 ## In a Process
 
@@ -41,7 +41,3 @@ print MB_A0_10KNTC_Mash~Tun_MT.raw     (the reading before smoothing)
 print Water_Flow.raw                   (a flow meter's rate before smoothing)
 print Pulse_Counter.rate               (a Counter's counts per second)
 ```
-
-## BruControl Import
-
-BruControl's **Avg Weight** on an Analog In or temperature port becomes its **Smoothing %**. The Import notes list them.

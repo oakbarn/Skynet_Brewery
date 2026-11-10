@@ -1,6 +1,6 @@
-# Pipe Widgets from Fritz's drawings
+# Pipe Widgets from the Skynet drawings
 
-Fritz, 2026-11-02: new Skynet drawings of the TC pipe fittings, the Manual Ball Valve and two motorized valves. They are drawn as SVG (Rule 7.1). Flow goes either way through all of them; none of them has a flow direction (a check valve is still the only one-way fitting).
+new Skynet drawings of the TC pipe fittings, the Manual Ball Valve and two motorized valves. They are drawn as SVG (Rule 7.1). Flow goes either way through all of them; none of them has a flow direction (a check valve is still the only one-way fitting).
 
 ## Where the IPs are
 
@@ -25,7 +25,7 @@ These are Skynet pipe fitting Templates. Like every pipe fitting they have only 
 | **Reducer_2_1_Front** | a TC 2 to TC 1 reducer seen from the front | both at the center of the opening |
 | **Reducer** | TC 2 to TC 1.5, drawn like the concentric one | big end (left), small end (right) |
 
-Each fitting is drawn to Fritz's shape: a Long Tee is wider than it is tall. **Autosize to pipe** keeps that shape and makes the pipe on the picture as thick as the biggest pipe joined to it.
+Each fitting is drawn to its Skynet shape: a Long Tee is wider than it is tall. **Autosize to pipe** keeps that shape and makes the pipe on the picture as thick as the biggest pipe joined to it.
 
 A Skynet pipe fitting already on a Tab takes its new picture the next time you open **Edit layout**, and its IPs move onto the new ferrules. **Save layout** keeps the change. A pipe on it follows its IP; check that it still runs straight.
 
@@ -37,7 +37,7 @@ The **Manual Valve Widget** is the same special Widget as before: its Open/Close
 - **Manual Ball Valve, side view**: the pipe runs across the middle.
 - **Manual Ball Valve, front view**: looking down the pipe.
 
-The picture stays the same open or closed; while open the **open overlay** (a green ring and a tick) is drawn on top (Fritz, 2026-11-05: the Open pictures are retired).
+The picture stays the same open or closed; while open the **open overlay** (a green ring and a tick) is drawn on top (the Open pictures are retired).
 - **Manual Ball Valve on a front elbow**: the same, with the elbow's leg going down.
 
 The Tab swaps between the open and the closed picture by itself, and the green open overlay still shows while it is open. A Manual Valve has one IP, in the middle of its picture.
@@ -58,7 +58,7 @@ and the picture and its IPs follow.
 
 | Valve | Orientations |
 |---|---|
-| **Skynet Motorized Butterfly Valve** | Fritz's grey actuator on a butterfly valve: Horizontal, Vertical Left, Vertical Right, 45 degrees, **Front** (looking down the pipe: both IPs at the center of the opening; the disc edge on means open, the disc facing you means closed) and **Front Elbow** (one IP at the center of the front opening, one at the bottom ferrule) |
-| **Skynet Motorized Ball Valve** | drawn after Fritz's blue actuator: Horizontal, Vertical Left, Vertical Right, 45 degrees and **Front** (both IPs at the center of the opening) |
+| **Skynet Motorized Butterfly Valve** | a grey actuator on a butterfly valve: Horizontal, Vertical Left, Vertical Right, 45 degrees, **Front** (looking down the pipe: both IPs at the center of the opening; the disc edge on means open, the disc facing you means closed) and **Front Elbow** (one IP at the center of the front opening, one at the bottom ferrule) |
+| **Skynet Motorized Ball Valve** | a blue actuator: Horizontal, Vertical Left, Vertical Right, 45 degrees and **Front** (both IPs at the center of the opening) |
 
 As before, a closed valve shows a ring on its body and an open one a bar and red bolts. A Front view has no Flip to set.

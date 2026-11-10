@@ -1,8 +1,7 @@
 # API_Name: the name a Voice Command says
 
 Every Device and Widget that has a value has an **API_Name** box in its **Database and .API** pop-up (the ⬢ beside
-Database and .API in its Properties). It is a String (text), and it is the name a **Voice Command** uses (Skynet Rule 6.18;
-Fritz, 2026-11-06). It is only on the Database and .API pop-up.
+Database and .API in its Properties). It is a String (text), and it is the name a **Voice Command** uses (Skynet Rule 6.18). It is only on the Database and .API pop-up.
 
 ## Unique
 
@@ -10,7 +9,7 @@ Fritz, 2026-11-06). It is only on the Database and .API pop-up.
 count, so `Mash Temp`, `mash temp` and `Mash  Temp` are the same API_Name. Saving one that is already used says which item
 has it, and nothing is saved until it is changed.
 
-Name it the way you will say it. Fritz's example: a pump with the API_Name **Red Pump** is switched by saying
+Name it the way you will say it. For example, a pump with the API_Name **Red Pump** is switched by saying
 **"Turn on Red Pump"**. Others: `Hot Liquor`, `Mash Temp`. Spaces are fine. These characters are not allowed:
 `< > : " / \ | ? *`. At most 60 characters.
 

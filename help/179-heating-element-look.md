@@ -56,10 +56,5 @@ A Valve and a Heating Element always have one of these two in their **Toggle** b
 A **Process ignores this choice**: a Process, the .API and voice turn it On or Off as always. A Valve or Heating Element that had
 None is changed to Toggle when its Schema loads. A Manual valve has no power, so it has neither.
 
-## BruControl Import
-
-The Importer's first Control Type column for a Heating Element is **Direct Only**. A heater that BruControl marked as not user
-controlled becomes a Toggle, since a Heating Element can not have None.
-
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
 Electrician.

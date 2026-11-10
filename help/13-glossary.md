@@ -18,19 +18,17 @@
 
 **Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
 
-**BruControl**: the Windows brewery program this panel is modelled on. Its Schemas (BruControl calls them configuration files) and processes can be imported.
-
 **Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
 
 **Device**: a thing tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
 
-**Element**: an old BruControl word. Skynet does not use it: a thing on a Tab is a **Device** (tied to a port on a board) or a **Widget** (app only). The one exception is a *heating element*, the real part in a kettle.
+**Element**: a word Skynet does not use: a thing on a Tab is a **Device** (tied to a port on a board) or a **Widget** (app only). The one exception is a *heating element*, the real part in a kettle.
 
 **Fitting**: a pipe part (tee, elbow, cross, coupling, cap, manual valve) placed as an IP type.
 
 **Hose**: a flexible pipe that bends in curves, with an IP (a coupling) at both ends. See [Pipes, hoses and reducers](24-pipes-and-hoses).
 
-**Global**: BruControl's variable class. The panel turns Globals into gGlobal variables when they are imported.
+**Global**: an old variable class. The panel turns Globals into gGlobal variables when they are loaded.
 
 **.backpath, .backpath_2, .backpath_3**: the three background picture paths of an item (they were imagePath_1, _2, _3). `background = 1, 2 or 3` picks one; 0, blank or over 3 shows none; `name.image = "path"` changes .backpath. See [Pictures on items](25-picture-paths).
 
@@ -48,7 +46,7 @@
 
 **Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
 
-**Schema**: the whole setup of your brewery in the panel: Tabs, Devices, Widgets, pipes and settings (other programs call it a setup or configuration). The samples are ready-made Schemas, and a BruControl configuration file is imported as a Schema. It is saved in the `config` folder.
+**Schema**: the whole setup of your brewery in the panel: Tabs, Devices, Widgets, pipes and settings (other programs call it a setup or configuration). The samples are ready-made Schemas. It is saved in the `config` folder.
 
 **Shared variable**: an old class that is gone; use a gGlobal instead. An older Schema that still has one loads without it: see [Shared variables became gGlobals](149-shared-variables-became-gglobals).
 
@@ -58,7 +56,7 @@
 
 **SVG**: a picture format that stays sharp at any size. The panel makes SVG copies of your PNG and JPG pictures.
 
-**Tab**: one brewery screen (BruControl calls it a workspace).
+**Tab**: one brewery screen.
 
 **Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 

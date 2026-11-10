@@ -30,9 +30,3 @@ exception, because the pop-up is not a question before switching: it is you tell
 
 Every Widget that can be On or Off has a **.confirmation** switch in its Properties. When it is on, that Widget is a Confirmation
 Widget. It starts on for Manual Valves, Manual Pumps and QD Hoses, and off for everything else.
-
-## From the BruControl Importer
-
-On the Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other), you can say you have more than were found, for
-example 8 Pumps when 6 were found. The extra ones, *Pump 7* and *Pump 8*, have no Interface Port, so they become Confirmation
-Widgets ([Help 143](143-brucontrol-importer)).

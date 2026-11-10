@@ -20,7 +20,7 @@ An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Meg
 
 ## Device names
 
-When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order, as BruControl does:
+When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order:
 
 1. **Interface** (the board), listed by its full name with its ID after it, for example *Main Brewery Mega USB (ID MB_)*.
 2. **Device Type** (see the list below)
@@ -38,13 +38,13 @@ The port is always in the name, and the Device Type ID comes third. There is **o
 
 `MB_25_P_L_Vlv_Fly~Sparge_SP`
 
-Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
+Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
 - Control characters and emoji are left out, and spaces at the start and end are dropped.
 - Each of `< > : " / \ | ? * . ,` becomes `~`. *Fly/Sparge In* becomes `Fly~Sparge~In`.
-- Spaces become `~` too (OakBarn Brewery, 2026-11-07), so the `_` only separates the parts of the name: *Mash Tun* becomes `Mash~Tun`. Names made before keep their `_`.
+- Spaces become `~` too, so the `_` only separates the parts of the name: *Mash Tun* becomes `Mash~Tun`. Names made before keep their `_`.
 
 More rules:
 
@@ -53,7 +53,7 @@ More rules:
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
 - A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge_SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
-- **One Interface Port, one Device** (Rule 6.1, Fritz 2026-11-07). Two Devices can't use the same port on the same Interface. This is different from BruControl, where one heater could have a Hysteresis and a PID on its port: in Skynet the heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
+- **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
 - **Older Schemas:** two Devices that already share a port keep working (the last one turned on wins, the others on that port are turned off) and can still be saved. No new ones can be made.
 
 ## Pins kept for RTD and OneWire probes
@@ -83,7 +83,7 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_HE_HLT_BR`, whatever heating method it uses; elements named before keep `DO`.
 
-**Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 and BruControl type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
+**Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
 **Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `HE` Heating Element (on / off output, its method picked by a click or a Process), `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
 
@@ -103,11 +103,11 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
-**Virtual ports.** Some Devices have no pin of their own, so, as in BruControl, they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt_FE`.
+**Virtual ports.** Some Devices have no pin of their own, so they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt_FE`.
 
 ## Thermistors
 
-An NTC thermistor is read on an analog pin with a series resistor, using its **ohms at 25 °C** and its **Beta** value from the data sheet. The Add list has 10K (Beta 3950), 10K BCS-462 / BruControl (Beta 3977), 50K and 100K ready; for any other one pick **NTC** and type its numbers. The temperature is worked out in °C, and each probe shows **°F or °C**, whichever you pick in its properties.
+An NTC thermistor is read on an analog pin with a series resistor, using its **ohms at 25 °C** and its **Beta** value from the data sheet. The Add list has 10K (Beta 3950), 10K BCS-462 (Beta 3977), 50K and 100K ready; for any other one pick **NTC** and type its numbers. The temperature is worked out in °C, and each probe shows **°F or °C**, whichever you pick in its properties.
 
 ## Devices you already have
 
