@@ -11,7 +11,7 @@ The idea: the things you set most are on the dialog itself. Everything else is o
 2. **Pick the pump** from the list. Each one has its picture: March 809 and 815, Chugger, Blichmann Riptide, Topsflo TD5 and
    KegLand MKII. The picture you pick is the pump's Picture.
 3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
-   and colors) and **Label Visible**, 2 the **Interface (board)**, 3 an **Available Port**, 4 the **Tab**. Then 5 the
+   and colors) and **Label Visible**, 2 the **Interface** (the board), 3 an **Available Port**, 4 the **Tab**. Then 5 the
    **Suggested Name** shows, made from them. The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
 4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
@@ -34,7 +34,7 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
 2. **1. Label ⬆ ⬢**: what shows on the Tab. The arrow opens a 2 line box; the hexagon opens the Label pop-up: Label, Visible,
    Font size, Font, Bold, Fore color, Back color and Alignment. A Label is never blank: leave it empty and it becomes the Name.
    **Label Visible** switches it on or off.
-3. **2. Interface (board)** and **Available Ports** on one line: greyed out once it is added (the board and pin it is wired to).
+3. **2. Interface** and **Available Ports** on one line: greyed out once it is added (the board and pin it is wired to).
 4. **3. Tab**: the Tab it is on.
 5. **4. Name**: starts as the Suggested Name (from the Label, Interface, Port, Device Type and Tab); you may type your own. It
    must be unique. A Process uses it: `Pump_Name.state = true`.

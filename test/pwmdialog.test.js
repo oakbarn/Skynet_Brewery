@@ -16,7 +16,7 @@ assert.match(add, /\.\.\.\(pwm \? \[\.\.\.PWM_GRAPHIC_FIELDS\(e, after\), \.\.\.
 assert.match(add, /\.\.\.\(dd \? \[\.\.\.\(pwm \? \[\] : \['tap'\]\)/, 'a PWM keeps its own tap (it opens the % box)');
 const own = app.slice(app.indexOf('const PWM_SIGNALS'), app.indexOf("// a new Alarm's Name follows its Label"));
 assert.ok(!/cover|orient|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, Orientation or Toggle');
-assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true[^\n]*'pinsel', 'pwm'/, 'fixed wiring, PWM pins');
+assert.match(own, /\['device', '2\. Interface', 'dev', 'addnewid', false, false, \{ set: true[^\n]*'pinsel', 'pwm'/, 'fixed wiring, PWM pins');
 assert.match(own, /dbPop: true/, 'Database and .API on the Overlay line');
 assert.match(app, /if \(isPwmDev\(it\)\) return pwmDeviceFields\(it, item\);/);
 assert.match(app, /if \(pwm && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\(pwmAutoLabel\(e\)\);/, 'Label auto fill (Fritz, 2026-11-05)');

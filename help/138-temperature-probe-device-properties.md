@@ -14,7 +14,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    **tP_TC_1** (thermocouple), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (NTC thermistors), **tP_LM35_1**, **tP_TMP36_1**,
    so the cursor starts on the next empty field. You can change the Label, but it can't
    be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the
-   **Interface (board)** and, on the same line, the **Port**: the **Probe #** for a DS18B20 (its OneWire probe number), or an
+   **Interface** (the board) and, on the same line, the **Port**: the **Probe #** for a DS18B20 (its OneWire probe number), or an
    **Available Port** (the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36), 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic** and **Path** (a Thermowell or probe tee): the Skynet drawing as it will show on the Tab. The Path is set.
@@ -37,7 +37,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
 1. The title is the probe (for example **Long Tee, probe in the branch: PT100 RTD**), with the **🔓 lock**, **Visible** and
    **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**.
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
-3. **2. Interface (board)** and its **Port**, greyed out.
+3. **2. Interface** and its **Port**, greyed out.
 4. **3. Tab** and **4. Name** (the Suggested Name; you may type your own).
 5. **Graphic**, **Path**, **Orientation** and **Flip** (a Thermowell or probe tee).
 6. The probe's own settings: **Probe type ⬢**, **Units** and **Decimals**, **Calibration offset** with **Database and .API ⬢**,

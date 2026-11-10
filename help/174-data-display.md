@@ -7,15 +7,15 @@ Some Devices have more than one value. A Flow meter has its Rate and its Total, 
 
 | Device | Data Display choices (the first shows them all, as before) |
 |---|---|
-| PID, Deadband | Output % and Setpoint, Output %, Reading (its probe), Setpoint |
-| Hysteresis | ON / OFF and Setpoint, ON / OFF, Reading (its probe), Setpoint |
-| Duty Cycle | Duty cycle %, ON / OFF now |
-| Heating Element (run by a method) | What it is doing and its Setpoint, Output % or ON / OFF, Reading (its probe), Setpoint |
+| PID, Deadband | Output % and Setpoint, Output %, Reading, Setpoint |
+| Hysteresis | ON / OFF and Setpoint, ON / OFF, Reading, Setpoint |
+| Duty Cycle | Duty cycle %, ON / OFF |
+| Heating Element (run by a method) | Status and Setpoint, Output, Reading, Setpoint |
 | Flow meter | Rate and Total, Rate, Total |
 | Scale | Volume and Weight, Volume, Weight |
 | PWM or Analog output with Measured volts | Value and Volts, Value, Volts |
 
-Open the Device's **Properties** and pick **Data Display (what it shows)**. While a Device is switched off, it shows OFF as before.
+Open the Device's **Properties** and pick **Data Display**. While a Device is switched off, it shows OFF as before.
 
 ## In a Process
 

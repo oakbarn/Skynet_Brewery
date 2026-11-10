@@ -4,15 +4,15 @@
 import { isHeatElem } from './heatmethod.js';
 
 // [key, the words shown]; the first is the default (what it showed before)
-const CTL = [['both', 'Output % and Setpoint'], ['output', 'Output %'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']];
+const CTL = [['both', 'Output % and Setpoint'], ['output', 'Output %'], ['reading', 'Reading'], ['setpoint', 'Setpoint']];
 export const DISPLAY_CHOICES = {
   pid: CTL, deadband: CTL,
-  hysteresis: [['both', 'ON / OFF and Setpoint'], ['state', 'ON / OFF'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']],
-  dutyCycle: [['both', 'Duty cycle %'], ['state', 'ON / OFF now']],
+  hysteresis: [['both', 'ON / OFF and Setpoint'], ['state', 'ON / OFF'], ['reading', 'Reading'], ['setpoint', 'Setpoint']],
+  dutyCycle: [['both', 'Duty cycle %'], ['state', 'ON / OFF']],
   flowMeter: [['both', 'Rate and Total'], ['rate', 'Rate'], ['total', 'Total']],
   scale: [['both', 'Volume and Weight'], ['volume', 'Volume'], ['weight', 'Weight']],
-  pwmOut: [['both', 'Value and Volts'], ['value', 'Value'], ['volts', 'Volts (Measured volts)']],
-  heat: [['both', 'What it is doing and its Setpoint'], ['output', 'Output % or ON / OFF'], ['reading', 'Reading (its probe)'], ['setpoint', 'Setpoint']],
+  pwmOut: [['both', 'Value and Volts'], ['value', 'Value'], ['volts', 'Volts']],
+  heat: [['both', 'Status and Setpoint'], ['output', 'Output'], ['reading', 'Reading'], ['setpoint', 'Setpoint']],
 };
 DISPLAY_CHOICES.analogOut = DISPLAY_CHOICES.pwmOut;
 const kindOf = el => isHeatElem(el) ? 'heat' : el?.type;
