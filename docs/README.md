@@ -10,6 +10,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Universal Properties](Universal_Properties.md) | The Properties and Process attributes every Device, Widget and Semi-Device has (Rule 1.21). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |
+| [Media Licenses](Media_Licenses.csv) | A spreadsheet of every picture and sound Skynet ships that is not its own drawing: where it came from, its license, and the credit the license asks for. Opens in Excel. |
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
 | [Minimum equipment and limitations](Minimum_Equipment_and_Limitations.md) | The smallest system, how far it grows, and what the panel cannot do yet. |
 | [Hardware shopping list](Skynet_Brewery_Shopping_List.md) | What to buy to run the panel, with rough prices. |
