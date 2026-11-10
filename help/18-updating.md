@@ -2,6 +2,8 @@
 
 **One zip does both:** a first install and every update. The zip has **no** `config`, `data`, `media` or `scripts` folders, so unzipping it over your panel can't replace yours. Their samples are in a folder called `defaults`, and the panel copies them in only on its very first start, into a folder you don't have yet.
 
+**The Skynet pictures and sounds are a separate download**, the Skynet Media Setup (Windows) or Skynet Media zip. It only adds the ones you don't have yet and never changes or deletes any. See [The Skynet Media Setup](183-skynet-media-setup).
+
 | Folder | What is in it | On an update |
 |---|---|---|
 | `config` | Your tabs, Devices, Widgets and settings (`brewery.json`) | **Kept.** Not in the zip. |
@@ -9,10 +11,10 @@
 | `media` | Your pictures and sounds | **Kept.** Not in the zip. |
 | `scripts` | Your processes | **Kept.** Not in the zip. |
 | `help` | This manual | Replaced by the new manual. The installers copy the old pages to `help/backups/before_update_<date>` first. |
-| `defaults` | The sample layout, pictures, sounds and processes | Replaced. Only used for a folder you don't have. |
+| `defaults` | The sample layout and processes | Replaced. Only used for a folder you don't have. |
 | Everything else (`lib`, `public`, `server.js`, `samples` …) | The program itself | Replaced. |
 
-**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, media, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `media` to `media_old`). The panel copies the samples into a fresh `media` the next time it starts.
+**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `scripts` to `scripts_old`). The panel copies the samples into a fresh `scripts` the next time it starts. (Pictures and sounds are never replaced: rename `media` only if you want to start it over, then run the Skynet Media Setup again.)
 
 > **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you pick **Update the program and reset all users** or **Start Fresh** in the installer and confirm the warning. See [Login, users and passwords](10-login).
 
