@@ -60,6 +60,8 @@ play SoundPlayer
 stop SoundPlayer
 ```
 
+A sound can also be a **web link to an MP3** (`https://...`), played straight from the web: see [Sounds from a web link](186-sounds-from-a-web-link).
+
 There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Sound Player**.
 
 Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that). To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.

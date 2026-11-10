@@ -2272,6 +2272,17 @@ a Duty Cycle, Hysteresis, PID or Deadband by its ON / OFF). It goes **ON while t
 blank slot does nothing; a Device that has no ON / OFF state is skipped with a note in the Console. Both programs: the BruControl Import
 puts BruControl's one Digital Output in slot 1 (an Alarm imported before keeps it there too). Help 178.
 
+7.20 **A sound can be a web link to an MP3** (OakBarn Brewery, 2026-11-10: "Yes. And is there a place we can store the mp3 for free";
+"We could give that as an option if people do not want the audio files on their computer"). Every sound box (an Alarm's Sound file, an
+Alarm Chain step, the Sound Player, the sound before a hop alert, and a Process's `SoundPlayer path = "..."`) takes a file in the media
+folders on the Brain **or** a web link that starts with `https://` (or `http://`) and points straight at the sound file. The browser
+plays the link from the web, so the file never has to be on the Brain. **No internet:** an Alarm whose link can't be reached plays the
+Skynet beep (`sounds/alarm_beep.wav`) from the Brain instead and shows a warning; a Sound Player stays quiet with the same warning; the
+sound before a hop alert is skipped and the alert's voice still speaks. Help says a file on the Brain is the safest choice for Hop and
+Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-Sounds` on the Skynet project, not set as the latest
+release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
+Import keeps a sound that is already a link as it is and never copies it. Help 186.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3898,3 +3909,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 7.19, Alarm Digital Outputs (OakBarn Brewery): 2 optional Devices go ON and OFF with their Alarm; blank does nothing; the Importer puts BruControl's one in slot 1; Help 178. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
+- 2026-11-10: Added Rule 7.20 (OakBarn Brewery): a sound can be a web link to an MP3, played by the browser from the web; an Alarm whose link can't be reached plays the Skynet beep from the Brain with a warning; the free home for MP3s is a GitHub Release (Skynet-Sounds). Help 186 (new) and Help 21. Next free Help 187. Checked against the BruControl Import: a sound that is already a link is kept and never copied. (thread "Play sounds from a web link")
