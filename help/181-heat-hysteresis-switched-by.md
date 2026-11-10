@@ -1,6 +1,6 @@
 # Heat Hysteresis: what switches the element
 
-A Heating Element says what turns it on and off: its **Switched by** (Skynet Rule 6.29). That decides how close its **Hysteresis**
+A Heating Element says what turns it on and off: its **Hardware Controller** (Skynet Rule 6.29). That decides how close its **Hysteresis**
 may hold the Setpoint, so the part that does the switching lasts.
 
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
@@ -8,7 +8,7 @@ Electrician.
 
 ## The choices
 
-| Switched by | Hysteresis On offset | On delay | Why |
+| Hardware Controller | Hysteresis On offset | On delay | Why |
 |---|---|---|---|
 | **Optical SSR** (solid state relay, the start) | 0.5 to 3 °F | any | No moving parts: it may switch often. |
 | **Contactor** | 2 to 5 °F | at least 60 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
@@ -22,7 +22,7 @@ With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Con
 
 ## Where it is
 
-- **Properties > Heating method > Switched by.** Under it, a line says the range for this element. When Hysteresis is Enabled but is
+- **Properties > Heating method > Hardware Controller.** Under it, a line says the range for this element. When Hysteresis is Enabled but is
   not the Current Method, its On offset and On delay still show, so they can be set.
 - **Save** refuses an On offset or On delay outside the range, and says what is allowed.
 - **A Process or the .API** gets the same plain error: `hE_1.onoffset = 8` on an element switched by an Optical SSR is refused.

@@ -2015,10 +2015,10 @@ cannot be, but there are two cases that may look like more than one:
 
 6.29 **Heat Hysteresis by what switches it** (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed
 for heating elements with Optical SSRs"; for a Contactor, OakBarn Brewery OK'd the suggestion of 2 to 5 with an On delay of at least
-60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Switched by**: **Optical
+60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Hardware Controller**: **Optical
 SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its **Hysteresis that heats** (a plus On offset) may only use:
 
-| Switched by | On offset | On delay |
+| Hardware Controller | On offset | On delay |
 |---|---|---|
 | Optical SSR | 0.5 to 3 °F | any |
 | Contactor | 2 to 5 °F | at least 60 seconds |
@@ -2026,7 +2026,7 @@ SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its
 
 With a °C probe the numbers are converted (0.3 to 1.7 °C; 1.1 to 2.8 °C). A Contactor's contacts wear each time they close, so it
 heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
-- **Properties:** Switched by is under Heating method, with a line giving its range; when Hysteresis is Enabled but is not the Current
+- **Properties:** Hardware Controller is under Heating method, with a line giving its range; when Hysteresis is Enabled but is not the Current
   Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
 - **A Process or the .API** setting `.onoffset` or `.ondelay` outside the range gets the same plain error. The Brain never runs a heat
   Hysteresis outside its range, whatever was saved.
@@ -2049,7 +2049,7 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
    each side's On delay, so a freezer just plugged in is never started at once. The Mode or Off stops a side at once.
 5. **Mode:** Heat & Cool, Heat only, Cool only. Heat and Cool are equal (fermentation makes heat at the start, needs heat at the end).
 6. A Heating Element as its Heat runs in **Direct** while the Fermentor Control is On; its offset and On delay are kept to its
-   **Switched by** range (Rule 6.29).
+   **Hardware Controller** range (Rule 6.29).
 7. **No reading:** both Off, and it shows No reading.
 8. **Built into a Fermentor Vessel Device** (Rule 5.31) by the Vessel Device Builder (Rule 19.5, question 14): the Heat and Cooling
    are built in **without a spot** and keep their own names, called VesselName.DeviceName in a Process (Rule 5.31, Help 180);
@@ -3359,6 +3359,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
 - 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Vessel Layer Order** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
