@@ -2424,6 +2424,12 @@ function fillEl(n, e0) {
   }
   // Data Display (Rule 6.26): a Device with more than one value shows the one picked (a Process: Flow_1.display = "Total")
   { const dk = v.display || e.display; if (dk && dk !== 'both' && displayChoices(e)) text = displayText(e, v, dk, text); }
+  if (e.type === 'alarm') {      // Rule 7.18: a sound played to its end is not "waiting"; Alarm Chain steps waiting show as a badge, also on a Basic Skynet Alarm
+    if (v.finished) text = String(text).replace('  (waiting)', '');
+    let bd = n.querySelector(':scope > .almWait');
+    if (v.waiting && !bd) n.append(bd = h('div', { class: 'almWait' }));
+    if (bd) { bd.classList.toggle('hidden', !v.waiting); bd.textContent = `+${v.waiting || 0}`; bd.title = `${v.waiting} Alarm Chain step${v.waiting === 1 ? '' : 's'} waiting their turn (Rule 7.18)`; }
+  }
   // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
   if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn || (isPwmDev(e) ? v.imageoff || e.imageOff : '')) : (v.imageoff || e.imageOff)) || pic;     // a PWM / Analog out: one picture, on and off (Rule 18.25)
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
@@ -6659,14 +6665,17 @@ const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+// Alarm Priority (Rule 7.18, OakBarn Brewery 2026-11-09)
+const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
 function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
     ['name', 'Name', 'text', null, false, 'b'],
-    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'}.active = true sounds it.`, 'infonote', 'alarm'],
+    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
     ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    ['priority', 'Priority (lower plays first; empty = its Kind\'s number)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
     A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
     ...EMAIL_FIELDS,
     ['_gb', 'Graphic', 'box'],
@@ -9009,6 +9018,10 @@ async function editItem(kind, id) {
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         applyDeviceTemplate(work, devTemplate(work));
       }
+      if (work.type === 'alarm' && work.priority !== undefined) {      // Alarm Priority (Rule 7.18): 0 to 99, two decimal places
+        if (!(work.priority >= 0 && work.priority <= 99)) throw new Error('Priority is a number from 0 to 99, such as 1, 1.1 or 1.15');
+        work.priority = Math.round(work.priority * 100) / 100;
+      }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       if (work.type === 'hydrometer') {      // a Tilt's Color, every other type's Hardware ID: mandatory and never shared (Rule 6.25)
         work.connection = hydroConnection(work);
@@ -9202,6 +9215,8 @@ function updateAlarms() {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
     a.loop = !!v.loop;
     const music = e.type === 'soundPlayer' || e.kind === 'sound';
+    // played to its end without Repeat: tell the Brain, so the next Alarm in line plays (Rule 7.18)
+    if (e.type === 'alarm' && !a._endHook) { a._endHook = true; a.addEventListener('ended', () => { if (!a.loop && S.values[e.name]?.active) api('POST', '/ui/sound/finished', { name: e.name }).catch(() => { }); }); }
     if (v.playing && soundOn) {
       if (a.paused && !a._playing) { a._playing = true; if (!(music && a._held && !a.ended)) a.currentTime = 0; a._held = false; a.play().catch(() => { }); }
     } else {
