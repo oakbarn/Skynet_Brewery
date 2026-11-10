@@ -22,6 +22,8 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
      above).
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
+- **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
+  KISS Keep It Simple Stupid NO clutter."): no clutter anywhere. The details for dialogs and Help are Rule 11.8.
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -1883,6 +1885,10 @@ help on its Heating method, Help 137 and 150, the BruControl Import's Heating El
 Electrician."** Any later page or dialog about wiring gets the same words. In a help balloon (the Heating method's) the warning comes
 **first**, with a red warning triangle, in **red bold** words, then the rest of the help (OakBarn Brewery, 2026-11-10, "Heat Method Hover
 Help").
+In **every Help page** the warning shows the same way: red bold words under the red warning triangle (OakBarn Brewery, 2026-11-10:
+"If Possible in any Help use the Red Text and the Icon for any Electricity Can Kill"; "And Oakbarn is fine here as well", so the
+warning keeps its OakBarn Brewery words, an approved OakBarn entry under Rule 11.6). A paragraph that starts with
+"⚠ Electricity can kill" is drawn this way by the Help page (public/help.js).
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -2241,6 +2247,13 @@ its Alarm still shows On. Set in Alarm Widget Properties > Alarm > **Priority**,
 (`""` puts back its Properties' number). `.waiting` (read only) is how many Chain steps wait. *Replaced:* between two of the same
 Kind the newest one played (PR #24). Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
 
+7.19 **Alarm Digital Outputs: an Alarm can switch 2 Devices** (OakBarn Brewery, 2026-11-09: "Ok, we can add that but add 2 Items to
+contol I assume it was one in BruControl", "And if blank those do nothing"). An Alarm Widget (every kind) has **Digital Output 1** and
+**Digital Output 2** (optional; None to start, Rule 18.33). Each picks a Device with an ON / OFF state (a warning light, a horn, a relay;
+a Duty Cycle, Hysteresis, PID or Deadband by its ON / OFF). It goes **ON while the Alarm is active and OFF when the Alarm stops**. A
+blank slot does nothing; a Device that has no ON / OFF state is skipped with a note in the Console. Both programs: the BruControl Import
+puts BruControl's one Digital Output in slot 1 (an Alarm imported before keeps it there too). Help 178.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -2415,6 +2428,8 @@ Help").
 Skynet Panel Help, with BruControl comments added for the Import Help"). A dialog's balloons (Rule 2.38) say the same thing as the Help
 page of that dialog, in the same words, with no BruControl comments (Rule 11.3). The Importer's own hover help is the same, with the
 BruControl comments added (on hold with the Importer Help).
+*Changed 2026-11-10 by Rule 11.8:* the Help and the Hover Help say the same for the same topic, **unless the Help expands on it**; the
+most technical explanations go in the Help, not the Hover Help.
 
 11.5 **Never mention Fritz in any Help** (OakBarn Brewery, 2026-11-10). No Help page, balloon or dialog note names a person, and no
 "(Fritz, date)" note is written in Help. Who asked for something, and when, is kept in these Rules and their Change log (and may stay in
@@ -2440,6 +2455,27 @@ what you see in the dialog. First done: the **Heater Properties** of a Vessel Bu
 (`BM_8_HE_HLT~element_BR`: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
 `BM_700_1W_HLT_BR`; in a Process `HLT_Vessel.BM_8_HE_HLT~element_BR`). A test (test/helpformat.test.js) checks the example still matches
 the sample. The other dialogs follow, one at a time.
+
+11.8 **KISS: Keep It Simple, no clutter** (OakBarn Brewery, 2026-11-10: "Label for DDLB and other field 1 to 2 Words. Use Hover Help for
+Bloviating, not on the Dialog. Plain English in Both Dialog, Dialog DDLB Choices and the Hover Help. If it needs a more geeky explanation
+then maybe but always follow by plain English in Help and Hover Help. Make the Help and Hover Help be the same for the same topic unless
+the Help can Expand More. Most technical Explanations in Help and Not Hover Help."). In both programs:
+  1. **A field's label is 1 or 2 words**, the label of a dropdown too. Nothing else is written on the dialog to explain it (Rule 2.38).
+  2. **Explanations go in the Hover Help**, never on the dialog.
+  3. **Plain English everywhere:** the dialog, its dropdown choices (short, Rule 2.38) and the Hover Help. A technical word may follow
+     the plain words, in ( ) (Rule 2.37).
+  4. **Plain English first, then the technical part.** Where a topic needs a more technical explanation, the plain English comes first,
+     in both the Help and the Hover Help.
+  5. **The same words for the same topic** in the Help and the Hover Help (Rule 11.4), unless the Help expands on it.
+  6. **The most technical explanations go in the Help**, not the Hover Help. Example: how a heater's Hysteresis works has the same plain
+     English explanation in the Hover Help and in the Help, using the dialog's own boxes and values (Rule 11.7); the Help then adds the
+     technical, scientific explanation.
+  7. **The Hysteresis Help is the model** (OakBarn Brewery, 2026-11-10: "Use the Hysteresis Help (Hover and Regular as a Model For
+     Help"). Every Help topic and its Hover Help are written the same way: the Hover Help says in plain English what happens, step by
+     step, with the dialog's own boxes and values from the 3 Vessel 1 Pump sample (Setpoint 150 °F, Offset (−) −1, 149 °F (150 −1));
+     the Help page shows the same Hover Help words first, then a **technical side** part with the science, using the same signs; the
+     electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are built into the Hysteresis
+     Hover Help and Help 150 after the Offset (−) dialog change (Rule 6.19 Direction) is in.
 
 ## 12. Privacy and sharing
 
@@ -3393,6 +3429,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Rule 6.29 changed (OakBarn Brewery, with a table): picking a Hardware Controller sets the On offset and On delay: Optical SSR 0.5 °F and 0 s, Contactor and Mechanical relay 1 °F and 10 s; a Contactor or relay's range is now 1 to 5 °F with an On delay of at least 10 s (was 2 to 5 °F and 60 s). Help 137, 181. Checked against the BruControl Import program: it brings imported offsets into the new range. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29: picking a Hardware Controller sets the On offset (Optical SSR 0.5, Contactor 3, Mechanical relay 3) and, on a Contactor or relay, an On delay of at least 60 s; the range line left the dialog for the balloons. Help 181. Checked against the BruControl Import program: it already brings offsets into range; no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
+- 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
+- 2026-11-10: Rule 11.8 point 7 (OakBarn Brewery): the Hysteresis Help (Hover Help, then the technical side) is the model for all Help. Rule 6.20: every "⚠ Electricity can kill" in a Help page shows in red bold under the red triangle, as in the balloons, and keeps its OakBarn Brewery words. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and its balloons already show the warning in red (shared public/hoverhelp.js). (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
 - 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Inside Vessel Device Layer** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
@@ -3816,5 +3854,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 2.40 point 4 built (OakBarn Brewery's approved wording): gauge settings drawn by Skynet (Dial shape, tick marks, the Skynet Bar, Skynet color styles); the Import maps BruControl gauges to the nearest; Help 152. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 6.27, Board settings and Board Talk (OakBarn Brewery): On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port on each Interface; Board Talk shows every line both ways in plain words and sends a typed line; the Importer keeps Enabled, Baud and Response Timeout; Help 177. (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Added Rule 7.19, Alarm Digital Outputs (OakBarn Brewery): 2 optional Devices go ON and OFF with their Alarm; blank does nothing; the Importer puts BruControl's one in slot 1; Help 178. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
