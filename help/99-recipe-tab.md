@@ -174,7 +174,7 @@ Skynet Water Profiles are there too (Distilled or RO, Balanced, Pale Ale Hoppy, 
 
 ## Hop schedule and alerts
 
-Skynet puts the hops in brew day order, as the OakBarn Hop Warnings did: **Top of Mash, 1st Wort, Start of Boil, then the boil hops (Bitter, Flavor, Aroma), Whirlpool, Dry Hop**. Hops that go in at the same time make one **Hop Group**.
+Skynet puts the hops in brew day order: **Top of Mash, 1st Wort, Start of Boil, then the boil hops (Bitter, Flavor, Aroma), Whirlpool, Dry Hop**. Hops that go in at the same time make one **Hop Group**.
 
 Each boil Hop Group (and each Boil Misc item) gets:
 
