@@ -2,7 +2,7 @@
 
 A **gGlobal** is a variable that every Process can use, and it keeps its value even when the Brain is turned off
 (Help 108 and 118). Besides the **gGlobal** screen (☰ Menu > Variables), a gGlobal can also be made by a line in a
-Process (Skynet Rule 1.24; OakBarn Brewery, 2026-11-06).
+Process (Skynet Rule 1.24).
 
 ## Three ways to write it
 

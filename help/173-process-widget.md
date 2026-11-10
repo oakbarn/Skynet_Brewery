@@ -1,8 +1,7 @@
 # Process Widget
 
 A **Process Widget** puts one **Process** on a Tab, so you can see what it is doing and start or stop it with one click
-(Skynet Rule 1.31, OakBarn Brewery 2026-11-09). It is BruControl's **Script element**: in Skynet a script is called a
-**Process** (Rule 1.4), so this is the Process Widget.
+(Skynet Rule 1.31).
 
 It shows three things:
 
@@ -43,11 +42,3 @@ Hover over a field's name for a short explanation.
   **No Process picked**.
 
 A Process Widget has no value of its own, so it has no Database or .API settings.
-
-## From BruControl
-
-The **BruControl Import** makes each BruControl **Script element** a Process Widget (it used to make a Value Widget). It shows the
-BruControl Script of the same name, which becomes that Process when your Scripts come into Skynet. The variable the Script
-element showed in BruControl is kept with what BruControl had. A Script element BruControl marked as **not user controlled**
-comes in with **When tapped: none**, so a click on it does nothing, as before. See [Help 143](143-brucontrol-importer) and
-[Help 165](165-importer-item-and-widget-pages).

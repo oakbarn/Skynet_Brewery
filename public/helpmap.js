@@ -18,7 +18,7 @@ export function elementTopic(e) {
   // a Temperature Probe, plain, Thermowell or probe tee: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26, Help 138)
   if (e.type === 'temperature' && !e.template && !e.kind) return ['temperature-probe-device-properties'];
   if (e.subtype === 'thermowell') return ['probe-tees-and-thermowells-on-pipes', 'thermowells'];     // Rule 5.30, Help 132
-  if (e.subtype === 'probeTee') return ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
+  if (e.subtype === 'probeTee') return ['pipe-widgets-from-skynet-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
   if (e.subtype === 'propValve') return ['proportional-valves'];      // Skynet KLD20T and the User Defined one (Fritz, 2026-11-03, Help 117)
   // a Motorized Ball Valve, Skynet or User Defined: the Pump's drill-down without a Cover (Fritz, 2026-11-05, Rule 18.23, Help 128)
   if (e.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (!e.template || /^Skynet_Motorized_Ball_Valve_/.test(e.template))) return ['motorized-ball-valve-device-properties'];

@@ -1,7 +1,6 @@
 # Deadband Device
 
-A **Deadband** Device holds a temperature (or any other reading) close to a **Setpoint**, the same way as BruControl's
-Deadband Output (Skynet Rule 6.17). It is gentler and slower than a PID: every **Calc Time** it nudges its output % up or
+A **Deadband** Device holds a temperature (or any other reading) close to a **Setpoint** (Skynet Rule 6.17). It is gentler and slower than a PID: every **Calc Time** it nudges its output % up or
 down by a set step, and when the reading is close to the Setpoint it leaves the output alone.
 
 Add one with **➕ Add > Devices: control outputs > Deadband**, then double-click it for its Properties.
@@ -49,9 +48,3 @@ A Process uses the same names in lower case: `DBand_HLT.setpoint = 152`, `DBand_
 Use a Deadband when the reading answers quickly and starts near the Setpoint, for example holding a fermenter or a
 RIMS tube that is already close. When the reading is far from the Setpoint or answers slowly (a big kettle), use a **PID**:
 a Deadband would keep stepping up while the heat has not shown yet, and overshoot.
-
-## Moving from BruControl
-
-Import brings a BruControl Deadband Output in as a Skynet Deadband with the same settings. BruControl counts its output
-from 0 to 255; Skynet counts it in %, so the Initial Output and the two Drives are changed to % on the way in (the import
-report says so; check them).

@@ -1,7 +1,6 @@
 # Moving something without its pipes, swapping a pump, and Put back
 
-(Skynet Rule 5.37; Fritz, 2026-11-07: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of
-its pipes".)
+(Skynet Rule 5.37.)
 
 ## The pop-up when you grab something with pipes on it
 
@@ -36,8 +35,3 @@ pumps of the same size and place line up.
 where they were. Press it again to go back further (up to 30 steps). Rest the mouse on it to see what it will put back. It starts
 fresh each time you open Edit layout. Changes made in a Properties dialog are not in it; **Exit** without saving still undoes
 everything since the last Save layout.
-
-## Checked with the BruControl Import
-
-The BruControl Import makes Schemas and does not move things on a Tab, so it is not changed. Schemas it makes get the pop-up,
-Swap and Put back in the Panel like any other.

@@ -56,9 +56,3 @@ The Fermentor Control is used by its own name. Its Heat and Cooling are built in
 | `FV1.changeover = 300` | The Changeover wait, in seconds |
 | `FV1.heatdelay`, `FV1.heatminrun`, `FV1.cooldelay`, `FV1.coolminrun` | The On delays and Shortest runs, in seconds |
 | `x = FV1.doing` | What it is doing now (read only) |
-
-## The BruControl Import
-
-BruControl holds a fermentor as two Hysteresis controls on the same probe, one that heats (a plus On offset) and one that cools (a
-minus On offset). The Import makes them ONE Fermentor Control with the same Setpoint and offsets. The two outputs keep their names
-and Ports. Each is listed in the Import notes.

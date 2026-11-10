@@ -16,11 +16,11 @@
 // theme). No imports, so the Brain, the browser and the Importer all read the same list.
 
 export const THEMES = [
-  { key: 'officeBlack', name: 'Office Black', light: false, like: 'BruControl Office 2019 Black', tabBack: '#262626', tabStyle: 'sky_tab_officeBlack',
+  { key: 'officeBlack', name: 'Office Black', light: false, like: 'Office 2019 Black', tabBack: '#262626', tabStyle: 'sky_tab_officeBlack',
     colors: { back: '#1F1F1F', panel: '#262626', box: '#363636', line: '#4A4A4A', text: '#F0F0F0', labels: '#ABABAB', accent: '#3A86D4', accentText: '#FAFAFA' } },
-  { key: 'darkGray', name: 'Dark Gray', light: false, like: 'BruControl Office 2019 Dark Gray', tabBack: '#444444', tabStyle: 'sky_tab_darkGray',
+  { key: 'darkGray', name: 'Dark Gray', light: false, like: 'Office 2019 Dark Gray', tabBack: '#444444', tabStyle: 'sky_tab_darkGray',
     colors: { back: '#383838', panel: '#444444', box: '#545454', line: '#696969', text: '#F4F4F4', labels: '#C8C8C8', accent: '#5FA8F0', accentText: '#101010' } },
-  { key: 'white', name: 'White', light: true, like: 'BruControl Office 2019 White or Colorful', tabBack: '#FAFAFA', tabStyle: 'sky_tab_white',
+  { key: 'white', name: 'White', light: true, like: 'Office 2019 White or Colorful', tabBack: '#FAFAFA', tabStyle: 'sky_tab_white',
     colors: { back: '#EBEBEB', panel: '#FAFAFA', box: '#F0F0F0', line: '#C6C6C6', text: '#262626', labels: '#5E5E5E', accent: '#2B579A', accentText: '#FAFAFA' } },
   { key: 'skynetNight', name: 'Skynet Night', light: false, like: 'the first Skynet look (blue gray with orange)', tabBack: '', tabStyle: 'sky_tab_default',
     colors: { back: '#12161C', panel: '#1B2129', box: '#232B35', line: '#34404D', text: '#E6EBF0', labels: '#8D9AA8', accent: '#E8A33A', accentText: '#1B1305' } },

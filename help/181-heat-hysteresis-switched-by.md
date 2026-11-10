@@ -29,10 +29,4 @@ With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Con
 - **The Brain** never runs a heating Hysteresis outside its range, whatever was saved.
 - Only Hysteresis that **heats** (a plus On offset) has a range. A minus On offset cools and is not checked here.
 
-## The BruControl Import
-
-BruControl does not say what switches a heater, so each imported heating element starts as an **Optical SSR**. A Hysteresis On
-offset outside 0.5 to 3 °F is brought to the nearest end of that range, and the Import notes list each one. If a Contactor or
-Mechanical relay switches it, pick that in its Properties.
-
 See also: [The heating method](150-heating-method), [Predictive Hysteresis](168-predictive-hysteresis).

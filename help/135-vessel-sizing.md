@@ -1,6 +1,6 @@
 # Vessel sizing by gallons
 
-Vessels have their own Rules (Skynet Rules section 19, Fritz 2026-11-05). They apply **only to Vessel Widgets and Vessel Devices**:
+Vessels have their own Rules (Skynet Rules section 19). They apply **only to Vessel Widgets and Vessel Devices**:
 for them they take the place of Rule 2.20 (resize grab points), Rule 1.21 (`.width` and `.height`) and the faint marks of Rule 5.31.
 
 ## Gallons
@@ -21,7 +21,7 @@ User Templates alike, and the number can be changed.
 
 ## Method: Proportional or Diameter
 
-- **Proportional:** the shape is OakBarn Brewery's plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
+- **Proportional:** the shape is the Skynet plain vessel, the **One Gallon start** of **197 x 237** pixels. A bigger vessel keeps
   that Width to Height.
 - **Diameter:** type its **Diameter** and **Height** (inches, or cm for Metric). It is drawn by its **real size**: they give its
   shape (a vessel as wide as it is tall is drawn square) and how big it is. Advertised gallons can be wrong, so the Gallons you type

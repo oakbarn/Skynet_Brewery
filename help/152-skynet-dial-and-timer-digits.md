@@ -1,8 +1,8 @@
 # Skynet Dial and Timer Digits
 
-Skynet draws its own temperature gauge and timer digits (Skynet Rule 2.40; Fritz, 2026-11-07). They are **Skynet's own drawings**,
-made from lines (SVG), so they stay sharp at any size and on phones. BruControl's gauges are paid drawings from another company
-(DevExpress); Skynet never copies their pictures, code or style names.
+Skynet draws its own temperature gauge and timer digits (Skynet Rule 2.40). They are **Skynet's own drawings**,
+made from lines (SVG), so they stay sharp at any size and on phones. Skynet never copies
+another company's pictures, code or style names.
 
 ## The Skynet Dial
 
@@ -41,7 +41,7 @@ A Timer's look is its **Style** ([Timer Widget](92-timer-widget)). A **User Styl
 
 - **Back color**: round the digits panel, under the title bar.
 - **Text Fore color**: the digits. **Text Back color**: the panel behind them.
-- **Frame**: the frame round the panel, from Fritz's own Timer frames: **Rounded corners**, **Square corners**, or **Square top,
+- **Frame**: the frame round the panel, from the Skynet Timer frames: **Rounded corners**, **Square corners**, or **Square top,
   rounded bottom**, with its **Frame color** (any color: Black, Blue, Green, Grey, Orange, Purple, Red, White, Yellow or Custom).
 
 Each Timer also has, in its Properties:
@@ -64,11 +64,3 @@ The same ⬢ holds **Gauge settings** (Skynet Rule 2.40 point 4), the kinds of s
 
 The **Skynet Bar** is a straight gauge: pick **Display > Skynet Bar** (or **Look > Skynet Bar**). It uses the same Lowest, Highest,
 Setpoint, ranges and colors as the Dial, and fills up to the reading. A Process can switch to it with `name.valueType = "Bar"`.
-
-## From BruControl
-
-The BruControl Import gives each BruControl gauge the closest Skynet look: a **round gauge** becomes the **Skynet Dial** and a
-**bar gauge** the **Skynet Bar**, with BruControl's lowest and highest numbers, its large and small tick marks, its shape (full or
-half round) or direction, and its decimals; a **digit gauge** shows **LCD digits**. Each gets the **nearest Skynet color style**
-(BruControl's style name is kept only as a record and never shown). Set the Setpoint in its Properties to get the blue, green and
-red reading.
