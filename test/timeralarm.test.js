@@ -25,3 +25,4 @@ const notes = JSON.stringify(r);
 assert.ok(notes.includes('Timer alarm(s) joined'), 'the notes list what was joined');
 assert.ok(notes.includes('already on'), 'an Alarm already on another Timer is listed to join by hand');
 console.log('timer alarm tests passed');
+await import('./timeformat.test.js');

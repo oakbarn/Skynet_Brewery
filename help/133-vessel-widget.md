@@ -74,11 +74,10 @@ button to the part's own Properties. When the vessel has none, that section is e
 
 **After it is built, only what can really change is in its Properties.** Once the vessel is built (with the Vessel Device Builder,
 or saved on a Tab) its Properties show its Name (✏ Change name), its Type (greyed out), its Label, Visible, Hidden Locked, Label and
-place, and the Heating Element and Thermowell / Probe sections. Those you can change: Label, Interface, Port, Heating method, Setpoint,
-Units and so on. If you put a different Heating Element or Probe in the vessel, pick **Swap for ...** (an existing one, or a new
-one) in its section and press 💾 Save: the old one is taken out of the vessel. If the new one is on **another Port**, the old one is
-**deleted**. If it is on **the same Port** (you changed the hardware, not the wiring), the old one stays on the Tab as a Device of
-its own. Its **Size** can still change: Gallons, Method, Diameter and Height, with the read only **Calculated Volume**, Dead space and Safe
+place, and the Heating Element and Thermowell / Probe sections. Those you can change: Label, Heating method, Setpoint, Units and
+so on. Their **Interface and Port are greyed out for good**: the vessel locks them (Skynet Rule 5.31), and a built in part can't be
+swapped. If the heater or probe itself wears out, put in a new one wired exactly the same way to the same Port; nothing changes in
+Skynet. Its **Size** can still change: Gallons, Method, Diameter and Height, with the read only **Calculated Volume**, Dead space and Safe
 Element Volume (Help: Vessel sizing). Its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can't change, so they are not shown.
 
 **Plugged openings hide their IP.** An Element, Probe or Thermowell plugs its opening, just like an End Cap, so its IP is

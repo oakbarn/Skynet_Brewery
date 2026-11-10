@@ -46,7 +46,12 @@ A Clone is **not used in Processes**. A Process uses the parent's name, and ever
 ## Deleting
 
 - Deleting a Clone deletes only the Clone.
-- Deleting the parent Device deletes its Clones too (the box names them first).
+- Deleting the parent Device asks what you want:
+  - **🗑 Delete the Device and all its Clones**, or
+  - **Make (a Clone) the Device**: one button for each Clone. The Device moves to where that Clone is, on its Tab, and that Clone
+    goes. The Device keeps its name, its Port and its Processes, and pipes joined to that Clone are now joined to the Device. Any
+    other Clones stay Clones of it.
+  - **✖ Cancel** keeps everything.
 - Deleting a Tab deletes the Clones on it, and the Clones of Devices that were on it.
 
 ## Method Clones (Devices with more than one Control Method)
