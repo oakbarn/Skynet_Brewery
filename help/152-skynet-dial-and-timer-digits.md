@@ -50,8 +50,25 @@ Each Timer also has, in its Properties:
 - **Seconds only in the last minute**: on, a Timer counting down shows just the seconds (**45**, **44** ...) once less than one
   minute is left, so the last minute is easy to read.
 
+## Gauge settings: shape, tick marks, the Skynet Bar and color styles
+
+The same ⬢ holds **Gauge settings** (Skynet Rule 2.40 point 4), the kinds of settings most gauge programs have, all drawn by Skynet:
+
+| Setting | What it does |
+|---|---|
+| **Dial shape** | Standard (two thirds round, as before), Full round, or Half round |
+| **Large tick marks** | How many big ticks, each with its number (2 to 21; empty = 6) |
+| **Small tick marks between** | Little ticks between two big ones (0 to 10; empty = none) |
+| **Bar direction** | For the **Skynet Bar**: up and down, or side to side |
+| **Color style** | Skynet Classic (as before), Skynet Dark, Steel, Night Green, Amber, Ice Blue, Fire Red or Paper. It also colors **LCD** and **LED digits** |
+
+The **Skynet Bar** is a straight gauge: pick **Display > Skynet Bar** (or **Look > Skynet Bar**). It uses the same Lowest, Highest,
+Setpoint, ranges and colors as the Dial, and fills up to the reading. A Process can switch to it with `name.valueType = "Bar"`.
+
 ## From BruControl
 
-The BruControl Import gives each BruControl gauge the closest Skynet look: a **round or bar gauge** becomes the **Skynet Dial**, with
-BruControl's lowest and highest numbers and its decimals; a **digit gauge** shows **LCD digits**. Set the Dial's **Setpoint** in its
-Properties to get the blue, green and red reading.
+The BruControl Import gives each BruControl gauge the closest Skynet look: a **round gauge** becomes the **Skynet Dial** and a
+**bar gauge** the **Skynet Bar**, with BruControl's lowest and highest numbers, its large and small tick marks, its shape (full or
+half round) or direction, and its decimals; a **digit gauge** shows **LCD digits**. Each gets the **nearest Skynet color style**
+(BruControl's style name is kept only as a record and never shown). Set the Setpoint in its Properties to get the blue, green and
+red reading.

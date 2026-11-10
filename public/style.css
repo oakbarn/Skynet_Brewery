@@ -216,10 +216,10 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 @media (pointer: coarse) { button { min-height: 40px; } nav#views button { padding: 8px 12px; } }
 
 /* ===== looks ===== */
-.el.look-led { background: #111 !important; border-color: #333; }
-.el.look-led .vl { color: #ff4a2a; font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255, 74, 42, .6); }
-.el.look-lcd { background: #0b1a33 !important; border: 2px solid #1d3b6e; }
-.el.look-lcd .vl { color: #8fd0ff; font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 6px rgba(143, 208, 255, .6); }
+.el.look-led { background: var(--gFace, #111) !important; border-color: #333; }
+.el.look-led .vl { color: var(--gInk, #ff4a2a); font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255, 74, 42, .6); }
+.el.look-lcd { background: var(--gFace, #0b1a33) !important; border: 2px solid #1d3b6e; }
+.el.look-lcd .vl { color: var(--gInk, #8fd0ff); font-family: var(--mono); font-size: 30px; letter-spacing: 3px; text-shadow: 0 0 6px rgba(143, 208, 255, .6); }
 .el.look-dark { background: #000 !important; color: #fff; border-color: #222; }
 .el.look-dark .vl { color: #fff; font-weight: 400; }
 .el.look-dark .nm { color: #bbb; }

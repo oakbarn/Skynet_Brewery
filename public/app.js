@@ -9,6 +9,7 @@ import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
 import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
+import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
@@ -2481,8 +2482,10 @@ function fillEl(n, e0) {
     if (ovl) fitOverlay(n, ov, img, stretchPic(e, v));
   }
   if (e.type === 'label') n.classList.add('text');
-  const dial = e.look === 'dial' && (DIAL_TYPES.has(e.type) || isHeatElem(e));
+  const dial = (e.look === 'dial' || e.look === 'bar') && (DIAL_TYPES.has(e.type) || isHeatElem(e));      // the Skynet Dial or Bar (Rule 2.40)
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
+  { const gs = ['led', 'lcd'].includes(e.look) ? gaugeStyle(e) : null;      // a digit gauge's color style (Rule 2.40 point 4)
+    if (gs) { n.style.setProperty('--gFace', gs.face); n.style.setProperty('--gInk', gs.ink); } else { n.style.removeProperty('--gFace'); n.style.removeProperty('--gInk'); } }
   n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
@@ -5467,7 +5470,7 @@ function useTabProfile(e) {
   if (type === 'gauge') { if (p.digits) e.digits = p.digits; if (p.precision !== undefined) e.precision = p.precision; }
 }
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
-const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : type === 'dial' ? 'dial' : 'normal';
+const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : type === 'dial' ? 'dial' : type === 'bar' ? 'bar' : 'normal';
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
 // Fritz, 2026-11-05 (Rule 18.27): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
 // already on a Tab keep working, and a Picture Widget that turns on with None is a still picture)
@@ -6792,8 +6795,17 @@ const DIAL_FIELDS = [['_dlh', 'Skynet Dial (Look = Skynet Dial)', 'head'],
   ['dialCool', 'Cooler range', 'num', null, false, false, { tip: DIAL_TIP.cool }], ['dialHot', 'Hotter range', 'num', null, false, false, { tip: DIAL_TIP.hot }],
   ['dialColdColor', 'Cold color', 'color', null, false, false, { tip: DIAL_TIP.cold }], ['dialOkColor', 'OK color', 'color', null, false, false, { tip: DIAL_TIP.ok }],
   ['dialHotColor', 'Hot color', 'color', null, false, false, { tip: DIAL_TIP.hotc }]];
-const DIAL_POP = { title: 'Skynet Dial settings', fields: DIAL_FIELDS.slice(1) };
-const LOOKS = ['normal', 'led', 'lcd', 'dark', 'button', 'indicator', ['dial', 'Skynet Dial']];
+// Gauge settings (Rule 2.40 point 4): the kinds of settings every gauge program has, drawn by Skynet
+DIAL_TIP.shape = 'The shape of the Skynet Dial: Standard (two thirds round), Full round, or Half round.';
+DIAL_TIP.major = 'Large tick marks, each with its number (2 to 21). Empty = 6.';
+DIAL_TIP.minor = 'Small tick marks between two large ones (0 to 10). Empty = none.';
+DIAL_TIP.orient = 'The Skynet Bar: up and down, or side to side.';
+DIAL_TIP.style = 'A Skynet color style for the Dial, the Bar, or LCD and LED digits: the color behind it and of its numbers. Skynet Classic = the look it has always had.';
+DIAL_FIELDS.push(['_gsh', 'Gauge settings (Dial and Bar)', 'head'], ['dialShape', 'Dial shape', 'sel', DIAL_SHAPES, false, false, { tip: DIAL_TIP.shape }],
+  ['dialMajor', 'Large tick marks', 'num', null, false, false, { tip: DIAL_TIP.major }], ['dialMinor', 'Small tick marks between', 'num', null, false, false, { tip: DIAL_TIP.minor }],
+  ['barOrient', 'Bar direction', 'sel', BAR_ORIENTS, false, false, { tip: DIAL_TIP.orient }], ['gaugeStyle', 'Color style (also LCD and LED digits)', 'sel', GAUGE_STYLES.map(g => [g[0], g[1]]), false, false, { tip: DIAL_TIP.style }]);
+const DIAL_POP = { title: 'Skynet Dial, Bar and gauge settings', fields: DIAL_FIELDS.slice(1) };
+const LOOKS = ['normal', 'led', 'lcd', 'dark', 'button', 'indicator', ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
 const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px; empty = Default)', 'num'], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
   ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
   ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
@@ -7095,7 +7107,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   CAL_ROW(it, x),
   [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
-const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
+const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
 function probeDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   it._flip = flipOf(it);
