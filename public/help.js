@@ -55,6 +55,12 @@ function inline(s) {
   return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${esc(codes[i])}</code>`);
 }
 
+// A paragraph that starts with "⚠ Electricity can kill" is the electrical warning (Rule 6.20): red bold words under a red triangle,
+// as in the hover help balloons (OakBarn Brewery, 2026-11-10: "in any Help use the Red Text and the Icon for any Electricity Can Kill")
+export function warnText(s) {
+  const m = /^(\*\*)?\s*⚠\s*(.*)$/s.exec(String(s).trim());
+  return m && /^(\*\*)?\s*Electricity can kill/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
+}
 export function markdown(text) {
   const lines = String(text).replace(/\r\n?/g, '\n').split('\n'), out = [];
   let i = 0;
@@ -76,7 +82,8 @@ export function markdown(text) {
     if (l.startsWith('>')) {
       const q = [];
       while (i < lines.length && lines[i].startsWith('>')) q.push(lines[i++].replace(/^>\s?/, ''));
-      out.push(`<blockquote>${markdown(q.join('\n'))}</blockquote>`); continue;
+      const inner = markdown(q.join('\n'));
+      out.push(inner.startsWith('<div class="helpWarn">') ? inner : `<blockquote>${inner}</blockquote>`); continue;      // a warning stands alone
     }
     if (/^\s*\|.*\|\s*$/.test(l) && /^\s*\|?[\s:|-]+\|?\s*$/.test(lines[i + 1] ?? '') && lines[i + 1].includes('-')) {
       const cells = r => r.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map(c => inline(c.trim().replace(/\\\|/g, '|')));
@@ -100,7 +107,8 @@ export function markdown(text) {
     const para = [];
     while (i < lines.length && lines[i].trim() && !isBlock(lines[i])) para.push(lines[i++].trim());
     if (!para.length) para.push(lines[i++].trim());
-    out.push(`<p>${inline(para.join(' '))}</p>`);
+    const w = warnText(para.join(' '));
+    out.push(w ? `<div class="helpWarn"><span class="hhTri"></span>${inline(w)}</div>` : `<p>${inline(para.join(' '))}</p>`);
   }
   return out.join('\n');
 }
