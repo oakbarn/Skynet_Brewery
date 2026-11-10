@@ -604,15 +604,6 @@ function vpFields(it, k, d) {
     ...(probe ? [[k + '_ptk', `${d.name}: probe type`, 'sel', tempKinds().map(([a, b]) => [a, b]), true]] : []),
     ...(!kind ? [] : ow ? [[k + '_pidx', `${d.name}: OneWire probe number`, 'probe']] : [[k + '_pin', `${d.name}: Available Ports / Pins`, 'pin', 'vp_' + k]])];
 }
-// an integrated Vessel Device's part sections: the free Ports on each part's Interface (its own Port too)
-function vpxPinLists(w, g) {
-  for (const e of draft.elements.filter(q => q.integratedIn === g.id && isVPart(q))) {
-    const k = e.integratedAs.slice(3), dev = w[`vpx_${k}_device`] ?? e.device;
-    const pins = dev ? freePins({ ...e, device: dev }, draft.elements, S.config.devices, e.type === 'temperature' && ANALOG_TEMP.includes(e.sensor)) : [];
-    $('#pins-vpx_' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-vpx_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: dev }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
-  }
-}
 // the Available Ports lists of its parts: the free pins on its Interface that fit each one (two parts can't share a pin)
 function vpPinLists(w, g) {
   const own = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), els = draft.elements.filter(e => !own.includes(e));
@@ -7335,52 +7326,17 @@ function vpPartFields(it, item) {
     : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
     ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }]];
 }
-// an integrated Vessel Device's part sections, saved onto the parts; the swaps to do once the dialog is closed: [spot, part, new]
+// an integrated Vessel Device's part sections, saved onto the parts (never their Interface or Port, Rule 5.31; no swapping)
 function vpxApply(g, x) {
-  const swaps = [], none = v => v === undefined || v === null || v === '';
+  const none = v => v === undefined || v === null || v === '';
   for (const e of draft.elements.filter(q => q.integratedIn === g.id && isVPart(q))) {
-    const k = e.integratedAs.slice(3), p = `vpx_${k}_`; if (!(p + 'label' in x) && !x[p + 'swap']) continue;
-    if (x[p + 'swap']) { swaps.push([k, e.name, x[p + 'swap']]); continue; }
+    const k = e.integratedAs.slice(3), p = `vpx_${k}_`; if (!(p + 'label' in x)) continue;
     const lab = String(x[p + 'label'] ?? '').trim(); if (!lab) throw new Error(`${e.name}: its Label can not be blank (Rule 18.15)`);
     e.label = lab;      // its Interface and Port are never changed (OakBarn Brewery, 2026-11-09, Rule 6.1)
     if (e.vpKind === 'element') { if (!none(x[p + 'heatMethod'])) e.heatMethod = x[p + 'heatMethod']; if (none(x[p + 'input'])) delete e.input; else e.input = x[p + 'input']; if (none(x[p + 'target'])) delete e.target; else e.target = +x[p + 'target']; }
     else { if (!none(x[p + 'units'])) e.units = x[p + 'units']; if (none(x[p + 'offset'])) delete e.offset; else e.offset = +x[p + 'offset']; }
   }
-  return swaps;
 }
-// a swap: the old part is taken out of the vessel and stays on its Tab as a Device of its own; the one picked (or a new one) is built in
-function vpxRelease(g, e) {
-  for (const k of ['integratedIn', 'integratedAs', 'vpKind']) delete e[k];
-  Object.assign(e, { workspace: g.workspace, x: Math.round((g.x || 0) + (g.w || 200) + 20), y: Math.round(g.y || 0) });
-}
-// the old part after a swap (OakBarn Brewery, 2026-11-09: "Delete if replace with a different Port"): on another Port it is deleted; on the
-// same Interface and Port (the hardware moved, the Port did not) it stays as a Device of its own. Whatever read it now reads the new one.
-const vpSamePort = (a, b) => a.device === b.device && String(a.channel ?? '') === String(b.channel ?? '') && String(a.probeIndex ?? '') === String(b.probeIndex ?? '');
-function vpxRetire(g, old, e) {
-  for (const q of draft.elements) if (q.input === old.name) q.input = e.name;
-  if (vpSamePort(old, e)) { vpxRelease(g, old); return `${old.name} is on the same Port, so it stays as a Device of its own`; }
-  draft.elements = draft.elements.filter(q => q !== old);
-  return `${old.name} was on another Port, so it is deleted`;
-}
-async function vpxSwap(gid, swaps) {
-  for (const [k, name, to] of swaps) {
-    const g = draft?.graphics.find(q => q.id === gid), old = draft?.elements.find(q => q.name === name); if (!g || !old) continue;
-    const kind = old.vpKind; g.vbWant ||= {};
-    const swap = e => { const said = vpxRetire(g, old, e); g.vbWant[k] = kind; vbAttach(g, k, kind, e); toast(`${e.name} is built into ${g.label || g.name}; ${said}. Save layout keeps it.`, false, 8000); };
-    if (to !== VPX_NEW) { const e = draft.elements.find(q => q.name === to); if (e) swap(kind === 'element' ? makeInstance(g, e) : e); continue; }
-    vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); swap(e); };
-    try {
-      if (kind === 'element') await addThing(...ELEMENT.slice(1));
-      else { const rows = amGroup('Devices: temperature'); const i = await choose('Pick the probe type', rows.map((r, n) => [r[0], n])); if (i === undefined) continue; await addThing(...rows[i].slice(1)); }
-    } finally { vbAfterAdd = null; }
-  }
-  renderWs();
-}
-// the Vessel Device's own Properties: a section for each Heating Element and for its Thermowell / Probe, showing that part's main
-// Properties and a button to its own Properties; with none built in, the section is there with everything greyed out and empty
-const VP_SECS = [['element', 'Heating Element', e => e.vpKind === 'element'], ['probe', 'Thermowell / Probe', e => e.vpKind === 'probe' || e.vpKind === 'thermowell']];
-const VPX_NEW = '\0new';
-const vpFits = kind => e => !e.integratedIn && !isMfPart(e) && (kind === 'element' ? isHeatElem(e) : e.type === 'temperature');
 function vpSections(it, edit = false) {
   const els = (draft || S.config).elements.filter(e => e.integratedIn === it.id && isVPart(e)), out = [];
   const open = e => () => {
@@ -7399,18 +7355,15 @@ function vpSections(it, edit = false) {
       if (edit && e) {      // integrated: its Heating Element or Probe can still be changed, or swapped for another (OakBarn Brewery, 2026-11-09)
         const x = `vpx_${spot}_`, ow = e.type === 'temperature' && isOneWire(e), what = kind === 'element' ? 'Heating Element' : 'Temperature Probe';
         const pre = { label: e.label ?? '', device: e.device ?? '', [ow ? 'pidx' : 'channel']: ow ? e.probeIndex ?? '' : e.channel ?? '',
-          ...(kind === 'element' ? { heatMethod: startMethod(e), input: e.input ?? '', target: e.target ?? '' } : { units: e.units || '°F', offset: e.offset ?? '' }), swap: '' };
+          ...(kind === 'element' ? { heatMethod: startMethod(e), input: e.input ?? '', target: e.target ?? '' } : { units: e.units || '°F', offset: e.offset ?? '' }) };
         for (const [a, b] of Object.entries(pre)) if (it[x + a] === undefined) it[x + a] = b;
-        const swapping = !!it[x + 'swap'];
         const temps = [['', '(none)'], ...(draft || S.config).elements.filter(q => q.type === 'temperature').map(q => [q.name, q.name])];
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
-          [x + 'swap', `Built in ${what}`, 'sel', [['', `${e.name} (keep it)`], ...(draft || S.config).elements.filter(vpFits(kind)).map(q => [q.name, `Swap for ${q.label ? q.label + ': ' : ''}${q.name}`]), [VPX_NEW, `➕ Swap for a new ${what}…`]], true],
-          ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
-            : [[x + 'label', '1. Label', 'text'], ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
+          ...[[x + 'label', '1. Label', 'text'], ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
               ro('n', '4. Name', e.name),
               ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
-              [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]])];
+              [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]]];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
         ro('l', '1. Label', e?.label), ro('i', '2. Interface (board)', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
@@ -8827,8 +8780,8 @@ async function editItem(kind, id) {
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
-  const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); vpxPinLists(x, item); };
-  if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); vpxPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
+  const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); };
+  if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
   const mf = isMf(item), mfRefresh = () => { };       // a Valve Tee or Supply Manifold (Rule 5.35)
   if (mf) Object.assign(work, mfWork(item));
   if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
@@ -8927,7 +8880,7 @@ async function editItem(kind, id) {
         if (isVDev(item) && vpLocked(item)) {       // built and saved: its IPs, parts and HERMS coil stay as they are (no way back)
           for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;
           if (item.herms) work.herms = item.herms; else delete work.herms;
-          vpApply = () => { const swaps = vpxApply(item, vpx); if (swaps.length) setTimeout(() => vpxSwap(item.id, swaps), 0); };
+          vpApply = () => vpxApply(item, vpx);
         } else if (isVDev(item)) {
           const hs = HERMS_SIDES[vp.vHerms];
           if (hs) { work.herms = vp.vHerms; for (const k of hs) if (work.ports[k]) work.ports[k].installed = true; } else delete work.herms;
@@ -13110,7 +13063,7 @@ function vdevDone(it) {
   return [['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['name', 'Name', 'lockname'], ['vtype', 'Type', 'ro', it.vtype || ''], ['label', 'Label (the only text on it; never blank)', 'text'],
     ...vSizeFields(it),       // Gallons and Size (OakBarn Brewery, 2026-11-09: "Both"), Rule 18.31
-    ['_vdl', 'Integrated Vessel Device: its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can not change. Its Heating Elements and Temperature Probe can: change them below, or swap one for another (it was changed on the vessel).', 'note'],
+    ['_vdl', 'Integrated Vessel Device: its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can not change, and neither can the Interface and Port of its Heating Elements and Temperature Probe (Rule 5.31). Their other settings can change below. New hardware wired the same way to the same Port needs no change here.', 'note'],
     ...vpSections(it, true), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
