@@ -31,7 +31,7 @@ export const PROCESS_TIPS = {
   label: 'What it is called on the Tab, for example Mash Steps. The ⬢ beside it sets its font, size and colors.',
   name: 'Made by Skynet from the Label and the Tab (wgt_PRC_Label_TabID, Rule 3.14). It must be unique.',
   process: 'The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.',
-  type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2). It is BruControl\'s Script element.',
+  type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
 };
 
 // A Process got a new name with ✏ Change name (Rule 3.11): every Process Widget that showed it follows (server.js). Returns how many.

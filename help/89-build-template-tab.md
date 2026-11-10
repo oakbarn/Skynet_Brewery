@@ -38,5 +38,5 @@ Press **💾 Save** (at the top or the bottom). The Add Device lists use the cha
 ## Skynet Templates and locking
 
 While Skynet is still being built, every Template made or changed here is a **Skynet Template**. A change to a shipped one is
-kept on this Brain until it is sent in to GitHub. When Fritz says the Templates are done, they are **locked**: then they can only
+kept on this Brain until it is sent in to GitHub. When the Skynet Templates are done, they are **locked**: then they can only
 be cloned, and this tab makes User Bundled Templates. Shipped Skynet Templates are never deleted.

@@ -1,7 +1,7 @@
 # Precise heating: hold a temperature to 0.1 degree
 
 **Precise** is a heating method of the Heating Element, next to On/Off, Duty Cycle, Hysteresis, PID and Deadband (Skynet Rule
-6.19; Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"). It is for jobs
+6.19). It is for jobs
 where a normal PID wanders: a still's column, a sous-vide water bath, a mash that must not drift.
 
 ## What decides how close it can hold
@@ -69,8 +69,3 @@ Start with Kp 10, Ki 0.1, Kd 0, Smoothing 10 s, Output window 2 s.
 - It swings up and down around the Setpoint: lower **Kp**, or raise **Smoothing**.
 - It sits a little below the Setpoint: raise **Ki** a little, or set the **Hold output**.
 - It overshoots on arrival: lower **Max output %**, or set the **Hold output**.
-
-## Coming from BruControl
-
-BruControl has no Precise method, so the BruControl Import brings a PID in as **PID**, as it was. Precise and the two-point
-calibration are Skynet's own: after the Import, tick **Precise** in the Heating Element's Properties and calibrate its probe.

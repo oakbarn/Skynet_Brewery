@@ -25,7 +25,3 @@ Make a **gGlobal** of the Kind that fits what it holds:
 Use **➕ New gGlobal** on **☰ Menu > Variables**, or a `new gV gV_Name` line in a Process (see
 [Make a gGlobal in a Process](145-make-a-gglobal-in-a-process)), and leave its **Database** and **.API** Off, so nothing
 outside the Processes can see it. A gGlobal is never on a Tab.
-
-## BruControl Globals
-
-Globals brought in by the BruControl Import are set one at a time later, in the Importer's globals questions.

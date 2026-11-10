@@ -48,7 +48,7 @@ On the Pi, in the panel folder:
 
 ```
 node tools/reset-password.js            (lists the users)
-node tools/reset-password.js Fritz      (asks for a new password for Fritz)
+node tools/reset-password.js Brewer      (asks for a new password for the user Brewer)
 sudo systemctl restart brewpanel
 ```
 

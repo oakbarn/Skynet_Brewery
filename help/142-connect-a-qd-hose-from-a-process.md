@@ -1,7 +1,7 @@
 # Connect a QD hose from a Process
 
 On Brew Day the same hose is often moved from vessel to vessel. A Process can say where the **Quick Disconnect hose** (Help 127)
-goes next, and then wait until a person has really put it there (Skynet Rule 5.34; Fritz, 2026-11-06).
+goes next, and then wait until a person has really put it there (Skynet Rule 5.34).
 
 ## The line
 

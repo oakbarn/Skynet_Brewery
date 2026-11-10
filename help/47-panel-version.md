@@ -45,6 +45,6 @@ Nothing has to be changed for a normal personal repository. If the **Panel versi
 
 You can also run it by hand: **Actions > Panel version > Run workflow**.
 
-## Small icon or text box (Fritz, 2026-10-30)
+## Small icon or text box
 
 On the Menu Bar the version is a small text box. **Click it** and it becomes a small 🏷 icon, so it takes little space. **Click the 🏷** and the text box with the version comes back. Each browser remembers which one you picked. Hover over the 🏷 to read the version without opening it.

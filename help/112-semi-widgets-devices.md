@@ -1,7 +1,7 @@
 # Semi_Widgets_Devices
 
 **Semi_Widgets_Devices** are a class between a Widget and a Device. Like a Widget they live only in the app: no board, no
-pin (Rule 1.2). Like a Device they have an **ON / OFF state** (`.state`, true or false). (Fritz, 2026-11-02, Rule 1.20)
+pin (Rule 1.2). Like a Device they have an **ON / OFF state** (`.state`, true or false). (Rule 1.20)
 
 | Semi_Widgets_Device | What it does | Device controlled |
 |---|---|---|
@@ -70,8 +70,3 @@ if led_HLT == true then ...
 A Semi_Widgets_Device can have **.API** like any Widget (Help: *Database and API*). When it has a Device controlled, an outside
 program may change it only if **that Device's own .API is Get and Put** too, so nobody gets around the Device's setting through a
 Switch. `.device_controlled` can never be changed from outside.
-
-## From BruControl
-
-The BruControl Import turns each **Toggle Switch** into a Boolean Widget. On its Switches page, **Becomes** picks which one
-(Switch to start), and **Linked Device** can link it to one of your imported Devices with an ON / OFF state.

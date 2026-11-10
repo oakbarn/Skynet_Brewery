@@ -1,6 +1,6 @@
 # Pipe fittings and Manual Valves
 
-OakBarn Brewery, 2026-10-28: pipe fittings are kept simple, and a Manual Valve is a Widget of its own. This works the same on the 🔨 Build Tab and on every Tab.
+pipe fittings are kept simple, and a Manual Valve is a Widget of its own. This works the same on the 🔨 Build Tab and on every Tab.
 
 ## Pipe fittings
 

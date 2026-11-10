@@ -1,8 +1,7 @@
 # Valve Tees and Supply Manifolds
 
 A **Valve Tee** is a TC 1.5 Long Tee with a valve built into its branch. A **Supply Manifold** is two or three of them joined end to
-end, the way many home brewers build a manifold to send liquid from one source to several places (Skynet Rule 5.35; Fritz,
-2026-11-06).
+end, the way many home brewers build a manifold to send liquid from one source to several places (Skynet Rule 5.35).
 
 | Fitting | Tees | Valves | IPs |
 | --- | --- | --- | --- |
@@ -78,6 +77,6 @@ Each valve is drawn with the same TC 1.5 ferrules as the tees: the top one is cl
 valve's IP. Dropped on a straight pipe in Edit layout, its run goes along the pipe and the pipe is cut in two, one piece on each open
 end, the same as a tee. It keeps its own size, so it has no Autosize to pipe.
 
-**Its size** (Skynet Rule 5.36, Fritz, 2026-11-07): it now sizes to its pipes like a tee. Its tees take the size most of the pipes
+**Its size** (Skynet Rule 5.36): it now sizes to its pipes like a tee. Its tees take the size most of the pipes
 and hoses on its IPs have (a tie takes the bigger), and its valves grow or shrink with it. With no pipe on it, it takes the Default pipe size (☰ Menu > Default settings, [Help 155](155-default-settings)).
 This replaces "It keeps its own size, so it has no Autosize to pipe" above.
