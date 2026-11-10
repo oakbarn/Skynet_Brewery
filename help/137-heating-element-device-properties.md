@@ -18,7 +18,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
    - **Path** (a Skynet element: greyed out), or **Path (off)** and **Path (on)** (a User Defined one).
    - **Orientation** (Right or Left) and, on the same line, **Toggle** (Toggle to start, or Push Button: on only while held; [Help 179](179-heating-element-look)).
-   - **Overlay** (**On = Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
+   - **Overlay** (**Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
@@ -81,12 +81,12 @@ What the balloons say:
 | **Device Type** | **HE**, a Heating Element. |
 | **Toggle** | Toggle: one click turns it On or Off at once, in Hysteresis, holding 150 °F. |
 | **Current Method** | **Hysteresis**: on below its Setpoint of 150 °F, off at it. |
-| **Switched by** | **Optical SSR**, so its On offset of 1 °F is in range (0.5 to 3 °F, Rule 6.29). |
+| **Hardware Controller** | **Optical SSR**, so its Offset of -1 °F is in range (-0.5 to -3 °F, Rule 6.29). |
 | **Enabled** and **Control Method** | Hysteresis, with Duty Cycle and PID switched on too: four balloons, Direct, Duty Cycle, Hysteresis and PID. |
 | **Temperature Probe** | `BM_700_1W_HLT_BR`, the DS18B20 probe built into the same vessel. |
 | **Setpoint** | **150** °F. |
-| **On offset** | **1**: it turns on at 149 °F and off at 150 °F. |
-| **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 60. |
+| **Offset (-)** | **-1**: it turns on at 149 °F (150 - 1) and off at 150 °F. |
+| **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 10. |
 | **Predictive** | On: if the water keeps warming half a degree after it turns off, it turns off half a degree under 150 °F. |
 
 A Process calls a Device built into a Vessel Device by the vessel's name and its own:
