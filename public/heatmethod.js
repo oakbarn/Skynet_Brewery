@@ -155,7 +155,7 @@ export function heatHysProblem(el, probe, offset = el?.onOffset ?? 1, delay = el
   if (!isHeatElem(el) || !allowedMethods(el).includes('hysteresis')) return null;
   const o = Number(offset), d = Number(delay) || 0, r = heatHysRange(el, probe), who = el.name || 'This Heating Element';
   if (Number.isFinite(o) && o >= 0 && (o < r.min || o > r.max))
-    return `${who} (Hardware Controller: ${r.word}): its Hysteresis On offset must be ${r.min} to ${r.max} ${r.u} (Rule 6.29). It is ${o}.`;
+    return `${who} (Hardware Controller: ${r.word}): its Hysteresis Offset (-) must be -${r.min} to -${r.max} ${r.u} (Rule 6.29). It is ${-o}.`;
   if (Number.isFinite(o) && o >= 0 && d < r.delay)
     return `${who} (Hardware Controller: ${r.word}): its Hysteresis On delay must be at least ${r.delay} seconds, so it does not wear out (Rule 6.29). It is ${d}.`;
   return null;
