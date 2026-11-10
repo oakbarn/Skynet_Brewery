@@ -6,6 +6,8 @@ Both use the same plain-text protocol: one command per line, ending with a newli
 - **Ethernet:** TCP port 4100. A Mega with a W5500 / W5100 Ethernet shield (`USE_ETHERNET 1` in the Mega sketch), or an ESP32 board with an Ethernet jack running the bridge sketch with `USE_ETHERNET 1`. Add it on the Devices page as **Board on Ethernet** with its IP address.
 - **ESP32 over WiFi:** TCP port 4100. The ESP32 can bridge to a Mega on its second serial port. The included sketch does this.
 
+The baud and the network port can be changed in the Interface's **Board settings** (Rule 6.27) to match a board running another program. **Board Talk** (💬 on the Devices page) shows every line below as it is sent and received, in plain words, and sends a line you type (Help 177).
+
 Connections are ranked by board (Help page 69, `public/links.js`). Arduino Mega: 1 USB best, 2 Ethernet OK (depends on the network), 3 WiFi through an ESP32 bridge poor. ESP32: USB best, Ethernet good, WiFi good as long as nothing heats on it. A heating Device (element, gas valve, igniter, heat pad, PID / Hysteresis / Duty Cycle output) on Ethernet or WiFi is allowed with a warning. On every link, the board turns all outputs off if it hears nothing for the Interface's **lost link delay** (Devices page, 3 to 600 s, default 10), sent as `CFG WD`.
 
 ## Server → device
