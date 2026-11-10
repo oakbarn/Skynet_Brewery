@@ -6509,7 +6509,7 @@ const VOLT_TIP = 'Measured volts (Rule 6.24): set the output to a few settings (
 const VOLT_FIELD = (x = {}) => ['voltTable', 'Measured volts (its setting, the volts you measured: one pair per line)', 'pairs', null, false, false, { tip: VOLT_TIP, ...x }];
 // Predictive Hysteresis (OakBarn Brewery, 2026-11-09, Rule 6.23): on unless switched off; lib/control.js _coast
 const PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often: safe for a compressor or a pump. On for every Hysteresis; switch it off for the plain way.';
-const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive (no overshoot)', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
+const PREDICTIVE_FIELD = (x = {}) => ['predictive', 'Predictive', 'bool', true, false, false, { tip: PREDICTIVE_TIP, ...x }];
 // A box the program or the board needs to work can't be left blank (Rule 18.33, OakBarn Brewery 2026-11-09: "If something is needed
 // for something to work, like a Hall Effect Flow Meter, that field cannot become blank"): blank, it gets Rule 18.28's pop-up at once,
 // so it is filled in or the dialog is Cancelled. The Label, Interface and Port may still be used.
