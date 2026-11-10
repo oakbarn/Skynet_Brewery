@@ -1,6 +1,6 @@
 # Cloned Devices
 
-In BruControl a Device could sit on only one worksheet, so showing the same pump on two screens took extra code and globals. In Skynet a Device can be shown on more than one Tab with a **Clone**.
+A Device can be shown on more than one Tab with a **Clone**.
 
 A Clone is **the same Device**, not a copy. It shows what its parent (the Device it was cloned from) shows, and tapping it is tapping the parent:
 

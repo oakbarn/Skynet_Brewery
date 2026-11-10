@@ -1,6 +1,6 @@
 # Pipe angles and upright kettles
 
-Fritz, 2026-11-02: pipes are drawn the way real hard pipe is put together, and kettles always stand upright. This works the same on the 🔨 Build Tab and on every Tab.
+pipes are drawn the way real hard pipe is put together, and kettles always stand upright. This works the same on the 🔨 Build Tab and on every Tab.
 
 ## Pipes run Horizontal, Vertical or 45
 

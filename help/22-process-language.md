@@ -1,18 +1,18 @@
 # Process language and steps
 
-Processes are now written the way most programming languages work. Old BruControl lines still run, and the panel rewrites them in the new style when you **Save** a Process or **Import** a BruControl file. A line is only rewritten when the new line means exactly the same thing, so nothing changes what a Process does.
+Processes are now written the way most programming languages work.
 
 ## The name alone is the main value
 
 Write the name of a Device or Widget on its own. You never need `value`, `state` or `active`.
 
-| New style | BruControl style (still works) |
-|---|---|
-| `Pump_Red = true` | `"Pump_Red" state = true` |
-| `alm_StrikeSpargeMash_ALARM = true` | `"alm_StrikeSpargeMash_ALARM" active = true` |
-| `Kettle_SetPoint = 185.5` | `"Kettle_SetPoint" value = 185.5` |
-| `if Kettle_SetPoint == 185.5` | `if "Kettle_SetPoint" value == 185.5` |
-| `wait tm_Mash <= 00:00:00` | `wait "tm_Mash" value <= 00:00:00` |
+```
+Pump_Red = true
+alm_StrikeSpargeMash_ALARM = true
+Kettle_SetPoint = 185.5
+if Kettle_SetPoint == 185.5
+wait tm_Mash <= 00:00:00
+```
 
 The main value of each kind:
 
@@ -120,7 +120,7 @@ if (vCount < 3 && !alm_Hops) {
 
 The `{` can also go on a line of its own, under the `if` or `else` (the way C# is often written). Every `{` needs its `}`, and the Process check tells you the line when one is missing.
 
-You can mix both styles in one Process. Old Processes and BruControl imports keep working as they are, and **Save** never changes one style into the other.
+You can mix both styles in one Process. **Save** never changes one style into the other.
 
 ## Codes inside text
 

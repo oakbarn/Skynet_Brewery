@@ -2323,6 +2323,42 @@ PR #16)
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
 PR #57)
 
+11.3 **BruControl differences are only in the Importer Help** (OakBarn Brewery, 2026-11-10: "BruControl Differences only in the
+Importer Help. Skynet Help and Hover Help take all references to Brucontrol Out. They can be added from the Skynet Pane Help when we
+update it for the Importer Help so keep the extracted help in a Sand Box."; "Hold off on the Import Help until we finish the SkyPanel
+Help").
+  - **Skynet Panel Help and Hover Help say nothing about BruControl:** no comparisons ("like BruControl's ..."), no "From BruControl"
+    sections, no BruControl words for things, no history of how BruControl did it. A Panel page may only **name** the Import screen
+    or the BruControl Import program where a Panel screen works with it (Help 1, 44 and 67), with no differences.
+  - **Nothing taken out is lost:** every BruControl sentence and section taken out is kept in `Sandbox/help/BruControl_Help_Extract.md`,
+    with where it was and what is there now. It is the starting point of the Importer Help.
+  - **The Importer Help** (Help 8 for the Panel's Import screen, Help 143 and 165) is the Skynet Panel Help with the BruControl comments
+    added. It is **on hold until the Skynet Panel Help is finished**.
+  - **A BruControl Read Me:** maybe one Read Me document in the Skynet Panel for BruControl users. It waits until the Import is done
+    (Rule 14.3).
+
+11.4 **Hover Help is the same as the Skynet Panel Help** (OakBarn Brewery, 2026-11-10: "The Hover Help will be the exact same as the
+Skynet Panel Help, with BruControl comments added for the Import Help"). A dialog's balloons (Rule 2.38) say the same thing as the Help
+page of that dialog, in the same words, with no BruControl comments (Rule 11.3). The Importer's own hover help is the same, with the
+BruControl comments added (on hold with the Importer Help).
+
+11.5 **Never mention Fritz in any Help** (OakBarn Brewery, 2026-11-10). No Help page, balloon or dialog note names a person, and no
+"(Fritz, date)" note is written in Help. Who asked for something, and when, is kept in these Rules and their Change log (and may stay in
+code comments). Where Help needs to say whose a drawing is, it says **Skynet** (the Skynet drawings, the Skynet Timer frames).
+
+11.6 **OakBarn Brewery entries are few, and approved** (OakBarn Brewery, 2026-11-10: "Oakbarn Entries should be limited and approved").
+"OakBarn Brewery" is written in Help or a balloon only where OakBarn Brewery has approved it. A dated "(OakBarn Brewery, date)" note is
+not written in Help (as in Rule 11.5). Approved so far: the electrical warning (Rule 6.20) and the GitHub address (github.com/oakbarn).
+The others found on 2026-11-10 wait for OakBarn Brewery's word (thread "Set the Help format rules").
+
+11.7 **Hover Help examples use the entries of their own dialog in the 3 Vessel 1 Pump sample** (OakBarn Brewery, 2026-11-10: "Have the
+examples in the Hover Help use the Properties and Entries in the Dialog they are on in the # Vessel Schema as a General Rule"). A
+balloon's example uses the real names and entries of the same dialog in the 3 Vessel 1 Pump sample, so what you read in the balloon is
+what you see in the dialog. First done: the **Heater Properties** of a Vessel Build, with the **HLT element** built into **HLT_Vessel**
+(`BM_8_HE_HLT~element_BR`: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
+`BM_700_1W_HLT_BR`; in a Process `HLT_Vessel.BM_8_HE_HLT~element_BR`). A test (test/helpformat.test.js) checks the example still matches
+the sample. The other dialogs follow, one at a time.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -2369,6 +2405,9 @@ browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
 only when Fritz says the program is set. (2026-10-26)
 
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
+
+14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
+finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
 
 ## 15. Importing
 
@@ -3259,6 +3298,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Added Rules 11.3 to 11.7, the General Help Format (OakBarn Brewery): BruControl differences only in the Importer Help, and every BruControl sentence taken out of the Skynet Panel Help and Hover Help kept in Sandbox/help/BruControl_Help_Extract.md; Hover Help the same as the Panel Help; never mention Fritz in any Help; OakBarn Brewery entries few and approved; Hover Help examples use their own dialog's entries in the 3 Vessel 1 Pump sample, the Heater Properties (the HLT element of HLT_Vessel) first. Added Rule 14.3 (the Importer Help and a BruControl Read Me wait). Help 110 renamed "Pipe Widgets from the Skynet drawings". Checked against both programs: the Panel's Help and balloons change; the BruControl Import program's pages, Help 143 and 165 are not changed (on hold), and the one shared word list it uses (public/naming.js, the 10K NTC type) no longer says BruControl. (thread "Set the Help format rules")
 - 2026-11-10: Changed Rule 1.29, Layer Order (OakBarn Brewery: "the layer only applies inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"): a Device built into a Vessel Device is not in its Tab's list; its Layer Order counts only among that vessel's parts, and the vessel's own Layer Order places the whole group on the Tab. Help 114 updated. Checked against both programs: the Panel draws and numbers it this way; the BruControl Import makes no built-in parts with a Tab Layer Order to change (the Vessel Device Builder builds them), so nothing changes there. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Added Rule 6.29, Heat Hysteresis by what switches it (OakBarn Brewery: "Offset Range from .5 to 3 is allowed for heating elements with Optical SSRs"): a Heating Element's Switched by (Optical SSR, Contactor, Mechanical relay) sets its heating Hysteresis On offset range (0.5 to 3 °F; 2 to 5 °F with an On delay of at least 60 seconds); Save, a Process and the .API are refused outside it and the Brain never runs outside it. Help 181. Checked against both programs: the Panel's Properties and Brain check it; the BruControl Import starts heaters as Optical SSR and brings imported offsets into range, listed in the notes. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")

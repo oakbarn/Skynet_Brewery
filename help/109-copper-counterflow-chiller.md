@@ -1,6 +1,6 @@
 # Copper Counterflow Chiller
 
-Fritz, 2026-11-02: the **Skynet Copper Counterflow Chiller** is a chiller Widget made from his Copper_CounterFlow drawing. It is a copper coil: the wort runs in the inner tube and the cold water in the outer tube, the opposite way, and the two never mix.
+the **Skynet Copper Counterflow Chiller** is a chiller Widget made from his Copper_CounterFlow drawing. It is a copper coil: the wort runs in the inner tube and the cold water in the outer tube, the opposite way, and the two never mix.
 
 ## Its 4 IPs
 

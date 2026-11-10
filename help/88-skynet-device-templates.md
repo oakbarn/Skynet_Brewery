@@ -49,7 +49,7 @@ Rotate 90 is retired (Rule 5.5). Use the Flips for left and right, and 45 degree
 ## Building Templates
 
 During the building phase an Admin makes and changes Templates on the **Build Template Tab** (coming next), with a **user can set**
-box on each attribute. They are locked when Fritz says.
+box on each attribute. They are locked when the Skynet Templates are finished.
 
 ## The User Defined Motorized Ball Valve
 

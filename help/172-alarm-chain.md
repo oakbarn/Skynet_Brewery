@@ -1,6 +1,6 @@
 # The Alarm Chain: one Alarm, many steps
 
-In BruControl you often had to **stack** several alarms on top of each other, one for each picture and sound. In Skynet **one
+You never need to **stack** several alarms on top of each other, one for each picture and sound. **One
 Alarm can do all of it**: its **Alarm Chain** is a list of **steps**, and each step changes how the Alarm looks and sounds.
 
 ## Add steps
@@ -49,14 +49,9 @@ step **and sounds**, once. One Hop Alarm can now call every hop drop of the boil
 The steps are kept **in the order they go On**: on a count-down timer the one with the most time left comes first. When you
 add a new step, it is put into its place as soon as you save. Steps with no time stay after them, in your order.
 
-**From BruControl:** a BruControl Timer had 2 alarms. The import joins each one that was on to its Alarm: the Alarm becomes a
-Hop Alarm on that Timer, the first time is the Alarm's own time, and a second time becomes a step on its Alarm Chain. In Skynet
-you can then add more steps (up to 20). The import notes list each one it joined.
-
 ## On, Off, true and false
 
 Anything that is true or false can be written either way: `alm_Brew = On` is the same as `alm_Brew = true`. A Process never
-writes `.active`. When the BruControl Import turns a BruControl Script into a Process, it always changes BruControl's
-`"alm_Brew" active = true` into `alm_Brew = true` or `alm_Brew = On`, whichever you pick.
+writes `.active`.
 
 See also [The Alarm Widget](107-alarm-widget) and [Alarms and sound](21-alarms-and-sound).

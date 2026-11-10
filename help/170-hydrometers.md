@@ -84,8 +84,3 @@ reading is saved.
    unticked, Save is **Exit (No Database)**.
 
 **Pause** hides the pop-up so you can do other things. It pops up again in 5 minutes. Only a person can pause it.
-
-## The BruControl Import
-
-A BruControl **Hydrometer Input** becomes a Tilt Hydrometer with the same Tilt Color, on the same port. The Importer's
-**Hydrometers** page lists the same Templates, with the Tilt Color and the Hardware ID.

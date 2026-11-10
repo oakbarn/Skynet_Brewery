@@ -1,6 +1,6 @@
 # Image block
 
-Every Device or Widget dialog that has pictures shows them the same way (Fritz, 2026-10-29):
+Every Device or Widget dialog that has pictures shows them the same way:
 
 | Field | What it does |
 |---|---|

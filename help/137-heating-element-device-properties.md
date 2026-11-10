@@ -65,3 +65,37 @@ name reads like `MB_25_HE_HLT_BR`.
 
 Heating elements built into a RIMS tube or an Integrated kettle keep their present dialog (Rule 18.10), with the Heating method
 added (Rule 6.19). The old separate PID, Hysteresis, Deadband and Duty Cycle heaters keep theirs too.
+
+## Built into a Vessel Device: the HLT example
+
+The balloons of this dialog (hold the mouse on a box's name) use the **HLT element** of the **3 Vessel 1 Pump** sample as their
+example (Skynet Rule 11.7). It is built into the vessel **HLT_Vessel**, so its dialog is called **Integrated Heating Element Device**.
+What the balloons say:
+
+| Box | The HLT element |
+|---|---|
+| **1. Label** | **HLT element**. It is the start of the Suggested Name: a space becomes ~, so it is HLT~element in the name. |
+| **2. Interface (board)** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
+| **3. Built into** | **HLT_Vessel**. It moves with the vessel and can't be separated from it. |
+| **4. Name** | `BM_8_HE_HLT~element_BR`: BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). |
+| **Device Type** | **HE**, a Heating Element. |
+| **Toggle** | Toggle: one click turns it On or Off at once, in Hysteresis, holding 150 °F. |
+| **Current Method** | **Hysteresis**: on below its Setpoint of 150 °F, off at it. |
+| **Switched by** | **Optical SSR**, so its On offset of 1 °F is in range (0.5 to 3 °F, Rule 6.29). |
+| **Enabled** and **Control Method** | Hysteresis, with Duty Cycle and PID switched on too: four balloons, Direct, Duty Cycle, Hysteresis and PID. |
+| **Temperature Probe** | `BM_700_1W_HLT_BR`, the DS18B20 probe built into the same vessel. |
+| **Setpoint** | **150** °F. |
+| **On offset** | **1**: it turns on at 149 °F and off at 150 °F. |
+| **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 60. |
+| **Predictive** | On: if the water keeps warming half a degree after it turns off, it turns off half a degree under 150 °F. |
+
+A Process calls a Device built into a Vessel Device by the vessel's name and its own:
+
+```
+HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 168
+HLT_Vessel.BM_8_HE_HLT~element_BR.method = "PID"
+HLT_Vessel.BM_8_HE_HLT~element_BR = on
+HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint"
+```
+
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)

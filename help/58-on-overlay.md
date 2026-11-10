@@ -2,7 +2,7 @@
 
 Instead of two pictures (one for **On**, one for **Off**), an item can keep **one picture** and show a small picture **on top of it** while it is On, for example a lightning bolt. The picture underneath stays visible.
 
-**Overlay when On is the preferred way** in Skynet (a Skynet Standard, 2026-10-27): one picture plus an On overlay. Two pictures are still allowed for the cases that need them. This is new in Skynet; BruControl never had it. In the Properties the overlay comes right after the picture, and the second picture (**Picture when on**) comes last, marked optional.
+**Overlay when On is the preferred way** in Skynet (a Skynet Standard, 2026-10-27): one picture plus an On overlay. Two pictures are still allowed for the cases that need them. In the Properties the overlay comes right after the picture, and the second picture (**Picture when on**) comes last, marked optional.
 
 ## Which items have it
 

@@ -30,7 +30,7 @@ The board gets the delay each time it connects, so a change takes effect right a
 
 ## Picking the board
 
-When you add an Interface, pick its **Board** and **Type**; the rating shows next to them. For an Interface added before, pick its board in the **Board** column (a name with "ESP" in it is taken to be an ESP32, anything else a Mega). A BruControl import takes the board from BruControl.
+When you add an Interface, pick its **Board** and **Type**; the rating shows next to them. For an Interface added before, pick its board in the **Board** column (a name with "ESP" in it is taken to be an ESP32, anything else a Mega).
 
 ## Pin 10 on an Ethernet Mega
 
