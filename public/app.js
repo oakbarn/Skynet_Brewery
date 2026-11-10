@@ -6978,6 +6978,14 @@ const HEAT_TIPS = {
   outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
 };
 // a Heating Element's own settings, with the HLT element of the 3 Vessel 1 Pump sample as the example (Rule 11.7)
+// the wave drawings of Integrate_4: the temperature (red) rises to the Setpoint (blue), coasts down to the Offset (yellow) and heats
+// again; the Delay drawing waits a moment at the Offset before it heats
+function heatWaveSvg(which) {
+  const d = which === 'delay' ? 'M0 22 C8 4 16 4 22 10 S34 30 40 30 L52 30 C58 4 70 4 76 10 S88 30 94 30 L106 30 C112 6 118 6 120 8'
+    : 'M0 22 C8 4 16 4 22 10 S36 30 42 30 C50 4 62 4 68 10 S82 30 88 30 C96 4 108 4 114 10 L120 14';
+  return `<svg viewBox="0 0 120 36" width="120" height="36" aria-hidden="true"><line x1="0" y1="9" x2="120" y2="9" stroke="#2b8cff" stroke-width="2"/>` +
+    `<line x1="0" y1="30" x2="120" y2="30" stroke="#ffd400" stroke-width="2"/><path d="${d}" fill="none" stroke="#e53935" stroke-width="2"/></svg>`;
+}
 const ELEM_HEAT_TIPS = {
   target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 168.',
   onOffset: 'Hysteresis: how far under the Setpoint it turns on (+ heats, - cools). It turns off at the Setpoint. Example: the HLT element has 1, so with its Setpoint of 150 °F it turns on at 149 °F and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR 0.5 to 3 °F, Contactor or Mechanical relay 1 to 5 °F. Picking a Hardware Controller sets it for you: 0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), 1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.onoffset = 2.',
@@ -6986,6 +6994,13 @@ const ELEM_HEAT_TIPS = {
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
 const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
+// the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else
+function offsetChoices(it) {
+  const r = heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input)), l = [];
+  for (let v = r.min; v <= r.max + 1e-9; v = Math.round((v + 0.5) * 10) / 10) l.push(v);
+  if (it.onOffset !== undefined && it.onOffset !== '' && !l.includes(+it.onOffset)) l.push(+it.onOffset);
+  return l.sort((a, b) => a - b).map(v => [String(v), String(v)]);
+}
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
   const liveM = heatMethodKey(S.values[it.name]?.method);
@@ -7003,9 +7018,13 @@ function heatFields(it, x = {}) {
     ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.eMethodSpot, ...x }],
     ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
     ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
-    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...x }]] : []),
-    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]),
-    ...(m === 'hysteresis' ? [PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP })] : []),
+    // Integrate_4 (OakBarn Brewery, 2026-11-10): the Temperature Probe and its Setpoint on one line; for Hysteresis, Direction (Heating)
+    // with its Offset picked from a list, and Predictive with its Delay, each with a small wave drawing
+    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...(HEAT_SETTINGS[m].some(([, k]) => k === 'target') ? { with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] } : {}), ...x }]] : []),
+    ...(m === 'hysteresis' ? [
+      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
+      PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay') }], ['_waveD', '', 'wave', 'delay']] })]
+      : HEAT_SETTINGS[m].filter(([, key]) => !(key === 'target' && NEEDS_PROBE.includes(m))).map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x])),
     // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
     ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]) : []),
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', { ...x, tip: ELEM_DISPLAY_TIP })] : []),
@@ -7570,7 +7589,7 @@ function withLayer(fields, item) {
   const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
   const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
-  const f = ['layer', inV ? 'Vessel Layer Order' : 'Layer Order', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
+  const f = ['layer', inV ? 'Inside Vessel Device Layer' : 'Layer Order', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
   return at >= 0 ? [...fields.slice(0, at + 1), f, ...fields.slice(at + 1)] : [...fields, f];
 }
 function fieldsFor(item) {
@@ -7790,6 +7809,7 @@ const DEVICE_TIPS = {
   ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BR.',
   eTab: 'The Tab this Heating Element goes on, for example Brewhouse. Its Tab ID, BR, ends the Suggested Name: BM_8_HE_HLT~element_BR. ➕ Add new Tab… makes a new Tab and comes back here.',
   eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BR is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BR = on.',
+  eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset beside it is how far under the Setpoint it turns on; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
   eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its short code HE is the third part of the Suggested Name: BM_8_HE_HLT~element_BR.',
   eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
@@ -8084,6 +8104,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
     input = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': opts }, ...os.map(o => h('option', { value: o, ...(o === (v ?? os[0]) ? { selected: true } : {}) }, o)), h('option', { value: '__add__' }, opts === 'vbTypes' ? 'Other (type its General Type) ...' : 'Add new ...'));
   }
+  else if (kind === 'numsel') {    // a number picked from a list (the Offset): saved as a number
+    input = h('select', { 'data-k': key, 'data-kind': 'numsel' }, ...opts.map(([o, l]) => h('option', { value: o, ...(String(v ?? opts[0][0]) === o ? { selected: true } : {}) }, l)));
+  }
+  else if (kind === 'wave') {      // the small wave drawing beside Offset or Delay (Integrate_4): Setpoint blue, Offset yellow, the temperature red
+    const s = h('span', { class: 'heatWave' }); s.innerHTML = heatWaveSvg(opts); return [null, s];
+  }
   else if (kind === 'sel') {       // an entry { group, items } is a heading with its choices under it
     const pair = o => Array.isArray(o) ? o : [o, o], os = opts.flatMap(o => o?.group ? o.items.map(pair) : [pair(o)]);
     const opt = ([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l);
@@ -8304,7 +8330,7 @@ function readFields(obj, root = $('#dlgBody')) {
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
-    else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'num' || kind === 'numsel') v = inp.value === '' ? undefined : +inp.value;
     else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
