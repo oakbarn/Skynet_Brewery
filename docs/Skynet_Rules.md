@@ -3277,6 +3277,22 @@ might"; "label is always mandatory in any dialog"). In the Panel **and the BruCo
   is clicked (fill it in or Cancel). The Panel's other boxes on this list are dropdowns or switches that are never blank, or are picked
   when the Device is added.
 
+18.34 **The Pump dialog is the model: Label Hover Help, Title Case, Label Attributes** (OakBarn Brewery, 2026-11-10, the Blichmann
+Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to the Skynet Panel and Importer"):
+- **Title Case** ("Titles and Attribute Labels follow Pascal Camel Code Style"): every dialog's field names, headings and pop-up
+  titles start each word with a capital (Fore Color, Font Size, Label Attributes); small joining words (and, of, the ...) stay
+  small, and what is in ( ) is left as it is. A long sentence is not a name: it belongs in Hover Help (Rule 11.8).
+- **The Label's Hover Help** of a Pump is OakBarn Brewery's own text (Help 115, "The Label"): how you call the Pump (the Red Pump
+  story), the Plain Text Part of the Suggested Name in red, the Suggested Name Format InterfaceID_Port_Type_Label_TabID read part by
+  part with the Device's own Interface, Port, Type and Tab, why a long name is no trouble in a Process (a List Box with Predictive
+  Text), and what the ⬆ (a 2 Line Label Text Dialog) and the ⬢ (the Label Attributes Dialog) open. Every other Device has the same
+  balloon, its first line asking how you refer to that Device.
+- **The ⬆ and ⬢ have their own balloons** (what they open), and **Available Ports** has its own balloon, apart from the Interface's.
+- **Label Visible**: "The Label may be shown on the Tab, for example Red Pump above the Pump."
+- **Label Attributes**: no clutter (Visible, Font Size); **Font Size** shows the size the Label has now, not a blank; **Alignment**
+  is **Left**, **Centered** or **Right**, with no "Default (Centered)" choice. A Label with no alignment of its own (nor from its
+  Tab Style) is really Centered. The same three choices on the Timer's Label and the Value look.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
