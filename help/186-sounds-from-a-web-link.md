@@ -24,7 +24,9 @@ play SoundPlayer
 
 A link needs the internet. Without it:
 
-- **An Alarm** plays the **Skynet beep** from the Brain instead, and a warning says the link can't be reached. The Alarm still sounds.
+- **An Alarm** plays the **Missing Alarm Sound** from the Brain instead (a voice that says the sound can't be found), and a
+  warning says why. If that isn't there either, it plays the Skynet beep. An Alarm is never silent. The same happens when an
+  Alarm's sound file on the Brain is missing.
 - **A Sound Player** stays quiet and shows the same warning.
 - **The sound before a hop alert** is skipped, and the alert's voice still speaks.
 
@@ -44,5 +46,6 @@ Only put up sounds you have the right to share (Skynet Rule 9.12).
 - A sound path that starts with `http://` or `https://` is a link (a URL). Anything else is a file in the media folders on the Brain.
 - The browser plays the link itself (an HTML `<audio>` element). The Brain never downloads it, so a phone on Tailscale plays it from
   the web too.
-- A link that fails to load (an `error` event) switches an Alarm to `sounds/alarm_beep.wav` until the page is opened again.
+- A sound that fails to load (an `error` event: a link, or a missing file) switches an Alarm to `sounds/Skynet/Alarm_Sound_Missing.mp3`,
+  then to `sounds/alarm_beep.wav` if that fails too, until the page is opened again.
 - **Media > Move** and the missing files list skip links: there is no file to move or find.

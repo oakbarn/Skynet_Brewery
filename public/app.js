@@ -9498,21 +9498,24 @@ function soundSrc(e, v) {
   return mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || (mode === 'default' ? 'sounds/alarm_beep.wav' : ''));
 }
 const hasSoundNow = (e, v) => !!soundSrc(e, v);
+// what an Alarm plays when its own sound can't play, in this order (Rule 7.20): the voice clip, then the beep
+const ALARM_FALLBACKS = ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
 function getAudio(e) {
   const src = soundSrc(e, S.values[e.name] || {});
   if (!src) return null;
   let a = audios.get(e.name);
   if (!a || a._src !== src) {
     a = new Audio(soundUrl(src)); a._src = src; audios.set(e.name, a);
-    // a web link that can't be reached (no internet, a wrong link): an Alarm plays the Skynet beep from the Brain instead (Rule 7.20)
-    if (isLink(src)) a.addEventListener('error', () => {
-      if (a._fellBack) return;
-      a._fellBack = true;
-      if (e.type === 'alarm') {
-        a.src = media('sounds/alarm_beep.wav');
-        if (a._playing) a.play().catch(() => { });
-        toast(`${e.label || e.name}: its sound link can't be reached (is the internet down?), so it plays the beep instead`, true);
-      } else toast(`${e.label || e.name}: its sound link can't be reached (is the internet down?)`, true);
+    // a sound that can't play (a web link with no internet, a wrong link, a missing file), Rule 7.20: an Alarm plays the Missing
+    // Alarm Sound voice clip from the Brain, or the Skynet beep when that isn't there either, and says why; a Sound Player only says why
+    a.addEventListener('error', () => {
+      const why = isLink(src) ? 'its sound link can\'t be reached (is the internet down?)' : `its sound file ${src} is missing`;
+      if (e.type !== 'alarm') { if (!a._told) { a._told = true; toast(`${e.label || e.name}: ${why}`, true); } return; }
+      const next = ALARM_FALLBACKS.filter(f => f !== src)[(a._fb ?? -1) + 1];
+      if (!next) return;
+      if (a._fb === undefined) toast(`${e.label || e.name}: ${why}, so it plays the Missing Alarm Sound instead`, true);
+      a._fb = (a._fb ?? -1) + 1; a.src = media(next);
+      if (a._playing) a.play().catch(() => { });
     });
   }
   return a;
