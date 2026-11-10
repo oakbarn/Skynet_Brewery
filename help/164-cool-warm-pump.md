@@ -21,8 +21,9 @@ Its Device Type ID is **CPMP**, so its suggested name reads plainly, for example
 Double-click the pump. Under **Cool / Warm Pump: its Method** pick how it runs:
 
 - **Direct** (was On/Off): a click or a Process turns it on and off.
-- **Hysteresis**: it runs by its **Temperature Probe** to hold a **Setpoint**. A **minus On offset cools** (it turns on above the
-  Setpoint, for a glycol pump); a **plus On offset warms** (it turns on below the Setpoint). **On delay** waits that many seconds before
+- **Hysteresis**: it runs by its **Temperature Probe** to hold a **Setpoint**. The **Offset** says where it turns on, Setpoint +
+  Offset: a **plus Offset cools** (it turns on above the Setpoint, for a glycol pump); a **minus Offset warms** (it turns on below the
+  Setpoint). **On delay** waits that many seconds before
   it turns on again.
 
 Tick **Hysteresis allowed too** to switch between the two with one click on the Tab, or from a Process. A pump is never run by
@@ -35,7 +36,7 @@ The words are the same as a Heating Element's:
 ```
 MB_D5_CPMP_Cool~Pump_FR.method = "Hysteresis"
 MB_D5_CPMP_Cool~Pump_FR.setpoint = 66
-MB_D5_CPMP_Cool~Pump_FR.onoffset = -1
+MB_D5_CPMP_Cool~Pump_FR.onoffset = +1
 MB_D5_CPMP_Cool~Pump_FR = On
 ```
 

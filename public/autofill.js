@@ -17,6 +17,8 @@
 //    if -> MB_06_Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
 //    Ctrl+Space then offers and / or to go on.
 //  - Where a value goes, typing also lists the Skynet Constants that fit (skc_Kg_To_Lb; typing Kg finds every kilogram one).
+//  - After name.onoffset = (and a Fermentor's .heatoffset / .cooloffset) it offers (-) Heat and (+) Cool, the ones that fit the Device,
+//    and puts the minus or plus in the line: the Offset's sign says where it turns On, Setpoint + Offset (Rule 6.19).
 //  - Only names are ever offered: never a hidden key (Rule 3.10), and never a Clone, which is not used in Processes (Rule 4.4).
 import { DEVICE_TYPES } from './colorize.js';
 import { SKYNET_CONSTANTS, showConstant } from './skconst.js';
@@ -167,6 +169,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (el && attr === el.main) attr = '';
     if (el?.bools?.includes(attr) || declared.get(op[1] ?? op[2]) === 'bool') for (const [k, h] of ON_OFF) add(k, h);
     if (el?.type === 'timer' && attr === 'type') { add('countdown', ''); add('countup', ''); }
+    // name.onoffset = : (-) Heat and (+) Cool (OakBarn Brewery, 2026-11-10, Rule 6.19)
+    if (el?.signs?.[attr]) { for (const s of el.signs[attr]) add(s, s === '-' ? 'Heat: On below the Setpoint' : 'Cool: On above the Setpoint', s === '-' ? '(-) Heat' : '(+) Cool'); if (!w) return done(); }
     // name.method = : the ways this Device can be controlled (Rule 6.19), for example "PID" or "Duty Cycle" on a Heating Element
     if (attr === 'method' && el?.methods) { for (const m of el.methods) add(`"${m}"`, 'method of control', m); if (!w) return done(); }
     // Hose_1.connect = : the Quick Disconnects, Vessels and IPs on the hose's Tab (Rule 5.34)

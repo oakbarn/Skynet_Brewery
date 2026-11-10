@@ -1,6 +1,6 @@
 # Predictive Hysteresis: no overshoot
 
-A **Hysteresis** turns its output **ON** when the reading drops a set amount (the **On offset**) below the **Setpoint**, and **OFF** when
+A **Hysteresis** turns its output **ON** at Setpoint + **Offset** (a heater's Offset has a minus, so below the **Setpoint**), and **OFF** when
 the reading gets back to the Setpoint. But a heating element (or a chiller) does not stop the moment it is switched off: the heat
 already in the element keeps going into the liquid, and the reading **overshoots** past the Setpoint.
 
@@ -13,7 +13,7 @@ Hysteresis method and a Cool / Warm Pump.
 2. It averages the coast of the last runs.
 3. Next time it turns off that much **before** the Setpoint, so the reading coasts up to the Setpoint and stops there.
 
-The early OFF is never more than half the On offset.
+The early OFF is never more than half the Offset (0.5 °F for -1).
 
 ## Safe for a compressor
 
@@ -27,4 +27,4 @@ The one cost: the low point of each swing is lower by the same amount (for cooli
 
 Open the Device's **Properties** and turn **Predictive** off. It then works the plain way.
 
-A heating element's Hysteresis also keeps to the On offset range of what switches it (Rule 6.29): see [Help 181](181-heat-hysteresis-switched-by).
+A heating element's Hysteresis also keeps to the Offset range of what switches it (Rule 6.29): see [Help 181](181-heat-hysteresis-switched-by).

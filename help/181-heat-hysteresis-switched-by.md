@@ -27,8 +27,8 @@ With a °C probe the numbers are converted: an Optical SSR -0.3 to -1.7 °C, a C
 - **Properties > Heating method > Hardware Controller.** Rest the mouse on it to see the range for this element. When Hysteresis is Enabled but is
   not the Current Method, its Offset and On delay still show, so they can be set.
 - **Save** refuses an Offset or On delay outside the range, and says what is allowed.
-- **A Process or the .API** writes `.onoffset` without the minus (2 means 2 degrees below), and gets the same plain error: `hE_1.onoffset = 8` on an element switched by an Optical SSR is refused.
+- **A Process or the .API** writes `.onoffset` with the same minus (`hE_1.onoffset = -2` turns on 2 degrees below), and gets the same plain error: `hE_1.onoffset = -8` on an element switched by an Optical SSR is refused, and so is a plus (`hE_1.onoffset = 2`), because a Heating Element only heats.
 - **The Brain** never runs a heating Hysteresis outside its range, whatever was saved.
-- Only Hysteresis that **heats** has a range. Cooling is not checked here.
+- Only Hysteresis that **heats** has a range.
 
 See also: [The heating method](150-heating-method), [Predictive Hysteresis](168-predictive-hysteresis).

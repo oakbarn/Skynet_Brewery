@@ -29,7 +29,7 @@ export const fermModeWords = () => FERM_MODES.map(m => m[1]).join(', ');
 // [runtime name (a Process reads and sets it), Properties key, label, starting value]. Times are in seconds.
 export const FERM_SETTINGS = [
   ['target', 'target', 'Setpoint', 66],
-  ['heatoffset', 'heatOffset', 'Heat Offset (-)', 1],
+  ['heatoffset', 'heatOffset', 'Heat Offset (-)', -1],      // Setpoint + Offset: minus, below the Setpoint (Rule 6.19)
   ['cooloffset', 'coolOffset', 'Cool Offset (+)', 1],
   ['changeover', 'changeover', 'Changeover wait (s): one side Off this long before the other may start', 300],
   ['heatdelay', 'heatDelay', 'Heat On delay (s): the shortest time Off before it starts again', 60],
@@ -53,7 +53,7 @@ export function fermProblems(el, has = () => true) {
   if (!el?.heat && !el?.cool) out.push('Pick its Heat, its Cooling, or both.');
   if (el?.heat && el.heat === el.cool) out.push('The Heat and the Cooling must be two different Devices.');
   for (const k of ['heat', 'cool', 'input']) if (el?.[k] && !has(el[k])) out.push(`${el[k]} is not a Device in this Schema.`);
-  if (el?.heat && !(n('heatOffset') > 0)) out.push('The Heat Offset (-) must be below 0 (for example -1).');
+  if (el?.heat && !(n('heatOffset') < 0)) out.push('The Heat Offset (-) must be below 0 (for example -1).');
   if (el?.cool && !(n('coolOffset') > 0)) out.push('The Cool Offset (+) must be more than 0.');
   for (const [, k, label] of FERM_SETTINGS.slice(3)) if (!(n(k) >= 0)) out.push(`${label.replace(/ \(.*/, '')} must be 0 or more.`);
   return out;
