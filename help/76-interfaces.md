@@ -13,7 +13,7 @@ There are three ways in, and all three open the same **Add Interface** pop-up:
 
 1. **☰ Menu > ➕ Add Interface…**
 2. **Devices page > Add Interface > ➕ Add Interface…** (the row of boxes under it still works too)
-3. In the **New Device** box on any Tab: open **1. Interface (board)** and pick **➕ Add new Interface…** at the bottom. When you click Add, you are taken back to the New Device box with the new Interface already picked. The New Device box for a RIMS tube or an electric kettle has the same choice.
+3. In the **New Device** box on any Tab: open **1. Interface** and pick **➕ Add new Interface…** at the bottom. When you click Add, you are taken back to the New Device box with the new Interface already picked. The New Device box for a RIMS tube or an electric kettle has the same choice.
 
 The pop-up asks:
 
