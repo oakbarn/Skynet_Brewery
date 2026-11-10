@@ -7,6 +7,7 @@
 #
 # It looks for the panel in this order: the BrewPanel folder this script sits in (BrewPanel/install/linux),
 # a Skynet*.zip next to this script, or a BrewPanel folder next to this script.
+# The Skynet pictures and sounds: a Skynet_Media*.zip next to this script (Rule 9.12).
 # It installs to ~/Brewing/BrewPanel, gets Node.js if needed, and adds a "Skynet Brewer" launcher.
 # On a Raspberry Pi it also makes the panel start by itself when the Pi starts (a systemd service).
 #
@@ -66,7 +67,7 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip_to "$ZIP" "$TMP/zip"
@@ -166,7 +167,7 @@ if [ "$SRC" != "$DEST" ]; then
       fi
     fi
     if [ "$FRESH" = no ] && ! ask "Keep all of them as they are? (No asks about each one)" Y; then
-      for d in "config:the sample layout" "media:the sample pictures and sounds" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
+      for d in "config:the sample layout" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
         name="${d%%:*}"
         [ -d "$DEST/$name" ] || continue
         if ask "Replace your $name folder with ${d#*:}? Yours is moved to backups/${name}_$STAMP first." N; then
@@ -190,6 +191,18 @@ if [ "$SRC" != "$DEST" ]; then
     mkdir -p "$DEST/$(dirname "$f")"
     cp -p "$SRC/$f" "$DEST/$f"
   done
+fi
+# The Skynet pictures and sounds are their own download, Skynet_Media_(version).zip (Rule 9.12). One next to this file is
+# added to media/; a picture or sound you already have is never changed and nothing is deleted (Rule #1, Never Take Away).
+MZIP="$(ls -t "$HERE"/Skynet_Media*.zip 2>/dev/null | head -n 1 || true)"
+if [ -n "$MZIP" ]; then
+  echo "Adding the Skynet pictures and sounds from $(basename "$MZIP") (a file you already have is never changed)"
+  unzip_to "$MZIP" "$TMP/media"
+  mkdir -p "$DEST/media"
+  cp -Rn "$TMP/media/BrewPanel/defaults/media/." "$DEST/media/" 2>/dev/null || true
+elif [ ! -d "$DEST/media/Images/Skynet" ]; then
+  echo "No Skynet pictures and sounds yet. Download Skynet_Media_(version).zip from"
+  echo "https://github.com/oakbarn/Skynet_Brewery/releases/latest, put it next to this file and run it again."
 fi
 chmod +x "$DEST"/install/linux/*.sh "$DEST"/install/mac/*.command 2>/dev/null || true
 

@@ -2353,6 +2353,18 @@ change. Signing (Rule 9.10) is the real cure; until it is on, a scanner may stil
 restored and reported to the scanner's maker as a false positive. Both programs (the Importer ships in the same Setup).
 (thread "Stop antivirus flagging the Setup")
 
+9.12 **The Skynet pictures and sounds are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "remove all the graphics and
+have separate exe loader for them ... we might only want to add more graphics (Never Change or Delete!)", "All Media Files"):
+everything in media/ (pictures and sounds) is left out of the panel zip and the Skynet Brewer Setup, and ships as
+**Skynet_Media_Setup_<date>.exe** (Windows) and **Skynet_Media_<date>.zip** (Mac, Linux, Pi, by hand), on the same GitHub
+Releases page. They only ADD: a file already there by that name is never changed, nothing is deleted (Rule #1), and the user's own
+pictures and sounds are never touched. **Get Skynet pictures** (Help 59) is add-only too. A redone drawing is a new file with a new
+name. The Setup's last page, the ReadMes and Help 183 say where to get it. **No copyrighted media** (OakBarn Brewery, 2026-11-10):
+Skynet ships only its own pictures and sounds, or ones in the public domain or under CC0 or another Creative Commons license (credit
+kept as the license asks); a questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
+Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
+(thread "Shrink the Setup .exe and remove dead code", Help 183)
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3857,3 +3869,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 7.19, Alarm Digital Outputs (OakBarn Brewery): 2 optional Devices go ON and OFF with their Alarm; blank does nothing; the Importer puts BruControl's one in slot 1; Help 178. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
+- 2026-11-10: Added Rule 9.12 (OakBarn Brewery): the Skynet pictures and sounds leave the panel zip and Setup and become the add-only Skynet Media Setup .exe and Skynet Media zip; Get Skynet pictures is add-only too; no copyrighted media ships. Help 183. Both programs. (thread "Shrink the Setup .exe and remove dead code")
