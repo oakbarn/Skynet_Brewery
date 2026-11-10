@@ -6,6 +6,7 @@
 #
 # It looks for the panel in this order: the BrewPanel folder this file sits in (BrewPanel/install/mac),
 # a Skynet*.zip next to this file, or a BrewPanel folder next to this file (Safari unzips downloads by itself).
+# The Skynet pictures and sounds: a Skynet_Media*.zip (or the folder Safari unzipped it to) next to this file (Rule 9.12).
 # It installs to ~/Brewing/BrewPanel and puts "Skynet Brewer" on the Desktop.
 set -eu
 
@@ -34,7 +35,7 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip -q "$ZIP" -d "$TMP/zip"
@@ -125,7 +126,7 @@ if [ "$SRC" != "$DEST" ]; then
       fi
     fi
     if [ "$FRESH" = no ] && ! ask "Keep all of them as they are? (No asks about each one)" Y; then
-      for d in "config:the sample layout" "media:the sample pictures and sounds" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
+      for d in "config:the sample layout" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
         name="${d%%:*}"
         [ -d "$DEST/$name" ] || continue
         if ask "Replace your $name folder with ${d#*:}? Yours is moved to backups/${name}_$STAMP first." N; then
@@ -149,6 +150,23 @@ if [ "$SRC" != "$DEST" ]; then
     mkdir -p "$DEST/$(dirname "$f")"
     cp -p "$SRC/$f" "$DEST/$f"
   done
+fi
+# The Skynet pictures and sounds are their own download, Skynet_Media_(version).zip (Rule 9.12). One next to this file is
+# added to media/; a picture or sound you already have is never changed and nothing is deleted (Rule #1, Never Take Away).
+MZIP="$(ls -t "$HERE"/Skynet_Media*.zip 2>/dev/null | head -n 1 || true)"
+if [ -n "$MZIP" ]; then
+  echo "Adding the Skynet pictures and sounds from $(basename "$MZIP") (a file you already have is never changed)"
+  unzip -q "$MZIP" -d "$TMP/media"
+  mkdir -p "$DEST/media"
+  cp -Rn "$TMP/media/BrewPanel/defaults/media/." "$DEST/media/" 2>/dev/null || true
+elif MDIR="$(for d in "$HERE"/*/; do [ -d "$d/defaults/media" ] && [ ! -f "$d/server.js" ] && echo "$d" && break; done)" && [ -n "$MDIR" ]; then
+  # Safari unzips a download by itself: the Media zip then is a folder with only defaults/media in it
+  echo "Adding the Skynet pictures and sounds from $(basename "$MDIR") (a file you already have is never changed)"
+  mkdir -p "$DEST/media"
+  cp -Rn "$MDIR/defaults/media/." "$DEST/media/" 2>/dev/null || true
+elif [ ! -d "$DEST/media/Images/Skynet" ]; then
+  echo "No Skynet pictures and sounds yet. Download Skynet_Media_(version).zip from"
+  echo "https://github.com/oakbarn/Skynet_Brewery/releases/latest, put it next to this file and run it again."
 fi
 # Files copied from a download are marked "from the internet"; clear that so they open without warnings
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true

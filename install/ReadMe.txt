@@ -13,6 +13,8 @@ The files in this release:
 
   Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
   Skynet_BrewPanel_<date>.zip       The panel itself: install or update by hand, or for Mac/Linux/Pi
+  Skynet_Media_Setup_<date>.exe     The Skynet pictures and sounds, for Windows (run it after the installer)
+  Skynet_Media_<date>.zip           The Skynet pictures and sounds, for Mac/Linux/Pi or by hand
   Install Skynet Brewer.command     Mac installer
   install-skynet-brewer.sh          Linux and Raspberry Pi installer
   Skynet_Brewer.bat                 Sample Windows start file (for a manual install)
@@ -58,6 +60,19 @@ confirm the warning) removes them. In the panel, Help > "Updating to a new versi
 the details.
 
 
+THE SKYNET PICTURES AND SOUNDS (SEPARATE DOWNLOAD)
+--------------------------------------------------
+The pictures and sounds are not inside the panel zip or the installer. They are their
+own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releases/latest
+  Windows:   run Skynet_Media_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe.
+  Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
+             or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
+             and start the panel: it copies in the pictures and sounds you do not have yet.
+They ONLY ADD: a picture or sound you already have, by that name, is never changed, and
+nothing is ever deleted. Your own pictures and sounds are never touched. Run them again
+whenever new pictures come out.
+
+
 WINDOWS, THE EASY WAY (INSTALLER)
 ---------------------------------
 1. Close the panel if it is running (Ctrl+C in its black window, then close it).
@@ -68,6 +83,7 @@ WINDOWS, THE EASY WAY (INSTALLER)
    If Node.js is missing it offers to install it (Windows asks for permission).
    If you had the panel straight in C:\Brewing before, it offers to copy your data across.
 4. Start it with "Skynet Brewer" on the Desktop. Your browser opens the panel.
+5. Then run Skynet_Media_Setup_<date>.exe for the Skynet pictures and sounds.
 
 To remove it: Settings > Apps > Skynet Brewer > Uninstall. It asks before deleting
 your brew data.
