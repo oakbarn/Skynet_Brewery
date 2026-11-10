@@ -41,7 +41,7 @@ console.log('manifold ok');
 // no Flip, only Horizontal, Left Vertical 90, Right Vertical 90
 assert.ok(app.includes("dialog(I.what, it => mfDrillFields(it, null, true)"), 'the Add box is the drill-down');
 assert.ok(app.includes('if (isMf(it)) return mfDrillFields(it, '), 'the Properties are the drill-down');
-for (const f of ["'1. Label'", "'2. Interface (board)'", "'4. Tab'", "'5. Name'", "'Device Type'"]) assert.ok(app.includes(f), f);
+for (const f of ["'1. Label'", "'2. Interface'", "'4. Tab'", "'5. Name'", "'Device Type'"]) assert.ok(app.includes(f), f);
 assert.ok(app.includes("const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']]"), 'three Orientations');
 assert.ok(app.includes('const MF_ROTS = [0, 90, 270]'), 'the turn buttons and a pipe drop keep to them');
 assert.ok(app.includes("class: 'mfNum'"), 'valve numbers');

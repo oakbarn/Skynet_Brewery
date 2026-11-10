@@ -29,7 +29,7 @@ assert.match(own, /\['rot', 'Orientation', 'vorient', EL_ROTATE, false, false, \
 assert.match(own, /\['units', 'Units', 'sel'[^\n]*with: \['precision', 'Decimals'/, 'Units and Decimals on one line');
 assert.match(own, /\['offset', 'Calibration offset', 'num', null, false, false, \{ tip: DEVICE_TIPS\.pOffset, dbPop: true/, 'Database and .API on the offset line');
 assert.match(own, /\['_ptype', 'Probe type', 'ro', probeKindName\(it\), false, false, \{ tip: DEVICE_TIPS\.pType, attr: PROBE_TYPE_POP/, 'Probe type greyed out, its settings in a pop-up');
-assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port set for good once added (Rule 18.13)');
+assert.match(own, /\['device', '2\. Interface', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port set for good once added (Rule 18.13)');
 assert.match(app, /if \(isProbeDev\(it\)\) return \[\.\.\.probeDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro'/, 'Properties: the drill-down, Device Type last');
 assert.equal((app.match(/if \(!\(await newDeviceDialog\(e, 'Temp', probeTitle\(e\)\)\)\) return;/g) || []).length, 2, 'Thermowell and probe tee: 2a picks the probe type, then the Add box');
 // the Flip pick

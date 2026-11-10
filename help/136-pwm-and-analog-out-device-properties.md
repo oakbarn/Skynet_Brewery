@@ -10,7 +10,7 @@ pipe ends) and **no Toggle** (a tap opens the box where you set its %). (Skynet 
    or **Analog output 4-20 mA**. The **Pump speed** rows in the Pumps list open the same box.
 2. The Add box opens titled **Add PWM Output** or **Add Analog Output**. Its **Label** is already filled in: **PWM_1** for a PWM output, **4_20_1** for a 4-20 mA Analog output, **0_10_1** for a 0-10 V one
    (the next number each time), so the cursor starts on the next empty field. You can change it, but it can't be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets
-   its font and colors) and **Label Visible**, 2 the **Interface (board)** and an **Available Port** on the same line (only the
+   its font and colors) and **Label Visible**, 2 the **Interface** (the board) and an **Available Port** on the same line (only the
    free PWM pins show), the **Device Type** (PWM to start; pick P_Pump, P_Fan ... if it drives one of those), 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the output as it will show on the Tab. With no picture it shows its value (for example 45 %).
@@ -31,7 +31,7 @@ pipe ends) and **no Toggle** (a tap opens the box where you set its %). (Skynet 
 
 - The title (**PWM Output Device Properties** or **Analog Output Device Properties**) with the 🔓 lock, **Visible** and
   **Hidden Locked**, then 🗑 Delete, ✖ Cancel, 💾 Save.
-- **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** (greyed out); **3. Tab**;
+- **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface** with **Available Ports** (greyed out); **3. Tab**;
   **4. Name** and the Suggested Name.
 - **Graphic**, **Path**, **Overlay** with **Database and .API ⬢**.
 - Its own settings: Start value and Decimals (PWM), or Signal, Units, Low value, High value and Decimals (Analog).
