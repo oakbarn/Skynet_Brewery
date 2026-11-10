@@ -18,7 +18,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
    - **Path** (a Skynet element: greyed out), or **Path (off)** and **Path (on)** (a User Defined one).
    - **Orientation** (Right or Left) and, on the same line, **Toggle** (Toggle to start, or Push Button: on only while held; [Help 179](179-heating-element-look)).
-   - **Overlay** (**Glow** to start: it glows while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
+   - **Overlay** (**On = Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
@@ -75,7 +75,7 @@ What the balloons say:
 | Box | The HLT element |
 |---|---|
 | **1. Label** | **HLT element**. It is the start of the Suggested Name: a space becomes ~, so it is HLT~element in the name. |
-| **2. Interface (board)** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
+| **2. Interface** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
 | **3. Built into** | **HLT_Vessel**. It moves with the vessel and can't be separated from it. |
 | **4. Name** | `BM_8_HE_HLT~element_BR`: BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). |
 | **Device Type** | **HE**, a Heating Element. |

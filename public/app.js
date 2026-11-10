@@ -6985,7 +6985,7 @@ const ELEM_HEAT_TIPS = {
 };
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
-const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: what it is doing and its Setpoint (the first choice), its Output % or ON / OFF, the Reading of its probe, or its Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
+const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
   const liveM = heatMethodKey(S.values[it.name]?.method);
