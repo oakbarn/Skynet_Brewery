@@ -315,7 +315,13 @@ IP markers, IP pipe fittings and Manual Valve Widgets), and **Save layout** numb
 Brewery, 2026-11-09: "Layer order is Z Order and yes to every item needs that is becomes a universal Attribute"): pipes, hoses, IP
 markers, IP pipe fittings and Manual Valve Widgets too. A Process reads and sets it with **`.layer`** (`Pump_1.layer = 1` puts it on
 top while Processes run, the others move down one on the screen; a whole number from 1; `""` puts back its Properties' number).
-Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
+Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. **Integrated Devices: their layer applies only inside the Integration** (OakBarn Brewery, 2026-11-10: "Layers on Integrated
+Devices would only be inside the Vessel Device. The Vessel Device Layer would be how it plays with others"; "the layer only applies
+inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"). A Device built into a Vessel Device (its
+Heating Element, Temperature Probe and the other built-in parts) is **not in its Tab's list**: its Layer Order counts only among the
+other parts of the same Vessel Device (1 = its top part, numbered 1, 2, 3 ... with no gaps), and its Properties call it **Layer Order
+inside its Vessel Device**. The **Vessel Device's own Layer Order** is its place in the Tab's list; its built-in parts always go with it,
+drawn just above the vessel. A Process `.layer` on a built-in part moves it only among the vessel's parts. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
 the order of each Workspace's Elements list, the first one on top (Layer Order 1) (Rule 15.4). Help 114.
 
 1.30 **A gGlobal takes only its own Kind of value** (OakBarn Brewery, 2026-11-09: "A gGlobal accepts a value that is only its
@@ -1974,6 +1980,27 @@ cannot be, but there are two cases that may look like more than one:
    (that is really why they are not truly independent and not really separate: all just one happy family). The last one turned Off
    turns the Port Off, so every one on it is Off. Help 180.
 
+6.29 **Heat Hysteresis by what switches it** (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed
+for heating elements with Optical SSRs"; for a Contactor, OakBarn Brewery OK'd the suggestion of 2 to 5 with an On delay of at least
+60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Switched by**: **Optical
+SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its **Hysteresis that heats** (a plus On offset) may only use:
+
+| Switched by | On offset | On delay |
+|---|---|---|
+| Optical SSR | 0.5 to 3 °F | any |
+| Contactor | 2 to 5 °F | at least 60 seconds |
+| Mechanical relay | 2 to 5 °F | at least 60 seconds |
+
+With a °C probe the numbers are converted (0.3 to 1.7 °C; 1.1 to 2.8 °C). A Contactor's contacts wear each time they close, so it
+heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
+- **Properties:** Switched by is under Heating method, with a line giving its range; when Hysteresis is Enabled but is not the Current
+  Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
+- **A Process or the .API** setting `.onoffset` or `.ondelay` outside the range gets the same plain error. The Brain never runs a heat
+  Hysteresis outside its range, whatever was saved.
+- **Both programs:** the Panel's Properties and Brain check it; the BruControl Import starts every heating element as an Optical
+  SSR (BruControl does not say what switches it), brings an On offset outside 0.5 to 3 °F to the nearest end, and lists each one
+  in the Import notes. Help 181. The Fermentor's heat and cool control (to come) follows it too.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -3219,6 +3246,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Changed Rule 1.29, Layer Order (OakBarn Brewery: "the layer only applies inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"): a Device built into a Vessel Device is not in its Tab's list; its Layer Order counts only among that vessel's parts, and the vessel's own Layer Order places the whole group on the Tab. Help 114 updated. Checked against both programs: the Panel draws and numbers it this way; the BruControl Import makes no built-in parts with a Tab Layer Order to change (the Vessel Device Builder builds them), so nothing changes there. (thread "Build integrated Fermentor heat and cool control")
+- 2026-11-10: Added Rule 6.29, Heat Hysteresis by what switches it (OakBarn Brewery: "Offset Range from .5 to 3 is allowed for heating elements with Optical SSRs"): a Heating Element's Switched by (Optical SSR, Contactor, Mechanical relay) sets its heating Hysteresis On offset range (0.5 to 3 °F; 2 to 5 °F with an On delay of at least 60 seconds); Save, a Process and the .API are refused outside it and the Brain never runs outside it. Help 181. Checked against both programs: the Panel's Properties and Brain check it; the BruControl Import starts heaters as Optical SSR and brings imported offsets into range, listed in the notes. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")
 - 2026-11-09: Added Rule 7.18, Alarm Priority (OakBarn Brewery): a number with up to two decimal places, the lower plays first,
   its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the

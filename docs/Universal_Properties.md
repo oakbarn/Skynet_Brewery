@@ -20,7 +20,7 @@ Rule 1.21 in the [Skynet Rules](Skynet_Rules.md) points here. Help page 114 expl
 | **Embedded Rich Text Codes** | string | `\b`, `\i`, `\n`, `\c{Red}` ... inside any string (Help 90). |
 | **Position** (`.x`, `.y`) | integer | Where it is on its Tab, in pixels. |
 | **Size** (Width, Height) | integer | How big it is, in pixels. |
-| **Layer Order** (`.layer`) | integer | Which item is drawn on top where items overlap, like BruControl's Z Order: 1 is on top; a new item gets 1; the Tab is numbered 1, 2, 3 ... with no gaps (Rule 1.29). |
+| **Layer Order** (`.layer`) | integer | Which item is drawn on top where items overlap, like BruControl's Z Order: 1 is on top; a new item gets 1; the Tab is numbered 1, 2, 3 ... with no gaps; a Device built into a Vessel Device counts only among that vessel's parts, and the vessel's own Layer Order places the group (Rule 1.29). |
 | **Visibility** (Visible) | boolean | Shown or not. |
 | **HiddenLock** | boolean | Hidden whenever the **Tab Lock is on** (outside Edit layout), even when Visible is on; seen (faded) only in Edit layout, like BruControl's HiddenLocked. |
 | **Lock** (Item Lock) | boolean | Locks the item's position. See *Item Lock* below. |

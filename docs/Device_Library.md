@@ -180,6 +180,9 @@ What each ID means:
   Temperature Probe and each method's settings); a Process (`hE_1.method = "PID"`) or a click while running changes it.
   `.state` / `.enabled` = ON, `.output` = its pin now (read only), `.value` = a PID or Deadband's output %. Same for a Heating
   Element built into a Vessel Device, RIMS tube or Integrated kettle. BruControl's two controls on one port import as one of these.
+  **Switched by** (Rule 6.29, Help 181): Optical SSR (the start), Contactor or Mechanical relay (saved as `switchedBy`: ssr,
+  contactor, relay). Its Hysteresis that heats may use an On offset of 0.5 to 3 °F on an Optical SSR, or 2 to 5 °F with an On delay
+  of at least 60 seconds on a Contactor or Mechanical relay (°C converted).
 
 ### 4.2 Pump
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).

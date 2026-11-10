@@ -49,4 +49,10 @@ A Clone has the same Properties, but most belong to its parent and can't be chan
 
 Every item has a Layer Order: pipes, hoses, IP markers, pipe fittings and Manual Valve Widgets too. A Tab that was never numbered keeps the order it always had (pipes at the bottom, IP markers at the top); **Save layout** numbers it. The **BruControl Import** brings BruControl's Z Order across: the first item in each BruControl Workspace is on top (Layer Order 1).
 
+**Inside a Vessel Device** (Skynet Rule 1.29): a Device built into a Vessel Device (its Heating Element, Temperature Probe and the
+other built-in parts) has a Layer Order that counts **only inside that vessel**. 1 is its top part, 2 is under it, and so on. They are
+not in the Tab's list. Where the whole vessel sits among the other items on the Tab is the **Vessel Device's own Layer Order**, and its
+built-in parts always go with it, drawn on top of the vessel. A Process works the same way: `HLT_Vessel.hE_1.layer = 1` puts that part
+on top of the other parts of the HLT, not on top of the Tab.
+
 The full standard is in the Skynet document **Universal Properties** (docs/Universal_Properties.md).

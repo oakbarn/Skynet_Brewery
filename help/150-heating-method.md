@@ -152,3 +152,5 @@ heating method instead of adding a second Device.
 Older Skynet Schemas that already have two Devices on one port keep working as before (the last one turned on wins), and those
 two can still be saved; you just can't make new ones. Anything else BruControl had sharing a port (for example a pump's on/off
 and its PWM speed) is listed in the Import notes so you can keep one.
+
+See also: [Heat Hysteresis: what switches the element](181-heat-hysteresis-switched-by) (Rule 6.29).
