@@ -97,3 +97,45 @@ export function declareCheck(word, name) {
   if (pk && pk !== dw.kind) return { error: `new ${word} ${name}: ${G_DECLARE[pk].prefix} is for ${G_DECLARE[pk].what}, not ${d.what}. Use new ${G_DECLARE[pk].local} ${name}, or give it a name starting ${d.prefix}` };
   return { kind: dw.kind, global: !!pk };
 }
+
+// A gGlobal takes only its own Kind of value (OakBarn Brewery, 2026-11-09, Rule 1.30). gT_HopDrop_1 = 00:15:00 works;
+// gT_HopDrop_1 = "My Hop Drop" is an error, and so is new gT gT_HopDrop_1 = "My Hop Drop". Nothing is changed into another
+// Kind on the quiet. Values come from lib/values.js: a Time is a TimeVal (.s seconds), a Date Time a DateVal (.ms).
+const isTimeV = v => v !== null && typeof v === 'object' && v.constructor?.name === 'TimeVal';
+const isDateV = v => v !== null && typeof v === 'object' && v.constructor?.name === 'DateVal';
+// what a value is, in plain words
+export function valueWhat(v) {
+  if (typeof v === 'number') return `${Math.round(v * 10000) / 10000} is a number`;
+  if (typeof v === 'boolean') return `${v} is a true or false value`;
+  if (typeof v === 'string') return `"${v.length > 40 ? v.slice(0, 40) + '...' : v}" is text`;
+  if (isTimeV(v)) return `${v} is a time`;
+  if (isDateV(v)) return `${v} is a date and time`;
+  return 'that value is not the right kind';
+}
+const KIND_TAKES = {
+  value: { ok: v => typeof v === 'number' && Number.isFinite(v), word: 'Value', takes: 'a number, such as 152.5' },
+  string: { ok: v => typeof v === 'string', word: 'String', takes: 'text in quotes, such as "Add the hops"' },
+  bool: { ok: v => typeof v === 'boolean', word: 'Boolean', takes: 'true or false (on or off)' },
+  time: { ok: isTimeV, word: 'Time', takes: 'a time, such as 00:15:00' },
+  // there is no way to type a date in a Process, so a Date Time also takes text that reads as a date and time
+  datetime: { ok: v => isDateV(v) || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Date.parse(v))), word: 'Date Time',
+    takes: 'a date and time, such as now, now + 01:00:00 or "11/09/2026 07:00:00"' },
+};
+// '' when the value fits the gGlobal's Kind, or the error in plain words. Kinds other than the five variable Kinds pass.
+export function kindValueError(name, kind, v) {
+  const k = KIND_TAKES[kind ?? 'value'];
+  if (!k || k.ok(v)) return '';
+  const tip = kind === 'time' && typeof v === 'number' ? ' (a number of minutes times 00:01:00 makes a time)'
+    : kind === 'string' && v !== undefined ? ' (to make text from it, put it after "" +, such as "" + 152)' : '';
+  return `${name} is a ${k.word} gGlobal: it only takes ${k.takes}. It was not changed, because ${valueWhat(v)}${tip}.`;
+}
+
+// A Time gGlobal's .minute and .seconds (OakBarn Brewery, 2026-11-09, Rule 1.30). They take a whole number, which is turned
+// into a time and becomes the whole value: gT_HopDrop_1.minute = 5 is 00:05:00, gT_HopDrop_1.seconds = 126 is 00:02:06 and
+// .seconds = 3726 is 01:02:06 (it rolls over into minutes and hours). Read, they give the whole time in minutes or seconds.
+export const TIME_PARTS = { minute: 60, minutes: 60, second: 1, seconds: 1 };
+export function timePartError(name, prop, v) {
+  if (typeof v === 'number' && Number.isInteger(v)) return '';
+  const per = TIME_PARTS[prop] === 60 ? 'minutes, such as 5 (it becomes 00:05:00)' : 'seconds, such as 126 (it becomes 00:02:06)';
+  return `${name}.${prop} only takes a whole number of ${per}. It was not changed, because ${typeof v === 'number' ? `${Math.round(v * 10000) / 10000} is not a whole number` : valueWhat(v)}.`;
+}
