@@ -1805,10 +1805,12 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
   Setpoint (blue) and the Offset (yellow). Data Display calls the probe reading **Temperature**. A Device built into a Vessel Device
   shows its layer as **Inside Vessel Device Layer**.
-- **Direction and the sign of the Offset** (OakBarn Brewery, 2026-11-10): the Direction is greyed and says which way the Hysteresis
-  works, and the Offset's name says its sign, so the user types a plain number and Skynet gives it the right sign in the background:
-  a Heating Element is **Heating** with **Offset (+)**; anything that only cools is **Cool** with **Offset (-)**; the Fermentor Control
-  (Rule 6.30) is **Bi-Directional** with **Heat Offset (+)** and **Cool Offset (-)**.
+- **Direction and the sign of the Offset** (OakBarn Brewery, 2026-11-10: "Plain English and not a Who's on First Confusion where
+  + = - and - = +"): the Direction is greyed and says which way the Hysteresis works. The sign of the Offset says where it turns On:
+  **On at Setpoint + Offset**, every time. A Heating Element is **Heating** with **Offset (-)** (the HLT element: -1, On at 149 °F with
+  a Setpoint of 150 °F); anything that only cools is **Cool** with **Offset (+)**; the Fermentor Control (Rule 6.30) is
+  **Bi-Directional** with **Heat Offset (-)** and **Cool Offset (+)**. Dialogs show and take these signs; the Rule 6.29 ranges are
+  shown with the same sign (Optical SSR -0.5 to -3 °F). The saved number and a Process's `.onoffset` stay as before (plus heats).
 - **Overlay colors follow the Direction** (OakBarn Brewery, 2026-11-10): the Overlay choices are None, Lightning Bolt, Flashing
   Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Red Glow, Orange Glow and Blue Glow. Something that
   **heats** (a Heating Element, the Heat of a Fermentor Control, a Cool / Warm Pump with a plus On offset) has no Blue Glow and no Green
@@ -3383,6 +3385,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Offset's sign says where it turns On, Setpoint + Offset: Heating is Offset (-), Cool is Offset (+), the Fermentor Control has Heat Offset (-) and Cool Offset (+). Dialogs show and take the sign; the saved number and a Process's .onoffset are unchanged. Help 150, 182. Checked against the BruControl Import program: it saves the same numbers, no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery): Blue is kept for cooling: the Blue Tint overlay is offered only when the Direction is Cool; a Heating Element's Overlay list has no Red Tint (On = Red Glow is the same). Help 58. Checked against the BruControl Import program: it sets no tints. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Direction (greyed) says which way a Hysteresis works and the Offset's name says its sign: Heating with Offset (+), Cool with Offset (-), and the Fermentor Control Bi-Directional with Heat Offset (+) and Cool Offset (-); the user types plain numbers and Skynet signs them. Help 150, 182. Checked against the BruControl Import program: it already turns BruControl's minus offsets into the Cool side. (thread "Build Integrated Instances")

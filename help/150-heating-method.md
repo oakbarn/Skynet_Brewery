@@ -48,7 +48,7 @@ When you build it (and later in its Properties), the **Heating method** part has
 
 - **Current Method**: the method it is in. The dialog opens on the one it is in now. Beside it, **Short Label** switches its
   balloons to short names (DO, DutyC, HYS ...).
-- **Hysteresis**: the **Temperature Probe** and its **Setpoint** sit on one line. **Direction** is Heating, with the **Offset (+)** beside it (type a plain number),
+- **Hysteresis**: the **Temperature Probe** and its **Setpoint** sit on one line. **Direction** is Heating, with the **Offset (-)** beside it (-1 turns it on 1 degree below the Setpoint),
   picked from a list (every half degree its Hardware Controller allows). **Predictive** has the **Delay** beside it. A small drawing
   beside each shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).
 - **On / Off**: on the same line, a small picture of the Element. One click turns it On or Off at once, like one click on it on

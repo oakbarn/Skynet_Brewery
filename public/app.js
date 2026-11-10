@@ -6998,18 +6998,20 @@ function heatWaveSvg(which) {
 }
 const ELEM_HEAT_TIPS = {
   target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 168.',
-  onOffset: 'Hysteresis: how far under the Setpoint it turns on (+ heats, - cools). It turns off at the Setpoint. Example: the HLT element has 1, so with its Setpoint of 150 °F it turns on at 149 °F and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR 0.5 to 3 °F, Contactor or Mechanical relay 1 to 5 °F. Picking a Hardware Controller sets it for you: 0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), 1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.onoffset = 2.',
+  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it without the minus, as before: HLT_Vessel.BM_8_HE_HLT~element_BR.onoffset = 2 turns on 2 °F below.',
   onDelay: 'Hysteresis: how many seconds the reading must stay under its On point before it turns on, so it does not click on and off. Example: the HLT element is switched by an Optical SSR, so 0 is fine; a Contactor or Mechanical relay needs at least 10 (Rule 6.29). Picking a Hardware Controller sets it: 0 for an Optical SSR, 10 for a Contactor or Mechanical relay.',
 };
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
 const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
-// the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else
+// the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else.
+// Shown with a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it);
+// the saved number stays plus, as the Brain and a Process use it.
 function offsetChoices(it) {
   const r = heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input)), l = [];
   for (let v = r.min; v <= r.max + 1e-9; v = Math.round((v + 0.5) * 10) / 10) l.push(v);
   if (it.onOffset !== undefined && it.onOffset !== '' && !l.includes(+it.onOffset)) l.push(+it.onOffset);
-  return l.sort((a, b) => a - b).map(v => [String(v), String(v)]);
+  return l.sort((a, b) => a - b).map(v => [String(v), v > 0 ? '-' + v : String(-v)]);
 }
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
@@ -7032,7 +7034,7 @@ function heatFields(it, x = {}) {
     // with its Offset picked from a list, and Predictive with its Delay, each with a small wave drawing
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...(HEAT_SETTINGS[m].some(([, k]) => k === 'target') ? { with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] } : {}), ...x }]] : []),
     ...(m === 'hysteresis' ? [
-      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (+)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
+      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (-)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
       PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay') }], ['_waveD', '', 'wave', 'delay']] })]
       : HEAT_SETTINGS[m].filter(([, key]) => !(key === 'target' && NEEDS_PROBE.includes(m))).map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x])),
     // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
@@ -7660,9 +7662,9 @@ const FERM_TIPS = {
   heat: 'What warms the beer: a heat mat, a heat wrap (Fermwrap), a ceramic heat emitter or a lamp. The Fermentor turns it on and off (a Heating Element is run in Direct), and keeps to the range of what switches it (Rule 6.29).',
   cool: 'What cools the beer: a freezer or fridge on a relay, a glycol pump or a glycol valve. The Fermentor turns it on and off.',
   mode: 'Heat & Cool holds the Setpoint both ways. Heat only or Cool only uses just one side (the other stays Off). A Process: FV1.mode = "Cool only".',
-  direction: 'Direction: a Fermentor Control both heats and cools, so it is always Bi-Directional. Heat Offset (+) is how far below the Setpoint the Heat starts; Cool Offset (-) is how far above it the Cooling starts. Type both as plain numbers: Skynet gives each its sign.',
-  heatOffset: 'Heat Offset (+): Heat starts when the beer is this far below the Setpoint, and stops at the Setpoint.',
-  coolOffset: 'Cool Offset (-): Cooling starts when the beer is this far above the Setpoint, and stops at the Setpoint.',
+  direction: 'Direction: a Fermentor Control both heats and cools, so it is always Bi-Directional. Each Offset says where that side turns on, as Setpoint + Offset: Heat Offset (-) is below the Setpoint (for example -1), Cool Offset (+) is above it (for example 1).',
+  heatOffset: 'Heat Offset (-): Heat starts at Setpoint + Offset, below the Setpoint (with a Setpoint of 66 and -1, at 65), and stops at the Setpoint.',
+  coolOffset: 'Cool Offset (+): Cooling starts at Setpoint + Offset, above the Setpoint (with a Setpoint of 66 and 1, at 67), and stops at the Setpoint.',
   changeover: 'Heat and Cooling are never On together. After one stops, the other waits this long before it may start, so they never fight. 300 s (5 minutes) is a good start.',
   heatDelay: 'Once the Heat stops, it stays Off at least this long. Flashing a bulb on and off is bad for it.',
   heatMinRun: 'Once the Heat starts, it stays On at least this long.',
@@ -7680,7 +7682,7 @@ function fermFields(it) {
     ['mode', 'Mode', 'sel', FERM_MODES.map(([k, w]) => [k, w]), false, false, { tip: FERM_TIPS.mode }],
     // its Direction is Bi-Directional, greyed; the two offsets say their sign and are saved as plain numbers (OakBarn Brewery, 2026-11-10)
     ['_dir', 'Direction', 'ro', 'Bi-Directional', false, false, { tip: FERM_TIPS.direction }],
-    ...FERM_SETTINGS.map(([, key, label]) => [key, label, 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
+    ...FERM_SETTINGS.map(([, key, label]) => [key, label, key === 'heatOffset' ? 'negnum' : 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
     PREDICTIVE_FIELD()];
 }
 function hydroFields(it) {
@@ -7822,7 +7824,7 @@ const DEVICE_TIPS = {
   ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BR.',
   eTab: 'The Tab this Heating Element goes on, for example Brewhouse. Its Tab ID, BR, ends the Suggested Name: BM_8_HE_HLT~element_BR. ➕ Add new Tab… makes a new Tab and comes back here.',
   eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BR is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BR = on.',
-  eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (+) beside it is how far under the Setpoint it turns on; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
+  eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (-) beside it says where it turns on: Setpoint + Offset, so -1 turns on 1 degree under the Setpoint; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
   eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its short code HE is the third part of the Suggested Name: BM_8_HE_HLT~element_BR.',
   eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
@@ -8268,7 +8270,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const id = 'hwids_' + Math.random().toString(36).slice(2);
     input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
-  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
+  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' || kind === 'negnum' ? 'number' : 'text', ...(kind === 'num' || kind === 'negnum' ? { step: 'any' } : {}), value: kind === 'negnum' ? (v === undefined || v === '' || v === null ? '' : -Math.abs(+v)) : v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   const full = kind === 'multi' || kind === 'area';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
 }
@@ -8344,6 +8346,7 @@ function readFields(obj, root = $('#dlgBody')) {
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
     else if (kind === 'num' || kind === 'numsel') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'negnum') v = inp.value === '' ? undefined : Math.abs(+inp.value);   // shown with a minus, saved plus (-1 or 1 both save 1)
     else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
