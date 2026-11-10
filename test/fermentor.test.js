@@ -46,14 +46,14 @@ function make(extra = {}) {
   clearTimeout(store._persistTimer);
 }
 {
-  // a heater on a Contactor keeps its range (Rule 6.29): Heat On offset 0.2 runs as 2 °F, its On delay at least 60 s
+  // a heater on a Contactor keeps its range (Rule 6.29): Heat On offset 0.2 runs as 1 °F, its On delay at least 10 s
   const { store, ctl } = make({ heatOffset: 0.2, heatDelay: 0, changeover: 0 });
   const d = store.get('Mat'); d.switchedBy = 'contactor';
   store.setProp('FV1', 'state', true);
-  store.setProp('T', 'value', 65); ctl.tick(1000); ctl.tick(70000);
-  assert.equal(!!store.getProp('Mat', 'state'), false, '1 °F below is not enough for a Contactor (2 to 5 °F)');
-  store.setProp('T', 'value', 63.9); ctl.tick(71000);
-  assert.equal(!!store.getProp('Mat', 'state'), true, '2 °F below heats');
+  store.setProp('T', 'value', 65.5); ctl.tick(1000); ctl.tick(70000);
+  assert.equal(!!store.getProp('Mat', 'state'), false, '0.5 °F below is not enough for a Contactor (1 to 5 °F)');
+  store.setProp('T', 'value', 64.9); ctl.tick(71000);
+  assert.equal(!!store.getProp('Mat', 'state'), true, '1 °F below heats');
   clearTimeout(store._persistTimer);
 }
 {

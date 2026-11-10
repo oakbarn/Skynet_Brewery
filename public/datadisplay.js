@@ -12,7 +12,7 @@ export const DISPLAY_CHOICES = {
   flowMeter: [['both', 'Rate and Total'], ['rate', 'Rate'], ['total', 'Total']],
   scale: [['both', 'Volume and Weight'], ['volume', 'Volume'], ['weight', 'Weight']],
   pwmOut: [['both', 'Value and Volts'], ['value', 'Value'], ['volts', 'Volts']],
-  heat: [['both', 'Status and Setpoint'], ['output', 'Output'], ['reading', 'Reading'], ['setpoint', 'Setpoint']],
+  heat: [['both', 'Status and Setpoint'], ['output', 'Output'], ['reading', 'Temperature'], ['setpoint', 'Setpoint']],
 };
 DISPLAY_CHOICES.analogOut = DISPLAY_CHOICES.pwmOut;
 const kindOf = el => isHeatElem(el) ? 'heat' : el?.type;

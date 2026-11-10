@@ -127,15 +127,18 @@ export function heatDefault(method, prop) {
 export const TYPE_METHOD = { digitalOut: 'onoff', dutyCycle: 'dutyCycle', hysteresis: 'hysteresis', pid: 'pid', deadband: 'deadband' };
 
 // Heat Hysteresis by what switches it (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed for
-// heating elements with Optical SSRs"; a Contactor (and a mechanical relay) 2 to 5 with an On delay of at least 60 seconds, Rule 6.29).
-// A Heating Element says what switches it (Switched by, saved as switchedBy; empty = Optical SSR). Its Hysteresis that heats (a plus or 0 On
-// offset) may only use an On offset inside that range, and on a Contactor or Relay an On delay of at least 60 s, so the contacts do not wear
+// heating elements with Optical SSRs"; a Contactor (and a mechanical relay) 1 to 5 with an On delay of at least 10 seconds, Rule 6.29).
+// A Heating Element says what switches it (Hardware Controller, saved as switchedBy; empty = Optical SSR). Its Hysteresis that heats (a plus or 0 On
+// offset) may only use an On offset inside that range, and on a Contactor or Relay an On delay of at least 10 s, so the contacts do not wear
 // out. A minus On offset (cooling) is not a heat Hysteresis and has no range here. The numbers are °F; with a °C probe they are converted.
 export const SWITCHED_BY = [
-  ['ssr', 'Optical SSR', 0.5, 3, 0],
-  ['contactor', 'Contactor', 2, 5, 60],
-  ['relay', 'Mechanical relay', 2, 5, 60],
+  ['ssr', 'Optical SSR', 0.5, 3, 0, 0.5, 0],
+  ['contactor', 'Contactor', 1, 5, 10, 1, 10],
+  ['relay', 'Mechanical relay', 1, 5, 10, 1, 10],
 ];
+// [key, word, lowest On offset, highest On offset, shortest On delay (s), the On offset and On delay it gets when picked] (°F)
+// Picking a Hardware Controller sets its On offset and On delay (OakBarn Brewery, 2026-11-10: Optical SSR .5 and 0, Contactor 1 and 10,
+// Mechanical relay 1 and 10)
 export const switchedBy = el => SWITCHED_BY.some(s => s[0] === el?.switchedBy) ? el.switchedBy : 'ssr';
 export const switchedByWord = k => SWITCHED_BY.find(s => s[0] === k)?.[1] ?? SWITCHED_BY[0][1];
 export const switchedByChoices = () => SWITCHED_BY.map(s => [s[0], s[1]]);
@@ -144,7 +147,7 @@ const isCelsius = u => /c/i.test(String(u ?? '')) && !/f/i.test(String(u ?? ''))
 export function heatHysRange(el, probe) {
   const s = SWITCHED_BY.find(x => x[0] === switchedBy(el)), c = isCelsius(probe?.units);
   const f = x => c ? Math.round(x * 5 / 9 * 10) / 10 : x;
-  return { min: f(s[2]), max: f(s[3]), delay: s[4], u: c ? '°C' : '°F', word: s[1] };
+  return { min: f(s[2]), max: f(s[3]), delay: s[4], u: c ? '°C' : '°F', word: s[1], start: f(s[5]), startDelay: s[6] };
 }
 // The plain error when its heat Hysteresis On offset or On delay is outside the range, or null. Only a Heating Element that may use
 // Hysteresis is checked; offset and delay default to the element's own saved ones.
@@ -152,8 +155,8 @@ export function heatHysProblem(el, probe, offset = el?.onOffset ?? 1, delay = el
   if (!isHeatElem(el) || !allowedMethods(el).includes('hysteresis')) return null;
   const o = Number(offset), d = Number(delay) || 0, r = heatHysRange(el, probe), who = el.name || 'This Heating Element';
   if (Number.isFinite(o) && o >= 0 && (o < r.min || o > r.max))
-    return `${who} (Switched by: ${r.word}): its Hysteresis On offset must be ${r.min} to ${r.max} ${r.u} (Rule 6.29). It is ${o}.`;
+    return `${who} (Hardware Controller: ${r.word}): its Hysteresis Offset (-) must be -${r.min} to -${r.max} ${r.u} (Rule 6.29). It is ${-o}.`;
   if (Number.isFinite(o) && o >= 0 && d < r.delay)
-    return `${who} (Switched by: ${r.word}): its Hysteresis On delay must be at least ${r.delay} seconds, so it does not wear out (Rule 6.29). It is ${d}.`;
+    return `${who} (Hardware Controller: ${r.word}): its Hysteresis On delay must be at least ${r.delay} seconds, so it does not wear out (Rule 6.29). It is ${d}.`;
   return null;
 }

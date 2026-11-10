@@ -26,7 +26,7 @@ assert.match(own, /\['_orient', 'Orientation', 'vorient', skyOrientChoices\(it\)
 assert.match(own, /\['tap', 'Toggle', 'sel', ONE_CLICK_TAP\(it\.tap\)/, 'Toggle works normally, Skynet valve too (Fritz, 2026-11-05); Toggle or Push Button, no None (Rule 2.46)');
 assert.match(own, /'vorient', skyOrientChoices\(it\), true, false, \{ tip: T\.vOrient, with: MBV_TOGGLE\(it\)/, 'Orientation and Toggle on one line, as the Pump\'s Cover and Toggle');
 assert.match(own, /with: \[\['closeAll', 'On Close List', 'bool', true[^\]]*\], \['openAll', 'On Open List', 'bool', true/, 'Tap water, On Close List and On Open List on one line');
-assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay\), false, false, \{ tip: DEVICE_TIPS\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
+assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay, it\), false, false, \{ tip: DEVICE_TIPS\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
 assert.ok(!/'ro'/.test(own.slice(own.indexOf('MBV_TOGGLE_OVERLAY'))) , 'nothing greyed out in Toggle / Overlay');
 assert.match(own, /\['imageOff', 'Path \(closed\)', 'gpick', null, false, false, \{ tip: T\.vPath, attr: MBV_IP_POP/, 'a User Defined valve: its own pictures and IP spots (Rule 5.22)');
 assert.match(own, /\['device', '2\. Interface', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port greyed out with Change once added (Rule 18.13)');
