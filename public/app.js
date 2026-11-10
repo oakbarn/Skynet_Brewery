@@ -1337,6 +1337,8 @@ const fontPx = v => +v > 0 ? +v : 0;
 // Default = the item's normal color, None = no color at all (see-through)
 const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
   ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#fafafa'], ['Black', '#000000']];     // White is RGB 250 250 250 in every color picker (Fritz, 2026-11-05, Rule 2.7)
+// where it starts Centered: Left, Centered or Right, no Default choice (a saved MiddleCenter shows as Centered)
+const ALIGN_LCR = [['MiddleLeft', 'Left'], ['', 'Centered', 'MiddleCenter'], ['MiddleRight', 'Right']];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
@@ -2287,7 +2289,7 @@ function styleEl(n, e) {
   if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
   const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, T.align, D.align), nal = firstSet(e.align, T.labelAlign, D.align);
-  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (nal) nm.style.textAlign = nal.toLowerCase();
+  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else nm.style.textAlign = (nal || 'Center').toLowerCase();      // Centered when nothing is set (Label Attributes)
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
   else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
   // Word wrap on: a long name goes onto more lines (off: one line, cut off with ...). Values always wrap.
@@ -4834,16 +4836,30 @@ function liveSuggestion(obj, body = $('#dlgBody')) {
   const w = { ...obj }; try { if (body) readFields(w, body); } catch { }
   try { return nameSuggestion(w, sugSelf(obj)) || ''; } catch { return ''; }
 }
-// The Label's balloon, made for where it is (OakBarn Brewery, 2026-11-09): its own Label and its Suggested Name, with the Label part marked
+// The Label's balloon, made for where it is (OakBarn Brewery, 2026-11-09): its own Label and its Suggested Name, with the Label part marked.
+// OakBarn Brewery, 2026-11-10 (the Pump dialog is the model): how you call it, the Suggested Name read part by part with its own
+// Interface, Port, Type and Tab, why a long name is no trouble in a Process, and what the ⬆ and ⬢ open.
+const LABEL_PUMP_STORY = 'How do you refer to this Pump? Brewing Pump, Mash Pump, HLT Pump ...? Use your name for the Pump as the Label. The OakBarn Brewery Sample Schema has several Pumps, color coded with a Cover. When OakBarn is brewing, he might yell out "Shut off the Red Pump" to stop the flow. The Fermenters are in a different room, and when they are visually full the Brewmeister yells "Turn off the Red Pump" to his comely assistant, who then clicks the Red Pump Off.';
+const LABEL_UP_TIP = n => `The ⬆ opens a ${n} Line Label Text Dialog.`;
+const LABEL_ATTR_TIP = 'The ⬢ opens the Label Attributes Dialog, where you set its font, size and colors.';
 function labelTip(o, x = {}) {
   const lab = String(o.label ?? '').trim(), part = parseLabel(lab), sug = (() => { try { return nameSuggestion(o, sugSelf(o)) || ''; } catch { return ''; } })();
-  const lines = [`The name shown on the Tab, for example ${lab || 'HLT Element'}. It is the Plain Text Part of the Suggested Name. Spaces become ~.`];
+  const dev = isDevice(o), pump = dev && isPumpDev(o);
+  const lines = [pump ? LABEL_PUMP_STORY : dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
+    '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.'];
   if (sug && part) {
-    const head = isDevice(o) ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o) }) : '', at = sug.indexOf(part, head.length);
+    const head = dev ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o) }) : '', at = sug.indexOf(part, head.length);
     lines.push(at >= 0 ? `${sug.slice(0, at)}⟦${part}⟧${sug.slice(at + part.length)}` : sug);
   } else if (sug) lines.push(sug);
-  if (x.attr) lines.push('The ⬢ sets its font, size and colors.');
-  if (x.up) lines.push(`The ⬆ expands the Text Box to ${x.up} Lines.`);
+  if (dev) {
+    const id = ifaceIdOf(o.device), port = portForName(o), code = o.typeCode ?? defaultCode(o), tab = tabIdOf(o.workspace);
+    lines.push('', 'Suggested Name Format: InterfaceID_Port_Type_Label_TabID');
+    if (sug && id && port && tab) lines.push(`From ${sug} you know that the Device ${lab || part} is connected to Interface ${id} (${o.device}), on Port ${port}, ${code} Type, labeled ${lab || part}, and is on Tab ${tab} (${o.workspace}).`);
+    lines.push('', `Do not worry about such a long name when writing a Process: it is a choice in a List Box. Because of Predictive Text, type ${id || 'BM'} in the List Box and only the Devices on ${id ? `${id}: ${o.device}` : 'BM: Brewery Mega'} are left to pick from.`);
+  } else lines.push('', 'Suggested Name Format: wgt_Type_Label_TabID');
+  if (x.up || x.attr) lines.push('');
+  if (x.up) lines.push(LABEL_UP_TIP(x.up));
+  if (x.attr) lines.push(LABEL_ATTR_TIP);
   return lines.join('\n');
 }
 function liveNames(body, obj) {
@@ -4950,7 +4966,7 @@ async function newDeviceDialog(e, hint, what) {
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + (pr && isOneWire(e) ? T.pNum : T.port) : ''), ...(pinPort ? { with: portF } : {}) }],
+    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface, ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
@@ -6599,7 +6615,7 @@ const F = {
     ['_nm', 'A Timer Widget counts up or down in hh:mm:ss. Its Name is how a Process uses it: name.attribute = Something.', 'infonote', 'timer'],
     ['_tb', 'Timer', 'box'], ['timerType', 'Type', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, 'b'], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the Brain starts', 'bool'],
     ['_lb', '', 'box'], ['label', 'Label (the title bar; never blank)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
-    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]],
+    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', ALIGN_LCR],
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
@@ -6752,9 +6768,20 @@ const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under th
   ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
-const LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
-  ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'],
-  ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]]] };
+// Label Attributes (OakBarn Brewery, 2026-11-10): Title Case names, no clutter, the size it shows at in Font Size, and Left, Centered or
+// Right (no Default choice: what it shows is what it is; Centered when nothing else is set)
+const LABEL_ALIGNS = [['MiddleLeft', 'Left'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right']];
+const LABEL_POP = { title: 'Label Attributes', tip: 'Opens the Label Attributes Dialog, where you set its font, size and colors.',
+  fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(), nameAlign: 'Middle' + labelDefaultAlign() }),
+  fields: [['label', 'Label', 'text', null, false, 'b', { tip: 'The Label shown on the Tab.' }], ['hideName', 'Visible', 'show', null, false, false, { tip: 'On: the Label shows on the Tab. Off: no Label shows.' }],
+  ['nameFontSize', 'Font Size', 'num', null, false, false, { tip: 'The size of the Label\'s letters, in pixels.' }],
+  ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore Color', 'color'], ['nameBg', 'Back Color', 'color'],
+  ['nameAlign', 'Alignment', 'sel', LABEL_ALIGNS]] };
+// the Label's size and alignment when it has none of its own: the Tab Style's, then the Default tab's, then the panel's own
+// the size its Label shows at on the Tab now (pixels), when it is there
+const labelShownSize = o => { try { const n = o?.name && document.querySelector(`#ws .el[data-name="${CSS.escape(o.name)}"] > .nm`); return n ? Math.round(parseFloat(getComputedStyle(n).fontSize)) || 0 : 0; } catch { return 0; } };
+const labelDefaultSize = () => fontPx(TS().labelSize) || TD().nameFontSize || 11;
+const labelDefaultAlign = () => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TD().align));
 const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
@@ -6955,7 +6982,7 @@ function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
@@ -7067,7 +7094,7 @@ function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true, tip: T.eVisible }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true, tip: T.eHidden }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.eLabel }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.eLabelVisible }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.eIface + ' ' + T.ePort, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.eIface, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.ePort }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.eTab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.eName }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
@@ -7139,7 +7166,7 @@ function mbvDeviceFields(it, item) {
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
     // the ⬢ Pin attributes (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'], attr: DEV_PORT_POP }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }], attr: DEV_PORT_POP }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Valve follows it until you type a name of your own)' : ''), 'note'],
@@ -7168,7 +7195,7 @@ function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'pwm'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: ['channel', 'Available Ports', 'pinsel', 'pwm', false, false, { tip: T.port }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -7231,7 +7258,7 @@ function probeDeviceFields(it, item) {
   it._flip = flipOf(it);
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + (isOneWire(it) ? T.pNum : T.port), with: probePort(it) }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: [...probePort(it), false, false, { tip: isOneWire(it) ? T.pNum : T.port }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Probe follows it until you type a name of your own)' : ''), 'note'],
@@ -7304,7 +7331,7 @@ const DATAW_TIPS = {
   format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
   code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
-const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
+const DATAW_ALIGN = ALIGN_LCR;
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
 const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BR.showas = "mm:ss" or wgt_DT_Clock_BR.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
@@ -7573,7 +7600,7 @@ function genDeviceFields(it, item, f) {
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ...f.filter(x => x[0] === '_sky'),
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ...(hasIface ? [['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + (port ? ' ' + (port[0] === 'probeIndex' ? T.pNum : T.port) : ''), ...(port ? { with: port } : {}), ...(pinPop ? { attr: DEV_PORT_POP } : {}) }]] : []),
+    ...(hasIface ? [['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, ...(port ? { with: [...port.slice(0, 4), ...Array(Math.max(0, 4 - port.length)).fill(undefined), false, false, { tip: port[0] === 'probeIndex' ? T.pNum : T.port }] } : {}), ...(pinPop ? { attr: DEV_PORT_POP } : {}) }]] : []),
     part ? ['_host', '3. Built into', 'ro', builtInHost(it), false, false, { tip: 'This Device is built into it (Rule 5.7): it moves, shows and is deleted with it, and its Interface and Port are set in its Properties.' }]
       : ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
@@ -7772,8 +7799,10 @@ function field(f, obj) {
   }
   if (x && out[1]) {
     const icons = []; let wrap;
-    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
-    if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
+    // each icon's own balloon (OakBarn Brewery, 2026-11-10): what it opens
+    const nm = String(f[1] || '').replace(/^\d+\.\s*/, '');
+    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Opens a ${x.up} Line ${nm} Text Dialog.`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
+    if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.tip || x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
   if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
@@ -7834,9 +7863,9 @@ const DEVICE_TIPS = {
   eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
-  labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
+  labelVisible: 'The Label may be shown on the Tab, for example Red Pump above the Pump. On: the Label shows. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
-  port: 'Available Ports: only the free pins on this board that fit this Device (for example 22, or A5 = 59).',
+  port: 'Available Ports: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is added it is greyed out: it is the wiring.',
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
   type: 'Its General Type first (DO = Digital Out, PWM, HYS ...), then its Device Type, which comes from the list it was picked in and is part of the Suggested Name.',
@@ -8132,7 +8161,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'sel') {       // an entry { group, items } is a heading with its choices under it
     const pair = o => Array.isArray(o) ? o : [o, o], os = opts.flatMap(o => o?.group ? o.items.map(pair) : [pair(o)]);
-    const opt = ([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l);
+    const opt = ([o, l, same]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o || (same && String(v) === same) ? { selected: true } : {}) }, l);      // a 3rd entry: a saved value that shows as this choice
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
   }
   else if (kind === 'note') return [h('div', { class: 'full muted', 'data-note': key }, label)];
@@ -8388,6 +8417,32 @@ function fillPicPair(body, sel) {
 const INPUT_KINDS = f => Array.isArray(f) && !['note', 'head', 'box', 'boxend', 'infonote', 'attrhead'].includes(f[2]) && !!f[1] && !f[6]?.inTitle;
 const KEEP_NOTE = t => /^\s*(⚠|🧪|Suggested|It is (OPEN|CLOSED)|Kind:|Name:|Clone of)/.test(t) || (t.length < 40 && !/\.\s*$/.test(t));
 const withTip = (f, tip) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); const x = g[6] || {}; g[6] = { ...x, tip: x.tip ? x.tip + ' ' + tip : tip }; return g; };
+// Titles and field names in Title Case (OakBarn Brewery, 2026-11-10: "Titles and Attribute Labels follow Pascal Camel Code Style"):
+// each plain lower-case word gets its capital, the small joining words stay small (not the first), and what is in ( ) is left as
+// it is. Only names (up to 5 words): a long sentence is an explanation, which belongs in its balloon (Rule 11.8).
+const TITLE_SMALL = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'of', 'on', 'or', 'per', 'the', 'to', 'vs', 'via', 'with']);
+function titleCase(t) {
+  if (typeof t !== 'string') return t;
+  const p = t.indexOf('('), head = p >= 0 ? t.slice(0, p) : t, rest = p >= 0 ? t.slice(p) : '';
+  const words = head.trim().split(/\s+/).filter(Boolean);
+  if (!words.length || words.length > 5) return t;
+  let first = true;
+  const out = head.replace(/\S+/g, w => {
+    const lead = /^[^A-Za-z]*/.exec(w)[0], core = w.slice(lead.length), isWord = /^[a-z]+(['’-][a-z]+)*[:.,;]?$/.test(core);
+    const cap = isWord && (first || !TITLE_SMALL.has(core.replace(/[:.,;]$/, '')));
+    if (/[A-Za-z]/.test(w)) first = /:$/.test(w);
+    return cap ? lead + core.charAt(0).toUpperCase() + core.slice(1) : w;
+  });
+  return out + rest;
+}
+const TITLED = f => Array.isArray(f) && typeof f[1] === 'string' && !['note', 'infonote', 'go', 'showall'].includes(f[2]);
+const titled = f => {
+  if (!TITLED(f)) return f;
+  const g = [...f]; g[1] = titleCase(f[1]);
+  const w = g[6]?.with;
+  if (w) g[6] = { ...g[6], with: Array.isArray(w[0]) ? w.map(titled) : titled(w) };
+  return g;
+};
 function cleanFields(list, sink) {
   const fs = list.map(f => {        // a long ( ) explanation after a name becomes its tip
     if (!INPUT_KINDS(f) || typeof f[1] !== 'string' || f[6]?.tip) return f;
@@ -8396,6 +8451,7 @@ function cleanFields(list, sink) {
     const g = withTip(f, m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.')); g[1] = m[1]; return g;
   });
   if (!fs.some(INPUT_KINDS)) return fs;      // only a message: its words are what it says
+  for (let i = 0; i < fs.length; i++) fs[i] = titled(fs[i]);
   const out = [], top = [];
   for (let i = 0; i < fs.length; i++) {
     const f = fs[i];
@@ -8814,10 +8870,15 @@ async function upEntry(wrap, f, lines) {
 async function attrEntry(attr, obj) {
   try { readFields(obj); } catch { }
   let body;
-  const r = await layerDialog(attr.title, b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete);
-  if (r === 'delete') return $('#dlg').close('delete');      // the Properties pop-up's Delete is the dialog's Delete (it asks first)
-  if (r !== 'ok') return;
-  readFields(obj, body);
+  // a box left empty shows what it is now (OakBarn Brewery, 2026-11-10: "Just put the Default Size in the Font Size field"); kept empty
+  // when it is not changed, so it goes on following the Tab Style
+  const fill = Object.entries(attr.fill?.(obj) ?? {}).filter(([k]) => obj[k] === undefined || obj[k] === null || obj[k] === '');
+  for (const [k, v] of fill) obj[k] = v;
+  const unfill = () => { for (const [k, v] of fill) if (String(obj[k] ?? '') === String(v)) obj[k] = ''; };
+  const r = await layerDialog(titleCase(attr.title), b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete);
+  if (r === 'delete') { unfill(); return $('#dlg').close('delete'); }      // the Properties pop-up's Delete is the dialog's Delete (it asks first)
+  if (r !== 'ok') return unfill();
+  readFields(obj, body); unfill();
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     if (!body.querySelector(`[data-k="${k}"]`)) continue;
