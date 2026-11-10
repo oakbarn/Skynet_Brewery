@@ -12,8 +12,8 @@ Electrician.
 
 ## How it works
 
-- **Heat comes on** when the beer is the **Heat On offset** below the Setpoint. **Cooling comes on** when it is the **Cool On
-  offset** above it. Both stop at the Setpoint, or a little before it when Predictive Hysteresis is on (Help 168).
+- Its **Direction** is **Bi-Directional** (greyed). **Heat comes on** when the beer is the **Heat Offset (+)** below the Setpoint.
+  **Cooling comes on** when it is the **Cool Offset (-)** above it. Type both as plain numbers: Skynet gives each its sign. Both stop at the Setpoint, or a little before it when Predictive Hysteresis is on (Help 168).
 - **Heat and Cooling are never On together.** One must have been Off for the **Changeover wait** (5 minutes to start) before the
   other may start, so they never fight. A small dip after cooling does not start the heat right away. (Just after
   the Fermentor Control is turned On nothing has run yet, so each side waits only its own On delay.)
