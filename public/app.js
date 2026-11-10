@@ -12,14 +12,15 @@ import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { loadSnippet } from './hoverhelp.js';
+import { loadSnippet, helpNodes } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
+import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
@@ -602,15 +603,6 @@ function vpFields(it, k, d) {
   return [[k + '_part', `${d.name}: on this IP`, 'sel', VP_KINDS, true],
     ...(probe ? [[k + '_ptk', `${d.name}: probe type`, 'sel', tempKinds().map(([a, b]) => [a, b]), true]] : []),
     ...(!kind ? [] : ow ? [[k + '_pidx', `${d.name}: OneWire probe number`, 'probe']] : [[k + '_pin', `${d.name}: Available Ports / Pins`, 'pin', 'vp_' + k]])];
-}
-// an integrated Vessel Device's part sections: the free Ports on each part's Interface (its own Port too)
-function vpxPinLists(w, g) {
-  for (const e of draft.elements.filter(q => q.integratedIn === g.id && isVPart(q))) {
-    const k = e.integratedAs.slice(3), dev = w[`vpx_${k}_device`] ?? e.device;
-    const pins = dev ? freePins({ ...e, device: dev }, draft.elements, S.config.devices, e.type === 'temperature' && ANALOG_TEMP.includes(e.sensor)) : [];
-    $('#pins-vpx_' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-vpx_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: dev }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
-  }
 }
 // the Available Ports lists of its parts: the free pins on its Interface that fit each one (two parts can't share a pin)
 function vpPinLists(w, g) {
@@ -2375,7 +2367,10 @@ function fillEl(n, e0) {
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
     case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget':
-      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      { const f = v.showas || e.showAs, dt = f && e.type !== 'valueWidget' ? dataWDt(e) : '';      // its format (Rule 2.45)
+        if (dt === 'time') text = formatTime(v.value, f); else if (dt === 'datetime') text = formatDateTime(v.value, f); }
+      break;
     case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led': case MANUAL_PUMP_TYPE:
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
@@ -2400,7 +2395,7 @@ function fillEl(n, e0) {
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
+    case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: v.showas || e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
       if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
@@ -4780,11 +4775,39 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
 // and Save Build ... > To a Tab adds it, as for a Device
 const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace)) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
+// A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
+const sugSelf = o => (draft || S.config).elements.find(x => x.name === o.name) || o;
+const hasSuggestion = o => !!o && (isDevice(o) || !!widgetTypeId(o));
+// the Suggested Name from what the Properties box shows now
+function liveSuggestion(obj, body = $('#dlgBody')) {
+  if (!hasSuggestion(obj)) return '';
+  const w = { ...obj }; try { if (body) readFields(w, body); } catch { }
+  try { return nameSuggestion(w, sugSelf(obj)) || ''; } catch { return ''; }
+}
+// The Label's balloon, made for where it is (OakBarn Brewery, 2026-11-09): its own Label and its Suggested Name, with the Label part marked
+function labelTip(o, x = {}) {
+  const lab = String(o.label ?? '').trim(), part = parseLabel(lab), sug = (() => { try { return nameSuggestion(o, sugSelf(o)) || ''; } catch { return ''; } })();
+  const lines = [`The name shown on the Tab, for example ${lab || 'HLT Element'}. It is the Plain Text Part of the Suggested Name. Spaces become ~.`];
+  if (sug && part) {
+    const head = isDevice(o) ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o) }) : '', at = sug.indexOf(part, head.length);
+    lines.push(at >= 0 ? `${sug.slice(0, at)}⟦${part}⟧${sug.slice(at + part.length)}` : sug);
+  } else if (sug) lines.push(sug);
+  if (x.attr) lines.push('The ⬢ sets its font, size and colors.');
+  if (x.up) lines.push(`The ⬆ expands the Text Box to ${x.up} Lines.`);
+  return lines.join('\n');
+}
+function liveNames(body, obj) {
+  if (!hasSuggestion(obj)) return;
+  const w = { ...obj }; try { readFields(w, body); } catch { }
+  let sug = ''; try { sug = nameSuggestion(w, sugSelf(obj)) || ''; } catch { }
+  for (const n of body.querySelectorAll('[data-note="_sug"]')) n.textContent = n.textContent.replace(/^(Suggested [Nn]ame: )(\(type a Label[^)]*\)|\S*)/, (_, a) => a + (sug || '(type a Label and pick the Interface and Port)'));
+  for (const l of body.querySelectorAll('[data-label-tip]')) { const f = l.dataset.labelTip; l.dataset.help = labelTip(w, { attr: f.startsWith('a'), up: +f.replace('a', '') || 0 }); }
+}
 // the Pin attributes pop-up's settings (DEV_PORT_POP), kept when a Device is added
 const PORT_POP_KEYS = ['activeLow', 'oneShot', 'oneShotDirection', 'dualThrowChannel', 'dualThrowDelay'];
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
@@ -4800,7 +4823,7 @@ function portError(e, self) {
   // One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1): only two that already shared a port in the saved Schema (made
   // before this Rule) may go on sharing it. A heater's other ways of control are its heating methods (Rule 6.19).
   const was = self && S.config.elements.find(x => x.name === self.name), old = new Set(was ? portSharers(was, S.config.elements).map(x => x.name) : []);
-  const share = portSharers(e, els).find(o => !old.has(o.name));
+  const share = portSharers(e, els).find(o => !old.has(o.name) && !instanceFamily(e, o));      // an Integrated Instance shares its Device's Port (Rule 6.1)
   if (share) return `Port ${pinsOf(e).find(p => pinsOf(share).includes(p)) ?? ''} on ${iface(e.device)} is already used by ${share.name}. One Interface Port, one Device (Rule 6.1).` +
     (isHeatElem(e) || isHeatElem(share) || HEAT_CTL_TYPES.includes(share.type) ? ' To control a heater another way, pick its Heating method (Rule 6.19).' : '');
   const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins, the OneWire data pin, few PWM and counter pins (Fritz, 2026-10-23)
@@ -5761,6 +5784,20 @@ function vbBuild(t, w) {
 }
 // the readouts of its Heating Element and Probe sit on the vessel, like the Three Vessel sample's HLT
 const VB_LOOK = { element: { w: 170, h: 60, look: 'dark', onText: 'HEAT', offText: 'idle' }, probe: { w: 170, h: 74, look: 'lcd' } };
+// Integrated Instances (OakBarn Brewery, 2026-11-09: "It is not a Clone but an Instance ... An Integrated Device Inherits its Properties
+// ... and then becomes independent. No longer part of the Borg Hive but More like a Bob in the Bobaverse"; "change the Rule to allow an
+// Integrated Instance", Rule 6.1 exception): building a Heating Element that is already on a Tab into a Vessel Device makes a copy of
+// it, on the same Interface Port (which it can't change), with its own On / Off, methods, Setpoint and look. The one on the Tab stays.
+// Its name is VesselName.DeviceName, the name a Process uses (HLT_Vessel.hE_1 = on). The last one turned On or Off has the Port.
+const vesselProcName = g => String(g.name || g.label || 'Vessel').trim().replace(/\s+/g, '_').replace(/\./g, '~');
+function makeInstance(g, src) {
+  const e = clone(src), base = `${vesselProcName(g)}.${src.name}`, taken = n => draft.elements.some(x => x.name.toLowerCase() === n.toLowerCase());
+  let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
+  for (const k of ['_key', 'integratedIn', 'integratedAs', 'vpKind', 'cloneOf']) delete e[k];
+  Object.assign(e, { name, instanceOf: src.name, label: src.label || src.name });
+  draft.elements.push(e);
+  return e;
+}
 function vbAttach(g, k, kind, e) {
   const n = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x) && x.vpKind === 'element').length;
   Object.assign(e, { integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind, workspace: g.workspace }, VB_LOOK[kind === 'element' ? 'element' : 'probe']);
@@ -5779,11 +5816,12 @@ async function vbPickPart(g, k) {
   const have = draft.elements.filter(fits), NEW = '\0new';
   const o = { pick: have.find(e => e.name === g.vbPre?.[k])?.name ?? have[0]?.name ?? NEW };      // the imported one first (BruControl Import)
   const r = await dialog(`${g.label || g.name}: the ${what} on the ${g.ports?.[k]?.label || vpName(k)}`, () => [
-    ['_p', `Pick an existing ${what}: it is built into the vessel and keeps its name and Port. Or add a new one. One already built into a vessel (the Three Vessel sample's too) is not listed: it stays in its own vessel.`, 'note'],
+    ['_p', kind === 'element' ? `Pick an existing ${what}: an Integrated Instance of it is built into the vessel (Rule 6.1): a copy of its Properties on the same Port, independent from then on (its own On / Off, method and Setpoint). The one on its Tab stays. A Process calls the Instance ${vesselProcName(g)}.Name. Or add a new one.`
+      : `Pick an existing ${what}: it is built into the vessel and keeps its name and Port. Or add a new one. One already built into a vessel (the Three Vessel sample's too) is not listed: it stays in its own vessel.`, 'note'],
     ['pick', what, 'sel', [...have.map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`]), [NEW, `➕ Add new ${what}…`]]]], o, false, ['vessel-device-builder']);
   if (r !== 'ok') return;
   readFields(o, $('#dlgBody'));
-  if (o.pick !== NEW) { const e = draft.elements.find(x => x.name === o.pick); if (e) vbAttach(g, k, kind, e); return; }
+  if (o.pick !== NEW) { const e = draft.elements.find(x => x.name === o.pick); if (e) vbAttach(g, k, kind, kind === 'element' ? makeInstance(g, e) : e); return; }
   vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); vbAttach(g, k, kind, e); };      // back on the 🔨 Build Tab with its vessel
   try {
     if (kind === 'element') await addThing(...ELEMENT.slice(1));
@@ -6883,7 +6921,7 @@ const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e
 const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
 const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? '' : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
-const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
+const elemTitle = e => e?.integratedIn ? 'Integrated Heating Element Device' : isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';      // built into a Vessel (OakBarn Brewery, 2026-11-09)
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
 const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'HE' : isProbeDev(e) ? '' : 'Valve';
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
@@ -7097,6 +7135,7 @@ const DATAW_TIPS = {
 const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
+const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BR.showas = "mm:ss" or wgt_DT_Clock_BR.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
   const cv = isCodeValue(it), dt = dataWDt(it), val = dt === 'value', T = DATAW_TIPS;
   const start = { value: 'Start value', time: 'Start value (hh:mm:ss)', datetime: 'Start value (mm/dd/yyyy hh:mm:ss)' }[dt];
@@ -7106,6 +7145,7 @@ function dataWidgetFields(it) {
     ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
     ...(cv ? [['format', 'Format', 'sel', CV_FORMATS, true, false, { tip: T.format }]] : []),      // a Code Value Widget (Rule 1.27)
     ['initial', start, val ? 'num' : 'text', null, false, false, { tip: T.start }],
+    ...(dt === 'time' || dt === 'datetime' ? [['showAs', 'Shows as', 'sel', formatChoices(dt === 'time' ? TIME_FORMATS : DATETIME_FORMATS, it.showAs), false, false, { tip: SHOWAS_TIP }]] : []),      // Rule 2.45
     ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
     ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
     ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
@@ -7242,9 +7282,11 @@ const TIMER_TIPS = {
   reset: 'The time a reset puts it back to, in hh:mm:ss.',
   running: 'On: it is already counting when the Brain starts.',
   style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own, with its Back, Text Fore and Text Back colors and its Frame (shape and color).',
-  format: 'How the time shows: hours, minutes and seconds (01:30:00), or just hours and minutes (01:30).',
+  format: 'How the time shows: hours, minutes and seconds (01:30:00), just hours and minutes (01:30), all minutes (90:00) and more (Rule 2.45). A Process can set any format with .showas, for example tm_Boil.showas = "mm:ss"; "" puts back this pick.',
   ss: 'On: a Timer counting down shows only the seconds (45) once less than one minute is left.',
 };
+// the Timer's Digits (Rule 2.40) and the other Time formats (Rule 2.45)
+const TIMER_FORMATS = [['', 'hh:mm:ss'], ['hm', 'hh:mm'], ...TIME_FORMATS.filter(([k]) => k && k !== 'hh:mm')];
 function timerWidgetFields() {
   const T = TIMER_TIPS;
   return [...wgtHead(T),
@@ -7252,7 +7294,7 @@ function timerWidgetFields() {
     ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
     ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
-    ['timerFormat', 'Digits', 'sel', [['', 'hh:mm:ss'], ['hm', 'hh:mm']], false, false, { tip: T.format }],
+    ['timerFormat', 'Digits', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
     ...wgtPlace()];
 }
@@ -7271,60 +7313,30 @@ const isBuiltIn = e => !!e?.integratedIn;
 // displayed just like it was an independent Device"): the Heating Element's or Temperature Probe's own Properties, with 3. Built into
 // (greyed out) in place of the Tab and no picture, X, Y, Width or Height (the vessel draws it and it moves with the vessel)
 const isVpDrill = e => isVPart(e) && ['element', 'probe', 'thermowell'].includes(e.vpKind);
+// the Process name of a Device built into a Vessel Device: VesselName.DeviceName (Rule 5.31); an Integrated Instance's name already is
+const builtInProcName = e => { if (String(e?.name).includes('.')) return e.name; const g = (draft || S.config).graphics.find(x => x.id === e?.integratedIn); return g ? `${vesselProcName(g)}.${e.name}` : e?.name; };
+// Built into's balloon (OakBarn Brewery, 2026-11-09, Rule 5.31)
+const builtInTip = e => `It is built (Integrated) into this Vessel Device and moves with it. The Integrated Device is part and parcel of the Vessel Device. It cannot be separated, and you can only look at and edit its Properties on this Vessel Device. It has its own Process name: to command it or change an .attribute in the Process Editor, you must use VesselDeviceName.IntegratedDeviceName.\nExample: ${builtInProcName(e)} = On`;
 const VP_DRILL_SKIP = new Set(['_pv', 'imageOff', 'imageOn', '_ppath', 'rot', 'x', 'y', 'w', 'h']);
 function vpPartFields(it, item) {
   const T = DEVICE_TIPS, base = it.vpKind === 'element' ? elemDeviceFields(it, item) : probeDeviceFields(it, item);
-  return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(f => f[0] !== 'workspace' ? f
-    : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: 'It is built into this Vessel Device and moves with it. It can only be taken out by deleting the vessel (Rule 5.31).' }]),
+  const inst = isInstance(it) ? f => f[0] !== 'device' ? f      // an Integrated Instance: its Device's Interface and Port, greyed for good (Rule 6.1)
+    : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: T.iface }] : f => f;
+  return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(inst).map(f => f[0] !== 'workspace' ? f
+    : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
     ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }]];
 }
-// an integrated Vessel Device's part sections, saved onto the parts; the swaps to do once the dialog is closed: [spot, part, new]
+// an integrated Vessel Device's part sections, saved onto the parts (never their Interface or Port, Rule 5.31; no swapping)
 function vpxApply(g, x) {
-  const swaps = [], none = v => v === undefined || v === null || v === '';
+  const none = v => v === undefined || v === null || v === '';
   for (const e of draft.elements.filter(q => q.integratedIn === g.id && isVPart(q))) {
-    const k = e.integratedAs.slice(3), p = `vpx_${k}_`; if (!(p + 'label' in x) && !x[p + 'swap']) continue;
-    if (x[p + 'swap']) { swaps.push([k, e.name, x[p + 'swap']]); continue; }
+    const k = e.integratedAs.slice(3), p = `vpx_${k}_`; if (!(p + 'label' in x)) continue;
     const lab = String(x[p + 'label'] ?? '').trim(); if (!lab) throw new Error(`${e.name}: its Label can not be blank (Rule 18.15)`);
-    e.label = lab; if (!none(x[p + 'device'])) e.device = x[p + 'device'];
-    if (p + 'pidx' in x) { if (!none(x[p + 'pidx'])) e.probeIndex = +x[p + 'pidx']; } else if (!none(x[p + 'channel'])) e.channel = x[p + 'channel'];
+    e.label = lab;      // its Interface and Port are never changed (OakBarn Brewery, 2026-11-09, Rule 6.1)
     if (e.vpKind === 'element') { if (!none(x[p + 'heatMethod'])) e.heatMethod = x[p + 'heatMethod']; if (none(x[p + 'input'])) delete e.input; else e.input = x[p + 'input']; if (none(x[p + 'target'])) delete e.target; else e.target = +x[p + 'target']; }
     else { if (!none(x[p + 'units'])) e.units = x[p + 'units']; if (none(x[p + 'offset'])) delete e.offset; else e.offset = +x[p + 'offset']; }
   }
-  return swaps;
 }
-// a swap: the old part is taken out of the vessel and stays on its Tab as a Device of its own; the one picked (or a new one) is built in
-function vpxRelease(g, e) {
-  for (const k of ['integratedIn', 'integratedAs', 'vpKind']) delete e[k];
-  Object.assign(e, { workspace: g.workspace, x: Math.round((g.x || 0) + (g.w || 200) + 20), y: Math.round(g.y || 0) });
-}
-// the old part after a swap (OakBarn Brewery, 2026-11-09: "Delete if replace with a different Port"): on another Port it is deleted; on the
-// same Interface and Port (the hardware moved, the Port did not) it stays as a Device of its own. Whatever read it now reads the new one.
-const vpSamePort = (a, b) => a.device === b.device && String(a.channel ?? '') === String(b.channel ?? '') && String(a.probeIndex ?? '') === String(b.probeIndex ?? '');
-function vpxRetire(g, old, e) {
-  for (const q of draft.elements) if (q.input === old.name) q.input = e.name;
-  if (vpSamePort(old, e)) { vpxRelease(g, old); return `${old.name} is on the same Port, so it stays as a Device of its own`; }
-  draft.elements = draft.elements.filter(q => q !== old);
-  return `${old.name} was on another Port, so it is deleted`;
-}
-async function vpxSwap(gid, swaps) {
-  for (const [k, name, to] of swaps) {
-    const g = draft?.graphics.find(q => q.id === gid), old = draft?.elements.find(q => q.name === name); if (!g || !old) continue;
-    const kind = old.vpKind; g.vbWant ||= {};
-    const swap = e => { const said = vpxRetire(g, old, e); g.vbWant[k] = kind; vbAttach(g, k, kind, e); toast(`${e.name} is built into ${g.label || g.name}; ${said}. Save layout keeps it.`, false, 8000); };
-    if (to !== VPX_NEW) { const e = draft.elements.find(q => q.name === to); if (e) swap(e); continue; }
-    vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); swap(e); };
-    try {
-      if (kind === 'element') await addThing(...ELEMENT.slice(1));
-      else { const rows = amGroup('Devices: temperature'); const i = await choose('Pick the probe type', rows.map((r, n) => [r[0], n])); if (i === undefined) continue; await addThing(...rows[i].slice(1)); }
-    } finally { vbAfterAdd = null; }
-  }
-  renderWs();
-}
-// the Vessel Device's own Properties: a section for each Heating Element and for its Thermowell / Probe, showing that part's main
-// Properties and a button to its own Properties; with none built in, the section is there with everything greyed out and empty
-const VP_SECS = [['element', 'Heating Element', e => e.vpKind === 'element'], ['probe', 'Thermowell / Probe', e => e.vpKind === 'probe' || e.vpKind === 'thermowell']];
-const VPX_NEW = '\0new';
-const vpFits = kind => e => !e.integratedIn && !isMfPart(e) && (kind === 'element' ? isHeatElem(e) : e.type === 'temperature');
 function vpSections(it, edit = false) {
   const els = (draft || S.config).elements.filter(e => e.integratedIn === it.id && isVPart(e)), out = [];
   const open = e => () => {
@@ -7343,18 +7355,15 @@ function vpSections(it, edit = false) {
       if (edit && e) {      // integrated: its Heating Element or Probe can still be changed, or swapped for another (OakBarn Brewery, 2026-11-09)
         const x = `vpx_${spot}_`, ow = e.type === 'temperature' && isOneWire(e), what = kind === 'element' ? 'Heating Element' : 'Temperature Probe';
         const pre = { label: e.label ?? '', device: e.device ?? '', [ow ? 'pidx' : 'channel']: ow ? e.probeIndex ?? '' : e.channel ?? '',
-          ...(kind === 'element' ? { heatMethod: startMethod(e), input: e.input ?? '', target: e.target ?? '' } : { units: e.units || '°F', offset: e.offset ?? '' }), swap: '' };
+          ...(kind === 'element' ? { heatMethod: startMethod(e), input: e.input ?? '', target: e.target ?? '' } : { units: e.units || '°F', offset: e.offset ?? '' }) };
         for (const [a, b] of Object.entries(pre)) if (it[x + a] === undefined) it[x + a] = b;
-        const swapping = !!it[x + 'swap'];
         const temps = [['', '(none)'], ...(draft || S.config).elements.filter(q => q.type === 'temperature').map(q => [q.name, q.name])];
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
-          [x + 'swap', `Built in ${what}`, 'sel', [['', `${e.name} (keep it)`], ...(draft || S.config).elements.filter(vpFits(kind)).map(q => [q.name, `Swap for ${q.label ? q.label + ': ' : ''}${q.name}`]), [VPX_NEW, `➕ Swap for a new ${what}…`]], true],
-          ...(swapping ? [[k + 'sw', `On 💾 Save the ${it[x + 'swap'] === VPX_NEW ? 'new one is added' : 'one picked is built in'} and ${e.name} is taken out of the vessel: deleted if the new one is on another Port, kept as a Device of its own if it is on the same Port.`, 'note']]
-            : [[x + 'label', '1. Label', 'text'], [x + 'device', '2. Interface (board)', 'dev', null, true], ow ? [x + 'pidx', 'Probe #', 'probe'] : [x + 'channel', 'Port', 'pin', 'vpx_' + spot],
+          ...[[x + 'label', '1. Label', 'text'], ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
               ro('n', '4. Name', e.name),
               ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
-              [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]])];
+              [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]]];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
         ro('l', '1. Label', e?.label), ro('i', '2. Interface (board)', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
@@ -7505,6 +7514,12 @@ function hydroFields(it) {
 }
 
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
+// the balloons of the lock, Visible and Hidden Locked in a dialog's title line (Rule 2.38)
+const TITLE_TIPS = {
+  visibility: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: Name.visible = true or false.',
+  visible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: Name.visible = true or false.',
+  hidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: Name.hidden = true or false. An Integrated Item has none (Rule 2.47).',
+};
 function field(f, obj) {
   const out = fieldOne(f, obj);
   if (f[6]?.disabled && out[1]) for (const i of [out[1], ...out[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
@@ -7529,6 +7544,8 @@ function field(f, obj) {
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
+    const tt = x.tip || TITLE_TIPS[f[0]];      // its own balloon (OakBarn Brewery, 2026-11-09: "Visible has no Help Balloon"), over its name and its switch
+    if (tt) for (const o of [t.querySelector('.ttlLbl'), out[1]]) if (o) { o.dataset.help = tt; o.classList.add('tipLbl'); }
     setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll(`.ttlExtra[data-for="${f[0]}"]`)) o.remove(); t.dataset.for = f[0]; ttl.append(t); }, 0);
     return [];
   }
@@ -7536,9 +7553,10 @@ function field(f, obj) {
     out[1] = h('div', { class: 'fldPair' }, out[1], h('span', { class: 'pairLbl dbPopLbl' }, 'Database and .API'),
       h('button', { type: 'button', class: 'fldIcon fldAttr', title: 'Database and .API: send to the database, and .API', onclick: ev => { ev.preventDefault(); attrEntry(DB_POP, obj); } }, '⬢'));
   }
+  if (f[0] === 'label' && x?.tip && out[0] && hasSuggestion(obj)) { x.tip = labelTip(obj, x); out[0].dataset.labelTip = `${x.attr ? 'a' : ''}${x.up || ''}`; }      // made for where it is
   if (x?.tip && out[0]) {        // Rules 18.16, 2.38: the name stays short; rest the mouse on it (hover help, public/hoverhelp.js) or tap it
     out[0].classList.add('tipLbl'); out[0].dataset.help = x.tip;
-    out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, x.tip); } });
+    out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, out[0].dataset.help || x.tip); } });
   }
   if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
   if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
@@ -7580,14 +7598,14 @@ const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digital
 const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
-  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', {}, text),
+  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', { style: 'white-space: pre-line' }, ...helpNodes(text)),
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Close')));
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: Direct (full on or off; it was called On/Off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  heatMethod: 'How it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
   methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
@@ -7887,7 +7905,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const opt = ([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l);
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
   }
-  else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
+  else if (kind === 'note') return [h('div', { class: 'full muted', 'data-note': key }, label)];
   else if (kind === 'go') return [h('div', { class: 'full' }, h('button', { type: 'button', class: 'vpGo', onclick: opts }, label))];      // a button to another dialog
   else if (kind === 'showall') {     // 👁 Show All (Vessel Rules, Fritz 2026-11-05): a button that shows what is hidden, pressed again hides it
     const cb = h('input', { type: 'checkbox', class: 'hidden', 'data-k': key, 'data-kind': 'bool', 'data-rerender': '1' }); cb.checked = !!v;
@@ -8139,6 +8157,10 @@ function bindForm(body, fields, obj, onChange) {
     menuHelpIcons(body);
   };
   build();
+  // Rule 3.16 (OakBarn Brewery, 2026-11-09): a change in the Label (or the Interface, Port, Type or Tab) updates the Suggested Name at once,
+  // and the Label's balloon with it
+  body.addEventListener('input', () => liveNames(body, obj));
+  body.addEventListener('change', () => liveNames(body, obj));
   body.onchange = ev => {
     const t = ev.target;
     if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
@@ -8169,7 +8191,7 @@ function bindForm(body, fields, obj, onChange) {
 function lockedName(key, label, obj) {
   const input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: obj[key], readonly: true, class: 'lockedName', title: 'The name is locked. Press ✏ Change name to change it.' });
   const btn = h('button', { type: 'button', class: 'nameBtn', title: 'Open the Name Change pop-up', onclick: async () => {
-    const to = await nameChange(input.value, { check: n => nameCheck(n, obj) });
+    const to = await nameChange(input.value, { check: n => nameCheck(n, obj), suggest: liveSuggestion(obj, input.closest('#dlgBody, .dlgBody, form') || undefined) });
     if (to === null) return;
     input.value = to;
     for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true }));
@@ -8196,13 +8218,16 @@ function nameCheck(n, obj) {
 }
 // The Name Change pop-up: the name now (read only) and a box for the new one. ✖ Cancel changes nothing; 💾 Save gives the
 // new name back (null on Cancel). check(name) returns what is wrong with it, or null. Spaces become _ unless spaces: true.
-function nameChange(current, { title = 'Name Change', check, spaces = false } = {}) {
+// Every Name Change box has 💾 Update to Suggested (OakBarn Brewery, 2026-11-09, Rule 3.16): it shows the Suggested Name and saves it in
+// one click. suggest: the Suggested Name now (a Device's or Widget's), or none (a Process or Schema has none: the button is greyed).
+function nameChange(current, { title = 'Name Change', check, spaces = false, suggest = '' } = {}) {
   return new Promise(res => {
     const box = h('input', { type: 'text', value: current, autocomplete: 'off', spellcheck: 'false', 'aria-label': 'New name' });
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
     const save = () => {
       const n = spaces ? box.value.trim() : noSpaces(box.value);
+      if (n === suggest && n !== current) { const bad = check?.(n); if (bad) { err.textContent = bad; return box.focus(); } out = n; d.close(); return; }
       if (!n) { err.textContent = 'Type the new name.'; return box.focus(); }
       if (n === current) { d.close(); return; }
       const bad = check?.(n); if (bad) { err.textContent = bad; return box.focus(); }
@@ -8212,8 +8237,10 @@ function nameChange(current, { title = 'Name Change', check, spaces = false } = 
       h('h3', {}, title),
       h('label', {}, 'Name now'), h('input', { type: 'text', value: current, readonly: true, class: 'lockedName', tabindex: '-1' }),
       h('label', {}, 'New name'), box, err,
+      h('p', { class: 'sugLine' }, suggest ? `Suggested Name: ${suggest}` : 'Suggested Name: none (only a Device or Widget has one)'),
       h('p', { class: 'muted' }, 'Every Process that uses this name is changed to the new name for you. The panel keeps track of the item by a hidden key, so nothing is lost.'),
-      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save')));
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, '💾 Save'),
+        h('button', { type: 'button', class: 'primary sugBtn', ...(suggest && suggest !== current ? {} : { disabled: true }), title: suggest ? (suggest === current ? 'The name is already the Suggested Name' : `Save the Suggested Name: ${suggest}`) : 'There is no Suggested Name here', onclick: () => { box.value = suggest; save(); } }, '💾 Update to Suggested')));
     box.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); save(); } });
     d.addEventListener('close', () => { d.remove(); res(out); });
     document.body.append(d); d.showModal(); box.focus(); box.select();
@@ -8715,7 +8742,8 @@ async function editItem(kind, id) {
   await loadMediaPictures();
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? it => {
+  // Rule 2.47: no Hidden Lock on any Integrated Item (OakBarn Brewery, 2026-11-09): it is not offered, and one already set is ignored
+  const fields0 = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
     if (it.type === 'chart') return chartWidgetFields();       // Graph Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
@@ -8741,6 +8769,7 @@ async function editItem(kind, id) {
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  const fields = fields0 && item.integratedIn ? it => (typeof fields0 === 'function' ? fields0(it) : fields0).filter(f => f[0] !== 'hidden') : fields0;
   const work = clone(item), before0 = item.fitting;
   if (kind === 'el' && item.type === 'alarm' && item.alarmClass) chainToWork(work);      // the Alarm Chain's steps as boxes (Rule 7.16)
   if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
@@ -8751,8 +8780,8 @@ async function editItem(kind, id) {
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
-  const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); vpxPinLists(x, item); };
-  if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); vpxPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
+  const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); };
+  if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
   const mf = isMf(item), mfRefresh = () => { };       // a Valve Tee or Supply Manifold (Rule 5.35)
   if (mf) Object.assign(work, mfWork(item));
   if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
@@ -8851,7 +8880,7 @@ async function editItem(kind, id) {
         if (isVDev(item) && vpLocked(item)) {       // built and saved: its IPs, parts and HERMS coil stay as they are (no way back)
           for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;
           if (item.herms) work.herms = item.herms; else delete work.herms;
-          vpApply = () => { const swaps = vpxApply(item, vpx); if (swaps.length) setTimeout(() => vpxSwap(item.id, swaps), 0); };
+          vpApply = () => vpxApply(item, vpx);
         } else if (isVDev(item)) {
           const hs = HERMS_SIDES[vp.vHerms];
           if (hs) { work.herms = vp.vHerms; for (const k of hs) if (work.ports[k]) work.ports[k].installed = true; } else delete work.herms;
@@ -13034,7 +13063,7 @@ function vdevDone(it) {
   return [['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['name', 'Name', 'lockname'], ['vtype', 'Type', 'ro', it.vtype || ''], ['label', 'Label (the only text on it; never blank)', 'text'],
     ...vSizeFields(it),       // Gallons and Size (OakBarn Brewery, 2026-11-09: "Both"), Rule 18.31
-    ['_vdl', 'Integrated Vessel Device: its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can not change. Its Heating Elements and Temperature Probe can: change them below, or swap one for another (it was changed on the vessel).', 'note'],
+    ['_vdl', 'Integrated Vessel Device: its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can not change, and neither can the Interface and Port of its Heating Elements and Temperature Probe (Rule 5.31). Their other settings can change below. New hardware wired the same way to the same Port needs no change here.', 'note'],
     ...vpSections(it, true), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
