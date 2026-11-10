@@ -53,7 +53,7 @@ The Fermentor Control is used by its own name. Its Heat and Cooling are built in
 | `FV1 = on` / `FV1 = off` | Turns it On or Off |
 | `FV1.setpoint = 66` | The Setpoint |
 | `FV1.mode = "Cool only"` | Heat & Cool, Heat only or Cool only |
-| `FV1.heatoffset = 1` / `FV1.cooloffset = 1` | The two offsets |
+| `FV1.heatoffset = -1` / `FV1.cooloffset = +1` | The two offsets, with their signs: Heat minus (below the Setpoint), Cooling plus (above it) |
 | `FV1.changeover = 300` | The Changeover wait, in seconds |
 | `FV1.heatdelay`, `FV1.heatminrun`, `FV1.cooldelay`, `FV1.coolminrun` | The On delays and Shortest runs, in seconds |
 | `x = FV1.doing` | What it is doing now (read only) |

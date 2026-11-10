@@ -38,6 +38,10 @@ The port is always in the name, and the Device Type ID comes third. There is **o
 
 `MB_25_P_L_Vlv_Fly~Sparge_SP`
 
+**Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
+Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
+When one word means two things, people end up like Abbott and Costello in [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
+
 Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):

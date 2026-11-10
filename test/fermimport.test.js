@@ -25,7 +25,7 @@ assert.equal(f.input, probe.name, 'it reads the same probe');
 assert.equal(heat.bru.name, 'FV1 Lamp'); assert.equal(cool.bru.name, 'FV1 Freezer');
 assert.deepEqual([heat.type, heat.subtype, heat.heatMethod, heat.channel], ['digitalOut', 'element', 'onoff', 30], 'the heater is a Heating Element in Direct on its Port');
 assert.deepEqual([cool.type, cool.subtype, cool.channel], ['digitalOut', undefined, 31], 'the cooling is a plain output on its Port');
-assert.deepEqual([f.target, f.heatOffset, f.coolOffset, f.mode], [64, 1.5, 2, 'auto'], 'the Setpoint and both offsets come over');
+assert.deepEqual([f.target, f.heatOffset, f.coolOffset, f.mode], [64, -1.5, 2, 'auto'], 'the Setpoint and both offsets come over');
 assert.equal(f.coolDelay, 600, 'a longer BruControl On delay is kept');
 assert.equal(f.heatDelay, 60, 'a shorter one gets the safe start');
 assert.deepEqual(fermProblems(f, n => !!by(n)), [], 'it can be saved as it is');
