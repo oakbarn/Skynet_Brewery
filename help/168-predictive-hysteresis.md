@@ -30,3 +30,5 @@ Open the Device's **Properties** and turn **Predictive (no overshoot)** off. It 
 ## From BruControl
 
 The BruControl Importer makes every imported Hysteresis Predictive.
+
+A heating element's Hysteresis also keeps to the On offset range of what switches it (Rule 6.29): see [Help 181](181-heat-hysteresis-switched-by).
