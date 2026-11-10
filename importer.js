@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, importFolder, importFileName, buildSchemaFile, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
 import { findParts, itemKind, guessPartDetails, cleanPartDetails, PART_PAGES, findVesselDetails, findProbes, findHeaters, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';

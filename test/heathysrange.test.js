@@ -26,7 +26,7 @@ assert.match(heatHysProblem(he({ heatMethod: 'pid', methodSpot_hysteresis: true,
 // the Brain: a Process is refused; the control never runs outside the range
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'heathys'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'T', type: 'temperature', sensor: 'simulated', units: '°F' },
   he({ device: 'MB', channel: 5, target: 150, onOffset: 1 }),
   he({ name: 'hC', device: 'MB', channel: 6, input: 'T', target: 150, onOffset: 0.1, switchedBy: 'contactor' }),

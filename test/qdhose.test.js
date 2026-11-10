@@ -60,7 +60,7 @@ assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: null, points: [[0, 'x']] }).error, 
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'qdconn')), file = path.join(d, 'c.json'), c = cfg();
   c.graphics.push({ id: 'q1n', kind: 'pipe', name: 'Hose_1', hose: true, qd: true, workspace: 'Brew', from: 'dev:Pump_1:out', to: null, points: [[0, 0], [9, 9]] });
   c.graphics.find(g => g.id === 'q1').name = 'QD_1'; c.graphics.find(g => g.id === 'k1').name = 'Mash_Tun';
-  c.elements = [{ name: 'Done', type: 'gKonstant', kind: 'value' }];
+  c.elements = [{ name: 'Done', type: 'gGlobal', kind: 'value' }];
   fs.writeFileSync(file, JSON.stringify(c));
   const store = new Store(file, path.join(d, 'data')); store.load();
   const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

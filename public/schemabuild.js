@@ -25,7 +25,6 @@ export const CHILLERS = { immersion: 'Immersion coil', plate: 'Plate chiller', c
 export const VALVES = { hand: 'Hand valves (Skynet asks you to turn them)', motorized: 'Motorized valves (one on each vessel outlet)' };
 export const MANIFOLDS = { none: 'None', Valve_Tee: 'Long Tee with a Valve', Supply_Manifold_2: 'Double Supply Manifold', Supply_Manifold_3: 'Triple Supply Manifold' };
 export const MANIFOLD_KINDS = { manual: 'Manual valves', motorized: 'Motorized valves' };
-export const SIM_IFACE = '';
 // the Brew Process steps a Fermentor-only Schema skips (it only ferments)
 const HOT_STEPS = ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Clean'];         // no real Interface yet: a pretend Mega on the Simulator
 

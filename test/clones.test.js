@@ -21,7 +21,7 @@ import { keyReplacer, dropKeys, claimKeys, useKeySecret } from '../lib/keys.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'clones'));
 useKeySecret(path.join(d, 'data'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], workspaces: [{ name: 'Hot Side' }, { name: 'Cellar' }],
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], workspaces: [{ name: 'Hot Side' }, { name: 'Cellar' }],
   elements: [{ name: 'MB_06_Pump__HS', type: 'digitalOut', device: 'MB', channel: 6, workspace: 'Hot Side' }],
   graphics: [{ kind: 'clone', name: 'MB_06_Pump__HS_Clone_2', of: 'MB_06_Pump__HS', workspace: 'Cellar', x: 1, y: 2 },
     { kind: 'clone', name: 'Lost_Clone_1', of: 'No_Such', workspace: 'Cellar' }] }));

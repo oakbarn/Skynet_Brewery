@@ -56,5 +56,4 @@ export function fileNameError(name, { ext = true, what = 'file' } = {}) {
 }
 
 // the same checks, as an error to throw
-export function checkElementName(name, what) { const e = elementNameError(name, what); if (e) throw new Error(e); return name; }
 export function checkFileName(name, opts) { const e = fileNameError(name, opts); if (e) throw new Error(e); return name; }

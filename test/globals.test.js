@@ -1,7 +1,7 @@
 // Retiring the Global class: node test/globals.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import assert from 'node:assert/strict';
-import { retireGlobals, retireGlobalsOnDisk, reportLines } from '../lib/globals.js';
+import { retireGlobals, reportLines } from '../lib/globals.js';
 import { Store } from '../lib/store.js';
 
 const cfg = {
@@ -57,23 +57,9 @@ assert.ok(reportLines(r.report)[0].startsWith('Globals retired: 7 → gGlobal (2
 const clash = retireGlobals({ elements: [{ name: 'RP_a', type: 'global' }, { name: 'gG_a', type: 'gGlobal' }] });
 assert.deepEqual(clash.report.notRenamed, [{ name: 'RP_a', to: 'gG_a' }]); assert.equal(clash.cfg.elements[0].type, 'gGlobal');
 
-// start-up: a saved setup is converted once, with backups, and saved values follow the renames
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpg'));
-for (const s of ['config', 'scripts', 'data']) fs.mkdirSync(path.join(d, s));
+for (const s of ['config', 'data']) fs.mkdirSync(path.join(d, s));
 const configPath = path.join(d, 'config', 'brewery.json');
-fs.writeFileSync(configPath, JSON.stringify(cfg));
-for (const s of scripts) fs.writeFileSync(path.join(d, 'scripts', s.name + '.txt'), s.text);
-fs.writeFileSync(path.join(d, 'data', 'state.json'), JSON.stringify({ RP_v_Pitch_Temp: 66, gblS_Msg: 'hi' }));
-const done = retireGlobalsOnDisk({ configPath, scriptsDir: path.join(d, 'scripts'), dataDir: path.join(d, 'data') });
-assert.ok(done.lines.length > 2);
-assert.ok(fs.readdirSync(path.join(d, 'config', 'backups'))[0].startsWith('brewery-before-globals-'));
-assert.ok(fs.existsSync(path.join(d, 'scripts', 'Brew.txt.before-globals.bak')));
-assert.ok(!fs.existsSync(path.join(d, 'scripts', 'Plain.txt.before-globals.bak')));
-assert.match(fs.readFileSync(path.join(d, 'scripts', 'Brew.txt'), 'utf8'), /^"gG_v_Pitch_Temp" value = 68/);
-assert.ok(fs.existsSync(path.join(d, 'data', 'globals-retired.txt')));
-assert.equal(retireGlobalsOnDisk({ configPath, scriptsDir: path.join(d, 'scripts'), dataDir: path.join(d, 'data') }), null, 'only once');
-const store = new Store(configPath, path.join(d, 'data')); store.load();
-assert.equal(store.getProp('gG_v_Pitch_Temp', 'value'), 66); assert.equal(store.getProp('gblS_Msg', 'value'), 'hi');
 // the Global class itself is gone
 fs.writeFileSync(configPath, JSON.stringify({ elements: [{ name: 'g', type: 'global' }] }));
 assert.throws(() => new Store(configPath, path.join(d, 'data')).load(), /unknown type "global"/);

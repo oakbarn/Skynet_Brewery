@@ -8,13 +8,13 @@ import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './coloriz
 import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
-import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
+import { dialSvg, DIAL_DEFAULTS } from './dial.js';
 import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes } from './hoverhelp.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
@@ -28,16 +28,16 @@ import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
-import { BOARDS, LINK_NAMES, boardOf, linkOf, toConnection, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
-import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
+import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
+import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
-import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
-import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
+import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
+import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -10420,7 +10420,7 @@ function renderDevices() {
     const TYPES = LINK_NAMES;
     const real = d.connection === 'simulator' && d.realConnection && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realConnection]} at ${d.port || d.host}`, onclick: guard(async () => {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realConnection]} (${d.port || d.host})?`)) return;
-      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realConnection, realType, type, ...rest }) => ({ ...rest, connection: realConnection ?? realType }))(x) : x) }); await load();
+      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realConnection, ...rest }) => ({ ...rest, connection: realConnection }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
     const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
@@ -10590,7 +10590,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
   if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
   const old = edit ? S.config.devices.find(d => d.name === start.name) : null;
   const renamable = !old || !ifaceUsers(old.name);      // a name nothing uses yet may still be changed here (a brand-new Interface)
-  const w = toConnection({ name: '', id: '', board: 'mega', connection: 'serial', port: '', host: '', ...clone(old || start) });
+  const w = { name: '', id: '', board: 'mega', connection: 'serial', port: '', host: '', ...clone(old || start) };
   boardStart(w);
   let ports = [];
   try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; } catch { /* no USB support on the server */ }
@@ -10627,7 +10627,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
         const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
         if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
         if (old?.id && id !== old.id && ifaceUsers(old.name) && !confirm(`Change the Interface ID from ${old.id}_ to ${id}_?\n\n${ifaceUsers(old.name)} Device(s) on this Interface keep ${old.id}_ in their names, so the names will be a mix. It is best to set the ID once and leave it.\n\nOK = change it anyway.  Cancel = keep ${old.id}_.`)) { w.id = old.id; continue; }
-        const d = { ...toConnection({ ...(old || {}) }), name, id, connection: w.connection, board: w.board };
+        const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
         if (w.connection === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
         if (['esp32', 'ethernet'].includes(w.connection)) { d.host = String(w.host ?? '').trim(); d.port = 4100; if (!d.host) throw new Error('Type the network address'); }

@@ -22,7 +22,6 @@ export const APPLIANCES = {
 };
 export const isAppliance = k => Object.prototype.hasOwnProperty.call(APPLIANCES, k ?? '');
 // the things on it a Process can ask for by hand (the screen's On/Off button is .power on the Brewzilla)
-export const HAND_PROPS = ['setpoint', 'power', 'heat', 'heat2', 'heat3', 'pump', 'run'];
 export const isHandProp = (app, prop) => {
   const a = APPLIANCES[app], p = String(prop ?? '').toLowerCase();
   if (!a) return false;

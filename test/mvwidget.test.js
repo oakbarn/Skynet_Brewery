@@ -7,7 +7,7 @@ import { Engine } from '../lib/engine.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'mvw'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Done', type: 'gKonstant', kind: 'value' }],
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Done', type: 'gGlobal', kind: 'value' }],
   graphics: [{ id: 'g1', kind: 'ip', fitting: 'manualValve', label: 'Kettle drain', workspace: 'Brew', x: 10, y: 10, w: 30, h: 30, confirmation: false },
     { id: 'g2', kind: 'ip', fitting: 'tee', workspace: 'Brew' }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
@@ -54,7 +54,7 @@ clearTimeout(store._persistTimer);
 // .confirmation on to start; a Switch only when ticked. A Process line shows the pop-up with Done and waits; Done changes it.
 {
   const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'cnf')), cfg2 = path.join(d2, 'c.json');
-  fs.writeFileSync(cfg2, JSON.stringify({ elements: [{ name: 'Step', type: 'gKonstant', kind: 'value' },
+  fs.writeFileSync(cfg2, JSON.stringify({ elements: [{ name: 'Step', type: 'gGlobal', kind: 'value' },
     { name: 'wgt_MP_Pump_1_BR', type: 'manualPump', subtype: 'pump', label: 'Pump 1', workspace: 'Brew' },
     { name: 'wgt_SW_Stir_BR', type: 'switch', label: 'Stir', workspace: 'Brew', confirmation: true },
     { name: 'wgt_SW_Plain_BR', type: 'switch', label: 'Plain', workspace: 'Brew' },
