@@ -11175,7 +11175,10 @@ function fillSchemaSelect(s) {
     h('option', { value: '__new' }, 'Add new Schema ...'), h('option', { value: '__clone' }, 'Clone a Schema ...'), h('option', { value: '__ren' }, 'Rename this Schema ...'),
     h('option', { value: '__ver' }, 'Save a new version now'),
     h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup or version ...'),
-    h('option', { value: '__del' }, 'Delete a Schema ...')));
+    h('option', { value: '__del' }, 'Delete a Schema ...'),
+    // Rule 10.9: share a Schema with another brewer, or add one from another brewer (the Schema.json page's two buttons)
+    h('option', { value: '__exp', title: 'Save a Schema as a .json file to give to another brewer' }, 'Export to share ...'),
+    h('option', { value: '__imp', title: "Add a Schema file another brewer gave you (put it in the Import folder, or pick it on this computer)" }, "Import a brewer's Schema ...")));
   // Sample Schemas (Fritz, 2026-10-28): picking one adds a copy of that sample as a new Schema; yours are never written over
   if (can('admin') && samples?.length) s.append(h('optgroup', { label: '── Add a Sample Schema ──' },
     ...samples.map(x => h('option', { value: '__smp:' + x.id, title: x.description || '' }, '➕ ' + x.name))));
@@ -11382,6 +11385,8 @@ const schemaPicked = guard(async ev => {
       return;
     }
     if (v === '__clone') return cloneSchema(act.id);
+    if (v === '__exp') return exportSchemaFile();
+    if (v === '__imp') return importSchemaFile();
     if (v.startsWith('__smp:')) return addSampleSchema(v.slice(6));
     if (v === '__ren') {
       const n = await nameChange(act?.name || '', { title: 'Name Change: Schema', spaces: true, check: n => S.schemas.list.some(x => !x.active && x.name.toLowerCase() === n.toLowerCase()) ? `There is already a Schema called "${n}"` : null });
@@ -12057,6 +12062,11 @@ function renderSchemaTab(box) {
       h('p', { class: 'muted' }, 'A copy of a ready-made sample brewery comes in as a new Schema and is loaded. Your own Schemas are never written over. Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.'),
       h('table', { class: 'grid' }, h('tbody', {}, ...samples.map(x => h('tr', {}, h('td', {}, h('b', {}, x.name)), h('td', { class: 'muted' }, x.description || ''),
         h('td', {}, h('button', { onclick: guard(() => editing ? toast('Save or exit Edit layout first', true) : addSampleSchema(x.id)) }, '➕ Add')))))) ] : '',
+    admin ? [h('h3', {}, 'Share with other brewers'),
+      h('p', { class: 'muted' }, SHARE_NOTICE),
+      h('div', { class: 'bar' },
+        h('button', { title: 'Save a Schema as a .json file to give to another brewer', onclick: guard(exportSchemaFile) }, '📤 Export to share'),
+        h('button', { title: 'Add a Schema file another brewer gave you. Put it in the Import folder, or pick it on this computer', onclick: guard(() => editing ? toast('Save or exit Edit layout first', true) : importSchemaFile()) }, "📥 Import a brewer's Schema"))] : '',
     admin ? '' : h('p', { class: 'muted' }, 'Only an admin can load, clone or change a Schema.')));
 }
 
@@ -14221,23 +14231,31 @@ $('#cfgBackups').onclick = guard(async () => {
     }) }, 'Restore')));
   $('#cfgBackupDlg').showModal();
 });
+// Sharing Schemas between brewers (OakBarn Brewery, 2026-11-10, Rule 10.9): "a Notice about copywrites but no checking of an export
+// or import between brewers"; "That is between the Brewers". Shown on Save as .json file and Open a Schema file, wherever they open.
+const SHARE_NOTICE = 'Sharing with other brewers: Skynet does not check what is in a Schema file, going out or coming in. The pictures, sounds, names and anything else in it, and any copyright on them, are between the brewers.';
 // Schema.json: Save as .json file. The file is named after the Schema version (Name_yyyymmddThhmm, ISO 8601) when it has one.
-$('#cfgExport').onclick = guard(async () => {
+// The Schema list's "Export to share ..." opens the same dialog (Rule 10.9).
+$('#cfgExport').onclick = guard(exportSchemaFile);
+async function exportSchemaFile() {
   const sc = S.schemas || { list: [] }, act = sc.active?.id, list = [...sc.list].sort((a, b) => (b.id === act) - (a.id === act));
   if (!list.length) throw new Error('There is no Schema to save yet');
   const w = { id: act || list[0].id };
   const fields = [['id', 'Schema', 'sel', list.map(x => [x.id, x.id === act ? `${x.name}  (loaded)` : x.name])],
-    ['_n', 'The file goes to the Downloads folder of this computer. It holds the Schema only (tabs, devices, widgets, pictures, pipes and its Equipment Profile drawing), not logins or panel settings.', 'note']];
+    ['_n', 'The file goes to the Downloads folder of this computer. It holds the Schema only (tabs, devices, widgets, pictures, pipes and its Equipment Profile drawing), not logins or panel settings.', 'note'],
+    ['_c', SHARE_NOTICE, 'note']];
   if (cfgDirty) fields.push(['_d', 'The changes in the editor are not saved yet, so they are not in the file. Press Save first to include them.', 'note']);
   if (await dialog('Save a Schema as a .json file', fields, w) !== 'ok') return;
   readFields(w);
   const r = await api('GET', `/ui/schemas/${encodeURIComponent(w.id)}/export`);
   download(r.file, JSON.stringify(r.schema, null, 2), 'application/json');
   toast(`Saved ${r.file}`);
-});
+}
 // Schema.json: Open a Schema file (Fritz, 2026-11-06). The BruControl Importer saves its Schema in the Brewing folder's Import
 // subfolder (C:\Brewing\Import); a file saved with "Save as .json file" works too. It becomes a new Schema (Rule 15.4).
-$('#cfgImport').onclick = guard(async () => {
+// A Schema file from another brewer goes in the same Import folder; the Schema list's "Import a brewer's Schema ..." opens this too (Rule 10.9).
+$('#cfgImport').onclick = guard(importSchemaFile);
+async function importSchemaFile() {
   const dir = await api('GET', '/ui/schemas/importfolder');
   const PC = '__pc';
   const opts = [...dir.files.map(f => [f.name, `${f.name}   (${f.modified})`]), [PC, 'A .json file on this computer…']];
@@ -14245,7 +14263,8 @@ $('#cfgImport').onclick = guard(async () => {
   const fields = [['pick', 'Schema file', 'sel', opts],
     ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The BruControl Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The BruControl Importer makes it when it saves a Schema.`, 'note'],
     ['load', 'Load it now (the panel switches to it)', 'bool'],
-    ['_p', 'The file becomes a new Schema; no Schema here is changed. Its Processes are added (a Process with the same name that differs is backed up first).', 'note']];
+    ['_p', 'The file becomes a new Schema; no Schema here is changed. Its Processes are added (a Process with the same name that differs is backed up first).', 'note'],
+    ['_c', SHARE_NOTICE, 'note']];
   if (await dialog('Open a Schema file', fields, w) !== 'ok') return;
   readFields(w);
   let body, q = 'load=' + (w.load ? '1' : '0');
@@ -14265,7 +14284,7 @@ $('#cfgImport').onclick = guard(async () => {
   if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);
   else { S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); toast(`Schema "${r.made.name}" added. Pick it in the Schema list to load it.`); }
   alert(lines.join('\n'));
-});
+}
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)

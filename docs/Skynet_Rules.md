@@ -2451,6 +2451,17 @@ Setup, Rule 9.13). The clone is a normal User Schema, always loaded at
 once, on the simulator (Rule 10.6). The OakBarn Brewery sample is not offered for now. (2026-10-28,
 thread "Improve the Simulator bar defaults", Help 85)
 
+10.9 **Sharing Schemas between brewers** (OakBarn Brewery, 2026-11-10: "A place to add a file from another Brewer and an method in
+Skynet to export a Schema with a Notice about copywrites but no checking of an export or import between brewers"; "That is between
+the Brewers"): the Schema list (Menu Bar dropdown and ☰ Menu > 🗂 Schema) has **Export to share ...** (the same as Schema.json >
+Save as .json file) and **Import a brewer's Schema ...** (the same as Schema.json > Open a Schema file). **The place for a file from
+another brewer is the Import folder** (`C:\Brewing\Import`), or any .json file picked on the computer; it always comes in as a new
+Schema (no Schema is written over). Every one of these dialogs, and the 🗂 Schema tab's **Share with other brewers** part, shows
+the notice: *"Skynet does not check what is in a Schema file, going out or coming in. The pictures, sounds, names and anything
+else in it, and any copyright on them, are between the brewers."* **Skynet does no checking** of a shared Schema. A shared Schema
+can also be added as a folder in `sample_schemas` (Rule 9.13). Both programs: the BruControl Import saves its Schemas in the same
+Import folder; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 44)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -3933,3 +3944,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
 - 2026-11-10: Added Rule 9.12 (OakBarn Brewery): the Skynet pictures and sounds leave the panel zip and Setup and become the add-only Skynet Media Setup .exe and Skynet Media zip; Get Skynet pictures is add-only too; no copyrighted media ships. Help 183. Both programs. (thread "Shrink the Setup .exe and remove dead code")
 - 2026-11-10: Added Rule 9.13 (OakBarn Brewery): the panel ships only the 3 Vessel 1 Pump sample; every other Sample Schema comes with the add-only Skynet Sample Schemas Setup .exe and zip into `sample_schemas` (no Schemas in it yet: the set-aside samples stay in the Sandbox and are added one at a time once brought up to the Rules); a Schema from another brewer goes in the same folder; on an update the three old samples in `samples/configs` are moved (never deleted) to `backups/old_samples_<date>`, nothing else touched; Help 83 gets the two 3 Vessel video links (coming soon). Rules 10.8 and 16.8 point to it. Help 184; next free Help 185. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
+- 2026-11-10: Added Rule 10.9 (OakBarn Brewery): sharing Schemas between brewers. Export to share ... and Import a brewer's Schema ... in the Schema list and on the 🗂 Schema tab (the Schema.json page's Save as .json file and Open a Schema file); the Import folder is the place for another brewer's file; a notice says copyright is between the brewers and Skynet does no checking. Help 44 and 184 updated; no new Help number. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
