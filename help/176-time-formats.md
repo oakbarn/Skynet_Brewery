@@ -48,10 +48,10 @@ For a Time, the biggest unit in the format holds the whole time, so `mm:ss` show
 'single quotes' to show them as typed.
 
 ```
-wgt_TM_Boil_BR.showas = "mm:ss"
+wgt_TM_Boil_BH.showas = "mm:ss"
 tm_Boil.showas = "mm' min'"          shows 45 min
-wgt_DT_Clock_BR.showas = "ddd h:mm tt"
-wgt_TM_Boil_BR.showas = ""           back to its Properties' pick
+wgt_DT_Clock_BH.showas = "ddd h:mm tt"
+wgt_TM_Boil_BH.showas = ""           back to its Properties' pick
 ```
 
 See also [Value, Time and DateTime Widgets](134-value-time-and-datetime-widgets) and [Timer digits](152-skynet-dial-and-timer-digits).

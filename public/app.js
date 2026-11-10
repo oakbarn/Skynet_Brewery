@@ -6140,7 +6140,7 @@ async function addManualPump() {
 // the Manual Pump Widget's Properties: a Pump Device's (Rule 18.21) without Interface and Port, and its .confirmation switch
 function manualPumpFields(it) {
   const T = DEVICE_TIPS;
-  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_MP_Pump~1_BR'}.state = true: a pop-up asks you to turn it on by hand, and the Process waits for Done. It must be unique.` }),
+  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_MP_Pump~1_BH'}.state = true: a pop-up asks you to turn it on by hand, and the Process waits for Done. It must be unique.` }),
     ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP }],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
@@ -7028,8 +7028,8 @@ function heatWaveSvg(which) {
     `<line x1="0" y1="30" x2="120" y2="30" stroke="#ffd400" stroke-width="2"/><path d="${d}" fill="none" stroke="#e53935" stroke-width="2"/></svg>`;
 }
 const ELEM_HEAT_TIPS = {
-  target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 168.',
-  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it without the minus, as before: HLT_Vessel.BM_8_HE_HLT~element_BR.onoffset = 2 turns on 2 °F below.',
+  target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BH.setpoint = 168.',
+  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it without the minus, as before: HLT_Vessel.BM_8_HE_HLT~element_BH.onoffset = 2 turns on 2 °F below.',
   onDelay: 'Hysteresis: how many seconds the reading must stay under its On point before it turns on, so it does not click on and off. Example: the HLT element is switched by an Optical SSR, so 0 is fine; a Contactor or Mechanical relay needs at least 10 (Rule 6.29). Picking a Hardware Controller sets it: 0 for an Optical SSR, 10 for a Contactor or Mechanical relay.',
 };
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
@@ -7037,7 +7037,7 @@ const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
 // while it is Hysteresis. Help 150 starts its Hysteresis part with the same words (Rule 11.4), then adds the technical side (Rule 11.8).
 const HYS_HOVER_TIP = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHysteresis keeps the water near the Setpoint by turning the heater On and Off.\nThe HLT element: Setpoint 150 °F, Direction Heating, Offset (−) −1.\n• The heater begins to heat.\n• The water reaches the Setpoint, 150 °F: the element turns Off.\n• The water cools to Setpoint - Offset, 149 °F (150 −1): the element turns On again.\n• The water reaches the Setpoint, 150 °F: the element turns Off again.\n• The water cools again, and the On and Off Hysteresis cycle repeats.\nDelay 0: it turns On as soon as the water reaches 149 °F.\nHardware Controller Optical SSR: the Offset may be −0.5 to −3 °F, and it starts at −0.5. A Contactor or Mechanical relay may use −1 to −5 °F with a Delay of at least 10 seconds, and it starts at −1 and 10 seconds. That way it clicks less often and lasts longer.\nPredictive On: the water keeps warming a little after Off. Skynet learns how much, and turns Off that much early, so the water stops at 150 °F.';
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
-const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
+const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BH.display = "Setpoint" ("" puts back this setting).';
 // the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else.
 // Shown with a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it);
 // the saved number stays plus, as the Brain and a Process use it.
@@ -7287,7 +7287,7 @@ const PIC_TIPS = {
   picture: 'The picture it shows. Pick it from the list (the 🖼 opens the icon picker); Add new ... takes any picture in media/Images.',
   tabBuild: 'A new Widget is made on the 🔨 Build Tab first, then sent to its Tab (Rule 4.1).',
   tab: 'The Tab this Widget is on.',
-  name: 'Made from the Label and the Tab: wgt_PIX_Label_TabID (wgt_PIX_Kettle_BR). You may type your own; it must be unique. A Process uses it, e.g. wgt_PIX_Kettle_BR.visible = false.',
+  name: 'Made from the Label and the Tab: wgt_PIX_Label_TabID (wgt_PIX_Kettle_BH). You may type your own; it must be unique. A Process uses it, e.g. wgt_PIX_Kettle_BH.visible = false.',
   graphic: 'The picture as it will show on the Tab.',
   follow: 'What turns the picture On: an on / off Device or Widget, or a heater (On while Enabled). None = a still picture, so the Overlay is greyed out.',
   toggle: 'What a tap on the picture does to what it turns on with: On/Off turns it on or off with one click; Push button is on only while held; None does nothing.',
@@ -7322,7 +7322,7 @@ const DATAW_TIPS = {
   label: 'The name shown on the Tab, for example Strike Volume. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   tab: 'The Tab this Widget is on.',
-  name: 'Made from the Label and the Tab: wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BR). A Process uses it, for example wgt_VAL_Strike_BR = 5.2. It must be unique.',
+  name: 'Made from the Label and the Tab: wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BH). A Process uses it, for example wgt_VAL_Strike_BH = 5.2. It must be unique.',
   start: 'The value it shows when it is made. It keeps its value when the Brain restarts.',
   units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Decimals, the Step for − and +, the Lowest and the Highest.',
   readOnly: 'On: a tap does nothing; only a Process sets it. Off: a tap and Set changes it.',
@@ -7331,12 +7331,12 @@ const DATAW_TIPS = {
   size: 'Its size on the Tab in pixels.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
-  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
+  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BH.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = ALIGN_LCR;
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
-const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BR.showas = "mm:ss" or wgt_DT_Clock_BR.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
+const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BH.showas = "mm:ss" or wgt_DT_Clock_BH.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
   const cv = isCodeValue(it), dt = dataWDt(it), val = dt === 'value', T = DATAW_TIPS;
   const start = { value: 'Start value', time: 'Start value (hh:mm:ss)', datetime: 'Start value (mm/dd/yyyy hh:mm:ss)' }[dt];
@@ -7383,7 +7383,7 @@ const TEXT_LOOK_POP = { title: 'Text look', fields: LOOK_FIELDS() };
 const TEXT_TIPS = {
   label: 'The small title over the Text on the Tab. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows over the Text. Off: only the Text shows.',
-  name: 'How a Process uses it, for example wgt_TXT_Note_BR = "Mashing" or wgt_TXT_Note_BR.visible = false. It must be unique.',
+  name: 'How a Process uses it, for example wgt_TXT_Note_BH = "Mashing" or wgt_TXT_Note_BH.visible = false. It must be unique.',
   text: 'What it says on the Tab. Rich Text codes work here and in the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color (Help > Rich Text Embedded Code). The ⬆ opens a bigger box; the ⬢ sets its font, size, colors and alignment. Word wrap is always on.',
   color: 'The color of the Text.',
 };
@@ -7434,7 +7434,7 @@ function overrideFields(it) {
 }
 // Sound Player: plays one sound file; pauses for alarms
 const SND_TIPS = {
-  name: 'How a Process uses it: play wgt_SND_Music_BR, stop wgt_SND_Music_BR, or wgt_SND_Music_BR.path = "..." to change the sound.',
+  name: 'How a Process uses it: play wgt_SND_Music_BH, stop wgt_SND_Music_BH, or wgt_SND_Music_BH.path = "..." to change the sound.',
   path: 'The sound file it plays. Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
   loop: 'On: the sound plays over and over until it is stopped.',
 };
@@ -7454,7 +7454,7 @@ const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on'
 const SEMI_TEXT_POP = { title: 'Text when off', fields: [['offText', 'Text when off', 'text']] };
 const semiWidgetFields = (type, it) => {
   const k = SEMI_KINDS[type], led = type === 'led', bs = boolStyleOf(it), drawn = SWITCH_LOOKS.includes(bs);      // a Slider, Checkbox or Lighted Button is drawn by Skynet
-  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BR'}.state = true. It must be unique.` }),
+  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BH'}.state = true. It must be unique.` }),
     ['deviceControlled', 'Linked Device', 'devctl', null, false, false, { tip: `${k.title}: a ${BOOL_CLASS} (a Widget with an ON / OFF state). With a Linked Device it acts like a Clone of that Device: the two follow each other. ${drawn ? boolStyleTip(bs) : SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
     ...(led || drawn ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
     ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
@@ -7470,7 +7470,7 @@ const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the 
 const mvWidgetFields = it => [['_mvnow', `It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now.`, 'note'],
   ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
   ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
-  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BR'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).` }],
+  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BH'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).` }],
   ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }],
   ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
   ...FIT_PLACE(it), wgtType(isTapMv(it) ? 'Tap Water Valve' : 'Manual Valve')];
@@ -7843,27 +7843,27 @@ function fieldTip(name, text) {
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
-  // (HLT_Vessel.BM_8_HE_HLT~element_BR: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_1W_HLT_BR)
-  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_HE_HLT~element_BR.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  // (HLT_Vessel.BM_8_HE_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_1W_HLT_BH)
+  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_HE_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_1W_HLT_BR, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_1W_HLT_BR. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_1W_HLT_BH, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_1W_HLT_BH. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   switchedBy: 'Hardware Controller: what turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 1 to 5 °F and an On delay of at least 10 seconds. Picking one sets the On offset and On delay for you: Optical SSR 0.5 and 0 seconds, Contactor 1 and 10 seconds, Mechanical relay 1 and 10 seconds. Nothing else changes. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
-  controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_HE_HLT~element_BR'),
+  controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_HE_HLT~element_BH'),
   elemTog: 'One click turns this Element On or Off at once, the same as one click on it on the Tab (Rule 2.33). On / Off is the Device itself: it is On in whatever method it is in, and Direct is 100 % On. Picking a method never turns it On (Rule 6.19).',
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
-  eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_HE_HLT~element_BR.HYS. Off: the full names.',
+  eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_HE_HLT~element_BH.HYS. Off: the full names.',
   methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   eMethodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. Example: the HLT element has Hysteresis as its Current Method, with Duty Cycle and PID switched on too, so it has four balloons: Direct, Duty Cycle, Hysteresis and PID. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
-  eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_HE_HLT~element_BR. The ⬢ beside it sets its font, size and colors.',
+  eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_HE_HLT~element_BH. The ⬢ beside it sets its font, size and colors.',
   eLabelVisible: 'On: its Label (for example HLT element) shows on the Tab. Off: no Label shows.',
-  eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_HE_HLT~element_BR.',
-  ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BR.',
-  eTab: 'The Tab this Heating Element goes on, for example Brewhouse. Its Tab ID, BR, ends the Suggested Name: BM_8_HE_HLT~element_BR. ➕ Add new Tab… makes a new Tab and comes back here.',
-  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BR is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BR = on.',
+  eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_HE_HLT~element_BH.',
+  ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BH.',
+  eTab: 'The Tab this Heating Element goes on, for example Brew House. Its Tab ID, BH, ends the Suggested Name: BM_8_HE_HLT~element_BH. ➕ Add new Tab… makes a new Tab and comes back here.',
+  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BH is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BH (the Brew House Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BH = on.',
   eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (-) beside it says where it turns on: Setpoint + Offset, so -1 turns on 1 degree under the Setpoint; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
-  eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its short code HE is the third part of the Suggested Name: BM_8_HE_HLT~element_BR.',
-  eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
-  eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
+  eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its short code HE is the third part of the Suggested Name: BM_8_HE_HLT~element_BH.',
+  eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BH.visible = false.',
+  eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BH.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'The Label may be shown on the Tab, for example Red Pump above the Pump. On: the Label shows. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
@@ -7924,7 +7924,7 @@ const DEVICE_TIPS = {
   ePath: 'The picture of your Heating Element when it is off.',
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
-  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BR = on turns it On either way.',
+  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BH = on turns it On either way.',
   eOverlay: 'What shows on the Heating Element while it is on. Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. Orange Glow colors it orange. The bolts are drawn small in the middle of it, on top of the glow (Rule 7.8). Blue and Green are kept for cooling.',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
@@ -8688,7 +8688,7 @@ const INFO = {
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
-    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.setpoint = {value} (Rule 1.27).'],
+    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BH.setpoint = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']] },
@@ -9018,7 +9018,7 @@ function cloneBundle(v) {
 // in Edit layout on its Tab, the same dialog as a double-click on the Tab. A double-click on a box or button in the row does its own job.
 // Picker dropdowns (Skynet Standard, Fritz 2026-10-27): double-click a choice in a dropdown that lists things with a Skynet
 // dialog (a Tab, a Device or Widget, a vessel, an IP) and that thing's Properties open, e.g. the Tab list > Brewhouse opens the
-// Brewhouse Tab settings. Picture and sound pickers work as before. A closed dropdown swallows the second click in some browsers,
+// Brew House Tab settings. Picture and sound pickers work as before. A closed dropdown swallows the second click in some browsers,
 // so two quick clicks on it count too, and so does a double-click on the field's name beside it.
 const PICK_OPEN = { ws: v => openTabProps(v), elem: v => openProps('el', v), multi: v => openProps('el', v), vessel: v => openProps('gfx', v),
   ip: v => v.startsWith('dev:') ? openProps('el', v.split(':')[1]) : v.startsWith('eq:') ? openProps('gfx', v.split(':')[1]) : openProps('gfx', v) };
@@ -11218,7 +11218,7 @@ async function newSchemaInterface(iface, wasSim) {
   });
   if (iface && S.config.devices.some(d => d.name === iface)) await addInterfaceDialog({ name: iface }, { edit: true, title: `Your new Interface: ${iface}` });
 }
-// ---- New Schema from a Skynet Schema Template (Fritz, 2026-11-06/07, Rule 16.6, Help 157). The Brewhouse Tab Template (1 Vessel,
+// ---- New Schema from a Skynet Schema Template (Fritz, 2026-11-06/07, Rule 16.6, Help 157). The Brew House Tab Template (1 Vessel,
 // 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2 Pumps, 3 Vessel) or the Fermentor Template on its own (templates/schema); then each vessel (a Vessel Template, or a general type at the bottom of the list) and its heat, the
 // pumps, recirculation, chiller, whirlpool, valves and a Supply Manifold. Every answer starts from ☰ Menu > Default settings.
 // Skynet makes the Schema on the brewer's real Interface (its free Ports), in Simulator Mode, sets every Brew Process job and builds
@@ -11231,13 +11231,13 @@ async function newSchemaFromTemplate(name) {
   // 1: how many vessels (the Schema Template), the Interface, the Tab
   const w1 = { template: stOf(nsDefault(b, 'ns_template')).name, iface: ST.interfaces[0]?.name ?? '', tab: nsDefault(b, 'ns_tab') };
   if (await dialog(`New Schema "${name}": from a Skynet Schema Template`, [
-    ['template', 'Brewhouse Tab Template (number of vessels and pumps)', 'sel', ST.templates.map(t => [t.name, t.title])],
+    ['template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', ST.templates.map(t => [t.name, t.title])],
     ['_t', ST.templates.map(t => `${t.title}: ${t.about}`).join('\n'), 'note'],
     ['iface', 'Interface (your board). Each Device takes its next free Port on it', 'sel', [...ST.interfaces.map(d => [d.name, `${d.name}${d.schema ? '  (in ' + d.schema + ')' : ''}`]), ['', '(none yet: a pretend Mega on the Simulator)']]],
     ['tab', 'Name of the Tab it goes on (the Fermentor Template has its own Fermentor Tab)', 'text'],
     ['_s', 'The new Schema starts in Simulator Mode: nothing real is switched until you press 🔌 Real.', 'note']], w1) !== 'ok') return;
   readFields(w1);
-  const st = stOf(w1.template), a = { ...startAnswers(st, b), name, tab: String(w1.tab || 'Brewhouse').trim() || 'Brewhouse' }, hot = a.vessels.length > 0;
+  const st = stOf(w1.template), a = { ...startAnswers(st, b), name, tab: String(w1.tab || 'Brew House').trim() || 'Brew House' }, hot = a.vessels.length > 0;
   // 2: each vessel, its heat, and the rest
   const vt = TPL.vessel.filter(t => (t.vesselType || 'vessel') === 'vessel' && !t.integrated && t.name !== GENERAL_TEMPLATE);
   const w2 = {};
@@ -11932,7 +11932,7 @@ function renderDefaultTab(box) {
     ['voiceName', 'Browser voice (empty = the browser\'s usual voice)', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
     ['_ns', 'New Schema from a Skynet Template', 'head'],
     ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
-    ['ns_template', 'Brewhouse Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
+    ['ns_template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
       ['Skynet_2_Vessel_2_Pumps', '2 Vessel + 2 Pumps'], ['Skynet_3_Vessel', '3 Vessel'], ['Skynet_Fermentor', 'Fermentor (on its own)']]],
     ['ns_fermentors', 'Fermentors on their own Fermentor Tab', 'sel', [['0', 'None'], ...[1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)])]],
     ['ns_tab', 'Name of the Tab it goes on', 'text'],

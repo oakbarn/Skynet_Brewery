@@ -482,7 +482,7 @@ Integrated items, IPs, pipes and hoses, Equipment Profile vessels). (2026-10-27,
 
 2.19 **Skynet Standard: double-click a picker dropdown** to open the Properties of the one picked,
 when it has a Skynet dialog a user can reach. Example: in pic_Kettle_Element's Properties,
-double-clicking the Tab dropdown on **Brewhouse** opens the Brewhouse Tab settings. Works for Tab,
+double-clicking the Tab dropdown on **Brewhouse** opens the Brew House Tab settings. Works for Tab,
 Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Picture and sound pickers
 work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
 changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
@@ -876,7 +876,7 @@ Name"; "All Change Name Dialog gets new Button").
 - In every Properties box, typing a **Label** (or picking another Interface, Port, Device Type or Tab) changes the **Suggested Name**
   line at once. The Name itself stays as it is until it is changed (Rule 3.11).
 - The Suggested Name always has its Device Type ID: a Device saved without one (the Three Vessel sample's built-in heaters and probes
-  were) gets its usual one (HE for a Heating Element), so `BM_8_HE_HLT~element_BR`, not `BM_8_HLT~element_BR`.
+  were) gets its usual one (HE for a Heating Element), so `BM_8_HE_HLT~element_BH`, not `BM_8_HLT~element_BR`.
 - **Every Name Change pop-up** shows the Suggested Name and has **💾 Update to Suggested** beside ✖ Cancel and 💾 Save: one click
   saves the Suggested Name. A Process or a Schema has no Suggested Name, so there the button is greyed out.
 - **The Label's help balloon is made for where it is:** it names its own Label, shows its own Suggested Name with the Label part in
@@ -1381,7 +1381,7 @@ Template"; thread "Build the Vessel Widget class", Help 133).
     own Properties that are first inherited from its Template, but once on a Vessel Device those Properties are unique to the Vessel
     Device and never have any connection with any other Instance of that heater, EXCEPT: **Last One Rules!** See Rule 6.28. You can
     only look at and edit its Properties on its Vessel Device. **In a Process it is VesselDeviceName.IntegratedDeviceName**
-    (`HLT_Vessel.BM_8_HE_HLT~element_BR = On`, `HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 152`, any capitals), and so is a Probe
+    (`HLT_Vessel.BM_8_HE_HLT~element_BH = On`, `HLT_Vessel.BM_8_HE_HLT~element_BH.setpoint = 152`, any capitals), and so is a Probe
     or Thermowell built into it; its plain name alone is refused in a Process. A rename of the Device or the vessel changes every
     Process for you. Its Interface and Port are greyed out in the Vessel Device's Properties too (Rule 6.1).
   - **Physical hardware may be replaced; the Device never is** (OakBarn Brewery, 2026-11-09: "Physical Hardware (such as a Heating
@@ -2458,8 +2458,8 @@ The others found on 2026-11-10 wait for OakBarn Brewery's word (thread "Set the 
 examples in the Hover Help use the Properties and Entries in the Dialog they are on in the # Vessel Schema as a General Rule"). A
 balloon's example uses the real names and entries of the same dialog in the 3 Vessel 1 Pump sample, so what you read in the balloon is
 what you see in the dialog. First done: the **Heater Properties** of a Vessel Build, with the **HLT element** built into **HLT_Vessel**
-(`BM_8_HE_HLT~element_BR`: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
-`BM_700_1W_HLT_BR`; in a Process `HLT_Vessel.BM_8_HE_HLT~element_BR`). A test (test/helpformat.test.js) checks the example still matches
+(`BM_8_HE_HLT~element_BH`: Brewery Mega Port 8, the Brew House Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
+`BM_700_1W_HLT_BH`; in a Process `HLT_Vessel.BM_8_HE_HLT~element_BH`). A test (test/helpformat.test.js) checks the example still matches
 the sample. The other dialogs follow, one at a time.
 
 11.8 **KISS: Keep It Simple, no clutter** (OakBarn Brewery, 2026-11-10: "Label for DDLB and other field 1 to 2 Words. Use Hover Help for
@@ -2761,13 +2761,13 @@ make, or review it.
 16.5 **`ask "text"`** in a Process shows a pop-up on every screen with ✔ Done and waits until an operator or Admin presses it.
 
 16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
-Answer a few questions, and the Schema is ready to brew. The **Brewhouse Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
+Answer a few questions, and the Schema is ready to brew. The **Brew House Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
 2 Vessel + 1 Pump, 2 Vessel + 2 Pumps, 3 Vessel** (the last hot side one), plus the **OakBarn Brewery** (every OakBarn vessel and
 pump). The **Fermentor Template** is on its own: a Fermentor Tab, each fermentor with its probe and a glycol valve. The questions are
 each vessel (a Vessel Template, or a general type HLT, Mash Tun, Brew Kettle, All In One at the **bottom** of the list) and its
 heat, the pumps, recirculation, chiller, whirlpool, valves, Supply Manifold and its valves, and the number of fermentors. **Every
 question has a default on ☰ Menu > Default settings** (Rule 2.42). The new Schema **starts in Simulator Mode but uses the user's
-real Interface**, each Device on its next free Port (never two on one Port). Each Brewhouse Tab Template uses the **Process
+real Interface**, each Device on its next free Port (never two on one Port). Each Brew House Tab Template uses the **Process
 Templates made for it** (`Skynet_Heat_Strike_1_Vessel`, `Skynet_Mash_2_Vessel` ...; the 3 Vessel uses the Skynet ones). The
 Skynet Process Templates follow the OakBarn brew day (chilling water choice, grain ready, vorlauf, first wort, a slow sparge,
 pre-boil gravity, hot break, sanitize the chiller about 17 minutes before the end, trub settle, OG, PBW for an hour). Pipes are
@@ -3005,7 +3005,7 @@ small pop-up with Close. The Add Device box has it now; other dialogs get it one
 the hover shows at once and stays while the mouse rests on the name (Rule 2.38).
 
 18.17 **Dropdowns of Interfaces and Tabs read "ID: Name"** (Fritz, 2026-11-04): an Interface as `BM: Brewery Mega`, a Tab as
-`BH: Brewhouse`, everywhere they are picked.
+`BH: Brew House`, everywhere they are picked.
 *Replaced:* the Interface list showed the full name first, `Brewery Mega   (ID BM_)` (Fritz, 2026-10-27).
 
 18.18 **Device Type shows its General Type first** (Fritz, 2026-11-04): where a Device Type is shown, it reads
@@ -3324,6 +3324,10 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
 - **Label Attributes**: no clutter (Visible, Font Size); **Font Size** shows the size the Label has now, not a blank; **Alignment**
   is **Left**, **Centered** or **Right**, with no "Default (Centered)" choice. A Label with no alignment of its own (nor from its
   Tab Style) is really Centered. The same three choices on the Timer's Label and the Value look.
+- **The 3 Vessel 1 Pump sample's Tab is BH: Brew House** (OakBarn Brewery, 2026-11-10: "BH follows Pascal Camel Code better"): Tab
+  ID BH, so every name on it ends _BH (BM_22_Pump_Pump_BH, BM_8_HE_HLT~element_BH ...), in its Processes, Help and Hover Help too.
+  Name examples in Help and Hover Help end _BH. A New Schema's hot-side Tab starts as Brew House (BH). Pipe ids (p_Brewhouse_1 ...)
+  are meaningless keys and stay as they are (Rule 2 of the Design Rules).
 
 ## 19. Vessel Rules
 
@@ -3855,7 +3859,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Changed Rule 18.31 again (OakBarn Brewery: "Fix this Dialog" and "It can still have the Universal attributes plus the sub device sections"): an integrated Vessel Device's Properties are the Universal Properties, its Type greyed out, and fully editable Heating Element and Thermowell / Probe sections, each of which can be swapped for another; nothing else. Help 133 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Rule 19.5 item 5 (the Drain, Tangential and Sparge Arm pieces, the Valve picker, the Sparge Arm drawing) and Rule 18.31 changed (OakBarn Brewery: "So Delete if replace with a differnt Port"): a Heating Element or Probe swapped out of an integrated Vessel Device is deleted when the new one is on another Port, kept as a Device of its own when on the same Port. Help 133 and 166 updated. Checked against the BruControl Import program: it will use the same builder and dialogs. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Rule 19.5 item 8 (OakBarn Brewery: "go ahead and create it in the Importer"; "do both unless I say only for Importer or Only for Skynet"): the Importer's Your vessels step opens the same Vessel Device Builder for each vessel, filled in from its row; the pickers list the imported Heating Elements and Probes and never a part already built into a vessel. Help 143 and 166 updated. Checked against both programs. (thread "Build the Vessel Device Builder")
-- 2026-11-09: The Three Vessel sample's Brewhouse Tab now has a Master Vessel Sizer (the HLT, Rule 19.3), so a vessel built for that Tab is drawn at the same scale as the sample's vessels (OakBarn Brewery: "It did not adjust size to the other Vessels"). No Rule changed. Checked against both programs: the Importer's Build page is the same Panel. (thread "Build the Vessel Device Builder")
+- 2026-11-09: The Three Vessel sample's Brew House Tab now has a Master Vessel Sizer (the HLT, Rule 19.3), so a vessel built for that Tab is drawn at the same scale as the sample's vessels (OakBarn Brewery: "It did not adjust size to the other Vessels"). No Rule changed. Checked against both programs: the Importer's Build page is the same Panel. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rules 19.2 and 18.31 (OakBarn Brewery: "Both", "if we use the size rather than the gallons it will draw better in proportion", "Advertized gallons could also be wrong", "add that as a Field (Read and Display Only)", "Also missing is Deadspace and Safe Element Volume"): a Diameter vessel is drawn by its real size; read only Calculated Volume; Dead space and Safe Element Volume on every Vessel; an integrated Vessel Device's Properties have its Size again. Number boxes take decimals (15.5). Help 133 and 135 updated. Checked against both programs (the Importer's Build page is the same Panel; its Vessels step passes Height and Diameter to the builder). (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
 - 2026-11-09: Added Rule 1.30 (OakBarn Brewery): a gGlobal takes only its own Kind of value; a wrong one is an error in plain words (found by the Check when it is typed on the line) and the gGlobal keeps its old value. A Time gGlobal gets .minute and .seconds, which take a whole number that becomes the whole time (126 seconds is 00:02:06). Help 145.
@@ -3867,7 +3871,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off. Reworded the same day (OakBarn Brewery: "Old Ways will never be depreciated in any Update ... An update may change things but never require old methods be updated to a new standard"): nothing old until the first Public Production (trial productions count as before it); after it, an update never takes away an old way or forces an old item up to a new standard, and an item left alone works as before.
 - 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
-- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
+- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BH and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
 - 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
 - 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.

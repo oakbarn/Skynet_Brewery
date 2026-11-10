@@ -152,7 +152,7 @@ Then you confirm what comes in, in small steps:
    - Every tick box and Label box starts blank. **Tick** a box to copy that item's Display Name into its Label box, then change it if you like.
    - A Label can have spaces; in the suggested Skynet name a space becomes `~` (*Mash Tun* is `Mash~Tun`).
    - A Label does not have to be different from the others: a Heater, a Temperature Probe and a Valve can all be **HLT**, and their
-     suggested names are still all different (for example `MB_25_HE_HLT_BR`, `MB_A0_10KNTC_HLT_BR`, `MB_30_MBV_HLT_BR`). The page shows
+     suggested names are still all different (for example `MB_25_HE_HLT_BH`, `MB_A0_10KNTC_HLT_BH`, `MB_30_MBV_HLT_BH`). The page shows
      three examples made from your own items when it can find them, or made-up samples.
    - Skynet names are the preferred way to name things in Skynet.
    - **Accept ▶** is at the bottom of the page. No Label may be blank: a message says how many are, and marks them in red. When they
