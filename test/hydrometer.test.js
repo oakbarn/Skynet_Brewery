@@ -78,7 +78,7 @@ assert.ok(HYDRO_MODEL_KEYS.every(k => cleanPartDetails('hydro', { hydro: k }).hy
 // the Brain: readings, SG / Plato / Brix all the time, ABV, Lost signal
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'hydro'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Sim', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Sim', connection: 'simulator' }], elements: [
   { name: 'PI_200_Hydro_Red_FE', type: 'hydrometer', device: 'Sim', channel: '200', model: 'tilt', color: 'Red', og: 1.05 },
   { name: 'PI_201_Hydro_Spin_FE', type: 'hydrometer', device: 'Sim', channel: '201', model: 'ispindel', hwId: 'iSpindel000', gravityUnits: 'Plato', lostMinutes: 30 },
   { name: 'OG_Value', type: 'valueWidget', label: 'OG' },

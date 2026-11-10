@@ -66,7 +66,6 @@ export const G_DECLARE = {
   datetime: { long: 'gGlobalDateTime', short: 'gD', prefix: 'gD_', what: 'a Date Time', local: 'datetime' },
   bool: { long: 'gGlobalBoolean', short: 'gB', prefix: 'gB_', what: 'a Boolean (true or false)', local: 'bool' },
 };
-export const DECLARE_WORDS = ['new', 'declare'];
 const LOCAL_WORDS = ['value', 'string', 'bool', 'time', 'datetime'];
 // the word after new: { kind, global } or null when it is not a variable word
 export function declareWord(word) {

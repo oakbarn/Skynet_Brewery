@@ -31,11 +31,11 @@ const brain = (name) => {
 // the old Brain: a Windows computer with two Schemas, Mega on COM3 (one on the Simulator), ESP32 on Ethernet
 const old = brain('old');
 const cfg = { title: 'T', schema: { id: 'home', name: 'Home' }, mediaRoots: ['./media', 'D:\\Pictures'],
-  devices: [{ name: 'Mega_1', type: 'serial', port: 'COM3', _key: 'k1' }, { name: 'Esp', type: 'ethernet', host: '10.0.0.5', port: 4100 }] };
+  devices: [{ name: 'Mega_1', connection: 'serial', port: 'COM3', _key: 'k1' }, { name: 'Esp', connection: 'ethernet', host: '10.0.0.5', port: 4100 }] };
 put(path.join(old.dirs.config, 'brewery.json'), JSON.stringify(cfg));
 put(path.join(old.dirs.config, 'schemas', 'home.json'), JSON.stringify({ name: 'Home', devices: cfg.devices }));
 put(path.join(old.dirs.config, 'schemas', 'home.state.json'), '{"gG_X":5}');
-put(path.join(old.dirs.config, 'schemas', 'test.json'), JSON.stringify({ name: 'Test', devices: [{ name: 'Mega_2', type: 'simulator', realType: 'serial', port: 'COM3' }, { name: 'Nano', type: 'serial', port: 'COM7' }] }));
+put(path.join(old.dirs.config, 'schemas', 'test.json'), JSON.stringify({ name: 'Test', devices: [{ name: 'Mega_2', connection: 'simulator', realConnection: 'serial', port: 'COM3' }, { name: 'Nano', connection: 'serial', port: 'COM7' }] }));
 put(path.join(old.dirs.data, 'users.json'), '{"users":[{"name":"fritz"}]}');
 put(path.join(old.dirs.data, 'sessions.json'), '{"x":1}');
 put(path.join(old.dirs.data, 'state.json'), '{"gG_Y":7}');

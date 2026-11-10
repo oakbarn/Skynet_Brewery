@@ -36,7 +36,7 @@ assert.equal(pwmVolts({ type: 'pwmOut' }, 50), null);
 // the Brain: a probe and a flow meter run their calibrations after their own reading; .volts reads and sets
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'cal'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Probe', type: 'temperature', sensor: 'ds18b20', probeIndex: 1, calibrations: [{ type: 'offset', offset: -1.5 }] },
   { name: 'DAC', type: 'pwmOut', device: 'MB', channel: 9, ...dac },
 ] }));

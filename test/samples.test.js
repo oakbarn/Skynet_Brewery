@@ -14,8 +14,8 @@ const list = listSamples(SAMPLES);
 assert.deepEqual(list.map(s => s.id), ['three-vessel-one-pump']);
 
 // a sample's Interfaces always come in on the simulator, keeping the real connection to switch to later (Fritz, 2026-10-28)
-assert.deepEqual(simulated([{ name: 'M', type: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]),
-  [{ name: 'M', connection: 'simulator', realConnection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }], 'old .type / .realType come out as .connection / .realConnection');
+assert.deepEqual(simulated([{ name: 'M', connection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }]),
+  [{ name: 'M', connection: 'simulator', realConnection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }]);
 
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));

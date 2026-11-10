@@ -45,7 +45,7 @@ assert.equal(homeLine({ ...a4988, homePin: 30, homeDir: 'plus', homeSpeed: 1, mi
 
 // Through the panel: a stepper on the simulator, driven the way a Process (script) drives it
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpstep'));
-fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({ devices: [{ name: 'Sim', type: 'simulator' }], elements: [
+fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({ devices: [{ name: 'Sim', connection: 'simulator' }], elements: [
   { name: 'Valve_M', type: 'stepper', device: 'Sim', channel: 22, dirPin: 23, driver: 'A4988', stepsPerRev: 200, microsteps: 1, units: '%', unitsPerRev: 100,
     maxSpeed: 50, accel: 200, minPos: 0, maxPos: 100, homePin: 30, sim: { start: 40, switchAt: -3 } },
   { name: 'Free_M', type: 'stepper', device: 'Sim', channel: 26, dirPin: 27, stepsPerRev: 200, microsteps: 1, units: 'rev', maxSpeed: 1 },

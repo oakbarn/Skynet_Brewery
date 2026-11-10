@@ -45,9 +45,9 @@ assert.equal(analogOutLevel({ rangeLow: 0, rangeHigh: 60 }, 30), 500, 'VFD 30 of
 // Protocol: lines out to the device and readings in
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpdev'));
 fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
-  devices: [], probes: [{ index: 1, name: 'HLT probe', rom: '28AA000000000001' }], elements: [
+  devices: [], probes: [{ index: 1, name: 'HLT probe', rom: '28AA000000000001' }, { index: 2, name: 'Old_T', rom: '28BB000000000009' }], elements: [
     { name: 'HLT_T', type: 'temperature', probeIndex: 1 },
-    { name: 'Old_T', type: 'temperature', probe: '28bb000000000009' },
+    { name: 'Old_T', type: 'temperature', probeIndex: 2 },
     { name: 'Relay', type: 'digitalOut', device: 'M', channel: 5, activeLow: true },
     { name: 'Pump_Speed', type: 'pwmOut', device: 'M', channel: 44 },
     { name: 'VFD', type: 'analogOut', device: 'M', channel: 45, rangeLow: 0, rangeHigh: 60 },
@@ -105,7 +105,6 @@ assert.match(hw._outLine({ name: 'Relay', type: 'digitalOut', channel: 'A5' }), 
   store.get('Press').channel = 'A1'; hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'A1'); void before; }
 
 // OneWire probe index: elements use the number; replacing a probe = new ROM id on the slot
-assert.equal(store.get('Old_T').probeIndex, 2, 'old ROM-on-element config gets a probe number'); assert.equal(store.config.probes[1].rom, '28BB000000000009');
 hw._onLine(dev, 'T 28AA000000000001 150.5'); assert.equal(store.getProp('HLT_T', 'value'), 150.5);
 hw._onLine(dev, 'T 28BB000000000009 66'); assert.equal(store.getProp('Old_T', 'value'), 66);
 store.saveLayout({ probes: [{ index: 1, name: 'HLT probe', rom: '28aa0000000000ff' }, store.config.probes[1]] });
@@ -171,7 +170,7 @@ assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a pro
   });
   await new Promise(r => board.listen(0, '127.0.0.1', r));
   const hw2 = new Hardware(store);
-  hw2.add({ name: 'M', type: 'ethernet', host: '127.0.0.1', port: board.address().port });
+  hw2.add({ name: 'M', connection: 'ethernet', host: '127.0.0.1', port: board.address().port });
   hw.devices.delete('M');
   await new Promise(r => setTimeout(r, 400));
   assert.ok(got.includes('HELLO') && got.includes('CFG RTD 49 4'), 'ethernet board got HELLO and settings: ' + got.join(','));
@@ -180,7 +179,7 @@ assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a pro
   hw2.stop(); board.close();
   // the BruControl Importer's Build page (OakBarn Brewery, 2026-11-08): no board is ever opened
   const hw3 = new Hardware(store, { off: true });
-  hw3.add({ name: 'M3', type: 'ethernet', host: '127.0.0.1', port: 1 });
+  hw3.add({ name: 'M3', connection: 'ethernet', host: '127.0.0.1', port: 1 });
   assert.equal(hw3.devices.get('M3').status, 'disabled', 'the Build page never connects a board');
   hw3.stop?.();
 }

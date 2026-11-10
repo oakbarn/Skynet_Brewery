@@ -9,7 +9,7 @@ import { isHeating } from '../public/links.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'deadband'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
   { name: 'DBand_HLT', type: 'deadband', typeCode: 'DBand', device: 'MB', channel: 5, input: 'Temp', target: 152,
     deadbandOffset: 0.5, innerBandOffset: 2, initialOutput: 40, innerBandDrive: 1, outerBandDrive: 5, calcTime: 10, outTime: 2 },
@@ -45,7 +45,7 @@ assert.equal(store.getProp('DBand_HLT', 'state'), false);
 
 // Reversed (cooling): too warm makes the output go up
 const cool = { name: 'DBand_Cool', type: 'deadband', reversed: true };
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' }, { ...cool, device: 'MB', channel: 6, input: 'Temp', target: 68, calcTime: 1, outerBandDrive: 10 }] }));
 const s2 = new Store(cfg, path.join(d, 'data2')); s2.load();
 const c2 = new Control(s2);
