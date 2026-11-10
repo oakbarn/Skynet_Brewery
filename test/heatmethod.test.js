@@ -55,7 +55,7 @@ assert.ok(sent.some(l => l === 'DO 42 0') || sent.some(l => l === 'DO 42 1'), 't
 
 // Hysteresis: on below Target - offset, off at the Target
 store.setProp('hE_PID_1', 'method', 'HYS');
-store.setProp('hE_PID_1', 'onoffset', 2);
+store.setProp('hE_PID_1', 'onoffset', -2);
 store.setProp('Temp', 'value', 149); ctl.tick(t += 1000);
 assert.equal(g('output'), true, 'below 150: on');
 store.setProp('Temp', 'value', 152.5); ctl.tick(t += 1000);
@@ -187,7 +187,7 @@ console.log('method spots tests passed');
   const { assignIds } = await import('../public/naming.js');
   const { controlMethods } = await import('../public/heatmethod.js');
   const c = { devices: [], workspaces: [], elements: [
-    { name: 'HLT_Heat', type: 'hysteresis', target: 150, onOffset: 1, integratedIn: 'v_HLT', integratedAs: 'ip:rElement', vpKind: 'element' },
+    { name: 'HLT_Heat', type: 'hysteresis', target: 150, onOffset: -1, integratedIn: 'v_HLT', integratedAs: 'ip:rElement', vpKind: 'element' },
     { name: 'RIMS_Heat', type: 'pid', kp: 9, integratedIn: 'r1', integratedAs: 'heat' },
     { name: 'Own_PID', type: 'pid' }] };
   assignIds(c);
@@ -209,7 +209,7 @@ console.log('built in Element upgrade tests passed');
   const cfg2 = path.join(d2, 'c.json');
   fs.writeFileSync(cfg2, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
     { name: 'Ferm_Temp', type: 'temperature', sensor: 'simulated' },
-    { name: 'MB_5_CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: -1 }] }));
+    { name: 'MB_5_CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: 1 }] }));
   const s2 = new Store(cfg2, path.join(d2, 'data')); s2.load();
   const c2 = new Control(s2);
   const pumpEl = s2.get('MB_5_CPMP_Cool~Pump_FR'), gp = p => s2.getProp('MB_5_CPMP_Cool~Pump_FR', p);

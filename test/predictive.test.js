@@ -11,7 +11,7 @@ function run(predictive, cool = false) {
   const cfg = path.join(d, 'c.json');
   fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
     { name: 'Temp', type: 'temperature', sensor: 'simulated' },
-    { name: 'Hys', type: 'hysteresis', device: 'MB', channel: 5, input: 'Temp', target: cool ? 34 : 150, onOffset: cool ? -4 : 4, ...(predictive === undefined ? {} : { predictive }) },
+    { name: 'Hys', type: 'hysteresis', device: 'MB', channel: 5, input: 'Temp', target: cool ? 34 : 150, onOffset: cool ? 4 : -4, ...(predictive === undefined ? {} : { predictive }) },
   ] }));
   const store = new Store(cfg, path.join(d, 'data')); store.load();
   const ctl = new Control(store);
