@@ -1176,15 +1176,15 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
 // your own in Images/On_Off. The list shows that group first, then every other picture; Add new takes any picture in media/Images.
 // "tint:red" is not a file: it colors the picture underneath itself (Fritz: a heating element in a vessel glows red when on).
 // Only the drawn part is colored, so it works best on pictures with a see-through background (SVG or PNG).
-const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 'rgb(255,30,0)'], orange: ['Glow orange (colors the picture itself)', 'rgb(255,140,0)'],
-  blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
+const TINTS = { red: ['Red Tint', 'rgb(255,30,0)'], orange: ['Orange Tint', 'rgb(255,140,0)'],
+  blue: ['Blue Tint', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
 // the red and yellow bolt (Fritz, 2026-11-04, Rule 7.16): the steady one is the On overlay every powered valve and pump starts
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
-const OVERLAY_GRAPHICS = [['Lightning bolt, red and yellow (valves and pumps)', BOLT], ['Lightning bolt, flashing red and yellow', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
-  ['Green glow ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
+const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Bolt', BOLT_FLASH], ['Corner Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Big Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
+  ['Green Glow Ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -6497,7 +6497,7 @@ const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device s
 const EMAIL_TIP = 'Email Notification (Rule 7.17): an email each time this Alarm goes off (at most one a minute). It goes through the mail server you picked in Settings > Sending codes: Gmail, Outlook.com or any other, never a built-in one. Gmail needs an app password there. A Process turns it on or off: alm_Boil.email = true.';
 const EMAIL_FIELDS = [['emailNotify', 'Email Notification (an email when it goes off)', 'bool', null, false, false, { tip: EMAIL_TIP }],
   ['emailTo', 'Email to (commas between; empty = every user with an email in My account)', 'text', null, false, false, { tip: EMAIL_TIP }]];
-const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display (what it shows)', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
+const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
 const SMOOTH_TIP = 'Smoothing (Rule 6.24): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
@@ -6907,7 +6907,7 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
-const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
+const OVERLAY_CHOICES = v => [['', 'None'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
 // DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
@@ -6965,7 +6965,7 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 };
 // A Heating Element's Overlay (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to the Glow (what None was
 // regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
-const ELEM_OVERLAY_CHOICES = v => [['', 'Glow (it glows while on; the start)'], ['none', 'None (nothing while on)'], ...OVERLAY_CHOICES(v).slice(1)];
+const ELEM_OVERLAY_CHOICES = v => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v).slice(1)];
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
@@ -6999,12 +6999,12 @@ function heatFields(it, x = {}) {
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
     ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
-    ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
+    ['switchedBy', 'Switched by', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
     ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.eMethodSpot, ...x }],
     ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
     ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
-    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.eHeatProbe, ...x }]] : []),
+    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]),
     ...(m === 'hysteresis' ? [PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP })] : []),
     // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
@@ -7023,7 +7023,7 @@ function pumpMethodFields(it, x = {}) {
   return [['_pumpHead', 'Cool / Warm Pump: its Method (Rule 6.21)', 'head', null, false, false, x],
     ['heatMethod', 'Method (it starts with)', 'sel', HEAT_METHODS.filter(([k]) => PUMP_METHOD_KEYS.includes(k)).map(([k, w, , d]) => [k, `${w} (${d})`]), true, false,
       { tip: 'One pump, one Device (Rule 6.21): Direct runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a minus On offset, a glycol pump) or to warm (a plus On offset). A Process changes it with .method.', ...x }],
-    ...(m === 'hysteresis' ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }],
+    ...(m === 'hysteresis' ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.heatProbe, ...x }],
       ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'On offset (- cools, + warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]), PREDICTIVE_FIELD(x)] : []),
     ['methodSpot_hysteresis', 'Hysteresis allowed too (a one-click spot on the Tab)', 'bool', null, false, false, { tip: T.methodSpot, ...x }],
     ['methodShort', 'Short method names on its buttons', 'bool', null, false, false, { tip: T.methodShort, ...x }]];
@@ -7498,13 +7498,13 @@ function vpSections(it, edit = false) {
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
           ...[[x + 'label', '1. Label', 'text'], ro('i', '2. Interface', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
               ro('n', '4. Name', e.name),
-              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
+              ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
               [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]]];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
         ro('l', '1. Label', e?.label), ro('i', '2. Interface', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
-        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Setpoint', e?.target)]
+        ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe', e?.input), ro('t', 'Setpoint', e?.target)]
           : [ro('t', 'Probe type', e && probeKindName(e)), ro('u', 'Units', e?.units), ro('o', 'Calibration offset', e && (e.offset ?? 0))]),
         ...(e ? [[k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]] : [])];
     };
@@ -7808,7 +7808,7 @@ const DEVICE_TIPS = {
   orient: 'Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
-  overlay: 'Drawn on top of the pump while it is On: the steady red and yellow lightning bolt to start; the flashing bolt and others are choices, (none) for no overlay.',
+  overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Bolt and the others are choices, None for no overlay.',
   pumpModel: 'Which pump this is. Its facts (power, flow, lift, hottest liquid, ports) show when you hold the mouse on the pump. A Skynet pump drawing picks its model by itself. The ⬢ beside it holds the facts; type your own to change one.',
   pumpPower: 'What the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
   pumpUse: 'Hot: wort and hot water (brew day). Cold: glycol or ice water (cooling a fermenter).',
@@ -7855,7 +7855,7 @@ const DEVICE_TIPS = {
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
   eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BR = on turns it On either way.',
-  eOverlay: 'What shows on the Heating Element while it is on. Glow (the start): it glows. None: nothing at all, the picture stays as it is. The bolts and others are drawn small in the middle of it, on top of the glow (Rule 7.8).',
+  eOverlay: 'What shows on the Heating Element while it is on. On = Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. The bolts and others are drawn small in the middle of it, on top of the glow (Rule 7.8).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);

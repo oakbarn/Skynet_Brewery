@@ -132,7 +132,7 @@ export const TYPE_METHOD = { digitalOut: 'onoff', dutyCycle: 'dutyCycle', hyster
 // offset) may only use an On offset inside that range, and on a Contactor or Relay an On delay of at least 60 s, so the contacts do not wear
 // out. A minus On offset (cooling) is not a heat Hysteresis and has no range here. The numbers are °F; with a °C probe they are converted.
 export const SWITCHED_BY = [
-  ['ssr', 'Optical SSR (solid state relay)', 0.5, 3, 0],
+  ['ssr', 'Optical SSR', 0.5, 3, 0],
   ['contactor', 'Contactor', 2, 5, 60],
   ['relay', 'Mechanical relay', 2, 5, 60],
 ];

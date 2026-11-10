@@ -18,8 +18,8 @@ or the pump's port on one side and out the other, the same in every Orientation.
 ## A lightning bolt when On
 
 While a valve is **open**, a pump is **running** or a Proportional Valve is above **0 %**, a red **lightning bolt** with a yellow
-edge shows over the middle of its picture (Skynet Rule 7.15). It is the **On overlay** called **Lightning bolt, red and yellow**
-(see Help 58). It stays still. If you want it to flash, pick **Lightning bolt, flashing red and yellow** instead.
+edge shows over the middle of its picture (Skynet Rule 7.15). It is the **On overlay** called **Lightning Bolt**
+(see Help 58). It stays still. If you want it to flash, pick **Flashing Bolt** instead.
 
 - Every new motorized valve, Proportional Valve and Pump starts with it, and the Skynet valves always have it.
 - The first time the panel starts with this version, each valve, Proportional Valve and Pump that had **no** On overlay gets

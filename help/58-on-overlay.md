@@ -21,16 +21,16 @@ Now the item shows its picture all the time, and the overlay appears on top of i
 
 The **On overlay** dropdown has:
 
-- **Lightning bolt, red and yellow**: a red bolt with a yellow edge over the middle. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
-- **Lightning bolt, flashing red and yellow**: the same bolt, flashing.
-- **Lightning bolt (corner badge)**: a small yellow bolt in the top right corner.
-- **Lightning bolt (big, see-through)**: a large half see-through bolt over the middle.
-- **Green glow ring**: a green glow around the picture.
-- **Glow red**, **Glow orange** and **Glow blue**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
+- **Lightning Bolt**: a red bolt with a yellow edge over the middle. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
+- **Flashing Bolt**: the same bolt, flashing.
+- **Corner Bolt**: a small yellow bolt in the top right corner.
+- **Big Bolt**: a large half see-through bolt over the middle.
+- **Green Glow Ring**: a green glow around the picture.
+- **Red Tint**, **Orange Tint** and **Blue Tint**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
 - Your own overlays from the **On Off** picture group (`media/Images/On_Off`), listed next.
 - Then every other picture in `media/Images`, and **Add new ...** to type the name of your own.
 
-Pick **(none)** to turn the overlay off. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
+Pick **None** to turn the overlay off. A Heating Element starts with **On = Red Glow**: it glows red while it is On. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
 
 ## Your own overlay picture
 
