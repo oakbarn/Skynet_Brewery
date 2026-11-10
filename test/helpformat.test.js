@@ -49,3 +49,19 @@ const heatTips = app.slice(app.indexOf('const ELEM_HEAT_TIPS = {'), app.indexOf(
 for (const k of ['target', 'onOffset', 'onDelay']) assert.match(heatTips, new RegExp(`  ${k}: '[^\\n]*HLT`), `ELEM_HEAT_TIPS.${k}`);
 assert.match(heatTips, /ELEM_PREDICTIVE_TIP = '[^\n]*HLT/); assert.match(heatTips, /ELEM_DISPLAY_TIP = '[^\n]*HLT_Vessel\.BM_8_HE_HLT~element_BR/);
 console.log('help format tests passed');
+
+// Rule 6.20 in Help (OakBarn Brewery, 2026-11-10): every "⚠ Electricity can kill" shows in red under the red triangle, as in the balloons
+{
+  const src = fs.readFileSync('public/help.js', 'utf8');
+  const fn = src.slice(src.indexOf('export function warnText'), src.indexOf('export function markdown'));
+  const warnText = new Function(`${fn.replace('export ', '')}; return warnText;`)();
+  assert.equal(warnText('> **⚠ Electricity can kill. Consult a Licensed Electrician.** (Rule 6.20)'.slice(2)), 'Electricity can kill. Consult a Licensed Electrician. (Rule 6.20)');
+  assert.equal(warnText('⚠ Electricity can kill. Consult a Licensed Electrician.'), 'Electricity can kill. Consult a Licensed Electrician.');
+  assert.equal(warnText('⚠ The Label cannot be blank.'), '', 'only the electrical warning');
+  assert.match(src, /<div class="helpWarn"><span class="hhTri"><\/span>/);
+  assert.match(fs.readFileSync('public/style.css', 'utf8'), /\.helpWarn \{ color: #d01818; font-weight: 700/);
+  for (const f of fs.readdirSync('help').filter(f => f.endsWith('.md')))
+    for (const l of fs.readFileSync(`help/${f}`, 'utf8').split('\n').filter(l => /Electricity can kill/.test(l)))
+      assert.ok(warnText(l.replace(/^>\s?/, '')), `help/${f}: the electrical warning starts its own paragraph with ⚠`);
+  console.log('electrical warning tests passed');
+}
