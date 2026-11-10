@@ -1863,6 +1863,10 @@ help on its Heating method, Help 137 and 150, the BruControl Import's Heating El
 Electrician."** Any later page or dialog about wiring gets the same words. In a help balloon (the Heating method's) the warning comes
 **first**, with a red warning triangle, in **red bold** words, then the rest of the help (OakBarn Brewery, 2026-11-10, "Heat Method Hover
 Help").
+In **every Help page** the warning shows the same way: red bold words under the red warning triangle (OakBarn Brewery, 2026-11-10:
+"If Possible in any Help use the Red Text and the Icon for any Electricity Can Kill"; "And Oakbarn is fine here as well", so the
+warning keeps its OakBarn Brewery words, an approved OakBarn entry under Rule 11.6). A paragraph that starts with
+"⚠ Electricity can kill" is drawn this way by the Help page (public/help.js).
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -2439,8 +2443,13 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
   5. **The same words for the same topic** in the Help and the Hover Help (Rule 11.4), unless the Help expands on it.
   6. **The most technical explanations go in the Help**, not the Hover Help. Example: how a heater's Hysteresis works has the same plain
      English explanation in the Hover Help and in the Help, using the dialog's own boxes and values (Rule 11.7); the Help then adds the
-     technical, scientific explanation. (The Hysteresis sample is being reviewed by OakBarn Brewery in the thread "Set the Help format
-     rules" before it is built.)
+     technical, scientific explanation.
+  7. **The Hysteresis Help is the model** (OakBarn Brewery, 2026-11-10: "Use the Hysteresis Help (Hover and Regular as a Model For
+     Help"). Every Help topic and its Hover Help are written the same way: the Hover Help says in plain English what happens, step by
+     step, with the dialog's own boxes and values from the 3 Vessel 1 Pump sample (Setpoint 150 °F, Offset (−) −1, 149 °F (150 −1));
+     the Help page shows the same Hover Help words first, then a **technical side** part with the science, using the same signs; the
+     electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are built into the Hysteresis
+     Hover Help and Help 150 after the Offset (−) dialog change (Rule 6.19 Direction) is in.
 
 ## 12. Privacy and sharing
 
@@ -3387,6 +3396,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 ## Change log
 
 - 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
+- 2026-11-10: Rule 11.8 point 7 (OakBarn Brewery): the Hysteresis Help (Hover Help, then the technical side) is the model for all Help. Rule 6.20: every "⚠ Electricity can kill" in a Help page shows in red bold under the red triangle, as in the balloons, and keeps its OakBarn Brewery words. Checked against both programs: the Importer Help uses the same Help page drawing. (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
 - 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Vessel Layer Order** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
