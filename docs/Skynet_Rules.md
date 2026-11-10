@@ -1801,6 +1801,10 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
   Setpoint (blue) and the Offset (yellow). Data Display calls the probe reading **Temperature**. A Device built into a Vessel Device
   shows its layer as **Inside Vessel Device Layer**.
+- **Direction and the sign of the Offset** (OakBarn Brewery, 2026-11-10): the Direction is greyed and says which way the Hysteresis
+  works, and the Offset's name says its sign, so the user types a plain number and Skynet gives it the right sign in the background:
+  a Heating Element is **Heating** with **Offset (+)**; anything that only cools is **Cool** with **Offset (-)**; the Fermentor Control
+  (Rule 6.30) is **Bi-Directional** with **Heat Offset (+)** and **Cool Offset (-)**.
 - **Its own On / Off in its Properties** (OakBarn Brewery, 2026-11-10: "There are 2 On Off Type on offs ... we need something to
   correspond on the Property Dialog. A small Icon of the Element as a Toggle"): on the Current Method line, a small picture of the
   Element is a Toggle. One click turns the Device **On or Off** at once, the same as one click on it on the Tab (Rule 2.33). On / Off is
@@ -3368,6 +3372,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Direction (greyed) says which way a Hysteresis works and the Offset's name says its sign: Heating with Offset (+), Cool with Offset (-), and the Fermentor Control Bi-Directional with Heat Offset (+) and Cool Offset (-); the user types plain numbers and Skynet signs them. Help 150, 182. Checked against the BruControl Import program: it already turns BruControl's minus offsets into the Cool side. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate_4): Temperature Probe + Setpoint on one line; Direction (Heating) + Offset list + wave drawing; Predictive + Delay + wave drawing; Data Display Temperature; Inside Vessel Device Layer. Help 150. Checked against the BruControl Import program: same Properties, no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29 changed (OakBarn Brewery, with a table): picking a Hardware Controller sets the On offset and On delay: Optical SSR 0.5 °F and 0 s, Contactor and Mechanical relay 1 °F and 10 s; a Contactor or relay's range is now 1 to 5 °F with an On delay of at least 10 s (was 2 to 5 °F and 60 s). Help 137, 181. Checked against the BruControl Import program: it brings imported offsets into the new range. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29: picking a Hardware Controller sets the On offset (Optical SSR 0.5, Contactor 3, Mechanical relay 3) and, on a Contactor or relay, an On delay of at least 60 s; the range line left the dialog for the balloons. Help 181. Checked against the BruControl Import program: it already brings offsets into range; no change. (thread "Build Integrated Instances")

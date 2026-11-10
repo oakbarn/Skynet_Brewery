@@ -7022,7 +7022,7 @@ function heatFields(it, x = {}) {
     // with its Offset picked from a list, and Predictive with its Delay, each with a small wave drawing
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...(HEAT_SETTINGS[m].some(([, k]) => k === 'target') ? { with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] } : {}), ...x }]] : []),
     ...(m === 'hysteresis' ? [
-      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
+      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (+)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
       PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay') }], ['_waveD', '', 'wave', 'delay']] })]
       : HEAT_SETTINGS[m].filter(([, key]) => !(key === 'target' && NEEDS_PROBE.includes(m))).map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x])),
     // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
@@ -7650,8 +7650,9 @@ const FERM_TIPS = {
   heat: 'What warms the beer: a heat mat, a heat wrap (Fermwrap), a ceramic heat emitter or a lamp. The Fermentor turns it on and off (a Heating Element is run in Direct), and keeps to the range of what switches it (Rule 6.29).',
   cool: 'What cools the beer: a freezer or fridge on a relay, a glycol pump or a glycol valve. The Fermentor turns it on and off.',
   mode: 'Heat & Cool holds the Setpoint both ways. Heat only or Cool only uses just one side (the other stays Off). A Process: FV1.mode = "Cool only".',
-  heatOffset: 'Heat starts when the beer is this far below the Setpoint, and stops at the Setpoint.',
-  coolOffset: 'Cooling starts when the beer is this far above the Setpoint, and stops at the Setpoint.',
+  direction: 'Direction: a Fermentor Control both heats and cools, so it is always Bi-Directional. Heat Offset (+) is how far below the Setpoint the Heat starts; Cool Offset (-) is how far above it the Cooling starts. Type both as plain numbers: Skynet gives each its sign.',
+  heatOffset: 'Heat Offset (+): Heat starts when the beer is this far below the Setpoint, and stops at the Setpoint.',
+  coolOffset: 'Cool Offset (-): Cooling starts when the beer is this far above the Setpoint, and stops at the Setpoint.',
   changeover: 'Heat and Cooling are never On together. After one stops, the other waits this long before it may start, so they never fight. 300 s (5 minutes) is a good start.',
   heatDelay: 'Once the Heat stops, it stays Off at least this long. Flashing a bulb on and off is bad for it.',
   heatMinRun: 'Once the Heat starts, it stays On at least this long.',
@@ -7667,6 +7668,8 @@ function fermFields(it) {
     ['heat', 'Heat (heat mat, heat wrap, ceramic heat emitter or lamp)', 'sel', opt(fermHeatFits, it.heat), false, false, { tip: FERM_TIPS.heat }],
     ['cool', 'Cooling (freezer or fridge, glycol pump or glycol valve)', 'sel', opt(fermCoolFits, it.cool), false, false, { tip: FERM_TIPS.cool }],
     ['mode', 'Mode', 'sel', FERM_MODES.map(([k, w]) => [k, w]), false, false, { tip: FERM_TIPS.mode }],
+    // its Direction is Bi-Directional, greyed; the two offsets say their sign and are saved as plain numbers (OakBarn Brewery, 2026-11-10)
+    ['_dir', 'Direction', 'ro', 'Bi-Directional', false, false, { tip: FERM_TIPS.direction }],
     ...FERM_SETTINGS.map(([, key, label]) => [key, label, 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
     PREDICTIVE_FIELD()];
 }
@@ -7809,7 +7812,7 @@ const DEVICE_TIPS = {
   ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BR.',
   eTab: 'The Tab this Heating Element goes on, for example Brewhouse. Its Tab ID, BR, ends the Suggested Name: BM_8_HE_HLT~element_BR. ➕ Add new Tab… makes a new Tab and comes back here.',
   eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BR is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BR = on.',
-  eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset beside it is how far under the Setpoint it turns on; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
+  eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (+) beside it is how far under the Setpoint it turns on; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
   eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its short code HE is the third part of the Suggested Name: BM_8_HE_HLT~element_BR.',
   eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
