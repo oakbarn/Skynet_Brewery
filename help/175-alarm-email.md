@@ -37,8 +37,3 @@ Skynet sends at most one email a minute for it, so your inbox is not flooded.
 
 The **Process log** says what went wrong in plain words: no mail server set up yet, no address to send to, or the mail server
 said no (often a wrong app password). Check the junk mail folder too.
-
-## From BruControl
-
-The BruControl Import keeps each Alarm's **Email Notification** switch. BruControl's own mail settings are not copied: pick
-your mail server in Skynet's Settings as in step 1.

@@ -6,7 +6,7 @@ them.
 
 ## Board settings
 
-Open the **Devices** page and click **⚙ Change** on the Interface (in the BruControl Importer: **Connect your brewery**).
+Open the **Devices** page and click **⚙ Change** on the Interface.
 
 | Setting | What it does |
 |---|---|
@@ -68,14 +68,7 @@ On the **Devices** page click **💬 Board Talk** on the Interface. A window ope
 | `ERR <text>` | board → Brain | The board reports a problem, in its own words. |
 
 A line the Skynet programs do not use is shown as "The Skynet programs do not use this line". A board running another program
-(BruControl's, for example) talks differently, so its lines will not make sense here. The full details are in
+talks differently, so its lines will not make sense here. The full details are in
 docs/DEVICE_PROTOCOL.md.
-
-## From BruControl
-
-The BruControl Import keeps each board's **On** (Enabled), **Baud** and **Response Timeout** (as the Answer wait, in seconds).
-BruControl's **Logging** is not turned on in Skynet, because Diagnostic logging writes every line; the import notes list the boards
-that had it, so you can turn it on while finding a problem. BruControl's **Refresh Interval** is not copied: Skynet boards report
-every second by themselves.
 
 See also [Interfaces](76-interfaces) and [Connection ratings](69-connection-ratings).

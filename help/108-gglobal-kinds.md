@@ -1,6 +1,6 @@
 # gGlobal Kinds
 
-Since 2026-11-02 (OakBarn Brewery) a **gGlobal** is a variable with a global scope: every Process can read it and change it. It is **not a Widget** and it is **not on a Tab**. To show something on a Tab, use a Widget (a Text, Picture, Value, Time or Date Time Widget). Any Device or Widget can already go to the database and be reached by outside programs (its **Database and .API** box), so a gGlobal is no longer needed for that either.
+A **gGlobal** is a variable with a global scope: every Process can read it and change it. It is **not a Widget** and it is **not on a Tab**. To show something on a Tab, use a Widget (a Text, Picture, Value, Time or Date Time Widget). Any Device or Widget can already go to the database and be reached by outside programs (its **Database and .API** box), so a gGlobal is no longer needed for that either.
 
 Every gGlobal has one **Kind**. The Kind is picked when the gGlobal is made and **can never be changed**. If the Kind is wrong, delete the gGlobal and make a new one.
 
@@ -79,10 +79,6 @@ In every dialog with ✖ Cancel and 💾 Save, if you changed something and pres
 
 ## The other gGlobal kinds
 
-Switch, Push Button, Pulse Button, List, Step and Long String are **not gGlobals** any more (OakBarn Brewery, 2026-11-02): they have a state you see on a Tab, so they go to a new class, **Semi_Widgets_Devices**. Until that is built they are still added on a Tab in **Edit layout** and work as before: see [Variables](04-variables).
+Switch, Push Button, Pulse Button, List, Step and Long String are **not gGlobals** any more: they have a state you see on a Tab, so they go to a new class, **Semi_Widgets_Devices**. Until that is built they are still added on a Tab in **Edit layout** and work as before: see [Variables](04-variables).
 
 Older gGlobals that are not true variables with a global scope will become a Text Widget or a Graphic Widget, one at a time. The list of every gGlobal in the shipped Schemas is in docs/ExistingGlobals.md.
-
-## Coming in from BruControl
-
-How BruControl Globals turn into these Kinds (and when the import asks you) is in the Importing Norms (docs/Importing_Norms.md), section 6c.

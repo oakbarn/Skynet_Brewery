@@ -2,7 +2,7 @@
 
 Some valves have **two control wires**: one wire drives the valve **open**, the other drives it **closed**. Some motors turn forward
 on one relay and backward on another. Both need two outputs that are **never on at the same time**. In Skynet that is one Digital Out
-with a **Dual Throw** second Port (Skynet Rule 6.22). It works like BruControl's Dual Throw output.
+with a **Dual Throw** second Port (Skynet Rule 6.22).
 
 ## How it switches
 
@@ -30,4 +30,3 @@ The second Port now belongs to this Device: no other Device can use it (One Inte
 - **OFF drives the second Port on.** When everything is switched off (another Schema is loaded), a Dual Throw valve goes OFF, so its
   Close wire is powered and the valve closes. Only a lost link between the Brain and the board turns both Ports off.
 - A **Heating Element** and a **Manual valve** have no Dual Throw.
-- **From BruControl:** the BruControl Importer keeps each Digital Out's Dual Throw port and delay, and lists them in the Import notes.

@@ -1,6 +1,6 @@
 # Vessel sizing by gallons
 
-Vessels have their own Rules (Skynet Rules section 19, Fritz 2026-11-05). They apply **only to Vessel Widgets and Vessel Devices**:
+Vessels have their own Rules (Skynet Rules section 19). They apply **only to Vessel Widgets and Vessel Devices**:
 for them they take the place of Rule 2.20 (resize grab points), Rule 1.21 (`.width` and `.height`) and the faint marks of Rule 5.31.
 
 ## Gallons

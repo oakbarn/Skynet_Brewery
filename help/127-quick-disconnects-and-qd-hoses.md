@@ -5,7 +5,7 @@ Many home brewers have a valve manifold and move one hose from source to source 
 
 ## The Quick Disconnect Widget
 
-A Quick Disconnect sits on an **IP**, most often the IP on one end of a valve. It is drawn as Fritz's **bold red star with a
+A Quick Disconnect sits on an **IP**, most often the IP on one end of a valve. It is drawn as a **bold red star with a
 grey center** so it is easy to see on a Tab, never smaller than 40 pixels.
 
 1. In **Edit layout**, open **Elbows, Tees …** (or **Add Widget**) and pick **Quick Disconnect** under *IPs, couplings and caps*.

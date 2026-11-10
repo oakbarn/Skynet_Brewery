@@ -2,7 +2,7 @@
 
 Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. The six plain Kinds (String, Graphic, Value, Boolean, Time, Date Time) are made on the **gGlobal** screen with **➕ New gGlobal** and never sit on a Tab: see [gGlobal Kinds](108-gglobal-kinds). The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String) are still added in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, then **Add Widget**. The name prefixes below are suggestions; any name works.
 
-gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30 (Fritz). Sending readings to the database and letting outside programs reach an item are now settings that every Device and Widget has, so a separate API class was no longer needed. Older ones are changed when the Brain starts: see [Database and .API on every Device and Widget](98-database-and-api).
+gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30. Sending readings to the database and letting outside programs reach an item are now settings that every Device and Widget has, so a separate API class was no longer needed. Older ones are changed when the Brain starts: see [Database and .API on every Device and Widget](98-database-and-api).
 
 ## Which kind to use
 
@@ -17,7 +17,7 @@ The old **Shared variable** class is gone. An older Schema that still has one lo
 
 Every gGlobal is **non-volatile**: starting a Process never clears it, and its value is saved on the Brain's disk and comes back when the Brain restarts. See [gGlobals keep their values](118-gglobals-keep-their-values).
 
-The old **Global** class (from BruControl) is retired. When a BruControl file or an older Schema is loaded, each Global becomes a gGlobal, and the list of what moved shows on the Processes page.
+The old **Global** class is retired. When an older Schema is loaded, each Global becomes a gGlobal, and the list of what moved shows on the Processes page.
 
 ## gGlobal kinds
 
