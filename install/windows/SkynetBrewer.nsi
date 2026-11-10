@@ -350,10 +350,20 @@ Section "Skynet Brew Panel" SecMain
       StrCpy $OldPanel "$0"
   ${EndIf}
 
-  ; The samples folder is program files: it is cleared first, so a sample an older version had (the 2 Vessel, BrewZilla and OakBarn
-  ; samples, now set aside in the Sandbox) does not stay behind. The panel ships only the 3 Vessel sample; every other one comes
-  ; with the Skynet Sample Schemas Setup into sample_schemas\, which this Setup never touches (Rule 9.13).
-  RMDir /r "$INSTDIR\samples"
+  ; The panel ships only the 3 Vessel sample (Rule 9.13). The three sample folders older versions put in samples\configs (now set
+  ; aside in the Sandbox) are MOVED, never deleted, to backups\old_samples_<date>, so they stop showing under Add a Sample Schema.
+  ; Nothing else is touched: your own Schemas are in config\schemas (never here), any other folder in samples\configs stays, and
+  ; sample_schemas\ (the Skynet Sample Schemas Setup's folder) is never touched by this Setup.
+  !macro MoveOldSample ID
+    ${If} ${FileExists} "$INSTDIR\samples\configs\${ID}\*.*"
+      CreateDirectory "$INSTDIR\backups\old_samples_$Stamp"
+      Rename "$INSTDIR\samples\configs\${ID}" "$INSTDIR\backups\old_samples_$Stamp\${ID}"
+      DetailPrint "The old sample ${ID} was moved to backups\old_samples_$Stamp (the panel ships only the 3 Vessel sample now)."
+    ${EndIf}
+  !macroend
+  !insertmacro MoveOldSample "two-vessel-one-pump"
+  !insertmacro MoveOldSample "brewzilla-brew-day"
+  !insertmacro MoveOldSample "oakbarn-brucontrol"
   ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"

@@ -144,9 +144,16 @@ if [ "$SRC" != "$DEST" ]; then
   else
     echo "Full install to $DEST"
   fi
-  # samples/ is program files: cleared first so a sample an older version had (now in the Sandbox) does not stay behind.
-  # The extra Sample Schemas live in sample_schemas/, which is never touched here (Rule 9.13).
-  rm -rf "$DEST/samples"
+  # The panel ships only the 3 Vessel sample (Rule 9.13). The three sample folders older versions put in samples/configs (now in
+  # the Sandbox) are MOVED, never deleted, to backups/old_samples_<date>. Nothing else is touched: your own Schemas are in
+  # config/schemas, any other folder in samples/configs stays, and sample_schemas/ is never touched here.
+  for old in two-vessel-one-pump brewzilla-brew-day oakbarn-brucontrol; do
+    if [ -d "$DEST/samples/configs/$old" ]; then
+      mkdir -p "$DEST/backups/old_samples_$STAMP"
+      mv "$DEST/samples/configs/$old" "$DEST/backups/old_samples_$STAMP/$old"
+      echo "The old sample $old was moved to backups/old_samples_$STAMP (the panel ships only the 3 Vessel sample now)."
+    fi
+  done
   ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
     case "$f" in
       ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;

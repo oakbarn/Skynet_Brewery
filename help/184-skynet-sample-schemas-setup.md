@@ -39,5 +39,6 @@ Put the folder in `sample_schemas` and press **F5**. It comes in exactly like a 
 
 ## Good to know
 
-- Updating the panel never touches `sample_schemas`. (The panel's own `samples` folder is program files: an update replaces it, so a sample an older version had does not stay behind.)
+- Updating the panel never touches `sample_schemas`. Your own Schemas are never touched either.
+- The samples older versions of the panel had (Two vessels, one pump; BrewZilla brew day; OakBarn Brewery) are moved, not deleted, to `backups/old_samples_<date>` the first time you update, so only the 3 Vessel sample is listed. A Schema you already made from one of them is yours and stays.
 - Uninstalling the panel and keeping your data (the recommended No) keeps `sample_schemas` too.
