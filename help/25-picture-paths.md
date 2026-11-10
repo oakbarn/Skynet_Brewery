@@ -1,6 +1,6 @@
 # Background pictures (.backpath, .backpath_2, .backpath_3)
 
-Every item on a tab (a Device or a Widget) can show a background picture. It has three background picture paths, and **.background** picks which one shows (Fritz, 2026-11-02):
+Every item on a tab (a Device or a Widget) can show a background picture. It has three background picture paths, and **.background** picks which one shows:
 
 | Attribute | In Properties | What it holds |
 |---|---|---|
@@ -39,8 +39,8 @@ A color name or code in **.background** (`my_Widget.background = "red"`) shows n
 
 ## The old names are gone
 
-**.imagePath_1**, **.imagePath_2** and **.imagePath_3** are now **.backpath**, **.backpath_2** and **.backpath_3** (Skynet Rule 15.2: nothing old is kept). When the panel starts, every Schema and every Process is changed to the new names by itself, and a Process is backed up first. An older item that had a picture and a blank background gets **.background = 1**, so it still shows its picture. A BruControl import comes in with the new names too.
+**.imagePath_1**, **.imagePath_2** and **.imagePath_3** are now **.backpath**, **.backpath_2** and **.backpath_3** (Skynet Rule 15.2: nothing old is kept). When the panel starts, every Schema and every Process is changed to the new names by itself, and a Process is backed up first. An older item that had a picture and a blank background gets **.background = 1**, so it still shows its picture.
 
 The first time you change Image Path 2 or 3 in the Properties, a **heads-up** pops up: in Skynet one picture path is enough, because `.image` can give any Device or Widget as many pictures as you like. Tick **Do not show this again** to stop it.
 
-> Every item has **at most 3** background pictures. An older item with a 4th picture or more (from stacked BruControl copies) keeps only the first 3; `.background = 4` or more shows no background.
+> Every item has **at most 3** background pictures. An older item with a 4th picture or more keeps only the first 3; `.background = 4` or more shows no background.

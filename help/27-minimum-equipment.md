@@ -91,7 +91,7 @@ The least you need for each kind of device the panel supports, which Mega port i
 | Device | Minimum to buy | Mega port used | Rough price | Notes |
 |---|---|---|---|---|
 | Pump (Riptide, Chugger) | The pump + 1 relay channel (8-channel 5 V relay board) | 1 digital pin | $150-220 pump, $10-15 relay board | Mains pumps through a contactor or a 10 A+ relay, on a GFCI circuit |
-| Motorized ball valve | The valve (12 V, stainless, CR05 wiring: stays put, 1 relay) + 12 V power supply | 1 digital pin per valve (CR02 wiring needs 2) | $25-45 each, $20-35 supply | BruControl VGC outputs import as valves |
+| Motorized ball valve | The valve (12 V, stainless, CR05 wiring: stays put, 1 relay) + 12 V power supply | 1 digital pin per valve (CR02 wiring needs 2) | $25-45 each, $20-35 supply | |
 | Solenoid valve (water) | 12 V solenoid valve + 1 relay channel | 1 digital pin | $10-25 | For water lines, not hot wort |
 | Proportional valve or pump speed | A 0-10 V (or 4-20 mA) valve or VFD + PWM-to-0-10 V module | 1 PWM pin | $5-15 module | 0-100 % on screen |
 | Electric heating element | SSR 25-40 A on a heat sink + 2-pole contactor (switched by a relay) | 1 PWM or digital pin for the SSR, 1 digital pin for the contactor | $20-45 SSR, $20-40 contactor | Mains: GFCI and an electrician's check |

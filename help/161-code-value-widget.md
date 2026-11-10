@@ -1,7 +1,6 @@
 # Code Value Widget
 
-A **Code Value Widget** is a Value Widget that **does something** when you set it (Skynet Rule 1.27, OakBarn Brewery
-2026-11-08). It shows its **Value** on a Tab in the **Format** you pick, with the normal **Label** of a Value Widget, and it
+A **Code Value Widget** is a Value Widget that **does something** when you set it (Skynet Rule 1.27). It shows its **Value** on a Tab in the **Format** you pick, with the normal **Label** of a Value Widget, and it
 holds a few lines of **Process code** in its **Code** attribute. Each time you set the Value, that code runs once.
 
 For example, a Code Value Widget for the Brew Kettle's temperature Setpoint. The Setpoint belongs to the Kettle's **Heating

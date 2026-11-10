@@ -1,7 +1,7 @@
 # Shortcut keys
 
 These keys work in **every text and string box** in Skynet Brewer: Properties dialogs, Labels, Texts, Names, the String
-Entry Dialogs (the red ⬆ Up Arrow, Rule 18.1), the Process editor and Schema.json. (Fritz, 2026-11-02, Rule 2.32)
+Entry Dialogs (the red ⬆ Up Arrow, Rule 18.1), the Process editor and Schema.json. (Rule 2.32)
 
 ## Skynet keys
 

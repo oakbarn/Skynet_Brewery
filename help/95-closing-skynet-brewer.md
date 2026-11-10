@@ -2,7 +2,7 @@
 
 On Windows, Skynet Brewer runs in a black **Command Prompt** window on the Brain. Your browser only shows the panel.
 
-To stop the panel **and** close that window in one go (Fritz, 2026-10-30):
+To stop the panel **and** close that window in one go:
 
 1. Open **☰ Menu**. At the bottom, pick **⏻ Close Skynet Brewer** (Admins only).
 2. The panel asks first, and says how many Processes are running. They stop.

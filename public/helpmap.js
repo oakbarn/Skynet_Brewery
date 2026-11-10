@@ -13,11 +13,12 @@ const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 // a device or widget element (the things added with Add Device / Add Widget)
 export function elementTopic(e) {
   if (!e) return null;
+  if (e.type === 'fermentor') return ['fermentor-control'];      // the Fermentor Control (OakBarn Brewery, 2026-11-10, Rule 6.30, Help 182)
   if (e.integratedIn) return ['skynet-integrated-devices'];
   // a Temperature Probe, plain, Thermowell or probe tee: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26, Help 138)
   if (e.type === 'temperature' && !e.template && !e.kind) return ['temperature-probe-device-properties'];
   if (e.subtype === 'thermowell') return ['probe-tees-and-thermowells-on-pipes', 'thermowells'];     // Rule 5.30, Help 132
-  if (e.subtype === 'probeTee') return ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
+  if (e.subtype === 'probeTee') return ['pipe-widgets-from-skynet-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
   if (e.subtype === 'propValve') return ['proportional-valves'];      // Skynet KLD20T and the User Defined one (Fritz, 2026-11-03, Help 117)
   // a Motorized Ball Valve, Skynet or User Defined: the Pump's drill-down without a Cover (Fritz, 2026-11-05, Rule 18.23, Help 128)
   if (e.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (!e.template || /^Skynet_Motorized_Ball_Valve_/.test(e.template))) return ['motorized-ball-valve-device-properties'];
@@ -117,7 +118,7 @@ export const DB_TRIGGER = ['database-and-api', 'database'];
 export const RIGHT_CLICK_PAGE = ['right-click-help'];
 export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
-  elementTopic({ type: 'alarm', alarmClass: 'basic' }),
+  elementTopic({ type: 'alarm', alarmClass: 'basic' }), elementTopic({ type: 'fermentor' }),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'gGlobal', kind: 'list' }), elementTopic({ type: 'analogOut', subtype: 'propValve' }),
   ...['switch', 'pushButton', 'pulseButton', 'led'].map(type => elementTopic({ type })),

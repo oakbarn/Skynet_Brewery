@@ -1,7 +1,7 @@
 # Tap Water Valve
 
 The **Tap Water Valve** is the brass household **hose bib** (outside faucet, sill cock) with a green handle, the kind you buy at a
-home store. In Skynet it is a **Manual Valve Widget** (Skynet Rule 5.33; Fritz, 2026-11-06): no board pin, turned by hand, and
+home store. In Skynet it is a **Manual Valve Widget** (Skynet Rule 5.33): no board pin, turned by hand, and
 it brings house water into your brewery.
 
 ![Tap Water Valve](Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg)

@@ -6,7 +6,7 @@ closed. You find them in the **Valves** list on the Edit layout bar.
 
 ## The Skynet KLD20T Proportional Valve
 
-The first **Skynet Proportional Valve** is the **KLD20T** sold by BruControl: a 1/2 inch NPT, stainless steel (SS304) motorized
+The first **Skynet Proportional Valve** is the **KLD20T**: a 1/2 inch NPT, stainless steel (SS304) motorized
 ball valve. It is powered by **24 VDC** and turns to the % set by a **0-5 VDC** control signal (0 V = closed, 5 V = wide open).
 
 It is a **Skynet Template** (Skynet Rule 5.16), the same way as the Skynet Motorized Ball Valve (Help 88):
