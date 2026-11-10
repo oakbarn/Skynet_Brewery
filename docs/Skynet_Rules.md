@@ -2361,7 +2361,8 @@ Releases page. They only ADD: a file already there by that name is never changed
 pictures and sounds are never touched. **Get Skynet pictures** (Help 59) is add-only too. A redone drawing is a new file with a new
 name. The Setup's last page, the ReadMes and Help 183 say where to get it. **No copyrighted media** (OakBarn Brewery, 2026-11-10):
 Skynet ships only its own pictures and sounds, or ones in the public domain or under CC0 or another Creative Commons license (credit
-kept as the license asks); a questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
+kept as the license asks). Every picture or sound that is not Skynet's own, CC0 and CC included, has a row in
+[Media_Licenses.csv](Media_Licenses.csv) with its source, license and what the license asks for. A questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
 Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
 (thread "Shrink the Setup .exe and remove dead code", Help 183)
 
