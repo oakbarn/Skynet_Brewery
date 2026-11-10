@@ -38,7 +38,7 @@ the Skynet Widget that does the same job:
 
 The first page lists every kind of Skynet Widget and how many of yours become one. Then there is one page for each kind found on
 the Tabs you are importing, so *Timers (1 of 1)* when Timers are the only kind.
-A Widget's suggested name is `wgt_`, its kind, the Label and the Tab ID, for example `wgt_TMR_Mash~Timer_BR`.
+A Widget's suggested name is `wgt_`, its kind, the Label and the Tab ID, for example `wgt_TMR_Mash~Timer_BH`.
 
 ## The item pages
 

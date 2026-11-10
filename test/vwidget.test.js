@@ -59,8 +59,8 @@ assert.ok(read('help/133-vessel-widget.md').includes('TC, NPT or BSP'), 'Help ex
 // their probes and heaters built into the Left and Right Element IPs
 const c = JSON.parse(read('samples/configs/three-vessel-one-pump/config.json'));
 const want = { HLT_Vessel: ['cBottomOutlet', 'lElement', 'rElement'], MLT_Vessel: ['cBottomOutlet', 'lSparge', 'lElement'], BK_Vessel: ['cBottomOutlet', 'lSparge', 'lElement', 'rElement'] };
-const parts = { HLT_Vessel: { lElement: ['BM_700_1W_HLT_BR', 'thermowell'], rElement: ['BM_8_HE_HLT~element_BR', 'element'] }, MLT_Vessel: { lElement: ['BM_701_1W_Mash_BR', 'thermowell'] },
-  BK_Vessel: { lElement: ['BM_702_1W_Kettle_BR', 'thermowell'], rElement: ['BM_9_HE_Kettle~element_BR', 'element'] } };
+const parts = { HLT_Vessel: { lElement: ['BM_700_1W_HLT_BH', 'thermowell'], rElement: ['BM_8_HE_HLT~element_BH', 'element'] }, MLT_Vessel: { lElement: ['BM_701_1W_Mash_BH', 'thermowell'] },
+  BK_Vessel: { lElement: ['BM_702_1W_Kettle_BH', 'thermowell'], rElement: ['BM_9_HE_Kettle~element_BH', 'element'] } };
 for (const [n, on] of Object.entries(want)) {
   const v = c.graphics.find(g => g.name === n);
   assert.ok(v?.vwidget && v.vdevice && v.template === 'Skynet_Vessel_Widget', `${n} is a Vessel Device`);
@@ -79,7 +79,7 @@ for (const [n, on] of Object.entries(want)) {
 }
 // the built in heaters are Heating Elements starting in Hysteresis (Rule 6.19), so they have the Heating method field and spots;
 // the Processes still set .target and .enabled
-{ const hlt = c.elements.find(e => e.name === 'BM_8_HE_HLT~element_BR'); assert.deepEqual([hlt.type, hlt.subtype, hlt.heatMethod], ['digitalOut', 'element', 'hysteresis']); }
+{ const hlt = c.elements.find(e => e.name === 'BM_8_HE_HLT~element_BH'); assert.deepEqual([hlt.type, hlt.subtype, hlt.heatMethod], ['digitalOut', 'element', 'hysteresis']); }
 assert.ok(!c.graphics.some(g => ['img_HLT', 'img_MLT', 'img_BK'].includes(g.id)), 'the old pictures went');
 console.log('vessel widget ok');
 

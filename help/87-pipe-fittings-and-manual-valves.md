@@ -15,7 +15,7 @@ A pipe fitting has no settings but:
 | **Width, Height** | How big it is. Switch **Autosize to pipe** off first; then you can type them, or drag its grab points in Edit layout. |
 | 🔒 Lock | Locks it in place, as on every item. |
 
-- It has **no label**, **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BR ...) shows in its Properties and when you hold the mouse over it.
+- It has **no label**, **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BH ...) shows in its Properties and when you hold the mouse over it.
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
 - An **End Cap** has **Autosize to pipe** too: on an opening of a pipe fitting it takes the size of that fitting's ferrule. On a Reducer, a Valve Tee or Supply Manifold, or a vessel opening it keeps its size.
@@ -53,6 +53,6 @@ The older **Valve type Manual** on a valve Device still works as before (pop-up 
 
 ## The Manual Pump Widget
 
-A **Manual Pump** (2026-11-08, Skynet Rule 5.15a) is a pump plugged into a wall outlet, that you switch by hand: no Interface or Port turns it. Add one from **Select Device Type > Pumps** or **Select Widget Type > Semi_Widgets_Devices**, then pick the pump from the same list as **Add Pump** (or the Sump pump). It looks and joins pipes like a Pump Device (the same drawing, inlet and outlet IPs, Cover and Overlay). Its name is **wgt_MP_** + Label + Tab ID, for example `wgt_MP_Pump~1_BR`.
+A **Manual Pump** (2026-11-08, Skynet Rule 5.15a) is a pump plugged into a wall outlet, that you switch by hand: no Interface or Port turns it. Add one from **Select Device Type > Pumps** or **Select Widget Type > Semi_Widgets_Devices**, then pick the pump from the same list as **Add Pump** (or the Sump pump). It looks and joins pipes like a Pump Device (the same drawing, inlet and outlet IPs, Cover and Overlay). Its name is **wgt_MP_** + Label + Tab ID, for example `wgt_MP_Pump~1_BH`.
 
-It is a Confirmation Widget too: a click on it, or a Process line such as `wgt_MP_Pump~1_BR.state = true`, shows **✋ TURN ON Pump 1 by hand, then press Done**. Switch the pump on, press **Done**, and it shows ON (a Process waits until then).
+It is a Confirmation Widget too: a click on it, or a Process line such as `wgt_MP_Pump~1_BH.state = true`, shows **✋ TURN ON Pump 1 by hand, then press Done**. Switch the pump on, press **Done**, and it shows ON (a Process waits until then).

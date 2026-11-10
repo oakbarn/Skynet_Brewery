@@ -27,7 +27,7 @@ Slider, LED and so on. Put a Slider on any Tab, link it to the Mash pump, and it
 
 In Edit layout, **Select Widget Type > Semi_Widgets_Devices**, then pick Switch, Slider, Checkbox, Lighted Button, Push Button,
 Pulse Button, LED or Manual Valve Widget (or use **Boolean ➕** on the Edit layout bar). Like every new Widget it is made on the 🔨 Build Tab and its Properties open; **Save Build ...** sends it to a Tab.
-New names are `wgt_SW_...`, `wgt_SLD_...` (Slider), `wgt_CHK_...` (Checkbox), `wgt_LTB_...` (Lighted Button), `wgt_PB_...`, `wgt_PL_...` and `wgt_LED_...`, then the Label and the Tab ID (Skynet Rule 3.14), for example `wgt_SW_Mash_Stir_BR`; a Manual Valve Widget is `wgt_MV_...` and a Tap Water Valve `wgt_TWV_...`. Older names (`sw_1`, `ManualValve_1`) keep working.
+New names are `wgt_SW_...`, `wgt_SLD_...` (Slider), `wgt_CHK_...` (Checkbox), `wgt_LTB_...` (Lighted Button), `wgt_PB_...`, `wgt_PL_...` and `wgt_LED_...`, then the Label and the Tab ID (Skynet Rule 3.14), for example `wgt_SW_Mash_Stir_BH`; a Manual Valve Widget is `wgt_MV_...` and a Tap Water Valve `wgt_TWV_...`. Older names (`sw_1`, `ManualValve_1`) keep working.
 
 ## Linked Device
 
