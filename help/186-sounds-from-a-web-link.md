@@ -27,7 +27,7 @@ A link needs the internet. Without it:
 - **An Alarm** plays the **Missing Alarm Sound** from the Brain instead (a voice that says the sound can't be found), and a
   warning says why. If that isn't there either, it plays the Skynet beep. An Alarm is never silent. The same happens when an
   Alarm's sound file on the Brain is missing.
-- **A Sound Player** stays quiet and shows the same warning.
+- **A Sound Player** plays OakBarn Brewery's song *Find The File - Connecting* once instead, and shows the same warning.
 - **The sound before a hop alert** is skipped, and the alert's voice still speaks.
 
 For **Hop** and **Brew Flow** Alarms, a file on the Brain is the safest choice: it plays with or without the internet.
@@ -48,4 +48,5 @@ Only put up sounds you have the right to share (Skynet Rule 9.12).
   the web too.
 - A sound that fails to load (an `error` event: a link, or a missing file) switches an Alarm to `sounds/Skynet/Alarm_Sound_Missing.mp3`,
   then to `sounds/alarm_beep.wav` if that fails too, until the page is opened again.
+- A Sound Player switches to `sounds/Skynet/Find_The_File_Connecting.mp3` and plays it once (Repeat is ignored for it).
 - **Media > Move** and the missing files list skip links: there is no file to move or find.

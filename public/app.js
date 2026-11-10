@@ -9500,6 +9500,8 @@ function soundSrc(e, v) {
 const hasSoundNow = (e, v) => !!soundSrc(e, v);
 // what an Alarm plays when its own sound can't play, in this order (Rule 7.20): the voice clip, then the beep
 const ALARM_FALLBACKS = ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
+// and a Sound Player: OakBarn Brewery's song "Find The File - Connecting" (Treblo), played once
+const PLAYER_FALLBACKS = ['sounds/Skynet/Find_The_File_Connecting.mp3'];
 function getAudio(e) {
   const src = soundSrc(e, S.values[e.name] || {});
   if (!src) return null;
@@ -9507,13 +9509,13 @@ function getAudio(e) {
   if (!a || a._src !== src) {
     a = new Audio(soundUrl(src)); a._src = src; audios.set(e.name, a);
     // a sound that can't play (a web link with no internet, a wrong link, a missing file), Rule 7.20: an Alarm plays the Missing
-    // Alarm Sound voice clip from the Brain, or the Skynet beep when that isn't there either, and says why; a Sound Player only says why
+    // Alarm Sound voice clip from the Brain, or the Skynet beep when that isn't there either; a Sound Player plays the
+    // "Find The File" song once; both say why
     a.addEventListener('error', () => {
       const why = isLink(src) ? 'its sound link can\'t be reached (is the internet down?)' : `its sound file ${src} is missing`;
-      if (e.type !== 'alarm') { if (!a._told) { a._told = true; toast(`${e.label || e.name}: ${why}`, true); } return; }
-      const next = ALARM_FALLBACKS.filter(f => f !== src)[(a._fb ?? -1) + 1];
-      if (!next) return;
-      if (a._fb === undefined) toast(`${e.label || e.name}: ${why}, so it plays the Missing Alarm Sound instead`, true);
+      const alarm = e.type === 'alarm', next = (alarm ? ALARM_FALLBACKS : PLAYER_FALLBACKS).filter(f => f !== src)[(a._fb ?? -1) + 1];
+      if (a._fb === undefined) toast(`${e.label || e.name}: ${why}` + (next ? `, so it plays ${alarm ? 'the Missing Alarm Sound' : 'the Find The File song'} instead` : ''), true);
+      if (!next) { a._fb = 99; return; }
       a._fb = (a._fb ?? -1) + 1; a.src = media(next);
       if (a._playing) a.play().catch(() => { });
     });
@@ -9525,7 +9527,7 @@ function getAudio(e) {
 function updateAlarms() {
   for (const e of S.config.elements.filter(isSoundEl)) {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
-    a.loop = !!v.loop;
+    a.loop = !!v.loop && !(e.type === 'soundPlayer' && a._fb !== undefined);      // the Find The File song plays once
     const music = e.type === 'soundPlayer' || e.kind === 'sound';
     // played to its end without Repeat: tell the Brain, so the next Alarm in line plays (Rule 7.18)
     if (e.type === 'alarm' && !a._endHook) { a._endHook = true; a.addEventListener('ended', () => { if (!a.loop && S.values[e.name]?.active) api('POST', '/ui/sound/finished', { name: e.name }).catch(() => { }); }); }
