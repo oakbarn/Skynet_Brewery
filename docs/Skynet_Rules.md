@@ -1823,7 +1823,9 @@ Electricians and can give no electrical advice. Consult a Licensed Electrician."
 Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
 help on its Heating method, Help 137 and 150, the BruControl Import's Heating Element note), it shows:
 **"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
-Electrician."** Any later page or dialog about wiring gets the same words.
+Electrician."** Any later page or dialog about wiring gets the same words. In a help balloon (the Heating method's) the warning comes
+**first**, with a red warning triangle, in **red bold** words, then the rest of the help (OakBarn Brewery, 2026-11-10, "Heat Method Hover
+Help").
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -3590,6 +3592,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
 - 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
+- 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")

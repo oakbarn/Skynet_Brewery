@@ -38,6 +38,18 @@ export const helpTarget = t => t?.closest?.(FIELD) ? null : t?.closest?.('[data-
 // ⬢ and ⬆ show red, as the buttons do
 export function helpNodes(text, doc = globalThis.document) {
   const out = [];
+  // a line that starts with ⚠ is a warning: a red triangle and red bold words (Rule 6.20, OakBarn Brewery, 2026-11-10: the Heat Method's balloon)
+  const lines = String(text ?? '').split('\n');
+  if (lines.some(l => l.startsWith('⚠'))) {
+    lines.forEach((l, n) => {
+      if (n && !lines[n - 1].startsWith('⚠')) out.push(doc.createTextNode('\n'));      // a warning is its own block
+      if (!l.startsWith('⚠')) { out.push(...helpNodes(l, doc)); return; }
+      const w = doc.createElement('span'); w.className = 'hhWarn';
+      const tri = doc.createElement('span'); tri.className = 'hhTri'; tri.textContent = '!';
+      w.append(tri, doc.createTextNode(l.replace(/^⚠\s*/, ''))); out.push(w);
+    });
+    return out;
+  }
   for (const [i, part] of String(text ?? '').split(/⟦|⟧/).entries()) {
     if (i % 2) { const m = doc.createElement('b'); m.className = 'hhMark'; m.textContent = part; out.push(m); continue; }
     for (const [j, bit] of part.split(/([⬢⬆])/).entries()) {
