@@ -29,11 +29,11 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'textbox-'));
 const cfg = path.join(dir, 'brewery.json');
 fs.writeFileSync(cfg, JSON.stringify({
   elements: [{ name: 'Pump_1', type: 'digitalOut', x: 10, y: 20, w: 100, h: 50 }, { name: 'Text_1', type: 'label' }],
-  graphics: [{ id: 'a', kind: 'text', text: 'Hello', x: 5, y: 6, w: 220, h: 40 }, { id: 'b', kind: 'text', name: 'Text_9', text: 'Hidden', visible: false }],
+  graphics: [{ id: 'a', kind: 'text', text: 'Hello', x: 5, y: 6, w: 220, h: 40 }, { id: 'b', kind: 'text', name: 'w_Text_9', text: 'Hidden', visible: false }],
 }));
 const s = new Store(cfg, dir); s.load();
 assert.equal(s.config.graphics[0].name, 'w_Text_1', 'a Text gets a name no Device has');
-assert.equal(s.config.graphics[1].name, 'w_Text_9', 'an older Text_9 becomes w_Text_9 (Rule 15.2)');
+assert.equal(s.config.graphics[1].name, 'w_Text_9', 'a named Text keeps its name');
 assert.ok(s.has('w_Text_1') && s.has('w_Text_9'));
 assert.equal(s.getProp('w_Text_1', 'value'), 'Hello');
 assert.equal(s.getProp('w_Text_9', 'visible'), false);

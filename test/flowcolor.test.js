@@ -35,25 +35,19 @@ assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tab: 'strike', pipe: '
 assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tap: true, tab: 'strike', pipe: 'orange' }), TAP_BLUE, 'tap water is #1 (Fritz 2026-11-04)');
 assert.ok(pipeWins('') && pipeWins('boil') && !pipeWins('purple'));
 
-// older Schemas: the old start color #4fb3ff becomes None, other colors are kept
-const gs = [{ kind: 'pipe', flowColor: '#4fb3ff' }, { kind: 'pipe', flowColor: '#E74C3C' }, { kind: 'pipe', hose: true, flowColor: 'transparent' }, { kind: 'pipe' }];
-assert.equal(flowStandard(gs), 3);
-assert.ok(!('flowColor' in gs[0])); assert.equal(gs[1].flowColor, '#e74c3c'); assert.ok(!('flowColor' in gs[2]));
-// Pipes default to None (Fritz, 2026-11-04): the samples' orange becomes None once per Schema; picked again later, it stays
-const sc = { graphics: [{ kind: 'pipe', flowColor: '#ffb347' }, { kind: 'pipe', flowColor: 'red' }] };
-flowStandard(sc.graphics, sc);
-assert.ok(!('flowColor' in sc.graphics[0])); assert.equal(sc.graphics[1].flowColor, 'red'); assert.equal(sc.pipeFlowNone, true);
-sc.graphics[0].flowColor = '#ffb347'; flowStandard(sc.graphics, sc);
-assert.equal(sc.graphics[0].flowColor, '#ffb347', 'only once');
+// a pipe's Flow color is a color word or an RGB color; anything else is None
+const gs = [{ kind: 'pipe', flowColor: '#E74C3C' }, { kind: 'pipe', hose: true, flowColor: 'transparent' }, { kind: 'pipe', flowColor: 'red' }, { kind: 'pipe' }];
+assert.equal(flowStandard(gs), 2);
+assert.equal(gs[0].flowColor, '#e74c3c'); assert.ok(!('flowColor' in gs[1])); assert.equal(gs[2].flowColor, 'red');
 
 // Processes
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'flowcolor'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Done', type: 'gKonstant', kind: 'value' }, { name: 'Seen', type: 'gKonstant', kind: 'string' }],
-  graphics: [{ id: 'p1', kind: 'pipe', name: 'Pipe_1', workspace: 'Main', points: [[0, 0], [100, 0]], flowColor: '#4fb3ff' }, { id: 'h1', kind: 'pipe', hose: true, name: 'Hose_1', workspace: 'Main', points: [[0, 0], [50, 50]] },
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Done', type: 'gGlobal', kind: 'value' }, { name: 'Seen', type: 'gGlobal', kind: 'string' }],
+  graphics: [{ id: 'p1', kind: 'pipe', name: 'Pipe_1', workspace: 'Main', points: [[0, 0], [100, 0]] }, { id: 'h1', kind: 'pipe', hose: true, name: 'Hose_1', workspace: 'Main', points: [[0, 0], [50, 50]] },
     { id: 'i1', kind: 'ip', name: 'IP_1', workspace: 'Main', x: 0, y: 0 }, { id: 'f1', kind: 'ip', fitting: 'tee', name: 'Tee_1', workspace: 'Main', x: 0, y: 0 }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
-assert.ok(!('flowColor' in store.config.graphics[0]), 'the old start color is None after loading');
+assert.ok(!('flowColor' in store.config.graphics[0]), 'a new pipe has no Flow color: None');
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const sent = []; eng.on('flow', f => sent.push(f));
 const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };

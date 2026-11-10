@@ -18,7 +18,7 @@ assert.deepEqual([samplingPeriod({}), samplingPeriod({ samplingPeriod: 30 }), sa
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'smooth'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'NTC', type: 'temperature', sensor: 'ntc', device: 'MB', channel: 'A0', units: '°F' },
   { name: 'DS', type: 'temperature', device: 'MB', probe: 'x', units: '°F' },
   { name: 'Flow', type: 'flowMeter', device: 'MB', channel: 2, pulsesPerUnit: 60, avgWeight: 50 },

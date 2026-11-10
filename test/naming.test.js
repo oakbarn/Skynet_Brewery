@@ -151,7 +151,7 @@ assert.equal(rtdPinError({ ...rtd, channel: 'D53' }), null);
 assert.equal(rtdPinError({ ...rtd, channel: 5, sensor: 'thermocouple' }), null, 'thermocouples unchanged');
 assert.equal(rtdPinError({ ...rtd, channel: 5, device: 'ESP' }, [{ name: 'ESP', board: 'esp32' }]), null, 'only on a Mega');
 // Skynet Rule 6.10 (Fritz, 2026-10-27): an Ethernet Mega keeps pin D10 for its shield
-const ethMega = [{ name: 'MEGA', board: 'mega', type: 'ethernet' }], usbMega = [{ name: 'MEGA', board: 'mega', type: 'serial' }];
+const ethMega = [{ name: 'MEGA', board: 'mega', connection: 'ethernet' }], usbMega = [{ name: 'MEGA', board: 'mega', connection: 'serial' }];
 const on10 = { name: 'MB_10_PWM_Fan', type: 'pwmOut', device: 'MEGA', channel: 10 };
 assert.match(busCheck(on10, [], ethMega).error, /Rule 6\.10/, 'no D10 on an Ethernet Mega');
 assert.equal(busCheck(on10, [], usbMega), null, 'D10 is fine on USB');
@@ -160,8 +160,8 @@ assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], usbMega).i
 assert.match(ethernetPinError(ethMega[0], [on10]), /Move MB_10_PWM_Fan .*Rule 6\.10/, 'USB to Ethernet refused while D10 is used');
 assert.equal(ethernetPinError(usbMega[0], [on10]), null);
 assert.equal(ethernetPinError(ethMega[0], [{ ...on10, channel: 11 }]), null);
-assert.match(ethernetPinError({ name: 'MEGA', board: 'mega', type: 'simulator', realType: 'ethernet' }, [on10]), /D10/, 'a simulator standing in for Ethernet too');
-assert.equal(ethernetPinError({ name: 'MEGA', board: 'esp32', type: 'ethernet' }, [on10]), null, 'only a Mega');
+assert.match(ethernetPinError({ name: 'MEGA', board: 'mega', connection: 'simulator', realConnection: 'ethernet' }, [on10]), /D10/, 'a simulator standing in for Ethernet too');
+assert.equal(ethernetPinError({ name: 'MEGA', board: 'esp32', connection: 'ethernet' }, [on10]), null, 'only a Mega');
 // Skynet Rule 6.11: D4 (the shield's SD card pin) is allowed, with a warning
 const on4 = { name: 'MB_04_DO_Light', type: 'digitalOut', device: 'MEGA', channel: 4 };
 assert.match(busCheck(on4, [], usbMega).warn, /SD Card Not Supported\. Never insert an SD Card!/);
@@ -181,7 +181,7 @@ assert.match(busCheck({ ...led, channel: 41 }, [probe], [{ name: 'MEGA', oneWire
 // the server gives IDs when a Schema loads, and refuses a Tab ID used twice
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'naming-'));
 const cfg = path.join(dir, 'brewery.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Main Brewery Mega USB', type: 'simulator' }], workspaces: [{ name: 'Sparge' }], elements: [] }));
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Main Brewery Mega USB', connection: 'simulator' }], workspaces: [{ name: 'Sparge' }], elements: [] }));
 const store = new Store(cfg, dir); store.load();
 assert.equal(store.config.devices[0].id, 'MB');
 assert.deepEqual(store.config.workspaces.map(w => w.id), ['SP', 'EQ'], 'the Equipment tab gets EQ');

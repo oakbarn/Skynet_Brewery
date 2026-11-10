@@ -103,7 +103,7 @@ assert.throws(() => pt.deleteUser('Mash', 'Skynet_Mash'), /No User Process Templ
 // ---- in a running Process: rcp_ values, ask, close_all_valves, open_all_valves, all_pumps_off
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', boilTime: 60 }, elements: [
-  ...elements.filter(e => e.type === 'digitalOut'), { name: 'V_Off_List', ...v({ closeAll: false, openAll: false }) }, { name: 'Out', type: 'gKonstant', kind: 'string', dataType: 'string' },
+  ...elements.filter(e => e.type === 'digitalOut'), { name: 'V_Off_List', ...v({ closeAll: false, openAll: false }) }, { name: 'Out', type: 'gGlobal', kind: 'string', dataType: 'string' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
