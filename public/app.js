@@ -10352,9 +10352,9 @@ const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device ===
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
 // ---- Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
 const BOARD_TIP = {
-  on: 'On: the panel talks to this board. Off: the panel never opens it (BruControl: Enabled). Its Devices show as not connected.',
+  on: 'On: the panel talks to this board. Off: the panel never opens it. Its Devices show as not connected.',
   paused: 'On: the panel stops sending to this board (only "are you there?" PINGs, so the board keeps its outputs as they are) and does not use what the board says. For finding a problem; Board Talk still shows every line. Off again sends every setting and output so the board matches the screen.',
-  answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer" (BruControl: Response Timeout). 2 to 600; empty = ${BOARD_DEFAULTS.answerSec}.`,
+  answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600; empty = ${BOARD_DEFAULTS.answerSec}.`,
   logging: 'On: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). For finding a problem; turn it off after.',
   baud: 'How fast the USB line talks. It must be the same as the program on the board: Skynet\'s own programs use 115200.',
   netPort: 'The network port the board listens on. It must be the same as the program on the board: Skynet\'s own programs use 4100.',

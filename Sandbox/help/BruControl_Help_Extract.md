@@ -907,6 +907,34 @@ Each entry says where the text was, what was taken out, and what is there now.
 
 **Now:** kept only: See also: [The heating method](150-heating-method), [Predict...
 
+### help/177-board-talk.md
+
+**Taken out (a sentence):**
+
+> (in the BruControl Importer: **Connect your brewery**)
+
+**Now:** removed
+
+**Taken out (a sentence):**
+
+> A board running another program
+> (BruControl's, for example) talks differently
+
+**Now:** 
+> A board running another program
+> talks differently
+
+**Taken out (the whole section "From BruControl"):**
+
+> ## From BruControl
+>
+> The BruControl Import keeps each board's **On** (Enabled), **Baud** and **Response Timeout** (as the Answer wait, in seconds).
+> BruControl's **Logging** is not turned on in Skynet, because Diagnostic logging writes every line; the import notes list the boards
+> that had it, so you can turn it on while finding a problem. BruControl's **Refresh Interval** is not copied: Skynet boards report
+> every second by themselves.
+
+**Now:** removed
+
 ## Hover Help and screen text
 
 ### public/app.js: hover help or screen text
@@ -1086,3 +1114,15 @@ Each entry says where the text was, what was taken out, and what is there now.
 **Now:**
 
 > Analog pin (A0-A15, or 54-69)
+
+### public/app.js: the Board settings balloons (shared with the Importer's Connect your brewery)
+
+**Taken out:**
+
+> (BruControl: Enabled)
+
+### public/app.js: the Board settings balloons (shared with the Importer's Connect your brewery)
+
+**Taken out:**
+
+> (BruControl: Response Timeout)
