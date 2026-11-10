@@ -22,15 +22,24 @@ Now the item shows its picture all the time, and the overlay appears on top of i
 The **On overlay** dropdown has:
 
 - **Lightning Bolt**: a red bolt with a yellow edge over the middle. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
-- **Flashing Bolt**: the same bolt, flashing.
-- **Corner Bolt**: a small yellow bolt in the top right corner.
-- **Big Bolt**: a large half see-through bolt over the middle.
+- **Flashing Lightning Bolt**: the same bolt, flashing.
+- **Corner Badge Bolt**: a small yellow bolt in the top right corner.
+- **See Through Lightning Bolt**: a large half see-through bolt over the middle.
 - **Green Glow Ring**: a green glow around the picture.
-- **Red Tint**, **Orange Tint** and **Blue Tint**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
+- **Red Glow**, **Orange Glow** and **Blue Glow**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
 - Your own overlays from the **On Off** picture group (`media/Images/On_Off`), listed next.
 - Then every other picture in `media/Images`, and **Add new ...** to type the name of your own.
 
-Pick **None** to turn the overlay off. A Heating Element starts with **On = Red Glow**: it glows red while it is On. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
+The colors follow what the item does:
+
+- Something that **heats** (a Heating Element, the Heat of a Fermentor Control) has no **Blue Glow** and no **Green Glow Ring**.
+- Something that **cools** (the Cooling of a Fermentor Control, a Cool / Warm Pump that cools) has no **Red Glow** and no **Orange Glow**,
+  and has **Blue Glow** and **Green Glow Ring**.
+- Anything else has every choice but **Blue Glow**: blue is kept for cooling.
+
+Each name starts with its own letter, so with the list open you can type that letter to pick it.
+
+Pick **None** to turn the overlay off. A Heating Element starts with **Red Glow**: it glows red while it is On. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
 
 ## Your own overlay picture
 

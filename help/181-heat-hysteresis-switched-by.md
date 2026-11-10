@@ -1,6 +1,6 @@
 # Heat Hysteresis: what switches the element
 
-A Heating Element says what turns it on and off: its **Switched by** (Skynet Rule 6.29). That decides how close its **Hysteresis**
+A Heating Element says what turns it on and off: its **Hardware Controller** (Skynet Rule 6.29). That decides how close its **Hysteresis**
 may hold the Setpoint, so the part that does the switching lasts.
 
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
@@ -8,25 +8,27 @@ Electrician.
 
 ## The choices
 
-| Switched by | Hysteresis On offset | On delay | Why |
+| Hardware Controller | Offset (-) | On delay | Why |
 |---|---|---|---|
-| **Optical SSR** (solid state relay, the start) | 0.5 to 3 °F | any | No moving parts: it may switch often. |
-| **Contactor** | 2 to 5 °F | at least 60 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
-| **Mechanical relay** | 2 to 5 °F | at least 60 seconds | The same as a contactor. |
+| **Optical SSR** (solid state relay, the start) | -0.5 to -3 °F | any | No moving parts: it may switch often. |
+| **Contactor** | -1 to -5 °F | at least 10 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
+| **Mechanical relay** | -1 to -5 °F | at least 10 seconds | The same as a contactor. |
 
-With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Contactor or Mechanical relay 1.1 to 2.8 °C.
+With a °C probe the numbers are converted: an Optical SSR -0.3 to -1.7 °C, a Contactor or Mechanical relay -0.6 to -2.8 °C.
 
-- The **On offset** is how far below the Setpoint the element turns on. It turns off at the Setpoint (or a little before it, when
+- The **Offset (-)** says where the element turns on: Setpoint + Offset, so -1 is 1 degree below the Setpoint. It turns off at the Setpoint (or a little before it, when
   Predictive Hysteresis is on: see Help 168).
 - The **On delay** is the shortest time it stays off before it may turn on again.
 
 ## Where it is
 
-- **Properties > Heating method > Switched by.** Under it, a line says the range for this element. When Hysteresis is Enabled but is
-  not the Current Method, its On offset and On delay still show, so they can be set.
-- **Save** refuses an On offset or On delay outside the range, and says what is allowed.
-- **A Process or the .API** gets the same plain error: `hE_1.onoffset = 8` on an element switched by an Optical SSR is refused.
+- **Picking a Hardware Controller sets the Offset and On delay for you**: an Optical SSR gets -0.5 °F and 0 seconds, a Contactor or
+  Mechanical relay -1 °F and 10 seconds. You can change them after, inside the range.
+- **Properties > Heating method > Hardware Controller.** Rest the mouse on it to see the range for this element. When Hysteresis is Enabled but is
+  not the Current Method, its Offset and On delay still show, so they can be set.
+- **Save** refuses an Offset or On delay outside the range, and says what is allowed.
+- **A Process or the .API** writes `.onoffset` without the minus (2 means 2 degrees below), and gets the same plain error: `hE_1.onoffset = 8` on an element switched by an Optical SSR is refused.
 - **The Brain** never runs a heating Hysteresis outside its range, whatever was saved.
-- Only Hysteresis that **heats** (a plus On offset) has a range. A minus On offset cools and is not checked here.
+- Only Hysteresis that **heats** has a range. Cooling is not checked here.
 
 See also: [The heating method](150-heating-method), [Predictive Hysteresis](168-predictive-hysteresis).
