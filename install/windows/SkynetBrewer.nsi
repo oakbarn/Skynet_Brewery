@@ -78,8 +78,8 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\install\ReadMe.txt"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-; The pictures and sounds are in their own Setup, the Skynet Media Setup (Rule 9.12): the Finish page links to where it is
-!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds (Skynet Media Setup)"
+; The pictures and sounds (Rule 9.12) and the extra Sample Schemas (Rule 9.13) are their own Setups: the Finish page links to them
+!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds, and more Sample Schemas"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -350,6 +350,10 @@ Section "Skynet Brew Panel" SecMain
       StrCpy $OldPanel "$0"
   ${EndIf}
 
+  ; The samples folder is program files: it is cleared first, so a sample an older version had (the 2 Vessel, BrewZilla and OakBarn
+  ; samples, now set aside in the Sandbox) does not stay behind. The panel ships only the 3 Vessel sample; every other one comes
+  ; with the Skynet Sample Schemas Setup into sample_schemas\, which this Setup never touches (Rule 9.13).
+  RMDir /r "$INSTDIR\samples"
   ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"
