@@ -34,6 +34,8 @@ The **Suggested Name** is filled in as you go:
 
 **Interface ID _ Port _ Device Type ID _ Label _ Tab ID** (one underscore between the parts; names made before 2026-11-05 keep their `__` before the Tab ID)
 
+Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
+
 The port is always in the name, and the Device Type ID comes third. There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
 `MB_25_P_L_Vlv_Fly~Sparge_SP`
