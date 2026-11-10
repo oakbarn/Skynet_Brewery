@@ -359,7 +359,7 @@ function tabItems(src, wsName, tabOf = g => g.workspace) {
   return [...src.graphics.filter(g => g.workspace === wsName && g.kind === 'pipe'),
     ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'vessel' && !isEqFit(g)),
     ...src.graphics.filter(g => tabOf(g) === wsName && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind)),
-    ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
+    ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e) && !inVesselLayers(src, e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
     ...src.graphics.filter(g => g.workspace === wsName && isClone(g)),
     ...src.graphics.filter(g => g.workspace === wsName && isEqFit(g)),
     ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'ip')];
@@ -372,14 +372,27 @@ function layerStack(items) {
   const set = items.map((o, i) => [o, i]).filter(([o]) => hasLayer(o)).sort((a, b) => a[0].layer - b[0].layer || b[1] - a[1]).map(x => x[0]);
   return [...items.filter(o => !hasLayer(o)).reverse(), ...set];
 }
-const layerNow = (src, item) => layerStack(tabItems(src, item.workspace)).indexOf(item) + 1;
-// put one item at Layer Order n on its Tab and number the whole Tab again, 1, 2, 3 ... (BruControl's up / down arrows)
+// Layers inside a Vessel Device (OakBarn Brewery, 2026-11-10: "Layers on Integrated Devices would only be inside the Vessel Device. The
+// Vessel Device Layer would be how it plays with others", Rule 1.29): a Device built into a vessel (its Heating Element, Probe ...) is not
+// in its Tab's list. Its Layer Order counts only among the other parts of the same vessel (1 = the top part), and the whole group is
+// drawn just above its vessel, at the vessel's own place on the Tab.
+const layerVessel = (src, e) => e?.integratedIn ? src.graphics.find(g => g.id === e.integratedIn && g.kind === 'vessel' && g.workspace === e.workspace) ?? null : null;
+const inVesselLayers = (src, e) => !!layerVessel(src, e);
+const vesselParts = (src, g) => src.elements.filter(e => e.integratedIn === g.id && e.workspace === g.workspace && !isMfPart(e) && !isAvPart(e));
+// a Tab's stack (top first) with each vessel's parts put just above it, in their own order inside the vessel
+const withParts = (src, stack, run = x => x) => stack.flatMap(o => o.kind === 'vessel' && !isEqFit(o) && src.graphics.includes(o) ? [...run(layerStack(vesselParts(src, o))), o] : [o]);
+const layerList = (src, item) => { const v = layerVessel(src, item); return v ? layerStack(vesselParts(src, v)) : layerStack(tabItems(src, item.workspace)); };
+const layerNow = (src, item) => layerList(src, item).indexOf(item) + 1;
+// put one item at Layer Order n on its Tab (or inside its Vessel Device) and number that list again, 1, 2, 3 ... (BruControl's up / down arrows)
 function moveLayer(src, wsName, item, n) {
-  const st = layerStack(tabItems(src, wsName)).filter(o => o !== item);
+  const st = (layerVessel(src, item) ? layerList(src, item) : layerStack(tabItems(src, wsName))).filter(o => o !== item);
   st.splice(Math.max(0, Math.min(st.length, n - 1)), 0, item);
   st.forEach((o, i) => { o.layer = i + 1; });
 }
-const renumberLayers = src => { for (const w of src.workspaces) layerStack(tabItems(src, w.name)).forEach((o, i) => { o.layer = i + 1; }); };
+const renumberLayers = src => {
+  for (const w of src.workspaces) layerStack(tabItems(src, w.name)).forEach((o, i) => { o.layer = i + 1; });
+  for (const g of src.graphics.filter(g => g.kind === 'vessel')) layerStack(vesselParts(src, g)).forEach((o, i) => { o.layer = i + 1; });
+};
 // outside Edit layout a Process may have moved an item (Pump_1.layer = 1): it goes to that place and the rest move down one
 function runStack(stack) {
   if (editing) return stack;
@@ -413,7 +426,7 @@ function drawWs() {
   // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
   const gfxs = new Set(L().graphics), clones = [];
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
-  for (const o of runStack(layerStack(tabItems(L(), w.name, gTab))).reverse()) {      // a Process can move a Text Widget to another Tab (.tab)
+  for (const o of withParts(L(), runStack(layerStack(tabItems(L(), w.name, gTab))), runStack).reverse()) {      // a vessel's parts just above it (Rule 1.29)      // a Process can move a Text Widget to another Tab (.tab)
     if (!gfxs.has(o)) ws.append(buildEl(o));
     else if (isClone(o)) { const e = cloneEl(o); if (e) { clones.push(e); ws.append(buildEl(e)); } }
     else if (o.kind === 'vessel') ws.append(buildVessel(o));
@@ -7435,6 +7448,7 @@ function genDeviceFields(it, item, f) {
 // Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: a Universal Property, "Have Skynet work the same as BruControl"): every Device
 // and Widget's Properties have it, right after its Size (or its place, or its Tab, when it has no Size). It is added here, once, so
 // no dialog's own layout changes (Rule 18.10).
+const LAYER_TIP_IN_VESSEL = 'This Device is built into a Vessel Device, so its Layer Order counts only inside that vessel: 1 is the top part, 2 is under it, and so on. Where the whole vessel sits among the other items on the Tab is the Vessel Device\'s own Layer Order (Rule 1.29).';
 const LAYER_TIP = 'Layer Order, like BruControl\'s Z Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
 // every item is in the Layer Order list, pipes and IP-kind items too (Rule 1.29)
 const inLayers = item => !!item;
@@ -7446,7 +7460,8 @@ function withLayer(fields, item) {
   if (fields.some(f => isF(f, 'layer'))) return fields;
   const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
-  const f = ['layer', 'Layer Order (1 = on top)', 'num', null, false, false, { tip: LAYER_TIP, ...same }];
+  const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
+  const f = ['layer', inV ? 'Layer Order inside its Vessel Device (1 = on top)' : 'Layer Order (1 = on top)', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
   return at >= 0 ? [...fields.slice(0, at + 1), f, ...fields.slice(at + 1)] : [...fields, f];
 }
 function fieldsFor(item) {

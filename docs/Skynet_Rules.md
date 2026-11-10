@@ -315,7 +315,13 @@ IP markers, IP pipe fittings and Manual Valve Widgets), and **Save layout** numb
 Brewery, 2026-11-09: "Layer order is Z Order and yes to every item needs that is becomes a universal Attribute"): pipes, hoses, IP
 markers, IP pipe fittings and Manual Valve Widgets too. A Process reads and sets it with **`.layer`** (`Pump_1.layer = 1` puts it on
 top while Processes run, the others move down one on the screen; a whole number from 1; `""` puts back its Properties' number).
-Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
+Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. **Integrated Devices: their layer applies only inside the Integration** (OakBarn Brewery, 2026-11-10: "Layers on Integrated
+Devices would only be inside the Vessel Device. The Vessel Device Layer would be how it plays with others"; "the layer only applies
+inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"). A Device built into a Vessel Device (its
+Heating Element, Temperature Probe and the other built-in parts) is **not in its Tab's list**: its Layer Order counts only among the
+other parts of the same Vessel Device (1 = its top part, numbered 1, 2, 3 ... with no gaps), and its Properties call it **Layer Order
+inside its Vessel Device**. The **Vessel Device's own Layer Order** is its place in the Tab's list; its built-in parts always go with it,
+drawn just above the vessel. A Process `.layer` on a built-in part moves it only among the vessel's parts. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
 the order of each Workspace's Elements list, the first one on top (Layer Order 1) (Rule 15.4). Help 114.
 
 1.30 **A gGlobal takes only its own Kind of value** (OakBarn Brewery, 2026-11-09: "A gGlobal accepts a value that is only its
@@ -3229,6 +3235,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Changed Rule 1.29, Layer Order (OakBarn Brewery: "the layer only applies inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"): a Device built into a Vessel Device is not in its Tab's list; its Layer Order counts only among that vessel's parts, and the vessel's own Layer Order places the whole group on the Tab. Help 114 updated. Checked against both programs: the Panel draws and numbers it this way; the BruControl Import makes no built-in parts with a Tab Layer Order to change (the Vessel Device Builder builds them), so nothing changes there. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Added Rule 6.29, Heat Hysteresis by what switches it (OakBarn Brewery: "Offset Range from .5 to 3 is allowed for heating elements with Optical SSRs"): a Heating Element's Switched by (Optical SSR, Contactor, Mechanical relay) sets its heating Hysteresis On offset range (0.5 to 3 °F; 2 to 5 °F with an On delay of at least 60 seconds); Save, a Process and the .API are refused outside it and the Brain never runs outside it. Help 181. Checked against both programs: the Panel's Properties and Brain check it; the BruControl Import starts heaters as Optical SSR and brings imported offsets into range, listed in the notes. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-09: Added Rule 7.18, Alarm Priority (OakBarn Brewery): a number with up to two decimal places, the lower plays first,
   its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the

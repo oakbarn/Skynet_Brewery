@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="40" viewBox="0 0 64 40">
+  <!-- Skynet drawing: heat wrap (Fermwrap style band) around a fermentor, off. See-through background. -->
+  <defs><linearGradient id="c" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset=".35" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></linearGradient></defs><path d="M4 8 Q32 13 60 8 V30 Q32 35 4 30 Z" fill="#2e2e2e" stroke="#151515" stroke-width=".8"/>
+  <path d="M10 12 V28 M16 12 V28 M22 12 V28 M28 12 V28 M34 12 V28 M40 12 V28 M46 12 V28 M52 12 V28" stroke="#5d5d5d" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M4 8 Q32 13 60 8 V30 Q32 35 4 30 Z" fill="url(#c)"/>
+  <path d="M32 33 C32 37 38 37 40 39" fill="none" stroke="#1e1e1e" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
