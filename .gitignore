@@ -22,3 +22,6 @@ scripts/Recycle_Bin/
 config/*.bak
 config/schemas/
 Import/
+# Picture copies the panel makes by itself (lib/vectorize.js): big, and made again on first start
+media/help_pictures/Bobiverse_Bob.svg
+media/help_pictures/Three_Musketeers.svg

@@ -240,7 +240,6 @@ export function cleanPartDetails(kind, d) {
 // of its items and the Scripts: its heaters, its probe (a thermowell with a probe), a Tangential inlet (or a whirlpool), a Steam
 // Slayer, a Sparge Arm, a HERMS Coil. Manual valves are never in BruControl, so they are asked: None, Manual Ball Valve or Manual
 // Butterfly Valve, None to start. Every found answer is a guess the brewer can change.
-export const MANUAL_VALVES = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
 export const VESSEL_PARTS = [['tangential', 'Tangential Inlet', /tangent|whirl ?pool/i], ['steamSlayer', 'Steam Slayer', /steam ?slayer/i],
   ['spargeArm', 'Sparge Arm', /sparge/i], ['herms', 'HERMS Coil', /herms/i]];
 const HEAT_TYPES = new Set(['hysteresis', 'pid', 'dutyCycle', 'deadband']);

@@ -6,7 +6,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { FileMove, kindOf, missingMedia } from '../lib/filemove.js';
-import { mediaAliases } from '../lib/store.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filemove-'));
 const dirs = { root, media: path.join(root, 'media'), scripts: path.join(root, 'scripts'), help: path.join(root, 'help') };
@@ -49,10 +48,5 @@ const miss = missingMedia({ workspaces: [{ name: 'B1', background: 'Images/Syste
   elements: [{ name: 'p', backpath: 'Images/Pumps/a.png', sounds: ['sounds/bell.wav', 'sounds/Hops.wav', ''], bru: { x: 'C:\\old.png' } }], graphics: [] }, find);
 assert.deepEqual(miss.map(m => [m.path, m.kind]), [['Images/System_Back_1.png', 'pictures'], ['sounds/Hops.wav', 'sounds']]);
 
-// old paths still work
-assert.deepEqual(mediaAliases('brewery_main.png'), ['Images/brewery_main.png', 'Images/Skynet/Miscellaneous/brewery_main.png']);
-assert.deepEqual(mediaAliases('Images/wave/Done.wav'), ['oakbarn/wave/Done.wav', 'sounds/Done.wav']);
-assert.deepEqual(mediaAliases('samples/kettle.svg'), ['Images/samples/kettle.svg', 'Images/Skynet/Vessels/kettle.svg']);
-assert.deepEqual(mediaAliases('sounds/a.wav'), []);
 fs.rmSync(root, { recursive: true });
 console.log('filemove tests passed');

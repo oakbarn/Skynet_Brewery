@@ -11,7 +11,7 @@ fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'Pump_Wort', type: 'digitalOut', subtype: 'pump' },
   { name: 'Pump_Hot', type: 'digitalOut', subtype: 'pump', cover: 'blue', coverColor: '#20b2aa' },
   { name: 'VGC_1', type: 'digitalOut', subtype: 'valve' },
-  { name: 'Done', type: 'gKonstant', kind: 'value' },
+  { name: 'Done', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.equal(store.getProp('Pump_Wort', 'cover'), 'None', 'None is the default');

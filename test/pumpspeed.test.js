@@ -10,10 +10,10 @@ import { freePins } from '../public/naming.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'pumpspeed'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator', board: 'mega' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator', board: 'mega' }], elements: [
   { name: 'Pump_Plain', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 30 },
   { name: 'Pump_DC', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 9, pwm: true, speed: 70, power: 'dc24', imageOff: 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg' },
-  { name: 'Done', type: 'gKonstant', kind: 'value' },
+  { name: 'Done', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.equal(store.getProp('Pump_DC', 'speed'), 70, 'starts at the Speed % in its Properties');
@@ -54,7 +54,7 @@ console.log('pumpspeed: ok');
 // on a Port that cannot do true PWM, a PWM pump is a plain On/Off pin (full speed), never a half-made PWM
 {
   const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'pumpspeed2')), c2 = path.join(d2, 'c.json');
-  fs.writeFileSync(c2, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator', board: 'mega' }], elements: [{ name: 'P30', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 30, pwm: 'pwm', speed: 40 }] }));
+  fs.writeFileSync(c2, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator', board: 'mega' }], elements: [{ name: 'P30', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 30, pwm: 'pwm', speed: 40 }] }));
   const s2 = new Store(c2, path.join(d2, 'data')); s2.load(); const h2 = new Hardware(s2);
   s2.setProp('P30', 'state', true);
   assert.equal(h2._outLine(s2.get('P30')), 'DO 30 1');

@@ -32,7 +32,6 @@ export const SKYNET_STYLES = {
 };
 export const STYLE_KINDS = Object.keys(SKYNET_STYLES);
 export const KIND_KEYS = { timer: ['digits', 'panel', 'bezel', 'titleFore', 'titleBack', 'back', 'frame'], tab: ['labelFore', 'labelBack', 'labelFont', 'labelSize', 'labelAlign', 'fore', 'back', 'font', 'size', 'align'] };
-export const STYLE_KEYS = KIND_KEYS.timer;
 export const isSkynetStyle = id => STYLE_KINDS.some(k => SKYNET_STYLES[k].some(s => s.id === id));
 
 // the Style an item uses: its own pick (Skynet or User), else the first Skynet Style. An older Timer with no Style keeps

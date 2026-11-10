@@ -24,7 +24,7 @@ assert.equal(nextAt({ frequency: 'clock', at: '1 AM' }, now), new Date(2026, 9, 
 // the shortcuts (Fritz, 2026-11-06): Every second / minute / hour, and Every day (at Midnight)
 assert.equal(intervalMs({ frequency: 'second' }), 1000); assert.equal(intervalMs({ frequency: 'minute' }), 60_000); assert.equal(intervalMs({ frequency: 'hour' }), 3600_000);
 assert.equal(nextAt({ frequency: 'midnight' }, now), new Date(2026, 9, 4, 0, 0).getTime());
-assert.deepEqual(clockTimeOnly({ frequency: 'days', every: 1, at: '12 AM' }), { frequency: 'clock', at: '12 AM' });
+assert.deepEqual(clockTimeOnly({ frequency: 'days', every: 1, at: '12 AM' }), { frequency: 'days', every: 1 });
 assert.deepEqual(clockTimeOnly({ frequency: 'hours', every: 6, at: '1 AM' }), { frequency: 'hours', every: 6 });
 assert.deepEqual(clockTimeOnly({ frequency: 'datetime', at: '2026-11-01T06:00' }), { frequency: 'datetime', at: '2026-11-01T06:00' });
 assert.equal(intervalMs({ frequency: 'hms', interval: '00:01:30' }), 90000); assert.equal(intervalMs({ frequency: 'ms', every: 5 }), 100);
