@@ -37,7 +37,7 @@ assert.ok(Number.isNaN(temperatureFrom({}, 'T', 'NAN')));
 // the Precise method on a Heating Element, holding a small water bath
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'precise'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
   { name: 'hE_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42, input: 'Temp', heatMethod: 'precise', target: 173,
     kp: 20, ki: 0.5, kd: 0, maxOutput: 100, holdOutput: 0, smoothing: 4, calcTime: 1, outTime: 2, methodSpot_pid: true },

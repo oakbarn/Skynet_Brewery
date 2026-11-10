@@ -100,7 +100,6 @@ export const pwmForVolts = (el, v) => {
 // Smoothing (OakBarn Brewery, 2026-11-09, Rule 6.24: "Smoothing might be added to more things than a Counter"; "my 10K NTC would be
 // better with smoothing as they sometimes jump"): BruControl's Avg Weight. Each new reading counts this many % and the shown value
 // the rest, so 100 = no smoothing and 25 = calm. A thermistor probe starts at 25 % (BruControl's default), anything else at 100.
-export const SMOOTH_TYPES = new Set(['temperature', 'analogIn', 'flowMeter', 'scale', 'digitalIn']);
 export const isThermistor = el => el?.type === 'temperature' && el.sensor === 'ntc';
 export function smoothWeight(el) {
   const w = el?.avgWeight;

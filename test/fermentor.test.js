@@ -13,7 +13,7 @@ assert.ok(fermProblems({ heat: 'H', cool: 'H' }).length === 2, 'no probe, same D
 function make(extra = {}) {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ferm'));
   const cfg = path.join(d, 'c.json');
-  fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+  fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
     { name: 'T', type: 'temperature', sensor: 'simulated', units: '°F' },
     { name: 'Mat', type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', device: 'MB', channel: 5, input: 'T', target: 150, onOffset: 1 },
     { name: 'Freezer', type: 'digitalOut', device: 'MB', channel: 6 },
