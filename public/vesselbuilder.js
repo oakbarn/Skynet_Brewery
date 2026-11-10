@@ -28,10 +28,15 @@ const SPOT_IP = { center: 'cProbe', left: 'lElement', right: 'rElement', backLef
 const SIDE = { left: 'l', right: 'r' };
 const spotWord = k => vbPicked(k) ? 'picked spot' : VB_PROBE_SPOTS.find(([x]) => x === k)?.[1] || k;
 
+// the Fermentor Control (OakBarn Brewery, 2026-11-10, Rule 6.30, public/fermentor.js): a Fermentor (or any vessel) may have Heat and
+// Cooling held by one Setpoint. They sit outside the vessel (a heat mat or wrap, a freezer, a glycol pump), so they take no spot.
+export const VB_FERM = [['none', 'None'], ['auto', 'Heat & Cool'], ['heat', 'Heat only'], ['cool', 'Cool only']];
+// what the Build Tab still needs picked for its Fermentor Control: { heat: true, cool: true }
+export const vbFermWant = w => !w.fctl || w.fctl === 'none' ? {} : { ...(w.fctl !== 'cool' ? { heat: true } : {}), ...(w.fctl !== 'heat' ? { cool: true } : {}) };
 // a new interview's answers: a 10 gallon vessel (Rule 19.1) with nothing chosen yet but a Center Bottom Drain
 export function vbStart(over = {}) {
   return { label: '', vtype: 'HLT', units: 'US', volume: 10, vheight: '', diameter: '', drain: 'cBottomOutlet', tangential: 'none', sparge: 'none',
-    probe: 'none', heater: 'none', heater2: 'none', herms: 'none', ...over };
+    probe: 'none', heater: 'none', heater2: 'none', herms: 'none', fctl: 'none', ...over };
 }
 // the IP a spot is on
 export const vbSpotIp = k => SPOT_IP[k] || vbPicked(k);
@@ -62,6 +67,7 @@ export function vbProblems(w, { metric = w.units === 'Metric' } = {}) {
   if (w.probe !== 'none' && (w.probe === w.heater || w.probe === w.heater2)) out.push(`The Thermowell / Probe and a Heating Element are both on the ${spotWord(w.probe)}. Pick another spot for one of them.`);
   if (w.heater !== 'none' && w.heater === w.heater2) out.push(`Both Heating Elements are on the ${spotWord(w.heater)}. Pick another spot for the second one.`);
   if (w.heater === 'none' && w.heater2 !== 'none') out.push('Pick the first Heating Element before a second one.');
+  if (w.fctl && w.fctl !== 'none' && (!w.probe || w.probe === 'none')) out.push('A Fermentor Control needs the Thermowell / Probe that reads the beer: pick its spot.');
   for (const k of Object.keys(VB_PICKABLE)) if (w[k] === 'pick') out.push('Double-click the spot for each Pick (choose Pick again to open the vessel).');
   const ipOf = k => { const v = w[k]; if (!v || v === 'none' || v === 'pick') return ''; if (vbPicked(v)) return vbPicked(v);
     return k === 'drain' ? v : k === 'tangential' || k === 'sparge' ? (SIDE[v] || '') + (k === 'sparge' ? 'Sparge' : 'Tangential') : vbSpotIp(v); };
@@ -81,6 +87,7 @@ export function vbSummary(w, { metric = w.units === 'Metric' } = {}) {
   if (w.probe !== 'none') L.push(`${w.probe === 'center' ? 'Probe' : 'Thermowell'}: ${spotWord(w.probe)}`);
   for (const k of [w.heater, w.heater2]) if (k !== 'none') L.push(`Heating Element: ${spotWord(k)}`);
   if (w.herms !== 'none') L.push(`HERMS Coil: ${word(VB_HERMS, w.herms)}`);
+  if (w.fctl && w.fctl !== 'none') L.push(`Fermentor Control: ${word(VB_FERM, w.fctl)}`);
   return L;
 }
 

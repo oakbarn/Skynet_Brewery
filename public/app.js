@@ -15,6 +15,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
+import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
@@ -35,6 +36,7 @@ import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
+import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, vbSummary, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -2420,6 +2422,8 @@ function fillEl(n, e0) {
       on = !!v.moving; break;
     }
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
+    // the Fermentor Control (Rule 6.30): what it is doing and its Setpoint (Cooling ▸ 66.0), or OFF
+    case 'fermentor': on = !!v.state; text = on ? `${v.doing ?? ''}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); n.classList.toggle('ferm-heat', on && v.doing === 'Heating'); n.classList.toggle('ferm-cool', on && v.doing === 'Cooling'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: v.showas || e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
@@ -2674,6 +2678,7 @@ function tapAction(e) {
     case 'analogIn': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
+    case 'fermentor': return 'toggle';         // one click turns the Fermentor Control On or Off (Rules 2.44, 6.30)
     case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
     case 'gGlobal':
       if (e.readOnly) return 'none';
@@ -2688,7 +2693,7 @@ function tapAction(e) {
 // a tap on a clone is a tap on its parent
 const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elements.find(x => x.name === S.config.graphics.find(g => isClone(g) && g.name === n)?.of);
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer', MANUAL_PUMP_TYPE].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
+const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer', 'fermentor', MANUAL_PUMP_TYPE].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 // One click on a Method Clone (Rule 4.4) acts as one on its parent, all in unison (Fritz, 2026-11-08: "Clones act just as if it was
 // the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"), no pop-up: shown ON (the parent ON in its
@@ -2920,6 +2925,9 @@ const SP_METHODS = ['hysteresis', 'pid', 'deadband', 'precise'];      // the hea
 function heatersOf(probe, first) {
   const out = [], add = e => { if (e && !out.includes(e) && (isHeatElem(e) || SP_OLD.includes(e.type))) out.push(e); };
   if (first) add(elByName(first));
+  // a Fermentor Control that reads this probe holds it (Rule 6.30): its Setpoint, not its heater's (the Fermentor runs its heater)
+  const ferm = S.config.elements.filter(e => isFermentor(e) && e.input === probe.name);
+  if (ferm.length) return ferm;
   for (const e of S.config.elements) if (e.input === probe.name) add(e);
   return out;
 }
@@ -2946,7 +2954,7 @@ function setpointDialog(p, t) {
   const d = $('#valDlg'); d.innerHTML = '';
   const pv = S.values[p.name] || {}, v = S.values[t.name] || {}, he = isHeatElem(t);
   const tl = v.label ?? t.label ?? t.name, pl = pv.label ?? p.label ?? p.name, u = p.units || '°F';
-  const onNow = he ? !!v.state : !!v.enabled;
+  const onNow = he || isFermentor(t) ? !!v.state : !!v.enabled;
   const now = he ? (heatMethodKey(v.method) ?? startMethod(t)) : t.type;
   // the method it uses for the Setpoint: the one in use if it holds a Setpoint, else the first allowed one that does
   const m = !he ? t.type : SP_METHODS.includes(now) ? now : allowedMethods(t).find(k => SP_METHODS.includes(k));
@@ -2957,10 +2965,10 @@ function setpointDialog(p, t) {
     d.close();
     if (he && m && m !== now) await setProp(t.name, 'method', heatMethodWord(m));
     await setProp(t.name, 'target', x);
-    if (on !== undefined) await setProp(t.name, he ? 'state' : 'enabled', on);
+    if (on !== undefined) await setProp(t.name, he || isFermentor(t) ? 'state' : 'enabled', on);
   };
   const reading = pv.fault ? 'FAULT' : `${fmtVal(p, pv.value)} ${u}`;
-  const word = he ? heatMethodWord(now) : { hysteresis: 'Hysteresis', pid: 'PID', deadband: 'Deadband' }[t.type];
+  const word = he ? heatMethodWord(now) : isFermentor(t) ? `Fermentor, ${v.mode ?? 'Heat & Cool'}, ${v.doing ?? 'Off'}` : { hysteresis: 'Hysteresis', pid: 'PID', deadband: 'Deadband' }[t.type];
   const note = !m ? `${tl} has no heating method that holds a Setpoint. Tick Hysteresis, PID, Deadband or Precise in its Properties.`
     : he && m !== now ? `${tl} is on ${heatMethodWord(now)} now. Set switches it to ${heatMethodWord(m)}.` : '';
   d.append(h('div', { class: 'vdTitle' }, `${pl}: ${reading}`),
@@ -5706,7 +5714,9 @@ const vbFields = w => {
     ['probe', '11. Thermowell / Probe (no IP of its own; on an IP it closes it like an End Cap)', 'sel', pk('probe', VB_PROBE_SPOTS)],
     ['heater', '12. Heating Element (no IP of its own; on an IP it closes it like an End Cap)', 'sel', pk('heater', VB_HEAT_SPOTS), true],
     ...(w.heater !== 'none' ? [['heater2', '12a. Second Heating Element (more than one is fine)', 'sel', pk('heater2', VB_HEAT_SPOTS)]] : []),
-    ['herms', '13. HERMS Coil', 'sel', VB_HERMS]];
+    ['herms', '13. HERMS Coil', 'sel', VB_HERMS],
+    // the Fermentor Control (OakBarn Brewery, 2026-11-10, Rule 6.30): Heat and Cooling held by one Setpoint; they take no spot
+    ['fctl', '14. Fermentor Control: Heat and Cooling held by one Setpoint (they take no spot; needs the Thermowell / Probe)', 'sel', VB_FERM]];
 };
 // a spot's name: a preset IP's, or the User IP's made by Pick
 const vbSpotName = (w, k) => (w.userIps || []).find(u => u.key === k)?.name || EQ_VW.ports[k]?.name || k;
@@ -5806,6 +5816,7 @@ function vbBuild(t, w) {
     const on = vbPlaced(w);
     for (const [k, d] of Object.entries(EQ_VW.ports)) if (g.ports[k]) g.ports[k].installed = !!d.vw && on.includes(k);      // the old Probe and Element spots are not used
     if (w.herms !== 'none') g.herms = w.herms; else delete g.herms;
+    if (w.fctl && w.fctl !== 'none') Object.assign(g, { vbFerm: w.fctl, vbFermWant: vbFermWant(w) }); else { delete g.vbFerm; delete g.vbFermWant; }      // Rule 6.30
     syncVesselPorts(g, old); shiftVesselParts(g, g.x - old.x, g.y - old.y);
     sel = { kind: 'gfx', id: g.id };
     renderTabs(); renderWs();
@@ -5840,6 +5851,7 @@ function vbAttach(g, k, kind, e) {
   delete g.vbWant[k]; if (g.vbPre) { delete g.vbPre[k]; if (!Object.keys(g.vbPre).length) delete g.vbPre; }
   const parts = draft.elements.filter(x => x.integratedIn === g.id && isVPart(x)), probe = parts.find(x => x.type === 'temperature');
   if (probe) for (const x of parts) if (x.vpKind === 'element' && !x.input) x.input = probe.name;      // its Heating Element holds the temperature of its probe
+  vbFermMake(g);
   syncVesselPorts(g, null); renderWs(); renderVbPanel();
 }
 // the Heater or Probe picker (Fritz: "Standard DDLB Picker ... Pick an Existing heater or add One"): an existing one is built into the
@@ -5867,6 +5879,62 @@ async function vbPickPart(g, k) {
     }
   } finally { vbAfterAdd = null; }
 }
+// ---- The Fermentor Control in the Vessel Builder (OakBarn Brewery, 2026-11-10, Rule 6.30, Help 182). Its Heat (a heat mat, heat wrap,
+// ceramic heat emitter or lamp) and its Cooling (a freezer or fridge on a relay, a glycol pump or valve) are picked like the Heater:
+// an existing one or ➕ Add new. They take no spot on the vessel: their readouts sit beside it. A Heating Element picked for the Heat
+// becomes an Integrated Instance (Rule 6.1) run in Direct; anything else is built in and keeps its name and Port. A Process calls them
+// VesselName.DeviceName (Rule 5.31). Once the Probe and every side are picked, the Fermentor Control itself is made, named after the Label.
+const FV_WHAT = { heat: 'Heat', cool: 'Cooling' };
+const fvPart = (g, side, els = draft.elements) => els.find(e => e.integratedIn === g.id && e.integratedAs === 'fv:' + side);
+// the Add new choices: the new pictures for a fermentor's heat (OakBarn Brewery, 2026-11-10: "Make those Heat Graphics")
+const FV_HEAT_NEW = [['Heat mat (relay or SSR)', 'digitalOut', 'HtPad', { imageOff: 'Images/Skynet/Other_Equipment/Heat_Mat_Off.svg', imageOn: 'Images/Skynet/Other_Equipment/Heat_Mat_On.svg' }],
+  ['Heat wrap / Fermwrap (relay or SSR)', 'digitalOut', 'HtPad', { imageOff: 'Images/Skynet/Other_Equipment/Heat_Wrap_Off.svg', imageOn: 'Images/Skynet/Other_Equipment/Heat_Wrap_On.svg' }],
+  ['Ceramic heat emitter or lamp (relay or SSR)', 'digitalOut', 'Light', { imageOff: 'Images/Skynet/Other_Equipment/Ceramic_Heat_Emitter_Off.svg', imageOn: 'Images/Skynet/Other_Equipment/Ceramic_Heat_Emitter_On.svg' }]];
+const FV_COOL_NEW = [['Freezer or fridge (relay on its power)', 'digitalOut', 'Chill'], PUMP, MBV];
+async function vbPickFerm(g, side) {
+  if (!g.vbFermWant?.[side]) return;
+  const fits = e => !e.integratedIn && !isMfPart(e) && (side === 'heat' ? fermHeatFits(e) : fermCoolFits(e));
+  const have = draft.elements.filter(fits), NEW = '\0new';
+  const o = { pick: have[0]?.name ?? NEW };
+  const r = await dialog(`${g.label || g.name}: its ${FV_WHAT[side]}`, () => [
+    ['_p', side === 'heat' ? `Pick what warms the beer, or add a new one. A Heating Element becomes an Integrated Instance of it (Rule 6.1), run in Direct: the Fermentor Control turns it on and off. Anything else is built in and keeps its name and Port. A Process calls it ${vesselProcName(g)}.Name.`
+      : `Pick what cools the beer (a freezer or fridge on a relay, a glycol pump or a glycol valve), or add a new one. It is built in and keeps its name and Port; the Fermentor Control turns it on and off. A Process calls it ${vesselProcName(g)}.Name.`, 'note'],
+    ['pick', FV_WHAT[side], 'sel', [...have.map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`]), [NEW, `➕ Add new ${FV_WHAT[side]}…`]]]], o, false, ['fermentor-control']);
+  if (r !== 'ok') return;
+  readFields(o, $('#dlgBody'));
+  if (o.pick !== NEW) { const e = draft.elements.find(x => x.name === o.pick); if (e) vbFermAttach(g, side, isHeatElem(e) ? makeInstance(g, e) : e); return; }
+  const rows = side === 'heat' ? [...FV_HEAT_NEW, ELEMENT] : FV_COOL_NEW;
+  const i = await choose(`Add new ${FV_WHAT[side]}`, rows.map((x, n) => [x[0], n])); if (i === undefined) return;
+  vbAfterAdd = e => { sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); vbFermAttach(g, side, e); };
+  try { const x = rows[i]; await addThing(x[1], x[2], x[3], x[0]); } finally { vbAfterAdd = null; }
+}
+function vbFermAttach(g, side, e) {
+  const n = side === 'heat' ? 0 : 1;
+  Object.assign(e, { integratedIn: g.id, integratedAs: 'fv:' + side, vpKind: side, workspace: g.workspace, x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round((g.y || 0) + 70 + n * 80), w: 150, h: 70 });
+  if (isHeatElem(e)) e.heatMethod = 'onoff';      // the Fermentor Control turns it on and off (Rule 6.30)
+  if (g.vbFermWant) { delete g.vbFermWant[side]; if (!Object.keys(g.vbFermWant).length) delete g.vbFermWant; }
+  vbFermMake(g); renderWs(); renderVbPanel();
+}
+// the Fermentor Control itself, once its Probe and every side are picked: named after the vessel's Label (FV1 = on in a Process)
+function vbFermMake(g) {
+  if (!g?.vbFerm || g.vbFermWant) return;
+  const probe = draft.elements.find(e => e.integratedIn === g.id && isVPart(e) && e.type === 'temperature'); if (!probe) return;
+  const heat = fvPart(g, 'heat'), cool = fvPart(g, 'cool'), have = fvPart(g, 'control');
+  if (have) { Object.assign(have, { input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '' }); return; }
+  // one the BruControl Import already made on this probe (Rule 6.30 point 10) is built in, not made twice
+  const loose = draft.elements.find(e => isFermentor(e) && !e.integratedIn && e.input === probe.name);
+  if (loose) {
+    Object.assign(loose, { integratedIn: g.id, integratedAs: 'fv:control', heat: heat?.name ?? '', cool: cool?.name ?? '', mode: g.vbFerm, workspace: g.workspace });
+    delete g.vbFerm; toast(`${g.label || g.name}: the imported Fermentor Control ${loose.name} is now built into it.`, false, 8000); return;
+  }
+  const taken = n => [...draft.elements, ...draft.graphics].some(x => String(x.name ?? '').toLowerCase() === n.toLowerCase());
+  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') || 'Fermentor';
+  let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
+  draft.elements.push({ name, type: FERM_TYPE, label: g.label || name, workspace: g.workspace, integratedIn: g.id, integratedAs: 'fv:control', input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '',
+    mode: g.vbFerm, ...Object.fromEntries(FERM_SETTINGS.map(([, k, , d]) => [k, d])), x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round(g.y || 0), w: 190, h: 60, offText: 'OFF' });
+  delete g.vbFerm;
+  toast(`${g.label || g.name}: its Fermentor Control ${name} is made. One click on it turns it On or Off; one click on its probe sets the Setpoint.`, false, 8000);
+}
 // the Vessel Builder panel, on the other side of the 🔨 Build Tab from the vessel: a line for each thing still to do
 function renderVbPanel() {
   $('#vbPanel')?.remove();
@@ -5875,7 +5943,11 @@ function renderVbPanel() {
   const parts = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e));
   const rows = [...Object.entries(g.vbWant || {}).map(([k, kind]) => h('button', { type: 'button', class: 'vbRow vbTodo', onclick: () => vbPickPart(g, k) },
       `⚠ ${VB_WHAT[kind]} on the ${g.ports?.[k]?.label || vpName(k)}: pick or add one ▸`)),
-    ...parts.map(e => h('button', { type: 'button', class: 'vbRow vbDone', onclick: () => editItem('el', e.name) }, `✓ ${VP_WHAT[e.vpKind] || e.vpKind} on the ${g.ports?.[e.integratedAs.slice(3)]?.label || vpName(e.integratedAs.slice(3))}: ${e.name}`))];
+    ...parts.map(e => h('button', { type: 'button', class: 'vbRow vbDone', onclick: () => editItem('el', e.name) }, `✓ ${VP_WHAT[e.vpKind] || e.vpKind} on the ${g.ports?.[e.integratedAs.slice(3)]?.label || vpName(e.integratedAs.slice(3))}: ${e.name}`)),
+    // the Fermentor Control (Rule 6.30): its Heat and Cooling to pick, then the Control itself
+    ...Object.keys(g.vbFermWant || {}).map(side => h('button', { type: 'button', class: 'vbRow vbTodo', onclick: () => vbPickFerm(g, side) }, `⚠ ${FV_WHAT[side]} for the Fermentor Control: pick or add one ▸`)),
+    ...['heat', 'cool', 'control'].map(side => fvPart(g, side)).filter(Boolean).map(e => h('button', { type: 'button', class: 'vbRow vbDone', onclick: () => editItem('el', e.name) }, `✓ ${e.type === FERM_TYPE ? 'Fermentor Control' : FV_WHAT[e.vpKind]}: ${e.name}`)),
+    ...(g.vbFerm && !g.vbFermWant ? [h('div', { class: 'vbRow vbTodo' }, '⚠ Fermentor Control: it is made once the Thermowell / Probe is picked')] : [])];
   // every other open IP it has (the Drain, Tangential, Sparge, a picked one): its pieces come in the next update
   const busy = new Set([...Object.keys(g.vbWant || {}), ...parts.map(e => e.integratedAs.slice(3)), ...(HERMS_SIDES[g.herms] || [])]);
   const spot = k => g.ports?.[k]?.label || vpName(k), done = g.vbChains || {};
@@ -5885,7 +5957,7 @@ function renderVbPanel() {
   document.body.append(h('div', { id: 'vbPanel', class: 'vbPanel' }, h('h3', {}, `🔨 Vessel Builder: ${g.label || g.name}`, ' ', helpIcon(['vessel-device-builder'])),
     ...(rows.length ? rows : [h('p', { class: 'muted' }, 'Nothing to pick.')]), ...later,
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Close the Vessel Builder. The vessel stays on the 🔨 Build Tab; its Properties change it.',
-      onclick: () => { if ((Object.keys(g.vbWant || {}).length || Object.keys(g.vbOpenings || {}).some(k => !g.vbChains?.[k])) && !confirm('Something is still not picked. Close the Vessel Builder anyway? Its spot stays closed until you pick it in the vessel\'s Properties.')) return; delete g.vbOpen; renderVbPanel(); } }, '✔ Done'))));
+      onclick: () => { if ((Object.keys(g.vbWant || {}).length || Object.keys(g.vbFermWant || {}).length || Object.keys(g.vbOpenings || {}).some(k => !g.vbChains?.[k])) && !confirm('Something is still not picked. Close the Vessel Builder anyway? Its spot stays closed until you pick it in the vessel\'s Properties.')) return; delete g.vbOpen; renderVbPanel(); } }, '✔ Done'))));
 }
 // ---- Step 2 (OakBarn Brewery, 2026-11-08, Rule 19.5): the pieces on the Drain, Tangential and Sparge Arm. Up to 3 pieces run out from
 // the vessel, each joined to the last by a short pipe: a Valve (an existing Motorized one, a new Motorized Ball Valve, or a Manual Valve
@@ -7518,6 +7590,7 @@ function fieldsOf(item) {
         ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
   if (item.type === 'hydrometer') return hydroFields(item);
+  if (item.type === FERM_TYPE) return fermFields(item);
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
     return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
@@ -7541,6 +7614,33 @@ function hydroPorts(e) {
   const used = new Set((draft || S.config).elements.filter(x => x !== e && x.name !== e.name && x.device === e.device && x.channel !== undefined).map(x => String(x.channel)));
   const out = []; for (let p = 200; p < 300 && out.length < 40; p++) if (!used.has(String(p)) || String(p) === String(e.channel ?? '')) out.push([String(p), String(p)]);
   return out;
+}
+// ---- The Fermentor Control's Properties (OakBarn Brewery, 2026-11-10, Rule 6.30, public/fermentor.js, Help 182): its Probe, Heat and
+// Cooling (built into its Fermentor Vessel Device), its Mode and Setpoint, the two On offsets and the short-cycle protection
+const FERM_TIPS = {
+  input: 'The Temperature Probe that reads the beer: in a thermowell, or taped to the side of the fermentor under some insulation. Not the air in the freezer.',
+  heat: 'What warms the beer: a heat mat, a heat wrap (Fermwrap), a ceramic heat emitter or a lamp. The Fermentor turns it on and off (a Heating Element is run in Direct), and keeps to the range of what switches it (Rule 6.29).',
+  cool: 'What cools the beer: a freezer or fridge on a relay, a glycol pump or a glycol valve. The Fermentor turns it on and off.',
+  mode: 'Heat & Cool holds the Setpoint both ways. Heat only or Cool only uses just one side (the other stays Off). A Process: FV1.mode = "Cool only".',
+  heatOffset: 'Heat starts when the beer is this far below the Setpoint, and stops at the Setpoint.',
+  coolOffset: 'Cooling starts when the beer is this far above the Setpoint, and stops at the Setpoint.',
+  changeover: 'Heat and Cooling are never On together. After one stops, the other waits this long before it may start, so they never fight. 300 s (5 minutes) is a good start.',
+  heatDelay: 'Once the Heat stops, it stays Off at least this long. Flashing a bulb on and off is bad for it.',
+  heatMinRun: 'Once the Heat starts, it stays On at least this long.',
+  coolDelay: 'Once the Cooling stops, it stays Off at least this long. A freezer or fridge compressor must not short cycle: 300 s (5 minutes) or more.',
+  coolMinRun: 'Once the Cooling starts, it stays On at least this long. 120 s (2 minutes) is a good start for a compressor.',
+};
+function fermFields(it) {
+  const els = (draft || S.config).elements, opt = (fit, cur) => [['', '(none)'], ...els.filter(e => (fit(e) || e.name === cur) && e.name !== it.name).map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`])];
+  const temps = [['', '(none)'], ...els.filter(e => e.type === 'temperature').map(e => [e.name, `${e.label ? e.label + ': ' : ''}${e.name}`])];
+  return [['_fh', 'Fermentor Control', 'head'],
+    ['_fn', `One Setpoint for the beer. Heat comes on below it, Cooling above it, never both at once (Rule 6.30). One click on it turns it On or Off; one click on its Temperature Probe sets the Setpoint. A Process: ${it.name || 'FV1'} = on, ${it.name || 'FV1'}.setpoint = 66, ${it.name || 'FV1'}.mode = "Cool only", ${it.name || 'FV1'}.doing (read only).`, 'note'],
+    ['input', 'Temperature Probe (reads the beer)', 'sel', temps, false, false, { tip: FERM_TIPS.input }],
+    ['heat', 'Heat (heat mat, heat wrap, ceramic heat emitter or lamp)', 'sel', opt(fermHeatFits, it.heat), false, false, { tip: FERM_TIPS.heat }],
+    ['cool', 'Cooling (freezer or fridge, glycol pump or glycol valve)', 'sel', opt(fermCoolFits, it.cool), false, false, { tip: FERM_TIPS.cool }],
+    ['mode', 'Mode', 'sel', FERM_MODES.map(([k, w]) => [k, w]), false, false, { tip: FERM_TIPS.mode }],
+    ...FERM_SETTINGS.map(([, key, label]) => [key, label, 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
+    PREDICTIVE_FIELD()];
 }
 function hydroFields(it) {
   const m = hydroModel(it), conn = hydroConnection(it), g = k => { const why = hydroGrey(it, k); return why ? { grey: why } : {}; };
@@ -9075,6 +9175,7 @@ async function editItem(kind, id) {
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
       { const bad = heatHysProblem(work, draft.elements.find(e => e.name === work.input)); if (bad) throw new Error(bad); }      // Rule 6.29
+      if (isFermentor(work)) { const bad = fermProblems(work, n => draft.elements.some(e => e.name === n)); if (bad.length) throw new Error(bad.join(' ')); }      // Rule 6.30
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
