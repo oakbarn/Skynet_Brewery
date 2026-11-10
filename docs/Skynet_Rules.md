@@ -1348,6 +1348,13 @@ Template"; thread "Build the Vessel Widget class", Help 133).
     (`HLT_Vessel.BM_8_HE_HLT~element_BR = On`, `HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 152`, any capitals), and so is a Probe
     or Thermowell built into it; its plain name alone is refused in a Process. A rename of the Device or the vessel changes every
     Process for you. Its Interface and Port are greyed out in the Vessel Device's Properties too (Rule 6.1).
+  - **Physical hardware may be replaced; the Device never is** (OakBarn Brewery, 2026-11-09: "Physical Hardware (such as a Heating
+    Element or Motorized Valve can be replace as long as it is wired in the exact same way to the same controlled Outlet controlled
+    by the same Interface Port Combination. Devices with different wiring or a different Interface Port Combination cannot be swapped
+    inside a Vessel Device. Once an Interface Combination is integrated, it can never be changed. The Vessel Device "locks" every
+    Interface Port Combinations that are integrated and none may be swapped for a different Device Port Combination ever."). A new
+    heater or valve wired exactly the same way to the same Port needs no change in Skynet. There is no Swap in a Vessel Device's
+    Properties.
   - The **RIMS tube Template is a kind of Vessel Device Template** (Fritz, 2026-11-05: "the Element and Probe are set and Locked.
     Just the shape and # of available IPs are fixed and shown"); it keeps its own Properties (Rules 5.3, 18.10).
   - *Replaced for a Vessel Device:* "a user can change the Place sliders on their copy" and "A Placed Probe or Element links a
@@ -3008,12 +3015,12 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   Heating Element as those could be Physically changed on the Vessel after it was built"):* once a Vessel Device is **integrated**
   (built with the Vessel Device Builder, or built and saved on a Tab) its Properties have only **the Universal Properties** (Rule
   1.21: Name with ✏ Change name, Label, Visible, Hidden Locked, Label and place, Tab, X, Y, Lock), its **Type** greyed out, its Out
-  flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections are fully editable (Label,
-  Interface, Port or Probe #, Heating method, Temperature Probe, Setpoint, Units, Calibration offset) and each can be **swapped** for
-  another existing one or a new one. On Save the old one is taken out of the vessel (2026-11-09: "It needs to go as it is a
-  replacement for an exist hardware ... So Delete if replace with a differnt Port"): when the new one is on **another Port** the old
-  one is **deleted**; when it is on **the same Port** (the hardware was changed, the wiring was not) the old one stays on the Tab as
-  a Device of its own. Anything that used the old one (a Heating Element's Temperature Probe) uses the new one.
+  flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections can change the Label, Heating
+  method, Temperature Probe, Setpoint, Units and Calibration offset; their **Interface and Port (or Probe #) are greyed out for good**
+  and **a part can't be swapped** (Rule 5.31).
+  *Replaced* (OakBarn Brewery, 2026-11-09, Rule 5.31: "none may be swapped for a different Device Port Combination ever"): "each can
+  be swapped for another existing one or a new one ... when the new one is on another Port the old one is deleted; when it is on the
+  same Port the old one stays on the Tab as a Device of its own." 
   Its **Size** stays (2026-11-09, OakBarn Brewery: "Both"): Gallons, Method, Diameter, Height, Calculated Volume (read only), Dead
   space and Safe Element Volume (Rule 19.2). No Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential,
   Sparge / Steam Slayer or IP rows: none of those can change after integration.
@@ -3582,6 +3589,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
 - 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
+- 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
