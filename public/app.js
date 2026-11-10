@@ -14,7 +14,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
@@ -6875,9 +6875,14 @@ function heatFields(it, x = {}) {
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
     ['_elecWarn', ELEC_WARN, 'note', null, false, false, x],
     ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
+    // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
+    ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
+    ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
     ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
+    // Hysteresis ticked but not its start: its On offset and On delay still show, so its range can be met (Rule 6.29)
+    ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]) : []),
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', x)] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
@@ -7616,6 +7621,7 @@ function fieldTip(name, text) {
 const DEVICE_TIPS = {
   heatMethod: 'How it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted.',
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
   methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
@@ -8995,6 +9001,7 @@ async function editItem(kind, id) {
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
+      { const bad = heatHysProblem(work, draft.elements.find(e => e.name === work.input)); if (bad) throw new Error(bad); }      // Rule 6.29
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
