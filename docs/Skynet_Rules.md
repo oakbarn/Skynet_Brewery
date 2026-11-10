@@ -22,6 +22,8 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
      above).
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
+- **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
+  KISS Keep It Simple Stupid NO clutter."): no clutter anywhere. The details for dialogs and Help are Rule 11.8.
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -2396,6 +2398,8 @@ Help").
 Skynet Panel Help, with BruControl comments added for the Import Help"). A dialog's balloons (Rule 2.38) say the same thing as the Help
 page of that dialog, in the same words, with no BruControl comments (Rule 11.3). The Importer's own hover help is the same, with the
 BruControl comments added (on hold with the Importer Help).
+*Changed 2026-11-10 by Rule 11.8:* the Help and the Hover Help say the same for the same topic, **unless the Help expands on it**; the
+most technical explanations go in the Help, not the Hover Help.
 
 11.5 **Never mention Fritz in any Help** (OakBarn Brewery, 2026-11-10). No Help page, balloon or dialog note names a person, and no
 "(Fritz, date)" note is written in Help. Who asked for something, and when, is kept in these Rules and their Change log (and may stay in
@@ -2421,6 +2425,22 @@ what you see in the dialog. First done: the **Heater Properties** of a Vessel Bu
 (`BM_8_HE_HLT~element_BR`: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
 `BM_700_1W_HLT_BR`; in a Process `HLT_Vessel.BM_8_HE_HLT~element_BR`). A test (test/helpformat.test.js) checks the example still matches
 the sample. The other dialogs follow, one at a time.
+
+11.8 **KISS: Keep It Simple, no clutter** (OakBarn Brewery, 2026-11-10: "Label for DDLB and other field 1 to 2 Words. Use Hover Help for
+Bloviating, not on the Dialog. Plain English in Both Dialog, Dialog DDLB Choices and the Hover Help. If it needs a more geeky explanation
+then maybe but always follow by plain English in Help and Hover Help. Make the Help and Hover Help be the same for the same topic unless
+the Help can Expand More. Most technical Explanations in Help and Not Hover Help."). In both programs:
+  1. **A field's label is 1 or 2 words**, the label of a dropdown too. Nothing else is written on the dialog to explain it (Rule 2.38).
+  2. **Explanations go in the Hover Help**, never on the dialog.
+  3. **Plain English everywhere:** the dialog, its dropdown choices (short, Rule 2.38) and the Hover Help. A technical word may follow
+     the plain words, in ( ) (Rule 2.37).
+  4. **Plain English first, then the technical part.** Where a topic needs a more technical explanation, the plain English comes first,
+     in both the Help and the Hover Help.
+  5. **The same words for the same topic** in the Help and the Hover Help (Rule 11.4), unless the Help expands on it.
+  6. **The most technical explanations go in the Help**, not the Hover Help. Example: how a heater's Hysteresis works has the same plain
+     English explanation in the Hover Help and in the Help, using the dialog's own boxes and values (Rule 11.7); the Help then adds the
+     technical, scientific explanation. (The Hysteresis sample is being reviewed by OakBarn Brewery in the thread "Set the Help format
+     rules" before it is built.)
 
 ## 12. Privacy and sharing
 
@@ -3366,6 +3386,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
 - 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Vessel Layer Order** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
