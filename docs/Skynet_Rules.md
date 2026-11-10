@@ -2100,6 +2100,22 @@ turn it on or off with **`alm_Brew.email = true`** / **`false`**. If no mail ser
 says so in plain words. Both programs: the BruControl Import keeps each Alarm's Email Notification switch (BruControl's own mail
 settings are not copied; the user picks the mail server in Skynet). Help 175.
 
+7.18 **Alarm Priority: every Alarm in one logical line** (OakBarn Brewery, 2026-11-09: "We could set a priority attributes on
+Alarms ... All 1 go before the first 2. Then within all the 1s, 1.0 goes before 1.1 goes before 1.2 ... If there is a Conflict
+between two (two 1.1 random pick one then follow with the other)", "and maybe 2 decimals as you could then insert without
+renumbering"). Only one sound plays at a time. Every Alarm has a **Priority**, a number from 0 to 99 with **up to two decimal
+places** (1, 1.1, 1.15, 2 ...): **the lower one plays first**, and an Alarm can go in between two others without renumbering. An
+Alarm with no Priority of its own has **its Kind's number** (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5; the Sound
+Player is 5). **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the
+same Priority; **two that go On at the same moment** (within a second) are **picked at random, then the other follows**. A lower
+Priority still cuts in at once (a Hop Alarm stops the music). It is the same whether an Alarm was set On by a Process, by its
+Alarm Chain (Rule 7.16) or by both. **Alarm Chain steps wait their turn:** a timer step that comes due while the Alarm still
+sounds the last step waits (the Alarm shows "+1 step waiting") and follows as soon as the last one is tapped off; a Process's
+`.step` still changes it at once. **A sound that does not Repeat lets the next one play** once it has played to its end, while
+its Alarm still shows On. Set in Alarm Widget Properties > Alarm > **Priority**, or by a Process: **`alm_Brew.priority = 1.15`**
+(`""` puts back its Properties' number). `.waiting` (read only) is how many Chain steps wait. *Replaced:* between two of the same
+Kind the newest one played (PR #24). Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -2570,11 +2586,12 @@ the backup. Help 100 and 157.
 
 16.9 **A true / false choice is written `= true` or `= On`** (OakBarn Brewery, 2026-11-09: "Any Boolean Choice ... alarm.active =
 true can be ... Alarm = On the .active is only for backward compatibilty"). In a Process every true / false item takes
-**`alm_Hops = true`** or **`alm_Hops = On`** (false or Off to turn it off), and `wait alm_Hops == Off` reads it. The old
-**`"alm_Hops" active = true`** and **`alm_Hops.active = true`** keep working **only so older Processes still run**; new Processes
-and Process Templates use the new style. **The BruControl Import** offers, when it turns a BruControl Script into a Process:
-**alm_Hops = true** (the default), **alm_Hops = On**, or **keep the old .active**, and **strongly suggests the new style**
-(lib/fold.js rewriteAlarmLines). The choice is shown on the Importer's Script page once that page is built.
+**`alm_Hops = true`** or **`alm_Hops = On`** (false or Off to turn it off), and `wait alm_Hops == Off` reads it. **`.active` is not written in a Process** (OakBarn
+Brewery, 2026-11-09: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production"): Skynet
+Processes, Process Templates and Help use only the new style. **The BruControl Import** always turns BruControl's
+`"alm_Hops" active = true` into the new style, and offers **alm_Hops = true** (the default) or **alm_Hops = On** (lib/fold.js
+rewriteAlarmLines); the choice is shown on the Importer's Script page once that page is built. *Replaced (2026-11-09):* a third
+choice kept the old `.active`.
 
 ---
 
@@ -3191,6 +3208,10 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-09: Added Rule 7.18, Alarm Priority (OakBarn Brewery): a number with up to two decimal places, the lower plays first,
+  its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the
+  other; Alarm Chain steps wait their turn; a sound without Repeat lets the next one play when it ends. Help 21 and 172. Checked
+  against both programs. (thread "Add look options to Alarm Chain steps")
 - 2026-11-09: Rule 18.33 gets OakBarn Brewery's test: a box is mandatory when the program or the board needs it to work; handy information (Volts, Amps, Watts) is optional; a box needed by some types only is greyed for the others and has a fill-it-or-abandon pop-up. The list of mandatory boxes is written in the Rule. Checked against both programs: the Importer's item pages follow the list, and the Panel's Flow Meter Pulses per unit and Analog input Value at highest signal can no longer be left blank (the Panel's other boxes on the list are never blank). Help 165 updated. (thread "Set which Importer boxes are mandatory")
 - 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
@@ -3202,7 +3223,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 7.16, the Alarm Chain (OakBarn Brewery): up to 20 steps on one Alarm, each changing Fore, Back, Set
   Graphic (Layer 2), Active overlay, Sound (and a User Alarm's picture), every choice No Change to start; `.step` and `.setgraphic`
   in a Process; a Hop Alarm's steps can have times on its timer and are kept in the order they go On. Added Rule 16.9 (true / false
-  written `= true` or `= On`; `.active` only for older Processes; the Import offers the new style). Help 172. Checked against both
+  written `= true` or `= On`; `.active` is not written in a Process; the Import always writes the new style). Help 172. Checked against both
   programs. (thread "Add look options to Alarm Chain steps")
 - 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
