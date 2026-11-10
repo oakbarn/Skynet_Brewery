@@ -46,6 +46,9 @@ see Minimum_Equipment_and_Limitations.txt, or Help > Minimum equipment in the pa
   [ ] Your Mac password (the one you use to install programs).
   [ ] The panel zip file: Skynet_BrewPanel_<date>.zip  (<date> is the release date,
       for example Skynet_BrewPanel_2026-10-19.zip)
+  [ ] The pictures and sounds zip: Skynet_Media_<date>.zip  (on the same download page,
+      https://github.com/oakbarn/Skynet_Brewery/releases/latest). It only ever ADDS
+      pictures and sounds: one you already have is never changed or deleted.
   [ ] The file that comes with this ReadMe:
         Skynet First Install.command   runs once, the first time
       (It is also inside the zip, in BrewPanel/install/mac.)
@@ -201,6 +204,12 @@ STEP 5. PUT THE PANEL IN THE BREWING FOLDER
   [ ] Check: you now have Brewing/BrewPanel in your home folder, and inside it a file
       named server.js
   [ ] Also move "Skynet First Install.command" into the Brewing folder.
+  [ ] Copy Skynet_Media_<date>.zip into the Brewing folder too, and unzip it in the
+      Terminal app (do not double-click it: that makes a second BrewPanel folder) (-n means it never replaces a file you already have):
+          cd ~/Brewing
+          unzip -n Skynet_Media_*.zip
+      It adds BrewPanel/defaults/media. The panel copies the pictures and sounds into
+      place when it starts.
 
   Your Brewing folder should now look like this:
       Brewing/

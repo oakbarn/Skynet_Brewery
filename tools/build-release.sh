@@ -3,6 +3,10 @@
 #   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
 #                                          data/, config/, media/ or scripts/ (their samples are in defaults/), so it never replaces yours
 #   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
+#   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   every Skynet picture and sound, kept out of the panel zip and
+#                                          Setup (OakBarn Brewery, 2026-11-10, Rule 9.12). They only ever ADD files: one you already
+#                                          have is never changed or deleted (Rule #1). The zip holds BrewPanel/defaults/media, which
+#                                          the panel copies into media/ on its next start, adding only what is missing (lib/seed.js).
 #   Install Skynet Brewer.command, install-skynet-brewer.sh, Skynet_Brewer.bat, ReadMe.txt
 #   First_Install_<platform>/              step-by-step first-install ReadMe + first-install file for Windows, Mac, Linux, Pi
 # Usage: bash tools/build-release.sh [version]     (version defaults to today's date, e.g. 2026-10-05)
@@ -31,12 +35,20 @@ chmod +x "$STAGE"/install/linux/*.sh "$STAGE"/install/pi/*.sh "$STAGE"/install/m
 # into place on its first start (lib/seed.js). So unzipping a new version over a panel can never replace yours.
 # data/ is never in a release at all.
 mkdir -p "$STAGE/defaults"
-for d in config media scripts; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/defaults/$d"; done
+for d in config scripts; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/defaults/$d"; done
+# The pictures and sounds (media/) are not in the panel zip or Setup: they are the Skynet Media zip and Setup (Rule 9.12)
+MSTAGE="$OUT/stage/media/BrewPanel/defaults"
+mkdir -p "$MSTAGE"
+[ -d "$STAGE/media" ] && mv "$STAGE/media" "$MSTAGE/media"
 
 ZIP="Skynet_BrewPanel_$VERSION.zip"
 rm -f "$OUT"/Skynet_BrewPanel_*.zip
 ( cd "$OUT/stage" && zip -qr -X "../$ZIP" BrewPanel )
 echo "Built $OUT/$ZIP"
+MZIP="Skynet_Media_$VERSION.zip"
+rm -f "$OUT"/Skynet_Media_*.zip
+( cd "$OUT/stage/media" && zip -qr -X "../../$MZIP" BrewPanel )
+echo "Built $OUT/$MZIP"
 
 cp -p install/ReadMe.txt install/windows/Skynet_Brewer.bat install/linux/install-skynet-brewer.sh "install/mac/Install Skynet Brewer.command" "$OUT/"
 # First-time install by hand: one ReadMe and one first-install file per platform
@@ -64,6 +76,9 @@ if command -v makensis >/dev/null; then
   fi
   makensis -V2 -DSRC="$(pwd)/$STAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$EXE"
+  MEXE="Skynet_Media_Setup_$VERSION.exe"
+  makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
+  echo "Built $OUT/$MEXE"
   [ -f "$OUT/signing.log" ] && cat "$OUT/signing.log"
 else
   echo "NSIS (makensis) is not installed, so no Windows installer was built. On Linux: sudo apt install nsis"

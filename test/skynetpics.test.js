@@ -1,5 +1,5 @@
-// Get Skynet pictures: what GitHub has in media/Images/Skynet against what this Brain has; only new and changed pictures
-// are copied, a damaged download is never saved, paths can't leave Images/Skynet, and your own files are never touched.
+// Get Skynet pictures: what GitHub has in media/Images/Skynet against what this Brain has; only new pictures are copied
+// (a picture already here is never changed, Rule #1), a damaged download is never saved, paths can't leave Images/Skynet, and your own files are never touched.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -26,25 +26,25 @@ const fetcher = async url => {
 const sp = new SkynetPictures(() => images, { fetcher });
 const c = await sp.check();
 assert.deepEqual(c.add.map(x => x.path).sort(), ['Valves/Bad.svg', 'Valves/New Valve.svg']);
-assert.deepEqual(c.update.map(x => x.path), ['Pumps/Old.svg']);
-assert.equal(c.same, 1); assert.equal(c.total, 4, 'only pictures inside media/Images/Skynet, never a path that climbs out');
+assert.equal(c.update, undefined, 'nothing is ever changed');
+assert.equal(c.same, 2); assert.equal(c.total, 4, 'only pictures inside media/Images/Skynet, never a path that climbs out');
 
 const got = [];
 const r = await sp.get([], f => got.push(f));
-assert.deepEqual(r.saved.sort(), ['Pumps/Old.svg', 'Valves/New Valve.svg']);
+assert.deepEqual(r.saved.sort(), ['Valves/New Valve.svg']);
 assert.equal(r.failed.length, 1); assert.match(r.failed[0], /Bad\.svg: the download was damaged/);
 assert.ok(!fs.existsSync(path.join(images, 'Skynet/Valves/Bad.svg')), 'a damaged download is never saved');
-assert.equal(fs.readFileSync(path.join(images, 'Skynet/Pumps/Old.svg'), 'utf8'), 'new drawing');
+assert.equal(fs.readFileSync(path.join(images, 'Skynet/Pumps/Old.svg'), 'utf8'), 'old drawing', 'a picture already here is never changed');
 assert.equal(fs.readFileSync(path.join(images, 'Skynet/Valves/New Valve.svg'), 'utf8'), 'brand new');
 assert.equal(fs.readFileSync(path.join(images, 'Pumps/Mine.png'), 'utf8'), 'mine', 'your own pictures are never touched');
 assert.ok(fs.existsSync(path.join(images, 'Skynet/Pumps/Extra.svg')), 'nothing is deleted');
-assert.equal(got.length, 2);
+assert.equal(got.length, 1);
 assert.ok(!fs.readdirSync(path.join(images, 'Skynet/Valves')).some(n => n.startsWith('.')), 'no temporary files left behind');
 assert.ok(asked.some(u => u.includes('/Valves/New%20Valve.svg')), 'names with spaces are asked for correctly');
 
 // a second check finds only the damaged one still missing; picking just some works
 const c2 = await sp.check();
-assert.deepEqual([...c2.add, ...c2.update].map(x => x.path), ['Valves/Bad.svg']);
+assert.deepEqual(c2.add.map(x => x.path), ['Valves/Bad.svg']);
 assert.deepEqual((await sp.get(['Pumps/Same.svg'])).saved, [], 'a picture already here is not in the list to get');
 
 // GitHub problems come back as plain words
