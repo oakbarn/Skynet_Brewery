@@ -1,0 +1,22 @@
+// The Pump dialog is the model (OakBarn Brewery, 2026-11-10, Rule 18.34): Label Hover Help, Title Case, Label Attributes
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+const tc = app.slice(app.indexOf('const TITLE_SMALL'), app.indexOf('const TITLED'));
+const titleCase = new Function(tc + '; return titleCase;')();
+assert.equal(titleCase('Fore color'), 'Fore Color');
+assert.equal(titleCase('Label attributes'), 'Label Attributes');
+assert.equal(titleCase('Database and .API'), 'Database and .API');
+assert.equal(titleCase('Width (pixels)'), 'Width (pixels)');
+assert.equal(titleCase('pH meter'), 'pH Meter');
+assert.equal(titleCase('Clone: put a copy of this thing next to it'), 'Clone: put a copy of this thing next to it', 'a sentence is left alone');
+assert.doesNotMatch(app, /Default \(Centered\)/, 'no Default (Centered) choice');
+assert.match(app, /const ALIGN_LCR = \[\['MiddleLeft', 'Left'\], \['', 'Centered', 'MiddleCenter'\], \['MiddleRight', 'Right'\]\]/);
+assert.match(app, /title: 'Label Attributes'/);
+assert.match(app, /nm\.style\.textAlign = \(nal \|\| 'Center'\)/, 'a Label is really Centered when nothing is set');
+assert.match(app, /How do you refer to this Pump\?/, 'the Red Pump story');
+assert.match(app, /Suggested Name Format: InterfaceID_Port_Type_Label_TabID/);
+assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: T\.port \}\]/, 'Available Ports has its own balloon');
+assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);
+console.log('pump model tests passed');
