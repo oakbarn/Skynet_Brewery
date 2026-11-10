@@ -39,7 +39,7 @@ export const isMethodDevice = el => isHeatElem(el) || isCoolPump(el);
 // older .target, which still works for older Processes and BruControl. Read or set either one: both are the one Setpoint.
 // It is on a Heating Element, a Cool / Warm Pump and the older Hysteresis, PID and Deadband Devices (a stepper's .target is
 // where it moves to, not a Setpoint).
-export const hasSetpoint = el => isMethodDevice(el) || ['hysteresis', 'pid', 'deadband'].includes(el?.type);
+export const hasSetpoint = el => isMethodDevice(el) || ['hysteresis', 'pid', 'deadband', 'fermentor'].includes(el?.type);      // the Fermentor Control too (Rule 6.30)
 
 // "PID", "pid", "Duty Cycle", "dutycycle", "DutyC", "HYS", "Direct", "On/Off" (the older word), "on off", "DO" ... -> the key (null when it is none of them)
 const squash = s => String(s ?? '').toLowerCase().replace(/[\s_/\-]+/g, '');
