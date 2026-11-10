@@ -22,8 +22,8 @@ With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Con
 
 ## Where it is
 
-- **Properties > Heating method > Switched by.** Under it, a line says the range for this element. When Hysteresis is ticked but is
-  not the method it starts with, its On offset and On delay still show, so they can be set.
+- **Properties > Heating method > Switched by.** Under it, a line says the range for this element. When Hysteresis is Enabled but is
+  not the Current Method, its On offset and On delay still show, so they can be set.
 - **Save** refuses an On offset or On delay outside the range, and says what is allowed.
 - **A Process or the .API** gets the same plain error: `hE_1.onoffset = 8` on an element switched by an Optical SSR is refused.
 - **The Brain** never runs a heating Hysteresis outside its range, whatever was saved.

@@ -45,10 +45,16 @@ How the element is wired decides which methods make sense (the hover help on the
 
 ## Its main method and the other methods allowed
 
-When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
-methods allowed**, tick each other method it may use. **Direct** (full power) is always allowed and always has its spot, so it
-has no switch there. **Only the main method and the ticked ones can be used**: the pop-up, the
-spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
+When you build it (and later in its Properties), the **Heating method** part has three rows:
+
+- **Current Method**: the method it is in. The dialog opens on the one it is in now. Beside it, **Short Label** switches its
+  balloons to short names (DO, DutyC, HYS ...).
+- **Enabled**: a switch under each method's name. **A method must be enabled to be used.** The Current Method and **Direct**
+  (full power) are always on. The pop-up, the balloons, Method Clones and Processes offer only the enabled ones, and a Process asking
+  for another one stops with a plain message.
+- **Control Method**: a balloon for each enabled method, the Current Method **red**, the others **yellow**. These are the same
+  balloons as under the Element on its Tab, and they work together: **click Duty Cycle here or on the Tab** and Duty Cycle becomes the
+  Current Method in both places, red, and the one before turns yellow.
 
 An Element **built into a Vessel Device or RIMS tube** works the same way: open its Properties (double-click it, or its ⚙) for
 its Heating method and the other methods allowed. Older Schemas whose built in Element was a separate Hysteresis or PID Device

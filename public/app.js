@@ -2134,6 +2134,18 @@ const isClone = g => g?.kind === 'clone';
 // and opens the pop-up; it shows ON only while the parent is ON in its method. It has its own Label.
 const isMethodClone = (g, p = L().elements.find(e => e.name === g?.of)) => isClone(g) && !!controlMethods(p) && !!heatMethodKey(g.method);
 const clonesOf = (name, gs = L().graphics) => gs.filter(g => isClone(g) && g.of === name);
+// A Clone becomes the Device (OakBarn Brewery, 2026-11-10: "User Picks the Clone be the Device"): the Device moves to the Clone's Tab
+// and place and the Clone goes. It keeps its name, hidden key, Port and Processes; pipes on the Clone's IPs now end on it, and pipes
+// on its old place are left open. Its other Clones stay its Clones.
+function promoteClone(dev, cl) {
+  const mine = [`dev:${dev.name}:in`, `dev:${dev.name}:out`];
+  for (const g of draft.graphics) for (const k of ['from', 'to']) if (mine.includes(g[k])) delete g[k];
+  for (const g of draft.graphics) for (const k of ['from', 'to']) if (g[k] === `dev:${cl.name}:in` || g[k] === `dev:${cl.name}:out`) g[k] = g[k].replace(`dev:${cl.name}:`, `dev:${dev.name}:`);
+  Object.assign(dev, { workspace: cl.workspace, x: cl.x, y: cl.y });
+  if (cl.visibility === 'hidden') dev.visibility = 'hidden'; else delete dev.visibility;
+  draft.graphics = draft.graphics.filter(g => g !== cl);
+  toast(`${dev.name} is now where ${cl.name} was; ${cl.name} is gone. Save layout keeps it.`);
+}
 function cloneEl(g) {
   const p = isClone(g) && L().elements.find(e => e.name === g.of);
   if (!p) return null;
@@ -6869,8 +6881,6 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 // regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
 const ELEM_OVERLAY_CHOICES = v => [['', 'Glow (it glows while on; the start)'], ['none', 'None (nothing while on)'], ...OVERLAY_CHOICES(v).slice(1)];
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
-// The electrical warning (Fritz, 2026-11-08, Rule 6.20): wherever wiring, elements or AC circuits come up
-const ELEC_WARN = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
 // Hysteresis, PID, Deadband or Precise reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
@@ -6881,29 +6891,34 @@ const HEAT_TIPS = {
   smoothing: 'Precise: the seconds it averages the probe over, so the probe\'s tiny steps do not make the heater twitch. 10 is a good start; more is calmer but slower to see a change. 0 = no smoothing.',
   outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
 };
+const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
+  const liveM = heatMethodKey(S.values[it.name]?.method);
+  if (it.name && !liveSeen.has(it)) { liveSeen.add(it); if (liveM && allowedMethods(it).includes(liveM)) it.heatMethod = liveM; }
   const m = startMethod(it), T = DEVICE_TIPS;
   const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
+  // Integrate 5 (OakBarn Brewery, 2026-11-10): Current Method and Short Label on one line; the Enabled switches; the Control Method
+  // balloons. The explanations (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
+  const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['_elecWarn', ELEC_WARN, 'note', null, false, false, x],
-    ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
+    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: ['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.methodShort }], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
+    ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.methodSpot, ...x }],
+    ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
+    ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
     ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
-    // Hysteresis ticked but not its start: its On offset and On delay still show, so its range can be met (Rule 6.29)
+    // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
     ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]) : []),
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', x)] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
-    ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
-    ...HEAT_METHODS.filter(([k]) => k !== m && k !== 'onoff').map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),      // Direct is always allowed, not a choice
-    ['methodShort', 'Short method names on its buttons', 'bool', null, false, false, { tip: T.methodShort, ...x }],
-    ['_heatNote', allowedMethods(it).length > 1 ? `A Process changes it: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m))}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m))}. So does a click on one of its spots, or on it while running. Only the methods allowed here can be used.` : 'Only its starting method is allowed. Tick another method above to switch between them by a click or a Process.', 'note', null, false, false, x]];
+  ];
 }
 // The Cool / Warm Pump's Method (Rule 6.21): a pump's own methods only, Direct (the old On/Off) or Hysteresis (- On offset cools, + warms)
 function pumpMethodFields(it, x = {}) {
@@ -7634,11 +7649,12 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted.',
+  controlMethod: (it, m) => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`,
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
-  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
@@ -7945,6 +7961,27 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
+  else if (kind === 'menabled') {   // the Enabled row (OakBarn Brewery, 2026-11-10, Integrate 5): a switch under each method's name
+    // opts = [[key, word, locked]]; a locked one is on and greyed (Direct always, and the Current Method); only switched-on methods can be used
+    return [h('div', { class: 'full mRow' }, ...opts.map(([k, word, locked]) => {
+      const cb = h('input', { type: 'checkbox', class: 'swc', 'data-rerender': '1', ...(k === 'onoff' ? {} : { 'data-k': 'methodSpot_' + k, 'data-kind': 'bool' }) });
+      cb.checked = locked || !!obj['methodSpot_' + k]; if (locked) { cb.disabled = true; cb.title = k === 'onoff' ? 'Direct is always enabled (Rule 6.19)' : 'The Current Method is always enabled'; }
+      return h('label', { class: 'mCol' }, h('span', { class: 'mWord' }, word), cb);
+    }))];
+  }
+  else if (kind === 'mballoons') {  // the Control Method balloons (Integrate 5): one for each enabled method; the Current Method is Red, the others Yellow.
+    // One click makes it the Current Method here and on the Tab at once (the Tab's balloons are the same ones, Rule 6.19)
+    const cur = startMethod(obj);
+    return [h('div', { class: 'full mBalloons' }, ...opts.map(([k, word]) => h('button', { type: 'button', class: 'hmBtn' + (k === cur ? ' cur' : ''), 'data-k': k,
+      onclick: ev => {
+        ev.preventDefault();
+        const body = ev.target.closest('#dlgBody, .dlgBody, form'), sel = body?.querySelector('select[data-k="heatMethod"]');
+        if (!sel || sel.value === k) return;
+        const live = S.config.elements.find(e => e.name === obj.name);
+        if (live && can('operator') && allowedMethods(live).includes(k)) setProp(live.name, 'method', heatMethodWord(k));      // the Tab follows at once
+        sel.value = k; sel.dispatchEvent(new Event('change', { bubbles: true }));
+      } }, methodButtonWord(k, !!obj.methodShort))))];
+  }
   else if (kind === 'orient') {      // Orientation (Rule 18.19): one pick that sets Flip Horizontal and Flip Vertical
     const fh = h('input', { type: 'checkbox', class: 'hidden', 'data-k': 'flipH', 'data-kind': 'bool' }), fv = h('input', { type: 'checkbox', class: 'hidden', 'data-k': 'flipV', 'data-kind': 'bool' });
     fh.checked = !!obj.flipH; fv.checked = !!obj.flipV;
@@ -8832,7 +8869,15 @@ async function editItem(kind, id) {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
       if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
       const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
-      if (!confirm(kids.length ? `Delete ${item.name}? Its ${kids.length === 1 ? 'Clone' : kids.length + ' Clones'} (${kids.map(g => g.name).join(', ')}) go too.` : 'Delete this item?')) return;
+      // a Device with Clones (OakBarn Brewery, 2026-11-10, Rule 4.4): 1. delete it and all its Clones, or 2. / 3. a Clone the user picks
+      // becomes the Device (the Parent) where that Clone is; the other Clones stay its Clones
+      if (kids.length) {
+        const tabOf = g => draft.workspaces.find(w => w.name === g.workspace)?.label || g.workspace || 'no Tab';
+        const pick = await choose(`Delete ${item.name}? It has ${kids.length === 1 ? 'a Clone' : kids.length + ' Clones'}.`,
+          [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
+        if (pick === undefined) return;
+        if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
+      } else if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
