@@ -17,6 +17,11 @@ The dialog adds the minus "in the background". **This PR's first change:** a Pro
 dialog shows it (`.onoffset = -1` heats, `.onoffset = 1` cools), and the predictive text after `.onoffset =` offers
 **(-) Heat** and **(+) Cool**.
 
+**Decided 2026-11-10 (OakBarn Brewery: "We need to think in plain terms No Debit a Credit Confusing"):** question 1 = flip it
+everywhere. Built in PR #334: the saved Schema, the Brain, a Process, the .API and the dialogs all use one sign (-1 heats, +1 cools),
+nothing is added in the background, and the BruControl Import turns BruControl's sign around. The notes below describe the code
+**before** that change.
+
 ## 1. The Brain (runs the heating and cooling)
 
 | File | Lines | What it does |

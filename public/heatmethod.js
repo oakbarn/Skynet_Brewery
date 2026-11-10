@@ -29,27 +29,24 @@ export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'ele
 export const noNoneTap = el => isHeatElem(el) || (el?.type === 'digitalOut' && el.subtype === 'valve' && el.valveType !== 'manual');
 // The Cool / Warm Pump (OakBarn Brewery, 2026-11-08, Rule 6.21): a pump that a temperature switches (a glycol pump that cools a
 // fermenter, or a pump that brings warm water) is ONE Device on its port too (One Port, One Device), a Pump with a Method field,
-// Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (- On offset) or warms
-// (+ On offset) to a Setpoint read by its Probe. The same .method, Setpoint and spots as a Heating Element, so a Process reads the same.
-// The Offset's sign in a Process (OakBarn Brewery, 2026-11-10: "in a Predictive Text DDLB Process Code Choice could be (-) Heat and (+)
-// Cool and place the appropriate + or minus in the code", Rule 6.19): the same as the dialogs, On at Setpoint + Offset. So
-// HLT.onoffset = -1 heats (On 1 degree below) and +1 cools (On 1 degree above); a Fermentor's .heatoffset is -1, its .cooloffset 1.
-// The saved number keeps its old sign (plus heats), so only what a Process reads and writes is turned around here.
+// Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (+ Offset) or warms
+// (- Offset) to a Setpoint read by its Probe. The same .method, Setpoint and spots as a Heating Element, so a Process reads the same.
+// The Offset's sign (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing", Rule 6.19): one sign
+// everywhere (dialogs, the saved Schema, the Brain, a Process and the .API): the Offset says where it turns On, Setpoint + Offset. So
+// HLT.onoffset = -1 heats (On 1 degree below the Setpoint) and +1 cools (On 1 degree above); a Fermentor's .heatoffset is -1, its .cooloffset 1.
 // offsetSigns: the signs the predictive text offers after name.prop = ('-' Heat, '+' Cool), or null.
 export const offsetSigns = el => el?.type === 'fermentor' ? { heatoffset: ['-'], cooloffset: ['+'] }
   : el?.type === 'digitalOut' && el.subtype === 'element' ? { onoffset: ['-'] }
   : (el?.type === 'hysteresis' || (el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP'))) ? { onoffset: ['-', '+'] } : null;
-const flips = (el, prop) => !!el && ((/^onoffset$/i.test(prop) && el.type !== 'fermentor') || (/^heatoffset$/i.test(prop) && el.type === 'fermentor'));
-// what a Process reads
-export const processOffset = (el, prop, v) => flips(el, String(prop)) && typeof v === 'number' && v !== 0 ? -v : v;
-// what is saved when a Process writes v; a Heating Element (or a Fermentor's Heat) given a plus is a plain error, since it only heats
-export function fromProcessOffset(el, prop, v) {
-  if (!flips(el, String(prop))) return v;
-  const n = Number(v);
-  if (!Number.isFinite(n)) return v;
-  const heatOnly = el.type === 'fermentor' || (el.type === 'digitalOut' && el.subtype === 'element');
-  if (heatOnly && n > 0) throw new Error(`${el.name} heats, so its .${String(prop).toLowerCase()} has a minus: -${n} turns it On ${n} degrees below the Setpoint (Rule 6.19).`);
-  return n === 0 ? 0 : -n;
+// The plain error when a Process (or the .API) gives an Offset the wrong sign, or null: a Heating Element and a Fermentor's Heat only
+// heat (minus), a Fermentor's Cooling only cools (plus).
+export function offsetSignProblem(el, prop, v) {
+  const p = String(prop).toLowerCase(), n = Number(v);
+  if (!el || !Number.isFinite(n) || n === 0) return null;
+  const heatOnly = (p === 'heatoffset' && el.type === 'fermentor') || (p === 'onoffset' && el.type === 'digitalOut' && el.subtype === 'element');
+  if (heatOnly && n > 0) return `${el.name} heats, so its .${p} has a minus: -${n} turns it On ${n} degrees below the Setpoint (Rule 6.19).`;
+  if (p === 'cooloffset' && el.type === 'fermentor' && n < 0) return `${el.name}'s Cooling cools, so its .cooloffset has a plus: ${-n} turns it On ${-n} degrees above the Setpoint (Rule 6.19).`;
+  return null;
 }
 export const isCoolPump = el => el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP');
 export const PUMP_METHOD_KEYS = ['onoff', 'hysteresis'];
@@ -96,7 +93,7 @@ export const controlMethods = el => { const l = allowedMethods(el); return l.len
 export const HEAT_SETTINGS = {
   onoff: [],
   dutyCycle: [['dutycycle', 'dutyCycle', 'Duty cycle %', 0], ['interval', 'interval', 'Cycle time (ms)', 1000]],
-  hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'On offset', 1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
+  hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'Offset', -1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
   pid: [['target', 'target', 'Setpoint', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
     ['maxintegral', 'maxIntegral', 'Max integral', 100], ['calctime', 'calcTime', 'Calc time (s)', 1], ['outtime', 'outTime', 'Output window (s)', 1]],
   deadband: [['target', 'target', 'Setpoint', 0], ['deadbandoffset', 'deadbandOffset', 'Deadband offset', 0.5], ['innerbandoffset', 'innerBandOffset', 'Inner band offset', 2],
@@ -148,15 +145,15 @@ export const TYPE_METHOD = { digitalOut: 'onoff', dutyCycle: 'dutyCycle', hyster
 
 // Heat Hysteresis by what switches it (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed for
 // heating elements with Optical SSRs"; a Contactor (and a mechanical relay) 1 to 5 with an On delay of at least 10 seconds, Rule 6.29).
-// A Heating Element says what switches it (Hardware Controller, saved as switchedBy; empty = Optical SSR). Its Hysteresis that heats (a plus or 0 On
-// offset) may only use an On offset inside that range, and on a Contactor or Relay an On delay of at least 10 s, so the contacts do not wear
-// out. A minus On offset (cooling) is not a heat Hysteresis and has no range here. The numbers are °F; with a °C probe they are converted.
+// A Heating Element says what switches it (Hardware Controller, saved as switchedBy; empty = Optical SSR). Its Hysteresis that heats (a minus or 0
+// Offset) may only use an Offset whose size is inside that range (-0.5 to -3 °F on an Optical SSR), and on a Contactor or Relay an On delay of
+// at least 10 s, so the contacts do not wear out. The numbers in the table are the Offset's size in °F; with a °C probe they are converted.
 export const SWITCHED_BY = [
   ['ssr', 'Optical SSR', 0.5, 3, 0, 0.5, 0],
   ['contactor', 'Contactor', 1, 5, 10, 1, 10],
   ['relay', 'Mechanical relay', 1, 5, 10, 1, 10],
 ];
-// [key, word, lowest On offset, highest On offset, shortest On delay (s), the On offset and On delay it gets when picked] (°F)
+// [key, word, smallest Offset size, largest Offset size, shortest On delay (s), the Offset size and On delay it gets when picked] (°F)
 // Picking a Hardware Controller sets its On offset and On delay (OakBarn Brewery, 2026-11-10: Optical SSR .5 and 0, Contactor 1 and 10,
 // Mechanical relay 1 and 10)
 export const switchedBy = el => SWITCHED_BY.some(s => s[0] === el?.switchedBy) ? el.switchedBy : 'ssr';
@@ -169,14 +166,16 @@ export function heatHysRange(el, probe) {
   const f = x => c ? Math.round(x * 5 / 9 * 10) / 10 : x;
   return { min: f(s[2]), max: f(s[3]), delay: s[4], u: c ? '°C' : '°F', word: s[1], start: f(s[5]), startDelay: s[6] };
 }
-// The plain error when its heat Hysteresis On offset or On delay is outside the range, or null. Only a Heating Element that may use
-// Hysteresis is checked; offset and delay default to the element's own saved ones.
-export function heatHysProblem(el, probe, offset = el?.onOffset ?? 1, delay = el?.onDelay ?? 0) {
+// The plain error when its heat Hysteresis Offset or On delay is outside the range, or null. Only a Heating Element that may use
+// Hysteresis is checked; offset and delay default to the element's own saved ones. A plus Offset on a Heating Element is an error too:
+// it only heats, so it turns On below the Setpoint (Rule 6.19).
+export function heatHysProblem(el, probe, offset = el?.onOffset ?? -1, delay = el?.onDelay ?? 0) {
   if (!isHeatElem(el) || !allowedMethods(el).includes('hysteresis')) return null;
   const o = Number(offset), d = Number(delay) || 0, r = heatHysRange(el, probe), who = el.name || 'This Heating Element';
-  if (Number.isFinite(o) && o >= 0 && (o < r.min || o > r.max))
-    return `${who} (Hardware Controller: ${r.word}): its Hysteresis Offset (-) must be -${r.min} to -${r.max} ${r.u} (Rule 6.29). It is ${-o}.`;
-  if (Number.isFinite(o) && o >= 0 && d < r.delay)
+  if (Number.isFinite(o) && o > 0) return `${who} heats, so its Hysteresis Offset has a minus: -${o} turns it On ${o} ${r.u} below the Setpoint (Rule 6.19).`;
+  if (Number.isFinite(o) && (-o < r.min || -o > r.max))
+    return `${who} (Hardware Controller: ${r.word}): its Hysteresis Offset (-) must be -${r.min} to -${r.max} ${r.u} (Rule 6.29). It is ${o}.`;
+  if (Number.isFinite(o) && d < r.delay)
     return `${who} (Hardware Controller: ${r.word}): its Hysteresis On delay must be at least ${r.delay} seconds, so it does not wear out (Rule 6.29). It is ${d}.`;
   return null;
 }

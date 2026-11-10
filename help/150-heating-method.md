@@ -162,7 +162,7 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
   it On or Off is its picture, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **Direct**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
-- Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset`, `.ondelay` (Hysteresis);
+- Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset` (with its minus: `-1`), `.ondelay` (Hysteresis);
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband); the PID's own plus `.holdoutput`, `.smoothing` (Precise).
   The same names the old separate Duty Cycle, Hysteresis, PID and Deadband Devices had.

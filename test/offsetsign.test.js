@@ -1,29 +1,30 @@
-// The Offset's sign in a Process (OakBarn Brewery, 2026-11-10, Rule 6.19): the same as the dialogs, On at Setpoint + Offset.
-// HLT.onoffset = -1 heats; a Heating Element given a plus is a plain error; the saved number keeps its old sign (plus heats).
+// The Offset's sign (OakBarn Brewery, 2026-11-10, Rule 6.19): one sign everywhere, On at Setpoint + Offset. HLT.onoffset = -1 heats,
+// and is saved -1; a Heating Element given a plus is a plain error.
 // The predictive text offers (-) Heat and (+) Cool; the BruControl Import turns BruControl's sign around.
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { offsetSigns, processOffset, fromProcessOffset } from '../public/heatmethod.js';
+import { offsetSigns, offsetSignProblem, heatHysProblem } from '../public/heatmethod.js';
 import { suggest } from '../public/autofill.js';
 import { flipOffsetSigns } from '../lib/brucontrol.js';
 
-const he = { name: 'hE', type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', input: 'T', onOffset: 1 };
-const pump = { name: 'cP', type: 'digitalOut', subtype: 'pump', typeCode: 'CPMP', heatMethod: 'hysteresis', input: 'T', onOffset: -2 };
-const fv = { name: 'FV', type: 'fermentor', heatOffset: 1, coolOffset: 1 };
+const he = { name: 'hE', type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', input: 'T', onOffset: -1 };
+const pump = { name: 'cP', type: 'digitalOut', subtype: 'pump', typeCode: 'CPMP', heatMethod: 'hysteresis', input: 'T', onOffset: 2 };
+const fv = { name: 'FV', type: 'fermentor', heatOffset: -1, coolOffset: 1 };
 assert.deepEqual(offsetSigns(he), { onoffset: ['-'] });
 assert.deepEqual(offsetSigns(pump), { onoffset: ['-', '+'] });
 assert.deepEqual(offsetSigns(fv), { heatoffset: ['-'], cooloffset: ['+'] });
 assert.equal(offsetSigns({ type: 'digitalOut', subtype: 'valve' }), null);
-assert.equal(processOffset(he, 'onoffset', 1), -1, 'saved 1 (heats) reads -1');
-assert.equal(processOffset(pump, 'onoffset', -2), 2, 'saved -2 (cools) reads 2');
-assert.equal(processOffset(fv, 'heatoffset', 1), -1);
-assert.equal(processOffset(fv, 'cooloffset', 1), 1, 'the Cool Offset is plus already');
-assert.equal(fromProcessOffset(he, 'onoffset', -2), 2);
-assert.throws(() => fromProcessOffset(he, 'onoffset', 2), /heats, so its \.onoffset has a minus/);
-assert.equal(fromProcessOffset(pump, 'onoffset', 1.5), -1.5, 'a plus cools');
-assert.throws(() => fromProcessOffset(fv, 'heatoffset', 1), /minus/);
+assert.equal(offsetSignProblem(he, 'onoffset', -2), null);
+assert.match(offsetSignProblem(he, 'onoffset', 2), /heats, so its \.onoffset has a minus/);
+assert.equal(offsetSignProblem(pump, 'onoffset', 1.5), null, 'a pump may cool (plus) or warm (minus)');
+assert.equal(offsetSignProblem(pump, 'onoffset', -1.5), null);
+assert.match(offsetSignProblem(fv, 'heatoffset', 1), /minus/);
+assert.match(offsetSignProblem(fv, 'cooloffset', -1), /plus/);
+assert.equal(heatHysProblem(he, null, -1, 0), null, '-1 on an Optical SSR is fine');
+assert.match(heatHysProblem(he, null, -4, 0), /must be -0.5 to -3 °F \(Rule 6.29\)\. It is -4/);
+assert.match(heatHysProblem(he, null, 1, 0), /has a minus/);
 
 // a plus sign before a number
 assert.deepEqual(compile('new value x\nx = +1\n').errors, []);
@@ -42,7 +43,8 @@ const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++
 eng.write('p', 'hE.onoffset = -2\nif hE.onoffset == -2\nStep = 1\nendif\n');
 eng.start('p');
 assert.ok(await until(() => store.getProp('Step', 'value') === 1), 'the Process reads back -2');
-assert.equal(store.getProp('hE', 'onoffset'), 2, 'saved plus, as the Brain uses it');
+assert.equal(store.getProp('hE', 'onoffset'), -2, 'the same sign in the Brain');
+assert.throws(() => store.setProp('hE', 'onoffset', 2, 'script'), /has a minus/);
 
 // predictive text
 const words = { elements: [{ name: 'hE', type: 'digitalOut', attrs: ['onoffset'], bools: [], signs: offsetSigns(he) }, { name: 'cP', type: 'digitalOut', attrs: ['onoffset'], bools: [], signs: offsetSigns(pump) }] };

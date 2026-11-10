@@ -22,6 +22,10 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
      above).
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
+- **Plain terms: no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.";
+  "Plain English and not a Who's on First Confusion where + = - and - = +"): a word, a name or a sign means ONE thing, everywhere: in the
+  dialogs, the saved Schema, the Brain, a Process, the .API and Help. Nothing is turned around in the background (for example the
+  Offset's sign, Rule 6.19). See Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) for what happens when it isn't.
 - **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
   KISS Keep It Simple Stupid NO clutter."): no clutter anywhere. The details for dialogs and Help are Rule 11.8.
 - **Plain terms, no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.
@@ -1818,11 +1822,19 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   **On at Setpoint + Offset**, every time. A Heating Element is **Heating** with **Offset (-)** (the HLT element: -1, On at 149 °F with
   a Setpoint of 150 °F); anything that only cools is **Cool** with **Offset (+)**; the Fermentor Control (Rule 6.30) is
   **Bi-Directional** with **Heat Offset (-)** and **Cool Offset (+)**. Dialogs show and take these signs; the Rule 6.29 ranges are
-  shown with the same sign (Optical SSR -0.5 to -3 °F). The saved number and a Process's `.onoffset` stay as before (plus heats).
+  shown with the same sign (Optical SSR -0.5 to -3 °F).
+- **One sign everywhere** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing", see "Plain
+  terms" at the top): the saved Schema, the Brain, a Process, the .API and the dialogs all use the same sign; nothing is turned
+  around in the background. A Process writes `HLT_Vessel.BM_8_HE_HLT~element_BH.onoffset = -1` to heat and `+1` (or `1`) to cool; a
+  Fermentor Control's `.heatoffset` is minus and `.cooloffset` plus. After `.onoffset =` the predictive text offers **(-) Heat** and
+  **(+) Cool** (only the ones that fit the Device) and writes the sign. A Heating Element (or a Fermentor's Heat) given a plus, or a
+  Fermentor's Cooling given a minus, gets a plain error. A Cool / Warm Pump may take either: plus cools, minus warms. **Both
+  programs:** the BruControl Import turns BruControl's sign around (in BruControl a plus heats), in its Devices and in its Process
+  lines (`.onoffset = 2` becomes `-2`; a calculation is listed in the Import notes to check by hand).
 - **Overlay colors follow the Direction** (OakBarn Brewery, 2026-11-10): the Overlay choices are None, Lightning Bolt, Flashing
   Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Red Glow, Orange Glow and Blue Glow. Something that
-  **heats** (a Heating Element, the Heat of a Fermentor Control, a Cool / Warm Pump with a plus On offset) has no Blue Glow and no Green
-  Glow Ring. Something whose Direction is **Cool** (the Cooling of a Fermentor Control, a Cool / Warm Pump with a minus On offset) has
+  **heats** (a Heating Element, the Heat of a Fermentor Control, a Cool / Warm Pump with a minus Offset) has no Blue Glow and no Green
+  Glow Ring. Something whose Direction is **Cool** (the Cooling of a Fermentor Control, a Cool / Warm Pump with a plus Offset) has
   no Red Glow and no Orange Glow, and has Blue Glow and Green Glow Ring. Anything else has every choice but Blue Glow (**Blue is kept
   for cooling**). A choice already saved always stays in its list. A Heating Element starts with **Red Glow** (saved as no overlay), so
   the other Red Glow is not in its list.
@@ -1901,8 +1913,8 @@ Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A p
 cools a fermenter, or a pump that brings warm water) is **ONE Pump Device on its port** (One Port, One Device, Rule 6.1), never a
 pump plus a separate Hysteresis Device. Its **Device Type ID is CPMP** (Cool / Warm Pump), so its suggested name reads plainly, for
 example `MB_D5_CPMP_Cool~Pump_FR`. It has a **Method** field, as a Heating Element has (Rule 6.19), with a pump's own methods only:
-**Direct** (On/Off: a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Setpoint: a **minus On offset cools**, a
-**plus On offset warms**). A Process changes it with `.method` and reads `.setpoint`, `.onoffset` and `.ondelay`, the same words a
+**Direct** (On/Off: a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Setpoint: a **plus Offset cools** (On above the Setpoint), a
+**minus Offset warms**). A Process changes it with `.method` and reads `.setpoint`, `.onoffset` and `.ondelay`, the same words a
 Heating Element uses. Methods that switch a motor many times a minute (Duty Cycle, PID, Deadband, Precise) are not offered for it.
 - **Both programs:** the Panel shows the Method, Probe, Setpoint and offsets in the Pump's Properties and the Brain runs it like a
   Heating Element's Hysteresis. The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port,
@@ -2050,26 +2062,26 @@ cannot be, but there are two cases that may look like more than one:
 6.29 **Heat Hysteresis by what switches it** (OakBarn Brewery, 2026-11-10: "Heat Only Hysteresis: Offset Range from .5 to 3 is allowed
 for heating elements with Optical SSRs"; for a Contactor, OakBarn Brewery OK'd the suggestion of 2 to 5 with an On delay of at least
 60 seconds: "Right track"). A Heating Element (Rule 6.19, on its own or built into a Vessel Device) has a **Hardware Controller**: **Optical
-SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its **Hysteresis that heats** (a plus On offset) may only use:
+SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its **Hysteresis** (Offset with a minus, Rule 6.19) may only use:
 
-| Hardware Controller | On offset | On delay |
+| Hardware Controller | Offset | On delay |
 |---|---|---|
-| Optical SSR | 0.5 to 3 °F | any |
-| Contactor | 1 to 5 °F | at least 10 seconds |
-| Mechanical relay | 1 to 5 °F | at least 10 seconds |
+| Optical SSR | -0.5 to -3 °F | any |
+| Contactor | -1 to -5 °F | at least 10 seconds |
+| Mechanical relay | -1 to -5 °F | at least 10 seconds |
 
-With a °C probe the numbers are converted (0.3 to 1.7 °C; 0.6 to 2.8 °C). A Contactor's contacts wear each time they close, so it
-heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
+With a °C probe the numbers are converted (-0.3 to -1.7 °C; -0.6 to -2.8 °C). A Contactor's contacts wear each time they close, so it
+heats less often and longer. A Heating Element only heats, so a plus Offset on it is refused (Rule 6.19).
 - **Picking a Hardware Controller sets the On offset and the On delay** (OakBarn Brewery, 2026-11-10, with a table): Optical SSR
-  **0.5 °F and 0 seconds**, Contactor **1 °F and 10 seconds**, Mechanical relay **1 °F and 10 seconds** (the offset converted for a °C probe).
-  So a Contactor or Mechanical relay may hold 1 to 5 °F with an On delay of at least 10 seconds. The reason is in the balloons of Hardware Controller and On offset; no
+  **-0.5 °F and 0 seconds**, Contactor **-1 °F and 10 seconds**, Mechanical relay **-1 °F and 10 seconds** (the offset converted for a °C probe).
+  So a Contactor or Mechanical relay may hold -1 to -5 °F with an On delay of at least 10 seconds. The reason is in the balloons of Hardware Controller and On offset; no
   range line is written in the dialog.
 - **Properties:** Hardware Controller is under Heating method, its range in its balloon; when Hysteresis is Enabled but is not the Current
   Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
 - **A Process or the .API** setting `.onoffset` or `.ondelay` outside the range gets the same plain error. The Brain never runs a heat
   Hysteresis outside its range, whatever was saved.
 - **Both programs:** the Panel's Properties and Brain check it; the BruControl Import starts every heating element as an Optical
-  SSR (BruControl does not say what switches it), brings an On offset outside 0.5 to 3 °F to the nearest end, and lists each one
+  SSR (BruControl does not say what switches it), brings an Offset outside -0.5 to -3 °F to the nearest end, and lists each one
   in the Import notes. Help 181. The Fermentor Control's Heat follows it too (Rule 6.30).
 
 6.30 **The Fermentor Control** (OakBarn Brewery, 2026-11-10: "an integrated Fermentor control that heats and Cools with Hysteresis";
@@ -2078,8 +2090,8 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
 1. **Its three Devices:** the **Heat** (a Heating Element, a Light or a plain Digital Out: heat mat, heat wrap, ceramic heat
    emitter, lamp), the **Cooling** (a plain Digital Out for a freezer or fridge, a Pump for glycol, or a Motorized valve for glycol;
    never a Manual valve) and the **Temperature Probe** that reads the beer. Heat only or Cooling only is allowed; the probe is a must.
-2. **Heat comes on** the **Heat On offset** below the Setpoint, **Cooling** the **Cool On offset** above it (both more than 0, 1 °F
-   to start); both stop at the Setpoint, a little before it with Predictive Hysteresis (Rule 6.23, learned for each side).
+2. **Heat comes on** at Setpoint + **Heat Offset (-)** (below the Setpoint, -1 °F to start), **Cooling** at Setpoint + **Cool
+   Offset (+)** (above it, 1 °F to start), Rule 6.19; both stop at the Setpoint, a little before it with Predictive Hysteresis (Rule 6.23, learned for each side).
 3. **Never both On.** One must have been Off for the **Changeover wait** (300 seconds to start) before the other may start (once
    the other side has run; a fresh start waits only its own On delay).
 4. **Short-cycle protection on both sides:** an **On delay** (the shortest time Off before it starts again: Heat 60 s, Cool 300 s
@@ -2097,7 +2109,7 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
    read only. It has no Port of its own.
 9. **One click** turns it On or Off (Rule 2.44); **a click on its probe opens its Setpoint** (Rule 2.43).
 10. **Both programs:** the Panel's Properties, Vessel Device Builder and Brain; the BruControl Import makes ONE Fermentor Control
-    from a heating Hysteresis (a plus On offset) and a cooling Hysteresis (a minus On offset) on the same probe, keeps the two
+    from a heating Hysteresis (a plus OnOffset in BruControl) and a cooling Hysteresis (a minus OnOffset in BruControl) on the same probe, keeps the two
     outputs' names and Ports, takes the Setpoint, offsets and the longer of the two On delays, and lists it in the notes. Help 182.
 
 ## 7. Pictures
@@ -2788,7 +2800,7 @@ the backup. Help 100 and 157.
 - **Old Heating Elements** (OakBarn Brewery, 2026-11-08: "Old Heater Elements if on a Template need to be updated to new standard
   One Port One Device. But only in Templates and 3 Vessel Schema"): an old Duty Cycle, Hysteresis, PID or Deadband Device in a
   Template or in the test bed becomes **one Heating Element on one Port** (Rule 6.19), turned On or Off (`= on` / `= off`), never
-  Enabled. A gas burner and a fermentor's glycol valve are Heating Elements too (a minus On offset cools).
+  Enabled. A gas burner and a fermentor's glycol valve are Heating Elements too (a plus Offset cools, Rule 6.19).
 - **The Sandbox:** for now, every other Schema Skynet had (the Two vessels, one pump and BrewZilla brew day samples and the old
   default Schema "Skynet Brew Panel" with its Processes) waits in the repo's **`Sandbox/`** folder, untouched and not brought up
   to new Rules, to be put back later (most likely rebuilt as Schema Templates). `Sandbox/README.md` lists what came from where.
@@ -3875,6 +3887,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
 - 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
 - 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.
+- 2026-11-10: Rule 6.19 (OakBarn Brewery: "We need to think in plain terms No Debit a Credit Confusing"): the Offset has ONE sign everywhere: the saved Schema, the Brain, a Process (`.onoffset = -1` heats, `+1` cools), the .API and the dialogs; nothing is turned around in the background. Predictive text after `.onoffset =` offers (-) Heat and (+) Cool. A Heating Element given a plus gets a plain error. Rule 6.29's table and Rule 6.30's Heat Offset now carry the minus; Rules 6.21 and 16.6 words follow. New "Plain terms: no Who's on First?" under How Rules work, with a link. Checked against both programs: the BruControl Import turns BruControl's sign around in Devices, Fermentor Controls and Process lines. Help 46, 150, 164, 181, 182. (thread "Fix Process code for Hysteresis Offset", PR #334)
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
