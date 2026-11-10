@@ -10,7 +10,7 @@ import { portClash, instanceFamily, isInstance } from '../public/naming.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'instances'));
 const cfg = path.join(d, 'c.json');
 const hE = { name: 'hE_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42, label: 'Element', heatMethod: 'onoff' };
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
   hE,
   { ...hE, name: 'HLT_Vessel.hE_1', instanceOf: 'hE_1', integratedIn: 'v1', integratedAs: 'ip:rElement', vpKind: 'element', input: 'Temp', heatMethod: 'hysteresis', target: 150 },

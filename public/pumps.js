@@ -8,7 +8,6 @@ export const PUMP_POWERS = [['', 'Not set'], ['ac120', 'AC 120 V (house power)']
 export const PUMP_USES = [['', 'Hot (wort, water)'], ['cold', 'Cold (glycol, ice water)']];
 export const PUMP_SPEEDS = [['', 'On/Off only'], ['pwm', 'PWM speed (Speed %)']];
 export const isDcPower = p => /^dc/.test(String(p || ''));
-export const isAcPower = p => /^ac/.test(String(p || ''));
 export const powerText = p => PUMP_POWERS.find(([k]) => k === p)?.[1] ?? '';
 
 // speed: 'pwm' = can be slowed with PWM; 'try' = brushless with its own driver, PWM may work (test it slowly first); 'no' = AC, On/Off only.

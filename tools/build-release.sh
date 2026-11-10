@@ -16,7 +16,11 @@ mkdir -p "$STAGE"
 
 # Only the files git knows about (tracked, or new and not ignored), so data/, node_modules and backups stay out.
 # Delete/ (retired files, Rule 15.3) and Sandbox/ (Schemas set aside, Rule 16.8) are never shipped either.
-git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|\.github/|\.gitignore$|Delete/|Sandbox/)' | while IFS= read -r -d '' f; do
+# Nor are the files only used while building the panel, which the panel never opens (they stay on GitHub): the tests (test/),
+# the drawings and screenshots in docs/ (docs/*.png, docs/reviews/) and the OakBarn Scripts notes (docs/OakBarn_Scripts/).
+# The docs/ text files still ship, because Help points to some of them.
+git ls-files -z --cached --others --exclude-standard \
+  | grep -zEv '^(release/|\.github/|\.gitignore$|Delete/|Sandbox/|test/|docs/reviews/|docs/OakBarn_Scripts/|docs/.*\.png$)' | while IFS= read -r -d '' f; do
   [ -e "$f" ] || continue
   mkdir -p "$STAGE/$(dirname "$f")"
   cp -p "$f" "$STAGE/$f"

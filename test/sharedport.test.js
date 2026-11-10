@@ -7,7 +7,7 @@ import { Hardware } from '../lib/hardware.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'sharedport'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
   { name: 'MB_05_Hys_HLT', type: 'hysteresis', typeCode: 'Hys', device: 'MB', channel: 5, input: 'Temp' },
   { name: 'MB_05_PID_HLT', type: 'pid', typeCode: 'PID', device: 'MB', channel: 5, input: 'Temp' },

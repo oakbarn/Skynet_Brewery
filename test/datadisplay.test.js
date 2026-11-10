@@ -18,7 +18,7 @@ assert.equal(displayWord({ type: 'scale' }, 'weight'), 'Weight');
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ddisp'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Flow', type: 'flowMeter', device: 'MB', channel: 2 },
   { name: 'Flow2', type: 'flowMeter', device: 'MB', channel: 3, display: 'total' },
   { name: 'Probe', type: 'temperature', device: 'MB', channel: 'A0', sensor: 'ntc' },

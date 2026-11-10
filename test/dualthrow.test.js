@@ -14,13 +14,13 @@ assert.equal(hasDualThrow(valve), true);
 assert.equal(hasDualThrow({ ...valve, dualThrowChannel: '' }), false, 'empty = None');
 assert.equal(hasDualThrow({ ...valve, subtype: 'element' }), false, 'never on a Heating Element');
 assert.equal(portClash({ name: 'Other', type: 'digitalOut', device: 'MB', channel: 23 }, [valve])?.other, 'MB_22_MBV_Valve');
-const devs = [{ name: 'MB', type: 'serial', board: 'mega' }];
+const devs = [{ name: 'MB', connection: 'serial', board: 'mega' }];
 assert.ok(!freePins({ name: '\0new', type: 'digitalOut', device: 'MB' }, [valve], devs).map(String).includes('23'), 'the second Port drops off the Available Ports');
 
 // the Brain switches both Ports, the one going off first and the other after the delay
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'dualthrow'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [valve, { name: 'MB_30_Inv', type: 'digitalOut', device: 'MB', channel: 30, activeLow: true, dualThrowChannel: 31 }] }));
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [valve, { name: 'MB_30_Inv', type: 'digitalOut', device: 'MB', channel: 30, activeLow: true, dualThrowChannel: 31 }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const hw = new Hardware(store), sent = [];
 hw.devices.set('MB', { name: 'MB', send: l => sent.push(l) });
