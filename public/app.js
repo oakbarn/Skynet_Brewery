@@ -6907,8 +6907,11 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
-const OVERLAY_CHOICES = v => [['', 'None'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
-const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
+// Blue is kept for cooling (OakBarn Brewery, 2026-11-10): the Blue Tint is offered only to something whose Direction is Cool (the Cooling of
+// a Fermentor Control, or a Cool / Warm Pump with a minus On offset), or that already has it
+const coolsDir = it => !!it && (/^fv:cool/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) < 0) || (draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.cool && f.cool === it.name));
+const OVERLAY_CHOICES = (v, it) => [['', 'None'], ...OVERLAY_GRAPHICS.filter(([, p]) => p !== 'tint:blue' || v === p || coolsDir(it)).map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
+const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
 // DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
 // it can) and the voltage, Lift, GPM etc are all good info to have at your fingertips." Model with its facts ⬢, Power with Use, and
@@ -6966,8 +6969,8 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 // A Heating Element's Overlay (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to the Glow (what None was
 // regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
 // a Heating Element: On = Red Glow already glows red, so the Red Tint (the same look on it) is left off its list (OakBarn Brewery, 2026-11-10)
-const ELEM_OVERLAY_CHOICES = v => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v).slice(1).filter(([p]) => p !== 'tint:red' || v === 'tint:red')];
-const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
+const ELEM_OVERLAY_CHOICES = (v, it) => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v, it).slice(1).filter(([p]) => p !== 'tint:red' || v === 'tint:red')];
+const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
 // Hysteresis, PID, Deadband or Precise reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
@@ -7104,7 +7107,7 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
 // Fritz, 2026-11-05 ("It should look and feel almost a copy of the Pump dialogs"): two dropdowns on one line as the Pump's Cover and
 // Toggle are, so the Toggle sits beside the Orientation (a valve has no Cover)
 const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', ONE_CLICK_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
-const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
+const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
 // Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
 // Fritz, 2026-11-07: a Tap water valve shows On Close List on and On Open List off, both greyed out (Rule 6.15)
@@ -7141,7 +7144,7 @@ const PWM_SIGNALS = ['0-10V', '4-20mA', '0-5V'];
 const pwmAutoLabel = e => e.type === 'pwmOut' ? 'PWM' : e.signal === '4-20mA' ? '4_20' : '0_10';
 const PWM_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.pGraphic, ...x }],
   ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.pPath, ...x }]];
-const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.pOverlay, dbPop: true, ...x }]];
+const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.pOverlay, dbPop: true, ...x }]];
 const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
   ? [['signal', 'Signal', 'sel', PWM_SIGNALS, false, false, { tip: DEVICE_TIPS.pSignal, with: ['units', 'Units', 'text', null, false, false, { tip: DEVICE_TIPS.pUnits }], ...x }],
     ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
@@ -7565,7 +7568,7 @@ function genDeviceFields(it, item, f) {
     ...(pics ? [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic }],
       [...(f.find(x => x[0] === 'imageOff') || ['imageOff', 'Path', 'gpick']).slice(0, 1), onPic ? 'Path (off)' : 'Path', 'gpick', null, false, false, { tip: 'The picture file it shows on the Tab.' }],
       ...(onPic ? [['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: 'A second picture while it is on (optional: the Overlay is the preferred way, Rule 7.8).' }]] : []),
-      ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }] } : {}) }]] : []),
+      ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }] } : {}) }]] : []),
     ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }]] : []),
     ...own, ...(isHeatElem(it) ? heatFields(it) : isCoolPump(it) ? pumpMethodFields(it) : []), ...dbLine,
     ...(part ? [] : [['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: GEN_TEXT_POP }],
@@ -8076,7 +8079,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const fill = () => {
       const cur = s.value || v || '';
       s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
-        ...os.filter(p => p === cur || isTint(p) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
+        ...os.filter(p => p === cur || (isTint(p) && (p !== 'tint:blue' || coolsDir(obj))) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
       s.value = cur;
     };
     fill();
