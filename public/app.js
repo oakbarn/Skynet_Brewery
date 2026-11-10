@@ -6997,7 +6997,7 @@ function heatFields(it, x = {}) {
   // balloons. The explanations (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
   const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
+    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, true, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Hardware Controller', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.eMethodSpot, ...x }],
