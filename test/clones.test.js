@@ -47,4 +47,8 @@ assert.ok(!store.config.graphics.some(g => g.kind === 'clone'));
 const pipes = linkClones([{ kind: 'clone', name: 'X_Clone_1', of: 'Y' }, { kind: 'pipe', from: 'dev:X_Clone_1:out', to: 'ip1' }], [{ name: 'Y' }]);
 assert.equal(pipes[1].from, 'dev:Y_Clone_1:out', 'a pipe on the Clone\'s IP follows its new name');
 assert.deepEqual(linkClones([{ kind: 'clone', name: 'X_Clone_1', of: 'X' }], [{ name: 'X' }]).length, 1, 'a parent with no key yet links by name');
+{ const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.ok(app.includes("[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all']"), 'deleting a parent: all killed');
+  assert.ok(app.includes("kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])"), 'or the user picks which Clone becomes the Device');
+  assert.ok(app.includes("Object.assign(dev, { workspace: cl.workspace, x: cl.x, y: cl.y });"), 'the Device moves to the Clone and keeps its name'); }
 console.log('clones (keys): all tests passed');
