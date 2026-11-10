@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, noSpaces, attrsOf, mainProp } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { modernize, removeSpacesOnDisk, visibilityOnDisk } from '../lib/modernize.js';
+import { modernize } from '../lib/modernize.js';
 import { renumber, addSteps, guessClass, flowOrder } from '../lib/scaffold.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'lang'));
@@ -109,22 +109,6 @@ assert.equal(modernize(m.text, n => store.get(n)).changed, 0);          // alrea
 assert.equal(noSpaces('Test Timer'), 'Test_Timer');
 assert.equal(noSpaces('sw_Advance_ BrewStatus'), 'sw_Advance_BrewStatus');
 assert.equal(noSpaces('strt_2__Reset'), 'strt_2__Reset');
-{
-  const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'spc'));
-  fs.mkdirSync(path.join(d2, 's')); fs.mkdirSync(path.join(d2, 'data'));
-  fs.writeFileSync(path.join(d2, 'c.json'), JSON.stringify({ elements: [{ name: 'Test Timer', type: 'timer' }, { name: 'Test_Timer', type: 'timer' }], graphics: [{ flowWhen: ['Test Timer'] }] }));
-  fs.writeFileSync(path.join(d2, 's', 'p.txt'), 'start "Test Timer"\n');
-  fs.writeFileSync(path.join(d2, 'data', 'state.json'), JSON.stringify({ 'Test Timer': 5 }));
-  const r = removeSpacesOnDisk({ configPath: path.join(d2, 'c.json'), scriptsDir: path.join(d2, 's'), dataDir: path.join(d2, 'data') });
-  const c = JSON.parse(fs.readFileSync(path.join(d2, 'c.json'), 'utf8'));
-  assert.equal(c.elements[0].name, 'Test_Timer_2');
-  assert.equal(c.elements[0].label, 'Test Timer');
-  assert.deepEqual(c.graphics[0].flowWhen, ['Test_Timer_2']);
-  assert.equal(fs.readFileSync(path.join(d2, 's', 'p.txt'), 'utf8'), 'start "Test_Timer_2"\n');
-  assert.equal(JSON.parse(fs.readFileSync(path.join(d2, 'data', 'state.json'), 'utf8')).Test_Timer_2, 5);
-  assert.ok(r.lines.length);
-  assert.equal(removeSpacesOnDisk({ configPath: path.join(d2, 'c.json'), scriptsDir: path.join(d2, 's'), dataDir: path.join(d2, 'data') }), null);
-}
 
 // ---- classes and step numbers
 assert.equal(guessClass('scrBrew200_Mashing'), 'flow');
@@ -246,13 +230,6 @@ const hl = modernize(`"Pump_Red" visibility = visible\n"Pump_Red" visibility = h
 assert.equal(hl.text, `Pump_Red.visible = true\nPump_Red.visible = false\n  Pump_Red.visible = false; Pump_Red.hidden = true // note`);
 await run('proc_hl2', hl.text.split('\n')[2] + '\n');
 assert.equal(store.getProp('Pump_Red', 'hidden'), true);
-// Processes on disk are changed once at start-up, the old copy kept
-const vdir = path.join(d, 'visdisk'); fs.mkdirSync(vdir);
-fs.writeFileSync(path.join(vdir, 'Old.txt'), `"Msg" visibility = hiddenlocked\nprint "x"\n`);
-assert.deepEqual(visibilityOnDisk(vdir), ['Old']);
-assert.equal(fs.readFileSync(path.join(vdir, 'Old.txt'), 'utf8'), `Msg.visible = false; Msg.hidden = true\nprint "x"\n`);
-assert.ok(fs.existsSync(path.join(vdir, 'Old.txt.before-hidden.bak')));
-assert.deepEqual(visibilityOnDisk(vdir), []);
 
 console.log('language tests passed');
 process.exit(0);

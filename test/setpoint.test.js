@@ -12,7 +12,7 @@ const step = { name: 'Step_1', type: 'stepper', device: 'MB', channel: 42 };
 const man = { name: 'Zilla', type: 'manual' };
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'setpoint'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [{ name: 'Temp', type: 'temperature', sensor: 'simulated' }, he, pid, step, man] }));
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [{ name: 'Temp', type: 'temperature', sensor: 'simulated' }, he, pid, step, man] }));
 const s = new Store(cfg, path.join(d, 'data')); s.load();
 
 assert.equal(s.getProp('hE_1', 'setpoint'), 150);

@@ -19,7 +19,7 @@ assert.equal(heatMethodWord('dutyCycle'), 'Duty Cycle');
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'heatmethod'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
   { name: 'hE_PID_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42, input: 'Temp', heatMethod: 'pid', target: 152, kp: 20, ki: 0, kd: 0, methodSpot_dutyCycle: true, methodSpot_hysteresis: true, methodSpot_onoff: true,
     heatControls: [{ name: 'HLT_PID', method: 'PID' }, { name: 'M_HLT_Heat', method: 'Duty Cycle' }] },
@@ -150,7 +150,7 @@ console.log('heatmethod Process editor tests passed');
 // One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1): a new Device is never offered a port in use, of any Device Type
 {
   const { freePins, portClash } = await import('../public/naming.js');
-  const devices = [{ name: 'MB', type: 'serial', board: 'mega' }];
+  const devices = [{ name: 'MB', connection: 'serial', board: 'mega' }];
   const els = [{ name: 'hE_PID_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42 }];
   assert.ok(!freePins({ type: 'pid', device: 'MB', name: '\0new' }, els, devices).map(String).includes('42'), 'port 42 is not offered to a new PID');
   assert.ok(portClash({ type: 'pid', device: 'MB', channel: 42, name: '\0new' }, els), 'a new Device on a used port clashes');
@@ -207,7 +207,7 @@ console.log('built in Element upgrade tests passed');
   const { defaultCode } = await import('../public/naming.js');
   const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'coolpump'));
   const cfg2 = path.join(d2, 'c.json');
-  fs.writeFileSync(cfg2, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+  fs.writeFileSync(cfg2, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
     { name: 'Ferm_Temp', type: 'temperature', sensor: 'simulated' },
     { name: 'MB_5_CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: -1 }] }));
   const s2 = new Store(cfg2, path.join(d2, 'data')); s2.load();

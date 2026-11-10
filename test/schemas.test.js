@@ -12,7 +12,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'schemas-'));
 const cfgPath = path.join(dir, 'config', 'brewery.json');
 fs.mkdirSync(path.dirname(cfgPath), { recursive: true });
 fs.writeFileSync(cfgPath, JSON.stringify({ title: 'Oak Barn', mqtt: { host: 'x' }, workspaces: [{ name: 'Main' }],
-  elements: [{ name: 'gGV_Setpoint', type: 'gGlobal', kind: 'value', initial: 150 }], graphics: [], devices: [{ name: 'Sim', type: 'simulator' }] }));
+  elements: [{ name: 'gGV_Setpoint', type: 'gGlobal', kind: 'value', initial: 150 }], graphics: [], devices: [{ name: 'Sim', connection: 'simulator' }] }));
 const store = new Store(cfgPath, path.join(dir, 'data'));
 store.load();
 let started = [], restarts = 0;
