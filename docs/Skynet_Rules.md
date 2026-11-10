@@ -2021,14 +2021,14 @@ SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its
 | Hardware Controller | On offset | On delay |
 |---|---|---|
 | Optical SSR | 0.5 to 3 °F | any |
-| Contactor | 2 to 5 °F | at least 60 seconds |
-| Mechanical relay | 2 to 5 °F | at least 60 seconds |
+| Contactor | 1 to 5 °F | at least 10 seconds |
+| Mechanical relay | 1 to 5 °F | at least 10 seconds |
 
-With a °C probe the numbers are converted (0.3 to 1.7 °C; 1.1 to 2.8 °C). A Contactor's contacts wear each time they close, so it
+With a °C probe the numbers are converted (0.3 to 1.7 °C; 0.6 to 2.8 °C). A Contactor's contacts wear each time they close, so it
 heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
-- **Picking a Hardware Controller sets the On offset** (OakBarn Brewery, 2026-11-10: "Nothing in the Offset Changes other than the
-  Value when the Hardware Controller is changed"): Optical SSR **0.5**, Contactor **3**, Mechanical relay **3** (°F; converted for a °C probe),
-  and on a Contactor or relay an On delay of at least 60 seconds. The reason is in the balloons of Hardware Controller and On offset; no
+- **Picking a Hardware Controller sets the On offset and the On delay** (OakBarn Brewery, 2026-11-10, with a table): Optical SSR
+  **0.5 °F and 0 seconds**, Contactor **1 °F and 10 seconds**, Mechanical relay **1 °F and 10 seconds** (the offset converted for a °C probe).
+  So a Contactor or Mechanical relay may hold 1 to 5 °F with an On delay of at least 10 seconds. The reason is in the balloons of Hardware Controller and On offset; no
   range line is written in the dialog.
 - **Properties:** Hardware Controller is under Heating method, its range in its balloon; when Hysteresis is Enabled but is not the Current
   Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
@@ -3363,6 +3363,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rule 6.29 changed (OakBarn Brewery, with a table): picking a Hardware Controller sets the On offset and On delay: Optical SSR 0.5 °F and 0 s, Contactor and Mechanical relay 1 °F and 10 s; a Contactor or relay's range is now 1 to 5 °F with an On delay of at least 10 s (was 2 to 5 °F and 60 s). Help 137, 181. Checked against the BruControl Import program: it brings imported offsets into the new range. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29: picking a Hardware Controller sets the On offset (Optical SSR 0.5, Contactor 3, Mechanical relay 3) and, on a Contactor or relay, an On delay of at least 60 s; the range line left the dialog for the balloons. Help 181. Checked against the BruControl Import program: it already brings offsets into range; no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")

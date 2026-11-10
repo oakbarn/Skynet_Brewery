@@ -11,10 +11,10 @@ Electrician.
 | Hardware Controller | Hysteresis On offset | On delay | Why |
 |---|---|---|---|
 | **Optical SSR** (solid state relay, the start) | 0.5 to 3 °F | any | No moving parts: it may switch often. |
-| **Contactor** | 2 to 5 °F | at least 60 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
-| **Mechanical relay** | 2 to 5 °F | at least 60 seconds | The same as a contactor. |
+| **Contactor** | 1 to 5 °F | at least 10 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
+| **Mechanical relay** | 1 to 5 °F | at least 10 seconds | The same as a contactor. |
 
-With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Contactor or Mechanical relay 1.1 to 2.8 °C.
+With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Contactor or Mechanical relay 0.6 to 2.8 °C.
 
 - The **On offset** is how far below the Setpoint the element turns on. It turns off at the Setpoint (or a little before it, when
   Predictive Hysteresis is on: see Help 168).
@@ -22,8 +22,8 @@ With a °C probe the numbers are converted: an Optical SSR 0.3 to 1.7 °C, a Con
 
 ## Where it is
 
-- **Picking a Hardware Controller sets the On offset for you**: 0.5 °F for an Optical SSR, 3 °F for a Contactor or Mechanical relay
-  (and an On delay of 60 seconds if it had less). You can change it after, inside the range.
+- **Picking a Hardware Controller sets the On offset and On delay for you**: an Optical SSR gets 0.5 °F and 0 seconds, a Contactor or
+  Mechanical relay 1 °F and 10 seconds. You can change them after, inside the range.
 - **Properties > Heating method > Hardware Controller.** Rest the mouse on it to see the range for this element. When Hysteresis is Enabled but is
   not the Current Method, its On offset and On delay still show, so they can be set.
 - **Save** refuses an On offset or On delay outside the range, and says what is allowed.

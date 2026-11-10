@@ -86,7 +86,7 @@ What the balloons say:
 | **Temperature Probe** | `BM_700_1W_HLT_BR`, the DS18B20 probe built into the same vessel. |
 | **Setpoint** | **150** °F. |
 | **On offset** | **1**: it turns on at 149 °F and off at 150 °F. |
-| **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 60. |
+| **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 10. |
 | **Predictive** | On: if the water keeps warming half a degree after it turns off, it turns off half a degree under 150 °F. |
 
 A Process calls a Device built into a Vessel Device by the vessel's name and its own:
