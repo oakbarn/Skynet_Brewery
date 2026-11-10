@@ -31,6 +31,26 @@ export const noNoneTap = el => isHeatElem(el) || (el?.type === 'digitalOut' && e
 // fermenter, or a pump that brings warm water) is ONE Device on its port too (One Port, One Device), a Pump with a Method field,
 // Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (- On offset) or warms
 // (+ On offset) to a Setpoint read by its Probe. The same .method, Setpoint and spots as a Heating Element, so a Process reads the same.
+// The Offset's sign in a Process (OakBarn Brewery, 2026-11-10: "in a Predictive Text DDLB Process Code Choice could be (-) Heat and (+)
+// Cool and place the appropriate + or minus in the code", Rule 6.19): the same as the dialogs, On at Setpoint + Offset. So
+// HLT.onoffset = -1 heats (On 1 degree below) and +1 cools (On 1 degree above); a Fermentor's .heatoffset is -1, its .cooloffset 1.
+// The saved number keeps its old sign (plus heats), so only what a Process reads and writes is turned around here.
+// offsetSigns: the signs the predictive text offers after name.prop = ('-' Heat, '+' Cool), or null.
+export const offsetSigns = el => el?.type === 'fermentor' ? { heatoffset: ['-'], cooloffset: ['+'] }
+  : el?.type === 'digitalOut' && el.subtype === 'element' ? { onoffset: ['-'] }
+  : (el?.type === 'hysteresis' || (el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP'))) ? { onoffset: ['-', '+'] } : null;
+const flips = (el, prop) => !!el && ((/^onoffset$/i.test(prop) && el.type !== 'fermentor') || (/^heatoffset$/i.test(prop) && el.type === 'fermentor'));
+// what a Process reads
+export const processOffset = (el, prop, v) => flips(el, String(prop)) && typeof v === 'number' && v !== 0 ? -v : v;
+// what is saved when a Process writes v; a Heating Element (or a Fermentor's Heat) given a plus is a plain error, since it only heats
+export function fromProcessOffset(el, prop, v) {
+  if (!flips(el, String(prop))) return v;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return v;
+  const heatOnly = el.type === 'fermentor' || (el.type === 'digitalOut' && el.subtype === 'element');
+  if (heatOnly && n > 0) throw new Error(`${el.name} heats, so its .${String(prop).toLowerCase()} has a minus: -${n} turns it On ${n} degrees below the Setpoint (Rule 6.19).`);
+  return n === 0 ? 0 : -n;
+}
 export const isCoolPump = el => el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP');
 export const PUMP_METHOD_KEYS = ['onoff', 'hysteresis'];
 // a Device whose control is picked by .method: the Heating Element and the Cool / Warm Pump
