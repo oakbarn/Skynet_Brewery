@@ -602,6 +602,8 @@ of the dropdown or field and pop up Help as long as the hover is there"). In eve
 Import** (they share these Rules, Rule 15.4):
 1. A dialog shows **short field names and the fields themselves**. Sentences that explain what a field or the dialog does are
    **not** written on the dialog.
+   **Dropdown choices are short and in plain English too** (OakBarn Brewery, 2026-11-10: "Keep Choices in DDLB in Plain English
+   when Possible and Short"): **On = Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
@@ -1970,7 +1972,7 @@ picks which of its settings it uses; every setting is in its Properties and the 
 6.26 **Data Display: pick which value shows** (OakBarn Brewery, 2026-11-09: "Not only Primary. Just have a DataDisplay and able to
 pick which one. If there was a script command, we just write our Process to do it either way or have two different ways to do it to
 make it back compatible with BruControl"). A Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, a Heating Element
-run by a method, Flow meter, Scale, a PWM or Analog output with Measured volts) has **Data Display (what it shows)** in its
+run by a method, Flow meter, Scale, a PWM or Analog output with Measured volts) has **Data Display** in its
 Properties: the first choice shows them all, as before, or one of its values (for example a Flow meter's Rate or Total). BruControl had
 a Primary Value and a Show Secondary Value switch; Skynet lists every value. A Process changes it: `Flow_1.display = "Total"` (its key
 or its words, any capitals; `""` puts back its Properties' pick). A Flow meter's `.value` follows it (BruControl's Primary Value: its
@@ -3349,6 +3351,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")
 - 2026-11-10: Dialog names cleaned (OakBarn Brewery: "leave off the Clutter (1 = Top). Leave that for the Hover Help", "Get rid of clutter (Board)"): **2. Interface** (was Interface (board)), **Layer Order** and, for a Device built into a Vessel Device, **Vessel Layer Order** (the 1 = on top is in the balloon); a Heating Element's Device Type shows **DO: Heater Element**. Help pages updated. Checked against the BruControl Import program: it uses the same Build page, so it follows. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery: "A small Icon of the Element as a Toggle"): a Heating Element's Properties get its own On / Off, a small picture of it on the Current Method line; one click turns the Device On or Off, like a click on the Tab. Help 150. Checked against the BruControl Import program: no change (it has no running Elements). (thread "Build Integrated Instances")
 - 2026-11-10: Added Rules 11.3 to 11.7, the General Help Format (OakBarn Brewery): BruControl differences only in the Importer Help, and every BruControl sentence taken out of the Skynet Panel Help and Hover Help kept in Sandbox/help/BruControl_Help_Extract.md; Hover Help the same as the Panel Help; never mention Fritz in any Help; OakBarn Brewery entries few and approved; Hover Help examples use their own dialog's entries in the 3 Vessel 1 Pump sample, the Heater Properties (the HLT element of HLT_Vessel) first. Added Rule 14.3 (the Importer Help and a BruControl Read Me wait). Help 110 renamed "Pipe Widgets from the Skynet drawings". Checked against both programs: the Panel's Help and balloons change; the BruControl Import program's pages, Help 143 and 165 are not changed (on hold), and the one shared word list it uses (public/naming.js, the 10K NTC type) no longer says BruControl. (thread "Set the Help format rules")
