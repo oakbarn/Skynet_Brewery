@@ -14,7 +14,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
@@ -359,7 +359,7 @@ function tabItems(src, wsName, tabOf = g => g.workspace) {
   return [...src.graphics.filter(g => g.workspace === wsName && g.kind === 'pipe'),
     ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'vessel' && !isEqFit(g)),
     ...src.graphics.filter(g => tabOf(g) === wsName && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind)),
-    ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
+    ...src.elements.filter(e => e.workspace === wsName && !isMfPart(e) && !isAvPart(e) && !inVesselLayers(src, e)),      // a Valve Tee's valves are drawn on it (Rule 5.35)
     ...src.graphics.filter(g => g.workspace === wsName && isClone(g)),
     ...src.graphics.filter(g => g.workspace === wsName && isEqFit(g)),
     ...src.graphics.filter(g => g.workspace === wsName && g.kind === 'ip')];
@@ -372,14 +372,27 @@ function layerStack(items) {
   const set = items.map((o, i) => [o, i]).filter(([o]) => hasLayer(o)).sort((a, b) => a[0].layer - b[0].layer || b[1] - a[1]).map(x => x[0]);
   return [...items.filter(o => !hasLayer(o)).reverse(), ...set];
 }
-const layerNow = (src, item) => layerStack(tabItems(src, item.workspace)).indexOf(item) + 1;
-// put one item at Layer Order n on its Tab and number the whole Tab again, 1, 2, 3 ... (BruControl's up / down arrows)
+// Layers inside a Vessel Device (OakBarn Brewery, 2026-11-10: "Layers on Integrated Devices would only be inside the Vessel Device. The
+// Vessel Device Layer would be how it plays with others", Rule 1.29): a Device built into a vessel (its Heating Element, Probe ...) is not
+// in its Tab's list. Its Layer Order counts only among the other parts of the same vessel (1 = the top part), and the whole group is
+// drawn just above its vessel, at the vessel's own place on the Tab.
+const layerVessel = (src, e) => e?.integratedIn ? src.graphics.find(g => g.id === e.integratedIn && g.kind === 'vessel' && g.workspace === e.workspace) ?? null : null;
+const inVesselLayers = (src, e) => !!layerVessel(src, e);
+const vesselParts = (src, g) => src.elements.filter(e => e.integratedIn === g.id && e.workspace === g.workspace && !isMfPart(e) && !isAvPart(e));
+// a Tab's stack (top first) with each vessel's parts put just above it, in their own order inside the vessel
+const withParts = (src, stack, run = x => x) => stack.flatMap(o => o.kind === 'vessel' && !isEqFit(o) && src.graphics.includes(o) ? [...run(layerStack(vesselParts(src, o))), o] : [o]);
+const layerList = (src, item) => { const v = layerVessel(src, item); return v ? layerStack(vesselParts(src, v)) : layerStack(tabItems(src, item.workspace)); };
+const layerNow = (src, item) => layerList(src, item).indexOf(item) + 1;
+// put one item at Layer Order n on its Tab (or inside its Vessel Device) and number that list again, 1, 2, 3 ... (BruControl's up / down arrows)
 function moveLayer(src, wsName, item, n) {
-  const st = layerStack(tabItems(src, wsName)).filter(o => o !== item);
+  const st = (layerVessel(src, item) ? layerList(src, item) : layerStack(tabItems(src, wsName))).filter(o => o !== item);
   st.splice(Math.max(0, Math.min(st.length, n - 1)), 0, item);
   st.forEach((o, i) => { o.layer = i + 1; });
 }
-const renumberLayers = src => { for (const w of src.workspaces) layerStack(tabItems(src, w.name)).forEach((o, i) => { o.layer = i + 1; }); };
+const renumberLayers = src => {
+  for (const w of src.workspaces) layerStack(tabItems(src, w.name)).forEach((o, i) => { o.layer = i + 1; });
+  for (const g of src.graphics.filter(g => g.kind === 'vessel')) layerStack(vesselParts(src, g)).forEach((o, i) => { o.layer = i + 1; });
+};
 // outside Edit layout a Process may have moved an item (Pump_1.layer = 1): it goes to that place and the rest move down one
 function runStack(stack) {
   if (editing) return stack;
@@ -413,7 +426,7 @@ function drawWs() {
   // Every item, pipes and IP-kind items too, goes on the Tab in that order (no z-index, so each item's own markers stay as they were)
   const gfxs = new Set(L().graphics), clones = [];
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
-  for (const o of runStack(layerStack(tabItems(L(), w.name, gTab))).reverse()) {      // a Process can move a Text Widget to another Tab (.tab)
+  for (const o of withParts(L(), runStack(layerStack(tabItems(L(), w.name, gTab))), runStack).reverse()) {      // a vessel's parts just above it (Rule 1.29)      // a Process can move a Text Widget to another Tab (.tab)
     if (!gfxs.has(o)) ws.append(buildEl(o));
     else if (isClone(o)) { const e = cloneEl(o); if (e) { clones.push(e); ws.append(buildEl(e)); } }
     else if (o.kind === 'vessel') ws.append(buildVessel(o));
@@ -6890,12 +6903,17 @@ function heatFields(it, x = {}) {
   const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
     ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: ['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.methodShort }], ...x }],
+    // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
+    ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
+    ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
     ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.methodSpot, ...x }],
     ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
     ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
     ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
+    // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
+    ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]) : []),
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', x)] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
@@ -7445,6 +7463,7 @@ function genDeviceFields(it, item, f) {
 // Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: a Universal Property, "Have Skynet work the same as BruControl"): every Device
 // and Widget's Properties have it, right after its Size (or its place, or its Tab, when it has no Size). It is added here, once, so
 // no dialog's own layout changes (Rule 18.10).
+const LAYER_TIP_IN_VESSEL = 'This Device is built into a Vessel Device, so its Layer Order counts only inside that vessel: 1 is the top part, 2 is under it, and so on. Where the whole vessel sits among the other items on the Tab is the Vessel Device\'s own Layer Order (Rule 1.29).';
 const LAYER_TIP = 'Layer Order, like BruControl\'s Z Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
 // every item is in the Layer Order list, pipes and IP-kind items too (Rule 1.29)
 const inLayers = item => !!item;
@@ -7456,7 +7475,8 @@ function withLayer(fields, item) {
   if (fields.some(f => isF(f, 'layer'))) return fields;
   const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
-  const f = ['layer', 'Layer Order (1 = on top)', 'num', null, false, false, { tip: LAYER_TIP, ...same }];
+  const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
+  const f = ['layer', inV ? 'Layer Order inside its Vessel Device (1 = on top)' : 'Layer Order (1 = on top)', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
   return at >= 0 ? [...fields.slice(0, at + 1), f, ...fields.slice(at + 1)] : [...fields, f];
 }
 function fieldsFor(item) {
@@ -7631,6 +7651,7 @@ function fieldTip(name, text) {
 const DEVICE_TIPS = {
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted.',
   controlMethod: (it, m) => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`,
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
   methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
@@ -9040,6 +9061,7 @@ async function editItem(kind, id) {
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
+      { const bad = heatHysProblem(work, draft.elements.find(e => e.name === work.input)); if (bad) throw new Error(bad); }      // Rule 6.29
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
