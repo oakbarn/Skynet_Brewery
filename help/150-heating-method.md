@@ -32,6 +32,48 @@ Process sets it (Skynet Rule 6.19).
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
 
+## Hysteresis
+
+Hysteresis keeps the water near the **Setpoint** by turning the heater On and Off.
+The HLT element: **Setpoint** 150 °F, **Direction** Heating, **Offset (−)** −1.
+
+- The heater begins to heat.
+- The water reaches the Setpoint, 150 °F: the element turns Off.
+- The water cools to Setpoint - Offset, 149 °F (150 −1): the element turns On again.
+- The water reaches the Setpoint, 150 °F: the element turns Off again.
+- The water cools again, and the On and Off Hysteresis cycle repeats.
+
+**Delay** 0: it turns On as soon as the water reaches 149 °F.
+
+**Hardware Controller** Optical SSR: the Offset may be −0.5 to −3 °F, and it starts at −0.5. A Contactor or Mechanical relay may use
+−1 to −5 °F with a Delay of at least 10 seconds, and it starts at −1 and 10 seconds. That way it clicks less often and lasts longer.
+
+**Predictive** On: the water keeps warming a little after Off. Skynet learns how much, and turns Off that much early, so the water
+stops at 150 °F.
+
+### The technical side
+
+- **What it is.** Hysteresis is an On/Off controller (also called a two-point or "bang-bang" controller) with a gap between its two
+  switch points. It turns On at Setpoint + Offset (150 + (−1) = 149 °F) and Off at the Setpoint (150 °F). The 1 °F gap is the
+  **hysteresis band**. When Cooling, the Offset is (+): +1 turns On at 151 °F and Off at 150 °F.
+- **Why the gap.** With no gap, the element would switch every time the probe reading moved by one small step. A DS18B20 probe
+  reads in 0.0625 °C steps (0.11 °F), so the element would turn on and off many times a minute. This is called chattering, and it
+  wears out relays and contactors. The band stops it.
+- **Why it overshoots.** When the element turns Off, its metal sheath is still hotter than the water, and that heat keeps flowing
+  in. Heat also takes time to travel from the element to the probe. So the water rises past the Setpoint after Off. This is called
+  thermal lag or dead time.
+- **What Predictive does.** Skynet measures how far the water rises after each Off (the coast), and moves both switch points down by
+  that much. The shift is never more than half the size of the Offset (0.5 °F for −1). The gap stays the same, so the element does
+  not switch more often. That makes it safe for a compressor.
+- **How often it cycles.** Each cycle takes about the time to heat the water through the band. Water needs 1 BTU per pound per °F.
+  For example, 15 gallons is about 125 lb, so 1 °F takes 125 BTU, or about 37 watt-hours. A 5500 W element supplies that in about
+  24 seconds, plus whatever the vessel loses to the air. A wider band means longer, fewer cycles.
+- **Why the Hardware Controller ranges.** An Optical SSR (solid state relay) has no moving parts and switches when the AC wave
+  crosses zero, so it can switch often: −0.5 to −3 °F. A contactor or mechanical relay is rated for only so many closings, and each
+  close makes a small arc. That is why it needs a wider band (−1 to −5 °F) and at least a 10 second Delay (Rule 6.29).
+
+⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.
+
 ## Which methods suit your wiring
 
 How the element is wired decides which methods make sense (the hover help on the Heating method field says this too):

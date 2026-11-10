@@ -65,3 +65,19 @@ console.log('help format tests passed');
       assert.ok(warnText(l.replace(/^>\s?/, '')), `help/${f}: the electrical warning starts its own paragraph with ⚠`);
   console.log('electrical warning tests passed');
 }
+
+// Rule 11.8 point 7 (OakBarn Brewery, 2026-11-10): the Hysteresis Help is the model. Its Hover Help (Current Method while Hysteresis)
+// and Help 150 say the same plain words with the HLT element's values, and Help 150 then adds the technical side.
+{
+  const app = fs.readFileSync('public/app.js', 'utf8');
+  const tip = /const HYS_HOVER_TIP = '([^\n]*)';/.exec(app)?.[1];
+  assert.ok(tip, 'HYS_HOVER_TIP');
+  assert.match(app, /tip: m === 'hysteresis' \? HYS_HOVER_TIP : T\.heatMethod/, 'the Current Method balloon shows it while Hysteresis');
+  assert.ok(tip.startsWith('⚠ Electricity can kill'), 'the electrical warning first (Rule 6.20)');
+  const h150 = fs.readFileSync('help/150-heating-method.md', 'utf8').replace(/\*\*/g, '').replace(/\n(?![-\n#⚠])/g, ' ');
+  const lines = tip.split('\\n').slice(1).map(l => l.replace(/^• /, ''));
+  for (const l of lines) assert.ok(h150.includes(l), `Help 150 has the Hover Help words (Rule 11.4): ${l}`);
+  assert.match(tip, /Setpoint 150 °F, Direction Heating, Offset \(−\) −1/);
+  assert.match(h150, /### The technical side/);
+  console.log('hysteresis help tests passed');
+}
