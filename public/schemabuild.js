@@ -111,7 +111,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
       const el = heat === 'electric'
         ? { label: `${s} element`, onText: 'HEAT', offText: 'idle' }
         : { label: `${s} burner`, onText: 'FLAME', offText: 'off' };
-      const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: 1, x: cx, y: 500, w: 170, h: 60 });
+      const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: -1, x: cx, y: 500, w: 170, h: 60 });
       probe.sim = { start: 62, heater: h.name, heatRate: 1.2, maxTemp: 212 };
       job((ROLE_JOBS[role]?.heater ?? []).filter(j => !(role === 'All In One' && j === 'Mash_Heater' && a.recirc !== 'none')), h.name);
     }
@@ -168,7 +168,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     vessels.push({ template: 'Fermenter', role: 'Fermentor', vtype: 'Fermenter', label: `Fermentor ${i + 1}`, short: s, tab: fTab, x: 60 + i * 260, y: 80 });
     const vi = vessels.length - 1;
     const probe = add({ place: { at: 'v', i: vi, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: 60, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' }, fTab, fTabId);
-    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 66, onOffset: -1, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
+    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 66, onOffset: 1, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
     if (i === 0) { fields.Ferment_Probe = probe.name; fields.Ferment_Heater = g.name; }
   }
   const manifold = hot && a.manifold && a.manifold !== 'none' ? { template: a.manifold, kind: a.manifoldKind === 'motorized' ? 'motorized' : 'manual', x: Math.max(60, x - 120), y: 600 } : null;

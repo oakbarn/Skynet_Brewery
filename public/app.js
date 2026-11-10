@@ -6587,7 +6587,7 @@ const F = {
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'ON offset (positive = heat: on below setpoint - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['onOffset', 'Offset (- heats, + cools)', 'num'], ['onDelay', 'ON delay (seconds)', 'num'], PREDICTIVE_FIELD()],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
   deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Setpoint', 'num'],
@@ -6942,9 +6942,9 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 // Overlay colors by Direction (OakBarn Brewery, 2026-11-10, Rule 6.19): something that heats has no Blue Glow and no Green Glow Ring;
 // something that cools (the Cooling of a Fermentor Control, or a Cool / Warm Pump with a minus On offset) has no Red Glow and no
 // Orange Glow, and has Blue and Green; anything else has every choice but Blue (Blue is kept for cooling). The one saved always stays.
-const coolsDir = it => !!it && (/^fv:cool/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) < 0) || (draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.cool && f.cool === it.name));
+const coolsDir = it => !!it && (/^fv:cool/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) > 0) || (draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.cool && f.cool === it.name));
 const GREEN_RING = 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg';
-const heatsDir = it => !!it && (isHeatElem(it) || /^fv:heat/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) > 0) || !!(draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.heat && f.heat === it.name));
+const heatsDir = it => !!it && (isHeatElem(it) || /^fv:heat/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) < 0) || !!(draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.heat && f.heat === it.name));
 const overlayFits = (p, it) => coolsDir(it) ? p !== 'tint:red' && p !== 'tint:orange' : heatsDir(it) ? p !== 'tint:blue' && p !== GREEN_RING : p !== 'tint:blue';
 const OVERLAY_CHOICES = (v, it) => [['', 'None'], ...OVERLAY_GRAPHICS.filter(([, p]) => v === p || overlayFits(p, it)).map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
@@ -7029,7 +7029,7 @@ function heatWaveSvg(which) {
 }
 const ELEM_HEAT_TIPS = {
   target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BH.setpoint = 168.',
-  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it without the minus, as before: HLT_Vessel.BM_8_HE_HLT~element_BH.onoffset = 2 turns on 2 °F below.',
+  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it the same way, with the minus: HLT_Vessel.BM_8_HE_HLT~element_BH.onoffset = -2 turns on 2 °F below.',
   onDelay: 'Hysteresis: how many seconds the reading must stay under its On point before it turns on, so it does not click on and off. Example: the HLT element is switched by an Optical SSR, so 0 is fine; a Contactor or Mechanical relay needs at least 10 (Rule 6.29). Picking a Hardware Controller sets it: 0 for an Optical SSR, 10 for a Contactor or Mechanical relay.',
 };
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
@@ -7039,13 +7039,14 @@ const HYS_HOVER_TIP = '⚠ Electricity can kill. OakBarn Brewery and Skynet are 
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
 const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BH.display = "Setpoint" ("" puts back this setting).';
 // the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else.
-// Shown with a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it);
-// the saved number stays plus, as the Brain and a Process use it.
+// With a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it); saved
+// with the same minus, as the Brain and a Process use it (Rule 6.19: one sign everywhere).
 function offsetChoices(it) {
   const r = heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input)), l = [];
   for (let v = r.min; v <= r.max + 1e-9; v = Math.round((v + 0.5) * 10) / 10) l.push(v);
+  for (let i = 0; i < l.length; i++) l[i] = -l[i];
   if (it.onOffset !== undefined && it.onOffset !== '' && !l.includes(+it.onOffset)) l.push(+it.onOffset);
-  return l.sort((a, b) => a - b).map(v => [String(v), v > 0 ? '-' + v : String(-v)]);
+  return l.sort((a, b) => b - a).map(v => [String(v), String(v)]);
 }
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
@@ -7086,9 +7087,9 @@ function pumpMethodFields(it, x = {}) {
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
   return [['_pumpHead', 'Cool / Warm Pump: its Method (Rule 6.21)', 'head', null, false, false, x],
     ['heatMethod', 'Method (it starts with)', 'sel', HEAT_METHODS.filter(([k]) => PUMP_METHOD_KEYS.includes(k)).map(([k, w, , d]) => [k, `${w} (${d})`]), true, false,
-      { tip: 'One pump, one Device (Rule 6.21): Direct runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a minus On offset, a glycol pump) or to warm (a plus On offset). A Process changes it with .method.', ...x }],
+      { tip: 'One pump, one Device (Rule 6.21): Direct runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a plus Offset, a glycol pump: On above the Setpoint) or to warm (a minus Offset: On below it). A Process changes it with .method.', ...x }],
     ...(m === 'hysteresis' ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.heatProbe, ...x }],
-      ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'On offset (- cools, + warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]), PREDICTIVE_FIELD(x)] : []),
+      ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'Offset (+ cools, - warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]), PREDICTIVE_FIELD(x)] : []),
     ['methodSpot_hysteresis', 'Hysteresis allowed too (a one-click spot on the Tab)', 'bool', null, false, false, { tip: T.methodSpot, ...x }],
     ['methodShort', 'Short method names on its buttons', 'bool', null, false, false, { tip: T.methodShort, ...x }]];
 }
@@ -7716,7 +7717,7 @@ function fermFields(it) {
     ['mode', 'Mode', 'sel', FERM_MODES.map(([k, w]) => [k, w]), false, false, { tip: FERM_TIPS.mode }],
     // its Direction is Bi-Directional, greyed; the two offsets say their sign and are saved as plain numbers (OakBarn Brewery, 2026-11-10)
     ['_dir', 'Direction', 'ro', 'Bi-Directional', false, false, { tip: FERM_TIPS.direction }],
-    ...FERM_SETTINGS.map(([, key, label]) => [key, label, key === 'heatOffset' ? 'negnum' : 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
+    ...FERM_SETTINGS.map(([, key, label]) => [key, label, 'num', null, false, false, FERM_TIPS[key] ? { tip: FERM_TIPS[key] } : {}]),
     PREDICTIVE_FIELD()];
 }
 function hydroFields(it) {
@@ -8306,7 +8307,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const id = 'hwids_' + Math.random().toString(36).slice(2);
     input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
-  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' || kind === 'negnum' ? 'number' : 'text', ...(kind === 'num' || kind === 'negnum' ? { step: 'any' } : {}), value: kind === 'negnum' ? (v === undefined || v === '' || v === null ? '' : -Math.abs(+v)) : v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
+  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   const full = kind === 'multi' || kind === 'area';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
 }
@@ -8382,7 +8383,6 @@ function readFields(obj, root = $('#dlgBody')) {
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
     else if (kind === 'num' || kind === 'numsel') v = inp.value === '' ? undefined : +inp.value;
-    else if (kind === 'negnum') v = inp.value === '' ? undefined : Math.abs(+inp.value);   // shown with a minus, saved plus (-1 or 1 both save 1)
     else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
@@ -8506,9 +8506,9 @@ function bindForm(body, fields, obj, onChange) {
       build();
     } else if (t.dataset?.rerender) {
       try { readFields(obj, body); } catch { }
-      // picking a Hardware Controller sets the On offset and the On delay to its values (OakBarn Brewery, 2026-11-10, Rule 6.29: Optical SSR
-      // 0.5 and 0 s, Contactor or Mechanical relay 1 and 10 s); nothing else about them changes
-      if (t.dataset.k === 'switchedBy' && isHeatElem(obj)) { const r = heatHysRange(obj, (draft || S.config).elements.find(e => e.name === obj.input)); obj.onOffset = r.start; obj.onDelay = r.startDelay; }
+      // picking a Hardware Controller sets the Offset and the On delay to its values (OakBarn Brewery, 2026-11-10, Rule 6.29: Optical SSR
+      // -0.5 and 0 s, Contactor or Mechanical relay -1 and 10 s); nothing else about them changes
+      if (t.dataset.k === 'switchedBy' && isHeatElem(obj)) { const r = heatHysRange(obj, (draft || S.config).elements.find(e => e.name === obj.input)); obj.onOffset = -r.start; obj.onDelay = r.startDelay; }
       build();
     }
     else if (t.dataset?.kind === 'gpick' && PIC_PAIR[t.dataset.k] && t.value) fillPicPair(body, t);
