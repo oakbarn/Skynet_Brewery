@@ -53,7 +53,7 @@ if w_Text_1.visible == true
 endif
 ```
 
-- Each new **Text Widget** starts with the name `wgt_TXT_Text_1_BR` (Skynet Rule 3.14; older ones are `w_Text_1`, `w_Text_2` ...) (it can be changed: see [Text Widget](91-text-widget)). `w_Text_1 = "..."` (or `w_Text_1.text = "..."`) changes what it says.
+- Each new **Text Widget** starts with the name `wgt_TXT_Text_1_BH` (Skynet Rule 3.14; older ones are `w_Text_1`, `w_Text_2` ...) (it can be changed: see [Text Widget](91-text-widget)). `w_Text_1 = "..."` (or `w_Text_1.text = "..."`) changes what it says.
 - Colors are a name (Red, Black ...) or a code like `#ffffff`.
 - Alignment is `Left`, `Center` or `Right` (`"Left justified"` and `"Centered"` work too).
 - Width, Height, X and Y are whole numbers of pixels. Reading one (`if w_Text_1.width > 200`) gives the size or place it has now.

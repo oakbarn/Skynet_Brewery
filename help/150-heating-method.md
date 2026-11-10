@@ -144,15 +144,15 @@ hE_HLT_1.dutycycle = 70
 **The short way:** the method's short code after a dot, on a line of its own, switches it, the same as `.method =`:
 
 ```
-MB_25_HE_HLT_BR.HYS
-MB_25_HE_HLT_BR.DutyC
+MB_25_HE_HLT_BH.HYS
+MB_25_HE_HLT_BH.DutyC
 ```
 
 The codes are **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** and **DeadB** (Deadband). The Process editor offers them after the name.
 
 ## Its name
 
-A Heating Element's Device Type is **HE**, so its name reads like `MB_25_HE_HLT_BR` (Interface, Port, HE, Label, Tab), whatever method it is using.
+A Heating Element's Device Type is **HE**, so its name reads like `MB_25_HE_HLT_BH` (Interface, Port, HE, Label, Tab), whatever method it is using.
 It is wired straight to its port, going to an SSR or contactor, or to a DAC. Elements named before keep DO in their names.
 
 - `.method` is **Direct**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB

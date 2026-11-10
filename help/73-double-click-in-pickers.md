@@ -2,7 +2,7 @@
 
 **A Skynet Standard (2026-10-27):** in a Properties dialog, a dropdown that picks something with a Skynet dialog of its own opens that thing's Properties when you double-click it.
 
-Example: open the Properties of the Picture Widget **pic_Kettle_Element** on the Two vessel sample. Its **Tab** dropdown shows **Brewhouse**. Double-click it and the **Brewhouse Tab settings** pop up.
+Example: open the Properties of the Picture Widget **pic_Kettle_Element** on the Two vessel sample. Its **Tab** dropdown shows **Brewhouse**. Double-click it and the **Brew House Tab settings** pop up.
 
 | Dropdown | Double-click opens |
 | --- | --- |

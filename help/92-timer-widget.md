@@ -18,7 +18,7 @@ Rest the mouse on a field's name to see what it is for (hover help).
 
 - **The title line:** the 🔓 lock, **Visible** and **Hidden Locked**.
 - **1. Label** (the title bar) with ⬆ (a bigger box) and ⬢ (its font, size, colors and alignment), then **Label Visible**.
-- **2. Tab** and **3. Name**. A new Timer is named **wgt_TMR_** + the Label + the Tab ID, for example **wgt_TMR_Mash_BR** (Rule 3.14).
+- **2. Tab** and **3. Name**. A new Timer is named **wgt_TMR_** + the Label + the Tab ID, for example **wgt_TMR_Mash_BH** (Rule 3.14).
   Once saved the name is locked 🔒; **✏ Change name** changes it and every Process that uses it follows.
 - **Count** (Count up or Count down), **Start value** and **Reset value** (hh:mm:ss).
 - **Running at start** (it is already counting when the Brain starts), with **Database and .API ⬢** on its line.

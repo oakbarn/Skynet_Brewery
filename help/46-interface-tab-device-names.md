@@ -55,7 +55,7 @@ How the Label is turned into the name part (the Label itself stays exactly as yo
 More rules:
 
 - **No spaces in Device names.**
-- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2_BR`.
+- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2_BH`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
 - A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge_SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
@@ -87,7 +87,7 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 ## Device Type IDs
 
-Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_HE_HLT_BR`, whatever heating method it uses; elements named before keep `DO`.
+Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_HE_HLT_BH`, whatever heating method it uses; elements named before keep `DO`.
 
 **Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
