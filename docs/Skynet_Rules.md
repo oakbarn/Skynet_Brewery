@@ -603,7 +603,11 @@ Import** (they share these Rules, Rule 15.4):
 1. A dialog shows **short field names and the fields themselves**. Sentences that explain what a field or the dialog does are
    **not** written on the dialog.
    **Dropdown choices are short and in plain English too** (OakBarn Brewery, 2026-11-10: "Keep Choices in DDLB in Plain English
-   when Possible and Short"): **On = Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
+   when Possible and Short"): **Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
+   **Each choice in a dropdown starts with its own first letter** (OakBarn Brewery, 2026-11-10, for typing ahead: "Do this for all
+   DDLB choices as a Rule for Predictive Text"): with the list open, typing that letter picks it. The word that sets a choice apart
+   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. Lists that break this are brought to it
+   before the first Public Production.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
@@ -1805,9 +1809,13 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   works, and the Offset's name says its sign, so the user types a plain number and Skynet gives it the right sign in the background:
   a Heating Element is **Heating** with **Offset (+)**; anything that only cools is **Cool** with **Offset (-)**; the Fermentor Control
   (Rule 6.30) is **Bi-Directional** with **Heat Offset (+)** and **Cool Offset (-)**.
-- **Blue is kept for cooling** (OakBarn Brewery, 2026-11-10): the **Blue Tint** overlay is offered only on something whose Direction
-  is Cool (the Cooling of a Fermentor Control, a Cool / Warm Pump with a minus On offset). A Heating Element's list has no Red Tint, since
-  its **On = Red Glow** looks the same.
+- **Overlay colors follow the Direction** (OakBarn Brewery, 2026-11-10): the Overlay choices are None, Lightning Bolt, Flashing
+  Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Red Glow, Orange Glow and Blue Glow. Something that
+  **heats** (a Heating Element, the Heat of a Fermentor Control, a Cool / Warm Pump with a plus On offset) has no Blue Glow and no Green
+  Glow Ring. Something whose Direction is **Cool** (the Cooling of a Fermentor Control, a Cool / Warm Pump with a minus On offset) has
+  no Red Glow and no Orange Glow, and has Blue Glow and Green Glow Ring. Anything else has every choice but Blue Glow (**Blue is kept
+  for cooling**). A choice already saved always stays in its list. A Heating Element starts with **Red Glow** (saved as no overlay), so
+  the other Red Glow is not in its list.
 - **Its own On / Off in its Properties** (OakBarn Brewery, 2026-11-10: "There are 2 On Off Type on offs ... we need something to
   correspond on the Property Dialog. A small Icon of the Element as a Toggle"): on the Current Method line, a small picture of the
   Element is a Toggle. One click turns the Device **On or Off** at once, the same as one click on it on the Tab (Rule 2.33). On / Off is
@@ -3375,6 +3383,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery): Blue is kept for cooling: the Blue Tint overlay is offered only when the Direction is Cool; a Heating Element's Overlay list has no Red Tint (On = Red Glow is the same). Help 58. Checked against the BruControl Import program: it sets no tints. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Direction (greyed) says which way a Hysteresis works and the Offset's name says its sign: Heating with Offset (+), Cool with Offset (-), and the Fermentor Control Bi-Directional with Heat Offset (+) and Cool Offset (-); the user types plain numbers and Skynet signs them. Help 150, 182. Checked against the BruControl Import program: it already turns BruControl's minus offsets into the Cool side. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate_4): Temperature Probe + Setpoint on one line; Direction (Heating) + Offset list + wave drawing; Predictive + Delay + wave drawing; Data Display Temperature; Inside Vessel Device Layer. Help 150. Checked against the BruControl Import program: same Properties, no change. (thread "Build Integrated Instances")

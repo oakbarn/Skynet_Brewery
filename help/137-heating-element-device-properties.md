@@ -18,7 +18,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
    - **Path** (a Skynet element: greyed out), or **Path (off)** and **Path (on)** (a User Defined one).
    - **Orientation** (Right or Left) and, on the same line, **Toggle** (Toggle to start, or Push Button: on only while held; [Help 179](179-heating-element-look)).
-   - **Overlay** (**On = Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
+   - **Overlay** (**Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**

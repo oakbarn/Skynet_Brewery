@@ -1176,14 +1176,15 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
 // your own in Images/On_Off. The list shows that group first, then every other picture; Add new takes any picture in media/Images.
 // "tint:red" is not a file: it colors the picture underneath itself (Fritz: a heating element in a vessel glows red when on).
 // Only the drawn part is colored, so it works best on pictures with a see-through background (SVG or PNG).
-const TINTS = { red: ['Red Tint', 'rgb(255,30,0)'], orange: ['Orange Tint', 'rgb(255,140,0)'],
-  blue: ['Blue Tint', 'rgb(0,120,255)'] };
+const TINTS = { red: ['Red Glow', 'rgb(255,30,0)'], orange: ['Orange Glow', 'rgb(255,140,0)'],
+  blue: ['Blue Glow', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
 // the red and yellow bolt (Fritz, 2026-11-04, Rule 7.16): the steady one is the On overlay every powered valve and pump starts
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
-const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Bolt', BOLT_FLASH], ['Corner Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Big Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
+// the names (OakBarn Brewery, 2026-11-10): each starts with its own first letter, so typing that letter in the list picks it (Rule 2.38)
+const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', BOLT_FLASH], ['Corner Badge Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['See Through Lightning Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green Glow Ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
@@ -6907,10 +6908,14 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
-// Blue is kept for cooling (OakBarn Brewery, 2026-11-10): the Blue Tint is offered only to something whose Direction is Cool (the Cooling of
-// a Fermentor Control, or a Cool / Warm Pump with a minus On offset), or that already has it
+// Overlay colors by Direction (OakBarn Brewery, 2026-11-10, Rule 6.19): something that heats has no Blue Glow and no Green Glow Ring;
+// something that cools (the Cooling of a Fermentor Control, or a Cool / Warm Pump with a minus On offset) has no Red Glow and no
+// Orange Glow, and has Blue and Green; anything else has every choice but Blue (Blue is kept for cooling). The one saved always stays.
 const coolsDir = it => !!it && (/^fv:cool/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) < 0) || (draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.cool && f.cool === it.name));
-const OVERLAY_CHOICES = (v, it) => [['', 'None'], ...OVERLAY_GRAPHICS.filter(([, p]) => p !== 'tint:blue' || v === p || coolsDir(it)).map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
+const GREEN_RING = 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg';
+const heatsDir = it => !!it && (isHeatElem(it) || /^fv:heat/.test(it.integratedAs || '') || (isCoolPump(it) && Number(it.onOffset) > 0) || !!(draft || S.config)?.elements?.some(f => f.type === 'fermentor' && f.heat && f.heat === it.name));
+const overlayFits = (p, it) => coolsDir(it) ? p !== 'tint:red' && p !== 'tint:orange' : heatsDir(it) ? p !== 'tint:blue' && p !== GREEN_RING : p !== 'tint:blue';
+const OVERLAY_CHOICES = (v, it) => [['', 'None'], ...OVERLAY_GRAPHICS.filter(([, p]) => v === p || overlayFits(p, it)).map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
 // DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
@@ -6968,8 +6973,9 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 };
 // A Heating Element's Overlay (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to the Glow (what None was
 // regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
-// a Heating Element: On = Red Glow already glows red, so the Red Tint (the same look on it) is left off its list (OakBarn Brewery, 2026-11-10)
-const ELEM_OVERLAY_CHOICES = (v, it) => [['', 'On = Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v, it).slice(1).filter(([p]) => p !== 'tint:red' || v === 'tint:red')];
+// a Heating Element: Red Glow is its start (saved as no overlay), so the other Red Glow (the same look on it) is left off its list
+// (OakBarn Brewery, 2026-11-10)
+const ELEM_OVERLAY_CHOICES = (v, it) => [['', 'Red Glow'], ['none', 'None'], ...OVERLAY_CHOICES(v, it).slice(1).filter(([p]) => p !== 'tint:red' || v === 'tint:red')];
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
@@ -7834,7 +7840,7 @@ const DEVICE_TIPS = {
   orient: 'Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
-  overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Bolt and the others are choices, None for no overlay.',
+  overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
   pumpModel: 'Which pump this is. Its facts (power, flow, lift, hottest liquid, ports) show when you hold the mouse on the pump. A Skynet pump drawing picks its model by itself. The ⬢ beside it holds the facts; type your own to change one.',
   pumpPower: 'What the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
   pumpUse: 'Hot: wort and hot water (brew day). Cold: glycol or ice water (cooling a fermenter).',
@@ -7881,7 +7887,7 @@ const DEVICE_TIPS = {
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
   eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BR = on turns it On either way.',
-  eOverlay: 'What shows on the Heating Element while it is on. On = Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. The bolts and others are drawn small in the middle of it, on top of the glow (Rule 7.8).',
+  eOverlay: 'What shows on the Heating Element while it is on. Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. Orange Glow colors it orange. The bolts are drawn small in the middle of it, on top of the glow (Rule 7.8). Blue and Green are kept for cooling.',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -8079,7 +8085,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const fill = () => {
       const cur = s.value || v || '';
       s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
-        ...os.filter(p => p === cur || (isTint(p) && (p !== 'tint:blue' || coolsDir(obj))) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
+        ...os.filter(p => p === cur || (isTint(p) ? overlayFits(p, obj) : p === GREEN_RING ? overlayFits(p, obj) && inGroup(p, g) && inSource(p, src) : inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
       s.value = cur;
     };
     fill();
