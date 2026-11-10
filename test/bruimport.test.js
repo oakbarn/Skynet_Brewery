@@ -138,5 +138,11 @@ console.log('bruimport tests passed');
   assert.ok(q.report.globals.some(g => g.name === 'gMashTemp'), 'the Global is listed');
   assert.ok(!q.conv.graphics.some(g => g.placeholder?.bruName === 'gMashTemp'), '... and gets no Placeholder'); }
 
+// a sound that is already a web link (Rule 7.20): kept as it is, never copied
+{ const link = 'https://github.com/oakbarn/Skynet_Brewery/releases/download/Skynet-Sounds/Hops.mp3', moved = [];
+  const q = importBruControl(xml.replace('C:\\BruControl\\Media\\hops.wav', link), { copy: true, media: (from, to) => { moved.push(from); return true; } });
+  assert.equal(q.conv.elements.find(e => e.bru?.name === 'alm_Hops').sound, link, 'the link is kept');
+  assert.ok(!moved.includes(link), '... and never copied'); }
+
 // the Process Widget (Rule 1.31): its own checks, run from here
 await import('./processwidget.test.js');
