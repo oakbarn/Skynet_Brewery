@@ -235,7 +235,7 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.k-graphic { border-color: transparent; background-color: transparent; }
 #ws.editing .el.k-graphic:not(.has-img) { background-color: rgba(128,128,128,.25); }
 .el .slider { flex: none; align-self: center; width: 54px; height: 28px; margin: 2px 0 6px; border-radius: 14px; background: #555d66; position: relative; transition: background .15s; }
-.el .slider .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.5); transition: left .15s; }
+.el .slider .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.5); transition: left .15s; }
 .el.on .slider { background: var(--ok); }
 .el.on .slider .knob { left: 29px; }
 .el.k-switch .vl, .el.k-pushbutton .vl, .el.k-momentary .vl { font-size: 13px; flex: none; }
@@ -492,13 +492,13 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .sw { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; cursor: pointer; }
 .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
 .sw .swk { position: absolute; inset: 0; border-radius: 13px; background: #9aa2aa; transition: background .15s; }
-.sw .swk::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+.sw .swk::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
 .sw input:checked + .swk { background: #3fbf6a; }
 .sw input:checked + .swk::after { transform: translateX(20px); }
 .sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
 /* a plain checkbox drawn as a small switch: every on / off choice is a switch or a toggle icon, never a list box (Fritz, 2026-10-23) */
 input[type=checkbox].swc { appearance: none; -webkit-appearance: none; position: relative; display: inline-block; width: 36px; height: 20px; flex: none; margin: 0; padding: 0; border: none; border-radius: 10px; background: #9aa2aa; cursor: pointer; vertical-align: middle; transition: background .15s; }
-input[type=checkbox].swc::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+input[type=checkbox].swc::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #FAFAFA; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
 input[type=checkbox].swc:checked { background: #3fbf6a; }
 input[type=checkbox].swc:checked::after { transform: translateX(16px); }
 input[type=checkbox].swc:focus-visible { outline: 2px solid #4fb3ff; outline-offset: 2px; }
@@ -1051,6 +1051,12 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
   background: #fffbe0; color: #1b232c; border: 1px solid #c9b25a; border-radius: 7px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
   font: 13px/1.4 var(--font); white-space: pre-line; text-align: left; pointer-events: none; }
 .hoverHelp:not([popover]):not(.show) { display: none; }
+.hhMark { color: #d01818; font-weight: 700; }
+.hhIcon { color: #e02424; font-weight: 700; }
+.hhWarn { display: block; color: #d01818; font-weight: 700; margin-bottom: 4px; }
+.hhTri { display: block; width: 0; height: 0; margin: 2px 0 4px; position: relative; border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-bottom: 24px solid #e01e1e; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); font-size: 0; }
+.hhTri::after { content: '!'; position: absolute; left: -3px; top: 6px; font: 700 15px/1 Arial, sans-serif; color: #ffd400; }
 dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .fldPair { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fldPair > select:first-child { flex: 1; min-width: 0; }
@@ -1112,8 +1118,13 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 /* an invisible box only as wide as the methods ticked, its middle under the middle of the picture (OakBarn Brewery, 2026-11-09) */
 #ws .hmSpots { position: absolute; display: flex; justify-content: center; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; transform: translateX(-50%); background: transparent; border: 0; }
 /* Fritz, 2026-11-07: the method in use is Red, the others Yellow (orange is the Element's own glow while on) */
-#ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
-#ws .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
+#ws .hmBtn, .mBalloons .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
+/* Integrate 5 (OakBarn Brewery, 2026-11-10): the Enabled switches under each method's name, and the Control Method balloons in the dialog */
+.mRow { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: flex-end; }
+.mCol { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; }
+.mBalloons { display: flex; flex-wrap: wrap; gap: 4px; }
+.mBalloons .hmBtn { font-size: 13px; padding: 3px 10px; }
+#ws .hmBtn.cur, .mBalloons .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
 
 /* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
 .lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }
