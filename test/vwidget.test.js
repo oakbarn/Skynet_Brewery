@@ -97,7 +97,7 @@ assert.ok(app.includes("['vtype', 'Type', 'ro', it.vtype || '']") && app.include
 assert.ok(app.includes("...vpSections(it, true), ...VESSEL_FLOW(it),"), 'integrated: the Heater and Probe sections are editable');
 assert.ok(app.includes("vpApply = () => vpxApply(item, vpx);"), 'their changes are saved onto the parts');
 assert.ok(!app.includes("vpxSwap") && !app.includes("x + 'swap'"), 'a built in part can never be swapped (Rule 5.31, 2026-11-09)');
-assert.ok(app.includes("ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)"), 'its Interface and Port are greyed out');
+assert.ok(app.includes("ro('i', '2. Interface', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)"), 'its Interface and Port are greyed out');
 assert.ok(app.includes("for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;"), 'locked: Place does not change');
 assert.ok(app.includes("...(vdev && vpLocked(it) ? [] : looseField(it))"), 'locked: no un-bundling');
 assert.ok(app.includes("integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind"), 'its parts are built in, like the RIMS tube');

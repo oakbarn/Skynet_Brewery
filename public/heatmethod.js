@@ -76,7 +76,7 @@ export const controlMethods = el => { const l = allowedMethods(el); return l.len
 export const HEAT_SETTINGS = {
   onoff: [],
   dutyCycle: [['dutycycle', 'dutyCycle', 'Duty cycle %', 0], ['interval', 'interval', 'Cycle time (ms)', 1000]],
-  hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'On offset (+ heats, - cools)', 1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
+  hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'On offset', 1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
   pid: [['target', 'target', 'Setpoint', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
     ['maxintegral', 'maxIntegral', 'Max integral', 100], ['calctime', 'calcTime', 'Calc time (s)', 1], ['outtime', 'outTime', 'Output window (s)', 1]],
   deadband: [['target', 'target', 'Setpoint', 0], ['deadbandoffset', 'deadbandOffset', 'Deadband offset', 0.5], ['innerbandoffset', 'innerBandOffset', 'Inner band offset', 2],
@@ -132,7 +132,7 @@ export const TYPE_METHOD = { digitalOut: 'onoff', dutyCycle: 'dutyCycle', hyster
 // offset) may only use an On offset inside that range, and on a Contactor or Relay an On delay of at least 60 s, so the contacts do not wear
 // out. A minus On offset (cooling) is not a heat Hysteresis and has no range here. The numbers are °F; with a °C probe they are converted.
 export const SWITCHED_BY = [
-  ['ssr', 'Optical SSR (solid state relay)', 0.5, 3, 0],
+  ['ssr', 'Optical SSR', 0.5, 3, 0],
   ['contactor', 'Contactor', 2, 5, 60],
   ['relay', 'Mechanical relay', 2, 5, 60],
 ];

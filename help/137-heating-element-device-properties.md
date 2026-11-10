@@ -13,12 +13,12 @@ has no Cover**. (Skynet Rule 18.24)
    - **Skynet Heating Element**: the Skynet element drawing. Its picture is set, and it glows when on.
    - **User Defined Heating Element**: your own off and on pictures.
 3. The Add box opens with the element's name as its title. Its **Label** is already filled in (**hE_1**, hE_2 ...; see below), so the cursor starts on the next empty field. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and
-   colors) and **Label Visible**, 2 the **Interface (board)** and an **Available Port** on the same line, 3 the **Tab**.
+   colors) and **Label Visible**, 2 the **Interface** (the board) and an **Available Port** on the same line, 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
    - **Path** (a Skynet element: greyed out), or **Path (off)** and **Path (on)** (a User Defined one).
    - **Orientation** (Right or Left) and, on the same line, **Toggle** (Toggle to start, or Push Button: on only while held; [Help 179](179-heating-element-look)).
-   - **Overlay** (**Glow** to start: it glows while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
+   - **Overlay** (**On = Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
@@ -55,7 +55,7 @@ name reads like `MB_25_HE_HLT_BR`.
 1. The title (**Skynet Heating Element** or **User Defined Heating Element**), with the **🔓 lock**, **Visible** and **Hidden Locked**
    beside it. Then **Delete**, **Cancel** and **Save**.
 2. **1. Label ⬆ ⬢** and **Label Visible**.
-3. **2. Interface (board)** and **Available Ports**, greyed out.
+3. **2. Interface** and **Available Ports**, greyed out.
 4. **3. Tab** and **4. Name**.
 5. **Graphic**, **Path**, then **Orientation** and **Toggle** on one line.
 6. **Overlay** with **Database and .API ⬢**.
@@ -75,7 +75,7 @@ What the balloons say:
 | Box | The HLT element |
 |---|---|
 | **1. Label** | **HLT element**. It is the start of the Suggested Name: a space becomes ~, so it is HLT~element in the name. |
-| **2. Interface (board)** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
+| **2. Interface** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
 | **3. Built into** | **HLT_Vessel**. It moves with the vessel and can't be separated from it. |
 | **4. Name** | `BM_8_HE_HLT~element_BR`: BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). |
 | **Device Type** | **HE**, a Heating Element. |

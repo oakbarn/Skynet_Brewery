@@ -25,6 +25,6 @@ The one cost: the low point of each swing is lower by the same amount (for cooli
 
 ## Switching it off
 
-Open the Device's **Properties** and turn **Predictive (no overshoot)** off. It then works the plain way.
+Open the Device's **Properties** and turn **Predictive** off. It then works the plain way.
 
 A heating element's Hysteresis also keeps to the On offset range of what switches it (Rule 6.29): see [Help 181](181-heat-hysteresis-switched-by).
