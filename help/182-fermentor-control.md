@@ -23,7 +23,7 @@ Electrician.
   - **Shortest run:** once on, it stays on at least this long (Heat 1 minute, Cool 2 minutes to start).
 - **Fermentation makes heat** at the start and needs heat at the end, so Heat and Cooling are equal.
 - A **Heating Element** used as the Heat is run in **Direct** (the Fermentor Control turns it on and off), and its offset and On
-  delay are kept to what its **Switched by** allows (Help 181).
+  delay are kept to what its **Hardware Controller** allows (Help 181).
 - **Mode:** **Heat & Cool**, **Heat only** or **Cool only**.
 - **No reading** from the probe: both are turned Off until it reads again.
 
