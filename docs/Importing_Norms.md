@@ -187,6 +187,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | Stacked timers | never folded (long mash timer, short delay timer, sub-process timer are kept on purpose) | Built |
 | Same-spot items with different names | not folded; listed so they can be sorted by hand | Built |
 | Alarm Email Notification switch (EmailNotification) | kept as the Alarm's Email Notification (Rule 7.17); BruControl's mail settings are not copied, the user picks the mail server in Skynet's Settings | Built |
+| Alarm Digital Output (DigitalOutputID, one) | Digital Output 1 of the Alarm's 2 slots; ON and OFF with the Alarm (Rule 7.19) | Built |
 
 ## 8. Devices
 
@@ -266,4 +267,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 11: a Timer's and a time Global's Format are kept (Rule 2.45).
 - 2026-11-09: Section 8: gauge settings (ticks, shape, bar, nearest Skynet color style) are kept (Rule 2.40 point 4).
 - 2026-11-09: Section 8: Interface settings (Enabled, Baud, Response Timeout; Logging listed) are kept (Rule 6.27).
+- 2026-11-09: Section 7: an Alarm's Digital Output goes in slot 1 of its 2 (Rule 7.19).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).

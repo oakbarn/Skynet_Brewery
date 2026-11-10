@@ -6496,6 +6496,9 @@ const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device s
 // Alarm Email Notification (OakBarn Brewery, 2026-11-09, Rule 7.17): one email each time the Alarm goes off, through the mail server
 // picked in Settings > Sending codes (Gmail, Outlook.com or any other)
 const EMAIL_TIP = 'Email Notification (Rule 7.17): an email each time this Alarm goes off (at most one a minute). It goes through the mail server you picked in Settings > Sending codes: Gmail, Outlook.com or any other, never a built-in one. Gmail needs an app password there. A Process turns it on or off: alm_Boil.email = true.';
+// Alarm Digital Outputs (Rule 7.19): 2 optional slots; each Device goes ON with the Alarm and OFF when it stops. None = does nothing
+const ALARM_OUT_TIP = 'Optional: a Device with an ON / OFF state (a warning light, a horn, a relay) that goes ON while this Alarm is active and OFF when it stops. None = nothing.';
+const ALARM_OUT_FIELDS = [['digitalOutput1', 'Digital Output 1 (optional)', 'devctl', null, false, false, { tip: ALARM_OUT_TIP }], ['digitalOutput2', 'Digital Output 2 (optional)', 'devctl', null, false, false, { tip: ALARM_OUT_TIP }]];
 const EMAIL_FIELDS = [['emailNotify', 'Email Notification (an email when it goes off)', 'bool', null, false, false, { tip: EMAIL_TIP }],
   ['emailTo', 'Email to (commas between; empty = every user with an email in My account)', 'text', null, false, false, { tip: EMAIL_TIP }]];
 const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
@@ -6631,7 +6634,7 @@ const F = {
 };
 // Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
 for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
-F.alarm.push(...EMAIL_FIELDS);      // Alarm Email (Rule 7.17)
+F.alarm.push(...EMAIL_FIELDS, ...ALARM_OUT_FIELDS);      // Alarm Email (Rule 7.17)
 // A pipe or hose has a Label like everything else (Rule 1.21), but no editable Position or Size (Fritz, 2026-11-03, Rule 5.21):
 // its place and size come from where it is drawn, so X, Y, Width and Height are hidden. Its Name is given by Skynet (Pipe_1, Hose_1).
 const PIPE_HIDE_FIXED = true;       // false: show X, Y, Width and Height greyed out instead of hiding them
@@ -6769,6 +6772,7 @@ function alarmWidgetFields(it) {
     ['priority', 'Priority (lower plays first; empty = its Kind\'s number)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
     A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
     ...EMAIL_FIELDS,
+    ...ALARM_OUT_FIELDS,      // Alarm Digital Outputs (Rule 7.19)
     ['_gb', 'Graphic', 'box'],
     ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
       ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
