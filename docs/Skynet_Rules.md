@@ -911,8 +911,11 @@ Properties. (An **Integrated Instance** is not a Clone: it is a copy that become
 Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
 Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
-rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
-per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+rename. **Deleting the parent** (OakBarn Brewery, 2026-11-10) asks which of these the user wants: **1. all killed:** the Device and
+all its Clones are deleted; **2. one Clone:** the user picks that Clone to be the Device; **3. several Clones:** the user picks which
+Clone becomes the Device and Parent, and the others stay its Clones. The Device moves to that Clone's Tab and place and the Clone
+goes; it keeps its name, hidden key, Port and Processes, and pipes on that Clone's IPs now end on it. *Replaced:* "deleting the parent
+deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 - **Method Clones: Devices with more than one Control Method** (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the
   Device displayed like Tartan has one"; "Make it part of the Rule for Devices that have more than One Control Method"). A Clone of
   a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
@@ -1772,6 +1775,12 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
+- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5): **Current Method** (a dropdown) and **Short Label** (a
+  switch) on one line; then **Enabled**, a switch under each method's name: **a method must be enabled to be used** (the Current Method
+  and Direct are always on, greyed); then **Control Method**, a balloon for each enabled method, the Current Method **Red** and the others
+  **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
+  the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
+  is in now. The explanations are in hover help, so the dialog stays clean.
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
@@ -1829,7 +1838,9 @@ Electricians and can give no electrical advice. Consult a Licensed Electrician."
 Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
 help on its Heating method, Help 137 and 150, the BruControl Import's Heating Element note), it shows:
 **"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
-Electrician."** Any later page or dialog about wiring gets the same words.
+Electrician."** Any later page or dialog about wiring gets the same words. In a help balloon (the Heating method's) the warning comes
+**first**, with a red warning triangle, in **red bold** words, then the rest of the help (OakBarn Brewery, 2026-11-10, "Heat Method Hover
+Help").
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -1982,8 +1993,8 @@ SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its
 
 With a °C probe the numbers are converted (0.3 to 1.7 °C; 1.1 to 2.8 °C). A Contactor's contacts wear each time they close, so it
 heats less often and longer. A minus On offset (cooling) is not a heat Hysteresis and has no range here.
-- **Properties:** Switched by is under Heating method, with a line giving its range; when Hysteresis is ticked but is not the method
-  it starts with, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
+- **Properties:** Switched by is under Heating method, with a line giving its range; when Hysteresis is Enabled but is not the Current
+  Method, its On offset and On delay still show. **Save refuses** a number outside the range and says what is allowed.
 - **A Process or the .API** setting `.onoffset` or `.ondelay` outside the range gets the same plain error. The Brain never runs a heat
   Hysteresis outside its range, whatever was saved.
 - **Both programs:** the Panel's Properties and Brain check it; the BruControl Import starts every heating element as an Optical
@@ -3241,6 +3252,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
   its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the
   other; Alarm Chain steps wait their turn; a sound without Repeat lets the next one play when it ends. Help 21 and 172. Checked
   against both programs. (thread "Add look options to Alarm Chain steps")
+- 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")
 - 2026-11-09: Rule 18.33 gets OakBarn Brewery's test: a box is mandatory when the program or the board needs it to work; handy information (Volts, Amps, Watts) is optional; a box needed by some types only is greyed for the others and has a fill-it-or-abandon pop-up. The list of mandatory boxes is written in the Rule. Checked against both programs: the Importer's item pages follow the list, and the Panel's Flow Meter Pulses per unit and Analog input Value at highest signal can no longer be left blank (the Panel's other boxes on the list are never blank). Help 165 updated. (thread "Set which Importer boxes are mandatory")
 - 2026-11-09: Added Rule 6.25, One Hydrometer Device with a Template for each kind (OakBarn Brewery): settings greyed out when its Template does not use them, Tilt Color or Hardware ID mandatory and never shared, never by IP address, SG / °Plato / °Brix always with a switch on a Graph, smoothing, Lost signal, Database and .API (On, greyed for web ones), and `take_reading` for a Refractometer or Glass reading by hand. Rule 1.11 updated. Help 170. Checked against the BruControl Import program: a Hydrometer Input becomes a Tilt with its color, and the Hydrometers page lists the same Templates. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Added Rule 6.24, Calibrations on every reading (OakBarn Brewery: "similar to other programs and not proprietary to BruControl"): layered calibrations in plain boxes on Probes, Analog Ins and Flow meters; Measured volts on PWM and Analog outputs (`.volts`); the BruControl Importer keeps them; Help 169.
@@ -3640,6 +3652,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
 - 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
+- 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
+- 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
