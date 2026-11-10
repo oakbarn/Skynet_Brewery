@@ -2384,6 +2384,23 @@ kept as the license asks). Every picture or sound that is not Skynet's own, CC0 
 Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
 (thread "Shrink the Setup .exe and remove dead code", Help 183)
 
+9.13 **The extra Sample Schemas are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "separate the Sample Schemas in a
+separate exe and only leave the 3 vessel as the only Sample Schema as Skynet Panel ships"; "leave the new exe empty of schema
+because we may fix those before adding and I would do That one at a Time. That would also be the basis for someone imported a
+Schema from another Brewer"): the panel zip and the Skynet Brewer Setup ship **only the 3 Vessel 1 Pump sample**
+(`samples/configs`). Every other Sample Schema ships as **Skynet_Sample_Schemas_Setup_<date>.exe** (Windows) and
+**Skynet_Sample_Schemas_<date>.zip** (Mac, Linux, Pi, by hand), on the same GitHub Releases page, into the panel's
+**`sample_schemas`** folder (repo `sample_schemas/`). **For now it holds no Schemas**, only its ReadMe: the set-aside samples stay
+in `Sandbox/` (Rule 16.8) and are added **one at a time**, each only after it is brought up to the current Rules. Like the Media
+Setup (Rule 9.12) it only ADDS: a sample already there by that name is never changed, nothing is deleted (Rule #1), and a redone
+sample gets a new name. The panel lists `sample_schemas` after the 3 Vessel sample under Add a Sample Schema (Rule 10.6); a name
+already in `samples/configs` wins. **A Schema from another brewer** goes in the same folder (its `sample.json`, `config.json` and
+`scripts/`) and comes in the same way. An update of the panel never touches `sample_schemas`; the panel's own `samples` folder is
+program files and is cleared before an update, so a sample an older version had does not stay behind. **Videos:** Help 83 links
+"How to use the 3 Vessel sample, step by step" and "How to add another Pump and edit the manifold in the 3 Vessel sample" (marked
+coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import ships in the same Setup
+and does not use Sample Schemas; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 184)
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -2427,8 +2444,9 @@ thin 🧪 SIMULATION strip that always stayed). Hiding changes no setting.
 the user's choices stay until the next switch on. (2026-10-28, thread "Improve the Simulator bar
 defaults", Help 85)
 
-10.8 **The 1, 2 and 3 vessel Sample Schemas can be cloned to a User Schema** (Clone a Schema lists
-them after the user's own Schemas, as 🧪 Sample). The clone is a normal User Schema, always loaded at
+10.8 **The Sample Schemas can be cloned to a User Schema** (Clone a Schema lists
+them after the user's own Schemas, as 🧪 Sample; the panel ships only the 3 Vessel sample, the others come with the Sample Schemas
+Setup, Rule 9.13). The clone is a normal User Schema, always loaded at
 once, on the simulator (Rule 10.6). The OakBarn Brewery sample is not offered for now. (2026-10-28,
 thread "Improve the Simulator bar defaults", Help 85)
 
@@ -2816,7 +2834,8 @@ the backup. Help 100 and 157.
   Enabled. A gas burner and a fermentor's glycol valve are Heating Elements too (a plus Offset cools, Rule 6.19).
 - **The Sandbox:** for now, every other Schema Skynet had (the Two vessels, one pump and BrewZilla brew day samples and the old
   default Schema "Skynet Brew Panel" with its Processes) waits in the repo's **`Sandbox/`** folder, untouched and not brought up
-  to new Rules, to be put back later (most likely rebuilt as Schema Templates). `Sandbox/README.md` lists what came from where.
+  to new Rules, to be put back later (most likely rebuilt as Schema Templates, or added one at a time to the Sample Schemas Setup
+  once brought up to the current Rules, Rule 9.13). `Sandbox/README.md` lists what came from where.
   The panel does not use `Sandbox/`, and it is left out of the release zip and the installer (so is `Delete/`, Rule 15.3).
 - **The OakBarn Brewery Scripts:** all 175 BruControl Scripts of the OakBarn Brewery configuration are kept in
   [docs/OakBarn_Scripts](OakBarn_Scripts/README.md). **They are read only when OakBarn Brewery says so, or after asking
@@ -3912,3 +3931,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
 - 2026-11-10: Added Rule 9.12 (OakBarn Brewery): the Skynet pictures and sounds leave the panel zip and Setup and become the add-only Skynet Media Setup .exe and Skynet Media zip; Get Skynet pictures is add-only too; no copyrighted media ships. Help 183. Both programs. (thread "Shrink the Setup .exe and remove dead code")
+- 2026-11-10: Added Rule 9.13 (OakBarn Brewery): the panel ships only the 3 Vessel 1 Pump sample; every other Sample Schema comes with the add-only Skynet Sample Schemas Setup .exe and zip into `sample_schemas` (no Schemas in it yet: the set-aside samples stay in the Sandbox and are added one at a time once brought up to the Rules); a Schema from another brewer goes in the same folder; the panel's `samples` folder is cleared on update so old samples do not stay behind; Help 83 gets the two 3 Vessel video links (coming soon). Rules 10.8 and 16.8 point to it. Help 184; next free Help 185. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")

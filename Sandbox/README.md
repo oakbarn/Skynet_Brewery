@@ -6,7 +6,8 @@ Schemas below are kept here, untouched, so they can be put back later (most of t
 They are **not** brought up to new Rules while they wait here. The panel does not use this folder, and it is left out of the
 release zip and the installer.
 
-To put one back: move its folder (or file) back to the same path outside `Sandbox/`, then bring it up to the current Rules.
+To put one back: bring it up to the current Rules, then move its folder into `sample_schemas/` (repo top), so it ships in the
+add-only Skynet Sample Schemas Setup (Rule 9.13), one at a time. The panel itself ships only the 3 Vessel sample.
 
 | File or folder here | Was | What it was |
 |---|---|---|

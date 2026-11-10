@@ -7,6 +7,9 @@
 #                                          Setup (OakBarn Brewery, 2026-11-10, Rule 9.12). They only ever ADD files: one you already
 #                                          have is never changed or deleted (Rule #1). The zip holds BrewPanel/defaults/media, which
 #                                          the panel copies into media/ on its next start, adding only what is missing (lib/seed.js).
+#   Skynet_Sample_Schemas_<version>.zip / Skynet_Sample_Schemas_Setup_<version>.exe   the extra Sample Schemas (sample_schemas/),
+#                                          kept out of the panel zip and Setup (OakBarn Brewery, 2026-11-10, Rule 9.13): the panel ships
+#                                          only the 3 Vessel sample. Add-only, like the Media Setup. No Schemas in it yet, only its ReadMe.
 #   Install Skynet Brewer.command, install-skynet-brewer.sh, Skynet_Brewer.bat, ReadMe.txt
 #   First_Install_<platform>/              step-by-step first-install ReadMe + first-install file for Windows, Mac, Linux, Pi
 # Usage: bash tools/build-release.sh [version]     (version defaults to today's date, e.g. 2026-10-05)
@@ -41,6 +44,11 @@ MSTAGE="$OUT/stage/media/BrewPanel/defaults"
 mkdir -p "$MSTAGE"
 [ -d "$STAGE/media" ] && mv "$STAGE/media" "$MSTAGE/media"
 
+# The extra Sample Schemas (sample_schemas/) are not in the panel zip or Setup either: they are the Sample Schemas zip and Setup (Rule 9.13)
+SSTAGE="$OUT/stage/samples/BrewPanel"
+mkdir -p "$SSTAGE"
+[ -d "$STAGE/sample_schemas" ] && mv "$STAGE/sample_schemas" "$SSTAGE/sample_schemas"
+
 ZIP="Skynet_BrewPanel_$VERSION.zip"
 rm -f "$OUT"/Skynet_BrewPanel_*.zip
 ( cd "$OUT/stage" && zip -qr -X "../$ZIP" BrewPanel )
@@ -49,6 +57,10 @@ MZIP="Skynet_Media_$VERSION.zip"
 rm -f "$OUT"/Skynet_Media_*.zip
 ( cd "$OUT/stage/media" && zip -qr -X "../../$MZIP" BrewPanel )
 echo "Built $OUT/$MZIP"
+SZIP="Skynet_Sample_Schemas_$VERSION.zip"
+rm -f "$OUT"/Skynet_Sample_Schemas_*.zip
+( cd "$OUT/stage/samples" && zip -qr -X "../../$SZIP" BrewPanel )
+echo "Built $OUT/$SZIP"
 
 cp -p install/ReadMe.txt install/windows/Skynet_Brewer.bat install/linux/install-skynet-brewer.sh "install/mac/Install Skynet Brewer.command" "$OUT/"
 # First-time install by hand: one ReadMe and one first-install file per platform
@@ -79,6 +91,9 @@ if command -v makensis >/dev/null; then
   MEXE="Skynet_Media_Setup_$VERSION.exe"
   makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
   echo "Built $OUT/$MEXE"
+  SEXE="Skynet_Sample_Schemas_Setup_$VERSION.exe"
+  makensis -V2 -DSRC="$(pwd)/$SSTAGE/sample_schemas" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$SEXE" "${SIGN[@]}" install/windows/SkynetSampleSchemas.nsi
+  echo "Built $OUT/$SEXE"
   [ -f "$OUT/signing.log" ] && cat "$OUT/signing.log"
 else
   echo "NSIS (makensis) is not installed, so no Windows installer was built. On Linux: sudo apt install nsis"

@@ -5,7 +5,7 @@
 # It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
 # commits it back to the branch, and makes a GitHub tag and Release with the same name.
 # The Release carries the Windows installer (Skynet_Brewer_Setup_<version>.exe), the panel zip, the add-only Skynet Media Setup
-# .exe and zip (pictures and sounds, Rule 9.12) and the install files,
+# .exe and zip (pictures and sounds, Rule 9.12), the add-only Sample Schemas Setup .exe and zip (Rule 9.13) and the install files,
 # built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
 # Never edit version.json by hand or in a pull request: this workflow owns it.
@@ -167,8 +167,11 @@ jobs:
 
           **Pictures and sounds:** \`Skynet_Media_Setup_$VERSION.exe\` (Windows, run it after the Setup) or \`Skynet_Media_$VERSION.zip\`. They only add the ones you do not have: nothing you have is changed or deleted.
 
+          **More Sample Schemas:** \`Skynet_Sample_Schemas_Setup_$VERSION.exe\` (Windows) or \`Skynet_Sample_Schemas_$VERSION.zip\`. The panel comes with the 3 Vessel sample; more samples are added here one at a time. Add-only, like the pictures and sounds.
+
           NOTES
           gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest \
-            release/Skynet_Brewer_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_Setup_*.exe release/Skynet_Media_*.zip release/ReadMe.txt \
+            release/Skynet_Brewer_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_Setup_*.exe release/Skynet_Media_*.zip \
+            release/Skynet_Sample_Schemas_Setup_*.exe release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
             release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt

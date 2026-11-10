@@ -4,6 +4,8 @@
 
 **The Skynet pictures and sounds are a separate download**, the Skynet Media Setup (Windows) or Skynet Media zip. It only adds the ones you don't have yet and never changes or deletes any. See [The Skynet Media Setup](183-skynet-media-setup).
 
+**More Sample Schemas are a separate download too**, the Skynet Sample Schemas Setup (Windows) or zip. The panel comes with only the 3 Vessel sample. See [The Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup).
+
 | Folder | What is in it | On an update |
 |---|---|---|
 | `config` | Your tabs, Devices, Widgets and settings (`brewery.json`) | **Kept.** Not in the zip. |
@@ -12,6 +14,7 @@
 | `scripts` | Your processes | **Kept.** Not in the zip. |
 | `help` | This manual | Replaced by the new manual. The installers copy the old pages to `help/backups/before_update_<date>` first. |
 | `defaults` | The sample layout and processes | Replaced. Only used for a folder you don't have. |
+| `sample_schemas` | The extra Sample Schemas from the Sample Schemas Setup, and any Schema from another brewer | **Kept.** Not in the zip. |
 | Everything else (`lib`, `public`, `server.js`, `samples` …) | The program itself | Replaced. |
 
 **Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `scripts` to `scripts_old`). The panel copies the samples into a fresh `scripts` the next time it starts. (Pictures and sounds are never replaced: rename `media` only if you want to start it over, then run the Skynet Media Setup again.)

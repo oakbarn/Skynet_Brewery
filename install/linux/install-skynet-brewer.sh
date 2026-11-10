@@ -7,6 +7,7 @@
 #
 # It looks for the panel in this order: the BrewPanel folder this script sits in (BrewPanel/install/linux),
 # a Skynet*.zip next to this script, or a BrewPanel folder next to this script.
+# The extra Sample Schemas: a Skynet_Sample_Schemas*.zip next to this file (Rule 9.13).
 # The Skynet pictures and sounds: a Skynet_Media*.zip next to this script (Rule 9.12).
 # It installs to ~/Brewing/BrewPanel, gets Node.js if needed, and adds a "Skynet Brewer" launcher.
 # On a Raspberry Pi it also makes the panel start by itself when the Pi starts (a systemd service).
@@ -67,7 +68,7 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | grep -v "Skynet_Sample_Schemas" | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip_to "$ZIP" "$TMP/zip"
@@ -184,6 +185,9 @@ if [ "$SRC" != "$DEST" ]; then
   else
     echo "Full install to $DEST"
   fi
+  # samples/ is program files: cleared first so a sample an older version had (now in the Sandbox) does not stay behind.
+  # The extra Sample Schemas live in sample_schemas/, which is never touched here (Rule 9.13).
+  rm -rf "$DEST/samples"
   ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
     case "$f" in
       ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
@@ -203,6 +207,15 @@ if [ -n "$MZIP" ]; then
 elif [ ! -d "$DEST/media/Images/Skynet" ]; then
   echo "No Skynet pictures and sounds yet. Download Skynet_Media_(version).zip from"
   echo "https://github.com/oakbarn/Skynet_Brewery/releases/latest, put it next to this file and run it again."
+fi
+# The extra Sample Schemas are their own download too, Skynet_Sample_Schemas_(version).zip (Rule 9.13). One next to this file is
+# added to sample_schemas/; a sample you already have is never changed and nothing is deleted (Rule #1, Never Take Away).
+SZIP="$(ls -t "$HERE"/Skynet_Sample_Schemas*.zip 2>/dev/null | head -n 1 || true)"
+if [ -n "$SZIP" ]; then
+  echo "Adding the Sample Schemas from $(basename "$SZIP") (a sample you already have is never changed)"
+  unzip_to "$SZIP" "$TMP/samples"
+  mkdir -p "$DEST/sample_schemas"
+  cp -Rn "$TMP/samples/BrewPanel/sample_schemas/." "$DEST/sample_schemas/" 2>/dev/null || true
 fi
 chmod +x "$DEST"/install/linux/*.sh "$DEST"/install/mac/*.command 2>/dev/null || true
 
