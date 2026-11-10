@@ -54,10 +54,4 @@ wgt_DT_Clock_BR.showas = "ddd h:mm tt"
 wgt_TM_Boil_BR.showas = ""           back to its Properties' pick
 ```
 
-## From BruControl
-
-BruControl Timers and time Globals had a **Format** box with the same letters. The BruControl Import keeps a Timer's Format. A
-Time or DateTime Global's Format is kept in the Globals list, so when Globals are imported each one becomes a Time or DateTime
-Widget that shows the same way.
-
 See also [Value, Time and DateTime Widgets](134-value-time-and-datetime-widgets) and [Timer digits](152-skynet-dial-and-timer-digits).

@@ -54,3 +54,7 @@ The New Device box suggests a name from the Interface ID, the Port, the Device T
 - The Device name is **only used in Processes** and is **never shown on a Tab** (the Label is). A unique, meaningful name, like the Suggested Name, is the better choice.
 
 Click OK to keep your own name, or Cancel to go back and change it.
+
+Each Interface also has **Board settings** (On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port) and
+**💬 Board Talk** on the Devices page, which shows every line to and from the board in plain words: see
+[Board settings and Board Talk](177-board-talk).

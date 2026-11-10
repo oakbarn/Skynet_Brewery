@@ -533,6 +533,15 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Valve numbers** 1, 2, 3 on the valves in Edit layout and on the dialog Graphic, matching Valve 1, 2, 3.
 - **Orientation:** Horizontal, Left Vertical 90, Right Vertical 90, with Flip (No flip, Flip Vertical: valves on top when Horizontal, Flip Horizontal, Flip both; Fritz 2026-11-07). No Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
 
+### 5.5 Fermentor Control (Skynet Rule 6.30, Help 182)
+- **Made by:** the Vessel Device Builder, question 14 (Heat & Cool, Heat only, Cool only), or the BruControl Import from a heating and a cooling Hysteresis on the same probe.
+- **Three Devices:** Heat (Heating Element run in Direct, Light, or plain Digital Out: heat mat, heat wrap, ceramic heat emitter, lamp); Cooling (plain Digital Out for a freezer or fridge, Pump or Motorized valve for glycol); the Temperature Probe that reads the beer. Heat and Cooling are built into the vessel without a spot and keep their own names (VesselName.DeviceName in a Process, Rule 5.31).
+- **No Port of its own**; saved as type `fermentor`, named after the vessel's Label (e.g. `FV1`).
+- **Settings:** Setpoint (66), Heat On offset (1), Cool On offset (1), Changeover wait (300 s), Heat On delay (60 s), Heat shortest run (60 s), Cool On delay (300 s), Cool shortest run (120 s), Mode, Predictive.
+- **Never both On**; a Heating Element as Heat stays in its Switched by range (Rule 6.29).
+- **Process:** `FV1 = on`, `.setpoint`, `.mode`, `.heatoffset`, `.cooloffset`, `.changeover`, `.heatdelay`, `.heatminrun`, `.cooldelay`, `.coolminrun`; `.doing` read only.
+- **New pictures for the Heat** (Images/Skynet/Other_Equipment): Heat_Mat, Heat_Wrap, Ceramic_Heat_Emitter, Off and On.
+
 ---
 
 ## 6. Reserved, not built yet
@@ -570,3 +579,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-08: 5.3 Vessel Device: can be made step by step with the Vessel Device Builder (Skynet Rule 19.5, Help 166).
 - 2026-11-09: Added 4.17 Hydrometer (Type ID Hydro, virtual ports 200+), with its Templates; Hydro taken off Reserved (Skynet Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
 - 2026-11-09: 4.17 Hydrometer reads Bluetooth: Tilts by Tilt Color, RAPT Pills by Hardware ID, heard by an ESP32 (ESP32_Hydrometer) or a Raspberry Pi's own Bluetooth (Pi_Bluetooth) (Skynet Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
+- 2026-11-10: Added 5.5 Fermentor Control (Skynet Rule 6.30, Help 182). (thread "Build integrated Fermentor heat and cool control")

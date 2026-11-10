@@ -1,6 +1,6 @@
 # gGlobals keep their values
 
-Since 2026-11-03 (Fritz, Skynet Rule 1.22) **every gGlobal is non-volatile**. It keeps its **.value** like a setting does, not like a
+**Every gGlobal is non-volatile**. It keeps its **.value** like a setting does, not like a
 Process variable:
 
 | | A Process variable (`new value vTemp`) | A gGlobal (`gV_Strike_Temp`) |

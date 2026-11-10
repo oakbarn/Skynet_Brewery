@@ -1,7 +1,7 @@
 # Properties hotspots on a Vessel Device
 
 A **Vessel Device** (a vessel built from a Vessel Widget Template, Skynet Rule 5.31) has small **⚙ hotspots** in **Edit layout**.
-**One click** on a hotspot opens a Properties dialog (Skynet Rule 5.38; Fritz, 2026-11-07).
+**One click** on a hotspot opens a Properties dialog (Skynet Rule 5.38).
 
 | Where the ⚙ sits | What one click opens |
 |---|---|
@@ -44,8 +44,3 @@ one will open.
 - Hold the mouse over a ⚙ to see what it will open.
 - The hotspots show **only in Edit layout**, where Properties are changed. While brewing, the vessel looks as it always does.
 - Phones and tablets are for running the brewery (Skynet Rule 2.35), so they do not get them.
-
-## BruControl Import
-
-A vessel the BruControl Import makes into a Vessel Device gets the same hotspots when it is opened in the Skynet Panel. The Import
-program itself has no Device dialogs, so nothing changes there.

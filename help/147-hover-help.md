@@ -1,6 +1,6 @@
 # Hover help in dialogs
 
-Skynet keeps its dialogs as clean as possible (Skynet Rule 2.38; Fritz, 2026-11-06). A dialog shows short field names and the
+Skynet keeps its dialogs as clean as possible (Skynet Rule 2.38). A dialog shows short field names and the
 fields themselves. The explanation of a field is in its **hover help**.
 
 ## See the help of a field
@@ -21,8 +21,6 @@ with **Close**.
 - Warnings you must act on, like **⚠ The Label cannot be blank.**
 - What something is now, like the Suggested Name, or a valve that is OPEN or CLOSED.
 - The yellow **?** in the title, which opens the full Help page.
-
-The **BruControl Import** works the same way.
 
 ## Widget dialogs
 

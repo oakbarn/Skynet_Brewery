@@ -39,9 +39,4 @@ MB_D5_CPMP_Cool~Pump_FR.onoffset = -1
 MB_D5_CPMP_Cool~Pump_FR = On
 ```
 
-## From BruControl
-
-The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port, alone or beside its on/off
-output, one Cool / Warm Pump that starts in that method, with its Setpoint, offsets and probe. The report lists each one.
-
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.

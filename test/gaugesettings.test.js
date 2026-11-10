@@ -39,3 +39,4 @@ assert.equal(by('Level').bru.gauge.style, 'GothicMat', 'the style name is only k
 assert.equal(by('Press').look, 'lcd'); assert.equal(by('Press').gaugeStyle, 'dark');
 assert.ok(JSON.stringify(r).includes('Skynet Bar'), 'the Import notes say so');
 console.log('gauge settings tests passed');
+await import('./boardtalk.test.js');

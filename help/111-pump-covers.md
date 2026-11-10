@@ -16,7 +16,7 @@ In the pump's Properties, **Cover overlay** is right after the picture:
 - **Red, Yellow, Blue, Green, Purple, Orange, White** (White is RGB 250 250 250): the Skynet cover colors.
 - **User**: the same cover in the color you pick in **User cover color** (the standard color list, or Custom for any RGB).
 
-There is **one cover for each color, and every cover fits every Skynet pump** (Fritz, 2026-11-05). Skynet keeps one cover shape for
+There is **one cover for each color, and every cover fits every Skynet pump**. Skynet keeps one cover shape for
 each pump drawing and fills it with the color you pick, so changing the color or the pump never needs a new picture.
 
 Covers are drawn only on the Skynet no-cover pump drawings (March 809 and 815, Chugger, Riptide, Topsflo TD5, KegLand MKII). On any other pump picture the setting does nothing. Flip Horizontal and Flip Vertical turn the cover with the picture.

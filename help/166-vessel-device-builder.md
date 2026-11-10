@@ -2,7 +2,7 @@
 
 The **Vessel Device Builder** asks what your vessel has, then builds it for you as a **Vessel Device** (Skynet Rules 19.5 and 5.31).
 Its Heating Elements and its Temperature probe are **built into it**, like the RIMS tube's, so they can't be lost or deleted on
-their own. The BruControl Import program uses this same builder, with the same look (see below).
+their own.
 
 ## Where to find it
 
@@ -68,12 +68,3 @@ Press **✔ Done** to close the panel. Then press **💾 Save Build ... > To a T
 
 **Once it is on a Tab and the layout is saved, its openings and built in parts are locked for good.** Its Name, Labels, Volume,
 Tab and place can still change.
-
-## In the BruControl Import
-
-On the Importer's **Your vessels** step, each vessel has a **🔨 Build** button. It opens this same Vessel Device Builder on the
-Importer's Build page, with the questions already filled in from that vessel's row: its Label, General Type, Volume, Height,
-Diameter, Drain, Tangential Inlet, Sparge Arm, HERMS Coil, and a Heating Element and Probe spot when the row has them. BruControl
-never knew which side a Tangential Inlet is on or where the Heating Element and Probe sit, so check those spots. The Heating Element
-and Probe pickers list the ones imported from your BruControl file, with the row's own picked first. Build the vessel, press
-**Save layout**, then go back to the Importer.

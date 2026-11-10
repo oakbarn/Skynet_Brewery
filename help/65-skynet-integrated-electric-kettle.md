@@ -1,6 +1,6 @@
 # Skynet Integrated Electric Kettle
 
-The **Basic electric kettle** is a [Skynet_Integrated_Device](64-skynet-integrated-devices) drawn from Fritz's picture. It is the base of every Skynet Integrated Electric Kettle: later ones add fittings and a valve to it as built-in parts.
+The **Basic electric kettle** is a [Skynet_Integrated_Device](64-skynet-integrated-devices) drawn from a Skynet picture. It is the base of every Skynet Integrated Electric Kettle: later ones add fittings and a valve to it as built-in parts.
 
 It has three holes:
 
