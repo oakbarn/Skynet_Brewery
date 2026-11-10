@@ -34,6 +34,19 @@ export function placeBubble(r, box, view) {
 export const FIELD = 'select, option, optgroup, datalist, textarea, input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset])';
 export const helpTarget = t => t?.closest?.(FIELD) ? null : t?.closest?.('[data-help], .tipLbl, dialog [title], [data-hover-titles] [title]') || null;      // the BruControl Import's pages: data-hover-titles on its body
 
+// a balloon's words as page parts: ⟦ ⟧ marks a part in red (the Label part of a Suggested Name, OakBarn Brewery, 2026-11-09), and the
+// ⬢ and ⬆ show red, as the buttons do
+export function helpNodes(text, doc = globalThis.document) {
+  const out = [];
+  for (const [i, part] of String(text ?? '').split(/⟦|⟧/).entries()) {
+    if (i % 2) { const m = doc.createElement('b'); m.className = 'hhMark'; m.textContent = part; out.push(m); continue; }
+    for (const [j, bit] of part.split(/([⬢⬆])/).entries()) {
+      if (!bit) continue;
+      if (j % 2) { const ic = doc.createElement('span'); ic.className = 'hhIcon'; ic.textContent = bit; out.push(ic); } else out.push(doc.createTextNode(bit));
+    }
+  }
+  return out;
+}
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
   doc._hoverHelp = true;
@@ -50,7 +63,7 @@ function start(doc = globalThis.document) {
   };
   const show = el => {
     const text = helpOf(el); if (!text || !el.isConnected) return;
-    tip.textContent = text;
+    tip.replaceChildren(...helpNodes(text, doc));
     (pop ? doc.body : el.closest('dialog[open]') || doc.body).append(tip);
     if (pop) { try { tip.showPopover(); } catch { } } else tip.classList.add('show');
     const r = el.getBoundingClientRect(), b = tip.getBoundingClientRect();
