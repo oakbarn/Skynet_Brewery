@@ -201,6 +201,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | AvgWeight (Analog In, temperature ports) | Smoothing % (Rule 6.24) | Built |
 | ShowSecondaryValue false | Data Display shows only the main value (Output %, ON / OFF, Rate, Value) (Rule 6.26) | Built |
 | UserControl false on a heater's joined controls | Toggle (a Heating Element or Valve is Toggle or Push Button, never None, Rule 2.46); its On/Off control is the Direct method | Built |
+| Gauge settings: Circular / Linear / Digital, Min / Max, Major and Minor tick counts, Layout (Full, Half), Orientation, Style | Skynet Dial (round), Skynet Bar (straight) or LCD digits, with the same numbers, ticks, shape or direction and the nearest Skynet color style; the style name is kept only in `bru.gauge` (Rule 2.40 point 4) | Built |
 | PWM output calibrations (0-255) | not copied, listed in the notes (Skynet counts %) | Built |
 | Port types Skynet does not have yet | skipped, with a warning | Built |
 
@@ -262,4 +263,5 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-11-09: Section 7: BruControl's Alarm Email Notification switch is kept (Rule 7.17).
 - 2026-11-09: Section 11: a Timer's 2 alarms are now imported (Timer Alarm Chain, Rule 7.16).
 - 2026-11-09: Section 11: a Timer's and a time Global's Format are kept (Rule 2.45).
+- 2026-11-09: Section 8: gauge settings (ticks, shape, bar, nearest Skynet color style) are kept (Rule 2.40 point 4).
 - 2026-11-09: Section 8: BruControl's Avg Weight becomes Smoothing % (Rule 6.24).

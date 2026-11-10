@@ -204,6 +204,8 @@ Shows one **Process** on a Tab, as BruControl's Script element does: its Label a
 ### Skynet Dial (a Look, Rule 2.40, 2026-11-07, Help 152)
 Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the reading in digits under it), drawn by Skynet as SVG. Not a Widget of its own: a **Look** (`look: dial`) a Temperature Probe picks with **Display > Skynet Dial**, and any Device that shows a number picks in its Text attributes ⬢ (analog in, PWM / analog out, Duty Cycle, PID, Deadband, a Heating Element's output %). A Process: `name.valueType = "Dial"`.
 
+**Gauge settings** (Rule 2.40 point 4, 2026-11-09): in the same ⬢, **Dial shape** (Standard, Full round, Half round), **Large tick marks**, **Small tick marks between**, **Bar direction** and **Color style** (8 Skynet styles, also for LCD and LED digits). The **Skynet Bar** (`look: bar`, `name.valueType = "Bar"`) is a straight gauge with the same settings.
+
 | Setting | Notes |
 |---|---|
 | Lowest / Highest (`dialMin` / `dialMax`) | The ends of the arc. Empty = 0-220 °F, -20-110 °C, else 0-100 |
@@ -578,4 +580,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-09: Boolean Widgets (Rule 1.20): Slider, Checkbox and Lighted Button added as their own sub-Widgets with a fixed look; Device controlled shown as Linked Device (acts like a Clone of the Device). (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Alarm Widget gets Email Notification and Email to (Rule 7.17, Help 175). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Time and DateTime Widgets get Shows as; a Timer's Digits get the same Time formats (Rule 2.45, Help 176). (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Skynet Dial gets Gauge settings (shape, tick marks, color styles) and the Skynet Bar look (Rule 2.40 point 4, Help 152). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Chart Widget: a Hydrometer's line has an SG / °P / °Bx switch right on the Graph (Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
