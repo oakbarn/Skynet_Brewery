@@ -53,6 +53,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { watchAlarmEmails } from './lib/alarmemail.js';
+import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
@@ -136,6 +137,7 @@ store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (
   }
 });
 const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
+hw.logDir = path.join(DATA, 'logs', 'boards');      // Board settings: Diagnostic logging (Rule 6.27)
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
@@ -358,6 +360,7 @@ function processWords() {
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
@@ -952,6 +955,20 @@ async function route(req, res) {
     }
   }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
+  // Board Talk (Rule 6.27): the lines to and from a board, sending one, and Pause communications
+  if (p === '/ui/boardtalk' && m === 'GET') { try { return ok(res, hw.talkSince(String(url.searchParams.get('name') ?? ''), Number(url.searchParams.get('after')) || 0)); } catch (e) { return fail(res, 400, e.message); } }
+  if (p === '/ui/boardtalk' && m === 'POST') {
+    const body = await jsonBody(req);
+    try {
+      if (typeof body.pause === 'boolean') {
+        hw.pause(String(body.name ?? ''), body.pause);
+        const d = store.config.devices?.find(x => x.name === body.name); if (d) { if (body.pause) d.paused = true; else delete d.paused; store.writeConfig(); }
+        return ok(res, { ok: true });
+      }
+      hw.talkSend(String(body.name ?? ''), cleanTalkLine(body.line));
+      return ok(res, { ok: true });
+    } catch (e) { return fail(res, 400, e.message); }
+  }
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
   // a Chart Widget's lines (Rule 1.26): /ui/chart?names=A,B&from=ms&to=ms&points=400
   if (p === '/ui/chart' && m === 'GET') {
