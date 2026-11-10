@@ -55,10 +55,9 @@ The dialog follows the General Dialog Rules (Skynet Rules section 18):
 ## In a Process
 
 ```
-alm_Hops.active = true        // sound it
+alm_Hops = On                 // sound it
 alm_Hops.back = "Red"         // Layer 4 of a Basic Skynet Alarm (the color behind a User Alarm)
 alm_Hops.fore = "Yellow"      // Layer 3: the bell
 alm_Hops.back = ""            // back to what its Properties say
 alm_Hops.step = 2             // step 2 of its Alarm Chain (or alm_Hops.step = "Aroma")
-alm_Hops = On                 // the same as alm_Hops = true
 ```
