@@ -1,6 +1,6 @@
 # Edit layout bar
 
-The **Edit layout** bar (press the blue Edit layout button beside **☰ Menu**) has three rows (Fritz, 2026-10-28). A new Device goes straight on the Tab picked in its Add Device box (Rule 4.1, Fritz 2026-11-04); other new things are made on the 🔨 [Build Tab](55-build-tab) first, and **💾 Save Build ...** then puts them on a Tab.
+The **Edit layout** bar (press the blue Edit layout button beside **☰ Menu**) has three rows. A new Device goes straight on the Tab picked in its Add Device box (Rule 4.1); other new things are made on the 🔨 [Build Tab](55-build-tab) first, and **💾 Save Build ...** then puts them on a Tab.
 
 | Row | What is on it |
 |---|---|

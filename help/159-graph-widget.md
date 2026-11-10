@@ -1,7 +1,7 @@
 # Graph Widget
 
 A **Graph Widget** draws a **line graph over time** on a Tab, for example your fermenter temperature over the last 5 days, or an
-iSpindel's gravity over 2 weeks (Skynet Rule 1.26). It used to be called the Chart Widget; BruControl still calls it a Chart.
+iSpindel's gravity over 2 weeks (Skynet Rule 1.26). It used to be called the Chart Widget.
 Each Graph draws up to **two** Devices or Widgets:
 
 - **Channel 1** uses the **left** axis.
@@ -16,8 +16,6 @@ must be **sent to the database** (its **Database** box, for example Every 1 minu
 1 hour Span. Double-click it for its Properties.
 
 ## Its Properties
-
-The settings are the same as a BruControl Chart, so a BruControl Chart imports one to one:
 
 | Properties | What it does | Process attribute |
 |---|---|---|
@@ -39,12 +37,3 @@ wgt_GPH_Conical_CT.ch1linecolor = "#00B050"
 
 A Graph made before the new name keeps its old name (`wgt_CHT_...`) and works the same; names already made never change by
 themselves (Rule 3.5).
-
-## From BruControl
-
-The BruControl Importer turns each BruControl **Chart** into a Graph Widget, in the same place and size, with the same Span,
-Refresh interval, grid lines, colors and Channels. Each item a Graph draws is set to be sent to the database every Refresh
-interval (if it had no Database setting), so its line fills as soon as readings come in. A Graph that draws a BruControl Global
-which is not imported yet keeps its name, and its line fills once that Global comes in.
-
-BruControl's Charts are DevExpress drawings; Skynet draws its own (lines in the browser) and copies nothing from BruControl.

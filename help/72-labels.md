@@ -11,7 +11,7 @@ The Label used to be called the **Display name** (`displayName` in the Schema fi
 
 Every Properties dialog that has a **Label** also has a **Show label** switch right with it. Off = the Label is kept but not drawn on the Tab. This is true for:
 
-- every Device and Widget (it is BruControl's Name Visibility)
+- every Device and Widget
 - the New Device dialog
 - vessels, Tab_Vessels and Tab_Fittings, the RIMS tube and Integrated kettles
 - IPs
@@ -24,7 +24,7 @@ Every Properties dialog that has a **Label** also has a **Show label** switch ri
 tm_Mash.label = "Mash rest"
 ```
 
-`label` is the Skynet word. BruControl's old word still works and means the same:
+`label` is the Skynet word. The older word still works and means the same:
 
 ```
 tm_Mash.displayname = "Mash rest"

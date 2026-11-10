@@ -4393,7 +4393,7 @@ const PRESETS = {
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
-  const an = [...Array(16).keys()].map(i => [`A${i}`, `A${i} = pin ${54 + i} (BruControl)`]);
+  const an = [...Array(16).keys()].map(i => [`A${i}`, `A${i} = pin ${54 + i}`]);
   const tagged = i => [String(i), `D${i}` + (pinTag(i) ? `  (${pinTag(i)})` : '')];      // D5 (PWM), D2 (PWM + Counter), D18 (Counter)
   const dig = [...Array(54).keys()].map(tagged);
   const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(tagged), interrupt: [2, 3, 18, 19, 20, 21].map(tagged), rtdcs: RTD_CS_PINS.map(tagged) };      // rtdcs: RTD CS pins on a Mega (Rule 6.9)
@@ -4436,7 +4436,7 @@ const ADD_MENU = [
     ['Thermocouple type K (MAX31855 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
     ['Thermocouple K / J / T and others (MAX31856 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
     ['NTC thermistor 10K, Beta 3950 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
-    ['NTC thermistor 10K, BCS-462 / BruControl type, Beta 3977 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3977, series: 10000 }],
+    ['NTC thermistor 10K, BCS-462 type, Beta 3977 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3977, series: 10000 }],
     ['NTC thermistor 50K, Beta 3950 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 50000, beta: 3950, series: 50000 }],
     ['NTC thermistor 100K, Beta 3950, 3D printer type (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 100000, beta: 3950, series: 100000 }],
     ['LM35 analog temperature sensor (10 mV per °C)', 'temperature', 'Temp', { sensor: 'lm35' }],
@@ -6417,7 +6417,7 @@ function displayText(e, v, k, shown) {
   }
   return shown;
 }
-const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device shows on the Tab. The first choice shows them all, as before. A Process can change it while it runs: Flow_1.display = "Total" ("" puts back this setting). For a Flow meter it is also its Value (BruControl\'s Primary Value): Flow_1.value is its Total when Total is picked.';
+const DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Device shows on the Tab. The first choice shows them all, as before. A Process can change it while it runs: Flow_1.display = "Total" ("" puts back this setting). For a Flow meter it is also its Value: Flow_1.value is its Total when Total is picked.';
 // Alarm Email Notification (OakBarn Brewery, 2026-11-09, Rule 7.17): one email each time the Alarm goes off, through the mail server
 // picked in Settings > Sending codes (Gmail, Outlook.com or any other)
 const EMAIL_TIP = 'Email Notification (Rule 7.17): an email each time this Alarm goes off (at most one a minute). It goes through the mail server you picked in Settings > Sending codes: Gmail, Outlook.com or any other, never a built-in one. Gmail needs an app password there. A Process turns it on or off: alm_Boil.email = true.';
@@ -6425,8 +6425,8 @@ const EMAIL_FIELDS = [['emailNotify', 'Email Notification (an email when it goes
   ['emailTo', 'Email to (commas between; empty = every user with an email in My account)', 'text', null, false, false, { tip: EMAIL_TIP }]];
 const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display (what it shows)', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
-const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom, like BruControl\'s layered calibrations. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
-const SMOOTH_TIP = 'Smoothing (Rule 6.24, BruControl\'s Avg Weight): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
+const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
+const SMOOTH_TIP = 'Smoothing (Rule 6.24): how much each new reading counts, in %. 100 = no smoothing, the number jumps with every reading. 25 = calm: a jumpy probe or flow meter reads steadily and still follows a real change in a few seconds. Empty = 25 for a thermistor (NTC) probe, 100 for everything else. A Process and the alarms see the smoothed number; .raw is the reading before smoothing.';
 const SMOOTH_FIELD = ['avgWeight', 'Smoothing % (100 = none)', 'num', null, false, false, { tip: SMOOTH_TIP }];
 const CAL_FIELD = ['calibrations', 'Calibrations (top to bottom)', 'calchain', null, false, false, { tip: CAL_TIP }];
 const CAL_POP = { title: 'Calibrations', fields: [CAL_FIELD] };
@@ -6472,7 +6472,7 @@ const F = {
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
-    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds, empty = 1)', 'num', null, false, false, { tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, as BruControl\'s Counter Input, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
+    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds, empty = 1)', 'num', null, false, false, { tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
     ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
@@ -6538,7 +6538,7 @@ const F = {
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
       ['label', 'Label (shown in the "by hand" message; never blank)', 'text'], ['labelVisible', 'Show label', 'yn'],
-      ['image', 'Picture (Fritz\'s Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
+      ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
@@ -6605,9 +6605,9 @@ const SENSOR_FIELDS = {
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
   pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
-  ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
-  lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
-  tmp36: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
+  ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
+  lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
+  tmp36: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
 };
 const SIGNAL_FIELDS = {
   raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
@@ -6903,6 +6903,15 @@ const HEAT_TIPS = {
   smoothing: 'Precise: the seconds it averages the probe over, so the probe\'s tiny steps do not make the heater twitch. 10 is a good start; more is calmer but slower to see a change. 0 = no smoothing.',
   outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
 };
+// a Heating Element's own settings, with the HLT element of the 3 Vessel 1 Pump sample as the example (Rule 11.7)
+const ELEM_HEAT_TIPS = {
+  target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 168.',
+  onOffset: 'Hysteresis: how far under the Setpoint it turns on (+ heats, - cools). It turns off at the Setpoint. Example: the HLT element has 1, so with its Setpoint of 150 °F it turns on at 149 °F and off at 150 °F. Its range is set by Switched by (Rule 6.29). A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.onoffset = 2.',
+  onDelay: 'Hysteresis: how many seconds the reading must stay under its On point before it turns on, so it does not click on and off. Example: the HLT element is switched by an Optical SSR, so 0 is fine; a Contactor or Mechanical relay needs at least 60 (Rule 6.29).',
+};
+const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
+const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
+const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: what it is doing and its Setpoint (the first choice), its Output % or ON / OFF, the Reading of its probe, or its Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_HE_HLT~element_BR.display = "Setpoint" ("" puts back this setting).';
 const liveSeen = new WeakSet();      // a dialog opens on the method the Element is in now, so it shows what the Tab shows (Integrate 5)
 function heatFields(it, x = {}) {
   const liveM = heatMethodKey(S.values[it.name]?.method);
@@ -6914,19 +6923,19 @@ function heatFields(it, x = {}) {
   // balloons. The explanations (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
   const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: ['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.methodShort }], ...x }],
+    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: ['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.eMethodShort }], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
-    ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.methodSpot, ...x }],
+    ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.eMethodSpot, ...x }],
     ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
     ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
-    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
-    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
-    ...(m === 'hysteresis' ? [PREDICTIVE_FIELD(x)] : []),
+    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.eHeatProbe, ...x }]] : []),
+    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]),
+    ...(m === 'hysteresis' ? [PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP })] : []),
     // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
-    ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]) : []),
-    ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', x)] : []),
+    ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]) : []),
+    ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', { ...x, tip: ELEM_DISPLAY_TIP })] : []),
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
@@ -6947,11 +6956,11 @@ function pumpMethodFields(it, x = {}) {
 }
 function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
-  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
-    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
-    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
-    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true, tip: T.eVisible }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true, tip: T.eHidden }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.eLabel }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.eLabelVisible }],
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.eIface + ' ' + T.ePort, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.eTab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.eName }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
     ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it), ...heatFields(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
@@ -7055,7 +7064,7 @@ function pwmDeviceFields(it, item) {
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
     ...PWM_GRAPHIC_FIELDS(it), ...PWM_OVERLAY(it), ...PWM_OWN(it),
-    ...(it.pseudoPwm ? [['_pseudo', 'Pseudo PWM: on a plain pin, the Brain turns it fully on for its % of every second (Fritz, 2026-11-05). A pump or fan surges; heat is fine. For true PWM, delete it and add it again on a PWM pin.', 'note']] : []),
+    ...(it.pseudoPwm ? [['_pseudo', 'Pseudo PWM: on a plain pin, the Brain turns it fully on for its % of every second. A pump or fan surges; heat is fine. For true PWM, delete it and add it again on a PWM pin.', 'note']] : []),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }],
     PWM_TYPE(it)];
@@ -7255,8 +7264,8 @@ const CHART_TIPS = {
   label: 'The title over the graph, for example Conical 5 Day. The ⬢ beside it sets its font, size and colors.',
   name: 'Made from the Label and the Tab: wgt_GPH_ + the Label + the Tab ID. A Process uses it, for example wgt_GPH_Conical_CT.spanseconds = 86400. It must be unique.',
   ch: n => `The Device or Widget whose readings Channel ${n} draws (Channel 1 on the left axis, Channel 2 on the right axis). It must be sent to the database (its Database box), or its line stays empty. The ⬢ beside it sets Auto scale, the axis lowest and highest, the Line color and the Axis color.`,
-  span: 'How far back the graph goes, in seconds, like BruControl\'s Span: 3600 = 1 hour, 86400 = 1 day, 432000 = 5 days. The ⬢ beside it sets the grid lines and the time axis color.',
-  refresh: 'How often the graph is drawn again with the newest readings, in seconds, like BruControl\'s Refresh interval.',
+  span: 'How far back the graph goes, in seconds: 3600 = 1 hour, 86400 = 1 day, 432000 = 5 days. The ⬢ beside it sets the grid lines and the time axis color.',
+  refresh: 'How often the graph is drawn again with the newest readings, in seconds.',
 };
 const CHART_CH_POP = n => ({ title: `Channel ${n}`, fields: [[`ch${n}AutoScale`, 'Auto scale (the axis fits the readings)', 'bool', true], [`ch${n}YMin`, 'Axis lowest (Auto scale off)', 'num'], [`ch${n}YMax`, 'Axis highest (Auto scale off)', 'num'],
   [`ch${n}LineColor`, 'Line color', 'color'], [`ch${n}AxisColor`, 'Axis color', 'color']] });
@@ -7325,7 +7334,7 @@ const mvWidgetFields = it => [['_mvnow', `It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'
   ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
   ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BR'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).` }],
   ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }],
-  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "OakBarn Brewery's Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
+  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
   ...FIT_PLACE(it), wgtType(isTapMv(it) ? 'Tap Water Valve' : 'Manual Valve')];
 // Timer Widget Properties in the Pump's drill-down look (Rule 18.30): no pictures and no background; its look is a Style (Rule 2.24)
 const TIMER_TIPS = {
@@ -7375,10 +7384,10 @@ const VP_DRILL_SKIP = new Set(['_pv', 'imageOff', 'imageOn', '_ppath', 'rot', 'x
 function vpPartFields(it, item) {
   const T = DEVICE_TIPS, base = it.vpKind === 'element' ? elemDeviceFields(it, item) : probeDeviceFields(it, item);
   const inst = isInstance(it) ? f => f[0] !== 'device' ? f      // an Integrated Instance: its Device's Interface and Port, greyed for good (Rule 6.1)
-    : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: T.iface }] : f => f;
+    : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: it.vpKind === 'element' ? T.eIface : T.iface }] : f => f;
   return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(inst).map(f => f[0] !== 'workspace' ? f
     : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
-    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }]];
+    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: it.vpKind === 'element' ? T.eType : T.type }]];
 }
 // an integrated Vessel Device's part sections, saved onto the parts (never their Interface or Port, Rule 5.31; no swapping)
 function vpxApply(g, x) {
@@ -7476,7 +7485,7 @@ function genDeviceFields(it, item, f) {
 // and Widget's Properties have it, right after its Size (or its place, or its Tab, when it has no Size). It is added here, once, so
 // no dialog's own layout changes (Rule 18.10).
 const LAYER_TIP_IN_VESSEL = 'This Device is built into a Vessel Device, so its Layer Order counts only inside that vessel: 1 is the top part, 2 is under it, and so on. Where the whole vessel sits among the other items on the Tab is the Vessel Device\'s own Layer Order (Rule 1.29).';
-const LAYER_TIP = 'Layer Order, like BruControl\'s Z Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
+const LAYER_TIP = 'Layer Order: which one is drawn on top when items overlap on a Tab. 1 is on top, 2 is under it, and so on. A new item gets 1 and the others move down one. Type a new number and the item moves to that place; the others are numbered again with no gaps. A Process uses .layer (name.layer = 1).';
 // every item is in the Layer Order list, pipes and IP-kind items too (Rule 1.29)
 const inLayers = item => !!item;
 function withLayer(fields, item) {
@@ -7511,7 +7520,7 @@ function fieldsOf(item) {
   if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
-    return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (Fritz's drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
+    return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (a Skynet drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
       ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool'], ['rot', 'Rotate (the picture and its IPs follow)', 'sel', EL_ROTATE]] : []),
       ...(isThermowell(item) ? [['_tw', `Thermowell (${item.front ? 'seen from the front, on a front facing IP' : item.thermowell || 'Short'}): a Temperature Device. Its one IP is the face of its TC cap; drop it on an IP (a tee's branch, a vessel port) and it snaps on. On a front facing IP it shows from the front (Rule 5.30).`, 'note'],
         ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
@@ -7519,7 +7528,7 @@ function fieldsOf(item) {
   if (item.type === 'hydrometer') return hydroFields(item);
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
-    return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
+    return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'Calibrations (used instead of the settings above, from the raw reading)', 'calchain', null, false, false, { tip: CAL_TIP }], SMOOTH_FIELD, ['prefix', 'Prefix', 'text'],
@@ -7661,12 +7670,26 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
+  // (HLT_Vessel.BM_8_HE_HLT~element_BR: Brewery Mega Port 8, the Brewhouse Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_1W_HLT_BR)
+  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_HE_HLT~element_BR.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted.',
-  controlMethod: (it, m) => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`,
+  eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_1W_HLT_BR, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_1W_HLT_BR. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
+  controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_HE_HLT~element_BR'),
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
-  methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_HE_HLT~element_BR.HYS. Off: the full names.',
+  methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  eMethodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. Example: the HLT element has Hysteresis as its Current Method, with Duty Cycle and PID switched on too, so it has four balloons: Direct, Duty Cycle, Hysteresis and PID. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_HE_HLT~element_BR. The ⬢ beside it sets its font, size and colors.',
+  eLabelVisible: 'On: its Label (for example HLT element) shows on the Tab. Off: no Label shows.',
+  eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_HE_HLT~element_BR.',
+  ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_HE_HLT~element_BR.',
+  eTab: 'The Tab this Heating Element goes on, for example Brewhouse. Its Tab ID, BR, ends the Suggested Name: BM_8_HE_HLT~element_BR. ➕ Add new Tab… makes a new Tab and comes back here.',
+  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_HE_HLT~element_BR is BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BR (the Brewhouse Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_HE_HLT~element_BR = on.',
+  eType: 'Its Device Type: HE, a Heating Element. It is the third part of the Suggested Name: BM_8_HE_HLT~element_BR.',
+  eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_HE_HLT~element_BR.visible = false.',
+  eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_HE_HLT~element_BR.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
@@ -7727,7 +7750,7 @@ const DEVICE_TIPS = {
   ePath: 'The picture of your Heating Element when it is off.',
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
-  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in. Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice.',
+  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BR = on turns it On either way.',
   eOverlay: 'What shows on the Heating Element while it is on. Glow (the start): it glows. None: nothing at all, the picture stays as it is. The bolts and others are drawn small in the middle of it, on top of the glow (Rule 7.8).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
@@ -8364,7 +8387,7 @@ function styleEditor(kind, st, from) {
     bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
       ['back', 'Back color', 'color', null, false, false, { tip: 'The color round the digits panel, under the title bar. Default = as it is now.' }],
       ['digits', 'Text Fore color', 'color', null, false, false, { tip: 'The color of the digits.' }], ['panel', 'Text Back color', 'color', null, false, false, { tip: 'The color of the panel behind the digits. Default = the orange-red glow.' }],
-      ['frame', 'Frame', 'sel', TIMER_FRAMES, false, false, { tip: 'The shape of the frame round the panel (Fritz\'s Timer frames): rounded corners, square corners, or square at the top and rounded at the bottom.' }],
+      ['frame', 'Frame', 'sel', TIMER_FRAMES, false, false, { tip: 'The shape of the frame round the panel (the Skynet Timer frames): rounded corners, square corners, or square at the top and rounded at the bottom.' }],
       ['bezel', 'Frame color', 'color', null, false, false, { tip: 'The color of the frame.' }],
       ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
       : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
@@ -8443,7 +8466,7 @@ const INFO = {
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
     ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it): Back, Text Fore and Text Back colors, and the Frame (rounded, square, or square top) with its color.'],
     ['Digits', ': hh:mm:ss or hh:mm, and Seconds only in the last minute (a Timer counting down shows just SS when less than a minute is left).'],
-    ['No pictures and no background', ' (Fritz, 2026-10-29).'],
+    ['No pictures and no background', '.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.'],
     ['▶ ■ ↺ Set', ' buttons under the digits start, stop, reset and set it.']],
     attributes: [['.value', 'the time, hh:mm:ss; the same as the name alone'], ['.running', 'true / false'], ['.countdown', 'true = counts down'], ['.resetvalue', 'hh:mm:ss'], ['.label'],
@@ -8831,7 +8854,7 @@ async function editItem(kind, id) {
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
-    if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
+    if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.eType }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
@@ -11756,7 +11779,7 @@ function renderBuildTemplateTab(box) {
   if (!list.some(t => t.name === btPick)) btPick = list[0]?.name || null;
   box.append(h('h3', {}, 'Build Template'),
     h('p', { class: 'muted' }, TPL.locked ? 'The Skynet Templates are locked: they can only be cloned. Templates made here are User Bundled Templates.'
-      : 'Skynet is still building its Templates: every Template made or changed here is a Skynet Template. They are locked when Fritz says (Skynet Rules 5.16 and 5.18).'));
+      : 'Skynet is still building its Templates: every Template made or changed here is a Skynet Template. They are locked when the Skynet Templates are finished (Skynet Rules 5.16 and 5.18).'));
   const pick = h('select', { title: 'The Template to see or change' }, ...list.map(t => h('option', { value: t.name, ...(t.name === btPick ? { selected: true } : {}) }, `${t.title || t.name}  (${t.name})`)));
   pick.onchange = () => { btPick = pick.value; renderMenuPane(); };
   const mk = async from => {

@@ -1,6 +1,6 @@
 # Value, Time and DateTime Widgets
 
-Three Widgets that show **one value on a Tab** for you to look at (Skynet Rule 1.23, Fritz 2026-11-05):
+Three Widgets that show **one value on a Tab** for you to look at (Skynet Rule 1.23):
 
 | Widget | Shows | Starts as |
 |---|---|---|
@@ -24,7 +24,7 @@ It keeps its value when the Brain restarts.
 
 ## Properties
 
-They look like the Pump's Properties (Skynet Rule 18.30; Fritz, 2026-11-06: "Widget look similar to the Pump Drill Down").
+They look like the Pump's Properties (Skynet Rule 18.30).
 Rest the mouse on a field's name to see what it is for (hover help).
 
 - **The title line:** the 🔓 lock, **Visible** and **Hidden Locked**.
@@ -39,7 +39,7 @@ Rest the mouse on a field's name to see what it is for (hover help).
 
 ## Widget, Device or Clone: your choice
 
-When you put a reading on a Tab, pick what fits your brewery (Fritz, 2026-11-05). Skynet does not choose for you:
+When you put a reading on a Tab, pick what fits your brewery. Skynet does not choose for you:
 
 - **A Device** when a board reads it, for example a **smart pH meter** wired to an Interface: its reading comes in by itself.
 - **A Clone** of that Device (see [Cloned Devices](71-cloned-devices)) when you want the same reading on another Tab, for

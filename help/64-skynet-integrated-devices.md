@@ -40,4 +40,4 @@ A **Thermowell** is a Temperature Device drawn as a TC 1.5 thermowell. There are
 
 ## Skynet TC 1.5 fittings
 
-The Skynet Fitting Templates use Fritz's TC 1.5 drawings, with rounder bends: **Elbow_90**, **Elbow_45**, **Tee** (an equal tee), **End_Cap** and the new **Instrument_Tee**, a short tee with a short, narrow branch for a probe or a gauge. Fittings already on a Tab keep the picture they had.
+The Skynet Fitting Templates use the Skynet TC 1.5 drawings, with rounder bends: **Elbow_90**, **Elbow_45**, **Tee** (an equal tee), **End_Cap** and the new **Instrument_Tee**, a short tee with a short, narrow branch for a probe or a gauge. Fittings already on a Tab keep the picture they had.

@@ -1,6 +1,6 @@
 # Processes
 
-Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `scripts` folder on the Pi and work like BruControl processes.
+Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `scripts` folder on the Pi.
 
 ## The Processes screen
 
@@ -52,22 +52,20 @@ The name alone means its main value, and other attributes use a dot. See [Proces
 
 ## Labels
 
-Every Device and Widget has a **label**: the name shown on the tab (empty = its Name). The old BruControl word `displayname` still works and means the same thing. A process can change it on any kind of Device or Widget, including String, Value and Graphic gGlobals, timers, alarms and outputs:
+Every Device and Widget has a **label**: the name shown on the tab (empty = its Name). The older word `displayname` still works and means the same thing. A process can change it on any kind of Device or Widget, including String, Value and Graphic gGlobals, timers, alarms and outputs:
 
 ```
 tm_Delay_W1.label = "1 Minute Delay"
 gGS_Brewery_Top.label = "Mash"
 ```
 
-(In BruControl this failed on a Global String; here it works the same on every type.)
-
 ## Files that are not on the Brain
 
-When you save a process with a new file path that is not on the Brain (the Raspberry Pi), a warning pops up. That happens for a Windows path such as `C:\BruControl\Media\Hops.wav`, a path outside the media folders, or a file that is not in a media folder yet. Phones and other computers cannot reach those files. Put the file in a media folder with the [Media](07-media) screen and use its path there, for example `sounds/Hops.wav`.
+When you save a process with a new file path that is not on the Brain (the Raspberry Pi), a warning pops up. That happens for a Windows path such as `C:\Brewing\Sounds\Hops.wav`, a path outside the media folders, or a file that is not in a media folder yet. Phones and other computers cannot reach those files. Put the file in a media folder with the [Media](07-media) screen and use its path there, for example `sounds/Hops.wav`.
 
 Tick **Do not show this warning again** to stop the warnings. Turn them back on in **Settings > Panel settings**.
 
-## Differences from BruControl
+## Good to know
 
 - Labels and gotos can be anywhere, even inside if/endif.
 - Starting a process that is already running does nothing (it prints a note).

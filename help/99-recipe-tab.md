@@ -141,7 +141,7 @@ Pick the **Mash Profile**: a Skynet Template, one of your own (☰ Menu > Mash P
 - The Recipe's own mash: **Mash Step +** adds a step, **Delete** takes one away, and the sparge boxes are the same as on the Recipe tab.
 - Calculate on the Recipe tab uses the first step for the 1st Mash and the strike water.
 
-Two Skynet Templates were made for Fritz: **Skynet Single Step, Batch Sparge** (152 °F for 60 minutes, mash out at 168 °F, batch sparge with a 10 minute rest) and **Skynet 3 Mash Steps, Fly Sparge** (122 °F for 15, 146 °F for 30, 158 °F for 20 minutes, mash out at 168 °F, fly sparge with 168 °F water).
+Skynet has two Templates: **Skynet Single Step, Batch Sparge** (152 °F for 60 minutes, mash out at 168 °F, batch sparge with a 10 minute rest) and **Skynet 3 Mash Steps, Fly Sparge** (122 °F for 15, 146 °F for 30, 158 °F for 20 minutes, mash out at 168 °F, fly sparge with 168 °F water).
 
 Skynet_Fields: `rcp_Mash_Profile`, `rcp_Mash_Step_N_Name`, `rcp_Mash_Step_N_Temp`, `rcp_Mash_Step_N_Time`.
 

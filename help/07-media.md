@@ -2,7 +2,7 @@
 
 Pictures and sounds live in **media folders** on the Pi. Everywhere in the panel, a picture or sound is given by its **path** inside a media folder, for example `Images/Skynet/Pumps/Pump_Red_Rip_On.png`. The media folders are listed in **Settings > Panel settings**.
 
-**Every picture lives in `media/Images`**, sorted into **picture groups** (a folder for Pumps, Valves, Vessels ...), with the Skynet pictures kept apart in `Images/Skynet` (see [Picture groups](57-picture-groups)), backgrounds too. The picture lists in the properties dialogs only show pictures from there. **Every sound lives in `media/sounds`.** Old paths still work: `oakbarn/...` (the old name of Images), a bare picture name like `brewery_main.png`, the sample drawings `samples/...`, and sounds imported from BruControl as `Images/wave/...`.
+**Every picture lives in `media/Images`**, sorted into **picture groups** (a folder for Pumps, Valves, Vessels ...), with the Skynet pictures kept apart in `Images/Skynet` (see [Picture groups](57-picture-groups)), backgrounds too. The picture lists in the properties dialogs only show pictures from there. **Every sound lives in `media/sounds`.** Old paths still work: `oakbarn/...` (the old name of Images), a bare picture name like `brewery_main.png`, the sample drawings `samples/...`, and sounds kept as `Images/wave/...`.
 
 On a real brewery all of this is on the Brain (the Pi), in the panel folder: `media/Images` and `media/sounds`. Phones and PCs never hold the pictures; they get them from the Brain. To copy pictures from a PC to the Brain use **File Move** (whole folders at once) or this Media screen.
 
@@ -10,7 +10,7 @@ On a real brewery all of this is on the Brain (the Pi), in the panel folder: `me
 
 It looks like Windows File Explorer: folders on the left, files on the right.
 
-- **Add pictures / sounds**: pick files, or drag them onto the page. A `.zip` is unpacked with its folders, which is handy for a whole BruControl Media folder.
+- **Add pictures / sounds**: pick files, or drag them onto the page. A `.zip` is unpacked with its folders, which is handy for a whole folder of pictures.
 - **New folder**, **Up**, and **Large icons** or **Details** view.
 - Drag a file onto a folder on the left to move it (on a phone use **Move**).
 - Pick several files with **Ctrl+click** or **Shift+click** (on a phone tick **Select many**), then drag them or press **Move picked** or **Delete picked**.
@@ -22,4 +22,4 @@ Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a.
 
 ## Sharp SVG pictures
 
-Every PNG or JPG gets an SVG copy next to it, so it stays sharp at any size. A picture kept in another folder (for example `C:\BruControl\Media`, added in **Settings > Media folders**) gets its copy with the Brain instead, in the hidden `media\.svg` folder, so nothing is written into BruControl's folders. The original is never changed (BruControl can still use it), and you keep typing the `.png` path. **Settings > Pictures** shows each original beside its SVG and lets you pick which one is used. Photo-like pictures look better as the original.
+Every PNG or JPG gets an SVG copy next to it, so it stays sharp at any size. A picture kept in another folder (for example `D:\Pictures`, added in **Settings > Media folders**) gets its copy with the Brain instead, in the hidden `media\.svg` folder, so nothing is written into that folder. The original is never changed (other programs can still use it), and you keep typing the `.png` path. **Settings > Pictures** shows each original beside its SVG and lets you pick which one is used. Photo-like pictures look better as the original.

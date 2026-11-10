@@ -1,7 +1,6 @@
 # Every Device dialog looks like the Pump's
 
-Every Device's Properties work the same way as the Pump's (Skynet Rule 18.31; Fritz, 2026-11-07: "All dialogs for devices should
-follow the Pump Drill down sample"). Once you know the Pump's dialog, you know them all.
+Every Device's Properties work the same way as the Pump's (Skynet Rule 18.31). Once you know the Pump's dialog, you know them all.
 
 ## From the top
 
@@ -25,7 +24,3 @@ X, Y, Width or Height, because it moves with what it is built into. A built in p
 **Calibration offset** and **Reading now**.
 
 In Edit layout, **double-click the part's picture on the Vessel** (or its reading) to open its Properties.
-
-## The BruControl Import
-
-The Importer has no Device dialogs of its own. The Devices it brings in open in these same Properties in the Panel.

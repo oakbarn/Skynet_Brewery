@@ -48,7 +48,7 @@ alm_Hops_1 = false           turn it off
 "alm_PreHop_1" before = 00:05:00
 ```
 
-`alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`: the BruControl Import changes BruControl's `"alm_Hops_1" active = true` into the new style. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
+`alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
 
 ## Sound Player
 
@@ -63,13 +63,3 @@ stop SoundPlayer
 There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Sound Player**.
 
 Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that). To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
-
-## Importing from BruControl
-
-The [BruControl import](08-import) now also does this:
-
-- Each alarm gets a kind guessed from its name: Hops and Aroma are Hop Alarms, Hop or Irish Moss **Warning** ones are Pre-Hop, Strike, Mash, Sparge, Boil and Sanitize are Brew Flow, Music, Sound, Beep and Water Flow are Sound only, the rest are General. The import report lists them; change any on the alarm's settings.
-- Every `"alm_..." active = true` line becomes `alm_... = true`.
-- **Stacked look-alikes are folded into one.** BruControl allows only 3 background pictures per item, so one message panel was often three copies on top of each other (`gblS_Brewery_Top_1`, `_2`, `_3`). Copies with the same name apart from the number at the end, on the same tab at the same spot, become one item (`gblS_Brewery_Top`) with all their pictures: copy 1's pictures are 1-3, copy 2's are 4-6, copy 3's are 7-9. Processes are changed to match, and "hide the other copy" lines become comments.
-- **Timers are never folded**, so a long mash timer, a short delay timer and a sub-process timer can stay stacked.
-- Items stacked at one spot with different names are listed in the report, not folded.

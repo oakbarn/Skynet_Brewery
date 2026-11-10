@@ -1,6 +1,6 @@
 # Build Tab Add button
 
-Three tools on the **Edit layout** bar make building easier (Fritz, 2026-10-27): the turn and flip buttons, grab points on every side, and the X / Y / Width / Height read-out. The **Edit layout** button itself (the hammer and pick beside **☰ Menu**) is **blue** (navy at first; since 2026-11-07 a medium blue, #1D56B0, so it no longer looks black).
+Three tools on the **Edit layout** bar make building easier: the turn and flip buttons, grab points on every side, and the X / Y / Width / Height read-out. The **Edit layout** button itself (the hammer and pick beside **☰ Menu**) is **blue** (navy at first; since 2026-11-07 a medium blue, #1D56B0, so it no longer looks black).
 
 ## The Add button
 

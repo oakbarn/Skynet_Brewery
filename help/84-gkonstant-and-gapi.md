@@ -2,7 +2,7 @@
 
 > **Replaced on 2026-10-30:** gKonstant and gAPI are now one class, **gGlobal** (`gG_` names), and the API is `/api/items`. See [Database and .API on every Device and Widget](98-database-and-api). This page tells the history.
 
-On 2026-10-28 Fritz renamed the two variable classes:
+On 2026-10-28 the two variable classes were renamed:
 
 | Was | Now | What it is |
 |---|---|---|
@@ -49,4 +49,3 @@ The web API address is now **`/api/gapi`** (see [The API](11-api)). `/api/vapi` 
 
 ## Importing
 
-A BruControl `RP_...` Global now comes in as a gAPI named `gA_...` (it used to be `vA_...`), and a `gbl...` Global becomes a gKonstant with the same name. See [Variables](04-variables).

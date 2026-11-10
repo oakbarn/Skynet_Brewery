@@ -13,7 +13,7 @@ import { TYPE_METHOD } from './heatmethod.js';
 const T = {
   // temperature
   '1W': 'DS18B20 (OneWire probe)', RTD: 'RTD: PT100 / PT1000 (MAX31865 board)', TC: 'Thermocouple (MAX31855 / MAX31856 board)',
-  '10KNTC': '10K NTC thermistor (BCS-462 and BruControl type)', '5KNTC': '5K NTC thermistor', '50KNTC': '50K NTC thermistor',
+  '10KNTC': '10K NTC thermistor (BCS-462 type)', '5KNTC': '5K NTC thermistor', '50KNTC': '50K NTC thermistor',
   '100KNT': '100K NTC thermistor (3D printer type)', NTC: 'NTC thermistor, other size', LM35: 'LM35 analog temperature sensor',
   TMP36: 'TMP36 analog temperature sensor',
   // heating
@@ -345,7 +345,7 @@ export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(S
 // How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins
 export function pinLabel(p, board) {
   p = String(p);
-  if (/^A\d+$/.test(p)) return `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)`;
+  if (/^A\d+$/.test(p)) return `A${p.slice(1)} = pin ${54 + +p.slice(1)}`;
   const t = pinTag(p, board);
   return pinProfile(board).label(p) + (t ? `  (${t})` : '');
 }

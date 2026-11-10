@@ -41,9 +41,3 @@ measure it:
 
 The output then shows about how many volts it gives, for example `75 %  ≈ 7.0 V`. A Process reads `My_DAC.volts`, and
 `My_DAC.volts = 7.5` sets the % the pairs say gives 7.5 V.
-
-## From BruControl
-
-The BruControl Importer keeps each Analog In's and probe's calibrations in the same order, with its Decimal Places, Prefix and Suffix
-(the Suffix becomes its Units). A PWM output's BruControl calibrations are not copied, because BruControl counts a PWM output 0-255 and
-Skynet counts it in %. They are listed in the Import notes.
