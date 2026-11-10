@@ -2025,7 +2025,35 @@ heats less often and longer. A minus On offset (cooling) is not a heat Hysteresi
   Hysteresis outside its range, whatever was saved.
 - **Both programs:** the Panel's Properties and Brain check it; the BruControl Import starts every heating element as an Optical
   SSR (BruControl does not say what switches it), brings an On offset outside 0.5 to 3 °F to the nearest end, and lists each one
-  in the Import notes. Help 181. The Fermentor's heat and cool control (to come) follows it too.
+  in the Import notes. Help 181. The Fermentor Control's Heat follows it too (Rule 6.30).
+
+6.30 **The Fermentor Control** (OakBarn Brewery, 2026-11-10: "an integrated Fermentor control that heats and Cools with Hysteresis";
+"Has three integrated devices 1. Heater 2. Cooling 3. Temperature Probe"; "flashing a Light Bulb is not good either"; fermentation is
+exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one Setpoint** with **Hysteresis on both sides**:
+1. **Its three Devices:** the **Heat** (a Heating Element, a Light or a plain Digital Out: heat mat, heat wrap, ceramic heat
+   emitter, lamp), the **Cooling** (a plain Digital Out for a freezer or fridge, a Pump for glycol, or a Motorized valve for glycol;
+   never a Manual valve) and the **Temperature Probe** that reads the beer. Heat only or Cooling only is allowed; the probe is a must.
+2. **Heat comes on** the **Heat On offset** below the Setpoint, **Cooling** the **Cool On offset** above it (both more than 0, 1 °F
+   to start); both stop at the Setpoint, a little before it with Predictive Hysteresis (Rule 6.23, learned for each side).
+3. **Never both On.** One must have been Off for the **Changeover wait** (300 seconds to start) before the other may start (once
+   the other side has run; a fresh start waits only its own On delay).
+4. **Short-cycle protection on both sides:** an **On delay** (the shortest time Off before it starts again: Heat 60 s, Cool 300 s
+   to start) and a **Shortest run** (once on, it stays on at least: Heat 60 s, Cool 120 s). Turning the Fermentor Control On starts
+   each side's On delay, so a freezer just plugged in is never started at once. The Mode or Off stops a side at once.
+5. **Mode:** Heat & Cool, Heat only, Cool only. Heat and Cool are equal (fermentation makes heat at the start, needs heat at the end).
+6. A Heating Element as its Heat runs in **Direct** while the Fermentor Control is On; its offset and On delay are kept to its
+   **Switched by** range (Rule 6.29).
+7. **No reading:** both Off, and it shows No reading.
+8. **Built into a Fermentor Vessel Device** (Rule 5.31) by the Vessel Device Builder (Rule 19.5, question 14): the Heat and Cooling
+   are built in **without a spot** and keep their own names, called VesselName.DeviceName in a Process (Rule 5.31, Help 180);
+   the probe is on its spot. The Fermentor Control itself is called by **its own plain name** (the vessel's Label): `FV1 = on`,
+   `FV1.setpoint`, `FV1.mode`, `FV1.heatoffset`, `FV1.cooloffset`, `FV1.changeover`, `FV1.heatdelay`, `FV1.heatminrun`,
+   `FV1.cooldelay`, `FV1.coolminrun`; `FV1.doing` (Off, Idle, Heating, Cooling, Waiting to heat, Waiting to cool, No reading) is
+   read only. It has no Port of its own.
+9. **One click** turns it On or Off (Rule 2.44); **a click on its probe opens its Setpoint** (Rule 2.43).
+10. **Both programs:** the Panel's Properties, Vessel Device Builder and Brain; the BruControl Import makes ONE Fermentor Control
+    from a heating Hysteresis (a plus On offset) and a cooling Hysteresis (a minus On offset) on the same probe, keeps the two
+    outputs' names and Ports, takes the Setpoint, offsets and the longer of the two On delays, and lists it in the notes. Help 182.
 
 ## 7. Pictures
 
@@ -3235,6 +3263,11 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    **Your vessels** step has **🔨 Build** on each vessel: it opens the builder on the Importer's Build page with the questions
    filled in from that vessel's row (public/vesselbuilder.js vbFromImport). The Heating Element and Probe pickers list the
    imported ones, the row's own first. A part already built into a vessel (the Three Vessel sample's too) is never listed.
+9. **14. Fermentor Control** (2026-11-10, Rule 6.30): None, Heat & Cool, Heat only or Cool only (a Thermowell / Probe is a must).
+   After 🔨 Build the panel has a **Heat** row and a **Cooling** row: pick one not built into anything, or **➕ Add new** (Heat mat,
+   Heat wrap, Ceramic heat emitter, Heating Element, Light; Freezer or fridge, Glycol pump, Glycol valve). They are built in
+   without a spot, beside the vessel. Then the Fermentor Control is made, named after the vessel's Label. In the Importer, a
+   Fermentor Control the Import already made on that probe is built in instead of a second one. Help 182.
 Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 ## Open questions (not Rules yet)
@@ -3272,6 +3305,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Added Rule 6.30, the Fermentor Control (OakBarn Brewery: "an integrated Fermentor control that heats and Cools with Hysteresis"): one Setpoint, Heat below and Cooling above it, never both On, a Changeover wait, an On delay and a Shortest run on each side, Mode Heat & Cool / Heat only / Cool only; built into a Fermentor by the Vessel Device Builder (Rule 19.5 question 14). Help 182. Checked against both programs: the Panel's Properties, Builder and Brain run it; the BruControl Import joins a heating and a cooling Hysteresis on the same probe into one. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Changed Rule 1.29, Layer Order (OakBarn Brewery: "the layer only applies inside the Integration. The Vessel Device has Layer that deals with the Hierarchy on a Tab"): a Device built into a Vessel Device is not in its Tab's list; its Layer Order counts only among that vessel's parts, and the vessel's own Layer Order places the whole group on the Tab. Help 114 updated. Checked against both programs: the Panel draws and numbers it this way; the BruControl Import makes no built-in parts with a Tab Layer Order to change (the Vessel Device Builder builds them), so nothing changes there. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Added Rule 6.29, Heat Hysteresis by what switches it (OakBarn Brewery: "Offset Range from .5 to 3 is allowed for heating elements with Optical SSRs"): a Heating Element's Switched by (Optical SSR, Contactor, Mechanical relay) sets its heating Hysteresis On offset range (0.5 to 3 °F; 2 to 5 °F with an On delay of at least 60 seconds); Save, a Process and the .API are refused outside it and the Brain never runs outside it. Help 181. Checked against both programs: the Panel's Properties and Brain check it; the BruControl Import starts heaters as Optical SSR and brings imported offsets into range, listed in the notes. (thread "Build integrated Fermentor heat and cool control")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")
