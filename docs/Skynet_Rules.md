@@ -2278,7 +2278,7 @@ Alarm Chain step, the Sound Player, the sound before a hop alert, and a Process'
 folders on the Brain **or** a web link that starts with `https://` (or `http://`) and points straight at the sound file. The browser
 plays the link from the web, so the file never has to be on the Brain. **When a sound can't play** (OakBarn Brewery, 2026-11-10: "We will Do a Text to Speach MP3 for a Missing
 Alarm Sound"): a link with no internet, a wrong link, or a file that is missing. An Alarm then plays the **Missing Alarm Sound**, a
-voice clip on the Brain (`sounds/Skynet/Alarm_Sound_Missing.mp3`, made by OakBarn Brewery), or the Skynet beep (`sounds/alarm_beep.wav`)
+voice clip on the Brain (`sounds/Skynet/Alarm_Sound_Missing.mp3`, a Text to Speech voice made by OakBarn Brewery), or the Skynet beep (`sounds/alarm_beep.wav`)
 when that isn't there either, and shows a warning that says why; an Alarm is never silent. A Sound Player plays OakBarn Brewery's own
 song *Find The File - Connecting* (Treblo, `sounds/Skynet/Find_The_File_Connecting.mp3`) once instead, with the same warning (OakBarn
 Brewery, 2026-11-10: the song for music, the voice for Alarms); the sound before a hop alert is skipped and the alert's voice still speaks. Help says a file on the Brain is the safest choice for Hop and
