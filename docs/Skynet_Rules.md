@@ -1972,6 +1972,19 @@ or its words, any capitals; `""` puts back its Properties' pick). A Flow meter's
 Total when Total is picked), so BruControl scripts work either way. **Both programs:** the Importer turns Show Secondary Value off into
 the main value's pick and lists it in the notes. Help 174.
 
+6.27 **Board settings and Board Talk** (OakBarn Brewery, 2026-11-09: "You could add the Board things also as it is possible
+sometimes to use communications to the board to find or fix a problem. There was no real explaination on how to communicate or what
+to send and what is reply meant"). Each Interface has **Board settings** (its ⚙ Change dialog, both programs): **On** (Off = never
+opened; saved as `enabled`), **Pause communications** (only PING is sent, so the board keeps its outputs; what the board says is
+shown but not used; going on again sends every setting and output), **Answer wait** (seconds without a word from the board before
+the Devices page says "no answer"; 2 to 600, default 10; BruControl's Response Timeout), **Diagnostic logging** (every line, with
+plain words, to a file a day in the data folder's logs/boards), **Baud** (USB) and **Network port** (Ethernet / WiFi), which must
+match the program on the board (Skynet's: 115200 and 4100). **Board Talk** (💬 on the Devices page, admins) is a window with every
+line to (→) and from (←) the board, each with its time and its meaning in plain words, Hide PING, Pause, and a box to send a line
+(sent even while paused). Help 177 lists every line in plain words (public/boardtalk.js, the same words as the window; the details
+are in docs/DEVICE_PROTOCOL.md). BruControl Import: Enabled, Baud and Response Timeout (ms to seconds) are kept; Logging is listed in
+the notes, not turned on (it writes every line); Refresh Interval is not copied. Help 177.
+
 6.28 **Last One Rules** (OakBarn Brewery, 2026-11-09, its own draft: "All for One, One For All"): **The last Device with the same
 Interface and Port controls the action.** How can there be more than one Device with the same Interface and Port (Rule 6.1)? There
 cannot be, but there are two cases that may look like more than one:
@@ -3673,5 +3686,6 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added Rule 2.45, Time and DateTime formats (OakBarn Brewery): Shows as on Time, DateTime and Code Value Widgets, more Digits on a Timer, `.showas` takes any format; the Importer keeps a Timer's Format and a time Global's Format; Help 176. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 2.40 point 4 built (OakBarn Brewery's approved wording): gauge settings drawn by Skynet (Dial shape, tick marks, the Skynet Bar, Skynet color styles); the Import maps BruControl gauges to the nearest; Help 152. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
+- 2026-11-09: Added Rule 6.27, Board settings and Board Talk (OakBarn Brewery): On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port on each Interface; Board Talk shows every line both ways in plain words and sends a typed line; the Importer keeps Enabled, Baud and Response Timeout; Help 177. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")

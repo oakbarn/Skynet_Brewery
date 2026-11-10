@@ -19,6 +19,7 @@ import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, p
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
@@ -10253,6 +10254,7 @@ function renderDevices() {
     tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.connection] || d.connection) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realConnection]})` : d.connection === 'simulator' && d.realConnection ? ` (for ${TYPES[d.realConnection]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
       h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its connection (USB, Ethernet, WiFi or Simulator), port or address, board and ID', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+    tb.lastChild?.lastChild?.append(' ', h('button', { class: 'admin-only', title: 'Board Talk: every line to and from this board in plain words, and a box to send one (Rule 6.27)', onclick: () => boardTalk(d.name) }, '💬 Board Talk'));
   }
   renderProbes();
 }
@@ -10325,11 +10327,76 @@ const IFACE_ID_NOTES = [
   'Set it once, now, and do not change it. Devices made before a change keep the old ID in their names, so a change leaves a mix of names.'];
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
+// ---- Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
+const BOARD_TIP = {
+  on: 'On: the panel talks to this board. Off: the panel never opens it (BruControl: Enabled). Its Devices show as not connected.',
+  paused: 'On: the panel stops sending to this board (only "are you there?" PINGs, so the board keeps its outputs as they are) and does not use what the board says. For finding a problem; Board Talk still shows every line. Off again sends every setting and output so the board matches the screen.',
+  answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer" (BruControl: Response Timeout). 2 to 600; empty = ${BOARD_DEFAULTS.answerSec}.`,
+  logging: 'On: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). For finding a problem; turn it off after.',
+  baud: 'How fast the USB line talks. It must be the same as the program on the board: Skynet\'s own programs use 115200.',
+  netPort: 'The network port the board listens on. It must be the same as the program on the board: Skynet\'s own programs use 4100.',
+};
+const boardFields = o => [['_bsh', 'Board settings', 'head'], ['enabled', 'On', 'bool', null, false, false, { tip: BOARD_TIP.on }],
+  ['paused', 'Pause communications', 'bool', null, false, false, { tip: BOARD_TIP.paused }],
+  ['answerSec', 'Answer wait (seconds)', 'num', null, false, false, { tip: BOARD_TIP.answer }],
+  ['logging', 'Diagnostic logging', 'bool', null, false, false, { tip: BOARD_TIP.logging }],
+  ...(o.connection === 'serial' ? [['baud', 'Baud (USB speed)', 'sel', BAUDS.map(b => [b, String(b) + (b === BOARD_DEFAULTS.baud ? ' (Skynet)' : '')]), false, false, { tip: BOARD_TIP.baud }]] : []),
+  ...(['ethernet', 'esp32'].includes(o.connection) ? [['netPort', 'Network port', 'num', null, false, false, { tip: BOARD_TIP.netPort }]] : []),
+  ['_btk', 'Board Talk (on the Devices page, 💬) shows every line sent to and from the board in plain words, and sends a line you type.', 'note']];
+function boardStart(w) {
+  w.enabled = w.enabled !== false; w.paused = w.paused === true; w.logging = w.logging === true;
+  w.baud = Number(w.baud) || BOARD_DEFAULTS.baud;
+  w.netPort = ['ethernet', 'esp32'].includes(w.connection) && Number(w.port) > 0 ? Number(w.port) : BOARD_DEFAULTS.netPort;
+  w.answerSec ??= '';
+}
+function boardSave(d, w) {
+  if (w.enabled === false || w.enabled === 'false') d.enabled = false; else delete d.enabled;
+  for (const k of ['paused', 'logging']) if (w[k] === true || w[k] === 'true') d[k] = true; else delete d[k];
+  const a = String(w.answerSec ?? '').trim();
+  if (a === '') delete d.answerSec; else { const n = Math.round(Number(a)); if (!(n >= 2 && n <= 600)) throw new Error('Answer wait is 2 to 600 seconds (empty = 10)'); d.answerSec = n; }
+  if (d.connection === 'serial') d.baud = BAUDS.includes(Number(w.baud)) ? Number(w.baud) : BOARD_DEFAULTS.baud;
+  if (['ethernet', 'esp32'].includes(d.connection)) { const n = Math.round(Number(w.netPort)); if (!(n >= 1 && n <= 65535)) throw new Error('Network port is 1 to 65535 (Skynet uses 4100)'); d.port = n; }
+}
+// Board Talk (Rule 6.27): a window with every line to (→) and from (←) a board, each in plain words; a box to send a line; Pause
+function boardTalk(name) {
+  let after = 0, timer = null, hidePing = true;
+  const list = h('div', { class: 'btList' }), state = h('span', { class: 'muted' });
+  const inp = h('input', { class: 'btLine', placeholder: 'A line to send, for example HELLO or DO 22 1', maxlength: 120 });
+  const pauseBtn = h('button', { onclick: guard(async () => { await api('POST', '/ui/boardtalk', { name, pause: !pauseBtn.dataset.on }); pull(); }) });
+  const send = guard(async () => { const line = cleanTalkLine(inp.value); await api('POST', '/ui/boardtalk', { name, line }); inp.value = ''; pull(); });
+  inp.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); send(); } };
+  const row = l => {
+    const arrow = { out: '→', in: '←', held: '⏸', note: '!' }[l.dir] ?? '';
+    return h('div', { class: 'btRow bt-' + l.dir, title: l.dir === 'out' ? 'Sent by the Brain to the board' : l.dir === 'in' ? 'Sent by the board to the Brain' : l.dir === 'held' ? 'Not sent: communications are paused' : '' },
+      h('span', { class: 'btTime' }, new Date(l.t).toLocaleTimeString()), h('span', { class: 'btArrow' }, arrow), h('code', {}, l.line),
+      l.dir === 'note' ? '' : h('span', { class: 'btWords' }, explainLine(l.line, l.dir === 'in' ? 'in' : 'out')));
+  };
+  const pull = async () => {
+    let r; try { r = await api('GET', `/ui/boardtalk?name=${encodeURIComponent(name)}&after=${after}`); } catch (e) { state.textContent = e.message; return; }
+    const atEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
+    for (const l of r.lines) { if (hidePing && /^PING$/i.test(l.line)) continue; list.append(row(l)); }
+    while (list.childElementCount > 500) list.firstChild.remove();
+    if (r.lines.length && atEnd) list.scrollTop = list.scrollHeight;
+    after = r.seq;
+    state.textContent = `${r.status}${r.paused ? ', paused' : ''}${r.logging ? ', logging to a file' : ''}${r.info ? ': ' + r.info : ''}`;
+    pauseBtn.textContent = r.paused ? '▶ Talk again' : '⏸ Pause communications'; pauseBtn.dataset.on = r.paused ? '1' : '';
+  };
+  const d = h('dialog', { class: 'boardTalk' },
+    h('h3', {}, `💬 Board Talk: ${name}`),
+    h('p', { class: 'muted' }, '→ the Brain to the board, ← the board to the Brain, each with plain words. Help 177 lists every line.'),
+    h('div', { class: 'bar' }, state, ' ', pauseBtn, ' ', h('label', {}, h('input', { type: 'checkbox', checked: true, onchange: ev => { hidePing = ev.target.checked; } }), ' Hide PING'),
+      ' ', h('button', { onclick: () => list.replaceChildren() }, 'Clear the window')),
+    list,
+    h('div', { class: 'bar' }, inp, ' ', h('button', { class: 'primary', onclick: send }, 'Send'), ' ', h('button', { onclick: () => d.close() }, 'Close')));
+  d.addEventListener('close', () => { clearInterval(timer); d.remove(); });
+  document.body.append(d); d.showModal(); pull(); timer = setInterval(pull, 1000);
+}
 async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {}) {
   if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
   const old = edit ? S.config.devices.find(d => d.name === start.name) : null;
   const renamable = !old || !ifaceUsers(old.name);      // a name nothing uses yet may still be changed here (a brand-new Interface)
   const w = toConnection({ name: '', id: '', board: 'mega', connection: 'serial', port: '', host: '', ...clone(old || start) });
+  boardStart(w);
   let ports = [];
   try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; } catch { /* no USB support on the server */ }
   const fields = o => {
@@ -10346,6 +10413,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
       ...(rt.text ? [['_rt', 'Connection rating: ' + rt.text, 'note']] : []),
       ...(o.connection === 'serial' ? [['port', 'USB port', 'text'], ['_pt', `For example COM3 (Windows) or /dev/ttyACM0 (Pi).${ports.length ? ' Found now: ' + ports.map(p => p.path).join(', ') : ''}`, 'note']] : []),
       ...(['ethernet', 'esp32'].includes(o.connection) ? [['host', 'Network address', 'text'], ['_ht', 'For example 192.168.1.60', 'note']] : []),
+      ...boardFields(o),      // Board settings (Rule 6.27)
       ...(S.sim?.on ? [['_sim', '🧪 The panel is in Simulator mode: every Interface is pretend until you switch to Real boards.', 'note']] : []),
     ];
   };
@@ -10368,6 +10436,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
         if (w.connection === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
         if (['esp32', 'ethernet'].includes(w.connection)) { d.host = String(w.host ?? '').trim(); d.port = 4100; if (!d.host) throw new Error('Type the network address'); }
+        boardSave(d, w);
         const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
         await api('PUT', '/ui/layout', { devices });
         if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
