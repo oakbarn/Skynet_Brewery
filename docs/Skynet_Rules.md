@@ -7,6 +7,21 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 
 ## How Rules work
 
+- **No old ways before the Public Production; nothing old ever breaks after it** (OakBarn Brewery, 2026-11-09: "Do Not Worry about
+  OLD ways of doing something. There will be ZERO old in the first production."; "Old Ways will never be depreciated in any Update.
+  We may have trial Productions but when the Public Production is produced, not can be old in it. An update may change things but
+  never require old methods be updated to a new standard.").
+  - **Until the first Public Production** (trial productions count as before it): there is nothing old. A Rule does not keep or
+    explain an older way of doing something (an older Schema, an older word). Change log lines and *Replaced:* notes stay as history.
+  - **After the Public Production:** an update never takes away an old way and never makes an old item be brought up to a new
+    standard. An item may need to be brought up to a new standard to use a new feature (for example a new attribute), and the user
+    then changes it to use it; an item left alone works as it did before.
+- **Two rules behind every update** (OakBarn Brewery, 2026-11-09: "Rule # 1: Never Take Away, Only Add! and Rule # 2: Always use a
+  Meaningless Key. 90% of issues with software updates are removed if you follow those rules."):
+  1. **Never take away, only add.** An update adds things; it does not remove what users already have (after the Public Production,
+     above).
+  2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
+     rename never breaks a link.
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -303,6 +318,23 @@ top while Processes run, the others move down one on the screen; a whole number 
 Only the markers Skynet adds itself (a Device's own IPs, the hotspots, a hose end to grab) always stay on top. The **BruControl Import** brings the Z Order across as `.layer`: BruControl's file has no Z Order field, its order is
 the order of each Workspace's Elements list, the first one on top (Layer Order 1) (Rule 15.4). Help 114.
 
+1.30 **A gGlobal takes only its own Kind of value** (OakBarn Brewery, 2026-11-09: "A gGlobal accepts a value that is only its
+type. An error is thrown if you try to put the wrong type of data"). `gT_HopDrop_1 = 00:15:00` works; `gT_HopDrop_1 = "My Hop
+Drop"` is an **error**, and so is `new gT gT_HopDrop_1 = "My Hop Drop"` (making it with a value works the same way, Rule 1.24).
+A **Value** (gV_) takes a number, a **String** (gS_) text in quotes, a **Boolean** (gB_) true or false (on or off), a **Time** (gT_)
+a time such as 00:15:00, and a **Date Time** (gD_) a date and time (`now`, `now + 01:00:00`, or text that reads as a date and time,
+such as "11/09/2026 07:00:00", because a date can't be typed any other way). Nothing is turned into another Kind on the quiet: the
+gGlobal **keeps its old value**, the Process stops, and the error says in plain words what the gGlobal takes and what it was given
+(a number into a String: put it after `"" +`, such as `"" + 152`). A value typed right on the line is found by the **Check**, before
+the Process runs; one that comes from somewhere else (a variable, a Device, a sum) is found when the line runs. The Kind is the one
+the gGlobal was made with (Rule 1.19), whatever its name starts with. A Time gGlobal also has **`.minute`** and **`.seconds`**
+(OakBarn Brewery, 2026-11-09: "where an Integer is the value", "gT_HopDrop_1.seconds = 126 would translate as 00:02:06", "or
+maybe even hours if enough seconds are added"): they take **a whole number only**, which is turned into a time and becomes the
+**whole value**, rolling over into minutes and hours: `gT_HopDrop_1.minute = 5` is 00:05:00, `.seconds = 45` is 00:00:45,
+`.seconds = 126` is 00:02:06 and `.seconds = 3726` is 01:02:06. Read, they give the whole time in minutes or seconds (01:02:06 reads
+62 and 3726), so `gT_HopDrop_1.minute += 5` adds five minutes. 2.5 or text is an error. Both programs follow this: a Process brought
+in by the **BruControl Import** is checked the same way. Help 145.
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -356,6 +388,12 @@ Vessel Device, a Valve Tee or a Supply Manifold) and of a Heating Element (on it
   so it is not one of them. Pumps keep their own Toggle list (Rule 2.33).
 - **Both programs:** the BruControl Import makes a heater BruControl marked as not user controlled a Toggle too (Rule 2.44's
   "When tapped: none" is not used on them). Help 179.
+
+2.47 **No Hidden Lock on any Integrated Item** (OakBarn Brewery, 2026-11-09: "Rule All: No Hidden Lock on any Integrated Item.
+Ignore the Hidden Lock Setting if there is one."). An item built into a Vessel Device, RIMS tube, kettle or any other Integrated item
+has no **Hidden Locked** switch in its Properties. A Hidden Locked setting it already has (an older Schema) is ignored, and a
+Process's `Name.hidden = true` does nothing to it. **Visible** still works. The lock, **Visible** and **Hidden Locked** in a dialog's
+title line each have a help balloon (Rule 2.38). Help 180.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -681,6 +719,18 @@ allowed method that does. A Tap set by hand (When tapped) still wins. Operators 
   Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
   temperature widgets", Help 160)
 
+2.45 **Time and DateTime formats: pick how a time shows** (OakBarn Brewery, 2026-11-09: BruControl's time Globals become Time or
+DateTime Widgets, with more than one format, and the Importer carries the format over). A **Time Widget** and a **DateTime
+Widget** (and a Code Value Widget holding a Time or DateTime) have **Shows as** in their Properties; a **Timer** has the same Time
+formats in its **Digits** box (Rule 2.40). Time: hh:mm:ss (the standard look), hh:mm, h:mm:ss, mm:ss (all minutes, 90:00), Minutes
+only, Seconds only, Days too. DateTime: mm/dd/yyyy hh:mm:ss (the standard look), with AM / PM, Date only, Nov 9, 2026, Monday,
+November 9, 2026, Clock (2:30 PM), 24-hour clock, Day and clock, 2026-11-09 14:30:00. The letters are the same ones BruControl
+and Windows use (yyyy MMM dd ddd HH hh mm ss tt; for a Time the biggest unit holds the whole time), so a Process can set **any**
+format with **`.showas`** (`wgt_TM_Boil_BR.showas = "mm:ss"`, `tm_Boil.showas = "mm' min'"`); `""` puts back the Properties'
+pick. Only how it shows changes: the value a Process reads is the same. Both programs: the BruControl Import keeps a Timer's
+Format, and a Time or DateTime Global's Format rides along in its Globals list for when Globals are imported (each becomes a
+Time or DateTime Widget with that format). Help 176.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -749,7 +799,8 @@ how the Graphic Picker handles a path. (2026-10-27)
 
 3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
 name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
-the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
+the new name, the **Suggested Name**, ✖ Cancel, 💾 Save and **💾 Update to Suggested** (Rule 3.16). The same pop-up renames
+Processes and Schemas. (2026-10-27)
 **All names are treated the same** (Fritz, 2026-10-29): a name is only there to find the item on the screen and, in the Process
 Editor, to set its `.attribute`. **Skynet names are fixed** and are never changed (only while building Skynet). **Any name a Process
 could use changes only with ✏ Change name** (Rule 3.6: the Processes follow). Exceptions: **User Template names** (only for picking
@@ -786,6 +837,18 @@ hidden name (the one saved in the Schema, used by the code) is the name shown on
 an Interface's **Connection** (USB, Ethernet, WiFi or Simulator) is saved as `connection`, and the real Connection of a board in the
 Simulator as `realConnection` (they were `type` and `realType`). An old Schema is changed over by itself when it is opened; nothing
 else changes for the user. Both programs: the BruControl Importer writes `connection` too.
+
+3.16 **The Suggested Name follows the Label** (OakBarn Brewery, 2026-11-09: "Rule All: A change in the Label Updates the Suggest
+Name"; "All Change Name Dialog gets new Button").
+- In every Properties box, typing a **Label** (or picking another Interface, Port, Device Type or Tab) changes the **Suggested Name**
+  line at once. The Name itself stays as it is until it is changed (Rule 3.11).
+- The Suggested Name always has its Device Type ID: a Device saved without one (the Three Vessel sample's built-in heaters and probes
+  were) gets its usual one (HE for a Heating Element), so `BM_8_HE_HLT~element_BR`, not `BM_8_HLT~element_BR`.
+- **Every Name Change pop-up** shows the Suggested Name and has **💾 Update to Suggested** beside ✖ Cancel and 💾 Save: one click
+  saves the Suggested Name. A Process or a Schema has no Suggested Name, so there the button is greyed out.
+- **The Label's help balloon is made for where it is:** it names its own Label, shows its own Suggested Name with the Label part in
+  red (`MB_22_HE_`**`HLT~Element`**`_BR`), says spaces become ~, and says what the ⬢ (font, size and colors) and ⬆ (a 2 line Text
+  Box) beside it do. Help 180.
 
 ## 4. Making things: the Build Tab
 
@@ -837,13 +900,16 @@ a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar;
 **the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
 already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
 be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). The name is only for reference in its
-Properties. **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
+Properties. (An **Integrated Instance** is not a Clone: it is a copy that becomes independent, Rule 6.1.) **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
 (the key link is built once PR #114 is in; until then a Clone points at its parent by name). Only **.visible, .x, .y and its Tab** (a
 Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
 Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
-rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
-per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+rename. **Deleting the parent** (OakBarn Brewery, 2026-11-10) asks which of these the user wants: **1. all killed:** the Device and
+all its Clones are deleted; **2. one Clone:** the user picks that Clone to be the Device; **3. several Clones:** the user picks which
+Clone becomes the Device and Parent, and the others stay its Clones. The Device moves to that Clone's Tab and place and the Clone
+goes; it keeps its name, hidden key, Port and Processes, and pipes on that Clone's IPs now end on it. *Replaced:* "deleting the parent
+deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 - **Method Clones: Devices with more than one Control Method** (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the
   Device displayed like Tartan has one"; "Make it part of the Rule for Devices that have more than One Control Method"). A Clone of
   a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
@@ -1278,6 +1344,20 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   - **Once it is built and saved** (on a Tab, not the 🔨 Build Tab, and the layout saved), **its IPs (Place), parts and HERMS coil
     can't be changed and it can't be un-bundled: there is no way back** (Fritz: "No Way to Back Out Once Built and Saved"). Its
     Name, Labels, Gallons, Tab and place can still change.
+  - **A heater integrated into a Vessel Device becomes an inseparable part of that Device** (OakBarn Brewery, 2026-11-09). It has its
+    own Properties that are first inherited from its Template, but once on a Vessel Device those Properties are unique to the Vessel
+    Device and never have any connection with any other Instance of that heater, EXCEPT: **Last One Rules!** See Rule 6.28. You can
+    only look at and edit its Properties on its Vessel Device. **In a Process it is VesselDeviceName.IntegratedDeviceName**
+    (`HLT_Vessel.BM_8_HE_HLT~element_BR = On`, `HLT_Vessel.BM_8_HE_HLT~element_BR.setpoint = 152`, any capitals), and so is a Probe
+    or Thermowell built into it; its plain name alone is refused in a Process. A rename of the Device or the vessel changes every
+    Process for you. Its Interface and Port are greyed out in the Vessel Device's Properties too (Rule 6.1).
+  - **Physical hardware may be replaced; the Device never is** (OakBarn Brewery, 2026-11-09: "Physical Hardware (such as a Heating
+    Element or Motorized Valve can be replace as long as it is wired in the exact same way to the same controlled Outlet controlled
+    by the same Interface Port Combination. Devices with different wiring or a different Interface Port Combination cannot be swapped
+    inside a Vessel Device. Once an Interface Combination is integrated, it can never be changed. The Vessel Device "locks" every
+    Interface Port Combinations that are integrated and none may be swapped for a different Device Port Combination ever."). A new
+    heater or valve wired exactly the same way to the same Port needs no change in Skynet. There is no Swap in a Vessel Device's
+    Properties.
   - The **RIMS tube Template is a kind of Vessel Device Template** (Fritz, 2026-11-05: "the Element and Probe are set and Locked.
     Just the shape and # of available IPs are fixed and shown"); it keeps its own Properties (Rules 5.3, 18.10).
   - *Replaced for a Vessel Device:* "a user can change the Place sliders on their copy" and "A Placed Probe or Element links a
@@ -1481,15 +1561,18 @@ Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
-Major difference from BruControl"). No two Devices share a port on an Interface, whatever their Device Types. A heater's ways of
-control are one Heating Element's heating methods (Rule 6.19), not more Devices. The Available Ports lists never offer a port in
-use, and saving a Device on a used port is refused and says which Device has it.
-- **Once a Port is picked, it is taken** (Fritz, 2026-11-07: "Once a Port Is Selected, it is taken. So the method of choosing a
-  Port has to be addressed as well"): every way of choosing a Port (the Add box, Properties, a Vessel Device's or a Valve Tee's
-  parts, a RIMS tube, and the older typed Pin boxes, whose list now holds only free Ports) offers only the free Ports on that
-  Interface that fit the Device, plus the Device's own. A Port picked by one Device drops off every other list.
-- **Older Schemas:** two Devices that already shared a port in a saved Schema (made under the old exception below) keep working
-  as before, the last one turned on wins and the others turn off, and can still be saved; no new sharing can be made.
+Major difference from BruControl"; reworded by OakBarn Brewery, 2026-11-09). **No two Devices ever share a Port on an Interface,**
+whatever their Device Types. A heater's ways of control are one Heating Element's heating methods (Rule 6.19), not more Devices. The
+Available Ports lists never offer a Port that is assigned, and saving a Device on a used Port is refused and says which Device has it.
+- **Once a Port is picked, it is taken:** it can never be picked again. It never shows up on a list to be picked, because only free,
+  fitting Ports fill any pick list.
+- **A Template, Device or Integrated Device can NEVER change its Interface or Port.** Once set, they still show in its Properties,
+  greyed out: you can see them but not change them.
+- **Quibbling exception: Integrated Instances and Clones:**
+  1. An Integrated Device inherits its Properties from the Template and then becomes independent, but it still follows this Rule. As
+     long as a Template, a Device or an Integrated Device uses an Interface and Port, that Port is never available to be used ANYWHERE.
+     See Rule 6.28, Last One Rules.
+  2. Clones are simply duplicates of the Parent, except: see Rule 6.28, Last One Rules.
 - **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
   (for example a pump's on/off and its PWM speed) is listed in the Import notes so the brewer can keep one.
 *Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
@@ -1651,8 +1734,7 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **Direct**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**. **Direct** is full on or
-off, the method that was called **On/Off** (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct"); a Process that says "On/Off"
-still works.
+off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
   still's column, which a BruControl PID could not hold): a calm PID that holds a Setpoint to 0.1 degree. It shares the PID's
   Setpoint, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Setpoint; it starts there),
@@ -1677,7 +1759,7 @@ still works.
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
   its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
-  nothing ticked has one way of control. **Direct (On/Off) is always allowed and always has its spot; it is not a tick box** (Fritz,
+  nothing ticked has one way of control. **Direct is always allowed and always has its spot; it is not a tick box** (Fritz,
   2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
@@ -1687,6 +1769,12 @@ still works.
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
+- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5): **Current Method** (a dropdown) and **Short Label** (a
+  switch) on one line; then **Enabled**, a switch under each method's name: **a method must be enabled to be used** (the Current Method
+  and Direct are always on, greyed); then **Control Method**, a balloon for each enabled method, the Current Method **Red** and the others
+  **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
+  the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
+  is in now. The explanations are in hover help, so the dialog stays clean.
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
@@ -1706,8 +1794,7 @@ still works.
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
-- **A Process:** `hE_1.method = "PID"` (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC; the
-  older "On/Off" is Direct), or the
+- **A Process:** `hE_1.method = "PID"` (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
   `.DutyC`, `.PID`, `.DeadB`, `.PREC` or `.DO` switches it to that method, the same as `.method =`. Its settings
   by the same names the separate Devices had (`.setpoint`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
@@ -1745,7 +1832,9 @@ Electricians and can give no electrical advice. Consult a Licensed Electrician."
 Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
 help on its Heating method, Help 137 and 150, the BruControl Import's Heating Element note), it shows:
 **"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
-Electrician."** Any later page or dialog about wiring gets the same words.
+Electrician."** Any later page or dialog about wiring gets the same words. In a help balloon (the Heating method's) the warning comes
+**first**, with a red warning triangle, in **red bold** words, then the rest of the help (OakBarn Brewery, 2026-11-10, "Heat Method Hover
+Help").
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -1863,6 +1952,27 @@ a Primary Value and a Show Secondary Value switch; Skynet lists every value. A P
 or its words, any capitals; `""` puts back its Properties' pick). A Flow meter's `.value` follows it (BruControl's Primary Value: its
 Total when Total is picked), so BruControl scripts work either way. **Both programs:** the Importer turns Show Secondary Value off into
 the main value's pick and lists it in the notes. Help 174.
+
+6.28 **Last One Rules** (OakBarn Brewery, 2026-11-09, its own draft: "All for One, One For All"): **The last Device with the same
+Interface and Port controls the action.** How can there be more than one Device with the same Interface and Port (Rule 6.1)? There
+cannot be, but there are two cases that may look like more than one:
+1. **A Clone** (Rule 4.4).
+   a. A Clone is an exact copy of its Device and is like the Borg.
+   b. A Clone and its Parent have one set of Properties. Change one and it changes the other. They are **totally dependent** and just
+      a reflection of each other. You can consider them one, except for the **Last One Rules!** Whoever in this group turns something
+      On, all of the group turn On. Because of this, think of the Device and its Clones as ONE. In this Rule, **Device** means the
+      Device and all its Clones, unless a Clone is the topic (**Last One Rules!**).
+2. **An Integrated Instance** on a Vessel Device (Rule 6.1).
+   a. It has the Properties it inherited from where it was made, but unlike a Clone it becomes totally independent, except for the
+      **Last One Rules!** It is more like Bob of the Bobiverse (We Are Legion) than the Borg.
+   b. An Integrated Instance of a Device has its own independent Properties that have no link to the original Device or Template,
+      except that they share the same Interface and Port.
+3. In both cases the Interface and Port cannot be used to make a new Device, and neither one can change its Interface or Port.
+4. **LAST One Rules!** And most important for the On or method action of something like a Heater: whenever a Device commands
+   something to turn On, all its Instances are turned Off. Whenever an Instance commands something to turn On, the Device and the
+   other Instances are all turned Off. **Only one, the Device or one Instance of the same Interface and Port, can be On at one time**
+   (that is really why they are not truly independent and not really separate: all just one happy family). The last one turned Off
+   turns the Port Off, so every one on it is Off. Help 180.
 
 ## 7. Pictures
 
@@ -2933,12 +3043,12 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   Heating Element as those could be Physically changed on the Vessel after it was built"):* once a Vessel Device is **integrated**
   (built with the Vessel Device Builder, or built and saved on a Tab) its Properties have only **the Universal Properties** (Rule
   1.21: Name with ✏ Change name, Label, Visible, Hidden Locked, Label and place, Tab, X, Y, Lock), its **Type** greyed out, its Out
-  flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections are fully editable (Label,
-  Interface, Port or Probe #, Heating method, Temperature Probe, Setpoint, Units, Calibration offset) and each can be **swapped** for
-  another existing one or a new one. On Save the old one is taken out of the vessel (2026-11-09: "It needs to go as it is a
-  replacement for an exist hardware ... So Delete if replace with a differnt Port"): when the new one is on **another Port** the old
-  one is **deleted**; when it is on **the same Port** (the hardware was changed, the wiring was not) the old one stays on the Tab as
-  a Device of its own. Anything that used the old one (a Heating Element's Temperature Probe) uses the new one.
+  flow color, and a section for each **Heating Element** and **Thermowell / Probe**. Those sections can change the Label, Heating
+  method, Temperature Probe, Setpoint, Units and Calibration offset; their **Interface and Port (or Probe #) are greyed out for good**
+  and **a part can't be swapped** (Rule 5.31).
+  *Replaced* (OakBarn Brewery, 2026-11-09, Rule 5.31: "none may be swapped for a different Device Port Combination ever"): "each can
+  be swapped for another existing one or a new one ... when the new one is on another Port the old one is deleted; when it is on the
+  same Port the old one stays on the Tab as a Device of its own." 
   Its **Size** stays (2026-11-09, OakBarn Brewery: "Both"): Gallons, Method, Diameter, Height, Calculated Volume (read only), Dead
   space and Safe Element Volume (Rule 19.2). No Graphic, Place sliders, one Interface for all parts, HERMS coil, Drain, Tangential,
   Sparge / Steam Slayer or IP rows: none of those can change after integration.
@@ -3109,6 +3219,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Rule 6.19 (OakBarn Brewery, Integrate 5): the Heating method section: Current Method + Short Label on one line, Enabled switches (a method must be enabled to be used), Control Method balloons in the dialog that work together with the balloons on the Tab (Red = Current, Yellow = the others). Help 150. Checked against the BruControl Import program: it still enables the joined controls' methods; no change. (thread "Build Integrated Instances")
 - 2026-11-09: Added Rule 7.18, Alarm Priority (OakBarn Brewery): a number with up to two decimal places, the lower plays first,
   its Kind's number to start; the same Priority in the order they went On, a tie at the same moment picked at random then the
   other; Alarm Chain steps wait their turn; a sound without Repeat lets the next one play when it ends. Help 21 and 172. Checked
@@ -3501,13 +3612,23 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: The Three Vessel sample's Brewhouse Tab now has a Master Vessel Sizer (the HLT, Rule 19.3), so a vessel built for that Tab is drawn at the same scale as the sample's vessels (OakBarn Brewery: "It did not adjust size to the other Vessels"). No Rule changed. Checked against both programs: the Importer's Build page is the same Panel. (thread "Build the Vessel Device Builder")
 - 2026-11-09: Changed Rules 19.2 and 18.31 (OakBarn Brewery: "Both", "if we use the size rather than the gallons it will draw better in proportion", "Advertized gallons could also be wrong", "add that as a Field (Read and Display Only)", "Also missing is Deadspace and Safe Element Volume"): a Diameter vessel is drawn by its real size; read only Calculated Volume; Dead space and Safe Element Volume on every Vessel; an integrated Vessel Device's Properties have its Size again. Number boxes take decimals (15.5). Help 133 and 135 updated. Checked against both programs (the Importer's Build page is the same Panel; its Vessels step passes Height and Diameter to the builder). (thread "Build the Vessel Device Builder")
 - 2026-11-09: Added Rule 9.10 (OakBarn Brewery chose Microsoft Artifact Signing so Smart App Control lets the Setup .exe run): the release build signs the Setup .exe and its Uninstall .exe once the six GitHub settings are in; until then it builds unsigned as before. Steps in docs/Code_Signing_Setup.md. Both programs (the Importer ships in the same Setup). (thread "Sign the Setup .exe with Azure")
+- 2026-11-09: Added Rule 1.30 (OakBarn Brewery): a gGlobal takes only its own Kind of value; a wrong one is an error in plain words (found by the Check when it is typed on the line) and the gGlobal keeps its old value. A Time gGlobal gets .minute and .seconds, which take a whole number that becomes the whole time (126 seconds is 00:02:06). Help 145.
 - 2026-11-09: Added Rule 9.11 (OakBarn Brewery: "yes look at things for scanners", after Malwarebytes quarantined the Setup .exe): Setup .exe Details filled in with a rising version number; the .bat files drop -ExecutionPolicy Bypass and download Node.js into TEMP instead of the Public folder. Nothing the Setup does changes. Both programs. (thread "Stop antivirus flagging the Setup")
 - 2026-11-09: Rule 6.24 gets **Smoothing** (OakBarn Brewery: "Smoothing might be added to more things than a Counter"): Smoothing % on Probes (thermistor 25 % to start), Analog In, Flow meter rate, Scale and a new Counter Rate with Sampling Period; `.raw` before smoothing; the BruControl Importer keeps Avg Weight; Help 171.
 - 2026-11-09: Rule 1.20 gets the **Boolean Widgets** (OakBarn Brewery): Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED are each their own sub-Widget with a fixed look; Device controlled is shown as **Linked Device** and makes it act like a Clone of that Device. Rule 3.14 gets the letters SLD, CHK, LTB. BruControl Import: Toggle Switch becomes the Boolean Widget picked (Becomes column) with an optional Linked Device. Help 112 updated; no new Help number. (thread "Add Boolean Widget styles and linking")
 - 2026-11-09: Heating Element on-screen look (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 7.8, On overlays have no border and are drawn smaller (every overlay); a Heating Element's Overlay is Glow (the start), None (truly nothing) or a picture. Rule 6.19: On/Off is now **Direct** (the old word still works in a Process); the method buttons sit in an invisible box sized to the methods allowed, centred under the picture; **Short method names** switch (DO, DutyC, HYS, PID, DeadB, PREC); the Turn Off button is gone (one click on the picture). Added Rule 2.46: Valves and Heating Elements are Toggle (the start) or Push Button, never None; a Push Button is reversed when it is already On; Processes ignore it. Importer: Direct Only column; a not user controlled heater is a Toggle. Help 179 (175-178 are taken by other work); next free Help 180.
+- 2026-11-09: Integrated Instances and the built-in heater's Properties (OakBarn Brewery, thread "Improve heating element on-screen look"): Rule 6.1 gets the Integrated Instance exception (a Heating Element built into a Vessel Device from one on a Tab is an independent copy on the same Port; the last one turned On or Off has the Port; a Process calls it `VesselName.DeviceName`); Rule 4.4 notes an Instance is not a Clone. Added Rule 2.47 (no Hidden Lock on any Integrated Item; the title line's lock, Visible and Hidden Locked get help balloons) and Rule 3.16 (the Suggested Name follows the Label at once, always has its Device Type ID, every Name Change pop-up has Update to Suggested, the Label's balloon shows its own Suggested Name). Rule 3.11 lists the new button. A built-in Heating Element's Properties are titled Integrated Heating Element Device. The Three Vessel sample's built-in heaters and probes get their Device Type IDs. Help 180; next free Help 181.
+- 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off. Reworded the same day (OakBarn Brewery: "Old Ways will never be depreciated in any Update ... An update may change things but never require old methods be updated to a new standard"): nothing old until the first Public Production (trial productions count as before it); after it, an update never takes away an old way or forces an old item up to a new standard, and an item left alone works as before.
+- 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
+- 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
+- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_HE_HLT~element_BR and so on. The Built into balloon is OakBarn Brewery's text with its own example.
+- 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
+- 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
+- 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.
 - 2026-11-09: Added Rule 6.26, Data Display (OakBarn Brewery: "Just have a DataDisplay and able to pick which one"): a Device with more than one value picks which one shows; `.display` in a Process; a Flow meter's `.value` follows it (BruControl's Primary Value); the Importer turns Show Secondary Value off into the pick; Help 174.
 - 2026-11-09: Added Rule 7.17, Alarm Email Notification (OakBarn Brewery): an Alarm can send an email through the mail server the user picks (Gmail, Outlook.com or any other); Email to, or every user with an email; `.email` in a Process; the Importer keeps BruControl's EmailNotification switch; Help 175. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 7.16: the BruControl Import joins a Timer's 2 alarms to their Alarms (Hop Alarm on that Timer; a second time is an Alarm Chain step). (thread "Find BruControl properties missing in Skynet")
+- 2026-11-09: Added Rule 2.45, Time and DateTime formats (OakBarn Brewery): Shows as on Time, DateTime and Code Value Widgets, more Digits on a Timer, `.showas` takes any format; the Importer keeps a Timer's Format and a time Global's Format; Help 176. (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Rule 1.26 renamed: the Chart Widget is now the **Graph Widget** (OakBarn Brewery: "We will call the Chart a Graph"), in the Panel, the Importer, Help 159 (now 159-graph-widget) and the Widget Library. Rule 3.14 letters GPH (was CHT); Graphs made before keep their wgt_CHT_ names (Rule 3.5) and old Schemas load as before. Checked against both programs. (thread "Rename Chart to Graph everywhere")
 - 2026-11-09: Added Rule 3.15, hidden names match what is shown (OakBarn Brewery): an Interface's Connection is saved as `connection` (and `realConnection` in the Simulator), no longer `type` / `realType`; old Schemas change over by themselves. Checked against the BruControl Import program: it writes `connection` too. (thread "Add Hydrometer Device with templates")
 - 2026-11-09: Rule 6.25 gets **Bluetooth** (OakBarn Brewery, the second Hydrometer PR): listeners (ESP32_Hydrometer sketch, or the Pi's own Bluetooth) send adverts to /api/hydrometer/bluetooth; the Brain reads Tilts by Color and RAPT Pills by Hardware ID. Help 170. Checked against the BruControl Import program: an imported Tilt is already Bluetooth with its Color, so it is heard with no change. (thread "Add Hydrometer Device with templates")
