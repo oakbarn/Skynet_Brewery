@@ -11,7 +11,7 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
    - **User Defined Motorized Ball Valve**: your own pictures, and you set where its In and Out IPs are.
 3. The Add box opens with the valve's name as its title. Its **Label** is already filled in as **mBV_1**, mBV_2 ... (the next
    number), so the cursor starts on the next empty field. You can change the Label, but it can't be blank. Fill it in order: 1 the
-   **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the **Interface (board)** and an **Available Port** on the same line, 3 the **Tab**.
+   **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the **Interface** (the board) and an **Available Port** on the same line, 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the valve as it will show on the Tab, closed, turned to its Orientation.
    - **Path**: the picture file.
@@ -31,7 +31,7 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
 1. The title is the valve (**Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve**), with the **🔓 lock**,
    **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**.
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
-3. **2. Interface (board)** and **Available Ports**, greyed out (the board and pin it is wired to).
+3. **2. Interface** and **Available Ports**, greyed out (the board and pin it is wired to).
 4. **3. Tab** and **4. Name** (the Suggested Name; you may type your own).
 5. **Graphic** and **Path**, then **Orientation** and **Toggle** on one line (as on the Pump).
 6. **Overlay** with **Database and .API ⬢**.

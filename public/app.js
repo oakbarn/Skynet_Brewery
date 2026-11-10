@@ -634,7 +634,7 @@ function vpPinLists(w, g) {
 function applyVParts(g, vp, tab, label) {
   const old = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), made = [], none = v => v === undefined || v === null || v === '';
   const want = Object.entries(vwClassOf(g).ports).filter(([k, d]) => d.vw && vp[k + '_part'] && !vpHermsOn({ herms: vp.vHerms }, k));
-  if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface (board) the parts on its IPs are wired to');
+  if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface the parts on its IPs are wired to');
   for (const [k, d] of want) {
     const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k);
     // a built in Element is one Heating Element (Rule 6.19); an old control Device is made one on load (naming.js assignIds)
@@ -1020,8 +1020,8 @@ function mfDrillFields(it, item, adding) {
   const setIface = !adding && keys.some(k => mfSetPin(item, k));
   return [['locked', '', 'lock', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: MF_LABEL_POP, tip: T.label }], ['labelVisible', 'Label Visible', 'yn', true, false, false, { tip: T.labelVisible }],
-    setIface ? ['_mfIfaceRo', '2. Interface (board)', 'ro', mfIfaceText(it.mfIface), false, false, { tip: T.iface }]
-      : ['mfIface', '2. Interface (board)', 'dev', adding ? 'addnewid' : null, true, false, { tip: T.iface }],
+    setIface ? ['_mfIfaceRo', '2. Interface', 'ro', mfIfaceText(it.mfIface), false, false, { tip: T.iface }]
+      : ['mfIface', '2. Interface', 'dev', adding ? 'addnewid' : null, true, false, { tip: T.iface }],
     ...keys.map((k, i) => {
       const motor = it[k + '_mfk'] === 'motorized', set = !adding && motor && mfSetPin(item, k);
       const port = !motor ? null : set ? ['_' + k + '_pinro', 'Port', 'ro', pinLabel(set.channel, boardOfDevice(set, S.config.devices)), false, false, { tip: T.port }]
@@ -1084,7 +1084,7 @@ function applyMf(g, w, tab, label, loose = false) {
     e.x = Math.round(g.x || 0); e.y = Math.round(g.y || 0);          // never shown on its own: it sits on the fitting
     e.label = `${base} V${mfNum(k)}`;
     if (motor) {
-      if (!loose && none(w.mfIface)) throw new Error('Pick the Interface (board) the Motorized valves are wired to');
+      if (!loose && none(w.mfIface)) throw new Error('Pick the Interface the Motorized valves are wired to');
       if (!loose && none(w[k + '_mfpin'])) throw new Error(`Valve ${mfNum(k)}: pick its Port`);
       if (!none(w.mfIface)) e.device = w.mfIface; else delete e.device;
       if (!none(w[k + '_mfpin'])) e.channel = /^\d+$/.test(String(w[k + '_mfpin'])) ? +w[k + '_mfpin'] : w[k + '_mfpin']; else delete e.channel;
@@ -2645,6 +2645,7 @@ $('#ws').addEventListener('click', ev => {
 
 function updateEl(name) {
   litSpots(name);
+  for (const b of $$(`.elTog[data-dev="${CSS.escape(name)}"]`)) b._show?.();      // the On / Off picture in an open Properties dialog
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
   const e = elNamed(name);
   if (n && e) fillEl(n, e);
@@ -4939,7 +4940,7 @@ async function newDeviceDialog(e, hint, what) {
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + (pr && isOneWire(e) ? T.pNum : T.port) : ''), ...(pinPort ? { with: portF } : {}) }],
+    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + (pr && isOneWire(e) ? T.pNum : T.port) : ''), ...(pinPort ? { with: portF } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
@@ -5333,7 +5334,7 @@ function rimsWork(g) {
 function rimsFields(w) {
   const ow = isOneWire({ type: 'temperature', ...tempKindOf(w.tempKind) });
   // the thermowell is part of the heating element (Fritz, 2026-10-26): its probe is the element's Input
-  return [['iface', '1. Interface (board)', 'dev'],
+  return [['iface', '1. Interface', 'dev'],
     ['_dt', `2. Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element, with its thermowell, is built in.`, 'note'],
     ['_he', 'Heating element', 'head'],
     ['heatCtl', 'Control', 'sel', HEAT_CTL, true],
@@ -5361,7 +5362,7 @@ function applyRims(g, w, tab, label) {
   const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
   const none = v => v === undefined || v === null || v === '';
   if (!h0 && !t0 && none(w.iface) && none(w.heatPin) && none(w.tempPin) && none(w.tempProbe)) return;
-  if (none(w.iface)) throw new Error(`1. Pick the Interface (board) the ${intWhat(g)[0]} is wired to`);
+  if (none(w.iface)) throw new Error(`1. Pick the Interface the ${intWhat(g)[0]} is wired to`);
   if (none(w.heatPin)) throw new Error('3. Pick the Port for the heating element');
   if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? '3. Pick the OneWire probe number of the temperature probe' : '3. Pick the Port for the temperature probe');
   const base = String(label || intWhat(g)[1]).trim();
@@ -5412,7 +5413,7 @@ async function newIntegratedDevice(tname) {
       const g0 = draft.graphics.length;
       try {
         readFields(w, body);
-        if (!String(w.iface ?? '').trim()) throw new Error(`1. Pick the Interface (board) the ${what} is wired to`);
+        if (!String(w.iface ?? '').trim()) throw new Error(`1. Pick the Interface the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
         // its name comes from its Label (RIMS, RIMS_2 ...): it is one Device, not a bundle (Fritz, 2026-10-26)
         let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
@@ -6869,7 +6870,7 @@ function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
@@ -6914,7 +6915,7 @@ function heatFields(it, x = {}) {
   // balloons. The explanations (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
   const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: ['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.methodShort }], ...x }],
+    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, false, false, { tip: T.methodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Switched by (what turns it on and off)', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ...(allowedMethods(it).includes('hysteresis') ? [['_hysRange', (r => `Hysteresis that heats: On offset ${r.min} to ${r.max} ${r.u}${r.delay ? `, On delay at least ${r.delay} seconds` : ''} (Rule 6.29).`)(heatHysRange(it, (draft || S.config).elements.find(e => e.name === it.input))), 'note', null, false, false, x]] : []),
@@ -6949,7 +6950,7 @@ function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
@@ -7021,7 +7022,7 @@ function mbvDeviceFields(it, item) {
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
     // the ⬢ Pin attributes (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'], attr: DEV_PORT_POP }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'], attr: DEV_PORT_POP }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Valve follows it until you type a name of your own)' : ''), 'note'],
@@ -7050,7 +7051,7 @@ function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'pwm'] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'pwm'] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -7113,7 +7114,7 @@ function probeDeviceFields(it, item) {
   it._flip = flipOf(it);
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + (isOneWire(it) ? T.pNum : T.port), with: probePort(it) }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + (isOneWire(it) ? T.pNum : T.port), with: probePort(it) }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Probe follows it until you type a name of your own)' : ''), 'note'],
@@ -7413,14 +7414,14 @@ function vpSections(it, edit = false) {
         for (const [a, b] of Object.entries(pre)) if (it[x + a] === undefined) it[x + a] = b;
         const temps = [['', '(none)'], ...(draft || S.config).elements.filter(q => q.type === 'temperature').map(q => [q.name, q.name])];
         return [[k + 'h', `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}`, 'head'],
-          ...[[x + 'label', '1. Label', 'text'], ro('i', '2. Interface (board)', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
+          ...[[x + 'label', '1. Label', 'text'], ro('i', '2. Interface', e.device), ro('p', 'Port', port),      // set for good (Rule 6.1)
               ro('n', '4. Name', e.name),
               ...(kind === 'element' ? [[x + 'heatMethod', 'Heating method (it starts with)', 'sel', methodChoices()], [x + 'input', 'Temperature Probe (what it reads)', 'sel', temps], [x + 'target', 'Setpoint', 'num']]
                 : [ro('t', 'Probe type', probeKindName(e)), [x + 'units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']]], [x + 'offset', 'Calibration offset', 'num']]),
               [k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]]];
       }
       return [[k + 'h', e || todo ? `${word}${many ? ' ' + (n + 1) : ''}: on the ${it.ports?.[spot]?.label || vpName(spot)}${todo ? ', still to be picked (the Vessel Builder)' : ''}` : `${word}: None`, 'head'],
-        ro('l', '1. Label', e?.label), ro('i', '2. Interface (board)', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
+        ro('l', '1. Label', e?.label), ro('i', '2. Interface', e?.device), ro('p', 'Port', port), ro('n', '4. Name', e?.name),
         ...(kind === 'element' ? [ro('m', 'Heating method (it starts with)', e && heatMethodWord(startMethod(e))), ro('r', 'Temperature Probe (what it reads)', e?.input), ro('t', 'Setpoint', e?.target)]
           : [ro('t', 'Probe type', e && probeKindName(e)), ro('u', 'Units', e?.units), ro('o', 'Calibration offset', e && (e.offset ?? 0))]),
         ...(e ? [[k + 'go', `✏ Open the ${word}'s own Properties (all its attributes)`, 'go', open(e)]] : [])];
@@ -7455,7 +7456,7 @@ function genDeviceFields(it, item, f) {
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ...f.filter(x => x[0] === '_sky'),
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ...(hasIface ? [['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + (port ? ' ' + (port[0] === 'probeIndex' ? T.pNum : T.port) : ''), ...(port ? { with: port } : {}), ...(pinPop ? { attr: DEV_PORT_POP } : {}) }]] : []),
+    ...(hasIface ? [['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + (port ? ' ' + (port[0] === 'probeIndex' ? T.pNum : T.port) : ''), ...(port ? { with: port } : {}), ...(pinPop ? { attr: DEV_PORT_POP } : {}) }]] : []),
     part ? ['_host', '3. Built into', 'ro', builtInHost(it), false, false, { tip: 'This Device is built into it (Rule 5.7): it moves, shows and is deleted with it, and its Interface and Port are set in its Properties.' }]
       : ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
@@ -7488,7 +7489,7 @@ function withLayer(fields, item) {
   const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
   const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
-  const f = ['layer', inV ? 'Layer Order inside its Vessel Device (1 = on top)' : 'Layer Order (1 = on top)', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
+  const f = ['layer', inV ? 'Vessel Layer Order' : 'Layer Order', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
   return at >= 0 ? [...fields.slice(0, at + 1), f, ...fields.slice(at + 1)] : [...fields, f];
 }
 function fieldsFor(item) {
@@ -7585,7 +7586,7 @@ function field(f, obj) {
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
-  if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface (board) and its Available Ports)
+  if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface and its Available Ports)
     // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
     const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
     for (const w of more) {
@@ -7651,7 +7652,8 @@ function field(f, obj) {
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. Only shown; the Device
 // keeps its type (digitalOut ...) and Device Type ID (Pump) as they are saved.
 const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND', hydrometer: 'HYDRO' };
-const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
+const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.subtype === 'element' && g ? 'Heater Element' : e?.typeCode || '';      // a Heating Element: DO: Heater Element (OakBarn Brewery, 2026-11-10)
+  return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
   const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', { style: 'white-space: pre-line' }, ...helpNodes(text)),
@@ -7664,6 +7666,7 @@ const DEVICE_TIPS = {
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   switchedBy: 'What turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 2 to 5 °F and an On delay of at least 60 seconds. With a °C probe the numbers are converted.',
+  elemTog: 'One click turns this Element On or Off at once, the same as one click on it on the Tab (Rule 2.33). On / Off is the Device itself: it is On in whatever method it is in, and Direct is 100 % On. Picking a method never turns it On (Rule 6.19).',
   controlMethod: (it, m) => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`,
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
   methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters (OakBarn Brewery, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
@@ -7973,6 +7976,23 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
+  else if (kind === 'elemtog') {    // the Element's own On / Off in its Properties (OakBarn Brewery, 2026-11-10): a small picture of it as a
+    // Toggle, the same as one click on it on the Tab. It turns the Device On or Off in the method it is in (Direct = 100 % On); it is not a method
+    const name = obj.name, on = () => !!S.values[name]?.state, live = () => S.config.elements.find(e => e.name === name);
+    const img = h('img', { class: 'elTogPic', alt: '' });
+    const b = h('button', { type: 'button', class: 'elTog', 'data-dev': name || '' }, img);
+    b._show = () => { img.src = media(on() ? obj.imageOn || ELEM_ON : obj.imageOff || ELEM_OFF); b.classList.toggle('on', on()); b.title = !live() ? 'Save it first: then it can be turned On here' : on() ? 'On: one click turns it Off' : 'Off: one click turns it On'; };
+    b._show();
+    b.onclick = ev => {
+      ev.preventDefault();
+      const e = live(); if (!e) return toast('Save it first: then it can be turned On here', true);
+      if (!can('operator')) return toast('Your account is view only', true);
+      const k = heatMethodKey(S.values[name]?.method) ?? startMethod(e);
+      if (!on() && NEEDS_PROBE.includes(k) && !e.input) return toast(`${e.label || name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one and Save)`, true);
+      setProp(name, 'state', !on());
+    };
+    return [null, b];
+  }
   else if (kind === 'menabled') {   // the Enabled row (OakBarn Brewery, 2026-11-10, Integrate 5): a switch under each method's name
     // opts = [[key, word, locked]]; a locked one is on and greyed (Direct always, and the Current Method); only switched-on methods can be used
     return [h('div', { class: 'full mRow' }, ...opts.map(([k, word, locked]) => {
@@ -13092,7 +13112,7 @@ F.skynetFitting = it => {
 // a Vessel Device's Properties: its Interface and HERMS coil, or that it is locked (built and saved)
 const vdevHead = it => vpLocked(it) ? [['_vdl', `Vessel Device, built and saved: its IPs, the parts built into them${it.herms ? ' and its HERMS coil (' + (HERMS_WORDS[it.herms] || it.herms) + ')' : ''} are locked for good. The Labels can still change.`, 'note']]
   : [['_vdn', 'Vessel Device: an Element, Temperature Probe, Thermowell or Valve put on an IP is built into it (like the RIMS tube). Once it is built and saved on a Tab, its IPs, parts and HERMS coil are locked for good.', 'note'],
-    ['vpIface', 'Interface (board) the parts on its IPs are wired to', 'dev'],
+    ['vpIface', 'Interface the parts on its IPs are wired to', 'dev'],
     ['vHerms', 'HERMS coil', 'sel', HERMS_PICKS, true]];
 const vwPlacedNow = (it, k) => k + '_on' in it ? !!it[k + '_on'] : !!it.ports?.[k]?.installed;
 const vwShows = (it, k) => !!it.vwShowAll || vwPlacedNow(it, k) || !!it.ports?.[k]?.installed;

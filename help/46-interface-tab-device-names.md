@@ -22,7 +22,7 @@ An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Meg
 
 When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order, as BruControl does:
 
-1. **Interface (board)**, listed by its full name with its ID after it, for example *Main Brewery Mega USB (ID MB_)*.
+1. **Interface** (the board), listed by its full name with its ID after it, for example *Main Brewery Mega USB (ID MB_)*.
 2. **Device Type** (see the list below)
 3. **Available Ports / Pins**. The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. Each pin in the list says what it is kept for: **PWM**, **Counter**, **PWM + Counter**, **SPI, for RTD boards** or **OneWire probes**; a plain pin has no tag. You can still type another pin. An output port can have more than one type, see below.
 4. **Label**, the text the tab shows (its **Show label** switch hides it), for example *Fly Sparge*.
