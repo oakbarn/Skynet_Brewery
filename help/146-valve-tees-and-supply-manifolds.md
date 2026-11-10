@@ -26,7 +26,7 @@ In **Edit layout**, open **Elbows, Tees …** and pick one from **Valve Tees and
 The **Add box** works like a Pump's (Skynet Rule 18.29). Hover the name of any field for its help.
 
 1. **Label**: filled in for you (**valve_tee_1**, **manifold_2_1**, **manifold_3_1**). You can change it, but it can't be blank.
-2. **Interface (board)**: the board its Motorized valves are wired to (one board for all of them).
+2. **Interface** (the board): the board its Motorized valves are wired to (one board for all of them).
 3. **Valve 1**, **Valve 2**, **Valve 3**: **Manual** or **Motorized**. A Motorized valve picks its Port in **Available Ports** on the
    same line. Two valves can't share a Port.
 4. **Tab**: the Tab it goes on.

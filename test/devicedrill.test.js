@@ -5,7 +5,7 @@ import fs from 'node:fs';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 const gen = app.slice(app.indexOf('function genDeviceFields('), app.indexOf('function fieldsFor(item)'));
-const order = ["'1. Label'", "'2. Interface (board)'", "'3. Tab'", "'4. Name'", "'Graphic'", "'Overlay'", "'Text attributes'", "'X (Horizontal)'", 'typeF];'].map(k => gen.indexOf(k));
+const order = ["'1. Label'", "'2. Interface'", "'3. Tab'", "'4. Name'", "'Graphic'", "'Overlay'", "'Text attributes'", "'X (Horizontal)'", 'typeF];'].map(k => gen.indexOf(k));
 assert.ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), 'fields in the Pump drill-down order');
 assert.match(gen, /\['locked', '', 'lock', null, false, false, \{ inTitle: true \}\]/, 'the lock in the title line');
 assert.match(gen, /\{ set: true, tip:/, 'Interface and Port greyed out for good (Rule 18.13)');

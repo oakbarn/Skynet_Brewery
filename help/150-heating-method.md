@@ -49,6 +49,8 @@ When you build it (and later in its Properties), the **Heating method** part has
 
 - **Current Method**: the method it is in. The dialog opens on the one it is in now. Beside it, **Short Label** switches its
   balloons to short names (DO, DutyC, HYS ...).
+- **On / Off**: on the same line, a small picture of the Element. One click turns it On or Off at once, like one click on it on
+  the Tab. On / Off is the Element itself; **Direct** is a method (simply On or Off), so a Direct Element that is On heats at 100 %.
 - **Enabled**: a switch under each method's name. **A method must be enabled to be used.** The Current Method and **Direct**
   (full power) are always on. The pop-up, the balloons, Method Clones and Processes offer only the enabled ones, and a Process asking
   for another one stops with a plain message.
