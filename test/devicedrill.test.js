@@ -18,3 +18,4 @@ assert.ok(app.includes("const vpPartOpen = vp => () => { if (vp.dev) return edit
 assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /\.vwPart\.vpPart \{ pointer-events: auto/);
 assert.ok(fs.existsSync(new URL('../help/148-every-device-dialog.md', import.meta.url)), 'Help 148');
 console.log('devicedrill ok');
+await import('./pumpmodel.test.js');      // the Pump dialog is the model (Rule 18.34)
