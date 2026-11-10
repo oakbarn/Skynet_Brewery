@@ -26,7 +26,7 @@ assert.equal(answerSec({}), 10); assert.equal(answerSec({ answerSec: 3 }), 3); a
 // the Brain keeps every line both ways; Pause holds what the panel sends (but not PING, nor a typed line)
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'btalk'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator', logging: true }], elements: [{ name: 'Pump', type: 'digitalOut', device: 'MB', channel: 22 }] }));
+fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator', logging: true }], elements: [{ name: 'Pump', type: 'digitalOut', device: 'MB', channel: 22 }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const hw = new Hardware(store); hw.logDir = path.join(d, 'logs');
 hw.add(store.config.devices[0]);

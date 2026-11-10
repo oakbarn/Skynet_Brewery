@@ -11,7 +11,7 @@ import { rating, heatingLinkWarning, BOARDS } from '../public/links.js';
 import { pinOf } from '../lib/sensors.js';
 
 // ---- panel side
-const devices = [{ name: 'Brain Pins', type: 'ethernet', host: '127.0.0.1', board: 'pi' }, { name: 'Stand Pi', type: 'esp32', host: '192.168.1.70', board: 'pi' }, { name: 'MEGA', type: 'serial', board: 'mega' }];
+const devices = [{ name: 'Brain Pins', connection: 'ethernet', host: '127.0.0.1', board: 'pi' }, { name: 'Stand Pi', connection: 'esp32', host: '192.168.1.70', board: 'pi' }, { name: 'MEGA', connection: 'serial', board: 'mega' }];
 assert.ok(BOARDS.some(([v]) => v === 'pi'), 'Raspberry Pi is a board choice');
 assert.equal(rating(devices[0]).level, 'best', 'the Brain\'s own pins: best');
 assert.equal(rating({ ...devices[0], host: '192.168.1.71' }).level, 'good', 'a Pi on Ethernet: good');

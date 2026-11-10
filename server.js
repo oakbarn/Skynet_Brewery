@@ -14,8 +14,8 @@ import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildB
 import { checkControlled } from './public/semi.js';
 import { isCodeValue } from './public/codevalue.js';
 import { controlMethods } from './public/heatmethod.js';
-import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs, toBackpathText } from './lib/store.js';
-import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
+import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
+import { modernize } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -24,7 +24,6 @@ import { apiNameListError } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { parseWifiReport, hydroFor, decodeBle, hydroForBle } from './public/hydrometer.js';
-import { toConnection } from './public/links.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
@@ -37,7 +36,6 @@ import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
 import { blankRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
-import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
@@ -46,7 +44,7 @@ import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { FileMove, KINDS as MOVE_KINDS, missingMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
-import { plain, toStr } from './lib/values.js';
+import { plain } from './lib/values.js';
 import { Help } from './lib/help.js';
 import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
@@ -60,16 +58,14 @@ import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
-import { gStandardOnDisk } from './lib/gstandard.js';
 import { cleanUserStyles } from './public/styles.js';
-import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
 import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
-import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
+import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'));
@@ -96,47 +92,14 @@ if (moved) for (const l of moved.lines) console.log(l);
 // A release has its samples in defaults/: a folder you don't have yet (first start) gets a copy; yours are never touched
 const seeded = IMPORT_BUILD ? [] : seedDefaults(ROOT);
 if (seeded.length) console.log(`First start: copied the samples into ${seeded.join(', ')}`);
-// A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
-const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
-// Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
-const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
-// gKonstant / gAPI became one class, gGlobal, gK_ / gA_ names gG_, and log lines send_db: every Schema, saved value, the database and Processes, once
-const gnames = gStandardOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
-// Names can't have < > : " / \ | ? * any more (Fritz, 2026-10-29): an older name gets a ~ for each, once, everywhere (lib/namechars.js)
-const safenames = safeNamesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
-// Old "X" visibility = hidden / hiddenlocked lines become X.visible = false (and X.hidden = true), once (*.before-hidden.bak)
-const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
-// Picture groups: the eleven Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
-{
-  const before = JSON.stringify(store.config.svgChoices ?? {});
-  const grouped = setupPictureGroups(store._findMedia('Images'), store.config.svgChoices);
-  if (grouped.moved.length) console.log(`Picture groups: moved ${grouped.moved.length} Skynet picture(s) into their group in media/Images (old paths still work)`);
-  if (JSON.stringify(store.config.svgChoices ?? {}) !== before) store.writeConfig();
-}
+// Picture groups: the eleven Skynet folders in media/Images are made (lib/picgroups.js)
+setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
-store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gG names
-// the Schema loaded at start-up: Text_1 -> w_Text_1 (Rule 15.2) happened before the engine was up, so its Processes follow now
-{ const tr = renameInProcesses(engine, store.loadRenames ?? new Map()); if (tr.length) console.log(`Processes updated for the new Text Widget names: ${tr.map(x => x.name).join(', ')}`); }
-// Background pictures (Fritz, 2026-11-02, Rule 15.2): .imagePath_1, _2, _3 in a Process become .backpath, .backpath_2, .backpath_3, once
-{
-  const fixed = [];
-  for (const name of engine.names()) {
-    const text = engine.read(name), out = toBackpathText(text);
-    if (out !== text) { engine.backup(name); engine.write(name, out); fixed.push(name); }
-  }
-  if (fixed.length) console.log(`Processes updated for .backpath (was .imagePath_1): ${fixed.join(', ')}`);
-}
-store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (written in quotes in a Process)
-  for (const name of engine.names()) {
-    const text = engine.read(name), out = renameQuoted(text, map);
-    if (out !== text) { engine.backup(name); engine.write(name, out); }
-  }
-});
 const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
 hw.logDir = path.join(DATA, 'logs', 'boards');      // Board settings: Diagnostic logging (Rule 6.27)
 const auth = new Auth(DATA);
@@ -163,12 +126,7 @@ const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source
 const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], scripts: SCRIPTS, help: HELP }));   // File Move page
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
-if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
-if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
-if (gnames) for (const l of gnames.lines) { console.log(l); engine.print('system', l); }
-if (safenames) for (const l of safenames.lines) { console.log(l); engine.print('system', l); }
 if (moved) for (const l of moved.lines) engine.print('system', l);
-if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
 // Schemas (the Schema dropdown at the top) and Equipment Profiles (☰ Menu > Equipment Profile)
@@ -678,7 +636,7 @@ async function route(req, res) {
     // the browser already changed what points to a name it renamed; a clone renamed here needs the same done on the Brain
     if (clones.size) for (const g of body.graphics ?? store.config.graphics) renameGraphicRefs(g, clones);
     store.saveLayout({ ...body, renames });
-    if (body.devices) { store.config.devices = body.devices.map(d => toConnection({ ...d })); store.writeConfig(); hw.restart(); }
+    if (body.devices) { store.config.devices = body.devices.map(d => ({ ...d })); store.writeConfig(); hw.restart(); }
     const out = { ok: true };
     if (renames.size) {
       out.renamed = [...renames].map(([from, to]) => ({ from, to, clone: clones.has(from) }));

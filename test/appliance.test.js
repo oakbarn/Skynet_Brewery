@@ -44,7 +44,7 @@ fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'DigiBoil_Spigot', type: 'digitalOut', subtype: 'valve', valveType: 'manual', label: 'DigiBoil Spigot', integratedIn: 'g1', integratedAs: 'av:spigot' },
   { name: 'Old_Manual', type: 'manual', label: 'Old' },
   { name: 'Moto', type: 'digitalOut', subtype: 'valve' },
-  { name: 'Step', type: 'gKonstant', kind: 'value' },
+  { name: 'Step', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

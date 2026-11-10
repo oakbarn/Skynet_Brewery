@@ -13,11 +13,11 @@ const wait = ms => new Promise(res => setTimeout(res, ms));
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'dbgroup'));
 fs.mkdirSync(path.join(d, 'scripts'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ dbGroups: [{ id: 'grp_a1', name: 'Readings' }, { id: 'grp_m1', name: 'Mash' }, { id: 'grp_b1', name: 'Boil' }], elements: [
-  { name: 'gGV_Strike', type: 'gGlobal', kind: 'value', initial: 7.5, database: { frequency: 'group', group: 'grp_a1' } },
-  { name: 'gGV_pH', type: 'gGlobal', kind: 'value', initial: 5.4, database: { frequency: 'group', group: 'grp_a1' } },
+fs.writeFileSync(cfg, JSON.stringify({ dbGroups: [{ id: 'grp_o1', name: 'Once' }, { id: 'grp_a1', name: 'Readings' }, { id: 'grp_m1', name: 'Mash' }, { id: 'grp_b1', name: 'Boil' }], elements: [
+  { name: 'gGV_Strike', type: 'gGlobal', kind: 'value', initial: 7.5, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
+  { name: 'gGV_pH', type: 'gGlobal', kind: 'value', initial: 5.4, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
   { name: 'gGV_Other', type: 'gGlobal', kind: 'value', initial: 1 },
-  { name: 'gGV_Old', type: 'gGlobal', kind: 'value', initial: 3, database: { frequency: 'once' } },
+  { name: 'gGV_Old', type: 'gGlobal', kind: 'value', initial: 3, database: { frequency: 'ondemand', groups: ['grp_o1'] } },
   // Fritz's Mash probe: every N (here 100 ms so the test is quick), in the Groups Mash and Boil
   { name: 'gGV_MashTemp', type: 'gGlobal', kind: 'value', initial: 152, database: { frequency: 'ms', every: 100, groups: ['grp_m1', 'grp_b1'] } },
   { name: 'gGV_Free', type: 'gGlobal', kind: 'value', initial: 2, database: { frequency: 'ms', every: 100 } },
@@ -26,13 +26,7 @@ const store = new Store(cfg, path.join(d, 'data')); store.load();
 const logger = new Logger(store, path.join(d, 'data', 'brewlog.db'));
 const count = name => logger.query({ name }).length;
 
-// ---- older Schemas: Once and In a Group become On demand in their Group (Rule 15.2), and the Schema file says so
 assert.ok(!LOG_MODES.includes('once') && !LOG_MODES.includes('group'));
-const once = groupByName(store.config, 'once');
-assert.ok(once && /^grp_[0-9a-f]{12}$/.test(once.id), 'the Group Once is made, with a meaningless key');
-assert.deepEqual(store.config.elements.find(e => e.name === 'gGV_Old').database, { frequency: 'ondemand', groups: [once.id] });
-assert.deepEqual(store.config.elements.find(e => e.name === 'gGV_Strike').database, { frequency: 'ondemand', groups: ['grp_a1'] });
-assert.equal(JSON.parse(fs.readFileSync(cfg, 'utf8')).elements.find(e => e.name === 'gGV_Old').database.frequency, 'ondemand');
 
 // ---- an item in a Group is not sent while none of its Groups is started; one in no Group is
 await wait(350);
@@ -76,8 +70,7 @@ const g = addGroup(store.config, 'Brew_Day_End'); assert.equal(groupByName(store
 assert.equal(renameGroupInText('send_db_group Readings\n  SEND_DB_GROUP "Readings"\nsend_db_group Readings_2\nstart_db_group Readings\nstop_db_group "Readings"\nprint "Readings"\n', 'Readings', 'Report'),
   'send_db_group Report\n  SEND_DB_GROUP "Report"\nsend_db_group Readings_2\nstart_db_group Report\nstop_db_group "Report"\nprint "Readings"\n');
 
-// ---- the Database box settings keep the Groups (more than one), and an old In a Group is On demand
-assert.deepEqual(cleanDatabase({ database: { frequency: 'group', group: 'grp_a1', every: 'x' } }).database, { frequency: 'ondemand', groups: ['grp_a1'] });
+// ---- the Database box settings keep the Groups (more than one)
 assert.deepEqual(cleanDatabase({ database: { frequency: 'minutes', every: 1, groups: ['grp_m1', 'grp_b1', 'grp_m1', 'bad key'] } }).database, { frequency: 'minutes', groups: ['grp_m1', 'grp_b1'], every: 1 });
 
 logger.close(); clearTimeout(store._persistTimer);
