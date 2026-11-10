@@ -11,7 +11,7 @@ It shows three things:
 
 Add one in **Edit layout > Add Widget > Widgets (app only, no board pin) > Process Widget**. Like every Widget it is made on the
 🔨 Build Tab first and lives only in the app (no Interface or Port). Its Name follows `wgt_PRC_` + the Label + the Tab ID, for
-example `wgt_PRC_Mash~Steps_BR` (Rule 3.14).
+example `wgt_PRC_Mash~Steps_BH` (Rule 3.14).
 
 ## One click starts or stops it
 

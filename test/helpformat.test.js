@@ -29,12 +29,12 @@ for (const [k, re] of [['CAL_TIP', /const CAL_TIP = '([^\n]*)';/], ['SMOOTH_TIP'
 
 // Rule 11.7: the Heater Properties examples are the sample's HLT element, and they must stay true to the sample
 const cfg = JSON.parse(fs.readFileSync('samples/configs/three-vessel-one-pump/config.json', 'utf8'));
-const he = cfg.elements.find(e => e.name === 'BM_8_HE_HLT~element_BR');
+const he = cfg.elements.find(e => e.name === 'BM_8_HE_HLT~element_BH');
 assert.ok(he, 'the sample has the HLT element');
 const vessel = cfg.graphics.find(g => g.id === he.integratedIn);
 assert.equal(vessel?.name, 'HLT_Vessel', 'built into HLT_Vessel');
 assert.deepEqual([he.label, he.device, he.channel, he.workspace, he.heatMethod, he.target, he.onOffset, he.input],
-  ['HLT element', 'Brewery Mega', 8, 'Brewhouse', 'hysteresis', 150, 1, 'BM_700_1W_HLT_BR'], 'the HLT element the hover help describes');
+  ['HLT element', 'Brewery Mega', 8, 'Brew House', 'hysteresis', 150, 1, 'BM_700_1W_HLT_BH'], 'the HLT element the hover help describes');
 assert.ok(he.methodSpot_pid && he.methodSpot_dutyCycle, 'Duty Cycle and PID enabled too (four balloons)');
 assert.equal(cfg.elements.find(e => e.name === he.input)?.integratedIn, he.integratedIn, 'its probe is built into the same vessel');
 
@@ -47,7 +47,7 @@ for (const k of ['heatMethod', 'eHeatProbe', 'switchedBy', 'eMethodShort', 'eMet
 }
 const heatTips = app.slice(app.indexOf('const ELEM_HEAT_TIPS = {'), app.indexOf('const liveSeen'));
 for (const k of ['target', 'onOffset', 'onDelay']) assert.match(heatTips, new RegExp(`  ${k}: '[^\\n]*HLT`), `ELEM_HEAT_TIPS.${k}`);
-assert.match(heatTips, /ELEM_PREDICTIVE_TIP = '[^\n]*HLT/); assert.match(heatTips, /ELEM_DISPLAY_TIP = '[^\n]*HLT_Vessel\.BM_8_HE_HLT~element_BR/);
+assert.match(heatTips, /ELEM_PREDICTIVE_TIP = '[^\n]*HLT/); assert.match(heatTips, /ELEM_DISPLAY_TIP = '[^\n]*HLT_Vessel\.BM_8_HE_HLT~element_BH/);
 console.log('help format tests passed');
 
 // Rule 6.20 in Help (OakBarn Brewery, 2026-11-10): every "⚠ Electricity can kill" shows in red under the red triangle, as in the balloons

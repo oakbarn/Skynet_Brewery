@@ -65,14 +65,14 @@ for (const sm of list) {
   for (const e of c3.elements) {
     if (e.type === 'gGlobal') continue;
     const dev = ['temperature', 'digitalOut'].includes(e.type);
-    assert.match(e.name, dev ? /^BM_\d+_(1W|HE|Pump|Chill|eVlv)_[A-Za-z0-9~]+_BR$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BR|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
+    assert.match(e.name, dev ? /^BM_\d+_(1W|HE|Pump|Chill|eVlv)_[A-Za-z0-9~]+_BH$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
   }
-  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BR|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
+  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
 }
 
 // ---- run each brew day, fast
 const OLD_NAMES = { testing: 'sw_Status_Testing', advance: 'sw_Advance_BrewStatus', alarms: ['alm_Hops', 'alm_Step', 'alm_Warning'] };
-const NAMES = { 'three-vessel-one-pump': { testing: 'wgt_SW_Testing_BR', advance: 'wgt_SW_Advance_BR', alarms: ['wgt_ALM_Hop~alarm_BR', 'wgt_ALM_Step~alarm_BR', 'wgt_ALM_Warning_BR'] } };
+const NAMES = { 'three-vessel-one-pump': { testing: 'wgt_SW_Testing_BH', advance: 'wgt_SW_Advance_BH', alarms: ['wgt_ALM_Hop~alarm_BH', 'wgt_ALM_Step~alarm_BH', 'wgt_ALM_Warning_BH'] } };
 async function brewDay(id, tweak) {
   const { store, engine, hw } = scratch();
   loadSample(SAMPLES, id, { store, engine, hw });

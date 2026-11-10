@@ -1,4 +1,4 @@
-// New Schema from a Skynet Schema Template (Fritz, 2026-11-06/07, Rule 16.6): pick a Brewhouse Tab Template (1 Vessel, 1 Vessel +
+// New Schema from a Skynet Schema Template (Fritz, 2026-11-06/07, Rule 16.6): pick a Brew House Tab Template (1 Vessel, 1 Vessel +
 // 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2 Pumps, 3 Vessel) or the Fermentor Template on its own, answer a few questions, and Skynet makes the Schema: its Tab, its vessels (from Vessel Templates), the Devices on the brewer's real
 // Interface and free Ports, the chiller, a Supply Manifold if asked, the timers, and the Brew Process with every job picked, so
 // Build the Brew Day is all that is left. The panel goes to Simulator Mode, so nothing real is switched until the brewer says.
@@ -31,7 +31,7 @@ const HOT_STEPS = ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpoo
 // The defaults of the questions (☰ Menu > Default settings > New Schema from a Skynet Template). brewDefaults keeps them as ns_...
 export const NS_DEFAULTS = { ns_template: 'Skynet_3_Vessel', ns_fermentors: '1', ns_recirc: 'none', ns_chiller: 'immersion', ns_whirlpool: false,
   ns_valves: 'hand', ns_manifold: 'none', ns_manifoldKind: 'manual', ns_heat_HLT: 'electric', 'ns_heat_Mash Tun': 'none', 'ns_heat_Brew Kettle': 'electric',
-  'ns_heat_All In One': 'electric', ns_tab: 'Brewhouse' };
+  'ns_heat_All In One': 'electric', ns_tab: 'Brew House' };
 export const nsDefault = (b, k) => b?.[k] !== undefined && b[k] !== '' ? b[k] : NS_DEFAULTS[k];
 // a general type is picked as '@HLT' ... (a Vessel Template can have the same name, like HLT)
 export const generalPick = t => '@' + t;
@@ -64,9 +64,9 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   const hot = (a.vessels ?? []).length > 0, nF = Math.max(0, Math.min(8, +a.fermentors || 0));
   if (!hot && !nF) throw new Error('A Schema needs at least one vessel or fermentor');
   a = { ...a, vessels: a.vessels ?? [] };
-  // the hot side goes on its Tab (Brewhouse); the fermentors on their own Fermentor Tab (Fritz: "Fermentor Template is on its own")
+  // the hot side goes on its Tab (Brew House); the fermentors on their own Fermentor Tab (Fritz: "Fermentor Template is on its own")
   const fTab = hot ? (String(a.tab || '').trim().toLowerCase() === 'fermentor' ? 'Fermentors' : 'Fermentor') : 'Fermentor';
-  const tab = hot ? String(a.tab || 'Brewhouse').trim() : fTab, tabId = defaultTabId(tab, []);
+  const tab = hot ? String(a.tab || 'Brew House').trim() : fTab, tabId = defaultTabId(tab, []);
   const fTabId = hot ? defaultTabId(fTab, [tabId]) : tabId;
   const dev = iface ?? { name: 'New_Mega_2560_1', id: 'NM', connection: 'simulator', board: 'mega' };
   const devices = [dev], elements = [], used = new Set(taken.map(n => String(n).toLowerCase()));

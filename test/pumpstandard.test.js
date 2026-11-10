@@ -24,12 +24,12 @@ console.log('pump standard ok');
 // Left (Flip Horizontal: inlet facing the incoming pipe on the left, outlet up) at pipe size 10.
 {
   const cfg = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '..', 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
-  const e = cfg.elements.find(x => x.name === 'BM_22_Pump_Pump_BR');
+  const e = cfg.elements.find(x => x.name === 'BM_22_Pump_Pump_BH');
   assert.ok(e.w === 150 && e.h === 150 && e.flipH, 'the sample pump is 150 x 150, shown Left');
   const spot = ([fx, fy]) => { const x = Math.round(e.x + fx * 150), y = Math.round(e.y + fy * 150); return [e.flipH ? Math.round(2 * (e.x + 75) - x) : x, y]; };
   const ips = { in: spot([285 / 300, 150 / 300]), out: spot([243 / 300, 56 / 300]) };
   for (const k of ['in', 'out']) {
-    const id = `dev:BM_22_Pump_Pump_BR:${k}`, p = cfg.graphics.find(g => g.kind === 'pipe' && (g.from === id || g.to === id));
+    const id = `dev:BM_22_Pump_Pump_BH:${k}`, p = cfg.graphics.find(g => g.kind === 'pipe' && (g.from === id || g.to === id));
     assert.ok(p, `a pipe is on the pump ${k}`);
     const end = p.from === id ? p.points[0] : p.points[p.points.length - 1];
     assert.ok(Math.hypot(end[0] - ips[k][0], end[1] - ips[k][1]) <= 1.5, `the ${k} pipe ends on the pump's ${k} IP (${end} vs ${ips[k]})`);
