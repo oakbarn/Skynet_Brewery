@@ -18,7 +18,7 @@ assert.match(app, /if \(pick === 'mbv'\) \{[\s\S]{0,400}pickValve\(\)[\s\S]{0,30
 const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexOf('// ---- Thermowell'));
 assert.match(add, /const dd = isDrillDev\(e\), mbv = isMbvDev\(e\)/);
 assert.match(add, /\.\.\.\(mbv \? \[\.\.\.MBV_GRAPHIC_FIELDS\(e, after\), \.\.\.MBV_TOGGLE_OVERLAY\(e, after\), \.\.\.MBV_OWN\(\{ \.\.\.e, tapwater: false \}, after\)\] : \[\]\)/, 'Graphic, Path, Orientation + Toggle, Overlay, the three switches');
-assert.match(add, /\.\.\.\(isPumpDev\(e\) \? \['cover'(, \.\.\.PUMP_TYPE_KEYS)?\] : \[\]\)/, 'only a pump saves a Cover (and its Model, Power, Speed: Rule 18.32)');
+assert.match(add, /\.\.\.\(isPumpDev\(e\) \? \['cover'(, 'coverColor')?(, \.\.\.PUMP_TYPE_KEYS)?\] : \[\]\)/, 'only a pump saves a Cover (and its Model, Power, Speed: Rule 18.32)');
 assert.match(add, /mbv \? mbvTitle\(e\)/, 'the Add box is titled with the valve');
 const own = app.slice(app.indexOf('const MBV_GRAPHIC_FIELDS'), app.indexOf("// a new Alarm's Name follows its Label"));
 assert.ok(!/cover/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover on a valve (code, not comments)');

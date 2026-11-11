@@ -3397,6 +3397,12 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
 - **Label Visible** of a Pump: "The Label may be shown on the Tab, for example Red Pump above the Pump Device." with the Red Pump
   picture.
 - **The Add box** has the ⬆ beside the Label too, with the ⬢.
+- **The second part of the Pump Add box** (OakBarn Brewery, 2026-11-11, "Second Blichmann Pump Build Dialog"): repeated fields keep
+  the same layout and Hover Help as the first part, with what was entered there. Once 1 to 4 are done the **Interface and Available
+  Ports** line is greyed out (it can't change after the Device is made; Cancel to change it); **Label and Tab** can still be edited
+  and the Suggested Name follows them; the focus goes to **Orientation**, the first box that was not on the first part. **Graphic**
+  Hover Help ends "The Picture itself cannot be changed." **Cover**: "Pick Cover Color" (was "User cover (pick its color below)")
+  pops up the Color Picker; a color must be picked, or **◀ Back** sets the Cover back to None (no cover).
 - **The ⬆ and ⬢ have their own balloons** (what they open), and **Available Ports** has its own balloon, apart from the Interface's.
 - **Label Attributes**: no clutter (Visible, Font Size); **Font Size** shows the size the Label has now, not a blank; **Alignment**
   is **Left**, **Centered** or **Right**, with no "Default (Centered)" choice. A Label with no alignment of its own (nor from its

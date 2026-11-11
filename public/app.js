@@ -1767,7 +1767,7 @@ const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120,
 // the shape with the cover's color, so a new color needs no new drawings.
 const PUMP_COVER_COLORS = { Red: '#d32f2f', Yellow: '#f6c21c', Blue: '#1e63c8', Green: '#2e9e44', Purple: '#7b3fa8', Orange: '#f57c00', White: '#fafafa' };     // White is RGB 250 250 250 (Fritz, 2026-11-05)
 const PUMP_COVERS = Object.keys(PUMP_COVER_COLORS);
-const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
+const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'Pick Cover Color']];
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
 function coverOf(e, v) {
@@ -5014,6 +5014,7 @@ async function newDeviceDialog(e, hint, what) {
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
+  let wired = false;      // the Interface and Available Ports are set once the rest of the box is open
   // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
   const gate = () => {
     const w = { ...work }; try { readFields(w, body); } catch { }
@@ -5024,6 +5025,16 @@ async function newDeviceDialog(e, hint, what) {
       : portSel && portSel.options.length < 2 ? 'This Interface has no free Port for this Device: pick another Interface, or free a Port' : 'Pick the Port first (Available Ports)';
     for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !ok); b.title = why; }
     for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
+    // the rest of the Add box is open (OakBarn Brewery, 2026-11-11, the second Blichmann Pump Build Dialog): the Interface and Available
+    // Ports line is greyed out (the wiring is set; Cancel to change it), the Label and Tab can still change (the Suggested Name follows),
+    // and the focus goes to the first box that was not on the first part: the Orientation
+    if (ok && dd) {
+      const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
+      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.title = 'Set: the board and pin it is wired to. Cancel to change it.'; }
+      dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
+      if (!wired) setTimeout(() => (body.querySelector('select.orientSel') || body.querySelector('.afterStep select, .afterStep input'))?.focus(), 20);
+      wired = true;
+    }
     return why;
   };
   let portSel = null;
@@ -5115,7 +5126,7 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', 'coverColor', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
           for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
@@ -6940,7 +6951,7 @@ const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', '
 const ONE_CLICK_TAP = v => [['toggle', 'Toggle'], ['hold', 'Push Button'], ...(v && !['toggle', 'hold', 'none', '', 'default'].includes(v) ? [[v, v]] : [])];
 const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(it.tap);
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
-const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic, ...x }],
+const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic + (pumpModelOf(it) ? ' The Picture itself cannot be changed.' : ''), ...x }],
   pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
     : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }]];
@@ -7777,6 +7788,16 @@ function field(f, obj) {
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
+  // Pick Cover Color (OakBarn Brewery, 2026-11-11): picking it pops up the Color Picker; a color must be picked, or ◀ Back sets the
+  // Cover back to None (no cover)
+  if (f[0] === 'cover' && f[2] === 'sel' && out[1]?.matches?.('select')) {
+    const sel = out[1];
+    sel.addEventListener('change', async () => {
+      if (sel.value !== 'User') return;
+      if (await pickCoverColor(obj)) return;
+      sel.value = 'None'; sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface and its Available Ports)
     // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
     const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
@@ -8867,6 +8888,25 @@ function layerDialog(title, build, canDelete = false) {
     d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
     d.showModal();
   });
+}
+// the Color Picker of Pick Cover Color: true once a color is picked (it goes into the item), false on ◀ Back
+async function pickCoverColor(obj) {
+  const tmp = { coverColor: obj.coverColor || '' };
+  for (;;) {
+    let body;
+    const r = await layerDialog('Pick Cover Color', b => {
+      body = b; bindForm(b, [['coverColor', 'Cover Color', 'color', null, false, false, { tip: 'The color of the cover over the pump. Pick one, or ◀ Back for None (no cover).' }]], tmp);
+      for (const btn of b.closest('dialog').querySelectorAll('.bar button:not(.primary)')) btn.textContent = '◀ Back';
+    });
+    if (r !== 'ok') return false;
+    readFields(tmp, body);
+    if (String(tmp.coverColor || '').trim()) {
+      obj.coverColor = tmp.coverColor;
+      const inp = document.querySelector('#dlgBody [data-k="coverColor"]'); if (inp) { inp.value = tmp.coverColor; inp.dispatchEvent(new Event('change', { bubbles: true })); }
+      return true;
+    }
+    toast('Pick a Cover Color, or ◀ Back for None (no cover).', true);
+  }
 }
 // ⬆ String Entry Dialog (Rule 18.1): 2 or 30 lines, word wrap, Rich Text codes allowed. A one-line box keeps a new line as \n.
 async function upEntry(wrap, f, lines) {
