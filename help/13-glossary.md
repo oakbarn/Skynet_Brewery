@@ -34,6 +34,8 @@
 
 **IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout.
 
+**List box** (dropdown, drop down list box): a box with a ▼ that opens a list of choices. Type a letter to jump to a choice; **➕ Add new ...** at the end makes a new one. See [List Boxes (Dropdowns)](189-list-boxes).
+
 **Media folder**: a folder on the Pi that holds pictures and sounds. See [Media](07-media).
 
 **PLC**: in this project, a hobby board: Arduino-compatible (such as the Mega), ESP32 or Raspberry Pi.

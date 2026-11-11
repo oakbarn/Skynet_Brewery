@@ -456,7 +456,7 @@ day.
 
 2.6 **Choices with more than two answers are dropdowns.** A list that can grow ends with
 "Add new ...". Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
-number (Value). (2026-10-04, PR #14)
+number (Value). (2026-10-04, PR #14; how list boxes work, are filled and are limited: Help 189)
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
 a swatch, then Custom, which opens the Color Picker (Rule 2.48). (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
@@ -3633,6 +3633,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Help 189 (new), List Boxes (Dropdowns), asked for by OakBarn Brewery: how a list box works, where its choices come from (built into Skynet, your Schema, a list that grows with ➕ Add new ..., Rule 18.14) and how they are limited (by kind, by board, free ports only; typing BM_ in the Process editor shows only the Brewery Mega's Devices, a dialog's list box jumps to the first BM_ choice). Rule 2.6 points to it; Glossary entry List box. No Rule changed. Next free Help 190. (thread "Explain list boxes in Help")
 - 2026-11-11: Added Rule 2.49 (OakBarn Brewery): hot spots in Hover Help. Words in a balloon that have their own Help page (Interface ID, Tab ID, Suggested Name, Label, Hysteresis, Setpoint ...) are blue links that open that Help page at its part; a balloon with hot spots waits a moment so the mouse can reach it; the tap pop-up has them too. The balloon words are not changed. Help 147 updated. Checked against both programs: shared public/hoverhelp.js; the BruControl Import keeps plain words while its Help is on hold (Rule 11.3). (thread "Link hover help to full Help")
 - 2026-11-11: Added Rule 11.9 (OakBarn Brewery): a **Step by Step** section in Help, listed first; guides titled "Step by Step: ..." with a screenshot at each step. First guide Help 188, Step by Step: Add a Schema. Easier start: ☰ Menu > ➕ New Schema… and a ➕ New Schema button on the Schema tab, opening the same Add new Schema box. Help 48 and 157 point to them. Next free Help 189. (thread "Add step-by-step guides to Help")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "a on/off Pump is DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Type part of a Device name starts with its General Type and an `@` (`BM_22_DO@Pump_Pump_BH`); a Process reads `@` inside a name with no quotes; older Schemas get it once when they load (Rule 15.2), Processes follow; the sample and default Schema changed (Rule 15.3). Both programs. New docs/Special_Characters.md lists every special character and its use in a name. Help 46 updated. (thread "Show DO: type in Suggested Names")
