@@ -14,8 +14,13 @@ assert.doesNotMatch(app, /Default \(Centered\)/, 'no Default (Centered) choice')
 assert.match(app, /const ALIGN_LCR = \[\['MiddleLeft', 'Left'\], \['', 'Centered', 'MiddleCenter'\], \['MiddleRight', 'Right'\]\]/);
 assert.match(app, /title: 'Label Attributes'/);
 assert.match(app, /nm\.style\.textAlign = \(nal \|\| 'Center'\)/, 'a Label is really Centered when nothing is set');
-assert.match(app, /How do you refer to this Pump\?/, 'the Red Pump story');
-assert.match(app, /Suggested Name Format: InterfaceID_Port_Type_Label_TabID/);
+assert.match(app, /How do You refer to this Pump\. Brewing Pump, Mash Pump, HLT Pump \.\.\.\? Use your name for the Pump as the Label\. OakBarn Brewery Sample Schema has several Pumps and they are Color Coded with a Cover\./, 'the Red Pump text word for word');
+assert.match(app, /⟪img:help_pictures\/Label_Visible_Switch\.png⟫/, 'with its pictures');
+assert.match(app, /⟪img:help_pictures\/Red_Pump_Label\.png⟫/);
+for (const f of ['Label_Visible_Switch.png', 'Red_Pump_Label.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
+assert.match(app, /\['label', n\(\) \+ 'Label', 'text', null, false, false, \{ tip: T\.label, \.\.\.\(dd \? \{ up: 2, attr: LABEL_POP \}/, 'the ⬆ in the Add box');
+assert.match(app, /\['hideName', 'Label Visible', 'show', null, false, false, \{ tip: isPumpDev\(e\) \? LABEL_VISIBLE_PUMP_TIP/, 'Label Visible stays in the Add box');
+assert.match(app, /Suggested Name Format: INTERFACEid_Port_Type_Label_TABid/);
 assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: T\.port \}\]/, 'Available Ports has its own balloon');
 assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);

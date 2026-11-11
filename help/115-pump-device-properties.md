@@ -54,23 +54,31 @@ The On / Off text is shown with an Overlay (the green On overlay of the Skynet p
 
 ## The Label
 
-How do you refer to this Pump? Brewing Pump, Mash Pump, HLT Pump ...? Use your name for the Pump as the Label. The OakBarn
-Brewery Sample Schema has several Pumps, color coded with a Cover. When OakBarn is brewing, he might yell out "Shut off the Red
-Pump" to stop the flow. The Fermenters are in a different room, and when they are visually full the Brewmeister yells "Turn off
-the Red Pump" to his comely assistant, who then clicks the Red Pump Off.
+How do You refer to this Pump. Brewing Pump, Mash Pump, HLT Pump ...? Use your name for the Pump as the Label. OakBarn
+Brewery Sample Schema has several Pumps and they are Color Coded with a Cover. When OakBarn is brewing, he might yell out,
+"Shut off the Red Pump" to stop the flow. The Fermenters are in a different Room and when visually full, the Brewmeister yells
+to "Turn off the Red Pump" to his comely assistant, who then clicks the Red Pump Off.
 
-**Label Visible**: the Label may be shown on the Tab, for example Red Pump above the Pump.
+![Label Visible](help_pictures/Label_Visible_Switch.png)
 
-The Label is the Plain Text Part of the Suggested Name. Spaces become ~: BM_6_Pump_**Red~Pump**_BH.
+The Label may be shown on the Tab, for example Red Pump above the Pump Device.
 
-Suggested Name Format: **InterfaceID_Port_Type_Label_TabID**. From BM_6_Pump_Red~Pump_BH you know that the Device Red Pump is
-connected to Interface BM (Brewery Mega, an Arduino), on Port 6, Pump Type, labeled Red Pump, and is on Tab BH (Brew House).
+![Red Pump: the Label above the Pump](help_pictures/Red_Pump_Label.png)
 
-Do not worry about such a long name when writing a Process: it is a choice in a List Box, and you will quickly find it useful.
-Because of Predictive Text, type BM in the List Box and only the Devices on BM: Brewery Mega are left to pick from.
+This is the Plain Text Part of the Suggested Name. Spaces become ~.
+BM_6_Pump_**Red~Pump**_BH
 
-- The **⬆** opens a 2 Line Label Text Dialog.
-- The **⬢** opens the Label Attributes Dialog, where you set its font, size and colors.
+Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
+From the above BM_6_Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+(Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You
+will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your
+choices are limited only to those devices on the BM: Brewery Mega Arduino.
+
+The **⬆** opens a 2 Line Label Text Dialog
+
+The **⬢** opens a Label Attributes Dialog where you can set its font, size and colors.
 
 **Available Ports**: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is
 added it is greyed out: it is the wiring.
