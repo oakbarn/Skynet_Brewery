@@ -11,6 +11,16 @@ fields themselves. The explanation of a field is in its **hover help**.
 - The box **stays as long as the mouse is on the name**. Move the mouse off (or click, press a key or scroll) and it goes away.
 - **Click the name** to open the same help in a small pop-up with **Close**, if you want to keep it open while you read.
 
+## Hot spots: jump to the bigger Help
+
+Some words in a help box are **blue and underlined**. They are **hot spots**: each one has its own, bigger Help page.
+
+- Move the mouse from the name into the help box. A box with hot spots waits a moment, so the mouse can reach it.
+- **Click a hot spot** and the Help window opens at the part about it. Example: in the help for **Interface**, click
+  **Interface ID** and Help opens **Interfaces**, at **The Interface ID**.
+- Only the first time a word shows in a box is it a hot spot, so the box stays easy to read.
+- The pop-up with **Close** (a click or a tap on the name) has the same hot spots.
+
 ## On a phone or tablet
 
 Phones and tablets are for running the brewery (Rule 2.35), and they have no mouse. **Tap the name** to open the small pop-up

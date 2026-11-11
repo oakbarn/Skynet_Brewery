@@ -1076,6 +1076,12 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .hhPic { display: block; max-width: min(100%, 240px); height: auto; margin: 2px 0; border-radius: 4px; }
 .hoverHelp.hhWide { max-width: min(560px, calc(100vw - 16px)); font-size: 12.5px; }
 .hhHead { display: block; font-size: 1.05em; }
+/* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
+.hoverHelp.hhHasLinks { pointer-events: auto; }
+.hhLink { color: #0b57b0; text-decoration: underline; cursor: pointer; }
+.hhLink:hover { color: #08408a; background: rgba(11,87,176,.1); border-radius: 3px; }
+.tipDlg .hhLink { color: #6cb6ff; }      /* the tap pop-up has the dialog's own (dark) colors */
+.tipDlg .hhLink:hover { color: #9ccfff; background: rgba(108,182,255,.15); }
 .hhWarn { display: block; color: #d01818; font-weight: 700; margin-bottom: 4px; }
 .hhTri { display: block; width: 0; height: 0; margin: 2px 0 4px; position: relative; border-left: 14px solid transparent; border-right: 14px solid transparent;
   border-bottom: 24px solid #e01e1e; filter: drop-shadow(0 0 0.6px #000) drop-shadow(0 0 0.6px #000); font-size: 0; }

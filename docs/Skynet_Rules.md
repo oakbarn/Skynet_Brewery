@@ -438,6 +438,17 @@ list (shown as **RGB r g b**); **Cancel** leaves the box as it was. The Color (R
 **Pump covers:** Save draws the cover in that color on the pump in the dialog and on the Tab; **◀ Back** sets the Cover back to None
 (no cover). A color is still saved as #rrggbb, so nothing saved before changes. Help 187.
 
+2.49 **Hot spots in Hover Help open the bigger Help** (OakBarn Brewery, 2026-11-11: "And in Hover help, Hot spots that take you to
+the bigger help about an Item in the Hover Help. Like if the Hover Help is about Interface ID, a means to jump to the Bigger Regular
+Help for Interfaces"). A word in a balloon (Rule 2.38) that has its own Help page is a **hot spot**: blue and underlined. One click
+opens that Help page at its part, in the Help window, the same as the yellow ? (Rule 2.11). Example: the Interface balloon says
+"Interface ID", and a click on it opens Help **Interfaces**, part **The Interface ID**. The words of the balloon are never changed;
+only words found in the hot spot list (public/helpmap.js, HOT_SPOTS) become links, and each topic is a link only the first time it
+shows in a balloon. A balloon with hot spots **waits a moment** when the mouse leaves its name, so the mouse can move into it and
+click; one without hot spots goes away at once, as before. The tap pop-up on phones (Rule 18.16) has the same hot spots. A new Help
+page about an item adds its words to the list (Rule 11.2). **Both programs:** the BruControl Import shares the balloons, but its Help is
+on hold (Rule 11.3), so its balloons keep plain words until its Help is made. Help 147.
+
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
 
@@ -3689,6 +3700,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 ## Change log
 
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
+- 2026-11-11: Added Rule 2.49 (OakBarn Brewery): hot spots in Hover Help. Words in a balloon that have their own Help page (Interface ID, Tab ID, Suggested Name, Label, Hysteresis, Setpoint ...) are blue links that open that Help page at its part; a balloon with hot spots waits a moment so the mouse can reach it; the tap pop-up has them too. The balloon words are not changed. Help 147 updated. Checked against both programs: shared public/hoverhelp.js; the BruControl Import keeps plain words while its Help is on hold (Rule 11.3). (thread "Link hover help to full Help")
 - 2026-11-11: Added Rule 11.9 (OakBarn Brewery): a **Step by Step** section in Help, listed first; guides titled "Step by Step: ..." with a screenshot at each step. First guide Help 188, Step by Step: Add a Schema. Easier start: ☰ Menu > ➕ New Schema… and a ➕ New Schema button on the Schema tab, opening the same Add new Schema box. Help 48 and 157 point to them. Next free Help 189. (thread "Add step-by-step guides to Help")
 - 2026-11-11: Rule 3.3 and new Rule 3.17, Label Rules (OakBarn Brewery: "Hunt for Beginning or trailing spaces in a label or name and not allow. This is an issue in BruControl I want to remove from Skynet"; "Put that in Nameing and Label Rules"): no space at the start or end of any name or Label; Labels are trimmed when you leave the box, when saved (the Brain trims every Label it is sent) and on load. Rule 3.17 gathers the Label Rules (no © ® ™, no @ ~, never blank). Checked against both programs: BruControl names and Labels with spaces at the ends are trimmed when imported.
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Valve_E_H and Valve_Sgas"): the High Temperature Electric Valve's Type ID is Valve_E_H (was E_H_Vlv) and the Solenoid Gas Valve's is Valve_Sgas (was G_Vlv): DO@Valve_E_H, DO@Valve_Sgas; older ones are upgraded on load with their names. Checked against both programs: the BruControl Import's Burner (BrN) comes in as Valve_Sgas.
