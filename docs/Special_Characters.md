@@ -14,7 +14,7 @@ These are already used in every Suggested Name (Rule 3.1). Each one means one th
 |---|---|---|---|
 | `_` | underscore | Separates the parts of a name: Interface, Port, Type, Label, Tab. | `BM_22_DO@Pump_Red~Pump_BH` |
 | `~` | tilde | Stands for a space in the Label, and for any blocked mark typed in the Label. | Label *Red Pump* is `Red~Pump` |
-| `@` | at | Stands for the `:` between the General Type and the Device Type (OakBarn Brewery, 2026-11-11). | *DO: Pump* is `DO@Pump` |
+| `@` | at | Joins the General Type and the Device Type, in the name and wherever the Device Type is shown (OakBarn Brewery, 2026-11-11). A `:` can't be in a name, so `@` is used everywhere. | `DO@Pump`, `PWM@Pump` |
 
 ## Still free
 

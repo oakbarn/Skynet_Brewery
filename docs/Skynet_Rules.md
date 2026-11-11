@@ -3128,8 +3128,13 @@ the hover shows at once and stays while the mouse rests on the name (Rule 2.38).
 *Replaced:* the Interface list showed the full name first, `Brewery Mega   (ID BM_)` (Fritz, 2026-10-27).
 
 18.18 **Device Type shows its General Type first** (Fritz, 2026-11-04): where a Device Type is shown, it reads
-`General Type: Type`, for example an On/Off Pump as `DO: Pump`. The saved type stays as it was (digitalOut, typeCode Pump)
-so nothing conflicts, and the Suggested Name still uses the Type (Pump). General Types: **DO** (Digital Out), **PWM**,
+`GeneralType@Type`, the same as in the Suggested Name (Rule 3.1; OakBarn Brewery, 2026-11-11: "Any where in Skynet Change any DO:Pump
+and any other devices where there is a Subgroup to Type to DO@Pump"; "All Get Updated to the new standard"): an On/Off Pump is `DO@Pump`,
+a Pump on a PWM port `PWM@Pump`, a Heating Element `DO@HE` (`PWM@HE`, `AO@HE`). A new Device fills it in: a new On/Off Pump (a
+Blichmann RipTide) reads `DO@Pump`. On a PWM or 0-10 V port a Pump, Fan, Motor, LED or Heating Element has the same Type ID as on an
+On/Off port (Pump, Fan, Mtr, LED, HE; they were P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO), since the General Type already says the
+port; older Schemas are upgraded on load, names too (Rule 15.2). A Proportional Valve keeps `P_L_Vlv` / `P_H_Vlv` (a different valve).
+The saved type stays as it was (digitalOut, typeCode Pump). General Types: **DO** (Digital Out), **PWM**,
 **HYS** (Hysteresis) from Fritz; AO (Analog Out), DI (Digital In), AI (Analog In), TEMP, FLOW, SCALE, STEP (Stepper),
 DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-type shows only its General Type.
 
@@ -3158,7 +3163,7 @@ pump drawing only); **Cover** with **Toggle** (On/Off, Push
 button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
 2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
 the hexagon opens the Database and .API settings in a pop-up, in the Add box and the Properties (Fritz's screen 7); **X, Y, Width, Height**; the **Device
-Type** (DO: Pump) greyed out last. A User pump has the same Properties. **Only these** belong to a Pump: the old Hidden Locked row,
+Type** (DO@Pump) greyed out last. A User pump has the same Properties. **Only these** belong to a Pump: the old Hidden Locked row,
 Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture ⬢, Background picture ⬢ and Text when on / off are gone
 from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
 *Replaced:* for the Pump, Rule 18.12's list of fields (2026-11-03).
@@ -3184,8 +3189,8 @@ Valve drill-down dialog", Help 128):
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
    valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
-5. Its Type ID is **eVlv** (Fritz, 2026-11-05, was E_L_Vlv; the Device Type reads **DO: eVlv**). Valves named before keep their
-   names (Rule 3.5); the Brain upgrades the stored Type ID on load.
+5. Its Type ID is **eVlv** (Fritz, 2026-11-05, was E_L_Vlv; the Device Type reads **DO@eVlv**). Older valves are
+   upgraded on load, the stored Type ID and the name (Rule 15.2).
 - **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
   **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
   Width and Height; **Toggle and Overlay work normally**, as on the Pump (Fritz, 2026-11-05: "Toggles and Overlays should work
@@ -3248,7 +3253,7 @@ Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, 
    **Orientation** (Rotate 0, 90, 180, 270) with **Flip** on its line; then the probe's own set (Rule 18.22): **Probe type** greyed
    out with a ⬢ for its settings (wires, reference resistor, thermocouple type, thermistor values, board voltage, Simulator
    settings), **Units** with **Decimals** on one line, **Calibration offset** with **Database and .API ⬢** on its line; X, Y, Width,
-   Height, and the Device Type greyed out last (e.g. **TEMP: 1W**). Enter goes Label, Interface, Port, Tab, Orientation,
+   Height, and the Device Type greyed out last (e.g. **TEMP@1W**). Enter goes Label, Interface, Port, Tab, Orientation,
    ➕ Add Device. **No Cover, Toggle or Overlay** (a probe is an input).
 3. Its Label starts filled in by its kind of probe as **tP_Type_n**, n the next number for that kind, so the focus starts on the
    Interface (Rule 18.15). Fritz, 2026-11-05: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow
@@ -3312,7 +3317,7 @@ be kept as clean as possible"):
    **3. Valve 1**, **Valve 2**, **Valve 3**, each **Manual** or **Motorized**, a Motorized one with its **Available Ports** on the
    same line (two valves can't share a Port); **4. Tab** (➕ Add new Tab… and ➕ Add new Interface… work as Rule 18.14); then the
    **5. Name**, the **Graphic** (its valves as picked, with their numbers), its **Path** (greyed out, Rule 5.6), **Orientation**
-   (Rule 5.35's three, with **Flip** on its line), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO: eVlv, V2 DO: M_L_Vlv).
+   (Rule 5.35's three, with **Flip** on its line), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO@eVlv, V2 DO@M_L_Vlv).
    ➕ Add Device can always be pressed and says what is missing (Rule 18.15). Enter goes Label, Interface, each Valve and Port, Tab,
    Orientation, Flip, ➕ Add Device (Rule 18.20).
 2. Its **Properties** are the same with 🗑 Delete, ✖ Cancel and 💾 Save and the 🔓 lock in the title line. A valve saved Motorized
@@ -3592,6 +3597,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 18.18 (OakBarn Brewery: "Any where in Skynet Change any DO:Pump ... to DO@Pump ... also PWM@Pump"; "All Get Updated to the new standard"): the Device Type reads GeneralType@Type everywhere (DO@Pump, PWM@Pump, DO@HE), filled in on a new Device; P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO become Pump, Fan, Mtr, LED, HE under PWM / AO; older Schemas' Type IDs and names upgraded on load. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "a on/off Pump is DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Type part of a Device name starts with its General Type and an `@` (`BM_22_DO@Pump_Pump_BH`); a Process reads `@` inside a name with no quotes; older Schemas get it once when they load (Rule 15.2), Processes follow; the sample and default Schema changed (Rule 15.3). Both programs. New docs/Special_Characters.md lists every special character and its use in a name. Help 46 updated. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.32 and the Pump dialog (OakBarn Brewery's drawing, Add Pump and Pump Properties, both programs): Cover choice **User Add** with the Color (RGB) line below; KISS Model and Power names (no "From the drawing" / "From the model"); Use greyed out, Hot & Cool; X, Y, Width, Height on one line; the electrical warning starts the Power Hover Help; Speed Control and Speed % for PWM pumps only; known values (Model, Power, Pump Facts) filled in and greyed out, a User Defined pump's stay editable; Blichmann RipTide facts added (7 GPM, 21 ft, 1/2" NPT). Help 111, 115, 163, 187. (thread "Add color picker to color fields")
 - 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs (his drawing): the User Add pops it up and a Color (RGB) line (swatch + 250,250,250) shows just below, double-click brings the picker up again; Save adds the color to the list. Pick Cover Color works the same way; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
