@@ -29,8 +29,9 @@ assert.match(app, /\['User', 'Pick Cover Color'\]\]/, 'Pick Cover Color');
 assert.match(app, /async function pickCoverColor\(obj\)/, 'its Color Picker');
 assert.match(app, /cancelText: '◀ Back'/, 'Back sets None');
 // the Color Picker (Rule 2.48): Pickr in every color box, the Cover Color field just below the Cover
-assert.match(app, /import \{ openColorPicker, hexToRgb, rgbText \} from '\.\/colorpick\.js'/, 'the Color Picker');
-assert.match(app, /coverRow: true/, 'the Cover Color field waits below the Cover');
+assert.match(app, /import \{ openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb \} from '\.\/colorpick\.js'/, 'the Color Picker');
+assert.match(app, /\['coverColor', 'Color \(RGB\)', 'rgb'/, 'the Color (RGB) field waits below the Cover');
+assert.match(app, /txt\.addEventListener\('dblclick'/, 'double-click brings up the Color Picker again');
 assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
 assert.match(app, /The Picture itself cannot be changed\./);
 assert.match(app, /i\.disabled = true; i\.title = 'Set: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out');

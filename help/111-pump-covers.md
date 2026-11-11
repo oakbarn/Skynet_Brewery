@@ -14,8 +14,8 @@ In the pump's Properties, **Cover overlay** is right after the picture:
 
 - **None** (the default): no cover.
 - **Red, Yellow, Blue, Green, Purple, Orange, White** (White is RGB 250 250 250): the Skynet cover colors.
-- **Pick Cover Color**: the same cover in a color of your own. The **Cover Color** box shows just below the Cover and the Color
-  Picker opens at once (any RGB, Help 187); **◀ Back** sets the Cover back to None.
+- **Pick Cover Color**: the same cover in a color of your own. The Color Picker pops up and the **Color (RGB)** line shows just
+  below the Cover (Help 187); double-click it to change the color later. **◀ Back** sets the Cover back to None.
 
 There is **one cover for each color, and every cover fits every Skynet pump**. Skynet keeps one cover shape for
 each pump drawing and fills it with the color you pick, so changing the color or the pump never needs a new picture.
