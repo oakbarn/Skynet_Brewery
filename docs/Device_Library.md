@@ -113,8 +113,8 @@ With PR #108: heating Devices (element, gas valve, igniter, heat pad, PID, Hyste
 **Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
 
 | Direct On / Off output | DO, H_Element, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
-| PWM output | PWM, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
-| Analog output | AO, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@Pump ...) |
+| PWM output | PWM, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
+| Analog output | AO, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr (shown AO@Pump ...) |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
 | Analog input | AI, Pres, Level, Vol, PH_Met |
 | Flow meter | FlowM |
@@ -144,8 +144,8 @@ What each ID means:
 | H_Element | Heating Element (DO@H_Element, PWM@H_Element, AO@H_Element) | HtPad | Fermenter heat wrap or pad |
 | | | Ignit | Burner igniter |
 | PWM | PWM (plain) | DI | Direct Input (plain) |
-| P_L_Vlv | Low Temperature Proportional Valve | Float | Float (true while made) |
-| P_H_Vlv | High Temperature Proportional Valve | DIN | DIN momentary push button (one trigger per press, 3 s lockout) |
+| Valve_L | Low Temperature Proportional Valve | Float | Float (true while made) |
+| Valve_H | High Temperature Proportional Valve | DIN | DIN momentary push button (one trigger per press, 3 s lockout) |
 | Pump | Pump (PWM@Pump, AO@Pump: its speed) | PB | Push button (ON only while held) |
 | Fan | Fan (PWM@Fan: its speed) | Toggle | Toggle button (press ON, press again OFF) |
 | Mtr | Motor (PWM@Mtr: its speed) | Latch | Latching input (ON until reset) |
@@ -252,14 +252,14 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
-- **Type IDs:** PWM, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@...).
+- **Type IDs:** PWM, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr, LED (shown PWM@...).
 - **Port:** PWM pins only (Mega 2-13, 44-46).
 - **Settings:** Interface, PWM pin, Start value (%), Decimals, **Measured volts** (Rule 6.24, Help 169: pairs of % and the volts measured; shows ≈ V, `.volts` reads and sets).
 - **Value:** 0-100 % on screen; the board gets 0-255. Board line `PWM <pin> <0-255>`.
 
 ### 4.5 Analog output (0-10 V / 4-20 mA)
 - **Add menu:** Devices: outputs > Analog output 0-10 V, or Analog output 4-20 mA.
-- **Type IDs:** AO, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@...).
+- **Type IDs:** AO, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr (shown AO@...).
 - **Port:** a PWM pin feeding a PWM-to-0-10 V or 4-20 mA module.
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals, **Measured volts** (Rule 6.24).
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).
@@ -269,7 +269,7 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
   0-100 % (analog output)", renamed 2026-11-03).
 - Its own pictures (open above 0 % / closed at 0 %, Image Path 1-3, Rule 7.10) and **In / Out IP across % and down %** (ipInX,
   ipInY, ipOutX, ipOutY), the same as the User Defined Motorized Ball Valve (4.3c). Help 117.
-- **Type IDs:** P_L_Vlv (default), P_H_Vlv.
+- **Type IDs:** Valve_L (default), Valve_H.
 - An Analog output (4.5) set to 0-10 V, 0-100 %, with IN and OUT IPs and pictures for open (above 0 %) and closed (0 %).
 
 ### 4.6a Skynet KLD20T Proportional Valve (Skynet Template, Rules 5.16, 5.17, 5.22)
@@ -278,7 +278,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - **Add menu:** Valves on the Edit layout bar (not On/Off: it is not an on / off valve). One entry; **Orientation** picks
   Horizontal, Vertical Left, Vertical Right or 45 degrees.
 - **Templates:** templates/device/Skynet_KLD20T_Proportional_Valve_H (main), _VL, _VR (Flip Horizontal on).
-- **Type:** analogOut, subtype propValve. **Type ID:** P_L_Vlv.
+- **Type:** analogOut, subtype propValve. **Type ID:** Valve_L.
 - **Fixed by the Template:** Kind, Service (Room Temperature Liquid), Signal 0-5V, 0 to 100 %, Decimals 0, pictures (the Skynet
   Motorized Ball Valve's: Valve_Motor_Ball_*H, *V_LC, until Fritz sends a KLD20T drawing), look.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,

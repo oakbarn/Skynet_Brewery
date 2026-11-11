@@ -38,7 +38,7 @@ Each part of the name says one plain thing, always in the same place, so nobody 
 
 The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO@Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_25_PWM@P_L_Vlv_Fly~Sparge_SP`
+`MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
 **Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
 Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
@@ -100,9 +100,9 @@ Every Device Type ID means one thing. The **General Type** in front says what ki
 
 A **DIN** gives one trigger per press, however long the button is held, and a second or third press within **3 seconds** does nothing. You can change the 3 seconds in its properties (*Pulse: lockout*).
 
-**PWM:** `PWM` plain, `H_Element` heating PWM, `P_L_Vlv` low temperature proportional valve, `P_H_Vlv` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
+**PWM:** `PWM` plain, `H_Element` heating PWM, `Valve_L` low temperature proportional valve, `Valve_H` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
 
-**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_Element`, `P_L_Vlv`, `P_H_Vlv`, `Pump`, `Fan`, `Mtr` (shown as `AO@Pump` ...).
+**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_Element`, `Valve_L`, `Valve_H`, `Pump`, `Fan`, `Mtr` (shown as `AO@Pump` ...).
 
 **Analog inputs:** `AI` plain, `Pres` pressure, `Level`, `Vol` volume, `PH_Met` pH meter.
 
