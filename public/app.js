@@ -19,7 +19,7 @@ import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHe
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES } from './naming.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -5066,7 +5066,7 @@ async function newDeviceDialog(e, hint, what) {
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
     ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface, ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
-    ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
+    ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
@@ -5078,7 +5078,7 @@ async function newDeviceDialog(e, hint, what) {
     ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
     ...(isPumpDev(e) ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }]]),      // a Pump: X, Y, Width and Height on one line
-    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: T.type }]] : [])];
+    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: typeTip({ ...e, typeCode: work.typeCode || drillCode(e) }) }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
@@ -7333,7 +7333,7 @@ const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
     ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
     ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)]
   : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)];
-const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: DEVICE_TIPS.type }];
+const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(it) }];
 function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
@@ -7666,7 +7666,7 @@ function vpPartFields(it, item) {
     : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: it.vpKind === 'element' ? T.eIface : T.iface }] : f => f;
   return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(inst).map(f => f[0] !== 'workspace' ? f
     : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
-    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: it.vpKind === 'element' ? T.eType : T.type }]];
+    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: it.vpKind === 'element' ? T.eType : typeTip(it) }]];
 }
 // an integrated Vessel Device's part sections, saved onto the parts (never their Interface or Port, Rule 5.31; no swapping)
 function vpxApply(g, x) {
@@ -7739,7 +7739,7 @@ function genDeviceFields(it, item, f) {
   const own = part && it.type === 'temperature' ? [...PROBE_OWN(it), ['info', 'Reading now', 'info']]
     : f.filter(x => !skip.has(x[0]) && !['box', 'boxend'].includes(x[2]) && !(x[2] === 'note' && /^_(sky|sug|hint|ovn)$/.test(x[0])));
   const dbLine = !dbKeys.size || pics || own.some(x => x[6]?.dbPop) ? [] : [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP }]];
-  const typeF = typeCodes(it).length > 1 && !part ? PWM_TYPE(it) : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }];
+  const typeF = typeCodes(it).length > 1 && !part ? PWM_TYPE(it) : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }];
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ...f.filter(x => x[0] === '_sky'),
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
@@ -7996,6 +7996,15 @@ function field(f, obj) {
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type (GENERAL_TYPE in public/naming.js), with an @
 // as in the Suggested Name (OakBarn Brewery, 2026-11-11: "Any where in Skynet Change any DO@Pump ... to DO@Pump"): DO@Pump, PWM@Pump,
 // DO@HE (a Heating Element). A new Device fills in its own: a new On/Off Pump (a Blichmann RipTide) is DO@Pump.
+// The Device Type's Hover Help, made for this Device (OakBarn Brewery, 2026-11-11: "In Hover Help ... DO@Pump"): DO@Pump is a Pump on a
+// Digital Out (DO), and the same DO@Pump is in its Suggested Name
+const GENERAL_WORDS = { DO: 'Digital Out, On/Off', PWM: 'PWM output, its speed or power', AO: 'Analog Out, 0-10 V', DI: 'Digital In', AI: 'Analog In', TEMP: 'Temperature', FLOW: 'Flow', SCALE: 'Scale', STEP: 'Stepper', DUTY: 'Duty Cycle', HYS: 'Hysteresis', PID: 'PID', DBAND: 'Deadband', HYDRO: 'Hydrometer' };
+const typeTip = e => {
+  const t = shownType(e), [g, c] = t.includes('@') ? t.split('@') : [t, ''], d = c && TYPE_NAMES[c] ? `${TYPE_NAMES[c]} (${c})` : '';
+  if (!t) return DEVICE_TIPS.type;
+  const sug = (() => { try { return deviceSuggestion(e); } catch { return ''; } })();
+  return `Its Device Type: ${t}${d ? `, a ${d}` : ''} on a ${GENERAL_WORDS[g] || g} (${g}) port.${c ? ` The General Type comes first, then an @, then the Device Type.` : ''} The same ${t} is the third part of the Suggested Name${sug ? `: ${sug}` : ''}. It comes from the Device you added and is filled in for you.`;
+};
 const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || (isDevice(e) ? defaultCode(e) : '') || '';
   return !g ? c : !c || c.toUpperCase() === g ? g : `${g}@${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
@@ -8037,7 +8046,7 @@ const DEVICE_TIPS = {
   port: 'Available Ports: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is added it is greyed out: it is the wiring.',
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
-  type: 'Its General Type first (DO = Digital Out, PWM, HYS ...), then its Device Type, which comes from the list it was picked in and is part of the Suggested Name.',
+  type: 'Its Device Type: the General Type, an @, then the Device Type, for example DO@Pump, an On/Off Pump (Pump on a Digital Out, DO), or PWM@Pump, a Pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: BM_22_DO@Pump_Pump_BH. A new Device fills it in.',
   cover: 'A colored cover drawn over the pump picture (the Skynet pump drawings only). None to start.',
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
@@ -9312,10 +9321,10 @@ async function editItem(kind, id) {
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
-    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
+    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.eType }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
-    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
-    if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];
+    if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);
     if (isProcessWidget(it)) return processWidgetFields(it);      // the Process Widget (Rule 1.31)

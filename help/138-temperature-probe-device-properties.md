@@ -25,7 +25,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    - **Units** (°F or °C) and **Decimals** on one line.
    - **Display**: how the reading shows on its Tab: a **Number**, **LCD digits**, **LED digits** or the **Skynet Dial**; the ⬢ beside it holds the Dial settings ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)).
    - **Calibration offset** (added to every reading) and, on the same line, **Database and .API ⬢** (Help 98).
-   - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**).
+   - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**: a DS18B20 probe, 1W, on a Temperature port, TEMP; the same TEMP@1W is in its Suggested Name).
    **Enter** takes you through Label, Interface, Port, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device** looks faded,
    press it anyway: it tells you what is still missing.
 3. Press **➕ Add Device**. The probe goes on the Tab you picked and its Properties open. The **Interface** and **Port** are now
