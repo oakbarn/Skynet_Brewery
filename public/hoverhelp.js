@@ -50,6 +50,21 @@ export function helpNodes(text, doc = globalThis.document) {
     });
     return out;
   }
+  // ⟪img:path⟫ is a picture (a path in a media folder, as in Help) and ⟪b:words⟫ a heading in bold (OakBarn Brewery, 2026-11-10: the
+  // Pump Label's balloon has its pictures, the same as the Help page)
+  const pics = String(text ?? '').split(/⟪(img|b):([^⟫]*)⟫/);
+  if (pics.length > 1) {
+    for (let i = 0; i < pics.length; i += 3) {
+      let t = pics[i] ?? '';
+      if (i > 0 && pics[i - 2] === 'img') t = t.replace(/^\n+/, '');      // a picture is its own block: no empty line beside it
+      if (pics[i + 1] === 'img') t = t.replace(/\n+$/, '');
+      if (t) out.push(...helpNodes(t, doc));
+      if (i + 2 >= pics.length) break;
+      if (pics[i + 1] === 'b') { const b = doc.createElement('b'); b.className = 'hhHead'; b.textContent = pics[i + 2]; out.push(b); continue; }
+      const im = doc.createElement('img'); im.className = 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]); out.push(im);
+    }
+    return out;
+  }
   for (const [i, part] of String(text ?? '').split(/⟦|⟧/).entries()) {
     if (i % 2) { const m = doc.createElement('b'); m.className = 'hhMark'; m.textContent = part; out.push(m); continue; }
     for (const [j, bit] of part.split(/([⬢⬆])/).entries()) {
@@ -76,11 +91,17 @@ function start(doc = globalThis.document) {
   const show = el => {
     const text = helpOf(el); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
+    tip.classList.toggle('hhWide', text.includes('⟪img:'));      // a balloon with pictures is wider, so it fits on the screen
     (pop ? doc.body : el.closest('dialog[open]') || doc.body).append(tip);
     if (pop) { try { tip.showPopover(); } catch { } } else tip.classList.add('show');
     const r = el.getBoundingClientRect(), b = tip.getBoundingClientRect();
     const p = placeBubble(r, { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
     tip.style.left = p.left + 'px'; tip.style.top = p.top + 'px';
+    for (const im of tip.querySelectorAll('img')) if (!im.complete) im.addEventListener('load', () => {      // placed again once its pictures are in
+      if (!tip.isConnected) return;
+      const b2 = tip.getBoundingClientRect(), p2 = placeBubble(el.getBoundingClientRect(), { w: b2.width, h: b2.height }, { w: innerWidth, h: innerHeight });
+      tip.style.left = p2.left + 'px'; tip.style.top = p2.top + 'px';
+    }, { once: true });
   };
   doc.addEventListener('pointerover', ev => {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;       // a finger gets the tap pop-up (Rule 18.16), not a hover
