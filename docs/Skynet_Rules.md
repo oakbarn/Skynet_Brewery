@@ -2382,9 +2382,10 @@ Skynet ships only its own pictures and sounds, or ones in the public domain or u
 kept as the license asks). Every picture or sound that is not Skynet's own, CC0 and CC included, has a row in
 [Media_Licenses.csv](Media_Licenses.csv) with its source, license and what the license asks for. A questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
 Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
-**Exception** (OakBarn Brewery, 2026-11-10, "Keep the Beep"): the two Alarm fallback sounds, sounds/alarm_beep.wav and
-sounds/Skynet/Alarm_Sound_Missing.mp3, also stay in the panel zip and the Skynet Brewer Setup (in defaults/media, copied in only
-when missing), so an Alarm can always sound. Every other sound and picture, songs included, is only in the Media Setup.
+**Exception** (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"): the three fallback sounds,
+sounds/alarm_beep.wav, sounds/Skynet/Alarm_Sound_Missing.mp3 and sounds/Skynet/Find_The_File_Connecting.mp3, also stay in the
+panel zip and the Skynet Brewer Setup (in defaults/media, copied in only when missing), so an Alarm or Sound Player can always
+sound. Every other sound and picture is only in the Media Setup.
 (thread "Shrink the Setup .exe and remove dead code", Help 183)
 
 9.13 **The extra Sample Schemas are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "separate the Sample Schemas in a
@@ -3948,4 +3949,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Added Rule 9.12 (OakBarn Brewery): the Skynet pictures and sounds leave the panel zip and Setup and become the add-only Skynet Media Setup .exe and Skynet Media zip; Get Skynet pictures is add-only too; no copyrighted media ships. Help 183. Both programs. (thread "Shrink the Setup .exe and remove dead code")
 - 2026-11-10: Added Rule 9.13 (OakBarn Brewery): the panel ships only the 3 Vessel 1 Pump sample; every other Sample Schema comes with the add-only Skynet Sample Schemas Setup .exe and zip into `sample_schemas` (no Schemas in it yet: the set-aside samples stay in the Sandbox and are added one at a time once brought up to the Rules); a Schema from another brewer goes in the same folder; on an update the three old samples in `samples/configs` are moved (never deleted) to `backups/old_samples_<date>`, nothing else touched; Help 83 gets the two 3 Vessel video links (coming soon). Rules 10.8 and 16.8 point to it. Help 184; next free Help 185. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
 - 2026-11-10: Added Rule 10.9 (OakBarn Brewery): sharing Schemas between brewers. Export to share ... and Import a brewer's Schema ... in the Schema list and on the 🗂 Schema tab (the Schema.json page's Save as .json file and Open a Schema file); the Import folder is the place for another brewer's file; a notice says copyright is between the brewers and Skynet does no checking. Help 44 and 184 updated; no new Help number. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
-- 2026-11-11: Rule 9.12 gets an exception (OakBarn Brewery: "Keep the Beep"): alarm_beep.wav and Alarm_Sound_Missing.mp3 stay in the panel zip and Setup too, in defaults/media. Both programs. (thread "Shrink the Setup .exe and remove dead code")
+- 2026-11-11: Rule 9.12 gets an exception (OakBarn Brewery: "Keep the Beep"): alarm_beep.wav, Alarm_Sound_Missing.mp3 and Find_The_File_Connecting.mp3 stay in the panel zip and Setup too, in defaults/media. Both programs. (thread "Shrink the Setup .exe and remove dead code")

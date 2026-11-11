@@ -2,7 +2,7 @@
 
 The Skynet pictures and sounds (pumps, valves, vessels, alarm sounds ...) are **not** inside the panel's installer or zip. They come as their own download, so the panel stays small, and new pictures can be added without a new panel version.
 
-Two sounds also come with the panel itself, so an Alarm can always sound: the alarm beep and the "Alarm sound missing" voice clip.
+Three sounds also come with the panel itself, so an Alarm or Sound Player can always sound: the alarm beep, the "Alarm sound missing" voice clip and the "Find The File" song.
 
 **It only ever adds.** A picture or sound you already have, by that name, is never changed. Nothing is ever deleted. Your own pictures and sounds are never touched.
 
