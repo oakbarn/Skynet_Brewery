@@ -12,6 +12,8 @@ The same Schema dropdown is in three places. Use whichever is handy:
 
 Picking another Schema loads it. Only an Admin can load or change a Schema.
 
+To start a **new** Schema, press **☰ Menu > ➕ New Schema…**, or **➕ New Schema** on the **☰ Menu > Schema** tab. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
+
 The **☰ Menu > Schema** tab also lists every Schema on the Brain: how many tabs it has, the Equipment Profile of each Tab and when it was last saved, with a **Load** and a **Clone** button on each one.
 
 ## When Processes are running
