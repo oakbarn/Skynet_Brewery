@@ -1,6 +1,6 @@
 // Predictive text in the Process editor (Fritz, 2026-10-05; more on 2026-10-28).
 //  - Typing a name lists matching names: ones already used above in this Process first, then Devices, Widgets,
-//    Processes and Process words. A name also matches on any part of it after a _ (typing Pump finds MB_06_Pump_Wort__HS).
+//    Processes and Process words. A name also matches on any part of it after a _ (typing Pump finds MB_06_DO@Pump_Wort__HS).
 //    Up / Down pick, Enter or Tab takes it, Esc closes. The best match is also shown in gray after the cursor
 //    (at the end of a line), and the Right arrow takes it too.
 //  - At the start of a line the commands come first, each with a short note of what it does.
@@ -14,7 +14,7 @@
 //  - Ctrl+Space (or the 💡 Suggest button, for phones) opens the list even before a letter is typed, with only what can
 //    stand there: after if, wait, = or and, the variables, timers, gGlobals, Devices, Widgets and Processes.
 //  - Picking a command or a name opens the list of what can come next, so a whole line can be made by picking:
-//    if -> MB_06_Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
+//    if -> MB_06_DO@Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
 //    Ctrl+Space then offers and / or to go on.
 //  - Where a value goes, typing also lists the Skynet Constants that fit (skc_Kg_To_Lb; typing Kg finds every kilogram one).
 //  - After name.onoffset = (and a Fermentor's .heatoffset / .cooloffset) it offers (-) Heat and (+) Cool, the ones that fit the Device,
@@ -45,8 +45,8 @@ const NEW_KINDS = [['value', 'a number'], ['string', 'a text'], ['bool', 'true o
 const G_PREFIX = Object.fromEntries(Object.values(G_DECLARE).flatMap(d => [[d.long.toLowerCase(), d.prefix], [d.short.toLowerCase(), d.prefix]]));
 const G_TEXT = Object.fromEntries(Object.values(G_DECLARE).map(d => [`new ${d.long}`, `new ${d.long} ${d.prefix}`]));
 const ON_OFF = [['true', 'on'], ['false', 'off'], ['on', ''], ['off', '']];
-const IDENT = /[A-Za-z_][A-Za-z0-9_~]*$/;
-const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~]*$/;
+const IDENT = /[A-Za-z_][A-Za-z0-9_~@]*$/;
+const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~@]*$/;
 // my_Process_Mash.running: true while it runs (read only)
 const PROCESS_ATTRS = ['running'];
 // which kinds of item each command works on (lib/engine.js)
@@ -117,7 +117,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     } else if (lineStart) {
       if (!proc) for (const [k, h] of SET) out.push({ text: k, hint: h });
       if (!proc) for (const p of props) out.push({ text: '.' + p + ' = ', label: '.' + p, hint: pHint(p), back: 1 });
-      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC", Rule 6.19)
+      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_DO@HE_HLT_BR.HYS or MB_25_DO@HE_HLT_BR.DutyC", Rule 6.19)
       if (el?.methods && !attr) for (const m of el.methods) out.push({ text: '.' + heatMethodCode(heatMethodKey(m)), hint: `switch it to ${m} (the same as .method = "${m}")`, back: 1 });
     } else return null;
     return out;
@@ -131,7 +131,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (nx) return { list: nx.map(i => i.back ? { ...i, back: 0 } : { ...i, text: ' ' + i.text }), typed: 0 };
   }
   if (!w && !q) {
-    const prev = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))(?:\.([A-Za-z_]\w*))?\s+$/.exec(pre);
+    const prev = /(?:"([^"\n]+)"|([A-Za-z_][\w~@]*))(?:\.([A-Za-z_]\w*))?\s+$/.exec(pre);
     const nx = prev && !/^\s*(start|stop|restart|reset|play|show|goto|new|print|log|sleep|step)\b/i.test(pre) && after(prev[1] ?? prev[2], prev[3], pre.slice(0, prev.index));
     if (nx) return { list: nx, typed: 0 };
     // after true / false / a number / a text in an if or a wait: and, or
@@ -163,7 +163,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   }
 
   // after = or == : true / false for something that is on or off
-  const op = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))(?:\.([A-Za-z_]\w*))?\s*(?:==|!=|=)\s*$/.exec(pre);
+  const op = /(?:"([^"\n]+)"|([A-Za-z_][\w~@]*))(?:\.([A-Za-z_]\w*))?\s*(?:==|!=|=)\s*$/.exec(pre);
   if (op) {
     const el = elOf(op[1] ?? op[2]); let attr = (op[3] ?? '').toLowerCase();
     if (el && attr === el.main) attr = '';
@@ -183,7 +183,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   if (atStart) {
     for (const [k, h] of COMMANDS) command(k, h);
     // names used above in this Process come next (the ones nearest the cursor first)
-    for (const m of [...above.slice(0, above.length - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_~]*/g)].reverse()) {
+    for (const m of [...above.slice(0, above.length - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_~@]*/g)].reverse()) {
       if (COMMANDS.some(([k]) => k.toLowerCase() === m[0].toLowerCase()) || ANYWHERE.some(([k]) => k === m[0].toLowerCase())) continue;
       if (elOf(m[0]) || declared.has(m[0]) || isProc(m[0])) add(m[0] + ' ', 'used above', m[0]);
     }
@@ -305,7 +305,7 @@ export function attachAutofill(ta, box, words, on = () => true) {
     const line = lineBefore(), p = ta.selectionStart;
     if (/^\s*(\/\/|#|')/.test(line)) return close();
     // after a dot: attributes
-    const dot = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))\.([A-Za-z_]*)$/.exec(line);
+    const dot = /(?:"([^"\n]+)"|([A-Za-z_][\w~@]*))\.([A-Za-z_]*)$/.exec(line);
     // with Predictive text off only .x and .y are filled in (x_hPosition, y_vPosition: Fritz, 2026-10-28)
     const live = forced || on();
     if (!live && !(dot && /^[xy]$/i.test(dot[3]))) return close();

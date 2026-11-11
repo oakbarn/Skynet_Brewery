@@ -102,7 +102,7 @@ The **Three Vessel** sample's Hot liquor tank, Mash tun and Boil kettle are **Ve
 its Temperature Probe** built into its **Left Element** IP. The Hot liquor tank and the Boil kettle have their **Heating Element**
 built into the **Right Element** IP, and the Mash tun and the Boil kettle have their **Left Sparge** IP Placed for the pipe in at
 the top. The probes and elements are the same Devices as before, with the same Ports. Since 2026-11-08 they have the Skynet names
-(BM_700_1W_HLT_BH, BM_8_HE_HLT~element_BH and so on, Rule 3.1), and the brew day Processes use those names.
+(BM_700_TEMP@1W_HLT_BH, BM_8_DO@HE_HLT~element_BH and so on, Rule 3.1), and the brew day Processes use those names.
 
 ## Size
 

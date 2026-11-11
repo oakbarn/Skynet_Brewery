@@ -21,7 +21,7 @@ export const GLOSSARY = {
   'modes of control': 'Modes of Control: the Methods a Device can use: PID, Hysteresis, Duty Cycle, Deadband, Direct On/Off and more.',
   'one port, one device': 'One Port, One Device (Skynet Rule 6.1): a Port of an Interface has only one Device, so Suggested Names are always different from each other.',
   'single device': 'A single Device: everything BruControl had on one Port becomes one Skynet Device with a Method.',
-  'suggested skynet names': 'Suggested Skynet Names: Interface ID _ Port _ Type _ Label _ Tab ID, for example MB_42_HE_HLT~Heat_BH: a Heating Element on Interface MB, Port 42, Label HLT Heat, on Tab BH. A space in the Label becomes ~.',
+  'suggested skynet names': 'Suggested Skynet Names: Interface ID _ Port _ Type _ Label _ Tab ID, for example MB_42_DO@HE_HLT~Heat_BH: a Heating Element on Interface MB, Port 42, Label HLT Heat, on Tab BH. A space in the Label becomes ~.',
   'skynet names': 'Skynet names: Interface ID _ Port _ Type _ Label _ Tab ID (Skynet Rule 3.1). They tell you where each item is at a glance. Recommended.',
   'skynet name': 'Skynet name: Interface ID _ Port _ Type _ Label _ Tab ID (Skynet Rule 3.1).',
   'display name': 'Display Name: the words BruControl showed with an Element (its DisplayName). In Skynet it is the Label.',
