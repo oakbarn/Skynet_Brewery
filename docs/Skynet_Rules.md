@@ -822,6 +822,13 @@ once, each to a `~` (`Pump:1` becomes `Pump~1`, `_2` if taken); it keeps its hid
 becomes its Label, and Processes, settings, saved values and the brew log follow (backups
 `.before-safe-names.bak`; for a Tab, everything on it follows). (2026-10-23, PR #95; `< > : " / \ | ? *` added by
 Fritz 2026-10-29, PR #134; every name 2026-10-29, Help 63)
+**Plain names** (OakBarn Brewery, 2026-11-11: the marks "Allowed in a name you type, but trouble are No No also"; "And any that
+interfere with, Mac or Linux, MQTT are in the list"): a Device, Widget, gGlobal, Text, pipe, vessel or other item name has only
+**letters, numbers, `_`, `~` and `@`**, and starts with a letter or `_`, so it works with no quotes in a Process and is safe on
+Windows, Mac, Linux and MQTT. Tab and Interface names are shown names (Brew House) and keep only the list above; their IDs are plain.
+An Integrated Instance keeps its `VesselName.DeviceName` (Rule 6.28). A Label may have any mark: in the Suggested Name each other mark
+becomes `~` and an accent is dropped. Older names (Rule 15.2): once per Schema, each other mark becomes `~` (an accent dropped, `_2`
+if taken) when the Schema loads; Processes and settings follow. Every mark and why: docs/Special_Characters.md.
 
 3.5 **Never rename an existing item by itself**, with one exception: **a clone follows its parent.**
 A clone's name is always its parent's name plus `_Clone_N`; when the parent is renamed, the parent part
@@ -3597,6 +3604,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 3.4 (OakBarn Brewery: the trouble marks "are No No also"; "any that interfere with, Mac or Linux, MQTT are in the list"): Device, Widget, gGlobal and item names have only letters, numbers, _ ~ @ and start with a letter or _; Tab and Interface names keep the Windows list; a Label's other marks become ~ in the Suggested Name; older names changed once on load, Processes follow. docs/Special_Characters.md lists Windows, Mac, Linux, MQTT and Process trouble for every mark; $ and ` are No too. Help 63. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "PWM already says the P"; "PWM@Valve_L or PWM@Valve_H and AO to follow"): a Proportional Valve's Type ID is Valve_L (low temperature) or Valve_H (high temperature), shown PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "Heating Element: DO@H_Element"): a Heating Element's Type ID is `H_Element` (was `HE`): `BM_8_DO@H_Element_HLT~element_BH`, Device Type DO@H_Element (PWM@H_Element, AO@H_Element); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Any where in Skynet Change any DO:Pump ... to DO@Pump ... also PWM@Pump"; "All Get Updated to the new standard"): the Device Type reads GeneralType@Type everywhere (DO@Pump, PWM@Pump, DO@H_Element), filled in on a new Device; P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO become Pump, Fan, Mtr, LED, H_Element under PWM / AO; older Schemas' Type IDs and names upgraded on load. Both programs. (thread "Show DO: type in Suggested Names")
