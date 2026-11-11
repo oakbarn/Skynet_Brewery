@@ -4,7 +4,7 @@
 //   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
 // Device name (Fritz, 2026-10-23; single _ 2026-11-05; General Type@ 2026-11-11): InterfaceID_Port_GeneralType@TypeID_ParsedLabel_TabID,
-//   e.g. MB_25_DO@eVlv_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
+//   e.g. MB_25_DO@Valve_E_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
 import { TYPE_METHOD } from './heatmethod.js';
 
@@ -21,7 +21,7 @@ const T = {
   H_Element: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
-  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
+  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', Valve_E: 'Electric Valve (motorized ball or butterfly valve, open / closed)', M_H_Vlv: 'High Temperature Manual Valve',
   E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input
@@ -50,7 +50,7 @@ const PWM_OWN = { H_Element: 'Heating PWM (element on a PWM output)', Pump: 'Pum
 const AO_OWN = { H_Element: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv Valve_E M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
   pwmOut: list('PWM H_Element Valve_L Valve_H Pump Fan Mtr LED', PWM_OWN),
   analogOut: list('AO H_Element Valve_L Valve_H Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
@@ -80,7 +80,7 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'H_Element' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'Valve_E', element: 'H_Element' }[el.subtype];
   else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'H_Element', propValve: 'Valve_L', pump: 'Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
@@ -88,7 +88,8 @@ export function defaultCode(el, hint) {
 }
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
-const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
+const OLD_CODES = { PmP: 'Pump', VlV: 'Valve_E', E_L_Vlv: 'Valve_E', eVlv: 'Valve_E',      // eVlv -> Valve_E: OakBarn Brewery, 2026-11-11 ("Change ON Off Motorized Valves to DO@Valve_E")
+  MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
   PWM_PmP: 'Pump', PWM_VlV: 'Valve_L', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
   AO_PmP: 'Pump', AO_VlV: 'Valve_L', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
   // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
@@ -147,7 +148,7 @@ export function typeAtName(el) {
   const name = String(el?.name ?? '');
   if (!isDevice(el) || !name || name.includes('@')) return '';
   // its own Device Type ID first; an older Device with none saved is matched by any ID of its type (BM_30_Chill_Chiller~water_BH)
-  // and any older ID that became it (P_Pump -> Pump, E_L_Vlv -> eVlv), so BM_5_P_Pump_Wort_BH is BM_5_PWM@Pump_Wort_BH
+  // and any older ID that became it (P_Pump -> Pump, eVlv -> Valve_E), so BM_5_P_Pump_Wort_BH is BM_5_PWM@Pump_Wort_BH
   const own = String(el.typeCode || '').trim(), ids = el.typeCode ? [own] : typeCodes(el).map(x => x[0]);
   const codes = [...ids, ...Object.keys(OLD_CODES).filter(o => ids.includes(OLD_CODES[o]))].sort((a, b) => b.length - a.length);
   for (const code of codes) {

@@ -1539,7 +1539,7 @@ supply manifolds", Help 146).
   (Rule 18.29). It goes straight on the Tab picked in the Add box (Rule 4.1: it holds Devices) and its Properties open.
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
-  name (Rule 3.1), e.g. `MB_22_eVlv_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
+  name (Rule 3.1), e.g. `MB_22_DO@Valve_E_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
 - **Orientation: three turns and Flip** (Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left
   Vertical 90, Right Vertical 90"; Fritz, 2026-11-07: "We need supply Manifolds to Flip Vertically Horizontally. Valves on Top or
   Valves on Bottom"): **Horizontal** (the valves hang down), **Left Vertical 90** (turned a quarter clockwise, the valves point left)
@@ -3196,7 +3196,7 @@ Valve drill-down dialog", Help 128):
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
    valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
-5. Its Type ID is **eVlv** (Fritz, 2026-11-05, was E_L_Vlv; the Device Type reads **DO@eVlv**). Older valves are
+5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
    upgraded on load, the stored Type ID and the name (Rule 15.2).
 - **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
   **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
@@ -3324,7 +3324,7 @@ be kept as clean as possible"):
    **3. Valve 1**, **Valve 2**, **Valve 3**, each **Manual** or **Motorized**, a Motorized one with its **Available Ports** on the
    same line (two valves can't share a Port); **4. Tab** (➕ Add new Tab… and ➕ Add new Interface… work as Rule 18.14); then the
    **5. Name**, the **Graphic** (its valves as picked, with their numbers), its **Path** (greyed out, Rule 5.6), **Orientation**
-   (Rule 5.35's three, with **Flip** on its line), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO@eVlv, V2 DO@M_L_Vlv).
+   (Rule 5.35's three, with **Flip** on its line), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO@Valve_E, V2 DO@M_L_Vlv).
    ➕ Add Device can always be pressed and says what is missing (Rule 18.15). Enter goes Label, Interface, each Valve and Port, Tab,
    Orientation, Flip, ➕ Add Device (Rule 18.20).
 2. Its **Properties** are the same with 🗑 Delete, ✖ Cancel and 💾 Save and the 🔓 lock in the title line. A valve saved Motorized
@@ -3604,6 +3604,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 3.1 / 18.18 (OakBarn Brewery: "Change ON Off Motorized Valves to DO@Valve_E"): an On/Off motorized valve's Type ID is Valve_E (was eVlv): DO@Valve_E, `BM_24_DO@Valve_E_HLT~out_BH`; older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.4 (OakBarn Brewery: the trouble marks "are No No also"; "any that interfere with, Mac or Linux, MQTT are in the list"): Device, Widget, gGlobal and item names have only letters, numbers, _ ~ @ and start with a letter or _; Tab and Interface names keep the Windows list; a Label's other marks become ~ in the Suggested Name; older names changed once on load, Processes follow. docs/Special_Characters.md lists Windows, Mac, Linux, MQTT and Process trouble for every mark; $ and ` are No too. Help 63. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "PWM already says the P"; "PWM@Valve_L or PWM@Valve_H and AO to follow"): a Proportional Valve's Type ID is Valve_L (low temperature) or Valve_H (high temperature), shown PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "Heating Element: DO@H_Element"): a Heating Element's Type ID is `H_Element` (was `HE`): `BM_8_DO@H_Element_HLT~element_BH`, Device Type DO@H_Element (PWM@H_Element, AO@H_Element); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")

@@ -38,10 +38,10 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
 7. The valve's own settings: **Tap water valve**, **On Close List** and **On Open List**, all three on one line (see [Tap water valves](31-tap-water-valves)).
    On Close List: `close_all_valves` in a Process closes it. On Open List: `open_all_valves` opens it. A tap water valve shows its
    **Tap end** instead, and is always on the Close List and never on the Open List.
-8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO@eVlv**: an electric valve, eVlv, on a Digital Out, DO; the same DO@eVlv is in its Suggested Name).
+8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO@Valve_E**: an electric valve, Valve_E, on a Digital Out, DO; the same DO@Valve_E is in its Suggested Name).
 
-The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `eVlv`, Label, Tab ID, such as
-`22_E_eVlv_MBV1__BR`. Valves added before 2026-11-05 keep their `E_L_Vlv` names (names never change by themselves, Rule 3.5).
+The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `Valve_E`, Label, Tab ID, such as
+`22_E_Valve_E_MBV1__BR`. Valves added before 2026-11-05 keep their `E_L_Vlv` names (names never change by themselves, Rule 3.5).
 
 ## Skynet or User Defined
 
