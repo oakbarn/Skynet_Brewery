@@ -46,7 +46,7 @@ named after the vessel's Label.
 
 ## In a Process
 
-The Fermentor Control is used by its own name. Its Heat and Cooling are built into the vessel, so a Process calls them by the vessel's name and their own (Help 180), for example `FV1.MB_30_Light_Lamp_FR`. While the Fermentor Control is On it switches them itself.
+The Fermentor Control is used by its own name. Its Heat and Cooling are built into the vessel, so a Process calls them by the vessel's name and their own (Help 180), for example `FV1.MB_30_DO@Light_Lamp_FR`. While the Fermentor Control is On it switches them itself.
 
 | Line | What it does |
 |---|---|

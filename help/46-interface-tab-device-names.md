@@ -32,32 +32,33 @@ Press **Create**. The Device is always made on the **Build Tab** first, the same
 
 The **Suggested Name** is filled in as you go:
 
-**Interface ID _ Port _ Device Type ID _ Label _ Tab ID** (one underscore between the parts; names made before 2026-11-05 keep their `__` before the Tab ID)
+**Interface ID _ Port _ General Type@Device Type ID _ Label _ Tab ID** (one underscore between the parts)
 
 Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
 
-The port is always in the name, and the Device Type ID comes third. There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
+The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO: Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_25_P_L_Vlv_Fly~Sparge_SP`
+`MB_25_PWM@P_L_Vlv_Fly~Sparge_SP`
 
 **Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
 Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
 When one word means two things, people end up like Abbott and Costello in [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
 
-Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
+Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_TEMP@1W_HLT_HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
 - Control characters and emoji are left out, and spaces at the start and end are dropped.
 - Each of `< > : " / \ | ? * . ,` becomes `~`. *Fly/Sparge In* becomes `Fly~Sparge~In`.
-- Spaces become `~` too, so the `_` only separates the parts of the name: *Mash Tun* becomes `Mash~Tun`. Names made before keep their `_`.
+- Spaces become `~` too, so the `_` only separates the parts of the name: *Mash Tun* becomes `Mash~Tun`.
 
 More rules:
 
 - **No spaces in Device names.**
-- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2_BH`.
+- If the name is already used, a number goes after the Label: `MB_25_DO@Pump_Wort_2_BH`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge_SP = true`.
+- A name with `~` or `@` in it works in a Process as it is, with no quotes: `MB_25_DO@eVlv_Fly~Sparge_SP = true`.
+- Every special character and what it does in a name: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
 - **Older Schemas:** two Devices that already share a port keep working (the last one turned on wins, the others on that port are turned off) and can still be saved. No new ones can be made.
@@ -66,7 +67,7 @@ More rules:
 
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
 
-- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT_HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
+- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_TEMP@RTD_HLT_HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
 - **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
 
 What the panel does:
@@ -87,7 +88,7 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 ## Device Type IDs
 
-Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_HE_HLT_BH`, whatever heating method it uses; elements named before keep `DO`.
+Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_DO@HE_HLT_BH`, whatever heating method it uses; elements named before keep `DO`.
 
 **Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
