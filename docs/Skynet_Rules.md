@@ -2281,9 +2281,9 @@ Alarm Sound"): a link with no internet, a wrong link, or a file that is missing.
 voice clip on the Brain (`sounds/Skynet/Alarm_Sound_Missing.mp3`, a Text to Speech voice made by OakBarn Brewery), or the Skynet beep (`sounds/alarm_beep.wav`)
 when that isn't there either, and shows a warning that says why; an Alarm is never silent. A Sound Player plays OakBarn Brewery's own
 song *Find The File - Connecting* (Treblo, `sounds/Skynet/Find_The_File_Connecting.mp3`) once instead, with the same warning (OakBarn
-Brewery, 2026-11-10: the song for music, the voice for Alarms); the sound before a hop alert is skipped and the alert's voice still speaks. **The beep and the Missing Alarm Sound come with the main Setup and
-the panel zip** (OakBarn Brewery, 2026-11-10: "Keep the Beep"), so an Alarm has a sound even without the Skynet Media Setup (an
-exception to Rule 9.12); the Find The File song comes with the Media Setup like the other songs. Help says a file on the Brain is the safest choice for Hop and
+Brewery, 2026-11-10: the song for music, the voice for Alarms); the sound before a hop alert is skipped and the alert's voice still speaks. **The beep, the Missing Alarm Sound and the Find The File song come
+with the main Setup and the panel zip** (OakBarn Brewery, 2026-11-10: "Keep the Beep"; "Song and clip also with the brain"), so they
+are on the Brain even without the Skynet Media Setup (an exception to Rule 9.12). Help says a file on the Brain is the safest choice for Hop and
 Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-Sounds` on the Skynet project, not set as the latest
 release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
 Import keeps a sound that is already a link as it is and never copies it. Help 186.
