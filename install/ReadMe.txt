@@ -15,6 +15,8 @@ The files in this release:
   Skynet_BrewPanel_<date>.zip       The panel itself: install or update by hand, or for Mac/Linux/Pi
   Skynet_Media_Setup_<date>.exe     The Skynet pictures and sounds, for Windows (run it after the installer)
   Skynet_Media_<date>.zip           The Skynet pictures and sounds, for Mac/Linux/Pi or by hand
+  Skynet_Sample_Schemas_Setup_<date>.exe  More Sample Schemas, for Windows (none in it yet)
+  Skynet_Sample_Schemas_<date>.zip  More Sample Schemas, for Mac/Linux/Pi or by hand
   Install Skynet Brewer.command     Mac installer
   install-skynet-brewer.sh          Linux and Raspberry Pi installer
   Skynet_Brewer.bat                 Sample Windows start file (for a manual install)
@@ -71,6 +73,24 @@ own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releas
 They ONLY ADD: a picture or sound you already have, by that name, is never changed, and
 nothing is ever deleted. Your own pictures and sounds are never touched. Run them again
 whenever new pictures come out.
+
+
+MORE SAMPLE SCHEMAS (SEPARATE DOWNLOAD)
+--------------------------------------
+The panel comes with one Sample Schema, the 3 Vessel 1 Pump brewery. Every other sample
+comes in the Skynet Sample Schemas Setup (Windows) or zip, on the same download page,
+added one at a time. There are none in it yet: each older sample is brought up to the
+current Skynet Rules first. It installs into BrewPanel\sample_schemas, which is also
+where a Schema from another brewer goes (see the ReadMe.txt in that folder).
+  Windows:   run Skynet_Sample_Schemas_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe.
+  Mac/Linux/Pi: put Skynet_Sample_Schemas_<date>.zip next to the installer before you
+             run it, or unzip it (unzip -n) into the folder that holds BrewPanel.
+It ONLY ADDS: a sample you already have is never changed, and nothing is deleted.
+
+VIDEOS (COMING SOON)
+  How to use the 3 Vessel sample, step by step
+  How to add another Pump and edit the manifold in the 3 Vessel sample
+  The links will be in the panel's Help > Add a Sample Schema.
 
 
 WINDOWS, THE EASY WAY (INSTALLER)

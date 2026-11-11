@@ -78,8 +78,8 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\install\ReadMe.txt"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-; The pictures and sounds are in their own Setup, the Skynet Media Setup (Rule 9.12): the Finish page links to where it is
-!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds (Skynet Media Setup)"
+; The pictures and sounds (Rule 9.12) and the extra Sample Schemas (Rule 9.13) are their own Setups: the Finish page links to them
+!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds, and more Sample Schemas"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -350,6 +350,20 @@ Section "Skynet Brew Panel" SecMain
       StrCpy $OldPanel "$0"
   ${EndIf}
 
+  ; The panel ships only the 3 Vessel sample (Rule 9.13). The three sample folders older versions put in samples\configs (now set
+  ; aside in the Sandbox) are MOVED, never deleted, to backups\old_samples_<date>, so they stop showing under Add a Sample Schema.
+  ; Nothing else is touched: your own Schemas are in config\schemas (never here), any other folder in samples\configs stays, and
+  ; sample_schemas\ (the Skynet Sample Schemas Setup's folder) is never touched by this Setup.
+  !macro MoveOldSample ID
+    ${If} ${FileExists} "$INSTDIR\samples\configs\${ID}\*.*"
+      CreateDirectory "$INSTDIR\backups\old_samples_$Stamp"
+      Rename "$INSTDIR\samples\configs\${ID}" "$INSTDIR\backups\old_samples_$Stamp\${ID}"
+      DetailPrint "The old sample ${ID} was moved to backups\old_samples_$Stamp (the panel ships only the 3 Vessel sample now)."
+    ${EndIf}
+  !macroend
+  !insertmacro MoveOldSample "two-vessel-one-pump"
+  !insertmacro MoveOldSample "brewzilla-brew-day"
+  !insertmacro MoveOldSample "oakbarn-brucontrol"
   ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"

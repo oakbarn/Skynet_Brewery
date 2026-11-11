@@ -7,6 +7,7 @@
 #
 # It looks for the panel in this order: the BrewPanel folder this script sits in (BrewPanel/install/linux),
 # a Skynet*.zip next to this script, or a BrewPanel folder next to this script.
+# The extra Sample Schemas: a Skynet_Sample_Schemas*.zip next to this file (Rule 9.13).
 # The Skynet pictures and sounds: a Skynet_Media*.zip next to this script (Rule 9.12).
 # It installs to ~/Brewing/BrewPanel, gets Node.js if needed, and adds a "Skynet Brewer" launcher.
 # On a Raspberry Pi it also makes the panel start by itself when the Pi starts (a systemd service).
@@ -67,7 +68,7 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | grep -v "Skynet_Media" | grep -v "Skynet_Sample_Schemas" | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip_to "$ZIP" "$TMP/zip"
@@ -184,6 +185,16 @@ if [ "$SRC" != "$DEST" ]; then
   else
     echo "Full install to $DEST"
   fi
+  # The panel ships only the 3 Vessel sample (Rule 9.13). The three sample folders older versions put in samples/configs (now in
+  # the Sandbox) are MOVED, never deleted, to backups/old_samples_<date>. Nothing else is touched: your own Schemas are in
+  # config/schemas, any other folder in samples/configs stays, and sample_schemas/ is never touched here.
+  for old in two-vessel-one-pump brewzilla-brew-day oakbarn-brucontrol; do
+    if [ -d "$DEST/samples/configs/$old" ]; then
+      mkdir -p "$DEST/backups/old_samples_$STAMP"
+      mv "$DEST/samples/configs/$old" "$DEST/backups/old_samples_$STAMP/$old"
+      echo "The old sample $old was moved to backups/old_samples_$STAMP (the panel ships only the 3 Vessel sample now)."
+    fi
+  done
   ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
     case "$f" in
       ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
@@ -203,6 +214,15 @@ if [ -n "$MZIP" ]; then
 elif [ ! -d "$DEST/media/Images/Skynet" ]; then
   echo "No Skynet pictures and sounds yet. Download Skynet_Media_(version).zip from"
   echo "https://github.com/oakbarn/Skynet_Brewery/releases/latest, put it next to this file and run it again."
+fi
+# The extra Sample Schemas are their own download too, Skynet_Sample_Schemas_(version).zip (Rule 9.13). One next to this file is
+# added to sample_schemas/; a sample you already have is never changed and nothing is deleted (Rule #1, Never Take Away).
+SZIP="$(ls -t "$HERE"/Skynet_Sample_Schemas*.zip 2>/dev/null | head -n 1 || true)"
+if [ -n "$SZIP" ]; then
+  echo "Adding the Sample Schemas from $(basename "$SZIP") (a sample you already have is never changed)"
+  unzip_to "$SZIP" "$TMP/samples"
+  mkdir -p "$DEST/sample_schemas"
+  cp -Rn "$TMP/samples/BrewPanel/sample_schemas/." "$DEST/sample_schemas/" 2>/dev/null || true
 fi
 chmod +x "$DEST"/install/linux/*.sh "$DEST"/install/mac/*.command 2>/dev/null || true
 

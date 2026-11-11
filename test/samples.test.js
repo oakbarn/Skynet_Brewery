@@ -13,6 +13,21 @@ const list = listSamples(SAMPLES);
 // only the 3 Vessel 1 Pump sample (the test bed) ships; the others wait in Sandbox/ (Fritz, 2026-11-08, Rule 16.8)
 assert.deepEqual(list.map(s => s.id), ['three-vessel-one-pump']);
 
+// Rule 9.13: the extra Sample Schemas (sample_schemas/, from the Sample Schemas Setup) are listed after the panel's own, and a name
+// the panel already has wins. The repo's sample_schemas/ holds no Schemas yet, only its ReadMe.
+assert.deepEqual(listSamples([SAMPLES, path.join(ROOT, 'sample_schemas')]).map(s => s.id), ['three-vessel-one-pump']);
+assert.ok(fs.existsSync(path.join(ROOT, 'sample_schemas', 'ReadMe.txt')));
+{
+  const extra = fs.mkdtempSync(path.join(os.tmpdir(), 'bpx'));
+  fs.mkdirSync(path.join(extra, 'from-a-brewer')); fs.writeFileSync(path.join(extra, 'from-a-brewer', 'sample.json'), JSON.stringify({ name: 'A brewer', order: 9 }));
+  fs.mkdirSync(path.join(extra, 'three-vessel-one-pump')); fs.writeFileSync(path.join(extra, 'three-vessel-one-pump', 'sample.json'), JSON.stringify({ name: 'Not this one' }));
+  fs.mkdirSync(path.join(extra, 'broken')); fs.writeFileSync(path.join(extra, 'broken', 'sample.json'), '{ not json');
+  const both = listSamples([SAMPLES, extra]);
+  assert.deepEqual(both.map(s => s.id), ['three-vessel-one-pump', 'from-a-brewer']);
+  assert.equal(both[0].name, list[0].name);
+  fs.rmSync(extra, { recursive: true, force: true });
+}
+
 // a sample's Interfaces always come in on the simulator, keeping the real connection to switch to later (Fritz, 2026-10-28)
 assert.deepEqual(simulated([{ name: 'M', connection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }]),
   [{ name: 'M', connection: 'simulator', realConnection: 'serial', port: 'COM3' }, { name: 'S', connection: 'simulator', realConnection: 'tcp' }]);
