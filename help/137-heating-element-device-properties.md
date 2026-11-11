@@ -42,7 +42,7 @@ it (Rule 5.31). *Electric kettle, basic* is still in the full **Add Device** lis
 
 Every Heating Element's Label starts filled in, with the next free number. You can change it, but it can't be blank.
 It has no heating method in it, since the method can change while brewing (Help 150). Its Device Type is **HE**, so its
-name reads like `MB_25_HE_HLT_BH`.
+name reads like `MB_25_DO@HE_HLT_BH`.
 
 | Kind | Label |
 |---|---|
@@ -77,13 +77,13 @@ What the balloons say:
 | **1. Label** | **HLT element**. It is the start of the Suggested Name: a space becomes ~, so it is HLT~element in the name. |
 | **2. Interface** and **Available Ports** | **Brewery Mega** (its ID is **BM**), Port **8**. |
 | **3. Built into** | **HLT_Vessel**. It moves with the vessel and can't be separated from it. |
-| **4. Name** | `BM_8_HE_HLT~element_BH`: BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BH (the Brew House Tab). |
+| **4. Name** | `BM_8_DO@HE_HLT~element_BH`: BM (Brewery Mega), Port 8, HE (Heating Element), HLT~element (its Label) and BH (the Brew House Tab). |
 | **Device Type** | **HE**, a Heating Element. |
 | **Toggle** | Toggle: one click turns it On or Off at once, in Hysteresis, holding 150 °F. |
 | **Current Method** | **Hysteresis**: on below its Setpoint of 150 °F, off at it. |
 | **Hardware Controller** | **Optical SSR**, so its Offset of -1 °F is in range (-0.5 to -3 °F, Rule 6.29). |
 | **Enabled** and **Control Method** | Hysteresis, with Duty Cycle and PID switched on too: four balloons, Direct, Duty Cycle, Hysteresis and PID. |
-| **Temperature Probe** | `BM_700_1W_HLT_BH`, the DS18B20 probe built into the same vessel. |
+| **Temperature Probe** | `BM_700_TEMP@1W_HLT_BH`, the DS18B20 probe built into the same vessel. |
 | **Setpoint** | **150** °F. |
 | **Offset (-)** | **-1**: it turns on at 149 °F (150 - 1) and off at 150 °F. |
 | **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 10. |
@@ -92,10 +92,10 @@ What the balloons say:
 A Process calls a Device built into a Vessel Device by the vessel's name and its own:
 
 ```
-HLT_Vessel.BM_8_HE_HLT~element_BH.setpoint = 168
-HLT_Vessel.BM_8_HE_HLT~element_BH.method = "PID"
-HLT_Vessel.BM_8_HE_HLT~element_BH = on
-HLT_Vessel.BM_8_HE_HLT~element_BH.display = "Setpoint"
+HLT_Vessel.BM_8_DO@HE_HLT~element_BH.setpoint = 168
+HLT_Vessel.BM_8_DO@HE_HLT~element_BH.method = "PID"
+HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on
+HLT_Vessel.BM_8_DO@HE_HLT~element_BH.display = "Setpoint"
 ```
 
 > **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)

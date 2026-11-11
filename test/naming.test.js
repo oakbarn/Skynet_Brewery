@@ -205,3 +205,33 @@ console.log('naming tests passed');
   assert.equal(widgetTypeId({ type: 'switch', cloneOf: 'sw_1' }), '', 'a Clone keeps its own name');
   assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 17); assert.equal(widgetTypeId({ type: 'chart' }), 'GPH', 'Graph Widget, was Chart (Rule 1.26)');
 }
+
+// The General Type in a Device name (OakBarn Brewery, 2026-11-11: "use @ symbol"): DO: Pump is DO@Pump in the Suggested Name
+{
+  const { nameType, typeAtName } = await import('../public/naming.js');
+  const { compile } = await import('../lib/engine.js');
+  assert.equal(suggestName({ iface: 'BM', port: 22, code: 'Pump', type: 'digitalOut', label: 'Red Pump', tab: 'BH' }), 'BM_22_DO@Pump_Red~Pump_BH');
+  assert.equal(suggestName({ iface: 'BM', port: 700, code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM_700_TEMP@1W_HLT_BH');
+  assert.equal(nameType('pwmOut', 'P_Pump'), 'PWM@P_Pump'); assert.equal(nameType('hysteresis', 'Hys'), 'Hys', 'the same word is written once');
+  assert.equal(nameType('digitalOut', 'DO'), 'DO'); assert.equal(nameType(undefined, 'Pump'), 'Pump', 'no type: the Type ID alone');
+  // a Process reads the @ as part of the name, with no quotes
+  assert.deepEqual(tokenize('BM_22_DO@Pump_Red~Pump_BH.state = true').slice(0, 3).map(t => t.v), ['BM_22_DO@Pump_Red~Pump_BH', '.', 'state']);
+  assert.equal(typeAtName({ name: 'BM_22_Pump_Pump_BH', type: 'digitalOut', subtype: 'pump', typeCode: 'Pump' }), 'BM_22_DO@Pump_Pump_BH');
+  assert.equal(typeAtName({ name: 'BM_30_Chill_Chiller~water_BH', type: 'digitalOut' }), 'BM_30_DO@Chill_Chiller~water_BH', 'no Type ID saved: found by its name');
+  assert.equal(typeAtName({ name: 'Red_Pump', type: 'digitalOut', typeCode: 'Pump' }), '', 'a name of its own stays');
+  assert.equal(typeAtName({ name: 'BM_22_DO@Pump_Pump_BH', type: 'digitalOut', typeCode: 'Pump' }), '', 'already has it');
+  // once per Schema: older names get it, and what points to them follows
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'typeat')), cfg = path.join(d, 'c.json');
+  fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Brewery Mega', id: 'BM', connection: 'simulator' }], elements: [
+    { name: 'BM_22_Pump_Pump_BH', type: 'digitalOut', subtype: 'pump', typeCode: 'Pump', device: 'Brewery Mega', channel: 22 },
+    { name: 'sw_1', type: 'switch', follow: 'BM_22_Pump_Pump_BH' }],
+    graphics: [{ kind: 'pipe', name: 'p1', from: 'dev:BM_22_Pump_Pump_BH:out', to: 'x', points: [[0, 0], [10, 0]], flowWhen: ['BM_22_Pump_Pump_BH'] }] }));
+  const s = new Store(cfg, path.join(d, 'data')); s.load();
+  assert.ok(s.has('BM_22_DO@Pump_Pump_BH')); assert.deepEqual([...s.loadRenames], [['BM_22_Pump_Pump_BH', 'BM_22_DO@Pump_Pump_BH']]);
+  const c = JSON.parse(fs.readFileSync(cfg, 'utf8'));
+  assert.equal(c.elements[1].follow, 'BM_22_DO@Pump_Pump_BH'); assert.equal(c.graphics[0].from, 'dev:BM_22_DO@Pump_Pump_BH:out'); assert.deepEqual(c.graphics[0].flowWhen, ['BM_22_DO@Pump_Pump_BH']);
+  assert.equal(c.typeAtNames, true);
+  s.load(); assert.equal(s.loadRenames.size, 0, 'only once');
+  assert.equal(compile('BM_22_DO@Pump_Pump_BH = true').errors?.length ?? 0, 0);
+  console.log('General Type@ name tests passed');
+}

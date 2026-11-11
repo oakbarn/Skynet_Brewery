@@ -85,7 +85,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     }
     const port = el.type === 'temperature' ? oneWirePort(el.probeIndex) : el.channel ?? '';
     const code = el.device !== undefined ? defaultCode(el) : '';
-    let name = el.device !== undefined ? suggestName({ iface: dev.id, port, code, label: el.label, tab: wsId }) : el.name;
+    let name = el.device !== undefined ? suggestName({ iface: dev.id, port, code, type: el.type, label: el.label, tab: wsId }) : el.name;
     name = uniqueName(name, isTaken, wsId);
     el.name = name; used.add(name.toLowerCase()); elements.push(el);
     return el;

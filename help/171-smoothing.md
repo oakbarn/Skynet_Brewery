@@ -36,8 +36,8 @@ empty = 1). The Rate is then smoothed. The **Count** itself is never smoothed.
 A Process, an Alarm and the Tab all see the smoothed number. The reading before smoothing is `.raw`:
 
 ```
-if MB_A0_10KNTC_Mash~Tun_MT > 152      (the smoothed reading)
-print MB_A0_10KNTC_Mash~Tun_MT.raw     (the reading before smoothing)
+if MB_A0_TEMP@10KNTC_Mash~Tun_MT > 152      (the smoothed reading)
+print MB_A0_TEMP@10KNTC_Mash~Tun_MT.raw     (the reading before smoothing)
 print Water_Flow.raw                   (a flow meter's rate before smoothing)
 print Pulse_Counter.rate               (a Counter's counts per second)
 ```

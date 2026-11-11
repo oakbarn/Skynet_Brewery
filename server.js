@@ -101,6 +101,10 @@ store.load();
 setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
+// Device names given their General Type@ when a Schema loads (Rule 3.1, lib/store.js): every Process follows
+const typeAtProcesses = map => { const r = renameInProcesses(engine, map); if (r.length) console.log(`Processes following the General Type@ names: ${r.map(x => x.name).join(', ')}`); };
+if (store.loadRenames?.size) typeAtProcesses(store.loadRenames);
+store.on('loadRenames', typeAtProcesses);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
 hw.logDir = path.join(DATA, 'logs', 'boards');      // Board settings: Diagnostic logging (Rule 6.27)

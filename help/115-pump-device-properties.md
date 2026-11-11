@@ -71,10 +71,10 @@ The Label may be shown on the Tab, for example Red Pump above the Pump Device.
 ![Red Pump: the Label above the Pump](help_pictures/Red_Pump_Label.png)
 
 This is the Plain Text Part of the Suggested Name. Spaces become ~.
-BM_6_Pump_**Red~Pump**_BH
+BM_6_DO@Pump_**Red~Pump**_BH
 
 Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
-From the above BM_6_Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+From the above BM_6_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
 (Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
 
 And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You
