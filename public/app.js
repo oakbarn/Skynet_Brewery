@@ -19,7 +19,7 @@ import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHe
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -4934,7 +4934,8 @@ const LABEL_PUMP_TIP = ['⟪b:Label⟫How do You refer to this Pump. Brewing Pum
   'This is the Plain Text Part of the Suggested Name. Spaces become ~.\nBM_6_Pump_⟦Red~Pump⟧_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_6_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
-  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.'].join('\n\n');
+  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.',
+  COPYRIGHT_MSG + '\n' + SUGGESTED_MSG].join('\n\n');      // OakBarn Brewery, 2026-11-11: "to next ballon"
 const LABEL_VISIBLE_PUMP_TIP = 'The Label may be shown on the Tab, for example Red Pump above the Pump Device.⟪img:help_pictures/Red_Pump_Label.png⟫';
 const LABEL_UP_TIP = n => `The ⬆ opens a ${n} Line Label Text Dialog`;
 const LABEL_ATTR_TIP = 'The ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.';
@@ -4943,7 +4944,7 @@ function labelTip(o, x = {}) {
   const dev = isDevice(o), pump = dev && isPumpDev(o);
   if (pump) return LABEL_PUMP_TIP;
   const lines = [dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
-    '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.'];
+    '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.', '', COPYRIGHT_MSG, SUGGESTED_MSG];
   if (sug && part) {
     const head = dev ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o), type: o.type }) : '', at = sug.indexOf(part, head.length);
     lines.push(at >= 0 ? `${sug.slice(0, at)}⟦${part}⟧${sug.slice(at + part.length)}` : sug);

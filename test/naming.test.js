@@ -33,7 +33,7 @@ assert.equal(toks[1].v, 'MB_E_L_Vlv_Fly~Sparge__SP', 'a name with ~ works bare i
 // Device Type IDs: unique (any capitals), Fritz's own longer ones, the added ones 6 or fewer
 const ids = Object.keys(TYPE_NAMES);
 assert.equal(new Set(ids.map(i => i.toLowerCase())).size, ids.length, 'every Device Type ID is unique');
-const fritz7 = ['M_L_Vlv', 'M_H_Vlv', 'E_H_Vlv', 'Valve_L', 'Valve_H', 'H_Element', 'Valve_E'];      // H_Element, Valve_L, Valve_H: OakBarn Brewery, 2026-11-11
+const fritz7 = ['M_L_Vlv', 'M_H_Vlv', 'Valve_E_H', 'Valve_L', 'Valve_H', 'H_Element', 'Valve_E', 'Valve_Sgas'];      // H_Element, Valve_L, Valve_H, Valve_E_H, Valve_Sgas: OakBarn Brewery, 2026-11-11
 for (const i of ids) assert.ok(i.length <= 6 || fritz7.includes(i), `${i} is longer than 6 characters`);
 for (const [type, list] of Object.entries(TYPE_CODES)) for (const [c, l] of list) assert.ok(l, `${type} ${c} has a description`);
 
@@ -241,6 +241,9 @@ console.log('naming tests passed');
   assert.equal(defaultCode({ type: 'pwmOut', subtype: 'pump' }), 'Pump');
   assert.equal(typeAtName({ name: 'BM_5_P_Pump_Wort_BH', type: 'pwmOut', typeCode: 'Pump' }), 'BM_5_PWM@Pump_Wort_BH', 'an older ID in the name is upgraded too');
   assert.equal(typeAtName({ name: 'BM_24_E_L_Vlv_HLT~out_BH', type: 'digitalOut', subtype: 'valve', typeCode: 'Valve_E' }), 'BM_24_DO@Valve_E_HLT~out_BH');
+  // OakBarn Brewery, 2026-11-11: "Valve_E_H and Valve_Sgas" (were E_H_Vlv, G_Vlv)
+  assert.equal(typeAtName({ name: 'BM_26_E_H_Vlv_Steam_BH', type: 'digitalOut', subtype: 'valve', typeCode: upgradeCode({ type: 'digitalOut', subtype: 'valve', typeCode: 'E_H_Vlv' }) }), 'BM_26_DO@Valve_E_H_Steam_BH');
+  assert.equal(typeAtName({ name: 'BM_27_G_Vlv_Burner_BK', type: 'digitalOut', typeCode: upgradeCode({ type: 'digitalOut', typeCode: 'G_Vlv' }) }), 'BM_27_DO@Valve_Sgas_Burner_BK');
   assert.equal(typeAtName({ name: 'BM_8_HE_HLT~element_BH', type: 'digitalOut', subtype: 'element', typeCode: 'H_Element' }), 'BM_8_DO@H_Element_HLT~element_BH', 'HE became H_Element');
   assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'P_H_Vlv' }), 'Valve_H', 'was P_H_Vlv'); assert.equal(nameType('analogOut', 'Valve_L'), 'AO@Valve_L');
   assert.equal(typeAtName({ name: 'MB_25_P_L_Vlv_Fly~Sparge_SP', type: 'pwmOut', subtype: 'propValve', typeCode: 'Valve_L' }), 'MB_25_PWM@Valve_L_Fly~Sparge_SP');

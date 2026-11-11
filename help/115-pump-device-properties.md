@@ -85,6 +85,9 @@ The **⬆** opens a 2 Line Label Text Dialog
 
 The **⬢** opens a Label Attributes Dialog where you can set its font, size and colors.
 
+© ® ™: Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License.
+@ ~: Kept for the Suggested Name. Not typed in a name or a Label.
+
 **Available Ports**: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is
 added it is greyed out: it is the wiring.
 
