@@ -41,7 +41,7 @@ they are None now (changed once in each Schema), so pick a color again on any pi
 | Ferment | Golden |
 | Red, Yellow, Blue, Green | the primary colors |
 | Brown, Orange, Purple, Reddish Brown, Golden | |
-| RGB | a color of your own, picked with the color picker |
+| RGB | a color of your own, picked with the Color Picker (Help 187) |
 
 ## Setting it
 
