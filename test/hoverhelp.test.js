@@ -35,3 +35,15 @@ console.log('hoverhelp ok');
   assert.ok(/select/.test(FIELD) && /textarea/.test(FIELD) && /checkbox/.test(FIELD), 'tick boxes keep theirs');
   console.log('hover help never covers a field: ok');
 }
+// a balloon with pictures and a bold heading (the Pump Label, 2026-11-11)
+{
+  const { helpNodes: hn } = await import('../public/hoverhelp.js');
+  const mk = tag => ({ tag, className: '', textContent: '', alt: '', src: '' });
+  const doc = { createElement: mk, createTextNode: t => ({ tag: '#text', textContent: t }) };
+  const n = hn('⟪b:Label⟫Text one.\n\n⟪img:help_pictures/Red_Pump_Label.png⟫\n\nText two ⬢.', doc);
+  if (n[0].tag !== 'b' || n[0].textContent !== 'Label') throw new Error('heading');
+  const img = n.find(x => x.tag === 'img');
+  if (!img || img.src !== '/media?path=' + encodeURIComponent('help_pictures/Red_Pump_Label.png')) throw new Error('picture');
+  if (n.some(x => x.tag === '#text' && /^\n|\n$/.test(x.textContent) && n[n.indexOf(x) + 1]?.tag === 'img')) throw new Error('no empty line beside a picture');
+  console.log('hover help pictures ok');
+}

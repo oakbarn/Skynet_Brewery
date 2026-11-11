@@ -3390,13 +3390,20 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
 - **Title Case** ("Titles and Attribute Labels follow Pascal Camel Code Style"): every dialog's field names, headings and pop-up
   titles start each word with a capital (Fore Color, Font Size, Label Attributes); small joining words (and, of, the ...) stay
   small, and what is in ( ) is left as it is. A long sentence is not a name: it belongs in Hover Help (Rule 11.8).
-- **The Label's Hover Help** of a Pump is OakBarn Brewery's own text (Help 115, "The Label"): how you call the Pump (the Red Pump
-  story), the Plain Text Part of the Suggested Name in red, the Suggested Name Format InterfaceID_Port_Type_Label_TabID read part by
-  part with the Device's own Interface, Port, Type and Tab, why a long name is no trouble in a Process (a List Box with Predictive
-  Text), and what the ⬆ (a 2 Line Label Text Dialog) and the ⬢ (the Label Attributes Dialog) open. Every other Device has the same
-  balloon, its first line asking how you refer to that Device.
+- **The Label's Hover Help** of a Pump is OakBarn Brewery's own text, **word for word, with its pictures** (the Label Visible
+  switch and the Red Pump with its Label), the same as Help 115 "The Label" (Rule 11.4). Only the spelling is fixed (Rule 2.37).
+  Second pass, 2026-11-11 ("You did not put the Hover Help for label correctly"): no rewording, no shortening. A balloon may hold
+  pictures (help_pictures, as in Help) and a bold heading. Every other Device's balloon starts "How do you refer to this Device?".
+- **Label Visible** of a Pump: "The Label may be shown on the Tab, for example Red Pump above the Pump Device." with the Red Pump
+  picture.
+- **The Add box** has the ⬆ beside the Label too, with the ⬢.
+- **The second part of the Pump Add box** (OakBarn Brewery, 2026-11-11, "Second Blichmann Pump Build Dialog"): repeated fields keep
+  the same layout and Hover Help as the first part, with what was entered there. Once 1 to 4 are done the **Interface and Available
+  Ports** line is greyed out (it can't change after the Device is made; Cancel to change it); **Label and Tab** can still be edited
+  and the Suggested Name follows them; the focus goes to **Orientation**, the first box that was not on the first part. **Graphic**
+  Hover Help ends "The Picture itself cannot be changed." **Cover**: "Pick Cover Color" (was "User cover (pick its color below)")
+  pops up the Color Picker; a color must be picked, or **◀ Back** sets the Cover back to None (no cover).
 - **The ⬆ and ⬢ have their own balloons** (what they open), and **Available Ports** has its own balloon, apart from the Interface's.
-- **Label Visible**: "The Label may be shown on the Tab, for example Red Pump above the Pump."
 - **Label Attributes**: no clutter (Visible, Font Size); **Font Size** shows the size the Label has now, not a blank; **Alignment**
   is **Left**, **Centered** or **Right**, with no "Default (Centered)" choice. A Label with no alignment of its own (nor from its
   Tab Style) is really Centered. The same three choices on the Timer's Label and the Value look.

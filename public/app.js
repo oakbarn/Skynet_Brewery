@@ -1767,7 +1767,7 @@ const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120,
 // the shape with the cover's color, so a new color needs no new drawings.
 const PUMP_COVER_COLORS = { Red: '#d32f2f', Yellow: '#f6c21c', Blue: '#1e63c8', Green: '#2e9e44', Purple: '#7b3fa8', Orange: '#f57c00', White: '#fafafa' };     // White is RGB 250 250 250 (Fritz, 2026-11-05)
 const PUMP_COVERS = Object.keys(PUMP_COVER_COLORS);
-const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
+const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'Pick Cover Color']];
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
 function coverOf(e, v) {
@@ -4842,13 +4842,22 @@ function liveSuggestion(obj, body = $('#dlgBody')) {
 // The Label's balloon, made for where it is (OakBarn Brewery, 2026-11-09): its own Label and its Suggested Name, with the Label part marked.
 // OakBarn Brewery, 2026-11-10 (the Pump dialog is the model): how you call it, the Suggested Name read part by part with its own
 // Interface, Port, Type and Tab, why a long name is no trouble in a Process, and what the ⬆ and ⬢ open.
-const LABEL_PUMP_STORY = 'How do you refer to this Pump? Brewing Pump, Mash Pump, HLT Pump ...? Use your name for the Pump as the Label. The OakBarn Brewery Sample Schema has several Pumps, color coded with a Cover. When OakBarn is brewing, he might yell out "Shut off the Red Pump" to stop the flow. The Fermenters are in a different room, and when they are visually full the Brewmeister yells "Turn off the Red Pump" to his comely assistant, who then clicks the Red Pump Off.';
-const LABEL_UP_TIP = n => `The ⬆ opens a ${n} Line Label Text Dialog.`;
-const LABEL_ATTR_TIP = 'The ⬢ opens the Label Attributes Dialog, where you set its font, size and colors.';
+// The Pump's Label balloon is OakBarn Brewery's own text, word for word, with its pictures (2026-11-10, the Blichmann PDF; only the
+// spelling is fixed, Rule 2.37). It is the same as Help 115, The Label (Rule 11.4).
+const LABEL_PUMP_TIP = ['⟪b:Label⟫How do You refer to this Pump. Brewing Pump, Mash Pump, HLT Pump ...? Use your name for the Pump as the Label. OakBarn Brewery Sample Schema has several Pumps and they are Color Coded with a Cover. When OakBarn is brewing, he might yell out, "Shut off the Red Pump" to stop the flow. The Fermenters are in a different Room and when visually full, the Brewmeister yells to "Turn off the Red Pump" to his comely assistant, who then clicks the Red Pump Off.',
+  '⟪img:help_pictures/Label_Visible_Switch.png⟫The Label may be shown on the Tab, for example Red Pump above the Pump Device.⟪img:help_pictures/Red_Pump_Label.png⟫',
+  'This is the Plain Text Part of the Suggested Name. Spaces become ~.\nBM_6_Pump_⟦Red~Pump⟧_BH',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_6_Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
+  'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
+  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.'].join('\n\n');
+const LABEL_VISIBLE_PUMP_TIP = 'The Label may be shown on the Tab, for example Red Pump above the Pump Device.⟪img:help_pictures/Red_Pump_Label.png⟫';
+const LABEL_UP_TIP = n => `The ⬆ opens a ${n} Line Label Text Dialog`;
+const LABEL_ATTR_TIP = 'The ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.';
 function labelTip(o, x = {}) {
   const lab = String(o.label ?? '').trim(), part = parseLabel(lab), sug = (() => { try { return nameSuggestion(o, sugSelf(o)) || ''; } catch { return ''; } })();
   const dev = isDevice(o), pump = dev && isPumpDev(o);
-  const lines = [pump ? LABEL_PUMP_STORY : dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
+  if (pump) return LABEL_PUMP_TIP;
+  const lines = [dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
     '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.'];
   if (sug && part) {
     const head = dev ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o) }) : '', at = sug.indexOf(part, head.length);
@@ -4968,7 +4977,8 @@ async function newDeviceDialog(e, hint, what) {
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
-  const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+  // the ⬆ and ⬢ in the Add box too (Blichmann PDF, 2026-11-10)
+  const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
     ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface, ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
@@ -5004,6 +5014,7 @@ async function newDeviceDialog(e, hint, what) {
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
+  let wired = false;      // the Interface and Available Ports are set once the rest of the box is open
   // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
   const gate = () => {
     const w = { ...work }; try { readFields(w, body); } catch { }
@@ -5014,6 +5025,16 @@ async function newDeviceDialog(e, hint, what) {
       : portSel && portSel.options.length < 2 ? 'This Interface has no free Port for this Device: pick another Interface, or free a Port' : 'Pick the Port first (Available Ports)';
     for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !ok); b.title = why; }
     for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
+    // the rest of the Add box is open (OakBarn Brewery, 2026-11-11, the second Blichmann Pump Build Dialog): the Interface and Available
+    // Ports line is greyed out (the wiring is set; Cancel to change it), the Label and Tab can still change (the Suggested Name follows),
+    // and the focus goes to the first box that was not on the first part: the Orientation
+    if (ok && dd) {
+      const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
+      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.title = 'Set: the board and pin it is wired to. Cancel to change it.'; }
+      dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
+      if (!wired) setTimeout(() => (body.querySelector('select.orientSel') || body.querySelector('.afterStep select, .afterStep input'))?.focus(), 20);
+      wired = true;
+    }
     return why;
   };
   let portSel = null;
@@ -5105,7 +5126,7 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', 'coverColor', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
           for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
@@ -6774,7 +6795,7 @@ const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under th
 // Label Attributes (OakBarn Brewery, 2026-11-10): Title Case names, no clutter, the size it shows at in Font Size, and Left, Centered or
 // Right (no Default choice: what it shows is what it is; Centered when nothing else is set)
 const LABEL_ALIGNS = [['MiddleLeft', 'Left'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right']];
-const LABEL_POP = { title: 'Label Attributes', tip: 'Opens the Label Attributes Dialog, where you set its font, size and colors.',
+const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Dialog where you can set its font, size and colors.',
   fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(), nameAlign: 'Middle' + labelDefaultAlign() }),
   fields: [['label', 'Label', 'text', null, false, 'b', { tip: 'The Label shown on the Tab.' }], ['hideName', 'Visible', 'show', null, false, false, { tip: 'On: the Label shows on the Tab. Off: no Label shows.' }],
   ['nameFontSize', 'Font Size', 'num', null, false, false, { tip: 'The size of the Label\'s letters, in pixels.' }],
@@ -6930,7 +6951,7 @@ const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', '
 const ONE_CLICK_TAP = v => [['toggle', 'Toggle'], ['hold', 'Push Button'], ...(v && !['toggle', 'hold', 'none', '', 'default'].includes(v) ? [[v, v]] : [])];
 const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(it.tap);
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
-const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic, ...x }],
+const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic + (pumpModelOf(it) ? ' The Picture itself cannot be changed.' : ''), ...x }],
   pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
     : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }]];
@@ -6984,7 +7005,7 @@ const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
-    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: LABEL_VISIBLE_PUMP_TIP }],
     ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
@@ -7767,6 +7788,16 @@ function field(f, obj) {
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
+  // Pick Cover Color (OakBarn Brewery, 2026-11-11): picking it pops up the Color Picker; a color must be picked, or ◀ Back sets the
+  // Cover back to None (no cover)
+  if (f[0] === 'cover' && f[2] === 'sel' && out[1]?.matches?.('select')) {
+    const sel = out[1];
+    sel.addEventListener('change', async () => {
+      if (sel.value !== 'User') return;
+      if (await pickCoverColor(obj)) return;
+      sel.value = 'None'; sel.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface and its Available Ports)
     // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
     const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
@@ -7807,7 +7838,7 @@ function field(f, obj) {
     const icons = []; let wrap;
     // each icon's own balloon (OakBarn Brewery, 2026-11-10): what it opens
     const nm = String(f[1] || '').replace(/^\d+\.\s*/, '');
-    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Opens a ${x.up} Line ${nm} Text Dialog.`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
+    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Opens a ${x.up} Line ${nm} Text Dialog`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.tip || x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
@@ -8857,6 +8888,25 @@ function layerDialog(title, build, canDelete = false) {
     d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
     d.showModal();
   });
+}
+// the Color Picker of Pick Cover Color: true once a color is picked (it goes into the item), false on ◀ Back
+async function pickCoverColor(obj) {
+  const tmp = { coverColor: obj.coverColor || '' };
+  for (;;) {
+    let body;
+    const r = await layerDialog('Pick Cover Color', b => {
+      body = b; bindForm(b, [['coverColor', 'Cover Color', 'color', null, false, false, { tip: 'The color of the cover over the pump. Pick one, or ◀ Back for None (no cover).' }]], tmp);
+      for (const btn of b.closest('dialog').querySelectorAll('.bar button:not(.primary)')) btn.textContent = '◀ Back';
+    });
+    if (r !== 'ok') return false;
+    readFields(tmp, body);
+    if (String(tmp.coverColor || '').trim()) {
+      obj.coverColor = tmp.coverColor;
+      const inp = document.querySelector('#dlgBody [data-k="coverColor"]'); if (inp) { inp.value = tmp.coverColor; inp.dispatchEvent(new Event('change', { bubbles: true })); }
+      return true;
+    }
+    toast('Pick a Cover Color, or ◀ Back for None (no cover).', true);
+  }
 }
 // ⬆ String Entry Dialog (Rule 18.1): 2 or 30 lines, word wrap, Rich Text codes allowed. A one-line box keeps a new line as \n.
 async function upEntry(wrap, f, lines) {
