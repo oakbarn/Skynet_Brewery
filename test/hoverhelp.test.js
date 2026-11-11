@@ -47,3 +47,19 @@ console.log('hoverhelp ok');
   if (n.some(x => x.tag === '#text' && /^\n|\n$/.test(x.textContent) && n[n.indexOf(x) + 1]?.tag === 'img')) throw new Error('no empty line beside a picture');
   console.log('hover help pictures ok');
 }
+// hot spots (Rule 2.49, OakBarn Brewery 2026-11-11): words with their own Help page are links, longer words first, once per topic
+{
+  const { setHelpLinks, hotSpotParts } = await import('../public/hoverhelp.js');
+  const { HOT_SPOTS } = await import('../public/helpmap.js');
+  setHelpLinks(HOT_SPOTS, () => {});
+  const p = hotSpotParts('The board this Device is wired to. Its Interface ID (BM) starts the name; another Interface ID is not linked again.');
+  const links = p.filter(x => x.topic);
+  assert.deepEqual(links.map(x => x.t), ['Interface ID'], 'Interface ID wins over Interface, and only once');
+  assert.deepEqual(links[0].topic, ['interfaces', 'the-interface-id']);
+  assert.equal(p.map(x => x.t).join(''), 'The board this Device is wired to. Its Interface ID (BM) starts the name; another Interface ID is not linked again.', 'the words never change');
+  assert.equal(hotSpotParts('BM_8_HE_HLT~element_BH and HLT_Vessel.Label').filter(x => x.topic).length, 0, 'never inside a name');
+  assert.deepEqual(hotSpotParts('Hysteresis holds the Setpoint.').filter(x => x.topic).map(x => x.t), ['Hysteresis', 'Setpoint']);
+  setHelpLinks([], null);
+  assert.equal(hotSpotParts('Interface ID').length, 1, 'no list (the BruControl Import): plain words');
+  console.log('hover help hot spots ok');
+}
