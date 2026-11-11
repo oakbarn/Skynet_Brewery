@@ -11614,19 +11614,7 @@ const schemaPicked = guard(async ev => {
   try {
     if (!can('admin') && !(S.me?.role === 'admin' && !v.startsWith('__'))) return toast('Only an admin can load another Schema', true);   // run mode (Rule 2.35): load only
     if (editing) return toast('Save or exit Edit layout first', true);
-    if (v === '__new') {
-      const w = { name: '', start: 'copy' };
-      if (await dialog('Add new Schema', [['name', 'Name of the new Schema', 'text'],
-        ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)'], ['template', 'A Skynet Schema Template (answer a few questions, and it is ready to brew)']]],
-        ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
-      readFields(w);
-      if (!okToSwitch(w.name, 'Making and loading')) return;
-      if (w.start === 'template') return newSchemaFromTemplate(w.name);
-      const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
-      await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
-      if (r.simulator) await newSchemaInterface(r.iface, r.wasSim);
-      return;
-    }
+    if (v === '__new') return addNewSchema();
     if (v === '__clone') return cloneSchema(act.id);
     if (v === '__exp') return exportSchemaFile();
     if (v === '__imp') return importSchemaFile();
@@ -11657,6 +11645,22 @@ const schemaPicked = guard(async ev => {
     await afterSchemaSwitch(`Schema "${to.name}" loaded`);
   } finally { back(); }
 });
+// Add new Schema: the Schema dropdown's "Add new Schema ...", the ☰ Menu's "➕ New Schema…" and the Schema Menu tab's
+// "➕ New Schema" button all open this same box (Fritz, 2026-11-11: "I could not see an easy way to begin"; Help 188 shows it step by step)
+async function addNewSchema() {
+  if (!can('admin')) return toast('Only an admin can add a Schema', true);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  const act = S.schemas?.active, w = { name: '', start: 'copy' };
+  if (await dialog('Add new Schema', [['name', 'Name of the new Schema', 'text'],
+    ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)'], ['template', 'A Skynet Schema Template (answer a few questions, and it is ready to brew)']]],
+    ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
+  readFields(w);
+  if (!okToSwitch(w.name, 'Making and loading')) return;
+  if (w.start === 'template') return newSchemaFromTemplate(w.name);
+  const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
+  await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
+  if (r.simulator) await newSchemaInterface(r.iface, r.wasSim);
+}
 // Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
 async function addSampleSchema(id, name = '') {
@@ -11798,6 +11802,8 @@ function menuItems(list, go) {
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
     { title: 'Pick the Schema to load; add, clone, rename, back up or restore one; add a Sample Schema' }));
+  // Fritz, 2026-11-11: an easy way to begin a new Schema, right under 🗂 Schema (the same box as Schema dropdown > Add new Schema)
+  if (can('admin')) list.append(item('➕ New Schema…', guard(addNewSchema), { title: 'Start a new Schema: a copy of this one, an empty one, or a Skynet Schema Template. Help: Step by Step: Add a Schema' }));
   // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
   list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
   if (can('admin')) {
@@ -12297,6 +12303,9 @@ function renderSchemaTab(box) {
   box.append(h('h3', {}, 'Schema'), h('div', { class: 'schemaPane' },
     h('div', { class: 'bar menuPick' }, h('span', {}, 'Loaded Schema'), schemaSelect(),
       act?.version ? h('span', { class: 'muted' }, 'Version ' + act.version) : ''),
+    admin ? h('div', { class: 'bar' },
+      h('button', { class: 'big', title: 'Start a new Schema: a copy of this one, an empty one, or a Skynet Schema Template', onclick: guard(addNewSchema) }, '➕ New Schema'),
+      h('button', { title: 'Help: Step by Step: Add a Schema', onclick: () => openHelp(['step-by-step-add-a-schema']) }, '❓ Step by step')) : '',
     run.length ? h('div', { class: 'eqWarn' }, `⚠ ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running (${run.map(x => x.name).join(', ')}). Loading another Schema stops ${run.length > 1 ? 'them' : 'it'}; you are asked first.`) : '',
     h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profiles take the place of the loaded one. The one you leave is kept as it is.'),
     h('h3', {}, 'Schemas on this Brain'),

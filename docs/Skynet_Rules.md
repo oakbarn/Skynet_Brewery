@@ -2595,6 +2595,19 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
      electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are the balloon on a Heating
      Element's **Current Method** while it is Hysteresis (after the electrical warning), and the **Hysteresis** part of Help 150.
 
+11.9 **Step by Step guides** (OakBarn Brewery, 2026-11-11: "Also need Section in Help That is a Step By Step with Pictures on How to do
+something. First Step By Step in Add a Schema as I could not see an easy way to begin."). Help has a **Step by Step** section: it is
+listed first, above every other page, in the Help page list (and in the page dropdown on a phone). A Step by Step guide:
+  1. has a title that starts **Step by Step:** (that is what puts it in the section), and a Help page number like any other page;
+  2. walks through one job from the very beginning, numbered **Step 1, Step 2 ...**, with a **picture of the real screen** at each step
+     (a screenshot of the panel, in `media/help_pictures/`, named `Step_<Job>_NN_<What>.png`; the thing to press has a red box around it);
+  3. follows the Help format (Rules 11.3 to 11.8): plain English, the names of the 3 Vessel sample, no person named;
+  4. links to the full Help page of each part for more.
+First guide: **Step by Step: Add a Schema** (Help 188). The same day, an easier way to begin: **☰ Menu > ➕ New Schema…** (just under 🗂 Schema)
+and a big **➕ New Schema** button (with **❓ Step by step**) on the ☰ Menu > Schema tab; both open the same Add new Schema box as the
+Schema dropdown's Add new Schema (the box itself is not changed, Rule 18.10). Both programs: the Importer uses the Panel's Help and Schema
+list, so nothing else changes there.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -3586,6 +3599,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Added Rule 11.9 (OakBarn Brewery): a **Step by Step** section in Help, listed first; guides titled "Step by Step: ..." with a screenshot at each step. First guide Help 188, Step by Step: Add a Schema. Easier start: ☰ Menu > ➕ New Schema… and a ➕ New Schema button on the Schema tab, opening the same Add new Schema box. Help 48 and 157 point to them. Next free Help 189. (thread "Add step-by-step guides to Help")
 - 2026-11-11: Rule 18.32 and the Pump dialog (OakBarn Brewery's drawing, Add Pump and Pump Properties, both programs): Cover choice **User Add** with the Color (RGB) line below; KISS Model and Power names (no "From the drawing" / "From the model"); Use greyed out, Hot & Cool; X, Y, Width, Height on one line; the electrical warning starts the Power Hover Help; Speed Control and Speed % for PWM pumps only; known values (Model, Power, Pump Facts) filled in and greyed out, a User Defined pump's stay editable; Blichmann RipTide facts added (7 GPM, 21 ft, 1/2" NPT). Help 111, 115, 163, 187. (thread "Add color picker to color fields")
 - 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs (his drawing): the User Add pops it up and a Color (RGB) line (swatch + 250,250,250) shows just below, double-click brings the picker up again; Save adds the color to the list. Pick Cover Color works the same way; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
 - 2026-11-10: Added Rule 7.20 (OakBarn Brewery): a sound can be a web link to an MP3, played by the browser from the web; an Alarm whose sound can't play (no internet, a wrong link, a missing file) plays the Missing Alarm Sound voice clip, or the beep; a Sound Player plays the Find The File song once; the free home for MP3s is a GitHub Release (Skynet-Sounds). Help 186 (new) and Help 21. Next free Help 187. Checked against the BruControl Import: a sound that is already a link is kept and never copied. (thread "Play sounds from a web link")
