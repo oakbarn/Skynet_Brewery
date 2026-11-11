@@ -22,7 +22,7 @@ const T = {
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
   Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', Valve_E: 'Electric Valve (motorized ball or butterfly valve, open / closed)', M_H_Vlv: 'High Temperature Manual Valve',
-  E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
+  Valve_E_H: 'High Temperature Electric Valve', Valve_Sgas: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input
   DI: 'Direct Input (plain)', Float: 'Float (true while made)', DIN: 'DIN momentary push button (one trigger per press, 3 s lockout)',
@@ -50,7 +50,7 @@ const PWM_OWN = { H_Element: 'Heating PWM (element on a PWM output)', Pump: 'Pum
 const AO_OWN = { H_Element: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv Valve_E M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv Valve_E M_H_Vlv Valve_E_H Valve_Sgas Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
   pwmOut: list('PWM H_Element Valve_L Valve_H Pump Fan Mtr LED', PWM_OWN),
   analogOut: list('AO H_Element Valve_L Valve_H Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
@@ -89,11 +89,13 @@ export function defaultCode(el, hint) {
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
 const OLD_CODES = { PmP: 'Pump', VlV: 'Valve_E', E_L_Vlv: 'Valve_E', eVlv: 'Valve_E',      // eVlv -> Valve_E: OakBarn Brewery, 2026-11-11 ("Change ON Off Motorized Valves to DO@Valve_E")
-  MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
+  MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'Valve_Sgas',
   PWM_PmP: 'Pump', PWM_VlV: 'Valve_L', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
   AO_PmP: 'Pump', AO_VlV: 'Valve_L', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
   // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
   P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'H_Element', H_AO: 'H_Element',
+  // OakBarn Brewery, 2026-11-11: "Valve_E_H and Valve_Sgas" (were E_H_Vlv, G_Vlv)
+  E_H_Vlv: 'Valve_E_H', G_Vlv: 'Valve_Sgas',
   // OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element" (was HE)
   HE: 'H_Element',
   // OakBarn Brewery, 2026-11-11: "PWM@Valve_L or PWM@Valve_H and AO to follow" (PWM already says the P)
@@ -119,7 +121,10 @@ const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0
 // © ® ™ are taken out and @ ~ become a space: public/labelguard.js does it while typing (and says why), lib/store.js on load.
 export const LABEL_NO = /[©®™@~]/;
 export const cleanLabel = s => String(s ?? '').replace(/[©®™]/g, '').replace(/[@~]/g, ' ');
-export const LABEL_NO_MSG = 'A Label can\'t have © ® ™ (kept for copyright notices) or @ ~ (kept for the Suggested Name).';
+// the words in the small box and the Label Hover Help (OakBarn Brewery, 2026-11-11, word for word for © ® ™)
+export const COPYRIGHT_MSG = '© ® ™: Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License.';
+export const SUGGESTED_MSG = '@ ~: Kept for the Suggested Name. Not typed in a name or a Label.';
+export const labelNoMsg = s => [/[©®™]/.test(s) ? COPYRIGHT_MSG : '', /[@~]/.test(s) ? SUGGESTED_MSG : ''].filter(Boolean).join(' ');
 export const parseLabel = s => [...cleanLabel(s).replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@°]/g, '~');
 

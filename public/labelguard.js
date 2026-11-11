@@ -10,7 +10,7 @@ export const LABEL_WARN_MS = 5000;
 export const blankWarn = what => `The ${what} cannot be blank.`;
 
 export const isBlank = v => !String(v ?? '').trim();
-import { LABEL_NO, LABEL_NO_MSG, cleanLabel } from './naming.js';
+import { LABEL_NO, labelNoMsg, cleanLabel } from './naming.js';
 // a Cancel button: data-close="cancel" (Properties), value="cancel", or a button whose text is Cancel / ✖ Cancel (the Rule 18 pop-ups)
 export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
 
@@ -55,7 +55,7 @@ function showWarn(field, msg) {
   const what = whatOf(field);
   // a field may say it in its own words (data-guard-msg: a Tilt's Color, OakBarn Brewery 2026-11-09)
   w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (msg || field.dataset?.guardMsg || blankWarn(what)) }),
-    Object.assign(document.createElement('span'), { textContent: msg ? '© ® ™ were taken out; @ and ~ became a space.' : what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
+    Object.assign(document.createElement('span'), { textContent: msg ? (/@/.test(msg) ? 'It was taken out (@ and ~ become a space).' : 'It was taken out.') : what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
   clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 5 seconds
   if (msg) return;
   field.classList.add('labelBlank');
@@ -84,10 +84,10 @@ export function installLabelGuard(doc = document) {
     const t = ev.target;
     if (t?.dataset?.k !== 'label' || !t.closest?.('dialog[open]')) return;
     if (!LABEL_NO.test(t.value)) return;
-    const at = t.selectionStart, before = t.value.length;
+    const at = t.selectionStart, before = t.value.length, msg = labelNoMsg(t.value);
     t.value = cleanLabel(t.value);
     try { t.setSelectionRange(at - (before - t.value.length), at - (before - t.value.length)); } catch { }
-    showWarn(t, LABEL_NO_MSG);
+    showWarn(t, msg);
   }, true);
   const clear = ev => { if (ev.target?.classList?.contains('labelBlank') && !isBlank(ev.target.value)) ev.target.classList.remove('labelBlank'); };
   doc.addEventListener('input', clear, true); doc.addEventListener('change', clear, true);

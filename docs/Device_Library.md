@@ -112,7 +112,7 @@ With PR #108: heating Devices (element, gas valve, igniter, heat pad, PID, Hyste
 
 **Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
 
-| Direct On / Off output | DO, H_Element, Pump, CPMP, M_L_Vlv, Valve_E, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
+| Direct On / Off output | DO, H_Element, Pump, CPMP, M_L_Vlv, Valve_E, M_H_Vlv, Valve_E_H, Valve_Sgas, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
 | Analog output | AO, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr (shown AO@Pump ...) |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
@@ -133,8 +133,8 @@ What each ID means:
 | TC | Thermocouple on a MAX31855 / MAX31856 board | M_L_Vlv | Low Temperature Manual Valve |
 | 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | Valve_E | Electric Valve (motorized ball valve, low temperature; was E_L_Vlv) |
 | 5KNTC | 5K NTC thermistor | M_H_Vlv | High Temperature Manual Valve |
-| 50KNTC | 50K NTC thermistor | E_H_Vlv | High Temperature Electric Valve |
-| 100KNT | 100K NTC thermistor (3D printer type) | G_Vlv | Solenoid Gas Valve |
+| 50KNTC | 50K NTC thermistor | Valve_E_H | High Temperature Electric Valve |
+| 100KNT | 100K NTC thermistor (3D printer type) | Valve_Sgas | Solenoid Gas Valve |
 | NTC | NTC thermistor, other size | Mtr | Motor |
 | LM35 | LM35 analog temperature sensor | LED | LED |
 | TMP36 | TMP36 analog temperature sensor | Light | Light |
@@ -165,7 +165,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, H_Element (Heating Element, Rule 3.1: `MB_25_DO@H_Element_HLT_BR`), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, Valve_E, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, H_Element (Heating Element, Rule 3.1: `MB_25_DO@H_Element_HLT_BR`), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, Valve_E, M_H_Vlv, Valve_E_H, Valve_Sgas, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
@@ -200,7 +200,7 @@ What each ID means:
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
-- **Type IDs:** Valve_E (default), E_H_Vlv, M_L_Vlv, M_H_Vlv, G_Vlv.
+- **Type IDs:** Valve_E (default), Valve_E_H, M_L_Vlv, M_H_Vlv, Valve_Sgas.
 - Same settings as 4.1 with Kind = valve, plus:
   - Valve type: **Electro_Mechanical** (switched by its pin) or **Manual** (turned by hand; a Process shows a pop-up and waits for Done)
   - Orientation: by its shape, Horizontal, Vertical, 45° Left, 45° Right

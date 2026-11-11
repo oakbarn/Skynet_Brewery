@@ -17,7 +17,7 @@ assert.equal(rating({ board: 'esp32', connection: 'esp32' }, true).level, 'poor'
 assert.equal(rating({ board: 'esp32', connection: 'ethernet' }, true).level, 'good', 'heating on Ethernet keeps its rating');
 assert.equal(rating({ connection: 'simulator' }).level, '');
 
-assert.ok(isHeating({ type: 'pid' }) && isHeating({ type: 'pwmOut', typeCode: 'H_Element' }) && isHeating({ type: 'digitalOut', subtype: 'element' }) && isHeating({ type: 'digitalOut', typeCode: 'G_Vlv' }));
+assert.ok(isHeating({ type: 'pid' }) && isHeating({ type: 'pwmOut', typeCode: 'H_Element' }) && isHeating({ type: 'digitalOut', subtype: 'element' }) && isHeating({ type: 'digitalOut', typeCode: 'Valve_Sgas' }));
 assert.ok(!isHeating({ type: 'digitalOut', typeCode: 'Pump' }));
 
 const devs = [{ name: 'MEGA', connection: 'serial' }, { name: 'WIFI', connection: 'esp32', board: 'esp32' }, { name: 'ETH', connection: 'ethernet' }];

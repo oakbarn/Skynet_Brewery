@@ -843,8 +843,9 @@ if taken) when the Schema loads; Processes and settings follow. Every mark and w
 even in a Name"): `Temp_°F`. **`@` and `~` are kept for the Suggested Name** (OakBarn Brewery, 2026-11-11: "prevent @ and ~ being used
 in a Label or name except when put there by the program in a Suggested Name", "AS they are reserved for Suggested Name Use Only"): a
 name typed by hand can't have them unless it is the Suggested Name (or the item's name already); use `_`. **A Label can't have © ® ™ or
-@ ~** (OakBarn Brewery, 2026-11-11: "No Circle C or R in Labels", it "interferes with the MIT License idea"; © ® ™ are kept for
-copyright and trademark notices): while typing, © ® ™ are taken out and @ ~ become a space, and a small box says why; an older Label
+@ ~** (OakBarn Brewery, 2026-11-11: "No Circle C or R in Labels"; © ® ™ are "Reserved for copyright and trademark notices of the
+Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License", the
+words of the small box and the Label Hover Help): while typing, © ® ™ are taken out and @ ~ become a space, and a small box says why; an older Label
 gets the same when its Schema loads. Every other mark may be in a Label. **The words of the Process language** (Help 22, Reserved
 words: `NULL`, `true`, `if`, `wait` ...) can't be a name either.
 
@@ -3215,7 +3216,9 @@ Valve drill-down dialog", Help 128):
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
    valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
 5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
-   upgraded on load, the stored Type ID and the name (Rule 15.2).
+   upgraded on load, the stored Type ID and the name (Rule 15.2). The other electric valves follow (OakBarn Brewery, 2026-11-11:
+   "Valve_E_H and Valve_Sgas"): a High Temperature Electric Valve is **Valve_E_H** (**DO@Valve_E_H**, was E_H_Vlv) and a Solenoid Gas
+   Valve is **Valve_Sgas** (**DO@Valve_Sgas**, was G_Vlv), upgraded on load the same way.
 - **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
   **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
   Width and Height; **Toggle and Overlay work normally**, as on the Pump (Fritz, 2026-11-05: "Toggles and Overlays should work
@@ -3622,6 +3625,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 18.18 (OakBarn Brewery: "Valve_E_H and Valve_Sgas"): the High Temperature Electric Valve's Type ID is Valve_E_H (was E_H_Vlv) and the Solenoid Gas Valve's is Valve_Sgas (was G_Vlv): DO@Valve_E_H, DO@Valve_Sgas; older ones are upgraded on load with their names. Checked against both programs: the BruControl Import's Burner (BrN) comes in as Valve_Sgas.
 - 2026-11-11: Added Rule 1.32, NULL (OakBarn Brewery: "Could we use NULL", "OK and in the Help about reserved words"): `X = NULL` empties a Process variable, gGlobal or Value Widget (shows blank, kept after a restart); `== NULL` / `!= NULL` ask; math or `< >` on NULL stops the Process with a plain message; a Device can't be NULL. Help 22 gets "NULL: the empty value" and a "Reserved words" list; a reserved word can't be a name (Rule 3.4). Checked against both programs: the Panel runs it; the Importer brings in no NULL.
 - 2026-11-11: Rule 3.4 (OakBarn Brewery: the degree mark "should be allowed even in a Name"; "No Circle C or R in Labels"; "@ and ~ ... reserved for Suggested Name Use Only"): `°` is allowed in names; a Label can't have © ® ™ (taken out) or @ ~ (become a space), while typing and on load; a typed name has @ or ~ only when it is the Suggested Name. Checked against both programs: the Importer's Labels are cleaned the same way when the Schema loads.
 - 2026-11-11: Rule 3.1 / 18.18 (OakBarn Brewery: "Change ON Off Motorized Valves to DO@Valve_E"): an On/Off motorized valve's Type ID is Valve_E (was eVlv): DO@Valve_E, `BM_24_DO@Valve_E_HLT~out_BH`; older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
