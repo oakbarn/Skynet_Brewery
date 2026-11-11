@@ -7,6 +7,12 @@
 export const PUMP_POWERS = [['', 'Not set'], ['ac120', 'AC 120 V (house power)'], ['ac240', 'AC 240 V (house power)'], ['dc12', 'DC 12 V'], ['dc24', 'DC 24 V']];
 export const PUMP_USES = [['', 'Hot (wort, water)'], ['cold', 'Cold (glycol, ice water)']];
 export const PUMP_SPEEDS = [['', 'On/Off only'], ['pwm', 'PWM speed (Speed %)']];
+// Pump Ports (OakBarn Brewery, 2026-11-11: "This should be DDLB TC1.5 TC2 TC3/4 TC1/2 FPT1/2 FPT 3/4 FPT1 MPT1/2 MPT3/4 MPT1 Differnt BSP
+// up to 1 Metrc"): Tri-Clamp, Female and Male Pipe Thread (NPT), British pipe thread (BSP) up to 1", and metric pipe (DN, the
+// metric sizes that match 1/4" to 1"). A pump's port can be changed by adding a fitting (FPT1/2 + a TC1.5 fitting = TC1.5).
+export const PUMP_PORTS = ['TC1.5', 'TC2', 'TC3/4', 'TC1/2', 'FPT1/2', 'FPT3/4', 'FPT1', 'MPT1/2', 'MPT3/4', 'MPT1',
+  'BSP1/4', 'BSP3/8', 'BSP1/2', 'BSP3/4', 'BSP1', 'DN8', 'DN10', 'DN15', 'DN20', 'DN25'];
+export const isTcPort = p => /^TC/i.test(String(p || '').trim());
 export const isDcPower = p => /^dc/.test(String(p || ''));
 export const powerText = p => PUMP_POWERS.find(([k]) => k === p)?.[1] ?? '';
 
@@ -26,7 +32,7 @@ export const PUMP_FACTS = [
   { key: 'march_809', name: 'March 809-PL-HS (AC)', power: 'ac120', speed: 'no', flow: '6 GPM', lift: '12.1 ft', hottest: '250 °F', ports: '1/2" NPT in and out', body: 'Polysulfone or stainless head', pics: ['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet'] },
   { key: 'march_815', name: 'March 815-PL-C (AC)', power: 'ac120', speed: 'no', flow: '8 GPM', lift: '18.6 ft', hottest: '250 °F', ports: '3/4" NPT in (center), 1/2" NPT out', body: 'Polysulfone or stainless head', pics: ['Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet'] },
   { key: 'chugger', name: 'Chugger (AC)', power: 'ac120', speed: 'no', flow: '7 GPM', lift: '18.6 ft', hottest: '250 °F', ports: '1/2" NPT in and out (inline head)', body: 'Stainless', note: '1.4 A.', pics: ['Pump_Chugger_SS_90_Inlet', 'Pump_Chugger_SS_Center_Inlet'] },
-  { key: 'riptide', name: 'Blichmann RipTide (AC)', power: 'ac120', speed: 'no', flow: '', lift: '', hottest: '', ports: '', body: 'Stainless', pics: ['Pump_Riptide_SS_Center_Inlet'] },
+  { key: 'riptide', name: 'Blichmann RipTide (AC)', power: 'ac120', speed: 'no', flow: '7 GPM', lift: '21 ft', hottest: '', ports: '1/2" NPT in and out (also made with Tri-Clamp)', body: 'Stainless', pics: ['Pump_Riptide_SS_Center_Inlet'] },
   { key: 'kegland_mkii', name: 'KegLand MKII 25 W (AC)', power: 'ac240', speed: 'no', flow: '19 L/min (5 GPM)', lift: '3.4 m (11 ft)', hottest: '248 °F (120 °C head)', ports: '1/2" BSP', body: 'Polysulfone or stainless', pics: ['Pump_KegLand_MKII_Poly_Center_Inlet', 'Pump_KegLand_MKII_SS_Center_Inlet'], note: '25 W. 110 V and 240 V models are sold.' },
   { key: 'brewzilla_g4', name: 'BrewZilla Gen 4 built-in pump (AC)', power: 'ac240', speed: 'no', flow: '', lift: '', hottest: '', ports: 'BrewZilla fittings', body: 'Plastic', note: '6 W.' },
 ];
@@ -46,7 +52,7 @@ export function factLines(el) {
   const f = factsOf(el), out = [];
   if (f) out.push(f.name);
   const pw = powerText(powerOf(el)); if (pw) out.push('Power: ' + pw);
-  out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot (wort, water)'));
+  out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool'));
   if (isPwmPump(el)) out.push(`Speed control: PWM, Speed ${pumpSpeed(el.speed)} %`);
   const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest, ports: el?.pumpPorts };
   for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest'], ['ports', 'Ports']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }

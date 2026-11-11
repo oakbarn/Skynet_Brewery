@@ -25,10 +25,22 @@ assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', fa
 assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);
 // the second part of the Add box (2026-11-11)
-assert.match(app, /\['User', 'Pick Cover Color'\]\]/, 'Pick Cover Color');
+assert.match(app, /\['User', 'User Add'\]\]/, 'User Add');
 assert.match(app, /async function pickCoverColor\(obj\)/, 'its Color Picker');
-assert.match(app, /btn\.textContent = '◀ Back'/, 'Back sets None');
-assert.match(app, /sel\.value = 'None'; sel\.dispatchEvent/);
+assert.match(app, /cancelText: '◀ Back'/, 'Back sets None');
+// the Color Picker (Rule 2.48): Pickr in every color box, the Cover Color field just below the Cover
+assert.match(app, /import \{ openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb \} from '\.\/colorpick\.js'/, 'the Color Picker');
+assert.match(app, /\['coverColor', 'Color \(RGB\)', 'rgb'/, 'the Color (RGB) field waits below the Cover');
+assert.match(app, /txt\.addEventListener\('dblclick'/, 'double-click brings up the Color Picker again');
+// the Pump dialog to OakBarn Brewery's drawing (2026-11-11): KISS names, Use greyed, X Y Width Height on one line, PWM pumps only,
+// known values greyed out, the electrical warning in the Power Hover Help
+assert.doesNotMatch(app, /`From the drawing \(/, 'no From the drawing (...)');
+assert.match(app, /const pumpUseText = it => useOf\(it\) === 'cold' \? 'Cold \(glycol, ice water\)' : 'Hot & Cool'/);
+assert.match(app, /const PUMP_XYWH = /);
+assert.match(app, /showIf: pumpPwmShown/);
+assert.match(app, /pumpPower: '⚠ Electricity can kill\./);
+assert.doesNotMatch(app, /\['_pwarn'/, 'no warning line in the dialog');
+assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
 assert.match(app, /The Picture itself cannot be changed\./);
 assert.match(app, /i\.disabled = true; i\.title = 'Set: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out');
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');

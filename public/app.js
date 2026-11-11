@@ -14,7 +14,7 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes } from './hoverhelp.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, pumpSpeed } from './pumps.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
@@ -32,6 +32,7 @@ import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarn
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
+import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
@@ -1340,6 +1341,8 @@ const fontPx = v => +v > 0 ? +v : 0;
 // Default = the item's normal color, None = no color at all (see-through)
 const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
   ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#fafafa'], ['Black', '#000000']];     // White is RGB 250 250 250 in every color picker (Fritz, 2026-11-05, Rule 2.7)
+// a color of your own (picked with the Color Picker, Rule 2.48) shows in a color dropdown by its RGB: 'RGB 160 69 42'
+const customColorName = c => rgbText(c) || c;
 // where it starts Centered: Left, Centered or Right, no Default choice (a saved MiddleCenter shows as Centered)
 const ALIGN_LCR = [['MiddleLeft', 'Left'], ['', 'Centered', 'MiddleCenter'], ['MiddleRight', 'Right']];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
@@ -1767,8 +1770,11 @@ const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120,
 // the shape with the cover's color, so a new color needs no new drawings.
 const PUMP_COVER_COLORS = { Red: '#d32f2f', Yellow: '#f6c21c', Blue: '#1e63c8', Green: '#2e9e44', Purple: '#7b3fa8', Orange: '#f57c00', White: '#fafafa' };     // White is RGB 250 250 250 (Fritz, 2026-11-05)
 const PUMP_COVERS = Object.keys(PUMP_COVER_COLORS);
-const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'Pick Cover Color']];
+const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User Add']];      // User Add (OakBarn Brewery's drawing, 2026-11-11): pops up the Color Picker, Color (RGB) below
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
+// the Color (RGB) field of the Cover (OakBarn Brewery, 2026-11-11, his drawing): just below the Cover, shown only while the Cover is User Add
+const COVER_COLOR_TIP = 'The color of the cover over the pump, as Red, Green, Blue (0 to 255 each). Double-click it to open the Color Picker.';
+const isUserCover = c => String(c || '').trim().toLowerCase() === 'user';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
 function coverOf(e, v) {
   if (e.subtype !== 'pump') return null;
@@ -4986,13 +4992,13 @@ async function newDeviceDialog(e, hint, what) {
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
-    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
+    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: e.cover || 'None' }, after), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
     ...(pr ? [...PROBE_GRAPHIC_FIELDS(e, after), ...PROBE_OWN(e, after)] : []),        // no Cover, Toggle or Overlay on a probe
     ...(pwm ? [...PWM_GRAPHIC_FIELDS(e, after), ...PWM_OVERLAY(e, after), ...PWM_OWN(e, after)] : []),        // PWM / Analog out (Rule 18.25)
     ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
-    ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
-    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
+    ...(isPumpDev(e) ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
+      ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }]]),      // a Pump: X, Y, Width and Height on one line
     ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
@@ -6789,7 +6795,7 @@ function alarmFields(item) {
 // a pump's Cover (Fritz, 2026-11-02): between its picture and the On overlay; None is the default. Only the Skynet no-cover pump
 // drawings (Help 104) have covers; a Process changes it with Pump_1.cover = "Blue" and Pump_1.coverColor = "#20b2aa".
 const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under the On overlay; Skynet no-cover pump drawings only)', 'sel', COVER_CHOICES, true],
-  ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
+  ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true }]];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
 // Label Attributes (OakBarn Brewery, 2026-11-10): Title Case names, no clutter, the size it shows at in Font Size, and Left, Centered or
@@ -6958,7 +6964,7 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
   const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
-  return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color', null, false, false, x]] : [])]
+  return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true, ...x }]]
     : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
@@ -6976,27 +6982,54 @@ const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f =
 // DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
 // it can) and the voltage, Lift, GPM etc are all good info to have at your fingertips." Model with its facts ⬢, Power with Use, and
 // Speed control with Speed %. An AC pump is On/Off only.
-const PUMP_MODEL_CHOICES = (v, it) => [['', (f => f ? `From the drawing (${f.name})` : '(not set)')(it && !it.pumpModel ? factsOf(it) : null)], ...PUMP_FACTS.map(f => [f.key, f.name]), ['other', 'Other (type its facts in the ⬢)'], ...(v && v !== 'other' && !pumpFacts(v) ? [[v, v]] : [])];
+// KISS (OakBarn Brewery's drawing, 2026-11-11, Rule 11.8): the model a Skynet pump drawing picks shows by its own name, "Blichmann
+// RipTide (AC)", with no "From the drawing (...)" round it; the same name is not listed twice.
+const PUMP_MODEL_CHOICES = (v, it) => { const d = it && !it.pumpModel ? factsOf(it) : null;
+  return [['', d ? d.name : '(not set)'], ...PUMP_FACTS.filter(f => f.key !== d?.key).map(f => [f.key, f.name]), ['other', 'Other (type its facts in the ⬢)'], ...(v && v !== 'other' && !pumpFacts(v) ? [[v, v]] : [])]; };
+// the Power the model gives shows by its own words, "AC 120 V (house power)", with no "From the model (...)" round it (KISS)
+const PUMP_POWER_CHOICES = it => { const m = !it.power && factsOf(it)?.power;
+  return PUMP_POWERS.filter(([k]) => !(m && k === m)).map(([k, t]) => [k, k === '' && m ? PUMP_POWERS.find(p => p[0] === m)[1] : t]); };
+// Use is greyed out (OakBarn Brewery's drawing, 2026-11-11): Hot & Cool, or Cold for a glycol pump; it is not changed in the dialog
+const pumpUseText = it => useOf(it) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool';
+// Speed Control and Speed % show for PWM pumps only (OakBarn Brewery's drawing, 2026-11-11): a DC pump, or one already set to PWM
+const pumpPwmShown = it => !!it.pwm || isDcPower(powerOf(it));
+// Pump facts (OakBarn Brewery, 2026-11-11: "If the data is Known, fill it in and Grey Out for Know values"; "For a User defined pump
+// Useful"): a fact the model knows is filled in and greyed out; a fact it doesn't know, or every fact of a User Defined pump (Other,
+// or no model), is a box to type in. A fact typed before stays the brewer's own and can still be changed (Rule #1).
+const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
+  ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
+  ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.'],
+  ['pumpPorts', 'ports', 'Ports', 'Its inlet and outlet: Tri-Clamp (TC), Female or Male Pipe Thread (FPT, MPT), BSP or metric (DN), and size. A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.']];
+// Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
+// make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
+function pumpPortField(o, f, tip) {
+  const own = String(o.pumpPorts ?? '').trim(), tc = !own && f?.port && isTcPort(f.port);
+  if (tc) return ['_pumpPorts', 'Ports', 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
+  const hint = f?.ports ? ` The model: ${f.ports}.` : '';
+  return ['pumpPorts', 'Ports', 'sel', [['', '(pick)'], ...PUMP_PORTS.map(p => [p, p]), ...(own && !PUMP_PORTS.includes(own) ? [[own, own]] : [])], false, false, { tip: tip + hint }];
+}
 const PUMP_FACTS_POP = { title: 'Pump facts', fields: o => {
-  const f = factsOf(o), dflt = k => f?.[k] ? ` · model: ${f[k]}` : '';
-  return [['_pfn', f ? `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''} Leave a box empty to use the model's fact.` : 'No model picked: type what you know.', 'note', null, false, false, { keep: true }],
-    ['pumpFlow', 'Flow' + dflt('flow'), 'text', null, false, false, { tip: 'How much it moves with nothing in the way (GPM or L/min).' }],
-    ['pumpLift', 'Lift' + dflt('lift'), 'text', null, false, false, { tip: 'How high it pushes liquid straight up before the flow stops (the head, ft or m).' }],
-    ['pumpHottest', 'Hottest liquid' + dflt('hottest'), 'text', null, false, false, { tip: 'The hottest liquid it is made for.' }],
-    ['pumpPorts', 'Ports' + dflt('ports'), 'text', null, false, false, { tip: 'Its inlet and outlet: thread, tri-clamp or barb, and size.' }]];
+  const f = factsOf(o), known = k => k === 'ports' ? !!(f?.port && isTcPort(f.port) && String(o.pumpPorts ?? '').trim() === '') : !!(f?.[k] && (o[PUMP_FACT_ROWS.find(r => r[1] === k)[0]] ?? '') === '');
+  const some = PUMP_FACT_ROWS.some(r => known(r[1])), open = PUMP_FACT_ROWS.some(r => !known(r[1]));
+  return [['_pfn', f ? `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}${some ? ' Known facts are filled in and greyed out.' : ''}${open ? ' Type what you know in the others.' : ''}` : 'User Defined pump: type what you know.', 'note', null, false, false, { keep: true }],
+    ...PUMP_FACT_ROWS.map(([key, k, label, tip]) => k === 'ports' ? pumpPortField(o, f, tip)
+      : known(k) ? [`_${key}`, label, 'ro', f[k], false, false, { tip: tip + ' Known from the model, so it is greyed out.' }] : [key, label, 'text', null, false, false, { tip }])];
 } };
 function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   const T = DEVICE_TIPS;
   if (it.pwm === true) it.pwm = 'pwm';
-  const pw = powerOf(it), ac = !add && /^ac/.test(pw);
-  return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...x }],
-    ['power', 'Power', 'sel', PUMP_POWERS.map(([k, t]) => [k, k === '' && factsOf(it)?.power ? `From the model (${PUMP_POWERS.find(p => p[0] === factsOf(it).power)[1]})` : t]), true, false,
-      { tip: T.pumpPower, with: ['pumpUse', 'Use', 'sel', PUMP_USES.map(([k, t]) => [k, k === '' && factsOf(it)?.use === 'cold' ? 'From the model (Cold)' : t]), false, false, { tip: T.pumpUse }], ...x }],
-    ...(ac ? [['_pac', 'An AC pump is turned On and Off only (no Speed %).', 'note', null, false, false, x]]
-      : [['pwm', 'Speed control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, ...(it.pwm || add ? { with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed }] } : {}), ...x }],
-        ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])]),
-    ['_pwarn', '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.', 'note', null, false, false, x]];
+  // known values are filled in and greyed out (OakBarn Brewery, 2026-11-11: "If the data is Known, fill it in and Grey Out for Know
+  // values"): the Model a Skynet pump drawing picks, and the Power that model runs on. The ⬢ Pump facts stays open.
+  const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it)), powerKnown = !!(!it.power && factsOf(it)?.power);
+  return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel + (known ? ' Known from the pump drawing, so it is greyed out.' : ''), attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
+    ['power', 'Power', 'sel', PUMP_POWER_CHOICES(it), true, false,
+      { tip: T.pumpPower + (powerKnown ? ' Known from the model, so it is greyed out.' : ''), with: ['_use', 'Use', 'ro', pumpUseText(it), false, false, { tip: T.pumpUse }], ...(powerKnown ? { disabled: true, known: true } : {}), ...x }],
+    ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed }], showIf: pumpPwmShown, ...x }],
+    ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
+// X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
+const PUMP_XYWH = (x = {}) => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, pairCls: 'xywh',
+  with: [['y', 'Y (Vertical)', 'num', null, false, false, { tip: DEVICE_TIPS.xy }], ['w', 'Width', 'num', null, false, false, { tip: DEVICE_TIPS.size }], ['h', 'Height', 'num', null, false, false, { tip: DEVICE_TIPS.size }]], ...x }]];
 const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpPorts'];
 // can this Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin)
 const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
@@ -7011,8 +7044,7 @@ function pumpDeviceFields(it, item) {
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it), ...PUMP_TYPE_FIELDS(it),
-    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
-    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+    ...PUMP_XYWH()];
 }
 
 // ---- Heating Element Device Properties (Fritz, 2026-11-05: "Same with Heating Element"): the Pump's Add box and Properties
@@ -7782,20 +7814,24 @@ const TITLE_TIPS = {
 function field(f, obj) {
   const out = fieldOne(f, obj);
   if (f[6]?.disabled && out[1]) for (const i of [out[1], ...out[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
+  if (f[6]?.known && out[0]) out[0].classList.add('greyed');      // a known value, filled in and greyed out (OakBarn Brewery, 2026-11-11)
   // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
   // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
   const x = f[6];
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
-  // Pick Cover Color (OakBarn Brewery, 2026-11-11): picking it pops up the Color Picker; a color must be picked, or ◀ Back sets the
+  // User Add, the Pump Cover color (OakBarn Brewery, 2026-11-11): picking it pops up the Color Picker; a color must be picked, or ◀ Back sets the
   // Cover back to None (no cover)
+  if (x?.coverRow) for (const el of out) if (el) { el.dataset.coverRow = '1'; el.classList.toggle('coverOff', !isUserCover(obj.cover)); }
   if (f[0] === 'cover' && f[2] === 'sel' && out[1]?.matches?.('select')) {
     const sel = out[1];
     sel.addEventListener('change', async () => {
+      for (const el of sel.closest('form, dialog, .miniBody')?.querySelectorAll('[data-cover-row]') || []) el.classList.toggle('coverOff', !isUserCover(sel.value));      // the Cover Color field shows just below
       if (sel.value !== 'User') return;
       if (await pickCoverColor(obj)) return;
-      sel.value = 'None'; sel.dispatchEvent(new Event('change', { bubbles: true }));
+      const live = sel.isConnected ? sel : [...document.querySelectorAll('dialog[open] select[data-k="cover"]')].pop() || sel;      // the dialog may have redrawn
+      live.value = 'None'; live.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface and its Available Ports)
@@ -7809,7 +7845,7 @@ function field(f, obj) {
       if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.dataset.help = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
       parts.push(lbl, o2[1]);
     }
-    out[1] = h('div', { class: 'fldPair' }, ...parts);
+    out[1] = h('div', { class: 'fldPair' + (x.pairCls ? ' ' + x.pairCls : '') }, ...parts);
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
@@ -7860,6 +7896,16 @@ function field(f, obj) {
     out[0].classList.add('greyed'); out[0].title = 'Pick what it turns on with first (Turns on with is None)';
     for (const x of out[1].querySelectorAll?.('select, button, input') ?? []) x.disabled = true;
     if (out[1].matches?.('select, input')) out[1].disabled = true;
+  }
+  if (x?.showIf && out[1]) {     // shown only while showIf(the item as the dialog has it now) is true (a Pump's Speed Control: PWM pumps only)
+    const els = out.filter(Boolean), test = () => {
+      const box = els[1].closest('dialog'); if (!box) return;
+      const now = { ...obj }; try { readFields(now, box.querySelector('#dlgBody, .miniBody') || box); } catch { }
+      for (const el of els) el.classList.toggle('showOff', !x.showIf(now));
+    };
+    for (const el of els) el.classList.toggle('showOff', !x.showIf(obj));
+    const on = () => { if (!els[1].isConnected) { document.removeEventListener('change', on, true); return; } setTimeout(test, 0); };
+    setTimeout(() => document.addEventListener('change', on, true), 0);
   }
   return out;
 }
@@ -7915,8 +7961,8 @@ const DEVICE_TIPS = {
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
   overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
   pumpModel: 'Which pump this is. Its facts (power, flow, lift, hottest liquid, ports) show when you hold the mouse on the pump. A Skynet pump drawing picks its model by itself. The ⬢ beside it holds the facts; type your own to change one.',
-  pumpPower: 'What the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
-  pumpUse: 'Hot: wort and hot water (brew day). Cold: glycol or ice water (cooling a fermenter).',
+  pumpPower: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nWhat the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
+  pumpUse: 'What it pumps. Hot & Cool: wort, hot water and cold water. Cold: glycol or ice water (cooling a fermenter). Set by the model; it is not changed here.',
   pumpSpeedCtl: 'On/Off only: the pin turns the pump on and off. PWM speed: a DC pump on a PWM pin (with a MOSFET module) runs at its Speed % while it is On. A brushless DC pump with its own driver may not like PWM: try it at a slow speed first.',
   pumpSpeed: 'How fast it runs while it is On, 0 to 100 % (empty = 100). A Process can change it: Pump_Name.speed = 60.',
   toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
@@ -7962,6 +8008,34 @@ const DEVICE_TIPS = {
   eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BH = on turns it On either way.',
   eOverlay: 'What shows on the Heating Element while it is on. Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. Orange Glow colors it orange. The bolts are drawn small in the middle of it, on top of the glow (Rule 7.8). Blue and Green are kept for cooling.',
 };
+// The Color (RGB) box (OakBarn Brewery, 2026-11-11, his drawing: "User Add then Pop up Color Picker then add the color field just
+// below. Double Click brings up the Color Picker again."; "Use this on every User Add Color Picker"). A row "Color (RGB)" with a
+// swatch and the color as three numbers, 250,250,250. Typing numbers sets the color; a double-click opens the Color Picker (Rule 2.48).
+// val is the field's hidden saved value (#rrggbb). onSet(hex) when a color is kept, onCancel() when the Color Picker is cancelled.
+function rgbRow(cur, val, { onSet = () => {}, onCancel = () => {} } = {}) {
+  let hex = hexToRgb(cur) ? cur : '';
+  const sw = h('span', { class: 'cswatch rgbSwatch' }), txt = h('input', { type: 'text', class: 'rgbText', value: rgbNums(hex), placeholder: 'R,G,B', spellcheck: 'false', autocomplete: 'off',
+    'data-help': 'The color as Red, Green, Blue (0 to 255 each), for example 250,250,250. Type it, or double-click to open the Color Picker.' });
+  const paint = c => { sw.style.background = c || ''; sw.classList.toggle('dflt', !c); txt.value = rgbNums(c); };
+  const live = c => { val.value = c; paint(c); val.dispatchEvent(new Event('input', { bubbles: true })); };      // the picture in the dialog follows
+  const keep = c => { hex = c; live(c); onSet(c); val.dispatchEvent(new Event('change', { bubbles: true })); };
+  paint(hex);
+  const pick = (more = {}) => {      // more: { onSave, onCancel, cancelText } from the one who opened it (the Cover's User Add)
+    const back = val.value;
+    openColorPicker(txt, hex || '#888888', { cancelText: more.cancelText, onChange: c => live(c),
+      onSave: c => { keep(c); more.onSave?.(c); },
+      onCancel: () => { val.value = back; paint(hex); val.dispatchEvent(new Event('input', { bubbles: true })); onCancel(); more.onCancel?.(); } });
+  };
+  txt.addEventListener('dblclick', ev => { ev.preventDefault(); pick(); });
+  txt.addEventListener('change', ev => {
+    ev.stopPropagation();
+    const c = parseRgb(txt.value);
+    if (c) keep(c); else { if (txt.value.trim()) toast('Type the color as three numbers from 0 to 255, for example 250,250,250', true); paint(hex); }
+  });
+  txt.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); txt.dispatchEvent(new Event('change')); } });
+  const lab = h('label', { class: 'rgbLbl' }, 'Color (RGB)'), box = h('div', { class: 'rgbBox' }, sw, txt);
+  return { els: [lab, box], pick, hex: () => hex, show: on => { for (const e of [lab, box]) e.classList.toggle('rgbOff', !on); } };
+}
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
@@ -8111,39 +8185,55 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'vkitems', 'data-k': key, 'data-kind': kind }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Value'), h('th', {}, 'Text'), h('th'))), tb), add);
     return [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)];
   }
-  else if (kind === 'flowc') {     // a Flow Color (Rule 5.21): None first, the brew stages, the colors, then RGB (a color of your own)
+  else if (kind === 'flowc') {     // a Flow Color (Rule 5.21): None first, the brew stages, the colors, then RGB (the Color Picker, Rule 2.48)
     const cur = flowKey(v) ?? '', rgb = cur.startsWith('#');
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'text', value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
-    const pick = h('input', { type: 'color', class: rgb ? '' : 'hidden', value: rgb ? cur : '#a0452a', title: 'RGB: pick your own color' });
     const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
     const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
     const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
       ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
-    s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'rgb'); set(s.value === 'rgb' ? pick.value : s.value); };
-    pick.oninput = () => set(pick.value);
-    input = h('div', { class: 'cpick' }, sw, s, pick, val);
+    let last = s.value;
+    const row = rgbRow(rgb ? cur : '', val, {
+      onSet: c => { s.value = 'rgb'; last = 'rgb'; set(c); },
+      onCancel: () => { s.value = last; set(last === 'rgb' ? row.hex() : last); row.show(last === 'rgb'); } });
+    s.onchange = () => { if (s.value === 'rgb') { row.show(true); row.pick(); } else { last = s.value; set(s.value); row.show(false); } };      // RGB opens the Color Picker at once (Rule 2.44)
+    return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
     return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
   }
-  else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
-    const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
-    const cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa'), known = cols.find(c => c[1] === cur);
+  else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
+    const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
+    const cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa');
+    if (cur && !cols.some(c => c[1] === cur) && hexToRgb(cur)) cols.push([customColorName(cur), cur]);      // a color of its own shows by its RGB
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
-    const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') + (cur === 'transparent' ? ' none' : '') }); sw.style.background = cur;
-    const pick = h('input', { type: 'color', class: known ? 'hidden' : '', value: /^#[0-9a-f]{6}$/.test(cur) ? cur : '#888888' });
-    const set = c => { val.value = c; sw.style.background = c; sw.classList.toggle('dflt', !c); sw.classList.toggle('none', c === 'transparent'); };
-    const s = h('select', {}, ...cols.map(([n, c]) => h('option', { value: c, ...(known && known[1] === c ? { selected: true } : {}), ...(c && c !== 'transparent' ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n)),
-      h('option', { value: 'custom', ...(known ? {} : { selected: true }) }, 'Custom (add new) ...'));
-    s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'custom'); set(s.value === 'custom' ? pick.value : s.value); };
-    pick.oninput = () => set(pick.value);
-    pick.onchange = () => {      // a custom color joins the list for next time
-      const c = pick.value.toLowerCase(); if (vList('colors').includes(c) || COLORS.some(k => k[1] === c)) return;
+    const sw = h('span', { class: 'cswatch' }), named = c => COLORS.some(k => k[1] === c) || c === CHAIN_KEEP;
+    const set = c => { val.value = c; sw.style.background = c === CHAIN_KEEP ? '' : c; sw.classList.toggle('dflt', !c || c === CHAIN_KEEP); sw.classList.toggle('none', c === 'transparent'); };
+    const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n);
+    const custom = h('option', { value: 'custom' }, 'Custom (add new) ...');
+    const s = h('select', {}, ...cols.map(([n, c]) => optOf(n, c)), custom);
+    s.value = cur; if (s.selectedIndex < 0) s.value = '';
+    let last = s.value; set(cur);
+    const keepColor = c => {      // a picked color joins the list for next time, and this dropdown shows it
+      if (![...s.options].some(o => o.value === c)) s.insertBefore(optOf(customColorName(c), c), custom);
+      s.value = c; last = c; set(c);
+      if (vList('colors').includes(c) || COLORS.some(k => k[1] === c)) return;
       const lists = S.config.vesselLists = { ...(S.config.vesselLists || {}) }; lists.colors = [...(lists.colors || []), c];
       api('PUT', '/ui/settings', { vesselLists: lists }).catch(e => toast(e.message, true));
     };
-    input = h('div', { class: 'cpick' }, sw, s, pick, val);
+    const own = c => !!hexToRgb(c) && !named(c);      // a color of the user's own: its Color (RGB) box shows
+    const row = rgbRow(own(cur) ? cur : '', val, { onSet: c => { keepColor(c); row.show(!named(c)); }, onCancel: () => { s.value = last; set(last); row.show(own(last)); } });
+    row.show(own(cur));
+    s.onchange = () => { if (s.value === 'custom') { row.show(true); row.pick(); } else { last = s.value; set(s.value); row.show(own(s.value)); } };      // Custom opens the Color Picker at once (one click, Rule 2.44)
+    return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
+  }
+  else if (kind === 'rgb') {       // only the Color (RGB) box: the Pump's Cover Color (OakBarn Brewery, 2026-11-11, his drawing)
+    const cur = hexToRgb(v) ? String(v).toLowerCase() : '';
+    const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'color', value: cur });
+    const row = rgbRow(cur, val, {});
+    row.els[1].append(val); row.els[1]._pick = row.pick;
+    return [h('label', {}, label), row.els[1]];
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
@@ -8889,24 +8979,16 @@ function layerDialog(title, build, canDelete = false) {
     d.showModal();
   });
 }
-// the Color Picker of Pick Cover Color: true once a color is picked (it goes into the item), false on ◀ Back
+// The Cover's User Add (OakBarn Brewery, 2026-11-11, Rule 2.48): the dialog shows its Cover Color field just below the Cover (the Cover
+// list redraws the dialog) and the Color Picker opens on it at once. true once a color is picked (Save), false on Cancel (the Cover
+// goes back to None).
 async function pickCoverColor(obj) {
-  const tmp = { coverColor: obj.coverColor || '' };
-  for (;;) {
-    let body;
-    const r = await layerDialog('Pick Cover Color', b => {
-      body = b; bindForm(b, [['coverColor', 'Cover Color', 'color', null, false, false, { tip: 'The color of the cover over the pump. Pick one, or ◀ Back for None (no cover).' }]], tmp);
-      for (const btn of b.closest('dialog').querySelectorAll('.bar button:not(.primary)')) btn.textContent = '◀ Back';
-    });
-    if (r !== 'ok') return false;
-    readFields(tmp, body);
-    if (String(tmp.coverColor || '').trim()) {
-      obj.coverColor = tmp.coverColor;
-      const inp = document.querySelector('#dlgBody [data-k="coverColor"]'); if (inp) { inp.value = tmp.coverColor; inp.dispatchEvent(new Event('change', { bubbles: true })); }
-      return true;
-    }
-    toast('Pick a Cover Color, or ◀ Back for None (no cover).', true);
-  }
+  await new Promise(r => setTimeout(r, 0));       // the dialog has redrawn with the Cover Color field
+  const wraps = [...document.querySelectorAll('dialog[open] [data-k="coverColor"]')].map(i => i.closest('.rgbBox')).filter(w => w?._pick);
+  const wrap = wraps[wraps.length - 1];
+  if (!wrap) return !!String(obj.coverColor || '').trim();
+  wrap.scrollIntoView?.({ block: 'nearest' });
+  return new Promise(res => wrap._pick({ cancelText: '◀ Back', onSave: c => { obj.coverColor = c; res(true); }, onCancel: () => { toast('No Cover Color picked: the Cover is None (no cover).'); res(false); } }));
 }
 // ⬆ String Entry Dialog (Rule 18.1): 2 or 30 lines, word wrap, Rich Text codes allowed. A one-line box keeps a new line as \n.
 async function upEntry(wrap, f, lines) {
