@@ -112,9 +112,9 @@ With PR #108: heating Devices (element, gas valve, igniter, heat pad, PID, Hyste
 
 **Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
 
-| Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
-| PWM output | PWM, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
-| Analog output | AO, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@Pump ...) |
+| Direct On / Off output | DO, H_Element, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
+| PWM output | PWM, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
+| Analog output | AO, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@Pump ...) |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
 | Analog input | AI, Pres, Level, Vol, PH_Met |
 | Flow meter | FlowM |
@@ -141,7 +141,7 @@ What each ID means:
 | PID | PID | E_Alm | Electric Alarm |
 | DutyCy | Duty Cycle | Fan | Fan |
 | Hys | Hysteresis | Chill | Chiller / glycol / fridge compressor |
-| HE | Heating Element (DO@HE, PWM@HE, AO@HE) | HtPad | Fermenter heat wrap or pad |
+| H_Element | Heating Element (DO@H_Element, PWM@H_Element, AO@H_Element) | HtPad | Fermenter heat wrap or pad |
 | | | Ignit | Burner igniter |
 | PWM | PWM (plain) | DI | Direct Input (plain) |
 | P_L_Vlv | Low Temperature Proportional Valve | Float | Float (true while made) |
@@ -165,7 +165,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, HE (Heating Element, Rule 3.1: `MB_25_DO@HE_HLT_BR`; elements named before keep DO), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, H_Element (Heating Element, Rule 3.1: `MB_25_DO@H_Element_HLT_BR`), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
@@ -252,14 +252,14 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
-- **Type IDs:** PWM, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@...).
+- **Type IDs:** PWM, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@...).
 - **Port:** PWM pins only (Mega 2-13, 44-46).
 - **Settings:** Interface, PWM pin, Start value (%), Decimals, **Measured volts** (Rule 6.24, Help 169: pairs of % and the volts measured; shows ≈ V, `.volts` reads and sets).
 - **Value:** 0-100 % on screen; the board gets 0-255. Board line `PWM <pin> <0-255>`.
 
 ### 4.5 Analog output (0-10 V / 4-20 mA)
 - **Add menu:** Devices: outputs > Analog output 0-10 V, or Analog output 4-20 mA.
-- **Type IDs:** AO, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@...).
+- **Type IDs:** AO, H_Element, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@...).
 - **Port:** a PWM pin feeding a PWM-to-0-10 V or 4-20 mA module.
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals, **Measured volts** (Rule 6.24).
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).

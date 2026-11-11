@@ -17,13 +17,13 @@ assert.equal(rating({ board: 'esp32', connection: 'esp32' }, true).level, 'poor'
 assert.equal(rating({ board: 'esp32', connection: 'ethernet' }, true).level, 'good', 'heating on Ethernet keeps its rating');
 assert.equal(rating({ connection: 'simulator' }).level, '');
 
-assert.ok(isHeating({ type: 'pid' }) && isHeating({ type: 'pwmOut', typeCode: 'HE' }) && isHeating({ type: 'digitalOut', subtype: 'element' }) && isHeating({ type: 'digitalOut', typeCode: 'G_Vlv' }));
+assert.ok(isHeating({ type: 'pid' }) && isHeating({ type: 'pwmOut', typeCode: 'H_Element' }) && isHeating({ type: 'digitalOut', subtype: 'element' }) && isHeating({ type: 'digitalOut', typeCode: 'G_Vlv' }));
 assert.ok(!isHeating({ type: 'digitalOut', typeCode: 'Pump' }));
 
 const devs = [{ name: 'MEGA', connection: 'serial' }, { name: 'WIFI', connection: 'esp32', board: 'esp32' }, { name: 'ETH', connection: 'ethernet' }];
-assert.match(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'HE', device: 'WIFI' }, devs), /on WiFi.*after 10 s/, 'heating on WiFi: allowed, with a warning');
-assert.match(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'HE', device: 'ETH' }, [{ name: 'ETH', connection: 'ethernet', lostLinkSec: 5 }]), /on Ethernet.*after 5 s/);
-assert.equal(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'HE', device: 'MEGA' }, devs), '', 'no warning on USB');
+assert.match(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'H_Element', device: 'WIFI' }, devs), /on WiFi.*after 10 s/, 'heating on WiFi: allowed, with a warning');
+assert.match(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'H_Element', device: 'ETH' }, [{ name: 'ETH', connection: 'ethernet', lostLinkSec: 5 }]), /on Ethernet.*after 5 s/);
+assert.equal(heatingLinkWarning({ name: 'HLT_Element', type: 'pwmOut', typeCode: 'H_Element', device: 'MEGA' }, devs), '', 'no warning on USB');
 assert.equal(heatingLinkWarning({ name: 'Pump1', type: 'digitalOut', typeCode: 'Pump', device: 'WIFI' }, devs), '');
 assert.equal(lostLinkSec(undefined), 10); assert.equal(lostLinkSec({ lostLinkSec: 1 }), 3); assert.equal(lostLinkSec({ lostLinkSec: 9999 }), 600); assert.equal(lostLinkSec({ lostLinkSec: 30 }), 30);
 console.log('links tests passed');

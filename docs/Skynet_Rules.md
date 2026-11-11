@@ -224,7 +224,7 @@ Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05)
 will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
 next to the Value Widget it grows from). A Value Widget (Rule 1.23) with two more things: a **Format** (**Number** with Units and
 Decimals, **Time** hh:mm:ss, or **DateTime**) and a **Code** attribute that holds **Process code**. In the Code, **`{value}`**
-stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.setpoint = {value}` (a Heating Element's Setpoint is its
+stands for the Value of the Widget, e.g. `MB_25_DO@H_Element_Brew~Kettle_BR.setpoint = {value}` (a Heating Element's Setpoint is its
 `.setpoint`, Rule 6.19; the older `.target` is the same). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
 value) or the .API (Read & Control). **A Process setting the Value does not run it**, so they can never set each other off in a
 loop, and a Brain restart does not run it. It runs like a short Process with the same words, is **not on the Processes list**,
@@ -791,7 +791,7 @@ the label part of the name. Make that the rule"), so `_` only ever separates the
 **The Type part starts with the General Type and an `@`** (OakBarn Brewery, 2026-11-11: "It is regarding Device Types. a on/off Pump is
 DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Device Type shown as `DO: Pump` (Rule 18.18) is `DO@Pump` in the
 name, because a `:` can't be in a name (Rule 3.4). An On/Off Pump is `BM_22_DO@Pump_Pump_BH`, a DS18B20 probe `BM_700_TEMP@1W_HLT_BH`, a
-Heating Element `BM_8_DO@HE_HLT~element_BH`. When the General Type and the Type ID are the same word it is written once (`PID`, `Hys`,
+Heating Element `BM_8_DO@H_Element_HLT~element_BH`. When the General Type and the Type ID are the same word it is written once (`PID`, `Hys`,
 `DO`). A Process reads the `@` as part of the name, with no quotes. Older Schemas (Rule 15.2): once per Schema, a Device named in the
 Suggested Name form gets its General Type@ when the Schema loads; its hidden key stays and every Process and setting that uses it follows.
 The 3 Vessel sample and the default Schema are changed (Rule 15.3). Both programs: the BruControl Import names the same way. Every special
@@ -799,8 +799,8 @@ character and what it does in a name: docs/Special_Characters.md.
 *Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
 (2026-10-23, PR #97)
-**A Heating Element's Type ID is `HE`** (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we
-could Use MB_25_HE_HLT_BR"), e.g. `MB_25_DO@HE_HLT_BR` (with its General Type since 2026-11-11), whatever heating method it is using (Rule 6.19); the method is not in its
+**A Heating Element's Type ID is `H_Element`** (OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element"; was `HE` from Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we
+could Use MB_25_HE_HLT_BR"), e.g. `MB_25_DO@H_Element_HLT_BR` (with its General Type since 2026-11-11), whatever heating method it is using (Rule 6.19); the method is not in its
 name or Label, since it can change while brewing. A Heating Element is wired straight to its port, going to an SSR (or a
 contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruControl Import names them the same way.
 *Replaced:* a Heating Element on a relay had `DO`, like a plain relay (2026-10-23).
@@ -901,7 +901,7 @@ Name"; "All Change Name Dialog gets new Button").
 - In every Properties box, typing a **Label** (or picking another Interface, Port, Device Type or Tab) changes the **Suggested Name**
   line at once. The Name itself stays as it is until it is changed (Rule 3.11).
 - The Suggested Name always has its Device Type ID: a Device saved without one (the Three Vessel sample's built-in heaters and probes
-  were) gets its usual one (HE for a Heating Element), so `BM_8_DO@HE_HLT~element_BH`, not `BM_8_HLT~element_BR`.
+  were) gets its usual one (HE for a Heating Element), so `BM_8_DO@H_Element_HLT~element_BH`, not `BM_8_HLT~element_BR`.
 - **Every Name Change pop-up** shows the Suggested Name and has **💾 Update to Suggested** beside ✖ Cancel and 💾 Save: one click
   saves the Suggested Name. A Process or a Schema has no Suggested Name, so there the button is greyed out.
 - **The Label's help balloon is made for where it is:** it names its own Label, shows its own Suggested Name with the Label part in
@@ -1428,7 +1428,7 @@ Template"; thread "Build the Vessel Widget class", Help 133).
     own Properties that are first inherited from its Template, but once on a Vessel Device those Properties are unique to the Vessel
     Device and never have any connection with any other Instance of that heater, EXCEPT: **Last One Rules!** See Rule 6.28. You can
     only look at and edit its Properties on its Vessel Device. **In a Process it is VesselDeviceName.IntegratedDeviceName**
-    (`HLT_Vessel.BM_8_DO@HE_HLT~element_BH = On`, `HLT_Vessel.BM_8_DO@HE_HLT~element_BH.setpoint = 152`, any capitals), and so is a Probe
+    (`HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = On`, `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = 152`, any capitals), and so is a Probe
     or Thermowell built into it; its plain name alone is refused in a Process. A rename of the Device or the vessel changes every
     Process for you. Its Interface and Port are greyed out in the Vessel Device's Properties too (Rule 6.1).
   - **Physical hardware may be replaced; the Device never is** (OakBarn Brewery, 2026-11-09: "Physical Hardware (such as a Heating
@@ -1868,7 +1868,7 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   shown with the same sign (Optical SSR -0.5 to -3 °F).
 - **One sign everywhere** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing", see "Plain
   terms" at the top): the saved Schema, the Brain, a Process, the .API and the dialogs all use the same sign; nothing is turned
-  around in the background. A Process writes `HLT_Vessel.BM_8_DO@HE_HLT~element_BH.onoffset = -1` to heat and `+1` (or `1`) to cool; a
+  around in the background. A Process writes `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.onoffset = -1` to heat and `+1` (or `1`) to cool; a
   Fermentor Control's `.heatoffset` is minus and `.cooloffset` plus. After `.onoffset =` the predictive text offers **(-) Heat** and
   **(+) Cool** (only the ones that fit the Device) and writes the sign. A Heating Element (or a Fermentor's Heat) given a plus, or a
   Fermentor's Cooling given a minus, gets a plain error. A Cool / Warm Pump may take either: plus cools, minus warms. **Both
@@ -2576,8 +2576,8 @@ The others found on 2026-11-10 wait for OakBarn Brewery's word (thread "Set the 
 examples in the Hover Help use the Properties and Entries in the Dialog they are on in the # Vessel Schema as a General Rule"). A
 balloon's example uses the real names and entries of the same dialog in the 3 Vessel 1 Pump sample, so what you read in the balloon is
 what you see in the dialog. First done: the **Heater Properties** of a Vessel Build, with the **HLT element** built into **HLT_Vessel**
-(`BM_8_DO@HE_HLT~element_BH`: Brewery Mega Port 8, the Brew House Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
-`BM_700_TEMP@1W_HLT_BH`; in a Process `HLT_Vessel.BM_8_DO@HE_HLT~element_BH`). A test (test/helpformat.test.js) checks the example still matches
+(`BM_8_DO@H_Element_HLT~element_BH`: Brewery Mega Port 8, the Brew House Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
+`BM_700_TEMP@1W_HLT_BH`; in a Process `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH`). A test (test/helpformat.test.js) checks the example still matches
 the sample. The other dialogs follow, one at a time.
 
 11.8 **KISS: Keep It Simple, no clutter** (OakBarn Brewery, 2026-11-10: "Label for DDLB and other field 1 to 2 Words. Use Hover Help for
@@ -3130,9 +3130,9 @@ the hover shows at once and stays while the mouse rests on the name (Rule 2.38).
 18.18 **Device Type shows its General Type first** (Fritz, 2026-11-04): where a Device Type is shown, it reads
 `GeneralType@Type`, the same as in the Suggested Name (Rule 3.1; OakBarn Brewery, 2026-11-11: "Any where in Skynet Change any DO:Pump
 and any other devices where there is a Subgroup to Type to DO@Pump"; "All Get Updated to the new standard"): an On/Off Pump is `DO@Pump`,
-a Pump on a PWM port `PWM@Pump`, a Heating Element `DO@HE` (`PWM@HE`, `AO@HE`). A new Device fills it in: a new On/Off Pump (a
+a Pump on a PWM port `PWM@Pump`, a Heating Element `DO@H_Element` (`PWM@H_Element`, `AO@H_Element`). A new Device fills it in: a new On/Off Pump (a
 Blichmann RipTide) reads `DO@Pump`. On a PWM or 0-10 V port a Pump, Fan, Motor, LED or Heating Element has the same Type ID as on an
-On/Off port (Pump, Fan, Mtr, LED, HE; they were P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO), since the General Type already says the
+On/Off port (Pump, Fan, Mtr, LED, H_Element; they were P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO), since the General Type already says the
 port; older Schemas are upgraded on load, names too (Rule 15.2). A Proportional Valve keeps `P_L_Vlv` / `P_H_Vlv` (a different valve).
 The saved type stays as it was (digitalOut, typeCode Pump). General Types: **DO** (Digital Out), **PWM**,
 **HYS** (Hysteresis) from Fritz; AO (Analog Out), DI (Digital In), AI (Analog In), TEMP, FLOW, SCALE, STEP (Stepper),
@@ -3475,7 +3475,7 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
   is **Left**, **Centered** or **Right**, with no "Default (Centered)" choice. A Label with no alignment of its own (nor from its
   Tab Style) is really Centered. The same three choices on the Timer's Label and the Value look.
 - **The 3 Vessel 1 Pump sample's Tab is BH: Brew House** (OakBarn Brewery, 2026-11-10: "BH follows Pascal Camel Code better"): Tab
-  ID BH, so every name on it ends _BH (BM_22_DO@Pump_Pump_BH, BM_8_DO@HE_HLT~element_BH ...), in its Processes, Help and Hover Help too.
+  ID BH, so every name on it ends _BH (BM_22_DO@Pump_Pump_BH, BM_8_DO@H_Element_HLT~element_BH ...), in its Processes, Help and Hover Help too.
   Name examples in Help and Hover Help end _BH. A New Schema's hot-side Tab starts as Brew House (BH). Pipe ids (p_Brewhouse_1 ...)
   are meaningless keys and stay as they are (Rule 2 of the Design Rules).
 
@@ -3597,7 +3597,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
-- 2026-11-11: Rule 18.18 (OakBarn Brewery: "Any where in Skynet Change any DO:Pump ... to DO@Pump ... also PWM@Pump"; "All Get Updated to the new standard"): the Device Type reads GeneralType@Type everywhere (DO@Pump, PWM@Pump, DO@HE), filled in on a new Device; P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO become Pump, Fan, Mtr, LED, HE under PWM / AO; older Schemas' Type IDs and names upgraded on load. Both programs. (thread "Show DO: type in Suggested Names")
+- 2026-11-11: Rule 3.1 (OakBarn Brewery: "Heating Element: DO@H_Element"): a Heating Element's Type ID is `H_Element` (was `HE`): `BM_8_DO@H_Element_HLT~element_BH`, Device Type DO@H_Element (PWM@H_Element, AO@H_Element); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
+- 2026-11-11: Rule 18.18 (OakBarn Brewery: "Any where in Skynet Change any DO:Pump ... to DO@Pump ... also PWM@Pump"; "All Get Updated to the new standard"): the Device Type reads GeneralType@Type everywhere (DO@Pump, PWM@Pump, DO@H_Element), filled in on a new Device; P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO become Pump, Fan, Mtr, LED, H_Element under PWM / AO; older Schemas' Type IDs and names upgraded on load. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "a on/off Pump is DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Type part of a Device name starts with its General Type and an `@` (`BM_22_DO@Pump_Pump_BH`); a Process reads `@` inside a name with no quotes; older Schemas get it once when they load (Rule 15.2), Processes follow; the sample and default Schema changed (Rule 15.3). Both programs. New docs/Special_Characters.md lists every special character and its use in a name. Help 46 updated. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.32 and the Pump dialog (OakBarn Brewery's drawing, Add Pump and Pump Properties, both programs): Cover choice **User Add** with the Color (RGB) line below; KISS Model and Power names (no "From the drawing" / "From the model"); Use greyed out, Hot & Cool; X, Y, Width, Height on one line; the electrical warning starts the Power Hover Help; Speed Control and Speed % for PWM pumps only; known values (Model, Power, Pump Facts) filled in and greyed out, a User Defined pump's stay editable; Blichmann RipTide facts added (7 GPM, 21 ft, 1/2" NPT). Help 111, 115, 163, 187. (thread "Add color picker to color fields")
 - 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs (his drawing): the User Add pops it up and a Color (RGB) line (swatch + 250,250,250) shows just below, double-click brings the picker up again; Save adds the color to the list. Pick Cover Color works the same way; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
@@ -4026,7 +4027,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-09: Added **No old ways** under How Rules work (OakBarn Brewery: "Do Not Worry about OLD ways of doing something. There will be ZERO old in the first production."): Rule 6.1's Older Schemas line is gone; Rule 6.19 and Help 150 no longer mention the older word On/Off. Reworded the same day (OakBarn Brewery: "Old Ways will never be depreciated in any Update ... An update may change things but never require old methods be updated to a new standard"): nothing old until the first Public Production (trial productions count as before it); after it, an update never takes away an old way or forces an old item up to a new standard, and an item left alone works as before.
 - 2026-11-09: Added **Two rules behind every update** under How Rules work (OakBarn Brewery): 1. Never take away, only add. 2. Always use a meaningless key (Rule 3.10).
 - 2026-11-09: Added Rule 6.28, **Last One Rules** (OakBarn Brewery's own draft, "All for One, One For All"): a Clone and its Device act as one; an Integrated Instance is independent except that only one on an Interface and Port can be On at a time, the last one turned On; neither can change its Interface or Port. Rule 6.1's Integrated Instances exception points to it.
-- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_DO@HE_HLT~element_BH and so on. The Built into balloon is OakBarn Brewery's text with its own example.
+- 2026-11-09: Rule 6.1 reworded by OakBarn Brewery (no Device ever shares a Port; a Template, Device or Integrated Device can never change its Interface or Port; the quibbling exception for Integrated Instances and Clones points to Rule 6.28). Rule 5.31: a heater built into a Vessel Device is inseparable, and a Process calls any Device built into a Vessel Device VesselDeviceName.IntegratedDeviceName (the plain name is refused); the Three Vessel sample's Processes now say HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH and so on. The Built into balloon is OakBarn Brewery's text with its own example.
 - 2026-11-09: Rule 5.31: physical hardware may be replaced only when wired the same way to the same Interface and Port; a Vessel Device locks every integrated Interface and Port and none may ever be swapped (OakBarn Brewery). Rule 18.31: Swap is gone from an integrated Vessel Device's Heating Element and Probe sections, and their Interface and Port are greyed out.
 - 2026-11-10: Rule 6.20: the Heating method's help balloon starts with the electrical warning, a red triangle and red bold words (OakBarn Brewery, "Heat Method Hover Help").
 - 2026-11-10: Rule 4.4: deleting a Device with Clones asks: delete it and all its Clones, or make one Clone (picked by the user) the Device; the others stay its Clones (OakBarn Brewery: "User Option One: All killed", "User Picks the Clone be the Device"). Help 71.

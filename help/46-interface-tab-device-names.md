@@ -88,21 +88,21 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 ## Device Type IDs
 
-Every Device Type ID means one thing. The **General Type** in front says what kind of port it is on, so the same ID is used on every kind of port: a Pump is `DO@Pump` on an On/Off port and `PWM@Pump` on a PWM port (its speed). The Device Type box shows it the same way. A Heating Element is `HE`, e.g. `MB_25_DO@HE_HLT_BH`, whatever heating method it uses.
+Every Device Type ID means one thing. The **General Type** in front says what kind of port it is on, so the same ID is used on every kind of port: a Pump is `DO@Pump` on an On/Off port and `PWM@Pump` on a PWM port (its speed). The Device Type box shows it the same way. A Heating Element is `H_Element`, e.g. `MB_25_DO@H_Element_HLT_BH`, whatever heating method it uses.
 
 **Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
-**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `HE` Heating Element (its method picked by a click or a Process): `DO@HE` on an on / off output, `PWM@HE` on a PWM output, `AO@HE` on a 0-10 V power controller (SCR / SSVR).
+**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `H_Element` Heating Element (its method picked by a click or a Process): `DO@H_Element` on an on / off output, `PWM@H_Element` on a PWM output, `AO@H_Element` on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `HE` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 
 A **DIN** gives one trigger per press, however long the button is held, and a second or third press within **3 seconds** does nothing. You can change the 3 seconds in its properties (*Pulse: lockout*).
 
-**PWM:** `PWM` plain, `HE` heating PWM, `P_L_Vlv` low temperature proportional valve, `P_H_Vlv` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
+**PWM:** `PWM` plain, `H_Element` heating PWM, `P_L_Vlv` low temperature proportional valve, `P_H_Vlv` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
 
-**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `HE`, `P_L_Vlv`, `P_H_Vlv`, `Pump`, `Fan`, `Mtr` (shown as `AO@Pump` ...).
+**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_Element`, `P_L_Vlv`, `P_H_Vlv`, `Pump`, `Fan`, `Mtr` (shown as `AO@Pump` ...).
 
 **Analog inputs:** `AI` plain, `Pres` pressure, `Level`, `Vol` volume, `PH_Met` pH meter.
 
