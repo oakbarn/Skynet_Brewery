@@ -53,7 +53,7 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    Just below them, **Overlay**: what is drawn on top while the pump is On (the steady lightning bolt, the flashing bolt,
    the Green glow ring, or None). On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
-10. The **Device Type** (DO@Pump) greyed out.
+10. The **Device Type** greyed out and filled in for you: **DO@Pump** for an On/Off pump like the Blichmann RipTide (a Pump on a Digital Out, DO), **PWM@Pump** for a pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: `BM_22_DO@Pump_Pump_BH`.
 
 The On / Off text is shown with an Overlay (the green On overlay of the Skynet pump drawings).
 
