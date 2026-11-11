@@ -854,6 +854,8 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
 .buildOpt label { display: block; margin: 6px 0; }
 /* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
 .el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+.el > .pumplink { position: absolute; inset: 0; pointer-events: none; z-index: 1; }      /* a pump's Hose or Pipe to its IP spots (Rule 5.27): over the Cover, under the On overlay */
+.el > .pumplink svg { display: block; }
 /* On overlays are drawn smaller, in the middle of the picture (OakBarn Brewery, 2026-11-09: "On Overlays no Border and smaller", every
    overlay). A glow (tint) colors the picture itself and the Glow ring goes round it, so those two stay the picture's size. */
 .el > .onov.small { background-size: 55% 55%; }
@@ -1086,6 +1088,8 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .devPreviewWrap { display: flex; align-items: center; justify-content: flex-start; min-height: 60px; }
 .devPreview { position: relative; display: inline-block; line-height: 0; background: var(--panel2, transparent); border-radius: 6px; }
 .devPreview img { height: 120px; width: auto; max-width: 220px; display: block; }
+.devPreview .pvLink { position: absolute; inset: 0; pointer-events: none; }
+.devPreview .pvLink svg { display: block; }
 .devPreview .pvCover { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 button.waitStep { opacity: .55; }
 
