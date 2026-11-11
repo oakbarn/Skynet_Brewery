@@ -57,7 +57,7 @@ More rules:
 - **No spaces in Device names.**
 - If the name is already used, a number goes after the Label: `MB_25_DO@Pump_Wort_2_BH`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` or `@` in it works in a Process as it is, with no quotes: `MB_25_DO@eVlv_Fly~Sparge_SP = true`.
+- A name with `~` or `@` in it works in a Process as it is, with no quotes: `MB_25_DO@Valve_E_Fly~Sparge_SP = true`.
 - Every special character and what it does in a name: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
@@ -94,7 +94,7 @@ Every Device Type ID means one thing. The **General Type** in front says what ki
 
 **Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `H_Element` Heating Element (its method picked by a click or a Process): `DO@H_Element` on an on / off output, `PWM@H_Element` on a PWM output, `AO@H_Element` on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `Valve_E` electric valve (motorized ball valve, low temperature), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 
