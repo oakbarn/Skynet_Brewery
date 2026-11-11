@@ -1726,6 +1726,8 @@ function propPct(e) {
 }
 const SIDES = ['left', 'right', 'top', 'bottom'];
 const VALVE_ENDS = { h: ['left', 'right'], v: ['top', 'bottom'], l45: ['topleft', 'bottomright'], r45: ['topright', 'bottomleft'] };
+// a pump's spot (Rule 5.27) on its box as it stands on the Tab
+const spotPt = (e, c) => { const gm = elGeom(e), [fx, fy] = PUMP_SPOTS[c] || PUMP_SPOTS.LM; return [Math.round((gm.x || 0) + fx * (gm.w || 120)), Math.round((gm.y || 0) + fy * (gm.h || 60))]; };
 function sidePt(e, side) {
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60;
   if (side === 'topleft') return [x, y]; if (side === 'topright') return [x + w, y];
@@ -1753,7 +1755,73 @@ const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h')
 // to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
 // (Rule 5.11: 20 units = 1 inch in the box, 10 at 150 x 150); their port tubes are made longer where needed to reach the two spots.
 // The IPs sit on the tips of the ports, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
-const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]] };
+const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]], std: true };
+// Every pump has 8 IPs (OakBarn Brewery, 2026-11-11: "an IP at every corner and one in between, middle bottom / top and side / side
+// middle, so we can easily substitute a different pump"; Rule 5.27): the 4 corners of its box and the middle of each side, the same on
+// every pump. Its Inlet and Outlet are each on one of them, picked in its Properties (Top Left ... Left Middle, as seen on the Tab), so
+// it says which is In and which is Out even when both are on one side. A Skynet pump drawing gets a Hose or Pipe drawn from its own
+// port (PUMP_STD.ends, the tips of its ports) to the spot, over the picture and its Cover, under the On overlay (layer 2 of the
+// picture; the On image is layer 1). It starts with its Inlet on the Right Middle and its Outlet on the Top Right (mirrored when Left),
+// the spots nearest its ports. A User pump starts on the middle of its sides (its IN IP side and OUT IP side, Left and Right).
+const PUMP_SPOTS = { TL: [0, 0], TM: [0.5, 0], TR: [1, 0], RM: [1, 0.5], BR: [1, 1], BM: [0.5, 1], BL: [0, 1], LM: [0, 0.5] };
+const PUMP_SPOT_NAMES = { TL: 'Top Left', TM: 'Top Middle', TR: 'Top Right', RM: 'Right Middle', BR: 'Bottom Right', BM: 'Bottom Middle', BL: 'Bottom Left', LM: 'Left Middle' };
+const SPOT_FLIP_H = { TL: 'TR', TM: 'TM', TR: 'TL', RM: 'LM', BR: 'BL', BM: 'BM', BL: 'BR', LM: 'RM' };
+const SPOT_FLIP_V = { TL: 'BL', TM: 'BM', TR: 'BR', RM: 'RM', BR: 'TR', BM: 'TM', BL: 'TL', LM: 'LM' };
+const flipSpot = (c, fh, fv) => { if (fh) c = SPOT_FLIP_H[c]; if (fv) c = SPOT_FLIP_V[c]; return c; };
+const SIDE_SPOT = { left: 'LM', right: 'RM', top: 'TM', bottom: 'BM', topleft: 'TL', topright: 'TR', bottomleft: 'BL', bottomright: 'BR' };
+const isStdPump = e => e?.subtype === 'pump' && !!picFlow(e.imageOff || e.imageOn)?.std;
+const isUserPump = e => e?.subtype === 'pump' && !isInline(e) && !picFlow(e.imageOff || e.imageOn);
+// where a pump's Inlet and Outlet start (as seen on the Tab)
+const pumpSpotStart = e => isStdPump(e) ? [flipSpot('RM', e.flipH, e.flipV), flipSpot('TR', e.flipH, e.flipV)] : [SIDE_SPOT[e.ipIn] || 'LM', SIDE_SPOT[e.ipOut] || 'RM'];
+// [inlet, outlet]: the spots a pump's IPs are on, as seen on the Tab (never both on one spot)
+function pumpSpots(e) {
+  const [di, dout] = pumpSpotStart(e), a = PUMP_SPOTS[e.pumpIn] ? e.pumpIn : di;
+  let b = PUMP_SPOTS[e.pumpOut] ? e.pumpOut : dout;
+  if (a === b) b = a !== dout ? dout : a !== di ? di : 'TM';
+  return [a, b];
+}
+// a Skynet pump drawing's flow with its two IPs on its spots (as parts of the picture before it is flipped; flipPt flips them)
+const pumpSpotFlow = (e, f) => f?.std && e?.subtype === 'pump' ? { ...f, ends: pumpSpots(e).map(c => PUMP_SPOTS[flipSpot(c, e.flipH, e.flipV)]) } : f;
+// The Hose or Pipe from a pump's own port to its spot (in the 300 x 300 box, before flips): straight out of the port to a lane just
+// inside the box, round the lane the shorter way (the other way when that would pass the other IP), then out to the spot. When the
+// lane would start on the other IP, it runs on a lane further in.
+function pumpRoute(tip, dir, spot, avoid, m = 9) {
+  const lo = m, hi = 300 - m, L = hi - lo, P = 4 * L, wrap = v => ((v % P) + P) % P;
+  const per = ([x, y]) => y <= lo ? x - lo : x >= hi ? L + y - lo : y >= hi ? 2 * L + hi - x : 3 * L + hi - y;
+  const at = s => { s = wrap(s); return s <= L ? [lo + s, lo] : s <= 2 * L ? [hi, lo + s - L] : s <= 3 * L ? [hi - (s - 2 * L), hi] : [lo, hi - (s - 3 * L)]; };
+  const cl = v => Math.min(hi, Math.max(lo, v)), same = (p, q) => !!p && !!q && Math.abs(p[0] - q[0]) < 0.01 && Math.abs(p[1] - q[1]) < 0.01;
+  const e = dir[0] > 0 ? [hi, cl(tip[1])] : dir[0] < 0 ? [lo, cl(tip[1])] : dir[1] < 0 ? [cl(tip[0]), lo] : [cl(tip[0]), hi];
+  const t = [cl(spot[0]), cl(spot[1])], av = avoid && [cl(avoid[0]), cl(avoid[1])];
+  if (m < 20 && same(e, av)) return pumpRoute(tip, dir, spot, avoid, 26);
+  const a = per(e), cw = wrap(per(t) - a), hit = sg => !!av && m < 20 && (d => d > 0 && d < (sg > 0 ? cw : P - cw))(wrap(sg * (per(av) - a)));
+  let sg = cw <= P - cw ? 1 : -1; if (hit(sg)) sg = -sg;
+  const n = sg > 0 ? cw : P - cw, mid = [];
+  for (let c = 0; c < 4; c++) { const d = wrap(sg * (c * L - a)); if (d > 0 && d < n) mid.push([d, at(c * L)]); }
+  const pts = [tip, e, ...mid.sort((p, q) => p[0] - q[0]).map(p => p[1]), t, spot];
+  return pts.filter((p, i) => !i || !same(p, pts[i - 1]));
+}
+// the route as an SVG path: a hose bends round its corners, a pipe turns square (at its TC elbows)
+function routeD(pts, r) {
+  const f = v => +v.toFixed(1);
+  let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i], n = pts[i + 1];
+    if (!n || !r) { d += ` L${f(p[0])},${f(p[1])}`; continue; }
+    const q = pts[i - 1], l1 = Math.hypot(p[0] - q[0], p[1] - q[1]), l2 = Math.hypot(n[0] - p[0], n[1] - p[1]), k = Math.min(r, l1 / 2, l2 / 2);
+    if (!l1 || !l2) { d += ` L${f(p[0])},${f(p[1])}`; continue; }
+    d += ` L${f(p[0] - (p[0] - q[0]) / l1 * k)},${f(p[1] - (p[1] - q[1]) / l1 * k)} Q${f(p[0])},${f(p[1])} ${f(p[0] + (n[0] - p[0]) / l2 * k)},${f(p[1] + (n[1] - p[1]) / l2 * k)}`;
+  }
+  return d;
+}
+// the Hose (white, like the hoses OakBarn Brewery lined up in BruControl) or the Pipe (stainless), as SVG in the 300 x 300 box
+function pumpLinkSvg(e) {
+  if (!isStdPump(e)) return '';
+  const [si, so] = pumpSpots(e).map(c => PUMP_SPOTS[flipSpot(c, e.flipH, e.flipV)].map(v => v * 300));
+  const pipe = e.pumpLink === 'pipe', [ti, to] = PUMP_STD.ends.map(([x, y]) => [x * 300, y * 300]);
+  const draw = d => pipe ? `<path d="${d}" fill="none" stroke="#5b6168" stroke-width="17"/><path d="${d}" fill="none" stroke="#c9ced4" stroke-width="13"/><path d="${d}" fill="none" stroke="#eef1f4" stroke-width="3" transform="translate(-2,-2)"/>`
+    : `<path d="${d}" fill="none" stroke="#8a8f94" stroke-width="17" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#f7f7f7" stroke-width="13" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible">${draw(routeD(pumpRoute(to, [0, -1], so, si), pipe ? 0 : 18))}${draw(routeD(pumpRoute(ti, [1, 0], si, so), pipe ? 0 : 18))}</svg>`;
+}
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
   'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
   'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
@@ -1852,7 +1920,7 @@ function picFlow(path) {
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = picFlow(e.imageOff || e.imageOn) || userValveStd(e), o = e.orientation;
+  const f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e), o = e.orientation;
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
@@ -1908,8 +1976,9 @@ const devIps = e => {
     return [{ id: `dev:${e.name}:in`, label: `${e.name} thermowell`, text: '', c: elPicPt(e, ...(e.front ? [0.5, 0.5] : [0, 0.5])).map(Math.round) }];
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
-    return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
-      { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : sidePt(e, e.ipOut || 'right') }]; }
+    const us = isUserPump(e) ? pumpSpots(e).map(c => spotPt(e, c)) : null;      // a User pump: its 8 spots too (Rule 5.27)
+    return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : us ? us[0] : sidePt(e, e.ipIn || 'left') },
+      { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : us ? us[1] : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
@@ -1974,7 +2043,7 @@ function splitPorts(it) {
     const [cx, cy] = ipCenter(it);
     return eqPorts(it).map(q => { const dx = q.c[0] - cx, dy = q.c[1] - cy; return { id: q.id, c: q.c, f: Math.abs(dx) > 2 * Math.abs(dy) ? [Math.sign(dx), 0] : Math.abs(dy) > 2 * Math.abs(dx) ? [0, Math.sign(dy)] : null }; });
   }
-  const f = picFlow(it.imageOff || it.imageOn), pe = picEnds(it), gm = elGeom(it);
+  const f = pumpSpotFlow(it, picFlow(it.imageOff || it.imageOn)), pe = picEnds(it), gm = elGeom(it);
   const turned = it.subtype === 'valve' && ['l45', 'r45'].includes(it.orientation);
   return devIps(it).map((q, i) => {
     let face = null;
@@ -2471,7 +2540,7 @@ function fillEl(n, e0) {
   // Pump cover: over the picture, under the On overlay, on and off (it mirrors with the picture's flips)
   const cv = coverOf(e, v);
   let co = n.querySelector(':scope > .coverov');
-  if (cv && !co) { co = h('div', { class: 'coverov' }); const o1 = n.querySelector(':scope > .onov'); if (o1) n.insertBefore(co, o1); else n.append(co); }
+  if (cv && !co) { co = h('div', { class: 'coverov' }); const o1 = n.querySelector(':scope > .pumplink') || n.querySelector(':scope > .onov'); if (o1) n.insertBefore(co, o1); else n.append(co); }
   if (co) {
     co.classList.toggle('hidden', !cv);
     co.style.backgroundImage = cv ? `url("${media(cv.file)}")` : '';
@@ -2479,6 +2548,16 @@ function fillEl(n, e0) {
     co.style.webkitMaskImage = co.style.maskImage = cv?.mask ? `url("${media(cv.mask)}")` : '';
     co.style.transform = e.flipH || e.flipV ? `scale(${e.flipH ? -1 : 1}, ${e.flipV ? -1 : 1})` : '';
     if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
+  }
+  // A pump's Hose or Pipe to its Inlet and Outlet spots (Rule 5.27): over the picture and its Cover, under the On overlay
+  const lk = pumpLinkSvg(e), lkKey = lk && `${pumpSpots(e)}|${e.pumpLink || ''}|${!!e.flipH}${!!e.flipV}`;
+  let lo = n.querySelector(':scope > .pumplink');
+  if (lk && !lo) { lo = h('div', { class: 'pumplink' }); const o1 = n.querySelector(':scope > .onov'); if (o1) n.insertBefore(lo, o1); else n.append(lo); }
+  if (lo) {
+    lo.classList.toggle('hidden', !lk);
+    if (lo.dataset.k !== (lkKey || '')) { lo.innerHTML = lk; lo.dataset.k = lkKey || ''; }
+    lo.style.transform = e.flipH || e.flipV ? `scale(${e.flipH ? -1 : 1}, ${e.flipV ? -1 : 1})` : '';
+    if (lk) fitOverlay(n, lo, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
   const lit = on || (e.type === 'alarm' && !!v.active), ovlRaw = v.imageoverlay || e.imageOverlay, ovl = lit && (ovlRaw === 'none' ? '' : ovlRaw);      // 'none': an Alarm Chain step took it off (Rule 7.16), or Overlay None
@@ -6960,7 +7039,12 @@ const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(i
 const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic + (pumpModelOf(it) ? ' The Picture itself cannot be changed.' : ''), ...x }],
   pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
     : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
-  ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }]];
+  ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }], ...PUMP_SPOT_FIELDS(it, x)];
+// The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
+// the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
+const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
+const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), false, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), false, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
+  ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
   const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
@@ -7923,6 +8007,8 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
+  pumpIn: 'Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab. Example: the 3 Vessel 1 Pump sample pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left. Pipes joined to it slide to meet the new spot.',
+  pumpLink: 'What is drawn from the pump\'s own inlet and outlet to its Inlet IP and Outlet IP: a white Hose, or a stainless Pipe. It is drawn over the pump and its Cover, under the On overlay.',
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
   // (HLT_Vessel.BM_8_HE_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_1W_HLT_BH)
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_HE_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
@@ -8353,8 +8439,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'mfpic') return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, mfPreview(obj))];      // a Valve Tee or Supply Manifold (Rule 5.35)
   else if (kind === 'devpic') {      // the Graphic shown on the dialog (Rule 18.19): its picture, Cover and Orientation, kept up to date
-    const box = h('div', { class: 'devPreview' }), pic = h('img', { alt: '' }), cov = h('div', { class: 'pvCover' });
-    box.append(pic, cov);
+    const box = h('div', { class: 'devPreview' }), pic = h('img', { alt: '' }), cov = h('div', { class: 'pvCover' }), lnk = h('div', { class: 'pvLink' });
+    box.append(pic, cov, lnk);
     const draw = () => {
       const root = box.closest('#dlgBody, .dlgBody, dialog') || document;
       const q = k => root.querySelector(`[data-k="${k}"]`);
@@ -8381,7 +8467,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       if (q('cover')) w.cover = q('cover').value;
       if (q('coverColor')) w.coverColor = q('coverColor').value;
       if (q('flipH')) { w.flipH = q('flipH').checked; w.flipV = q('flipV').checked; }
+      for (const k of ['pumpIn', 'pumpOut', 'pumpLink']) if (q(k)) w[k] = q(k).value;
       pic.src = w.imageOff ? media(w.imageOff) : ''; pic.classList.toggle('hidden', !w.imageOff);
+      lnk.innerHTML = pumpLinkSvg(w);      // its Hose or Pipe to the Inlet and Outlet spots picked (Rule 5.27)
       const cv = coverOf(w, {});
       cov.classList.toggle('hidden', !cv);
       cov.style.backgroundImage = cv ? `url("${media(cv.file)}")` : '';
@@ -9489,7 +9577,10 @@ async function editItem(kind, id) {
     const pickedPort = work.attachTo !== item.attachTo;
     const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
     if (work.type === 'alarm' && work.alarmClass) chainFromWork(work);      // the boxes back to .chain (Rule 7.16)
+    const spotsWas = item.subtype === 'pump' ? String(pumpSpots(item)) : '';
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    // a pump's Inlet or Outlet put on another of its 8 spots (Rule 5.27): it moves onto its pipes (Rule 5.23) and their ends slide to meet it
+    if (spotsWas && String(pumpSpots(item)) !== spotsWas && item.workspace === oldTab) centerOnPipes(draft, item.workspace);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
       const frozen = profileFrozen(item);
       if (frozen) { setLock(item, lockWas); toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true); }

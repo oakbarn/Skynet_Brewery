@@ -1212,10 +1212,12 @@ should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123).
 - Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve is joined to the nearer end (two pipes take one end each)
   when its Tab is shown and when Edit layout opens; Save layout keeps it.
 - **Every Skynet Pump has an IP on its inlet and its outlet** (Fritz, 2026-11-04: "All Skynet Pump should have IPs on the inlet Out
-  Let"), in both Orientations (Right, Left) and with any Cover: on the Skynet pump drawings (March, Chugger, Riptide, Topsflo, KegLand)
-  the tip of each port, as before; on the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every color and
-  No Cover) the outer face of the inlet union on the pump head and the top of the outlet pipe; on the sump pump the middle of its
-  screen (inlet) and the top of its riser (outlet). A pump picture of a user's own keeps them on the middle of its sides.
+  Let"), in both Orientations (Right, Left) and with any Cover. Since 2026-11-11 they are on two of the pump's **8 IP spots** (the
+  corners and side middles of its box, Rule 5.27), its **Inlet IP** and **Outlet IP**, with a Hose or Pipe drawn from the tip of
+  each real port to its spot; on the sump pump the middle of its screen (inlet) and the top of its riser (outlet).
+  *Replaced (2026-11-11):* "on the Skynet pump drawings ... the tip of each port ...; on the older Riptide-style pictures ... the outer
+  face of the inlet union on the pump head and the top of the outlet pipe ... A pump picture of a user's own keeps them on the middle of
+  its sides."
 
 5.25 **TC Pipe Fittings is a Widget subclass** (Fritz, 2026-11-04: "Widget Subclass TC Pipe Fittings"; "Clean up any svg that have
 broken or missing end. I like the way you install them when pipes need them. There is a need to add manually as well. They should
@@ -1262,15 +1264,31 @@ straight Horizontal or Vertical pipe (or added right on one):
 - Nothing is cut when the item is still joined to another pipe (a message says so; one dragged off its pipes lets them go first, Rule 5.19, and then cuts the pipe it is dropped on), is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
 
-5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its IPs in the same spots** (Fritz, 2026-11-05: "They could
+5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its 8 IPs in the same spots** (Fritz, 2026-11-05: "They could
 comply with the rule if we drew everyone in the same Ratio Box. We could make it a 300 x 300 for all Pump Drawings and by default
 display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standardize pump size and IPs", Help 130).
 - **Why:** a pump put in the same place as the one it replaces must stay joined to the same pipes.
 - **Every Skynet pump picture is drawn in a 300 x 300 box:** the brew pump drawings (March, Chugger, Riptide, Topsflo, KegLand), their
   Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover).
-- **The IPs are always in the same spots** (Orientation Right): the **inlet** at **(285, 150)** of the box (the middle of its height,
-  near the right side) and the **outlet** at **(243, 56)** (near the top right). Shown at **150 x 150** that is (142.5, 75) and
-  (121.5, 28). Orientation Left mirrors them. The IPs stay on the tips of the ports (Rule 5.20, 5.24).
+- **Every pump has 8 IPs, the same on every pump** (OakBarn Brewery, 2026-11-11: "What should be is an IP at Every Corner and one in
+  between Middle / Bottom Top and Side / side Middle so we can easily substitute a Different Pump ... All Pumps get 8 IPs"; thread
+  "Add pump hose stubs for inlet and outlet"): the **4 corners** of its box and the **middle of each side**: Top Left, Top Middle,
+  Top Right, Right Middle, Bottom Right, Bottom Middle, Bottom Left, Left Middle. Its **Inlet IP** and **Outlet IP** are each on one
+  of them, picked in its Add box and Properties (as seen on the Tab), so it is always known which is In and which is Out, even with
+  both on one side; they are never on the same spot. A **Skynet pump** starts with its Inlet on the **Right Middle** and its Outlet on
+  the **Top Right** (Orientation Left: Left Middle and Top Left), the spots nearest its ports; a **User pump** on the middle of its
+  left and right sides, as before.
+- **A Hose or Pipe to the spot** (OakBarn Brewery, 2026-11-09: "something on a Pump that looks like a Hose or Pipe ... so it looks
+  correct in a Diagram"; "a Pipe or Hose choice ... layer 2 on the Image as Layer 1 would be the On Image"): on a Skynet pump drawing
+  Skynet draws a white **Hose** (the start) or a stainless **Pipe** (the **Hose or Pipe** choice) from the tip of the pump's own
+  port, the inlet at **(285, 150)** and the outlet at **(243, 56)** of the box (Rule 5.20), round the inside edge of its box to the
+  spot. It is drawn over the picture and its Cover and under the On overlay (layer 2; the On image is layer 1), it mirrors with the
+  pump, and it is no picture file (nothing is added to the Image Library).
+- **A new spot keeps the pump on its pipes:** a pipe joined to the Inlet or Outlet stays where it is and the pump moves onto its line
+  (Rule 5.23), and the pipe's end slides along to meet the new spot.
+  *Replaced (2026-11-11):* "**The IPs are always in the same spots** (Orientation Right): the **inlet** at **(285, 150)** of the box
+  ... and the **outlet** at **(243, 56)** ... Orientation Left mirrors them. The IPs stay on the tips of the ports (Rule 5.20, 5.24)."
+  Those two points are now where the pump's own ports end and its Hose or Pipe starts.
 - **To scale (Rule 5.11):** the brew pump drawings are all the same scale, 20 units = 1 inch in the box (10 at 150 x 150). Where a
   pump's ports are closer together than the spots, its **port tube is drawn longer** (straight tube only) to reach them. The older
   Riptide-style pictures came from BruControl at their own scale; their inlet and outlet pipes are made a little longer the same way.
@@ -1278,8 +1296,12 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
   and X, Y always line up.
 - **Older Schemas** (Rule 15.2): once per Schema, a Pump Device or Picture Widget showing a Skynet pump picture becomes 150 x 150
   about its middle; Rule 5.23 then puts it back on its pipes.
-- The **sump pump** is not a pipe pump (it sits in the liquid and draws in through its screen), so it keeps its own box. A **User
-  pump** picture keeps its IPs in the middle of its sides.
+- The **sump pump** is not a pipe pump (it sits in the liquid and draws in through its screen), so it keeps its own box and its own two
+  IPs. A **User pump** picture has the same 8 spots on its box (no Hose or Pipe is drawn, since Skynet does not know where its ports are).
+- **Older Schemas** (Rule 15.2, 8 IPs): a Skynet pump with no spots picked starts on the Right Middle and Top Right (mirrored when Left);
+  when its Tab is shown, it moves onto its pipes (Rule 5.23) and their ends slide to meet it. The 3 Vessel 1 Pump sample is changed
+  (Rule 15.3): its pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left.
+- **BruControl Import:** a pump imported as a Skynet Pump Device gets the same 8 IPs and starts on the same spots.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
 IP of a Valve. Many home brewers have a manifold but move a pipe from source to source ... a special hose that connects to a Pump but
@@ -3124,7 +3146,9 @@ opens with the focus on the first empty field of the sequence. Arrow keys change
 the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
 ✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
 (greyed out for good, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
-Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Cover** with **Toggle** (On/Off, Push
+Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Inlet IP** with **Outlet IP** on the
+same line and **Hose or Pipe** below them (Rule 5.27; OakBarn Brewery, 2026-11-11: every pump has 8 IPs; Hose or Pipe on a Skynet
+pump drawing only); **Cover** with **Toggle** (On/Off, Push
 button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
 2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
 the hexagon opens the Database and .API settings in a pop-up, in the Add box and the Properties (Fritz's screen 7); **X, Y, Width, Height**; the **Device
@@ -4008,3 +4032,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Added Rule 9.13 (OakBarn Brewery): the panel ships only the 3 Vessel 1 Pump sample; every other Sample Schema comes with the add-only Skynet Sample Schemas Setup .exe and zip into `sample_schemas` (no Schemas in it yet: the set-aside samples stay in the Sandbox and are added one at a time once brought up to the Rules); a Schema from another brewer goes in the same folder; on an update the three old samples in `samples/configs` are moved (never deleted) to `backups/old_samples_<date>`, nothing else touched; Help 83 gets the two 3 Vessel video links (coming soon). Rules 10.8 and 16.8 point to it. Help 184; next free Help 185. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
 - 2026-11-10: Added Rule 10.9 (OakBarn Brewery): sharing Schemas between brewers. Export to share ... and Import a brewer's Schema ... in the Schema list and on the 🗂 Schema tab (the Schema.json page's Save as .json file and Open a Schema file); the Import folder is the place for another brewer's file; a notice says copyright is between the brewers and Skynet does no checking. Help 44 and 184 updated; no new Help number. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
 - 2026-11-11: Rule 9.12 gets an exception (OakBarn Brewery: "Keep the Beep"): alarm_beep.wav, Alarm_Sound_Missing.mp3 and Find_The_File_Connecting.mp3 stay in the panel zip and Setup too, in defaults/media. Both programs. (thread "Shrink the Setup .exe and remove dead code")
+- 2026-11-11: Rule 5.27 (OakBarn Brewery: "an IP at Every Corner and one in between ... All Pumps get 8 IPs"): every pump has 8 IP spots (the corners and side middles of its box, the same on every pump); its Inlet IP and Outlet IP are picked from them (Add box and Properties); a Skynet pump drawing gets a white Hose or a stainless Pipe (Hose or Pipe) from its own port to the spot, over the picture and Cover, under the On overlay (layer 2). Starts on Right Middle / Top Right (Left: mirrored); a new spot moves the pump onto its pipes (Rule 5.23). Replaced the "IPs are always in the same spots" line. Rule 5.24 and Rule 18.21 (the two new choices) updated; the 3 Vessel 1 Pump sample pump changed (Rule 15.3). Help 130, 123, 104 and 143 updated. Checked against the BruControl Import program: its pumps are Skynet Pump Devices, so they get the same 8 IPs and start spots; nothing else changes there. (thread "Add pump hose stubs for inlet and outlet")
