@@ -27,8 +27,11 @@ assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url)
 // the second part of the Add box (2026-11-11)
 assert.match(app, /\['User', 'Pick Cover Color'\]\]/, 'Pick Cover Color');
 assert.match(app, /async function pickCoverColor\(obj\)/, 'its Color Picker');
-assert.match(app, /btn\.textContent = '◀ Back'/, 'Back sets None');
-assert.match(app, /sel\.value = 'None'; sel\.dispatchEvent/);
+assert.match(app, /cancelText: '◀ Back'/, 'Back sets None');
+// the Color Picker (Rule 2.48): Pickr in every color box, the Cover Color field just below the Cover
+assert.match(app, /import \{ openColorPicker, hexToRgb, rgbText \} from '\.\/colorpick\.js'/, 'the Color Picker');
+assert.match(app, /coverRow: true/, 'the Cover Color field waits below the Cover');
+assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
 assert.match(app, /The Picture itself cannot be changed\./);
 assert.match(app, /i\.disabled = true; i\.title = 'Set: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out');
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
