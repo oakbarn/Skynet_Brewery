@@ -3005,16 +3005,32 @@ User Choices the level"). The **Level** dropdown sits at the top of the Recipe t
 
 | Level | Choice | What it is | Shows |
 |---|---|---|---|
-| 1 | 1 Can Kit | Extract Can Kit, for a beginner brewer: a can of hopped malt extract (often with sugar or dry malt extract) and yeast | Fermentable, Yeast and Adjuncts tabs; no grain, mash, sparge or hop boxes |
-| 2 | 2 Extract | Malt extract boiled with your own hops | adds the HOPs, Drops and Waters tabs, IBU and Whirlpool Minutes; no grain, mash or sparge boxes |
+| 1 | 1 Can Kit | Extract Can Kit, for a beginner brewer: a can of hopped malt extract (often with dry malt extract) and yeast | Fermentable (Extracts only), Yeast, Adjuncts and Waters tabs; no grain, mash, sparge or hop boxes |
+| 2 | 2 Extract | Malt extract boiled with your own hops | adds the HOPs and Drops tabs, IBU and Whirlpool Minutes; Fermentable Extracts only; no grain, mash or sparge boxes |
 | 3 | 3 Partial Grain | Extract with Partial Grain and Hops: some grain mashed or steeped, plus extract and hops | every tab and box |
 | 4 | 4 All Grain | All grain (the Recipe tab as it was built) | every tab and box |
 
+**Waters on every Level, starting with Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap
+Water"; Rule 17.12). **Fermentables on every Level; Levels 1 and 2 offer Extracts only** (OakBarn Brewery, 2026-11-11: "Also
+Fermentable (Grains/ Sugars/ Extracts) but on the Level 1 and 2 only Extracts"): the Fermentable tab's Type list is Extract and Dry
+Extract on Levels 1 and 2, and Adjunct, Extract, Dry Extract and Sugar on Levels 3 and 4 (grains are on the Grain tab, Levels 3 and 4);
+an imported line with another Type keeps it in its own list.
 Changing the Level only hides or shows; nothing is deleted, and a hidden box keeps its value. A Level 1 Can Kit has no HOPs tab, so
 Calculate does not check its Actual AAU. The Level is saved with the Recipe as `level`, and the Recipe's BeerXML type says the same
 thing (Levels 1 and 2 Extract, 3 Partial Mash, 4 All Grain); an imported BeerSmith or BeerXML file comes in at Level 2, 3 or 4 from its
 type, and the user can change it. Skynet_Field `rcp_Level` (1 to 4) lets a Process do the steps for its Level. A NEW Recipe starts at
 the Level picked. (Help 99)
+
+17.12 **Tap Water** (OakBarn Brewery, 2026-11-11: "Waters should be on each level defaulted to Tap Water. And maybe a Page in the
+Defaults for the common Water things important for brewing available from the Water Supplier or a Test Kit"; "Also in help: Suggestion
+on where to find the Water Information (Your Water Department) or a Water Test Kit"). Every Brain has one Water Profile named **Tap
+Water**, made when the Brain first starts (a Water Profile the user already named Tap Water becomes it) and never deleted. Every Recipe,
+on every Level, starts with it on the Waters tab, and so do the Default settings' Water Profile and a Process when no Water Profile is
+picked. Its numbers are filled in on **☰ Menu > Default settings > Tap Water** (its own **Save Tap Water**): From (Water Department or
+Test Kit), Date (yyyy-mm-dd), Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate (ppm), Alkalinity (as CaCO3, the same number
+as Bicarbonate: typing one fills the other, Bicarbonate = Alkalinity x 1.22), Hardness (worked out from Calcium and Magnesium, greyed),
+pH, and Chlorine (None, Chlorine, Ammonia + chlorine (Chloramine), Unknown). Each box has Hover Help on what it does for the beer.
+Help 155 says where to find the numbers: the Water Department's report, or a Water Test Kit (or a lab for well water). (Help 155, 99)
 
 ## 18. General Dialog Rules
 
@@ -3605,7 +3621,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 - 2026-11-11: Rule 18.32 and the Pump dialog (OakBarn Brewery's drawing, Add Pump and Pump Properties, both programs): Cover choice **User Add** with the Color (RGB) line below; KISS Model and Power names (no "From the drawing" / "From the model"); Use greyed out, Hot & Cool; X, Y, Width, Height on one line; the electrical warning starts the Power Hover Help; Speed Control and Speed % for PWM pumps only; known values (Model, Power, Pump Facts) filled in and greyed out, a User Defined pump's stay editable; Blichmann RipTide facts added (7 GPM, 21 ft, 1/2" NPT). Help 111, 115, 163, 187. (thread "Add color picker to color fields")
 - 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs (his drawing): the User Add pops it up and a Color (RGB) line (swatch + 250,250,250) shows just below, double-click brings the picker up again; Save adds the color to the list. Pick Cover Color works the same way; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
-- 2026-11-11: Added Rule 17.11 (OakBarn Brewery): four Recipe Levels the user picks (1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain); the Recipe tab shows only the boxes and Daughter Tabs that Level uses; Skynet_Field `rcp_Level`.
+- 2026-11-11: Added Rule 17.11 (OakBarn Brewery): four Recipe Levels the user picks (1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain); the Recipe tab shows only the boxes and Daughter Tabs that Level uses; Waters and Fermentables on every Level, Levels 1 and 2 Extracts only; Skynet_Field `rcp_Level`. Added Rule 17.12: Tap Water, the water every Recipe starts with, filled in on ☰ Menu > Default settings > Tap Water.
 - 2026-11-10: Added Rule 7.20 (OakBarn Brewery): a sound can be a web link to an MP3, played by the browser from the web; an Alarm whose sound can't play (no internet, a wrong link, a missing file) plays the Missing Alarm Sound voice clip, or the beep; a Sound Player plays the Find The File song once; the free home for MP3s is a GitHub Release (Skynet-Sounds). Help 186 (new) and Help 21. Next free Help 187. Checked against the BruControl Import: a sound that is already a link is kept and never copied. (thread "Play sounds from a web link")
 - 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Offset's sign says where it turns On, Setpoint + Offset: Heating is Offset (-), Cool is Offset (+), the Fermentor Control has Heat Offset (-) and Cool Offset (+). Dialogs show and take the sign; the saved number and a Process's .onoffset are unchanged. Help 150, 182. Checked against the BruControl Import program: it saves the same numbers, no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")
