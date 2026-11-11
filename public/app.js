@@ -30,7 +30,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -12144,6 +12144,7 @@ function otherDefaults() {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
+  if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
@@ -12159,7 +12160,7 @@ function renderDefaultTab(box) {
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
     ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
-    ['waterProfile', 'Water Profile', 'sel', pick(S.waterProfiles, '(none)')],
+    ['waterProfile', 'Water Profile', 'sel', S.waterProfiles.map(x => [x.id, x.name]), false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
     ['boilTime', 'Boil time (minutes)', 'num'],
     ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}; empty = 180 °F / 82 °C): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num'],
     ['hopStandMinutes', 'Hop stand time (minutes, cooling water off; empty = 20) when a Recipe gives none', 'num'],
@@ -12260,8 +12261,52 @@ function renderDefaultTab(box) {
   const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Default'), h('th', {}, 'Now'), h('th', {}, 'Changed on'), h('th', {}, 'Rule'))),
     h('tbody', {}, ...otherDefaults().map(([what, now, where, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, where), h('td', { class: 'muted' }, rule)))));
   box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    ...tapWaterSection(admin),
     h('h3', {}, 'Defaults set somewhere else (to look at)'), h('p', { class: 'muted' }, 'These are not changed here. Each one says where it is changed.'), others,
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+}
+
+// ---- Tap Water (OakBarn Brewery, 2026-11-11, Rule 17.12): the numbers that matter for brewing, from the Water Department's report
+// or a Test Kit. They are the Tap Water profile (☰ Menu > Water Profile lists it too), the water every Recipe starts with.
+// Alkalinity (as CaCO3, what a Test Kit gives) and Bicarbonate are one number: Bicarbonate = Alkalinity x 1.22. Hardness is
+// worked out from Calcium and Magnesium (known values are filled in and greyed).
+const ALK_HCO3 = 1.22, hardnessOf = w => Math.round((2.497 * (+w.ca || 0) + 4.118 * (+w.mg || 0)) * 10) / 10;
+function tapWaterSection(admin) {
+  const tw = S.waterProfiles.find(x => x.tap);
+  if (!tw) return [h('h3', {}, 'Tap Water'), h('p', { class: 'muted' }, 'No Tap Water profile yet: it is made when the Brain starts.')];
+  const w = clone(tw), r1 = v => Math.round(v * 10) / 10;
+  w._alk = r1((+w.hco3 || 0) / ALK_HCO3); w._hard = hardnessOf(w);
+  const alkWas = w._alk, hco3Was = w.hco3;
+  const T = tip => [false, false, { tip }];
+  const fields = () => [['_tn', 'The numbers from your Water Department\'s report (most put one on their web site) or from a Test Kit. Every Recipe uses Tap Water unless you pick another water. ppm is the same as mg/L.', 'note'],
+    ['source', 'From', 'sel', [['supplier', 'Water Department'], ['kit', 'Test Kit']], ...T('Where these numbers came from.')],
+    ['tested', 'Date', 'text', null, ...T('The date of the report or the test, written yyyy-mm-dd, for example 2026-11-11. Water changes with the seasons, so test again now and then.')],
+    ['ca', 'Calcium (Ca) ppm', 'num', null, ...T('Helps the mash and the yeast, and clears the beer. 50 to 150 ppm is good for most beers.')],
+    ['mg', 'Magnesium (Mg) ppm', 'num', null, ...T('A yeast food. 10 to 30 ppm; much more tastes bitter and sour.')],
+    ['na', 'Sodium (Na) ppm', 'num', null, ...T('Rounds out the malt. Keep it under 100 ppm; a water softener adds a lot.')],
+    ['so4', 'Sulfate (SO4) ppm', 'num', null, ...T('Makes hops taste crisp and dry. High for hoppy beers.')],
+    ['cl', 'Chloride (Cl) ppm', 'num', null, ...T('Makes malt taste round and full. High for malty beers. Not the same as chlorine.')],
+    ['hco3', 'Bicarbonate (HCO3) ppm', 'num', null, ...T('Raises the mash pH. Good for dark beers, bad for pale ones. A report may give it, or give Alkalinity.')],
+    ['_alk', 'Alkalinity (CaCO3) ppm', 'num', null, ...T('Total Alkalinity (as CaCO3), what most Test Kits give. It is the same thing as Bicarbonate: type either one, and the other follows (Bicarbonate = Alkalinity x 1.22).')],
+    ['_hard', 'Hardness (CaCO3) ppm', 'num', null, ...T('Total Hardness (as CaCO3), worked out from Calcium and Magnesium. A Test Kit gives it too: use it to check your numbers.')],
+    ['ph', 'pH', 'num', null, ...T('7 is neutral. Tap water is often 7 to 8.5. The mash pH matters more, and the grain changes it.')],
+    ['chlorine', 'Chlorine', 'sel', [['unknown', 'Unknown'], ['none', 'None'], ['chlorine', 'Chlorine'], ['ammonia', 'Ammonia + chlorine (Chloramine)']], ...T('What the Water Department adds to clean the water. Either one gives a medicine taste to beer. One Campden tablet in 20 gallons takes out both; chlorine alone also boils off or leaves water left out overnight.')]];
+  const f = paneForm(fields, w, () => { }, !admin);
+  // Hardness is worked out: greyed (known values are filled in and greyed). Alkalinity and Bicarbonate follow each other as they are typed.
+  const inp = k => f.body.querySelector(`[data-k="${k}"], [name="${k}"]`);
+  const hard = inp('_hard'); if (hard) { hard.disabled = true; hard.tabIndex = -1; }
+  const live = () => { f.read(); if (hard) hard.value = hardnessOf(w); };
+  for (const k of ['ca', 'mg']) inp(k)?.addEventListener('input', live);
+  inp('_alk')?.addEventListener('input', () => { const a = inp('_alk').value, hc = inp('hco3'); if (hc && a !== '') hc.value = r1(+a * ALK_HCO3); });
+  inp('hco3')?.addEventListener('input', () => { const v = inp('hco3').value, al = inp('_alk'); if (al && v !== '') al.value = r1(+v / ALK_HCO3); });
+  const save = guard(async () => {
+    f.read();
+    if (w.hco3 === hco3Was && w._alk !== alkWas && w._alk !== '' && w._alk !== undefined && w._alk !== null) w.hco3 = r1(+w._alk * ALK_HCO3);
+    const body = { ...w }; delete body._alk; delete body._hard; delete body._tn;
+    const r = await api('PUT', `/ui/profiles/water/${tw.id}`, body);
+    S.waterProfiles = r.list; renderMenuPane(); toast('Tap Water saved');
+  });
+  return [h('h3', {}, 'Tap Water'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save Tap Water')) : '')];
 }
 
 // ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.
@@ -14227,11 +14272,11 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : '(needs the Brew Length on the Recipe tab)';
   };
   const live = { onChange: () => { changed(); sum(); } };
-  const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : 'adjunct', kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
+  const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : levelFermTypes(rc).includes('adjunct') ? 'adjunct' : levelFermTypes(rc)[0], kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
   const del = (f, n) => guard(() => { if (!confirm(`Delete ${what} ${n}${f.name ? ` (${f.name})` : ''}?`)) return; all.splice(all.indexOf(f), 1); changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grains' : 'Fermentables'),
     op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `${grainTab ? 'Add ' : ''}${what} `, h('b', {}, '+')) : ''));
-  if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.'));
+  if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : (levelFermTypes(rc).includes('sugar') ? 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.' : 'No extracts yet. Press Add Fermentable for a can of extract or dry extract.')));
   mine.forEach((f, i) => {
     const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
@@ -14240,7 +14285,8 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     else {
       // Amount in the line's own Measurement; Measurement and Type are select-only lists from the BeerXML standard
       const M = FERM_MEASURES[f.unit] ? f.unit : W;
-      const types = [...BEERXML_FERM_TYPES, ...(BEERXML_FERM_TYPES.includes(f.type) ? [] : [f.type])].map(k => [k, FERMENTABLE_TYPES[k] || k]);
+      // the Recipe Level's Types (Rule 17.11: Levels 1 and 2 Extracts only); a line that already has another Type keeps it in its list
+      const LT = levelFermTypes(rc), types = [...LT, ...(LT.includes(f.type) ? [] : [f.type])].map(k => [k, FERMENTABLE_TYPES[k] || k]);
       line.append(rcBox('g', 'Amount', rcInput(f, 'kg', { to: v => kgTo(v, M), from: v => toKg(v, M), ...live }), { field: F('Amount') }),
         rcBox('g', 'Measurement', rcInput({ unit: M }, 'unit', { kind: 'sel', list: Object.entries(FERM_MEASURES), onChange: () => {} }), { field: F('Measurement') }),
         rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
@@ -14334,17 +14380,19 @@ function rcMash(pane, rc, u, changed) {
 // ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
 // itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
 function rcWaters(pane, rc, u, changed) {
-  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile), b = wp ? blendWater(wp) : {};
+  // none picked: Tap Water (Rule 17.12, its numbers on ☰ Menu > Default)
+  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile) || S.waterProfiles.find(x => x.tap), b = wp ? blendWater(wp) : {};
   const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
-  const pick = rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const pick = rcInput({ waterProfile: wp?.id ?? '' }, 'waterProfile', { kind: 'sel', list: S.waterProfiles.map(x => [x.id, x.name]), onChange: () => {} });
+  pick.addEventListener('change', () => { rc.waterProfile = pick.value; changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
-    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes ? h('span', { class: 'muted' }, wp.notes) : ''));
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes && !wp.tap ? h('span', { class: 'muted' }, wp.notes) : ''));
   if (wp) {
     const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
     pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
       h('div', { class: 'rcRow' }, rcBox('c', '% Distilled / RO', ro(+wp.distilledPct || 0), { unit: '%', field: rest[0][0] }), rcBox('c', 'SO4 : Cl', ro(b.so4cl ?? ''), { field: rest[1][0], tip: 'Above 2: crisp and hoppy. Below 1: round and malty' }),
         rcBox('c', 'pH', ro(wp.ph ?? ''), { field: rest[2][0] })),
-      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
+      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : wp.tap ? 'Fill in your Tap Water numbers on ☰ Menu > Default settings > Tap Water.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
   }
   const W = rc.ingredients.waters || [];
   pane.append(h('h3', {}, 'Waters in the recipe file'), W.length ? '' : h('p', { class: 'muted' }, 'None.'),
