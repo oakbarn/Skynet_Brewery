@@ -9,6 +9,21 @@ Along the top:
 - **Library ...** opens a saved Recipe, saves this one (💾), or deletes a saved one. Saved Recipes are on the Brain in `config/recipes`.
 - **Cancel** and **Save**.
 
+## The Level
+
+Pick the **Level** of the Recipe at the top of the Recipe tab, beside NEW. **NEW** asks for it too.
+
+- **1 Can Kit**: an Extract Can Kit, for a beginner brewer. A can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.
+- **2 Extract**: malt extract (liquid or dry) boiled with your own hops. No grain.
+- **3 Partial Grain**: extract with partial grain and hops. Some grain is mashed or steeped in a small amount of water, then extract and your own hops.
+- **4 All Grain**: all the sugar comes from mashed grain.
+
+The Recipe tab shows only the boxes and tabs that Level uses. Level 1 shows the Fermentable, Yeast and Adjuncts tabs. Level 2 adds HOPs, Drops and Waters. Levels 3 and 4 show everything. Changing the Level never deletes anything: a box that is hidden keeps its value.
+
+A recipe file you IMPORT comes in at its own Level (an Extract recipe at Level 2, a Partial Mash at Level 3, an All Grain at Level 4). Change it if it is a Can Kit.
+
+The technical side: the Level is the Skynet_Field `rcp_Level` (1 to 4), so a Process can do the steps for its Level. It is saved with the Recipe, and its BeerXML type says the same thing (Levels 1 and 2 are Extract, 3 is Partial Mash, 4 is All Grain).
+
 ## The boxes
 
 Each box has a colored top that says what kind it is:
@@ -33,6 +48,7 @@ Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has 
 |---|---|
 | Beer Name | `rcp_Name` |
 | Style | `rcp_Style` |
+| Level | `rcp_Level` |
 | Brew Length | `rcp_Batch_Volume` |
 | Grain Wt. | `rcp_Total_Grain_Weight` |
 | 1st Mash | `rcp_First_Mash_Temp` |
