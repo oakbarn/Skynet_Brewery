@@ -116,7 +116,25 @@ export function barTopic(target) {
 export const TAB_SPOT = ['tab-background'];      // an empty spot on a tab, and Tab settings: its background color and picture
 export const DB_TRIGGER = ['database-and-api', 'database'];
 export const RIGHT_CLICK_PAGE = ['right-click-help'];
-export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
+// Hot spots in Hover Help (OakBarn Brewery, 2026-11-11: "in Hover help, Hot spots that take you to the bigger help about an Item in
+// the Hover Help. Like if the Hover Help is about Interface ID, a means to jump to the Bigger Regular Help for Interfaces"). Each
+// word or words, when it shows in a balloon, becomes a link to its Help page (and part). Longer words win (Interface ID before
+// Interface); only the first time a topic shows in a balloon is it a link. test/helpmap.test.js checks every page and part exists.
+export const HOT_SPOTS = [
+  ['Interface ID', ['interfaces', 'the-interface-id']], ['Interfaces', ['interfaces']], ['Interface', ['interfaces']],
+  ['Tab ID', ['interface-tab-device-names', 'tab-id']], ['Suggested Name', ['interface-tab-device-names', 'device-names']],
+  ['Device Type', ['interface-tab-device-names', 'device-type-ids']], ['Available Ports', ['interface-tab-device-names', 'pins-kept-for-rtd-and-onewire-probes']],
+  ['Label', ['labels']], ['Tabs', ['tabs']], ['Tab', ['tabs']], ['Processes', ['scripts']], ['Process', ['scripts']],
+  ['Hysteresis', ['heating-method', 'hysteresis']], ['Duty Cycle', ['heating-method']], ['PID', ['heating-method']],
+  ['Deadband', ['deadband-device']], ['Precise', ['precise-heating']], ['Setpoint', ['setpoint-from-a-temperature']],
+  ['Temperature Probe', ['temperature-probe-device-properties']], ['Heating Element', ['heating-element-device-properties']],
+  ['Vessel Device', ['vessel-device-builder']], ['gGlobal', ['gglobal-kinds']], ['Database', ['database-and-api', 'database']],
+  ['Schema', ['schemas-and-equipment-profiles']], ['Cover', ['pump-covers']], ['Color Picker', ['color-picker']],
+  ['SSR', ['heat-hysteresis-switched-by']], ['Contactor', ['heat-hysteresis-switched-by']], ['Fermentor Control', ['fermentor-control']],
+  ['Smoothing', ['smoothing']], ['Dual Throw', ['dual-throw']], ['Alarm', ['alarms-and-sound']], ['Hover Help', ['hover-help']],
+];
+
+export const ALL_TOPICS = () => [...HOT_SPOTS.map(x => x[1]), ...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'alarm', alarmClass: 'basic' }), elementTopic({ type: 'fermentor' }),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),

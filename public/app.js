@@ -2,7 +2,7 @@ import { addEyes } from './eye.js';
 import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
-import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
@@ -13,7 +13,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { loadSnippet, helpNodes } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
@@ -4092,6 +4092,8 @@ function openHelp(topic, quiet = false) {
   setView('help', true);
   window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
 }
+// Hot spots in Hover Help (OakBarn Brewery, 2026-11-11, Rule 2.49): a word with its own Help page is a link that opens it
+setHelpLinks(HOT_SPOTS, topic => openHelp(topic));
 // Help for what is showing: the Menu tab that is open, else the page you are on
 const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '') || ['menu'] : viewTopic(view);
 // the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
@@ -7999,7 +8001,9 @@ const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.subtype === 'el
   return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
-  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', { style: 'white-space: pre-line' }, ...helpNodes(text)),
+  const tipText = h('p', { style: 'white-space: pre-line' }, ...helpNodes(text));
+  linkify(tipText);      // its hot spots open their Help page (Rule 2.49)
+  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), tipText,
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Close')));
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
