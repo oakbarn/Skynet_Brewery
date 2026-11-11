@@ -11,13 +11,14 @@ import { KEYWORDS, LOGIC_WORDS, CONST_WORDS, VAR_TYPES } from '../lib/engine.js'
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpnull'));
 const cfg = path.join(d, 'c.json'), data = path.join(d, 'data'), scripts = path.join(d, 'scripts');
-fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Pump_1', type: 'digitalOut', label: 'Red~Pump® @ HLT' },
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Pump_1', type: 'digitalOut', label: '  Red~Pump® @ HLT ' }, { name: 'Pump_2', type: 'digitalOut', label: ' Blue Pump  ' },
   { name: 'gV_Strike', type: 'gGlobal', kind: 'value', initial: 152 }, { name: 'gS_Note', type: 'gGlobal', kind: 'string', initial: 'Mash' },
   { name: 'gT_Rest', type: 'gGlobal', kind: 'time', initial: '00:10:00' }, { name: 'gB_Added', type: 'gGlobal', kind: 'bool', initial: true },
   { name: 'wgt_VAL_Strike_BH', type: 'valueWidget', dataType: 'value', initial: 5 }] }));
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let s = new Store(cfg, data); s.load();
 assert.equal(s.get('Pump_1').label, 'Red Pump HLT', 'a Label loses © ® ™, and @ ~ become a space (Rule 3.4)');
+assert.equal(s.get('Pump_2').label, 'Blue Pump', 'no space at the start or end of a Label (Rule 3.3)');
 const eng = new Engine(s, scripts, { logNow() {} });
 const run = async (name, src) => { eng.write(name, src); eng.start(name); await wait(250); return eng.running.get(name) ?? null; };
 

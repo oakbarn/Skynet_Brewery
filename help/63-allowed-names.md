@@ -11,9 +11,10 @@ A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **lett
 - `@` and `~` are kept for the **Suggested Name**. The program puts them there (`BM_6_DO@Pump_Red~Pump_BH`); a name you type yourself can't have them, so use `_`.
 - `°` is fine: `Temp_°F`.
 - A word of the Process language (`NULL`, `true`, `if`, `wait` ...) can't be a name. See [Process language](22-process-language), Reserved words.
-- A **Label** may have almost any mark, but not `©` `®` `™` (kept for copyright notices) or `@` `~` (kept for the Suggested Name). While you type, `©` `®` `™` are taken out and `@` `~` become a space. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
+- No name or **Label** can start or end with a space. A Label is trimmed as soon as you leave its box.
+- A **Label** may have almost any mark, but not `©` `®` `™` (reserved for copyright and trademark notices of the Skynet MIT License) or `@` `~` (kept for the Suggested Name). While you type, `©` `®` `™` are taken out and `@` `~` become a space. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 
-Your **Label** may have any of them: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`).
+Your **Label** may have the other marks: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`).
 
 **Tab and Interface names** are shown names (*Brew House*, *Brewery Mega*), so they may have spaces; their IDs (`BH`, `BM`) are plain. (User Template names are only for picking a Template, so they are left alone.) No name can have:
 
@@ -27,7 +28,7 @@ Your **Label** may have any of them: it is only shown. In the Suggested Name eac
 
 `CON_2` or `COM10` are fine: only the exact names are kept by Windows.
 
-Use `~` or `_` instead: `Hot~Cold` or `Hot_Cold`, not `Hot/Cold`. A Suggested Device name already does this with your Label: each of these characters (and `.` `,`) becomes a `~`.
+Use `_` instead: `Hot_Cold`, not `Hot/Cold`. A Suggested Device name already does this with your Label: each of these characters (and `.` `,`) becomes a `~`.
 
 ### Older names
 

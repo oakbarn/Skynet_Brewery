@@ -14,7 +14,7 @@ for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Hot~Cold', 'CON_2
 for (const bad of ['Brü_Kessel', 'Pump©', 'Pump®', 'a.b', 'Red-Pump', 'Pump#1', 'A$B', 'a`b', 'x+y', 'Hot (1)', '2Pump'])
   assert.notEqual(elementNameError(bad), '', bad + ' is refused');
 assert.equal(elementNameError('Brew House', 'Tab'), ''); assert.equal(elementNameError('Brewery Mega', 'Interface'), '');
-{ const { plainName, typedNameError } = await import('../public/names.js'); assert.equal(plainName('Würze 1'), 'Wurze~1'); assert.equal(plainName('Temp °F©'), 'Temp~°F');
+{ const { plainName, typedNameError } = await import('../public/names.js'); assert.equal(plainName('Würze 1'), 'Wurze~1'); assert.equal(plainName('Temp °F©'), 'Temp~°F'); assert.equal(plainName(' Mash Tun '), 'Mash~Tun', 'spaces at the ends go (Rule 3.3)');
   // @ and ~ are kept for the Suggested Name (OakBarn Brewery, 2026-11-11): typed by hand they are refused, unless it is the suggestion or the name already
   assert.match(typedNameError('My@Pump'), /kept for the Suggested Name/); assert.match(typedNameError('Red~Pump', { what: 'gGlobal' }), /gGlobal name/);
   assert.equal(typedNameError('BM_6_DO@Pump_Red~Pump_BH', { suggestion: 'BM_6_DO@Pump_Red~Pump_BH' }), '');

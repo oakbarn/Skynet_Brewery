@@ -43,7 +43,7 @@ export const PLAIN_NAME = /^[A-Za-z_][A-Za-z0-9_~@°]*$/;
 const SHOWN_NAMES = ['Tab', 'Interface'];
 // any other mark (a space, - + = ! # ' % ^ & ( ) [ ] { } ; , . $ `, an accent ...) becomes ~; © ® ™ are dropped; an accent is dropped first (Würze -> Wurze)
 export const plainName = n => {
-  let s = String(n ?? '').replace(/[©®™]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_~@°]/g, '~');
+  let s = String(n ?? '').trim().replace(/[©®™]/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_~@°]/g, '~');
   if (s && !/^[A-Za-z_]/.test(s)) s = '_' + s;
   return s;
 };
