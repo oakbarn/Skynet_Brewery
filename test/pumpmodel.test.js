@@ -24,4 +24,13 @@ assert.match(app, /Suggested Name Format: INTERFACEid_Port_Type_Label_TABid/);
 assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: T\.port \}\]/, 'Available Ports has its own balloon');
 assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);
+// the second part of the Add box (2026-11-11)
+assert.match(app, /\['User', 'Pick Cover Color'\]\]/, 'Pick Cover Color');
+assert.match(app, /async function pickCoverColor\(obj\)/, 'its Color Picker');
+assert.match(app, /btn\.textContent = '◀ Back'/, 'Back sets None');
+assert.match(app, /sel\.value = 'None'; sel\.dispatchEvent/);
+assert.match(app, /The Picture itself cannot be changed\./);
+assert.match(app, /i\.disabled = true; i\.title = 'Set: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out');
+assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
+assert.match(app, /\['cover', 'coverColor', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked color is kept');
 console.log('pump model tests passed');

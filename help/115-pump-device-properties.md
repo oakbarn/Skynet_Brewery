@@ -13,6 +13,11 @@ The idea: the things you set most are on the dialog itself. Everything else is o
 3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
    and colors) and **Label Visible**, 2 the **Interface** (the board), 3 an **Available Port**, 4 the **Tab**. Then 5 the
    **Suggested Name** shows, made from them. The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
+   Once 1 to 4 are done, the rest of the box opens: the **Interface** and **Available Ports** line is greyed out (it is the
+   wiring; press Cancel to change it), the **Label** and **Tab** can still be changed and the Suggested Name follows them, and
+   the focus goes to **Orientation**. The **Graphic** is the picture of this Device as it will show on the Tab, with its Cover
+   and Orientation; the Picture itself cannot be changed. **Pick Cover Color** in Cover pops up the Color Picker: pick a color,
+   or **◀ Back** sets the Cover back to None (no cover).
 4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
 ## The two icons
