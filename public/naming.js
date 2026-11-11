@@ -109,13 +109,19 @@ export function upgradeCode(el) {
 // Label -> the part of a name (Fritz, 2026-10-23): control characters and emoji are dropped, spaces at the ends trimmed,
 // < > : " / \ | ? * . , each become ~, and so do spaces (OakBarn Brewery, 2026-11-07: "I like the ~ instead of a _ in the label
 // part of the name"): the _ only ever separates the parts of a name
-// Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
+// Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners
 const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
 const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
-// Every other mark that isn't a letter, number, _ or @ becomes ~ too, and an accent is dropped (OakBarn Brewery, 2026-11-11: they are
+// Every other mark that isn't a letter, number, _, @ or ° becomes ~ too (° is fine in a name: OakBarn Brewery, 2026-11-11), and an accent is dropped (OakBarn Brewery, 2026-11-11: they are
 // "No No" in a name): Fly/Sparge-In becomes Fly~Sparge~In, Würze becomes Wurze.
-export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@]/g, '~');
+// Marks a Label can't have (OakBarn Brewery, 2026-11-11, Rule 3.4): © ® ™ are kept for copyright and trademark notices ("No Circle C or R
+// in Labels", it "interferes with the MIT License"), and @ ~ are kept for the Suggested Name ("reserved for Suggested Name Use Only").
+// © ® ™ are taken out and @ ~ become a space: public/labelguard.js does it while typing (and says why), lib/store.js on load.
+export const LABEL_NO = /[©®™@~]/;
+export const cleanLabel = s => String(s ?? '').replace(/[©®™]/g, '').replace(/[@~]/g, ' ');
+export const LABEL_NO_MSG = 'A Label can\'t have © ® ™ (kept for copyright notices) or @ ~ (kept for the Suggested Name).';
+export const parseLabel = s => [...cleanLabel(s).replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@°]/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).

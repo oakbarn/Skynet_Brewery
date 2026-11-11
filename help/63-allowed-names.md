@@ -6,7 +6,12 @@ Only a **new** name, or a name you **change**, is checked. The one exception is 
 
 ## Names of Devices, Widgets and everything a Process uses
 
-A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **letters, numbers, `_`, `~` and `@`**, and starts with a letter or `_`. Such a name works in a Process with no quotes, and is safe on Windows, Mac, Linux and MQTT. Every other mark (a space, `-` `+` `=` `!` `#` `'` `$` `%` `^` `&` `(` `)` `[` `]` `{` `}` `;` `,` `.` and the backquote, an accent or `°`) is refused, with a message that says which one. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
+A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **letters, numbers, `_`, `~`, `@` and `°`**, and starts with a letter or `_`. Such a name works in a Process with no quotes, and is safe on Windows, Mac, Linux and MQTT. Every other mark (a space, `-` `+` `=` `!` `#` `'` `$` `%` `^` `&` `(` `)` `[` `]` `{` `}` `;` `,` `.` and the backquote, an accent, `©` `®` `™`) is refused, with a message that says which one.
+
+- `@` and `~` are kept for the **Suggested Name**. The program puts them there (`BM_6_DO@Pump_Red~Pump_BH`); a name you type yourself can't have them, so use `_`.
+- `°` is fine: `Temp_°F`.
+- A word of the Process language (`NULL`, `true`, `if`, `wait` ...) can't be a name. See [Process language](22-process-language), Reserved words.
+- A **Label** may have almost any mark, but not `©` `®` `™` (kept for copyright notices) or `@` `~` (kept for the Suggested Name). While you type, `©` `®` `™` are taken out and `@` `~` become a space. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 
 Your **Label** may have any of them: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`).
 
@@ -26,7 +31,7 @@ Use `~` or `_` instead: `Hot~Cold` or `Hot_Cold`, not `Hot/Cold`. A Suggested De
 
 ### Older names
 
-**Plain names:** the first time a Schema loads, a Device, Widget or item name with any mark other than letters, numbers, `_`, `~` and `@` is changed once: each mark becomes `~` and an accent is dropped (`Red-Pump` becomes `Red~Pump`; if that name is taken, `Red~Pump_2`). Every Process and setting that uses it follows.
+**Plain names:** the first time a Schema loads, a Device, Widget or item name with any mark other than letters, numbers, `_`, `~`, `@` and `°` is changed once: each mark becomes `~` and an accent is dropped (`Red-Pump` becomes `Red~Pump`; if that name is taken, `Red~Pump_2`). Every Process and setting that uses it follows.
 
 When the panel starts, or a Schema is opened, a name that still has one of `<` `>` `:` `"` `/` `\` `|` `?` `*` is changed once: each of them becomes a `~` (`Pump:1` becomes `Pump~1`; if that name is taken, `Pump~1_2`). It is the same item (it keeps its hidden key), and:
 

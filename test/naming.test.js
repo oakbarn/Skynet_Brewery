@@ -15,7 +15,10 @@ assert.equal(parseLabel('  Hot  Liquor Tank '), 'Hot~Liquor~Tank', 'spaces at th
 assert.equal(parseLabel('a<b>c:d"e/f\\g|h?i*j.k,l'), 'a~b~c~d~e~f~g~h~i~j~k~l', 'each of < > : " / \\ | ? * . , becomes ~');
 assert.equal(parseLabel('.Kettle'), '~Kettle', 'a leading dot becomes ~ too');
 assert.equal(parseLabel('Mash 🍺 Tun\u0007'), 'Mash~Tun', 'emoji and control characters are dropped');
-assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash~Tun~~~2', 'joined emoji go, © is a ~ (only letters, numbers, _ ~ @ in a name, 2026-11-11)');
+assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash~Tun~2', 'joined emoji go, © is dropped (kept for copyright notices, 2026-11-11)');
+assert.equal(parseLabel('HLT 170 °F'), 'HLT~170~°F', '° stays (2026-11-11: it "does no interference")');
+{ const { cleanLabel, LABEL_NO } = await import('../public/naming.js');
+  assert.equal(cleanLabel('Red~Pump® @ HLT™'), 'Red Pump   HLT', '© ® ™ go, @ ~ become a space'); assert.ok(LABEL_NO.test('a~b')); assert.ok(!LABEL_NO.test('170 °F')); }
 assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle~~2~~Boil~', 'every other mark is a ~ (2026-11-11)');
 assert.equal(suggestName({ iface: 'MB', port: '700', code: '1W', label: '', tab: 'BR' }), 'MB_700_1W_BR', 'an empty Label is left out');
 assert.equal(suggestName({ iface: 'MB', code: 'Pump', label: 'Wort' }), 'MB_Pump_Wort', 'no tab: no __');

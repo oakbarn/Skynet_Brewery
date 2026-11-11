@@ -294,6 +294,16 @@ anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet reall
 so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
 person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
 
+1.32 **NULL, the empty value** (OakBarn Brewery, 2026-11-11: "Could we use NULL", "OK and in the Help about reserved words").
+`X = NULL` empties a Process variable, a gGlobal or a Value Widget of any Kind (number, text, time, date and time, true / false): it
+has **no value at all**, not 0, `false` or `""`. Its box on the Tab shows **blank**, and a gGlobal stays empty after a restart, until
+something sets it again. `if X == NULL` asks if it is empty and `!= NULL` if it has a value. Math (`+ - * / ^`, `+=` ...) or `< > <= >=`
+on an empty value **stops the Process** and says in plain words which value is empty and to test it first. A Device can't be
+`NULL` (it is always on or off): `Pump_1 = NULL` is an error. Only `= NULL` makes a value empty; a sensor with no reading is not
+`NULL`. `NULL` is a reserved word (any case), shown in the editor's colors and offered by Predictive Text. `NUL` (one L) is a Windows
+name and not a Process word (Rule 3.4). Both programs follow this; the BruControl Import has no NULL to bring in. Help 22 (NULL and
+Reserved words).
+
 1.31 **Process Widget** (OakBarn Brewery, 2026-11-09, asked whether a BruControl Script element should come in as a Value Widget or a
 Push Button: "A Script Widget"; then, as Rule 1.4 says a script is a Process: "Process Widget"). A Widget that shows one **Process** on a Tab, as BruControl's Script element does: its **Label** as
 the title, what the Process is doing (**Running**, **Waiting**, **Stopped**, **Stopped on an error**; **No such Process** or **No
@@ -824,11 +834,19 @@ becomes its Label, and Processes, settings, saved values and the brew log follow
 Fritz 2026-10-29, PR #134; every name 2026-10-29, Help 63)
 **Plain names** (OakBarn Brewery, 2026-11-11: the marks "Allowed in a name you type, but trouble are No No also"; "And any that
 interfere with, Mac or Linux, MQTT are in the list"): a Device, Widget, gGlobal, Text, pipe, vessel or other item name has only
-**letters, numbers, `_`, `~` and `@`**, and starts with a letter or `_`, so it works with no quotes in a Process and is safe on
+**letters, numbers, `_`, `~`, `@` and `°`**, and starts with a letter or `_`, so it works with no quotes in a Process and is safe on
 Windows, Mac, Linux and MQTT. Tab and Interface names are shown names (Brew House) and keep only the list above; their IDs are plain.
-An Integrated Instance keeps its `VesselName.DeviceName` (Rule 6.28). A Label may have any mark: in the Suggested Name each other mark
+An Integrated Instance keeps its `VesselName.DeviceName` (Rule 6.28). A Label may have any other mark (but see below): in the Suggested Name each other mark
 becomes `~` and an accent is dropped. Older names (Rule 15.2): once per Schema, each other mark becomes `~` (an accent dropped, `_2`
 if taken) when the Schema loads; Processes and settings follow. Every mark and why: docs/Special_Characters.md.
+**° is allowed** in a name (OakBarn Brewery, 2026-11-11: the degree mark, typed with Ctrl+D, "does no interference so should be allowed
+even in a Name"): `Temp_°F`. **`@` and `~` are kept for the Suggested Name** (OakBarn Brewery, 2026-11-11: "prevent @ and ~ being used
+in a Label or name except when put there by the program in a Suggested Name", "AS they are reserved for Suggested Name Use Only"): a
+name typed by hand can't have them unless it is the Suggested Name (or the item's name already); use `_`. **A Label can't have © ® ™ or
+@ ~** (OakBarn Brewery, 2026-11-11: "No Circle C or R in Labels", it "interferes with the MIT License idea"; © ® ™ are kept for
+copyright and trademark notices): while typing, © ® ™ are taken out and @ ~ become a space, and a small box says why; an older Label
+gets the same when its Schema loads. Every other mark may be in a Label. **The words of the Process language** (Help 22, Reserved
+words: `NULL`, `true`, `if`, `wait` ...) can't be a name either.
 
 3.5 **Never rename an existing item by itself**, with one exception: **a clone follows its parent.**
 A clone's name is always its parent's name plus `_Clone_N`; when the parent is renamed, the parent part
@@ -3604,6 +3622,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Added Rule 1.32, NULL (OakBarn Brewery: "Could we use NULL", "OK and in the Help about reserved words"): `X = NULL` empties a Process variable, gGlobal or Value Widget (shows blank, kept after a restart); `== NULL` / `!= NULL` ask; math or `< >` on NULL stops the Process with a plain message; a Device can't be NULL. Help 22 gets "NULL: the empty value" and a "Reserved words" list; a reserved word can't be a name (Rule 3.4). Checked against both programs: the Panel runs it; the Importer brings in no NULL.
+- 2026-11-11: Rule 3.4 (OakBarn Brewery: the degree mark "should be allowed even in a Name"; "No Circle C or R in Labels"; "@ and ~ ... reserved for Suggested Name Use Only"): `°` is allowed in names; a Label can't have © ® ™ (taken out) or @ ~ (become a space), while typing and on load; a typed name has @ or ~ only when it is the Suggested Name. Checked against both programs: the Importer's Labels are cleaned the same way when the Schema loads.
 - 2026-11-11: Rule 3.1 / 18.18 (OakBarn Brewery: "Change ON Off Motorized Valves to DO@Valve_E"): an On/Off motorized valve's Type ID is Valve_E (was eVlv): DO@Valve_E, `BM_24_DO@Valve_E_HLT~out_BH`; older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.4 (OakBarn Brewery: the trouble marks "are No No also"; "any that interfere with, Mac or Linux, MQTT are in the list"): Device, Widget, gGlobal and item names have only letters, numbers, _ ~ @ and start with a letter or _; Tab and Interface names keep the Windows list; a Label's other marks become ~ in the Suggested Name; older names changed once on load, Processes follow. docs/Special_Characters.md lists Windows, Mac, Linux, MQTT and Process trouble for every mark; $ and ` are No too. Help 63. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "PWM already says the P"; "PWM@Valve_L or PWM@Valve_H and AO to follow"): a Proportional Valve's Type ID is Valve_L (low temperature) or Valve_H (high temperature), shown PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
