@@ -18,7 +18,7 @@
 
 **Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
 
-**Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
+**Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color: it opens the **Color Picker** (RGB, Help 187), and the color is kept in the list for next time. The **🎨** beside every color box opens the Color Picker too.
 
 **Device**: a thing tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
 
