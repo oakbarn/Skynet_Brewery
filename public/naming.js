@@ -111,8 +111,10 @@ export function upgradeCode(el) {
 // Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
 const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
 const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
+// Every other mark that isn't a letter, number, _ or @ becomes ~ too, and an accent is dropped (OakBarn Brewery, 2026-11-11: they are
+// "No No" in a name): Fly/Sparge-In becomes Fly~Sparge~In, Würze becomes Wurze.
 export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '~');
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@]/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).

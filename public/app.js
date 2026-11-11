@@ -5927,7 +5927,7 @@ function vbBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
   try {
     const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
-    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
+    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
     let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
     addTemplateToTab('vessel', t, w.workspace, name);
     const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
@@ -6055,7 +6055,7 @@ function vbFermMake(g) {
     delete g.vbFerm; toast(`${g.label || g.name}: the imported Fermentor Control ${loose.name} is now built into it.`, false, 8000); return;
   }
   const taken = n => [...draft.elements, ...draft.graphics].some(x => String(x.name ?? '').toLowerCase() === n.toLowerCase());
-  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') || 'Fermentor';
+  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
   let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
   draft.elements.push({ name, type: FERM_TYPE, label: g.label || name, workspace: g.workspace, integratedIn: g.id, integratedAs: 'fv:control', input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '',
     mode: g.vbFerm, ...Object.fromEntries(FERM_SETTINGS.map(([, k, , d]) => [k, d])), x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round(g.y || 0), w: 190, h: 60, offText: 'OFF' });

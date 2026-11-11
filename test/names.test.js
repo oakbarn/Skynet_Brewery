@@ -8,8 +8,13 @@ import { MediaFiles } from '../lib/mediafiles.js';
 import { FileMove } from '../lib/filemove.js';
 
 // ---- Device and Widget names ----
-for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Temp_°F', 'Hot~Cold', 'CON_2', 'COM10', 'Brü_Kessel', 'a.b'])
+for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Hot~Cold', 'CON_2', 'COM10', 'BM_22_DO@Pump_Pump_BH', '_x'])
   assert.equal(elementNameError(ok), '', ok + ' is fine');
+// only letters, numbers, _ ~ @ (OakBarn Brewery, 2026-11-11: the trouble marks are "No No also"); Tab and Interface names are shown names
+for (const bad of ['Temp_°F', 'Brü_Kessel', 'a.b', 'Red-Pump', 'Pump#1', 'A$B', 'a`b', 'x+y', 'Hot (1)', '2Pump'])
+  assert.notEqual(elementNameError(bad), '', bad + ' is refused');
+assert.equal(elementNameError('Brew House', 'Tab'), ''); assert.equal(elementNameError('Brewery Mega', 'Interface'), '');
+{ const { plainName } = await import('../public/names.js'); assert.equal(plainName('Würze 1'), 'Wurze~1'); assert.equal(plainName('2Pump'), '_2Pump'); }
 for (const [bad, why] of [['', 'name'], [' Pump', 'space'], ['Pump ', 'space'], ['.Pump', 'dot'], ['Pump\u0007', 'control'], ['Pump\t1', 'control'],
   ['Beer🍺', 'emoji'], ['Hot✅', 'emoji'], ['Flag🇺🇸', 'emoji'], ['CON', 'Windows'], ['nul', 'Windows'], ['COM1', 'Windows'], ['LPT9', 'Windows']])
   assert.match(elementNameError(bad), new RegExp(why, 'i'), JSON.stringify(bad));

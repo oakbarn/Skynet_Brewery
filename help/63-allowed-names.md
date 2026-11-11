@@ -4,9 +4,13 @@ Some characters can't be used in names, because they break Processes, or because
 
 Only a **new** name, or a name you **change**, is checked. The one exception is the list of characters below: older names that have them are changed for you (see **Older names** further down).
 
-## Names of Devices, Widgets, Tabs and everything else
+## Names of Devices, Widgets and everything a Process uses
 
-Every name is treated the same: Devices, Widgets, Interfaces, Tabs, Texts, pipes, vessels and the rest. (User Template names are only for picking a Template, so they are left alone.) A name can't have:
+A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **letters, numbers, `_`, `~` and `@`**, and starts with a letter or `_`. Such a name works in a Process with no quotes, and is safe on Windows, Mac, Linux and MQTT. Every other mark (a space, `-` `+` `=` `!` `#` `'` `$` `%` `^` `&` `(` `)` `[` `]` `{` `}` `;` `,` `.` and the backquote, an accent or `°`) is refused, with a message that says which one. The full list, with why each mark is trouble: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
+
+Your **Label** may have any of them: it is only shown. In the Suggested Name each one becomes `~`, and an accent is dropped (*Würze #2* gives `Wurze~~2`).
+
+**Tab and Interface names** are shown names (*Brew House*, *Brewery Mega*), so they may have spaces; their IDs (`BH`, `BM`) are plain. (User Template names are only for picking a Template, so they are left alone.) No name can have:
 
 - any of these: `<` `>` `:` `"` `/` `\` `|` `?` `*`
 
@@ -21,6 +25,8 @@ Every name is treated the same: Devices, Widgets, Interfaces, Tabs, Texts, pipes
 Use `~` or `_` instead: `Hot~Cold` or `Hot_Cold`, not `Hot/Cold`. A Suggested Device name already does this with your Label: each of these characters (and `.` `,`) becomes a `~`.
 
 ### Older names
+
+**Plain names:** the first time a Schema loads, a Device, Widget or item name with any mark other than letters, numbers, `_`, `~` and `@` is changed once: each mark becomes `~` and an accent is dropped (`Red-Pump` becomes `Red~Pump`; if that name is taken, `Red~Pump_2`). Every Process and setting that uses it follows.
 
 When the panel starts, or a Schema is opened, a name that still has one of `<` `>` `:` `"` `/` `\` `|` `?` `*` is changed once: each of them becomes a `~` (`Pump:1` becomes `Pump~1`; if that name is taken, `Pump~1_2`). It is the same item (it keeps its hidden key), and:
 

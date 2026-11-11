@@ -628,7 +628,7 @@ async function route(req, res) {
       for (const [a, b] of c) clones.set(a, b);
     }
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
-    for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
+    for (const el of body.elements ?? []) { const bad = !el.instanceOf && !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
     // ... and so does every other new or newly spelled name: Tabs, Texts, pipes, vessels ... (Fritz, 2026-10-29, Skynet Rule 3.11)
     for (const [k, what] of [['workspaces', 'Tab'], ['graphics', 'item']]) {
       const had = new Set((store.config[k] ?? []).map(x => x?.name));
