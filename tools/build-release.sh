@@ -43,6 +43,13 @@ for d in config scripts; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/default
 MSTAGE="$OUT/stage/media/BrewPanel/defaults"
 mkdir -p "$MSTAGE"
 [ -d "$STAGE/media" ] && mv "$STAGE/media" "$MSTAGE/media"
+# Except the two alarm fallback sounds (OakBarn Brewery, 2026-11-10, "Keep the Beep"; Rule 9.12): they stay in the panel zip and
+# Setup, in defaults/media, so every panel can sound an Alarm. The panel copies them in only if they are missing (lib/seed.js).
+for f in sounds/alarm_beep.wav sounds/Skynet/Alarm_Sound_Missing.mp3; do
+  [ -f "$MSTAGE/media/$f" ] || continue
+  mkdir -p "$STAGE/defaults/media/$(dirname "$f")"
+  cp -p "$MSTAGE/media/$f" "$STAGE/defaults/media/$f"
+done
 
 # The extra Sample Schemas (sample_schemas/) are not in the panel zip or Setup either: they are the Sample Schemas zip and Setup (Rule 9.13)
 SSTAGE="$OUT/stage/samples/BrewPanel"
