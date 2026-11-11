@@ -80,7 +80,7 @@ assert.equal(defaultCode({ type: 'digitalOut' }), 'DO');
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'element' }), 'HE');
 assert.equal(suggestName({ iface: 'MB', port: '25', code: defaultCode({ type: 'digitalOut', subtype: 'element' }), label: 'HLT', tab: 'BR' }), 'MB_25_HE_HLT_BR');
 assert.equal(defaultCode({ type: 'pwmOut' }), 'PWM');
-assert.equal(defaultCode({ type: 'pwmOut', subtype: 'element' }), 'H_PWM');
+assert.equal(defaultCode({ type: 'pwmOut', subtype: 'element' }), 'HE', 'PWM@HE (was H_PWM)');
 assert.equal(defaultCode({ type: 'analogOut', subtype: 'propValve' }), 'P_L_Vlv');
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Float'), 'Float');
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Pulse'), 'DIN');
@@ -206,13 +206,13 @@ console.log('naming tests passed');
   assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 17); assert.equal(widgetTypeId({ type: 'chart' }), 'GPH', 'Graph Widget, was Chart (Rule 1.26)');
 }
 
-// The General Type in a Device name (OakBarn Brewery, 2026-11-11: "use @ symbol"): DO: Pump is DO@Pump in the Suggested Name
+// The General Type in a Device name (OakBarn Brewery, 2026-11-11: "use @ symbol"): an On/Off Pump is DO@Pump in the Suggested Name
 {
   const { nameType, typeAtName } = await import('../public/naming.js');
   const { compile } = await import('../lib/engine.js');
   assert.equal(suggestName({ iface: 'BM', port: 22, code: 'Pump', type: 'digitalOut', label: 'Red Pump', tab: 'BH' }), 'BM_22_DO@Pump_Red~Pump_BH');
   assert.equal(suggestName({ iface: 'BM', port: 700, code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM_700_TEMP@1W_HLT_BH');
-  assert.equal(nameType('pwmOut', 'P_Pump'), 'PWM@P_Pump'); assert.equal(nameType('hysteresis', 'Hys'), 'Hys', 'the same word is written once');
+  assert.equal(nameType('pwmOut', 'Pump'), 'PWM@Pump'); assert.equal(nameType('hysteresis', 'Hys'), 'Hys', 'the same word is written once');
   assert.equal(nameType('digitalOut', 'DO'), 'DO'); assert.equal(nameType(undefined, 'Pump'), 'Pump', 'no type: the Type ID alone');
   // a Process reads the @ as part of the name, with no quotes
   assert.deepEqual(tokenize('BM_22_DO@Pump_Red~Pump_BH.state = true').slice(0, 3).map(t => t.v), ['BM_22_DO@Pump_Red~Pump_BH', '.', 'state']);
@@ -233,5 +233,10 @@ console.log('naming tests passed');
   assert.equal(c.typeAtNames, true);
   s.load(); assert.equal(s.loadRenames.size, 0, 'only once');
   assert.equal(compile('BM_22_DO@Pump_Pump_BH = true').errors?.length ?? 0, 0);
+  // P_ and H_ IDs are the plain ones under PWM / AO (OakBarn Brewery, 2026-11-11: "PWM@Pump"; "All Get Updated to the new standard")
+  assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'P_Pump' }), 'Pump'); assert.equal(upgradeCode({ type: 'analogOut', typeCode: 'H_AO' }), 'HE');
+  assert.equal(defaultCode({ type: 'pwmOut', subtype: 'pump' }), 'Pump');
+  assert.equal(typeAtName({ name: 'BM_5_P_Pump_Wort_BH', type: 'pwmOut', typeCode: 'Pump' }), 'BM_5_PWM@Pump_Wort_BH', 'an older ID in the name is upgraded too');
+  assert.equal(typeAtName({ name: 'BM_24_E_L_Vlv_HLT~out_BH', type: 'digitalOut', subtype: 'valve', typeCode: 'eVlv' }), 'BM_24_DO@eVlv_HLT~out_BH');
   console.log('General Type@ name tests passed');
 }

@@ -41,12 +41,18 @@ const T = {
 // (Hydro was kept here from 2026-10-23 until the Hydrometer Device was built, Rule 6.25.)
 export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity' };
 export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
-const list = ids => ids.split(' ').map(id => [id, T[id]]);
+// own: a description that is this General Type's own (a Pump on a PWM port is a Pump speed)
+const list = (ids, own = {}) => ids.split(' ').map(id => [id, own[id] ?? T[id]]);
+// The General Type in front says what kind of port it is (OakBarn Brewery, 2026-11-11: "PWM@Pump"), so a Pump, Fan, Motor, LED or
+// Heating Element on a PWM or 0-10 V port has the same Type ID as on an On/Off port: PWM@Pump, AO@Fan, PWM@HE (were P_Pump, H_PWM ...).
+// A Proportional Valve keeps its P_: it is a different valve, not an On/Off valve run at a speed.
+const PWM_OWN = { HE: 'Heating PWM (element on a PWM output)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed', LED: 'LED / light dimmer' };
+const AO_OWN = { HE: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
   digitalOut: list('DO HE Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
-  pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
-  analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
+  pwmOut: list('PWM HE P_L_Vlv P_H_Vlv Pump Fan Mtr LED', PWM_OWN),
+  analogOut: list('AO HE P_L_Vlv P_H_Vlv Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
   analogIn: list('AI Pres Level Vol PH_Met'),
   flowMeter: list('FlowM'),
@@ -75,7 +81,7 @@ export function defaultCode(el, hint) {
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
   else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
-  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
+  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'HE', propValve: 'P_L_Vlv', pump: 'Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
   return c && has(c) ? c : codes[0][0];
@@ -83,8 +89,10 @@ export function defaultCode(el, hint) {
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
 const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
-  PWM_PmP: 'P_Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'P_Mtr', PWM_FaN: 'P_Fan', PWM_LgT: 'P_LED', PWM_LeD: 'P_LED', PWM_ElM: 'H_PWM',
-  AO_PmP: 'P_Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'P_Mtr', AO_FaN: 'P_Fan', AO_ElM: 'H_AO',
+  PWM_PmP: 'Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'HE',
+  AO_PmP: 'Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'HE',
+  // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
+  P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'HE', H_AO: 'HE',
   DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
   FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
 export function upgradeCode(el) {
@@ -114,12 +122,12 @@ export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ?
 // Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
 // Names made before keep their double __ before the Tab ID (Rule 3.5).
 // The Type part has the Device's General Type in front with an @ (OakBarn Brewery, 2026-11-11: "use @ symbol"): an On/Off Pump,
-// shown as DO: Pump, is DO@Pump in its name (BM_22_DO@Pump_Pump_BH). A colon can't be in a name (Rule 3.4), so @ stands for it.
+// is DO@Pump in its name (BM_22_DO@Pump_Pump_BH) and wherever its Device Type is shown. A colon can't be in a name (Rule 3.4), so @ stands for it.
 // type: the Device's type (digitalOut ...). With no type the Type part is the Device Type ID alone.
 export function suggestName({ iface, port, code, type, label, tab } = {}) {
   return [iface, port, nameType(type, code), parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
-// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. The Device keeps its type
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO@Pump. The Device keeps its type
 // (digitalOut ...) and Device Type ID (Pump) as they are saved.
 export const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND', hydrometer: 'HYDRO' };
 // The Type part of a Device name: General Type @ Device Type ID (DO@Pump). When the two are the same word (PID, HYS ...) it is written once.
@@ -133,9 +141,11 @@ export function typeAtName(el) {
   const name = String(el?.name ?? '');
   if (!isDevice(el) || !name || name.includes('@')) return '';
   // its own Device Type ID first; an older Device with none saved is matched by any ID of its type (BM_30_Chill_Chiller~water_BH)
-  const own = String(el.typeCode || '').trim(), codes = el.typeCode ? [own] : typeCodes(el).map(x => x[0]).sort((a, b) => b.length - a.length);
+  // and any older ID that became it (P_Pump -> Pump, E_L_Vlv -> eVlv), so BM_5_P_Pump_Wort_BH is BM_5_PWM@Pump_Wort_BH
+  const own = String(el.typeCode || '').trim(), ids = el.typeCode ? [own] : typeCodes(el).map(x => x[0]);
+  const codes = [...ids, ...Object.keys(OLD_CODES).filter(o => ids.includes(OLD_CODES[o]))].sort((a, b) => b.length - a.length);
   for (const code of codes) {
-    const t = nameType(el.type, code);
+    const t = nameType(el.type, OLD_CODES[code] && !ids.includes(code) ? OLD_CODES[code] : code);
     if (!code || t === code) continue;
     const m = new RegExp(`^(.+?_[^_]+)_${code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=_|$)`).exec(name);
     if (m) return `${m[1]}_${t}${name.slice(m[0].length)}`;

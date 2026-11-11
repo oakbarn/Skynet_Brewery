@@ -39,7 +39,7 @@ export const realConnOf = d => d?.realConnection ?? '';
 export const linkOf = d => connOf(d) === 'simulator' ? realConnOf(d) : connOf(d);
 
 // Devices that heat: electric elements, burner gas valves and igniters, heat pads, and the outputs of PID, Hysteresis and Duty Cycle
-const HEAT_CODES = new Set(['H_PWM', 'H_AO', 'HtPad', 'Ignit', 'G_Vlv']);
+const HEAT_CODES = new Set(['HE', 'HtPad', 'Ignit', 'G_Vlv']);      // HE on a PWM or 0-10 V port was H_PWM / H_AO
 export const isHeating = el => !!el && (['pid', 'hysteresis', 'dutyCycle', 'deadband'].includes(el.type) || HEAT_CODES.has(el.typeCode) || el.subtype === 'element');
 
 // { level, text } for an Interface; heating = it has a heating Device on it

@@ -96,7 +96,7 @@ Interface, port or settings of its own, so it never counts against "one Device p
 | Arduino Mega / other Arduino | Best | OK (depends on the network) | Poor (through an ESP32 bridge) |
 | ESP32 | Best | Good | Good, as long as nothing heats on it |
 
-With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pad, PID, Hysteresis, Duty Cycle) on Ethernet or WiFi are allowed but warned about; each Interface gets a Board dropdown and a "Lost link: all OFF after" time (3 to 600 seconds, default 10).
+With PR #108: heating Devices (element, gas valve, igniter, heat pad, PID, Hysteresis, Duty Cycle) on Ethernet or WiFi are allowed but warned about; each Interface gets a Board dropdown and a "Lost link: all OFF after" time (3 to 600 seconds, default 10).
 
 ---
 
@@ -113,8 +113,8 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 **Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
 
 | Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
-| PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
-| Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
+| PWM output | PWM, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
+| Analog output | AO, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@Pump ...) |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
 | Analog input | AI, Pres, Level, Vol, PH_Met |
 | Flow meter | FlowM |
@@ -141,15 +141,15 @@ What each ID means:
 | PID | PID | E_Alm | Electric Alarm |
 | DutyCy | Duty Cycle | Fan | Fan |
 | Hys | Hysteresis | Chill | Chiller / glycol / fridge compressor |
-| H_PWM | Heating element on a PWM output | HtPad | Fermenter heat wrap or pad |
-| H_AO | Heating element on a 0-10 V power controller (SCR / SSVR) | Ignit | Burner igniter |
+| HE | Heating Element (DO@HE, PWM@HE, AO@HE) | HtPad | Fermenter heat wrap or pad |
+| | | Ignit | Burner igniter |
 | PWM | PWM (plain) | DI | Direct Input (plain) |
 | P_L_Vlv | Low Temperature Proportional Valve | Float | Float (true while made) |
 | P_H_Vlv | High Temperature Proportional Valve | DIN | DIN momentary push button (one trigger per press, 3 s lockout) |
-| P_Pump | Pump speed | PB | Push button (ON only while held) |
-| P_Fan | Fan speed | Toggle | Toggle button (press ON, press again OFF) |
-| P_Mtr | Motor speed | Latch | Latching input (ON until reset) |
-| P_LED | LED / light dimmer | FlowSw | Flow switch |
+| Pump | Pump (PWM@Pump, AO@Pump: its speed) | PB | Push button (ON only while held) |
+| Fan | Fan (PWM@Fan: its speed) | Toggle | Toggle button (press ON, press again OFF) |
+| Mtr | Motor (PWM@Mtr: its speed) | Latch | Latching input (ON until reset) |
+| LED | LED (PWM@LED: dimmer) | FlowSw | Flow switch |
 | AO | Analog output 0-10 V / 4-20 mA (plain) | Intlk | Door / lid / safety interlock |
 | AI | Analog input (plain) | EStop | Emergency stop |
 | Pres | Pressure | Leak | Leak sensor |
@@ -186,7 +186,7 @@ What each ID means:
 
 ### 4.2 Pump
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).
-- **Type ID:** Pump (or P_Pump on a PWM / analog output for speed).
+- **Type ID:** Pump: DO@Pump on an On/Off port, PWM@Pump or AO@Pump on a speed output.
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
 - **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
 - **Pump Standard** (Rule 5.27, Fritz 2026-11-05, Help 130): every Skynet pump picture (these drawings, their Covers and the older Riptide-style color pictures) is drawn to scale in the same 300 x 300 box and shown 150 x 150, with its ports ending at (285, 150) (inlet) and (243, 56) (outlet) of the box (Orientation Left mirrors them). Port tubes are drawn longer where needed, so one pump can replace another in the same place and stay joined. The sump pump keeps its own box.
@@ -252,14 +252,14 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
-- **Type IDs:** PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED.
+- **Type IDs:** PWM, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr, LED (shown PWM@...).
 - **Port:** PWM pins only (Mega 2-13, 44-46).
 - **Settings:** Interface, PWM pin, Start value (%), Decimals, **Measured volts** (Rule 6.24, Help 169: pairs of % and the volts measured; shows ≈ V, `.volts` reads and sets).
 - **Value:** 0-100 % on screen; the board gets 0-255. Board line `PWM <pin> <0-255>`.
 
 ### 4.5 Analog output (0-10 V / 4-20 mA)
 - **Add menu:** Devices: outputs > Analog output 0-10 V, or Analog output 4-20 mA.
-- **Type IDs:** AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr.
+- **Type IDs:** AO, HE, P_L_Vlv, P_H_Vlv, Pump, Fan, Mtr (shown AO@...).
 - **Port:** a PWM pin feeding a PWM-to-0-10 V or 4-20 mA module.
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals, **Measured volts** (Rule 6.24).
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).

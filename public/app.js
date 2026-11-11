@@ -7993,10 +7993,11 @@ function field(f, obj) {
   }
   return out;
 }
-// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump (GENERAL_TYPE in public/naming.js).
-// In the Suggested Name it is DO@Pump (OakBarn Brewery, 2026-11-11).
-const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.subtype === 'element' && g ? 'Heater Element' : e?.typeCode || '';      // a Heating Element: DO: Heater Element (OakBarn Brewery, 2026-11-10)
-  return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type (GENERAL_TYPE in public/naming.js), with an @
+// as in the Suggested Name (OakBarn Brewery, 2026-11-11: "Any where in Skynet Change any DO@Pump ... to DO@Pump"): DO@Pump, PWM@Pump,
+// DO@HE (a Heating Element). A new Device fills in its own: a new On/Off Pump (a Blichmann RipTide) is DO@Pump.
+const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || (isDevice(e) ? defaultCode(e) : '') || '';
+  return !g ? c : !c || c.toUpperCase() === g ? g : `${g}@${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
   const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', { style: 'white-space: pre-line' }, ...helpNodes(text)),
@@ -8025,9 +8026,9 @@ const DEVICE_TIPS = {
   eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_DO@HE_HLT~element_BH.',
   ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_DO@HE_HLT~element_BH.',
   eTab: 'The Tab this Heating Element goes on, for example Brew House. Its Tab ID, BH, ends the Suggested Name: BM_8_DO@HE_HLT~element_BH. ➕ Add new Tab… makes a new Tab and comes back here.',
-  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_DO@HE_HLT~element_BH is BM (Brewery Mega), Port 8, DO@HE (DO: Heater Element), HLT~element (its Label) and BH (the Brew House Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on.',
+  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_DO@HE_HLT~element_BH is BM (Brewery Mega), Port 8, DO@HE (a Heating Element on an On/Off port), HLT~element (its Label) and BH (the Brew House Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on.',
   eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (-) beside it says where it turns on: Setpoint + Offset, so -1 turns on 1 degree under the Setpoint; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
-  eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its General Type and short code, DO@HE, are the third part of the Suggested Name: BM_8_DO@HE_HLT~element_BH.',
+  eType: 'Its Device Type: DO@HE, a Heating Element (HE) on a Digital Out (DO). The same DO@HE is the third part of the Suggested Name: BM_8_DO@HE_HLT~element_BH.',
   eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.visible = false.',
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
@@ -8286,7 +8287,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
-    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
+    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
     const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
