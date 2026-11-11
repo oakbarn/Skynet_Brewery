@@ -112,7 +112,7 @@ console.log('heatmethod tests passed');
   const [h] = heat;
   assert.deepEqual([h.type, h.subtype, h.heatMethod], ['digitalOut', 'element', 'dutyCycle'], 'a Heating Element starting in the first one\'s method');
   assert.deepEqual(h.heatControls.map(c => [c.name, c.bruName, c.method]), [['M_HLT_Heat', 'M_HLT Heat', 'Duty Cycle'], ['HLT_PID', 'HLT PID', 'PID']]);
-  assert.equal(h.name, 'MP_42_HE_HLT~Heat_BH', 'a Heating Element is HE (Rule 3.1)');
+  assert.equal(h.name, 'MP_42_DO@HE_HLT~Heat_BH', 'a Heating Element is DO@HE (Rule 3.1)');
   assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
@@ -195,7 +195,7 @@ console.log('method spots tests passed');
   assert.equal(c.elements[1].heatMethod, 'pid'); assert.equal(c.elements[1].kp, 9);
   assert.equal(c.elements[2].type, 'pid', 'a PID of its own (not built in) stays as it is');
   const { readFileSync } = await import('node:fs');
-  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_HE_HLT~element_BH', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
+  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_DO@HE_HLT~element_BH', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
   const hlt = s.elements.find(e => e.name === 'HLT_Heat');
   assert.deepEqual(controlMethods(hlt), ['Direct', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
@@ -209,21 +209,21 @@ console.log('built in Element upgrade tests passed');
   const cfg2 = path.join(d2, 'c.json');
   fs.writeFileSync(cfg2, JSON.stringify({ devices: [{ name: 'MB', connection: 'simulator' }], elements: [
     { name: 'Ferm_Temp', type: 'temperature', sensor: 'simulated' },
-    { name: 'MB_5_CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: 1 }] }));
+    { name: 'MB_5_DO@CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: 1 }] }));
   const s2 = new Store(cfg2, path.join(d2, 'data')); s2.load();
   const c2 = new Control(s2);
-  const pumpEl = s2.get('MB_5_CPMP_Cool~Pump_FR'), gp = p => s2.getProp('MB_5_CPMP_Cool~Pump_FR', p);
+  const pumpEl = s2.get('MB_5_DO@CPMP_Cool~Pump_FR'), gp = p => s2.getProp('MB_5_DO@CPMP_Cool~Pump_FR', p);
   assert.ok(isCoolPump(pumpEl)); assert.ok(!isHeatElem(pumpEl), 'it is a Pump, not a Heating Element');
   assert.equal(defaultCode(pumpEl), 'CPMP'); assert.equal(defaultCode({ type: 'digitalOut', subtype: 'pump' }), 'Pump', 'a plain pump stays Pump');
   assert.deepEqual(allowedMethods(pumpEl), ['onoff', 'hysteresis']);
   assert.equal(gp('method'), 'Hysteresis');
-  s2.setProp('MB_5_CPMP_Cool~Pump_FR', 'state', true);
+  s2.setProp('MB_5_DO@CPMP_Cool~Pump_FR', 'state', true);
   let t2 = 0;
   s2.setProp('Ferm_Temp', 'value', 68); c2.tick(t2 += 1000);
   assert.equal(gp('output'), true, 'warmer than the Target: the glycol pump runs');
   s2.setProp('Ferm_Temp', 'value', 65.5); c2.tick(t2 += 1000);
   assert.equal(gp('output'), false, 'at the Target: it stops');
-  assert.throws(() => s2.setProp('MB_5_CPMP_Cool~Pump_FR', 'method', 'PID'), /may only use/, 'a pump is never run by PID');
+  assert.throws(() => s2.setProp('MB_5_DO@CPMP_Cool~Pump_FR', 'method', 'PID'), /may only use/, 'a pump is never run by PID');
   console.log('cool / warm pump ok');
 }
 

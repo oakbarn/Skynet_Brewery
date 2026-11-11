@@ -1066,7 +1066,7 @@ function exampleName() {
   const tab = e ? state.r.tabs.find(t => t.name === e.tab)?.id : '';
   const parts = e && e.name.split('_');
   const x = parts && parts.length >= 5 ? { name: e.name, ifc: ifc || parts[0], port: parts[1], label: parts.slice(3, -1).join(' ').replace(/~/g, ' '), tab: tab || parts.at(-1) }
-    : { name: 'MB_42_HE_HLT~Heat_BH', ifc: 'MB', port: '42', label: 'HLT Heat', tab: 'BH' };
+    : { name: 'MB_42_DO@HE_HLT~Heat_BH', ifc: 'MB', port: '42', label: 'HLT Heat', tab: 'BH' };
   for (const n of document.querySelectorAll('.exName')) { n.textContent = n.dataset.ex === 'method' ? x.name + '.PID' : x.name; n.dataset.help = GLOSSARY['suggested skynet names']; n.classList.add('gloss'); }
   const put = (sel, v, help) => { for (const n of document.querySelectorAll(sel)) { n.textContent = v; n.dataset.help = help; n.classList.add('gloss'); } };
   put('.exIf', x.ifc, `${x.ifc}: the ID of the Interface (board) this Device is on (the first part of its name).`);

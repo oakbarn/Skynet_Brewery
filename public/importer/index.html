@@ -104,9 +104,9 @@
               <li>Each allowed method gets a small <b>one-click spot</b> under the Element on its Tab (or under it on its Vessel), so
                 one click switches it, for example from Duty Cycle to PID.</li>
               <li>A <b>Process</b> (BruControl Script) can command the method switched at will, for example
-                <code class="exName" data-ex="method">MB_42_HE_HLT~Heat_BH.PID</code> commands the Heating Element
-                <code class="exName" data-ex="name">MB_42_HE_HLT~Heat_BH</code> to switch to PID mode of control.
-                <b>What is <span class="exName" data-ex="name">MB_42_HE_HLT~Heat_BH</span>?</b> Rest the mouse on it and a help box explains
+                <code class="exName" data-ex="method">MB_42_DO@HE_HLT~Heat_BH.PID</code> commands the Heating Element
+                <code class="exName" data-ex="name">MB_42_DO@HE_HLT~Heat_BH</code> to switch to PID mode of control.
+                <b>What is <span class="exName" data-ex="name">MB_42_DO@HE_HLT~Heat_BH</span>?</b> Rest the mouse on it and a help box explains
                 <b>Suggested Skynet Names</b>. In a nutshell, it reads as a <b>Heating Element</b> type Device (a BruControl PID,
                 Hysteresis, PWM or Duty Cycle Element) that is on the <b class="exIf">MB</b> <b>Interface</b> (a BruControl Device,
                 an Arduino Mega or the like), on <b>Port</b> (Pin) <b class="exPort">42</b>, that has a <b>Label</b> (BruControl
@@ -122,7 +122,7 @@
                 Hysteresis, Duty Cycle, Deadband, Direct On/Off) as in BruControl, but in Skynet you have one Device and just change its
                 <b>Method</b> with a click or a <b>Process</b> (BruControl Script). The same goes for a <b>Cool Pump</b> or <b>Warm
                 Pump</b> switched by a temperature: one Pump with a Method.</li>
-              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT~Heat_BH</code>.</li>
+              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_DO@HE_HLT~Heat_BH</code>.</li>
               <li>The Import does this for you: the first Element on the port sets the main method, the others are ticked, and if
                 BruControl showed both on a Tab, the second becomes a <b>Method Clone</b> tile with its BruControl Label. Your
                 old names (<i>HLT_PID</i>) still work in a Process.</li>
@@ -200,7 +200,7 @@
         in (Skynet Rule 15.1). Every change is listed in the import report, and Processes are updated to the new Names. You may choose
         to keep your BruControl Names instead, but we will ask you twice, because <b>the Skynet way is better in the end</b>: one look at
         a Name tells you the Interface, port, type, Label and Tab, and every new Device you add will have a Skynet Name anyway.</p>
-      <p class="example">Example: <code>MB_A0_10KNTC_Mash~Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
+      <p class="example">Example: <code>MB_A0_TEMP@10KNTC_Mash~Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
         <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash Tun</i> (its space is now <code>~</code>), Tab <i>SP</i>.</p>
     </div>
 

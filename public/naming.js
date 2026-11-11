@@ -3,8 +3,8 @@
 // Interface ID: 1 to 4 letters, unique. A new Interface gets the first letter of its first two words ("Main Brewery Mega USB" = MB),
 //   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
-// Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_eVlv_Fly~Sparge_In__SP
-//   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
+// Device name (Fritz, 2026-10-23; single _ 2026-11-05; General Type@ 2026-11-11): InterfaceID_Port_GeneralType@TypeID_ParsedLabel_TabID,
+//   e.g. MB_25_DO@eVlv_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
 import { TYPE_METHOD } from './heatmethod.js';
 
@@ -113,10 +113,36 @@ export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ?
 
 // Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
 // Names made before keep their double __ before the Tab ID (Rule 3.5).
-export function suggestName({ iface, port, code, label, tab } = {}) {
-  return [iface, port, code, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
+// The Type part has the Device's General Type in front with an @ (OakBarn Brewery, 2026-11-11: "use @ symbol"): an On/Off Pump,
+// shown as DO: Pump, is DO@Pump in its name (BM_22_DO@Pump_Pump_BH). A colon can't be in a name (Rule 3.4), so @ stands for it.
+// type: the Device's type (digitalOut ...). With no type the Type part is the Device Type ID alone.
+export function suggestName({ iface, port, code, type, label, tab } = {}) {
+  return [iface, port, nameType(type, code), parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
-// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2_BR.
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. The Device keeps its type
+// (digitalOut ...) and Device Type ID (Pump) as they are saved.
+export const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND', hydrometer: 'HYDRO' };
+// The Type part of a Device name: General Type @ Device Type ID (DO@Pump). When the two are the same word (PID, HYS ...) it is written once.
+export function nameType(type, code) {
+  const g = GENERAL_TYPE[type], c = String(code ?? '').trim();
+  return !g ? c : !c ? g : c.toUpperCase() === g ? c : `${g}@${c}`;
+}
+// An older Device name in the Suggested Name form with no General Type yet (BM_22_Pump_Pump_BH) -> with it (BM_22_DO@Pump_Pump_BH);
+// '' when it has one, is not in that form, or needs none. Used once per Schema when it loads (Rule 15.2, lib/store.js).
+export function typeAtName(el) {
+  const name = String(el?.name ?? '');
+  if (!isDevice(el) || !name || name.includes('@')) return '';
+  // its own Device Type ID first; an older Device with none saved is matched by any ID of its type (BM_30_Chill_Chiller~water_BH)
+  const own = String(el.typeCode || '').trim(), codes = el.typeCode ? [own] : typeCodes(el).map(x => x[0]).sort((a, b) => b.length - a.length);
+  for (const code of codes) {
+    const t = nameType(el.type, code);
+    if (!code || t === code) continue;
+    const m = new RegExp(`^(.+?_[^_]+)_${code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=_|$)`).exec(name);
+    if (m) return `${m[1]}_${t}${name.slice(m[0].length)}`;
+  }
+  return '';
+}
+// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_DO@Pump_Wort_2_BR.
 // tab: the Tab ID at its end, so the number goes before it (an older name's __ before the Tab ID works too).
 export function uniqueName(name, isTaken, tab) {
   if (!name || !isTaken(name)) return name;
@@ -412,7 +438,7 @@ export function portClash(el, elements) {
 }
 
 // Cloned Devices (Fritz, 2026-10-27): a Clone's name is its parent's name, _Clone_ and the lowest free number:
-// MB_06_Pump_Wort__HS -> MB_06_Pump_Wort__HS_Clone_1. Skynet makes it; nobody types it. taken(name) says a name is used.
+// MB_06_DO@Pump_Wort__HS -> MB_06_DO@Pump_Wort__HS_Clone_1. Skynet makes it; nobody types it. taken(name) says a name is used.
 export function cloneName(parent, taken, keep) {
   if (keep && !taken(`${parent}_Clone_${keep}`)) return `${parent}_Clone_${keep}`;      // a parent rename keeps the Clone's number
   let n = 1; while (taken(`${parent}_Clone_${n}`)) n++;

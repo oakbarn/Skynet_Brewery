@@ -22,7 +22,7 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)
 
-Example: `MB_25_eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_DO@eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
@@ -65,7 +65,7 @@ Devices with on/off states also have **Picture when on / off**, an **On overlay*
 A **Clone** shows a Device on another Tab too (Skynet Rule 4.4, Help 71). It is the same Device, not a new one: it has no
 Interface, port or settings of its own, so it never counts against "one Device per port".
 - **Made only with ⧉ Clone Device** (Edit layout bar), on any Tab, the Build Tab too. The list is grouped by type.
-- **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_Pump_Wort_HS_Clone_1`. It follows a parent rename.
+- **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_DO@Pump_Wort_HS_Clone_1`. It follows a parent rename.
 - **Its own settings:** Visible, Tab, X, Y, Lock position. **Not used in Processes.**
 - **Everything else is the parent's** (pictures, look, size, value). Tapping it taps the parent: an on/off Device or one with
   Enabled (PID) turns on or off; a reading Device (1W) is only shown, in the parent's format.
@@ -165,7 +165,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, HE (Heating Element, Rule 3.1: `MB_25_HE_HLT_BR`; elements named before keep DO), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, HE (Heating Element, Rule 3.1: `MB_25_DO@HE_HLT_BR`; elements named before keep DO), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
@@ -493,7 +493,7 @@ Both are made the same way:
 
 Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
-- **Built-in Devices made:** a heating element (PID, Hysteresis, Duty Cycle, or PWM with Kind = element) named `<Label> Heat`, and a Temperature probe named `<Label> Temp`. Example names: `MB_9_PID_RIMS_Heat`, `MB_700_1W_RIMS_Temp`.
+- **Built-in Devices made:** a heating element (PID, Hysteresis, Duty Cycle, or PWM with Kind = element) named `<Label> Heat`, and a Temperature probe named `<Label> Temp`. Example names: `MB_9_PID_RIMS_Heat`, `MB_700_TEMP@1W_RIMS_Temp`.
 - A PID or Hysteresis element always holds the temperature its own probe reads (its Input is set for you).
 - **Properties:** Interface; Heating element: Control, Port and all that control's own settings (for a PID: Setpoint, Kp, Ki, Kd, Max output ...); Heating element's thermowell: probe type and Port. Save and both Devices follow.
 - Put on a Tab from a Template (☰ Menu), it has no Devices yet; set the Interface and Ports in its Properties.
@@ -516,7 +516,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Or step by step:** Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds it on the Build Tab (Skynet Rule 19.5, Help 166).
 - **Picture:** the Template's (Skynet_Vessel_Widget.svg: 16 IPs: 15 from the Vessel IP Template drawing, plus Center Back Element).
 - **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
-- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge_BH`.
+- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_DO@eVlv_HLT_Right_Sparge_BH`.
 - **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.
 - **HERMS coil:** Left or Right, drawn under that side's HERMS In and Out IPs; the two IPs are the coil's ends.
 - **Locked once built and saved** on a Tab: IPs (Place), parts and HERMS coil can't be changed; no un-bundling.
@@ -528,7 +528,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **IPs:** only the two open ends of the joined tees and the far end of each valve (3, 4 or 5). A closed valve shuts its IP.
 - **Built-in Devices:** one valve per tee, a Digital Output with Kind = valve. **Manual** = Valve type Manual (no Port; a Process shows a pop-up and waits for Done), Type ID M_L_Vlv. **Motorized** = Valve type Electro_Mechanical, Type ID eVlv, on a Port of the fitting's one **Interface**. Two valves can't share a Port.
 - **Each valve is swapped Manual / Motorized on its own** in the fitting's Properties (Valves: Valve 1, Valve 2 ...), at any time; not locked once saved (unlike 5.3).
-- **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_eVlv_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
+- **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_DO@eVlv_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
 - A click on a valve on its Tab opens or closes it. Motorized valves are on Close all / Open all.
 - **Add box and Properties:** the Pump's drill-down (Rule 18.29): 1 Label, 2 Interface, 3 Valve 1 / 2 / 3 (Manual or Motorized, Available Ports on its line), 4 Tab, then Name, Graphic, Path, Orientation, X, Y, Width, Height, Device Type. A saved Motorized valve's Port and the Interface are greyed out (make it Manual, Save, then Motorized to wire it again).
 - **Valve numbers** 1, 2, 3 on the valves in Edit layout and on the dialog Graphic, matching Valve 1, 2, 3.
