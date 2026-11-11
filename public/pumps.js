@@ -52,7 +52,7 @@ export function factLines(el) {
   const f = factsOf(el), out = [];
   if (f) out.push(f.name);
   const pw = powerText(powerOf(el)); if (pw) out.push('Power: ' + pw);
-  out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot (wort, water)'));
+  out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool'));
   if (isPwmPump(el)) out.push(`Speed control: PWM, Speed ${pumpSpeed(el.speed)} %`);
   const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest, ports: el?.pumpPorts };
   for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest'], ['ports', 'Ports']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
