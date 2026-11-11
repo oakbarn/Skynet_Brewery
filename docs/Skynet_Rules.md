@@ -413,18 +413,20 @@ has no **Hidden Locked** switch in its Properties. A Hidden Locked setting it al
 Process's `Name.hidden = true` does nothing to it. **Visible** still works. The lock, **Visible** and **Hidden Locked** in a dialog's
 title line each have a help balloon (Rule 2.38). Help 180.
 
-2.48 **The Color Picker: every color slot on every dialog** (OakBarn Brewery, 2026-11-11: "For when there is a choice for Colors
-that a User Add which should be added to all the Color slots on any Dialog"; "Pump Cover Should have One as Well. And a Field that
-appears just below the Cover Label and Field when the User Add has been selected."; "That field should look like any other of the
-Color selected fields (Like Fore and Back ones)"; "Also a user Pump Cover needs to be created and used on the graphic on the Dialog
-and Tab"). Every color box in the Skynet Panel and in the BruControl Import (its Build page is the Panel's) keeps Rule 2.7's list and
-adds the free **Color Picker** (Pickr, MIT License, kept in the panel so it works with no internet; docs/Media_Licenses.csv):
-**Custom (add new) ...** opens it at once (one click, Rule 2.44), and a **🎨** beside every color box opens it from the box's color.
-It picks by RGB (Red, Green, Blue, 0 to 255) or a # code; **Save** keeps the color and adds it to the color list (shown as
-**RGB r g b**), **Cancel** leaves the box as it was. A Flow Color's **RGB (pick your own color) ...** works the same way (Rule 5.21).
-**Pump covers:** picking **Pick Cover Color** in Cover shows the **Cover Color** box just below the Cover, the same color box as Fore
-and Back, and opens the Color Picker at once; Save draws the cover in that color on the pump in the dialog and on the Tab, **◀ Back**
-sets the Cover back to None (no cover). A color is still saved as #rrggbb, so nothing saved before changes. Help 187.
+2.48 **The Color Picker and the Color (RGB) box on every color slot of every dialog** (OakBarn Brewery, 2026-11-11: "For when
+there is a choice for Colors that a User Add which should be added to all the Color slots on any Dialog"; "Pump Cover Should have One
+as Well. And a Field that appears just below the Cover Label and Field when the User Add has been selected."; "Also a user Pump Cover
+needs to be created and used on the graphic on the Dialog and Tab"; his drawing: "User Add then Pop up Color Picker then add the
+color field just below. Double Click brings up the Color Picker again. Both the Graphic Here and on a Tab get updated with the Cover
+with correct Color."; "Appears when User Add Is selected. Use this on every User Add Color Picker"). Every color box in the Skynet
+Panel and in the BruControl Import (its Build page is the Panel's) keeps Rule 2.7's list. Its User Add (**Custom (add new) ...**, a
+Flow Color's **RGB (pick your own color) ...**, the Cover's **Pick Cover Color**) pops up the free **Color Picker** (Pickr, MIT
+License, kept in the panel so it works with no internet; docs/Media_Licenses.csv) at once (one click, Rule 2.44), and a
+**Color (RGB)** line shows just below: a swatch and the color as Red, Green, Blue numbers, **250,250,250**. Double-clicking the
+numbers brings up the Color Picker again; typing three numbers sets the color. **Save** keeps the color and adds it to the color
+list (shown as **RGB r g b**); **Cancel** leaves the box as it was. The Color (RGB) line shows only while the color is the user's own.
+**Pump covers:** Save draws the cover in that color on the pump in the dialog and on the Tab; **◀ Back** sets the Cover back to None
+(no cover). A color is still saved as #rrggbb, so nothing saved before changes. Help 187.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -3543,7 +3545,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
-- 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs; Custom and a 🎨 open it; RGB or # code; Save adds the color to the list. Pick Cover Color shows the Cover Color box just below the Cover and opens the Color Picker; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
+- 2026-11-11: Added Rule 2.48 (OakBarn Brewery): the free Color Picker (Pickr, MIT) in every color box of every dialog, in both programs (his drawing): the User Add pops it up and a Color (RGB) line (swatch + 250,250,250) shows just below, double-click brings the picker up again; Save adds the color to the list. Pick Cover Color works the same way; the user cover is drawn in the dialog and on the Tab. Rule 2.7 points to it. Help 187; Help 13, 111, 115, 116 updated. Checked against both programs: one shared color box. (thread "Add color picker to color fields")
 - 2026-11-10: Added Rule 7.20 (OakBarn Brewery): a sound can be a web link to an MP3, played by the browser from the web; an Alarm whose sound can't play (no internet, a wrong link, a missing file) plays the Missing Alarm Sound voice clip, or the beep; a Sound Player plays the Find The File song once; the free home for MP3s is a GitHub Release (Skynet-Sounds). Help 186 (new) and Help 21. Next free Help 187. Checked against the BruControl Import: a sound that is already a link is kept and never copied. (thread "Play sounds from a web link")
 - 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Offset's sign says where it turns On, Setpoint + Offset: Heating is Offset (-), Cool is Offset (+), the Fermentor Control has Heat Offset (-) and Cool Offset (+). Dialogs show and take the sign; the saved number and a Process's .onoffset are unchanged. Help 150, 182. Checked against the BruControl Import program: it saves the same numbers, no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")

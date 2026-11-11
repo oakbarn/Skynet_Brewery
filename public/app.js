@@ -32,7 +32,7 @@ import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarn
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
-import { openColorPicker, hexToRgb, rgbText } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
+import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
@@ -1772,8 +1772,8 @@ const PUMP_COVER_COLORS = { Red: '#d32f2f', Yellow: '#f6c21c', Blue: '#1e63c8', 
 const PUMP_COVERS = Object.keys(PUMP_COVER_COLORS);
 const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'Pick Cover Color']];
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
-// the Cover Color field (OakBarn Brewery, 2026-11-11): just below the Cover, shown only while the Cover is Pick Cover Color (User)
-const COVER_COLOR_TIP = 'The color of the cover over the pump. 🎨 opens the Color Picker (RGB).';
+// the Color (RGB) field of the Cover (OakBarn Brewery, 2026-11-11, his drawing): just below the Cover, shown only while the Cover is Pick Cover Color (User)
+const COVER_COLOR_TIP = 'The color of the cover over the pump, as Red, Green, Blue (0 to 255 each). Double-click it to open the Color Picker.';
 const isUserCover = c => String(c || '').trim().toLowerCase() === 'user';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
 function coverOf(e, v) {
@@ -6795,7 +6795,7 @@ function alarmFields(item) {
 // a pump's Cover (Fritz, 2026-11-02): between its picture and the On overlay; None is the default. Only the Skynet no-cover pump
 // drawings (Help 104) have covers; a Process changes it with Pump_1.cover = "Blue" and Pump_1.coverColor = "#20b2aa".
 const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under the On overlay; Skynet no-cover pump drawings only)', 'sel', COVER_CHOICES, true],
-  ['coverColor', 'Cover Color', 'color', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true }]];
+  ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true }]];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
 // Label Attributes (OakBarn Brewery, 2026-11-10): Title Case names, no clutter, the size it shows at in Font Size, and Left, Centered or
@@ -6964,7 +6964,7 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
   const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
-  return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ['coverColor', 'Cover Color', 'color', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true, ...x }]]
+  return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true, ...x }]]
     : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
@@ -7971,6 +7971,34 @@ const DEVICE_TIPS = {
   eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_HE_HLT~element_BH = on turns it On either way.',
   eOverlay: 'What shows on the Heating Element while it is on. Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. Orange Glow colors it orange. The bolts are drawn small in the middle of it, on top of the glow (Rule 7.8). Blue and Green are kept for cooling.',
 };
+// The Color (RGB) box (OakBarn Brewery, 2026-11-11, his drawing: "User Add then Pop up Color Picker then add the color field just
+// below. Double Click brings up the Color Picker again."; "Use this on every User Add Color Picker"). A row "Color (RGB)" with a
+// swatch and the color as three numbers, 250,250,250. Typing numbers sets the color; a double-click opens the Color Picker (Rule 2.48).
+// val is the field's hidden saved value (#rrggbb). onSet(hex) when a color is kept, onCancel() when the Color Picker is cancelled.
+function rgbRow(cur, val, { onSet = () => {}, onCancel = () => {} } = {}) {
+  let hex = hexToRgb(cur) ? cur : '';
+  const sw = h('span', { class: 'cswatch rgbSwatch' }), txt = h('input', { type: 'text', class: 'rgbText', value: rgbNums(hex), placeholder: 'R,G,B', spellcheck: 'false', autocomplete: 'off',
+    'data-help': 'The color as Red, Green, Blue (0 to 255 each), for example 250,250,250. Type it, or double-click to open the Color Picker.' });
+  const paint = c => { sw.style.background = c || ''; sw.classList.toggle('dflt', !c); txt.value = rgbNums(c); };
+  const live = c => { val.value = c; paint(c); val.dispatchEvent(new Event('input', { bubbles: true })); };      // the picture in the dialog follows
+  const keep = c => { hex = c; live(c); onSet(c); val.dispatchEvent(new Event('change', { bubbles: true })); };
+  paint(hex);
+  const pick = (more = {}) => {      // more: { onSave, onCancel, cancelText } from the one who opened it (Pick Cover Color)
+    const back = val.value;
+    openColorPicker(txt, hex || '#888888', { cancelText: more.cancelText, onChange: c => live(c),
+      onSave: c => { keep(c); more.onSave?.(c); },
+      onCancel: () => { val.value = back; paint(hex); val.dispatchEvent(new Event('input', { bubbles: true })); onCancel(); more.onCancel?.(); } });
+  };
+  txt.addEventListener('dblclick', ev => { ev.preventDefault(); pick(); });
+  txt.addEventListener('change', ev => {
+    ev.stopPropagation();
+    const c = parseRgb(txt.value);
+    if (c) keep(c); else { if (txt.value.trim()) toast('Type the color as three numbers from 0 to 255, for example 250,250,250', true); paint(hex); }
+  });
+  txt.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); txt.dispatchEvent(new Event('change')); } });
+  const lab = h('label', { class: 'rgbLbl' }, 'Color (RGB)'), box = h('div', { class: 'rgbBox' }, sw, txt);
+  return { els: [lab, box], pick, hex: () => hex, show: on => { for (const e of [lab, box]) e.classList.toggle('rgbOff', !on); } };
+}
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
@@ -8124,33 +8152,27 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const cur = flowKey(v) ?? '', rgb = cur.startsWith('#');
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'text', value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
-    const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); sw.title = rgbText(flowHex(c)); };
+    const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
     const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
-    const rgbOpt = opt('rgb', rgb ? `RGB (pick your own color): ${rgbText(cur).slice(4)}` : 'RGB (pick your own color) ...');
     const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
-      ...FLOW_COLORS.map(([k, n]) => opt(k, n)), rgbOpt);
-    let last = s.value; set(cur);
-    const pickBtn = h('button', { type: 'button', class: 'cpickBtn', 'data-help': 'Color Picker: pick any Flow color of your own (RGB).' }, '🎨');
-    const pickOwn = () => {
-      const before = last, back = val.value;
-      openColorPicker(pickBtn, val.value.startsWith('#') ? val.value : '#a0452a', {
-        onChange: c => set(c), onCancel: () => { s.value = before; set(back); },
-        onSave: c => { rgbOpt.textContent = `RGB (pick your own color): ${rgbText(c).slice(4)}`; s.value = 'rgb'; last = 'rgb'; set(c); } });
-    };
-    pickBtn.onclick = pickOwn;
-    s.onchange = () => { if (s.value === 'rgb') pickOwn(); else { last = s.value; set(s.value); } };      // RGB opens the Color Picker at once (Rule 2.44)
-    input = h('div', { class: 'cpick' }, sw, s, pickBtn, val);
+      ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
+    let last = s.value;
+    const row = rgbRow(rgb ? cur : '', val, {
+      onSet: c => { s.value = 'rgb'; last = 'rgb'; set(c); },
+      onCancel: () => { s.value = last; set(last === 'rgb' ? row.hex() : last); row.show(last === 'rgb'); } });
+    s.onchange = () => { if (s.value === 'rgb') { row.show(true); row.pick(); } else { last = s.value; set(s.value); row.show(false); } };      // RGB opens the Color Picker at once (Rule 2.44)
+    return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
     return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
   }
-  else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker (RGB, Rule 2.48)
+  else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
     const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
-    let cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa');
+    const cur = String(v || '').toLowerCase().replace(/^#fff(fff)?$/, '#fafafa');
     if (cur && !cols.some(c => c[1] === cur) && hexToRgb(cur)) cols.push([customColorName(cur), cur]);      // a color of its own shows by its RGB
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
-    const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') + (cur === 'transparent' ? ' none' : '') }); sw.style.background = cur;
-    const set = c => { val.value = c; sw.style.background = c; sw.classList.toggle('dflt', !c); sw.classList.toggle('none', c === 'transparent'); sw.title = rgbText(c); };
+    const sw = h('span', { class: 'cswatch' }), named = c => COLORS.some(k => k[1] === c) || c === CHAIN_KEEP;
+    const set = c => { val.value = c; sw.style.background = c === CHAIN_KEEP ? '' : c; sw.classList.toggle('dflt', !c || c === CHAIN_KEEP); sw.classList.toggle('none', c === 'transparent'); };
     const optOf = (n, c) => h('option', { value: c, ...(c && c !== 'transparent' && c !== CHAIN_KEEP ? { style: `background:${c};color:${['#fafafa', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n);
     const custom = h('option', { value: 'custom' }, 'Custom (add new) ...');
     const s = h('select', {}, ...cols.map(([n, c]) => optOf(n, c)), custom);
@@ -8163,18 +8185,18 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       const lists = S.config.vesselLists = { ...(S.config.vesselLists || {}) }; lists.colors = [...(lists.colors || []), c];
       api('PUT', '/ui/settings', { vesselLists: lists }).catch(e => toast(e.message, true));
     };
-    const pickBtn = h('button', { type: 'button', class: 'cpickBtn', 'data-help': 'Color Picker: pick any color of your own (RGB). Save adds it to this list.' }, '🎨');
-    const pickOwn = (more = {}) => {      // more: { onSave, onCancel, cancelText } from the one who opened it (Pick Cover Color)
-      const before = last, back = val.value;
-      openColorPicker(pickBtn, hexToRgb(val.value) ? val.value : '#888888', { cancelText: more.cancelText,
-        onChange: c => { set(c); val.dispatchEvent(new Event('input', { bubbles: true })); },      // the picture in the dialog follows as you pick
-        onSave: c => { keepColor(c); val.dispatchEvent(new Event('change', { bubbles: true })); more.onSave?.(c); },
-        onCancel: () => { s.value = before; set(back); val.dispatchEvent(new Event('input', { bubbles: true })); more.onCancel?.(); } });
-    };
-    pickBtn.onclick = () => pickOwn();
-    s.onchange = () => { if (s.value === 'custom') pickOwn(); else { last = s.value; set(s.value); } };      // Custom opens the Color Picker at once (one click, Rule 2.44)
-    input = h('div', { class: 'cpick' }, sw, s, pickBtn, val);
-    input._pick = pickOwn;
+    const own = c => !!hexToRgb(c) && !named(c);      // a color of the user's own: its Color (RGB) box shows
+    const row = rgbRow(own(cur) ? cur : '', val, { onSet: c => { keepColor(c); row.show(!named(c)); }, onCancel: () => { s.value = last; set(last); row.show(own(last)); } });
+    row.show(own(cur));
+    s.onchange = () => { if (s.value === 'custom') { row.show(true); row.pick(); } else { last = s.value; set(s.value); row.show(own(s.value)); } };      // Custom opens the Color Picker at once (one click, Rule 2.44)
+    return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
+  }
+  else if (kind === 'rgb') {       // only the Color (RGB) box: the Pump's Cover Color (OakBarn Brewery, 2026-11-11, his drawing)
+    const cur = hexToRgb(v) ? String(v).toLowerCase() : '';
+    const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'color', value: cur });
+    const row = rgbRow(cur, val, {});
+    row.els[1].append(val); row.els[1]._pick = row.pick;
+    return [h('label', {}, label), row.els[1]];
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
@@ -8925,7 +8947,7 @@ function layerDialog(title, build, canDelete = false) {
 // goes back to None).
 async function pickCoverColor(obj) {
   await new Promise(r => setTimeout(r, 0));       // the dialog has redrawn with the Cover Color field
-  const wraps = [...document.querySelectorAll('dialog[open] [data-k="coverColor"]')].map(i => i.closest('.cpick')).filter(w => w?._pick);
+  const wraps = [...document.querySelectorAll('dialog[open] [data-k="coverColor"]')].map(i => i.closest('.rgbBox')).filter(w => w?._pick);
   const wrap = wraps[wraps.length - 1];
   if (!wrap) return !!String(obj.coverColor || '').trim();
   wrap.scrollIntoView?.({ block: 'nearest' });

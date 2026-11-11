@@ -73,3 +73,21 @@ function nativePicker(anchor, hex, { onChange, onSave, onCancel }) {
   inp.click();
   return { close: () => inp.remove() };
 }
+
+// the Color (RGB) box (OakBarn Brewery, 2026-11-11, his drawing): a color as three numbers, "250,250,250"
+export function rgbNums(hex) {
+  const c = hexToRgb(hex);
+  return c ? c.join(',') : '';
+}
+// what was typed in the Color (RGB) box -> '#rrggbb', or null. "250,250,250", "250 250 250", "rgb(250, 250, 250)" or "#fafafa".
+// Pure white (255,255,255) is Skynet White, 250,250,250 (Rule 2.7).
+export function parseRgb(text) {
+  const t = String(text ?? '').trim();
+  let hex = null;
+  if (/^#?[0-9a-f]{6}$/i.test(t)) hex = '#' + t.replace('#', '').toLowerCase();
+  else {
+    const n = t.replace(/^rgba?\(|\)$/gi, '').split(/[\s,;]+/).filter(Boolean);
+    if (n.length === 3 && n.every(x => /^\d{1,3}$/.test(x) && +x <= 255)) hex = rgbToHex(n.map(Number));
+  }
+  return hex === '#ffffff' ? '#fafafa' : hex;
+}

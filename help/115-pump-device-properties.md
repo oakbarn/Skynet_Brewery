@@ -16,8 +16,8 @@ The idea: the things you set most are on the dialog itself. Everything else is o
    Once 1 to 4 are done, the rest of the box opens: the **Interface** and **Available Ports** line is greyed out (it is the
    wiring; press Cancel to change it), the **Label** and **Tab** can still be changed and the Suggested Name follows them, and
    the focus goes to **Orientation**. The **Graphic** is the picture of this Device as it will show on the Tab, with its Cover
-   and Orientation; the Picture itself cannot be changed. **Pick Cover Color** in Cover shows the **Cover Color** box just below
-   it and opens the Color Picker (Help 187): pick a color and press Save, or **◀ Back** sets the Cover back to None (no cover).
+   and Orientation; the Picture itself cannot be changed. **Pick Cover Color** in Cover pops up the Color Picker and shows the
+   **Color (RGB)** line just below it (Help 187): pick a color and press Save, or **◀ Back** sets the Cover back to None (no cover).
 4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
 ## The two icons

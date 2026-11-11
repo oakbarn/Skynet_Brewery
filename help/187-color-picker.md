@@ -10,30 +10,36 @@ Each color box is one dropdown with a swatch in front of it:
 2. **None** means no color at all (see-through).
 3. The standard colors by name, each with its swatch (White is RGB 250 250 250, Rule 2.7).
 4. Your own colors, shown by their RGB numbers, for example **RGB 32 178 170**.
-5. **Custom (add new) ...** opens the **Color Picker** at once.
+5. **Custom (add new) ...** pops up the **Color Picker** at once.
 
-The **🎨** button beside every color box opens the Color Picker too, starting from the color the box has now.
+## The Color (RGB) box
+
+When you pick a color of your own, a **Color (RGB)** line shows just below the color box: a swatch and the color as three
+numbers, Red, Green, Blue (0 to 255 each), for example **250,250,250**.
+
+- **Double-click** the numbers to bring up the Color Picker again.
+- Or type three numbers there, for example `32,178,170`, and press Enter.
+- Pick a named color (or Default or None) and the Color (RGB) line goes away again.
 
 ## The Color Picker
 
 - Drag in the big square to pick how light and how strong the color is, and on the color strip beside it to pick the color.
-- Or type it in the box under them: as **RGB** (Red, Green, Blue, each 0 to 255, for example `rgb(32, 178, 170)`), or press
-  **HEX** and type a # code (for example `#20B2AA`).
+- Or type it in the box under them: as **RGB** (for example `rgb(32, 178, 170)`), or press **HEX** and type a # code
+  (for example `#20B2AA`).
 - The swatch and the picture in the dialog change as you pick, so you see the color before you keep it.
 - **Save** keeps the color. It is added to the color list, so it is there in every color box next time.
 - **Cancel** (or Escape) closes the Color Picker and the box keeps the color it had.
 
 ## Pump covers
 
-On a Skynet pump, pick **Pick Cover Color** in **Cover**. The **Cover Color** box shows just below the Cover, and the Color
-Picker opens at once. Pick the color and press **Save**: the cover is drawn in that color on the pump in the dialog and on the
-Tab. **◀ Back** sets the Cover back to None (no cover). The Cover Color box is the same color box as every other one, so its
-**🎨** changes the color later.
+On a Skynet pump, pick **Pick Cover Color** in **Cover**. The Color Picker pops up and the **Color (RGB)** line shows just below
+the Cover. Pick the color and press **Save**: the cover is drawn in that color on the pump in the dialog and on the Tab.
+**◀ Back** sets the Cover back to None (no cover). Double-click the Color (RGB) numbers to change the color later.
 
 ## Flow colors
 
 A Flow Color (pipes, hoses, vessels, IPs and the Tab, Rule 5.21) picks **RGB (pick your own color) ...** the same way: the Color
-Picker opens at once, and the **🎨** beside it opens it again.
+Picker pops up and the Color (RGB) line shows below it.
 
 ## The technical side
 
