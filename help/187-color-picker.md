@@ -32,7 +32,7 @@ numbers, Red, Green, Blue (0 to 255 each), for example **250,250,250**.
 
 ## Pump covers
 
-On a Skynet pump, pick **Pick Cover Color** in **Cover**. The Color Picker pops up and the **Color (RGB)** line shows just below
+On a Skynet pump, pick **User Add** in **Cover**. The Color Picker pops up and the **Color (RGB)** line shows just below
 the Cover. Pick the color and press **Save**: the cover is drawn in that color on the pump in the dialog and on the Tab.
 **◀ Back** sets the Cover back to None (no cover). Double-click the Color (RGB) numbers to change the color later.
 

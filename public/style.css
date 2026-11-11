@@ -484,6 +484,13 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .rgbBox .cswatch.dflt { background: transparent !important; border-style: dashed; }
 .rgbBox .rgbText { width: 9em; flex: none; }
 .rgbOff { display: none !important; }
+.showOff { display: none !important; }      /* a field that shows only when it applies (a Pump's Speed Control: PWM pumps only) */
+.fldPair.xywh { flex-wrap: wrap; gap: 4px 6px; }
+.fldPair.xywh .pairLbl { white-space: nowrap; }
+.fldPair.xywh > input:not([type="checkbox"]) { width: 3.6em; flex: none; padding-left: 5px; padding-right: 3px; }      /* X, Y, Width and Height on one line, small boxes */
+.fldPair.xywh > input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.fldPair.xywh > input[type=number]::-webkit-inner-spin-button, .fldPair.xywh > input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.fldPair > input.roField:not([type="checkbox"]) { flex: 0 1 8em; min-width: 0; }      /* a greyed box on a line (a Pump's Use) */
 .pcr-app { z-index: 2000; }
 .coverOff { display: none !important; }      /* the Cover Color field waits until the Cover is Pick Cover Color */      /* the Color Picker is on top of the dialog it was opened from */
 .cpick .hidden { display: none; }
