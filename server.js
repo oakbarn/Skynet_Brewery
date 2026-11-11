@@ -72,7 +72,9 @@ const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'con
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
 const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 'scripts'));
 const PUBLIC = path.join(ROOT, 'public');
-const SAMPLES = path.join(ROOT, 'samples', 'configs');
+// The 3 Vessel sample ships in the panel (samples/configs); every other Sample Schema comes with the add-only Skynet Sample Schemas
+// Setup into sample_schemas/ (Rule 9.13). Both are listed together.
+const SAMPLES = [path.join(ROOT, 'samples', 'configs'), path.join(ROOT, 'sample_schemas')];
 const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
 // The BruControl Importer's Build page (OakBarn Brewery, 2026-11-08: "Connect to your Brewery will use the same Build page as in
 // Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"). The Importer starts this same Panel with
