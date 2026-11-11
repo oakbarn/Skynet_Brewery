@@ -11,6 +11,7 @@ export const blankWarn = what => `The ${what} cannot be blank.`;
 
 export const isBlank = v => !String(v ?? '').trim();
 import { LABEL_NO, labelNoMsg, cleanLabel } from './naming.js';
+const isLabelField = t => t?.dataset?.k === 'label' && !!t.closest?.('dialog[open]');
 // a Cancel button: data-close="cancel" (Properties), value="cancel", or a button whose text is Cancel / ✖ Cancel (the Rule 18 pop-ups)
 export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
 
@@ -89,6 +90,8 @@ export function installLabelGuard(doc = document) {
     try { t.setSelectionRange(at - (before - t.value.length), at - (before - t.value.length)); } catch { }
     showWarn(t, msg);
   }, true);
+  // no space at the start or end of a Label (OakBarn Brewery, 2026-11-11): trimmed as soon as the user leaves the box
+  doc.addEventListener('change', ev => { const t = ev.target; if (isLabelField(t) && t.value !== t.value.trim()) t.value = t.value.trim(); }, true);
   const clear = ev => { if (ev.target?.classList?.contains('labelBlank') && !isBlank(ev.target.value)) ev.target.classList.remove('labelBlank'); };
   doc.addEventListener('input', clear, true); doc.addEventListener('change', clear, true);
 }

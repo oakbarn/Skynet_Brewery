@@ -121,6 +121,9 @@ const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0
 // © ® ™ are taken out and @ ~ become a space: public/labelguard.js does it while typing (and says why), lib/store.js on load.
 export const LABEL_NO = /[©®™@~]/;
 export const cleanLabel = s => String(s ?? '').replace(/[©®™]/g, '').replace(/[@~]/g, ' ');
+// a Label never starts or ends with a space either (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label or
+// name and not allow. This is an issue in BruControl I want to remove from Skynet"): trimmed when it is saved and when a Schema loads
+export const tidyLabel = s => cleanLabel(s).trim();
 // the words in the small box and the Label Hover Help (OakBarn Brewery, 2026-11-11, word for word for © ® ™)
 export const COPYRIGHT_MSG = '© ® ™: Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License.';
 export const SUGGESTED_MSG = '@ ~: Kept for the Suggested Name. Not typed in a name or a Label.';

@@ -822,6 +822,11 @@ Interface ID is best set once (it is part of every Suggested Device name) and wa
 one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
+**No space at the start or end of any name or Label** (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label
+or name and not allow. This is an issue in BruControl I want to remove from Skynet"; "Put that in Naming and Label Rules"). A name
+(Tab and Interface names too, though they may have spaces inside) is refused with a message; a Label is trimmed as soon as you leave its
+box, again when it is saved, and every older Label once its Schema loads. Both programs follow this: a BruControl name or Label
+brought in by the Import is trimmed the same way. See Rule 3.17.
 
 3.4 **Allowed characters** in every name (Devices, Widgets, Interfaces, Tabs, Texts, pipes, vessels ...;
 all names are treated the same, Rule 3.11): no control characters, no spaces at the start or end, no leading dot, no emoji, none of `< > : " / \ | ? *`, none of the Windows reserved
@@ -933,6 +938,16 @@ Name"; "All Change Name Dialog gets new Button").
 - **The Label's help balloon is made for where it is:** it names its own Label, shows its own Suggested Name with the Label part in
   red (`MB_22_HE_`**`HLT~Element`**`_BR`), says spaces become ~, and says what the ⬢ (font, size and colors) and ⬆ (a 2 line Text
   Box) beside it do. Help 180.
+
+3.17 **Label Rules** (OakBarn Brewery, 2026-11-11: "Put that in Nameing and Label Rules"). A Label is the name shown on the Tab, and
+it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 18.28). It may have spaces and most marks, but:
+- **No space at the start or end** (Rule 3.3; "an issue in BruControl I want to remove from Skynet"). It is trimmed as soon as you
+  leave its box, when it is saved, and in an older Schema when it loads.
+- **No © ® ™**: "Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a
+  name or a Label to avoid confusion with the Skynet MIT License." They are taken out as you type, and a small box says so.
+- **No @ ~**: kept for the Suggested Name (Rule 3.4). Typed, they become a space, and the small box says so.
+- In the Suggested Name each space or other mark becomes `~`, an accent is dropped and ° stays (Rule 3.4, docs/Special_Characters.md).
+- The same words are in the Label's Hover Help (Help 115).
 
 ## 4. Making things: the Build Tab
 
@@ -3625,6 +3640,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 3.3 and new Rule 3.17, Label Rules (OakBarn Brewery: "Hunt for Beginning or trailing spaces in a label or name and not allow. This is an issue in BruControl I want to remove from Skynet"; "Put that in Nameing and Label Rules"): no space at the start or end of any name or Label; Labels are trimmed when you leave the box, when saved (the Brain trims every Label it is sent) and on load. Rule 3.17 gathers the Label Rules (no © ® ™, no @ ~, never blank). Checked against both programs: BruControl names and Labels with spaces at the ends are trimmed when imported.
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Valve_E_H and Valve_Sgas"): the High Temperature Electric Valve's Type ID is Valve_E_H (was E_H_Vlv) and the Solenoid Gas Valve's is Valve_Sgas (was G_Vlv): DO@Valve_E_H, DO@Valve_Sgas; older ones are upgraded on load with their names. Checked against both programs: the BruControl Import's Burner (BrN) comes in as Valve_Sgas.
 - 2026-11-11: Added Rule 1.32, NULL (OakBarn Brewery: "Could we use NULL", "OK and in the Help about reserved words"): `X = NULL` empties a Process variable, gGlobal or Value Widget (shows blank, kept after a restart); `== NULL` / `!= NULL` ask; math or `< >` on NULL stops the Process with a plain message; a Device can't be NULL. Help 22 gets "NULL: the empty value" and a "Reserved words" list; a reserved word can't be a name (Rule 3.4). Checked against both programs: the Panel runs it; the Importer brings in no NULL.
 - 2026-11-11: Rule 3.4 (OakBarn Brewery: the degree mark "should be allowed even in a Name"; "No Circle C or R in Labels"; "@ and ~ ... reserved for Suggested Name Use Only"): `°` is allowed in names; a Label can't have © ® ™ (taken out) or @ ~ (become a space), while typing and on load; a typed name has @ or ~ only when it is the Suggested Name. Checked against both programs: the Importer's Labels are cleaned the same way when the Schema loads.
