@@ -30,7 +30,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -13957,9 +13957,16 @@ function renderRecipeTab(box) {
   const changed = () => { profDirty.recipe = true; state.textContent = 'Not saved yet'; };
   const save = guard(async () => { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); renderMenuPane(); toast('Recipe saved'); });
   const cancel = guard(async () => { if (profDirty.recipe && !confirm('Leave the changes that are not saved?')) return; await rcLoad(); renderMenuPane(); });
+  // NEW asks which Recipe Level (1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain): the user picks it (Rule 17.11)
   const fresh = guard(async () => {
-    if (!confirm('Clear the Recipe and start a NEW one?\n\nIt starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.')) return;
-    await api('POST', '/ui/recipe/new'); await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast('New Recipe');
+    const w = { level: String(recipeLevel(rc)) };
+    if (await dialog('NEW Recipe', [['_n', 'Clear the Recipe and start a NEW one? It starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.', 'note'],
+      ['level', 'Level', 'sel', RECIPE_LEVELS.map(x => [String(x.level), x.name])]], w) !== 'ok') return;
+    readFields(w);
+    await api('POST', '/ui/recipe/new'); await rcLoad();
+    const L = RECIPE_LEVELS.find(x => x.level === +w.level) || RECIPE_LEVELS[3];
+    if (L.level !== recipeLevel(rcWork)) { rcWork.level = L.level; rcWork.type = L.type; await api('PUT', '/ui/recipe', rcWork); await rcLoad(); }
+    rcSub = 'recipe'; renderMenuPane(); toast(`New Recipe, ${L.title}`);
   });
   // IMPORT: a .bsmx or .xml file from this computer or phone. A file with many recipes asks which one.
   const file = h('input', { type: 'file', accept: '.bsmx,.xml,text/xml', hidden: true });
@@ -13991,11 +13998,18 @@ function renderRecipeTab(box) {
     await api('POST', `/ui/recipes/${v}/open`); await rcLoad(); renderMenuPane(); toast('Recipe opened');
   });
   const right = op ? h('div', { class: 'rcRight' }, state, lib, h('button', { onclick: cancel }, 'Cancel'), h('button', { class: 'primary', onclick: save }, 'Save')) : h('div', { class: 'rcRight' }, state);
+  // the Recipe Level (Rule 17.11), at the top beside NEW: the user picks it; the boxes and Daughter Tabs this Level does not use
+  // are not shown (their values stay). It sits in the top line so the boxes keep OakBarn Brewery's layout.
+  rc.level = recipeLevel(rc);
+  const level = rcInput(rc, 'level', { kind: 'sel', list: RECIPE_LEVELS.map(x => [x.level, x.name]), onChange: () => { rc.level = +rc.level; rc.type = levelOf(rc).type; changed(); renderMenuPane(); } });
+  const levelBox = h('label', { class: 'rcLevel', 'data-field': 'rcp_Level', title: [...RECIPE_LEVELS.map(x => `${x.title}: ${x.about}`), 'Skynet_Field rcp_Level'].join('\n') }, h('b', {}, 'Level '), level);
+  if (!op) level.disabled = true;
+  if (!levelShowsTab(rc, rcSub)) rcSub = 'recipe';     // a Daughter Tab this Level does not use goes back to the Recipe tab
   const sub = RC_DAUGHTERS.find(d => d[0] === rcSub);
   const crumb = sub ? h('button', { class: 'rcCrumb', onclick: () => { rcSub = 'recipe'; renderMenuPane(); }, title: 'Back to the Recipe tab' }, 'Recipe') : h('span', {}, 'Recipe');
   box.append(file, h('div', { class: 'rcHead' }, h('h3', {}, crumb, sub ? ` > ${sub[1]}` : ': Import >'),
     op && !sub ? [h('button', { class: 'rcYellow', onclick: () => file.click(), title: 'A BeerSmith .bsmx file (BeerSmith 3 or 4) or a BeerXML .xml file' }, 'IMPORT'),
-      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), h('b', {}, 'Fields can be edited.')] : '',
+      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), levelBox, h('b', {}, 'Fields can be edited.')] : !sub ? levelBox : '',
     h('span', { class: 'spacer' }), right));
   const pane = h('fieldset', { class: 'menuSet rcPane', ...(op ? {} : { disabled: true }) });
   box.append(pane);
@@ -14057,22 +14071,25 @@ function rcMain(pane, rc, u, changed) {
       rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
       rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
       can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
-    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'), h('span', { class: 'rcMini' }, 'Grain Wt.'), h('span', { class: 'rcMini' }, '1st Mash'), h('span', { class: 'rcMini' }, 'IBU'), h('span', { class: 'rcMini' }, 'Expected Gravity'),
-      h('b', {}, 'These fields are calculated from the Other Tabs, Grain, Fermentable, Mash, and Hops.')),
+    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'),
+      ...[['Grain Wt.', 'rcp_Total_Grain_Weight'], ['1st Mash', 'rcp_First_Mash_Temp'], ['IBU', 'rcp_IBU'], ['Expected Gravity', 'rcp_Expected_Gravity']].filter(([, f]) => levelShowsBox(rc, f)).map(([t]) => h('span', { class: 'rcMini' }, t)),
+      h('b', {}, 'These fields are calculated from the Other Tabs.')),
     h('div', { class: 'rcLower' },
-      h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.map(([k, t, about]) => h('div', { class: 'rcDRow' },
+      h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.filter(([k]) => levelShowsTab(rc, k)).map(([k, t, about]) => h('div', { class: 'rcDRow' },
         h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: 'Opens the ' + t + ' tab' }, t), h('span', {}, about)))),
       h('div', { class: 'rcLegend' }, h('div', { class: 'rcDRow' }, h('span', { class: 'rcTabBtn rcTabDemo' }, 'CLICK Here'), h('span', {}, 'opens the Tab')),
         h('div', { class: 'rcDRow' }, h('span', { class: 'rcCalcBtn rcCalcMini' }, 'Calculate'),
           h('b', {}, 'calculates Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature. It also calculates the Strike Volume and Temperature Grain Temperature and Grain Ratio.')))),
     h('p', { class: 'muted' }, `${rc.name ? `"${rc.name}": ` : ''}${rcFrom(rc)}${rc.sourceFile ? `, ${rc.sourceFile}` : ''}${rc.importedAt ? `, imported ${new Date(rc.importedAt).toLocaleString()}` : ''}. Amounts show in the units picked on ☰ Menu > Default.`));
+  // the boxes this Recipe Level does not use are not shown (Rule 17.11); their values stay in the Recipe
+  for (const el of pane.querySelectorAll('.rcBox[data-field]')) if (!levelShowsBox(rc, el.dataset.field)) el.remove();
 }
 // Calculate (the Recipe tab and the Hops tab): only when every hop has an Actual AAU above zero. Otherwise nothing is
 // changed and a warning says which hops to fix or delete (Fritz's Hops tab, 2026-10-31).
 // When one is 0, Skynet switches to the Hops tab, highlights the Actual AAU boxes that are 0 and shows Fritz's warning.
 let rcAAWarn = false;
 function rcCalculate(rc, changed) {
-  if (hopActualProblems(rc).length) {
+  if (levelShowsTab(rc, 'hops') && hopActualProblems(rc).length) {     // a Level 1 Can Kit has no HOPs tab: its hops are not checked
     rcAAWarn = true; rcSub = 'hops'; renderMenuPane();
     return readWarning('Actual AAU', ['Any Hop MUST have its Actual AAU set to the AAU on the Hop Package. The Recipe is based on a Recipe AAU, but the real IBUs of a Brew is calculated using the Actual AAU.',
       'Fix any Actual AAUs that are Zero and try Calculate again.', 'Click the Read Button to exit this dialog.']);
