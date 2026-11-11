@@ -52,6 +52,9 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const media = p => '/media?path=' + encodeURIComponent(p);
+// a sound can be a web link to an MP3 (Rule 7.20): the browser plays it straight from the web; anything else is a file on the Brain
+const isLink = p => /^https?:\/\//i.test(String(p ?? '').trim());
+const soundUrl = p => isLink(p) ? String(p).trim() : media(p);
 const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
 // a background that is not a number is a color ("red", "#3fa34d"); a number only ever picks a picture
@@ -1193,7 +1196,7 @@ const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)
 function usedPaths(re) {
   const c = draft || S.config;
   return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.imageOverlay, o.image, o.background, o.sound, ...slotsOf(o).map(n => o[slotKey(n)]), ...(o.sounds || [])])
-    .filter(p => typeof p === 'string' && re.test(p)))].sort();
+    .filter(p => typeof p === 'string' && (re.test(p) || (re === SND_RE && isLink(p)))))].sort();
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
@@ -7436,7 +7439,7 @@ function overrideFields(it) {
 // Sound Player: plays one sound file; pauses for alarms
 const SND_TIPS = {
   name: 'How a Process uses it: play wgt_SND_Music_BH, stop wgt_SND_Music_BH, or wgt_SND_Music_BH.path = "..." to change the sound.',
-  path: 'The sound file it plays. Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
+  path: 'The sound file it plays: a file on the Brain, or a web link to an MP3 (https://...), which needs the internet. Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
   loop: 'On: the sound plays over and over until it is stopped.',
 };
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
@@ -8492,7 +8495,7 @@ function bindForm(body, fields, obj, onChange) {
     const t = ev.target;
     if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
       const k = t.dataset.k, prev = obj[k];
-      let text = (prompt({ vbTypes: 'Type its General Type (for example Hop Pot Strainer). It is kept in the list as USER: Hop Pot Strainer.', units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture in media/Images (for example MyValve_On.png or Valves/MyValve_On.png)' : 'Add to this list')) || '').trim();
+      let text = (prompt({ vbTypes: 'Type its General Type (for example Hop Pot Strainer). It is kept in the list as USER: Hop Pot Strainer.', units: 'New unit (for example psi)', sounds: 'Sound file in your media folders (for example sounds/bell.wav), or a web link to an MP3 (for example https://.../song.mp3)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture in media/Images (for example MyValve_On.png or Valves/MyValve_On.png)' : 'Add to this list')) || '').trim();
       if (text && ['onoff', 'pictures', 'backgrounds'].includes(t.dataset.list)) text = imagesPath(text);
       if (t.dataset.list === 'vbTypes') text = vbUserType(text);       // a General Type the user names: USER: Hop Pot Strainer (Rule 19.5)
       try { readFields(obj, body); } catch { }
@@ -9495,11 +9498,28 @@ function soundSrc(e, v) {
   return mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || (mode === 'default' ? 'sounds/alarm_beep.wav' : ''));
 }
 const hasSoundNow = (e, v) => !!soundSrc(e, v);
+// what an Alarm plays when its own sound can't play, in this order (Rule 7.20): the voice clip, then the beep
+const ALARM_FALLBACKS = ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
+// and a Sound Player: OakBarn Brewery's song "Find The File - Connecting" (Treblo), played once
+const PLAYER_FALLBACKS = ['sounds/Skynet/Find_The_File_Connecting.mp3'];
 function getAudio(e) {
   const src = soundSrc(e, S.values[e.name] || {});
   if (!src) return null;
   let a = audios.get(e.name);
-  if (!a || a._src !== src) { a = new Audio(media(src)); a._src = src; audios.set(e.name, a); }
+  if (!a || a._src !== src) {
+    a = new Audio(soundUrl(src)); a._src = src; audios.set(e.name, a);
+    // a sound that can't play (a web link with no internet, a wrong link, a missing file), Rule 7.20: an Alarm plays the Missing
+    // Alarm Sound voice clip from the Brain, or the Skynet beep when that isn't there either; a Sound Player plays the
+    // "Find The File" song once; both say why
+    a.addEventListener('error', () => {
+      const why = isLink(src) ? 'its sound link can\'t be reached (is the internet down?)' : `its sound file ${src} is missing`;
+      const alarm = e.type === 'alarm', next = (alarm ? ALARM_FALLBACKS : PLAYER_FALLBACKS).filter(f => f !== src)[(a._fb ?? -1) + 1];
+      if (a._fb === undefined) toast(`${e.label || e.name}: ${why}` + (next ? `, so it plays ${alarm ? 'the Missing Alarm Sound' : 'the Find The File song'} instead` : ''), true);
+      if (!next) { a._fb = 99; return; }
+      a._fb = (a._fb ?? -1) + 1; a.src = media(next);
+      if (a._playing) a.play().catch(() => { });
+    });
+  }
   return a;
 }
 // Only one sound at a time: the panel marks the one that plays ("playing"); the others are quiet.
@@ -9507,7 +9527,7 @@ function getAudio(e) {
 function updateAlarms() {
   for (const e of S.config.elements.filter(isSoundEl)) {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
-    a.loop = !!v.loop;
+    a.loop = !!v.loop && !(e.type === 'soundPlayer' && a._fb !== undefined);      // the Find The File song plays once
     const music = e.type === 'soundPlayer' || e.kind === 'sound';
     // played to its end without Repeat: tell the Brain, so the next Alarm in line plays (Rule 7.18)
     if (e.type === 'alarm' && !a._endHook) { a._endHook = true; a.addEventListener('ended', () => { if (!a.loop && S.values[e.name]?.active) api('POST', '/ui/sound/finished', { name: e.name }).catch(() => { }); }); }
@@ -9710,7 +9730,7 @@ function ppSelect(p) {
 function ppShow() {
   const p = ppVal, snd = $('#ppKind').value === 'sounds';
   $('#ppPath').textContent = p || 'Nothing here: add pictures on the Media page';
-  $('#ppAudio').hidden = !snd || !p; if (p && snd) $('#ppAudio').src = media(p);
+  $('#ppAudio').hidden = !snd || !p; if (p && snd) $('#ppAudio').src = soundUrl(p);
   $('#ppInsert').disabled = !p;
 }
 // arrow keys move through the icons like in Explorer: left / right one, up / down one row
@@ -11932,7 +11952,7 @@ function renderDefaultTab(box) {
     ['_h', 'Hop alerts', 'head'],
     ['hopWarnMinutes', `Warning before each hop drop (minutes; empty = ${RECIPE_DEFAULTS.hopWarnMinutes}, 0 = no warning)`, 'num'],
     ['alertMergeMinutes', `Alerts this close together become one alert (minutes; empty = ${RECIPE_DEFAULTS.alertMergeMinutes})`, 'num'],
-    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav; empty = none)', 'text'],
+    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3; empty = none)', 'text'],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice (empty = the browser\'s usual voice)', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
     ['_ns', 'New Schema from a Skynet Template', 'head'],
@@ -14148,13 +14168,14 @@ function hopAlert(a) {
   document.body.append(bar);
   if (!soundOn) return;
   const speak = () => {
-    if (a.audio && a.audioFound) return new Audio(media(a.audio)).play().catch(() => { });
+    if (a.audio && a.audioFound) return new Audio(soundUrl(a.audio)).play().catch(() => { });
     if (d.speakAlerts === false || !window.speechSynthesis) return;
     const ut = new SpeechSynthesisUtterance(a.speak || a.text);
     if (d.voiceName) { const v = speechSynthesis.getVoices().find(x => x.name === d.voiceName); if (v) ut.voice = v; }
     speechSynthesis.speak(ut);
   };
-  if (d.hopAlertSound) { const s = new Audio(media(d.hopAlertSound)); s.onended = speak; s.play().catch(speak); } else speak();
+  // a web link that can't be reached goes straight on to the voice (Rule 7.20)
+  if (d.hopAlertSound) { const s = new Audio(soundUrl(d.hopAlertSound)); let said = false; const once = () => { if (!said) { said = true; speak(); } }; s.onended = once; s.onerror = once; s.play().catch(once); } else speak();
 }
 
 // ---------------------------------------------------------------- start

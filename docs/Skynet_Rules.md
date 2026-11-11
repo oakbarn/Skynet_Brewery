@@ -2272,6 +2272,22 @@ a Duty Cycle, Hysteresis, PID or Deadband by its ON / OFF). It goes **ON while t
 blank slot does nothing; a Device that has no ON / OFF state is skipped with a note in the Console. Both programs: the BruControl Import
 puts BruControl's one Digital Output in slot 1 (an Alarm imported before keeps it there too). Help 178.
 
+7.20 **A sound can be a web link to an MP3** (OakBarn Brewery, 2026-11-10: "Yes. And is there a place we can store the mp3 for free";
+"We could give that as an option if people do not want the audio files on their computer"). Every sound box (an Alarm's Sound file, an
+Alarm Chain step, the Sound Player, the sound before a hop alert, and a Process's `SoundPlayer path = "..."`) takes a file in the media
+folders on the Brain **or** a web link that starts with `https://` (or `http://`) and points straight at the sound file. The browser
+plays the link from the web, so the file never has to be on the Brain. **When a sound can't play** (OakBarn Brewery, 2026-11-10: "We will Do a Text to Speach MP3 for a Missing
+Alarm Sound"): a link with no internet, a wrong link, or a file that is missing. An Alarm then plays the **Missing Alarm Sound**, a
+voice clip on the Brain (`sounds/Skynet/Alarm_Sound_Missing.mp3`, a Text to Speech voice made by OakBarn Brewery), or the Skynet beep (`sounds/alarm_beep.wav`)
+when that isn't there either, and shows a warning that says why; an Alarm is never silent. A Sound Player plays OakBarn Brewery's own
+song *Find The File - Connecting* (Treblo, `sounds/Skynet/Find_The_File_Connecting.mp3`) once instead, with the same warning (OakBarn
+Brewery, 2026-11-10: the song for music, the voice for Alarms); the sound before a hop alert is skipped and the alert's voice still speaks. **The beep, the Missing Alarm Sound and the Find The File song come
+with the main Setup and the panel zip** (OakBarn Brewery, 2026-11-10: "Keep the Beep"; "Song and clip also with the brain"), so they
+are on the Brain even without the Skynet Media Setup (an exception to Rule 9.12). Help says a file on the Brain is the safest choice for Hop and
+Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-Sounds` on the Skynet project, not set as the latest
+release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
+Import keeps a sound that is already a link as it is and never copies it. Help 186.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3503,6 +3519,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-10: Added Rule 7.20 (OakBarn Brewery): a sound can be a web link to an MP3, played by the browser from the web; an Alarm whose sound can't play (no internet, a wrong link, a missing file) plays the Missing Alarm Sound voice clip, or the beep; a Sound Player plays the Find The File song once; the free home for MP3s is a GitHub Release (Skynet-Sounds). Help 186 (new) and Help 21. Next free Help 187. Checked against the BruControl Import: a sound that is already a link is kept and never copied. (thread "Play sounds from a web link")
 - 2026-11-10: Rules 6.19 and 6.30 (OakBarn Brewery): the Offset's sign says where it turns On, Setpoint + Offset: Heating is Offset (-), Cool is Offset (+), the Fermentor Control has Heat Offset (-) and Cool Offset (+). Dialogs show and take the sign; the saved number and a Process's .onoffset are unchanged. Help 150, 182. Checked against the BruControl Import program: it saves the same numbers, no change. (thread "Build Integrated Instances")
 - 2026-11-10: Rules 2.38 and 6.19 (OakBarn Brewery): Overlay names Red Glow (a Heating Element's start), None, Lightning Bolt, Flashing Lightning Bolt, Corner Badge Bolt, See Through Lightning Bolt, Green Glow Ring, Orange Glow, Blue Glow (saved values unchanged). Heating things have no Blue or Green; cooling things have no Red or Orange and have Blue and Green; others have no Blue. Rule 2.38: each dropdown choice starts with its own first letter (typing ahead). Help 58, 121, 137. Checked against the BruControl Import program: it shares these lists and sets no tints. (thread "Build Integrated Instances")
 - 2026-11-10: Rule 6.19 (OakBarn Brewery): Blue is kept for cooling: the Blue Tint overlay is offered only when the Direction is Cool; a Heating Element's Overlay list has no Red Tint (On = Red Glow is the same). Help 58. Checked against the BruControl Import program: it sets no tints. (thread "Build Integrated Instances")
