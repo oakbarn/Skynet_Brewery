@@ -29,7 +29,7 @@ const T = {
   PB: 'Push button (ON only while held)', Toggle: 'Toggle button (press ON, press again OFF)', Latch: 'Latching input (ON until reset)',
   FlowSw: 'Flow switch', Intlk: 'Door / lid / safety interlock', EStop: 'Emergency stop', Leak: 'Leak sensor', Count: 'Pulse counter',
   // PWM and analog outputs
-  PWM: 'PWM (plain)', P_L_Vlv: 'Low Temperature Proportional Valve', P_H_Vlv: 'High Temperature Proportional Valve',
+  PWM: 'PWM (plain)', Valve_L: 'Low Temperature Proportional Valve', Valve_H: 'High Temperature Proportional Valve',
   P_Pump: 'Pump speed', P_Fan: 'Fan speed', P_Mtr: 'Motor speed', P_LED: 'LED / light dimmer', AO: 'Analog output 0-10 V / 4-20 mA (plain)',
   // analog inputs and the rest
   AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', PH_Met: 'pH meter', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
@@ -45,14 +45,14 @@ export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = (ids, own = {}) => ids.split(' ').map(id => [id, own[id] ?? T[id]]);
 // The General Type in front says what kind of port it is (OakBarn Brewery, 2026-11-11: "PWM@Pump"), so a Pump, Fan, Motor, LED or
 // Heating Element on a PWM or 0-10 V port has the same Type ID as on an On/Off port: PWM@Pump, AO@Fan, PWM@H_Element (were P_Pump, H_PWM ...).
-// A Proportional Valve keeps its P_: it is a different valve, not an On/Off valve run at a speed.
+// A Proportional Valve is Valve_L (low temperature) or Valve_H (high temperature): PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv).
 const PWM_OWN = { H_Element: 'Heating PWM (element on a PWM output)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed', LED: 'LED / light dimmer' };
 const AO_OWN = { H_Element: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
   digitalOut: list('DO H_Element Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
-  pwmOut: list('PWM H_Element P_L_Vlv P_H_Vlv Pump Fan Mtr LED', PWM_OWN),
-  analogOut: list('AO H_Element P_L_Vlv P_H_Vlv Pump Fan Mtr', AO_OWN),
+  pwmOut: list('PWM H_Element Valve_L Valve_H Pump Fan Mtr LED', PWM_OWN),
+  analogOut: list('AO H_Element Valve_L Valve_H Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
   analogIn: list('AI Pres Level Vol PH_Met'),
   flowMeter: list('FlowM'),
@@ -81,7 +81,7 @@ export function defaultCode(el, hint) {
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
   else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'H_Element' }[el.subtype];
-  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'H_Element', propValve: 'P_L_Vlv', pump: 'Pump' }[el.subtype];
+  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'H_Element', propValve: 'Valve_L', pump: 'Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
   return c && has(c) ? c : codes[0][0];
@@ -89,12 +89,14 @@ export function defaultCode(el, hint) {
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
 const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
-  PWM_PmP: 'Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
-  AO_PmP: 'Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
+  PWM_PmP: 'Pump', PWM_VlV: 'Valve_L', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
+  AO_PmP: 'Pump', AO_VlV: 'Valve_L', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
   // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
   P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'H_Element', H_AO: 'H_Element',
   // OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element" (was HE)
   HE: 'H_Element',
+  // OakBarn Brewery, 2026-11-11: "PWM@Valve_L or PWM@Valve_H and AO to follow" (PWM already says the P)
+  P_L_Vlv: 'Valve_L', P_H_Vlv: 'Valve_H',
   DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
   FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
 export function upgradeCode(el) {

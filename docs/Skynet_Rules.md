@@ -3133,7 +3133,7 @@ and any other devices where there is a Subgroup to Type to DO@Pump"; "All Get Up
 a Pump on a PWM port `PWM@Pump`, a Heating Element `DO@H_Element` (`PWM@H_Element`, `AO@H_Element`). A new Device fills it in: a new On/Off Pump (a
 Blichmann RipTide) reads `DO@Pump`. On a PWM or 0-10 V port a Pump, Fan, Motor, LED or Heating Element has the same Type ID as on an
 On/Off port (Pump, Fan, Mtr, LED, H_Element; they were P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO), since the General Type already says the
-port; older Schemas are upgraded on load, names too (Rule 15.2). A Proportional Valve keeps `P_L_Vlv` / `P_H_Vlv` (a different valve).
+port; older Schemas are upgraded on load, names too (Rule 15.2). A Proportional Valve is `Valve_L` (low temperature) or `Valve_H` (high temperature): `PWM@Valve_L`, `AO@Valve_H` (OakBarn Brewery, 2026-11-11: "PWM@Valve_L or PWM@Valve_H and AO to follow"; were P_L_Vlv, P_H_Vlv).
 The saved type stays as it was (digitalOut, typeCode Pump). General Types: **DO** (Digital Out), **PWM**,
 **HYS** (Hysteresis) from Fritz; AO (Analog Out), DI (Digital In), AI (Analog In), TEMP, FLOW, SCALE, STEP (Stepper),
 DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-type shows only its General Type.
@@ -3597,6 +3597,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-11: Rule 18.18 (OakBarn Brewery: "PWM already says the P"; "PWM@Valve_L or PWM@Valve_H and AO to follow"): a Proportional Valve's Type ID is Valve_L (low temperature) or Valve_H (high temperature), shown PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "Heating Element: DO@H_Element"): a Heating Element's Type ID is `H_Element` (was `HE`): `BM_8_DO@H_Element_HLT~element_BH`, Device Type DO@H_Element (PWM@H_Element, AO@H_Element); older Schemas upgraded on load, names and Processes follow. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Any where in Skynet Change any DO:Pump ... to DO@Pump ... also PWM@Pump"; "All Get Updated to the new standard"): the Device Type reads GeneralType@Type everywhere (DO@Pump, PWM@Pump, DO@H_Element), filled in on a new Device; P_Pump, P_Fan, P_Mtr, P_LED, H_PWM, H_AO become Pump, Fan, Mtr, LED, H_Element under PWM / AO; older Schemas' Type IDs and names upgraded on load. Both programs. (thread "Show DO: type in Suggested Names")
 - 2026-11-11: Rule 3.1 (OakBarn Brewery: "a on/off Pump is DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Type part of a Device name starts with its General Type and an `@` (`BM_22_DO@Pump_Pump_BH`); a Process reads `@` inside a name with no quotes; older Schemas get it once when they load (Rule 15.2), Processes follow; the sample and default Schema changed (Rule 15.3). Both programs. New docs/Special_Characters.md lists every special character and its use in a name. Help 46 updated. (thread "Show DO: type in Suggested Names")
