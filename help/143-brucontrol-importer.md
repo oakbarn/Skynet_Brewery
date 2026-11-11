@@ -191,8 +191,8 @@ Then you confirm what comes in, in small steps:
   neither are its Placeholders. A Tab with no items and no Placeholders is a good one to leave out;
 - your **Globals** are **only listed** for now, on the summary (each Global with its Tab). They are not imported, they get no
   Placeholder, and nothing is asked about them: Globals will be dealt with in a later step;
-- your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
-  swapped in later; your **heating controls** keep their settings (BruControl's Target becomes the Setpoint, Kp, Ki, Kd ...; a script's `target` is written `.setpoint`, and an old
+- your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard, with the same 8 IPs as every pump:
+  Inlet on the Right Middle and Outlet on the Top Right to start), so any pump can be swapped in later; your **heating controls** keep their settings (BruControl's Target becomes the Setpoint, Kp, Ki, Kd ...; a script's `target` is written `.setpoint`, and an old
   `.target` line still works) and their temperature probe, so a
   click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
 - your **Charts**: each BruControl Chart becomes a Skynet **Graph Widget** ([Help 159](159-graph-widget)) with the same span,
