@@ -117,7 +117,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     } else if (lineStart) {
       if (!proc) for (const [k, h] of SET) out.push({ text: k, hint: h });
       if (!proc) for (const p of props) out.push({ text: '.' + p + ' = ', label: '.' + p, hint: pHint(p), back: 1 });
-      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_DO@HE_HLT_BR.HYS or MB_25_DO@HE_HLT_BR.DutyC", Rule 6.19)
+      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_DO@H_Element_HLT_BR.HYS or MB_25_DO@H_Element_HLT_BR.DutyC", Rule 6.19)
       if (el?.methods && !attr) for (const m of el.methods) out.push({ text: '.' + heatMethodCode(heatMethodKey(m)), hint: `switch it to ${m} (the same as .method = "${m}")`, back: 1 });
     } else return null;
     return out;

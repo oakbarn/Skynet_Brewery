@@ -6,7 +6,7 @@ import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /\['heat', 'Heating Element', \[ELEMENT,[\s\S]{0,200}am\('RIMS tube'\), VESSEL_ELEMENT\]\]/, 'Vessel Device Template in place of the Electric kettle, basic');
-assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'HE'\]/);
+assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'H_Element'\]/);
 assert.match(app, /const ELEM_MODELS = \[\['Skynet Heating Element', 'sky'[^\]]*\], \['User Defined Heating Element/, 'step 2 picks the element');
 assert.match(app, /if \(pick === 'vesselElement'\) \{[\s\S]{0,200}pickElemVessel\(\)/, 'choose the Vessel first');
 assert.match(app, /if \(elemVessel\) return elemVesselBuild\(elemVessel, e\);/, 'then Build');

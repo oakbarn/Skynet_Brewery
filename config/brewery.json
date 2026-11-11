@@ -1359,7 +1359,7 @@
    "look": "lcd",
    "sim": {
     "start": 62,
-    "heater": "BM_8_DO@HE_HLT~element_BH",
+    "heater": "BM_8_DO@H_Element_HLT~element_BH",
     "heatRate": 1.2,
     "maxTemp": 212
    },
@@ -1414,7 +1414,7 @@
    "look": "lcd",
    "sim": {
     "start": 62,
-    "heater": "BM_9_DO@HE_Kettle~element_BH",
+    "heater": "BM_9_DO@H_Element_Kettle~element_BH",
     "heatRate": 1.2,
     "maxTemp": 212,
     "follow": "BM_701_TEMP@1W_Mash_BH",
@@ -1433,7 +1433,7 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "BM_8_DO@HE_HLT~element_BH",
+   "name": "BM_8_DO@H_Element_HLT~element_BH",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",
@@ -1458,7 +1458,7 @@
    "vpKind": "element"
   },
   {
-   "name": "BM_9_DO@HE_Kettle~element_BH",
+   "name": "BM_9_DO@H_Element_Kettle~element_BH",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",

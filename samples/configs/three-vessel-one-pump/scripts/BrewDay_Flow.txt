@@ -52,8 +52,8 @@ BM_26_DO@eVlv_Kettle~out_BH = false
 BM_27_DO@eVlv_To~mash~tun_BH = false
 BM_28_DO@eVlv_To~kettle_BH = false
 BM_29_DO@eVlv_To~fermenter_BH = false
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = off
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = off
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
 BM_30_DO@Chill_Chiller~water_BH = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
@@ -78,8 +78,8 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 103
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Strike~volume_RP"
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH.setpoint = gblV_Desired_Strike
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = gblV_Desired_Strike
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on
 vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °F."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -130,7 +130,7 @@ BM_27_DO@eVlv_To~mash~tun_BH = false
 BM_28_DO@eVlv_To~kettle_BH = false
 BM_29_DO@eVlv_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH.setpoint = gblV_Sparge_Temp
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = gblV_Sparge_Temp
 vSHops = ""
 if gblV_Hop1_Group_R1 == -333
 	if gblS_Hop1_R1 != ""
@@ -478,7 +478,7 @@ BM_27_DO@eVlv_To~mash~tun_BH = false
 BM_28_DO@eVlv_To~kettle_BH = false
 BM_29_DO@eVlv_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = off
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
 [SectionBrew306]
 step 1.00016 "SectionBrew306"
 gblV_Brew_Status = 306
@@ -533,8 +533,8 @@ wait gblV_Brew_Status == 311
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Pre~boil~volume_RP"
 send_db "wgt_VAL_Pre~boil~gravity_RP"
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH.setpoint = 215
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = on
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.setpoint = 215
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = on
 vSMsg = "Heating the kettle to a boil."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -841,7 +841,7 @@ goto "Boil_Loop"
 step 1.00021 "Boil Done"
 stop "wgt_TMR_Step~timer_BH"
 gblS_Hop_Warning = ""
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = off
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew480]
 step 1.00022 "SectionBrew480"

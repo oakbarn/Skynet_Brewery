@@ -8,7 +8,7 @@
 import { boardOf, linkOf } from './links.js';
 import { TYPE_METHOD } from './heatmethod.js';
 
-// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is HE
+// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is H_Element
 // (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we could Use MB_25_HE_HLT_BR"). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
 const T = {
   // temperature
@@ -18,7 +18,7 @@ const T = {
   TMP36: 'TMP36 analog temperature sensor',
   // heating
   PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor)',
-  HE: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
+  H_Element: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
   Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
@@ -44,15 +44,15 @@ export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 // own: a description that is this General Type's own (a Pump on a PWM port is a Pump speed)
 const list = (ids, own = {}) => ids.split(' ').map(id => [id, own[id] ?? T[id]]);
 // The General Type in front says what kind of port it is (OakBarn Brewery, 2026-11-11: "PWM@Pump"), so a Pump, Fan, Motor, LED or
-// Heating Element on a PWM or 0-10 V port has the same Type ID as on an On/Off port: PWM@Pump, AO@Fan, PWM@HE (were P_Pump, H_PWM ...).
+// Heating Element on a PWM or 0-10 V port has the same Type ID as on an On/Off port: PWM@Pump, AO@Fan, PWM@H_Element (were P_Pump, H_PWM ...).
 // A Proportional Valve keeps its P_: it is a different valve, not an On/Off valve run at a speed.
-const PWM_OWN = { HE: 'Heating PWM (element on a PWM output)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed', LED: 'LED / light dimmer' };
-const AO_OWN = { HE: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
+const PWM_OWN = { H_Element: 'Heating PWM (element on a PWM output)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed', LED: 'LED / light dimmer' };
+const AO_OWN = { H_Element: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO HE Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
-  pwmOut: list('PWM HE P_L_Vlv P_H_Vlv Pump Fan Mtr LED', PWM_OWN),
-  analogOut: list('AO HE P_L_Vlv P_H_Vlv Pump Fan Mtr', AO_OWN),
+  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  pwmOut: list('PWM H_Element P_L_Vlv P_H_Vlv Pump Fan Mtr LED', PWM_OWN),
+  analogOut: list('AO H_Element P_L_Vlv P_H_Vlv Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
   analogIn: list('AI Pres Level Vol PH_Met'),
   flowMeter: list('FlowM'),
@@ -80,8 +80,8 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
-  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'HE', propValve: 'P_L_Vlv', pump: 'Pump' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'H_Element' }[el.subtype];
+  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'H_Element', propValve: 'P_L_Vlv', pump: 'Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
   return c && has(c) ? c : codes[0][0];
@@ -89,10 +89,12 @@ export function defaultCode(el, hint) {
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
 const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
-  PWM_PmP: 'Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'HE',
-  AO_PmP: 'Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'HE',
+  PWM_PmP: 'Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
+  AO_PmP: 'Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
   // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
-  P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'HE', H_AO: 'HE',
+  P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'H_Element', H_AO: 'H_Element',
+  // OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element" (was HE)
+  HE: 'H_Element',
   DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
   FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
 export function upgradeCode(el) {
