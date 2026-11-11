@@ -123,7 +123,7 @@ const KIND_TAKES = {
 // '' when the value fits the gGlobal's Kind, or the error in plain words. Kinds other than the five variable Kinds pass.
 export function kindValueError(name, kind, v) {
   const k = KIND_TAKES[kind ?? 'value'];
-  if (!k || k.ok(v)) return '';
+  if (!k || v === null || k.ok(v)) return '';          // NULL empties every Kind (Rule 1.32)
   const tip = kind === 'time' && typeof v === 'number' ? ' (a number of minutes times 00:01:00 makes a time)'
     : kind === 'string' && v !== undefined ? ' (to make text from it, put it after "" +, such as "" + 152)' : '';
   return `${name} is a ${k.word} gGlobal: it only takes ${k.takes}. It was not changed, because ${valueWhat(v)}${tip}.`;

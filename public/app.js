@@ -21,7 +21,7 @@ import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES } from './naming.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
-import { elementNameError, fileNameError } from './names.js';
+import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -964,7 +964,7 @@ async function addMf(tname, kind) {
         readFields(work, body);
         if (missing) throw new Error(missing);
         const name = noSpaces(work.name || last);
-        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: last, what: 'Device' }); if (bad) throw new Error(bad);
         if (used().some(n => String(n || '').toLowerCase() === name.toLowerCase())) throw new Error(`The name ${name} is already used. Names must be unique.`);
         const g = placeTabFitting(t, work.workspace, name, null);
         try {
@@ -5205,7 +5205,7 @@ async function newDeviceDialog(e, hint, what) {
         if (missing) throw new Error(missing);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
         if (!name) throw new Error('Type a Label (or a Name)');
-        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Device' }); if (bad) throw new Error(bad);     // @ ~ only in the Suggested Name
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
@@ -5283,7 +5283,7 @@ async function newPictureDialog(e) {
         readFields(work, body);
         if (missing) throw new Error(missing);
         const sug = picSuggest(e, work.label), name = noSpaces(work.name || sug);
-        const bad = elementNameError(name, 'Widget'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Widget' }); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Names must be unique.`);
         for (const k of KEEP) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
@@ -8756,17 +8756,18 @@ function lockedName(key, label, obj) {
 function nameCheck(n, obj) {
   const all = draft || S.config;
   if (obj.type && (S.types || []).includes(obj.type)) {          // a Device or Widget element: Fritz's name rules, unique
-    const bad = elementNameError(n, isDevice(obj) ? 'Device' : 'Widget'); if (bad) return bad;
+    let sug = ''; try { sug = nameSuggestion(obj, obj) || ''; } catch { }
+    const bad = typedNameError(n, { suggestion: sug, was: obj.name, what: isDevice(obj) ? 'Device' : 'Widget' }); if (bad) return bad;     // @ ~ only in the Suggested Name
     if (all.elements.some(x => x._ref !== obj._ref && x.name.toLowerCase() === n.toLowerCase()) || all.graphics.some(g => g.kind === 'text' && g.name === n)) return `The name ${n} is already used. Names must be unique.`;
   } else if (obj.kind === 'text') {                              // a Text Widget: the same rules as a Widget's name
-    const bad = elementNameError(n, 'Widget'); if (bad) return bad;
+    const bad = typedNameError(n, { was: obj.name, what: 'Widget' }); if (bad) return bad;
     const low = n.toLowerCase();
     if (all.elements.some(x => x.name.toLowerCase() === low) || all.graphics.some(g => g.id !== obj.id && String(g.name ?? '').toLowerCase() === low)) return `The name ${n} is already used. Names must be unique.`;
   } else if (all.workspaces.some(w => w === obj || w._ref === obj._ref)) {
     const bad = elementNameError(n, 'Tab'); if (bad) return bad;
     if (all.workspaces.some(w => w._ref !== obj._ref && w.name.toLowerCase() === n.toLowerCase())) return `There is already a Tab called ${n}`;
   } else {                                                         // every other name follows the same rules (Fritz, 2026-10-29, Rule 3.11)
-    const bad = elementNameError(n, 'item'); if (bad) return bad;
+    const bad = typedNameError(n, { was: obj.name, what: 'item' }); if (bad) return bad;
   }
   return null;
 }
@@ -9560,7 +9561,10 @@ async function editItem(kind, id) {
       const follow = autoNamed.has(item) && work.name === item.name && (isDevice(work) || !!widgetTypeId(work));      // a new Widget follows its suggestion too (Rule 3.14)
       if (follow) work.name = nameSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
-      if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
+      if (work.name !== item.name) {      // public/names.js; @ ~ only in the Suggested Name
+        let sug = ''; try { sug = nameSuggestion(work, item) || ''; } catch { }
+        const bad = typedNameError(work.name, { suggestion: sug, was: item.name, what: isDevice(work) ? 'Device' : 'Widget' }); if (bad) throw new Error(bad);
+      }
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
@@ -10552,7 +10556,7 @@ async function globalDialog(work, orig) {
     if (!work.name) throw new Error('Name: it can\'t be blank');
     if (!work.kind) throw new Error('Kind: pick the Kind of this gGlobal');
     if (!orig || work.name !== orig.name) {
-      const bad = elementNameError(work.name, 'gGlobal'); if (bad) throw new Error(bad);
+      const bad = typedNameError(work.name, { was: orig?.name, what: 'gGlobal' }); if (bad) throw new Error(bad);
       const lc = work.name.toLowerCase();
       if ([...S.config.elements.filter(x => x !== orig), ...S.config.graphics].some(x => String(x.name ?? '').toLowerCase() === lc)) throw new Error(`The name ${work.name} is already used. Names must be unique.`);
     }
