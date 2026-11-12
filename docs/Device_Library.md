@@ -22,7 +22,7 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)
 
-Example: `MB_25_DO@eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_DO@Valve_E_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID Valve_E, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
@@ -96,7 +96,7 @@ Interface, port or settings of its own, so it never counts against "one Device p
 | Arduino Mega / other Arduino | Best | OK (depends on the network) | Poor (through an ESP32 bridge) |
 | ESP32 | Best | Good | Good, as long as nothing heats on it |
 
-With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pad, PID, Hysteresis, Duty Cycle) on Ethernet or WiFi are allowed but warned about; each Interface gets a Board dropdown and a "Lost link: all OFF after" time (3 to 600 seconds, default 10).
+With PR #108: heating Devices (element, gas valve, igniter, heat pad, PID, Hysteresis, Duty Cycle) on Ethernet or WiFi are allowed but warned about; each Interface gets a Board dropdown and a "Lost link: all OFF after" time (3 to 600 seconds, default 10).
 
 ---
 
@@ -112,9 +112,9 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 
 **Data Display (Rule 6.26, Help 174):** a Device with more than one value (PID, Deadband, Hysteresis, Duty Cycle, Heating Element by method, Flow meter, Scale, PWM / Analog output with Measured volts) picks which one shows on the Tab; `.display` in a Process; a Flow meter's `.value` follows it.
 
-| Direct On / Off output | DO, HE, Pump, CPMP, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
-| PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
-| Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
+| Direct On / Off output | DO, H_Element, Pump, CPMP, M_L_Vlv, Valve_E, M_H_Vlv, Valve_E_H, Valve_Sgas, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
+| PWM output | PWM, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr, LED (shown PWM@Pump ...) |
+| Analog output | AO, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr (shown AO@Pump ...) |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
 | Analog input | AI, Pres, Level, Vol, PH_Met |
 | Flow meter | FlowM |
@@ -131,25 +131,25 @@ What each ID means:
 | 1W | DS18B20 OneWire probe | DO | Direct On/Off (relay, SSR, contactor) |
 | RTD | PT100 / PT1000 on a MAX31865 board | Pump | Pump |
 | TC | Thermocouple on a MAX31855 / MAX31856 board | M_L_Vlv | Low Temperature Manual Valve |
-| 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | eVlv | Electric Valve (motorized ball valve, low temperature; was E_L_Vlv) |
+| 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | Valve_E | Electric Valve (motorized ball valve, low temperature; was E_L_Vlv) |
 | 5KNTC | 5K NTC thermistor | M_H_Vlv | High Temperature Manual Valve |
-| 50KNTC | 50K NTC thermistor | E_H_Vlv | High Temperature Electric Valve |
-| 100KNT | 100K NTC thermistor (3D printer type) | G_Vlv | Solenoid Gas Valve |
+| 50KNTC | 50K NTC thermistor | Valve_E_H | High Temperature Electric Valve |
+| 100KNT | 100K NTC thermistor (3D printer type) | Valve_Sgas | Solenoid Gas Valve |
 | NTC | NTC thermistor, other size | Mtr | Motor |
 | LM35 | LM35 analog temperature sensor | LED | LED |
 | TMP36 | TMP36 analog temperature sensor | Light | Light |
 | PID | PID | E_Alm | Electric Alarm |
 | DutyCy | Duty Cycle | Fan | Fan |
 | Hys | Hysteresis | Chill | Chiller / glycol / fridge compressor |
-| H_PWM | Heating element on a PWM output | HtPad | Fermenter heat wrap or pad |
-| H_AO | Heating element on a 0-10 V power controller (SCR / SSVR) | Ignit | Burner igniter |
+| H_Element | Heating Element (DO@H_Element, PWM@H_Element, AO@H_Element) | HtPad | Fermenter heat wrap or pad |
+| | | Ignit | Burner igniter |
 | PWM | PWM (plain) | DI | Direct Input (plain) |
-| P_L_Vlv | Low Temperature Proportional Valve | Float | Float (true while made) |
-| P_H_Vlv | High Temperature Proportional Valve | DIN | DIN momentary push button (one trigger per press, 3 s lockout) |
-| P_Pump | Pump speed | PB | Push button (ON only while held) |
-| P_Fan | Fan speed | Toggle | Toggle button (press ON, press again OFF) |
-| P_Mtr | Motor speed | Latch | Latching input (ON until reset) |
-| P_LED | LED / light dimmer | FlowSw | Flow switch |
+| Valve_L | Low Temperature Proportional Valve | Float | Float (true while made) |
+| Valve_H | High Temperature Proportional Valve | DIN | DIN momentary push button (one trigger per press, 3 s lockout) |
+| Pump | Pump (PWM@Pump, AO@Pump: its speed) | PB | Push button (ON only while held) |
+| Fan | Fan (PWM@Fan: its speed) | Toggle | Toggle button (press ON, press again OFF) |
+| Mtr | Motor (PWM@Mtr: its speed) | Latch | Latching input (ON until reset) |
+| LED | LED (PWM@LED: dimmer) | FlowSw | Flow switch |
 | AO | Analog output 0-10 V / 4-20 mA (plain) | Intlk | Door / lid / safety interlock |
 | AI | Analog input (plain) | EStop | Emergency stop |
 | Pres | Pressure | Leak | Leak sensor |
@@ -165,7 +165,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, HE (Heating Element, Rule 3.1: `MB_25_DO@HE_HLT_BR`; elements named before keep DO), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, H_Element (Heating Element, Rule 3.1: `MB_25_DO@H_Element_HLT_BR`), Pump, CPMP (Cool / Warm Pump, one Pump with a Method, Rule 6.21: `MB_D5_CPMP_Cool~Pump_FR`, Help 164), M_L_Vlv, Valve_E, M_H_Vlv, Valve_E_H, Valve_Sgas, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
@@ -186,7 +186,7 @@ What each ID means:
 
 ### 4.2 Pump
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).
-- **Type ID:** Pump (or P_Pump on a PWM / analog output for speed).
+- **Type ID:** Pump: DO@Pump on an On/Off port, PWM@Pump or AO@Pump on a speed output.
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
 - **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
 - **Pump Standard** (Rule 5.27, Fritz 2026-11-05, Help 130): every Skynet pump picture (these drawings, their Covers and the older Riptide-style color pictures) is drawn to scale in the same 300 x 300 box and shown 150 x 150, with its ports ending at (285, 150) (inlet) and (243, 56) (outlet) of the box (Orientation Left mirrors them). Port tubes are drawn longer where needed, so one pump can replace another in the same place and stay joined. The sump pump keeps its own box.
@@ -200,7 +200,7 @@ What each ID means:
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
-- **Type IDs:** eVlv (default), E_H_Vlv, M_L_Vlv, M_H_Vlv, G_Vlv.
+- **Type IDs:** Valve_E (default), Valve_E_H, M_L_Vlv, M_H_Vlv, Valve_Sgas.
 - Same settings as 4.1 with Kind = valve, plus:
   - Valve type: **Electro_Mechanical** (switched by its pin) or **Manual** (turned by hand; a Process shows a pop-up and waits for Done)
   - Orientation: by its shape, Horizontal, Vertical, 45° Left, 45° Right
@@ -216,7 +216,7 @@ What each ID means:
   without a Cover (Rule 18.23, Help 128): Graphic, Path (greyed out), Orientation, Toggle and Overlay (user settable: an exception
   to Rule 5.18, Fritz 2026-11-05), Database and .API ⬢, Tap water valve, On Close List / On Open List. Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
   Template, never shown as Master / Daughter). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR, _Front).
-- **Type ID:** eVlv (set by the Template; Fritz 2026-11-05, was E_L_Vlv, names already made keep it, so the Add Device box doesn't ask for it).
+- **Type ID:** Valve_E (set by the Template; Fritz 2026-11-05, was E_L_Vlv, names already made keep it, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
   Look normal, Ask before changing, background / .backpath, _2, _3, Digits, Hide value.
@@ -252,14 +252,14 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
-- **Type IDs:** PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED.
+- **Type IDs:** PWM, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr, LED (shown PWM@...).
 - **Port:** PWM pins only (Mega 2-13, 44-46).
 - **Settings:** Interface, PWM pin, Start value (%), Decimals, **Measured volts** (Rule 6.24, Help 169: pairs of % and the volts measured; shows ≈ V, `.volts` reads and sets).
 - **Value:** 0-100 % on screen; the board gets 0-255. Board line `PWM <pin> <0-255>`.
 
 ### 4.5 Analog output (0-10 V / 4-20 mA)
 - **Add menu:** Devices: outputs > Analog output 0-10 V, or Analog output 4-20 mA.
-- **Type IDs:** AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr.
+- **Type IDs:** AO, H_Element, Valve_L, Valve_H, Pump, Fan, Mtr (shown AO@...).
 - **Port:** a PWM pin feeding a PWM-to-0-10 V or 4-20 mA module.
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals, **Measured volts** (Rule 6.24).
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).
@@ -269,7 +269,7 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
   0-100 % (analog output)", renamed 2026-11-03).
 - Its own pictures (open above 0 % / closed at 0 %, Image Path 1-3, Rule 7.10) and **In / Out IP across % and down %** (ipInX,
   ipInY, ipOutX, ipOutY), the same as the User Defined Motorized Ball Valve (4.3c). Help 117.
-- **Type IDs:** P_L_Vlv (default), P_H_Vlv.
+- **Type IDs:** Valve_L (default), Valve_H.
 - An Analog output (4.5) set to 0-10 V, 0-100 %, with IN and OUT IPs and pictures for open (above 0 %) and closed (0 %).
 
 ### 4.6a Skynet KLD20T Proportional Valve (Skynet Template, Rules 5.16, 5.17, 5.22)
@@ -278,7 +278,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - **Add menu:** Valves on the Edit layout bar (not On/Off: it is not an on / off valve). One entry; **Orientation** picks
   Horizontal, Vertical Left, Vertical Right or 45 degrees.
 - **Templates:** templates/device/Skynet_KLD20T_Proportional_Valve_H (main), _VL, _VR (Flip Horizontal on).
-- **Type:** analogOut, subtype propValve. **Type ID:** P_L_Vlv.
+- **Type:** analogOut, subtype propValve. **Type ID:** Valve_L.
 - **Fixed by the Template:** Kind, Service (Room Temperature Liquid), Signal 0-5V, 0 to 100 %, Decimals 0, pictures (the Skynet
   Motorized Ball Valve's: Valve_Motor_Ball_*H, *V_LC, until Fritz sends a KLD20T drawing), look.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
@@ -516,7 +516,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Or step by step:** Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds it on the Build Tab (Skynet Rule 19.5, Help 166).
 - **Picture:** the Template's (Skynet_Vessel_Widget.svg: 16 IPs: 15 from the Vessel IP Template drawing, plus Center Back Element).
 - **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
-- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_DO@eVlv_HLT_Right_Sparge_BH`.
+- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_DO@Valve_E_HLT_Right_Sparge_BH`.
 - **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.
 - **HERMS coil:** Left or Right, drawn under that side's HERMS In and Out IPs; the two IPs are the coil's ends.
 - **Locked once built and saved** on a Tab: IPs (Place), parts and HERMS coil can't be changed; no un-bundling.
@@ -526,9 +526,9 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Add menu:** Edit layout bar > Elbows, Tees … > Valve Tees and Supply Manifolds, or Select Device Type > Valves. Six rows: **Long Tee with a Valve**, **Double Supply Manifold** and **Triple Supply Manifold**, each with all its valves **Manual** or all **Motorized** to start. Templates: Valve_Tee, Supply_Manifold_2, Supply_Manifold_3 (Bundled Fitting Templates).
 - **Pictures:** Skynet_TC15_Valve_Tee.svg, Skynet_TC15_Supply_Manifold_2.svg, Skynet_TC15_Supply_Manifold_3.svg (Fritz's Long Tees joined end to end); the panel draws each valve on its branch, Manual or Motorized, with TC 1.5 ferrules that match the tee ends (top one clamped to the branch, bottom one the IP); no picture file.
 - **IPs:** only the two open ends of the joined tees and the far end of each valve (3, 4 or 5). A closed valve shuts its IP.
-- **Built-in Devices:** one valve per tee, a Digital Output with Kind = valve. **Manual** = Valve type Manual (no Port; a Process shows a pop-up and waits for Done), Type ID M_L_Vlv. **Motorized** = Valve type Electro_Mechanical, Type ID eVlv, on a Port of the fitting's one **Interface**. Two valves can't share a Port.
+- **Built-in Devices:** one valve per tee, a Digital Output with Kind = valve. **Manual** = Valve type Manual (no Port; a Process shows a pop-up and waits for Done), Type ID M_L_Vlv. **Motorized** = Valve type Electro_Mechanical, Type ID Valve_E, on a Port of the fitting's one **Interface**. Two valves can't share a Port.
 - **Each valve is swapped Manual / Motorized on its own** in the fitting's Properties (Valves: Valve 1, Valve 2 ...), at any time; not locked once saved (unlike 5.3).
-- **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_DO@eVlv_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
+- **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_DO@Valve_E_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
 - A click on a valve on its Tab opens or closes it. Motorized valves are on Close all / Open all.
 - **Add box and Properties:** the Pump's drill-down (Rule 18.29): 1 Label, 2 Interface, 3 Valve 1 / 2 / 3 (Manual or Motorized, Available Ports on its line), 4 Tab, then Name, Graphic, Path, Orientation, X, Y, Width, Height, Device Type. A saved Motorized valve's Port and the Interface are greyed out (make it Manual, Save, then Motorized to wire it again).
 - **Valve numbers** 1, 2, 3 on the valves in Edit layout and on the dialog Graphic, matching Valve 1, 2, 3.

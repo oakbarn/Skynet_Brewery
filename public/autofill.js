@@ -39,14 +39,14 @@ const COMMANDS = [
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
 ];
 // words that fit anywhere on a line, not only at its start
-const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['and', ''], ['or', ''], ['not', '']];
+const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['NULL', 'empty: no value'], ['and', ''], ['or', ''], ['not', '']];
 const NEW_KINDS = [['value', 'a number'], ['string', 'a text'], ['bool', 'true or false'], ['time', '00:10:00'], ['datetime', 'date and time']];
 // new gGlobalValue -> new gGlobalValue gV_ (the start of a gGlobal's name comes with its word, Rule 1.24)
 const G_PREFIX = Object.fromEntries(Object.values(G_DECLARE).flatMap(d => [[d.long.toLowerCase(), d.prefix], [d.short.toLowerCase(), d.prefix]]));
 const G_TEXT = Object.fromEntries(Object.values(G_DECLARE).map(d => [`new ${d.long}`, `new ${d.long} ${d.prefix}`]));
 const ON_OFF = [['true', 'on'], ['false', 'off'], ['on', ''], ['off', '']];
-const IDENT = /[A-Za-z_][A-Za-z0-9_~@]*$/;
-const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~@]*$/;
+const IDENT = /[A-Za-z_][A-Za-z0-9_~@°]*$/;
+const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~@°]*$/;
 // my_Process_Mash.running: true while it runs (read only)
 const PROCESS_ATTRS = ['running'];
 // which kinds of item each command works on (lib/engine.js)
@@ -117,7 +117,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     } else if (lineStart) {
       if (!proc) for (const [k, h] of SET) out.push({ text: k, hint: h });
       if (!proc) for (const p of props) out.push({ text: '.' + p + ' = ', label: '.' + p, hint: pHint(p), back: 1 });
-      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_DO@HE_HLT_BR.HYS or MB_25_DO@HE_HLT_BR.DutyC", Rule 6.19)
+      // the short way to switch its method (Fritz, 2026-11-07: "MB_25_DO@H_Element_HLT_BR.HYS or MB_25_DO@H_Element_HLT_BR.DutyC", Rule 6.19)
       if (el?.methods && !attr) for (const m of el.methods) out.push({ text: '.' + heatMethodCode(heatMethodKey(m)), hint: `switch it to ${m} (the same as .method = "${m}")`, back: 1 });
     } else return null;
     return out;
@@ -183,7 +183,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   if (atStart) {
     for (const [k, h] of COMMANDS) command(k, h);
     // names used above in this Process come next (the ones nearest the cursor first)
-    for (const m of [...above.slice(0, above.length - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_~@]*/g)].reverse()) {
+    for (const m of [...above.slice(0, above.length - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_~@°]*/g)].reverse()) {
       if (COMMANDS.some(([k]) => k.toLowerCase() === m[0].toLowerCase()) || ANYWHERE.some(([k]) => k === m[0].toLowerCase())) continue;
       if (elOf(m[0]) || declared.has(m[0]) || isProc(m[0])) add(m[0] + ' ', 'used above', m[0]);
     }

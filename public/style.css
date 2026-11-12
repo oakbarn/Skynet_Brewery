@@ -953,6 +953,8 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rcHead h3 { margin: 0; font-size: 1.3em; }
 .rcCrumb { font: inherit; font-weight: 700; background: none; border: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; }
 .rcYellow { background: #ffd400; color: #000; border: 3px solid #111; border-radius: 10px; font-weight: 800; padding: 6px 22px; letter-spacing: .5px; }
+.rcLevel { display: inline-flex; align-items: center; gap: 6px; }
+.rcLevel select { font-size: 1.05em; padding: 4px 8px; min-width: 9em; }
 .rcRight { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-left: auto; }
 .rcLib { max-width: 14em; }
 .rcPane { border: none; padding: 0; margin: 0; }

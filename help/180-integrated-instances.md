@@ -37,7 +37,7 @@ An Instance is more like **Bob** of the Bobiverse (*We Are Legion*) than a Clone
 ## In a Process
 
 Every Device built into a Vessel Device (a Heating Element, Probe or Thermowell) is called by the vessel's name, a dot and its own
-name: `HLT_Vessel.BM_8_DO@HE_HLT~element_BH = On` (Skynet Rule 5.31). Its plain name alone is refused, so a Process always says which
+name: `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = On` (Skynet Rule 5.31). Its plain name alone is refused, so a Process always says which
 vessel it means. An Instance's own name already is the vessel's name, a dot and the Heating Element's name. Capitals don't matter.
 When a Device or a vessel is renamed, every Process is changed for you.
 
@@ -57,7 +57,7 @@ Double-click a built-in Heating Element in Edit layout to open **Integrated Heat
   still works.
 - **Help balloons:** rest the mouse on Visible, on the lock or on any name in the box to see what it does.
 - **The Label's balloon** names your Label and shows your Suggested Name with the Label part in red, for example
-  MB_22_DO@HE_**HLT~Element**_BH. Spaces in a Label become ~ in the name. The red ⬢ beside the Label sets its font, size and colors; the
+  MB_22_DO@H_Element_**HLT~Element**_BH. Spaces in a Label become ~ in the name. The red ⬢ beside the Label sets its font, size and colors; the
   red ⬆ opens a Text Box with 2 lines.
 
 ## The Suggested Name follows the Label

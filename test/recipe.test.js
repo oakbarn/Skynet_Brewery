@@ -4,8 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity } from '../public/recipecalc.js';
+import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
+import { recipeValues } from '../lib/brewprocess.js';
 
 // a small .bsmx as BeerSmith writes it: ounces, fluid ounces, °F; a folder of two recipes
 const hop = (n, oz, use, t, alpha = 10) => `<Hops><F_H_NAME>${n}</F_H_NAME><F_H_ALPHA>${alpha}</F_H_ALPHA><F_H_AMOUNT>${oz}</F_H_AMOUNT><F_H_BOIL_TIME>${t}</F_H_BOIL_TIME><F_H_DRY_HOP_TIME>4</F_H_DRY_HOP_TIME><F_H_USE>${use}</F_H_USE><F_H_FORM>0</F_H_FORM><F_H_IN_RECIPE>1</F_H_IN_RECIPE></Hops>`;
@@ -170,4 +171,32 @@ const water = new ProfileStore(path.join(dir, 'water'), 'water');
 const half = water.create('Half distilled', { from: 'skynet-balanced' });
 assert.equal(water.save(half.id, { ...half, distilledPct: 50 }).distilledPct, 50);
 assert.throws(() => water.save(half.id, { ...half, distilledPct: 150 }), /percent/);
+// The four Recipe Levels (Rule 17.11): the user picks one; an imported file's type gives it; each Level shows its own tabs and boxes
+assert.deepEqual(RECIPE_LEVELS.map(x => x.name), ['1 Can Kit', '2 Extract', '3 Partial Grain', '4 All Grain']);
+assert.equal(new Set(RECIPE_LEVELS.map(x => x.name[0])).size, 4, 'each Level choice starts with its own letter (type to pick)');
+assert.equal(blankRecipe().level, 4, 'a NEW Recipe starts at Level 4 until the user picks');
+assert.equal(recipeLevel({ type: 'Extract' }), 2); assert.equal(recipeLevel({ type: 'Partial Mash' }), 3); assert.equal(recipeLevel({ type: 'All Grain' }), 4);
+assert.equal(recipeLevel({ level: 1, type: 'Extract' }), 1, 'the Level the user picked wins');
+const k1 = cleanRecipe({ name: 'Kit', level: 1 });
+assert.equal(k1.level, 1); assert.equal(k1.type, 'Extract', 'a Can Kit is an Extract recipe in BeerXML words');
+assert.equal(cleanRecipe({ name: 'P', level: 3 }).type, 'Partial Mash');
+assert.equal(cleanRecipe({ name: 'Old', type: 'Partial Mash' }).level, 3);
+assert.equal(levelShowsTab(k1, 'hops'), false); assert.equal(levelShowsTab(k1, 'fermentables'), true); assert.equal(levelShowsTab(k1, 'grain'), false);
+assert.equal(levelShowsTab({ level: 2 }, 'hops'), true); assert.equal(levelShowsTab({ level: 2 }, 'mash'), false);
+assert.equal(levelShowsBox({ level: 2 }, 'rcp_Strike_Temp'), false); assert.equal(levelShowsBox({ level: 2 }, 'rcp_IBU'), true);
+assert.equal(levelShowsBox(k1, 'rcp_IBU'), false); assert.equal(levelShowsBox({ level: 3 }, 'rcp_Strike_Temp'), true);
+for (const L of RECIPE_LEVELS) for (const f of L.hide) assert.ok(recipeField(f), `${f} is a Skynet_Field`);
+assert.equal(recipeFieldValues({ level: 1 }).rcp_Level, 1); assert.equal(recipeFieldValues({ type: 'Extract' }).rcp_Level, 2);
+for (const l of [1, 2, 3, 4]) assert.ok(levelShowsTab({ level: l }, 'waters') && levelShowsTab({ level: l }, 'fermentables'), `Level ${l} has Waters and Fermentables`);
+assert.deepEqual(levelFermTypes({ level: 1 }), ['extract', 'dry extract'], 'Levels 1 and 2: Extracts only'); assert.deepEqual(levelFermTypes({ level: 2 }), ['extract', 'dry extract']);
+assert.ok(levelFermTypes({ level: 3 }).includes('sugar'));
+// Tap Water (Rule 17.12): always one, never deleted, keeps its flag, the water used when none is picked
+const tapStore = new ProfileStore(path.join(dir, 'tapwater'), 'water');
+const tap = tapStore.ensureTap(); assert.equal(tap.name, 'Tap Water'); assert.equal(tapStore.ensureTap().id, tap.id, 'only one Tap Water');
+assert.throws(() => tapStore.remove(tap.id), /always kept/);
+const tap2 = tapStore.save(tap.id, { ...tap, ca: 40, hco3: 122, tested: '2026-11-11', chlorine: 'ammonia', source: 'kit' });
+assert.equal(tap2.tap, true); assert.equal(tap2.chlorine, 'ammonia'); assert.equal(tap2.source, 'kit');
+assert.throws(() => tapStore.save(tap.id, { ...tap, tested: '11/11/2026' }), /yyyy-mm-dd/);
+const tv = recipeValues({ recipe: { ...blankRecipe(), waterProfile: '' } }, { water: tapStore.list() });
+assert.equal(tv.rcp_Water_Ca, 40, 'no Water Profile picked: Tap Water');
 console.log('recipe tests passed');
