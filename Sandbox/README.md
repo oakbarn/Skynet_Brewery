@@ -20,4 +20,5 @@ add-only Skynet Sample Schemas Setup (Rule 9.13), one at a time. The panel itsel
 
 | File here | What it is |
 |---|---|
-| `help/BruControl_Help_Extract.md` | Every BruControl sentence and section taken out of the Skynet Panel Help and Hover Help (OakBarn Brewery, 2026-11-10, Rule 11.3), with where it was and what is there now. It is the starting point for the Importer Help, written after the Skynet Panel Help is finished. Nothing in it is shown by the panel. |
+| `help/BruControl_Help_Extract.md` | Every BruControl sentence and section taken out of the Skynet Panel Help, Hover Help and README (OakBarn Brewery, 2026-11-10, Rule 11.3), with where it was and what is there now. It is the starting point for the Importer Help, written after the Skynet Panel Help is finished. Nothing in it is shown by the panel. |
+| `Importer/Importer_Notes.md` | The Importer Sandbox (OakBarn Brewery, 2026-11-12, Rule 11.3): notes said to be for the Importer version only, with where each goes, kept until the Big Merge moves them into the Importer. |
