@@ -8,7 +8,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { closeLauncherWindow } from './lib/closewindow.js';
-import { openAppWindow, closeAppWindow } from './lib/appwindow.js';
+import { openAppWindow, closeAppWindow, openInDefaultBrowser } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, brewNames, isBrewName, SKIP } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
@@ -336,6 +336,7 @@ function processWords() {
 
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/openlink') return 'viewer';      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -1034,6 +1035,13 @@ async function route(req, res) {
       try { return ok(res, { ok: true, ...engine.binRestore(id, as) }); } catch (e) { if (e.code === 409) return ok(res, { ok: false, taken: true, msg: e.message }); throw e; }
     }
     if (!s[2] && m === 'DELETE') { engine.binPurge(id); return ok(res); }
+  }
+  // An outside link from the panel on this computer opens in the default browser, not in Skynet's clean Edge window (lib/appwindow.js).
+  // Only for a page on this same computer: a phone or another PC opens its links itself.
+  if (p === '/ui/openlink' && m === 'POST') {
+    const local = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req)) && !req.headers['x-forwarded-for'];
+    let url = ''; try { url = String((await jsonBody(req))?.url ?? ''); } catch { /* no body: nothing to open */ }
+    return ok(res, { opened: local && CLOSABLE ? openInDefaultBrowser(url) : false });
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
   // ☰ Menu > Close Skynet Brewer (Fritz, 2026-10-30): stops the panel, and the launcher then closes its Command Prompt window.
