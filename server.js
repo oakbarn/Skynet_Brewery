@@ -339,7 +339,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -571,6 +571,11 @@ async function route(req, res) {
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
+  // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step
+  if (p === '/ui/brain/resume' && m === 'POST') {
+    if (!power) return fail(res, 400, 'Nothing to resume here.');
+    try { return ok(res, power.resume(String((await jsonBody(req)).id ?? ''), me?.name ?? '')); } catch (e) { return fail(res, 400, e.message); }
+  }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   // a screen played an Alarm's sound to its end (Rule 7.18): one that does not repeat lets the next Alarm in line play
   if (p === '/ui/sound/finished' && m === 'POST') {
