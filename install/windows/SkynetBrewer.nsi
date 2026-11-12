@@ -402,6 +402,7 @@ Section "Skynet Brew Panel" SecMain
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   Call AskImporter
+  Call AskStartWithWindows
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Uninstall Skynet Brewer.lnk" "$INSTDIR\Uninstall Skynet Brewer.exe"
 
@@ -450,6 +451,24 @@ Function AskImporter
     Delete "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk"
     Delete "$DESKTOP\Skynet BruControl Importer.lnk"
     Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
+FunctionEnd
+
+; Start with Windows (OakBarn Brewery, 2026-11-12, Rule 6.31): most brewers use a Windows PC as the Brain, and Windows restarts
+; for updates. Yes puts a Skynet Brewer shortcut in your Startup folder, so the panel starts by itself each time you sign in to
+; Windows (with Windows' "Use my sign-in info to automatically finish setting up after an update", that is right after an update
+; restart too). No admin rights are needed. On an update, the answer you gave last time is the default.
+Function AskStartWithWindows
+  ${If} ${FileExists} "$SMSTARTUP\Skynet Brewer.lnk"
+    MessageBox MB_YESNO|MB_ICONQUESTION "Start Skynet Brewer by itself each time you sign in to Windows?$\r$\n$\r$\nYes (recommended for a brewing computer): after Windows restarts, for an update or any other reason, Skynet starts again as soon as you sign in. Everything starts Off.$\r$\nNo: you start Skynet Brewer from its shortcut yourself.$\r$\n$\r$\nYou can change this by running this Setup again." /SD IDYES IDYES add IDNO leave
+  ${Else}
+    MessageBox MB_YESNO|MB_ICONQUESTION "Start Skynet Brewer by itself each time you sign in to Windows?$\r$\n$\r$\nYes (recommended for a brewing computer): after Windows restarts, for an update or any other reason, Skynet starts again as soon as you sign in. Everything starts Off.$\r$\nNo: you start Skynet Brewer from its shortcut yourself.$\r$\n$\r$\nYou can change this by running this Setup again." /SD IDNO IDYES add IDNO leave
+  ${EndIf}
+  add:
+    CreateShortCut "$SMSTARTUP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0 SW_SHOWMINIMIZED
+    DetailPrint "Skynet Brewer starts by itself when you sign in to Windows"
+    Return
+  leave:
+    Delete "$SMSTARTUP\Skynet Brewer.lnk"
 FunctionEnd
 
 Function StartPanel
@@ -502,6 +521,7 @@ FunctionEnd
 Section "Uninstall"
   Delete "$DESKTOP\Skynet Brewer.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+  Delete "$SMSTARTUP\Skynet Brewer.lnk"
   ; the Importer shortcut in the Import folder (the folder and your files in it are kept)
   Delete "$INSTDIR\..\Import\Skynet BruControl Importer.lnk"
   Delete "$INSTDIR\Import\Skynet BruControl Importer.lnk"
