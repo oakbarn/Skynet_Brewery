@@ -26,8 +26,13 @@ Checked 2026-11-12 in the repo settings:
   scanner works by scanning the harmless EICAR test file (the standard file every antivirus is built to
   catch). Clean: a "Virus check ... nothing found" line goes at the top of the Release notes. Anything found:
   the Release goes back to a Draft (hidden from the public), the check turns red and GitHub emails you.
-  Nothing is deleted. Not added: VirusTotal (70 scanners at once). It needs a free API key, and every file
-  sent there is kept by VirusTotal and can be downloaded by its paying members.
+  Nothing is deleted.
+- **VirusTotal** (Rule 9.11), also in `panel-version.yml`. After the Defender check, about 70 virus
+  scanners look at every .exe. It only reports: a "VirusTotal" list goes at the top of the Release notes
+  (how many scanners flagged each file, with a link to the full report), and a yellow warning shows if any
+  did. It never hides the Release, because one or two of the 70 often guess wrong on a new installer.
+  It is skipped until the API key below is saved. Every file sent there is kept by VirusTotal and its
+  paying members can download it; that is fine because the Releases are public anyway.
 
 ## Switches to turn on (click by click)
 
@@ -43,7 +48,22 @@ Checked 2026-11-12 in the repo settings:
 6. **Code scanning**: leave it alone. Do **not** pick "Default setup"; the file in the pull request
    does this job, and GitHub allows only one of the two.
 
-### 2. Make outside pull requests wait for you
+### 2. VirusTotal key
+
+Make the account with an `@oakbarnbrewery.com` email (for example a new one at pair just for this), not a
+new Google account: a Google account nobody signs in to can be closed for not being used.
+
+1. Go to https://www.virustotal.com/gui/join-us and sign up with that email. Confirm the email.
+2. Sign in, click your name (top right) > **API key**. Click the copy button next to the key.
+3. Open https://github.com/oakbarn/Skynet_Brewery/settings/secrets/actions
+4. Click **New repository secret**.
+5. **Name**: `VIRUSTOTAL_API_KEY` (exactly like that). **Secret**: paste the key.
+6. Click **Add secret**.
+
+From the next merge on, each Release gets its VirusTotal list. Sign in to VirusTotal once in a while so the
+account stays alive. The free key allows 4 checks a minute and 500 a day, far more than Skynet needs.
+
+### 3. Make outside pull requests wait for you
 
 So a stranger's pull request cannot run its own code on GitHub before you look at it:
 
@@ -52,7 +72,7 @@ So a stranger's pull request cannot run its own code on GitHub before you look a
    **Require approval for all external contributors**.
 3. Click **Save**.
 
-### 3. Protect the main branch
+### 4. Protect the main branch
 
 1. Open https://github.com/oakbarn/Skynet_Brewery/settings/branches
 2. Click **Add classic branch protection rule**.

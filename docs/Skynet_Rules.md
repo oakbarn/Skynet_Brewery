@@ -2488,6 +2488,9 @@ Virus check (OakBarn Brewery, 2026-11-12: "Can a exe be sent to the virus check 
 made, a Windows computer at GitHub scans every .exe on it with Microsoft Defender (first proving the scanner works on the
 harmless EICAR test file). Clean: the Release notes get a "Virus check ... nothing found" line. Anything found: the
 Release goes back to a Draft (hidden from the public) and GitHub emails OakBarn Brewery; nothing is deleted.
+Then VirusTotal (OakBarn Brewery, 2026-11-12: "Can skynet have that free account", key in the VIRUSTOTAL_API_KEY secret)
+has about 70 scanners look at every .exe; it only reports (counts and links at the top of the Release notes, a warning
+if any flag a file) and never hides the Release. Skipped until the key is saved.
 (thread "Turn on code scanning for Skynet repo")
 
 9.12 **The Skynet pictures and sounds are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "remove all the graphics and
@@ -3723,7 +3726,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
-- 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
+- 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Then VirusTotal (about 70 scanners) reports on each .exe in the Release notes, never hides it; needs the VIRUSTOTAL_API_KEY secret. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
