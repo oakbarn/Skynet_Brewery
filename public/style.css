@@ -487,6 +487,9 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .showOff { display: none !important; }      /* a field that shows only when it applies (a Pump's Speed Control: PWM pumps only) */
 .fldPair.xywh { flex-wrap: wrap; gap: 4px 6px; }
 .fldPair.xywh .pairLbl { white-space: nowrap; }
+/* X, Y, Width and Height: every label the same font and size, centered on its box (OakBarn Brewery, 2026-11-12: "Center and same fonts and sizes on labels") */
+.fldPair.xywh { align-items: center; }
+.fldPair.xywh .pairLbl, .fldPair.xywh .pairLbl.tipLbl { font: inherit; font-size: inherit; opacity: 1; color: inherit; line-height: normal; text-align: center; align-self: center; }
 .fldPair.xywh > input:not([type="checkbox"]) { width: 3.6em; flex: none; padding-left: 5px; padding-right: 3px; }      /* X, Y, Width and Height on one line, small boxes */
 .fldPair.xywh > input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .fldPair.xywh > input[type=number]::-webkit-inner-spin-button, .fldPair.xywh > input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

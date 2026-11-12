@@ -2871,7 +2871,7 @@ async function doTap(e) {
   const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
   if (t.type === 'temperature') return probeTap(t);      // a Probe, a Thermowell, or a picture that shows one (Rule 2.43)
   if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
-  if (act === 'toggle' && isBoolEl(t)) {
+  if ((act === 'toggle' || act === 'dual') && isBoolEl(t)) {      // Dual Action: a click is On / Off (Rule 2.50)
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (isConfirmation(t)) return confirmByHand(t, !cur);      // a Confirmation Widget: do it by hand, then Done (Rule 1.28)
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
@@ -2892,9 +2892,24 @@ function release() {
 // A Valve or Heating Element set to Push Button (OakBarn Brewery, 2026-11-09, Rule 2.46): On only while its picture is held down, on
 // the Tab, built into a Vessel Device or in a Valve Tee; when it is already On, Off only while held (the Brain reverses it).
 const isPushHeld = name => { const e = name && elByName(name); return !!e && tapAction(e) === 'hold'; };
+// Dual Action (OakBarn Brewery, 2026-11-12, Rule 2.50): held longer than DUAL_HOLD_MS it is a Push Button (On only while held) and the
+// click that follows the let go is ignored; let go sooner and it is a plain click (On / Off)
+const DUAL_HOLD_MS = 500;
+let dualWait = null, dualSkipClick = false;
+const dualCancel = () => { if (dualWait) { clearTimeout(dualWait); dualWait = null; } };
 $('#ws').addEventListener('pointerdown', ev => {
   if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
   const n = ev.target.closest('.el, .vpPart[data-dev], .mfValve[data-dev]'); const e = n && elByName(n.dataset.name || n.dataset.dev);
+  if (e && tapAction(e) === 'dual' && can('operator')) {
+    dualCancel(); dualSkipClick = false;
+    const name = e.tapTarget || e.name;
+    dualWait = setTimeout(() => {
+      dualWait = null; dualSkipClick = true; release();
+      const send = () => api('POST', '/ui/hold', { name, down: true }).catch(x => { toast(x.message, true); release(); });
+      held = { name, n, t: setInterval(send, 500) }; n.classList.add('pressed'); send();
+    }, DUAL_HOLD_MS);
+    return;
+  }
   if (!e || tapAction(e) !== 'hold') return;
   if (!can('operator')) return toast('Your account is view only', true);
   ev.preventDefault(); release();
@@ -2903,12 +2918,13 @@ $('#ws').addEventListener('pointerdown', ev => {
   held = { name, n, t: setInterval(send, 500) }; n.classList.add('pressed'); send();
   n.setPointerCapture?.(ev.pointerId);
 });
-for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, release);
+for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, () => { dualCancel(); release(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
 $('#ws').addEventListener('contextmenu', ev => { if (!editing && ev.target.closest('.el.k-pushbutton')) ev.preventDefault(); });
 
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
+  if (dualSkipClick) { dualSkipClick = false; return; }       // a Dual Action held as a Push Button: its let go is not a click
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
   const mfv = ev.target.closest('.mfValve');
@@ -4986,7 +5002,7 @@ const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An 
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
-  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our example Interface is: BM: Brewery Mega',
+  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our example Interface is: BM: Brewery Mega',
   'The ID is important as it is Part of the Suggested Name.\n⟦BM⟧_15_DO@Pump_Red~Pump_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
@@ -5001,7 +5017,7 @@ const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeis
 const TAB_PUMP_TIP = ['The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.',
   'A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).\nAnd like a Star Ship, there is an Alternate Bridge and other Compartments of decks.\nThere can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the Bridge.',
   'Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to control things, but only a workshop to build something to be placed on a Normal User Tab.',
-  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD,
   'You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.\n➕ Add new Tab… makes a new Tab and comes back here and sets it as the default for the Build Tab.'].join('\n\n');
 // The Pump's Device Type balloon (the same PDF). The BruControl comparison he wrote with it is for the Importer only: it waits in
@@ -5010,6 +5026,16 @@ const DEVTYPE_PUMP_TIP = ['Its Device Type: DO@Pump, a Pump (Pump) on a Digital 
   'The same DO@Pump is the third part of the Suggested Name: DO@Pump. It comes from the Device you added and is set for you.\nBM_15_⟦DO@Pump⟧_Red~Pump_BH\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD].join('\n\n');
 const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : DEVICE_TIPS.tab;
+// The Pump's Name balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text (only the spelling fixed), the
+// Suggested Name read part by part with each part in red, and a short Predictive Text note (its words are a link to that Help).
+// The same text is in Help 46, Device names, and Help 115, The Name.
+const NAME_PUMP_TIP = ['This is how the Device (or a Widget) is referred to as the unique identifier for the Skynet Panel to access and use the Red Pump you just built.\nIn Skynet, there are some standards such as Prohibited Characters such as :, " and others that could interfere with the Computer\'s Operating System or Skynet\'s own background code. No spaces are allowed in Skynet names.',
+  'Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the Device (or Widget) just by the name alone.',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nInterfaceid: ⟦BM⟧_15_DO@Pump_Red~Pump_BH\nPort: BM_⟦15⟧_DO@Pump_Red~Pump_BH\nType: BM_15_⟦DO@Pump⟧_Red~Pump_BH\nLabel: BM_15_DO@Pump_⟦Red~Pump⟧_BH\nTABid: BM_15_DO@Pump_Red~Pump_⟦BH⟧',
+  'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
+  'Predictive Text: in a Process you never type this long name. Type BM and the list shows only the Devices on the BM Interface; pick Red Pump from it. The Suggested Name is what makes that work.',
+  'In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have not chosen to do so earlier.'].join('\n\n');
+const nameTip = e => isPumpDev(e) ? NAME_PUMP_TIP : DEVICE_TIPS.name;
 // The Pump's Port balloon (OakBarn Brewery, 2026-11-12: "Add this to the Port Hover Help on the Blickman Riptide Dialogs in a similar
 // manner as the Label Hover Help"): the Available Ports balloon, then his Suggested Name example with the Port part marked red
 const portTip = e => isPumpDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Pump_Red~Pump_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).' : DEVICE_TIPS.port;
@@ -5196,7 +5222,7 @@ async function newDeviceDialog(e, hint, what) {
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: tabTip(e) }],
-    ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
+    ['name', n() + 'Name', 'text', null, false, false, { tip: nameTip(e), ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: e.cover || 'None' }, after), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
@@ -7276,15 +7302,19 @@ const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap ta
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
 const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
-const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
+// Dual Action (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2, Rule 2.50): a click turns it On or Off, and pressed and held it
+// is a Push Button (On only while held), for topping off a vessel by hand
+const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push Button'], ['dual', 'Dual Action'], ['none', 'None'], ...(v && !['toggle', 'hold', 'dual', 'none'].includes(v) ? [[v, v]] : [])];
 // Valves and Heating Elements (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle cannot have None, Default to Toggle", Rule 2.46):
 // Toggle (one click On / Off, the start) or Push Button (On only while the picture is held; reversed when it is already On). No None.
 const ONE_CLICK_TAP = v => [['toggle', 'Toggle'], ['hold', 'Push Button'], ...(v && !['toggle', 'hold', 'none', '', 'default'].includes(v) ? [[v, v]] : [])];
 const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(it.tap);
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
-const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic + (pumpModelOf(it) ? ' The Picture itself cannot be changed.' : ''), ...x }],
-  pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
-    : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
+// OakBarn Brewery, 2026-11-12 (Blichmann RipTide Dialog 2): "Get Rid of Path as useless information" on a Skynet pump drawing; its
+// Graphic balloon is his text. A User pump keeps its one Path (its picture is picked there).
+const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is set by Skynet and cannot be changed.';
+const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: pumpModelOf(it) ? PUMP_GRAPHIC_TIP : DEVICE_TIPS.graphic, ...x }],
+  ...(pumpModelOf(it) ? [] : [['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }]]),
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }], ...PUMP_SPOT_FIELDS(it, x)];
 // The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
 // the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
@@ -7293,10 +7323,16 @@ const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPO
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
-  const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
+  const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: PUMP_TOGGLE_TIP }];
   return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true, ...x }]]
-    : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
+    : [[...tog.slice(0, 4), false, false, { tip: PUMP_TOGGLE_TIP, ...x }]];
 };
+// the Pump's Toggle balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text, only the spelling fixed (Rule 2.37)
+const PUMP_TOGGLE_TIP = ['This is what action is taken when the Pump Image is clicked on the Tab. The Choice can vary depending on what Device or Widget\'s Dialog you are working on. In this example, you are working on a Blichmann RipTide Pump and the choices are listed as On/Off, Push Button, Dual Action or None.',
+  'On/Off: causes the state of the Pump to True (On) or False (Off), controlling the Pump on the Tab with a click. (most Common)',
+  'Push Button: The Pump is only On as long as the Image is clicked and Held (like depressing a real Button). While not very useful on a Blichmann RipTide Pump, it could be if that Red Pump was only used to manually Top Off a vessel.',
+  'Dual Action (both On/Off and Push Button): a click (press and let go) turns the Pump On or Off. Pressed and held for more than half a second, it is a Push Button: On only as long as it is held. Handy for manually topping off with a small amount, which is common on a Brew Day.',
+  'None: Image not interactive.'].join('\n\n');
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
 // Overlay colors by Direction (OakBarn Brewery, 2026-11-10, Rule 6.19): something that heats has no Blue Glow and no Green Glow Ring;
@@ -7371,7 +7407,7 @@ function pumpDeviceFields(it, item) {
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: LABEL_VISIBLE_PUMP_TIP }],
     ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: portTip(it) }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: tabTip(it) }],
-    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['name', '4. Name', 'text', null, false, false, { tip: nameTip(it) }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it), ...PUMP_TYPE_FIELDS(it),
     ...PUMP_XYWH()];
