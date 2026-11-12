@@ -53,6 +53,7 @@ import { Messaging, CARRIERS } from './lib/messaging.js';
 import { watchAlarmEmails } from './lib/alarmemail.js';
 import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
+import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update restarts and restarts (Rule 6.31)
 import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
@@ -238,6 +239,9 @@ engine.on('config', () => { store.writeConfig(); broadcast('config', {}); });   
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
+// Sleep, Windows Update restarts and restarts (OakBarn Brewery, 2026-11-12, Rule 6.31): kept awake while brewing, a notice after a
+// stop or a sleep during a brew, and one when Windows has an update waiting to restart the computer. Not on the Importer's Build page.
+const power = IMPORT_BUILD ? null : new BrainPower({ store, engine, hw, dataDir: DATA, notify: list => broadcast('brainNotices', list), log: text => { console.log(text); engine.print('system', text); } });
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
@@ -335,7 +339,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -563,8 +567,10 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, brainNotices: power?.notices ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
+  // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
+  if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   // a screen played an Alarm's sound to its end (Rule 7.18): one that does not repeat lets the next Alarm in line play
   if (p === '/ui/sound/finished' && m === 'POST') {
@@ -1190,6 +1196,7 @@ server.listen(PORT, () => {
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
+  power?.start();
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
   // Windows: the panel opens in its own clean window, whatever .bat started it (Rule 2.36, lib/appwindow.js)
@@ -1221,11 +1228,18 @@ function minimizeWindow() {
 // from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.
 const CLOSABLE = !process.env.INVOCATION_ID;
 // closeWindow: closed from ☰ Menu, so on Windows its Command Prompt window closes too, whatever .bat started it (Rule 2.25)
-function shutdown({ closeWindow = false } = {}) {
-  console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
-  if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
-  if (closeWindow) closeLauncherWindow();
-  process.exit(0);
+// reason: 'closed' (☰ Menu, Ctrl+C) or 'system' (Windows or the Pi shut down, restarted, signed out, or the window was closed).
+// Every output is turned Off first and given a moment to reach the boards (Rule 6.31), so nothing waits for the boards' lost link.
+let stopping = false;
+function shutdown({ closeWindow = false, reason = 'closed' } = {}) {
+  if (stopping) return; stopping = true;
+  console.log('Stopping...'); auth.flush(); power?.closing(reason); engine.stopAll(); control.stop(); store.persistNow();
+  setTimeout(() => {
+    mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
+    if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
+    if (closeWindow) closeLauncherWindow();
+    process.exit(0);
+  }, 400);
 }
-// SIGHUP: the black window was closed with its X (Windows gives the panel a few seconds to stop)
-process.on('SIGINT', () => shutdown()); process.on('SIGTERM', () => shutdown()); process.on('SIGHUP', () => shutdown());
+// SIGHUP: the black window was closed with its X, or Windows is shutting down or restarting (Windows gives the panel a few seconds)
+process.on('SIGINT', () => shutdown()); process.on('SIGTERM', () => shutdown({ reason: 'system' })); process.on('SIGHUP', () => shutdown({ reason: 'system' }));
