@@ -1162,3 +1162,149 @@ Each entry says where the text was, what was taken out, and what is there now.
 > BruControl had one; Skynet has 2.
 
 **Now:** removed
+
+## README.md (the GitHub front page)
+
+Taken out 2026-11-12 (OakBarn Brewery: "One for Skynet and One for the Importer. The One in Skynet NEVER has the BruControl Cross Refferece or Differenves"). The Importer's own Read Me starts from these.
+
+### line 3, the first sentence
+
+**Taken out:**
+
+> with BruControl-style screens (called **Tabs**; BruControl calls them workspaces) and processes.
+
+**Now:**
+
+> with brewery screens (called **Tabs**) and Processes.
+
+### 1a. Start from a sample Schema
+
+**Taken out:**
+
+>  panel that works like BruControl:
+
+**Now:**
+
+>  panel:
+
+### 2. What is in it, Looks
+
+**Taken out:**
+
+> , `dark` (white on black, like the BruControl message panels)
+
+**Now:**
+
+> , `dark` (white on black)
+
+### 2. What is in it, Pumps and valves
+
+**Taken out:**
+
+>  Importing a BruControl file makes every output whose name starts with **VGC** a valve.
+
+**Now:**
+
+> (nothing)
+
+### 2. What is in it, Media page
+
+**Taken out:**
+
+>  (unpacked keeping its folders, handy for the BruControl Media folder)
+
+**Now:**
+
+>  (unpacked keeping its folders)
+
+### 2. What is in it, SVG pictures
+
+**Taken out:**
+
+> The original is never changed, so BruControl can still use it, and you keep
+
+**Now:**
+
+> The original is never changed, and you keep
+
+### 2a. Variables (the whole old Global class part: old ways, Importer only)
+
+**Taken out:**
+
+> **The old Global class is retired.** Every Global that is kept becomes a gGlobal, on start-up for a saved Schema and in the BruControl import:
+> 
+> - `gbl…` keeps the **same name** (so the names still match BruControl for now), .API Off.
+> - `RP_…` is renamed `RP_` → `gG_` in the Schema and in every process (`RP_v_Pitch_Temp` → `gG_v_Pitch_Temp`), .API Get and Put.
+> - `x…` is **deleted**. Processes or items still using one are listed with line numbers.
+> - `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (Schema and processes), then like the rest of `gbl…`.
+> - `DX_gblV_…` is renamed `DX_gblV_` → `gG_` in the Schema and every process, .API Get and Put.
+> - `insp_…` is **deleted** like `x…` (processes still using one are listed).
+> - Any other name keeps its name with .API Get and Put (as a Global was) and is listed so it can be sorted later.
+> - A Global's database trigger becomes its **Database** setting.
+> 
+
+**Now:**
+
+> (nothing)
+
+### 3. Processes, first paragraph
+
+**Taken out:**
+
+> Processes (BruControl and older versions of this panel call them scripts) are text files in the `scripts` folder. You can edit them on the **Processes** page or in any text editor. Only the name on screen changed: the folder, the file format, the process commands and the config settings are the same as before, so existing processes and BruControl files work unchanged.
+
+**Now:**
+
+> Processes are text files in the `scripts` folder. You can edit them on the **Processes** page or in any text editor.
+
+### 3. Processes, process lines
+
+**Taken out:**
+
+> ; BruControl lines like `"V_BK_In" state = true` still run and are rewritten in this style when a Process is saved or imported)
+
+**Now:**
+
+> )
+
+### 3. Processes, heading
+
+**Taken out:**
+
+> **Differences from BruControl**
+
+**Now:**
+
+> **What Processes do**
+
+### 3. Processes, last bullet
+
+**Taken out:**
+
+> - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).
+
+**Now:**
+
+> - Alarms use `sound` (a path).
+
+### 5. Files, media/Images
+
+**Taken out:**
+
+> (backgrounds too, e.g. media/Images/brewery_main.png); put all your
+>                      BruControl pictures here - the File Move page copies a whole folder from your computer
+
+**Now:**
+
+> (backgrounds too, e.g. media/Images/brewery_main.png); the
+>                      File Move page copies a whole folder from your computer
+
+### 5. Files, media/sounds
+
+**Taken out:**
+
+> alarm and timer sounds (BruControl's Media\wave sounds go here)
+
+**Now:**
+
+> alarm and timer sounds
