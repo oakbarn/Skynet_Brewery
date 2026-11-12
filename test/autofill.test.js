@@ -50,7 +50,7 @@ assert.equal(texts('gGV_Strike = '), null, 'a number gets no list before a lette
 
 // Ctrl+Space: after if only what can stand in a condition, in Fritz's order (no commands, no and / or yet)
 const afterIf = get('if ', 'new value count\nif ', 'new value count\nif ', true).list;
-assert.deepEqual(afterIf.map(i => i.text.trim()), ['count', 'tm_Mash', 'gGV_HLT', 'gGV_Strike', 'MB_06_Pump_Wort__HS', 'Stir', 'alm_Hops', 'sub_Fill', 'scr_Mash', 'true', 'false', 'now', 'not']);
+assert.deepEqual(afterIf.map(i => i.text.trim()), ['count', 'tm_Mash', 'gGV_HLT', 'gGV_Strike', 'MB_06_Pump_Wort__HS', 'Stir', 'alm_Hops', 'sub_Fill', 'scr_Mash', 'true', 'false', 'now', 'NULL', 'not']);
 assert.match(afterIf[0].hint, /variable/); assert.match(afterIf[4].hint, /Device/); assert.match(afterIf[6].hint, /Widget/);
 assert.equal(texts('if '), null, 'without Ctrl+Space nothing pops up before a letter');
 assert.equal(ctrl('')[0], 'if ', 'Ctrl+Space on an empty line: the commands');

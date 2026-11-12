@@ -19,9 +19,9 @@ import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHe
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
-import { elementNameError, fileNameError } from './names.js';
+import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -30,7 +30,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -964,7 +964,7 @@ async function addMf(tname, kind) {
         readFields(work, body);
         if (missing) throw new Error(missing);
         const name = noSpaces(work.name || last);
-        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: last, what: 'Device' }); if (bad) throw new Error(bad);
         if (used().some(n => String(n || '').toLowerCase() === name.toLowerCase())) throw new Error(`The name ${name} is already used. Names must be unique.`);
         const g = placeTabFitting(t, work.workspace, name, null);
         try {
@@ -4788,9 +4788,9 @@ const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: '
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
 // the Manual Pump Widget (Rule 1.28): in the Pumps list too, as the Manual Valve Widget is in the Valves list; it stays a Widget
 const MANUAL_PUMP_ROW = ['Manual Pump (Widget, no Port: you switch it by hand and confirm)', () => addManualPump()];
-const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'HE'];
+const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'H_Element'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
-const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'HE'];
+const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'H_Element'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -4892,7 +4892,7 @@ function cloneHere(name, byMethod) {
 for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventListener(ev, () => { if (!$('#cloneDev').value) fillClones(); });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
-// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_PWM@P_L_Vlv_Fly~Sparge_SP (public/naming.js). An Admin may
+// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_PWM@Valve_L_Fly~Sparge_SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
@@ -4934,7 +4934,8 @@ const LABEL_PUMP_TIP = ['⟪b:Label⟫How do You refer to this Pump. Brewing Pum
   'This is the Plain Text Part of the Suggested Name. Spaces become ~.\nBM_6_Pump_⟦Red~Pump⟧_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_6_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
-  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.'].join('\n\n');
+  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.',
+  COPYRIGHT_MSG + '\n' + SUGGESTED_MSG].join('\n\n');      // OakBarn Brewery, 2026-11-11: "to next ballon"
 const LABEL_VISIBLE_PUMP_TIP = 'The Label may be shown on the Tab, for example Red Pump above the Pump Device.⟪img:help_pictures/Red_Pump_Label.png⟫';
 const LABEL_UP_TIP = n => `The ⬆ opens a ${n} Line Label Text Dialog`;
 const LABEL_ATTR_TIP = 'The ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.';
@@ -4943,7 +4944,7 @@ function labelTip(o, x = {}) {
   const dev = isDevice(o), pump = dev && isPumpDev(o);
   if (pump) return LABEL_PUMP_TIP;
   const lines = [dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
-    '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.'];
+    '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.', '', COPYRIGHT_MSG, SUGGESTED_MSG];
   if (sug && part) {
     const head = dev ? suggestName({ iface: ifaceIdOf(o.device), port: portForName(o), code: o.typeCode ?? defaultCode(o), type: o.type }) : '', at = sug.indexOf(part, head.length);
     lines.push(at >= 0 ? `${sug.slice(0, at)}⟦${part}⟧${sug.slice(at + part.length)}` : sug);
@@ -5066,7 +5067,7 @@ async function newDeviceDialog(e, hint, what) {
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
     ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: T.iface, ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
-    ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
+    ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
@@ -5078,7 +5079,7 @@ async function newDeviceDialog(e, hint, what) {
     ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
     ...(isPumpDev(e) ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }]]),      // a Pump: X, Y, Width and Height on one line
-    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: T.type }]] : [])];
+    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: typeTip({ ...e, typeCode: work.typeCode || drillCode(e) }) }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
@@ -5205,7 +5206,7 @@ async function newDeviceDialog(e, hint, what) {
         if (missing) throw new Error(missing);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
         if (!name) throw new Error('Type a Label (or a Name)');
-        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Device' }); if (bad) throw new Error(bad);     // @ ~ only in the Suggested Name
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
@@ -5283,7 +5284,7 @@ async function newPictureDialog(e) {
         readFields(work, body);
         if (missing) throw new Error(missing);
         const sug = picSuggest(e, work.label), name = noSpaces(work.name || sug);
-        const bad = elementNameError(name, 'Widget'); if (bad) throw new Error(bad);
+        const bad = typedNameError(name, { suggestion: sug, was: e.name, what: 'Widget' }); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Names must be unique.`);
         for (const k of KEEP) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
@@ -5927,7 +5928,7 @@ function vbBuild(t, w) {
   const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
   try {
     const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
-    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
+    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
     let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
     addTemplateToTab('vessel', t, w.workspace, name);
     const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
@@ -6055,7 +6056,7 @@ function vbFermMake(g) {
     delete g.vbFerm; toast(`${g.label || g.name}: the imported Fermentor Control ${loose.name} is now built into it.`, false, 8000); return;
   }
   const taken = n => [...draft.elements, ...draft.graphics].some(x => String(x.name ?? '').toLowerCase() === n.toLowerCase());
-  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') || 'Fermentor';
+  const base = String(g.label || 'Fermentor').trim().replace(/\s+/g, '~').replace(/[^\w~]/g, '') || 'Fermentor';
   let name = base; for (let i = 2; taken(name); i++) name = `${base}_${i}`;
   draft.elements.push({ name, type: FERM_TYPE, label: g.label || name, workspace: g.workspace, integratedIn: g.id, integratedAs: 'fv:control', input: probe.name, heat: heat?.name ?? '', cool: cool?.name ?? '',
     mode: g.vbFerm, ...Object.fromEntries(FERM_SETTINGS.map(([, k, , d]) => [k, d])), x: Math.round((g.x || 0) + (g.w || 200) + 12), y: Math.round(g.y || 0), w: 190, h: 60, offText: 'OFF' });
@@ -6354,7 +6355,7 @@ function moveBuildTo(tab) {
   for (const x of items) x.workspace = to.name;
   if (vMaster(to)) for (const v of items.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
-  // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM@P_L_Vlv_Fly~Sparge_SP, wgt_DT_DateTime_1_BR)
+  // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM@Valve_L_Fly~Sparge_SP, wgt_DT_DateTime_1_BR)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
     const n = nameSuggestion(e);
     if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
@@ -7168,8 +7169,8 @@ function heatWaveSvg(which) {
     `<line x1="0" y1="30" x2="120" y2="30" stroke="#ffd400" stroke-width="2"/><path d="${d}" fill="none" stroke="#e53935" stroke-width="2"/></svg>`;
 }
 const ELEM_HEAT_TIPS = {
-  target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.setpoint = 168.',
-  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it the same way, with the minus: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.onoffset = -2 turns on 2 °F below.',
+  target: 'Setpoint: the temperature it holds. Example: the HLT element holds 150 °F. A Process changes it: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = 168.',
+  onOffset: 'Offset (-): where it turns on, as Setpoint + Offset. Heating turns on below the Setpoint, so the Offset has a minus. It turns off at the Setpoint. Example: the HLT element has -1, so with its Setpoint of 150 °F it turns on at 149 °F (150 - 1) and off at 150 °F. Its range is set by its Hardware Controller (Rule 6.29): Optical SSR -0.5 to -3 °F, Contactor or Mechanical relay -1 to -5 °F. Picking a Hardware Controller sets it for you: -0.5 for an Optical SSR (it has no moving parts, so it can switch often and hold close), -1 for a Contactor or Mechanical relay (with an On delay of 10 seconds, because its contacts wear each time they close). A Process writes it the same way, with the minus: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.onoffset = -2 turns on 2 °F below.',
   onDelay: 'Hysteresis: how many seconds the reading must stay under its On point before it turns on, so it does not click on and off. Example: the HLT element is switched by an Optical SSR, so 0 is fine; a Contactor or Mechanical relay needs at least 10 (Rule 6.29). Picking a Hardware Controller sets it: 0 for an Optical SSR, 10 for a Contactor or Mechanical relay.',
 };
 const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
@@ -7177,7 +7178,7 @@ const elemTip = key => ELEM_HEAT_TIPS[key] ?? HEAT_TIPS[key];
 // while it is Hysteresis. Help 150 starts its Hysteresis part with the same words (Rule 11.4), then adds the technical side (Rule 11.8).
 const HYS_HOVER_TIP = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHysteresis keeps the water near the Setpoint by turning the heater On and Off.\nThe HLT element: Setpoint 150 °F, Direction Heating, Offset (−) −1.\n• The heater begins to heat.\n• The water reaches the Setpoint, 150 °F: the element turns Off.\n• The water cools to Setpoint - Offset, 149 °F (150 −1): the element turns On again.\n• The water reaches the Setpoint, 150 °F: the element turns Off again.\n• The water cools again, and the On and Off Hysteresis cycle repeats.\nDelay 0: it turns On as soon as the water reaches 149 °F.\nHardware Controller Optical SSR: the Offset may be −0.5 to −3 °F, and it starts at −0.5. A Contactor or Mechanical relay may use −1 to −5 °F with a Delay of at least 10 seconds, and it starts at −1 and 10 seconds. That way it clicks less often and lasts longer.\nPredictive On: the water keeps warming a little after Off. Skynet learns how much, and turns Off that much early, so the water stops at 150 °F.';
 const ELEM_PREDICTIVE_TIP = 'Predictive (Rule 6.23): Skynet learns how far the reading keeps going after it turns off (the heat already on its way), and turns off that much before the Setpoint, so it settles at the Setpoint instead of overshooting. Its ON point moves the same amount, so it never starts more often. Example: if the HLT water keeps warming half a degree after the element turns off, it turns off half a degree under 150 °F and stops at 150 °F. On for every Hysteresis; switch it off for the plain way.';
-const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.display = "Setpoint" ("" puts back this setting).';
+const ELEM_DISPLAY_TIP = 'Data Display (Rule 6.26): which of its values this Heating Element shows on the Tab: Status and Setpoint (the first choice: what it is doing and its Setpoint), Output (its Output % or ON / OFF), Reading (its probe) or Setpoint. A Process can change it while it runs: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.display = "Setpoint" ("" puts back this setting).';
 // the Offset list (Integrate_4): every half degree its Hardware Controller allows (Rule 6.29), and the one saved if it is something else.
 // With a minus (OakBarn Brewery, 2026-11-10: the sign says where it turns On, Setpoint + Offset: heating turns On below it); saved
 // with the same minus, as the Brain and a Process use it (Rule 6.19: one sign everywhere).
@@ -7265,7 +7266,7 @@ const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => e?.integratedIn ? 'Integrated Heating Element Device' : isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';      // built into a Vessel (OakBarn Brewery, 2026-11-09)
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
-const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'HE' : isProbeDev(e) ? '' : 'Valve';
+const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'H_Element' : isProbeDev(e) ? '' : 'Valve';
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
@@ -7333,7 +7334,7 @@ const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
     ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
     ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)]
   : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }], VOLT_FIELD(x), DISPLAY_FIELD('pwmOut', x)];
-const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: DEVICE_TIPS.type }];
+const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(it) }];
 function pwmDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
@@ -7472,7 +7473,7 @@ const DATAW_TIPS = {
   size: 'Its size on the Tab in pixels.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
   format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
-  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_DO@HE_Brew~Kettle_BH.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
+  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = ALIGN_LCR;
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
@@ -7666,7 +7667,7 @@ function vpPartFields(it, item) {
     : ['_instPort', '2. Interface and Port', 'ro', `${it.device ?? ''} Port ${it.channel ?? ''}: the Port of ${it.instanceOf}. An Integrated Instance shares it and can't change it; the last one turned On or Off has the Port (Rule 6.1).`, false, false, { tip: it.vpKind === 'element' ? T.eIface : T.iface }] : f => f;
   return [...base.flatMap(f => f[0] === '_or' ? (f[6]?.with ? [f[6].with] : []) : VP_DRILL_SKIP.has(f[0]) ? [] : [f]).map(inst).map(f => f[0] !== 'workspace' ? f
     : ['_builtIn', '3. Built into', 'ro', builtInHost(it), false, false, { tip: builtInTip(it) }]),
-    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: it.vpKind === 'element' ? T.eType : T.type }]];
+    ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: it.vpKind === 'element' ? T.eType : typeTip(it) }]];
 }
 // an integrated Vessel Device's part sections, saved onto the parts (never their Interface or Port, Rule 5.31; no swapping)
 function vpxApply(g, x) {
@@ -7739,7 +7740,7 @@ function genDeviceFields(it, item, f) {
   const own = part && it.type === 'temperature' ? [...PROBE_OWN(it), ['info', 'Reading now', 'info']]
     : f.filter(x => !skip.has(x[0]) && !['box', 'boxend'].includes(x[2]) && !(x[2] === 'note' && /^_(sky|sug|hint|ovn)$/.test(x[0])));
   const dbLine = !dbKeys.size || pics || own.some(x => x[6]?.dbPop) ? [] : [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP }]];
-  const typeF = typeCodes(it).length > 1 && !part ? PWM_TYPE(it) : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }];
+  const typeF = typeCodes(it).length > 1 && !part ? PWM_TYPE(it) : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }];
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ...f.filter(x => x[0] === '_sky'),
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
@@ -7993,10 +7994,20 @@ function field(f, obj) {
   }
   return out;
 }
-// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump (GENERAL_TYPE in public/naming.js).
-// In the Suggested Name it is DO@Pump (OakBarn Brewery, 2026-11-11).
-const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.subtype === 'element' && g ? 'Heater Element' : e?.typeCode || '';      // a Heating Element: DO: Heater Element (OakBarn Brewery, 2026-11-10)
-  return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type (GENERAL_TYPE in public/naming.js), with an @
+// as in the Suggested Name (OakBarn Brewery, 2026-11-11: "Any where in Skynet Change any DO@Pump ... to DO@Pump"): DO@Pump, PWM@Pump,
+// DO@H_Element (a Heating Element). A new Device fills in its own: a new On/Off Pump (a Blichmann RipTide) is DO@Pump.
+// The Device Type's Hover Help, made for this Device (OakBarn Brewery, 2026-11-11: "In Hover Help ... DO@Pump"): DO@Pump is a Pump on a
+// Digital Out (DO), and the same DO@Pump is in its Suggested Name
+const GENERAL_WORDS = { DO: 'Digital Out, On/Off', PWM: 'PWM output, its speed or power', AO: 'Analog Out, 0-10 V', DI: 'Digital In', AI: 'Analog In', TEMP: 'Temperature', FLOW: 'Flow', SCALE: 'Scale', STEP: 'Stepper', DUTY: 'Duty Cycle', HYS: 'Hysteresis', PID: 'PID', DBAND: 'Deadband', HYDRO: 'Hydrometer' };
+const typeTip = e => {
+  const t = shownType(e), [g, c] = t.includes('@') ? t.split('@') : [t, ''], d = c && TYPE_NAMES[c] ? `${TYPE_NAMES[c]} (${c})` : '';
+  if (!t) return DEVICE_TIPS.type;
+  const sug = (() => { try { return deviceSuggestion(e); } catch { return ''; } })();
+  return `Its Device Type: ${t}${d ? `, a ${d}` : ''} on a ${GENERAL_WORDS[g] || g} (${g}) port.${c ? ` The General Type comes first, then an @, then the Device Type.` : ''} The same ${t} is the third part of the Suggested Name${sug ? `: ${sug}` : ''}. It comes from the Device you added and is filled in for you.`;
+};
+const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || (isDevice(e) ? defaultCode(e) : '') || '';
+  return !g ? c : !c || c.toUpperCase() === g ? g : `${g}@${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
   const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', { style: 'white-space: pre-line' }, ...helpNodes(text)),
@@ -8009,34 +8020,34 @@ const DEVICE_TIPS = {
   pumpIn: 'Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab. Example: the 3 Vessel 1 Pump sample pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left. Pipes joined to it slide to meet the new spot.',
   pumpLink: 'What is drawn from the pump\'s own inlet and outlet to its Inlet IP and Outlet IP: a white Hose, or a stainless Pipe. It is drawn over the pump and its Cover, under the On overlay.',
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
-  // (HLT_Vessel.BM_8_DO@HE_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_TEMP@1W_HLT_BH)
-  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@HE_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  // (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_TEMP@1W_HLT_BH)
+  heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_TEMP@1W_HLT_BH, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_TEMP@1W_HLT_BH. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   switchedBy: 'Hardware Controller: what turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 1 to 5 °F and an On delay of at least 10 seconds. Picking one sets the On offset and On delay for you: Optical SSR 0.5 and 0 seconds, Contactor 1 and 10 seconds, Mechanical relay 1 and 10 seconds. Nothing else changes. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
-  controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_DO@HE_HLT~element_BH'),
+  controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH'),
   elemTog: 'One click turns this Element On or Off at once, the same as one click on it on the Tab (Rule 2.33). On / Off is the Device itself: it is On in whatever method it is in, and Direct is 100 % On. Picking a method never turns it On (Rule 6.19).',
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
-  eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.HYS. Off: the full names.',
+  eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.HYS. Off: the full names.',
   methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   eMethodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. Example: the HLT element has Hysteresis as its Current Method, with Duty Cycle and PID switched on too, so it has four balloons: Direct, Duty Cycle, Hysteresis and PID. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
-  eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_DO@HE_HLT~element_BH. The ⬢ beside it sets its font, size and colors.',
+  eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_DO@H_Element_HLT~element_BH. The ⬢ beside it sets its font, size and colors.',
   eLabelVisible: 'On: its Label (for example HLT element) shows on the Tab. Off: no Label shows.',
-  eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_DO@HE_HLT~element_BH.',
-  ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_DO@HE_HLT~element_BH.',
-  eTab: 'The Tab this Heating Element goes on, for example Brew House. Its Tab ID, BH, ends the Suggested Name: BM_8_DO@HE_HLT~element_BH. ➕ Add new Tab… makes a new Tab and comes back here.',
-  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_DO@HE_HLT~element_BH is BM (Brewery Mega), Port 8, DO@HE (DO: Heater Element), HLT~element (its Label) and BH (the Brew House Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on.',
+  eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_DO@H_Element_HLT~element_BH.',
+  ePort: 'Available Ports: only the free pins on this board that fit a Heating Element. The HLT element is on Port 8, the second part of BM_8_DO@H_Element_HLT~element_BH.',
+  eTab: 'The Tab this Heating Element goes on, for example Brew House. Its Tab ID, BH, ends the Suggested Name: BM_8_DO@H_Element_HLT~element_BH. ➕ Add new Tab… makes a new Tab and comes back here.',
+  eName: 'Made from the Interface ID, Port, Device Type, Label and Tab ID: BM_8_DO@H_Element_HLT~element_BH is BM (Brewery Mega), Port 8, DO@H_Element (a Heating Element on an On/Off port), HLT~element (its Label) and BH (the Brew House Tab). You may type your own; it must be unique. Built into a Vessel Device, a Process calls it by the vessel\'s name and its own: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on.',
   eDirection: 'Direction: a Heating Element heats, so it is always Heating (a cooler is set up in a Fermentor Control, Rule 6.30). The Offset (-) beside it says where it turns on: Setpoint + Offset, so -1 turns on 1 degree under the Setpoint; the drawing shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).',
-  eType: 'Its Device Type: DO: Heater Element (a Digital Out that heats). Its General Type and short code, DO@HE, are the third part of the Suggested Name: BM_8_DO@HE_HLT~element_BH.',
-  eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.visible = false.',
-  eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_DO@HE_HLT~element_BH.hidden = true. An Integrated Item has none (Rule 2.47).',
+  eType: 'Its Device Type: DO@H_Element, a Heating Element (H_Element) on a Digital Out (DO). The same DO@H_Element is the third part of the Suggested Name: BM_8_DO@H_Element_HLT~element_BH.',
+  eVisible: 'Visible: on = it shows on its Tab; off = it is hidden there. A Process can show or hide it: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.visible = false.',
+  eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'The Label may be shown on the Tab, for example Red Pump above the Pump. On: the Label shows. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
   port: 'Available Ports: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is added it is greyed out: it is the wiring.',
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
-  type: 'Its General Type first (DO = Digital Out, PWM, HYS ...), then its Device Type, which comes from the list it was picked in and is part of the Suggested Name.',
+  type: 'Its Device Type: the General Type, an @, then the Device Type, for example DO@Pump, an On/Off Pump (Pump on a Digital Out, DO), or PWM@Pump, a Pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: BM_22_DO@Pump_Pump_BH. A new Device fills it in.',
   cover: 'A colored cover drawn over the pump picture (the Skynet pump drawings only). None to start.',
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
@@ -8090,7 +8101,7 @@ const DEVICE_TIPS = {
   ePath: 'The picture of your Heating Element when it is off.',
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
-  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on turns it On either way.',
+  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in (the HLT element: Hysteresis, holding 150 °F). Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on turns it On either way.',
   eOverlay: 'What shows on the Heating Element while it is on. Red Glow (the start): it glows red. None: nothing at all, the picture stays as it is. Orange Glow colors it orange. The bolts are drawn small in the middle of it, on top of the glow (Rule 7.8). Blue and Green are kept for cooling.',
 };
 // The Color (RGB) box (OakBarn Brewery, 2026-11-11, his drawing: "User Add then Pop up Color Picker then add the color field just
@@ -8286,7 +8297,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
-    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO: Pump, Rule 18.18)
+    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
     const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
@@ -8746,17 +8757,18 @@ function lockedName(key, label, obj) {
 function nameCheck(n, obj) {
   const all = draft || S.config;
   if (obj.type && (S.types || []).includes(obj.type)) {          // a Device or Widget element: Fritz's name rules, unique
-    const bad = elementNameError(n, isDevice(obj) ? 'Device' : 'Widget'); if (bad) return bad;
+    let sug = ''; try { sug = nameSuggestion(obj, obj) || ''; } catch { }
+    const bad = typedNameError(n, { suggestion: sug, was: obj.name, what: isDevice(obj) ? 'Device' : 'Widget' }); if (bad) return bad;     // @ ~ only in the Suggested Name
     if (all.elements.some(x => x._ref !== obj._ref && x.name.toLowerCase() === n.toLowerCase()) || all.graphics.some(g => g.kind === 'text' && g.name === n)) return `The name ${n} is already used. Names must be unique.`;
   } else if (obj.kind === 'text') {                              // a Text Widget: the same rules as a Widget's name
-    const bad = elementNameError(n, 'Widget'); if (bad) return bad;
+    const bad = typedNameError(n, { was: obj.name, what: 'Widget' }); if (bad) return bad;
     const low = n.toLowerCase();
     if (all.elements.some(x => x.name.toLowerCase() === low) || all.graphics.some(g => g.id !== obj.id && String(g.name ?? '').toLowerCase() === low)) return `The name ${n} is already used. Names must be unique.`;
   } else if (all.workspaces.some(w => w === obj || w._ref === obj._ref)) {
     const bad = elementNameError(n, 'Tab'); if (bad) return bad;
     if (all.workspaces.some(w => w._ref !== obj._ref && w.name.toLowerCase() === n.toLowerCase())) return `There is already a Tab called ${n}`;
   } else {                                                         // every other name follows the same rules (Fritz, 2026-10-29, Rule 3.11)
-    const bad = elementNameError(n, 'item'); if (bad) return bad;
+    const bad = typedNameError(n, { was: obj.name, what: 'item' }); if (bad) return bad;
   }
   return null;
 }
@@ -8899,7 +8911,7 @@ const INFO = {
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
-    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_DO@HE_Brew~Kettle_BH.setpoint = {value} (Rule 1.27).'],
+    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']] },
@@ -9311,10 +9323,10 @@ async function editItem(kind, id) {
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
-    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
+    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.eType }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
-    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
-    if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];
+    if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);
     if (isProcessWidget(it)) return processWidgetFields(it);      // the Process Widget (Rule 1.31)
@@ -9550,7 +9562,10 @@ async function editItem(kind, id) {
       const follow = autoNamed.has(item) && work.name === item.name && (isDevice(work) || !!widgetTypeId(work));      // a new Widget follows its suggestion too (Rule 3.14)
       if (follow) work.name = nameSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
-      if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
+      if (work.name !== item.name) {      // public/names.js; @ ~ only in the Suggested Name
+        let sug = ''; try { sug = nameSuggestion(work, item) || ''; } catch { }
+        const bad = typedNameError(work.name, { suggestion: sug, was: item.name, what: isDevice(work) ? 'Device' : 'Widget' }); if (bad) throw new Error(bad);
+      }
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
@@ -10542,7 +10557,7 @@ async function globalDialog(work, orig) {
     if (!work.name) throw new Error('Name: it can\'t be blank');
     if (!work.kind) throw new Error('Kind: pick the Kind of this gGlobal');
     if (!orig || work.name !== orig.name) {
-      const bad = elementNameError(work.name, 'gGlobal'); if (bad) throw new Error(bad);
+      const bad = typedNameError(work.name, { was: orig?.name, what: 'gGlobal' }); if (bad) throw new Error(bad);
       const lc = work.name.toLowerCase();
       if ([...S.config.elements.filter(x => x !== orig), ...S.config.graphics].some(x => String(x.name ?? '').toLowerCase() === lc)) throw new Error(`The name ${work.name} is already used. Names must be unique.`);
     }
@@ -12149,6 +12164,7 @@ function otherDefaults() {
 }
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
+  if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
@@ -12164,7 +12180,7 @@ function renderDefaultTab(box) {
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
     ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
-    ['waterProfile', 'Water Profile', 'sel', pick(S.waterProfiles, '(none)')],
+    ['waterProfile', 'Water Profile', 'sel', S.waterProfiles.map(x => [x.id, x.name]), false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
     ['boilTime', 'Boil time (minutes)', 'num'],
     ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}; empty = 180 °F / 82 °C): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num'],
     ['hopStandMinutes', 'Hop stand time (minutes, cooling water off; empty = 20) when a Recipe gives none', 'num'],
@@ -12265,8 +12281,52 @@ function renderDefaultTab(box) {
   const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Default'), h('th', {}, 'Now'), h('th', {}, 'Changed on'), h('th', {}, 'Rule'))),
     h('tbody', {}, ...otherDefaults().map(([what, now, where, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, where), h('td', { class: 'muted' }, rule)))));
   box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    ...tapWaterSection(admin),
     h('h3', {}, 'Defaults set somewhere else (to look at)'), h('p', { class: 'muted' }, 'These are not changed here. Each one says where it is changed.'), others,
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+}
+
+// ---- Tap Water (OakBarn Brewery, 2026-11-11, Rule 17.12): the numbers that matter for brewing, from the Water Department's report
+// or a Test Kit. They are the Tap Water profile (☰ Menu > Water Profile lists it too), the water every Recipe starts with.
+// Alkalinity (as CaCO3, what a Test Kit gives) and Bicarbonate are one number: Bicarbonate = Alkalinity x 1.22. Hardness is
+// worked out from Calcium and Magnesium (known values are filled in and greyed).
+const ALK_HCO3 = 1.22, hardnessOf = w => Math.round((2.497 * (+w.ca || 0) + 4.118 * (+w.mg || 0)) * 10) / 10;
+function tapWaterSection(admin) {
+  const tw = S.waterProfiles.find(x => x.tap);
+  if (!tw) return [h('h3', {}, 'Tap Water'), h('p', { class: 'muted' }, 'No Tap Water profile yet: it is made when the Brain starts.')];
+  const w = clone(tw), r1 = v => Math.round(v * 10) / 10;
+  w._alk = r1((+w.hco3 || 0) / ALK_HCO3); w._hard = hardnessOf(w);
+  const alkWas = w._alk, hco3Was = w.hco3;
+  const T = tip => [false, false, { tip }];
+  const fields = () => [['_tn', 'The numbers from your Water Department\'s report (most put one on their web site) or from a Test Kit. Every Recipe uses Tap Water unless you pick another water. ppm is the same as mg/L.', 'note'],
+    ['source', 'From', 'sel', [['supplier', 'Water Department'], ['kit', 'Test Kit']], ...T('Where these numbers came from.')],
+    ['tested', 'Date', 'text', null, ...T('The date of the report or the test, written yyyy-mm-dd, for example 2026-11-11. Water changes with the seasons, so test again now and then.')],
+    ['ca', 'Calcium (Ca) ppm', 'num', null, ...T('Helps the mash and the yeast, and clears the beer. 50 to 150 ppm is good for most beers.')],
+    ['mg', 'Magnesium (Mg) ppm', 'num', null, ...T('A yeast food. 10 to 30 ppm; much more tastes bitter and sour.')],
+    ['na', 'Sodium (Na) ppm', 'num', null, ...T('Rounds out the malt. Keep it under 100 ppm; a water softener adds a lot.')],
+    ['so4', 'Sulfate (SO4) ppm', 'num', null, ...T('Makes hops taste crisp and dry. High for hoppy beers.')],
+    ['cl', 'Chloride (Cl) ppm', 'num', null, ...T('Makes malt taste round and full. High for malty beers. Not the same as chlorine.')],
+    ['hco3', 'Bicarbonate (HCO3) ppm', 'num', null, ...T('Raises the mash pH. Good for dark beers, bad for pale ones. A report may give it, or give Alkalinity.')],
+    ['_alk', 'Alkalinity (CaCO3) ppm', 'num', null, ...T('Total Alkalinity (as CaCO3), what most Test Kits give. It is the same thing as Bicarbonate: type either one, and the other follows (Bicarbonate = Alkalinity x 1.22).')],
+    ['_hard', 'Hardness (CaCO3) ppm', 'num', null, ...T('Total Hardness (as CaCO3), worked out from Calcium and Magnesium. A Test Kit gives it too: use it to check your numbers.')],
+    ['ph', 'pH', 'num', null, ...T('7 is neutral. Tap water is often 7 to 8.5. The mash pH matters more, and the grain changes it.')],
+    ['chlorine', 'Chlorine', 'sel', [['unknown', 'Unknown'], ['none', 'None'], ['chlorine', 'Chlorine'], ['ammonia', 'Ammonia + chlorine (Chloramine)']], ...T('What the Water Department adds to clean the water. Either one gives a medicine taste to beer. One Campden tablet in 20 gallons takes out both; chlorine alone also boils off or leaves water left out overnight.')]];
+  const f = paneForm(fields, w, () => { }, !admin);
+  // Hardness is worked out: greyed (known values are filled in and greyed). Alkalinity and Bicarbonate follow each other as they are typed.
+  const inp = k => f.body.querySelector(`[data-k="${k}"], [name="${k}"]`);
+  const hard = inp('_hard'); if (hard) { hard.disabled = true; hard.tabIndex = -1; }
+  const live = () => { f.read(); if (hard) hard.value = hardnessOf(w); };
+  for (const k of ['ca', 'mg']) inp(k)?.addEventListener('input', live);
+  inp('_alk')?.addEventListener('input', () => { const a = inp('_alk').value, hc = inp('hco3'); if (hc && a !== '') hc.value = r1(+a * ALK_HCO3); });
+  inp('hco3')?.addEventListener('input', () => { const v = inp('hco3').value, al = inp('_alk'); if (al && v !== '') al.value = r1(+v / ALK_HCO3); });
+  const save = guard(async () => {
+    f.read();
+    if (w.hco3 === hco3Was && w._alk !== alkWas && w._alk !== '' && w._alk !== undefined && w._alk !== null) w.hco3 = r1(+w._alk * ALK_HCO3);
+    const body = { ...w }; delete body._alk; delete body._hard; delete body._tn;
+    const r = await api('PUT', `/ui/profiles/water/${tw.id}`, body);
+    S.waterProfiles = r.list; renderMenuPane(); toast('Tap Water saved');
+  });
+  return [h('h3', {}, 'Tap Water'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save Tap Water')) : '')];
 }
 
 // ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.
@@ -13957,9 +14017,16 @@ function renderRecipeTab(box) {
   const changed = () => { profDirty.recipe = true; state.textContent = 'Not saved yet'; };
   const save = guard(async () => { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); renderMenuPane(); toast('Recipe saved'); });
   const cancel = guard(async () => { if (profDirty.recipe && !confirm('Leave the changes that are not saved?')) return; await rcLoad(); renderMenuPane(); });
+  // NEW asks which Recipe Level (1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain): the user picks it (Rule 17.11)
   const fresh = guard(async () => {
-    if (!confirm('Clear the Recipe and start a NEW one?\n\nIt starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.')) return;
-    await api('POST', '/ui/recipe/new'); await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast('New Recipe');
+    const w = { level: String(recipeLevel(rc)) };
+    if (await dialog('NEW Recipe', [['_n', 'Clear the Recipe and start a NEW one? It starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.', 'note'],
+      ['level', 'Level', 'sel', RECIPE_LEVELS.map(x => [String(x.level), x.name])]], w) !== 'ok') return;
+    readFields(w);
+    await api('POST', '/ui/recipe/new'); await rcLoad();
+    const L = RECIPE_LEVELS.find(x => x.level === +w.level) || RECIPE_LEVELS[3];
+    if (L.level !== recipeLevel(rcWork)) { rcWork.level = L.level; rcWork.type = L.type; await api('PUT', '/ui/recipe', rcWork); await rcLoad(); }
+    rcSub = 'recipe'; renderMenuPane(); toast(`New Recipe, ${L.title}`);
   });
   // IMPORT: a .bsmx or .xml file from this computer or phone. A file with many recipes asks which one.
   const file = h('input', { type: 'file', accept: '.bsmx,.xml,text/xml', hidden: true });
@@ -13991,11 +14058,18 @@ function renderRecipeTab(box) {
     await api('POST', `/ui/recipes/${v}/open`); await rcLoad(); renderMenuPane(); toast('Recipe opened');
   });
   const right = op ? h('div', { class: 'rcRight' }, state, lib, h('button', { onclick: cancel }, 'Cancel'), h('button', { class: 'primary', onclick: save }, 'Save')) : h('div', { class: 'rcRight' }, state);
+  // the Recipe Level (Rule 17.11), at the top beside NEW: the user picks it; the boxes and Daughter Tabs this Level does not use
+  // are not shown (their values stay). It sits in the top line so the boxes keep OakBarn Brewery's layout.
+  rc.level = recipeLevel(rc);
+  const level = rcInput(rc, 'level', { kind: 'sel', list: RECIPE_LEVELS.map(x => [x.level, x.name]), onChange: () => { rc.level = +rc.level; rc.type = levelOf(rc).type; changed(); renderMenuPane(); } });
+  const levelBox = h('label', { class: 'rcLevel', 'data-field': 'rcp_Level', title: [...RECIPE_LEVELS.map(x => `${x.title}: ${x.about}`), 'Skynet_Field rcp_Level'].join('\n') }, h('b', {}, 'Level '), level);
+  if (!op) level.disabled = true;
+  if (!levelShowsTab(rc, rcSub)) rcSub = 'recipe';     // a Daughter Tab this Level does not use goes back to the Recipe tab
   const sub = RC_DAUGHTERS.find(d => d[0] === rcSub);
   const crumb = sub ? h('button', { class: 'rcCrumb', onclick: () => { rcSub = 'recipe'; renderMenuPane(); }, title: 'Back to the Recipe tab' }, 'Recipe') : h('span', {}, 'Recipe');
   box.append(file, h('div', { class: 'rcHead' }, h('h3', {}, crumb, sub ? ` > ${sub[1]}` : ': Import >'),
     op && !sub ? [h('button', { class: 'rcYellow', onclick: () => file.click(), title: 'A BeerSmith .bsmx file (BeerSmith 3 or 4) or a BeerXML .xml file' }, 'IMPORT'),
-      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), h('b', {}, 'Fields can be edited.')] : '',
+      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), levelBox, h('b', {}, 'Fields can be edited.')] : !sub ? levelBox : '',
     h('span', { class: 'spacer' }), right));
   const pane = h('fieldset', { class: 'menuSet rcPane', ...(op ? {} : { disabled: true }) });
   box.append(pane);
@@ -14057,22 +14131,25 @@ function rcMain(pane, rc, u, changed) {
       rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
       rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
       can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
-    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'), h('span', { class: 'rcMini' }, 'Grain Wt.'), h('span', { class: 'rcMini' }, '1st Mash'), h('span', { class: 'rcMini' }, 'IBU'), h('span', { class: 'rcMini' }, 'Expected Gravity'),
-      h('b', {}, 'These fields are calculated from the Other Tabs, Grain, Fermentable, Mash, and Hops.')),
+    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'),
+      ...[['Grain Wt.', 'rcp_Total_Grain_Weight'], ['1st Mash', 'rcp_First_Mash_Temp'], ['IBU', 'rcp_IBU'], ['Expected Gravity', 'rcp_Expected_Gravity']].filter(([, f]) => levelShowsBox(rc, f)).map(([t]) => h('span', { class: 'rcMini' }, t)),
+      h('b', {}, 'These fields are calculated from the Other Tabs.')),
     h('div', { class: 'rcLower' },
-      h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.map(([k, t, about]) => h('div', { class: 'rcDRow' },
+      h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.filter(([k]) => levelShowsTab(rc, k)).map(([k, t, about]) => h('div', { class: 'rcDRow' },
         h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: 'Opens the ' + t + ' tab' }, t), h('span', {}, about)))),
       h('div', { class: 'rcLegend' }, h('div', { class: 'rcDRow' }, h('span', { class: 'rcTabBtn rcTabDemo' }, 'CLICK Here'), h('span', {}, 'opens the Tab')),
         h('div', { class: 'rcDRow' }, h('span', { class: 'rcCalcBtn rcCalcMini' }, 'Calculate'),
           h('b', {}, 'calculates Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature. It also calculates the Strike Volume and Temperature Grain Temperature and Grain Ratio.')))),
     h('p', { class: 'muted' }, `${rc.name ? `"${rc.name}": ` : ''}${rcFrom(rc)}${rc.sourceFile ? `, ${rc.sourceFile}` : ''}${rc.importedAt ? `, imported ${new Date(rc.importedAt).toLocaleString()}` : ''}. Amounts show in the units picked on ☰ Menu > Default.`));
+  // the boxes this Recipe Level does not use are not shown (Rule 17.11); their values stay in the Recipe
+  for (const el of pane.querySelectorAll('.rcBox[data-field]')) if (!levelShowsBox(rc, el.dataset.field)) el.remove();
 }
 // Calculate (the Recipe tab and the Hops tab): only when every hop has an Actual AAU above zero. Otherwise nothing is
 // changed and a warning says which hops to fix or delete (Fritz's Hops tab, 2026-10-31).
 // When one is 0, Skynet switches to the Hops tab, highlights the Actual AAU boxes that are 0 and shows Fritz's warning.
 let rcAAWarn = false;
 function rcCalculate(rc, changed) {
-  if (hopActualProblems(rc).length) {
+  if (levelShowsTab(rc, 'hops') && hopActualProblems(rc).length) {     // a Level 1 Can Kit has no HOPs tab: its hops are not checked
     rcAAWarn = true; rcSub = 'hops'; renderMenuPane();
     return readWarning('Actual AAU', ['Any Hop MUST have its Actual AAU set to the AAU on the Hop Package. The Recipe is based on a Recipe AAU, but the real IBUs of a Brew is calculated using the Actual AAU.',
       'Fix any Actual AAUs that are Zero and try Calculate again.', 'Click the Read Button to exit this dialog.']);
@@ -14218,11 +14295,11 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : '(needs the Brew Length on the Recipe tab)';
   };
   const live = { onChange: () => { changed(); sum(); } };
-  const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : 'adjunct', kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
+  const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : levelFermTypes(rc).includes('adjunct') ? 'adjunct' : levelFermTypes(rc)[0], kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
   const del = (f, n) => guard(() => { if (!confirm(`Delete ${what} ${n}${f.name ? ` (${f.name})` : ''}?`)) return; all.splice(all.indexOf(f), 1); changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grains' : 'Fermentables'),
     op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `${grainTab ? 'Add ' : ''}${what} `, h('b', {}, '+')) : ''));
-  if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.'));
+  if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : (levelFermTypes(rc).includes('sugar') ? 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.' : 'No extracts yet. Press Add Fermentable for a can of extract or dry extract.')));
   mine.forEach((f, i) => {
     const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
@@ -14231,7 +14308,8 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     else {
       // Amount in the line's own Measurement; Measurement and Type are select-only lists from the BeerXML standard
       const M = FERM_MEASURES[f.unit] ? f.unit : W;
-      const types = [...BEERXML_FERM_TYPES, ...(BEERXML_FERM_TYPES.includes(f.type) ? [] : [f.type])].map(k => [k, FERMENTABLE_TYPES[k] || k]);
+      // the Recipe Level's Types (Rule 17.11: Levels 1 and 2 Extracts only); a line that already has another Type keeps it in its list
+      const LT = levelFermTypes(rc), types = [...LT, ...(LT.includes(f.type) ? [] : [f.type])].map(k => [k, FERMENTABLE_TYPES[k] || k]);
       line.append(rcBox('g', 'Amount', rcInput(f, 'kg', { to: v => kgTo(v, M), from: v => toKg(v, M), ...live }), { field: F('Amount') }),
         rcBox('g', 'Measurement', rcInput({ unit: M }, 'unit', { kind: 'sel', list: Object.entries(FERM_MEASURES), onChange: () => {} }), { field: F('Measurement') }),
         rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
@@ -14325,17 +14403,19 @@ function rcMash(pane, rc, u, changed) {
 // ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
 // itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
 function rcWaters(pane, rc, u, changed) {
-  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile), b = wp ? blendWater(wp) : {};
+  // none picked: Tap Water (Rule 17.12, its numbers on ☰ Menu > Default)
+  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile) || S.waterProfiles.find(x => x.tap), b = wp ? blendWater(wp) : {};
   const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
-  const pick = rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const pick = rcInput({ waterProfile: wp?.id ?? '' }, 'waterProfile', { kind: 'sel', list: S.waterProfiles.map(x => [x.id, x.name]), onChange: () => {} });
+  pick.addEventListener('change', () => { rc.waterProfile = pick.value; changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
-    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes ? h('span', { class: 'muted' }, wp.notes) : ''));
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes && !wp.tap ? h('span', { class: 'muted' }, wp.notes) : ''));
   if (wp) {
     const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
     pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
       h('div', { class: 'rcRow' }, rcBox('c', '% Distilled / RO', ro(+wp.distilledPct || 0), { unit: '%', field: rest[0][0] }), rcBox('c', 'SO4 : Cl', ro(b.so4cl ?? ''), { field: rest[1][0], tip: 'Above 2: crisp and hoppy. Below 1: round and malty' }),
         rcBox('c', 'pH', ro(wp.ph ?? ''), { field: rest[2][0] })),
-      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
+      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : wp.tap ? 'Fill in your Tap Water numbers on ☰ Menu > Default settings > Tap Water.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
   }
   const W = rc.ingredients.waters || [];
   pane.append(h('h3', {}, 'Waters in the recipe file'), W.length ? '' : h('p', { class: 'muted' }, 'None.'),

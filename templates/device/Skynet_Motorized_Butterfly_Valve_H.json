@@ -5,7 +5,7 @@
     "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "valve",
     "valveType": "electric",
     "service": "room",
-    "typeCode": "eVlv",
+    "typeCode": "Valve_E",
     "orientation": "h",
     "w": 150,
     "h": 150,

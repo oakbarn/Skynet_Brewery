@@ -46,14 +46,14 @@ gblB_Hop6_Added = false
 gblB_Hop7_Added = false
 gblB_Hop8_Added = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = off
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = off
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
 BM_30_DO@Chill_Chiller~water_BH = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
@@ -78,8 +78,8 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 103
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Strike~volume_RP"
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH.target = gblV_Desired_Strike
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = on
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = gblV_Desired_Strike
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on
 vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °F."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -101,14 +101,14 @@ wait gblV_Brew_Status == 105
 wgt_SW_Advance_BH.visible = false
 wgt_ALM_Step~alarm_BH = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_24_DO@eVlv_HLT~out_BH = true
-BM_27_DO@eVlv_To~mash~tun_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = true
+BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew106]
@@ -123,14 +123,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 107
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH.target = gblV_Sparge_Temp
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.target = gblV_Sparge_Temp
 vSHops = ""
 if gblV_Hop1_Group_R1 == -333
 	if gblS_Hop1_R1 != ""
@@ -200,14 +200,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 151
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = true
-BM_27_DO@eVlv_To~mash~tun_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = true
+BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew152]
@@ -246,12 +246,12 @@ if gblT_2_Mash_Time_R1 == 00:00:00
 	goto "Mash_Steps_Done"
 endif
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 [SectionBrew220]
 step 1.00009 "SectionBrew220"
@@ -265,14 +265,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 221
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = true
-BM_27_DO@eVlv_To~mash~tun_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = true
+BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 vVStep = gblT_2_Mash_Time_R1
@@ -295,12 +295,12 @@ if gblT_3_Mash_Time_R1 == 00:00:00
 	goto "Mash_Steps_Done"
 endif
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 [SectionBrew230]
 step 1.00011 "SectionBrew230"
@@ -314,14 +314,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 231
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = true
-BM_27_DO@eVlv_To~mash~tun_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = true
+BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 vVStep = gblT_3_Mash_Time_R1
@@ -341,12 +341,12 @@ stop "wgt_TMR_Step~timer_BH"
 [Mash_Steps_Done]
 step 1.00012 "Mash Steps Done"
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 start "wgt_ALM_Step~alarm_BH"
 vSHops = ""
@@ -419,14 +419,14 @@ wait gblV_Brew_Status == 301
 wgt_SW_Advance_BH.visible = false
 wgt_ALM_Step~alarm_BH = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = true
-BM_28_DO@eVlv_To~kettle_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = true
+BM_28_DO@Valve_E_To~kettle_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew302]
@@ -441,22 +441,22 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 303
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_24_DO@eVlv_HLT~out_BH = true
-BM_27_DO@eVlv_To~mash~tun_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = true
+BM_27_DO@Valve_E_To~mash~tun_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew304]
@@ -471,14 +471,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 305
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
-HLT_Vessel.BM_8_DO@HE_HLT~element_BH = off
+HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
 [SectionBrew306]
 step 1.00016 "SectionBrew306"
 gblV_Brew_Status = 306
@@ -491,14 +491,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 307
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = true
-BM_28_DO@eVlv_To~kettle_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = true
+BM_28_DO@Valve_E_To~kettle_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew308]
@@ -513,12 +513,12 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 309
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 [SectionBrew310]
 step 1.00018 "SectionBrew310"
@@ -533,8 +533,8 @@ wait gblV_Brew_Status == 311
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Pre~boil~volume_RP"
 send_db "wgt_VAL_Pre~boil~gravity_RP"
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH.target = 215
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = on
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.target = 215
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = on
 vSMsg = "Heating the kettle to a boil."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -841,7 +841,7 @@ goto "Boil_Loop"
 step 1.00021 "Boil Done"
 stop "wgt_TMR_Step~timer_BH"
 gblS_Hop_Warning = ""
-BK_Vessel.BM_9_DO@HE_Kettle~element_BH = off
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew480]
 step 1.00022 "SectionBrew480"
@@ -924,14 +924,14 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 501
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = true
-BM_28_DO@eVlv_To~kettle_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = true
+BM_28_DO@Valve_E_To~kettle_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 vVStep = gblV_Whirlpool_Min * vVScale
@@ -956,12 +956,12 @@ gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
 wait BK_Vessel.BM_702_TEMP@1W_Kettle_BH <= gblV_Pitch_Temp
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew600]
@@ -978,14 +978,14 @@ wgt_SW_Advance_BH.visible = false
 wgt_ALM_Step~alarm_BH = false
 send_db "wgt_VAL_Post~boil~volume_RP"
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = true
-BM_29_DO@eVlv_To~fermenter_BH = true
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = true
+BM_29_DO@Valve_E_To~fermenter_BH = true
 sleep 1000
 BM_22_DO@Pump_Pump_BH = true
 [SectionBrew602]
@@ -1000,12 +1000,12 @@ wgt_SW_Advance_BH.visible = true
 wait gblV_Brew_Status == 603
 wgt_SW_Advance_BH.visible = false
 BM_22_DO@Pump_Pump_BH = false
-BM_24_DO@eVlv_HLT~out_BH = false
-BM_25_DO@eVlv_Mash~tun~out_BH = false
-BM_26_DO@eVlv_Kettle~out_BH = false
-BM_27_DO@eVlv_To~mash~tun_BH = false
-BM_28_DO@eVlv_To~kettle_BH = false
-BM_29_DO@eVlv_To~fermenter_BH = false
+BM_24_DO@Valve_E_HLT~out_BH = false
+BM_25_DO@Valve_E_Mash~tun~out_BH = false
+BM_26_DO@Valve_E_Kettle~out_BH = false
+BM_27_DO@Valve_E_To~mash~tun_BH = false
+BM_28_DO@Valve_E_To~kettle_BH = false
+BM_29_DO@Valve_E_To~fermenter_BH = false
 sleep 1000
 BM_30_DO@Chill_Chiller~water_BH = false
 [SectionBrew604]
