@@ -21,7 +21,7 @@ const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
 export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group', 'new', 'play',
   'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'take_reading'];
-export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
+export const CONSTANTS = ['true', 'false', 'now', 'on', 'off', 'null'];      // NULL: the empty value (Rule 1.32)
 export const LOGIC = ['and', 'or', 'not'];
 // gGlobals made in a Process (Rule 1.24): declare is the same as new, and the gGlobal words
 COMMANDS.push('declare', 'gglobalvalue', 'gglobalstring', 'gglobaltime', 'gglobaldatetime', 'gglobalboolean', 'gv', 'gs', 'gt', 'gd', 'gb');
@@ -85,7 +85,7 @@ export function classify(text, words) {
       if ((m = /^\d+:\d{2}(?::\d{2}(?:\.\d+)?)?/.exec(rest)) || (m = /^(\d+\.?\d*|\.\d+)/.exec(rest))) {
         if (!(c === '.' && prev === 'name')) { set(p, p + m[0].length, 'num'); i += m[0].length; prev = 'num'; first = false; continue; }
       }
-      if ((m = /^[A-Za-z_][A-Za-z0-9_]*/.exec(rest))) {
+      if ((m = /^[A-Za-z_][A-Za-z0-9_~@°]*/.exec(rest))) {
         const w = m[0], lw = w.toLowerCase();
         let cls = '';
         if (prev === '.') cls = 'attr';
@@ -175,7 +175,7 @@ ${css}
 // Without words it is a general file: gGlobals by their gG prefix.
 export function notepadPlusPlus(words, texts = []) {
   const k = COLORS.light, hex = c => c.replace('#', '');
-  const ok = n => /^[A-Za-z_][A-Za-z0-9_]*$/.test(n);
+  const ok = n => /^[A-Za-z_][A-Za-z0-9_~@°]*$/.test(n);
   const group = c => [...new Set((words?.elements ?? []).filter(e => elementClass(e.type) === c && ok(e.name)).map(e => e.name))].sort().join(' ');
   const vars = [...new Set(texts.flatMap(t => [...String(t).matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1])))].sort().join(' ');
   const general = !words;

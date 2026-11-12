@@ -19,7 +19,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 | X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). A Text Widget always wraps.
-- **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
+- **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\t` an indent, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
 - **Shortcut keys** type the codes for you: Shift+Enter `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Shift+D (⌘+Shift+D) °F or °C. See [Shortcut keys](113-shortcut-keys).
 - **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 

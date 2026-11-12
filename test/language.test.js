@@ -13,7 +13,7 @@ fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'alm_Hops', type: 'alarm' }, { name: 'Pump_Red', type: 'digitalOut' }, { name: 'tm_Mash', type: 'timer' },
   { name: 'Kettle_SP', type: 'gGlobal', kind: 'value' }, { name: 'Msg', type: 'gGlobal', kind: 'string' },
   { name: 'gGB_Flag', type: 'gGlobal', kind: 'bool' }, { name: 'gGStep_Brew', type: 'gGlobal', kind: 'step' },
-  { name: 'odd (name)', type: 'gGlobal', kind: 'value' },
+  { name: 'odd~name', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
@@ -44,8 +44,8 @@ Msg.visible = false
 if Msg.visible == false and Msg.visibility == hidden
   print "hidden"
 endif
-"odd (name)".value = 3
-"odd (name)".visible = true
+"odd~name".value = 3
+"odd~name".visible = true
 tm_Mash.countdown = true
 print tm_Mash.type
 tm_Mash.displayname = "Mash " + Kettle_SP
@@ -56,7 +56,7 @@ assert.equal(store.getProp('Pump_Red', 'state'), true);
 assert.equal(store.getProp('Kettle_SP', 'value'), 186.5);
 assert.equal(store.getProp('alm_Hops', 'active'), false);
 assert.equal(store.getProp('Msg', 'visibility'), 'hidden');
-assert.equal(store.getProp('odd (name)', 'value'), 3);
+assert.equal(store.getProp('odd~name', 'value'), 3);
 assert.equal(store.getProp('tm_Mash', 'type'), 'countdown');
 assert.equal(store.getProp('tm_Mash', 'displayname'), 'Mash 186.5');
 assert.deepEqual(prints.slice(0, 4), ['alarm on', '187', 'hidden', 'countdown']);
@@ -86,7 +86,7 @@ if "Pump_Red" state == true && "Kettle_SP" value > 3
 vX precision = 0
 vS = "Msg" visibility
 wait "gGB_Flag" state == false
-"odd (name)" value = 1
+"odd~name" value = 1
 "Pump_Red" bogus = 1 +
 `;
 const m = modernize(old, n => store.get(n));
@@ -100,7 +100,7 @@ tm_Mash.countdown = true
 vX.precision = 0
 vS = Msg.visibility
 wait gGB_Flag == false
-"odd (name)".value = 1
+odd~name = 1
 "Pump_Red" bogus = 1 +
 `);
 assert.equal(modernize(m.text, n => store.get(n)).changed, 0);          // already new: nothing to do
