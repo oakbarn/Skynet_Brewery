@@ -2600,6 +2600,16 @@ Help").
     with where it was and what is there now. It is the starting point of the Importer Help.
   - **The Importer Help** (Help 8 for the Panel's Import screen, Help 143 and 165) is the Skynet Panel Help with the BruControl comments
     added. It is **on hold until the Skynet Panel Help is finished**.
+  - **Importer updates go to the Sandbox for now; one Big Merge later** (OakBarn Brewery, 2026-11-12: "For the Most Part, Put Updates to
+    the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
+    importer version, then that goes to the Importer SandBox"). The Skynet Panel version is polished first (Help, Hover Help, the
+    README); its model for the Importer version comes later. Until the Big Merge, anything said to be for the Importer version only
+    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md`, with
+    where it goes, and is not put in the Importer yet. **But when OakBarn Brewery says to update both the Importer and Skynet** (OakBarn
+    Brewery, 2026-11-12: "I may also tell you to update Both Importer and Skynet, an ten it does not go to the importer sandbox, but to
+    the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
+    `Sandbox/help/BruControl_Help_Extract.md` as before. Example: the README (GitHub front page) is the Skynet version, with no
+    BruControl (2026-11-12); its BruControl text is in the extract, ready for the Importer's own Read Me.
   - **A BruControl Read Me:** maybe one Read Me document in the Skynet Panel for BruControl users. It waits until the Import is done
     (Rule 14.3).
 
@@ -3718,6 +3728,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
