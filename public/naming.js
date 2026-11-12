@@ -399,11 +399,12 @@ export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
 // can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
 export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(String(el?.channel ?? ''));
-// How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins
-export function pinLabel(p, board) {
+// How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins.
+// el (the Device being given a Port) is optional: a Device that doesn't need PWM sees a PWM pin as "D5 (Save for PWM)" (Rule 4.2).
+export function pinLabel(p, board, el) {
   p = String(p);
   if (/^A\d+$/.test(p)) return `A${p.slice(1)} = pin ${54 + +p.slice(1)}`;
-  const t = pinTag(p, board);
+  const t = pinTag(p, board, el);
   return pinProfile(board).label(p) + (t ? `  (${t})` : '');
 }
 // The board of the Interface a Device is on ('mega', 'esp32', 'pi', 'other')
@@ -417,10 +418,13 @@ function piDeviceError(el, mine) {
   return null;
 }
 // what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
-export function pinTag(p, board) {
+// For a Device that doesn't need PWM (an On/Off DO, a probe, a pseudo PWM ...) a PWM pin reads "Save for PWM" (OakBarn Brewery,
+// 2026-11-12: "Mark the PWM as Save for PWM for DO that dont need PWM", Rule 4.2), so it is kept for a Device that needs it.
+export const SAVE_FOR_PWM = 'Save for PWM';
+export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''; }
-  const t = [PWM_PINS.includes(p) && 'PWM', COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
+  const t = [PWM_PINS.includes(p) && (el?.type && !needsPwm(el) ? SAVE_FOR_PWM : 'PWM'), COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
   if (p === SD_PIN) return t + ', SD card pin';      // Skynet Rule 6.11
   return t || (SPI_PINS.includes(p) ? 'SPI, for RTD boards' : p === ONEWIRE_PIN ? 'OneWire probes' : p === '0' || p === '1' ? 'USB link' : '');
 }

@@ -991,7 +991,8 @@ focus; a Label Skynet filled in is skipped** (taken as accepted; it can still be
 which has a **default** (the Interface the last new Device went on, or else the first one) to accept, change, or ➕ Add new. Then the
 **Available Ports**: a Device that works best with **true PWM** is offered only PWM pins; any other Device (on/off, or pseudo PWM done
 in software) is offered only the pins that **can't** do PWM, so the PWM pins are kept for the Devices that need them (only when none
-of those is free are the PWM pins offered; on a Pi every pin does PWM). Once the Label (never blank), Interface and Port are set (and
+of those is free are the PWM pins offered; on a Pi every pin does PWM). A PWM pin offered to a Device that doesn't need PWM reads
+**Save for PWM**, e.g. **D5 (Save for PWM)** (OakBarn Brewery, 2026-11-12: "Mark the PWM as Save for PWM for DO that dont need PWM"). Once the Label (never blank), Interface and Port are set (and
 the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `~` in the name (Rule 3.1). This is in the one Add Device box every
 Device uses (Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probe ...).
 **No free PWM pin** (Fritz, 2026-11-05: "If No PWM Pin is available for a True PWM, 2 choices for User 1. Add Interface, 2 Use Pseudo PWM
@@ -3699,6 +3700,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
 - 2026-11-11: Help 189 (new), List Boxes (Dropdowns), asked for by OakBarn Brewery: how a list box works, where its choices come from (built into Skynet, your Schema, a list that grows with ➕ Add new ..., Rule 18.14) and how they are limited (by kind, by board, free ports only; typing BM_ in the Process editor shows only the Brewery Mega's Devices, a dialog's list box jumps to the first BM_ choice). Rule 2.6 points to it; Glossary entry List box. No Rule changed. Next free Help 190. (thread "Explain list boxes in Help")
 - 2026-11-11: Added Rule 2.49 (OakBarn Brewery): hot spots in Hover Help. Words in a balloon that have their own Help page (Interface ID, Tab ID, Suggested Name, Label, Hysteresis, Setpoint ...) are blue links that open that Help page at its part; a balloon with hot spots waits a moment so the mouse can reach it; the tap pop-up has them too. The balloon words are not changed. Help 147 updated. Checked against both programs: shared public/hoverhelp.js; the BruControl Import keeps plain words while its Help is on hold (Rule 11.3). (thread "Link hover help to full Help")
