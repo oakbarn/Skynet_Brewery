@@ -19,6 +19,8 @@ for (const f of fs.readdirSync('help').filter(f => f.endsWith('.md'))) {
   assert.deepEqual(lines, [], `help/${f} has BruControl text; it belongs in the Importer Help (Rule 11.3)`);
 }
 assert.ok(fs.existsSync('Sandbox/help/BruControl_Help_Extract.md'), 'the text taken out of the Help is kept in the Sandbox (Rule 11.3)');
+// the GitHub front page is the Skynet version too: no BruControl (OakBarn Brewery, 2026-11-12); the Importer has its own Read Me
+assert.doesNotMatch(fs.readFileSync('README.md', 'utf8'), /BruControl/, 'README.md is the Skynet version: no BruControl (Rule 11.3)');
 
 // the hover help of the Panel's dialogs: no BruControl comparisons, no person
 const app = fs.readFileSync('public/app.js', 'utf8');
