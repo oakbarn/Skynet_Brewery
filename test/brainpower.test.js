@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
-import { BrainPower, whatIsOn, runningProcesses, stoppedNotice, wakeGapMs, stayAwakeCommand } from '../lib/brainpower.js';
+import { BrainPower, whatIsOn, runningProcesses, stoppedNotice, wakeGapMs, stayAwakeCommand, onItems, RESUME_MS } from '../lib/brainpower.js';
+import { compile, resumeAt } from '../lib/engine.js';
 
 // a tiny Brain: some outputs, a Process list, and Everything off
 function brain() {
@@ -130,6 +131,87 @@ assert.equal(stoppedNotice(null), null);
   assert.equal(p.notices[0]?.kind, 'update');
   await p._checkUpdate(); assert.equal(p.notices.length, 1);
   waiting = false; await p._checkUpdate(); assert.deepEqual(p.notices, []);
+}
+
+// the Resume button (OakBarn Brewery, 2026-11-12: "Resume Button"): within 15 minutes of the stop, one click turns back On what
+// was On and starts each Process again at its step with its variables; after that the button is gone
+{
+  const b = brain(); let t = 7_000_000;
+  b.store.has = n => b.els.some(e => e.name === n);
+  const started = [];
+  b.engine.start = (name, by, resume) => { started.push({ name, by, resume }); return { ok: true }; };
+  const p = new BrainPower({ ...b, dataDir: dir, platform: 'freebsd', now: () => t, checkUpdate: async () => false });
+  p.start(); clearInterval(p.timer); clearInterval(p.updateTimer);
+  b.vals['Port_DO_H_Element_HLT~Heater_Main'] = { state: true }; b.vals.PWM1.value = 55; b.vals.HLT_Hys.enabled = true; b.vals.MV1.state = true;
+  b.engine.snapshot = () => [{ name: 'Mash', line: 9, step: { num: '2', name: 'Rest' }, vars: [['x', { type: 'value', val: 152, precision: null }]] }];
+  assert.deepEqual(onItems(b.els, b.store.getProp), [{ name: 'Port_DO_H_Element_HLT~Heater_Main', set: { state: true } }, { name: 'PWM1', set: { value: 55 } }, { name: 'HLT_Hys', set: { enabled: true } }]);
+  t += 1000; p.tick();
+  p.closing('system');
+  b.engine.snapshot = () => [];
+  assert.equal(b.vals.PWM1.value, 0);
+  t += 5 * 60 * 1000;                                      // back 5 minutes later
+  const p2 = new BrainPower({ ...b, dataDir: dir, platform: 'freebsd', now: () => t, checkUpdate: async () => false });
+  p2.start(); clearInterval(p2.timer); clearInterval(p2.updateTimer);
+  assert.ok(p2.notices[0].resume, 'a Resume button');
+  assert.match(p2.notices[0].text, /Resume turns back On/);
+  assert.match(p2.notices[0].text, /Mash \(step "Rest", line 9\)/);
+  const r = p2.resume('stopped', 'Brewer');
+  assert.deepEqual(r.failed, []);
+  assert.equal(b.vals['Port_DO_H_Element_HLT~Heater_Main'].state, true); assert.equal(b.vals.PWM1.value, 55); assert.equal(b.vals.HLT_Hys.enabled, true);
+  assert.deepEqual(started, [{ name: 'Mash', by: 'resume', resume: { step: { num: '2', name: 'Rest' }, line: 9, vars: [['x', { type: 'value', val: 152, precision: null }]] } }]);
+  assert.deepEqual(p2.notices, [], 'the notice goes once resumed');
+  assert.throws(() => p2.resume('stopped'), /nothing to resume/);
+}
+{
+  // too late: the button goes after 15 minutes, and a click after that does nothing
+  const b = brain(); let t = 8_000_000;
+  const p = new BrainPower({ ...b, dataDir: dir, platform: 'freebsd', now: () => t, checkUpdate: async () => false });
+  p.start(); clearInterval(p.timer); clearInterval(p.updateTimer);
+  b.vals.Pump1 = { state: true }; t += 1000; p.tick(); p.closing('closed');
+  t += 10 * 60 * 1000;
+  const p2 = new BrainPower({ ...b, dataDir: dir, platform: 'freebsd', now: () => t, checkUpdate: async () => false });
+  p2.start(); clearInterval(p2.timer); clearInterval(p2.updateTimer);
+  assert.ok(p2.notices[0].resume);
+  t += 6 * 60 * 1000;
+  assert.throws(() => p2.resume('stopped'), /Too late/);
+  assert.equal(b.vals.Pump1.state, false);
+  assert.equal(p2.notices[0].resume, undefined); assert.doesNotMatch(p2.notices[0].text, /Resume turns/);
+  // down longer than 15 minutes: no button at all
+  assert.equal(stoppedNotice({ brewing: true, at: 0, stoppedAt: 0, on: ['Pump1'], items: [{ name: 'Pump1', set: { state: true } }] }, RESUME_MS + 1).resume, undefined);
+  assert.ok(stoppedNotice({ brewing: true, at: 0, stoppedAt: 0, on: ['Pump1'], items: [{ name: 'Pump1', set: { state: true } }] }, RESUME_MS - 1).resume);
+}
+
+// where a resumed Process starts: its step by number and name, else the line it was on; a step that is gone: not resumed
+{
+  const prog = compile('step 1.00001 "Heat"\nsleep 1000\nstep 1.00002 "Rest"\nsleep 2000\nsleep 3000');
+  const at = resumeAt(prog.stmts, { step: { num: '1.00002', name: 'Rest' } });
+  assert.equal(prog.stmts[at].op, 'step'); assert.equal(prog.stmts[at].name, 'Rest');
+  assert.equal(prog.stmts[resumeAt(prog.stmts, { line: 5 })].line, 5);
+  assert.equal(resumeAt(prog.stmts, { step: { num: '1.00003', name: 'Boil' } }), -1);
+  assert.equal(resumeAt(prog.stmts, {}), -1);
+}
+
+// a real Process: snapshot, stopped, then resumed at its step with its variable
+{
+  const { Store } = await import('../lib/store.js');
+  const { Engine } = await import('../lib/engine.js');
+  const cfg = path.join(dir, 'c.json');
+  fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Seen', type: 'gGlobal', kind: 'value' }] }));
+  const store = new Store(cfg, path.join(dir, 'data')); store.load();
+  const eng = new Engine(store, path.join(dir, 'scripts'), { logNow() { } });
+  const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };
+  eng.write('Brew', 'new value x\nx = 1\nSeen = 1\nstep 1.00001 "Heat"\nx = x + 10\nsleep 60000\nstep 1.00002 "Rest"\nSeen = x + 100\nsleep 60000');
+  eng.start('Brew');
+  assert.ok(await until(() => eng.snapshot()[0]?.step?.name === 'Heat'));
+  const snap = eng.snapshot()[0];
+  assert.deepEqual(snap.vars, [['x', { type: 'value', val: 11, precision: null }]]);
+  eng.stopAll(); assert.ok(await until(() => !eng.running.size));
+  // a later step is where it resumes; the lines before it do not run again (Seen would be 1)
+  store.setProp('Seen', 'value', 0);
+  assert.equal(eng.start('Brew', 'resume', { step: { num: '1.00002', name: 'Rest' }, line: 9, vars: snap.vars }).ok, true);
+  assert.ok(await until(() => store.getProp('Seen', 'value') === 111));
+  eng.stopAll(); assert.ok(await until(() => !eng.running.size));
+  assert.equal(eng.start('Brew', 'resume', { step: { num: '9.00009', name: 'Gone' } }).ok, false);
 }
 
 fs.rmSync(dir, { recursive: true, force: true });

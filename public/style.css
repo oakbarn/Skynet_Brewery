@@ -632,6 +632,7 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 .brainNotice.update { background: #f2c94c; color: #1a1a1a; }
 .brainNotice span { flex: 1; }
 .brainNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
+.brainNotice button.resumeBtn { background: #fff; color: #b3261e; font-weight: 700; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
 #dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
 #dlgBody label.greyed + .fldIcons { opacity: 1; } #dlgBody label.greyed + .fldIcons > :first-child { opacity: 0.45; }      /* a greyed out field whose ⬢ still opens (the Probe type, Rule 18.26) */
