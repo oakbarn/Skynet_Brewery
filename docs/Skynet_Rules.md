@@ -1089,6 +1089,17 @@ deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per po
 *Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
 **Vessel** at the far right (2026-11-03).
 
+4.6 **The Default Interface and Default Tab of a Build** (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1 #2:
+"We need to set on the Defaults the Interface and Tab and have that both on the Default Panel and maybe DDLBs on the Build Tab Menu
+where a User can quickly set the defaults for the Build. These are the same defaults and not unique to the Build Tab."):
+- **☰ Menu > Default settings > New Devices and Widgets (the Build)** has **Default Interface** and **Default Tab**. The Edit layout
+  bar of the 🔨 Build Tab has the same two as dropdowns (**Interface**, **Tab**); a change in either place is the same default.
+- A new Device's Add box starts on the Default Interface (else the one the last new Device went on, else the first, as before), and
+  a new Device or Widget is set to go to the Default Tab at the end of the Build (Rule 4.1; else the Tab the Build Tab came from).
+- **➕ Add new Tab…** in an Add box makes the new Tab, comes back, and sets it as the Default Tab.
+- Kept with the other defaults by its **Interface ID** and **Tab ID**; a Schema with no Interface or Tab of that ID uses the old way.
+- **Both programs:** the BruControl Import's Build page is the Panel's, so it has the same two dropdowns.
+
 ## 5. Templates and Integrated items
 
 5.1 **Two kinds of Template:** Skynet Templates (come with Skynet, read only, cannot be deleted,
@@ -2711,6 +2722,21 @@ and a big **➕ New Schema** button (with **❓ Step by step**) on the ☰ Menu 
 Schema dropdown's Add new Schema (the box itself is not changed, Rule 18.10). Both programs: the Importer uses the Panel's Help and Schema
 list, so nothing else changes there.
 
+11.10 **No outside links in Help unless OakBarn Brewery directs one; a broken Help link opens nothing** (OakBarn Brewery, 2026-11-12,
+Hover Help Blichmann RipTide Dialog 1 #2: "None Links outside of Help unless it is directed By me. If the Help Link in a Hover Help is
+Broken or not set, it opens Bing and takes me to a Page on the WEB. Broken links will be sent to support@oakbarnbrewery.com with the
+details of the Broken link, and a Pop Up Dialog saying that and a button to Send."):
+- **Outside links:** a Help page links to a web page only when OakBarn Brewery directs it. Each one is listed in
+  `docs/Outside_Links.md`; a test fails on any Help web link that is not on the list. Those links open in the default browser
+  ("Outside links open in the default browser", under How Rules work).
+- **A broken Help link:** a hot spot in a Hover Help (Rule 2.49) or a link between Help pages is checked before it opens. When its
+  page or part is not there, or it has none set, **nothing opens and nothing goes to the web**: a pop-up says **This Help link is
+  broken**, shows the details (where, the link, what is wrong, the page, the browser, the time), and has **✖ Close** and **✉ Send**.
+  Send emails the details to **support@oakbarnbrewery.com** from the Brain when its email is set up (Settings > Sending codes);
+  otherwise the computer's own mail program opens with them filled in.
+- **Both programs:** the Panel and its Help window. The BruControl Import's balloons have no hot spots while its Help is on hold
+  (Rule 11.3), so it has no Help links to break.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -3635,6 +3661,14 @@ Confirm Button and a Back Button."; "Do Not Lock the Interface or Port until the
   pressed before the Review brings the Review up.
 - **✔ Confirm** greys out the Interface and Available Ports line in the Add box; the rest of the box opens once the Label and Tab are
   filled in too. They are set for good only when **➕ Add Device** saves the Device; **Cancel** before that keeps nothing.
+- **➕ Add Device's own Hover Help** (OakBarn Brewery, 2026-11-12, Dialog 1 #2: "The Hover Help for the Add Device should be the same
+  with Just that the Label or Port needs to be set first"): while it waits, its balloon is the line that says what is missing
+  ("Type a Label first", "Pick the Port first" ...), a blank line, then the same balloon as that box (Label, Interface, Available
+  Ports or Tab).
+- **The Pump's Tab and Device Type Hover Help** (the same PDF) are OakBarn Brewery's own text too, in the Add box and in Pump Device
+  Properties (Dialog 2), the same as Help 115 The Tab and The Device Type. After each Suggested Name Format line comes the same
+  standard text as the Interface balloon (what the name tells you, and Predictive Text). The BruControl comparison he wrote with the
+  Device Type is for the Importer only: it waits in the Importer Sandbox (Rule 11.3).
 - The **Hover Help** of the Pump's Interface and of every Available Ports is OakBarn Brewery's own text (Rule 18.34, word for word,
   the electrical warning in red, Rule 6.20), the same as Help 115 The Port and The Interface. Its examples use **Port 15**
   (BM_15_DO@Pump_Red~Pump_BH): Port 6 is used elsewhere on the 3 Vessel sample. The waiting ➕ Add Device button's balloon keeps
@@ -3763,6 +3797,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Added Rule 4.6 (OakBarn Brewery): the Default Interface and Default Tab of a Build, in ☰ Menu > Default settings and as two dropdowns on the 🔨 Build Tab's Edit layout bar (the same defaults); ➕ Add new Tab… in an Add box sets the Default Tab. Added Rule 11.10 (OakBarn Brewery): no outside links in Help unless he directs one (docs/Outside_Links.md, checked by a test); a broken or empty Help link opens nothing and pops up This Help link is broken with ✉ Send to support@oakbarnbrewery.com. Rule 18.35: ➕ Add Device's balloon is the missing line plus that box's own balloon; the Pump's Tab and Device Type balloons are his text (Help 115). Checked against both programs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 2.49 (OakBarn Brewery): the Help that a hot spot opens has its ◀ Back ... ✕ Close row frozen at the top while the page scrolls (the Help window and the panel's own Help page); the part opened shows just under it. Help 54, 147. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3). (thread "Link hover help to full Help")
 - 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")

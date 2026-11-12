@@ -51,7 +51,17 @@ assert.match(app, /const conf = !dd \|\| \(!!wireKey\(w\) && confirmed === wireK
 assert.match(app, /if \(missing === CONFIRM_WHY\) \{ await askReview\(work\); continue; \}/);
 assert.match(app, /'⚠ Electricity can kill\. OakBarn Brewery and Skynet are not electricians and can give no electrical advice\. Consult a Licensed Electrician\.\\nBrain -> Arduino IO \(Port\)/, 'the red warning in the Interface balloon');
 assert.match(app, /tip: ifaceTip\(e\)/); assert.match(app, /tip: IFACE_PUMP_TIP/);
-assert.match(app, /PICK_PORT_WHY \+ '\\n\\n' \+ PORT_PICK_TIP/, 'Pick the Port first, then a blank line and more');
+assert.match(app, /if \(why\) b\.dataset\.help = same \? why \+ '\\n\\n' \+ same : why;/, 'Add Device: the missing line, a blank line, then that box\'s balloon');
+// Dialog 1 #2 (2026-11-12): the Pump's Tab and Device Type balloons, in the Add box and in Pump Device Properties (Dialog 2)
+assert.match(app, /const TAB_PUMP_TIP = \['The Tab this Device \(or a new Widget\) goes to when the Move to Tab Button is clicked/);
+assert.match(app, /const DEVTYPE_PUMP_TIP = \['Its Device Type: DO@Pump, a Pump \(Pump\) on a Digital Out, On\/Off \(DO\) port\./);
+assert.match(app, /\['workspace', '3\. Tab', 'ws', 'addnewid', false, false, \{ tip: tabTip\(it\) \}\]/, 'Dialog 2 Tab');
+assert.match(app, /pumpDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro', shownType\(it\), false, false, \{ tip: devTypeTip\(it\) \}\]/, 'Dialog 2 Device Type');
+assert.doesNotMatch(app, /BruControl you could only select/i, 'the Importer note stays in the Sandbox');
+// the Default Interface and Default Tab (Rule 4.6)
+assert.match(app, /\['buildIface', 'Default Interface', 'sel'/); assert.match(app, /\['buildTab', 'Default Tab', 'sel'/);
+assert.match(app, /function buildGoesTo\(name\)/); assert.match(app, /saveBuildDefs\(\{ buildTab: nt\.id \}\)/, 'Add new Tab sets the Default Tab');
+assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /id="buildDefIface"/);
 assert.doesNotMatch(app, /BM_6_/, 'Port 15 in the examples');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.35 \*\*Review the Interface and Port/m);
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
