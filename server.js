@@ -62,6 +62,7 @@ import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
+import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
@@ -115,6 +116,18 @@ const messaging = new Messaging(DATA);
 // Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
 const PANEL_VERSION = readVersion(ROOT);
 const versionCheck = new VersionCheck(PANEL_VERSION);
+// Official Skynet (Rule 9.14, lib/official.js): on every start the core program files are checked against OakBarn Brewery's list of
+// this version. Official and unchanged: they are made Read-only. Changed or not Official: every screen is warned, ☰ Menu > About
+// names the files and an Admin can Repair. Never stops anything: a brew carries on whatever it finds. Not on the Importer's Build page.
+let official = IMPORT_BUILD ? { state: 'importbuild', text: '', changed: [], missing: [], added: [] } : { state: 'checking', text: 'Checking the program files ...', changed: [], missing: [], added: [] };
+async function runOfficialCheck() {
+  try { official = await checkOfficial(ROOT); } catch (e) { official = { state: 'unknown', text: `Could not check the program files: ${e.message}`, changed: [], missing: [], added: [] }; }
+  if (official.state === 'official' && canLock(ROOT)) setReadOnly(ROOT, coreFiles(ROOT));
+  if (official.state !== 'official') console.log(official.text);
+  broadcast('official', official);
+  return official;
+}
+if (!IMPORT_BUILD) setTimeout(runOfficialCheck, 1500);   // after the panel is up, so the start is not slowed
 const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
 sim.apply();
 hw.start();
@@ -563,9 +576,16 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
+  // Official Skynet (Rule 9.14): check again (everyone), Repair (admins, needRole)
+  if (p === '/ui/official' && m === 'GET') return ok(res, IMPORT_BUILD ? official : await runOfficialCheck());
+  if (p === '/ui/official/repair' && m === 'POST') {
+    if (IMPORT_BUILD) return fail(res, 400, 'Repair is in the Skynet Panel');
+    try { const r = await repairOfficial(ROOT); engine.print('system', `Repair: ${r.fixed.length} file(s) put back, ${r.moved.length} moved to ${r.backup || 'backups'}${r.failed.length ? `, ${r.failed.length} failed` : ''}`); return ok(res, { ok: true, ...r, official: await runOfficialCheck() }); }
+    catch (e) { return fail(res, 400, e.message); }
+  }
   // a screen played an Alarm's sound to its end (Rule 7.18): one that does not repeat lets the next Alarm in line play
   if (p === '/ui/sound/finished' && m === 'POST') {
     const { name } = await jsonBody(req);

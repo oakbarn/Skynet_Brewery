@@ -365,6 +365,11 @@ Section "Skynet Brew Panel" SecMain
   !insertmacro MoveOldSample "brewzilla-brew-day"
   !insertmacro MoveOldSample "oakbarn-brucontrol"
   ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
+  ; Official Skynet (Rule 9.14): the panel makes its program files Read-only once it has checked them, so take that off first
+  ; (only Read-only is taken off; nothing is deleted).
+  ${If} ${FileExists} "$INSTDIR\server.js"
+    Call CoreWritable
+  ${EndIf}
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"
   ${If} $OldPanel != ""
@@ -452,6 +457,33 @@ Function AskImporter
     Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
 FunctionEnd
 
+; Official Skynet (Rule 9.14, lib/official.js): the core program files (the same list as CORE there) lose their Read-only mark.
+; Only the core: your config, data, media, scripts and help files are never touched.
+!macro CoreWritable UN
+Function ${UN}CoreWritable
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\server.js"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\importer.js"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\package.json"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\lib\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\public\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\templates\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\firmware\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\install\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\samples\*" /S'
+  Pop $0
+FunctionEnd
+!macroend
+!insertmacro CoreWritable ""
+!insertmacro CoreWritable "un."
+
 Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"
 FunctionEnd
@@ -500,6 +532,8 @@ FunctionEnd
 
 ; ---------------------------------------------------------------- Uninstall
 Section "Uninstall"
+  ; the program files are Read-only (Official Skynet, Rule 9.14): take that off, or Windows would not let them be removed
+  Call un.CoreWritable
   Delete "$DESKTOP\Skynet Brewer.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
   ; the Importer shortcut in the Import folder (the folder and your files in it are kept)
