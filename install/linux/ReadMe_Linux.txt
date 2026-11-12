@@ -13,6 +13,8 @@ For a Raspberry Pi, use ReadMe_Raspberry_Pi.txt instead.
 these steps for you. This ReadMe is the step-by-step way, so you know exactly what
 is on your computer. Use one or the other, not both.)
 
+Any folder name works: spaces and accented letters (like "Brassage bière") are fine.
+
 
 WHICH COMPUTER IS THE BRAIN? READ THIS FIRST
 --------------------------------------------

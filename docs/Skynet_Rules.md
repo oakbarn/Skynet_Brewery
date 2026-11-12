@@ -2614,6 +2614,13 @@ and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample al
 additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
 Schemas Setup, which is only for additional samples. (thread "Move Sample Schemas to own Setup", Help 184)
 
+9.15 **The installers work from and into a folder with any name** (OakBarn Brewery, 2026-11-12, after a brewer on Ubuntu
+24.04 ran the Linux installer from `Brassage bière/.../Skynet Brew Panel`): spaces, accented letters (é, è, ü), apostrophes,
+`$`, `%` and quotes in the folder name never stop an install, an update or the panel. Every path is kept whole (in quotes), and
+each file the installer writes (the start file, the Skynet Brewer menu entry and Desktop icon, the start-by-itself service) gets the
+path in that file's own way of quoting. Applies to the Linux, Raspberry Pi and Mac installers and to the panel itself. Both
+programs: the BruControl Import is Windows only and is installed by the same Setup .exe; nothing changes there.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3848,6 +3855,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-12: Added Rule 9.15 (OakBarn Brewery): the installers work from and into a folder with any name (spaces, accented letters, $, %, quotes). The Linux and Pi installers now quote the folder correctly in the start file, the Skynet Brewer menu entry/Desktop icon and the start-by-itself service; tested installing from `Brassage bière/Logiciel de brassage de bière/Skynet Brew Panel` into a folder named `Brew Panel ü $x "q" it's 50%`. Checked against both programs: the BruControl Import is Windows only; nothing changes there.
 - 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
