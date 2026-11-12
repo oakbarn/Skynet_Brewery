@@ -2277,6 +2277,30 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
     from a heating Hysteresis (a plus OnOffset in BruControl) and a cooling Hysteresis (a minus OnOffset in BruControl) on the same probe, keeps the two
     outputs' names and Ports, takes the Setpoint, offsets and the longer of the two On delays, and lists it in the notes. Help 182.
 
+6.31 **Sleep, Windows Update and restarts** (OakBarn Brewery, 2026-11-12: "With a New Build, most people will likely start right on a
+PC Computer and not the Pi as the "Brain", so we need to fix the Sleep Issue and What Happens during an Update and Restart, or even a
+User Introduced Restart"). The Processes and controls run in Skynet Brewer on the Brain, never in the browser, so closing a browser
+never stops a brew. On every Brain (Windows, Mac, Linux, Pi):
+1. **Kept awake while brewing:** while any Process runs or anything is On, Skynet asks the computer not to sleep (the screen may go
+   dark). Nothing is asked when nothing is brewing.
+2. **Off before it stops:** however Skynet is closed (☰ Menu, the window's X, Ctrl+C, Windows shutting down or restarting), every
+   output is turned Off first. A power cut or a crash is covered by each board's Lost link (Rule 6.3).
+3. **Nothing comes back On by itself:** after a restart everything starts Off and no Process carries on where it was (a Process set
+   to start when the panel starts still starts from its top). Woken from sleep during a brew, everything is set Off and every
+   Process is stopped, so a board that talks again is never told to turn something back On.
+   **The Resume button** (OakBarn Brewery, 2026-11-12: "Resume Button"): for **15 minutes after the stop**, the notice has
+   **▶ Resume** (Operator or Admin). One click turns back On what was On (outputs, PWM, controls, running timers) and starts each
+   Process again **at its step** (no step: the line it was on) with its variables; a Stepper never moves by itself. After 15 minutes
+   the button is gone.
+4. **A notice on every screen:** after a stop or a sleep during a brew, it says when, what was On, and which Process was on which
+   step and line; when Windows has an update waiting to restart, a yellow notice says to restart before brewing. ✕ closes it on
+   every screen (Operator or Admin).
+5. **Setup:** "Start Skynet Brewer by itself each time you sign in to Windows?" (a Startup folder shortcut, no admin rights). Skynet
+   never changes Windows settings itself; Help 190 says how to set Active hours, sign-in after an update, the laptop lid and power
+   return.
+6. **Both programs:** the Panel does all of this; the BruControl Import controls nothing, so it needs none of it (its Build page
+   runs no board and shows no notice). The same Setup asks the question for both. Help 190.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -3831,6 +3855,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 - 2026-11-12: Added Rule 4.6 (OakBarn Brewery): the Default Interface and Default Tab of a Build, in ☰ Menu > Default settings and as two dropdowns on the 🔨 Build Tab's Edit layout bar (the same defaults); ➕ Add new Tab… in an Add box sets the Default Tab. Added Rule 11.10 (OakBarn Brewery): no outside links in Help unless he directs one (docs/Outside_Links.md, checked by a test); a broken or empty Help link opens nothing and pops up This Help link is broken with ✉ Send to support@oakbarnbrewery.com. Rule 18.35: ➕ Add Device's balloon is the missing line plus that box's own balloon; the Pump's Tab and Device Type balloons are his text (Help 115). Checked against both programs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 2.49 (OakBarn Brewery): the Help that a hot spot opens has its ◀ Back ... ✕ Close row frozen at the top while the page scrolls (the Help window and the panel's own Help page); the part opened shows just under it. Help 54, 147. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3). (thread "Link hover help to full Help")
 - 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
+- 2026-11-12: Added Rule 6.31, Sleep, Windows Update and restarts (OakBarn Brewery: "fix the Sleep Issue and What Happens during an Update and Restart"): kept awake while brewing, every output Off before Skynet stops, nothing back On by itself after a restart or a sleep, a notice of what was running with a Resume button for 15 minutes after the stop (OakBarn Brewery picked "Resume Button"), a Windows update waiting notice, and a Setup question to start Skynet at sign-in. Help 190 (new); Help 19 and 95 link to it. Checked against both programs: Panel only; the Importer controls nothing (its Build page runs no board). Next free Help 191. (thread "Keep Skynet brewing through PC sleep and restarts")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
