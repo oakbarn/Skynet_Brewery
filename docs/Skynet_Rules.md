@@ -2521,7 +2521,12 @@ coming soon until the YouTube links exist); the ReadMe names them. Both programs
 and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample always stays in the Skynet Panel** (OakBarn Brewery,
 2026-11-12: "3 Vessel Schema always stays with the Skynet Panel it is not moved to the sample Schema exe. That will be for
 additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
-Schemas Setup, which is only for additional samples. (thread "Move Sample Schemas to own Setup", Help 184)
+Schemas Setup, which is only for additional samples. **Tick boxes, no All, never delete** (OakBarn Brewery, 2026-11-12, README markup "Skynet Brew Panel 1 a": "In that
+sample Schema exe Have tick boxes for which samples will be imported. No All Tickbox. Rule Never Delete a Sample Available if a
+change is need add a new Sample with the same Name but at #2"): the Sample Schemas Setup shows **one tick box per sample** so the
+brewer picks which samples are imported, and has **no All tick box**. A sample that is available is **never deleted**: when a change
+is needed, a new sample is added with the **same Name and #2** at the end (then #3 ...), and the old one stays. The tick boxes are
+built with the first sample put in the Setup (it holds none yet). (thread "Move Sample Schemas to own Setup", Help 184)
 
 ## 10. Testing
 
@@ -3731,6 +3736,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Rule 9.13 (OakBarn Brewery, README markup "Skynet Brew Panel 1 a"): the Sample Schemas Setup has a tick box per sample and no All tick box; a sample is never deleted, a changed one is added with the same Name and #2. The README is polished from the same markup (the Brain, Official Release, Pumps and Valves split, .API, Predictive text, Suggested Names). Checked against both programs: the Importer does not use Sample Schemas; the README is the Skynet version (Rule 11.3). (thread "Polish the Skynet Brew Panel")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
