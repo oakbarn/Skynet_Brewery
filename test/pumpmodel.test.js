@@ -42,7 +42,7 @@ assert.match(app, /showIf: pumpPwmShown/);
 assert.match(app, /pumpPower: '⚠ Electricity can kill\./);
 assert.doesNotMatch(app, /\['_pwarn'/, 'no warning line in the dialog');
 assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
-assert.match(app, /The Picture itself cannot be changed\./);
+assert.match(app, /The Skynet Picture is set by Skynet and cannot be changed\./);
 assert.match(app, /i\.disabled = true; i\.title = 'Confirmed: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out once Confirmed');
 // the Review step and the Interface / Port Hover Help (OakBarn Brewery, 2026-11-12, Rule 18.35)
 assert.match(app, /const REVIEW_IFACE_PORT = 'You MUST Confirm the Interface and Port Number\. Once Confirmed, they cannot be changed\.\\nIf a Change is needed now, Click the Back Button\.'/);
@@ -67,4 +67,16 @@ assert.doesNotMatch(app, /BM_6_/, 'Port 15 in the examples');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.35 \*\*Review the Interface and Port/m);
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
 assert.match(app, /\['cover', 'coverColor', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked color is kept');
+// Dialog 2 (2026-11-12): Dual Action (Rule 2.50), the Toggle, Graphic and Name balloons, no Path box on a Skynet pump drawing, Rule 3.2 words
+assert.match(app, /\['hold', 'Push Button'\]/); assert.match(app, /\['dual', 'Dual Action'\]/);
+assert.match(app, /const DUAL_HOLD_MS = 500/);
+assert.match(app, /const PUMP_TOGGLE_TIP = \['This is what action is taken when the Pump Image is clicked on the Tab\./);
+assert.match(app, /const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab/);
+assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', 'gpick'/, 'a Skynet pump drawing has no Path box');
+assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : DEVICE_TIPS\.name;/);
+assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);
+assert.doesNotMatch(app, /once saved can never be changed|1 to 4 Characters/, 'Rule 3.2: only an Admin changes an ID; a Tab ID is 2 letters');
+assert.match(app, /It is exactly 2 letters\. Our example Tab is: BH/);
+assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /el\.tap === 'hold' \|\| el\.tap === 'dual'/);
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.50 \*\*Dual Action click\*\*/m);
 console.log('pump model tests passed');

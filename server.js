@@ -602,7 +602,7 @@ async function route(req, res) {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
     // a Push Button (Semi_Widgets_Devices), a Push Button gGlobal, or an output or switch set to "push button (on while held)"
-    const push = el && (el.type === 'pushButton' || (el.type === 'gGlobal' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
+    const push = el && (el.type === 'pushButton' || (el.type === 'gGlobal' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && (el.tap === 'hold' || el.tap === 'dual')));      // Dual Action held (Rule 2.50)
     if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);
     return ok(res);

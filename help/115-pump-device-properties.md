@@ -46,13 +46,16 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
 3. **2. Interface** and **Available Ports** on one line: greyed out once it is added (the board and pin it is wired to).
 4. **3. Tab**: the Tab it is on.
 5. **4. Name**: starts as the Suggested Name (from the Label, Interface, Port, Device Type and Tab); you may type your own. It
-   must be unique. A Process uses it: `Pump_Name.state = true`.
-6. **Graphic**: the pump's picture as it shows on the Tab. **Path**: greyed out on a Skynet pump drawing (it is set); a User
-   pump's one Path can be changed.
+   must be unique. A Process uses it: `Pump_Name.state = true`. See **The Name** below.
+6. **Graphic**: the Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is
+   set by Skynet and cannot be changed, so a Skynet pump drawing has no Path box. A User pump keeps its **Path** box, so its one
+   picture can be changed. The Graphic changes as soon as you pick another Orientation or Cover.
 7. **Orientation**: **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn, and its IPs
    follow.
-8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line: On/Off (one click turns it on or off), Push
-   button (on only while held) or None.
+8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. The Toggle is what happens when the pump is
+   clicked on the Tab: **On/Off** (one click turns it on or off, most common), **Push Button** (on only while held), **Dual
+   Action** (a click turns it on or off; pressed and held for more than half a second, it is on only while held, handy for topping
+   off a vessel by hand) or **None** (the picture does nothing when clicked). Rule 2.50.
    Just below them, **Overlay**: what is drawn on top while the pump is On (the steady lightning bolt, the flashing bolt,
    the Green glow ring, or None). On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
@@ -133,7 +136,7 @@ is Direct Output. If the State of the Device is true, the power is on (through t
 power. Similar to a Light Switch.
 
 When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a
-free form Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our
+free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our
 example Interface is: BM: Brewery Mega
 
 The ID is important as it is Part of the Suggested Name.
@@ -167,7 +170,7 @@ are available on that Tab), there are also Special Skynet Tabs (like this Build 
 control things, but only a workshop to build something to be placed on a Normal User Tab.
 
 When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form
-Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our example Tab
+Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab
 is: BH: Brew House
 The ID is important as it is Part of the Suggested Name.
 BM_15_DO@Pump_Red~Pump_**BH**
@@ -201,6 +204,35 @@ And do not worry about such a convoluted name when coding a Process as it will b
 quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are
 limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices)
 in the Predictive Text List Box.
+
+## The Name
+
+This is how the Device (or a Widget) is referred to as the unique identifier for the Skynet Panel to access and use the Red Pump you
+just built.
+In Skynet, there are some standards such as Prohibited Characters such as :, " and others that could interfere with the Computer's
+Operating System or Skynet's own background code. No spaces are allowed in Skynet names.
+
+Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the
+Device (or Widget) just by the name alone.
+
+Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
+
+| Part | In the name |
+|---|---|
+| Interfaceid | **BM**_15_DO@Pump_Red~Pump_BH |
+| Port | BM_**15**_DO@Pump_Red~Pump_BH |
+| Type | BM_15_**DO@Pump**_Red~Pump_BH |
+| Label | BM_15_DO@Pump_**Red~Pump**_BH |
+| TABid | BM_15_DO@Pump_Red~Pump_**BH** |
+
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery
+Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+**Predictive Text**: in a Process you never type this long name. Type BM and the List Box shows only the Devices on the BM
+Interface; pick Red Pump from it. The Suggested Name is what makes that work.
+
+In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have
+not chosen to do so earlier. Today each name has its own **💾 Update to Suggested** button (Rule 3.16).
 
 ## The ➕ Add Device button
 
