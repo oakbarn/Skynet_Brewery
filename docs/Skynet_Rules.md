@@ -943,6 +943,8 @@ Name"; "All Change Name Dialog gets new Button").
 it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 18.28). It may have spaces and most marks, but:
 - **No space at the start or end** (Rule 3.3; "an issue in BruControl I want to remove from Skynet"). It is trimmed as soon as you
   leave its box, when it is saved, and in an older Schema when it loads.
+  To lay text out, use the codes `\n` (a new line) and `\t` (an indent, OakBarn Brewery, 2026-11-12: "\t for indent!"), not extra
+  spaces (OakBarn Brewery: "extra spaces are used as a poor man's way of spacing in a form or Box"). Help 22, Codes inside text.
 - **No © ® ™**: "Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a
   name or a Label to avoid confusion with the Skynet MIT License." They are taken out as you type, and a small box says so.
 - **No @ ~**: kept for the Suggested Name (Rule 3.4). Typed, they become a space, and the small box says so.
@@ -3640,6 +3642,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
 - 2026-11-11: Rule 3.3 and new Rule 3.17, Label Rules (OakBarn Brewery: "Hunt for Beginning or trailing spaces in a label or name and not allow. This is an issue in BruControl I want to remove from Skynet"; "Put that in Nameing and Label Rules"): no space at the start or end of any name or Label; Labels are trimmed when you leave the box, when saved (the Brain trims every Label it is sent) and on load. Rule 3.17 gathers the Label Rules (no © ® ™, no @ ~, never blank). Checked against both programs: BruControl names and Labels with spaces at the ends are trimmed when imported.
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Valve_E_H and Valve_Sgas"): the High Temperature Electric Valve's Type ID is Valve_E_H (was E_H_Vlv) and the Solenoid Gas Valve's is Valve_Sgas (was G_Vlv): DO@Valve_E_H, DO@Valve_Sgas; older ones are upgraded on load with their names. Checked against both programs: the BruControl Import's Burner (BrN) comes in as Valve_Sgas.
 - 2026-11-11: Added Rule 1.32, NULL (OakBarn Brewery: "Could we use NULL", "OK and in the Help about reserved words"): `X = NULL` empties a Process variable, gGlobal or Value Widget (shows blank, kept after a restart); `== NULL` / `!= NULL` ask; math or `< >` on NULL stops the Process with a plain message; a Device can't be NULL. Help 22 gets "NULL: the empty value" and a "Reserved words" list; a reserved word can't be a name (Rule 3.4). Checked against both programs: the Panel runs it; the Importer brings in no NULL.

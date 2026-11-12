@@ -129,6 +129,7 @@ Text in quotes can carry codes that change how it looks on the screen. They work
 | Code | What it does | Example | Shows |
 |---|---|---|---|
 | `\n` | a new line | `"Mash in\nStir well"` | Mash in, then Stir well on the next line |
+| `\t` | an indent (about four spaces wide) | `"Mash in\n\tStir well"` | Stir well, pushed in, on the next line |
 | `\b` | bold on / off | `"Add \bhops\b now"` | Add **hops** now |
 | `\L` | large text on / off | `"\LSTRIKE\L 165"` | STRIKE in large letters |
 | `\_` | subscript on / off | `"CO\_2\_"` | CO₂ |
@@ -137,6 +138,8 @@ Text in quotes can carry codes that change how it looks on the screen. They work
 | `\\` | one backslash | `"C:\\Brewing"` | C:\Brewing |
 
 Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
+
+Use `\t` and `\n` to lay text out, not extra spaces: a Label can't start or end with a space (they are trimmed).
 
 The size of large text is **Large text size** on the ☰ Menu **Default** tab, in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
 
