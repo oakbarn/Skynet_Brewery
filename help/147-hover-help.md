@@ -18,6 +18,8 @@ Some words in a help box are **blue and underlined**. They are **hot spots**: ea
 - Move the mouse from the name into the help box. A box with hot spots waits a moment, so the mouse can reach it.
 - **Click a hot spot** and the Help window opens at the part about it. Example: in the help for **Interface**, click
   **Interface ID** and Help opens **Interfaces**, at **The Interface ID**.
+- The row at the top of Help, with **◀ Back** and **✕ Close**, stays frozen while you scroll. Click **✕ Close** to close Help and go
+  back to your dialog.
 - Only the first time a word shows in a box is it a hot spot, so the box stays easy to read.
 - The pop-up with **Close** (a click or a tap on the name) has the same hot spots.
 

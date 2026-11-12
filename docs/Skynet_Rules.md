@@ -450,6 +450,10 @@ shows in a balloon. A balloon with hot spots **waits a moment** when the mouse l
 click; one without hot spots goes away at once, as before. The tap pop-up on phones (Rule 18.16) has the same hot spots. A new Help
 page about an item adds its words to the list (Rule 11.2). **Both programs:** the BruControl Import shares the balloons, but its Help is
 on hold (Rule 11.3), so its balloons keep plain words until its Help is made. Help 147.
+**The Help that opens has a frozen Close row** (OakBarn Brewery, 2026-11-12: "When there is a Link to normal Help from a Hover Help :
+have close Button that a frozen row at the Top to close that dialog"): the row with **◀ Back**, **🖨 Print**, **✏ Edit page** and
+**✕ Close** stays frozen at the top of the Help page while it scrolls, in the Help window and on the panel's own Help page, so Close
+is always one click away. The part a hot spot opens shows just under that row, never hidden by it. Help 54, 147.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -3759,6 +3763,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Rule 2.49 (OakBarn Brewery): the Help that a hot spot opens has its ◀ Back ... ✕ Close row frozen at the top while the page scrolls (the Help window and the panel's own Help page); the part opened shows just under it. Help 54, 147. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3). (thread "Link hover help to full Help")
 - 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
