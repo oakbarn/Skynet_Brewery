@@ -977,6 +977,16 @@ it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 
 - In the Suggested Name each space or other mark becomes `~`, an accent is dropped and ° stays (Rule 3.4, docs/Special_Characters.md).
 - The same words are in the Label's Hover Help (Help 115).
 
+3.18 **🏷 Suggested Names: convert all names at once** (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be
+converted to a Suggested Name, if you have not chosen to do so earlier" ... "build"). In Edit layout, Admins only, the **🏷 Suggested
+Names** button lists every Device and Widget, on every Tab, whose Name is not its Suggested Name: Tab, Name now, Suggested Name,
+each ticked (☑ Tick all, ☐ Untick all). **💾 Convert** gives each ticked one its Suggested Name, one at a time, so two that would
+get the same name get `_2` (Rule 3.3, names unique). **Save layout** keeps them; Exit without Saving drops them. Every Process
+follows the new names (hidden keys, Rule 3.10), and Clones follow their parent (Rule 3.5). Never changed: Integrated Instances
+(VesselName.DeviceName, Rule 6.28), and items with no Suggested Name (vessels, pipes, fittings, Text, Processes, Schemas). Nothing
+is converted unless the Admin presses Convert (Rule #1, never take away). **Both programs:** the BruControl Import's Build page
+uses the same Edit layout bar, so imported names can be converted the same way after the Import. Help 46, 115.
+
 ## 4. Making things: the Build Tab
 
 4.1 **Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab** (OakBarn Brewery,
@@ -3806,6 +3816,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 3.2 kept as the standard (OakBarn Brewery: "ID Rule ... is standard. Make all comply"): the Pump dialogs' Interface and Tab balloons and Help 115 now say only an Admin can change an ID (best set once), the Interface ID is 1 to 4 letters and the Tab ID exactly 2 letters. Added Rule 2.50 (OakBarn Brewery): Dual Action, a Pump's Toggle choice where a click turns it On or Off and a press held over half a second works as a Push Button. The Pump's Name balloon is his text with each part of the Suggested Name in red, a Predictive Text note and its link (Help 46, 115); its Graphic balloon is his text and a Skynet pump drawing has no Path box; X, Y, Width and Height labels share one font and size. Checked against both programs: the BruControl Import shares the Pump dialogs; its BruControl notes for the Name wait in the Importer Sandbox (Rule 11.3). (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 4.6 (OakBarn Brewery): the Default Interface and Default Tab of a Build, in ☰ Menu > Default settings and as two dropdowns on the 🔨 Build Tab's Edit layout bar (the same defaults); ➕ Add new Tab… in an Add box sets the Default Tab. Added Rule 11.10 (OakBarn Brewery): no outside links in Help unless he directs one (docs/Outside_Links.md, checked by a test); a broken or empty Help link opens nothing and pops up This Help link is broken with ✉ Send to support@oakbarnbrewery.com. Rule 18.35: ➕ Add Device's balloon is the missing line plus that box's own balloon; the Pump's Tab and Device Type balloons are his text (Help 115). Checked against both programs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 2.49 (OakBarn Brewery): the Help that a hot spot opens has its ◀ Back ... ✕ Close row frozen at the top while the page scrolls (the Help window and the panel's own Help page); the part opened shows just under it. Help 54, 147. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3). (thread "Link hover help to full Help")

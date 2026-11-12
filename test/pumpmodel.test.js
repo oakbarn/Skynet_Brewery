@@ -79,4 +79,9 @@ assert.doesNotMatch(app, /once saved can never be changed|1 to 4 Characters/, 'R
 assert.match(app, /It is exactly 2 letters\. Our example Tab is: BH/);
 assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /el\.tap === 'hold' \|\| el\.tap === 'dual'/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.50 \*\*Dual Action click\*\*/m);
+// 🏷 Suggested Names (Rule 3.18): convert all names at once
+assert.match(app, /function convertAllNames\(\)/); assert.match(app, /const canSuggest = e => hasSuggestion\(e\) && !isInstance\(e\) && !!e\.workspace;/); assert.match(app, /function sugOf\(e\)/);
+assert.match(app, /if \(!sug \|\| sug === r\.e\.name \|\| nameCheck\(sug, r\.e\)\) continue;/, 'each checked, one at a time');
+assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /id="sugAllNames" class="admin-only"/);
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^3\.18 \*\*🏷 Suggested Names/m);
 console.log('pump model tests passed');
