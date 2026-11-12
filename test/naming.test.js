@@ -9,14 +9,17 @@ import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
 
 // Fritz, 2026-10-23: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID (the port always in it, the type third)
-assert.equal(suggestName({ iface: 'MB', port: 25, code: 'P_L_Vlv', label: 'Fly Sparge', tab: 'SP' }), 'MB_25_P_L_Vlv_Fly~Sparge_SP');
+assert.equal(suggestName({ iface: 'MB', port: 25, code: 'Valve_L', label: 'Fly Sparge', tab: 'SP' }), 'MB_25_Valve_L_Fly~Sparge_SP');
 assert.equal(suggestName({ iface: 'MB', port: 'A0', code: '10KNTC', label: 'Mash/Tun', tab: 'SP' }), 'MB_A0_10KNTC_Mash~Tun_SP');
 assert.equal(parseLabel('  Hot  Liquor Tank '), 'Hot~Liquor~Tank', 'spaces at the ends go, spaces inside become ~ (OakBarn Brewery, 2026-11-07)');
 assert.equal(parseLabel('a<b>c:d"e/f\\g|h?i*j.k,l'), 'a~b~c~d~e~f~g~h~i~j~k~l', 'each of < > : " / \\ | ? * . , becomes ~');
 assert.equal(parseLabel('.Kettle'), '~Kettle', 'a leading dot becomes ~ too');
 assert.equal(parseLabel('Mash 🍺 Tun\u0007'), 'Mash~Tun', 'emoji and control characters are dropped');
-assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash~Tun~©~2', 'joined emoji go, © stays (as the name rules count it)');
-assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle~#2~(Boil)', 'other characters stay');
+assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash~Tun~2', 'joined emoji go, © is dropped (kept for copyright notices, 2026-11-11)');
+assert.equal(parseLabel('HLT 170 °F'), 'HLT~170~°F', '° stays (2026-11-11: it "does no interference")');
+{ const { cleanLabel, LABEL_NO } = await import('../public/naming.js');
+  assert.equal(cleanLabel('Red~Pump® @ HLT™'), 'Red Pump   HLT', '© ® ™ go, @ ~ become a space'); assert.ok(LABEL_NO.test('a~b')); assert.equal((await import('../public/naming.js')).tidyLabel('  HLT ~ '), 'HLT', 'trimmed (Rule 3.3)'); assert.ok(!LABEL_NO.test('170 °F')); }
+assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle~~2~~Boil~', 'every other mark is a ~ (2026-11-11)');
 assert.equal(suggestName({ iface: 'MB', port: '700', code: '1W', label: '', tab: 'BR' }), 'MB_700_1W_BR', 'an empty Label is left out');
 assert.equal(suggestName({ iface: 'MB', code: 'Pump', label: 'Wort' }), 'MB_Pump_Wort', 'no tab: no __');
 const used = new Set(['MB_Pump_Wort__BR', 'MB_Pump_Wort_2__BR']);
@@ -27,10 +30,10 @@ assert.equal(uniqueName('MB_25_Pump_Wort_BR', n => n === 'MB_25_Pump_Wort_BR', '
 const toks = tokenize('if MB_E_L_Vlv_Fly~Sparge__SP == true', 1);
 assert.equal(toks[1].v, 'MB_E_L_Vlv_Fly~Sparge__SP', 'a name with ~ works bare in a Process');
 
-// Device Type IDs: unique (any capitals), Fritz's own up to 7 characters, the added ones 6 or fewer
+// Device Type IDs: unique (any capitals), Fritz's own longer ones, the added ones 6 or fewer
 const ids = Object.keys(TYPE_NAMES);
 assert.equal(new Set(ids.map(i => i.toLowerCase())).size, ids.length, 'every Device Type ID is unique');
-const fritz7 = ['M_L_Vlv', 'M_H_Vlv', 'E_H_Vlv', 'P_L_Vlv', 'P_H_Vlv'];
+const fritz7 = ['M_L_Vlv', 'M_H_Vlv', 'Valve_E_H', 'Valve_L', 'Valve_H', 'H_Element', 'Valve_E', 'Valve_Sgas'];      // H_Element, Valve_L, Valve_H, Valve_E_H, Valve_Sgas: OakBarn Brewery, 2026-11-11
 for (const i of ids) assert.ok(i.length <= 6 || fritz7.includes(i), `${i} is longer than 6 characters`);
 for (const [type, list] of Object.entries(TYPE_CODES)) for (const [c, l] of list) assert.ok(l, `${type} ${c} has a description`);
 
@@ -71,17 +74,17 @@ assert.equal(oneWirePort(100), '799');
 assert.equal(oneWirePort(''), '', 'no probe picked yet');
 
 // Device Type IDs a new Device starts with
-assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve' }), 'eVlv', 'Fritz, 2026-11-05: E_L_Vlv is now eVlv');
-assert.equal(upgradeCode({ type: 'digitalOut', subtype: 'valve', typeCode: 'E_L_Vlv' }), 'eVlv', 'an older valve gets the new Type ID (its name is kept)');
+assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve' }), 'Valve_E', 'Fritz, 2026-11-05: E_L_Vlv is now Valve_E');
+assert.equal(upgradeCode({ type: 'digitalOut', subtype: 'valve', typeCode: 'E_L_Vlv' }), 'Valve_E', 'an older valve gets the new Type ID (its name is kept)');
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), 'M_L_Vlv');
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'pump' }), 'Pump');
 assert.equal(defaultCode({ type: 'digitalOut' }), 'DO');
-// a Heating Element is HE (Fritz, 2026-11-07): MB_25_HE_HLT_BR
-assert.equal(defaultCode({ type: 'digitalOut', subtype: 'element' }), 'HE');
-assert.equal(suggestName({ iface: 'MB', port: '25', code: defaultCode({ type: 'digitalOut', subtype: 'element' }), label: 'HLT', tab: 'BR' }), 'MB_25_HE_HLT_BR');
+// a Heating Element is H_Element (OakBarn Brewery, 2026-11-11; was HE): MB_25_H_Element_HLT_BR
+assert.equal(defaultCode({ type: 'digitalOut', subtype: 'element' }), 'H_Element');
+assert.equal(suggestName({ iface: 'MB', port: '25', code: defaultCode({ type: 'digitalOut', subtype: 'element' }), label: 'HLT', tab: 'BR' }), 'MB_25_H_Element_HLT_BR');
 assert.equal(defaultCode({ type: 'pwmOut' }), 'PWM');
-assert.equal(defaultCode({ type: 'pwmOut', subtype: 'element' }), 'H_PWM');
-assert.equal(defaultCode({ type: 'analogOut', subtype: 'propValve' }), 'P_L_Vlv');
+assert.equal(defaultCode({ type: 'pwmOut', subtype: 'element' }), 'H_Element', 'PWM@H_Element (was H_PWM)');
+assert.equal(defaultCode({ type: 'analogOut', subtype: 'propValve' }), 'Valve_L');
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Float'), 'Float');
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Pulse'), 'DIN');
 assert.equal(defaultCode({ type: 'hysteresis' }), 'Hys');
@@ -93,11 +96,11 @@ assert.equal(defaultCode({ type: 'temperature', sensor: 'ntc', r0: 100000 }), '1
 assert.equal(defaultCode({ type: 'temperature', sensor: 'ntc', r0: 2252 }), 'NTC');
 assert.equal(defaultCode({ type: 'temperature', sensor: 'pt100' }), 'RTD');
 assert.equal(defaultCode({ type: 'temperature', sensor: 'lm35' }), 'LM35');
-assert.ok(typeCodes({ type: 'pwmOut' }).some(([k]) => k === 'P_H_Vlv'));
+assert.ok(typeCodes({ type: 'pwmOut' }).some(([k]) => k === 'Valve_H'));
 assert.deepEqual(typeCodes({ type: 'timer' }), [], 'Widgets have no Device Type');
 // PR #61 codes are brought up to date
 assert.equal(upgradeCode({ type: 'digitalOut', typeCode: 'PmP' }), 'Pump');
-assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'PWM_VlV' }), 'P_L_Vlv');
+assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'PWM_VlV' }), 'Valve_L');
 assert.equal(upgradeCode({ type: 'temperature', sensor: 'ntc', r0: 10000, typeCode: 'TmP' }), '10KNTC');
 assert.equal(upgradeCode({ type: 'digitalIn', typeCode: 'DIN' }), 'DIN', 'a new ID stays');
 // LM35 and TMP36: 10 mV per degree C
@@ -204,4 +207,45 @@ console.log('naming tests passed');
   assert.equal(widgetTypeId({ type: 'digitalOut' }), '', 'a Device is named by Rule 3.1');
   assert.equal(widgetTypeId({ type: 'switch', cloneOf: 'sw_1' }), '', 'a Clone keeps its own name');
   assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 17); assert.equal(widgetTypeId({ type: 'chart' }), 'GPH', 'Graph Widget, was Chart (Rule 1.26)');
+}
+
+// The General Type in a Device name (OakBarn Brewery, 2026-11-11: "use @ symbol"): an On/Off Pump is DO@Pump in the Suggested Name
+{
+  const { nameType, typeAtName } = await import('../public/naming.js');
+  const { compile } = await import('../lib/engine.js');
+  assert.equal(suggestName({ iface: 'BM', port: 22, code: 'Pump', type: 'digitalOut', label: 'Red Pump', tab: 'BH' }), 'BM_22_DO@Pump_Red~Pump_BH');
+  assert.equal(suggestName({ iface: 'BM', port: 700, code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM_700_TEMP@1W_HLT_BH');
+  assert.equal(nameType('pwmOut', 'Pump'), 'PWM@Pump'); assert.equal(nameType('hysteresis', 'Hys'), 'Hys', 'the same word is written once');
+  assert.equal(nameType('digitalOut', 'DO'), 'DO'); assert.equal(nameType(undefined, 'Pump'), 'Pump', 'no type: the Type ID alone');
+  // a Process reads the @ as part of the name, with no quotes
+  assert.deepEqual(tokenize('BM_22_DO@Pump_Red~Pump_BH.state = true').slice(0, 3).map(t => t.v), ['BM_22_DO@Pump_Red~Pump_BH', '.', 'state']);
+  assert.equal(typeAtName({ name: 'BM_22_Pump_Pump_BH', type: 'digitalOut', subtype: 'pump', typeCode: 'Pump' }), 'BM_22_DO@Pump_Pump_BH');
+  assert.equal(typeAtName({ name: 'BM_30_Chill_Chiller~water_BH', type: 'digitalOut' }), 'BM_30_DO@Chill_Chiller~water_BH', 'no Type ID saved: found by its name');
+  assert.equal(typeAtName({ name: 'Red_Pump', type: 'digitalOut', typeCode: 'Pump' }), '', 'a name of its own stays');
+  assert.equal(typeAtName({ name: 'BM_22_DO@Pump_Pump_BH', type: 'digitalOut', typeCode: 'Pump' }), '', 'already has it');
+  // once per Schema: older names get it, and what points to them follows
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'typeat')), cfg = path.join(d, 'c.json');
+  fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Brewery Mega', id: 'BM', connection: 'simulator' }], elements: [
+    { name: 'BM_22_Pump_Pump_BH', type: 'digitalOut', subtype: 'pump', typeCode: 'Pump', device: 'Brewery Mega', channel: 22 },
+    { name: 'sw_1', type: 'switch', follow: 'BM_22_Pump_Pump_BH' }],
+    graphics: [{ kind: 'pipe', name: 'p1', from: 'dev:BM_22_Pump_Pump_BH:out', to: 'x', points: [[0, 0], [10, 0]], flowWhen: ['BM_22_Pump_Pump_BH'] }] }));
+  const s = new Store(cfg, path.join(d, 'data')); s.load();
+  assert.ok(s.has('BM_22_DO@Pump_Pump_BH')); assert.deepEqual([...s.loadRenames], [['BM_22_Pump_Pump_BH', 'BM_22_DO@Pump_Pump_BH']]);
+  const c = JSON.parse(fs.readFileSync(cfg, 'utf8'));
+  assert.equal(c.elements[1].follow, 'BM_22_DO@Pump_Pump_BH'); assert.equal(c.graphics[0].from, 'dev:BM_22_DO@Pump_Pump_BH:out'); assert.deepEqual(c.graphics[0].flowWhen, ['BM_22_DO@Pump_Pump_BH']);
+  assert.equal(c.typeAtNames, true);
+  s.load(); assert.equal(s.loadRenames.size, 0, 'only once');
+  assert.equal(compile('BM_22_DO@Pump_Pump_BH = true').errors?.length ?? 0, 0);
+  // P_ and H_ IDs are the plain ones under PWM / AO (OakBarn Brewery, 2026-11-11: "PWM@Pump"; "All Get Updated to the new standard")
+  assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'P_Pump' }), 'Pump'); assert.equal(upgradeCode({ type: 'analogOut', typeCode: 'H_AO' }), 'H_Element'); assert.equal(upgradeCode({ type: 'digitalOut', typeCode: 'HE' }), 'H_Element', 'was HE');
+  assert.equal(defaultCode({ type: 'pwmOut', subtype: 'pump' }), 'Pump');
+  assert.equal(typeAtName({ name: 'BM_5_P_Pump_Wort_BH', type: 'pwmOut', typeCode: 'Pump' }), 'BM_5_PWM@Pump_Wort_BH', 'an older ID in the name is upgraded too');
+  assert.equal(typeAtName({ name: 'BM_24_E_L_Vlv_HLT~out_BH', type: 'digitalOut', subtype: 'valve', typeCode: 'Valve_E' }), 'BM_24_DO@Valve_E_HLT~out_BH');
+  // OakBarn Brewery, 2026-11-11: "Valve_E_H and Valve_Sgas" (were E_H_Vlv, G_Vlv)
+  assert.equal(typeAtName({ name: 'BM_26_E_H_Vlv_Steam_BH', type: 'digitalOut', subtype: 'valve', typeCode: upgradeCode({ type: 'digitalOut', subtype: 'valve', typeCode: 'E_H_Vlv' }) }), 'BM_26_DO@Valve_E_H_Steam_BH');
+  assert.equal(typeAtName({ name: 'BM_27_G_Vlv_Burner_BK', type: 'digitalOut', typeCode: upgradeCode({ type: 'digitalOut', typeCode: 'G_Vlv' }) }), 'BM_27_DO@Valve_Sgas_Burner_BK');
+  assert.equal(typeAtName({ name: 'BM_8_HE_HLT~element_BH', type: 'digitalOut', subtype: 'element', typeCode: 'H_Element' }), 'BM_8_DO@H_Element_HLT~element_BH', 'HE became H_Element');
+  assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'P_H_Vlv' }), 'Valve_H', 'was P_H_Vlv'); assert.equal(nameType('analogOut', 'Valve_L'), 'AO@Valve_L');
+  assert.equal(typeAtName({ name: 'MB_25_P_L_Vlv_Fly~Sparge_SP', type: 'pwmOut', subtype: 'propValve', typeCode: 'Valve_L' }), 'MB_25_PWM@Valve_L_Fly~Sparge_SP');
+  console.log('General Type@ name tests passed');
 }

@@ -80,7 +80,7 @@ for (const sm of list) {
   for (const e of c3.elements) {
     if (e.type === 'gGlobal') continue;
     const dev = ['temperature', 'digitalOut'].includes(e.type);
-    assert.match(e.name, dev ? /^BM_\d+_(1W|HE|Pump|Chill|eVlv)_[A-Za-z0-9~]+_BH$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
+    assert.match(e.name, dev ? /^BM_\d+_(TEMP@1W|DO@H_Element|DO@Pump|DO@Chill|DO@Valve_E)_[A-Za-z0-9~]+_BH$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
   }
   for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BH|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
 }

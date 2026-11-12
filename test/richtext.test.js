@@ -17,4 +17,8 @@ assert.equal(plainText('no codes'), 'no codes');
 const st = compile('new string vS = "Mash\\n\\b152\\degF\\b"').stmts[1];
 assert.equal(st.expr.v, 'Mash\n\\b152\\degF\\b');
 assert.equal(plainText(st.expr.v), 'Mash\n152°F');
+// \t is an indent (OakBarn Brewery, 2026-11-12: "\t for indent!")
+assert.equal(plainText('Mash in\\n\\tStir well'), 'Mash in\n\u2003\u2003Stir well');
+assert.equal(plainText('C:\\\\temp'), 'C:\\temp', '\\\\ is still one backslash, so C:\\temp is not an indent');
+assert.equal(compile('new string vT = "Hops\\tAdd"').stmts[1].expr.v, 'Hops\\tAdd', 'the Process keeps \\t for the screen');
 console.log('richtext tests passed');

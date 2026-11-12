@@ -53,7 +53,7 @@ import { Messaging, CARRIERS } from './lib/messaging.js';
 import { watchAlarmEmails } from './lib/alarmemail.js';
 import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
-import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
+import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
@@ -101,6 +101,10 @@ store.load();
 setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
+// Device names given their General Type@ when a Schema loads (Rule 3.1, lib/store.js): every Process follows
+const typeAtProcesses = map => { const r = renameInProcesses(engine, map); if (r.length) console.log(`Processes following the General Type@ names: ${r.map(x => x.name).join(', ')}`); };
+if (store.loadRenames?.size) typeAtProcesses(store.loadRenames);
+store.on('loadRenames', typeAtProcesses);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
 hw.logDir = path.join(DATA, 'logs', 'boards');      // Board settings: Diagnostic logging (Rule 6.27)
@@ -623,8 +627,10 @@ async function route(req, res) {
       for (const m of [r, c]) for (const [a, b] of m) if (!renames.has(a)) renames.set(a, b);
       for (const [a, b] of c) clones.set(a, b);
     }
+    // every Label: no © ® ™ @ ~ and no space at the start or end (OakBarn Brewery, 2026-11-11, Rule 3.4; public/naming.js tidyLabel)
+    for (const k of ['elements', 'graphics']) for (const x of body[k] ?? []) if (x && typeof x.label === 'string') x.label = tidyLabel(x.label);
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
-    for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
+    for (const el of body.elements ?? []) { const bad = !el.instanceOf && !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
     // ... and so does every other new or newly spelled name: Tabs, Texts, pipes, vessels ... (Fritz, 2026-10-29, Skynet Rule 3.11)
     for (const [k, what] of [['workspaces', 'Tab'], ['graphics', 'item']]) {
       const had = new Set((store.config[k] ?? []).map(x => x?.name));

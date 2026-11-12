@@ -1,7 +1,7 @@
 // Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27, Help 161): a Value Widget with a Format and a Code attribute.
 // It shows its Value in the chosen Format (Number, Time or DateTime), and each time a person sets the Value (a tap and Set on
 // its Tab, or the .API) the Brain runs the Process code in its Code attribute once. In the code, {value} stands for the
-// Value of the Widget, for example:  MB_25_HE_Brew~Kettle_BR.setpoint = {value} (a Heating Element's Setpoint)
+// Value of the Widget, for example:  MB_25_DO@H_Element_Brew~Kettle_BR.setpoint = {value} (a Heating Element's Setpoint)
 // Shared by the Brain (lib/engine.js, lib/store.js) and the panel (public/app.js).
 
 export const CODE_VALUE_TYPE = 'codeValueWidget';

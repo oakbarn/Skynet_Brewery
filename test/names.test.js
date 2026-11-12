@@ -8,8 +8,17 @@ import { MediaFiles } from '../lib/mediafiles.js';
 import { FileMove } from '../lib/filemove.js';
 
 // ---- Device and Widget names ----
-for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Temp_°F', 'Hot~Cold', 'CON_2', 'COM10', 'Brü_Kessel', 'a.b'])
+for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Hot~Cold', 'CON_2', 'COM10', 'BM_22_DO@Pump_Pump_BH', '_x', 'Temp_°F'])
   assert.equal(elementNameError(ok), '', ok + ' is fine');
+// only letters, numbers, _ ~ @ (OakBarn Brewery, 2026-11-11: the trouble marks are "No No also"); Tab and Interface names are shown names
+for (const bad of ['Brü_Kessel', 'Pump©', 'Pump®', 'a.b', 'Red-Pump', 'Pump#1', 'A$B', 'a`b', 'x+y', 'Hot (1)', '2Pump'])
+  assert.notEqual(elementNameError(bad), '', bad + ' is refused');
+assert.equal(elementNameError('Brew House', 'Tab'), ''); assert.equal(elementNameError('Brewery Mega', 'Interface'), '');
+{ const { plainName, typedNameError } = await import('../public/names.js'); assert.equal(plainName('Würze 1'), 'Wurze~1'); assert.equal(plainName('Temp °F©'), 'Temp~°F'); assert.equal(plainName(' Mash Tun '), 'Mash~Tun', 'spaces at the ends go (Rule 3.3)');
+  // @ and ~ are kept for the Suggested Name (OakBarn Brewery, 2026-11-11): typed by hand they are refused, unless it is the suggestion or the name already
+  assert.match(typedNameError('My@Pump'), /kept for the Suggested Name/); assert.match(typedNameError('Red~Pump', { what: 'gGlobal' }), /gGlobal name/);
+  assert.equal(typedNameError('BM_6_DO@Pump_Red~Pump_BH', { suggestion: 'BM_6_DO@Pump_Red~Pump_BH' }), '');
+  assert.equal(typedNameError('odd~name', { was: 'odd~name' }), ''); assert.equal(typedNameError('Red_Pump'), ''); assert.equal(plainName('2Pump'), '_2Pump'); }
 for (const [bad, why] of [['', 'name'], [' Pump', 'space'], ['Pump ', 'space'], ['.Pump', 'dot'], ['Pump\u0007', 'control'], ['Pump\t1', 'control'],
   ['Beer🍺', 'emoji'], ['Hot✅', 'emoji'], ['Flag🇺🇸', 'emoji'], ['CON', 'Windows'], ['nul', 'Windows'], ['COM1', 'Windows'], ['LPT9', 'Windows']])
   assert.match(elementNameError(bad), new RegExp(why, 'i'), JSON.stringify(bad));

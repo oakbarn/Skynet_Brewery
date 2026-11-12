@@ -13,7 +13,7 @@ As soon as you type a letter, a list pops up under the cursor with what fits:
 - At the **start of a line**: the commands first (`if`, `wait`, `start`, `new value` ...), each with a short note of what it does, then the names you already used higher up in this Process.
 - **Anywhere else**: the names of your variables, timers, gGlobals, Devices, Widgets and Processes.
 - Each letter you type **narrows the list**: `vV_` shows every name that starts with `vV_`, `vV_A` only those starting with `vV_A`. Inside an `if` the list only holds what an `if` can take, so commands never show up there. Each kind (variables, timers, gGlobals, Devices, Widgets) is listed A to Z.
-- A name also matches on **any part after a `_`**. Typing `Pump` finds `MB_06_Pump_Wort__HS`, so you don't need to remember the start of a long Device name.
+- A name also matches on **any part after a `_`**. Typing `Pump` finds `MB_06_DO@Pump_Wort__HS`, so you don't need to remember the start of a long Device name.
 
 The best pick is also shown in **gray after the cursor**. To take it:
 
@@ -49,10 +49,10 @@ Press **Ctrl+Space** (on a phone or tablet, tap **💡 Suggest** above the edito
 
 - On an **empty line**: the commands.
 - After **`if`**, **`wait`** or **`elseif`**: only what can be tested, in this order: variables made in this Process, timers, gGlobals, Devices, Widgets, Processes, then `true`, `false`, `now` and `not`. No commands.
-- After a **name in an `if`** (`if MB_06_Pump_Wort__HS`): the compare signs (`==` is equal to, `!=` is not, `>` more than ...) and that item's own attributes, such as `.state` (the same as the name alone), `.visible` or `.enabled`.
+- After a **name in an `if`** (`if MB_06_DO@Pump_Wort__HS`): the compare signs (`==` is equal to, `!=` is not, `>` more than ...) and that item's own attributes, such as `.state` (the same as the name alone), `.visible` or `.enabled`.
 - After a **name at the start of a line**: `=` set it to, `+=`, `-=`, `++`, and its attributes, such as `.visible = `.
 - After **`==` or `=`** on something that is on or off (a pump, a valve, an alarm, a true/false variable): `true`, `false`, `on` and `off` come first.
-- After a **whole test** (`if MB_06_Pump_Wort__HS == true`): `and` or `or`, to add another test.
+- After a **whole test** (`if MB_06_DO@Pump_Wort__HS == true`): `and` or `or`, to add another test.
 - After **`start`**, **`stop`** or **`restart`**: your Processes, then the timers and alarms they can start or stop. After **`reset`**: timers and stepper motors.
 - After **`play`**: alarms and sound players.
 - After **`show tab`**: your Tab names (a name with a space gets its quotes).
@@ -64,11 +64,11 @@ Press **Ctrl+Space** (on a phone or tablet, tap **💡 Suggest** above the edito
 When you pick a command or a name, the list of what can come next opens by itself. For example:
 
 1. On an empty line press **Ctrl+Space** (or **💡 Suggest**) and pick `if`.
-2. The list now shows what can be tested. Pick `MB_06_Pump_Wort__HS`.
+2. The list now shows what can be tested. Pick `MB_06_DO@Pump_Wort__HS`.
 3. The list shows `==`, `!=` ... and `.state`, `.visible`. Pick `==`.
 4. The list shows `true` and `false` first. Pick `true`.
 
-The line is now `if MB_06_Pump_Wort__HS == true`. A value ends the line, so the list stays closed and **Enter** makes a new line. To add another test, press **Ctrl+Space** again for `and` / `or`.
+The line is now `if MB_06_DO@Pump_Wort__HS == true`. A value ends the line, so the list stays closed and **Enter** makes a new line. To add another test, press **Ctrl+Space** again for `and` / `or`.
 
 ## What is never offered
 

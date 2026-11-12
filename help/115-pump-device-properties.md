@@ -53,7 +53,7 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    Just below them, **Overlay**: what is drawn on top while the pump is On (the steady lightning bolt, the flashing bolt,
    the Green glow ring, or None). On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
-10. The **Device Type** (DO: Pump) greyed out.
+10. The **Device Type** greyed out and filled in for you: **DO@Pump** for an On/Off pump like the Blichmann RipTide (a Pump on a Digital Out, DO), **PWM@Pump** for a pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: `BM_22_DO@Pump_Pump_BH`.
 
 The On / Off text is shown with an Overlay (the green On overlay of the Skynet pump drawings).
 
@@ -71,10 +71,10 @@ The Label may be shown on the Tab, for example Red Pump above the Pump Device.
 ![Red Pump: the Label above the Pump](help_pictures/Red_Pump_Label.png)
 
 This is the Plain Text Part of the Suggested Name. Spaces become ~.
-BM_6_Pump_**Red~Pump**_BH
+BM_6_DO@Pump_**Red~Pump**_BH
 
 Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
-From the above BM_6_Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+From the above BM_6_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
 (Brewery Mega {Arduino}), on Port 6, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
 
 And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You
@@ -84,6 +84,9 @@ choices are limited only to those devices on the BM: Brewery Mega Arduino.
 The **⬆** opens a 2 Line Label Text Dialog
 
 The **⬢** opens a Label Attributes Dialog where you can set its font, size and colors.
+
+© ® ™: Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License.
+@ ~: Kept for the Suggested Name. Not typed in a name or a Label.
 
 **Available Ports**: only the free Ports (pins) on this board that fit this Device, for example 22, or A5 = 59. Once it is
 added it is greyed out: it is the wiring.
