@@ -1156,7 +1156,7 @@ function applyMf(g, w, tab, label, loose = false) {
       if (o.name !== e.name) for (const x of draft.elements) if (x.input === o.name) x.input = e.name;
       Object.keys(o).forEach(x => delete o[x]); Object.assign(o, e);
     } else draft.elements.push(e);
-    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > To a Tab adds that Tab's ID (Rule 3.1)
+    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > Move to Tab adds that Tab's ID (Rule 3.1)
   }
 }
 
@@ -4741,7 +4741,7 @@ function elemVesselBuild(t, e) {
     g.ports ||= {}; g.ports.element = { ...(g.ports.element || { position: t.ports.element.position }), installed: true };
     g.heater = e.name; syncVesselPorts(g, null); renderWs(); editItem('gfx', g.id);
   }
-  toast(`${e.name} and ${g?.name || t.name} (its Element linked to it) are on the 🔨 Build Tab: 💾 Save Build ... > To a Tab puts them on the ${nameTab(e)} Tab.`, false, 9000);
+  toast(`${e.name} and ${g?.name || t.name} (its Element linked to it) are on the 🔨 Build Tab: 💾 Save Build ... > Move to Tab puts them on the ${nameTab(e)} Tab.`, false, 9000);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
@@ -4971,7 +4971,7 @@ function portForName(e) {
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
-// and Save Build ... > To a Tab adds it, as for a Device
+// and Save Build ... > Move to Tab adds it, as for a Device
 const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 // A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
@@ -6549,7 +6549,7 @@ $('#addHiddenWs').onclick = () => {
 const buildWs = () => draft?.workspaces.find(w => w.build);
 // Rule 4.1 (OakBarn Brewery, 2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular
 // Tab. It will be moved to the Regular Tab at the End of the Build chain."): a new Device or Widget waits on the 🔨 Build Tab and
-// remembers the Tab picked in its Add box (buildTo, never saved); 💾 Save Build ... > To a Tab moves it there. Its Suggested Name
+// remembers the Tab picked in its Add box (buildTo, never saved); 💾 Save Build ... > Move to Tab moves it there. Its Suggested Name
 // already has that Tab's ID.
 function onBuildTab(x) { return !!x?.workspace && !!draft?.workspaces.find(w => w.name === x.workspace)?.build; }
 function buildToOf(x) { return onBuildTab(x) && x.buildTo && draft.workspaces.some(w => w.name === x.buildTo && !w.build) ? x.buildTo : ''; }
@@ -6653,7 +6653,7 @@ function swapName(items, from, to) {
   const walk = o => { for (const k of Object.keys(o)) { if (o[k] === from) o[k] = to; else if (o[k] && typeof o[k] === 'object') walk(o[k]); } };
   items.forEach(walk);
 }
-// To a Tab: everything moves there as it is (same size, same spots to each other), in the dead center of the Tab (Fritz, 2026-10-22).
+// Move to Tab: everything moves there as it is (same size, same spots to each other), in the dead center of the Tab (Fritz, 2026-10-22).
 // own (Rule 4.1, 2026-11-12): when new items picked different Tabs in their Add boxes, each goes to its own Tab, the rest to `tab`.
 // Returns the Tabs they went to, each with how many items.
 function moveBuildTo(tab, own = false) {
@@ -6778,7 +6778,7 @@ async function saveBuildTemplate({ name, skynet }) {
   dropBuild();
   return made;
 }
-// Save Build ...: where does it go? To a Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
+// Save Build ...: where does it go? Move to Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
 async function saveBuild() {
   const b = buildWs(); if (!b) return true;
   // an item un-bundled to the Build Tab: back where it came from (same Tab, spot and size), or saved like a new build
@@ -6825,10 +6825,10 @@ function saveBuildDialog(b) {
         TPL.locked ? '' : h('label', { class: 'toggle' }, h('span', { class: 'sw' }, sky, h('span', { class: 'swk' })), ' Skynet Template (off = a User Bundled Template)'),
         h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: () => close({ to: 'template', kind: tk.kind, name: nm.value, skynet: sky.checked }) }, 'Save as Template')));
     } else tplBox.append(h('p', { class: 'muted' }, tk.why));
-    const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
+    const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'Move to Tab'),
       own ? h('p', { class: 'muted' }, 'Each new item goes to the Tab picked for it, at the spot and size it has on the Build Tab: ' + picked.map(t => `${picks.filter(x => buildToOf(x) === t).map(x => x.label || x.name).join(', ')} to ${t}`).join('; ') + '. Everything else goes to this Tab. Drag them to their place, then press Save layout.')
         : h('p', { class: 'muted' }, picked.length ? `Everything on the Build Tab moves to this Tab at the size it is now. To ${picked[0]} (the Tab picked for it) it keeps the spot it has on the Build Tab; to another Tab it goes to the middle. Then press Save layout.` : 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
-      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value, own }) }, 'Save to Tab')));
+      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value, own }) }, 'Move to Tab')));
     d.append(h('h3', {}, 'Save Build: where should it go?'),
       ...((b.cloneAs || buildItems(b).some(x => x.buildTo === TO_TPL)) && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
@@ -13923,7 +13923,7 @@ function openTemplate(kind, name) {
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
     // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
-    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > To a Tab puts it on the Tab.
+    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > Move to Tab puts it on the Tab.
     const taken = () => [...L().graphics.map(g => g.name), ...L().elements.map(e => e.name)].filter(Boolean);
     const cloneIt = guard(async () => {
       const w = { name: copyName(t.name, [...tplNames(kind), ...taken()]) };
@@ -13943,7 +13943,7 @@ function openTemplate(kind, name) {
       const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken());
       w.name = def(w.tab);
       const ok = await miniDialog('Add to Tab', [['tab', 'Tab it goes on', 'sel', tabs.map(x => [x.name, x.name])], ['name', 'Name (change it to what you want)', 'text'],
-        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick To a Tab: this Tab is offered first.', 'note']], w, 'Add');
+        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick Move to Tab: this Tab is offered first.', 'note']], w, 'Add');
       if (!ok) return;
       if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
       const b = current(); finish();
@@ -13965,7 +13965,7 @@ function openTemplate(kind, name) {
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
       admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
-      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > To a Tab', onclick: toTab }, 'Add to Tab') : '',
+      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > Move to Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
       h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
     d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User Bundled'),
@@ -14008,7 +14008,7 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
   toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > As a Template to save the new Template.`
-    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > To a Tab to put it on the ${b.from} tab.`, false, 8000);
+    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > Move to Tab to put it on the ${b.from} tab.`, false, 8000);
 }
 function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;

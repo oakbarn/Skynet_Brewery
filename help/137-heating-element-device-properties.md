@@ -32,7 +32,7 @@ In the **Heating Element** list, **Vessel Device Template** takes the place of *
    other Vessel Template that has an Element Port.
 2. **Pick the heating element** and fill in the Add box, as above. Its title says which Vessel it is for.
 3. **➕ Add Device** builds them on the **🔨 Build Tab**: the Heating Element and a copy of the Vessel with its **Element Placed**
-   and linked to the new Heating Element (the Element glows while it is on). Press **💾 Save Build ... > To a Tab**: the Tab you
+   and linked to the new Heating Element (the Element glows while it is on). Press **💾 Save Build ... > Move to Tab**: the Tab you
    picked is offered first, and both go there.
 
 The Vessel still has no Devices of its own (Rule 5.7): the Heating Element is its own Device, and the Vessel's Element spot links to
