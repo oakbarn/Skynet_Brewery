@@ -232,7 +232,9 @@ Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab 
 Interface; pick Red Pump from it. The Suggested Name is what makes that work.
 
 In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have
-not chosen to do so earlier. Today each name has its own **💾 Update to Suggested** button (Rule 3.16).
+not chosen to do so earlier. In Edit layout, **🏷 Suggested Names** lists every Device and Widget whose Name is not
+its Suggested Name; tick the ones to change and press **💾 Convert**, then **Save layout** (Rule 3.18). One name at a time: **💾 Update
+to Suggested** in its Name Change box (Rule 3.16).
 
 ## The ➕ Add Device button
 

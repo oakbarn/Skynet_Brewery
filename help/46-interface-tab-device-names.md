@@ -78,8 +78,19 @@ Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab 
 **Predictive Text**: in a Process you never type this long name. Type BM and the List Box shows only the Devices on the BM
 Interface; pick Red Pump from it. The Suggested Name is what makes that work.
 
-In Skynet a name can be changed quite easily: each name has its own **💾 Update to Suggested** button (Rule 3.16). More in
+In Skynet a name can be changed quite easily: each name has its own **💾 Update to Suggested** button (Rule 3.16), and
+**🏷 Suggested Names** converts many at once (below). More in
 [The Name of a pump](115-pump-device-properties#the-name).
+
+## Convert all names to Suggested Names
+
+In **Edit layout**, an Admin presses **🏷 Suggested Names** (on the Edit layout bar). A list shows every Device and Widget, on every
+Tab, whose Name is not its Suggested Name: its Tab, the Name now and the Suggested Name. Each one starts ticked; untick any you want
+to keep (**☑ Tick all** and **☐ Untick all** help). Press **💾 Convert**, then **Save layout**. Every Process that uses a name is
+changed to the new name for you, and Clones follow their parent. **Exit** without saving keeps the old names (Skynet Rule 3.18).
+
+Not in the list: Integrated Instances (their names are VesselName.DeviceName), and things with no Suggested Name, such as vessels,
+pipes, fittings and Text.
 
 ## Pins kept for RTD and OneWire probes
 

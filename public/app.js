@@ -5940,6 +5940,63 @@ function lockTab(on) {
     + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
   renderWs(); updLockBtn();
 }
+// 🏷 Suggested Names (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be converted to a Suggested Name, if you
+// have not chosen to do so earlier", Rule 3.18): one list of every Device and Widget whose Name is not its Suggested Name, on every
+// Tab, each ticked; 💾 Convert gives each ticked one its Suggested Name in the layout being edited. Save layout keeps them, and every
+// Process follows the new names (hidden keys, Rule 3.10). Integrated Instances keep theirs (VesselName.DeviceName, Rule 6.28).
+// Not in the list: an item on no Tab (SoundPlayer and other Skynet items a Process calls by their own name).
+const canSuggest = e => hasSuggestion(e) && !isInstance(e) && !!e.workspace;
+// A Device saved with no Device Type ID keeps the one its name already has (BM_30_DO@Chill_Chiller~water_BH stays Chill, never just DO)
+function sugOf(e) {
+  let w = e;
+  if (isDevice(e) && !e.typeCode) {
+    const g = GENERAL_TYPE[e.type], hit = typeCodes(e).map(x => x[0]).filter(c => e.name.includes(`_${g && c.toUpperCase() !== g ? `${g}@${c}` : c}_`) || e.name.includes(`_${c}_`)).sort((a, b) => b.length - a.length)[0];
+    if (hit) w = { ...e, typeCode: hit };
+  }
+  try { return nameSuggestion(w, e) || ''; } catch { return ''; }
+}
+function suggestedRows() {
+  const rows = [];
+  for (const e of draft.elements) {
+    if (!canSuggest(e)) continue;
+    const sug = sugOf(e);
+    if (sug && sug !== e.name) rows.push({ e, sug });
+  }
+  return rows.sort((a, b) => String(a.e.workspace).localeCompare(String(b.e.workspace)) || a.e.name.localeCompare(b.e.name));
+}
+function convertAllNames() {
+  if (!editing || !draft) return;
+  if (!can('admin')) return toast('Only an Admin can change names.', true);
+  const rows = suggestedRows();
+  if (!rows.length) return toast('Every Device and Widget already has its Suggested Name.');
+  const ticks = rows.map(() => h('input', { type: 'checkbox', checked: true }));
+  const count = h('span', { class: 'muted' });
+  const conv = h('button', { type: 'button', class: 'primary' }, '💾 Convert');
+  const recount = () => { const n = ticks.filter(t => t.checked).length; count.textContent = `${n} of ${rows.length} ticked`; conv.disabled = !n; };
+  for (const t of ticks) t.addEventListener('change', recount);
+  const all = on => () => { for (const t of ticks) t.checked = on; recount(); };
+  const d = h('dialog', { class: 'sugAllDlg', 'data-nomenu': true },
+    h('h3', {}, '🏷 Suggested Names'),
+    h('p', {}, 'These Devices and Widgets do not have their Suggested Name. Tick the ones to change, then press 💾 Convert. Press Save layout to keep the new names. Every Process that uses a name is changed to the new name for you.'),
+    h('div', { class: 'bar' }, h('button', { type: 'button', onclick: all(true) }, '☑ Tick all'), h('button', { type: 'button', onclick: all(false) }, '☐ Untick all'), h('span', { class: 'spacer' }), count),
+    h('div', { class: 'sugAllList' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Tab'), h('th', {}, 'Name now'), h('th', {}, 'Suggested Name'))),
+      h('tbody', {}, ...rows.map((r, i) => h('tr', {}, h('td', {}, ticks[i]), h('td', {}, r.e.workspace || ''), h('td', {}, r.e.name), h('td', { class: 'sugNew' }, r.sug)))))),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), conv));
+  conv.onclick = () => {
+    let n = 0;
+    for (const [i, r] of rows.entries()) {
+      if (!ticks[i].checked) continue;
+      const sug = sugOf(r.e);      // again, one at a time: two that would get the same name get _2
+      if (!sug || sug === r.e.name || nameCheck(sug, r.e)) continue;
+      r.e.name = sug; n++;
+    }
+    d.close(); renderWs();
+    toast(n ? `${n} name${n === 1 ? '' : 's'} changed to the Suggested Name. Press Save layout to keep ${n === 1 ? 'it' : 'them'}.` : 'No names were changed.');
+  };
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); recount(); d.showModal();
+}
+$('#sugAllNames').onclick = convertAllNames;
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };

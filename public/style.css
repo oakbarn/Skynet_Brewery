@@ -1267,3 +1267,10 @@ dialog.boardTalk { width: min(900px, 96vw); }
 #ws .buildMark .bmPipe { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
 #ws .buildMark .bmText { fill: currentColor; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
 #ws .buildMark .bmTitle { fill: currentColor; font-size: 26px; font-weight: bold; }
+
+/* 🏷 Suggested Names (Rule 3.18): the list of names to convert */
+.sugAllDlg { max-width: min(900px, 96vw); }
+.sugAllList { max-height: 55vh; overflow: auto; margin: 8px 0; }
+.sugAllList table { border-collapse: collapse; width: 100%; }
+.sugAllList th, .sugAllList td { text-align: left; padding: 3px 8px; border-bottom: 1px solid rgba(127,127,127,.25); white-space: nowrap; }
+.sugAllList td.sugNew { font-weight: 600; }
