@@ -3567,8 +3567,8 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
   picture.
 - **The Add box** has the ⬆ beside the Label too, with the ⬢.
 - **The second part of the Pump Add box** (OakBarn Brewery, 2026-11-11, "Second Blichmann Pump Build Dialog"): repeated fields keep
-  the same layout and Hover Help as the first part, with what was entered there. Once 1 to 4 are done the **Interface and Available
-  Ports** line is greyed out (it can't change after the Device is made; Cancel to change it); **Label and Tab** can still be edited
+  the same layout and Hover Help as the first part, with what was entered there. Once the Interface and Port are **Confirmed** (Rule 18.35)
+  the **Interface and Available Ports** line is greyed out (it can't change after the Device is made; Cancel to start again); **Label and Tab** can still be edited
   and the Suggested Name follows them; the focus goes to **Orientation**, the first box that was not on the first part. **Graphic**
   Hover Help ends "The Picture itself cannot be changed." **Cover**: "User Add" (OakBarn Brewery's drawing, 2026-11-11; was "Pick
   Cover Color", before that "User cover (pick its color below)") pops up the Color Picker and shows the **Color (RGB)** line just
@@ -3581,6 +3581,24 @@ Riptide Add box: "Since the 3 Vessel is the Model, these all apply globally to t
   ID BH, so every name on it ends _BH (BM_22_DO@Pump_Pump_BH, BM_8_DO@H_Element_HLT~element_BH ...), in its Processes, Help and Hover Help too.
   Name examples in Help and Hover Help end _BH. A New Schema's hot-side Tab starts as Brew House (BH). Pipe ids (p_Brewhouse_1 ...)
   are meaningless keys and stay as they are (Rule 2 of the Design Rules).
+
+18.35 **Review the Interface and Port before they are set** (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1:
+"Add New Review Dialog with the Interface and Port List Boxes here Greyed Out. Check before A Confirm Button is Clicked. Add a
+Confirm Button and a Back Button."; "Do Not Lock the Interface or Port until the Confirm Button is Clicked and the device is saved."):
+- In the Add box of a Device with the Pump's drill-down (Pump, Motorized Ball Valve, Temperature Probe, PWM / Analog out, Heating
+  Element), once the **Interface** and **Port** are picked a **Review** pop-up shows them greyed out with this statement, and **no
+  Hover Help** on it: "You MUST Confirm the Interface and Port Number. Once Confirmed, they cannot be changed. If a Change is needed
+  now, Click the Back Button." Its buttons are **◀ Back** and **✔ Confirm**.
+- **◀ Back** (or Esc) goes back to the Port; nothing is greyed out. Picking another Interface or Port asks again. **➕ Add Device**
+  pressed before the Review brings the Review up.
+- **✔ Confirm** greys out the Interface and Available Ports line in the Add box; the rest of the box opens once the Label and Tab are
+  filled in too. They are set for good only when **➕ Add Device** saves the Device; **Cancel** before that keeps nothing.
+- The **Hover Help** of the Pump's Interface and of every Available Ports is OakBarn Brewery's own text (Rule 18.34, word for word,
+  the electrical warning in red, Rule 6.20), the same as Help 115 The Port and The Interface. Its examples use **Port 15**
+  (BM_15_DO@Pump_Red~Pump_BH): Port 6 is used elsewhere on the 3 Vessel sample. The waiting ➕ Add Device button's balloon keeps
+  "Pick the Port first (Available Ports)" and adds his longer help below it, one blank line between.
+- **Both programs:** the BruControl Import brings in Devices that are already wired, so it has no Add box and no Review; it shares
+  the balloons (public/app.js) when it uses the Panel's Build page.
 
 ## 19. Vessel Rules
 
@@ -3700,6 +3718,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
 - 2026-11-11: Help 189 (new), List Boxes (Dropdowns), asked for by OakBarn Brewery: how a list box works, where its choices come from (built into Skynet, your Schema, a list that grows with ➕ Add new ..., Rule 18.14) and how they are limited (by kind, by board, free ports only; typing BM_ in the Process editor shows only the Brewery Mega's Devices, a dialog's list box jumps to the first BM_ choice). Rule 2.6 points to it; Glossary entry List box. No Rule changed. Next free Help 190. (thread "Explain list boxes in Help")
