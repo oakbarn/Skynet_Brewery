@@ -21,7 +21,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **Overlay** (**Red Glow** to start: it glows red while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
-4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
+4. Press **➕ Add Device**. The Heating Element is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **💾 Save Build ...** moves it to the Tab you picked. The **Interface** and **Port**
    are now greyed out and set (they are the wiring). On the Tab, one click on it turns it ON or OFF at once, like a Pump (Rule 2.33).
 
 ## Vessel Device Template: choose, then Build
@@ -31,9 +31,9 @@ In the **Heating Element** list, **Vessel Device Template** takes the place of *
 1. **Choose the Vessel**: the Vessel Widget (every IP, a Temperature Probe and an Element Port, each with a Place slider) or any
    other Vessel Template that has an Element Port.
 2. **Pick the heating element** and fill in the Add box, as above. Its title says which Vessel it is for.
-3. **➕ Add Device** builds them: the Heating Element goes on the Tab you picked, and a copy of the Vessel goes on the
-   **🔨 Build Tab** with its **Element Placed** and linked to the new Heating Element (the Element glows while it is on). Press
-   **💾 Save Build ... > To a Tab** to put the Vessel on the same Tab.
+3. **➕ Add Device** builds them on the **🔨 Build Tab**: the Heating Element and a copy of the Vessel with its **Element Placed**
+   and linked to the new Heating Element (the Element glows while it is on). Press **💾 Save Build ... > To a Tab**: the Tab you
+   picked is offered first, and both go there.
 
 The Vessel still has no Devices of its own (Rule 5.7): the Heating Element is its own Device, and the Vessel's Element spot links to
 it (Rule 5.31). *Electric kettle, basic* is still in the full **Add Device** list (Devices: Skynet).
