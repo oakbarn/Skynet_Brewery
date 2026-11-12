@@ -1241,3 +1241,14 @@ dialog.boardTalk { width: min(900px, 96vw); }
 .boardTalk .btWords { opacity: .85; }
 .boardTalk .btLine { width: min(520px, 60vw); font-family: var(--mono); }
 @media (max-width: 600px) { .boardTalk .btRow { grid-template-columns: 5.5em 1.2em 1fr; } .boardTalk .btWords { grid-column: 3; } }
+
+/* Rule 4.1 (2026-11-12): a new item just moved from the Build Tab glows red with a slow pulse until clicked */
+@keyframes freshPulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(220, 30, 30, .9), 0 0 6px 2px rgba(220, 30, 30, .5); } 50% { box-shadow: 0 0 0 3px rgba(220, 30, 30, .35), 0 0 18px 8px rgba(220, 30, 30, .15); } }
+#ws .freshMoved { animation: freshPulse 2.4s ease-in-out infinite; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { #ws .freshMoved { animation: none; box-shadow: 0 0 0 3px rgba(220, 30, 30, .9); } }
+/* the watermark of the Tab a new item goes to, behind everything on the Build Tab (Rule 4.1) */
+#ws .buildMark { position: absolute; left: 0; top: 0; opacity: .18; pointer-events: none; z-index: 0; }
+#ws .buildMark .bmBox { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 6 4; }
+#ws .buildMark .bmPipe { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+#ws .buildMark .bmText { fill: currentColor; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
+#ws .buildMark .bmTitle { fill: currentColor; font-size: 26px; font-weight: bold; }
