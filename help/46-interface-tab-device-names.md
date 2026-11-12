@@ -36,9 +36,9 @@ The **Suggested Name** is filled in as you go:
 
 Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
 
-The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO: Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
+The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO@Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_25_PWM@P_L_Vlv_Fly~Sparge_SP`
+`MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
 **Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
 Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
@@ -57,7 +57,7 @@ More rules:
 - **No spaces in Device names.**
 - If the name is already used, a number goes after the Label: `MB_25_DO@Pump_Wort_2_BH`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` or `@` in it works in a Process as it is, with no quotes: `MB_25_DO@eVlv_Fly~Sparge_SP = true`.
+- A name with `~` or `@` in it works in a Process as it is, with no quotes: `MB_25_DO@Valve_E_Fly~Sparge_SP = true`.
 - Every special character and what it does in a name: [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
@@ -88,21 +88,21 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 ## Device Type IDs
 
-Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_DO@HE_HLT_BH`, whatever heating method it uses; elements named before keep `DO`.
+Every Device Type ID means one thing. The **General Type** in front says what kind of port it is on, so the same ID is used on every kind of port: a Pump is `DO@Pump` on an On/Off port and `PWM@Pump` on a PWM port (its speed). The Device Type box shows it the same way. A Heating Element is `H_Element`, e.g. `MB_25_DO@H_Element_HLT_BH`, whatever heating method it uses.
 
 **Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
-**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `HE` Heating Element (on / off output, its method picked by a click or a Process), `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
+**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `H_Element` Heating Element (its method picked by a click or a Process): `DO@H_Element` on an on / off output, `PWM@H_Element` on a PWM output, `AO@H_Element` on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `HE` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `Valve_E` electric valve (motorized ball valve, low temperature), `M_H_Vlv` high temperature manual valve, `Valve_E_H` high temperature electric valve, `Valve_Sgas` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 
 A **DIN** gives one trigger per press, however long the button is held, and a second or third press within **3 seconds** does nothing. You can change the 3 seconds in its properties (*Pulse: lockout*).
 
-**PWM:** `PWM` plain, `H_PWM` heating PWM, `P_L_Vlv` low temperature proportional valve, `P_H_Vlv` high temperature proportional valve, `P_Pump` pump speed, `P_Fan` fan speed, `P_Mtr` motor speed, `P_LED` LED / light dimmer.
+**PWM:** `PWM` plain, `H_Element` heating PWM, `Valve_L` low temperature proportional valve, `Valve_H` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
 
-**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_AO`, `P_L_Vlv`, `P_H_Vlv`, `P_Pump`, `P_Fan`, `P_Mtr`.
+**Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_Element`, `Valve_L`, `Valve_H`, `Pump`, `Fan`, `Mtr` (shown as `AO@Pump` ...).
 
 **Analog inputs:** `AI` plain, `Pres` pressure, `Level`, `Vol` volume, `PH_Met` pH meter.
 

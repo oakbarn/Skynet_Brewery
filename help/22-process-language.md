@@ -129,6 +129,7 @@ Text in quotes can carry codes that change how it looks on the screen. They work
 | Code | What it does | Example | Shows |
 |---|---|---|---|
 | `\n` | a new line | `"Mash in\nStir well"` | Mash in, then Stir well on the next line |
+| `\t` | an indent (about four spaces wide) | `"Mash in\n\tStir well"` | Stir well, pushed in, on the next line |
 | `\b` | bold on / off | `"Add \bhops\b now"` | Add **hops** now |
 | `\L` | large text on / off | `"\LSTRIKE\L 165"` | STRIKE in large letters |
 | `\_` | subscript on / off | `"CO\_2\_"` | CO₂ |
@@ -137,6 +138,8 @@ Text in quotes can carry codes that change how it looks on the screen. They work
 | `\\` | one backslash | `"C:\\Brewing"` | C:\Brewing |
 
 Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
+
+Use `\t` and `\n` to lay text out, not extra spaces: a Label can't start or end with a space (they are trimmed).
 
 The size of large text is **Large text size** on the ☰ Menu **Default** tab, in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
 
@@ -167,6 +170,40 @@ The change lasts until the panel restarts. To keep a look, set it in the item's 
 ## Skynet Constants
 
 Fixed numbers for common conversions are built in, so a Process can write `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. Every one starts with `skc_` and none can be changed. The full list is in [Skynet Constants](94-skynet-constants).
+
+## NULL: the empty value
+
+`NULL` means **no value at all**. It is not 0, not `false` and not `""`: it is empty.
+
+1. **Empty a value:** `gV_Strike = NULL`. Its box on the Tab shows **blank** until something sets it again, and it stays empty after a restart.
+2. **Ask if it is empty:** `if gV_Strike == NULL` (or `!= NULL` for "has a value").
+3. **Math needs a value:** `gV_Strike + 5`, `gV_Strike += 1` or `if gV_Strike > 150` on an empty value **stops the Process** and says which value is empty. Test it first:
+
+```
+if gV_Strike == NULL
+  gV_Strike = 152
+endif
+gV_Strike = gV_Strike + 1
+```
+
+`NULL` works for every Kind: a number, text, a time, a date and time, or true / false, in a Process variable, a gGlobal or a Value Widget. A Device (a pump, a valve, a Heating Element) is always on or off, so `Pump_1 = NULL` is an error. `NULL`, `Null` and `null` are the same word.
+
+### The technical side
+
+`NULL` is a reserved word (below). Only `= NULL` makes a value empty: nothing turns into `NULL` on its own, and a sensor with no reading is not `NULL`. `==` and `!=` are the only questions that take `NULL`; `+ - * / ^`, `< > <= >=` and `+= -= *= /=` stop the Process with the line number. `NUL` is a different word: it is one of the names Windows keeps for itself, so it can't be a name and does nothing in a Process.
+
+## Reserved words
+
+These words belong to the Process language, so none of them can be the name of a Device, Widget, gGlobal or Process variable. Upper and lower case are the same (`NULL` = `null`).
+
+- **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
+- **Joining words:** `and`, `or`, `not`
+- **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`
+- **Places:** `tab`, `workspace`
+- **Skynet Constants:** every name that starts with `skc_` (see above)
+
+The names Windows keeps for itself (CON, PRN, AUX, NUL, COM1 to COM9, LPT1 to LPT9) can't be names either. See [Allowed names](63-allowed-names).
 
 ## Names have no spaces
 

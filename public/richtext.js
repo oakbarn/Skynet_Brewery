@@ -1,6 +1,7 @@
 // Codes inside text (Fritz, 2026-10-21). They work in any text a Process shows: string values on Tabs, Labels,
 // print lines in the Process output, pop-ups (a manual valve's message) and text on a Tab.
 //   \n     a new line
+//   \t     an indent, the width of about four spaces (OakBarn Brewery, 2026-11-12: "\t for indent!")
 //   \b     bold on, the next \b turns it off
 //   \L     large text on / off (the size is "Large text size" on the ☰ Menu Default tab)
 //   \_     subscript on / off
@@ -9,6 +10,8 @@
 //   \\     one backslash
 // Codes that are not on the list stay as they are typed. No imports, so node can load it too (tests).
 
+// an indent: two em spaces, so it is the same width whatever the box does with spaces (a Label is trimmed, Rule 3.3; this is kept)
+export const INDENT = '\u2003\u2003';
 const TOGGLE = { b: 'b', B: 'b', L: 'L', l: 'L', _: 'sub', '^': 'sup' };
 
 // text -> [{ t, b, L, sub, sup }]: pieces of text with how each one looks
@@ -23,6 +26,7 @@ export function richRuns(text) {
     const nx = text[i + 1];
     if (/^deg/i.test(text.slice(i + 1, i + 4))) { cur += '°'; i += 3; continue; }
     if (nx === 'n') { cur += '\n'; i++; continue; }
+    if (nx === 't') { cur += INDENT; i++; continue; }
     if (nx === '\\') { cur += '\\'; i++; continue; }
     const k = TOGGLE[nx];
     if (!k) { cur += c; continue; }

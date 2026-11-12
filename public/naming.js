@@ -4,11 +4,11 @@
 //   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
 // Device name (Fritz, 2026-10-23; single _ 2026-11-05; General Type@ 2026-11-11): InterfaceID_Port_GeneralType@TypeID_ParsedLabel_TabID,
-//   e.g. MB_25_DO@eVlv_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
+//   e.g. MB_25_DO@Valve_E_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
 import { TYPE_METHOD } from './heatmethod.js';
 
-// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is HE
+// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is H_Element
 // (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we could Use MB_25_HE_HLT_BR"). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
 const T = {
   // temperature
@@ -18,18 +18,18 @@ const T = {
   TMP36: 'TMP36 analog temperature sensor',
   // heating
   PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor)',
-  HE: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
+  H_Element: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
-  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
-  E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
+  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', Valve_E: 'Electric Valve (motorized ball or butterfly valve, open / closed)', M_H_Vlv: 'High Temperature Manual Valve',
+  Valve_E_H: 'High Temperature Electric Valve', Valve_Sgas: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input
   DI: 'Direct Input (plain)', Float: 'Float (true while made)', DIN: 'DIN momentary push button (one trigger per press, 3 s lockout)',
   PB: 'Push button (ON only while held)', Toggle: 'Toggle button (press ON, press again OFF)', Latch: 'Latching input (ON until reset)',
   FlowSw: 'Flow switch', Intlk: 'Door / lid / safety interlock', EStop: 'Emergency stop', Leak: 'Leak sensor', Count: 'Pulse counter',
   // PWM and analog outputs
-  PWM: 'PWM (plain)', P_L_Vlv: 'Low Temperature Proportional Valve', P_H_Vlv: 'High Temperature Proportional Valve',
+  PWM: 'PWM (plain)', Valve_L: 'Low Temperature Proportional Valve', Valve_H: 'High Temperature Proportional Valve',
   P_Pump: 'Pump speed', P_Fan: 'Fan speed', P_Mtr: 'Motor speed', P_LED: 'LED / light dimmer', AO: 'Analog output 0-10 V / 4-20 mA (plain)',
   // analog inputs and the rest
   AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', PH_Met: 'pH meter', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
@@ -41,12 +41,18 @@ const T = {
 // (Hydro was kept here from 2026-10-23 until the Hydrometer Device was built, Rule 6.25.)
 export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity' };
 export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
-const list = ids => ids.split(' ').map(id => [id, T[id]]);
+// own: a description that is this General Type's own (a Pump on a PWM port is a Pump speed)
+const list = (ids, own = {}) => ids.split(' ').map(id => [id, own[id] ?? T[id]]);
+// The General Type in front says what kind of port it is (OakBarn Brewery, 2026-11-11: "PWM@Pump"), so a Pump, Fan, Motor, LED or
+// Heating Element on a PWM or 0-10 V port has the same Type ID as on an On/Off port: PWM@Pump, AO@Fan, PWM@H_Element (were P_Pump, H_PWM ...).
+// A Proportional Valve is Valve_L (low temperature) or Valve_H (high temperature): PWM@Valve_L, AO@Valve_H (were P_L_Vlv, P_H_Vlv).
+const PWM_OWN = { H_Element: 'Heating PWM (element on a PWM output)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed', LED: 'LED / light dimmer' };
+const AO_OWN = { H_Element: 'Heating element on a 0-10 V power controller (SCR / SSVR)', Pump: 'Pump speed', Fan: 'Fan speed', Mtr: 'Motor speed' };
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO HE Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
-  pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
-  analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
+  digitalOut: list('DO H_Element Pump CPMP M_L_Vlv Valve_E M_H_Vlv Valve_E_H Valve_Sgas Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  pwmOut: list('PWM H_Element Valve_L Valve_H Pump Fan Mtr LED', PWM_OWN),
+  analogOut: list('AO H_Element Valve_L Valve_H Pump Fan Mtr', AO_OWN),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
   analogIn: list('AI Pres Level Vol PH_Met'),
   flowMeter: list('FlowM'),
@@ -74,17 +80,26 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
-  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'Valve_E', element: 'H_Element' }[el.subtype];
+  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: 'H_Element', propValve: 'Valve_L', pump: 'Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
   return c && has(c) ? c : codes[0][0];
 }
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
 // E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
-const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
-  PWM_PmP: 'P_Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'P_Mtr', PWM_FaN: 'P_Fan', PWM_LgT: 'P_LED', PWM_LeD: 'P_LED', PWM_ElM: 'H_PWM',
-  AO_PmP: 'P_Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'P_Mtr', AO_FaN: 'P_Fan', AO_ElM: 'H_AO',
+const OLD_CODES = { PmP: 'Pump', VlV: 'Valve_E', E_L_Vlv: 'Valve_E', eVlv: 'Valve_E',      // eVlv -> Valve_E: OakBarn Brewery, 2026-11-11 ("Change ON Off Motorized Valves to DO@Valve_E")
+  MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'Valve_Sgas',
+  PWM_PmP: 'Pump', PWM_VlV: 'Valve_L', PWM_MtR: 'Mtr', PWM_FaN: 'Fan', PWM_LgT: 'LED', PWM_LeD: 'LED', PWM_ElM: 'H_Element',
+  AO_PmP: 'Pump', AO_VlV: 'Valve_L', AO_MtR: 'Mtr', AO_FaN: 'Fan', AO_ElM: 'H_Element',
+  // 2026-11-11 (OakBarn Brewery: "PWM@Pump"): the General Type says PWM or 0-10 V, so the P_ and H_ ones are the plain IDs
+  P_Pump: 'Pump', P_Fan: 'Fan', P_Mtr: 'Mtr', P_LED: 'LED', H_PWM: 'H_Element', H_AO: 'H_Element',
+  // OakBarn Brewery, 2026-11-11: "Valve_E_H and Valve_Sgas" (were E_H_Vlv, G_Vlv)
+  E_H_Vlv: 'Valve_E_H', G_Vlv: 'Valve_Sgas',
+  // OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element" (was HE)
+  HE: 'H_Element',
+  // OakBarn Brewery, 2026-11-11: "PWM@Valve_L or PWM@Valve_H and AO to follow" (PWM already says the P)
+  P_L_Vlv: 'Valve_L', P_H_Vlv: 'Valve_H',
   DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
   FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
 export function upgradeCode(el) {
@@ -96,11 +111,25 @@ export function upgradeCode(el) {
 // Label -> the part of a name (Fritz, 2026-10-23): control characters and emoji are dropped, spaces at the ends trimmed,
 // < > : " / \ | ? * . , each become ~, and so do spaces (OakBarn Brewery, 2026-11-07: "I like the ~ instead of a _ in the label
 // part of the name"): the _ only ever separates the parts of a name
-// Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
+// Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners
 const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
 const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
-export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '~');
+// Every other mark that isn't a letter, number, _, @ or ° becomes ~ too (° is fine in a name: OakBarn Brewery, 2026-11-11), and an accent is dropped (OakBarn Brewery, 2026-11-11: they are
+// "No No" in a name): Fly/Sparge-In becomes Fly~Sparge~In, Würze becomes Wurze.
+// Marks a Label can't have (OakBarn Brewery, 2026-11-11, Rule 3.4): © ® ™ are kept for copyright and trademark notices ("No Circle C or R
+// in Labels", it "interferes with the MIT License"), and @ ~ are kept for the Suggested Name ("reserved for Suggested Name Use Only").
+// © ® ™ are taken out and @ ~ become a space: public/labelguard.js does it while typing (and says why), lib/store.js on load.
+export const LABEL_NO = /[©®™@~]/;
+export const cleanLabel = s => String(s ?? '').replace(/[©®™]/g, '').replace(/[@~]/g, ' ');
+// a Label never starts or ends with a space either (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label or
+// name and not allow. This is an issue in BruControl I want to remove from Skynet"): trimmed when it is saved and when a Schema loads
+export const tidyLabel = s => cleanLabel(s).trim();
+// the words in the small box and the Label Hover Help (OakBarn Brewery, 2026-11-11, word for word for © ® ™)
+export const COPYRIGHT_MSG = '© ® ™: Reserved for copyright and trademark notices of the Skynet MIT License. Skynet is Open Source. Not Allowed in a name or a Label to avoid confusion with the Skynet MIT License.';
+export const SUGGESTED_MSG = '@ ~: Kept for the Suggested Name. Not typed in a name or a Label.';
+export const labelNoMsg = s => [/[©®™]/.test(s) ? COPYRIGHT_MSG : '', /[@~]/.test(s) ? SUGGESTED_MSG : ''].filter(Boolean).join(' ');
+export const parseLabel = s => [...cleanLabel(s).replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '~').replace(/[^A-Za-z0-9_~@°]/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).
@@ -114,12 +143,12 @@ export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ?
 // Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
 // Names made before keep their double __ before the Tab ID (Rule 3.5).
 // The Type part has the Device's General Type in front with an @ (OakBarn Brewery, 2026-11-11: "use @ symbol"): an On/Off Pump,
-// shown as DO: Pump, is DO@Pump in its name (BM_22_DO@Pump_Pump_BH). A colon can't be in a name (Rule 3.4), so @ stands for it.
+// is DO@Pump in its name (BM_22_DO@Pump_Pump_BH) and wherever its Device Type is shown. A colon can't be in a name (Rule 3.4), so @ stands for it.
 // type: the Device's type (digitalOut ...). With no type the Type part is the Device Type ID alone.
 export function suggestName({ iface, port, code, type, label, tab } = {}) {
   return [iface, port, nameType(type, code), parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
-// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. The Device keeps its type
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO@Pump. The Device keeps its type
 // (digitalOut ...) and Device Type ID (Pump) as they are saved.
 export const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND', hydrometer: 'HYDRO' };
 // The Type part of a Device name: General Type @ Device Type ID (DO@Pump). When the two are the same word (PID, HYS ...) it is written once.
@@ -133,9 +162,11 @@ export function typeAtName(el) {
   const name = String(el?.name ?? '');
   if (!isDevice(el) || !name || name.includes('@')) return '';
   // its own Device Type ID first; an older Device with none saved is matched by any ID of its type (BM_30_Chill_Chiller~water_BH)
-  const own = String(el.typeCode || '').trim(), codes = el.typeCode ? [own] : typeCodes(el).map(x => x[0]).sort((a, b) => b.length - a.length);
+  // and any older ID that became it (P_Pump -> Pump, eVlv -> Valve_E), so BM_5_P_Pump_Wort_BH is BM_5_PWM@Pump_Wort_BH
+  const own = String(el.typeCode || '').trim(), ids = el.typeCode ? [own] : typeCodes(el).map(x => x[0]);
+  const codes = [...ids, ...Object.keys(OLD_CODES).filter(o => ids.includes(OLD_CODES[o]))].sort((a, b) => b.length - a.length);
   for (const code of codes) {
-    const t = nameType(el.type, code);
+    const t = nameType(el.type, OLD_CODES[code] && !ids.includes(code) ? OLD_CODES[code] : code);
     if (!code || t === code) continue;
     const m = new RegExp(`^(.+?_[^_]+)_${code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=_|$)`).exec(name);
     if (m) return `${m[1]}_${t}${name.slice(m[0].length)}`;

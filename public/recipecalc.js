@@ -92,18 +92,19 @@ export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Ar
 // The user picks the Level; the Recipe tab then shows only the boxes and Daughter Tabs that Level uses. Nothing is deleted when
 // the Level changes: a box that is not shown keeps its value. type is the BeerXML word for the same thing (Extract, Partial
 // Mash, All Grain), so a BeerXML or BeerSmith file brings its Level in and a saved Recipe says the same thing both ways.
-//   tabs: the Daughter Tabs shown. hide: the Recipe tab boxes (their Skynet_Field) not shown.
+//   tabs: the Daughter Tabs shown (Waters on every Level, default Tap Water). hide: the Recipe tab boxes (their Skynet_Field) not shown.
+//   fermTypes: the Types the Fermentable tab offers (OakBarn Brewery, 2026-11-11: "on the Level 1 and 2 only Extracts").
 const MASH_BOXES = ['rcp_Total_Grain_Weight', 'rcp_First_Mash_Temp', 'rcp_Strike_Volume', 'rcp_Strike_Temp', 'rcp_Grain_Temp', 'rcp_Sparge_Volume',
   'rcp_Sparge_Type', 'rcp_Sparge_Minutes', 'rcp_Sparge_Temp', 'rcp_Grain_Ratio'];
 export const RECIPE_LEVELS = [
   { level: 1, name: '1 Can Kit', title: 'Level 1: Extract Can Kit', type: 'Extract', about: 'For a beginner brewer: a can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.',
-    tabs: ['fermentables', 'yeast', 'adjuncts'], hide: [...MASH_BOXES, 'rcp_IBU', 'rcp_Whirlpool_Minutes'] },
+    tabs: ['fermentables', 'yeast', 'adjuncts', 'waters'], hide: [...MASH_BOXES, 'rcp_IBU', 'rcp_Whirlpool_Minutes'], fermTypes: ['extract', 'dry extract'] },
   { level: 2, name: '2 Extract', title: 'Level 2: Extract', type: 'Extract', about: 'Malt extract (liquid or dry) boiled with your own hops. No grain.',
-    tabs: ['hops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES },
+    tabs: ['hops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES, fermTypes: ['extract', 'dry extract'] },
   { level: 3, name: '3 Partial Grain', title: 'Level 3: Extract with Partial Grain and Hops', type: 'Partial Mash', about: 'Malt extract plus some grain mashed or steeped in a small amount of water, and your own hops.',
-    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [] },
+    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
   { level: 4, name: '4 All Grain', title: 'Level 4: All Grain', type: 'All Grain', about: 'All the sugar comes from mashed grain, then the sparge, the boil and your own hops.',
-    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [] },
+    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
 ];
 // a Recipe's Level: the one picked, else from its BeerXML type (an imported file), else 4 All Grain
 export function recipeLevel(r) {
@@ -113,6 +114,7 @@ export function recipeLevel(r) {
 }
 export const levelOf = r => RECIPE_LEVELS.find(x => x.level === recipeLevel(r));
 export const levelShowsTab = (r, tab) => levelOf(r).tabs.includes(tab);
+export const levelFermTypes = r => levelOf(r).fermTypes;
 export const levelShowsBox = (r, field) => !levelOf(r).hide.includes(field);
 
 export function blankRecipe(d = {}) {

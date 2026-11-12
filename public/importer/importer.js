@@ -774,7 +774,7 @@ function sub5(which) {
         <p>The suggested Skynet name is always unique, and it is built from five parts, with one <code>_</code> between them:</p>
         <ol><li><b>Interface ID</b>: the board, for example <code>MP</code> for Main Panel.</li>
           <li><b>Port</b>: the pin it is wired to, for example <code>45</code> or <code>A0</code>.</li>
-          <li><b>Type ID</b>: what kind of Device it is, for example <code>DO</code> (a digital output), <code>HE</code> (a Heating Element), <code>10KNTC</code> (a probe).</li>
+          <li><b>Type ID</b>: what kind of Device it is, for example <code>DO</code> (a digital output), <code>H_Element</code> (a Heating Element), <code>10KNTC</code> (a probe).</li>
           <li><b>Label</b>: your own name for it, the BruControl DisplayName. A space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
           <li><b>Tab ID</b>: the two letters of the Tab (old Workspace) it is on.</li></ol>
         <p>For example <code>${esc(ex)}</code>. Because of the <b>One Port, One Device</b> Rule, two suggested names can never come out the same.</p>
@@ -1066,7 +1066,7 @@ function exampleName() {
   const tab = e ? state.r.tabs.find(t => t.name === e.tab)?.id : '';
   const parts = e && e.name.split('_');
   const x = parts && parts.length >= 5 ? { name: e.name, ifc: ifc || parts[0], port: parts[1], label: parts.slice(3, -1).join(' ').replace(/~/g, ' '), tab: tab || parts.at(-1) }
-    : { name: 'MB_42_DO@HE_HLT~Heat_BH', ifc: 'MB', port: '42', label: 'HLT Heat', tab: 'BH' };
+    : { name: 'MB_42_DO@H_Element_HLT~Heat_BH', ifc: 'MB', port: '42', label: 'HLT Heat', tab: 'BH' };
   for (const n of document.querySelectorAll('.exName')) { n.textContent = n.dataset.ex === 'method' ? x.name + '.PID' : x.name; n.dataset.help = GLOSSARY['suggested skynet names']; n.classList.add('gloss'); }
   const put = (sel, v, help) => { for (const n of document.querySelectorAll(sel)) { n.textContent = v; n.dataset.help = help; n.classList.add('gloss'); } };
   put('.exIf', x.ifc, `${x.ifc}: the ID of the Interface (board) this Device is on (the first part of its name).`);
