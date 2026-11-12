@@ -32,6 +32,8 @@ concurrency:
 jobs:
   stamp:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
     env:
       TZ: UTC
     steps:
@@ -175,3 +177,70 @@ jobs:
             release/Skynet_Sample_Schemas_Setup_*.exe release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
             release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt
+
+  # ---- Virus check (Rule 9.11): Microsoft Defender scans every .exe on the new Release, on a Windows computer at GitHub. ----
+  # Clean: a "Virus check" line is added to the Release notes.
+  # Anything found: the Release is turned back into a Draft (hidden from the public), this job turns red
+  # and GitHub emails oakbarn. Nothing is deleted; look at it, then publish the Draft again or remove it.
+  virus-check:
+    needs: stamp
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.stamp.outputs.version }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Get the .exe files from the Release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force scan | Out-Null
+          gh release download $env:VERSION --pattern '*.exe' --dir scan
+          Get-ChildItem scan | Format-Table Name, Length
+
+      - name: Scan them with Microsoft Defender
+        id: scan
+        shell: pwsh
+        run: |
+          $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
+          # GitHub's Windows computers tell Defender to skip their drives; take that off so the scan is real
+          $ex = (Get-MpPreference).ExclusionPath
+          if ($ex) { Remove-MpPreference -ExclusionPath $ex }
+          & $mp -SignatureUpdate | Out-Null
+          # Self-test: the harmless industry test file (EICAR) MUST be caught, or the scan proves nothing
+          New-Item -ItemType Directory -Force selftest | Out-Null
+          $t = Join-Path (Resolve-Path selftest) 'test.txt'
+          [IO.File]::WriteAllBytes($t, [Convert]::FromBase64String('WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNUQU5EQVJELUFOVElWSVJVUy1URVNULUZJTEUhJEgrSCo='))
+          & $mp -Scan -ScanType 3 -File $t -DisableRemediation | Out-Null
+          if ($LASTEXITCODE -ne 2) { throw "Defender self-test failed (code $LASTEXITCODE): the scanner is not working, so no result." }
+          Write-Host "Self-test OK: Defender caught the test file."
+          $sig = (Get-MpComputerStatus).AntivirusSignatureVersion
+          $bad = @()
+          foreach ($f in Get-ChildItem scan -Filter *.exe) {
+            & $mp -Scan -ScanType 3 -File $f.FullName -DisableRemediation | Out-Host
+            if ($LASTEXITCODE -eq 2) { $bad += $f.Name; Write-Host "FOUND SOMETHING: $($f.Name)" }
+            elseif ($LASTEXITCODE -ne 0) { throw "Defender could not scan $($f.Name) (code $LASTEXITCODE)" }
+            else { Write-Host "Clean: $($f.Name)" }
+          }
+          "sig=$sig" >> $env:GITHUB_OUTPUT
+          "bad=$($bad -join ', ')" >> $env:GITHUB_OUTPUT
+          $global:LASTEXITCODE = 0   # a find is handled by the next steps, not by failing here
+
+      - name: Clean - add a line to the Release notes
+        if: steps.scan.outputs.bad == ''
+        shell: pwsh
+        run: |
+          $notes = (gh release view $env:VERSION --json body --jq .body) -join "`n"
+          $line = "**Virus check:** every .exe here was scanned by Microsoft Defender (virus definitions ${{ steps.scan.outputs.sig }}) on $(Get-Date -Format 'yyyy-MM-dd') UTC: nothing found."
+          Set-Content -Path notes.md -Value ($line + "`n`n" + $notes) -Encoding utf8
+          gh release edit $env:VERSION --notes-file notes.md
+
+      - name: Something found - hide the Release
+        if: steps.scan.outputs.bad != ''
+        shell: pwsh
+        run: |
+          gh release edit $env:VERSION --draft=true
+          Write-Host "::error::Microsoft Defender flagged: ${{ steps.scan.outputs.bad }}. The Release $env:VERSION is now a Draft (hidden)."
+          exit 1
