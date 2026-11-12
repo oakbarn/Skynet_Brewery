@@ -84,4 +84,8 @@ assert.match(app, /function convertAllNames\(\)/); assert.match(app, /const canS
 assert.match(app, /if \(!sug \|\| sug === r\.e\.name \|\| nameCheck\(sug, r\.e\)\) continue;/, 'each checked, one at a time');
 assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /id="sugAllNames" class="admin-only"/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^3\.18 \*\*🏷 Suggested Names/m);
+// A frozen top on every dialog (Rule 2.51): the bottom row is gone from #dlg, and paired rows are frozen at the top
+assert.match(app, /function freezeDialogTop\(d\)/); assert.match(app, /try \{ freezeDialogTop\(this\); \}/);
+assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\) \.dlgBottomBar \{ display: none; \}/, 'only the Pump dialog (the model) loses its bottom row');
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.51 \*\*A frozen top on the model dialog\*\*/m);
 console.log('pump model tests passed');

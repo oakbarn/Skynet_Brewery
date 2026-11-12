@@ -38,7 +38,8 @@ nothing is really saved until you press **💾 Save** on the dialog. Cancel with
 Only these belong to a Pump (a Skynet pump drawing or your own User pump):
 
 1. The title is the pump, for example **Blichmann Riptide**, with the **🔓 lock** (locks its place: no drag or resize),
-   **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**.
+   **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**. The ☰, the title and these buttons stay
+   at the top while the rest of the box scrolls, so the buttons are always in view (there is no second row at the bottom).
 2. **1. Label ⬆ ⬢**: what shows on the Tab (see **The Label** below). The ⬆ opens a 2 Line Label Text Dialog; the ⬢ opens
    the **Label Attributes** Dialog: Label, Visible, Font Size, Font, Bold, Fore Color, Back Color and Alignment. Font Size shows
    the size the Label has now. Alignment is **Left**, **Centered** or **Right**; a Label starts Centered. A Label is never
