@@ -23,6 +23,16 @@ add a Blichmann pump to a Tab with 1" pipes: it is drawn for 1" pipes as soon as
 before that. A fitting sitting on a vessel opening with no pipe keeps its size. See
 [Pipe fittings and Manual Valves](87-pipe-fittings-and-manual-valves).
 
+## New Devices and Widgets (the Build)
+
+| Setting | What it does |
+|---|---|
+| **Default Interface** | The Interface a new Device's Add box starts on. Empty: the one the last new Device went on. |
+| **Default Tab** | The Tab a new Device or Widget goes to when the Build is done (💾 Save Build ... > To a Tab). Empty: the Tab the Build Tab came from. **➕ Add new Tab…** in an Add box sets it too. |
+
+They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
+without that Interface or Tab starts the old way. (Skynet Rule 4.6)
+
 ## The other settings on this tab
 
 New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), how amounts show on the Recipe tab, hop alerts, new Tabs and

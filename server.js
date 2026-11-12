@@ -339,7 +339,8 @@ function needRole(p, m) {
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
-  if (p === '/ui/openlink') return 'viewer';      // an outside link opens in the default browser (anyone who can read Help)
+  if (p === '/ui/openlink') return 'viewer';
+  if (p === '/ui/brokenlink') return 'viewer';      // anyone who can read Help can report a broken link (Rule 11.10)      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
@@ -1035,6 +1036,14 @@ async function route(req, res) {
       try { return ok(res, { ok: true, ...engine.binRestore(id, as) }); } catch (e) { if (e.code === 409) return ok(res, { ok: false, taken: true, msg: e.message }); throw e; }
     }
     if (!s[2] && m === 'DELETE') { engine.binPurge(id); return ok(res); }
+  }
+  // a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): ✉ Send in its pop-up emails the details to OakBarn Brewery support
+  // when this Brain has email set up (Settings > Messaging); otherwise the page opens the computer's own mail program instead
+  if (p === '/ui/brokenlink' && m === 'POST') {
+    let details = ''; try { details = String((await jsonBody(req))?.details ?? '').slice(0, 4000); } catch { /* nothing sent */ }
+    if (!details || !messaging.emailReady()) return ok(res, { sent: false });
+    try { await messaging.sendEmail('support@oakbarnbrewery.com', 'Skynet: a broken Help link', `${details}\nUser: ${me?.name ?? ''}`); return ok(res, { sent: true }); }
+    catch { return ok(res, { sent: false }); }
   }
   // An outside link from the panel on this computer opens in the default browser, not in Skynet's clean Edge window (lib/appwindow.js).
   // Only for a page on this same computer: a phone or another PC opens its links itself.

@@ -145,4 +145,60 @@ in the Predictive Text List Box.
 If you need to add a new Interface, select **➕ Add new Interface** in the List Box (Bottom Choice). Create the Interface and Save
 it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.
 
+## The Tab
+
+The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.
+
+A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a
+Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).
+And like a Star Ship, there is an Alternate Bridge and other Compartments of decks.
+There can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his
+Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the
+Bridge.
+
+Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items
+are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to
+control things, but only a workshop to build something to be placed on a Normal User Tab.
+
+When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form
+Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our example Tab
+is: BH: Brew House
+The ID is important as it is Part of the Suggested Name.
+BM_15_DO@Pump_Red~Pump_**BH**
+Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
+
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+(Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will
+quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are
+limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices)
+in the Predictive Text List Box.
+
+You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.
+**➕ Add new Tab…** makes a new Tab and comes back here and sets it as the default for the Build Tab (Skynet Rule 4.6).
+
+## The Device Type
+
+Its Device Type: DO@Pump, a Pump (Pump) on a Digital Out, On/Off (DO) port. The General Type comes first, then an @, then the
+Device Type.
+The Type is always supplied by Skynet and you cannot change it. All of the Skynet Devices have a set Type.
+
+The same DO@Pump is the third part of the Suggested Name: DO@Pump. It comes from the Device you added and is set for you.
+BM_15_**DO@Pump**_Red~Pump_BH
+Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
+
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+(Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will
+quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are
+limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices)
+in the Predictive Text List Box.
+
+## The ➕ Add Device button
+
+While something is still missing, **➕ Add Device** looks faded. Its Hover Help says what to do first ("Type a Label first", "Pick the
+Port first" ...), then, after a blank line, the same Hover Help as that box. Press it and it tells you what is missing.
+
 Every dialog's titles and field names are in Title Case (Fore Color, Font Size).

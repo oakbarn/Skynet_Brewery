@@ -61,6 +61,13 @@ A **Widget** lives only in the app, with no board pin.
 
 Row 1 is tight so it all fits on the top line in a window about 1900 pixels wide (a full HD screen). In a narrower window the last buttons drop to a second line; they still work the same.
 
+## The Build Tab's Default Interface and Default Tab
+
+On the 🔨 Build Tab the bar shows two dropdowns: **Interface** and **Tab**. They are the **Default Interface** (the one a new
+Device's Add box starts on) and the **Default Tab** (the one a new Device or Widget goes to when the Build is done). They are the same
+defaults as **☰ Menu > Default settings > New Devices and Widgets (the Build)**: change one here and it changes there too.
+**➕ Add new Tab…** in an Add box sets the new Tab as the Default Tab. (Skynet Rule 4.6)
+
 ## Row 2: pipes, fittings, locks and Tabs
 
 **Elbows, Tees …** sits beside **Draw pipe** and **Draw hose**: an IP point, a pipe, a tee, elbows, a cross, a manual valve, a coupling or a cap. The rest of the row is described in [Tabs](02-tabs) and [Build Tab Add button](75-build-tab-add-button) (turn and flip, grab points).
