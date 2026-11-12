@@ -1,0 +1,54 @@
+# Code scanning (CodeQL): GitHub reads the Skynet code looking for security holes
+# (for example a web page that could be tricked into running someone else's commands).
+# It runs on every pull request, after every merge, and once a week (new checks come out all the time).
+# Findings show under the repo's Security tab > Code scanning. It never changes any code.
+# Languages: JavaScript (the panel and the Importer), Python (the Pi firmware) and the GitHub
+# workflows themselves. The Arduino and ESP32 sketches (C++) are not scanned: they need a full build.
+# Do not also turn on "Default setup" for CodeQL in Settings: GitHub allows only one of the two.
+name: Code scanning
+
+on:
+  push:
+    branches: [claude/project-thread-vzxi0a]
+    paths-ignore: [version.json]
+  pull_request:
+    branches: [claude/project-thread-vzxi0a]
+  schedule:
+    - cron: '23 7 * * 1'   # Mondays 07:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Scan ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      security-events: write   # lets it post findings to the Security tab
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, python, actions]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          config: |
+            paths-ignore:
+              - node_modules
+              - lib/vendor
+              - Delete
+              - Sandbox
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
