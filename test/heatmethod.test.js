@@ -112,7 +112,7 @@ console.log('heatmethod tests passed');
   const [h] = heat;
   assert.deepEqual([h.type, h.subtype, h.heatMethod], ['digitalOut', 'element', 'dutyCycle'], 'a Heating Element starting in the first one\'s method');
   assert.deepEqual(h.heatControls.map(c => [c.name, c.bruName, c.method]), [['M_HLT_Heat', 'M_HLT Heat', 'Duty Cycle'], ['HLT_PID', 'HLT PID', 'PID']]);
-  assert.equal(h.name, 'MP_42_DO@HE_HLT~Heat_BH', 'a Heating Element is DO@HE (Rule 3.1)');
+  assert.equal(h.name, 'MP_42_DO@H_Element_HLT~Heat_BH', 'a Heating Element is DO@H_Element (Rule 3.1)');
   assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
@@ -195,7 +195,7 @@ console.log('method spots tests passed');
   assert.equal(c.elements[1].heatMethod, 'pid'); assert.equal(c.elements[1].kp, 9);
   assert.equal(c.elements[2].type, 'pid', 'a PID of its own (not built in) stays as it is');
   const { readFileSync } = await import('node:fs');
-  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_DO@HE_HLT~element_BH', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
+  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_DO@H_Element_HLT~element_BH', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
   const hlt = s.elements.find(e => e.name === 'HLT_Heat');
   assert.deepEqual(controlMethods(hlt), ['Direct', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }

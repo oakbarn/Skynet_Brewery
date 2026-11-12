@@ -10,6 +10,8 @@ export const LABEL_WARN_MS = 5000;
 export const blankWarn = what => `The ${what} cannot be blank.`;
 
 export const isBlank = v => !String(v ?? '').trim();
+import { LABEL_NO, labelNoMsg, cleanLabel } from './naming.js';
+const isLabelField = t => t?.dataset?.k === 'label' && !!t.closest?.('dialog[open]');
 // a Cancel button: data-close="cancel" (Properties), value="cancel", or a button whose text is Cancel / ✖ Cancel (the Rule 18 pop-ups)
 export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
 
@@ -42,7 +44,7 @@ export function allowedWhileBlank(t, field) {
 }
 
 const whatOf = f => f.dataset?.guard || 'Label';
-function showWarn(field) {
+function showWarn(field, msg) {
   const d = field.closest('dialog');
   let w = d.querySelector(':scope > .labelWarn');
   if (!w) {
@@ -53,9 +55,10 @@ function showWarn(field) {
   }
   const what = whatOf(field);
   // a field may say it in its own words (data-guard-msg: a Tilt's Color, OakBarn Brewery 2026-11-09)
-  w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (field.dataset?.guardMsg || blankWarn(what)) }),
-    Object.assign(document.createElement('span'), { textContent: what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
+  w.replaceChildren(Object.assign(document.createElement('b'), { textContent: '⚠ ' + (msg || field.dataset?.guardMsg || blankWarn(what)) }),
+    Object.assign(document.createElement('span'), { textContent: msg ? (/@/.test(msg) ? 'It was taken out (@ and ~ become a space).' : 'It was taken out.') : what === 'Tilt Color' ? 'Choose a Color, or press Cancel.' : field.dataset?.guardNow ? 'Type it in, or press Cancel.' : `${what === 'Label' ? 'Type' : 'Pick'} a ${what}, or press Cancel.` }));
   clearTimeout(w._t); w._t = setTimeout(() => w.remove(), LABEL_WARN_MS);      // it goes away by itself after 5 seconds
+  if (msg) return;
   field.classList.add('labelBlank');
   field.focus();
 }
@@ -77,6 +80,18 @@ export function installLabelGuard(doc = document) {
     showWarn(t);
   }, true);
   doc.addEventListener('focusin', ev => { if (ev.target?.dataset?.guard) ev.target.dataset.visited = '1'; }, true);
+  // © ® ™ @ ~ typed or pasted in a Label are taken out at once (@ ~ become a space), and the same small box says why (Rule 3.4)
+  doc.addEventListener('input', ev => {
+    const t = ev.target;
+    if (t?.dataset?.k !== 'label' || !t.closest?.('dialog[open]')) return;
+    if (!LABEL_NO.test(t.value)) return;
+    const at = t.selectionStart, before = t.value.length, msg = labelNoMsg(t.value);
+    t.value = cleanLabel(t.value);
+    try { t.setSelectionRange(at - (before - t.value.length), at - (before - t.value.length)); } catch { }
+    showWarn(t, msg);
+  }, true);
+  // no space at the start or end of a Label (OakBarn Brewery, 2026-11-11): trimmed as soon as the user leaves the box
+  doc.addEventListener('change', ev => { const t = ev.target; if (isLabelField(t) && t.value !== t.value.trim()) t.value = t.value.trim(); }, true);
   const clear = ev => { if (ev.target?.classList?.contains('labelBlank') && !isBlank(ev.target.value)) ev.target.classList.remove('labelBlank'); };
   doc.addEventListener('input', clear, true); doc.addEventListener('change', clear, true);
 }

@@ -56,7 +56,7 @@ Port, make it **Manual**, Save, then make it **Motorized** again and pick the Po
 
 - **Click a valve** on its Tab to open or close it (operators and admins). An open Motorized valve shows the bolt; an open Manual valve
   shows the green ring.
-- In a Process, use the valve's own name, for example `MB_22_DO@eVlv_manifold_2_1_V1_BH.state = true`. Each valve's Label is the
+- In a Process, use the valve's own name, for example `MB_22_DO@Valve_E_manifold_2_1_V1_BH.state = true`. Each valve's Label is the
   fitting's Label with **V1**, **V2**, **V3** after it, and its name is made from that (the suggested name).
 - Motorized valves are on the **Close all** and **Open all** valve lists, like every valve a Process can switch.
 
