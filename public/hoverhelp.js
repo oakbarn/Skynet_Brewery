@@ -6,6 +6,7 @@
 // One shared helper that watches the whole page, so every dialog of the Panel and of the BruControl Import gets it by itself.
 export const HOVER_DELAY_MS = 0;        // Fritz, 2026-11-06: "Help for any Choice is always available instantly"
 export const GAP = 6;                   // pixels between the name and the help box
+export const LINK_WAIT_MS = 400;        // a balloon with hot spots stays this long after the mouse leaves its name, to reach a link
 
 // the help of an element: data-help, or the old title of a tip label or of anything in a dialog (a button, an icon), moved to
 // data-help so the browser's own tooltip, which comes late and goes away by itself, does not show too (Fritz, 2026-11-06: "add
@@ -74,6 +75,56 @@ export function helpNodes(text, doc = globalThis.document) {
   }
   return out;
 }
+// Hot spots (OakBarn Brewery, 2026-11-11: "in Hover help, Hot spots that take you to the bigger help about an Item in the Hover
+// Help"): words in a balloon that have their own Help page are links to it. The Panel gives the list (helpmap.js HOT_SPOTS) and
+// how to open Help; a page that gives none (the BruControl Import, whose Help is on hold) keeps plain words.
+let spots = [], spotRe = null, openTopic = null;
+const esc = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export function setHelpLinks(list, open) {
+  spots = [...(list || [])].sort((a, b) => b[0].length - a[0].length);      // longer words first: Interface ID before Interface
+  spotRe = spots.length ? new RegExp(`(?<![\\w~.@])(${spots.map(x => esc(x[0])).join('|')})(?![\\w~@])`, 'g') : null;
+  openTopic = open || null;
+}
+// a text cut into plain parts and hot spots ({ t, topic }); a topic is a link only the first time it shows (seen is shared by a balloon)
+export function hotSpotParts(text, seen = new Set()) {
+  const t = String(text ?? ''), out = [];
+  if (!spotRe) return [{ t }];
+  let at = 0;
+  for (const m of t.matchAll(spotRe)) {
+    // a topic once; a whole page (Interface) not again after a part of it (Interface ID)
+    const topic = spots.find(x => x[0] === m[1])?.[1], key = topic?.join('#');
+    if (!topic || seen.has(key) || (topic.length < 2 && [...seen].some(k => k.split('#')[0] === topic[0]))) continue;
+    seen.add(key);
+    if (m.index > at) out.push({ t: t.slice(at, m.index) });
+    out.push({ t: m[1], topic }); at = m.index + m[1].length;
+  }
+  if (at < t.length || !out.length) out.push({ t: t.slice(at) });
+  return out;
+}
+// turns the hot spots in a balloon (or the tap pop-up) into links; a warning, a red mark and a heading are left as they are
+export function linkify(root, doc = globalThis.document) {
+  if (!root || !spotRe || !openTopic) return 0;
+  const seen = new Set(), texts = [], walk = doc.createTreeWalker(root, 4);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) if (!n.parentElement?.closest('.hhWarn, .hhMark, .hhHead, .hhLink')) texts.push(n);
+  let made = 0;
+  for (const n of texts) {
+    const parts = hotSpotParts(n.nodeValue, seen);
+    if (parts.length === 1 && !parts[0].topic) continue;
+    n.replaceWith(...parts.map(p => {
+      if (!p.topic) return doc.createTextNode(p.t);
+      made++;
+      const a = doc.createElement('a'); a.className = 'hhLink'; a.href = '#'; a.textContent = p.t;
+      a.title = ''; a.dataset.topic = p.topic.join('#');
+      a.addEventListener('click', ev => {
+        ev.preventDefault();
+        a.closest('dialog.tipDlg')?.close();      // the tap pop-up closes; the balloon is put away by its own click
+        openTopic(p.topic);
+      });
+      return a;
+    }));
+  }
+  return made;
+}
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
   doc._hoverHelp = true;
@@ -82,9 +133,9 @@ function start(doc = globalThis.document) {
   // a popover sits on top of every open dialog; an older browser gets it inside the open dialog instead
   const pop = typeof tip.showPopover === 'function';
   if (pop) tip.setAttribute('popover', 'manual');
-  let timer = 0, on = null;
+  let timer = 0, on = null, later = 0;
   const hide = () => {
-    clearTimeout(timer); on = null;
+    clearTimeout(timer); clearTimeout(later); on = null;
     if (pop) { try { tip.hidePopover(); } catch { } } else tip.classList.remove('show');
     tip.remove();
   };
@@ -92,7 +143,9 @@ function start(doc = globalThis.document) {
     const text = helpOf(el); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
     tip.classList.toggle('hhWide', text.includes('⟪img:'));      // a balloon with pictures is wider, so it fits on the screen
-    (pop ? doc.body : el.closest('dialog[open]') || doc.body).append(tip);
+    tip.classList.toggle('hhHasLinks', linkify(tip, doc) > 0);      // hot spots: the mouse may go into the balloon to click one
+    // inside an open dialog it stays a part of it, so its links can be clicked over a dialog that blocks the rest of the page
+    (el.closest('dialog[open]') || doc.body).append(tip);
     if (pop) { try { tip.showPopover(); } catch { } } else tip.classList.add('show');
     const r = el.getBoundingClientRect(), b = tip.getBoundingClientRect();
     const p = placeBubble(r, { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
@@ -105,19 +158,26 @@ function start(doc = globalThis.document) {
   };
   doc.addEventListener('pointerover', ev => {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;       // a finger gets the tap pop-up (Rule 18.16), not a hover
+    if (on && tip.contains(ev.target)) { clearTimeout(later); return; }      // into the balloon, to click a hot spot
     const el = helpTarget(ev.target);
-    if (el === on) return;
+    if (el === on) { clearTimeout(later); return; }
+    if (!el && on && tip.classList.contains('hhHasLinks')) return;      // on the way to the balloon: it waits a moment (below)
     hide();
     if (!el || !helpOf(el)) return;
     on = el; timer = setTimeout(() => { if (on === el) show(el); }, HOVER_DELAY_MS);
   });
   doc.addEventListener('pointerout', ev => {
     if (!on) return;
-    if (ev.relatedTarget && on.contains(ev.relatedTarget)) return;    // still on the name
-    hide();
+    if (ev.relatedTarget && (on.contains(ev.relatedTarget) || tip.contains(ev.relatedTarget))) return;    // still on the name or its balloon
+    if (!tip.classList.contains('hhHasLinks')) { hide(); return; }
+    clearTimeout(later); later = setTimeout(hide, LINK_WAIT_MS);      // a balloon with hot spots waits, so the mouse can reach it
   });
-  // a click, a key, a scroll or a dialog closing puts it away
-  for (const k of ['pointerdown', 'keydown', 'scroll', 'close']) doc.addEventListener(k, () => { if (on) hide(); }, true);
+  // a click, a key, a scroll or a dialog closing puts it away (a click on a hot spot opens its Help first)
+  for (const k of ['pointerdown', 'keydown', 'scroll', 'close']) doc.addEventListener(k, ev => {
+    if (!on || (k === 'pointerdown' && tip.contains(ev.target))) return;
+    hide();
+  }, true);
+  tip.addEventListener('click', ev => { if (ev.target.closest?.('.hhLink')) setTimeout(hide); });
 }
 
 // A snippet of a Help page for a dialog's title (Fritz, 2026-11-06: "You can take a snippet of help and have it in the Hover
