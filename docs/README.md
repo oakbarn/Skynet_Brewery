@@ -10,6 +10,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Universal Properties](Universal_Properties.md) | The Properties and Process attributes every Device, Widget and Semi-Device has (Rule 1.21). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
 | [Special Characters](Special_Characters.md) | Every keyboard mark and what it does in a name: the safe ones (`_` `~` `@`), the free ones, the blocked ones and the trouble ones. |
+| [Outside Links](Outside_Links.md) | Every web link in Help, and whether OakBarn Brewery directed it (Rule 11.10). A test fails on any other. |
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |
 | [Media Licenses](Media_Licenses.csv) | A spreadsheet of every picture and sound Skynet ships that is not its own drawing, and the free programs it ships (the Pickr Color Picker): where it came from, its license, and the credit the license asks for. Opens in Excel. |
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
@@ -29,5 +30,6 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Device protocol](DEVICE_PROTOCOL.md) | The message language between the Brain and the boards. |
 | [Moving from BruControl: board connections](BruControl_Connections.md) | How BruControl connects to its boards on Windows, what Skynet does today, and the gaps to close (Rule 6.16). |
 | [Hysteresis code review](Hysteresis_Code_Review.md) | Every place in the code that deals with Hysteresis and its Offset, with plain notes, for review (2026-11-10). |
+| [LED Test Board: parts list](LED_Test_Board_Parts.md) | Parts, wiring and pins for a plug-in Mega test board with LEDs (220 ohm) standing in for Pumps, Valves and other Devices (2026-11-12). |
 | [Summary 1](Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
 | [Summary 2](Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |

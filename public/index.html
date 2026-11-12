@@ -100,6 +100,7 @@
       <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
       <button id="lockAll" title="Lock every item on this Tab in place. Then unlock single items with 🔒 Lock / 🔓 Unlock. It is an action, not a switch.">🔒 Lock All</button>
       <button id="unlockAll" title="Unlock every item on this Tab. It is an action, not a switch.">🔓 Unlock All</button>
+      <button id="sugAllNames" class="admin-only" title="Suggested Names: give every Device and Widget whose Name is not its Suggested Name its Suggested Name (you pick which ones first). Save layout keeps them, and every Process follows (Rule 3.18).">🏷 Suggested Names</button>
       <button id="wsProps" title="Name, background color, background picture, size and pipe size of this tab. You can also double-click an empty spot on the tab.">⚙ Tab settings</button>
       <button id="addWs">New tab</button>
       <button id="addHiddenWs" title="A Hidden Special Tab (Hidden_1, Hidden_2 ...) for things a Process uses but nobody needs on Brew Day. It shows only in Edit layout.">👻 Hidden Tab</button>
@@ -107,6 +108,7 @@
       <button id="buildTab" title="A clean Tab to build something new on (Devices, Widgets, vessels, fittings). It only shows while you build. Save Build ... puts it on a Tab or saves it as a Template.">🔨 Build Tab</button>
       <button id="itemToBuild" title="Take the selected item off this Tab and work on it on the clean Build Tab. Its Tab, spot and size are remembered, so Save Build ... can put it back in the same place." disabled>🔨 To Build Tab</button>
       <button id="procTab" title="Open the Process editor: write and change Processes. Close (or the ✕ in its top right corner) brings you back here">📝 Processes</button>
+      <span id="buildDefs" class="hidden buildDefs" title="The Default Interface and Default Tab of a Build: the same defaults as ☰ Menu > Default settings (Rule 4.6)"><label>Interface <select id="buildDefIface"></select></label> <label>Tab <select id="buildDefTab"></select></label></span>
       <button id="buildMark" class="hidden" title="A faint picture of the Tab the picked item goes to, behind the Build Tab">🗺 Watermark On</button>
       <button id="previewBuild" class="hidden" title="See the Build Tab the way it looks on Brew Day, without the grid, outlines and handles. Press again to go back to building.">👁 Preview</button>
       <button id="saveBuild" class="primary hidden" title="Put what is on the Build Tab on a Tab, or save it as a Template">💾 Save Build ...</button>
@@ -547,7 +549,7 @@
   </section>
 </main>
 
-<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete" title="Delete it. It asks you first.">Delete</button><button type="button" data-close="copy" class="dlgCopy hidden" title="Save, then make a copy of it on the Build Tab">COPY</button><span class="spacer"></span><button type="button" data-close="cancel" title="Close without saving. If you changed something, it asks you first.">Cancel</button><button value="ok" class="primary" title="Save your changes and close.">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete" title="Delete it. It asks you first.">Delete</button><span class="spacer"></span><button type="button" data-close="cancel" title="Close without saving. If you changed something, it asks you first.">Cancel</button><button value="ok" class="primary" title="Save your changes and close.">Save</button></div></form></dialog>
+<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete" title="Delete it. It asks you first.">Delete</button><button type="button" data-close="copy" class="dlgCopy hidden" title="Save, then make a copy of it on the Build Tab">COPY</button><span class="spacer"></span><button type="button" data-close="cancel" title="Close without saving. If you changed something, it asks you first.">Cancel</button><button value="ok" class="primary" title="Save your changes and close.">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar dlgBottomBar"><button type="button" data-close="delete" class="danger dlgDelete" title="Delete it. It asks you first.">Delete</button><span class="spacer"></span><button type="button" data-close="cancel" title="Close without saving. If you changed something, it asks you first.">Cancel</button><button value="ok" class="primary" title="Save your changes and close.">Save</button></div></form></dialog>
 <!-- Process editor: Alt+P (or the Picture button) picks a picture or sound and types its path at the cursor -->
 <dialog id="picPickDlg" class="picPickDlg"><form method="dialog">
   <h3 id="ppTitle">Insert a picture or sound path</h3>

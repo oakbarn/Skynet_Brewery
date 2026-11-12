@@ -44,7 +44,7 @@ Interfaces and Tabs are listed as **ID: Name**, for example `BM: Brewery Mega` a
 
 With the Name come **Width** and **Height** (150 x 150 to start; a Pump also has **Cover**, **X** and **Y**). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
 
-Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top and at the bottom) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the 🔨 Build Tab and the rest of its Properties open; **💾 Save Build ...** moves it to the Tab you picked. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
+Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top; on a Pump it stays in view while the box scrolls) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the 🔨 Build Tab and the rest of its Properties open; **💾 Save Build ...** moves it to the Tab you picked. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
 
 ## Widgets
 
@@ -60,6 +60,13 @@ A **Widget** lives only in the app, with no board pin.
 - **Add equipment ➕** (row 2, after Elbows, Tees …): chillers, coils, trub filter, RIMS tube and pipe fittings.
 
 Row 1 is tight so it all fits on the top line in a window about 1900 pixels wide (a full HD screen). In a narrower window the last buttons drop to a second line; they still work the same.
+
+## The Build Tab's Default Interface and Default Tab
+
+On the 🔨 Build Tab the bar shows two dropdowns: **Interface** and **Tab**. They are the **Default Interface** (the one a new
+Device's Add box starts on) and the **Default Tab** (the one a new Device or Widget goes to when the Build is done). They are the same
+defaults as **☰ Menu > Default settings > New Devices and Widgets (the Build)**: change one here and it changes there too.
+**➕ Add new Tab…** in an Add box sets the new Tab as the Default Tab. (Skynet Rule 4.6)
 
 ## Row 2: pipes, fittings, locks and Tabs
 

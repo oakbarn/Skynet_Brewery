@@ -59,6 +59,39 @@ More rules:
 - **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
 - **Older Schemas:** two Devices that already share a port keep working (the last one turned on wins, the others on that port are turned off) and can still be saved. No new ones can be made.
 
+## What the Suggested Name tells you
+
+Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the
+Device (or Widget) just by the name alone. A Red Pump on Port 15 of the Interface BM (Brewery Mega), on the Brew House Tab BH:
+
+| Part | In the name |
+|---|---|
+| Interfaceid | **BM**_15_DO@Pump_Red~Pump_BH |
+| Port | BM_**15**_DO@Pump_Red~Pump_BH |
+| Type | BM_15_**DO@Pump**_Red~Pump_BH |
+| Label | BM_15_DO@Pump_**Red~Pump**_BH |
+| TABid | BM_15_DO@Pump_Red~Pump_**BH** |
+
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery
+Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+**Predictive Text**: in a Process you never type this long name. Type BM and the List Box shows only the Devices on the BM
+Interface; pick Red Pump from it. The Suggested Name is what makes that work.
+
+In Skynet a name can be changed quite easily: each name has its own **💾 Update to Suggested** button (Rule 3.16), and
+**🏷 Suggested Names** converts many at once (below). More in
+[The Name of a pump](115-pump-device-properties#the-name).
+
+## Convert all names to Suggested Names
+
+In **Edit layout**, an Admin presses **🏷 Suggested Names** (on the Edit layout bar). A list shows every Device and Widget, on every
+Tab, whose Name is not its Suggested Name: its Tab, the Name now and the Suggested Name. Each one starts ticked; untick any you want
+to keep (**☑ Tick all** and **☐ Untick all** help). Press **💾 Convert**, then **Save layout**. Every Process that uses a name is
+changed to the new name for you, and Clones follow their parent. **Exit** without saving keeps the old names (Skynet Rule 3.18).
+
+Not in the list: Integrated Instances (their names are VesselName.DeviceName), and things with no Suggested Name, such as vessels,
+pipes, fittings and Text.
+
 ## Pins kept for RTD and OneWire probes
 
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:

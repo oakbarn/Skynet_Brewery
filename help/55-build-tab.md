@@ -21,7 +21,7 @@ A new Device or Widget always starts on the Build Tab. The **Tab** you pick in i
 
 - Its **Suggested Name** already ends with that Tab's ID (for example `BM_22_DO@Pump_Pump_BH` for Brew House).
 - Its Properties show that Tab in the **Tab** box. Pick another Tab there and it will go to that one instead. It stays on the Build Tab until then.
-- **💾 Save Build ... > To a Tab** offers that Tab first. Press **Save to Tab** and it moves there. If the new things on the Build Tab were picked for different Tabs, each one goes to its own Tab.
+- **💾 Save Build ... > Move to Tab** offers that Tab first. Press **Move to Tab** and it moves there. If the new things on the Build Tab were picked for different Tabs, each one goes to its own Tab.
 
 ### Its spot on the Build Tab is its spot on its Tab
 
@@ -52,7 +52,7 @@ The Preview works before and after you change an item's Properties, as often as 
 
 A copy of a Template, from a **Skynet Template** or a **User Bundled Template**, is always made on the Build Tab first.
 
-- **Add to Tab**: pick the Tab it goes on and its name. The copy is made on the Build Tab, Bundled. **Save Build ... > Save to Tab** then offers that Tab first.
+- **Add to Tab**: pick the Tab it goes on and its name. The copy is made on the Build Tab, Bundled. **Save Build ... > Move to Tab** then offers that Tab first.
 - **Clone**: give the new Template a name. The copy is made on the Build Tab. Change it there, then **Save Build ...** shows **As a Template** first, with that name filled in. Press **Save as Template** and the new Template is saved. What the Build Tab doesn't show (like each port's Connection Standard) is copied from the Template you cloned.
 
 If you are not in Edit layout yet, it is switched on for you.
@@ -63,7 +63,7 @@ Press **💾 Save Build ...** on the Edit layout bar. A pop-up asks where it sho
 
 | Pick | What happens |
 |---|---|
-| **To a Tab** | Pick the Tab (the one picked for the new item is first; otherwise the one you came from) and press **Save to Tab**. Everything on the Build Tab moves there at the size it is now. To the Tab picked for it, it keeps its spot from the Build Tab; to another Tab it goes to the middle. It glows red until clicked. Then press **Save layout**. |
+| **Move to Tab** | Pick the Tab (the one picked for the new item is first; otherwise the one you came from) and press **Move to Tab**. Everything on the Build Tab moves there at the size it is now. To the Tab picked for it, it keeps its spot from the Build Tab; to another Tab it goes to the middle. It glows red until clicked. Then press **Save layout**. |
 | **As a Template** | Type a **Template Name** (no spaces, unique) and press **Save as Template**. It is saved at once in **☰ Menu**, and the Build Tab closes. Use **Add to Tab** on the Template to put it on a Tab. |
 | **Throw it away** | Everything on the Build Tab is deleted (it asks first). |
 | **Keep building** | Back to the Build Tab, nothing changes. |
