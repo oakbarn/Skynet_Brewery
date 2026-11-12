@@ -2644,6 +2644,19 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
      electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are the balloon on a Heating
      Element's **Current Method** while it is Hysteresis (after the electrical warning), and the **Hysteresis** part of Help 150.
 
+11.9 **Step by Step guides** (OakBarn Brewery, 2026-11-11: "Also need Section in Help That is a Step By Step with Pictures on How to do
+something. First Step By Step in Add a Schema as I could not see an easy way to begin."). Help has a **Step by Step** section: it is
+listed first, above every other page, in the Help page list (and in the page dropdown on a phone). A Step by Step guide:
+  1. has a title that starts **Step by Step:** (that is what puts it in the section), and a Help page number like any other page;
+  2. walks through one job from the very beginning, numbered **Step 1, Step 2 ...**, with a **picture of the real screen** at each step
+     (a screenshot of the panel, in `media/help_pictures/`, named `Step_<Job>_NN_<What>.png`; the thing to press has a red box around it);
+  3. follows the Help format (Rules 11.3 to 11.8): plain English, the names of the 3 Vessel sample, no person named;
+  4. links to the full Help page of each part for more.
+First guide: **Step by Step: Add a Schema** (Help 188). The same day, an easier way to begin: **☰ Menu > ➕ New Schema…** (just under 🗂 Schema)
+and a big **➕ New Schema** button (with **❓ Step by step**) on the ☰ Menu > Schema tab; both open the same Add new Schema box as the
+Schema dropdown's Add new Schema (the box itself is not changed, Rule 18.10). Both programs: the Importer uses the Panel's Help and Schema
+list, so nothing else changes there.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -3676,6 +3689,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 ## Change log
 
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
+- 2026-11-11: Added Rule 11.9 (OakBarn Brewery): a **Step by Step** section in Help, listed first; guides titled "Step by Step: ..." with a screenshot at each step. First guide Help 188, Step by Step: Add a Schema. Easier start: ☰ Menu > ➕ New Schema… and a ➕ New Schema button on the Schema tab, opening the same Add new Schema box. Help 48 and 157 point to them. Next free Help 189. (thread "Add step-by-step guides to Help")
 - 2026-11-11: Rule 3.3 and new Rule 3.17, Label Rules (OakBarn Brewery: "Hunt for Beginning or trailing spaces in a label or name and not allow. This is an issue in BruControl I want to remove from Skynet"; "Put that in Nameing and Label Rules"): no space at the start or end of any name or Label; Labels are trimmed when you leave the box, when saved (the Brain trims every Label it is sent) and on load. Rule 3.17 gathers the Label Rules (no © ® ™, no @ ~, never blank). Checked against both programs: BruControl names and Labels with spaces at the ends are trimmed when imported.
 - 2026-11-11: Rule 18.18 (OakBarn Brewery: "Valve_E_H and Valve_Sgas"): the High Temperature Electric Valve's Type ID is Valve_E_H (was E_H_Vlv) and the Solenoid Gas Valve's is Valve_Sgas (was G_Vlv): DO@Valve_E_H, DO@Valve_Sgas; older ones are upgraded on load with their names. Checked against both programs: the BruControl Import's Burner (BrN) comes in as Valve_Sgas.
 - 2026-11-11: Added Rule 1.32, NULL (OakBarn Brewery: "Could we use NULL", "OK and in the Help about reserved words"): `X = NULL` empties a Process variable, gGlobal or Value Widget (shows blank, kept after a restart); `== NULL` / `!= NULL` ask; math or `< >` on NULL stops the Process with a plain message; a Device can't be NULL. Help 22 gets "NULL: the empty value" and a "Reserved words" list; a reserved word can't be a name (Rule 3.4). Checked against both programs: the Panel runs it; the Importer brings in no NULL.
