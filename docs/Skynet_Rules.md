@@ -940,7 +940,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
-> To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
+> Move to Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
 alm_Hops, sw_1 ... keep working. The **BruControl Import** uses the same pattern when it brings Widgets in (Rule 15.4).
 *Replaced:* pic_ + Label (Picture Widget, Rule 18.27), w_Text_N (Text Widget), alm_ + Label (Alarm), w_Value_N, w_Time_N,
@@ -993,7 +993,7 @@ uses the same Edit layout bar, so imported names can be converted the same way a
 2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular Tab. It will be moved to the
 Regular Tab at the End of the Build chain."). The Tab picked in its Add box (Rule 4.2) is remembered: its Suggested Name already ends
 with that Tab's ID, and its Properties' **Tab** box shows that Tab (another Tab picked there changes where it will go; it stays on
-the Build Tab). **The end of the Build chain is 💾 Save Build ... > To a Tab** (Save layout opens it too): the Tab picked for it is
+the Build Tab). **The end of the Build chain is 💾 Save Build ... > Move to Tab** (Save layout opens it too): the Tab picked for it is
 offered first and it moves there. When the new things on the Build Tab were picked for different Tabs, each goes to its own Tab and
 the rest go to the Tab picked in Save Build.
 - **Its spot on the Build Tab is its spot on its Tab** (OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the
@@ -1053,7 +1053,7 @@ a real PWM signal), so it gets only choice 1.
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
-back where it came from?". Save to Tab places the build in the center of the chosen Tab.
+back where it came from?". Move to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
 
 4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
@@ -3776,7 +3776,7 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Heat wrap, Ceramic heat emitter, Heating Element, Light; Freezer or fridge, Glycol pump, Glycol valve). They are built in
    without a spot, beside the vessel. Then the Fermentor Control is made, named after the vessel's Label. In the Importer, a
    Fermentor Control the Import already made on that probe is built in instead of a second one. Help 182.
-Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
+Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 ## Open questions (not Rules yet)
 
@@ -3816,6 +3816,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 3.2 kept as the standard (OakBarn Brewery: "ID Rule ... is standard. Make all comply"): the Pump dialogs' Interface and Tab balloons and Help 115 now say only an Admin can change an ID (best set once), the Interface ID is 1 to 4 letters and the Tab ID exactly 2 letters. Added Rule 2.50 (OakBarn Brewery): Dual Action, a Pump's Toggle choice where a click turns it On or Off and a press held over half a second works as a Push Button. The Pump's Name balloon is his text with each part of the Suggested Name in red, a Predictive Text note and its link (Help 46, 115); its Graphic balloon is his text and a Skynet pump drawing has no Path box; X, Y, Width and Height labels share one font and size. Checked against both programs: the BruControl Import shares the Pump dialogs; its BruControl notes for the Name wait in the Importer Sandbox (Rule 11.3). (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 4.6 (OakBarn Brewery): the Default Interface and Default Tab of a Build, in ☰ Menu > Default settings and as two dropdowns on the 🔨 Build Tab's Edit layout bar (the same defaults); ➕ Add new Tab… in an Add box sets the Default Tab. Added Rule 11.10 (OakBarn Brewery): no outside links in Help unless he directs one (docs/Outside_Links.md, checked by a test); a broken or empty Help link opens nothing and pops up This Help link is broken with ✉ Send to support@oakbarnbrewery.com. Rule 18.35: ➕ Add Device's balloon is the missing line plus that box's own balloon; the Pump's Tab and Device Type balloons are his text (Help 115). Checked against both programs. (thread "Rewrite Add Device Hover Help and add confirm step")

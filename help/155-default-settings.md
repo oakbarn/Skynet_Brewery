@@ -28,7 +28,7 @@ before that. A fitting sitting on a vessel opening with no pipe keeps its size. 
 | Setting | What it does |
 |---|---|
 | **Default Interface** | The Interface a new Device's Add box starts on. Empty: the one the last new Device went on. |
-| **Default Tab** | The Tab a new Device or Widget goes to when the Build is done (💾 Save Build ... > To a Tab). Empty: the Tab the Build Tab came from. **➕ Add new Tab…** in an Add box sets it too. |
+| **Default Tab** | The Tab a new Device or Widget goes to when the Build is done (💾 Save Build ... > Move to Tab). Empty: the Tab the Build Tab came from. **➕ Add new Tab…** in an Add box sets it too. |
 
 They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
 without that Interface or Tab starts the old way. (Skynet Rule 4.6)
