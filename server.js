@@ -180,9 +180,17 @@ dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema ge
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
 let pending = {};
+// A browser that stops reading (a phone asleep, a laptop lid closed, WiFi gone without a goodbye) would make the Brain keep
+// every update for it in memory. Once more than 2 MB waits for one browser it is let go; it joins again by itself when it
+// wakes up and loads everything fresh.
+const SSE_BACKLOG = 2 * 1024 * 1024;
+function sse(res, msg) {
+  if (res.writableLength > SSE_BACKLOG) { clients.delete(res); res.destroy(); return; }
+  res.write(msg);
+}
 function broadcast(type, data) {
   const msg = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
-  for (const res of clients.keys()) res.write(msg);
+  for (const res of [...clients.keys()]) sse(res, msg);
 }
 function flush() { if (Object.keys(pending).length) { broadcast('values', pending); pending = {}; } }
 store.on('change', (name, prop, v) => {
@@ -234,7 +242,7 @@ pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
-setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
+setInterval(() => { dropEndedSessions(); for (const res of [...clients.keys()]) sse(res, ': ping\n\n'); }, 20000);
 
 // ---------------- helpers ----------------
 const MIME = {
