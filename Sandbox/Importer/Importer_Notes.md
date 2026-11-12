@@ -4,7 +4,7 @@ Kept here until the **Big Merge** (OakBarn Brewery, 2026-11-12, Rule 11.3): "For
 We will do a Big Merge to move things over to the Importer."
 
 The Skynet Panel version of each Help page, Hover Help and the README is polished first, and never mentions BruControl. Anything
-OakBarn Brewery says is for the **Importer version only** is written here, with where it goes, and is not put in the Importer yet.
+OakBarn Brewery says is for the **Importer version only** is written here, with where it goes, and is not put in the Importer yet. When OakBarn Brewery says to update **both** the Importer and Skynet, the change goes into the Importer itself, not here.
 BruControl text taken out of Skynet text is in `Sandbox/help/BruControl_Help_Extract.md`.
 
 The panel does not use this folder, and it is left out of the release zip and the installer.
