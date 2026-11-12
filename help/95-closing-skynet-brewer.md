@@ -21,3 +21,5 @@ Closing a browser tab never stops the panel. Your phone, another PC or a running
 - **Started inside Windows Terminal** (Windows 11 can do this): the tab may stay open with a line saying the program ended. Close it with its X.
 
 Closing the black window with its **X**, or **Ctrl + C** in it, still stops the panel as before.
+
+However Skynet stops, it turns every output Off first. What happens when the PC sleeps or restarts during a brew: [Sleep, Windows Update and restarts](190-sleep-updates-and-restarts).
