@@ -28,7 +28,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**: a DS18B20 probe, 1W, on a Temperature port, TEMP; the same TEMP@1W is in its Suggested Name).
    **Enter** takes you through Label, Interface, Port, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device** looks faded,
    press it anyway: it tells you what is still missing.
-3. Press **➕ Add Device**. The probe goes on the Tab you picked and its Properties open. The **Interface** and **Port** are now
+3. Press **➕ Add Device**. The probe is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **💾 Save Build ...** moves it to the Tab you picked. The **Interface** and **Port** are now
    greyed out and set: they are the wiring. To wire it to another board or pin, or to use another kind of probe, delete it and add
    it again. Its Name can still be changed with **✏ Change name**.
 

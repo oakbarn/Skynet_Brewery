@@ -1,6 +1,6 @@
 # Edit layout bar
 
-The **Edit layout** bar (press the blue Edit layout button beside **☰ Menu**) has three rows. A new Device goes straight on the Tab picked in its Add Device box (Rule 4.1); other new things are made on the 🔨 [Build Tab](55-build-tab) first, and **💾 Save Build ...** then puts them on a Tab.
+The **Edit layout** bar (press the blue Edit layout button beside **☰ Menu**) has three rows. Every new Device and Widget is made on the 🔨 [Build Tab](55-build-tab) first (Rule 4.1), and **💾 Save Build ...** then puts it on the Tab picked for it.
 
 | Row | What is on it |
 |---|---|
@@ -44,7 +44,7 @@ Interfaces and Tabs are listed as **ID: Name**, for example `BM: Brewery Mega` a
 
 With the Name come **Width** and **Height** (150 x 150 to start; a Pump also has **Cover**, **X** and **Y**). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
 
-Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top and at the bottom) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
+Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top and at the bottom) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the 🔨 Build Tab and the rest of its Properties open; **💾 Save Build ...** moves it to the Tab you picked. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
 
 ## Widgets
 
