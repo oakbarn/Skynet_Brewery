@@ -34,15 +34,11 @@ The **Suggested Name** is filled in as you go:
 
 **Interface ID _ Port _ General Type@Device Type ID _ Label _ Tab ID** (one underscore between the parts)
 
-Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
+Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) ([watch it on YouTube](https://www.youtube.com/watch?v=5FsJe4DScDs)). A sign means one thing too: a minus Offset is a minus in the dialog, the Schema and a Process alike.
 
 The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO@Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
-
-**Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
-Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
-When one word means two things, people end up like Abbott and Costello in [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
 
 Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_TEMP@1W_HLT_HL`. A probe number can belong to one Device only.
 

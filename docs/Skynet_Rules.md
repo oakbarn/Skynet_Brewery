@@ -22,18 +22,20 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
      above).
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
-- **Plain terms: no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.";
-  "Plain English and not a Who's on First Confusion where + = - and - = +"): a word, a name or a sign means ONE thing, everywhere: in the
-  dialogs, the saved Schema, the Brain, a Process, the .API and Help. Nothing is turned around in the background (for example the
-  Offset's sign, Rule 6.19). See Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) for what happens when it isn't.
 - **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
   KISS Keep It Simple Stupid NO clutter."): no clutter anywhere. The details for dialogs and Help are Rule 11.8.
 - **Plain terms, no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.
   We need to add a link to an Abbot and Costello Who's on First Script somewhere in Help when we discuss things like this. Maybe 2
   places (Suggested Name) and General Rules"): a name, a sign or a word says what it means, so plus means up and minus means down,
   and nothing reads backward like a debit and a credit. Example: the Hysteresis Offset is always Setpoint + Offset, so heating shows
-  −1 (Rule 6.19). Help links to Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) where it
-  explains this: Help 46 (the Suggested Name) and Help 1 (getting started).
+  −1 (Rule 6.19), in the dialogs, the saved Schema, the Brain, a Process, the .API and Help alike; nothing is turned around in the
+  background. Help links to Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) and a [YouTube video of it](https://www.youtube.com/watch?v=5FsJe4DScDs)
+  (OakBarn Brewery, 2026-11-12: "Add a second link to Youtube Video of it"; a link only, never embedded or copied) where it explains
+  this: Help 46 (the Suggested Name) and Help 1 (getting started).
+- **Outside links open in the default browser** (OakBarn Brewery, 2026-11-12: "The link in the Help On Who's On First used Edge to open
+  the Wikipedia Page and not my default browser"): a web link to another site (Help, Versions on GitHub, Buy a beer, an AI site) opens
+  in the person's own default browser, not in Skynet's clean Edge window (Rule 2.36). On the Brain's own computer the page asks the
+  Brain to hand it over; on a phone or another PC the page opens it as before. Both programs (Panel and BruControl Importer).
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -3748,6 +3750,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
 - 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
 - 2026-11-10: Added "Plain terms, no Who's on First?" under How Rules work (OakBarn Brewery), with a link to Abbott and Costello's Who's on First? in Help 1 and Help 46. Checked against both programs: a Rule for both; no screen changes. (thread "Set the Help format rules")
+- 2026-11-12: "Plain terms, no Who's on First?": the two copies of it under How Rules work are one now, with a second link to a YouTube video of the routine (Help 1, Help 46). New "Outside links open in the default browser" (OakBarn Brewery): Skynet's clean window is Edge, so outside links now go to the default browser through the Brain (lib/appwindow.js, public/extlinks.js). Checked against both programs: the BruControl Importer's page does the same (its AI site button). (thread "Fix Process code for Hysteresis Offset")
 - 2026-11-10: Rule 11.8 point 7 built (OakBarn Brewery approved the words): a Heating Element's Current Method balloon, while it is Hysteresis, shows the Hysteresis Hover Help with the HLT element's values (after the electrical warning); Help 150 has a new Hysteresis part with the same words, then the technical side. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and uses its own pages for Heating Elements. (thread "Set the Help format rules")
 - 2026-11-10: Rule 11.8 point 7 (OakBarn Brewery): the Hysteresis Help (Hover Help, then the technical side) is the model for all Help. Rule 6.20: every "⚠ Electricity can kill" in a Help page shows in red bold under the red triangle, as in the balloons, and keeps its OakBarn Brewery words. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and its balloons already show the warning in red (shared public/hoverhelp.js). (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")

@@ -46,7 +46,7 @@ The [Glossary](13-glossary) explains every special word. The three you will meet
 - **Device**: anything tied to a port or pin on a board (a pump relay, a probe, a valve).
 - **Widget**: something that lives only in the app and is not tied to any board (a pipe fitting, a note, a timer).
 
-Skynet uses plain words that say what they mean, so nothing reads backward. A plus means up and a minus means down: a heater's Offset of −1 turns it on 1 degree below the Setpoint. No "Who's on First?" mix-ups, as in Abbott and Costello's [famous routine](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
+Skynet uses plain words that say what they mean, so nothing reads backward. A plus means up and a minus means down: a heater's Offset of −1 turns it on 1 degree below the Setpoint. No "Who's on First?" mix-ups, as in Abbott and Costello's [famous routine](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) ([watch it on YouTube](https://www.youtube.com/watch?v=5FsJe4DScDs)).
 
 ## Updating to a new version
 
