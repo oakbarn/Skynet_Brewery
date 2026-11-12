@@ -102,6 +102,17 @@ function alertBar(text) {
   const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
   document.body.append(bar);
 }
+// Brain notices (OakBarn Brewery, 2026-11-12, Rule 6.31): Skynet stopped or the computer slept during a brew, or Windows has an
+// update waiting to restart the computer. They stay on every screen until a brewer closes them (closed on one, closed on all).
+// A stop or sleep notice has a Resume button for 15 minutes after the stop (OakBarn Brewery, 2026-11-12: "Resume Button").
+function renderBrainNotices(list) {
+  let box = document.getElementById('brainNotices');
+  if (!box) { box = h('div', { id: 'brainNotices' }); document.body.append(box); }
+  box.replaceChildren(...(list || []).map(n => h('div', { class: 'brainNotice ' + (n.kind || ''), role: 'alert' },
+    h('span', { style: 'white-space:pre-line' }, (n.kind === 'update' ? '🔄 ' : '⚠ ') + n.text),
+    n.resume && can('operator') ? h('button', { class: 'resumeBtn', title: 'Turn back On what was On and start each Process again at its step', onclick: e => { e.target.disabled = true; api('POST', '/ui/brain/resume', { id: n.id }).then(r => { if (r?.failed?.length) alertBar('Not resumed: ' + r.failed.join(', ')); }).catch(err => { e.target.disabled = false; alertBar(err.message); }); } }, '▶ Resume') : null,
+    h('button', { title: 'Close this notice on every screen', onclick: () => api('POST', '/ui/brain/notice', { id: n.id }).catch(e => alertBar(e.message)) }, '✕'))));
+}
 // Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done.
 // A Manual Valve Widget is asked for on a bar at the top instead (not a pop-up that covers the Tab): the valve blinks on its
 // Tab, and clicking it there is the confirm. The Process goes on once it shows the way the Process asked for.
@@ -230,6 +241,7 @@ const TEXT_NORMAL = 18, TEXT_LARGE = 28;
 const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
+  renderBrainNotices(S.brainNotices);
   for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
@@ -313,6 +325,7 @@ function connect() {
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
+  es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
