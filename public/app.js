@@ -40,6 +40,7 @@ import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GR
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
+import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -11445,7 +11446,7 @@ function showDonate(preview) {
   $('#donateText').textContent = d.message.trim() || DONATE_MSG;
   $('#donateGo').textContent = d.button.trim() || 'Buy Fritz a beer';
   const close = days => { if (!preview) donateSnooze(days); dlg.close(); };
-  $('#donateGo').onclick = () => { window.open(d.link, '_blank', 'noopener'); close(d.everyDays); };
+  $('#donateGo').onclick = () => { openLink(d.link); close(d.everyDays); };
   $('#donateLater').onclick = () => close(d.everyDays);
   $('#donateDone').onclick = () => { close(d.donatedDays); toast('Thank you, cheers! 🍺'); };
   dlg.oncancel = e => { e.preventDefault(); close(d.everyDays); };   // Esc counts as "Maybe later"
