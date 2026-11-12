@@ -1274,3 +1274,10 @@ dialog.boardTalk { width: min(900px, 96vw); }
 .sugAllList table { border-collapse: collapse; width: 100%; }
 .sugAllList th, .sugAllList td { text-align: left; padding: 3px 8px; border-bottom: 1px solid rgba(127,127,127,.25); white-space: nowrap; }
 .sugAllList td.sugNew { font-weight: 600; }
+
+/* A frozen top on the model dialog (Rule 2.51): only a Pump's Properties or Add box for now (OakBarn Brewery: "Wait ... until I am
+   100% Finished with the model"). The ☰, title and buttons stay put while the rest scrolls; the bottom row is not shown. */
+#dlg .dlgHead::after { content: ''; display: block; clear: both; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) { padding-top: 0; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar { display: none; }

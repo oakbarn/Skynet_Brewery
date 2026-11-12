@@ -450,6 +450,10 @@ shows in a balloon. A balloon with hot spots **waits a moment** when the mouse l
 click; one without hot spots goes away at once, as before. The tap pop-up on phones (Rule 18.16) has the same hot spots. A new Help
 page about an item adds its words to the list (Rule 11.2). **Both programs:** the BruControl Import shares the balloons, but its Help is
 on hold (Rule 11.3), so its balloons keep plain words until its Help is made. Help 147.
+**The Help that opens has a frozen Close row** (OakBarn Brewery, 2026-11-12: "When there is a Link to normal Help from a Hover Help :
+have close Button that a frozen row at the Top to close that dialog"): the row with **◀ Back**, **🖨 Print**, **✏ Edit page** and
+**✕ Close** stays frozen at the top of the Help page while it scrolls, in the Help window and on the panel's own Help page, so Close
+is always one click away. The part a hot spot opens shows just under that row, never hidden by it. Help 54, 147.
 
 2.50 **Dual Action click** (OakBarn Brewery, 2026-11-12: "Can an Image be Dual Function: Clicked and Release (Toggle on/off), Push
 Button On only as long as the mouse button was depressed. A delay to know it was not a click. If So Add Dual Action (Both Toggle and
@@ -459,10 +463,14 @@ second) turns it On or Off, the same as On/Off (Rule 2.33, no pop-up, Rule 2.44)
 (500 ms), it is a Push Button: On while held, Off when let go. A press that started as a hold never also counts as a click. Only an
 operator or an admin can use it. **Both programs:** the BruControl Import shares the Pump dialogs; imported pumps keep the choice they
 are given (On/Off). Help 115, 120.
-**The Help that opens has a frozen Close row** (OakBarn Brewery, 2026-11-12: "When there is a Link to normal Help from a Hover Help :
-have close Button that a frozen row at the Top to close that dialog"): the row with **◀ Back**, **🖨 Print**, **✏ Edit page** and
-**✕ Close** stays frozen at the top of the Help page while it scrolls, in the Help window and on the panel's own Help page, so Close
-is always one click away. The part a hot spot opens shows just under that row, never hidden by it. Help 54, 147.
+
+2.51 **A frozen top on the model dialog** (OakBarn Brewery, 2026-11-12, on the Blichmann RipTide Add box: "If this area could be
+frozen on a Dialog ... we could get rid of this", the bottom row of buttons, "even in the middle of long one, you would have the
+Buttons!"). In the **Pump** Add box and Pump Device Properties (the Blichmann RipTide, the model, Rule 18.21) the ☰, the title and the
+row of buttons (🗑 Delete, ✖ Cancel, 💾 Save or ➕ Add Device) stay at the top while the rest scrolls under them, and the same row at
+the bottom is not shown. **Only the model for now:** "This is on the model ... Wait for that until I am 100% Finished with the model";
+every other dialog keeps its buttons at the top and at the bottom until OakBarn Brewery says the model is finished and all dialogs
+follow it. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -3252,7 +3260,7 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 drill-down dialog standard for Devices"; his drawing [docs/Pump_Drill_Down_Format.png](Pump_Drill_Down_Format.png)). The Pump's
 dialog is the first one changed to Rule 18 (Rule 18.10) and is **the starting standard for all Devices added**; every other
 dialog will work the same way when Fritz commands it, one at a time. From the top:
-1. The title (**Pump Device Properties** and its **?**), then 🗑 Delete, ✖ Cancel, 💾 Save (top and bottom, Rule 2.17).
+1. The title (**Pump Device Properties** and its **?**), then 🗑 Delete, ✖ Cancel, 💾 Save (at the top, frozen while the rest scrolls; no bottom row, Rules 2.17, 2.51).
 2. **Visible**, **Hidden Locked** and the 🔓 lock.
 3. **Pump Properties ⬢**: the hexagon beside the heading opens the **Properties pop-up**: Visible, Hidden Locked, the lock, Tab,
    X Horizontal, Y Vertical, Width, Height, and 🗑 Delete, with ✖ Cancel and 💾 Save.
@@ -3816,6 +3824,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Rule 3.2 kept as the standard (OakBarn Brewery: "ID Rule ... is standard. Make all comply"): the Pump dialogs' Interface and Tab balloons and Help 115 now say only an Admin can change an ID (best set once), the Interface ID is 1 to 4 letters and the Tab ID exactly 2 letters. Added Rule 2.50 (OakBarn Brewery): Dual Action, a Pump's Toggle choice where a click turns it On or Off and a press held over half a second works as a Push Button. The Pump's Name balloon is his text with each part of the Suggested Name in red, a Predictive Text note and its link (Help 46, 115); its Graphic balloon is his text and a Skynet pump drawing has no Path box; X, Y, Width and Height labels share one font and size. Checked against both programs: the BruControl Import shares the Pump dialogs; its BruControl notes for the Name wait in the Importer Sandbox (Rule 11.3). (thread "Rewrite Add Device Hover Help and add confirm step")

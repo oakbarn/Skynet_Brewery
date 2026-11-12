@@ -12402,8 +12402,23 @@ function addDialogMenu(d) {
   wrap.classList.add('dlgMenu');
   host.prepend(wrap);
 }
+// A frozen top on the model dialog (OakBarn Brewery, 2026-11-12: "If this area could be frozen on a Dialog ... we could get rid of
+// this ... even in the middle of long one, you would have the Buttons!", Rule 2.51). For now ONLY the Pump dialogs (Blichmann RipTide,
+// the model): "This is on the model ... Wait for that until I am 100% Finished with the model". The ☰, the title and the buttons of the
+// Properties / Add box are kept together in .dlgHead; the CSS freezes it, and hides the bottom row, only when the box holds a Pump
+// (dialog#dlg:has([data-k="pumpModel"])). Every other dialog looks as before.
+function freezeDialogTop(d) {
+  if (d.id !== 'dlg') return;
+  const host = d.querySelector(':scope > form') || d;
+  if (host.querySelector(':scope > .dlgHead')) return;
+  const kids = [...host.children], top = kids.find(k => k.classList.contains('bar'));
+  if (!top) return;
+  const head = h('div', { class: 'dlgHead' });
+  host.insertBefore(head, kids[0]);
+  for (const k of kids.slice(0, kids.indexOf(top) + 1)) head.append(k);
+}
 const showModalPlain = HTMLDialogElement.prototype.showModal;
-HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
+HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } try { freezeDialogTop(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
 // the Menu Bar's own ☰, for every page but the Tabs (the Tabs have theirs on the tab line)
 $('#top .right').prepend(menuButton());
 async function menuEditLayout() {
