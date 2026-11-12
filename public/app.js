@@ -246,6 +246,7 @@ async function load() {
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
+  officialWarn();
   setTextLarge();
   // the Importer's Build Tab pages (OakBarn Brewery, 2026-11-08): the Importer opens one imported Tab at a time (#tab=Name)
   if (S.importBuild && !load.hashTab) {
@@ -311,6 +312,7 @@ function connect() {
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
+  es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
@@ -12748,6 +12750,7 @@ function renderAboutTab(box) {
     h('dl', { class: 'aboutGrid' },
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
       ...item('Panel version', panelVersionBox()),
+      ...(S.importBuild ? [] : item('Official Skynet', officialBox())),
       ...item('Signed in as', `${S.me.name} (${S.me.role})${S.me.role === 'admin' && touchRun() ? ', run mode on this phone or tablet (Rule 2.35)' : ''}`),
       ...item('Schema', schemaSelect()),
       ...item('Schema version', act.version || 'No version yet'),
@@ -12765,7 +12768,45 @@ function showPanelVer() {
   n.title = verSmall ? `Skynet Brewer version ${panelVersionName()}. Click to show it.` : 'Skynet Brewer version. Click to make it a small icon. ☰ Menu > About says if it is the latest.';
 }
 $('#panelVer').onclick = () => { verSmall = !verSmall; try { localStorage.setItem('bp.verSmall', verSmall ? '1' : '0'); } catch { } showPanelVer(); };
-const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : '(not stamped)'; };
+const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + officialMark() : '(not stamped)'; };
+// Official Skynet (OakBarn Brewery, 2026-11-12: "Warn the end user is a good idea for non official updates"; Rule 9.14, Help 191):
+// the server checks the program files against OakBarn Brewery's list on every start (lib/official.js). The Menu Bar version
+// gets ✓ Official, or ⚠ Changed / ⚠ Not Official; a red bar tells every screen once per page; About names the files, Admins Repair.
+const OFFICIAL_MARK = { official: ' ✓ Official', changed: ' ⚠ Changed', unofficial: ' ⚠ Not Official', unknown: ' ⚠ Not checked' };
+const officialMark = () => S.importBuild ? '' : OFFICIAL_MARK[S.official?.state] ?? '';
+const officialBad = () => !S.importBuild && ['changed', 'unofficial', 'unknown'].includes(S.official?.state);
+function officialWarn() {
+  document.getElementById('officialBar')?.remove();
+  if (!officialBad() || officialWarn.closed === S.official.checked) return;
+  const o = S.official;
+  const bar = h('div', { id: 'officialBar', class: 'alertBar', role: 'alert' },
+    h('span', {}, '⚠ ' + (o.state === 'changed' ? `Not Official Skynet: ${[[o.changed, 'changed'], [o.missing, 'missing'], [o.added, 'added']].filter(([l]) => l?.length).map(([l, w]) => `${l.length} ${w}`).join(', ')} program file${o.changed.length + o.missing.length + o.added.length === 1 ? '' : 's'}. A changed program could do things OakBarn Brewery never made it do.` : o.text)),
+    h('button', { title: 'See which files, and Repair (☰ Menu > About)', onclick: () => { bar.remove(); openMenuTab('about'); } }, 'Details'),
+    h('button', { title: 'What Official Skynet means (Help)', onclick: () => openHelp(['official-skynet-updates']) }, 'Help'),
+    h('button', { title: 'Close until the next check', onclick: () => { officialWarn.closed = o.checked; bar.remove(); } }, '✕'));
+  document.body.append(bar);
+}
+// ☰ Menu > About: Official Skynet, the files that are not the official ones, Check again and (Admins) Repair
+function officialBox() {
+  const o = S.official || {}, box = h('div', {});
+  const cls = o.state === 'official' ? 'ver-current' : o.state === 'checking' ? '' : 'ver-old';
+  box.append(h('div', { class: 'verState ' + cls }, (o.state === 'official' ? '✓ ' : o.state === 'checking' ? '' : '⚠ ') + (o.text || 'Not checked yet')));
+  if (o.checked) box.append(h('div', { class: 'muted' }, `Checked ${new Date(o.checked).toLocaleString()}` + (o.confirmed ? ', with OakBarn Brewery\'s GitHub' : '')));
+  const list = (title, files) => files?.length ? h('details', {}, h('summary', {}, `${title} (${files.length})`), h('ul', { class: 'officialFiles' }, ...files.slice(0, 200).map(f => h('li', {}, h('code', {}, f))))) : '';
+  box.append(list('Changed', o.changed), list('Missing', o.missing), list('Added', o.added));
+  const again = h('button', { title: 'Check every program file again', onclick: async () => { again.disabled = true; try { S.official = await api('GET', '/ui/official'); showPanelVer(); officialWarn(); renderMenuPane(); } catch (e) { toast(e.message, true); again.disabled = false; } } }, '🔍 Check again');
+  const fix = o.state === 'changed' && can('admin') ? h('button', { class: 'primary', title: 'Put back the official program files of this version from OakBarn Brewery\'s GitHub. The files it replaces go to backups. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.', onclick: async () => {
+    if (!confirm('Repair puts back the official program files of this version, straight from OakBarn Brewery\'s GitHub (it needs the internet).\n\nThe changed and added files are moved to the backups folder, not deleted. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.\n\nRepair now?')) return;
+    fix.disabled = true;
+    try {
+      const r = await api('POST', '/ui/official/repair');
+      S.official = r.official; showPanelVer(); officialWarn(); renderMenuPane();
+      alert(`Repair: ${r.fixed.length} file(s) put back` + (r.moved.length ? `, ${r.moved.length} added file(s) moved` : '') + (r.backup ? ` (the old ones are in ${r.backup})` : '') + '.' + (r.failed.length ? `\n\nThese could not be repaired:\n${r.failed.join('\n')}` : '') + '\n\nClose Skynet Brewer and start it again so it uses the repaired files.');
+    } catch (e) { toast(e.message, true); fix.disabled = false; }
+  } }, '🛠 Repair') : '';
+  box.append(h('div', { class: 'bar' }, again, fix, h('button', { title: 'What Official Skynet means', onclick: () => openHelp(['official-skynet-updates']) }, '❓ Help')));
+  return box;
+}
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {
   const v = S.panelVersion || {}, note = h('div', { class: 'muted' }, v.version ? 'Checking GitHub ...' : '');

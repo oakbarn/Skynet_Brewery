@@ -2520,6 +2520,35 @@ update; nothing else is touched (a user's own Schemas are in `config/schemas`, n
 coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import ships in the same Setup
 and does not use Sample Schemas; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 184)
 
+9.14 **Official Skynet: the program on a Brain is checked on every start, and a change is reported** (OakBarn Brewery, 2026-11-12:
+"can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "WE
+still want it open source but maybe once on a user computer core code cannot be accessed", "Warn the end user is a good idea for
+non official updates", "Explain the Offical Updates in the Help"). Skynet stays open source (MIT): the code stays public on GitHub.
+1. **The list:** every merge, GitHub writes `skynet_files.json` next to `version.json` (tools/make-file-list.js): the fingerprint
+   (SHA-256) of every **core** program file: `server.js`, `importer.js`, `package.json`, `lib`, `public`, `templates`, `firmware`,
+   `install`, `samples`. Never edited by hand. Not core, never checked or touched: `config`, `data`, `media`, `scripts`, `help`
+   (Admins edit Help pages), `sample_schemas`, `node_modules`, `backups`. (Text files are compared without carriage returns.)
+2. **Every start** (lib/official.js) the panel compares its core files with the list of its own version from **OakBarn Brewery's
+   GitHub** (always oakbarn/Skynet_Brewery, never the repository named in `version.json`); without the internet, with the list that
+   came with it, and says so. **Official** = an OakBarn Brewery version and every core file the same. **Changed** = an OakBarn
+   Brewery version with core files changed, missing or added. **Not Official** = someone else's copy (a fork), or no Panel version.
+3. **Warn the end user:** the Menu Bar version shows **✓ Official**, **⚠ Changed**, **⚠ Not Official** or **⚠ Not checked**; when
+   not Official, a red bar on every screen (Details, Help, ✕ until the next check); **☰ Menu > About > Official Skynet** names the
+   Changed, Missing and Added files, with **🔍 Check again**. The check never stops anything: a running brew carries on.
+4. **Repair** (Admins, when Changed): the official file of the same version for every changed or missing one, from OakBarn Brewery's
+   GitHub, each checked against the official list before use; the replaced and added files are **moved** to
+   `backups/changed_files_<date>`, never deleted (Rule #1). Without the internet: run the Setup of that version again.
+5. **Read-only:** Official and unchanged, the core files are made Read-only, so an editor can't save over one by accident. Not in a
+   developer's copy (a `.git` folder). The Windows Setup (install and uninstall) and the Mac and Linux / Pi installers take
+   Read-only off the core files first; `unzip -o` on a Pi replaces them anyway.
+6. **Honest limit:** whoever is the administrator of a computer can change any file on it, the check included. It finds and
+   reports changes; it can't make them impossible. Replaces the old "+ changes" after the version (the `code` fingerprint in
+   `version.json`, which covered only `lib`, `public`, `server.js` and `package.json`).
+7. **Help 191** explains Official Skynet updates, Repair, the virus checks on every Release (Rule 9.11) and how anyone can check a
+   Setup .exe for free at virustotal.com (named, not linked: Rule 11.10). Both programs: the BruControl Import's files are core
+   files of the same Setup, so the same check covers them; the Panel shows it. The Importer's Build page shows no badge and runs
+   no check of its own.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3718,6 +3747,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 
 ## Change log
 
+- 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.

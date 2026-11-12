@@ -15,6 +15,8 @@ Every way needs **Node.js** (free, from <https://nodejs.org>). The installers ge
 
 **Where to get it:** <https://github.com/oakbarn/skynet_brewery/releases/latest> always has the newest version. Scroll to **Assets** and click a file to download it. No GitHub account is needed. Older versions are further down the [Releases](https://github.com/oakbarn/skynet_brewery/releases) list.
 
+Every version on that page is an **Official Skynet update**: once installed, Skynet checks on every start that its program files are still the ones OakBarn Brewery sent, and shows **✓ Official** on the Menu Bar. See [Official Skynet updates](191-official-skynet-updates).
+
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
