@@ -2,6 +2,7 @@
 // Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
 // (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
 import { watchButtons } from './buttons.js';
+import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
 const $ = s => document.querySelector(s);
 if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
 const el = (tag, attrs = {}, ...kids) => {
@@ -159,7 +160,7 @@ function show(box, text, mark) {
 
 function open(name, mark, back = false, section) {
   const p = find(name);
-  if (!p) { say(`No help page "${name}"`, true); return; }
+  if (!p) { brokenLinkPop({ where: cur ? `Help page "${cur}"` : 'Help', link: name || '(none)', why: name ? `There is no Help page "${name}"` : 'The link has no Help page set' }); return; }      // Rule 11.10
   if (changed() && !confirm('Throw away your changes to this page?')) return;
   if (!back && cur && cur !== p.name) trail.push(cur);
   cur = p.name; stopEdit();
@@ -176,7 +177,10 @@ async function load(want, section) {
     $('#hpPage').innerHTML = '<p class="muted">The manual is empty. Its pages are the <code>.md</code> files in the <code>help</code> folder of the Brew Panel.</p>';
     renderList(); return;
   }
-  open(want && find(want) ? want : cur && find(cur) ? cur : pages[0].name, null, true, section);
+  // a link to a page that is not there: the broken link pop-up (Rule 11.10), and the page you were on (or the first) stays
+  if (want && !find(want)) brokenLinkPop({ where: 'Help link', link: [want, section].filter(Boolean).join('#'), why: `There is no Help page "${want}"` });
+  open(want && find(want) ? want : cur && find(cur) ? cur : pages[0].name, null, true, want && find(want) ? section : undefined);
+  if (want && find(want) && section && !$('#hpPage').querySelector('#' + CSS.escape(section))) brokenLinkPop({ where: 'Help link', link: `${want}#${section}`, why: `The Help page "${want}" has no part "${section}"` });
 }
 
 function startEdit() {
@@ -193,7 +197,11 @@ const changed = () => editing && !!find(cur) && $('#hpText').value !== find(cur)
 for (const box of [$('#hpPage'), $('#hpPreview')]) box.addEventListener('click', e => {
   const a = e.target.closest('a'); if (!a) return;
   if (a.dataset.page) { e.preventDefault(); if (box === $('#hpPreview')) return say('Save the page first, then follow the link'); open(a.dataset.page.split('#')[0]); }
-  else if (a.dataset.anchor) { e.preventDefault(); box.querySelector('#' + CSS.escape(a.dataset.anchor))?.scrollIntoView(); }
+  else if (a.dataset.anchor) {
+    e.preventDefault();
+    const at = box.querySelector('#' + CSS.escape(a.dataset.anchor));
+    if (at) at.scrollIntoView(); else if (box !== $('#hpPreview')) brokenLinkPop({ where: `Help page "${cur}"`, link: '#' + a.dataset.anchor, why: `This page has no part "${a.dataset.anchor}"` });      // Rule 11.10
+  }
 });
 
 let timer;
@@ -205,7 +213,7 @@ $('#hpPrint').onclick = () => window.print();
 $('#hpEdit').onclick = startEdit;
 $('#hpCancel').onclick = () => { if (changed() && !confirm('Throw away your changes to this page?')) return; stopEdit(); };
 $('#hpSave').onclick = async () => {
-  try { await call('PUT', '/ui/help/' + encodeURIComponent(cur), $('#hpText').value, true); say('Page saved'); await load(cur); }
+  try { await call('PUT', '/ui/help/' + encodeURIComponent(cur), $('#hpText').value, true); forgetHelpIndex(); say('Page saved'); await load(cur); }
   catch (e) { say(e.message, true); }
 };
 $('#hpDelete').onclick = async () => {

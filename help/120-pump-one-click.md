@@ -11,6 +11,13 @@ follows a Pump works the same way.
   the element before you turn it on: a dry element can burn out.
 - A **Valve built into a Vessel Device** opens or closes with one click on its picture, like any valve.
 
+## Dual Action: click or hold
+
+A Pump's **Toggle** (in its Properties) can be **On/Off** (one click turns it on or off), **Push Button** (on only while held),
+**Dual Action** or **None**. With **Dual Action**, a click turns the Pump on or off, and pressing and holding it for more than half
+a second makes it a Push Button: on while you hold it, off when you let go. Handy for topping off a vessel with a little water by
+hand on a Brew Day (Skynet Rule 2.50).
+
 ## Pumps made before this change
 
 The first time the panel starts with this version, every Pump in every Schema that used to ask ON / OFF is changed to one click.

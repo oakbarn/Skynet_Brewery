@@ -21,7 +21,8 @@ for (const f of ['Label_Visible_Switch.png', 'Red_Pump_Label.png']) assert.ok(fs
 assert.match(app, /\['label', n\(\) \+ 'Label', 'text', null, false, false, \{ tip: T\.label, \.\.\.\(dd \? \{ up: 2, attr: LABEL_POP \}/, 'the ⬆ in the Add box');
 assert.match(app, /\['hideName', 'Label Visible', 'show', null, false, false, \{ tip: isPumpDev\(e\) \? LABEL_VISIBLE_PUMP_TIP/, 'Label Visible stays in the Add box');
 assert.match(app, /Suggested Name Format: INTERFACEid_Port_Type_Label_TABid/);
-assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: T\.port \}\]/, 'Available Ports has its own balloon');
+assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: (T\.port|portTip\(it\)) \}\]/, 'Available Ports has its own balloon');
+assert.match(app, /const portTip = e => isPumpDev\(e\) \? DEVICE_TIPS\.port \+ '\\n\\nBM_⟦15⟧_DO@Pump_Red~Pump_BH/, 'the Port balloon: the Suggested Name example (2026-11-12)');
 assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);
 // the second part of the Add box (2026-11-11)
@@ -41,7 +42,7 @@ assert.match(app, /showIf: pumpPwmShown/);
 assert.match(app, /pumpPower: '⚠ Electricity can kill\./);
 assert.doesNotMatch(app, /\['_pwarn'/, 'no warning line in the dialog');
 assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
-assert.match(app, /The Picture itself cannot be changed\./);
+assert.match(app, /The Skynet Picture is set by Skynet and cannot be changed\./);
 assert.match(app, /i\.disabled = true; i\.title = 'Confirmed: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out once Confirmed');
 // the Review step and the Interface / Port Hover Help (OakBarn Brewery, 2026-11-12, Rule 18.35)
 assert.match(app, /const REVIEW_IFACE_PORT = 'You MUST Confirm the Interface and Port Number\. Once Confirmed, they cannot be changed\.\\nIf a Change is needed now, Click the Back Button\.'/);
@@ -51,9 +52,40 @@ assert.match(app, /const conf = !dd \|\| \(!!wireKey\(w\) && confirmed === wireK
 assert.match(app, /if \(missing === CONFIRM_WHY\) \{ await askReview\(work\); continue; \}/);
 assert.match(app, /'⚠ Electricity can kill\. OakBarn Brewery and Skynet are not electricians and can give no electrical advice\. Consult a Licensed Electrician\.\\nBrain -> Arduino IO \(Port\)/, 'the red warning in the Interface balloon');
 assert.match(app, /tip: ifaceTip\(e\)/); assert.match(app, /tip: IFACE_PUMP_TIP/);
-assert.match(app, /PICK_PORT_WHY \+ '\\n\\n' \+ PORT_PICK_TIP/, 'Pick the Port first, then a blank line and more');
+assert.match(app, /if \(why\) b\.dataset\.help = same \? why \+ '\\n\\n' \+ same : why;/, 'Add Device: the missing line, a blank line, then that box\'s balloon');
+// Dialog 1 #2 (2026-11-12): the Pump's Tab and Device Type balloons, in the Add box and in Pump Device Properties (Dialog 2)
+assert.match(app, /const TAB_PUMP_TIP = \['The Tab this Device \(or a new Widget\) goes to when the Move to Tab Button is clicked/);
+assert.match(app, /const DEVTYPE_PUMP_TIP = \['Its Device Type: DO@Pump, a Pump \(Pump\) on a Digital Out, On\/Off \(DO\) port\./);
+assert.match(app, /\['workspace', '3\. Tab', 'ws', 'addnewid', false, false, \{ tip: tabTip\(it\) \}\]/, 'Dialog 2 Tab');
+assert.match(app, /pumpDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro', shownType\(it\), false, false, \{ tip: devTypeTip\(it\) \}\]/, 'Dialog 2 Device Type');
+assert.doesNotMatch(app, /BruControl you could only select/i, 'the Importer note stays in the Sandbox');
+// the Default Interface and Default Tab (Rule 4.6)
+assert.match(app, /\['buildIface', 'Default Interface', 'sel'/); assert.match(app, /\['buildTab', 'Default Tab', 'sel'/);
+assert.match(app, /function buildGoesTo\(name\)/); assert.match(app, /saveBuildDefs\(\{ buildTab: nt\.id \}\)/, 'Add new Tab sets the Default Tab');
+assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /id="buildDefIface"/);
 assert.doesNotMatch(app, /BM_6_/, 'Port 15 in the examples');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.35 \*\*Review the Interface and Port/m);
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
 assert.match(app, /\['cover', 'coverColor', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked color is kept');
+// Dialog 2 (2026-11-12): Dual Action (Rule 2.50), the Toggle, Graphic and Name balloons, no Path box on a Skynet pump drawing, Rule 3.2 words
+assert.match(app, /\['hold', 'Push Button'\]/); assert.match(app, /\['dual', 'Dual Action'\]/);
+assert.match(app, /const DUAL_HOLD_MS = 500/);
+assert.match(app, /const PUMP_TOGGLE_TIP = \['This is what action is taken when the Pump Image is clicked on the Tab\./);
+assert.match(app, /const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab/);
+assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', 'gpick'/, 'a Skynet pump drawing has no Path box');
+assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : DEVICE_TIPS\.name;/);
+assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);
+assert.doesNotMatch(app, /once saved can never be changed|1 to 4 Characters/, 'Rule 3.2: only an Admin changes an ID; a Tab ID is 2 letters');
+assert.match(app, /It is exactly 2 letters\. Our example Tab is: BH/);
+assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /el\.tap === 'hold' \|\| el\.tap === 'dual'/);
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.50 \*\*Dual Action click\*\*/m);
+// 🏷 Suggested Names (Rule 3.18): convert all names at once
+assert.match(app, /function convertAllNames\(\)/); assert.match(app, /const canSuggest = e => hasSuggestion\(e\) && !isInstance\(e\) && !!e\.workspace;/); assert.match(app, /function sugOf\(e\)/);
+assert.match(app, /if \(!sug \|\| sug === r\.e\.name \|\| nameCheck\(sug, r\.e\)\) continue;/, 'each checked, one at a time');
+assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8'), /id="sugAllNames" class="admin-only"/);
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^3\.18 \*\*🏷 Suggested Names/m);
+// A frozen top on every dialog (Rule 2.51): the bottom row is gone from #dlg, and paired rows are frozen at the top
+assert.match(app, /function freezeDialogTop\(d\)/); assert.match(app, /try \{ freezeDialogTop\(this\); \}/);
+assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\) \.dlgBottomBar \{ display: none; \}/, 'only the Pump dialog (the model) loses its bottom row');
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.51 \*\*A frozen top on the model dialog\*\*/m);
 console.log('pump model tests passed');
