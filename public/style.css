@@ -1060,6 +1060,12 @@ dialog.askDiscard { width: min(420px, 94vw); }
 .miniDlg textarea.strEntry { width: 100%; box-sizing: border-box; font: inherit; resize: vertical; }
 /* Add Pump step 2 (Fritz, 2026-11-04): the pump list, each row with its picture */
 dialog.pumpPick { max-width: 560px; width: calc(100% - 32px); }
+/* the Review step (OakBarn Brewery, 2026-11-12, Rule 18.35): the Interface and Port greyed out, then Confirm or Back */
+dialog.reviewWire { max-width: 460px; }
+.reviewRow { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.reviewRow > span { min-width: 110px; }
+.reviewRow select { flex: 1; opacity: .6; }
+.reviewSay { white-space: pre-line; font-weight: 700; margin: 12px 0; }
 .pumpPickList { display: flex; flex-direction: column; gap: 4px; max-height: 70vh; overflow-y: auto; }
 .pumpPickRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; padding: 4px 10px; }
 .pumpPickRow img { width: 72px; height: 48px; object-fit: contain; flex: none; }

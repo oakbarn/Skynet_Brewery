@@ -8,7 +8,7 @@ Only a **new** name, or a name you **change**, is checked. The one exception is 
 
 A Device, Widget, gGlobal, Text, pipe, vessel or other item name has only **letters, numbers, `_`, `~`, `@` and `°`**, and starts with a letter or `_`. Such a name works in a Process with no quotes, and is safe on Windows, Mac, Linux and MQTT. Every other mark (a space, `-` `+` `=` `!` `#` `'` `$` `%` `^` `&` `(` `)` `[` `]` `{` `}` `;` `,` `.` and the backquote, an accent, `©` `®` `™`) is refused, with a message that says which one.
 
-- `@` and `~` are kept for the **Suggested Name**. The program puts them there (`BM_6_DO@Pump_Red~Pump_BH`); a name you type yourself can't have them, so use `_`.
+- `@` and `~` are kept for the **Suggested Name**. The program puts them there (`BM_15_DO@Pump_Red~Pump_BH`); a name you type yourself can't have them, so use `_`.
 - `°` is fine: `Temp_°F`.
 - A word of the Process language (`NULL`, `true`, `if`, `wait` ...) can't be a name. See [Process language](22-process-language), Reserved words.
 - No name or **Label** can start or end with a space. A Label is trimmed as soon as you leave its box.

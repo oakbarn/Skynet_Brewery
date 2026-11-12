@@ -17,7 +17,7 @@ assert.equal(elementNameError('Brew House', 'Tab'), ''); assert.equal(elementNam
 { const { plainName, typedNameError } = await import('../public/names.js'); assert.equal(plainName('Würze 1'), 'Wurze~1'); assert.equal(plainName('Temp °F©'), 'Temp~°F'); assert.equal(plainName(' Mash Tun '), 'Mash~Tun', 'spaces at the ends go (Rule 3.3)');
   // @ and ~ are kept for the Suggested Name (OakBarn Brewery, 2026-11-11): typed by hand they are refused, unless it is the suggestion or the name already
   assert.match(typedNameError('My@Pump'), /kept for the Suggested Name/); assert.match(typedNameError('Red~Pump', { what: 'gGlobal' }), /gGlobal name/);
-  assert.equal(typedNameError('BM_6_DO@Pump_Red~Pump_BH', { suggestion: 'BM_6_DO@Pump_Red~Pump_BH' }), '');
+  assert.equal(typedNameError('BM_15_DO@Pump_Red~Pump_BH', { suggestion: 'BM_15_DO@Pump_Red~Pump_BH' }), '');
   assert.equal(typedNameError('odd~name', { was: 'odd~name' }), ''); assert.equal(typedNameError('Red_Pump'), ''); assert.equal(plainName('2Pump'), '_2Pump'); }
 for (const [bad, why] of [['', 'name'], [' Pump', 'space'], ['Pump ', 'space'], ['.Pump', 'dot'], ['Pump\u0007', 'control'], ['Pump\t1', 'control'],
   ['Beer🍺', 'emoji'], ['Hot✅', 'emoji'], ['Flag🇺🇸', 'emoji'], ['CON', 'Windows'], ['nul', 'Windows'], ['COM1', 'Windows'], ['LPT9', 'Windows']])
