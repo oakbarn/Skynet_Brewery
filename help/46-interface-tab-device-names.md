@@ -24,7 +24,7 @@ When you add a Device (anything wired to a port), the **New Device** box asks fo
 
 1. **Interface** (the board), listed by its full name with its ID after it, for example *Main Brewery Mega USB (ID MB_)*.
 2. **Device Type** (see the list below)
-3. **Available Ports / Pins**. The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. Each pin in the list says what it is kept for: **PWM**, **Counter**, **PWM + Counter**, **SPI, for RTD boards** or **OneWire probes**; a plain pin has no tag. You can still type another pin. An output port can have more than one type, see below.
+3. **Available Ports / Pins**. The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. Each pin in the list says what it is kept for: **PWM**, **Counter**, **PWM + Counter**, **SPI, for RTD boards** or **OneWire probes**; a plain pin has no tag. For a Device that doesn't need PWM (an On/Off Pump, a valve, a relay, a probe, or a Device on Pseudo PWM) a PWM pin says **Save for PWM**, for example **D5 (Save for PWM)**: it works, but keep it for a Device that needs PWM. You can still type another pin. An output port can have more than one type, see below.
 4. **Label**, the text the tab shows (its **Show label** switch hides it), for example *Fly Sparge*.
 5. **Suggested Name**, filled in for you from the boxes above (see below). You may type your own name instead; it must be unique.
 
@@ -131,7 +131,7 @@ See also [Devices and boards](03-devices) and [Login, users and passwords](10-lo
 ## No free PWM pin
 
 A Device that needs true PWM (a PWM output, a PID or Deadband on a PWM pin) is offered only PWM pins; every other Device is offered only
-the pins that can't do PWM, so the PWM pins stay free. If the Interface has no free PWM pin left, a pop-up gives two choices:
+the pins that can't do PWM, so the PWM pins stay free. When none of those is free, the PWM pins are offered, marked **Save for PWM**. If the Interface has no free PWM pin left, a pop-up gives two choices:
 
 1. **➕ Add an Interface**: add another board, and the Add Device box comes back with it picked.
 2. **Use Pseudo PWM on a plain pin**: the Brain turns the pin fully on for the Device's % of every second and off for the rest (50 % = ½ s on,
