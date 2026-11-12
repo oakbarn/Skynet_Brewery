@@ -140,6 +140,8 @@ const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipmen
 const schemas = new Schemas(store, { engine, hw, profiles });
 // Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
+// Tap Water (Rule 17.12): every Brain has one; a Recipe or the Default tab with no Water Profile picked uses it
+try { brewProfiles.water.ensureTap(store.config.brewDefaults?.units); } catch (e) { console.log('Tap Water profile: ' + e.message); }
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live

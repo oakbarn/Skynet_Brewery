@@ -88,10 +88,39 @@ export function expectedGravity(r) {
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
 
+// The four Recipe Levels (OakBarn Brewery, 2026-11-11: "WE need 4 Recipes Level"; "Separate so a User Chooses the level").
+// The user picks the Level; the Recipe tab then shows only the boxes and Daughter Tabs that Level uses. Nothing is deleted when
+// the Level changes: a box that is not shown keeps its value. type is the BeerXML word for the same thing (Extract, Partial
+// Mash, All Grain), so a BeerXML or BeerSmith file brings its Level in and a saved Recipe says the same thing both ways.
+//   tabs: the Daughter Tabs shown (Waters on every Level, default Tap Water). hide: the Recipe tab boxes (their Skynet_Field) not shown.
+//   fermTypes: the Types the Fermentable tab offers (OakBarn Brewery, 2026-11-11: "on the Level 1 and 2 only Extracts").
+const MASH_BOXES = ['rcp_Total_Grain_Weight', 'rcp_First_Mash_Temp', 'rcp_Strike_Volume', 'rcp_Strike_Temp', 'rcp_Grain_Temp', 'rcp_Sparge_Volume',
+  'rcp_Sparge_Type', 'rcp_Sparge_Minutes', 'rcp_Sparge_Temp', 'rcp_Grain_Ratio'];
+export const RECIPE_LEVELS = [
+  { level: 1, name: '1 Can Kit', title: 'Level 1: Extract Can Kit', type: 'Extract', about: 'For a beginner brewer: a can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.',
+    tabs: ['fermentables', 'yeast', 'adjuncts', 'waters'], hide: [...MASH_BOXES, 'rcp_IBU', 'rcp_Whirlpool_Minutes'], fermTypes: ['extract', 'dry extract'] },
+  { level: 2, name: '2 Extract', title: 'Level 2: Extract', type: 'Extract', about: 'Malt extract (liquid or dry) boiled with your own hops. No grain.',
+    tabs: ['hops', 'drops', 'fermentables', 'yeast', 'adjuncts', 'waters'], hide: MASH_BOXES, fermTypes: ['extract', 'dry extract'] },
+  { level: 3, name: '3 Partial Grain', title: 'Level 3: Extract with Partial Grain and Hops', type: 'Partial Mash', about: 'Malt extract plus some grain mashed or steeped in a small amount of water, and your own hops.',
+    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
+  { level: 4, name: '4 All Grain', title: 'Level 4: All Grain', type: 'All Grain', about: 'All the sugar comes from mashed grain, then the sparge, the boil and your own hops.',
+    tabs: ['hops', 'drops', 'grain', 'fermentables', 'yeast', 'adjuncts', 'waters', 'mash'], hide: [], fermTypes: BEERXML_FERM_TYPES },
+];
+// a Recipe's Level: the one picked, else from its BeerXML type (an imported file), else 4 All Grain
+export function recipeLevel(r) {
+  const l = +r?.level; if (RECIPE_LEVELS.some(x => x.level === l)) return l;
+  const t = String(r?.type || '').toLowerCase();
+  return t === 'extract' ? 2 : t === 'partial mash' ? 3 : 4;
+}
+export const levelOf = r => RECIPE_LEVELS.find(x => x.level === recipeLevel(r));
+export const levelShowsTab = (r, tab) => levelOf(r).tabs.includes(tab);
+export const levelFermTypes = r => levelOf(r).fermTypes;
+export const levelShowsBox = (r, field) => !levelOf(r).hide.includes(field);
+
 export function blankRecipe(d = {}) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) };
   return {
-    sourceFormat: 'manual', sourceVersion: null, sourceFile: null, name: '', type: 'All Grain', style: '', brewer: '', assistantBrewer: '', notes: '',
+    sourceFormat: 'manual', sourceVersion: null, sourceFile: null, name: '', level: 4, type: 'All Grain', style: '', brewer: '', assistantBrewer: '', notes: '',
     volumes: { batchLiters: d.batchSize ? toL(d.batchSize, d.units === 'Metric' ? 'L' : 'gal') : null, boilLiters: null },
     boilTime: D.boilTime, efficiency: D.efficiency, og: null, fg: null, ibu: null, color: null,
     waterToGrain: D.waterToGrain, grainTempC: D.grainTempC,
@@ -244,6 +273,7 @@ export function blendWater(w = {}) {
 export const RECIPE_FIELDS = [
   ['rcp_Name', 'Beer Name', r => r.name ?? ''],
   ['rcp_Style', 'Style', r => r.style ?? ''],
+  ['rcp_Level', 'Recipe Level: 1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain', r => recipeLevel(r)],
   ['rcp_Batch_Volume', 'Brew Length (batch size into the fermenter)', (r, u) => lTo(r.volumes?.batchLiters, u.volumeUnit)],
   ['rcp_Total_Grain_Weight', 'Grain Wt. (calculated)', (r, u) => kgTo(r.grainKg, u.grainUnit)],
   ['rcp_First_Mash_Temp', '1st Mash (calculated)', (r, u) => cTo(r.firstMashC, u.tempUnit)],

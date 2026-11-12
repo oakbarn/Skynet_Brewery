@@ -29,6 +29,32 @@ New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), how amount
 valves (Tab Background Profile, Tab Style, Valve Profile), the Menu Bar, Sound, On startup (Zoom, Full screen), Text (the look of
 every text box) and Phones and tablets. See [The Menu](33-menu).
 
+## Tap Water
+
+Your own tap water: the numbers that matter for brewing. Every Recipe starts with Tap Water on its Waters tab, on every Level, unless you pick another water. Fill them in, then press **Save Tap Water**.
+
+**Where to find the numbers:**
+
+- **Your Water Department.** Most cities and water companies put a water report on their web site. Search for your town's name and "water quality report". If you can't find it, call them and ask for the latest report. Look for Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate or Alkalinity, pH, and whether they add chlorine or chloramine.
+- **A Water Test Kit.** Brewing and aquarium stores sell them, and so do pool supply stores. Most kits give Total Hardness, Total Alkalinity, pH and chlorine. A water testing lab can test a mailed sample for all of the numbers.
+- **Well water** has no Water Department report: use a Test Kit or a lab.
+
+Water changes with the seasons, so check again now and then and change the **Date**.
+
+The boxes:
+
+- **From**: Water Department or Test Kit.
+- **Date**: when the report or the test was done.
+- **Calcium**, **Magnesium**, **Sodium**, **Sulfate**, **Chloride**, **Bicarbonate**: in ppm (the same as mg/L).
+- **Alkalinity**: what most Test Kits give. It is the same thing as Bicarbonate, so type either one and the other follows.
+- **Hardness**: worked out from Calcium and Magnesium (greyed). A Test Kit gives it too, so you can check your numbers.
+- **pH**: 7 is neutral; tap water is often 7 to 8.5.
+- **Chlorine**: None, Chlorine, Ammonia + chlorine (Chloramine) or Unknown. Either one gives a medicine taste to beer. One Campden tablet in 20 gallons takes out both.
+
+Rest the mouse on a box (or tap its name) to see what it does for the beer.
+
+The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `rcp_Water_...` Skynet_Fields (Help 99).
+
 ## Defaults set somewhere else
 
 Some defaults are changed in another place. They are listed here so you can see them all, with **what it is now**, **where it is

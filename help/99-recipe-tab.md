@@ -9,6 +9,25 @@ Along the top:
 - **Library ...** opens a saved Recipe, saves this one (💾), or deletes a saved one. Saved Recipes are on the Brain in `config/recipes`.
 - **Cancel** and **Save**.
 
+## The Level
+
+Pick the **Level** of the Recipe at the top of the Recipe tab, beside NEW. **NEW** asks for it too.
+
+- **1 Can Kit**: an Extract Can Kit, for a beginner brewer. A can of hopped malt extract, often with sugar or dry malt extract, then the yeast. No grain and no hops to add.
+- **2 Extract**: malt extract (liquid or dry) boiled with your own hops. No grain.
+- **3 Partial Grain**: extract with partial grain and hops. Some grain is mashed or steeped in a small amount of water, then extract and your own hops.
+- **4 All Grain**: all the sugar comes from mashed grain.
+
+The Recipe tab shows only the boxes and tabs that Level uses. Level 1 shows the Fermentable, Yeast, Adjuncts and Waters tabs. Level 2 adds HOPs and Drops. Levels 3 and 4 show everything. Changing the Level never deletes anything: a box that is hidden keeps its value.
+
+On Levels 1 and 2 the Fermentable tab offers **Extracts only** (Extract and Dry Extract). Levels 3 and 4 also offer Adjuncts and Sugars, and the Grain tab.
+
+Every Level has the Waters tab, and it starts with **Tap Water**: your own water, filled in on ☰ Menu > Default settings > **Tap Water**.
+
+A recipe file you IMPORT comes in at its own Level (an Extract recipe at Level 2, a Partial Mash at Level 3, an All Grain at Level 4). Change it if it is a Can Kit.
+
+The technical side: the Level is the Skynet_Field `rcp_Level` (1 to 4), so a Process can do the steps for its Level. It is saved with the Recipe, and its BeerXML type says the same thing (Levels 1 and 2 are Extract, 3 is Partial Mash, 4 is All Grain).
+
 ## The boxes
 
 Each box has a colored top that says what kind it is:
@@ -33,6 +52,7 @@ Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has 
 |---|---|
 | Beer Name | `rcp_Name` |
 | Style | `rcp_Style` |
+| Level | `rcp_Level` |
 | Brew Length | `rcp_Batch_Volume` |
 | Grain Wt. | `rcp_Total_Grain_Weight` |
 | 1st Mash | `rcp_First_Mash_Temp` |
@@ -147,7 +167,7 @@ Skynet_Fields: `rcp_Mash_Profile`, `rcp_Mash_Step_N_Name`, `rcp_Mash_Step_N_Temp
 
 ## The Waters tab
 
-Pick the **Water Profile**. Its minerals show after the distilled or RO cut (Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate, in ppm), with the **% Distilled / RO**, the **SO4 : Cl** ratio (above 2 crisp and hoppy, below 1 round and malty) and the **pH**. They are read only here; change the profile on ☰ Menu > Water Profile. Below them are the waters the recipe file listed.
+Pick the **Water Profile**. It starts with **Tap Water** (your own water, ☰ Menu > Default settings > Tap Water). Its minerals show after the distilled or RO cut (Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate, in ppm), with the **% Distilled / RO**, the **SO4 : Cl** ratio (above 2 crisp and hoppy, below 1 round and malty) and the **pH**. They are read only here; change the profile on ☰ Menu > Water Profile. Below them are the waters the recipe file listed.
 
 Skynet_Fields: `rcp_Water_Profile`, `rcp_Water_Ca`, `rcp_Water_Mg`, `rcp_Water_Na`, `rcp_Water_SO4`, `rcp_Water_Cl`, `rcp_Water_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`.
 
@@ -169,6 +189,8 @@ The Mash Profile dropdown (MASH tab) lists your own Mash Profiles and the **Skyn
 ## Water Profile
 
 Press **☰ Menu** and pick **Water Profile**. Type your water report (calcium, magnesium, sodium, sulfate, chloride, bicarbonate in ppm, and pH), then how much of the water is **distilled or RO** (50% = half and half). Skynet shows the water you brew with and its sulfate to chloride ratio.
+
+**Tap Water** is always on the list. It is the water a Recipe starts with. Fill in its numbers on ☰ Menu > Default settings > **Tap Water** (Help: Default settings). It can't be deleted.
 
 Skynet Water Profiles are there too (Distilled or RO, Balanced, Pale Ale Hoppy, Malty, Pilsen, Burton, Dublin, Munich, London). Like the Skynet Mash Profiles they cannot be changed, but can be copied.
 
