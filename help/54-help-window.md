@@ -14,7 +14,7 @@ There is only ever **one** Help window, so windows don't pile up. Clicking the p
 
 On a PC or Mac the Help window opens on the right side of the screen. Move or size it like any window. A handy setup is the panel on the left half of the screen and Help on the right half. On Windows you can drag a window to the left or right edge of the screen to make it fill that half.
 
-The Help window has its own search, page list, **◀ Back**, **🖨 Print** and, for admins, **✏ Edit page**. **Close** closes the Help window.
+The Help window has its own search, page list, **◀ Back**, **🖨 Print** and, for admins, **✏ Edit page**. **✕ Close** closes the Help window. That row stays **frozen at the top** while you scroll, so Close is always in reach.
 
 ## On a phone or tablet
 
