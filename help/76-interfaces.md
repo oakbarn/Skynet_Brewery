@@ -32,6 +32,28 @@ The pop-up asks:
 
 Left empty, the ID is the first letters of the Name (*Hot Side* = HS).
 
+## Ports (IO Pins)
+
+The Interface has **IO Pins** that provide the Trigger Signal. These are the **Ports**. Each Device sits on one Port of one
+Interface, and the **Available Ports** list in the New Device box shows only the free Ports on this board that fit that type of
+Device, for example 22, or A5 = 59. Digital Outputs have the most ports, true PWM Ports are much more limited (Help
+[Interface, Tab and Device names](46-interface-tab-device-names)). Once a Port is Confirmed and the Device is saved, it is greyed out
+and no longer changeable: it is the wiring (Help [Pump Device Properties](115-pump-device-properties)).
+
+## The Trigger Signal
+
+The Brain (Skynet Panel) never powers a pump or a heater itself. If the Brain is on a Computer, the computer cannot supply any
+120 VAC power for any connected device. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:
+
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
+Brain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook
+the 120 VAC Here) -> Pump Gets Power
+
+The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can
+vary. An On/Off Pump such as a Blichmann RipTide on Port 15 is Direct Output (DO): if the State of the Device is true, the power
+is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.
+
 ## Changing an Interface
 
 **⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to move a board from **Simulator** to its real **USB** port or network address once it is wired, to pick another USB port, or to set the ID. The name of an Interface that has Devices on it stays as it is.

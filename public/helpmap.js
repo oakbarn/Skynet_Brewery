@@ -132,6 +132,11 @@ export const HOT_SPOTS = [
   ['Schema', ['schemas-and-equipment-profiles']], ['Cover', ['pump-covers']], ['Color Picker', ['color-picker']],
   ['SSR', ['heat-hysteresis-switched-by']], ['Contactor', ['heat-hysteresis-switched-by']], ['Fermentor Control', ['fermentor-control']],
   ['Smoothing', ['smoothing']], ['Dual Throw', ['dual-throw']], ['Alarm', ['alarms-and-sound']], ['Hover Help', ['hover-help']],
+  // the blue words of the Pump's Interface and Port balloons (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1)
+  ['true PWM Ports', ['interface-tab-device-names', 'pwm-and-counter-pins']], ['IO Pins', ['interfaces', 'ports-io-pins']],
+  ['Ports', ['interfaces', 'ports-io-pins']], ['Port', ['interfaces', 'ports-io-pins']], ['Trigger Signal', ['interfaces', 'the-trigger-signal']],
+  ['Hardware Type', ['interface-tab-device-names', 'device-type-ids']], ['Direct Output', ['interface-tab-device-names', 'device-type-ids']],
+  ['Predictive Text', ['predictive-text']], ['List Box', ['list-boxes']],
 ];
 
 export const ALL_TOPICS = () => [...HOT_SPOTS.map(x => x[1]), ...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
