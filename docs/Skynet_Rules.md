@@ -2233,6 +2233,30 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
     from a heating Hysteresis (a plus OnOffset in BruControl) and a cooling Hysteresis (a minus OnOffset in BruControl) on the same probe, keeps the two
     outputs' names and Ports, takes the Setpoint, offsets and the longer of the two On delays, and lists it in the notes. Help 182.
 
+6.31 **Sleep, Windows Update and restarts** (OakBarn Brewery, 2026-11-12: "With a New Build, most people will likely start right on a
+PC Computer and not the Pi as the "Brain", so we need to fix the Sleep Issue and What Happens during an Update and Restart, or even a
+User Introduced Restart"). The Processes and controls run in Skynet Brewer on the Brain, never in the browser, so closing a browser
+never stops a brew. On every Brain (Windows, Mac, Linux, Pi):
+1. **Kept awake while brewing:** while any Process runs or anything is On, Skynet asks the computer not to sleep (the screen may go
+   dark). Nothing is asked when nothing is brewing.
+2. **Off before it stops:** however Skynet is closed (☰ Menu, the window's X, Ctrl+C, Windows shutting down or restarting), every
+   output is turned Off first. A power cut or a crash is covered by each board's Lost link (Rule 6.3).
+3. **Nothing comes back On by itself:** after a restart everything starts Off and no Process carries on where it was (a Process set
+   to start when the panel starts still starts from its top). Woken from sleep during a brew, everything is set Off and every
+   Process is stopped, so a board that talks again is never told to turn something back On.
+   **The Resume button** (OakBarn Brewery, 2026-11-12: "Resume Button"): for **15 minutes after the stop**, the notice has
+   **▶ Resume** (Operator or Admin). One click turns back On what was On (outputs, PWM, controls, running timers) and starts each
+   Process again **at its step** (no step: the line it was on) with its variables; a Stepper never moves by itself. After 15 minutes
+   the button is gone.
+4. **A notice on every screen:** after a stop or a sleep during a brew, it says when, what was On, and which Process was on which
+   step and line; when Windows has an update waiting to restart, a yellow notice says to restart before brewing. ✕ closes it on
+   every screen (Operator or Admin).
+5. **Setup:** "Start Skynet Brewer by itself each time you sign in to Windows?" (a Startup folder shortcut, no admin rights). Skynet
+   never changes Windows settings itself; Help 190 says how to set Active hours, sign-in after an update, the laptop lid and power
+   return.
+6. **Both programs:** the Panel does all of this; the BruControl Import controls nothing, so it needs none of it (its Build page
+   runs no board and shows no notice). The same Setup asks the question for both. Help 190.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2541,7 +2565,10 @@ already in `samples/configs` wins. **A Schema from another brewer** goes in the 
 update; nothing else is touched (a user's own Schemas are in `config/schemas`, never in `samples`). **Videos:** Help 83 links
 "How to use the 3 Vessel sample, step by step" and "How to add another Pump and edit the manifold in the 3 Vessel sample" (marked
 coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import ships in the same Setup
-and does not use Sample Schemas; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 184)
+and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample always stays in the Skynet Panel** (OakBarn Brewery,
+2026-11-12: "3 Vessel Schema always stays with the Skynet Panel it is not moved to the sample Schema exe. That will be for
+additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
+Schemas Setup, which is only for additional samples. (thread "Move Sample Schemas to own Setup", Help 184)
 
 ## 10. Testing
 
@@ -2623,6 +2650,16 @@ Help").
     with where it was and what is there now. It is the starting point of the Importer Help.
   - **The Importer Help** (Help 8 for the Panel's Import screen, Help 143 and 165) is the Skynet Panel Help with the BruControl comments
     added. It is **on hold until the Skynet Panel Help is finished**.
+  - **Importer updates go to the Sandbox for now; one Big Merge later** (OakBarn Brewery, 2026-11-12: "For the Most Part, Put Updates to
+    the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
+    importer version, then that goes to the Importer SandBox"). The Skynet Panel version is polished first (Help, Hover Help, the
+    README); its model for the Importer version comes later. Until the Big Merge, anything said to be for the Importer version only
+    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md`, with
+    where it goes, and is not put in the Importer yet. **But when OakBarn Brewery says to update both the Importer and Skynet** (OakBarn
+    Brewery, 2026-11-12: "I may also tell you to update Both Importer and Skynet, an ten it does not go to the importer sandbox, but to
+    the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
+    `Sandbox/help/BruControl_Help_Extract.md` as before. Example: the README (GitHub front page) is the Skynet version, with no
+    BruControl (2026-11-12); its BruControl text is in the extract, ready for the Importer's own Read Me.
   - **A BruControl Read Me:** maybe one Read Me document in the Skynet Panel for BruControl users. It waits until the Import is done
     (Rule 14.3).
 
@@ -3745,6 +3782,8 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 ## Change log
 
 - 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
+- 2026-11-12: Added Rule 6.31, Sleep, Windows Update and restarts (OakBarn Brewery: "fix the Sleep Issue and What Happens during an Update and Restart"): kept awake while brewing, every output Off before Skynet stops, nothing back On by itself after a restart or a sleep, a notice of what was running with a Resume button for 15 minutes after the stop (OakBarn Brewery picked "Resume Button"), a Windows update waiting notice, and a Setup question to start Skynet at sign-in. Help 190 (new); Help 19 and 95 link to it. Checked against both programs: Panel only; the Importer controls nothing (its Build page runs no board). Next free Help 191. (thread "Keep Skynet brewing through PC sleep and restarts")
+- 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
 - 2026-11-12: Rule 3.17 (OakBarn Brewery: "\t for indent!"): the code `\t` in text is an indent about four spaces wide, for laying out text instead of extra spaces (Help 22 Codes inside text, Help 49). Checked against both programs: the Panel shows it; the Importer brings in no codes.
@@ -4209,3 +4248,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Added Rule 10.9 (OakBarn Brewery): sharing Schemas between brewers. Export to share ... and Import a brewer's Schema ... in the Schema list and on the 🗂 Schema tab (the Schema.json page's Save as .json file and Open a Schema file); the Import folder is the place for another brewer's file; a notice says copyright is between the brewers and Skynet does no checking. Help 44 and 184 updated; no new Help number. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
 - 2026-11-11: Rule 9.12 gets an exception (OakBarn Brewery: "Keep the Beep"): alarm_beep.wav, Alarm_Sound_Missing.mp3 and Find_The_File_Connecting.mp3 stay in the panel zip and Setup too, in defaults/media. Both programs. (thread "Shrink the Setup .exe and remove dead code")
 - 2026-11-11: Rule 5.27 (OakBarn Brewery: "an IP at Every Corner and one in between ... All Pumps get 8 IPs"): every pump has 8 IP spots (the corners and side middles of its box, the same on every pump); its Inlet IP and Outlet IP are picked from them (Add box and Properties); a Skynet pump drawing gets a white Hose or a stainless Pipe (Hose or Pipe) from its own port to the spot, over the picture and Cover, under the On overlay (layer 2). Starts on Right Middle / Top Right (Left: mirrored); a new spot moves the pump onto its pipes (Rule 5.23). Replaced the "IPs are always in the same spots" line. Rule 5.24 and Rule 18.21 (the two new choices) updated; the 3 Vessel 1 Pump sample pump changed (Rule 15.3). Help 130, 123, 104 and 143 updated. Checked against the BruControl Import program: its pumps are Skynet Pump Devices, so they get the same 8 IPs and start spots; nothing else changes there. (thread "Add pump hose stubs for inlet and outlet")
+- 2026-11-12: Rule 9.13 (OakBarn Brewery): the 3 Vessel sample always stays in the Skynet Panel and is never moved to the Sample Schemas Setup, which is only for additional samples. Help 184 and the sample_schemas ReadMe say so. Wording only; the code already works this way. (thread "Move Sample Schemas to own Setup")
