@@ -964,8 +964,31 @@ it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 
 
 ## 4. Making things: the Build Tab
 
-4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
-straight on the Tab picked in its Add Device box** (Rule 4.2; Fritz's Add Pump drawing, 2026-11-04). (2026-10-23, PR #97 and PR #99)
+4.1 **Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab** (OakBarn Brewery,
+2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular Tab. It will be moved to the
+Regular Tab at the End of the Build chain."). The Tab picked in its Add box (Rule 4.2) is remembered: its Suggested Name already ends
+with that Tab's ID, and its Properties' **Tab** box shows that Tab (another Tab picked there changes where it will go; it stays on
+the Build Tab). **The end of the Build chain is 💾 Save Build ... > To a Tab** (Save layout opens it too): the Tab picked for it is
+offered first and it moves there. When the new things on the Build Tab were picked for different Tabs, each goes to its own Tab and
+the rest go to the Tab picked in Save Build.
+- **Its spot on the Build Tab is its spot on its Tab** (OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the
+  Position on the Tab it is sent to when the Build is totally complete"): the Build Tab is at least the size of that Tab, and a build
+  that goes to the Tab picked for it keeps its X and Y. Sent to any other Tab, it goes to the middle of that Tab, as before (Rule 4.3).
+- **The Watermark** (OakBarn Brewery, 2026-11-12: "On the Build a shadow background like a water mark diagram of a selected Tab the
+  item is going to only after the Tab attribute is set with the option to turn it off or on on the Menubar of the Build Tab"): once
+  the picked item's Tab is set, a faint drawing of that Tab (its background picture, a dashed outline and Label for each of its items,
+  its pipes, and "Goes to: Tab name") shows behind everything on the Build Tab, so the new item can be placed where it belongs.
+  Nothing in it can be clicked. **🗺 Watermark On / Off** on the Edit layout bar (only on the Build Tab) turns it on or off; this
+  browser remembers the choice. With nothing picked it shows the Tab every new item on the Build Tab goes to, when they all go to one.
+- **It glows until clicked** (OakBarn Brewery, 2026-11-12: "when first Moved to a Regular Tab ... we need the Border to glow red with a
+  slow pulse so easy to find. As soon as clicked, the Border reverts to normal."): each item Save Build moves onto a regular Tab has a
+  slowly pulsing red glow around it until it is clicked (in Edit layout or on Brew Day). It is never saved; reloading the page ends it.
+- **📁 Templates in the Tab list** (OakBarn Brewery, 2026-11-12: "Also the Option in the Tab DDLB to send to Templates"): the Tab list
+  in the Properties of a vessel, equipment or Tab_Fitting on the Build Tab ends with **📁 Templates**; picked, Save Build ... shows
+  **As a Template** first. Only these can be Templates (Help 55, What can be a Template), so a Device's or Widget's Tab list
+  does not offer it (asked 2026-11-12, Open question 15).
+*Replaced (2026-11-12):* "Every new Widget or copy of a Template is made on the 🔨 Build Tab first, then sent to a Tab. A new Device goes
+straight on the Tab picked in its Add Device box" (2026-11-04, Fritz's Add Pump drawing; before that 2026-10-23, PR #97 and PR #99).
 **A new Tab from the Add Device box** (Fritz, 2026-11-04; the general Rule is 18.14): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
 and keeps what was entered (Label, Interface and Port) for now; the new Tab is named and built in Tab settings; once it is
 saved the Add Device box comes back with that information filled in, the Tab list refreshed and the new Tab picked, and the
@@ -982,7 +1005,7 @@ Tab first (Rule 5.21).
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
-are done (the Label filled in, Rule 18.15). The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
+are done (the Label filled in, Rule 18.15). The Device starts on the 🔨 Build Tab and goes to the picked Tab at Save Build (Rule 4.1), in the middle of the Build Tab unless ☰ Menu > Default sets X and Y, and the rest of its
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
@@ -1584,7 +1607,7 @@ supply manifolds", Help 146).
   Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
 - **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
   each fitting with all its valves Manual or all Motorized to start. Its **Add box and Properties are the Pump's drill-down**
-  (Rule 18.29). It goes straight on the Tab picked in the Add box (Rule 4.1: it holds Devices) and its Properties open.
+  (Rule 18.29). It starts on the 🔨 Build Tab with its valves, and Save Build ... moves it to the Tab picked in the Add box (Rule 4.1); its Properties open.
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
   name (Rule 3.1), e.g. `MB_22_DO@Valve_E_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
@@ -3229,7 +3252,7 @@ until 💾 Save on the dialog. (Help 115)
    good** (Fritz, 2026-11-05: it is physical wiring, so a user almost never changes it; the Device keeps its hidden key, Rule 3.10,
    and only its Name changes, with ✏ Change name). To wire it to another board or pin, delete it and add it again. **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
    Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
-The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name) and the pump goes on the picked Tab (Rule 4.1).
+The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name); the pump starts on the 🔨 Build Tab and Save Build ... moves it to the picked Tab (Rule 4.1).
 (Help 115)
 
 18.14 **"Add new ..." in a dialog pauses it and comes back** (Fritz, 2026-11-04, a general Rule): when **➕ Add new ...** (a new
@@ -3750,11 +3773,15 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 14. **Universal Properties** (Rule 1.21): *answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all the same attribute (Rule
     1.15, exception to Rule 15.2). Rule 5.14 changed: pipe fittings get `.visible`,
     `.hiddenlock`, `.lock`, `.tab` and a Label. (asked and answered 2026-11-02)
+15. **📁 Templates for a Device or Widget?** OakBarn Brewery asked for "the Option in the Tab DDLB to send to Templates" (2026-11-12).
+    Today a Template holds one vessel or one Bundled Fitting, never a Device or Widget (Help 55). 📁 Templates is in the Tab list of a
+    vessel, equipment or Tab_Fitting on the Build Tab. Should a Device or Widget be able to become a Template too?
 
 ---
 
 ## Change log
 
+- 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
 - 2026-11-12: Added Rule 6.31, Sleep, Windows Update and restarts (OakBarn Brewery: "fix the Sleep Issue and What Happens during an Update and Restart"): kept awake while brewing, every output Off before Skynet stops, nothing back On by itself after a restart or a sleep, a notice of what was running with a Resume button for 15 minutes after the stop (OakBarn Brewery picked "Resume Button"), a Windows update waiting notice, and a Setup question to start Skynet at sign-in. Help 190 (new); Help 19 and 95 link to it. Checked against both programs: Panel only; the Importer controls nothing (its Build page runs no board). Next free Help 191. (thread "Keep Skynet brewing through PC sleep and restarts")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
