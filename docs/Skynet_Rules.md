@@ -2520,7 +2520,10 @@ already in `samples/configs` wins. **A Schema from another brewer** goes in the 
 update; nothing else is touched (a user's own Schemas are in `config/schemas`, never in `samples`). **Videos:** Help 83 links
 "How to use the 3 Vessel sample, step by step" and "How to add another Pump and edit the manifold in the 3 Vessel sample" (marked
 coming soon until the YouTube links exist); the ReadMe names them. Both programs: the BruControl Import ships in the same Setup
-and does not use Sample Schemas; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 184)
+and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample always stays in the Skynet Panel** (OakBarn Brewery,
+2026-11-12: "3 Vessel Schema always stays with the Skynet Panel it is not moved to the sample Schema exe. That will be for
+additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
+Schemas Setup, which is only for additional samples. (thread "Move Sample Schemas to own Setup", Help 184)
 
 ## 10. Testing
 
@@ -4196,3 +4199,4 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Added Rule 10.9 (OakBarn Brewery): sharing Schemas between brewers. Export to share ... and Import a brewer's Schema ... in the Schema list and on the 🗂 Schema tab (the Schema.json page's Save as .json file and Open a Schema file); the Import folder is the place for another brewer's file; a notice says copyright is between the brewers and Skynet does no checking. Help 44 and 184 updated; no new Help number. Checked against the BruControl Import: no change. (thread "Move Sample Schemas to own Setup")
 - 2026-11-11: Rule 9.12 gets an exception (OakBarn Brewery: "Keep the Beep"): alarm_beep.wav, Alarm_Sound_Missing.mp3 and Find_The_File_Connecting.mp3 stay in the panel zip and Setup too, in defaults/media. Both programs. (thread "Shrink the Setup .exe and remove dead code")
 - 2026-11-11: Rule 5.27 (OakBarn Brewery: "an IP at Every Corner and one in between ... All Pumps get 8 IPs"): every pump has 8 IP spots (the corners and side middles of its box, the same on every pump); its Inlet IP and Outlet IP are picked from them (Add box and Properties); a Skynet pump drawing gets a white Hose or a stainless Pipe (Hose or Pipe) from its own port to the spot, over the picture and Cover, under the On overlay (layer 2). Starts on Right Middle / Top Right (Left: mirrored); a new spot moves the pump onto its pipes (Rule 5.23). Replaced the "IPs are always in the same spots" line. Rule 5.24 and Rule 18.21 (the two new choices) updated; the 3 Vessel 1 Pump sample pump changed (Rule 15.3). Help 130, 123, 104 and 143 updated. Checked against the BruControl Import program: its pumps are Skynet Pump Devices, so they get the same 8 IPs and start spots; nothing else changes there. (thread "Add pump hose stubs for inlet and outlet")
+- 2026-11-12: Rule 9.13 (OakBarn Brewery): the 3 Vessel sample always stays in the Skynet Panel and is never moved to the Sample Schemas Setup, which is only for additional samples. Help 184 and the sample_schemas ReadMe say so. Wording only; the code already works this way. (thread "Move Sample Schemas to own Setup")
