@@ -21,7 +21,8 @@ for (const f of ['Label_Visible_Switch.png', 'Red_Pump_Label.png']) assert.ok(fs
 assert.match(app, /\['label', n\(\) \+ 'Label', 'text', null, false, false, \{ tip: T\.label, \.\.\.\(dd \? \{ up: 2, attr: LABEL_POP \}/, 'the ⬆ in the Add box');
 assert.match(app, /\['hideName', 'Label Visible', 'show', null, false, false, \{ tip: isPumpDev\(e\) \? LABEL_VISIBLE_PUMP_TIP/, 'Label Visible stays in the Add box');
 assert.match(app, /Suggested Name Format: INTERFACEid_Port_Type_Label_TABid/);
-assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: T\.port \}\]/, 'Available Ports has its own balloon');
+assert.match(app, /with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: (T\.port|portTip\(it\)) \}\]/, 'Available Ports has its own balloon');
+assert.match(app, /const portTip = e => isPumpDev\(e\) \? DEVICE_TIPS\.port \+ '\\n\\nBM_⟦15⟧_DO@Pump_Red~Pump_BH/, 'the Port balloon: the Suggested Name example (2026-11-12)');
 assert.match(fs.readFileSync(new URL('../help/115-pump-device-properties.md', import.meta.url), 'utf8'), /## The Label/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.34 \*\*The Pump dialog is the model/m);
 // the second part of the Add box (2026-11-11)

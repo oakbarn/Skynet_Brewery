@@ -104,6 +104,12 @@ Click to choose the Port.
 
 A PWM Port marked Save for PWM works, but keep it for a Device that needs PWM.
 
+BM_**15**_DO@Pump_Red~Pump_BH
+
+Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM
+(Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
 ## The Interface
 
 The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an

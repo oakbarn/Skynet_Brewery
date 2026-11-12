@@ -5010,6 +5010,9 @@ const DEVTYPE_PUMP_TIP = ['Its Device Type: DO@Pump, a Pump (Pump) on a Digital 
   'The same DO@Pump is the third part of the Suggested Name: DO@Pump. It comes from the Device you added and is set for you.\nBM_15_⟦DO@Pump⟧_Red~Pump_BH\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD].join('\n\n');
 const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : DEVICE_TIPS.tab;
+// The Pump's Port balloon (OakBarn Brewery, 2026-11-12: "Add this to the Port Hover Help on the Blickman Riptide Dialogs in a similar
+// manner as the Label Hover Help"): the Available Ports balloon, then his Suggested Name example with the Port part marked red
+const portTip = e => isPumpDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Pump_Red~Pump_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).' : DEVICE_TIPS.port;
 const devTypeTip = e => isPumpDev(e) && !isPwmDev(e) ? DEVTYPE_PUMP_TIP : typeTip(e);
 // the ➕ Add Device button's first line while it waits for the Port (its balloon then is the Port's own, Rule 18.35)
 const PICK_PORT_WHY = 'Pick the Port first (Available Ports)';
@@ -5189,7 +5192,7 @@ async function newDeviceDialog(e, hint, what) {
   if (mbv && e.template) e._orient = orientPick(e);
   // the ⬆ and ⬢ in the Add box too (Blichmann PDF, 2026-11-10)
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
-    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: ifaceTip(e), ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
+    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: ifaceTip(e), ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : portTip(e) }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: tabTip(e) }],
@@ -5243,7 +5246,7 @@ async function newDeviceDialog(e, hint, what) {
     // its Hover Help: the same words; waiting for the Port, OakBarn Brewery's longer help below them (2026-11-12)
     // its Hover Help (OakBarn Brewery, 2026-11-12, Dialog 1 #2: "The Hover Help for the Add Device should be the same with Just that the
     // Label or Port needs to be set first"): the line that says what is missing, a blank line, then that box's own balloon
-    const same = !lab ? labelTip({ ...e, ...w }, dd ? { up: 2, attr: true } : {}) : !w.device ? ifaceTip(e) : !wireKey(w) ? T.port : !conf ? '' : tabTip(e);
+    const same = !lab ? labelTip({ ...e, ...w }, dd ? { up: 2, attr: true } : {}) : !w.device ? ifaceTip(e) : !wireKey(w) ? portTip(e) : !conf ? '' : tabTip(e);
     for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !ok); b.removeAttribute('title'); if (why) b.dataset.help = same ? why + '\n\n' + same : why; else delete b.dataset.help; }
     for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
     // Confirmed (Rule 18.35): the Interface and Available Ports line is greyed out in the Add box; Cancel to start again. Nothing is
@@ -7366,7 +7369,7 @@ function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: LABEL_VISIBLE_PUMP_TIP }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }] }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: portTip(it) }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: tabTip(it) }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
