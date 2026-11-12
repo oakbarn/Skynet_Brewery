@@ -85,13 +85,15 @@ if ! { npm install --no-audit --no-fund && node -e "import('serialport').catch((
 fi
 
 # 4. The everyday start file on the Desktop
+# Any folder name works (Rule 9.15): the start file gets the folder in single quotes, so spaces, accents, $ and quotes are safe.
+sh_q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 START="$HOME/Desktop/Skynet Brewer.command"
 cat > "$START" <<EOF
 #!/bin/bash
 # MIT License Granted. Copyright (c) OakBarn Brewery 2026
 # Starts the Skynet Brew Panel and opens it in your browser. Keep this window open while you brew.
 export PATH="/usr/local/bin:/opt/homebrew/bin:\$PATH"
-cd "$PANEL" || { echo "The panel is not in $PANEL"; read -r -p "Press Enter to close. " _; exit 1; }
+cd $(sh_q "$PANEL") || { echo "The panel is not in the Brewing/BrewPanel folder"; read -r -p "Press Enter to close. " _; exit 1; }
 command -v node >/dev/null || { echo "Node.js is not installed. Get it from https://nodejs.org"; read -r -p "Press Enter to close. " _; exit 1; }
 ( sleep 4; open "http://localhost:$PORT" ) &
 # caffeinate keeps the Mac from falling asleep while the panel runs
