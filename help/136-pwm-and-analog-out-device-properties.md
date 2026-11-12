@@ -23,7 +23,7 @@ pipe ends) and **no Toggle** (a tap opens the box where you set its %). (Skynet 
    - **X**, **Y**, **Width** and **Height**.
    **Enter** takes you through Label, Interface, Available Ports, Device Type, Tab, then **➕ Add Device**. If **➕ Add Device**
    looks faded, press it anyway: it tells you what is still missing.
-3. Press **➕ Add Device**. The output goes on the Tab you picked and its Properties open. The **Interface** and **Port** are now
+3. Press **➕ Add Device**. The output is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **💾 Save Build ...** moves it to the Tab you picked. The **Interface** and **Port** are now
    greyed out and set: they are the wiring. To wire it to another board or pin, delete it and add it again. Its Name can still be
    changed with **✏ Change name**.
 
