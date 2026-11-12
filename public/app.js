@@ -228,6 +228,7 @@ const TEXT_NORMAL = 18, TEXT_LARGE = 28;
 const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
+  for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
   document.body.classList.toggle('touchRun', S.me.role === 'admin' && touchRun());
@@ -263,22 +264,52 @@ async function load() {
 }
 function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
+// Memory and work (OakBarn Brewery, 2026-11-12: "I would rather it not be a memory hog over speed"):
+// - while this browser tab can't be seen (another tab, minimized, a phone asleep) the Tab's pictures, pipes and the Output
+//   are not drawn again; the values are still kept and the alarm sounds still play. Coming back draws everything once.
+// - the pipes are drawn again at most about twice a second, not on every update (each drawing makes a new set of shapes).
+// - a Brain that had to let this browser go (it stopped reading, so its updates piled up) is joined again and loaded fresh.
+let pageStale = false, consoleStale = false, pipesT = null;
+function schedulePipes() { if (!pipesT) pipesT = setTimeout(() => { pipesT = null; if (!document.hidden) renderPipes(); else pageStale = true; }, 400); }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !S) return;
+  if (pageStale) { pageStale = false; renderWs(); renderPipes(); updateMeters(); if (view === 'globals') renderGlobals(); }
+  if (consoleStale) renderConsole();
+});
+// A dialog's live preview listens to every change on the page. It stops listening when its dialog is closed and gone
+// (before, it kept the closed dialog in memory until the next change anywhere).
+function whileShown(node, on, types = ['change', 'input']) {
+  const off = () => { for (const t of types) document.removeEventListener(t, run, true); };
+  const run = () => { if (!node.isConnected) return off(); on(); };
+  for (const t of types) document.addEventListener(t, run, true);
+  setTimeout(() => node.closest('dialog')?.addEventListener('close', () => setTimeout(() => { if (!node.isConnected) off(); }, 0), { once: true }), 0);
+}
 function connect() {
   const es = new EventSource('/ui/events');
-  es.onopen = () => $('#conn').classList.add('on');
+  let lost = false;
+  es.onopen = () => {
+    $('#conn').classList.add('on');
+    if (!lost) return;
+    lost = false;           // back after a break: anything missed while away is loaded fresh
+    if (!editing) load().catch(() => { }); else api('GET', '/ui/state').then(st => { S.values = st.values; S.scripts = st.scripts; renderPipes(); }).catch(() => { });
+  };
   es.onerror = () => {
+    lost = true;
     $('#conn').classList.remove('on');
     // signed out elsewhere, password changed or account removed: back to the sign-in page
     fetch('/auth/status').then(r => r.json()).then(st => { if (!st.user) { es.close(); location.replace('/login.html'); } }).catch(() => { });
   };
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
-    for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
+    for (const [n, props] of Object.entries(ch)) S.values[n] = { ...(S.values[n] || {}), ...props };
+    updateAlarms();          // the sounds play even while the page can't be seen
+    if (document.hidden) { pageStale = true; return; }       // drawn once when the page is seen again
+    for (const [n, props] of Object.entries(ch)) { if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
     if (!editing && view === 'workspace' && Object.values(ch).some(p => 'layer' in p)) renderWs();      // a Process changed a Layer Order (Rule 1.29)
-    renderPipes(); updateMeters(); updateAlarms(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
+    schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
-  es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
+  es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
@@ -306,6 +337,7 @@ function setView(v, here = false) {
   if (v === 'log') loadLogNames();
   if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
+  if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
 }
 
@@ -1061,8 +1093,7 @@ function mfPreview(obj) {
     box.style.width = BW + 'px'; box.style.height = BH + 'px';
     box.replaceChildren(pic, ...nums);
   };
-  const on = () => { if (!box.isConnected) { document.removeEventListener('change', on, true); document.removeEventListener('input', on, true); return; } setTimeout(draw, 0); };
-  document.addEventListener('change', on, true); document.addEventListener('input', on, true);
+  whileShown(box, () => setTimeout(draw, 0));
   setTimeout(draw, 0);
   return box;
 }
@@ -7991,8 +8022,7 @@ function field(f, obj) {
       for (const el of els) el.classList.toggle('showOff', !x.showIf(now));
     };
     for (const el of els) el.classList.toggle('showOff', !x.showIf(obj));
-    const on = () => { if (!els[1].isConnected) { document.removeEventListener('change', on, true); return; } setTimeout(test, 0); };
-    setTimeout(() => document.addEventListener('change', on, true), 0);
+    setTimeout(() => whileShown(els[1], () => setTimeout(test, 0), ['change']), 0);
   }
   return out;
 }
@@ -8491,8 +8521,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       cov.style.webkitMaskImage = cov.style.maskImage = cv?.mask ? `url("${media(cv.mask)}")` : '';
       box.style.transform = w.flipH || w.flipV ? `scale(${w.flipH ? -1 : 1}, ${w.flipV ? -1 : 1})` : '';
     };
-    const on = () => { if (!box.isConnected) { document.removeEventListener('change', on, true); document.removeEventListener('input', on, true); return; } setTimeout(draw, 0); };
-    document.addEventListener('change', on, true); document.addEventListener('input', on, true);
+    whileShown(box, () => setTimeout(draw, 0));
     setTimeout(draw, 0);
     return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, box)];
   }
@@ -9743,11 +9772,14 @@ const hasSoundNow = (e, v) => !!soundSrc(e, v);
 const ALARM_FALLBACKS = ['sounds/Skynet/Alarm_Sound_Missing.mp3', 'sounds/alarm_beep.wav'];
 // and a Sound Player: OakBarn Brewery's song "Find The File - Connecting" (Treblo), played once
 const PLAYER_FALLBACKS = ['sounds/Skynet/Find_The_File_Connecting.mp3'];
+// stop a sound and give back the memory its file used
+function freeAudio(a) { try { a._playing = false; a.pause(); a.removeAttribute('src'); a.load(); } catch { } }
 function getAudio(e) {
   const src = soundSrc(e, S.values[e.name] || {});
-  if (!src) return null;
+  if (!src) { const old = audios.get(e.name); if (old) { freeAudio(old); audios.delete(e.name); } return null; }
   let a = audios.get(e.name);
   if (!a || a._src !== src) {
+    if (a) freeAudio(a);       // its sound was changed: the old one is let go (it held the whole sound file in memory)
     a = new Audio(soundUrl(src)); a._src = src; audios.set(e.name, a);
     // a sound that can't play (a web link with no internet, a wrong link, a missing file), Rule 7.20: an Alarm plays the Missing
     // Alarm Sound voice clip from the Brain, or the Skynet beep when that isn't there either; a Sound Player plays the
@@ -9766,7 +9798,9 @@ function getAudio(e) {
 // Only one sound at a time: the panel marks the one that plays ("playing"); the others are quiet.
 // Music (Sound Player, Sound only alarms) pauses and goes on where it was; an alarm that had to wait starts from the beginning.
 function updateAlarms() {
-  for (const e of S.config.elements.filter(isSoundEl)) {
+  const sounds = S.config.elements.filter(isSoundEl);
+  if (audios.size > sounds.length) { const keep = new Set(sounds.map(e => e.name)); for (const [n, a] of audios) if (!keep.has(n)) { freeAudio(a); audios.delete(n); } }   // a deleted Alarm or Sound Player
+  for (const e of sounds) {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
     a.loop = !!v.loop && !(e.type === 'soundPlayer' && a._fb !== undefined);      // the Find The File song plays once
     const music = e.type === 'soundPlayer' || e.kind === 'sound';
@@ -10369,6 +10403,9 @@ $('#delScript').onclick = guard(async () => {
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); updateGutter(); refreshFind(false);
 });
 function renderConsole() {
+  // the Output is drawn only while it can be seen (the Processes page, this tab in front); otherwise once when it is opened
+  if (document.hidden || view !== 'scripts') { consoleStale = true; return; }
+  consoleStale = false;
   const all = $('#consoleAll').checked;
   const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
