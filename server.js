@@ -336,10 +336,10 @@ function processWords() {
 
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
-  if (p === '/ui/openlink') return 'viewer';      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
+  if (p === '/ui/openlink') return 'viewer';      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
