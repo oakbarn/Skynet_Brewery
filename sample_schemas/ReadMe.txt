@@ -3,7 +3,8 @@ SKYNET SAMPLE SCHEMAS
 
 This folder holds the extra Sample Schemas (ready-made breweries) that come with the
 Skynet Sample Schemas Setup (Rule 9.13). The panel itself ships only one sample, the
-3 Vessel 1 Pump brewery. Every other one is added here, one at a time.
+3 Vessel 1 Pump brewery, and it always stays there: it never moves here. This folder
+is only for additional samples, added one at a time.
 
 Right now there are none: each older sample is brought up to the current Skynet Rules
 before it is added.
