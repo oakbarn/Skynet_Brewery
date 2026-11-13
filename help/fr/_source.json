@@ -137,5 +137,9 @@
  "141-tap-water-valve": "eb0da2d42c1c5155",
  "142-connect-a-qd-hose-from-a-process": "7f4e428bbab8f6d6",
  "144-api-name-for-voice-commands": "563e8b1ccbfed20e",
- "145-make-a-gglobal-in-a-process": "244ad15c8993e6a3"
+ "145-make-a-gglobal-in-a-process": "244ad15c8993e6a3",
+ "146-valve-tees-and-supply-manifolds": "7f0bdf097c1081b3",
+ "147-hover-help": "a534aa0ad492568b",
+ "148-every-device-dialog": "334c52fc1bf74613",
+ "149-shared-variables-became-gglobals": "8c7732bc5dda8e21"
 }
