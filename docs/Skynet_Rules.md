@@ -2637,8 +2637,9 @@ Start added 2026-11-13): when an installer (the Windows Setup .exe, the Mac .com
 installed, it asks what this update does. The program files are always updated. The Windows Setup shows a page with four round
 choice buttons; the Mac and Linux / Pi installers show the same four as a numbered list:
 1. **Start Fresh: delete everything, nothing saved** (OakBarn Brewery, 2026-11-13: "A fresh start should be a real Fresh Start
-   with nothing saved" ... "and the Import"): as below, and now also the `backups` folders, the user's own pictures and sounds
-   (the Skynet ones in `lib/skynet_media.json` stay) and everything in the Import folder.
+   with nothing saved" ... "and the Import"; "the Fresh Install should also delete the Media files"): as below, and now also the
+   `backups` folders, the whole `media` folder (every picture and sound, the Skynet ones too: the Media Setup runs after it) and
+   everything in the Import folder.
 2. **Modified Fresh Start** (OakBarn Brewery, 2026-11-13: "a Modified Fresh Start like the Fresh Start now where some files are
    kept"): after a warning it deletes the Schemas, Tabs, Devices, Widgets and own Templates (`config`), users and the brew log
    (`data`) and Processes (`processes`). **Kept:** the Default settings (`brewDefaults`, put back into the new layout on the next
@@ -4186,6 +4187,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-13: Rule 9.8 (OakBarn Brewery: "I think that the Fresh Install should also delete the Media files"): Start Fresh deletes the whole media folder too, the Skynet pictures and sounds included; run the Media Setup after it (README install order). lib/skynet_media.json and tools/skynet-media-list.js are gone (no longer needed).
 - 2026-11-13: Added Rules 17.13 (Profiles: Add new ... everywhere, Skynet Boil Profiles 60 / 90 / 30 Minute and No Boil, Boil Off and Brewhouse Efficiency belong to the Equipment Profile, ask each time which Boil Off), 17.14 (Three Hop Stands High / Middle / Low, set in Default settings, Boil Profiles and Recipes; chill stops at each), 17.15 (imported Recipe: Save? then Overwrite with backup or Add new "#2"), 17.16 (amounts follow Units; Misc unit per line with Tablet, Pack; grain weight label locked from Units). Help 35 rewritten with tables (Mash, Boil, Water Profiles, Hop Stands), Help 100. Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-13: Added Rule 19.6, the Equipment Profile Interview (OakBarn Brewery): Add new Equipment Profile starts with Answer a few questions; Vessels, their type, pick or 🔨 build each, Pumps, Motorized Valves, Manual Valves, And so on, the numbers, Review, then 🔨 Build onto the Build Tab. It replaces the Vessel tab (Help 34 now says where its settings are). A profile keeps its pumps and motorized valves as slots (look and place, never Interface, Port or Name), so a layout can be picked in another Schema, which only gives the Ports. Open question 7 answered (one profile per Tab). Help 196 (new; next free Help 197), Help 13, 28, 33, 34, 43, 48, 68 and their French pages. Checked against both programs: the BruControl Import has no Equipment Profiles.
 - 2026-11-13: Rule 9.8 now has four update choices (OakBarn Brewery): 1 Start Fresh is a real fresh start, nothing saved (also the backups, own pictures and sounds, and the Import folder); new 2 Modified Fresh Start keeps the Default settings, own Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import; 3 reset all users; 4 keep everything. lib/freshstart.js does both Fresh Starts in every installer; lib/skynet_media.json lists the Skynet pictures and sounds (tools/skynet-media-list.js). Help 18, 19.

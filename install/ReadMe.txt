@@ -49,8 +49,8 @@ to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
 UPDATE CHOICES: before that, the installers ask what the update does:
   1. Start Fresh: delete everything, nothing saved. A warning says ALL EXISTING DATA
-     WILL BE DELETED (config, data, processes, backups, your own pictures and sounds,
-     and the Import folder, with no backup; the Skynet pictures and sounds stay).
+     WILL BE DELETED (config, data, processes, backups, every picture and sound, and
+     the Import folder, with no backup). Run the Media Setup after it.
   2. Modified Fresh Start: deletes Schemas, Processes, users and the brew log after a
      warning. Kept: Default settings, your own Profiles, Equipment Profiles, Recipes,
      pictures and sounds, the backups and the Import folder.
