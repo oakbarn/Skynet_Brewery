@@ -2842,6 +2842,29 @@ details of the Broken link, and a Pop Up Dialog saying that and a button to Send
 - **Both programs:** the Panel and its Help window. The BruControl Import's balloons have no hot spots while its Help is on hold
   (Rule 11.3), so it has no Help links to break.
 
+11.11 **Help in French; the screens stay English, forever** (OakBarn Brewery, 2026-11-13: "French Help Only forever"; "Ballons and
+Hover Help French"):
+- **Only the Help is translated:** the Help pages, the Hover Help balloons and the Help snippets in balloons. The screens, buttons,
+  labels, menus, dropdown choices and messages stay English, in both programs, forever. A French Help page or balloon writes the name
+  of a button, box or menu in English, exactly as it is on the screen (**Save Build**, **Interface ID**), so what you read is what you see.
+- **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français**. The browser remembers it (the Help
+  window, the panel's own Help page and the balloons follow the same choice). English is the default.
+- **French pages:** `help/fr/`, with the same file names as the English pages. They keep everything that is not words: each heading
+  keeps the id of its English heading (`## Pour commencer {#getting-started}`) so links to a part of a page work in both languages, and
+  the links, pictures, code and names are the same. The electrical warning (Rule 6.20) is in French, in red under the red triangle:
+  "⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité.
+  Consultez un électricien qualifié."
+- **English and French never drift apart:** whenever an English Help page changes, its French page is updated **in the same PR**. Each
+  French page records which English text it was made from (`help/fr/_source.json`); a test (test/helpfrench.test.js) fails and names the
+  page while a French page is missing or out of date. `node tools/help-french.js` lists them; `node tools/help-french.js --stamp <page>`
+  marks one brought up to date. The same goes for balloons once they are in French: a balloon change gets its French in the same PR.
+- **On a Brain:** when an Admin edits an English page in the Help window, its French page shows a note that it may be out of date, with a
+  link to the English page. A page not translated yet shows the English page with a note.
+- **Machine translation:** the French was made by machine translation. Every French page ends with a note saying so, and that the
+  English page is the one that counts if in doubt. A French-speaking brewer may review it.
+- **Both programs:** the Skynet Panel's Help (the BruControl Import uses the Panel's Help pages and balloons). The Importer Help is on
+  hold (Rule 11.3); when it is written it gets its French the same way.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -3905,6 +3928,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 - 2026-11-13: Sound question (OakBarn Brewery: "Ask when first opens and keep on the Tab and Hamburger Menu if it has not been done"): when the panel opens with sound off it asks 🔊 Turn sound on?; while off, a 🔇 Sound is off button on the Tab and 🔊 Turn Sound On at the top of the ☰ Menu. Help 21, README. Checked against both programs: the Importer's Build page plays no sounds. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 6.14 (OakBarn Brewery: "Name.Attribute DBSend and send_db Name have both"): a Process line `Name.Attribute DBSend` sends that one attribute to the database now; `Name DBSend` = `send_db Name`. DBSend is a reserved word. README BeerSmith row: Boil hops in Hop Groups 1, 2, 3 ... with no limit, the OakBarn group codes stay behind the scenes (text to the Importer Sandbox); README Hoses row written for hoses and QD hoses. Help 22, 98. Checked against both programs: the Importer brings in no DBSend lines. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "Alarm order. Change the Rule"): the Kind numbers are now Brew Flow 1, Hop 2 (was Hop 1, Brew Flow 2); an Alarm with its own Priority keeps it. Panel (lib/store.js, the Kind list, Hover Help), Help 21 and 107, README. Checked against both programs: the BruControl Import gives each Alarm its Kind's number, so it follows. May change again after the OakBarn sample test. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 11.11 (OakBarn Brewery: "French Help Only forever"; "Ballons and Hover Help French"): the Help pages and the Hover Help are in French as well as English, picked by 🌐 Help language in the Help page list; the screens, buttons and labels stay English forever. French pages in help/fr/ with the same names; an English Help change and its French change go in the same PR (help/fr/_source.json, test/helpfrench.test.js, tools/help-french.js). Machine translated. Help 54, 192. The French balloons follow in their own PR. Checked against both programs: the BruControl Import uses the Panel's Help and balloons; its own Help is on hold (Rule 11.3). (thread "Translate Help to French")
 - 2026-11-12: Rule 9.13 (OakBarn Brewery, README markup "Skynet Brew Panel 1 a"): the Sample Schemas Setup has a tick box per sample and no All tick box; a sample is never deleted, a changed one is added with the same Name and #2. The README is polished from the same markup (the Brain, Official Release, Pumps and Valves split, .API, Predictive text, Suggested Names). Checked against both programs: the Importer does not use Sample Schemas; the README is the Skynet version (Rule 11.3). (thread "Polish the Skynet Brew Panel")
 - 2026-11-12: Added Rule 9.15 (OakBarn Brewery): the installers work from and into a folder with any name (spaces, accented letters, $, %, quotes). The Linux and Pi installers now quote the folder correctly in the start file, the Skynet Brewer menu entry/Desktop icon and the start-by-itself service; tested installing from `Brassage bière/Logiciel de brassage de bière/Skynet Brew Panel` into a folder named `Brew Panel ü $x "q" it's 50%`. Checked against both programs: the BruControl Import is Windows only; nothing changes there.
 - 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
