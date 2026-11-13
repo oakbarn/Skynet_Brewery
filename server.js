@@ -1211,7 +1211,7 @@ async function route(req, res) {
     if (p === '/ui/filemove/upload' && m === 'PUT') {
       try {
         const r = await fileMove.save(req, q.kind, q.path, q.overwrite === '1');
-        if (q.kind === 'pictures') { pictures.forget(r.full); pictures.add(r.full); }
+        if (q.kind === 'pictures') { pictures.forget(r.full); pictures.add(r.full); broadcast('media', {}); }
         if (q.kind === 'processes') engine.emit('scripts');         // the Processes list shows the new one
         return ok(res, { ok: true, saved: r.saved, use: r.use });
       } catch (e) { return fail(res, e.code === 409 ? 409 : 400, e.message); }

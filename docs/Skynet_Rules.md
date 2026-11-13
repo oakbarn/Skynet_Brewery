@@ -2588,6 +2588,10 @@ Image that says File Not Found when the path does not work"; "Looks good use it"
   (`public/File_Not_Found.svg`: a torn picture with a red ✕) in its place, at its size, so the item is still seen and can be fixed.
 - Its Hover Help says **File Not Found:** and the path it looked for. Nothing in the Schema is changed; put the file back, or pick
   another picture in Properties.
+- **The picture shows by itself once its file is there** (OakBarn Brewery, 2026-11-13: after the Media Setup ran with the panel
+  open, File Not Found stayed until the panel was closed and opened again). The panel looks again for each missing picture when
+  its window comes back to the front, when pictures are added from the panel (File Move, Get Skynet pictures), and every 20
+  seconds while one is missing; no closing, no F5. Skynet does this in the Background and needs no user input (Rule 11.13).
 Both programs: the BruControl Import's Build page shows it too.
 
 ## 8. Sign-in and roles
@@ -4203,6 +4207,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-13: Rule 7.24 (OakBarn Brewery: after the Media Setup ran with the panel open, the pictures stayed File Not Found until the panel was closed and opened again): a missing picture is looked for again when the window comes back to the front, when pictures are added from the panel, and every 20 seconds while one is missing, so it shows by itself. Both programs.
 - 2026-11-13: Added Rule 9.19 (OakBarn Brewery, after an uninstall left the Import folder and the brew log behind; picked "All of C:\\Brewing, after a warning"): the Windows uninstall deletes everything like Start Fresh after one red warning, stops Skynet's own Node.js first (the panel with a key only it knows, the Importer with its Close call; never another Node.js program) so the brew log is not locked, and every Setup update and Fresh Start does the same, and deletes the Import folder too. The Importer note under Rule 15 no longer says an uninstall keeps the Import folder. Help 19, 184 (and French) and install/ReadMe.txt updated. Both programs.
 - 2026-11-13: Rule 9.8 (OakBarn Brewery: "I think that the Fresh Install should also delete the Media files"): Start Fresh deletes the whole media folder too, the Skynet pictures and sounds included; run the Media Setup after it (README install order). lib/skynet_media.json and tools/skynet-media-list.js are gone (no longer needed).
 - 2026-11-13: Added Rules 17.13 (Profiles: Add new ... everywhere, Skynet Boil Profiles 60 / 90 / 30 Minute and No Boil, Boil Off and Brewhouse Efficiency belong to the Equipment Profile, ask each time which Boil Off), 17.14 (Three Hop Stands High / Middle / Low, set in Default settings, Boil Profiles and Recipes; chill stops at each), 17.15 (imported Recipe: Save? then Overwrite with backup or Add new "#2"), 17.16 (amounts follow Units; Misc unit per line with Tablet, Pack; grain weight label locked from Units). Help 35 rewritten with tables (Mash, Boil, Water Profiles, Hop Stands), Help 100. Checked against both programs: the BruControl Import's Build page has no Recipe screens.
