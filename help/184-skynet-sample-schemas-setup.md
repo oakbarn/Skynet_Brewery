@@ -1,8 +1,8 @@
 # The Skynet Sample Schemas Setup
 
-The panel comes with **one** Sample Schema: the **3 Vessel 1 Pump** brewery (HLT, mash tun, boil kettle and one pump). It is kept up to every new Skynet Rule, and it is the Schema a new panel starts with.
+The panel comes with **one** Sample Schema: the **3 Vessel 1 Pump** brewery (HLT, mash tun, boil kettle and one pump). It is kept up to every new Skynet Rule, and it is the Schema a new panel starts with. It **always stays in the panel**: it is never moved to the Sample Schemas Setup.
 
-Every **other** Sample Schema (a ready-made brewery) comes as its own download, the **Skynet Sample Schemas Setup**, and they are added to it **one at a time**.
+The Sample Schemas Setup is only for **additional** samples. Every **other** Sample Schema (a ready-made brewery) comes as its own download, the **Skynet Sample Schemas Setup**, and they are added to it **one at a time**.
 
 > **There are none in it yet.** The older samples (Two vessels, one pump, and the BrewZilla brew day) are set aside while each one is brought up to the current Skynet Rules. When one is ready, it is added to the Sample Schemas Setup.
 

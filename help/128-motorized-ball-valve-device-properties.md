@@ -23,7 +23,7 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out.
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device**
    looks faded, press it anyway: it tells you what is still missing.
-4. Press **➕ Add Device**. The valve goes on the Tab you picked and its Properties open. The **Interface** and **Port** are now
+4. Press **➕ Add Device**. The valve is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **💾 Save Build ...** moves it to the Tab you picked. The **Interface** and **Port** are now
    greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
 ## Properties, from the top
