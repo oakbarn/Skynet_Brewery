@@ -6,7 +6,7 @@
  "04-variables": "6926973e93eb11d1",
  "05-scripts": "aaa25b71afec7ce6",
  "06-log": "5906688b79c6c7d5",
- "07-media": "0341f3f859972b0e",
+ "07-media": "cd2cba48534d8adc",
  "08-import": "7e51289d961c126e",
  "09-settings": "345088ba54ca9f5e",
  "10-login": "9980b1d838c99a80",
@@ -21,10 +21,10 @@
  "19-installing": "e3509a34f4a0d39d",
  "20-simulation": "a5a9811d7048e8db",
  "21-alarms-and-sound": "0cb552cdf7b965b8",
- "22-process-language": "2c91f2119ac002a5",
+ "22-process-language": "0c7abd3cb9a6072e",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
  "24-pipes-and-hoses": "51e52e298ed0df7a",
- "25-picture-paths": "9901f81ed10302e8",
+ "25-picture-paths": "da6f07a8f0351a9a",
  "26-tab-background": "6965bd49e0f0d4e3",
  "27-minimum-equipment": "33f5d0c4855421fe",
  "28-schemas-and-equipment-profiles": "60e374d5d9c5bf65",
@@ -184,5 +184,7 @@
  "189-list-boxes": "5c06502ff79c25d5",
  "190-sleep-updates-and-restarts": "224e846704ae5a78",
  "191-official-skynet-updates": "e8ec769a389645ef",
- "192-help-in-french": "1bfcd5f80c19e577"
+ "192-help-in-french": "1bfcd5f80c19e577",
+ "193-skynet-picture-numbers": "23124c82bc892965",
+ "194-two-part-paths": "25640c03fec2a1df"
 }

@@ -79,6 +79,7 @@ is lost), `tab_lock "Brewhouse" = true` / `false`, and `name.lock = true` / `fal
 | `.back` | color | Back color |
 | `.bold` | boolean | Bold |
 | `.backpath` | string | Background picture path (with `.backpath_2`, `.backpath_3`, Rule 7.10) |
+| `.backpath.path`, `.backpath.file` | string | The two parts of every picture or sound path: the whole path and only the file name (Rule 7.23). A file name alone gets its folder; a Skynet picture can be given by its number (Rule 7.22) |
 | `.alignment` | string | As in BruControl |
 | `.visible` | boolean | Shown or not |
 

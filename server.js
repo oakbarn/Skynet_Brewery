@@ -1,5 +1,7 @@
 // Skynet Brew Panel - server
 // Run:  node --no-warnings server.js   then open http://<this computer>:8080 in any browser
+import { skynetPicId, skynetPicRows, SKYNET_IMAGES } from './lib/skynetpicids.js';
+import { mediaDefaults, userFolderError, cleanFolder, DEFAULT_WORDS } from './public/mediapaths.js';
 import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -566,7 +568,7 @@ async function route(req, res) {
   // ===== Everything below needs a signed-in user =====
   if (m === 'GET' && PUBLIC_FILES.has(p)) return sendFile(req, res, path.join(PUBLIC, p));
   if (!me) {
-    if (m === 'GET' && (p === '/' || p === '/index.html' || p === '/help.html')) { res.writeHead(302, { Location: '/login.html' }); return res.end(); }
+    if (m === 'GET' && (p === '/' || p === '/index.html' || p === '/help.html' || p === '/picids.html')) { res.writeHead(302, { Location: '/login.html' }); return res.end(); }
     return fail(res, 401, 'Please sign in');
   }
   const need = needRole(p, m);
@@ -703,6 +705,11 @@ async function route(req, res) {
     const tl = body.brewDefaults?.textLarge;         // \L large text in strings: bigger than normal text (18 px)
     if (tl !== undefined && tl !== null && !(+tl > 18 && +tl <= 200)) return fail(res, 400, 'Large text size must be more than 18 (normal text) and at most 200');
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
+    if ('mediaDefaults' in body) {       // the User Graphic and User Audio folders (Rule 7.23); the Skynet ones can never be changed
+      const md = body.mediaDefaults ?? {}, out = {};
+      for (const k of ['userGraphic', 'userAudio']) { const bad = userFolderError(md[k]); if (bad) return fail(res, 400, `${DEFAULT_WORDS[k]} folder: ${bad}`); if (cleanFolder(md[k])) out[k] = cleanFolder(md[k]); }
+      if (Object.keys(out).length) store.config.mediaDefaults = out; else delete store.config.mediaDefaults;
+    }
     if ('userStyles' in body) store.config.userStyles = cleanUserStyles(body.userStyles);     // a Skynet Style can never be changed (public/styles.js)
     if ('theme' in body) { if (!THEME_KEYS.includes(body.theme)) return fail(res, 400, 'That Look (theme) is not one of the Skynet Looks'); store.config.theme = body.theme; }
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
@@ -1182,10 +1189,12 @@ async function route(req, res) {
   // Media page
   if (p.startsWith('/ui/media/')) {
     const q = Object.fromEntries(url.searchParams), root = Number(q.root) || 0;
-    if (p === '/ui/media/list' && m === 'GET') return ok(res, mediaFiles.list(root, q.dir ?? ''));
+    if (p === '/ui/media/list' && m === 'GET') { const l = mediaFiles.list(root, q.dir ?? ''); if (!Number(root)) l.files = l.files.map(f => { const id = skynetPicId(f.use); return id ? { ...f, id } : f; }); return ok(res, l); }
     if (p === '/ui/media/tree' && m === 'GET') return ok(res, mediaFiles.tree(root));
     if (p === '/ui/media/groups' && m === 'GET') return ok(res, { groups: listGroups(store._findMedia('Images')) });
-    if (p === '/ui/media/all' && m === 'GET') return ok(res, { files: mediaFiles.all(root, q.dir ?? '') });
+    if (p === '/ui/media/all' && m === 'GET') return ok(res, { files: mediaFiles.all(root, q.dir ?? '').map(f => { const id = Number(root) ? null : skynetPicId(f.use); return id ? { ...f, id } : f; }) });
+    // the Skynet Picture numbers (Rule 7.22): the printable list, and the four default folders (Rule 7.23)
+    if (p === '/ui/media/skynet-ids' && m === 'GET') return ok(res, { rows: skynetPicRows().map(r => ({ ...r, path: SKYNET_IMAGES + r.file })), defaults: mediaDefaults(store.config) });
     if (p === '/ui/media/upload' && m === 'PUT') {
       try {
         const r = await mediaFiles.upload(req, root, q.dir ?? '', q.name ?? '', q.overwrite === '1');
