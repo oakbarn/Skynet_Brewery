@@ -14,7 +14,7 @@ Il ressemble à l'Explorateur de fichiers de Windows : les dossiers à gauche, l
 - **New folder**, **Up**, et la vue **Large icons** ou **Details**.
 - Faites glisser un fichier sur un dossier à gauche pour le déplacer (sur un téléphone, utilisez **Move**).
 - Choisissez plusieurs fichiers avec **Ctrl+clic** ou **Maj+clic** (sur un téléphone, cochez **Select many**), puis faites-les glisser ou appuyez sur **Move picked** ou **Delete picked**.
-- **Images/Skynet** contient les images livrées avec Skynet et est en **lecture seule** : rien ne peut y être ajouté, renommé, déplacé ni supprimé. Les groupes d'images standard 🔒 d'Images (pour vos images), et les dossiers Images et sounds eux-mêmes, ne peuvent être ni supprimés, ni renommés, ni déplacés.
+- **Images/Skynet** contient les images livrées avec Skynet et est en **lecture seule** : rien ne peut y être ajouté, renommé, déplacé ni supprimé. Chaque image Skynet montre son numéro ; **🔢 Skynet Picture numbers** ouvre la liste à imprimer ([Numéros des images Skynet](193-skynet-picture-numbers)). Les groupes d'images standard 🔒 d'Images (pour vos images), et les dossiers Images et sounds eux-mêmes, ne peuvent être ni supprimés, ni renommés, ni déplacés.
 - Cliquez sur un fichier pour le prévisualiser, le jouer, **copier son chemin**, le renommer ou le supprimer.
 - **Les images SVG (.svg) ne peuvent être ni supprimées, ni renommées, ni déplacées, ni remplacées**, même une que vous avez ajoutée vous-même. Les Templates Skynet et le panel sont dessinés avec elles, et une image manquante casserait chaque Tab qui l'utilise. Un dossier qui contient un SVG ne peut pas non plus être renommé ni déplacé. Pour changer un SVG, ajoutez-en un nouveau sous un nom à lui et choisissez plutôt celui-là.
 

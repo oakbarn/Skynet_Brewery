@@ -2477,6 +2477,43 @@ Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-So
 release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
 Import keeps a sound that is already a link as it is and never copies it. Help 186.
 
+
+7.22 **Skynet Picture numbers** (OakBarn Brewery, 2026-11-13, ReadMe markup "Skynet Brew Panel 1 a" page 16: "for all skynet Pictures,
+a Leading ID Number will be created and remains Unique and not changeable ever. That Number besides the Name will be in all DDLBs for
+these types of Graphics. A Printable list will also be available"). Every picture in media/Images/Skynet has a fixed **number**
+(lib/skynetpicids.json, a Meaningless Key, Design Rule #2): it never changes and is never given to another picture, even when the
+picture is renamed (its row keeps its number) or taken away (its row stays, marked retired). A new Skynet picture gets the next number
+(`node tools/skynet-picture-ids.js`, which also writes docs/Skynet_Picture_IDs.md; a test fails while a picture has no number).
+Every picture list shows a Skynet picture as **number · file name** (24 · Overlay_Bolt.svg), and so do the 🖼 picker and the Media page.
+**The printable list:** Media page > 🔢 Skynet Picture numbers (each picture, its number, file name and group; 🖨 Print). A Process can
+give a Skynet picture by its number wherever a picture goes: `alm_Brew.setgraphic = 24`. Both programs: the BruControl Import's Build
+page uses the same lists. Help 193.
+
+7.23 **Two-part paths: .path and .file** (OakBarn Brewery, 2026-11-13, ReadMe markup "Skynet Brew Panel 1 a" page 17: "All Paths will
+have two fields .path and .file ... When selecting a file the Path and file are combined so Generally the DDLBs will only contain the
+File Name. The path on a property dialog can be edited on a User Audio or Graphic but normally the default would be used.
+UserAlarmBackground = "File Name.svg" would construct the real path using the Default path. UserAlarmBackground.path = "Full Path"
+would require a Full Path"; "Two-part paths (.path + .file) build as it simplifies the entry in process").
+- **Four default folders:** **Skynet Graphic** `Images/Skynet` and **Skynet Audio** `sounds/Skynet` (never changed: the Skynet pictures
+  and sounds live there), **User Graphic** `Images` and **User Audio** `sounds` (Settings > Panel settings > Default folders; not a
+  Skynet folder).
+- **Properties:** every picture and sound list shows **only the file name** (with its number, Rule 7.22; the folder only when two
+  files have the same name). The **Folder** line under it shows the folder: greyed for a Skynet picture or sound, typed for your own
+  (normally the folder it is in is used).
+- **In a Process:** a file name alone (`alm_Brew.backpath = "Bell.svg"`) gets its folder: the User folder (and the folders in it) first,
+  then the Skynet folder (and its groups); found nowhere, it is the User folder and the name, and the Process check lists it.
+  **`.path`** is the whole path and **`.file`** only the file name (`alm_Brew.backpath.path = "Images/Hops/Bell.svg"`,
+  `alm_Brew.backpath.file = "Bell_Red.svg"`; .file keeps the folder when the file is there). Every picture or sound attribute has them:
+  .image, .backpath, .backpath_2, .backpath_3, .imageon, .imageoff, .imageoverlay, .setgraphic, an Alarm's .sound, a Sound Player's
+  sound (`SoundPlayer_1.path`, `SoundPlayer_1.file`) and a Graphic gGlobal (`gG_Pic.path`, `gG_Pic.file`). **The item's own
+  .path / .file** (OakBarn Brewery, 2026-11-13: "yes" to this mapping; ".path is the full path including the file. We might need .path_2
+  and .path_3 and .file_2 and .file_3"): on a Device or Widget `.path` / `.file` are Image Path 1, `.path_2` / `.file_2` Image Path 2,
+  `.path_3` / `.file_3` Image Path 3; on an Alarm or a Sound Player `.path` / `.file` are its sound. A web link and a word such as
+  none are kept as they are. The 🖼 picker in the Process editor inserts only the file name when no other file has that name.
+- Each path is still kept whole inside Skynet (folder and file together), so nothing that already works changes.
+Both programs: the BruControl Import's Build page uses the same dialogs and the same Process reader; the pictures and sounds it copies
+into Images/User and sounds/User are found by their file name. Help 194.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3915,6 +3952,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 7.22, Skynet Picture numbers (OakBarn Brewery, ReadMe markup page 16): every Skynet picture has a fixed number that never changes or moves to another picture (lib/skynetpicids.json, 194 pictures; tools/skynet-picture-ids.js gives new ones the next number and writes docs/Skynet_Picture_IDs.md); every picture list, the 🖼 picker and the Media page show number · file name; Media page > 🔢 Skynet Picture numbers is the printable list; a Process can give a picture by its number. Added Rule 7.23, Two-part paths (OakBarn Brewery, ReadMe markup page 17): four default folders (Skynet Graphic, Skynet Audio fixed; User Graphic, User Audio in Settings), lists show only the file name with a Folder line (greyed for Skynet), a file name alone in a Process gets its folder, .path and .file on every picture and sound; an item's own .path / .file, .path_2 / .file_2, .path_3 / .file_3 are Image Path 1, 2, 3 (an Alarm's or Sound Player's .path / .file is its sound). Help 193 and 194 (new); Help 7, 22, 25 point to them. Checked against both programs: the BruControl Import's Build page shares the dialogs and the Process reader. Next free Help 196 (Help 195 is taken by the Alarm attributes thread). (thread "Build two-part file paths")
 - 2026-11-13: Added Rule 11.11 (OakBarn Brewery: "French Help Only forever"; "Ballons and Hover Help French"): the Help pages and the Hover Help are in French as well as English, picked by 🌐 Help language in the Help page list; the screens, buttons and labels stay English forever. French pages in help/fr/ with the same names; an English Help change and its French change go in the same PR (help/fr/_source.json, test/helpfrench.test.js, tools/help-french.js). Machine translated. Help 54, 192. The French balloons follow in their own PR. Checked against both programs: the BruControl Import uses the Panel's Help and balloons; its own Help is on hold (Rule 11.3). (thread "Translate Help to French")
 - 2026-11-12: Added Rule 9.15 (OakBarn Brewery): the installers work from and into a folder with any name (spaces, accented letters, $, %, quotes). The Linux and Pi installers now quote the folder correctly in the start file, the Skynet Brewer menu entry/Desktop icon and the start-by-itself service; tested installing from `Brassage bière/Logiciel de brassage de bière/Skynet Brew Panel` into a folder named `Brew Panel ü $x "q" it's 50%`. Checked against both programs: the BruControl Import is Windows only; nothing changes there.
 - 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
