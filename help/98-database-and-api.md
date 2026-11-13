@@ -33,7 +33,16 @@ send_db HLT_Temp
 send_db "gGV_Mash_pH"
 ```
 
-`send_db Name` writes the reading at once, whatever its frequency, even when it is **Off**. It was `log Name`; older Processes are changed to `send_db` when the Brain starts (Skynet Rule 15.2).
+`send_db Name` writes the reading at once, whatever its frequency, even when it is **Off**.
+
+To send **one attribute** of it instead, put **DBSend** after the name and the attribute (OakBarn Brewery, 2026-11-13):
+
+```
+HLT_PID.setpoint DBSend      // sends its .setpoint now
+HLT_Temp DBSend              // the same as send_db HLT_Temp
+```
+
+Both ways work; use whichever reads better to you. The attribute is kept with the reading in the database. It was `log Name`; older Processes are changed to `send_db` when the Brain starts (Skynet Rule 15.2).
 
 ### Database Groups: send only when you want
 

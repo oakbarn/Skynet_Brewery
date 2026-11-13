@@ -57,7 +57,7 @@ const at = line => (suggest(line, { elements: [] }, '', '', true)?.list ?? []).m
 assert.ok(at('gV_Strike = NU').some(t => /NULL/.test(t)), 'Predictive Text offers NULL');
 
 // 6. the reserved words (Help 22) are the engine's words, and none can be a name
-assert.deepEqual([...PROCESS_WORDS].sort(), [...new Set([...KEYWORDS, ...LOGIC_WORDS, ...Object.keys(CONST_WORDS), ...VAR_TYPES, 'now', 'true', 'false', 'tab', 'workspace'])].sort());
+assert.deepEqual([...PROCESS_WORDS].sort(), [...new Set([...KEYWORDS, ...LOGIC_WORDS, ...Object.keys(CONST_WORDS), ...VAR_TYPES, 'now', 'true', 'false', 'tab', 'workspace', 'dbsend'])].sort());
 assert.match(elementNameError('NULL'), /word of the Process language/); assert.match(elementNameError('wait', 'gGlobal'), /can't be a gGlobal name/);
 assert.equal(elementNameError('Null_1'), '');
 console.log('null tests ok');
