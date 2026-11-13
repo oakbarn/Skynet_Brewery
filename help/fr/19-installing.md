@@ -15,6 +15,8 @@ Chaque méthode a besoin de **Node.js** (gratuit, sur <https://nodejs.org>). Les
 
 **Où le trouver :** <https://github.com/oakbarn/skynet_brewery/releases/latest> a toujours la version la plus récente. Descendez jusqu'à **Assets** et cliquez sur un fichier pour le télécharger. Aucun compte GitHub n'est nécessaire. Les versions plus anciennes sont plus bas dans la liste [Releases](https://github.com/oakbarn/skynet_brewery/releases).
 
+Chaque version sur cette page est une **mise à jour officielle de Skynet** : une fois installée, Skynet vérifie à chaque démarrage que ses fichiers du programme sont toujours ceux qu'OakBarn Brewery a envoyés, et affiche **✓ Official** sur la Menu Bar. Voir [Mises à jour officielles de Skynet](191-official-skynet-updates).
+
 | Fichier de la version | À quoi il sert |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |

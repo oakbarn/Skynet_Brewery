@@ -82,6 +82,8 @@ Le programme d'installation Windows (`Skynet_Brewer_Setup_<date>.exe`), celui du
 2. Par sécurité, copiez votre dossier du panel : clic droit sur `C:\Brewing\BrewPanel`, **Copier**, puis **Coller**.
 3. Clic droit sur `Skynet_BrewPanel_<date>.zip`, choisissez **Extraire tout…**, et extrayez dans **`C:\Brewing`** (le dossier *au-dessus* de BrewPanel).
 4. Quand Windows demande ce qu'il faut faire des fichiers qui ont le même nom, choisissez **Remplacer les fichiers dans la destination**. Cela ne remplace que les fichiers du programme, les pages d'aide et les exemples de `defaults`. Vos `config`, `data`, `media` et `scripts` ne sont pas dans le zip.
+   Les fichiers du programme sont en **lecture seule** (voir [Mises à jour officielles de Skynet](191-official-skynet-updates)). Si Windows pose une question sur un
+   fichier en lecture seule, choisissez **Oui**. S'il ne peut toujours pas en remplacer un, utilisez plutôt le Setup : il enlève la lecture seule tout seul.
 5. Relancez le panel avec **Skynet Brewer** sur le Bureau.
 
 > **Les zips d'avant le 5 octobre 2026** contenaient encore `config`, `media` et `scripts`. Si vous décompressez l'un d'eux par-dessus votre panel, choisissez **Ignorer ces fichiers** (ou renommez d'abord vos dossiers), sinon il remplace les vôtres.
