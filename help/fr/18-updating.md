@@ -47,34 +47,43 @@ Lancez le même programme d'installation que la première fois, celui de la nouv
 - **Mac :** `Install Skynet Brewer.command` à côté du nouveau zip.
 - **Linux / Pi :** `bash install-skynet-brewer.sh` à côté du nouveau zip.
 
-Il demande d'abord ce que fait cette mise à jour (voir [The three update choices](#the-three-update-choices) plus bas ; le troisième, déjà choisi, garde tout). Puis il demande **Keep all of them as they are?** pour vos dossiers config, data, media et processes. **Yes** (la réponse normale) les garde tous. Il met aussi une copie de votre disposition dans `config/backups/brewery_before_update_<date>.json`, au cas où. Les dates dans les noms de fichiers et de dossiers sont au format ISO 8601, par exemple `20261023T113005` (année, mois, jour, T, heure, minute, seconde).
+Il demande d'abord ce que fait cette mise à jour (voir [Les quatre choix de mise à jour](#the-four-update-choices) plus bas ; le quatrième, déjà choisi, garde tout). Puis il demande **Keep all of them as they are?** pour vos dossiers config, data, media et processes. **Yes** (la réponse normale) les garde tous. Il met aussi une copie de votre disposition dans `config/backups/brewery_before_update_<date>.json`, au cas où. Les dates dans les noms de fichiers et de dossiers sont au format ISO 8601, par exemple `20261023T113005` (année, mois, jour, T, heure, minute, seconde).
 
-## Les trois choix de mise à jour {#the-three-update-choices}
+## Les quatre choix de mise à jour {#the-four-update-choices}
 
-Quand le programme d'installation trouve le panel déjà là, il demande ce que fait cette mise à jour. Les fichiers du programme sont toujours mis à jour. Sous Windows, c'est une page avec trois boutons ronds ; sur un Mac, sous Linux ou sur un Pi, vous tapez **1**, **2** ou **3**.
+Quand le programme d'installation trouve le panel déjà là, il demande ce que fait cette mise à jour. Les fichiers du programme sont toujours mis à jour. Sous Windows, c'est une page avec quatre boutons ronds ; sur un Mac, sous Linux ou sur un Pi, vous tapez **1**, **2**, **3** ou **4**.
 
-1. **Start Fresh : tout supprimer.** Le panel comme s'il n'avait jamais été installé. Un deuxième avertissement, rouge, vient d'abord : **ALL EXISTING DATA WILL BE DELETED** (toutes les données existantes seront supprimées). Il liste ce qui part, pour de bon et sans sauvegarde :
-   - chaque Schema, Tab, Device, Widget et réglage (`config`)
+1. **Start Fresh : tout supprimer, rien n'est gardé.** Le panel comme s'il n'avait jamais été installé. Un deuxième avertissement, rouge, vient d'abord : **ALL EXISTING DATA WILL BE DELETED** (toutes les données existantes seront supprimées). Il liste ce qui part, pour de bon et sans sauvegarde :
+   - chaque Schema, Tab, Device, Widget, réglage, Profile et Recipe (`config`)
    - chaque utilisateur, mot de passe, connexion et le code de secours, le journal de brassage et les valeurs enregistrées (`data`)
-   - chaque Process (`processes`)
-
-   Vos images et vos sons (`media`) et le dossier `backups` sont **gardés**.
+   - chaque Process (`processes`) et les dossiers `backups`
+   - vos propres images et sons (les images et sons Skynet restent)
+   - tout ce qui est dans le dossier **Import** (`C:\Brewing\Import`)
    - **No** sur l'avertissement revient en arrière. Rien n'est supprimé.
    - **Yes** les supprime. Le panel démarre alors comme une nouvelle installation à partir des exemples, et vous recréez le compte admin (notez le nouveau **code de secours**).
    - Sous Windows, il supprime aussi le nom d'utilisateur et le mot de passe dont se souvenait la fenêtre propre de Skynet, pour que rien d'ancien ne soit rempli. La fenêtre de Skynet ne se synchronise jamais avec votre compte Microsoft, donc une connexion synchronisée ne peut pas revenir non plus. Vous pouvez toujours enregistrer votre mot de passe dans la fenêtre de Skynet, et il se remplit au moment de Sign in comme d'habitude. Les cases de création de l'admin restent vides tant que vous ne cliquez ou ne tapez pas dedans, même si votre navigateur a enregistré un mot de passe pour le panel.
 
-2. **Update the program and reset all users** (mettre à jour le programme et réinitialiser tous les utilisateurs). Un avertissement vient d'abord ; **No** revient en arrière et rien n'est supprimé. **Yes** supprime, pour de bon :
+2. **Modified Fresh Start** (nouveau départ modifié). Un nouveau départ qui garde ce que vous avez préparé pour vous. Un avertissement vient d'abord ; **No** revient en arrière et rien n'est supprimé. **Yes** supprime, pour de bon, chaque Schema, Tab, Device, Widget et vos propres Templates, chaque utilisateur, mot de passe, connexion et le code de secours, le journal de brassage et chaque Process. **Gardés :**
+   - vos **réglages par défaut** (☰ Menu > Default settings)
+   - vos propres **Mash, Boil et Water Profiles** et **Equipment Profiles**
+   - vos **Recipes** enregistrées
+   - vos propres **images et sons**
+   - les dossiers **backups** et le dossier **Import**
+
+   Le panel démarre alors à partir des exemples avec vos réglages par défaut, et vous recréez le compte admin.
+
+3. **Update the program and reset all users** (mettre à jour le programme et réinitialiser tous les utilisateurs). Un avertissement vient d'abord ; **No** revient en arrière et rien n'est supprimé. **Yes** supprime, pour de bon :
    - chaque utilisateur et mot de passe
    - chaque connexion, sur chaque ordinateur et téléphone
    - le code de secours
    - sous Windows, le nom d'utilisateur et le mot de passe dont se souvenait la fenêtre propre de Skynet
 
    Vos Schemas et réglages (`config`), le journal de brassage et les valeurs enregistrées (`data`), les Processes (`processes`), les images et les sons (`media`) sont **gardés**. Le panel s'ouvre sur la création de l'admin : recréez le compte admin et notez le nouveau **code de secours**.
-3. **Update the program and keep everything** (mettre à jour le programme et tout garder ; recommandé, et déjà choisi pour vous). Vos Schemas, réglages, utilisateurs et mots de passe, journal de brassage, Processes, images et sons restent tels quels.
+4. **Update the program and keep everything** (mettre à jour le programme et tout garder ; recommandé, et déjà choisi pour vous). Vos Schemas, réglages, utilisateurs et mots de passe, journal de brassage, Processes, images et sons restent tels quels.
 
 Le programme d'installation Windows (`Skynet_Brewer_Setup_<date>.exe`), celui du Mac et celui de Linux / Pi le demandent tous. Si Windows ne peut pas supprimer un fichier parce qu'un programme l'a encore ouvert, le programme d'installation le dit : redémarrez l'ordinateur et relancez-le.
 
-> Vous voulez remettre un seul dossier aux exemples ? Choisissez **3** (ou **2**), puis répondez **No** à « Keep all of them as they are? » (plus haut). Cela déplace un dossier vers `backups` au lieu de le supprimer.
+> Vous voulez remettre un seul dossier aux exemples ? Choisissez **4** (ou **3**), puis répondez **No** à « Keep all of them as they are? » (plus haut). Cela déplace un dossier vers `backups` au lieu de le supprimer.
 
 ## Mettre à jour à la main : décompresser par-dessus le panel {#update-by-hand-unzip-over-the-panel}
 

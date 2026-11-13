@@ -47,34 +47,43 @@ Run the same installer you used the first time, from the new release. It sees th
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-It first asks what this update does (see [The three update choices](#the-three-update-choices) below; the third one, already picked, keeps everything). Then it asks **Keep all of them as they are?** about your config, data, media and processes folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
+It first asks what this update does (see [The four update choices](#the-four-update-choices) below; the fourth one, already picked, keeps everything). Then it asks **Keep all of them as they are?** about your config, data, media and processes folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
 
-## The three update choices
+## The four update choices
 
-When the installer finds the panel already there, it asks what this update does. The program files are always updated. On Windows it is a page with three round buttons; on a Mac, Linux or Pi you type **1**, **2** or **3**.
+When the installer finds the panel already there, it asks what this update does. The program files are always updated. On Windows it is a page with four round buttons; on a Mac, Linux or Pi you type **1**, **2**, **3** or **4**.
 
-1. **Start Fresh: delete everything.** The panel as if it had never been installed. A second, red warning comes first: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
-   - every Schema, Tab, Device, Widget and setting (`config`)
+1. **Start Fresh: delete everything, nothing saved.** The panel as if it had never been installed. A second, red warning comes first: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
+   - every Schema, Tab, Device, Widget, setting, Profile and Recipe (`config`)
    - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
-   - every Process (`processes`)
-
-   Your pictures and sounds (`media`) and the `backups` folder are **kept**.
+   - every Process (`processes`) and the `backups` folders
+   - your own pictures and sounds (the Skynet pictures and sounds stay)
+   - everything in the **Import** folder (`C:\Brewing\Import`)
    - **No** on the warning goes back. Nothing is deleted.
    - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
    - On Windows it also deletes the user name and password that Skynet's own window remembered, so nothing old is filled in. Skynet's window never syncs with your Microsoft account, so a synced login can't come back either. You can still save your password in Skynet's window, and it fills in on Sign in as usual. The admin setup boxes stay empty until you click or type in them, even if your browser saved a password for the panel.
 
-2. **Update the program and reset all users.** A warning comes first; **No** goes back and nothing is deleted. **Yes** deletes, for good:
+2. **Modified Fresh Start.** A fresh start that keeps what you set up for yourself. A warning comes first; **No** goes back and nothing is deleted. **Yes** deletes, for good, every Schema, Tab, Device, Widget and your own Templates, every user, password, sign-in and the recovery code, the brew log and every Process. **Kept:**
+   - your **Default settings** (☰ Menu > Default settings)
+   - your own **Mash, Boil and Water Profiles** and **Equipment Profiles**
+   - your saved **Recipes**
+   - your own **pictures and sounds**
+   - the **backups** folders and the **Import** folder
+
+   The panel then starts from the samples with your Default settings, and you make the admin account again.
+
+3. **Update the program and reset all users.** A warning comes first; **No** goes back and nothing is deleted. **Yes** deletes, for good:
    - every user and password
    - every sign-in, on every computer and phone
    - the recovery code
    - on Windows, the user name and password Skynet's own window remembered
 
    Your Schemas and settings (`config`), brew log and saved values (`data`), Processes (`processes`), pictures and sounds (`media`) are **kept**. The panel opens at admin setup: make the admin account again and write down the new **recovery code**.
-3. **Update the program and keep everything** (recommended, and already picked for you). Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are.
+4. **Update the program and keep everything** (recommended, and already picked for you). Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are.
 
 The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
 
-> Only want one folder back to the samples? Pick **3** (or **2**), then answer **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
+> Only want one folder back to the samples? Pick **4** (or **3**), then answer **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
 
 ## Update by hand: unzip over the panel
 
