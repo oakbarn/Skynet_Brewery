@@ -54,5 +54,16 @@
  "53-renaming": "18ea6d7f4a83cd7f",
  "54-help-window": "6fb913282c984d39",
  "55-build-tab": "56367f7f2e82fb1a",
- "56-locking": "75f6e6d7b560ca9d"
+ "56-locking": "75f6e6d7b560ca9d",
+ "57-picture-groups": "198f5178d159bc52",
+ "58-on-overlay": "f6b7fbe0843fc9bf",
+ "59-get-skynet-pictures": "39bdcfa0b49cf124",
+ "60-skynet-fittings": "0842e8bfbf48eaab",
+ "61-check-valves-and-flow-meters": "a21e48ba40243d8d",
+ "62-skynet-vessels": "6977d0606115a604",
+ "63-allowed-names": "7c0fc28942bb817f",
+ "64-skynet-integrated-devices": "de1ba8571e5351aa",
+ "65-skynet-integrated-electric-kettle": "4c3112d2952e8a5c",
+ "66-add-a-vessel": "b10200175383bd52",
+ "67-every-screen-in-the-menu": "afd9808dcf358543"
 }
