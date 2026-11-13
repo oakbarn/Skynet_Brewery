@@ -37,7 +37,9 @@ const find = n => n ? pages.find(p => p.name === n) || pages.find(p => bare(p.na
 
 // ---------------- Markdown to HTML (small and safe: every bit of text is escaped, links only go to http(s), mailto or other pages) ----------------
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-export const slug = s => s.toLowerCase().replace(/<[^>]+>/g, '').replace(/&\w+;/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// take out the tags again until none are left (a tag hidden inside another, like <<b>b>, can't come back)
+const noTags = s => { let p; do { p = s; s = s.replace(/<[^>]*>/g, ''); } while (s !== p); return s; };
+export const slug = s => noTags(s.toLowerCase()).replace(/&\w+;/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function href(url) {
   url = url.trim();
