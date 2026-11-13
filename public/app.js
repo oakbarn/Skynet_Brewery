@@ -11703,8 +11703,8 @@ function renderMqtt() {
   $('#mqHa').checked = c.homeAssistant?.enabled !== false;
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
-    const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    // .API is the one switch (Rule 6.18): set in the item's Properties, shown here
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, it.control ? 'Read & Control' : 'Read Only')));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -11712,7 +11712,6 @@ function renderMqtt() {
 }
 $('#saveMqtt').onclick = guard(async () => {
   const items = {};
-  for (const i of $$('#mqItems input')) (items[i.dataset.name] ??= {})[i.dataset.k] = i.checked;
   const body = {
     enabled: $('#mqEnabled').checked, tls: $('#mqTls').checked, host: $('#mqHost').value.trim(), port: +$('#mqPort').value || 0,
     username: $('#mqUser').value.trim(), baseTopic: $('#mqBase').value.trim(), homeAssistant: { enabled: $('#mqHa').checked },
@@ -15100,7 +15099,7 @@ async function importSchemaFile() {
   const r = await api('POST', '/ui/schemas/import?' + q, body ?? '', true);
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,
-    `Processes: ${p.written.length} added${p.backedUp.length ? ` (${p.backedUp.length} older ones backed up as .bak)` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
+    `Processes: ${p.written.length} added${p.renamed?.length ? ` (you already had ${p.renamed.length} with the same name, so these came in under a new name: ${p.renamed.join(', ')})` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
   if (r.draft) lines.push('This is a first draft from the BruControl Importer (made without its questions).');
   if (r.warningCount) lines.push(`${r.warningCount} notes from the import${r.warningCount > 30 ? ' (the first 30)' : ''}:`, ...r.warnings.slice(0, 30).map(x => '• ' + x));
   if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);

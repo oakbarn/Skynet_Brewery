@@ -439,7 +439,6 @@
  "Close to {0}": "Fermer vers {0}",
  "Every Tab gets back the back color and Tab Style it had before \"Use this Look on every Tab\" ({0}, {1}).": "Chaque Tab retrouve la couleur de fond et le Tab Style qu'il avait avant « Use this Look on every Tab » ({0}, {1}).",
  "Nothing to put back: \"Use this Look on every Tab\" has not been used in this Schema.": "Rien à remettre : « Use this Look on every Tab » n'a pas été utilisé dans ce Schema.",
- "Inputs from hardware are read only": "Les entrées venant du matériel sont en lecture seule",
  "Double-click for its Properties": "Double-cliquez pour ses Properties",
  "Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards": "Mode Simulator : rien de réel n'est commuté. Appuyez pour remettre tout le panel sur les vraies cartes (Real)",
  "Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing": "Les vraies cartes (Real) sont utilisées. Appuyez pour passer tout le panel (chaque Interface) sur le Simulator pour tester",
