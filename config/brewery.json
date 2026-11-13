@@ -403,7 +403,6 @@
    "h": 52,
    "label": "Notes",
    "initial": "",
-   "api": "getput",
    "backColor": "#4fb3ff",
    "foreColor": "#000000",
    "nameColor": "#fafafa",

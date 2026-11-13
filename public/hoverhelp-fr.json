@@ -418,7 +418,6 @@
  "Order in this list. Type a new number to move this Process there.": "Ordre dans cette liste. Tapez un nouveau numéro pour y déplacer ce Process.",
  "Show what is in it": "Montrer ce qu'il contient",
  "Name Change: Process": "Name Change: Process",
- "Double-click for its Properties (Database and .API are set there)": "Double-cliquez pour ses Properties (Database et .API se règlent là)",
  "Type it in a bigger box (String Entry, 2 lines)": "Le taper dans une plus grande boîte (String Entry, 2 lignes)",
  "Use the real {0} at {1}": "Utiliser le vrai {0} sur {1}",
  "Only an Admin can change the Interface ID. ": "Seul un Admin peut changer l'Interface ID. ",

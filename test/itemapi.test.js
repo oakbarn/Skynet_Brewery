@@ -30,14 +30,16 @@ assert.equal(cleanDatabase({ database: { frequency: 'bogus' } }).database, undef
 assert.equal(dateTimeMs('2026-11-01T06:00'), new Date(2026, 10, 1, 6, 0).getTime()); assert.equal(dateTimeMs('soon'), null);
 
 // ---- the API: only items with .API on, Put only with Get and Put
-assert.deepEqual(apiList(store).map(x => x.name), ['HLT_Temp', 'Pump_1', 'HLT_PID', 'gGV_Ph']);
+// a gGlobal has no .API (Rule 1.33, OakBarn Brewery 2026-11-13), even when an older file says Get only
+assert.deepEqual(apiList(store).map(x => x.name), ['HLT_Temp', 'Pump_1', 'HLT_PID']);
+assert.equal(apiItem(store, 'gGV_Ph'), null);
 assert.equal(apiItem(store, 'gGV_Hidden'), null, '.API Off is not reachable');
 assert.equal(apiItem(store, 'Pump_1').value, false); assert.equal(apiItem(store, 'HLT_PID', 'target').value, 0);
 assert.ok('target' in apiItem(store, 'HLT_PID').attributes);
 assert.deepEqual(apiPut(store, 'Pump_1', null, true), { name: 'Pump_1', attribute: 'state', value: true });
 assert.equal(store.getProp('Pump_1', 'state'), true);
 assert.deepEqual(apiPut(store, 'HLT_PID', null, { target: 152, kp: 3 }).set, { target: 152, kp: 3 });
-assert.throws(() => apiPut(store, 'gGV_Ph', null, 7), e => e.status === 403, 'Get only');
+assert.throws(() => apiPut(store, 'gGV_Ph', null, 7), e => e.status === 404, 'a gGlobal');
 assert.throws(() => apiPut(store, 'gGV_Hidden', null, 7), e => e.status === 404, 'Off');
 assert.throws(() => apiPut(store, 'HLT_Temp', 'value', 200), /can't be changed from outside/, 'a board reading');
 assert.throws(() => apiPut(store, 'Pump_1', 'image', 'x.png'), /can't be changed from outside/, 'a picture');
