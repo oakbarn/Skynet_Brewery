@@ -2,9 +2,11 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (deletes config, data and processes after a second warning;
-; media is kept), 2 update and reset all users (deletes users, passwords, sign-ins and the recovery code after a warning),
-; or 3 update and keep everything (the default, the original No). With 2 or 3 you can still replace one of your folders.
+; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (a real fresh start: nothing of yours is kept, the Import
+; folder is emptied too), 2 Modified Fresh Start (Schemas, Processes, users and brew log deleted; Default settings, own
+; Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import kept), 3 update and reset all users, or
+; 4 update and keep everything (the default, the original No). 1, 2 and 3 have a second warning. Both Fresh Starts run
+; lib\freshstart.js, the same file every installer runs. With 3 or 4 you can still replace one of your folders.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -101,6 +103,7 @@ Var Choice
 Var RadioKeep
 Var RadioUsers
 Var RadioFresh
+Var RadioModified
 Var OldPanel
 Var Stamp
 Var BrewDir
@@ -192,10 +195,13 @@ FunctionEnd
 
 ; ---------------------------------------------------------------- What this update does (Rule 9.8)
 ; Shown only when the panel is already in the chosen folder. Three choices (Fritz, 2026-11-06):
-;   1 fresh  Start Fresh: everything is deleted, as if the panel was never installed (media and backups are kept)
-;   2 users  Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
-;   3 keep   Update the program and keep everything (the original No: the default, and what a silent /S update does)
-; Reset and Start Fresh each have a warning with No as the default; No goes back to this page and nothing is deleted.
+;   1 fresh     Start Fresh: a real fresh start, nothing of yours is kept (OakBarn Brewery, 2026-11-13: "A fresh start should be
+;               a real Fresh Start with nothing saved" ... "and the Import"). Only the program and the Skynet pictures and sounds stay.
+;   2 modified  Modified Fresh Start: Schemas, Processes, users and brew log deleted. Kept: Default settings, your own Mash / Boil /
+;               Water Profiles, Equipment Profiles and Recipes, your own pictures and sounds, the backups folders and Import.
+;   3 users     Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
+;   4 keep      Update the program and keep everything (the original No: the default, and what a silent /S update does)
+; 1, 2 and 3 each have a warning with No as the default; No goes back to this page and nothing is deleted.
 ; The page only records the choice in $Choice. Nothing is deleted until the panel is stopped (Section SecMain).
 Function UpdateChoicePage
   StrCpy $Choice "keep"
@@ -212,19 +218,24 @@ Function UpdateChoicePage
   ${NSD_CreateLabel} 0 0 100% 14u "Found in $INSTDIR. The program files are always updated."
   Pop $0
 
-  ${NSD_CreateRadioButton} 0 18u 100% 12u "&1. Start Fresh: delete everything"
+  ${NSD_CreateRadioButton} 0 14u 100% 10u "&1. Start Fresh: delete everything, nothing saved"
   Pop $RadioFresh
-  ${NSD_CreateLabel} 12u 31u 96% 18u "Deletes every Schema, setting, user, password, the brew log and every Process, for good. Kept: pictures and sounds (media) and the backups folder. A warning comes next."
+  ${NSD_CreateLabel} 12u 24u 96% 17u "Like a new install. Every Schema, setting, user, Process, the brew log, the backups, your own pictures and sounds, and the Import folder are deleted for good."
   Pop $0
 
-  ${NSD_CreateRadioButton} 0 52u 100% 12u "&2. Update the program and reset all users"
+  ${NSD_CreateRadioButton} 0 42u 100% 10u "&2. Modified Fresh Start"
+  Pop $RadioModified
+  ${NSD_CreateLabel} 12u 52u 96% 25u "Deletes every Schema, Process, user and the brew log. Kept: Default settings, your own Mash, Boil and Water Profiles, Equipment Profiles, saved Recipes, your own pictures and sounds, the backups and the Import folder."
+  Pop $0
+
+  ${NSD_CreateRadioButton} 0 78u 100% 10u "&3. Update the program and reset all users"
   Pop $RadioUsers
-  ${NSD_CreateLabel} 12u 65u 96% 26u "Deletes every user, password, sign-in and the recovery code. You make the admin account again. Your Schemas, settings, brew log, Processes, pictures and sounds are kept."
+  ${NSD_CreateLabel} 12u 88u 96% 17u "Deletes every user, password, sign-in and the recovery code. You make the admin account again. Everything else is kept."
   Pop $0
 
-  ${NSD_CreateRadioButton} 0 94u 100% 12u "&3. Update the program and keep everything (recommended)"
+  ${NSD_CreateRadioButton} 0 106u 100% 10u "&4. Update the program and keep everything (recommended)"
   Pop $RadioKeep
-  ${NSD_CreateLabel} 12u 107u 96% 18u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are. This is the one already picked."
+  ${NSD_CreateLabel} 12u 116u 96% 17u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are. This is the one already picked."
   Pop $0
 
   ${NSD_Check} $RadioKeep
@@ -251,9 +262,16 @@ Function UpdateChoiceLeave
   ${EndIf}
   ${NSD_GetState} $RadioFresh $0
   ${If} $0 == ${BST_CHECKED}
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the backups folders$\r$\n   - your own pictures and sounds (the Skynet ones stay)$\r$\n   - everything in the Import folder ($BrewDir\Import)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
       Abort
     StrCpy $Choice "fresh"
+    Return
+  ${EndIf}
+  ${NSD_GetState} $RadioModified $0
+  ${If} $0 == ${BST_CHECKED}
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Modified Fresh Start?$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and your own Templates (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your Default settings, your own Mash, Boil and Water Profiles, Equipment Profiles, saved Recipes, your own pictures and sounds, the backups folders and the Import folder.$\r$\n$\r$\nYou make the admin account again.$\r$\n$\r$\nYes: Modified Fresh Start.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+      Abort
+    StrCpy $Choice "modified"
     Return
   ${EndIf}
   StrCpy $Choice "keep"
@@ -282,22 +300,22 @@ Function ResetUsers
   ${EndIf}
 FunctionEnd
 
-; Choice 1: delete all users, Schemas and Processes and start as if the panel was never installed. $Fresh = 1 when done.
+; Choices 1 and 2: lib\freshstart.js (the new one, so this runs after the program files are in) does the deleting, the same
+; way on every computer. A Modified Fresh Start writes the Default settings to config\kept_settings.json; the panel puts
+; them back into the new layout on its next start.
 Function StartFresh
-  RMDir /r "$INSTDIR\config"
-  RMDir /r "$INSTDIR\data"
-  RMDir /r "$INSTDIR\processes"
-  RMDir /r "$INSTDIR\scripts"   ; the name the processes folder had in earlier trial versions
+  Call FindBrewDir
   Call ForgetWindowLogin
-  ${If} ${FileExists} "$INSTDIR\config\*.*"
-  ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
-  ${OrIf} ${FileExists} "$INSTDIR\processes\*.*"
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish the Start Fresh." /SD IDOK
-    DetailPrint "Start Fresh: some files could not be deleted."
+  nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c "set "PATH=$PROGRAMFILES64\nodejs;%PATH%" & node "$INSTDIR\lib\freshstart.js" $Choice "$INSTDIR" "$BrewDir\Import""'
+  Pop $0
+  ${If} $0 != 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish." /SD IDOK
+    DetailPrint "Fresh Start: some files could not be deleted."
+  ${ElseIf} $Choice == "fresh"
+    DetailPrint "Start Fresh: everything of yours deleted. The panel starts again from the samples."
   ${Else}
-    DetailPrint "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
+    DetailPrint "Modified Fresh Start: Schemas, Processes, users and brew log deleted; your Default settings, Profiles, Recipes, pictures, sounds, backups and Import kept."
   ${EndIf}
-  StrCpy $Fresh 1
 FunctionEnd
 
 ; ---------------------------------------------------------------- Install
@@ -316,7 +334,8 @@ Section "Skynet Brew Panel" SecMain
     StrCpy $Upgrade 1
     StrCpy $Fresh 0
     ${If} $Choice == "fresh"
-      Call StartFresh
+    ${OrIf} $Choice == "modified"
+      StrCpy $Fresh 1   ; lib\freshstart.js runs once the new program files are in (below)
     ${ElseIf} $Choice == "users"
       Call ResetUsers
       DetailPrint "Updating. Kept as they are: layout and settings (config), brew data and log (data), pictures and sounds (media), processes (processes)."
@@ -379,6 +398,9 @@ Section "Skynet Brew Panel" SecMain
   ${EndIf}
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"
+  ${If} $Fresh == 1
+    Call StartFresh
+  ${EndIf}
   ${If} $OldPanel != ""
     DetailPrint "Copying data from $OldPanel"
     CreateDirectory "$INSTDIR\config"
