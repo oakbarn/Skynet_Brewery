@@ -3494,6 +3494,43 @@ as Bicarbonate: typing one fills the other, Bicarbonate = Alkalinity x 1.22), Ha
 pH, and Chlorine (None, Chlorine, Ammonia + chlorine (Chloramine), Unknown). Each box has Hover Help on what it does for the beer.
 Help 155 says where to find the numbers: the Water Department's report, or a Water Test Kit (or a lab for well water). (Help 155, 99)
 
+17.13 **Mash, Boil and Water Profiles: Add new ... and Skynet Boil Profiles** (OakBarn Brewery, 2026-11-13: "Like all the choices but
+explain good in the help what it means and have a User Add"; "Same with Water Profiles"; "and there are no Skynet Boil Profiles"):
+- Every Mash, Boil and Water Profile list ends with **Add new ...** (Rule 18.14): on the profile's ☰ Menu tab, in Default settings and
+  on the Recipe. It makes a new profile (empty, or a copy of any one) and opens its ☰ Menu tab.
+- **Skynet Boil Profiles**, read only: **60 Minute Boil**, **90 Minute Boil**, **30 Minute Boil**, **No Boil** (0 minutes). Help 35 explains
+  every Skynet Mash, Boil and Water Profile in a table (steps, temperatures, what it is for).
+- A Boil Profile has its own **Boil off** or none (empty = the Equipment Profile's). **Boil Off** belongs to the Equipment Profile
+  (OakBarn Brewery: "Yes"; starting value 1 gal / 4 L per hour), and so does **Brewhouse Efficiency** (OakBarn Brewery: "When we brew
+  with the Brewzilla, the efficiency is much higher than my big rig"); those two fields come with the Equipment Profile interview.
+- Picking a Boil Profile with its own Boil Off in a Recipe **asks each time** which to use: the Equipment Profile's or the profile's
+  own (OakBarn Brewery: "I think 3").
+- **Ask the kettle volume at the start and end of the boil** is a standard step of every Skynet Boil Profile (OakBarn Brewery: "Those
+  are standard things in a Skynet Boil Profile and a reason to use or modify the Skynet profiles rather than writing from Scratch").
+  How the volumes are measured, and the suggestion every 10 brews to update the Boil Off, come later.
+
+17.14 **Three Hop Stands** (OakBarn Brewery, 2026-11-13: "3 different Hop Stand and Times Hop Stand High with time, Hop Stand Middle with
+Time and Hop Stand Low with Time"; "Middle 154"; "low around Pitch"; "make BOTH temperature AND time user settable"; "AN XML FILE MAY
+HAVE INFO AS AN IMPORT"):
+- **High** 180 °F (82 °C), 10 minutes; **Middle** 154 °F (68 °C), 20 minutes; **Low** the Recipe's pitch temperature (68 °F / 20 °C
+  when none), 30 minutes. Replaces the single Hop stand temperature and time.
+- Temperature and time are set in ☰ Menu > Default settings, in own Boil Profiles and in each Recipe. The Recipe's own come first,
+  then its Boil Profile's, then Default settings.
+- Each Whirlpool hop picks its stand. The chill stops at each stand that has hops, highest first, cooling water off for its time
+  (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (and
+  Middle, Low).
+- An imported recipe's whirlpool temperature and time go to the nearest stand.
+
+17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
+this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). A saved Recipe with the same name asks
+**Overwrite** (the old one is kept in `config/backups/recipes`) or **Add new** (saved as "Name #2", the next free number).
+
+17.16 **Amounts follow Units** (OakBarn Brewery, 2026-11-13: "Come From US or Metric so not needed"): the "How amounts show" dropdowns
+are gone; every amount shows in US or Metric as Units says. Each **Misc** line picks its own unit, Tablet and Pack added ("Each its own
+DDLB Include Tablet, Pack"). The **grain weight label** (skn_XML_Grain_WT_Standard_Label) comes from Units (Pounds or Kg), is
+**Locked** (never typed in) and has **Visible**, On by default ("like any other label except Visible as defaulted to True"; "not user
+editable ... Locked True"). The New User Interview will fill Units in (later).
+
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
@@ -4126,6 +4163,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rules 17.13 (Profiles: Add new ... everywhere, Skynet Boil Profiles 60 / 90 / 30 Minute and No Boil, Boil Off and Brewhouse Efficiency belong to the Equipment Profile, ask each time which Boil Off), 17.14 (Three Hop Stands High / Middle / Low, set in Default settings, Boil Profiles and Recipes; chill stops at each), 17.15 (imported Recipe: Save? then Overwrite with backup or Add new "#2"), 17.16 (amounts follow Units; Misc unit per line with Tablet, Pack; grain weight label locked from Units). Help 35 rewritten with tables (Mash, Boil, Water Profiles, Hop Stands), Help 100. Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-13: Rule 9.8 now has four update choices (OakBarn Brewery): 1 Start Fresh is a real fresh start, nothing saved (also the backups, own pictures and sounds, and the Import folder); new 2 Modified Fresh Start keeps the Default settings, own Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import; 3 reset all users; 4 keep everything. lib/freshstart.js does both Fresh Starts in every installer; lib/skynet_media.json lists the Skynet pictures and sounds (tools/skynet-media-list.js). Help 18, 19.
 - 2026-11-13: Added Rule 18.36 (OakBarn Brewery, Default settings markup: "Just put 10 in the Slot and no comments like Empty = 10"): a box with a Skynet default shows the number in it; no "(empty = ...)" in any label; empty = Null; what an empty box means moves to its Hover Help ("Empty: ..."). Added Rule 7.24 (OakBarn Brewery): a missing picture shows the File Not Found picture, Hover Help names the path. Repair (Rule 9.14) now ends with a Skynet notice that this is Official Skynet again; Acknowledge closes About and goes to the opening Tab. ☰ Menu has Help in Français / Help in English. New items on the Build Tab go to the center of what is on screen; the New text X / Y boxes left Default settings. Checked against both programs.
 - 2026-11-13: Added Rule 2.52 (OakBarn Brewery, PDF "Blickmann Rip Tide Mode"): in Build mode (Edit layout) the ☰ Menu button is greyed out, dialogs have no ☰ (Rule 2.3 changed to say so) and never two after the Review step's Back, the Edit layout bar is greyed out while a dialog is open, and the Label Attributes Dialog shows the Font, Fore Color and Back Color defaults that are set, with Cancel and Save at the top only. Help 51, 115 (and French). Checked against both programs: the Importer's Build page is the same Edit layout. (thread "Build an Equipment Profile interview")
