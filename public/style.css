@@ -87,6 +87,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .el.img-missing { background-color: #c8c8c8; border-color: #888; }
 .el.img-missing .vl { color: #000 !important; text-shadow: none; }
 .el.img-missing.on .vl { color: #1b6e2a !important; }
+.el.img-notfound { background-size: contain !important; background-repeat: no-repeat !important; background-position: center !important; }
 .el.alarm.active { animation: blink 0.8s steps(2) infinite; border-color: var(--bad); }
 @keyframes blink { 50% { background-color: var(--bad); color: #fff; } }
 .el.timer .btns { display: flex; justify-content: center; gap: 4px; padding-bottom: 3px; }

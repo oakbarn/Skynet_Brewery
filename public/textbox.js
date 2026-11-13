@@ -47,8 +47,7 @@ export function textDefaults(d = {}) {
     visible: d.textVisible !== false, wrap: d.textWrap !== false,
     foreColor: d.textForeColor || '', backColor: d.textBackColor || '', align: tbAlign(d.textAlign) || '',
     width: px(d.textWidth, 220), height: px(d.textHeight, 40),
-    x: Number.isFinite(+d.textX) && d.textX !== '' && d.textX !== undefined ? Math.max(0, +d.textX) : 40,
-    y: Number.isFinite(+d.textY) && d.textY !== '' && d.textY !== undefined ? Math.max(0, +d.textY) : 40,
+    x: 40, y: 40,          // where a new text box starts; on the Build Tab it goes to the center (centerNew in app.js)
     nameFont: d.nameFont || '', nameFontSize: px(d.nameFontSize, 0),
   };
 }

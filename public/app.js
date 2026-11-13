@@ -55,7 +55,7 @@ const h = (tag, attrs = {}, ...kids) => {
   for (const k of kids.flat()) if (k !== null && k !== undefined) e.append(k.nodeType ? k : document.createTextNode(k));
   return e;
 };
-const media = p => '/media?path=' + encodeURIComponent(p);
+const media = p => p === '/File_Not_Found.svg' ? p : '/media?path=' + encodeURIComponent(p);      // the File Not Found picture is a program file (Rule 7.24)
 // a sound can be a web link to an MP3 (Rule 7.20): the browser plays it straight from the web; anything else is a file on the Brain
 const isLink = p => /^https?:\/\//i.test(String(p ?? '').trim());
 const soundUrl = p => isLink(p) ? String(p).trim() : media(p);
@@ -1059,7 +1059,7 @@ const MF_TIPS = {
   orient: 'Horizontal (the valves hang down), Left Vertical 90 (turned a quarter clockwise: the valves point left) or Right Vertical 90 (a quarter the other way: the valves point right). Flip: Flip Vertical puts the valves on the other side of the tees (on top when Horizontal), Flip Horizontal puts Valve 1 at the other end. The picture, its valves and its IPs follow.',
   xy: 'Where it is on the Tab, in pixels from the top left corner.', size: 'Its size in pixels. It keeps its shape as drawn (no Autosize).',
   type: 'A Skynet TC Pipe Fitting with its valve Devices built in (Rule 5.35).' };
-const MF_LABEL_POP = { title: 'Label attributes', fields: () => [['label', 'Label', 'text'], ['labelVisible', 'Visible (Show label)', 'yn', true], ['labelSize', 'Font size (px; empty = Default)', 'num'],
+const MF_LABEL_POP = { title: 'Label attributes', fields: () => [['label', 'Label', 'text'], ['labelVisible', 'Visible (Show label)', 'yn', true], ['labelSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }],
   ['labelColor', 'Fore color', 'color'], ['labelAlign', 'Label position', 'sel', LABEL_POS]] };
 const MF_KIND_SEL = [['manual', 'Manual'], ['motorized', 'Motorized']];
 // Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90" (the Valve Tee too);
@@ -2681,6 +2681,11 @@ function fillEl(n, e0) {
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
+  // any other picture whose path does not work shows the File Not Found picture (OakBarn Brewery, 2026-11-13: "Maybe we can create an
+  // Image that says File Not Found when the path does not work"; Rule 7.24), so a missing picture is seen at once, not an empty spot
+  const notFound = !!img && !isButton && imgMissing(media(img), n);
+  if (notFound) { n.title = `File Not Found: ${img}`; img = FILE_NOT_FOUND; }
+  n.classList.toggle('img-notfound', notFound);
   const stretch = stretchPic(e, v);
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
@@ -2755,6 +2760,7 @@ function fitOverlay(n, ov, img, stretch) {
 const stretchPic = (e, v) => (!!e.backpathsImported && hasPictures(e, v)) || isUserValvePic(e);     // imported BruControl pictures, and a user's own valve picture (Rule 5.29), fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
+const FILE_NOT_FOUND = '/File_Not_Found.svg';      // public/File_Not_Found.svg: ships with the program, never missing itself
 function imgMissing(url, node) {
   const st = imgState.get(url);
   if (st === true || st === false) return st;
@@ -3009,6 +3015,17 @@ function setMvOpen(name, open) {
 }
 
 // Big touch-friendly dialogs
+// A Skynet notice (not the browser's plain box): a title, plain text and one button, Acknowledge unless told otherwise. Esc does
+// not close it; the button does. Resolves when it is pressed.
+function noticeDialog(title, text, button = 'Acknowledge') {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const ok = h('button', { type: 'button', class: 'big primary', onclick: () => { d.close(); res(true); } }, button);
+    d.append(h('div', { class: 'vdTitle' }, title), h('div', { class: 'vdText', style: 'white-space:pre-line;max-width:440px;margin:8px 0 12px' }, text), h('div', { class: 'vdBtns' }, ok));
+    d.oncancel = e => e.preventDefault();
+    d.showModal(); ok.focus();
+  });
+}
 function choose(title, buttons, current) {
   return new Promise(res => {
     const d = $('#valDlg'); d.innerHTML = '';
@@ -5785,12 +5802,15 @@ async function newIntegratedDevice(tname) {
 }
 
 // Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
-// Fritz, 2026-10-28: a new Device goes in the middle of the 🔨 Build Tab, unless ☰ Menu > Default tab sets where new things go (X, Y)
+// A new Device or Widget goes in the center of the 🔨 Build Tab, in the part you see on the screen (OakBarn Brewery, 2026-11-13:
+// "X Y Positions of new items not needed as they are moved on a Build tab. A new Item on the Build Tab should go to Center")
 function centerNew(e) {
-  const d = S.config.brewDefaults || {}, b = curWs();
-  if ((d.textX ?? '') !== '' || (d.textY ?? '') !== '' || !b?.build) return;
-  e.x = Math.max(0, Math.round(((+b.width || 1600) - e.w) / 2));
-  e.y = Math.max(0, Math.round(((+b.height || 900) - e.h) / 2));
+  const b = curWs(); if (!b?.build) return;
+  const tw = +b.width || 1600, th = +b.height || 900, box = $('#wsScroll'), z = Z();
+  const cx = box && box.clientWidth ? (box.scrollLeft + box.clientWidth / 2) / z : tw / 2;
+  const cy = box && box.clientHeight ? (box.scrollTop + box.clientHeight / 2) / z : th / 2;
+  e.x = Math.max(0, Math.min(tw - e.w, Math.round(cx - e.w / 2)));
+  e.y = Math.max(0, Math.min(th - e.h, Math.round(cy - e.h / 2)));
 }
 function stackNew(e) {
   const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
@@ -6111,7 +6131,7 @@ const vbFields = w => {
     ['workspace', '3. Tab it goes on (when the Build is saved)', 'sel', vbTabs()],
     ['units', '4. Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true],
     ['volume', `5. Volume (${metric ? 'Liters' : 'Gallons'})`, 'num'],
-    ['vheight', `6. Height (${unit}; empty = the plain vessel shape)`, 'num'], ['diameter', `7. Diameter (${unit}; empty = the plain vessel shape)`, 'num'],
+    ['vheight', `6. Height (${unit})`, 'num', null, false, false, { tip: `Empty: the plain vessel shape.` }], ['diameter', `7. Diameter (${unit})`, 'num', null, false, false, { tip: `Empty: the plain vessel shape.` }],
     ['drain', '8. Bottom Drain', 'sel', pk('drain', VB_DRAIN)], ['tangential', '9. Tangential Inlet', 'sel', pk('tangential', VB_TANGENTIAL)],
     ['sparge', '10. Sparge Arm / Steam Slayer', 'sel', pk('sparge', VB_SPARGE)],
     ['probe', '11. Thermowell / Probe (no IP of its own; on an IP it closes it like an End Cap)', 'sel', pk('probe', VB_PROBE_SPOTS)],
@@ -6986,7 +7006,7 @@ const EMAIL_TIP = 'Email Notification (Rule 7.17): an email each time this Alarm
 const ALARM_OUT_TIP = 'Optional: a Device with an ON / OFF state (a warning light, a horn, a relay) that goes ON while this Alarm is active and OFF when it stops. None = nothing.';
 const ALARM_OUT_FIELDS = [['digitalOutput1', 'Digital Output 1 (optional)', 'devctl', null, false, false, { tip: ALARM_OUT_TIP }], ['digitalOutput2', 'Digital Output 2 (optional)', 'devctl', null, false, false, { tip: ALARM_OUT_TIP }]];
 const EMAIL_FIELDS = [['emailNotify', 'Email Notification (an email when it goes off)', 'bool', null, false, false, { tip: EMAIL_TIP }],
-  ['emailTo', 'Email to (commas between; empty = every user with an email in My account)', 'text', null, false, false, { tip: EMAIL_TIP }]];
+  ['emailTo', 'Email to (commas between)', 'text', null, false, false, { tip: `Empty: every user with an email in My account. ${EMAIL_TIP}` }]];
 const DISPLAY_FIELD = (type, x = {}) => ['display', 'Data Display', 'sel', DISPLAY_CHOICES[type], false, false, { tip: DISPLAY_TIP, ...x }];
 const voltsText = (e, val) => { const x = pwmVolts(e, val); return x === null || !Number.isFinite(x) ? '' : `  ≈ ${x.toFixed(1)} V`; };
 const CAL_TIP = 'Calibrations (Rule 6.24): each one works on the result of the one before, top to bottom. A probe and a flow meter start from their own reading; an Analog In starts from its raw 0-1023 reading. ➕ adds one; ↑ ↓ change the order; the switch turns one off without losing it.';
@@ -7015,12 +7035,12 @@ const F = {
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; never blank)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
     ['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
-    ['backpath', 'Image Path 1', 'imgopen', 1, false, 'b'], ['backpath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['backpath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
+    ['backpath', 'Image Path 1', 'imgopen', 1, false, 'b'], ['backpath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['backpath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge)', 'num', null, false, false, { tip: 'Empty: as many as needed.' }], ['fontSize', 'Value font size', 'num'],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab)', 'text', null, false, false, { tip: 'Empty: itself.' }], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
     ['wrap', 'Word wrap as needed (a long name goes onto more lines; off = one line, cut off with ...)', 'bool'],
-    ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px; empty = Default)', 'num'],
+    ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }],
     ['nameColor', 'Name color (over Fore color)', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color (over Fore color)', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font, more (JSON, e.g. {"bold":true,"italic":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool']],
@@ -7032,11 +7052,11 @@ const F = {
   switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
-    ['pulse', 'Pulse: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
+    ['pulse', 'Pulse: ON time per press (ms)', 'num', null, false, false, { def: 100 }], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds)', 'num', null, false, false, { def: 3000 }],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
-    ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
+    ['debounce', 'Debounce on the board (ms)', 'num', null, false, false, { def: 20 }], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
-    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds, empty = 1)', 'num', null, false, false, { tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
+    ['samplingPeriod', 'Counter: Sampling Period for its Rate (1 to 10 seconds)', 'num', null, false, false, { def: 1, tip: 'A Counter\'s Rate (.rate) is the counts per second over this many seconds, then smoothed. The Count itself is never smoothed.' }], SMOOTH_FIELD,
     ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
@@ -7053,7 +7073,7 @@ const F = {
     ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
     ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a variable with the OG)', 'elem'],
     ['offset', 'Weight offset (added after tare)', 'num'],
-    ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
+    ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L)', 'num', null, false, false, { tip: 'Empty: 0.05 gal or 0.2 L.' }], ['autoTareSeconds', 'Steady for (seconds)', 'num', null, false, false, { def: 10 }],
     ['precision', 'Decimals', 'num'], SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num', null, false, false, MUST('Pulses per unit', 'The Pulses per unit cannot be left blank: the program needs it to count the flow.')], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], CAL_FIELD, SMOOTH_FIELD, ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
@@ -7096,7 +7116,7 @@ const F = {
     ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path'], ...IP_AT_FIELDS],
-  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
+  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: plain drawn vessel.' }], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
@@ -7105,7 +7125,7 @@ const F = {
       ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
@@ -7143,7 +7163,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
-  ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
+  ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px)', 'num', null, false, false, { tip: 'Empty: the Name font size on the Default tab.' }],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 // field [key, label, kind, opts, onlyForKinds]
@@ -7165,13 +7185,13 @@ const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'fun
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
 const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD, SMOOTH_FIELD];
 const SENSOR_FIELDS = {
-  ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
-  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
-  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
+  ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device', 'dev', null, false, false, { tip: 'Empty: any.' }]],
+  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm)', 'num', null, false, false, { def: 430 }]],
+  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm)', 'num', null, false, false, { def: 4300 }]],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
   ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
-  lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
-  tmp36: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
+  lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32)', 'num', null, false, false, { def: 5 }]],
+  tmp36: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32)', 'num', null, false, false, { def: 5 }]],
 };
 const SIGNAL_FIELDS = {
   raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
@@ -7200,23 +7220,23 @@ function stepperFields(it) {
     ['wiring', 'Wired with', 'sel', [['stepDir', 'STEP and DIR pins (A4988, DRV8825, TMC, TB6600, DM542)'], ['fourWire', '4 coil pins (ULN2003 board, L298N)']], true],
     ...(four ? [['channel', 'IN1 pin', 'pin', 'digital'], ['pin2', 'IN2 pin', 'pin', 'digital'], ['pin3', 'IN3 pin', 'pin', 'digital'], ['pin4', 'IN4 pin', 'pin', 'digital']]
       : [['channel', 'STEP pin', 'pin', 'digital'], ['dirPin', 'DIR (direction) pin', 'pin', 'digital'],
-        ['enablePin', 'ENABLE pin (empty = not wired, driver always on)', 'pin', 'digital'],
+        ['enablePin', 'ENABLE pin', 'pin', 'digital', false, false, { tip: 'Empty: not wired, driver always on.' }],
         ['enableLevel', 'The driver is ON when the ENABLE pin is', 'sel', [['low', 'LOW (A4988, DRV8825, TMC, and TB6600 / DM542 with ENA- to GND)'], ['high', 'HIGH']]],
-        ['pulseUs', 'Shortest STEP pulse in microseconds (empty = what the driver needs)', 'num']]),
+        ['pulseUs', 'Shortest STEP pulse in microseconds', 'num', null, false, false, { tip: 'Empty: what the driver needs.' }]]),
     ['invertDir', 'Reverse the direction', 'yn'],
     ['stepsPerRev', 'Motor steps per turn (motor label or data sheet)', 'stpick', 'stepsPerRev'],
     ['microsteps', four ? 'Stepping' : 'Microstepping (set on the driver with its MS pins or switches; must match)', 'stpick', 'microsteps'],
-    ['gearRatio', 'Gearbox: motor turns per output turn (empty = 1, no gearbox)', 'num'],
+    ['gearRatio', 'Gearbox: motor turns per output turn', 'num', null, false, false, { def: 1, tip: '1 = no gearbox.' }],
     ['units', 'Position units', 'stpick', 'units'],
-    ['unitsPerRev', 'Units per output turn (empty = 1 turn, 360°, 100 %; lead screw = its pitch in mm; dosing pump = mL per turn)', 'num'],
-    ['maxSpeed', 'Top speed (units per second)', 'num'], ['accel', 'Speeds up and slows down by (units per second, each second; empty = 2 x top speed)', 'num'],
+    ['unitsPerRev', 'Units per output turn', 'num', null, false, false, { tip: 'Empty: 1 turn, 360°, 100 %; lead screw = its pitch in mm; dosing pump = mL per turn.' }],
+    ['maxSpeed', 'Top speed (units per second)', 'num'], ['accel', 'Speeds up and slows down by (units per second, each second)', 'num', null, false, false, { tip: 'Empty: 2 x top speed.' }],
     ['holdWhenIdle', 'Keep the motor powered when stopped (holds its place, runs warm)', 'yn', true],
-    ['minPos', 'Lowest position allowed (empty = no limit)', 'num'], ['maxPos', 'Highest position allowed (empty = no limit)', 'num'],
-    ['homePin', 'Home switch pin on the same board (empty = no switch)', 'pin', 'digital'],
+    ['minPos', 'Lowest position allowed', 'num', null, false, false, { tip: 'Empty: no limit.' }], ['maxPos', 'Highest position allowed', 'num', null, false, false, { tip: 'Empty: no limit.' }],
+    ['homePin', 'Home switch pin on the same board', 'pin', 'digital', false, false, { tip: 'Empty: no switch.' }],
     ['homeSwitch', 'Home switch', 'sel', [['no', 'Normally open, closes to GND when hit'], ['nc', 'Normally closed to GND, opens when hit']]],
     ['homeDir', 'Home switch is at the', 'sel', [['minus', 'low end (homing turns backward)'], ['plus', 'high end (homing turns forward)']]],
-    ['homeSpeed', 'Homing speed (units per second, empty = 1/4 of top speed)', 'num'], ['homePosition', 'Position at the home switch (empty = 0)', 'num'],
-    ['homeTravel', 'Stop homing if the switch is not found within (units, empty = 2 x the allowed range, or 10 turns)', 'num'],
+    ['homeSpeed', 'Homing speed (units per second)', 'num', null, false, false, { tip: 'Empty: 1/4 of top speed.' }], ['homePosition', 'Position at the home switch', 'num', null, false, false, { def: 0 }],
+    ['homeTravel', 'Stop homing if the switch is not found within (units)', 'num', null, false, false, { tip: 'Empty: 2 x the allowed range, or 10 turns.' }],
     ['homeOnConnect', 'Home by itself each time the board connects', 'yn'],
     ['precision', 'Decimals', 'num'], ['offText', 'Text when turned off', 'text'],
     ['sim', 'Simulator settings (JSON): where it starts and where its home switch is, in its units, e.g. {"start":40,"switchAt":-5}', 'json'], ['info', 'Position now', 'info']];
@@ -7227,8 +7247,8 @@ const ALARM_KIND_LIST = [['brewflow', 'Brew Flow Alarm (priority 1: beats every 
 function alarmFields(item) {
   const k = item.kind ??= 'general';
   return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
-    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
-    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer', 'elem', null, false, false, { tip: 'Empty: only from a Process.' }], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss)', 'text', null, false, false, { def: '00:10:00' }]] : []),
     ...kindFields('alarm', item)];
 }
 
@@ -7277,9 +7297,9 @@ function alarmWidgetFields(it) {
     ['name', 'Name', 'text', null, false, 'b'],
     ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : pre ? 'A Pre-Hop Alarm: a text box on a Skynet watermark.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
     ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
-    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
-    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
-    ['priority', 'Priority (lower plays first; empty = its Kind\'s number)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer', 'elem', null, false, false, { tip: 'Empty: only from a Process.' }], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss)', 'text', null, false, false, { def: '00:10:00' }]] : []),
+    ['priority', 'Priority (lower plays first)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
     A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop,
     ...(basic ? [] : [['string', 'Text', 'text', null, false, 'b', { up: 4, tip: ALM_STRING_TIP }], ['playTime', 'Play Time', 'num', null, false, false, { tip: ALM_PLAYTIME_TIP }]]),
     ...EMAIL_FIELDS,
@@ -7364,9 +7384,9 @@ const DEV_PROPS_POP = what => ({ title: `${what} Properties`, canDelete: true, f
 // Dual Throw (OakBarn Brewery, 2026-11-09, Rule 6.22, as BruControl's Dual Throw output): a second Port on the same Interface that is
 // always the opposite of this one, e.g. the Close wire of a valve whose Port is its Open wire
 const DUAL_THROW_TIP = 'Dual Throw (Rule 6.22): a second Port on the same Interface that is always the opposite of this one. ON = this Port on and the second Port off; OFF = this Port off and the second Port on. For a valve with an Open wire and a Close wire, or a motor that turns forward and backward. None = no second Port.';
-const DUAL_DELAY_TIP = 'How long both Ports stay off before the other one turns on, in milliseconds (1000 = 1 second), so the two are never on together. Empty = 0.';
+const DUAL_DELAY_TIP = 'How long both Ports stay off before the other one turns on, in milliseconds (1000 = 1 second), so the two are never on together.';
 const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'],
-  ['dualThrowChannel', 'Dual Throw: second Port (optional)', 'pinsel', 'digital', false, false, { tip: DUAL_THROW_TIP }], ['dualThrowDelay', 'Dual Throw delay (ms)', 'num', null, false, false, { tip: DUAL_DELAY_TIP }]] };
+  ['dualThrowChannel', 'Dual Throw: second Port (optional)', 'pinsel', 'digital', false, false, { tip: DUAL_THROW_TIP }], ['dualThrowDelay', 'Dual Throw delay (ms)', 'num', null, false, false, { tip: DUAL_DELAY_TIP, def: 0 }]] };
 const DEV_PIC_POP = { title: 'Picture attributes', fields: [['imageOverlay', 'On overlay (on top while it is on)', 'gpick', 'overlays'], ['imageOn', 'Picture when on (a second picture, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 const DEV_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
@@ -7376,8 +7396,8 @@ const DIAL_TIP = {
   min: 'The lowest number on the Dial. Empty = 0 °F, -20 °C, or 0 for anything else.',
   max: 'The highest number on the Dial. Empty = 220 °F, 110 °C, or 100 for anything else.',
   sp: 'The target. Type a number (170), or the Name of a Device or gGlobal to follow: a heater\'s Setpoint, or its value. Empty = no Setpoint: the arc goes from blue to red.',
-  cool: `How far below the Setpoint is still OK (empty = ${DIAL_DEFAULTS.cool}). Lower than that, the reading is the Cold color.`,
-  hot: `How far above the Setpoint is still OK (empty = ${DIAL_DEFAULTS.hot}). Higher than that, the reading is the Hot color.`,
+  cool: `How far below the Setpoint is still OK. Lower than that, the reading is the Cold color.`,
+  hot: `How far above the Setpoint is still OK. Higher than that, the reading is the Hot color.`,
   cold: 'The reading\'s color when it is too cold (below the Setpoint by more than the Cooler range). Default = Blue.',
   ok: 'The reading\'s color when it is between the Cooler and Hotter ranges. Default = Green.',
   hotc: 'The reading\'s color when it is too hot (above the Setpoint by more than the Hotter range). Default = Red.',
@@ -7385,25 +7405,25 @@ const DIAL_TIP = {
 const DIAL_FIELDS = [['_dlh', 'Skynet Dial (Look = Skynet Dial)', 'head'],
   ['dialMin', 'Lowest', 'num', null, false, false, { tip: DIAL_TIP.min }], ['dialMax', 'Highest', 'num', null, false, false, { tip: DIAL_TIP.max }],
   ['dialSp', 'Setpoint', 'text', null, false, false, { tip: DIAL_TIP.sp }],
-  ['dialCool', 'Cooler range', 'num', null, false, false, { tip: DIAL_TIP.cool }], ['dialHot', 'Hotter range', 'num', null, false, false, { tip: DIAL_TIP.hot }],
+  ['dialCool', 'Cooler range', 'num', null, false, false, { tip: DIAL_TIP.cool, def: DIAL_DEFAULTS.cool }], ['dialHot', 'Hotter range', 'num', null, false, false, { tip: DIAL_TIP.hot, def: DIAL_DEFAULTS.hot }],
   ['dialColdColor', 'Cold color', 'color', null, false, false, { tip: DIAL_TIP.cold }], ['dialOkColor', 'OK color', 'color', null, false, false, { tip: DIAL_TIP.ok }],
   ['dialHotColor', 'Hot color', 'color', null, false, false, { tip: DIAL_TIP.hotc }]];
 // Gauge settings (Rule 2.40 point 4): the kinds of settings every gauge program has, drawn by Skynet
 DIAL_TIP.shape = 'The shape of the Skynet Dial: Standard (two thirds round), Full round, or Half round.';
-DIAL_TIP.major = 'Large tick marks, each with its number (2 to 21). Empty = 6.';
+DIAL_TIP.major = 'Large tick marks, each with its number (2 to 21).';
 DIAL_TIP.minor = 'Small tick marks between two large ones (0 to 10). Empty = none.';
 DIAL_TIP.orient = 'The Skynet Bar: up and down, or side to side.';
 DIAL_TIP.style = 'A Skynet color style for the Dial, the Bar, or LCD and LED digits: the color behind it and of its numbers. Skynet Classic = the look it has always had.';
 DIAL_FIELDS.push(['_gsh', 'Gauge settings (Dial and Bar)', 'head'], ['dialShape', 'Dial shape', 'sel', DIAL_SHAPES, false, false, { tip: DIAL_TIP.shape }],
-  ['dialMajor', 'Large tick marks', 'num', null, false, false, { tip: DIAL_TIP.major }], ['dialMinor', 'Small tick marks between', 'num', null, false, false, { tip: DIAL_TIP.minor }],
+  ['dialMajor', 'Large tick marks', 'num', null, false, false, { tip: DIAL_TIP.major, def: 6 }], ['dialMinor', 'Small tick marks between', 'num', null, false, false, { tip: DIAL_TIP.minor }],
   ['barOrient', 'Bar direction', 'sel', BAR_ORIENTS, false, false, { tip: DIAL_TIP.orient }], ['gaugeStyle', 'Color style (also LCD and LED digits)', 'sel', GAUGE_STYLES.map(g => [g[0], g[1]]), false, false, { tip: DIAL_TIP.style }]);
 const DIAL_POP = { title: 'Skynet Dial, Bar and gauge settings', fields: DIAL_FIELDS.slice(1) };
 const LOOKS = ['normal', 'led', 'lcd', 'dark', 'button', 'indicator', ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
-const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px; empty = Default)', 'num'], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
+const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
   ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
   ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
   ['wrap', 'Word wrap as needed', 'bool'], ['look', 'Look', 'sel', LOOKS, false, false, { tip: DIAL_TIP.look }], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
-const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
+const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab)', 'text', null, false, false, { tip: 'Empty: itself.' }], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
@@ -7496,7 +7516,7 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel + (known ? ' Known from the pump drawing, so it is greyed out.' : ''), attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
     ['power', 'Power', 'sel', PUMP_POWER_CHOICES(it), true, false,
       { tip: T.pumpPower + (powerKnown ? ' Known from the model, so it is greyed out.' : ''), with: ['_use', 'Use', 'ro', pumpUseText(it), false, false, { tip: T.pumpUse }], ...(powerKnown ? { disabled: true, known: true } : {}), ...x }],
-    ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed }], showIf: pumpPwmShown, ...x }],
+    ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
     ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
@@ -7863,7 +7883,7 @@ const DATAW_TIPS = {
   code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_DO@H_Element_Brew~Kettle_BH.setpoint = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = ALIGN_LCR;
-const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
+const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest', 'num', null, false, false, { tip: 'Empty: none.' }], ['max', 'Highest', 'num', null, false, false, { tip: 'Empty: none.' }]] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
 const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BH.showas = "mm:ss" or wgt_DT_Clock_BH.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
@@ -7903,7 +7923,7 @@ const wgtType = (word, tip) => ['_wt', 'Widget Type', 'ro', word, false, false, 
 // ---- The other Widgets in the Pump's drill-down look (Fritz, 2026-11-06, Rule 18.30). Same order for each: the title line,
 // 1 Label ⬆ ⬢ and Label Visible, 2 Tab, 3 Name, its own fields (extras in ⬢ pop-ups), X, Y, Width, Height, the Widget Type last.
 // Every explanation that was a note on the dialog is in the hover help of a field's name now (Rule 2.38).
-const LOOK_FIELDS = (keys = {}) => [['fontSize', 'Font size (px; empty = Default)', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+const LOOK_FIELDS = (keys = {}) => [['fontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
   ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES]].map(f => (keys[f[0]] ? [keys[f[0]], ...f.slice(1)] : f));
 // Text Widget (Rule 2.22): its Label has its own keys (label_visible, size_label ...)
 const TEXT_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS],
@@ -7991,7 +8011,7 @@ const semiWidgetFields = (type, it) => {
     ...wgtPlace(), wgtType(`${boolStyleName(bs) || k.title} (a ${BOOL_CLASS})`, `Which ${BOOL_CLASS} it is. Each one is its own Widget, so its look is fixed: a Slider is always a Slider. To have another look, add that one from Boolean ➕.`)];
 };
 // the Label Widget: words on a Tab, nothing else
-const LBL_LOOK_POP = { title: 'Label look', fields: [['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px; empty = Default)', 'num']] };
+const LBL_LOOK_POP = { title: 'Label look', fields: [['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }]] };
 const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the Tab. The ⬢ beside it sets its font, size and colors.' }),
   ['foreColor', 'Fore color', 'color', null, false, false, { tip: 'The color of its words. The ⬢ beside it sets the Back color, alignment, font and size.', attr: LBL_LOOK_POP }],
   ...wgtPlace(), wgtType('Label')];
@@ -8266,11 +8286,11 @@ function hydroFields(it) {
       : conn === 'bluetooth' ? [['_bt', 'Bluetooth: a listener near the fermenter hears it and sends its readings to the Brain: an ESP32 with the ESP32_Hydrometer sketch, or a Raspberry Pi\'s own Bluetooth (firmware/Pi_Bluetooth). A Tilt is found by its Color, a RAPT Pill by its Hardware ID (it shows up in the list once a listener has heard it). Help 170 tells how.', 'note', null, false, false, { keep: true }]]
         : [['_cl', 'The maker\'s cloud: reading through the cloud comes in a later step. Its Cloud key is kept until then.', 'note', null, false, false, { keep: true }]]),
     ['_rd', 'Readings', 'head'],
-    ['gravityUnits', 'Gravity units', 'sel', Object.entries(GRAVITY_UNITS)], ['precision', 'Gravity decimals (empty = its Template\'s)', 'num'],
+    ['gravityUnits', 'Gravity units', 'sel', Object.entries(GRAVITY_UNITS)], ['precision', 'Gravity decimals', 'num', null, false, false, { tip: 'Empty: its Template\'s decimals.' }],
     ['tempUnits', 'Temperature units', 'sel', ['°F', '°C']],
     ['gravityOffset', 'Gravity offset (+ or -, in its gravity units)', 'num'], ['tempOffset', 'Temperature offset (+ or -)', 'num'],
     ['avgWeight', 'Smoothing weight % (100 = none)', 'num'],
-    ['lostMinutes', `Lost signal after (minutes; empty = ${m.lostMin})`, 'num', null, false, false, { tip: 'No reading for this long: it shows No signal and its .lost is true, so a Process can warn you.' }],
+    ['lostMinutes', 'Lost signal after (minutes)', 'num', null, false, false, { def: m.lostMin, tip: 'No reading for this long: it shows No signal and its .lost is true, so a Process can warn you.' }],
     ['og', 'Original Gravity (SG, for its ABV; a Process can set .og)', 'num'],
     ['_sends', `It sends: gravity, ${m.reads.map(r => ({ temperature: 'temperature', rssi: 'signal strength', battery: 'battery', angle: 'tilt angle' })[r]).join(', ')}.`, 'note'],
     ['sim', 'Simulator settings (JSON), e.g. {"og":1.056,"fg":1.012,"hours":96,"tempF":66}', 'json'], ['info', 'Reading now', 'info']];
@@ -8287,6 +8307,9 @@ function field(f, obj) {
   const out = fieldOne(f, obj);
   if (f[6]?.disabled && out[1]) for (const i of [out[1], ...out[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
   if (f[6]?.known && out[0]) out[0].classList.add('greyed');      // a known value, filled in and greyed out (OakBarn Brewery, 2026-11-11)
+  // Rule 18.36 (OakBarn Brewery, 2026-11-13: "Just put 10 in the Slot and no comments like Empty = 10. Empty = Nul"): a box with a
+  // Skynet default shows that number in the box; an empty box means nothing is set
+  fillDef(f, out[1]);
   // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
   // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
   const x = f[6];
@@ -8310,7 +8333,7 @@ function field(f, obj) {
     // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
     const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
     for (const w of more) {
-      const o2 = fieldOne(w, obj);
+      const o2 = fieldOne(w, obj); fillDef(w, o2[1]);
       if (w[6]?.disabled && o2[1]) for (const i of [o2[1], ...o2[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
       if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
       const lbl = h('span', { class: 'pairLbl' }, w[1]);
@@ -8449,7 +8472,7 @@ const DEVICE_TIPS = {
   pumpPower: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nWhat the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
   pumpUse: 'What it pumps. Hot & Cool: wort, hot water and cold water. Cold: glycol or ice water (cooling a fermenter). Set by the model; it is not changed here.',
   pumpSpeedCtl: 'On/Off only: the pin turns the pump on and off. PWM speed: a DC pump on a PWM pin (with a MOSFET module) runs at its Speed % while it is On. A brushless DC pump with its own driver may not like PWM: try it at a slow speed first.',
-  pumpSpeed: 'How fast it runs while it is On, 0 to 100 % (empty = 100). A Process can change it: Pump_Name.speed = 60.',
+  pumpSpeed: 'How fast it runs while it is On, 0 to 100 %. A Process can change it: Pump_Name.speed = 60.',
   toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
   // the Motorized Ball Valve (Fritz, 2026-11-05, Rule 18.23)
   vGraphic: 'The picture of this valve as it will show on the Tab, closed, turned to its Orientation.',
@@ -8521,6 +8544,8 @@ function rgbRow(cur, val, { onSet = () => {}, onCancel = () => {} } = {}) {
   const lab = h('label', { class: 'rgbLbl' }, 'Color (RGB)'), box = h('div', { class: 'rgbBox' }, sw, txt);
   return { els: [lab, box], pick, hex: () => hex, show: on => { for (const e of [lab, box]) e.classList.toggle('rgbOff', !on); } };
 }
+// Rule 18.36: a box with a Skynet default shows that number in the box (never 'empty = 10' in its label)
+function fillDef(f, el) { if (f[6]?.def === undefined || !el) return; const i = el.matches?.('input') ? el : el.querySelector?.('input'); if (i && i.value === '') i.value = f[6].def; }
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
@@ -9259,8 +9284,8 @@ function styleEditor(kind, st, from) {
       ['bezel', 'Frame color', 'color', null, false, false, { tip: 'The color of the frame.' }],
       ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
       : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
-        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
-        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: as now.' }], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: as now.' }], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
         ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font, size or alignment keeps it; the Style fills in only what it has none of.', 'note']], work);
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
@@ -11289,14 +11314,14 @@ const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device ===
 const BOARD_TIP = {
   on: 'On: the panel talks to this board. Off: the panel never opens it. Its Devices show as not connected.',
   paused: 'On: the panel stops sending to this board (only "are you there?" PINGs, so the board keeps its outputs as they are) and does not use what the board says. For finding a problem; Board Talk still shows every line. Off again sends every setting and output so the board matches the screen.',
-  answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600; empty = ${BOARD_DEFAULTS.answerSec}.`,
+  answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.`,
   logging: 'On: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). For finding a problem; turn it off after.',
   baud: 'How fast the USB line talks. It must be the same as the program on the board: Skynet\'s own programs use 115200.',
   netPort: 'The network port the board listens on. It must be the same as the program on the board: Skynet\'s own programs use 4100.',
 };
 const boardFields = o => [['_bsh', 'Board settings', 'head'], ['enabled', 'On', 'bool', null, false, false, { tip: BOARD_TIP.on }],
   ['paused', 'Pause communications', 'bool', null, false, false, { tip: BOARD_TIP.paused }],
-  ['answerSec', 'Answer wait (seconds)', 'num', null, false, false, { tip: BOARD_TIP.answer }],
+  ['answerSec', 'Answer wait (seconds)', 'num', null, false, false, { tip: BOARD_TIP.answer, def: BOARD_DEFAULTS.answerSec }],
   ['logging', 'Diagnostic logging', 'bool', null, false, false, { tip: BOARD_TIP.logging }],
   ...(o.connection === 'serial' ? [['baud', 'Baud (USB speed)', 'sel', BAUDS.map(b => [b, String(b) + (b === BOARD_DEFAULTS.baud ? ' (Skynet)' : '')]), false, false, { tip: BOARD_TIP.baud }]] : []),
   ...(['ethernet', 'esp32'].includes(o.connection) ? [['netPort', 'Network port', 'num', null, false, false, { tip: BOARD_TIP.netPort }]] : []),
@@ -11311,7 +11336,7 @@ function boardSave(d, w) {
   if (w.enabled === false || w.enabled === 'false') d.enabled = false; else delete d.enabled;
   for (const k of ['paused', 'logging']) if (w[k] === true || w[k] === 'true') d[k] = true; else delete d[k];
   const a = String(w.answerSec ?? '').trim();
-  if (a === '') delete d.answerSec; else { const n = Math.round(Number(a)); if (!(n >= 2 && n <= 600)) throw new Error('Answer wait is 2 to 600 seconds (empty = 10)'); d.answerSec = n; }
+  if (a === '') delete d.answerSec; else { const n = Math.round(Number(a)); if (!(n >= 2 && n <= 600)) throw new Error('Answer wait is 2 to 600 seconds'); d.answerSec = n; }
   if (d.connection === 'serial') d.baud = BAUDS.includes(Number(w.baud)) ? Number(w.baud) : BOARD_DEFAULTS.baud;
   if (['ethernet', 'esp32'].includes(d.connection)) { const n = Math.round(Number(w.netPort)); if (!(n >= 1 && n <= 65535)) throw new Error('Network port is 1 to 65535 (Skynet uses 4100)'); d.port = n; }
 }
@@ -12256,6 +12281,11 @@ function menuItems(list, go) {
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
   // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
   if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
+  // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well";
+  // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
+  { const hl = $('#hpLang'), fr = hl?.value === 'fr';
+    if (hl) list.append(item(fr ? '🌐 Help in English' : '🌐 Help in Français', () => { hl.value = fr ? 'en' : 'fr'; hl.dispatchEvent(new Event('change')); },
+      { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English.' })); }
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -12636,9 +12666,9 @@ function renderDefaultTab(box) {
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default pipe size: a new pipe starts at it, and every Device, Pipe Fitting and item with IPs (pumps too) with no pipe on it is drawn for it. With pipes on it, it takes the size most of them have (Rule 5.36)', 'sel', sizePick(PIPE_SIZES)],
     ['defHoseSize', 'Default hose size: a new hose starts at it', 'sel', sizePick(HOSE_SIZES)],
-    ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px; empty = 10). Each Tab can change it in Tab settings', 'num'],
-    ['newTabWidth', 'Width of a new Tab (px; empty = 1600)', 'num'],
-    ['newTabHeight', 'Height of a new Tab (px; empty = 900)', 'num'],
+    ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px). Each Tab can change it in Tab settings', 'num', null, false, false, { def: 10 }],
+    ['newTabWidth', 'Width of a new Tab (px)', 'num', null, false, false, { def: 1600 }],
+    ['newTabHeight', 'Height of a new Tab (px)', 'num', null, false, false, { def: 900 }],
     ['_bd', 'New Devices and Widgets (the Build)', 'head'],
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
@@ -12651,23 +12681,23 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['waterProfile', 'Water Profile', 'sel', S.waterProfiles.map(x => [x.id, x.name]), false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
     ['boilTime', 'Boil time (minutes)', 'num'],
-    ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}; empty = 180 °F / 82 °C): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num'],
-    ['hopStandMinutes', 'Hop stand time (minutes, cooling water off; empty = 20) when a Recipe gives none', 'num'],
+    ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num', null, false, false, { tip: `Empty: 180 °F / 82 °C.` }],
+    ['hopStandMinutes', 'Hop stand time (minutes, cooling water off) when a Recipe gives none', 'num', null, false, false, { def: 20 }],
     ['efficiency', 'Brewhouse efficiency (%)', 'num'],
     ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
     ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
-    ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature; empty = 0)`, 'num'],
+    ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature)`, 'num', null, false, false, { def: 0 }],
     ['_u', 'How amounts show (Recipe tab)', 'head'],
     ...DISPLAY_UNITS.map(([k, l, ch]) => [k, l, 'sel', Object.entries(ch)]),
-    ['grainLabel', 'Grain weight label on the Grain and Fermentable tabs (Skynet field skn_XML_Grain_WT_Standard_Label; empty = the standard above: Pounds, Kg ...). Only changed here', 'text'],
-    ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs (empty = PPG>SG). Only changed here', 'text'],
+    ['grainLabel', 'Grain weight label on the Grain and Fermentable tabs (Skynet field skn_XML_Grain_WT_Standard_Label). Only changed here', 'text', null, false, false, { tip: 'Empty: the standard above (Pounds, Kg ...).' }],
+    ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs. Only changed here', 'text', null, false, false, { tip: 'Empty: PPG>SG.' }],
     ['_un', 'A recipe is kept in kilograms, liters and °C, as BeerXML does, so changing these only changes how it shows. Units above picks the first choice of each when they are left alone.', 'note'],
     ['_h', 'Hop alerts', 'head'],
-    ['hopWarnMinutes', `Warning before each hop drop (minutes; empty = ${RECIPE_DEFAULTS.hopWarnMinutes}, 0 = no warning)`, 'num'],
-    ['alertMergeMinutes', `Alerts this close together become one alert (minutes; empty = ${RECIPE_DEFAULTS.alertMergeMinutes})`, 'num'],
-    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3; empty = none)', 'text'],
+    ['hopWarnMinutes', 'Warning before each hop drop (minutes; 0 = no warning)', 'num', null, false, false, { def: RECIPE_DEFAULTS.hopWarnMinutes }],
+    ['alertMergeMinutes', 'Alerts this close together become one alert (minutes)', 'num', null, false, false, { def: RECIPE_DEFAULTS.alertMergeMinutes }],
+    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
-    ['voiceName', 'Browser voice (empty = the browser\'s usual voice)', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
+    ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
     ['_ns', 'New Schema from a Skynet Template', 'head'],
     ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
     ['ns_template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
@@ -12703,12 +12733,10 @@ function renderDefaultTab(box) {
     ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)]],
     ['textWrap', 'Word wrap as needed', 'bool'],
     ['nameFont', 'Name font (names, Labels and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
-    ['nameFontSize', 'Name font size (px; empty = the panel\'s normal size)', 'num'],
-    ['textWidth', 'Width of a new Text or Label (px; empty = 220)', 'num'],
-    ['textHeight', 'Height of a new Text or Label (px; empty = 40)', 'num'],
-    ['textX', 'X position of new items (px from the left of the Tab; empty = 40)', 'num'],
-    ['textY', 'Y position of new items (px from the top of the Tab; empty = 40)', 'num'],
-    ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px); empty = ${TEXT_LARGE}`, 'num'],
+    ['nameFontSize', 'Name font size (px)', 'num', null, false, false, { tip: 'Empty: the panel\'s normal size.' }],
+    ['textWidth', 'Width of a new Text or Label (px)', 'num', null, false, false, { def: 220 }],
+    ['textHeight', 'Height of a new Text or Label (px)', 'num', null, false, false, { def: 40 }],
+    ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px)`, 'num', null, false, false, { def: TEXT_LARGE }],
     ['_p', 'Phones and tablets', 'head'],
     ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
@@ -12738,7 +12766,7 @@ function renderDefaultTab(box) {
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
-    for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10], ['textX', 'X position', 0], ['textY', 'Y position', 0]])
+    for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
     await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
@@ -13153,12 +13181,22 @@ function officialBox() {
   box.append(list('Changed', o.changed), list('Missing', o.missing), list('Added', o.added));
   const again = h('button', { title: 'Check every program file again', onclick: async () => { again.disabled = true; try { S.official = await api('GET', '/ui/official'); showPanelVer(); officialWarn(); renderMenuPane(); } catch (e) { toast(e.message, true); again.disabled = false; } } }, '🔍 Check again');
   const fix = o.state === 'changed' && can('admin') ? h('button', { class: 'primary', title: 'Put back the official program files of this version from OakBarn Brewery\'s GitHub. The files it replaces go to backups. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.', onclick: async () => {
-    if (!confirm('Repair puts back the official program files of this version, straight from OakBarn Brewery\'s GitHub (it needs the internet).\n\nThe changed and added files are moved to the backups folder, not deleted. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.\n\nRepair now?')) return;
+    // a Skynet dialog, not the browser's plain box (OakBarn Brewery, 2026-11-13: "Something to tell the user the repair worked and then
+    // with an aknowkedgement return to the Screen and maybe in the Dialog say something about Offical Release again"; Rule 9.14)
+    if (await choose('Repair puts back the official program files of this version, straight from OakBarn Brewery\'s GitHub (it needs the internet).\n\nThe changed and added files are moved to the backups folder, not deleted. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.', [['🛠 Repair now', 'go']]) !== 'go') return;
     fix.disabled = true;
     try {
       const r = await api('POST', '/ui/official/repair');
-      S.official = r.official; showPanelVer(); officialWarn(); renderMenuPane();
-      alert(`Repair: ${r.fixed.length} file(s) put back` + (r.moved.length ? `, ${r.moved.length} added file(s) moved` : '') + (r.backup ? ` (the old ones are in ${r.backup})` : '') + '.' + (r.failed.length ? `\n\nThese could not be repaired:\n${r.failed.join('\n')}` : '') + '\n\nClose Skynet Brewer and start it again so it uses the repaired files.');
+      S.official = r.official; showPanelVer(); officialWarn();
+      const done = [r.fixed.length && `${r.fixed.length} program file${r.fixed.length === 1 ? '' : 's'} put back`, r.moved.length && `${r.moved.length} file${r.moved.length === 1 ? '' : 's'} that OakBarn Brewery did not send moved to the backups folder`].filter(Boolean).join(', and ');
+      const ok = S.official?.state === 'official';
+      const text = (done ? done.charAt(0).toUpperCase() + done.slice(1) + (r.backup ? ` (${r.backup})` : '') + '.\n\n' : '')
+        + (ok ? `This is Official Skynet again, exactly as OakBarn Brewery released it in ${S.official.version}.` : (S.official?.text || 'Skynet could not check the files again.'))
+        + (r.failed.length ? `\n\nThese could not be repaired:\n${r.failed.join('\n')}` : '')
+        + (r.fixed.length ? '\n\nClose Skynet Brewer and start it again so it uses the repaired files.' : '');
+      await noticeDialog(ok && !r.failed.length ? '✓ Repair done' : '⚠ Repair', text);
+      for (const k of [...menuOpen]) closeMenuTab(k);        // back to the screen
+      if (menuTab) leaveMenuTab();
     } catch (e) { toast(e.message, true); fix.disabled = false; }
   } }, '🛠 Repair') : '';
   box.append(h('div', { class: 'bar' }, again, fix, h('button', { title: 'What Official Skynet means', onclick: () => openHelp(['official-skynet-updates']) }, '❓ Help')));
@@ -13990,7 +14028,7 @@ function vesselTplFields(w) {
 }
 function fittingTplFields(w) {
   return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
-    ['_cs', 'Connection Standard', 'head'], ...stdFields(w, 'Connection Standard (empty = the vessel\'s)'),
+    ['_cs', 'Connection Standard', 'head'], ...stdFields(w, 'Connection Standard'),
     ['_f', 'Fittings (from the vessel port outward)', 'head'], ...fittingSlotFields(w, false),
     ['_g', 'Graphic', 'head'],
     w.cls === 'skynet' ? ['image', 'Graphic (a Skynet picture)', 'sel', [['', '(the one that matches the fittings)'], ...SKYNET_FIT_PICS.map(p => [p, p.split('/').pop()])]] : ['image', 'Graphic (picture path)', 'path'],
@@ -14105,7 +14143,7 @@ function openTemplate(kind, name) {
       if (!vs.length) throw new Error('There is no Vessel Template that can be changed. Clone one first.');
       const w = { vessel: vs[0].name, port: 'outlet' }, def = () => bundleName(t.name, w.vessel, []);
       const ok = await miniDialog('Add to Vessel Template', [['vessel', 'Vessel Template', 'sel', vs.map(v => v.name)], ['port', 'On its', 'sel', Object.entries(FITTING_PORTS)],
-        ['name', 'Name (empty = bndl#_FittingName_VesselName; change it to what you want)', 'text']], w, 'Add');
+        ['name', 'Name', 'text', null, false, false, { tip: 'Empty: bndl#_FittingName_VesselName; change it to what you want.' }]], w, 'Add');
       if (!ok) return;
       const v = tplOf('vessel', w.vessel), ports = clone(v.ports || {});
       const d0 = (EQ[v.vesselType] || EQ.vessel).ports[w.port]; if (!d0) throw new Error(`A ${VESSEL_KINDS[v.vesselType]} has no ${FITTING_PORTS[w.port]}`);
@@ -14290,7 +14328,7 @@ F.skynetVessel = it => {
         ...(vdev && vpLocked(it) ? [] : [['vwShowAll', it.vwShowAll ? 'All the spots show, the Not Placed ones too (as faint marks on the vessel).' : `Only the Placed spots show${hidN(it) ? ` (${hidN(it)} Not Placed hidden)` : ''}.`, 'showall', 'Show the Not Placed spots too, so one can be Placed']]),
         ...(vdev ? vdevHead(it) : []),
         ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).flatMap(([k, d]) => [vdev && vpLocked(it) ? [k + '_onnote', `${d.name} IP: ${it.ports?.[k]?.installed ? 'Placed' : 'Not Placed'} (locked)`, 'note'] : [k + '_on', `${d.name} IP`, 'bool', false, vdev],
-          ...(d.vw ? [[k + '_label', `${d.name} Label (empty = the Name)`, 'text']] : []), ...(vdev && d.vw && (vpLocked(it) || it[k + '_on']) ? vpFields(it, k, d) : [])]),
+          ...(d.vw ? [[k + '_label', `${d.name} Label`, 'text', null, false, false, { tip: 'Empty: the Name.' }]] : []), ...(vdev && d.vw && (vpLocked(it) || it[k + '_on']) ? vpFields(it, k, d) : [])]),
         ...(it.ports?.thermowell && vwShows(it, 'thermowell') ? [['thermowell_on', 'Temperature Probe', 'bool', false, true], ...(well ? [['probeStyle', 'Probe: Front or Thermowell', 'sel', [['thermowell', 'Thermowell (in from the side)'], ['front', 'Front (seen from the front)']]]] : [])] : []),
         ...(it.ports?.element && vwShows(it, 'element') ? [['element_on', 'Element Port', 'bool', false, true]] : [])] : []),
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
@@ -14300,7 +14338,7 @@ F.skynetVessel = it => {
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...(vdev && vpLocked(it) ? [] : looseField(it)), ...VESSEL_FLOW(it),
-    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
+    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px)', 'num', null, false, false, { tip: 'Empty: the Name font size on the Default tab.' }],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
     ...(vw && vMaster(draft?.workspaces.find(w => w.name === it.workspace))?.id !== it.id ? [['_wh', `Width ${it.w} x Height ${it.h}: set by its Gallons and the Tab's Master Vessel Sizer (only the Master is resized).`, 'note']]
       : [['w', 'Width', 'num'], ['h', 'Height', 'num']]),
@@ -14316,7 +14354,7 @@ function vdevDone(it) {
     ...vSizeFields(it),       // Gallons and Size (OakBarn Brewery, 2026-11-09: "Both"), Rule 18.31
     ['_vdl', 'Integrated Vessel Device: its IPs, HERMS coil, Drain, Tangential and Sparge / Steam Slayer can not change, and neither can the Interface and Port of its Heating Elements and Temperature Probe (Rule 5.31). Their other settings can change below. New hardware wired the same way to the same Port needs no change here.', 'note'],
     ...vpSections(it, true), ...VESSEL_FLOW(it),
-    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
+    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px)', 'num', null, false, false, { tip: 'Empty: the Name font size on the Default tab.' }],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
     ['_wh', `Width ${it.w} x Height ${it.h}: set by its Size (or Gallons) and the Tab's Master Vessel Sizer.`, 'note'],
     ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']];
@@ -14418,7 +14456,7 @@ function profFields(kind) {
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
       ...Array.from({ length: MASH_STEPS }, (_, i) => [['_s' + i, `Step ${i + 1}${i ? ' (leave empty if not used)' : ''}`, 'head'],
         ['s' + i + '_name', 'Name', 'text'], ['s' + i + '_temp', `Temperature (${t})`, 'num'], ['s' + i + '_time', 'Time (minutes)', 'num']]).flat(),
-      ['_o', 'Mash out and sparge', 'head'], ['mashOutTemp', `Mash out temperature (${t}, empty = none)`, 'num'],
+      ['_o', 'Mash out and sparge', 'head'], ['mashOutTemp', `Mash out temperature (${t})`, 'num', null, false, false, { tip: `Empty: none.` }],
       ['sparge', 'Sparge', 'sel', Object.entries(SPARGE), true], ...(w.sparge === 'none' ? [] : [['spargeTemp', `Sparge water temperature (${t})`, 'num']]),
       ...(w.sparge === 'batch' ? [['batchRest', 'Batch sparge rest time (minutes)', 'num']] : []), ['notes', 'Notes', 'area']];
   };

@@ -2582,6 +2582,14 @@ would require a Full Path"; "Two-part paths (.path + .file) build as it simplifi
 Both programs: the BruControl Import's Build page uses the same dialogs and the same Process reader; the pictures and sounds it copies
 into Images/User and sounds/User are found by their file name. Help 194.
 
+7.24 **File Not Found picture** (OakBarn Brewery, 2026-11-13: "if a Path is missing it just does not display. Maybe we can create an
+Image that says File Not Found when the path does not work"; "Looks good use it"):
+- When a picture's file is missing (moved, renamed, or not on this Brain), Skynet shows the **File Not Found** picture
+  (`public/File_Not_Found.svg`: a torn picture with a red ✕) in its place, at its size, so the item is still seen and can be fixed.
+- Its Hover Help says **File Not Found:** and the path it looked for. Nothing in the Schema is changed; put the file back, or pick
+  another picture in Properties.
+Both programs: the BruControl Import's Build page shows it too.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -2624,18 +2632,26 @@ locks them before a production zip. (2026-10-21)
 Fritz dropped it: open PRs are on GitHub and Claude doesn't forget them, so no Unresolved PRs
 document is kept.
 
-9.8 **Three update choices on an existing install** (Fritz, 2026-11-06, replaces the single Start Fresh question): when an
-installer (the Windows Setup .exe, the Mac .command, the Linux / Pi .sh) finds the panel already installed, it asks what this
-update does. The program files are always updated. The Windows Setup shows a page with three round choice buttons; the Mac
-and Linux / Pi installers show the same three as a numbered list:
-1. **Start Fresh: delete everything**, as below.
-2. **Update the program and reset all users**: after a warning (No, go back, is the default) it deletes every user, password,
+9.8 **Four update choices on an existing install** (Fritz, 2026-11-06, replaces the single Start Fresh question; Modified Fresh
+Start added 2026-11-13): when an installer (the Windows Setup .exe, the Mac .command, the Linux / Pi .sh) finds the panel already
+installed, it asks what this update does. The program files are always updated. The Windows Setup shows a page with four round
+choice buttons; the Mac and Linux / Pi installers show the same four as a numbered list:
+1. **Start Fresh: delete everything, nothing saved** (OakBarn Brewery, 2026-11-13: "A fresh start should be a real Fresh Start
+   with nothing saved" ... "and the Import"): as below, and now also the `backups` folders, the user's own pictures and sounds
+   (the Skynet ones in `lib/skynet_media.json` stay) and everything in the Import folder.
+2. **Modified Fresh Start** (OakBarn Brewery, 2026-11-13: "a Modified Fresh Start like the Fresh Start now where some files are
+   kept"): after a warning it deletes the Schemas, Tabs, Devices, Widgets and own Templates (`config`), users and the brew log
+   (`data`) and Processes (`processes`). **Kept:** the Default settings (`brewDefaults`, put back into the new layout on the next
+   start), own Mash / Boil / Water Profiles, Equipment Profiles, saved Recipes, own pictures and sounds, the `backups` folders and
+   the Import folder.
+   Both Fresh Starts run `lib/freshstart.js`, the same file in every installer.
+3. **Update the program and reset all users**: after a warning (No, go back, is the default) it deletes every user, password,
    sign-in and the recovery code (`data/users.json` and `data/sessions.json`), and on Windows the user name and password the
    clean window remembers. Schemas and settings (`config`), the brew log and saved values (`data`), Processes (`processes`) and
    `media` are kept. The panel opens at Admin setup.
-3. **Update the program and keep everything** (the original No: recommended, already picked, and what a silent or
+4. **Update the program and keep everything** (the original No: recommended, already picked, and what a silent or
    unattended update does).
-With 2 or 3 the installer still offers to replace single folders ("Keep all of them as they are?").
+With 3 or 4 the installer still offers to replace single folders ("Keep all of them as they are?").
 *Replaced:* "it first asks **Delete all users and Schemas and Start Fresh?** (No is the default)." (2026-11-02)
 **Start Fresh** (Fritz, 2026-11-02): choice 1 shows a second warning that **all existing data will be deleted**, listing what goes,
 with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `config` (Schemas, Tabs, Devices, settings),
@@ -3980,6 +3996,15 @@ Confirm Button and a Back Button."; "Do Not Lock the Interface or Port until the
 - **Both programs:** the BruControl Import brings in Devices that are already wired, so it has no Add box and no Review; it shares
   the balloons (public/app.js) when it uses the Panel's Build page.
 
+18.36 **A default is the number in the box** (OakBarn Brewery, 2026-11-13, Default settings markup: "Empty = 10 and like is a real
+Who's on First Issue. Just put 10 in the Slot and no comments like Empty = 10 / Empty = Nul"):
+- A box with a Skynet default shows **that number in the box** (Pulse 100, Lockout 3000, a new Tab 1600 x 900, Dial tick marks 6,
+  Pump speed 100 ...). The user sees what is used and changes it there.
+- **No "(empty = ...)" in a label**, ever. A box left empty is **Null** (Rule 1.32).
+- When an empty box means something that is not a number ("none", "no limit", "itself", "the Name"), that goes in the box's
+  **Hover Help** as "Empty: ...", not in its label.
+Both programs: the BruControl Import's Build page uses the same dialogs.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4101,6 +4126,8 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 9.8 now has four update choices (OakBarn Brewery): 1 Start Fresh is a real fresh start, nothing saved (also the backups, own pictures and sounds, and the Import folder); new 2 Modified Fresh Start keeps the Default settings, own Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import; 3 reset all users; 4 keep everything. lib/freshstart.js does both Fresh Starts in every installer; lib/skynet_media.json lists the Skynet pictures and sounds (tools/skynet-media-list.js). Help 18, 19.
+- 2026-11-13: Added Rule 18.36 (OakBarn Brewery, Default settings markup: "Just put 10 in the Slot and no comments like Empty = 10"): a box with a Skynet default shows the number in it; no "(empty = ...)" in any label; empty = Null; what an empty box means moves to its Hover Help ("Empty: ..."). Added Rule 7.24 (OakBarn Brewery): a missing picture shows the File Not Found picture, Hover Help names the path. Repair (Rule 9.14) now ends with a Skynet notice that this is Official Skynet again; Acknowledge closes About and goes to the opening Tab. ☰ Menu has Help in Français / Help in English. New items on the Build Tab go to the center of what is on screen; the New text X / Y boxes left Default settings. Checked against both programs.
 - 2026-11-13: Added Rule 2.52 (OakBarn Brewery, PDF "Blickmann Rip Tide Mode"): in Build mode (Edit layout) the ☰ Menu button is greyed out, dialogs have no ☰ (Rule 2.3 changed to say so) and never two after the Review step's Back, the Edit layout bar is greyed out while a dialog is open, and the Label Attributes Dialog shows the Font, Fore Color and Back Color defaults that are set, with Cancel and Save at the top only. Help 51, 115 (and French). Checked against both programs: the Importer's Build page is the same Edit layout. (thread "Build an Equipment Profile interview")
 - 2026-11-13: Rule 9.13 note (OakBarn Brewery: "We need to add a schema version to the 3 vessel. We will change it again when we go to production."): the 3 Vessel sample (sample.json `version`) and the default Schema carry the Schema version `Three_Vessel_Brewery_20261113T1550`; loading the sample sets it. Help 42 (and French). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.14 (OakBarn Brewery: "pop a Dialog with the Caveat that the Translation was by Machine and not Human in English and the Language Chosen with an Aknowlegement Button"): picking a Help language other than English shows a machine translation notice in English and that language, closed with Acknowledge. Help 192 (and French). Checked against both programs. (thread "Polish the Skynet Brew Panel")

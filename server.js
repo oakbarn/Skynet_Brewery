@@ -40,6 +40,7 @@ import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from 
 import { blankRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
+import { applyKeptSettings } from './lib/freshstart.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -107,6 +108,8 @@ if (seeded.length) console.log(`First start: copied the samples into ${seeded.jo
 useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
+// a Modified Fresh Start kept the Default settings (lib/freshstart.js): they go back in now
+if (!IMPORT_BUILD && applyKeptSettings(store)) console.log('Modified Fresh Start: your Default settings were put back');
 // Picture groups: the eleven Skynet folders in media/Images are made (lib/picgroups.js)
 setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
