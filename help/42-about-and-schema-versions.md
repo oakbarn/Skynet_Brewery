@@ -6,7 +6,7 @@
 
 - **Signed in as**: your user name and whether you are a Viewer, Operator or Admin.
 - **Schema**: the Schema that is loaded now, as a dropdown. Pick another Schema there to load it, right from the About tab (Admins). It is the same list as on the Menu Bar and the **☰ Menu > Schema** tab, with the same choices (Add new, Clone, Rename, versions, backups, Delete). If any Process is running you are warned first, and every output is switched off before the other Schema loads. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
-- **Schema version**: its version, or "No version yet".
+- **Schema version**: its version, or "No version yet". The 3 Vessel sample comes with its own version from OakBarn Brewery (for example `Three_Vessel_Brewery_20261113T1550`).
 - **Last saved**: when the Schema was last saved.
 
 The **Sign out** button is here too. Your user name and Sign out are no longer on the Menu Bar.

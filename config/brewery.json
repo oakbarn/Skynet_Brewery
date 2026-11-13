@@ -4184,6 +4184,7 @@
  "boltSteady": true,
  "schema": {
   "id": "three-vessel-brewery",
-  "name": "Three Vessel Brewery"
+  "name": "Three Vessel Brewery",
+  "version": "Three_Vessel_Brewery_20261113T1550"
  }
 }
