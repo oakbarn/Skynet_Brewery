@@ -77,5 +77,11 @@
  "77-simulator-or-real-boards": "3fc14a525fa235ce",
  "78-raspberry-pi-gpio-pins": "8d331c749ffdbb6c",
  "79-predictive-text": "8e7640adc70723bc",
- "80-name-change-and-hidden-keys": "0596c77a87af3260"
+ "80-name-change-and-hidden-keys": "0596c77a87af3260",
+ "82-edit-layout-bar": "b3b9886ed7f7df3a",
+ "83-sample-schemas": "d0e5923a9dcc67a6",
+ "84-gkonstant-and-gapi": "2d1bf3057bafe98d",
+ "85-simulator-bar": "b6beb9730482e6ba",
+ "86-ip-snap-and-valve-pictures": "a4276323e3350632",
+ "87-pipe-fittings-and-manual-valves": "981725843aac3a70"
 }
