@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-194 pictures.
+197 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -204,5 +204,8 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 192 | Vessel_Kettle_BottomDrain_Side.svg | Vessels |
 | 193 | Vessel_Kettle_BottomDrain.svg | Vessels |
 | 194 | Vessel_Kettle_Tall.svg | Vessels |
+| 195 | Alarm_PreHop_Mark_1.svg | Alarms |
+| 196 | Alarm_PreHop_Mark_2.svg | Alarms |
+| 197 | Alarm_PreHop_Mark_3.svg | Alarms |
 
 *This list is written by `node tools/skynet-picture-ids.js`.*

@@ -1,11 +1,12 @@
 # Alarm Widget
 
-An **Alarm Widget** sounds and shows an alarm on a Tab. It comes in **two subclasses**. You pick one when you make it, in Edit
+An **Alarm Widget** sounds and shows an alarm on a Tab. It comes in **three subclasses**. You pick one when you make it, in Edit
 layout with **Select Widget Type > On-screen controls** (it is made on the 🔨 Build Tab first, like every new Widget), and it
-**can never be changed** to the other one:
+**can never be changed** to another one:
 
 - **Basic Skynet Alarm**: the Skynet bell picture. You pick its colors and what sits on it.
-- **User Alarm**: your own pictures.
+- **User Alarm**: your own pictures, with a text.
+- **Pre-Hop Alarm**: a text box on a Skynet watermark (a Combination Alarm and String Box Widget).
 
 Alarms made before 2026-11-02 keep working as before.
 
@@ -33,7 +34,22 @@ The Set Graphic and Active overlay lists hold only Skynet pictures: the `Alarm_S
   it opens the **Graphic Dialog** with Background #, Image Path 2 and 3, and the Back Colour behind the picture.
 - **Set Graphic (Layer 2)**: any picture, on top of the background.
 - **Active overlay (Layer 1)**: on top while the alarm is active.
-- **Back color**: the color behind it all (`.back` in a Process).
+- **Text**: what it says (`.string` in a Process). Rich Text codes work in it.
+- **Fore color** and **Back color**: the colors of its text (`.fore` and `.back` in a Process).
+- **Play time**: how many seconds it stays On, then it turns itself Off. Empty = until it is tapped.
+
+## Pre-Hop Alarm
+
+A text box on one of **three Skynet watermarks**. The watermarks are Skynet pictures and can't be changed; a Process picks one
+with `.background = 1`, `2` or `3` (1 to start).
+
+- **Text**, **Fore color**, **Back color** and **Play time**: as on a User Alarm.
+- **Set Graphic (Layer 2)** and **Active overlay (Layer 1)**: Skynet pictures on the watermark, as on a Basic Skynet Alarm.
+
+## Shows only while it is On
+
+Every Alarm Widget **shows while it is On and hides while it is Off**: you never set Visible. In Edit layout a hidden Alarm
+shows faint, so you can still place it. **A click on it turns it Off.** See [The Alarm attributes](195-alarm-attributes).
 
 ## Alarm Widget Properties
 
@@ -48,7 +64,7 @@ The dialog follows the General Dialog Rules (Skynet Rules section 18):
 - **Graphic**: the layers above.
 - **Alarm Chain**: steps that change its colors, pictures and sound, so one Alarm does the work of many stacked ones. Every
   choice starts on **No Change**. See [The Alarm Chain](172-alarm-chain).
-- **Properties**: Visible, Hidden Locked, Tab, X, Y, Width, Height and Lock.
+- **Properties**: Hidden Locked, Tab, X, Y, Width, Height and Lock. Visible is automatic (above).
 - **COPY** saves it and makes a copy on the 🔨 Build Tab. The orange **?** lists its Properties and Attributes.
 - **✖ Cancel** in the ⬆ and ⬢ pop-ups asks first when something was changed: discard the changes, or go back (Rule 18.11).
 
@@ -56,8 +72,12 @@ The dialog follows the General Dialog Rules (Skynet Rules section 18):
 
 ```
 alm_Hops = On                 // sound it
-alm_Hops.back = "Red"         // Layer 4 of a Basic Skynet Alarm (the color behind a User Alarm)
+alm_Hops.back = "Red"         // Layer 4 of a Basic Skynet Alarm (behind the text of a User or Pre-Hop Alarm)
 alm_Hops.fore = "Yellow"      // Layer 3: the bell
 alm_Hops.back = ""            // back to what its Properties say
 alm_Hops.step = 2             // step 2 of its Alarm Chain (or alm_Hops.step = "Aroma")
+alm_PreHop.string = "Get the Flavor Hops ready"   // the text of a Pre-Hop or User Alarm
+alm_PreHop.playtime = 30      // it turns itself Off after 30 seconds
 ```
+
+Every attribute an Alarm has is in [The Alarm attributes](195-alarm-attributes).

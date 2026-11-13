@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" width="600" height="300">
+  <!-- Skynet Pre-Hop Alarm watermark 2 (Rule 7.21): a pale clock, the time before the hop drop. Placeholder drawing, see-through. -->
+  <rect width="600" height="300" rx="24" fill="#fff8e6"/>
+  <g fill="none" stroke="#f0d9a0" stroke-width="12" stroke-linecap="round">
+    <circle cx="300" cy="150" r="110" fill="#fdefc9"/>
+    <path d="M300 150 V75 M300 150 L355 182"/>
+    <path d="M300 48 v14 M300 238 v14 M198 150 h14 M388 150 h14" stroke-width="8"/>
+  </g>
+</svg>

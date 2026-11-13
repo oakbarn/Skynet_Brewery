@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" width="600" height="300">
+  <!-- Skynet Pre-Hop Alarm watermark 3 (Rule 7.21): a pale bell. Placeholder drawing, see-through. -->
+  <rect width="600" height="300" rx="24" fill="#eef4fb"/>
+  <g fill="#d3e2f3" stroke="#b9cfe8" stroke-width="8" stroke-linejoin="round">
+    <path d="M300 40 C250 40 222 80 222 132 V180 L196 220 H404 L378 180 V132 C378 80 350 40 300 40 Z"/>
+    <circle cx="300" cy="240" r="22"/>
+  </g>
+</svg>

@@ -19,7 +19,7 @@ your own with **up to two decimal places**: 1, 1.1, 1.15, 2 ... **The lower one 
 and 1.1 before 1.15 before 1.2, so you can put an Alarm in between two others without renumbering them.
 
 - **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the same Priority.
-- **Two at the same moment** (within a second) with the same Priority: one is **picked at random**, then the other follows.
+- **Two at the same moment** with the same Priority: the **first one On plays first** (1a), then the next (1b), even within the same second. In a Process, that is the order of their lines.
 - **A sound that doesn't Repeat** lets the next one play as soon as it has played to its end, even while its Alarm still shows On.
 - **Alarm Chain steps wait their turn**: see [The Alarm Chain](172-alarm-chain).
 - A Process can change it: `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` puts back its Properties' number).
@@ -49,6 +49,8 @@ alm_Hops_1 = false           turn it off
 ```
 
 `alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
+
+**A Brew Flow Alarm holds its Process:** turning a Brew Flow Alarm Widget On in a Process (`alm_Mash_Done = On`) waits on that line until the brewer taps it Off, as if `wait alm_Mash_Done == false` followed it. Every attribute an Alarm has (`.path`, `.string`, `.playtime` ...) is in [The Alarm attributes](195-alarm-attributes).
 
 ## Sound Player
 

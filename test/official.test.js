@@ -6,7 +6,9 @@ import path from 'node:path';
 import { checkOfficial, repair, makeList, coreFiles, fingerprint, setReadOnly, canLock, LIST_FILE, OFFICIAL_REPO } from '../lib/official.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bp-official-'));
-const put = (f, t) => { fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true }); fs.writeFileSync(path.join(root, f), t); };
+// a test writing over a core file plays the brewer editing it: after Repair the file is Read-only, so it is made writable first
+// (root ignores Read-only, a normal user such as the GitHub test runner does not)
+const put = (f, t) => { const full = path.join(root, f); fs.mkdirSync(path.dirname(full), { recursive: true }); try { fs.chmodSync(full, fs.statSync(full).mode | 0o200); } catch { /* new file */ } fs.writeFileSync(full, t); };
 const OFFICIAL = { 'server.js': '// panel\n', 'lib/a.js': 'export const a = 1;\n', 'public/app.js': 'app();\n', 'templates/t.json': '{}\n' };
 for (const [f, t] of Object.entries(OFFICIAL)) put(f, t);
 put('config/brewery.json', '{"mine":true}');            // yours: never checked
