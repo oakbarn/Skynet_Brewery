@@ -130,5 +130,9 @@
  "134-value-time-and-datetime-widgets": "125e779fd802f13c",
  "135-vessel-sizing": "21e03313cd303162",
  "136-pwm-and-analog-out-device-properties": "fb9cca04f8c58a38",
- "137-heating-element-device-properties": "9c413c8c22d4f402"
+ "137-heating-element-device-properties": "9c413c8c22d4f402",
+ "138-temperature-probe-device-properties": "473f40c26f9580df",
+ "139-sight-glasses": "b47e7ed1b3ed3c5a",
+ "140-label-cannot-be-blank": "dc5fe7bdf518814d",
+ "141-tap-water-valve": "eb0da2d42c1c5155"
 }
