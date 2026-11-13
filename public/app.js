@@ -3914,6 +3914,7 @@ function setEditing(on) {
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
+  document.body.classList.toggle('buildMode', on);       // ☰ Menu greyed out; the Edit layout bar greyed while a box is open (Rule 2.52)
   $('#barEdit').classList.toggle('on', on); $('#barEdit').setAttribute('aria-pressed', String(on));
   $('#barEdit').title = on ? 'Leave Edit layout (asks to Save if something changed)' : 'Edit layout (admins): move, add and change things on the Tabs. Press again to leave it';
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
@@ -7260,8 +7261,12 @@ const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under th
 // Label Attributes (OakBarn Brewery, 2026-11-10): Title Case names, no clutter, the size it shows at in Font Size, and Left, Centered or
 // Right (no Default choice: what it shows is what it is; Centered when nothing else is set)
 const LABEL_ALIGNS = [['MiddleLeft', 'Left'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right']];
-const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Dialog where you can set its font, size and colors.',
-  fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(), nameAlign: 'Middle' + labelDefaultAlign() }),
+// Build mode (OakBarn Brewery, 2026-11-13, on the RipTide Add box: Font, Fore Color and Back Color "DiD not change to the defaults set";
+// the bottom Cancel and Save "Don't Need", Rule 2.52): each box shows the default it has now (Tab Style, then Default settings), kept
+// empty when it is not changed so it goes on following the defaults; Cancel and Save only at the top
+const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Dialog where you can set its font, size and colors.', noBottom: true,
+  fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(), nameAlign: 'Middle' + labelDefaultAlign(),
+    ...labelDefaultLook(o) }),
   fields: [['label', 'Label', 'text', null, false, 'b', { tip: 'The Label shown on the Tab.' }], ['hideName', 'Visible', 'show', null, false, false, { tip: 'On: the Label shows on the Tab. Off: no Label shows.' }],
   ['nameFontSize', 'Font Size', 'num', null, false, false, { tip: 'The size of the Label\'s letters, in pixels.' }],
   ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore Color', 'color'], ['nameBg', 'Back Color', 'color'],
@@ -7270,6 +7275,13 @@ const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Di
 // the size its Label shows at on the Tab now (pixels), when it is there
 const labelShownSize = o => { try { const n = o?.name && document.querySelector(`#ws .el[data-name="${CSS.escape(o.name)}"] > .nm`); return n ? Math.round(parseFloat(getComputedStyle(n).fontSize)) || 0 : 0; } catch { return 0; } };
 const labelDefaultSize = () => fontPx(TS().labelSize) || TD().nameFontSize || 11;
+// the Label's font and colors when it has none of its own: its own Fore and Back color, then the Tab Style's, then Default settings
+const labelDefaultLook = o => { const T = TS(), D = TD(), out = {};
+  const fam = o.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont), fore = firstSet(o.foreColor, T.labelFore, D.foreColor), back = firstSet(o.backColor, T.labelBack, D.backColor);
+  if (fam && FONTS.some(f => (Array.isArray(f) ? f[0] : f) === fam)) out.nameFontFamily = fam;
+  if (fore) out.nameColor = fore;
+  if (back) out.nameBg = back;
+  return out; };
 const labelDefaultAlign = () => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TD().align));
 const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
@@ -9492,11 +9504,11 @@ async function dbGroupDialog(g, me, cur) {
     document.body.append(d); d.showModal();
   });
 }
-function layerDialog(title, build, canDelete = false) {
+function layerDialog(title, build, canDelete = false, { bottom = true } = {}) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
     const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
-    d.append(h('h3', {}, title), bar(), body, bar());
+    d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
     const done = r => { d.close(); d.remove(); res(r); };
@@ -9539,7 +9551,7 @@ async function attrEntry(attr, obj) {
   const fill = Object.entries(attr.fill?.(obj) ?? {}).filter(([k]) => obj[k] === undefined || obj[k] === null || obj[k] === '');
   for (const [k, v] of fill) obj[k] = v;
   const unfill = () => { for (const [k, v] of fill) if (String(obj[k] ?? '') === String(v)) obj[k] = ''; };
-  const r = await layerDialog(titleCase(attr.title), b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete);
+  const r = await layerDialog(titleCase(attr.title), b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete, { bottom: !attr.noBottom });
   if (r === 'delete') { unfill(); return $('#dlg').close('delete'); }      // the Properties pop-up's Delete is the dialog's Delete (it asks first)
   if (r !== 'ok') return unfill();
   readFields(obj, body); unfill();
@@ -12464,7 +12476,7 @@ function showPart(el) {
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
 $('#barEdit').onclick = guard(menuEditLayout);      // the blue button (#1D56B0, Rule 2.14; crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
 $('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
-$('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
+$('#menuBtn').onclick = ev => { ev.stopPropagation(); if (editing) { closeMenuList(); return toast(MENU_BUILD_MSG); } const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });
 
 // Fritz, 2026-10-21: the ☰ Menu is on almost every dialog and on the Menu Bar of every page, as a way to get around.
@@ -12472,12 +12484,15 @@ document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) 
 // a choice and may say no; in a dialog it asks about unsaved changes and closes the dialog.
 const MENU_SVG = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const closeMenuCopies = () => { for (const l of $$('.menuCopy .menuList')) l.classList.add('hidden'); for (const b of $$('.menuCopy .menuBtn')) b.setAttribute('aria-expanded', 'false'); };
+const MENU_BUILD_MSG = '☰ Menu is greyed out while you build (Edit layout). Press Exit or Save layout first.';
 function menuButton(leave, label = ' Menu') {
   const list = h('div', { class: 'menuList menuFixed hidden', role: 'menu' });
   const btn = h('button', { type: 'button', class: 'menuBtn', title: 'Menu: Edit layout, the Menu tabs and the pages', 'aria-haspopup': 'true', 'aria-expanded': 'false' });
   btn.innerHTML = MENU_SVG + label;
   btn.onclick = ev => {
     ev.preventDefault(); ev.stopPropagation();
+    // greyed out in Build mode (OakBarn Brewery, 2026-11-13, Rule 2.52): its items do not work while building; Exit or Save layout leaves it
+    if (editing) { closeMenuList(); closeMenuCopies(); return toast(MENU_BUILD_MSG); }
     const show = list.classList.contains('hidden');
     closeMenuList(); closeMenuCopies();
     if (!show) return;
@@ -12499,7 +12514,11 @@ function addDialogMenu(d) {
   if ('nomenu' in d.dataset) return;
   d._menuSnap = dlgSnap(d);
   const host = d.querySelector(':scope > form') || d;
-  if (host.querySelector(':scope > .dlgMenu')) return;
+  // Build mode (Edit layout, Rule 2.52): the ☰ does not work while building, so a dialog has none (OakBarn Brewery, 2026-11-13: "Get
+  // Rid in Build mode"). A dialog opened again (the Review step's Back) keeps the one it has: never two ☰ (the frozen top holds it).
+  const mine = host.querySelectorAll(':scope > .dlgMenu, :scope > .dlgHead > .dlgMenu');
+  if (editing) { for (const m of mine) m.remove(); return; }
+  if (mine.length) return;
   const wrap = menuButton(() => {
     if (dlgSnap(d) !== d._menuSnap && !confirm('This window has changes that are not saved. Leave them?')) return false;
     // the dialog's own Cancel / Esc runs first, so whatever waits on it hears "cancel"
