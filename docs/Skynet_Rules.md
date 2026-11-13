@@ -2622,6 +2622,35 @@ and does not use Sample Schemas; nothing changes there. **The 3 Vessel sample al
 additional samples. The 3 Vessel one will always be available in the Skynet Panel as a Sample"): it is never moved to the Sample
 Schemas Setup, which is only for additional samples. (thread "Move Sample Schemas to own Setup", Help 184)
 
+9.14 **Official Skynet: the program on a Brain is checked on every start, and a change is reported** (OakBarn Brewery, 2026-11-12:
+"can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "WE
+still want it open source but maybe once on a user computer core code cannot be accessed", "Warn the end user is a good idea for
+non official updates", "Explain the Offical Updates in the Help"). Skynet stays open source (MIT): the code stays public on GitHub.
+1. **The list:** every merge, GitHub writes `skynet_files.json` next to `version.json` (tools/make-file-list.js): the fingerprint
+   (SHA-256) of every **core** program file: `server.js`, `importer.js`, `package.json`, `lib`, `public`, `templates`, `firmware`,
+   `install`, `samples`. Never edited by hand. Not core, never checked or touched: `config`, `data`, `media`, `scripts`, `help`
+   (Admins edit Help pages), `sample_schemas`, `node_modules`, `backups`. (Text files are compared without carriage returns.)
+2. **Every start** (lib/official.js) the panel compares its core files with the list of its own version from **OakBarn Brewery's
+   GitHub** (always oakbarn/Skynet_Brewery, never the repository named in `version.json`); without the internet, with the list that
+   came with it, and says so. **Official** = an OakBarn Brewery version and every core file the same. **Changed** = an OakBarn
+   Brewery version with core files changed, missing or added. **Not Official** = someone else's copy (a fork), or no Panel version.
+3. **Warn the end user:** the Menu Bar version shows **✓ Official**, **⚠ Changed**, **⚠ Not Official** or **⚠ Not checked**; when
+   not Official, a red bar on every screen (Details, Help, ✕ until the next check); **☰ Menu > About > Official Skynet** names the
+   Changed, Missing and Added files, with **🔍 Check again**. The check never stops anything: a running brew carries on.
+4. **Repair** (Admins, when Changed): the official file of the same version for every changed or missing one, from OakBarn Brewery's
+   GitHub, each checked against the official list before use; the replaced and added files are **moved** to
+   `backups/changed_files_<date>`, never deleted (Rule #1). Without the internet: run the Setup of that version again.
+5. **Read-only:** Official and unchanged, the core files are made Read-only, so an editor can't save over one by accident. Not in a
+   developer's copy (a `.git` folder). The Windows Setup (install and uninstall) and the Mac and Linux / Pi installers take
+   Read-only off the core files first; `unzip -o` on a Pi replaces them anyway.
+6. **Honest limit:** whoever is the administrator of a computer can change any file on it, the check included. It finds and
+   reports changes; it can't make them impossible. Replaces the old "+ changes" after the version (the `code` fingerprint in
+   `version.json`, which covered only `lib`, `public`, `server.js` and `package.json`).
+7. **Help 191** explains Official Skynet updates, Repair, the virus checks on every Release (Rule 9.11) and how anyone can check a
+   Setup .exe for free at virustotal.com (named, not linked: Rule 11.10). Both programs: the BruControl Import's files are core
+   files of the same Setup, so the same check covers them; the Panel shows it. The Importer's Build page shows no badge and runs
+   no check of its own.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3856,6 +3885,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
 - 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Then VirusTotal (about 70 scanners) reports on each .exe in the Release notes, never hides it; needs the VIRUSTOTAL_API_KEY secret. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
 - 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")

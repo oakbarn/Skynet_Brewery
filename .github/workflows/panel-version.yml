@@ -9,6 +9,9 @@
 # built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
 # Never edit version.json by hand or in a pull request: this workflow owns it.
+# It also writes skynet_files.json (Rule 9.14, tools/make-file-list.js): the fingerprint of every core program file of this version.
+# The panel checks its files against it on every start (lib/official.js), asking this repository for the list of its own version,
+# and says Official Skynet, or Changed with the files named. Never edit skynet_files.json by hand either.
 # Signing: when the Azure Artifact Signing secrets and variables are set (docs/Code_Signing_Setup.md), the Setup .exe and
 # the Uninstall .exe inside it are signed, so Windows Smart App Control lets them run. Until then (or if signing fails)
 # the Setup .exe is built unsigned as before and the release still happens.
@@ -17,7 +20,7 @@ name: Panel version
 on:
   push:
     branches: [claude/project-thread-vzxi0a]
-    paths-ignore: [version.json]
+    paths-ignore: [version.json, skynet_files.json]
   workflow_dispatch:
 
 permissions:
@@ -61,15 +64,14 @@ jobs:
           # two merges in the same minute: add _2, _3 ...
           base="$VERSION"; n=2
           while git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; do VERSION="${base}_$n"; n=$((n+1)); done
-          # the fingerprint of the program files, so the panel can tell when its files were changed after this merge
-          CODE=$(node -e "import('./lib/auth.js').then(m => console.log(m.codeFingerprint('.')))")
+          # the fingerprint of every core program file (Rule 9.14), so the panel can tell if its files are the official ones
+          node tools/make-file-list.js
           cat > version.json <<JSON
           {
             "version": "$VERSION",
             "merged": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "owner": "$OWNER",
             "commit": "${GITHUB_SHA}",
-            "code": "$CODE",
             "repo": "${GITHUB_REPOSITORY}",
             "branch": "${GITHUB_REF_NAME}"
           }
@@ -84,7 +86,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.json
+          git add version.json skynet_files.json
           git commit -m "Panel version $VERSION [skip ci]"
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
