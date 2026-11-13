@@ -296,6 +296,18 @@ anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet reall
 so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
 person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
 
+1.33 **A gGlobal has no Database and no .API** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew Panel 2a": "gGlobals or
+Variables sent to database with Process Command Only. No Need for API"; "In BruControl you could only use Globals for API. Since we
+can read a Device or Widget Attributes, there is no need for a Bridge to API like BruControl. The only real use for a gGlobal is as a
+variable with Global Scope."):
+- A gGlobal is a variable with Global Scope, Persistent and Non-Volatile (Rule 1.22). It has **no Database and .API box**: a Process
+  sends it to the database with `send_db Name` or `Name DBSend` (Rule 6.14). It is never in the web API, MQTT or voice (Rule 6.18);
+  outside programs read a Device's or Widget's own attributes.
+- The Variables page lists each gGlobal's Name, Kind and Value (no Database, .API or Log now columns). A gGlobal in an older file
+  loses its Database and .API settings when it loads (before the Public Production: nothing old, How Rules work).
+- **Both programs:** the BruControl Import makes gGlobals with no .API. When it turns a BruControl Global into a Widget, its Interview
+  asks about that Widget's .API (Importer Sandbox note, waits for OakBarn Brewery's OK on the question).
+
 1.32 **NULL, the empty value** (OakBarn Brewery, 2026-11-11: "Could we use NULL", "OK and in the Help about reserved words").
 `X = NULL` empties a Process variable, a gGlobal or a Value Widget of any Kind (number, text, time, date and time, true / false): it
 has **no value at all**, not 0, `false` or `""`. Its box on the Tab shows **blank**, and a gGlobal stays empty after a restart, until
@@ -4038,6 +4050,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 1.33 (OakBarn Brewery: "The only real use for a gGlobal is as a variable with Global Scope"): a gGlobal has no Database and .API box; a Process sends it to the database with send_db / DBSend; never in the web API, MQTT or voice; older files lose the settings on load; the Variables page has no Database, .API or Log now columns. Help 4, 13, 15, 98, 108, 118, 149 (and French). Checked against both programs: the Importer's Interview will ask .API for a Global that becomes a Widget (Sandbox note). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.13 (OakBarn Brewery: "Make that a Help Rule"): a background action the user cannot see and needs no input for gets only "Skynet does this in the Background and needs no user input." in Help; when the user gives one thing first (a file name to import), Help says that after it no other user input is needed and the action takes place in the background. How it is done stays out of Help (TMI). Rule 11.8 point 8 points to it. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")

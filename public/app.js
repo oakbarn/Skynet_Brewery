@@ -10844,7 +10844,7 @@ function logSummary(lg) {
 }
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
-const hasDbValue = e => !['picture', 'label', 'manual'].includes(e?.type);
+const hasDbValue = e => !['picture', 'label', 'manual', 'gGlobal'].includes(e?.type);      // a gGlobal: only send_db / DBSend in a Process (Rule 1.33)
 function dbFields(it) {
   if (!hasDbValue(it)) return [];
   const f = it.db_frequency || 'none', attrs = (S.words?.elements || []).find(x => x.name === it.name)?.attrs || [];
@@ -10912,13 +10912,8 @@ function varRow(e) {
   else val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
   const kindText = e.type === 'gGlobal' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
   const cells = [h('td', {}, e.name), h('td', {}, kindText), h('td', {}, val)];
-  if (e.type === 'gGlobal') {
-    const lg = e.database || { frequency: 'none' };
-    cells.push(h('td', {}, logSummary(lg)), h('td', {}, API_LABEL[e.api || 'off'].replace(/ \(.*\)$/, '')),
-      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now')));
-  }
   const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
-  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
+  return h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(open) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -10927,7 +10922,7 @@ function renderGlobals() {
     tb.append(...of(type).map(e => varRow(e)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
   }
-  // values and "Log now" need an operator
+  // values need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
 // ---------------------------------------------------------------- gGlobal Kinds (Fritz, 2026-11-02)
@@ -11075,15 +11070,7 @@ async function globalDialog(work, orig) {
       body.append(row('.value', inp));
     }
     // no Keep-value switch: every gGlobal keeps its .value when the Brain restarts (Rule 1.22); .value above is its first value
-    // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
-    body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
-      attrIcon('Database and .API settings', async () => {
-        const w2 = { name: work.name, database: work.database, api: work.api, apiName: work.apiName }; dbToWork(w2);
-        const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
-        if (r !== 'ok') return;
-        readFields(w2); dbFromWork(w2, orig);
-        work.database = w2.database; work.api = w2.api; work.apiName = w2.apiName; render();
-      })));
+    // no Database and no .API on a gGlobal (Rule 1.33, OakBarn Brewery 2026-11-13): a Process sends it with send_db / DBSend
   }
   render(); snap0 = snap();
   document.body.append(d); d.showModal();

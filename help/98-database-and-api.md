@@ -93,7 +93,7 @@ The database is a SQLite file on the Brain (`data/brewlog.db`): free, SQL, nothi
 
 **API_Name** (below .API in the pop-up) is the name a Voice Command says. It must be Unique and may be blank (with a warning): see [API_Name](144-api-name-for-voice-commands).
 
-The addresses and the safeguards are on [API (other programs)](11-api). A gGlobal shows up in MQTT and Home Assistant only when its .API is on, and can be changed there only with **Read & Control**.
+The addresses and the safeguards are on [API (other programs)](11-api). A gGlobal has no Database and .API box and never shows up in MQTT or Home Assistant: a Process sends it to the database with `send_db Name` or `Name DBSend`.
 
 The choices were called Get only and Get and Put until 2026-11-06. Skynet uses plain English first, with the computer words in ( ); they work the same. In the Rules and the other Help pages, Get only means Read Only and Get and Put means Read & Control.
 
@@ -105,7 +105,7 @@ The first time the Brain starts after this update (Skynet Rule 15.2, nothing old
 
 - Every gKonstant and gAPI (and any vKonstant or vAPI still around) becomes a gGlobal, in every Schema.
 - Names starting `gK..._`, `gA..._` (or `vK..._`, `vA..._`) become `gG..._`: `gKV_Strike` is `gGV_Strike`, `gAS_Note` is `gGS_Note`. If the new name is taken, `_2` is added.
-- A former gAPI keeps its database trigger as its **Database** setting and gets **.API = Get and Put**, so it works as before. A former gKonstant starts with Database Off and .API Off.
+- A former gAPI or gKonstant is a gGlobal, with no Database and .API box.
 - It is the same item (its hidden key stays), so every Process, the other Devices and Widgets that point to it, saved values, the BeerXML mapping and the brew database history follow the new name.
 - `log Name` lines in Processes become `send_db Name`.
 - The old files are kept as `.before-gglobal.bak` copies, and the list of what changed shows on the Processes page.

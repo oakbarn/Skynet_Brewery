@@ -1,6 +1,6 @@
 # gGlobal Kinds
 
-A **gGlobal** is a variable with a global scope: every Process can read it and change it. It is **not a Widget** and it is **not on a Tab**. To show something on a Tab, use a Widget (a Text, Picture, Value, Time or Date Time Widget). Any Device or Widget can already go to the database and be reached by outside programs (its **Database and .API** box), so a gGlobal is no longer needed for that either.
+A **gGlobal** is a variable with a global scope: every Process can read it and change it. It is **not a Widget** and it is **not on a Tab**. To show something on a Tab, use a Widget (a Text, Picture, Value, Time or Date Time Widget). Any Device or Widget can go to the database and be reached by outside programs (its **Database and .API** box), so a gGlobal has neither: a Process sends a gGlobal to the database with `send_db Name` or `Name DBSend`.
 
 Every gGlobal has one **Kind**. The Kind is picked when the gGlobal is made and **can never be changed**. If the Kind is wrong, delete the gGlobal and make a new one.
 
@@ -48,7 +48,7 @@ All of them follow the General Dialog Rules: Name first, ✖ Cancel and 💾 Sav
 | gT_Global_Time | **.value** like `01:30:00` |
 | gD_Global_DateTime | **.value** from a date and time picker |
 
-Every Kind also has **Database and .API** with a ⬢ for its settings. Every gGlobal keeps its .value when a Process starts and when the Brain restarts: see [gGlobals keep their values](118-gglobals-keep-their-values). The .value you type is its first value.
+Every gGlobal keeps its .value when a Process starts and when the Brain restarts: see [gGlobals keep their values](118-gglobals-keep-their-values). The .value you type is its first value.
 
 ## Sample
 

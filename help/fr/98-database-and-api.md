@@ -93,7 +93,7 @@ La base de données est un fichier SQLite sur le Brain (`data/brewlog.db`) : gra
 
 **API_Name** (sous .API dans la fenêtre) est le nom que dit une commande vocale. Il doit être unique et peut être vide (avec un avertissement) : voir [API_Name : le nom que dit une commande vocale](144-api-name-for-voice-commands).
 
-Les adresses et les protections sont sur [API (les autres programmes)](11-api). Une gGlobal n'apparaît dans MQTT et Home Assistant que quand son .API est activé, et ne peut y être changée qu'avec **Read & Control**.
+Les adresses et les protections sont sur [API (les autres programmes)](11-api). Une gGlobal n'a pas de case Database and .API et n'apparaît jamais dans MQTT ni Home Assistant : un Process l'envoie à la base de données avec `send_db Name` ou `Name DBSend`.
 
 Les choix s'appelaient Get only et Get and Put jusqu'au 2026-11-06. Skynet utilise d'abord l'anglais simple, avec les mots d'informatique entre ( ) ; ils marchent pareil. Dans les Règles et les autres pages d'aide, Get only veut dire Read Only et Get and Put veut dire Read & Control.
 
@@ -105,7 +105,7 @@ La première fois que le Brain démarre après cette mise à jour (Règle Skynet
 
 - Chaque gKonstant et gAPI (et tout vKonstant ou vAPI qui traîne encore) devient une gGlobal, dans chaque Schema.
 - Les noms qui commencent par `gK..._`, `gA..._` (ou `vK..._`, `vA..._`) deviennent `gG..._` : `gKV_Strike` devient `gGV_Strike`, `gAS_Note` devient `gGS_Note`. Si le nouveau nom est pris, `_2` est ajouté.
-- Un ancien gAPI garde son déclencheur de base de données comme réglage **Database** et reçoit **.API = Get and Put**, il marche donc comme avant. Un ancien gKonstant commence avec Database Off et .API Off.
+- Un ancien gAPI ou gKonstant est une gGlobal, sans case Database and .API.
 - C'est le même élément (sa clé cachée reste), donc chaque Process, les autres Devices et Widgets qui pointent vers lui, les valeurs enregistrées, la correspondance BeerXML et l'historique de la base de données de brassage suivent le nouveau nom.
 - Les lignes `log Name` des Processes deviennent `send_db Name`.
 - Les anciens fichiers sont gardés comme copies `.before-gglobal.bak`, et la liste de ce qui a changé s'affiche sur la page Processes.

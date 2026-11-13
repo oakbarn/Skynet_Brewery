@@ -13,10 +13,11 @@ const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.loa
 const engine = Object.assign(new EventEmitter(), { running: new Map(), print() { }, exists: () => true, stopAll() { }, start() { } });
 const b = new MqttBridge(store, engine);
 
-assert.equal(b.setFromMqtt('gGV_Boil', '75'), ''); assert.equal(store.getProp('gGV_Boil', 'value'), 75);
-assert.notEqual(b.setFromMqtt('gGS_Status', 'x'), '');            // read-only gGlobal
-assert.notEqual(b.setFromMqtt('gGV_Read', '1'), '');             // .API Get only: read, never changed
-assert.notEqual(b.setFromMqtt('gGV_Off', '1'), '');              // .API Off: not shared at all
+// a gGlobal has no .API (Rule 1.33, OakBarn Brewery 2026-11-13): never shared, whatever an older file said
+assert.notEqual(b.setFromMqtt('gGV_Boil', '75'), ''); assert.notEqual(store.getProp('gGV_Boil', 'value'), 75);
+assert.notEqual(b.setFromMqtt('gGS_Status', 'x'), '');
+assert.notEqual(b.setFromMqtt('gGV_Read', '1'), '');
+assert.notEqual(b.setFromMqtt('gGV_Off', '1'), '');
 assert.notEqual(b.setFromMqtt('HLT_Element', 'ON'), '');           // heat is off by default
 assert.equal(store.getProp('HLT_Element', 'state'), false);
 assert.equal(b.setFromMqtt('Pump', 'ON'), ''); assert.equal(store.getProp('Pump', 'state'), true);   // ticked
@@ -28,7 +29,7 @@ assert.notEqual(b.setFromMqtt('alm', 'ON'), '');
 
 const kinds = Object.fromEntries(b.discoveryConfigs().map(([c, x]) => [x.unique_id, c]));
 assert.equal(kinds.brewpanel_HLT_Element, 'binary_sensor'); assert.equal(kinds.brewpanel_Pump, 'switch');
-assert.equal(kinds.brewpanel_HLT_Temp, 'sensor'); assert.equal(kinds.brewpanel_gGS_Status, 'sensor'); assert.equal(kinds.brewpanel_gGV_Read, 'sensor'); assert.equal(kinds.brewpanel_gGV_Off, undefined);
+assert.equal(kinds.brewpanel_HLT_Temp, 'sensor'); assert.equal(kinds.brewpanel_gGS_Status, undefined); assert.equal(kinds.brewpanel_gGV_Read, undefined); assert.equal(kinds.brewpanel_gGV_Off, undefined);
 assert.equal(kinds.brewpanel_gGV_Boil, undefined); assert.equal(kinds.brewpanel_gV_Pass, undefined);
 assert.equal(kinds.brewpanel_stop_all_scripts, 'button');
 assert.deepEqual(cleanItems(store, { Pump: { voice: true, control: true }, HLT_Temp: { voice: false, control: false } }), { Pump: { control: true }, HLT_Temp: { voice: false } });

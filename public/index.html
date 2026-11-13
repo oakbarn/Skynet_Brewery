@@ -217,9 +217,9 @@
   <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
     <div class="bar admin-only"><button id="gNew" class="primary" title="Make a gGlobal: its Name, then its Kind, then fill in that Kind's dialog">➕ New gGlobal</button><button id="gSamples" title="Add one gGlobal of each Kind to this Schema, to see how they work">➕ Add the sample gGlobals</button></div>
-    <p class="muted">A gGlobal is a variable that every Process can read and change. It is not on a Tab. Its Kind is picked when it is made and can't be changed: <b>gS_Global_String</b>, <b>gG_Global_Graphic</b>, <b>gV_Global_Value</b>, <b>gB_Global_Boolean</b>, <b>gT_Global_Time</b>, <b>gD_Global_DateTime</b>. Switch, Push Button, Pulse Button, List, Step and Long String are not gGlobals (they move to the new Semi_Widgets_Devices class); until then they are still added in <em>Tabs &gt; Edit layout &gt; Select Widget Type &gt; gGlobal variables</em>. Every kind below can be read and changed by every process. Any Device or Widget (gGlobals too) can send its readings to the database and be reached by outside programs: its Properties, <em>Database and .API</em> box.</p>
-    <h3 id="sec-gglobal">gGlobal <span class="muted">(processes and screen; database and API when its Properties say so)</span></h3>
-    <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database</th><th>.API</th><th></th></tr></thead><tbody id="gBody"></tbody></table>
+    <p class="muted">A gGlobal is a variable that every Process can read and change. It is not on a Tab. Its Kind is picked when it is made and can't be changed: <b>gS_Global_String</b>, <b>gG_Global_Graphic</b>, <b>gV_Global_Value</b>, <b>gB_Global_Boolean</b>, <b>gT_Global_Time</b>, <b>gD_Global_DateTime</b>. Switch, Push Button, Pulse Button, List, Step and Long String are not gGlobals (they move to the new Semi_Widgets_Devices class); until then they are still added in <em>Tabs &gt; Edit layout &gt; Select Widget Type &gt; gGlobal variables</em>. Every kind below can be read and changed by every process. A gGlobal has no Database and no .API: a Process sends one to the database with <code>send_db</code> or <code>DBSend</code>. Outside programs read a Device's or Widget's own attributes.</p>
+    <h3 id="sec-gglobal">gGlobal <span class="muted">(a variable with Global Scope)</span></h3>
+    <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th></tr></thead><tbody id="gBody"></tbody></table>
   </section>
 
   <!-- ===== Log ===== -->

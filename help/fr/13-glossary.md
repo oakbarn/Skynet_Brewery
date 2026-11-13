@@ -64,7 +64,7 @@
 
 **gAPI** : retiré le 2026-10-30, c'est maintenant un **gGlobal**. Tout Device ou Widget peut atteindre la base de données et l'API avec ses réglages **Database and .API**.
 
-**gGlobal** : la classe de variable pour les Processes et l'écran ; ses réglages **Database and .API** l'envoient à la base de données ou laissent d'autres programmes l'atteindre. Les noms proposés commencent par `gG` (`gGV_`, `gGB_` ...). C'était gKonstant et gAPI (et avant cela vKonstant et vAPI).
+**gGlobal** : une variable à portée globale, pour les Processes. Elle n'a pas de case Database and .API : un Process l'envoie à la base de données avec `send_db` ou `DBSend`. Les noms proposés commencent par `gG` (`gGV_`, `gGB_` ...). C'était gKonstant et gAPI (et avant cela vKonstant et vAPI).
 
 **gKonstant** : retiré le 2026-10-30, c'est maintenant un **gGlobal**.
 
