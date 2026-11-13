@@ -1,6 +1,6 @@
 // Skynet opens in its own clean window on Windows; the normal browser is never changed (Rule 2.36, lib/appwindow.js)
 import assert from 'node:assert/strict';
-import { browserPaths, findBrowser, profileDir, appArgs, waitingOpeners, openAppWindow, closeScript, closeAppWindow } from '../lib/appwindow.js';
+import { browserPaths, findBrowser, profileDir, appArgs, waitingOpeners, openAppWindow, closeScript, closeAppWindow, openInDefaultBrowser, isWebLink } from '../lib/appwindow.js';
 
 const env = { 'ProgramFiles(x86)': 'C:\\Program Files (x86)', ProgramFiles: 'C:\\Program Files', LOCALAPPDATA: 'C:\\Users\\Fritz\\AppData\\Local' };
 const edge = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', chrome = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -74,4 +74,22 @@ console.log('appwindow tests passed');
   const nsi = fs.readFileSync(new URL('../install/windows/SkynetBrewer.nsi', import.meta.url), 'utf8');
   assert.ok(nsi.split('\n').filter(l => /Skynet BruControl Importer\.lnk/.test(l) && /CreateShortCut/.test(l)).every(l => l.includes('importer.ico')), 'every Importer shortcut has the mugs');
   console.log('importer icon tests passed');
+}
+
+// Outside links open in the default browser, not in Skynet's clean Edge window (OakBarn Brewery, 2026-11-12)
+{
+  const fs = await import('node:fs');
+  const ran = [], run = (exe, args) => ran.push([exe, ...args]);
+  assert.equal(openInDefaultBrowser('https://www.youtube.com/watch?v=5FsJe4DScDs', { platform: 'win32', run }), true);
+  assert.deepEqual(ran, [['explorer.exe', 'https://www.youtube.com/watch?v=5FsJe4DScDs']], 'Explorer hands it to the default browser');
+  assert.equal(openInDefaultBrowser('https://en.wikipedia.org/', { platform: 'linux', run }), false, 'not Windows: the page opens it');
+  for (const bad of ['file:///C:/Windows/system32/calc.exe', 'javascript:alert(1)', 'C:\\Windows\\notepad.exe', 'ms-settings:', 'https://a:b@x.com/', ''])
+    assert.equal(openInDefaultBrowser(bad, { platform: 'win32', run }), false, `never opens ${bad}`);
+  assert.equal(ran.length, 1);
+  assert.ok(isWebLink('http://example.com') && !isWebLink('ftp://example.com'));
+  const ext = fs.readFileSync(new URL('../public/extlinks.js', import.meta.url), 'utf8');
+  assert.match(ext, /\/ui\/openlink/); assert.match(ext, /\/api\/openlink/);
+  for (const page of ['../public/index.html', '../public/help.html', '../public/importer/index.html'])
+    assert.match(fs.readFileSync(new URL(page, import.meta.url), 'utf8'), /src="\/?extlinks\.js"/, `${page} loads extlinks.js`);
+  console.log('default browser link tests passed');
 }

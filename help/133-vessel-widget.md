@@ -86,7 +86,7 @@ hidden and no pipe or hose can join it. Only the open IPs show. A Valve's IP sti
 **HERMS coil:** pick **Left**, **Right**, or a crossed coil (**Outlet Right & Inlet Left**, **Outlet Left & Inlet Right**). The coil is drawn under that side's **HERMS In** and **HERMS Out** IPs, shaped to fit
 them, and the two IPs become the coil's two ends: flow that goes in one comes out of the other.
 
-**Once it is built and saved there is no way back.** After 💾 Save Build ... > To a Tab and Save layout, its IPs, the parts built
+**Once it is built and saved there is no way back.** After 💾 Save Build ... > Move to Tab and Save layout, its IPs, the parts built
 into them and its HERMS coil are locked for good, and it can't be un-bundled. Its Name, Labels, Gallons, Tab and place can still
 change. (One exception to Skynet Rules 5.7 and 5.31.)
 
