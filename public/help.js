@@ -2,6 +2,7 @@
 // Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
 // (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
 import { watchButtons } from './buttons.js';
+import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the buttons' tips of this window in French (Rule 11.11)
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
 const $ = s => document.querySelector(s);
 if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
@@ -19,7 +20,8 @@ async function call(method, url, body, raw) {
 let pages = [], cur = null, trail = [], editing = false;
 // The language of the Help pages (Rule 11.11, OakBarn Brewery, 2026-11-13: "French Help Only forever"): English or French. Only the
 // Help is translated; the screens, buttons and labels stay English. Kept in this browser (the Help window and the panel share it).
-export const LANG_KEY = 'skynet-help-lang';
+// the language picked (Rule 11.11): kept under one key with the balloons, which follow it (public/hoverhelp.js)
+export { LANG_KEY };
 export const helpLang = () => { try { return localStorage.getItem(LANG_KEY) === 'fr' ? 'fr' : 'en'; } catch { return 'en'; } };
 let lang = helpLang();
 const lq = () => lang === 'en' ? '' : '?lang=' + lang;
@@ -240,6 +242,7 @@ $('#hpLang').addEventListener('change', e => {
   if (changed() && !confirm('Throw away your changes to this page?')) { e.target.value = lang; return; }
   lang = e.target.value === 'fr' ? 'fr' : 'en';
   try { localStorage.setItem(LANG_KEY, lang); } catch { }
+  refreshBalloonLang();
   stopEdit(); load(cur).catch(err => say(err.message, true));
 });
 $('#hpPick').addEventListener('change', e => open(e.target.value));
