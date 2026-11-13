@@ -2571,6 +2571,14 @@ would require a Full Path"; "Two-part paths (.path + .file) build as it simplifi
 Both programs: the BruControl Import's Build page uses the same dialogs and the same Process reader; the pictures and sounds it copies
 into Images/User and sounds/User are found by their file name. Help 194.
 
+7.24 **File Not Found picture** (OakBarn Brewery, 2026-11-13: "if a Path is missing it just does not display. Maybe we can create an
+Image that says File Not Found when the path does not work"; "Looks good use it"):
+- When a picture's file is missing (moved, renamed, or not on this Brain), Skynet shows the **File Not Found** picture
+  (`public/File_Not_Found.svg`: a torn picture with a red ✕) in its place, at its size, so the item is still seen and can be fixed.
+- Its Hover Help says **File Not Found:** and the path it looked for. Nothing in the Schema is changed; put the file back, or pick
+  another picture in Properties.
+Both programs: the BruControl Import's Build page shows it too.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3969,6 +3977,15 @@ Confirm Button and a Back Button."; "Do Not Lock the Interface or Port until the
 - **Both programs:** the BruControl Import brings in Devices that are already wired, so it has no Add box and no Review; it shares
   the balloons (public/app.js) when it uses the Panel's Build page.
 
+18.36 **A default is the number in the box** (OakBarn Brewery, 2026-11-13, Default settings markup: "Empty = 10 and like is a real
+Who's on First Issue. Just put 10 in the Slot and no comments like Empty = 10 / Empty = Nul"):
+- A box with a Skynet default shows **that number in the box** (Pulse 100, Lockout 3000, a new Tab 1600 x 900, Dial tick marks 6,
+  Pump speed 100 ...). The user sees what is used and changes it there.
+- **No "(empty = ...)" in a label**, ever. A box left empty is **Null** (Rule 1.32).
+- When an empty box means something that is not a number ("none", "no limit", "itself", "the Name"), that goes in the box's
+  **Hover Help** as "Empty: ...", not in its label.
+Both programs: the BruControl Import's Build page uses the same dialogs.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4090,6 +4107,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 18.36 (OakBarn Brewery, Default settings markup: "Just put 10 in the Slot and no comments like Empty = 10"): a box with a Skynet default shows the number in it; no "(empty = ...)" in any label; empty = Null; what an empty box means moves to its Hover Help ("Empty: ..."). Added Rule 7.24 (OakBarn Brewery): a missing picture shows the File Not Found picture, Hover Help names the path. Repair (Rule 9.14) now ends with a Skynet notice that this is Official Skynet again; Acknowledge closes About and goes to the opening Tab. ☰ Menu has Help in Français / Help in English. New items on the Build Tab go to the center of what is on screen; the New text X / Y boxes left Default settings. Checked against both programs.
 - 2026-11-13: Rule 9.13 note (OakBarn Brewery: "We need to add a schema version to the 3 vessel. We will change it again when we go to production."): the 3 Vessel sample (sample.json `version`) and the default Schema carry the Schema version `Three_Vessel_Brewery_20261113T1550`; loading the sample sets it. Help 42 (and French). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.14 (OakBarn Brewery: "pop a Dialog with the Caveat that the Translation was by Machine and not Human in English and the Language Chosen with an Aknowlegement Button"): picking a Help language other than English shows a machine translation notice in English and that language, closed with Acknowledge. Help 192 (and French). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 9.18 (OakBarn Brewery: "Rename to Skynet Terms. That is part of the No Bructrol Rule"): the Processes folder is `processes`, not `scripts`, everywhere (panel, defaults, samples, Brain Move, File Move, installers, MQTT topic `processes/running`); an earlier trial panel's `scripts` folder is renamed once on start. Rule 1.4 updated. Help 1, 5, 18, 19, 30, 32, 44, 53, 63, 119, 184, 191 (and French), README, install/ReadMe.txt. Checked against both programs: the Importer's Build page uses `processes` in its own folder; the Importer still says Scripts for BruControl's. (thread "Polish the Skynet Brew Panel")

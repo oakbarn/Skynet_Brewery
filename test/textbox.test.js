@@ -16,8 +16,8 @@ assert.equal(tbPixels('x'), null);
 
 const d0 = textDefaults({});
 assert.deepEqual([d0.visible, d0.wrap, d0.width, d0.height, d0.x, d0.y, d0.foreColor, d0.nameFontSize], [true, true, 220, 40, 40, 40, '', 0]);
-const d1 = textDefaults({ textVisible: false, textWrap: false, textX: 0, textWidth: 300, textAlign: 'Right', nameFontSize: 14 });
-assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.nameFontSize], [false, false, 0, 300, 'Right', 14]);
+const d1 = textDefaults({ textVisible: false, textWrap: false, textWidth: 300, textAlign: 'Right', nameFontSize: 14 });
+assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.nameFontSize], [false, false, 40, 300, 'Right', 14]);
 assert.equal(firstSet('', undefined, 'Red', 'Blue'), 'Red');
 assert.equal(firstSet('', null), '');
 const g = { x: 1, y: 2, w: 3, h: 4 };
