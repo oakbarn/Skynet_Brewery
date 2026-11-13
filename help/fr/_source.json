@@ -170,5 +170,7 @@
  "176-time-formats": "a46b4d3b210c33cb",
  "177-board-talk": "85cb93c794f5a4ec",
  "178-alarm-digital-outputs": "8ba18eef89b943d5",
- "179-heating-element-look": "6b40c78046a417c6"
+ "179-heating-element-look": "6b40c78046a417c6",
+ "180-integrated-instances": "3b9c515812dcde93",
+ "181-heat-hysteresis-switched-by": "a2a596c8532814e8"
 }
