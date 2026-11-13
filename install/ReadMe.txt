@@ -36,12 +36,12 @@ The panel goes in C:\Brewing\BrewPanel on Windows, and in Brewing/BrewPanel in y
 home folder on a Mac, Linux or a Pi.
 
 INSTALL OR UPDATE: YOUR FOLDERS ARE SAFE
-The zip has NO config, data, media or scripts folders, so unzipping it over your
+The zip has NO config, data, media or processes folders, so unzipping it over your
 panel (or running an installer again) never replaces these:
   config    your layout, tabs, devices and settings
   data      brew log, saved values, users, passwords, sign-ins, recovery code
   media     your pictures and sounds
-  scripts   your processes
+  processes   your processes
 Their samples are in a "defaults" folder. The panel copies them in only on its first
 start, into a folder you don't have yet. On an update the installers ask "Keep all of
 them as they are?". Yes keeps them; No asks about each one and moves any you replace
@@ -49,7 +49,7 @@ to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
 UPDATE CHOICES: before that, the installers ask what the update does:
   1. Start Fresh: delete everything. A warning says ALL EXISTING DATA WILL BE DELETED
-     (config, data and scripts, with no backup; media is kept).
+     (config, data and processes, with no backup; media is kept).
   2. Update the program and reset all users: deletes every user, password, sign-in
      and the recovery code after a warning. Schemas, brew log, Processes, pictures
      and sounds are kept. You make the admin account again.

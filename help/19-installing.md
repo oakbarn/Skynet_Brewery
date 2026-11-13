@@ -20,7 +20,7 @@ Every version on that page is an **Official Skynet update**: once installed, Sky
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
-| `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `scripts` folders, so unzipping it over your panel can't replace yours. |
+| `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. |
 | `Install Skynet Brewer.command` | Mac installer |
 | `install-skynet-brewer.sh` | Linux and Raspberry Pi installer |
 | `Skynet_Brewer.bat` | Sample Windows start file |
@@ -30,7 +30,7 @@ Every version on that page is an **Official Skynet update**: once installed, Sky
 
 The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewPanel`** in your home folder on a Mac, Linux or a Pi. Every installer puts a **Skynet Brewer** shortcut on the Desktop.
 
-> **Updating?** Stop the panel first, then run the same installer again, or unzip the zip over the panel. Neither one replaces your layout and settings (`config`), brew data, users and passwords (`data`), pictures and sounds (`media`) or processes (`scripts`). See [Updating to a new version](18-updating).
+> **Updating?** Stop the panel first, then run the same installer again, or unzip the zip over the panel. Neither one replaces your layout and settings (`config`), brew data, users and passwords (`data`), pictures and sounds (`media`) or processes (`processes`). See [Updating to a new version](18-updating).
 
 ## Windows: the installer
 

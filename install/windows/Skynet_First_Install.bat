@@ -19,9 +19,10 @@ if not exist "%PANEL%\server.js" goto nopanel
 cd /d "%PANEL%"
 echo [1/5] Found the panel in %PANEL%
 
-:: Already had the panel here? Its work is in config, data, media and scripts (a new zip has none of them).
+:: Already had the panel here? Its work is in config, data, media and processes (a new zip has none of them).
+:: scripts: the name the processes folder had in earlier trial versions.
 set "OLD="
-for %%d in (config data media scripts) do if exist "%PANEL%\%%d" set "OLD=1"
+for %%d in (config data media processes scripts) do if exist "%PANEL%\%%d" set "OLD=1"
 if not defined OLD goto nodestep
 echo.
 color 4F
@@ -32,7 +33,7 @@ echo.
 echo  Starting over gives you a brand-new panel, as if it had never been installed.
 echo  ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN:
 echo    - your Tabs, layout, Devices, pipes and settings    (config)
-echo    - your Processes                                    (scripts)
+echo    - your Processes                                    (processes)
 echo    - your pictures and sounds                          (media)
 echo    - your brew log, users, passwords and recovery code (data)
 echo  As a safety net the old folders are moved to C:\Brewing\Old_Panel_(date),
@@ -58,8 +59,8 @@ if not errorlevel 1 goto stillrunning
 for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd'T'HHmmss"') do set "STAMP=%%t"
 set "KEEPDIR=C:\Brewing\Old_Panel_%STAMP%"
 mkdir "%KEEPDIR%"
-for %%d in (config data media scripts) do if exist "%PANEL%\%%d" move "%PANEL%\%%d" "%KEEPDIR%\" >nul
-for %%d in (config data media scripts) do if exist "%PANEL%\%%d" goto movefailed
+for %%d in (config data media processes scripts) do if exist "%PANEL%\%%d" move "%PANEL%\%%d" "%KEEPDIR%\" >nul
+for %%d in (config data media processes scripts) do if exist "%PANEL%\%%d" goto movefailed
 echo  Started over. The old work was moved to %KEEPDIR%
 goto nodestep
 

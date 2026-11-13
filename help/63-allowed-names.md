@@ -39,13 +39,13 @@ When the panel starts, or a Schema is opened, a name that still has one of `<` `
 - the screen still shows the old name (it becomes the Label, unless the item already had one)
 - every Process follows: `"Pump:1".visible` becomes `"Pump~1".visible`
 - settings that point to it, pipes, saved values and the brew log follow too (for a Tab, everything on it moves with it)
-- the old files are kept: `brewery.before-safe-names.bak` in the config folder and `<Process>.txt.before-safe-names.bak` in the scripts folder
+- the old files are kept: `brewery.before-safe-names.bak` in the config folder and `<Process>.txt.before-safe-names.bak` in the processes folder
 
 The Process Log says what was renamed.
 
 ## File and folder names
 
-This covers pictures and sounds you upload or rename in the Media manager, new folders, files sent with the **File Move Utility**, and **Process** names (each Process is a file, `scripts/<name>.txt`).
+This covers pictures and sounds you upload or rename in the Media manager, new folders, files sent with the **File Move Utility**, and **Process** names (each Process is a file, `processes/<name>.txt`).
 
 A file or folder name can't have:
 

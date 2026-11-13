@@ -39,13 +39,13 @@ Quand le panel démarre, ou qu'un Schema est ouvert, un nom qui a encore un de `
 - l'écran montre toujours l'ancien nom (il devient le Label, sauf si l'élément en avait déjà un)
 - chaque Process suit : `"Pump:1".visible` devient `"Pump~1".visible`
 - les réglages qui pointent vers lui, les tuyaux, les valeurs enregistrées et le journal de brassage suivent aussi (pour un Tab, tout ce qui est dessus bouge avec lui)
-- les anciens fichiers sont gardés : `brewery.before-safe-names.bak` dans le dossier config et `<Process>.txt.before-safe-names.bak` dans le dossier des scripts
+- les anciens fichiers sont gardés : `brewery.before-safe-names.bak` dans le dossier config et `<Process>.txt.before-safe-names.bak` dans le dossier processes
 
 Le Process Log dit ce qui a été renommé.
 
 ## Noms de fichiers et de dossiers {#file-and-folder-names}
 
-Cela concerne les images et les sons que vous envoyez ou renommez dans le gestionnaire Media, les nouveaux dossiers, les fichiers envoyés avec le **File Move Utility**, et les noms de **Process** (chaque Process est un fichier, `scripts/<name>.txt`).
+Cela concerne les images et les sons que vous envoyez ou renommez dans le gestionnaire Media, les nouveaux dossiers, les fichiers envoyés avec le **File Move Utility**, et les noms de **Process** (chaque Process est un fichier, `processes/<name>.txt`).
 
 Un nom de fichier ou de dossier ne peut pas avoir :
 

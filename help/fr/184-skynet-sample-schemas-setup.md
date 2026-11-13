@@ -33,7 +33,7 @@ Le même dossier, `BrewPanel/sample_schemas`, est l'endroit où va une brasserie
 |---|---|
 | `sample.json` | Son nom, son titre, une courte description, et ce dont il a besoin |
 | `config.json` | Ses Tabs, Devices, Widgets, tuyaux et Interfaces |
-| `scripts/` | Ses Processes (fichiers `.txt`) |
+| `processes/` | Ses Processes (fichiers `.txt`) |
 
 Mettez le dossier dans `sample_schemas` et appuyez sur **F5**. Il arrive exactement comme un exemple Skynet : comme nouveau Schema, sur le simulateur. Le `ReadMe.txt` de ce dossier dit la même chose.
 

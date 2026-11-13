@@ -337,7 +337,7 @@
     <div id="fmClose" class="pageClose"></div>
     <h2>File Move: copy files from this computer to the Brain</h2>
     <p class="muted">Works in any browser on Windows, Mac or Linux; nothing to install. Each kind of file goes to its one place on the Brain:
-      pictures to <b>media/Images</b> (folders inside the one you pick are kept), sounds to <b>media/sounds</b>, Processes to <b>scripts</b>, help pages to <b>help</b>.
+      pictures to <b>media/Images</b> (folders inside the one you pick are kept), sounds to <b>media/sounds</b>, Processes to <b>processes</b>, help pages to <b>help</b>.
       Files already on the Brain are skipped unless you tick Replace.</p>
     <div id="fmMissing" class="fmMissing"></div>
     <div class="bar fmTools">
@@ -345,7 +345,7 @@
         <option value="auto">Pictures and sounds (sorted for you)</option>
         <option value="pictures">Pictures only (media/Images)</option>
         <option value="sounds">Sounds only (media/sounds)</option>
-        <option value="processes">Processes (.txt to scripts)</option>
+        <option value="processes">Processes (.txt to processes)</option>
         <option value="help">Help pages (.md to help)</option>
       </select></label>
       <label title="Pictures go into this picture group in media/Images">Picture group <select id="fmGroup"><option value="">No group (straight into Images)</option></select></label>
@@ -591,7 +591,7 @@
 </form></dialog>
 <dialog id="binDlg" class="findAllDlg"><form method="dialog">
   <h3>Recycle Bin</h3>
-  <p class="muted">Deleted Processes wait here (in <code>scripts/Recycle_Bin</code> on the Brain) until you restore them or delete them for good. Nothing is restored or erased without asking you first.</p>
+  <p class="muted">Deleted Processes wait here (in <code>processes/Recycle_Bin</code> on the Brain) until you restore them or delete them for good. Nothing is restored or erased without asking you first.</p>
   <div id="binList" class="faList"></div>
   <pre id="binView" class="binView hidden"></pre>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>

@@ -82,8 +82,8 @@ need a Device or port. (2026-10-03)
 
 1.3 **Tab** = a screen (never "Workspace" or "Pane"). (2026-10-03)
 
-1.4 **Process** = a script, on screen and in the Help. (The scripts/ folder keeps its old name inside
-the program.) (2026-10-04, PR #17)
+1.4 **Process** = a script, on screen and in the Help. (2026-10-04, PR #17) The folder they are kept in is `processes`
+(Rule 9.18).
 
 1.5 **Interface** = a board (Mega, ESP32, Pi ...). (2026-10-21, PR #61)
 
@@ -2620,7 +2620,7 @@ and Linux / Pi installers show the same three as a numbered list:
 1. **Start Fresh: delete everything**, as below.
 2. **Update the program and reset all users**: after a warning (No, go back, is the default) it deletes every user, password,
    sign-in and the recovery code (`data/users.json` and `data/sessions.json`), and on Windows the user name and password the
-   clean window remembers. Schemas and settings (`config`), the brew log and saved values (`data`), Processes (`scripts`) and
+   clean window remembers. Schemas and settings (`config`), the brew log and saved values (`data`), Processes (`processes`) and
    `media` are kept. The panel opens at Admin setup.
 3. **Update the program and keep everything** (the original No: recommended, already picked, and what a silent or
    unattended update does).
@@ -2628,7 +2628,7 @@ With 2 or 3 the installer still offers to replace single folders ("Keep all of t
 *Replaced:* "it first asks **Delete all users and Schemas and Start Fresh?** (No is the default)." (2026-11-02)
 **Start Fresh** (Fritz, 2026-11-02): choice 1 shows a second warning that **all existing data will be deleted**, listing what goes,
 with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `config` (Schemas, Tabs, Devices, settings),
-`data` (users, passwords, sign-ins, recovery code, brew log, saved values) and `scripts` (Processes) for good, with no
+`data` (users, passwords, sign-ins, recovery code, brew log, saved values) and `processes` (Processes) for good, with no
 backup, and the panel starts again from the samples with Admin setup. **Kept:** `media` (pictures and sounds, Rule 7.3) and
 the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 **Fresh is fresh** (Fritz, 2026-11-05): Start Fresh on Windows also deletes the clean window's own browser profile (Rule 2.36,
@@ -2648,7 +2648,7 @@ Raspberry Pi later (or any Brain to any other), with **☰ Menu > Move Brain** (
    folders are not in it.
 2. On the **new** Brain (a normal fresh install), **Bring in the file** with the same password: it is checked first (a wrong
    password or a damaged file changes nothing), then **Move in now** stops the panel and, as it starts again, puts the old Brain's
-   files in place. The new Brain's own config, data, scripts and media are **kept** in `backups/before_brain_move_<date>`, never
+   files in place. The new Brain's own config, data, processes and media are **kept** in `backups/before_brain_move_<date>`, never
    deleted. Everyone signs in with the old Brain's user names and passwords.
 3. **USB ports**: each old USB port (COM3) is changed to the new Brain's (/dev/ttyACM0) in **every Schema at once**, Simulator
    boards included. A board the old Brain saw is found by its serial number and picked for you. It can be used any time, not only
@@ -2706,7 +2706,7 @@ in `Sandbox/` (Rule 16.8) and are added **one at a time**, each only after it is
 Setup (Rule 9.12) it only ADDS: a sample already there by that name is never changed, nothing is deleted (Rule #1), and a redone
 sample gets a new name. The panel lists `sample_schemas` after the 3 Vessel sample under Add a Sample Schema (Rule 10.6); a name
 already in `samples/configs` wins. **A Schema from another brewer** goes in the same folder (its `sample.json`, `config.json` and
-`scripts/`) and comes in the same way. An update of the panel never touches `sample_schemas`. The three samples older versions put in `samples/configs`
+`processes/`) and comes in the same way. An update of the panel never touches `sample_schemas`. The three samples older versions put in `samples/configs`
 (two-vessel-one-pump, brewzilla-brew-day, oakbarn-brucontrol) are **moved, never deleted**, to `backups/old_samples_<date>` on an
 update; nothing else is touched (a user's own Schemas are in `config/schemas`, never in `samples`). **Videos:** Help 83 links
 "How to use the 3 Vessel sample, step by step" and "How to add another Pump and edit the manifold in the 3 Vessel sample" (marked
@@ -2727,7 +2727,7 @@ still want it open source but maybe once on a user computer core code cannot be 
 non official updates", "Explain the Offical Updates in the Help"). Skynet stays open source (MIT): the code stays public on GitHub.
 1. **The list:** every merge, GitHub writes `skynet_files.json` next to `version.json` (tools/make-file-list.js): the fingerprint
    (SHA-256) of every **core** program file: `server.js`, `importer.js`, `package.json`, `lib`, `public`, `templates`, `firmware`,
-   `install`, `samples`. Never edited by hand. Not core, never checked or touched: `config`, `data`, `media`, `scripts`, `help`
+   `install`, `samples`. Never edited by hand. Not core, never checked or touched: `config`, `data`, `media`, `processes`, `help`
    (Admins edit Help pages), `sample_schemas`, `node_modules`, `backups`. (Text files are compared without carriage returns.)
 2. **Every start** (lib/official.js) the panel compares its core files with the list of its own version from **OakBarn Brewery's
    GitHub** (always oakbarn/Skynet_Brewery, never the repository named in `version.json`); without the internet, with the list that
@@ -2778,6 +2778,14 @@ on a Schema import with a name already taken: "Use the Rule, just cannot overwri
   same name as one you have but other text comes in as `Name_1` (`_2` ...), and the imported Schema's Process lines and Process
   Widgets point to it. `_1` stands in for Windows' `(1)` because a name can't have ( ) (Rule 3.1, docs/Special_Characters.md).
 - **Both programs:** the Panel's Schemas; the BruControl Import saves its Schema files to the Import folder and never writes over one.
+
+9.18 **The Processes folder is `processes`** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew Panel 2a": "Rename to Skynet
+Terms. That is part of the No Bructrol Rule"). It was called `scripts`, BruControl's word. Everywhere: the panel's folder, the
+release's `defaults/processes`, each sample's `processes/` (Sample Schemas and a Schema from another brewer, Rule 9.13), Brain Move
+files (Rule 9.9), File Move, the installers, and the MQTT topic `<base>/processes/running`. A panel from an earlier trial version
+that still has only `scripts/` gets it renamed to `processes/` once, on its next start, so no Process is lost; the installers'
+Start Fresh and start-over also clear an old `scripts/` folder. Help says only that Skynet does this in the Background and needs no
+user input (Rule 11.13). Only the BruControl Importer still says "scripts" where it means BruControl's own Scripts.
 
 ## 10. Testing
 
@@ -3003,6 +3011,14 @@ The action takes place in the background."):
   is needed. Example: an import: **"After you supply Skynet the File Name, no other user input is needed. The action takes place in
   the background."**
 - **Both programs:** the Skynet Panel and the BruControl Import (its Help is on hold, Rule 11.3).
+
+11.14 **Machine translation notice** (OakBarn Brewery, 2026-11-13: "when a different Language other than English is Chosen for the
+Help pop a Dialog with the Caveat that the Translation was by Machine and not Human in English and the Language Chosen with an
+Aknowlegement Button"). Every time a Help language other than English is picked (🌐 in the Help page list), a dialog says that the
+Help in that language was translated by a machine, not a person, may have mistakes, and that the English page is the one to trust.
+It says so in English and in the language picked, and closes only with its **Acknowledge** button (the button is English, like
+every screen, Rule 11.11). Picking English shows nothing. A new Help language adds its text to `public/mtnotice.js`
+(test/mtnotice.test.js checks every language in the list has it). Both programs (the BruControl Import uses the Panel's Help).
 
 ## 12. Privacy and sharing
 
@@ -4074,6 +4090,8 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 11.14 (OakBarn Brewery: "pop a Dialog with the Caveat that the Translation was by Machine and not Human in English and the Language Chosen with an Aknowlegement Button"): picking a Help language other than English shows a machine translation notice in English and that language, closed with Acknowledge. Help 192 (and French). Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 9.18 (OakBarn Brewery: "Rename to Skynet Terms. That is part of the No Bructrol Rule"): the Processes folder is `processes`, not `scripts`, everywhere (panel, defaults, samples, Brain Move, File Move, installers, MQTT topic `processes/running`); an earlier trial panel's `scripts` folder is renamed once on start. Rule 1.4 updated. Help 1, 5, 18, 19, 30, 32, 44, 53, 63, 119, 184, 191 (and French), README, install/ReadMe.txt. Checked against both programs: the Importer's Build page uses `processes` in its own folder; the Importer still says Scripts for BruControl's. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 6.18 (OakBarn Brewery: "We need to build for all three. API seems to be the place to do it"): .API is the one switch for the web API, MQTT and voice (Off / Read Only / Read & Control); the separate per-item MQTT and voice ticks are gone; every Device and Widget with .API on is shared, Widgets too. Help 15 (and French), docs/MQTT_AND_VOICE.md, README. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 9.17 (OakBarn Brewery, README markup "Skynet Brew Panel 2a" and his answers): a Schema backup, `<Schema name>_yyyymmddThhmm.BacUp`, every time a change is saved; no daily backup; never written over (_2 in the same minute) and never removed; Schema.json makes no copy on opening (before every save or restore only); an imported Schema with a taken name is added as Name #2. Help 28, 30, 42, 44 (and French), README 3a. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 1.33 (OakBarn Brewery: "The only real use for a gGlobal is as a variable with Global Scope"): a gGlobal has no Database and .API box; a Process sends it to the database with send_db / DBSend; never in the web API, MQTT or voice; older files lose the settings on load; the Variables page has no Database, .API or Log now columns. Help 4, 13, 15, 98, 108, 118, 149 (and French). Checked against both programs: the Importer's Interview will ask .API for a Global that becomes a Widget (Sandbox note). (thread "Polish the Skynet Brew Panel")
