@@ -33,7 +33,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -42,7 +42,7 @@ import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
-import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
+import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -2691,7 +2691,7 @@ function fillEl(n, e0) {
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   // a probe tee or a thermowell turns with its Rotate (Rule 5.30): turned 90 or 270, its picture is as wide as its box is high
-  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : img ? elRot(e) : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
+  const turn = notFound ? 0 : img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : img ? elRot(e) : 0, flip = img && !notFound && (e.flipH || e.flipV);      // File Not Found is never turned or mirrored (its words stay readable)    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
   const side = !!img && turnsEl(e) && elRot(e) % 180 === 90;
   n.classList.toggle('side', side);
@@ -12655,6 +12655,25 @@ function otherDefaults() {
     ['BruControl Import: Look', 'The Skynet Look closest to the BruControl theme, else Office Black', 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
   ];
 }
+// The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
+// defaulted to True / Fill with US or Metric after answer from user in New Setup"; "not user editable ... Locked True")
+const grainWtLabel = units => units === 'Metric' ? 'Kg' : 'Pounds';
+// Three Hop Stands (public/brewcalc.js HOP_STANDS): temperature and time of each, in Default settings and in a Boil Profile.
+// The boxes show the Skynet numbers (Rule 18.36); Low's temperature empty = the Recipe's pitch temperature.
+function hopStandFields(units, prefix = '_hs', tempTag = 'Temp') {
+  const metric = units === 'Metric', T = metric ? '°C' : '°F';
+  return HOP_STANDS.flatMap(([k, label, tempC, min]) => [
+    [`${prefix}${k}${tempTag}`, `Hop Stand ${label} (${T})`, 'num', null, false, false, tempC === null ? { tip: 'Empty: the Recipe\'s pitch temperature (68 °F / 20 °C when it has none).' } : { def: Math.round((metric ? tempC : tempC * 1.8 + 32) * 10) / 10 }],
+    [`hs${k}Min`, `Hop Stand ${label} time (min)`, 'num', null, false, false, { def: min, tip: 'Cooling water off for this long, with the hops of this stand in.' }]]);
+}
+function hopStandsToForm(d, tu) { for (const [k] of HOP_STANDS) if (d[`hs${k}TempC`] !== undefined && d[`hs${k}TempC`] !== null) d[`_hs${k}Temp`] = Math.round(cTo(d[`hs${k}TempC`], tu) * 10) / 10; }
+function hopStandsFromForm(d, tu) {
+  for (const [k, label] of HOP_STANDS) {
+    const v = d[`_hs${k}Temp`]; delete d[`_hs${k}Temp`];
+    if (v === undefined || v === '' || v === null) delete d[`hs${k}TempC`]; else d[`hs${k}TempC`] = Math.round(toC(v, tu) * 1000) / 1000;
+    const m = d[`hs${k}Min`]; if (m === '' || m === null) delete d[`hs${k}Min`]; else if (m !== undefined && !(+m >= 0)) throw new Error(`Hop Stand ${label} time must be 0 or more minutes`);
+  }
+}
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
@@ -12674,21 +12693,19 @@ function renderDefaultTab(box) {
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ['batchSize', `Batch size (${volUnit(w.units)}, into the fermenter)`, 'num'],
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
-    ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
-    ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
-    ['waterProfile', 'Water Profile', 'sel', S.waterProfiles.map(x => [x.id, x.name]), false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
+    ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD]],
+    ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD]],
+    ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
     ['boilTime', 'Boil time (minutes)', 'num'],
-    ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num', null, false, false, { tip: `Empty: 180 °F / 82 °C.` }],
-    ['hopStandMinutes', 'Hop stand time (minutes, cooling water off) when a Recipe gives none', 'num', null, false, false, { def: 20 }],
+    ...hopStandFields(w.units),
     ['efficiency', 'Brewhouse efficiency (%)', 'num'],
     ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
     ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
     ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature)`, 'num', null, false, false, { def: 0 }],
-    ['_u', 'How amounts show (Recipe tab)', 'head'],
-    ...DISPLAY_UNITS.map(([k, l, ch]) => [k, l, 'sel', Object.entries(ch)]),
-    ['grainLabel', 'Grain weight label on the Grain and Fermentable tabs (Skynet field skn_XML_Grain_WT_Standard_Label). Only changed here', 'text', null, false, false, { tip: 'Empty: the standard above (Pounds, Kg ...).' }],
+    ['_gl', 'Grain weight label', 'head'],
+    ['_grainLabel', 'Grain weight label (skn_XML_Grain_WT_Standard_Label)', 'text', null, false, false, { known: true, tip: 'The title of the amount box on the Grain and Fermentable tabs. It comes from Units: Pounds for US, Kg for Metric. Locked: it is not typed in.' }],
+    ['grainLabelVisible', 'Grain weight label visible', 'yn', true],
     ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs. Only changed here', 'text', null, false, false, { tip: 'Empty: PPG>SG.' }],
-    ['_un', 'A recipe is kept in kilograms, liters and °C, as BeerXML does, so changing these only changes how it shows. Units above picks the first choice of each when they are left alone.', 'note'],
     ['_h', 'Hop alerts', 'head'],
     ['hopWarnMinutes', 'Warning before each hop drop (minutes; 0 = no warning)', 'num', null, false, false, { def: RECIPE_DEFAULTS.hopWarnMinutes }],
     ['alertMergeMinutes', 'Alerts this close together become one alert (minutes)', 'num', null, false, false, { def: RECIPE_DEFAULTS.alertMergeMinutes }],
@@ -12742,9 +12759,11 @@ function renderDefaultTab(box) {
   const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   if (d.grainTempC !== undefined) d._grainT = Math.round(cTo(d.grainTempC, du.tempUnit) * 10) / 10;
-  if (d.hopStandTempC !== undefined) d._hsT = Math.round(cTo(d.hopStandTempC, du.tempUnit) * 10) / 10;
+  hopStandsToForm(d, du.tempUnit);
+  d._grainLabel = grainWtLabel(d.units);
   if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
+  if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
   const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
   now.onchange = () => setSound(now.checked);
@@ -12757,9 +12776,10 @@ function renderDefaultTab(box) {
       const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
       if (raw === undefined) delete d[k]; else d[k] = Math.round(from() * 1000) / 1000;
     }
-    if (d._hsT === undefined || d._hsT === '' || d._hsT === null) delete d.hopStandTempC; else d.hopStandTempC = Math.round(toC(d._hsT, su.tempUnit) * 1000) / 1000;
-    delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._hsT;
-    for (const [k, t] of [['hopStandMinutes', 'Hop stand time'], ['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
+    hopStandsFromForm(d, su.tempUnit);
+    delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._grainLabel; delete d.grainLabel;
+    for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
+    for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
@@ -13556,7 +13576,7 @@ function eqEditor() {
   const calc = () => {
     const all = { equipment: [...eqItems(p), ...(p.equipment || [])] };
     const u = volUnit(p.units), bp = S.boilProfiles.find(x => x.id === chk.boil), kettle = firstOfType(all, 'Brew Kettle'), ferm = firstOfType(all, 'Fermenter');
-    const v = brewVolumes({ ...p, batchSize: chk.batchSize, boilTime: bp?.boilTime, boilOffRate: bp?.boilOffRate, kettleVolume: kettle?.volume, fermenterVolume: ferm?.maxVolume ?? ferm?.volume, fermenterLoss: ferm?.extraTrub });
+    const v = brewVolumes({ ...p, batchSize: chk.batchSize, boilTime: bp?.boilTime, boilOffRate: bp?.boilOffRate ?? p.boilOffRate ?? (p.units === 'Metric' ? 4 : 1), kettleVolume: kettle?.volume, fermenterVolume: ferm?.maxVolume ?? ferm?.volume, fermenterLoss: ferm?.extraTrub });
     const bs = h('input', { type: 'number', step: 'any', min: 0, value: chk.batchSize, class: 'orderNum' }); bs.onchange = () => { chk.batchSize = +bs.value; calc(); };
     const bsel = h('select', {}, h('option', { value: '' }, '(no Boil Profile)'), ...S.boilProfiles.map(x => h('option', { value: x.id, ...(x.id === chk.boil ? { selected: true } : {}) }, x.name)));
     bsel.onchange = () => { chk.boil = bsel.value; calc(); };
@@ -14529,7 +14549,11 @@ function profFields(kind) {
         ['notes', 'Notes', 'area']];
     }
     if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
-      ['boilTime', 'Total boil time (minutes)', 'num'], ['boilOffRate', `Boil off (${u} per hour)`, 'num'], ['notes', 'Notes', 'area']];
+      ['boilTime', 'Total boil time (minutes)', 'num', null, false, false, { tip: '0 = No Boil.' }],
+      ['boilOffRate', `Boil off (${u} per hour)`, 'num', null, false, false, { tip: 'Empty: the Equipment Profile\'s Boil Off. With a number here, picking this profile in a Recipe asks which one to use.' }],
+      ['askVolumes', 'Ask the kettle volume at the start and end of the boil', 'yn', true],
+      ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: 'Empty: Default settings.' }]),
+      ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
       ...Array.from({ length: MASH_STEPS }, (_, i) => [['_s' + i, `Step ${i + 1}${i ? ' (leave empty if not used)' : ''}`, 'head'],
         ['s' + i + '_name', 'Name', 'text'], ['s' + i + '_temp', `Temperature (${t})`, 'num'], ['s' + i + '_time', 'Time (minutes)', 'num']]).flat(),
@@ -14594,16 +14618,42 @@ function tabsUsing(p, admin) {
     h('p', { class: 'muted' }, 'Pick the Tab Background Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
     h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Tab'), h('th', {}, 'Tab Background Profile'), h('th', {}, ''))), h('tbody', {}, ...rows)));
 }
-async function newBrewProfile(kind) {
+// Rule 18.14 (OakBarn Brewery, 2026-11-13: "Like all the choices but explain good in the help what it means and have a User Add";
+// "Same with Water Profiles"): every Mash, Boil and Water Profile list ends with Add new ...; picking it makes a new profile
+// (empty, or a copy of a Skynet one) and opens its ☰ Menu tab to fill in. The list keeps what it had.
+const PROF_ADD = ['__add__', 'Add new ...'];
+function profAddWatch(box, map) {
+  box.addEventListener('focusin', e => { const s = e.target; if (s?.tagName === 'SELECT' && map[s.dataset.k] && s.value !== '__add__') s.dataset.was = s.value; });
+  box.addEventListener('change', e => {
+    const s = e.target, kind = map[s?.dataset?.k];
+    if (!kind || s.value !== '__add__') return;
+    e.stopImmediatePropagation(); s.value = s.dataset.was ?? s.options[0]?.value ?? '';
+    newBrewProfile(kind, true);
+  }, true);
+}
+async function newBrewProfile(kind, openTab = false) {
   const K = PK[kind], list = K.list(), w = { name: '', from: '', units: S.config.brewDefaults?.units || 'US' };
   if (await dialog(`New ${K.title}`, [['name', 'Name', 'text'], ['from', 'Start from', 'sel', [['', K.start], ...list.map(p => [p.id, `A copy of "${p.name}"`])]],
     ...(K.noUnits ? [] : [['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)]])], w) !== 'ok') return;
   readFields(w);
   const r = await api('POST', `/ui/profiles/${kind}`, { name: w.name, from: w.from || undefined, units: w.units });
   S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.list.find(x => x.id === r.made))); profDirty[kind] = false;
-  renderMenuPane(); toast(`${K.title} "${w.name}" made`);
+  if (openTab && menuTab !== kind) openMenuTab(kind); else renderMenuPane();
+  toast(`${K.title} "${w.name}" made`);
 }
 
+// An imported Recipe is saved to the library only when the user says Yes (OakBarn Brewery, 2026-11-13). A saved Recipe with the same
+// name asks: Overwrite (its old copy goes to the backups folder) or Add new (saved as "Name #2").
+async function askSaveImported(name) {
+  if (await choose(`Save this Recipe? "${name}" goes in the Recipe library (Library ...).`, [['💾 Yes', 'yes'], ['No', 'no']]) !== 'yes') return;
+  let mode = 'overwrite';
+  if (rcView?.saved?.some(x => String(x.name).toLowerCase() === String(name).toLowerCase())) {
+    mode = await choose(`A saved Recipe is already called "${name}"`, [['Overwrite it (the old one goes to the backups folder)', 'overwrite'], ['Add new (a number is added to the name, "#2")', 'new']]);
+    if (!mode) return;
+  }
+  const r = await api('POST', '/ui/recipe/save', { mode });
+  await rcLoad(); renderMenuPane(); toast(`"${r.name}" saved to the library`);
+}
 // ---- ☰ Menu > Recipe (Fritz, 2026-10-30; his layout 2026-10-31): the Recipe for brew day. IMPORT a BeerSmith .bsmx
 // (BeerSmith 3 and 4) or a BeerXML .xml file, or start a NEW one. The Recipe tab is boxes Fritz laid out, colored by kind
 // (black: names, grey: times and choices, blue: volumes, red: temperatures, light grey: worked out by Calculate). The
@@ -14664,6 +14714,7 @@ function renderRecipeTab(box) {
         ['pick', 'Recipe', 'sel', r.names.map((n, i) => [String(i), n])]], w) === 'ok') { readFields(w); if (w.pick !== '0') r = await api('POST', q + '&pick=' + w.pick, buf, true); }
     }
     await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast(`Recipe "${r.name}" imported`);
+    if (op) await askSaveImported(r.name);
   });
   // the Recipe library: saved Recipes in config/recipes on the Brain
   const lib = h('select', { class: 'rcLib', title: 'Recipe library: saved Recipes (config/recipes on the Brain)' }, h('option', { value: '' }, 'Library ...'),
@@ -14715,6 +14766,38 @@ function rcInput(obj, key, { kind = 'num', to = v => v, from = v => v, list, d =
   el.onchange = () => { const v = el.value; obj[key] = kind === 'num' ? (v === '' ? null : from(+v)) : v; onChange?.(); };
   return el;
 }
+// The Recipe's Boil Profile (OakBarn Brewery, 2026-11-13). Picking one fills in the Boil Minutes. A profile with its own Boil Off
+// asks which to use, each time ("I think 3"): the Equipment Profile's, or the profile's own. The Recipe keeps the answer
+// (rc.boilOffRate in liters per hour; empty = the Equipment Profile's).
+function rcBoilPick(rc, changed) {
+  const was = rc.boilProfile ?? '';
+  const pick = rcInput({ boilProfile: was }, 'boilProfile', { kind: 'sel', list: [['', '(none)'], ...S.boilProfiles.map(x => [x.id, x.name]), ...(can('operator') ? [PROF_ADD] : [])], ro: !can('operator') });
+  pick.addEventListener('change', guard(async () => {
+    if (pick.value === '__add__') { pick.value = was; return newBrewProfile('boil', true); }
+    const bp = S.boilProfiles.find(x => x.id === pick.value);
+    rc.boilProfile = pick.value; rc.boilOffRate = null;
+    if (bp) {
+      rc.boilTime = bp.boilTime;
+      if (bp.boilOffRate !== undefined && bp.boilOffRate !== null && bp.boilOffRate !== '') {
+        const a = await choose('Which Boil Off?', [['Use the Equipment Profile\'s Boil Off', 'eq'], [`Use "${bp.name}"'s own: ${bp.boilOffRate} ${volUnit(bp.units)} per hour`, 'own']]);
+        if (a === 'own') rc.boilOffRate = Math.round((bp.units === 'Metric' ? +bp.boilOffRate : +bp.boilOffRate * 3.785411784) * 1000) / 1000;
+      }
+    }
+    changed(); renderMenuPane();
+  }));
+  return pick;
+}
+// The three Hop Stands of this Recipe (public/brewcalc.js): each box shows what is used (the Recipe's own, else its Boil Profile's,
+// else Default settings); a change here is the Recipe's own. The Whirlpool hops on the Hops tab each pick a stand.
+function rcHopStandsRow(rc, u, changed) {
+  const stands = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile)), op = can('operator');
+  const keep = (key, obj) => () => { rc.hopStands = { ...(rc.hopStands || {}), [key]: { tempC: obj.tempC, min: obj.min } }; changed(); };
+  return h('div', { class: 'rcRow' }, ...stands.flatMap(st => {
+    const o = { tempC: st.tempC, min: st.min }, k = keep(st.key, o);
+    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: 'The chill stops at this temperature and the Whirlpool hops of this stand go in.' }),
+      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: 'Cooling water off for this long.' })];
+  }));
+}
 function rcMain(pane, rc, u, changed) {
   rc.volumes = rc.volumes || {};
   const c = { onChange: changed }, vol = { to: v => lTo(v, u.volumeUnit), from: v => toL(v, u.volumeUnit), ...c }, tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
@@ -14749,11 +14832,13 @@ function rcMain(pane, rc, u, changed) {
       rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' }),
       rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { ...T, field: 'rcp_Sparge_Temp' }),
       rcBox('b', 'PreBoil Volume', rcInput(rc.volumes, 'boilLiters', vol), { ...V, field: 'rcp_Boil_Volume' }),
+      rcBox('g', 'Boil Profile', rcBoilPick(rc, changed), { wide: true, field: 'rcp_Boil_Profile', tip: 'A Skynet Boil Profile, one of your own (☰ Menu > Boil Profile), or none. Picking one fills in the Boil Minutes and its Hop Stands.' }),
       rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'rcp_Boil_Minutes' }),
       rcBox('g', 'Whirlpool Minutes', rcInput(rc, 'whirlpoolMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Whirlpool_Minutes' }),
       rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
       rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
       can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
+    rcHopStandsRow(rc, u, changed),
     h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'),
       ...[['Grain Wt.', 'rcp_Total_Grain_Weight'], ['1st Mash', 'rcp_First_Mash_Temp'], ['IBU', 'rcp_IBU'], ['Expected Gravity', 'rcp_Expected_Gravity']].filter(([, f]) => levelShowsBox(rc, f)).map(([t]) => h('span', { class: 'rcMini' }, t)),
       h('b', {}, 'These fields are calculated from the Other Tabs.')),
@@ -14865,7 +14950,7 @@ function rcHops(pane, rc, u, changed) {
 }
 // the Outside of Boil Hops dialog of one hop line. It works on a copy; Save puts the copy in the hop, Cancel drops it.
 function rcHopDialog(hop, i, u, changed) {
-  const keep = ['use', 'dryDays', 'date', 'wpTempC', 'time', 'hopRocket'];
+  const keep = ['use', 'dryDays', 'date', 'wpTempC', 'stand', 'time', 'hopRocket'];
   const work = rcHopOpen.get(hop) ?? Object.fromEntries(keep.map(k => [k, hop[k]]));
   const box = h('div', { class: 'hopDlg' });
   const F = end => hopFieldName(i + 1, end);
@@ -14883,7 +14968,10 @@ function rcHopDialog(hop, i, u, changed) {
       const date = h('input', { type: 'date', value: work.date || '' }); date.onchange = () => { work.date = date.value; };
       box.append(rcBox('g', what, date, { wide: true, field: F('Date') }), rcBox('g', 'Days', rcInput(work, 'dryDays', { d: 0 }), { field: F('Days') }));
     }
-    if (work.use === 'whirlpool') box.append(rcBox('g', 'Temperature', rcInput(work, 'wpTempC', tmp), { unit: TU(u.tempUnit), field: F('Whirlpool_Temp') }),
+    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand")
+    const st = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile));
+    if (work.use === 'whirlpool') { work.stand = standOf(work, st); work.wpTempC = null; }
+    if (work.use === 'whirlpool') box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: st.map(x => [x.key, `${x.label}: ${rcRound(cTo(x.tempC, u.tempUnit), 0)} ${TU(u.tempUnit)}, ${x.min} min`]) }), { wide: true, field: F('Hop_Stand'), tip: 'The chill stops at this stand\'s temperature and this hop goes in. Each stand\'s temperature and time are on the Recipe tab.' }),
       rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min') }),
       h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
     box.append(h('span', { class: 'spacer' }), h('div', { class: 'hopDlgBtns' },
@@ -14908,7 +14996,7 @@ function rcFerms(pane, rc, u, changed, grainTab) {
   const mine = all.filter(f => isGrain(f) === grainTab), W = u.grainUnit, what = grainTab ? 'Grain' : 'Fermentable';
   // the labels come from the Default tab: the grain weight standard (skn_XML_Grain_WT_Standard) or its own label, and PPG>SG
   const D = S.config.brewDefaults || {};
-  const wLabel = D.grainLabel || { lb: 'Pounds', kg: 'Kg', oz: 'Ounces', g: 'Grams' }[W], pLabel = D.ppgLabel || 'PPG>SG';
+  const wLabel = D.grainLabelVisible === false ? '' : grainWtLabel(D.units), pLabel = D.ppgLabel || 'PPG>SG';
   const total = h('b', {}), eg = h('b', {}), pts = [];
   // a changed amount or Potential: the gravity points of each line, the total, and the Expected Gravity on the Recipe tab
   const sum = () => {
@@ -14968,7 +15056,7 @@ function rcAdjuncts(pane, rc, changed) {
     const n = i + 1, F = end => `rcp_Adjunct_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `Adjunct ${n}`, rcInput(m, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }),
       rcBox('g', 'Amount', rcInput(m, 'amount', { d: 2, ...c }), { field: F('Amount') }),
-      rcBox('g', 'Measurement', sel(m, 'unit', MISC_UNITS.map(x => [x, x])), { field: F('Measurement') }),
+      rcBox('g', 'Measurement', sel(m, 'unit', MISC_LINE_UNITS.map(x => [x, x])), { field: F('Measurement') }),
       rcBox('g', 'Type', sel(m, 'type', MISC_TYPES.map(x => [x, x])), { field: F('Type') }),
       rcBox('g', 'Use', sel(m, 'use', Object.entries(MISC_USES).filter(([k]) => k !== 'other'), true), { field: F('Use'), tip: 'When it goes in. A Boil adjunct gets an alert on brew day (the Drops tab)' }),
       rcBox('g', m.use === 'boil' ? 'Boil Min' : 'Time', rcInput(m, 'time', { d: 0, ...c }), { field: F('Time'), tip: m.use === 'boil' ? 'Minutes left in the boil when it goes in' : 'How long' }),
@@ -14988,7 +15076,9 @@ function rcMash(pane, rc, u, changed) {
   const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
   const pTemp = v => v === null || v === undefined || v === '' ? '' : rcRound(cTo(mp.units === 'Metric' ? +v : fToC(+v), u.tempUnit), 1);
   const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
-  const pick = rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', 'The Recipe\'s own mash (below)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const was = rc.mashProfile ?? '';
+  const pick = rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', 'The Recipe\'s own mash (below)'], ...S.mashProfiles.map(x => [x.id, x.name]), ...(op ? [PROF_ADD] : [])],
+    onChange: () => { if (rc.mashProfile === '__add__') { rc.mashProfile = was; pick.value = was; return newBrewProfile('mash', true); } changed(); renderMenuPane(); } });
   const copy = guard(() => {
     rc.mash = { ...rc.mash, profileName: mp.name, steps: [...mp.steps.map(s => ({ name: s.name, type: 'Infusion', tempC: mp.units === 'Metric' ? +s.temp : fToC(+s.temp), min: +s.time || 0 })),
       ...(mp.mashOutTemp ? [{ name: 'Mash Out', type: 'Temperature', tempC: mp.units === 'Metric' ? +mp.mashOutTemp : fToC(+mp.mashOutTemp), min: 10 }] : [])] };
@@ -15029,8 +15119,8 @@ function rcWaters(pane, rc, u, changed) {
   // none picked: Tap Water (Rule 17.12, its numbers on ☰ Menu > Default)
   const wp = S.waterProfiles.find(x => x.id === rc.waterProfile) || S.waterProfiles.find(x => x.tap), b = wp ? blendWater(wp) : {};
   const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
-  const pick = rcInput({ waterProfile: wp?.id ?? '' }, 'waterProfile', { kind: 'sel', list: S.waterProfiles.map(x => [x.id, x.name]), onChange: () => {} });
-  pick.addEventListener('change', () => { rc.waterProfile = pick.value; changed(); renderMenuPane(); });
+  const pick = rcInput({ waterProfile: wp?.id ?? '' }, 'waterProfile', { kind: 'sel', list: [...S.waterProfiles.map(x => [x.id, x.name]), ...(can('operator') ? [PROF_ADD] : [])], onChange: () => {} });
+  pick.addEventListener('change', () => { if (pick.value === '__add__') { pick.value = wp?.id ?? ''; return newBrewProfile('water', true); } rc.waterProfile = pick.value; changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
     h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes && !wp.tap ? h('span', { class: 'muted' }, wp.notes) : ''));
   if (wp) {

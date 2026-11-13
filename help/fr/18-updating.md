@@ -57,7 +57,7 @@ Quand le programme d'installation trouve le panel déjà là, il demande ce que 
    - chaque Schema, Tab, Device, Widget, réglage, Profile et Recipe (`config`)
    - chaque utilisateur, mot de passe, connexion et le code de secours, le journal de brassage et les valeurs enregistrées (`data`)
    - chaque Process (`processes`) et les dossiers `backups`
-   - vos propres images et sons (les images et sons Skynet restent)
+   - toutes les images et tous les sons (`media`), ceux de Skynet aussi : lancez le **Media Setup** après
    - tout ce qui est dans le dossier **Import** (`C:\Brewing\Import`)
    - **No** sur l'avertissement revient en arrière. Rien n'est supprimé.
    - **Yes** les supprime. Le panel démarre alors comme une nouvelle installation à partir des exemples, et vous recréez le compte admin (notez le nouveau **code de secours**).

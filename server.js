@@ -937,7 +937,14 @@ async function route(req, res) {
     const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
     useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name });
   }
-  if (p === '/ui/recipe/save' && m === 'POST') { const b = await jsonBody(req); const s = recipes.save(currentRecipe() ?? {}, b.id || undefined); return ok(res, { id: s.id, saved: recipes.list() }); }
+  if (p === '/ui/recipe/save' && m === 'POST') {
+    // mode overwrite: the saved Recipe with this name is replaced (its old copy goes to config/backups/recipes); mode new: saved
+    // as "Name #2" (the next free number), and the open Recipe takes that name. No mode: as before (the id given, or a new one).
+    const b = await jsonBody(req), rc = currentRecipe() ?? {};
+    if (b.mode === 'new') { const nm = recipes.freeName(rc.name); useRecipe({ ...rc, name: nm }); const s = recipes.save(currentRecipe()); return ok(res, { id: s.id, name: nm, saved: recipes.list() }); }
+    if (b.mode === 'overwrite') { const same = recipes.byName(rc.name); if (same) recipes.backup(same.id); const s = recipes.save(rc, same?.id); return ok(res, { id: s.id, name: s.name, saved: recipes.list() }); }
+    const s = recipes.save(rc, b.id || undefined); return ok(res, { id: s.id, saved: recipes.list() });
+  }
   if (p === '/ui/recipe/alerts' && m === 'POST') {
     const b = await jsonBody(req);
     const text = b.action === 'stop' ? (hopAlerts.stop(), 'Hop alerts stopped') : hopAlerts.start(b.timer || undefined, 'Recipe tab');
