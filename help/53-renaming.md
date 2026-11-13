@@ -36,7 +36,7 @@ Other settings that point at the renamed one follow it as well: pipes and hoses 
 - **Rename it twice.** If you rename `Pump1` to `Pump_A` and then to `Pump_Main` before saving, the Processes go straight from `Pump1` to `Pump_Main`.
 - **Cancel.** If you leave Edit layout without saving, nothing is renamed and no Process is changed.
 - **A running Process** keeps working: it finds the renamed item through its hidden key. It uses the new name from its next start.
-- **Backup.** Before a Process is changed, the old copy is kept next to it as `<Process name>.txt.bak` in the scripts folder.
+- **Backup.** Before a Process is changed, the old copy is kept next to it as `<Process name>.txt.bak` in the processes folder.
 - **Other Schemas.** Processes are shared by every Schema. If another Schema still has a Device or Widget by the old name, the message tells you, because the changed Process now looks for the new name there too. Rename it in that Schema as well, or keep a copy of the Process for it.
 - **Tabs and Processes.** Renaming a Tab or a Process is separate; this page is about Devices and Widgets.
 

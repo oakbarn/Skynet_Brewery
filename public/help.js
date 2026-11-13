@@ -4,6 +4,7 @@
 import { watchButtons } from './buttons.js';
 import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the buttons' tips of this window in French (Rule 11.11)
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
+import { showMachineNotice } from './mtnotice.js';         // machine translation notice (Rule 11.14)
 const $ = s => document.querySelector(s);
 if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
 const el = (tag, attrs = {}, ...kids) => {
@@ -244,6 +245,7 @@ $('#hpLang').addEventListener('change', e => {
   try { localStorage.setItem(LANG_KEY, lang); } catch { }
   refreshBalloonLang();
   stopEdit(); load(cur).catch(err => say(err.message, true));
+  showMachineNotice(lang);
 });
 $('#hpPick').addEventListener('change', e => open(e.target.value));
 $('#hpBack').onclick = () => { const n = trail.pop(); if (n) open(n, null, true); };

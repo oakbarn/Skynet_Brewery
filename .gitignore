@@ -17,7 +17,7 @@ release/
 # Config Editor backups (made on the Pi while it runs)
 config/backups/
 # Deleted Processes (Recycle Bin on the Pi)
-scripts/Recycle_Bin/
+processes/Recycle_Bin/
 # Made while the panel or the tests run: config backup and Schema files
 config/*.bak
 config/schemas/

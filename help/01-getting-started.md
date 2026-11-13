@@ -50,7 +50,7 @@ Skynet uses plain words that say what they mean, so nothing reads backward. A pl
 
 ## Updating to a new version
 
-Stop the panel first, then run the installer again or unzip the new zip over the panel. The zip has no `config`, `data`, `media` or `scripts` folders, so your layout, settings, brew data, users, pictures, sounds and processes are never replaced. See [Updating to a new version](18-updating).
+Stop the panel first, then run the installer again or unzip the new zip over the panel. The zip has no `config`, `data`, `media` or `processes` folders, so your layout, settings, brew data, users, pictures, sounds and processes are never replaced. See [Updating to a new version](18-updating).
 
 ## About this manual
 

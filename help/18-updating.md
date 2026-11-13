@@ -1,6 +1,6 @@
 # Updating to a new version
 
-**One zip does both:** a first install and every update. The zip has **no** `config`, `data`, `media` or `scripts` folders, so unzipping it over your panel can't replace yours. Their samples are in a folder called `defaults`, and the panel copies them in only on its very first start, into a folder you don't have yet.
+**One zip does both:** a first install and every update. The zip has **no** `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. Their samples are in a folder called `defaults`, and the panel copies them in only on its very first start, into a folder you don't have yet.
 
 **The Skynet pictures and sounds are a separate download**, the Skynet Media Setup (Windows) or Skynet Media zip. It only adds the ones you don't have yet and never changes or deletes any. See [The Skynet Media Setup](183-skynet-media-setup).
 
@@ -11,13 +11,13 @@
 | `config` | Your tabs, Devices, Widgets and settings (`brewery.json`) | **Kept.** Not in the zip. |
 | `data` | Brew log, saved values, users, passwords, sign-ins, the recovery code | **Kept.** Not in the zip. |
 | `media` | Your pictures and sounds | **Kept.** Not in the zip. |
-| `scripts` | Your processes | **Kept.** Not in the zip. |
+| `processes` | Your processes (earlier versions called this folder `scripts`: Skynet renames it in the Background and needs no user input) | **Kept.** Not in the zip. |
 | `help` | This manual | Replaced by the new manual. The installers copy the old pages to `help/backups/before_update_<date>` first. |
 | `defaults` | The sample layout and processes | Replaced. Only used for a folder you don't have. |
 | `sample_schemas` | The extra Sample Schemas from the Sample Schemas Setup, and any Schema from another brewer | **Kept.** Not in the zip. |
 | Everything else (`lib`, `public`, `server.js`, `samples` …) | The program itself | Replaced. |
 
-**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `scripts` to `scripts_old`). The panel copies the samples into a fresh `scripts` the next time it starts. (Pictures and sounds are never replaced: rename `media` only if you want to start it over, then run the Skynet Media Setup again.)
+**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, processes, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `processes` to `processes_old`). The panel copies the samples into a fresh `processes` the next time it starts. (Pictures and sounds are never replaced: rename `media` only if you want to start it over, then run the Skynet Media Setup again.)
 
 > **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you pick **Update the program and reset all users** or **Start Fresh** in the installer and confirm the warning. See [Login, users and passwords](10-login).
 
@@ -47,7 +47,7 @@ Run the same installer you used the first time, from the new release. It sees th
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-It first asks what this update does (see [The three update choices](#the-three-update-choices) below; the third one, already picked, keeps everything). Then it asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
+It first asks what this update does (see [The three update choices](#the-three-update-choices) below; the third one, already picked, keeps everything). Then it asks **Keep all of them as they are?** about your config, data, media and processes folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
 
 ## The three update choices
 
@@ -56,7 +56,7 @@ When the installer finds the panel already there, it asks what this update does.
 1. **Start Fresh: delete everything.** The panel as if it had never been installed. A second, red warning comes first: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
    - every Schema, Tab, Device, Widget and setting (`config`)
    - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
-   - every Process (`scripts`)
+   - every Process (`processes`)
 
    Your pictures and sounds (`media`) and the `backups` folder are **kept**.
    - **No** on the warning goes back. Nothing is deleted.
@@ -69,7 +69,7 @@ When the installer finds the panel already there, it asks what this update does.
    - the recovery code
    - on Windows, the user name and password Skynet's own window remembered
 
-   Your Schemas and settings (`config`), brew log and saved values (`data`), Processes (`scripts`), pictures and sounds (`media`) are **kept**. The panel opens at admin setup: make the admin account again and write down the new **recovery code**.
+   Your Schemas and settings (`config`), brew log and saved values (`data`), Processes (`processes`), pictures and sounds (`media`) are **kept**. The panel opens at admin setup: make the admin account again and write down the new **recovery code**.
 3. **Update the program and keep everything** (recommended, and already picked for you). Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are.
 
 The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
@@ -81,11 +81,11 @@ The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and 
 1. Stop the panel (above).
 2. For extra safety, copy your panel folder: right-click `C:\Brewing\BrewPanel`, **Copy**, then **Paste**.
 3. Right-click `Skynet_BrewPanel_<date>.zip`, choose **Extract All…**, and extract into **`C:\Brewing`** (the folder *above* BrewPanel).
-4. When Windows asks about files with the same name, choose **Replace the files in the destination**. That only replaces program files, help pages and the samples in `defaults`. Your `config`, `data`, `media` and `scripts` aren't in the zip.
+4. When Windows asks about files with the same name, choose **Replace the files in the destination**. That only replaces program files, help pages and the samples in `defaults`. Your `config`, `data`, `media` and `processes` aren't in the zip.
    The program files are **Read-only** (see [Official Skynet updates](191-official-skynet-updates)). If Windows asks about a
    Read-only file, choose **Yes**. If it still can't replace one, use the Setup instead: it takes Read-only off by itself.
 5. Start the panel again with **Skynet Brewer** on the Desktop.
 
-> **Zips from before October 5, 2026** still had `config`, `media` and `scripts` in them. If you unzip one of those over your panel, choose **Skip these files** (or rename your folders first), or it replaces yours.
+> **Zips from before October 5, 2026** still had `config`, `media` and `processes` in them. If you unzip one of those over your panel, choose **Skip these files** (or rename your folders first), or it replaces yours.
 
 On the Raspberry Pi by hand: `sudo systemctl stop skynet-brewer`, unzip over the panel folder (`unzip -o Skynet_BrewPanel_<date>.zip -d ~/Brewing`), then `sudo systemctl start skynet-brewer`.

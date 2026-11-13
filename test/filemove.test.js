@@ -8,7 +8,7 @@ import { Readable } from 'node:stream';
 import { FileMove, kindOf, missingMedia } from '../lib/filemove.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filemove-'));
-const dirs = { root, media: path.join(root, 'media'), scripts: path.join(root, 'scripts'), help: path.join(root, 'help') };
+const dirs = { root, media: path.join(root, 'media'), processes: path.join(root, 'processes'), help: path.join(root, 'help') };
 const fm = new FileMove(() => dirs);
 const body = t => Readable.from([Buffer.from(t)]);
 
@@ -19,7 +19,7 @@ assert.equal(kindOf('notes.txt'), null);
 assert.deepEqual(fm.target('pictures', 'Pumps/a.png').use, 'Images/Pumps/a.png', 'picture folders are kept under Images');
 assert.equal(fm.target('pictures', 'Pumps/a.png').folder, 'media/Images/Pumps/a.png');
 assert.equal(fm.target('sounds', 'wave/bell.wav').use, 'sounds/bell.wav', 'sounds all go straight into media/sounds');
-assert.equal(fm.target('processes', 'BruControl/Mash.txt').folder, 'scripts/Mash.txt');
+assert.equal(fm.target('processes', 'BruControl/Mash.txt').folder, 'processes/Mash.txt');
 assert.equal(fm.target('help', '40-my-page.md').folder, 'help/40-my-page.md');
 assert.throws(() => fm.target('pictures', '../../server.js'), /dot|not one of/);
 assert.throws(() => fm.target('pictures', '../x.png'), /dot/);

@@ -9,7 +9,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'brainmove-'));
 const put = (f, t) => { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, t); };
 const brain = (name) => {
   const root = path.join(tmp, name);
-  return { root, dirs: { config: path.join(root, 'config'), data: path.join(root, 'data'), scripts: path.join(root, 'scripts'), media: path.join(root, 'media') } };
+  return { root, dirs: { config: path.join(root, 'config'), data: path.join(root, 'data'), processes: path.join(root, 'processes'), media: path.join(root, 'media') } };
 };
 
 // the zip writer and reader
@@ -40,7 +40,7 @@ put(path.join(old.dirs.data, 'users.json'), '{"users":[{"name":"fritz"}]}');
 put(path.join(old.dirs.data, 'sessions.json'), '{"x":1}');
 put(path.join(old.dirs.data, 'state.json'), '{"gG_Y":7}');
 put(path.join(old.dirs.data, 'brewlog.db'), 'live db');
-put(path.join(old.dirs.scripts, 'Mash.txt'), 'wait 1');
+put(path.join(old.dirs.processes, 'Mash.txt'), 'wait 1');
 put(path.join(old.dirs.media, 'Images', 'mine.png'), 'png');
 const copy = path.join(tmp, 'copy.db'); put(copy, 'clean db');
 
@@ -53,7 +53,7 @@ assert.equal(made.manifest.notMoved[0], 'D:\\Pictures');
 assert.ok(!made.file.includes(Buffer.from('"_key"')) && !made.file.includes(Buffer.from('fritz')), 'locked: no hidden key or user name can be read');
 const inside = checkMoveFile(unlock(made.file, 'brewday'));
 const names = inside.entries.map(e => e.name);
-assert.ok(names.includes('data/users.json') && names.includes('config/schemas/home.state.json') && names.includes('scripts/Mash.txt') && names.includes('media/Images/mine.png'));
+assert.ok(names.includes('data/users.json') && names.includes('config/schemas/home.state.json') && names.includes('processes/Mash.txt') && names.includes('media/Images/mine.png'));
 assert.ok(!names.includes('data/sessions.json'), 'browser sign-ins stay on the old Brain');
 assert.equal(inside.entries.find(e => e.name === 'data/brewlog.db').data.toString(), 'clean db', 'the brew log is the clean copy');
 
@@ -77,7 +77,7 @@ assert.match(r.lines[0], /Brain Move done: everything from OLDPC/);
 assert.ok(r.lines.some(l => /D:\\Pictures/.test(l)));
 assert.equal(fs.readFileSync(path.join(pi.dirs.data, 'users.json'), 'utf8'), '{"users":[{"name":"fritz"}]}', 'the old logins');
 assert.equal(fs.readFileSync(path.join(pi.dirs.data, 'state.json'), 'utf8'), '{"gG_Y":7}');
-assert.equal(fs.readFileSync(path.join(pi.dirs.scripts, 'Mash.txt'), 'utf8'), 'wait 1');
+assert.equal(fs.readFileSync(path.join(pi.dirs.processes, 'Mash.txt'), 'utf8'), 'wait 1');
 assert.ok(fs.existsSync(path.join(pi.dirs.media, 'Images', 'mine.png')));
 assert.deepEqual(JSON.parse(fs.readFileSync(path.join(pi.dirs.config, 'brewery.json'))).mediaRoots, ['./media'], 'a Windows media folder is not kept');
 assert.equal(fs.readFileSync(path.join(r.backup, 'data', 'users.json'), 'utf8'), '{"users":[{"name":"admin"}]}', "the Pi's own files are kept");

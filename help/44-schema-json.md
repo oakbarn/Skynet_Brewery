@@ -50,7 +50,7 @@ Pictures and sounds are not inside the file, only their names. If the other brew
 - The equipment and piping from each Tab's Equipment Profile, so the file is complete on its own, and the name of each Tab's profile.
 - The Schema name, its version and when the file was saved.
 
-What is **not** in the file: logins and passwords, the API key, MQTT settings, media folders and other panel settings. So the file is safe to give to a friend. The Processes themselves (the `scripts` folder) are shared by every Schema and are not in it either.
+What is **not** in the file: logins and passwords, the API key, MQTT settings, media folders and other panel settings. So the file is safe to give to a friend. The Processes themselves (the `processes` folder) are shared by every Schema and are not in it either.
 
 Unsaved changes in the editor are not in the file. Press **Save** first if you want them in it.
 

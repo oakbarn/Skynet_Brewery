@@ -80,7 +80,7 @@ Everything uses the **Topic name** from Settings (default `brewpanel`).
 | `brewpanel/status` | `online` or `offline` (the broker sets offline if the panel stops) |
 | `brewpanel/state/<name>` | The value of a gGlobal or Device. On/off things are `ON` / `OFF`. Timers are `hh:mm:ss`. |
 | `brewpanel/state/<timer>/running` | `ON` while a timer runs |
-| `brewpanel/scripts/running` | Names of the running processes, or `none` |
+| `brewpanel/processes/running` | Names of the running processes, or `none` |
 | `brewpanel/set/<name>` | Send a value here to change a gGlobal or Device (see the safety rules) |
 | `brewpanel/cmd/stopall` | Stops all processes |
 | `brewpanel/cmd/script/<script>/start` or `/stop` | Start or stop one process |

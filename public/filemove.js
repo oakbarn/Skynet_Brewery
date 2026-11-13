@@ -1,6 +1,6 @@
 // File Move page: copy files and whole folders from the computer you are using (Windows, Mac, Linux) to the Brain (the Pi).
 // Nothing to install: the browser sends the files to the panel, and the panel puts each kind in its one home on the Brain
-// (pictures in media/Images, sounds in media/sounds, Processes in scripts, help pages in help). See lib/filemove.js.
+// (pictures in media/Images, sounds in media/sounds, Processes in processes, help pages in help). See lib/filemove.js.
 const $ = s => document.querySelector(s);
 const el = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);

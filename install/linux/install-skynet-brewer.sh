@@ -124,13 +124,13 @@ UPDATE=no
 [ -f "$DEST/server.js" ] && UPDATE=yes
 mkdir -p "$DEST"
 DEST="$(cd "$DEST" && pwd)"
-# Your folders (config, data, media, scripts) are not in the release (samples are in defaults/, copied by the panel on
+# Your folders (config, data, media, processes) are not in the release (samples are in defaults/, copied by the panel on
 # its first start). They are kept unless you choose to replace one. Older releases that still carry them only add new files.
 if [ "$SRC" != "$DEST" ]; then
   if [ "$UPDATE" = yes ]; then
     echo "Updating the panel in $DEST"
     echo "Your own folders: config (layout, tabs, devices, settings), data (brew log, users, passwords, logins),"
-    echo "media (pictures and sounds) and scripts (Processes)."
+    echo "media (pictures and sounds) and processes (Processes)."
     # What this update does (Rule 9.8, Fritz 2026-11-06): 1 Start Fresh, 2 reset all users, 3 keep everything (the original
     # No: the default, and what a non-interactive run does). 1 and 2 each have a warning with No as the default; No backs out.
     FRESH=no
@@ -154,7 +154,7 @@ if [ "$SRC" != "$DEST" ]; then
     if [ "$CHOICE" = 2 ]; then
       printf '\n\033[1;33m%s\033[0m\n' "Reset all users? These are deleted for good, with no backup:"
       echo "  - every user and password, every sign-in (on every computer and phone) and the recovery code"
-      echo "Kept: Schemas and settings (config), brew log and saved values (data), Processes (scripts), pictures and sounds (media)."
+      echo "Kept: Schemas and settings (config), brew log and saved values (data), Processes (processes), pictures and sounds (media)."
       if ask "Really reset all users? (No backs out; nothing is deleted)" N; then
         rm -f "$DEST/data/users.json" "$DEST/data/users.json.tmp" "$DEST/data/sessions.json" "$DEST/data/sessions.json.tmp"
         echo "Reset all users: every user, password, sign-in and the recovery code deleted. Make the admin account again."
@@ -165,10 +165,10 @@ if [ "$SRC" != "$DEST" ]; then
       printf '\n\033[1;31m%s\033[0m\n' "WARNING: ALL EXISTING DATA WILL BE DELETED, for good, with no backup:"
       echo "  - every Schema, Tab, Device, Widget and setting (config)"
       echo "  - every user, password, sign-in and the recovery code, the brew log and saved values (data)"
-      echo "  - every Process (scripts)"
+      echo "  - every Process (processes)"
       echo "Kept: your pictures and sounds (media) and the backups folder. You make the admin account again."
       if ask "Really delete it all and Start Fresh? (No backs out; nothing is deleted)" N; then
-        rm -rf "$DEST/config" "$DEST/data" "$DEST/scripts"
+        rm -rf "$DEST/config" "$DEST/data" "$DEST/processes" "$DEST/scripts"
         FRESH=yes
         echo "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
       else
@@ -176,7 +176,7 @@ if [ "$SRC" != "$DEST" ]; then
       fi
     fi
     if [ "$FRESH" = no ] && ! ask "Keep all of them as they are? (No asks about each one)" Y; then
-      for d in "config:the sample layout" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
+      for d in "config:the sample layout" "processes:the sample Processes" "data:a fresh start (you create the admin account again)"; do
         name="${d%%:*}"
         [ -d "$DEST/$name" ] || continue
         if ask "Replace your $name folder with ${d#*:}? Yours is moved to backups/${name}_$STAMP first." N; then
@@ -213,7 +213,7 @@ if [ "$SRC" != "$DEST" ]; then
   done
   ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
     case "$f" in
-      ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
+      ./config/*|./media/*|./processes/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
     esac
     mkdir -p "$DEST/$(dirname "$f")"
     cp -p "$SRC/$f" "$DEST/$f"

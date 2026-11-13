@@ -20,7 +20,7 @@ Chaque version sur cette page est une **mise à jour officielle de Skynet** : un
 | Fichier de la version | À quoi il sert |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |
-| `Skynet_BrewPanel_<date>.zip` | Le panel lui-même : une première installation ou une mise à jour à la main, et pour Mac, Linux et le Pi. Il n'a pas de dossiers `config`, `data`, `media` ni `scripts`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. |
+| `Skynet_BrewPanel_<date>.zip` | Le panel lui-même : une première installation ou une mise à jour à la main, et pour Mac, Linux et le Pi. Il n'a pas de dossiers `config`, `data`, `media` ni `processes`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. |
 | `Install Skynet Brewer.command` | Programme d'installation Mac |
 | `install-skynet-brewer.sh` | Programme d'installation Linux et Raspberry Pi |
 | `Skynet_Brewer.bat` | Fichier de démarrage Windows d'exemple |
@@ -30,7 +30,7 @@ Chaque version sur cette page est une **mise à jour officielle de Skynet** : un
 
 Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/BrewPanel`** dans votre dossier personnel sur un Mac, sous Linux ou sur un Pi. Chaque programme d'installation met un raccourci **Skynet Brewer** sur le Bureau.
 
-> **Une mise à jour ?** Arrêtez d'abord le panel, puis relancez le même programme d'installation, ou décompressez le zip par-dessus le panel. Ni l'un ni l'autre ne remplace votre disposition et vos réglages (`config`), vos données de brassage, utilisateurs et mots de passe (`data`), vos images et sons (`media`) ou vos Processes (`scripts`). Voir [Passer à une nouvelle version](18-updating).
+> **Une mise à jour ?** Arrêtez d'abord le panel, puis relancez le même programme d'installation, ou décompressez le zip par-dessus le panel. Ni l'un ni l'autre ne remplace votre disposition et vos réglages (`config`), vos données de brassage, utilisateurs et mots de passe (`data`), vos images et sons (`media`) ou vos Processes (`processes`). Voir [Passer à une nouvelle version](18-updating).
 
 ## Windows : le programme d'installation {#windows-the-installer}
 

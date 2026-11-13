@@ -82,13 +82,13 @@ To use it on a Windows PC:
 2. Click **Language**, then **User Defined Language**, then **Define your language...**.
 3. Click **Import...**, pick `Skynet_Process_Notepad++.xml` and click **Open**. Close the window.
 4. Close Notepad++ and open it again.
-5. Open a Process (a `.txt` file in the `scripts` folder), then click **Language** and pick **Skynet Process** near the bottom of the list.
+5. Open a Process (a `.txt` file in the `processes` folder), then click **Language** and pick **Skynet Process** near the bottom of the list.
 
 A general file that colors commands, comments, numbers, text, operators and names starting with `gG` (gGlobals) is in the panel folder as `docs/Skynet_Process_Notepad++.xml`.
 
 ## Delete and the Recycle Bin
 
-**Delete** does not erase a Process. It asks first, then moves the Process to the **Recycle Bin** (the `scripts/Recycle_Bin` folder on the Brain).
+**Delete** does not erase a Process. It asks first, then moves the Process to the **Recycle Bin** (the `processes/Recycle_Bin` folder on the Brain).
 
 Press **Recycle Bin** under the Process list to see what was deleted and when:
 

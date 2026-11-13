@@ -2,12 +2,12 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (deletes config, data and scripts after a second warning;
+; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (deletes config, data and processes after a second warning;
 ; media is kept), 2 update and reset all users (deletes users, passwords, sign-ins and the recovery code after a warning),
 ; or 3 update and keep everything (the default, the original No). With 2 or 3 you can still replace one of your folders.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
-;   -DSRC=<the BrewPanel folder of the release (config and scripts samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
 ; and, only when signing is set up (docs/Code_Signing_Setup.md), -DSIGN_SCRIPT=<tools/sign-exe.sh>: the Setup .exe and the
 ; Uninstall .exe inside it are then signed with Azure Artifact Signing as they are made (needs NSIS 3.08 or newer).
 
@@ -174,14 +174,14 @@ Function MoveToBackups
 FunctionEnd
 
 Function AskReplaceFolders
-  MessageBox MB_YESNO|MB_ICONQUESTION "Keep all your own folders as they are?$\r$\n$\r$\n   config:   your layout, tabs, devices and settings$\r$\n   data:      brew log, users, passwords and logins$\r$\n   media:    your pictures and sounds$\r$\n   scripts:  your Processes$\r$\n$\r$\nYes (recommended): keep them all.$\r$\nNo: ask me about each one." /SD IDYES IDYES done
+  MessageBox MB_YESNO|MB_ICONQUESTION "Keep all your own folders as they are?$\r$\n$\r$\n   config:   your layout, tabs, devices and settings$\r$\n   data:      brew log, users, passwords and logins$\r$\n   media:    your pictures and sounds$\r$\n   processes: your Processes$\r$\n$\r$\nYes (recommended): keep them all.$\r$\nNo: ask me about each one." /SD IDYES IDYES done
   StrCpy $R0 "config"
   StrCpy $R1 "layout, tabs, devices and settings"
   MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your config folder ($R1) with the sample layout?$\r$\n$\r$\nYes moves yours to backups\config_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
     Call MoveToBackups
-  StrCpy $R0 "scripts"
+  StrCpy $R0 "processes"
   StrCpy $R1 "Processes"
-  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your scripts folder ($R1) with the sample Processes?$\r$\n$\r$\nYes moves yours to backups\scripts_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your processes folder ($R1) with the sample Processes?$\r$\n$\r$\nYes moves yours to backups\processes_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
     Call MoveToBackups
   StrCpy $R0 "data"
   StrCpy $R1 "brew log, users, passwords and logins"
@@ -244,14 +244,14 @@ FunctionEnd
 Function UpdateChoiceLeave
   ${NSD_GetState} $RadioUsers $0
   ${If} $0 == ${BST_CHECKED}
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Reset all users?$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every user and password$\r$\n   - every sign-in, on every computer and phone$\r$\n   - the recovery code$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your Schemas and settings (config), brew log and saved values (data), Processes (scripts), pictures and sounds (media).$\r$\n$\r$\nThe panel then asks you to make the admin account again.$\r$\n$\r$\nYes: reset all users.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Reset all users?$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every user and password$\r$\n   - every sign-in, on every computer and phone$\r$\n   - the recovery code$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your Schemas and settings (config), brew log and saved values (data), Processes (processes), pictures and sounds (media).$\r$\n$\r$\nThe panel then asks you to make the admin account again.$\r$\n$\r$\nYes: reset all users.$\r$\nNo: go back. Nothing is deleted." IDYES +2
       Abort
     StrCpy $Choice "users"
     Return
   ${EndIf}
   ${NSD_GetState} $RadioFresh $0
   ${If} $0 == ${BST_CHECKED}
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
       Abort
     StrCpy $Choice "fresh"
     Return
@@ -286,11 +286,12 @@ FunctionEnd
 Function StartFresh
   RMDir /r "$INSTDIR\config"
   RMDir /r "$INSTDIR\data"
-  RMDir /r "$INSTDIR\scripts"
+  RMDir /r "$INSTDIR\processes"
+  RMDir /r "$INSTDIR\scripts"   ; the name the processes folder had in earlier trial versions
   Call ForgetWindowLogin
   ${If} ${FileExists} "$INSTDIR\config\*.*"
   ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
-  ${OrIf} ${FileExists} "$INSTDIR\scripts\*.*"
+  ${OrIf} ${FileExists} "$INSTDIR\processes\*.*"
     MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish the Start Fresh." /SD IDOK
     DetailPrint "Start Fresh: some files could not be deleted."
   ${Else}
@@ -308,7 +309,7 @@ Section "Skynet Brew Panel" SecMain
   Call NeedNode
   Call WaitForPanelStopped
 
-  ; An update over an existing panel. The release has no config, data, media or scripts folders (their samples are in
+  ; An update over an existing panel. The release has no config, data, media or processes folders (their samples are in
   ; defaults\), so yours are kept unless you ask to replace one. A copy of the layout goes to config\backups just in case.
   StrCpy $Upgrade 0
   ${If} ${FileExists} "$INSTDIR\server.js"
@@ -318,9 +319,9 @@ Section "Skynet Brew Panel" SecMain
       Call StartFresh
     ${ElseIf} $Choice == "users"
       Call ResetUsers
-      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data and log (data), pictures and sounds (media), processes (scripts)."
+      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data and log (data), pictures and sounds (media), processes (processes)."
     ${Else}
-      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (scripts)."
+      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (processes)."
     ${EndIf}
     ${If} $Fresh == 0
     ${AndIf} ${FileExists} "$INSTDIR\config\brewery.json"
@@ -381,13 +382,14 @@ Section "Skynet Brew Panel" SecMain
   ${If} $OldPanel != ""
     DetailPrint "Copying data from $OldPanel"
     CreateDirectory "$INSTDIR\config"
-    CreateDirectory "$INSTDIR\scripts"
+    CreateDirectory "$INSTDIR\processes"
     CreateDirectory "$INSTDIR\media"
     CopyFiles /SILENT "$OldPanel\config\brewery.json" "$INSTDIR\config\brewery.json"
     ${If} ${FileExists} "$OldPanel\data\*.*"
       CopyFiles /SILENT "$OldPanel\data" "$INSTDIR"
     ${EndIf}
-    CopyFiles /SILENT "$OldPanel\scripts\*.*" "$INSTDIR\scripts"
+    CopyFiles /SILENT "$OldPanel\processes\*.*" "$INSTDIR\processes"
+    CopyFiles /SILENT "$OldPanel\scripts\*.*" "$INSTDIR\processes"   ; earlier trial versions called it scripts
     CopyFiles /SILENT "$OldPanel\media\*.*" "$INSTDIR\media"
     CopyFiles /SILENT "$OldPanel\help\*.*" "$INSTDIR\help"
   ${EndIf}
@@ -465,7 +467,7 @@ Function AskImporter
 FunctionEnd
 
 ; Official Skynet (Rule 9.14, lib/official.js): the core program files (the same list as CORE there) lose their Read-only mark.
-; Only the core: your config, data, media, scripts and help files are never touched.
+; Only the core: your config, data, media, processes and help files are never touched.
 !macro CoreWritable UN
 Function ${UN}CoreWritable
   nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\server.js"'

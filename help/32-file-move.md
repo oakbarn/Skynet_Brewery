@@ -8,7 +8,7 @@ Each kind of file has one home on the Brain, so nothing lands in the wrong place
 |---|---|---|
 | Pictures (png, jpg, gif, svg, webp, bmp) | `media/Images` | Folders inside the one you pick are kept, so `Media\Pumps\a.png` becomes `Images/Pumps/a.png`. |
 | Sounds (wav, mp3, ogg, m4a) | `media/sounds` | Always straight into `sounds`, so a separate `wave` folder is not needed. |
-| Processes (.txt) | `scripts` | Pick **Processes** in *Put them in* first. |
+| Processes (.txt) | `processes` | Pick **Processes** in *Put them in* first. |
 | Help pages (.md) | `help` | Pick **Help pages** in *Put them in* first. |
 
 ## Copying pictures and sounds from a folder

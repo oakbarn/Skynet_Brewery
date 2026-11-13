@@ -48,7 +48,7 @@ assert.throws(() => mf.mkdir(0, 'Images/Skynet/Mine'), /Skynet/);
 assert.equal(mf.unzip(zip1('a.png'), 0, 'Images/Skynet/Pumps').saved.length, 0, 'a zip can\'t unpack into Skynet');
 assert.equal(mf.list(0, 'Images/Skynet/Pumps').readOnly, true);
 assert.equal(mf.list(0, 'Images/Pumps').readOnly, false);
-assert.throws(() => new FileMove(() => ({ root: d, media, scripts: d, help: d })).target('pictures', 'Skynet/Pumps/x.png'), /Skynet/, 'File Move can\'t put pictures in Skynet');
+assert.throws(() => new FileMove(() => ({ root: d, media, processes: d, help: d })).target('pictures', 'Skynet/Pumps/x.png'), /Skynet/, 'File Move can\'t put pictures in Skynet');
 mf.rename(0, 'Images/Fermenters', 'Images/Conicals'); mf.remove(0, 'Images/Conicals');
 assert.deepEqual(mf.list(0, 'Images').kept, [...PICTURE_GROUPS, 'Skynet'].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })));
 mf.rename(0, 'Images/MyPump.png', 'Images/Pumps/MyPump.png');      // your picture moved into a group
