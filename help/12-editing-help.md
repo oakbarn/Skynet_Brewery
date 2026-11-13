@@ -28,4 +28,4 @@ Tables are rows of `|` with a `|---|---|` line under the first row, like the one
 
 ## The files
 
-Each page is a `.md` text file in the `help` folder of the panel on the Pi. The number at the front of the file name sets the order (`05-scripts.md`). You can also edit them with any text editor; the panel shows the change the next time the page is opened.
+Each page is a `.md` text file in the `help` folder of the panel on the Pi. The number at the front of the file name sets the order (`05-scripts.md`). You can also edit them with any text editor; the panel shows the change the next time the page is opened. The French pages are in `help/fr`, with the same file names (see [Help in French](192-help-in-french)).
