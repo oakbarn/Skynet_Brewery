@@ -1,6 +1,6 @@
 # gKonstant et gAPI (nouveaux noms) {#gkonstant-and-gapi-new-names}
 
-> **Remplacé le 2026-10-30 :** gKonstant et gAPI sont maintenant une seule classe, **gGlobal** (noms `gG_`), et l'API est `/api/items`. Voir [Database and .API on every Device and Widget](98-database-and-api). Cette page raconte l'historique.
+> **Remplacé le 2026-10-30 :** gKonstant et gAPI sont maintenant une seule classe, **gGlobal** (noms `gG_`), et l'API est `/api/items`. Voir [Base de données et .API sur chaque Device et Widget](98-database-and-api). Cette page raconte l'historique.
 
 Le 2026-10-28, les deux classes de variables ont été renommées :
 
@@ -45,6 +45,6 @@ Tout est mis au nouveau standard ; les anciens mots ne sont pas gardés (Règle 
 
 ## L'API {#the-api}
 
-L'adresse de l'API web est maintenant **`/api/gapi`** (voir [The API](11-api)). `/api/vapi` n'existe plus : un programme qui l'utilisait doit passer à `/api/gapi`. Les programmes qui utilisent le nom d'une variable renommée (Node-RED, Home Assistant par MQTT) doivent aussi utiliser le nouveau nom.
+L'adresse de l'API web est maintenant **`/api/gapi`** (voir [API (les autres programmes)](11-api)). `/api/vapi` n'existe plus : un programme qui l'utilisait doit passer à `/api/gapi`. Les programmes qui utilisent le nom d'une variable renommée (Node-RED, Home Assistant par MQTT) doivent aussi utiliser le nouveau nom.
 
 ## Importer {#importing}

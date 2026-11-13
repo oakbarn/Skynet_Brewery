@@ -6,7 +6,7 @@ Un **Skynet Fitting** est un Tab_Fitting fait à partir d'un Skynet Fitting Temp
 - Les IP ne peuvent être ni déplacés, ni réglés, ni retirés, et le raccord ne peut pas être dégroupé. Tracez vos tuyaux vers les IP.
 - Ses **Properties** n'ont aucun réglage d'IP.
 
-Les raccords que vous construisez vous-même (à partir d'un Template groupé de l'utilisateur) marchent comme avant : vous ajoutez les IP, vous les placez et vous les groupez. Voir [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+Les raccords que vous construisez vous-même (à partir d'un Template groupé de l'utilisateur) marchent comme avant : vous ajoutez les IP, vous les placez et vous les groupez. Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
 
 ## Ouvrir ses Properties {#opening-its-properties}
 

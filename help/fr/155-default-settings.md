@@ -21,7 +21,7 @@ Une fois des tuyaux joints, un élément prend la taille qu'ont **la plupart de 
 5.36). Depuis le 2026-11-07, cela couvre aussi les **pompes**. Par exemple,
 ajoutez une pompe Blichmann à un Tab avec des tuyaux de 1" : elle est dessinée pour des tuyaux de 1" dès que les tuyaux y sont, et pour le Default pipe size
 avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Voir
-[Pipe fittings and Manual Valves](87-pipe-fittings-and-manual-valves).
+[Raccords de tuyauterie et vannes manuelles](87-pipe-fittings-and-manual-valves).
 
 ## Nouveaux Devices et Widgets (le Build) {#new-devices-and-widgets-the-build}
 
@@ -37,7 +37,7 @@ sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6
 
 Nouvelles recettes (Units, Batch size, Profiles, Boil time, rendement ...), affichage des quantités sur le Tab Recipe, alertes houblon, nouveaux Tabs et
 vannes (Tab Background Profile, Tab Style, Valve Profile), la Menu Bar, Sound, On startup (Zoom, Full screen), Text (l'aspect de
-chaque case de texte) et Phones and tablets. Voir [The Menu](33-menu).
+chaque case de texte) et Phones and tablets. Voir [Le ☰ Menu](33-menu).
 
 ## Tap Water
 
@@ -70,7 +70,7 @@ Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile l
 Certains réglages par défaut se changent à un autre endroit. Ils sont listés ici pour que vous les voyiez tous, avec **ce qu'ils valent maintenant**, **où ils se
 changent** et leur **Règle**. Rien ne se change dans cette liste. Par exemple :
 
-- le **Look** (Office Black) et les **couleurs de fond et de texte d'un nouveau Tab**, depuis Settings > Panel settings > Look ([Panel Looks](151-panel-looks)) ;
+- le **Look** (Office Black) et les **couleurs de fond et de texte d'un nouveau Tab**, depuis Settings > Panel settings > Look ([Les Looks du panneau (thèmes)](151-panel-looks)) ;
 - le **Pump Standard** et le **Valve Standard** (dessinés en 150 x 150 pour un tuyau de 1/2") ;
 - l'**On overlay** (l'éclair fixe), l'**anneau vert lumineux** sur une nouvelle pompe, les **flow colors** (None) ;
 - les plages et couleurs du **Skynet Dial**, le **Pulse** (100 ms) et le **verrouillage du bouton poussoir** (3 secondes) ;

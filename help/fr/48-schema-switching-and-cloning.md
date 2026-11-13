@@ -1,6 +1,6 @@
 # Changer de Schema et cloner des Schemas {#switching-and-cloning-schemas}
 
-Un **Schema** est toute une configuration de brasserie : ses Tabs, ses Devices, ses Widgets, ses images, ses tuyaux, ses sondes, sa liste autostart, et le Equipment Profile de chaque Tab. Voir [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+Un **Schema** est toute une configuration de brasserie : ses Tabs, ses Devices, ses Widgets, ses images, ses tuyaux, ses sondes, sa liste autostart, et le Equipment Profile de chaque Tab. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
 ## Où choisir le Schema {#where-to-pick-the-schema}
 
@@ -12,7 +12,7 @@ La même liste déroulante Schema est à trois endroits. Utilisez celle qui vous
 
 Choisir un autre Schema le charge. Seul un Admin peut charger ou changer un Schema.
 
-Pour commencer un **nouveau** Schema, appuyez sur **☰ Menu > ➕ New Schema…**, ou sur **➕ New Schema** sur l'onglet **☰ Menu > Schema**. Voir [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
+Pour commencer un **nouveau** Schema, appuyez sur **☰ Menu > ➕ New Schema…**, ou sur **➕ New Schema** sur l'onglet **☰ Menu > Schema**. Voir [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema).
 
 L'onglet **☰ Menu > Schema** liste aussi chaque Schema du Brain : combien de Tabs il a, le Equipment Profile de chaque Tab et quand il a été enregistré pour la dernière fois, avec un bouton **Load** et un bouton **Clone** sur chacun.
 

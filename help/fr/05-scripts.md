@@ -4,7 +4,7 @@ Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, f
 
 ## L'écran Processes {#the-processes-screen}
 
-- La liste de gauche montre chaque Process ; celui qui tourne est marqué. Le petit nombre devant chacun est son **Order** (ordre) : tapez un nouveau nombre pour le déplacer, et les autres se renumérotent tout seuls. Voir [Process Order](38-process-order).
+- La liste de gauche montre chaque Process ; celui qui tourne est marqué. Le petit nombre devant chacun est son **Order** (ordre) : tapez un nouveau nombre pour le déplacer, et les autres se renumérotent tout seuls. Voir [L'ordre des Processes (Process Order)](38-process-order).
 - **New**, **Rename**, **Delete** (Admins).
 - **Save** et **Check** (Admins). Check trouve les erreurs sans lancer le Process.
 - **Start**, **Stop** et **Restart** (Operators et Admins). **Stop all** arrête tous les Processes. Restart arrête le Process, efface sa mémoire et le relance depuis le début.
@@ -50,7 +50,7 @@ stop_db_group Mash            ... until this line (see Database and .API)
 
 (Dans ce bloc, les mots après chaque ligne expliquent, en anglais, ce qu'elle fait : créer une variable, ouvrir une vanne, attendre une température, sauter à un Label, etc. Le code s'écrit toujours tel quel.)
 
-Le nom seul veut dire sa valeur principale, et les autres attributs utilisent un point. Voir [Process language and steps](22-process-language) pour la liste complète, la saisie automatique (autofill), les classes de Process et les numéros d'étape.
+Le nom seul veut dire sa valeur principale, et les autres attributs utilisent un point. Voir [Le langage des Processes et les étapes](22-process-language) pour la liste complète, la saisie automatique (autofill), les classes de Process et les numéros d'étape.
 
 ## Labels
 
@@ -63,7 +63,7 @@ gGS_Brewery_Top.label = "Mash"
 
 ## Les fichiers qui ne sont pas sur le Brain {#files-that-are-not-on-the-brain}
 
-Quand vous enregistrez un Process avec un nouveau chemin de fichier qui n'est pas sur le Brain (le Raspberry Pi), un avertissement s'affiche. Cela arrive pour un chemin Windows comme `C:\Brewing\Sounds\Hops.wav`, un chemin en dehors des dossiers media, ou un fichier qui n'est pas encore dans un dossier media. Les téléphones et les autres ordinateurs ne peuvent pas atteindre ces fichiers. Mettez le fichier dans un dossier media avec l'écran [Media](07-media) et utilisez son chemin là-bas, par exemple `sounds/Hops.wav`.
+Quand vous enregistrez un Process avec un nouveau chemin de fichier qui n'est pas sur le Brain (le Raspberry Pi), un avertissement s'affiche. Cela arrive pour un chemin Windows comme `C:\Brewing\Sounds\Hops.wav`, un chemin en dehors des dossiers media, ou un fichier qui n'est pas encore dans un dossier media. Les téléphones et les autres ordinateurs ne peuvent pas atteindre ces fichiers. Mettez le fichier dans un dossier media avec l'écran [Media (images et sons)](07-media) et utilisez son chemin là-bas, par exemple `sounds/Hops.wav`.
 
 Cochez **Do not show this warning again** pour ne plus voir les avertissements. Réactivez-les dans **Settings > Panel settings**.
 

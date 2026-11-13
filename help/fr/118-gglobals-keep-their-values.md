@@ -49,4 +49,4 @@ avertissement) les supprime, avec les Schemas.
 - Les gGlobals **Push Button** et **Pulse Button** commencent toujours relâchées (OFF), donc rien ne s'allume tout seul quand le Brain démarre.
 - Une **Long String** avec un fichier texte : sa valeur est le texte du fichier, et le fichier est déjà sur le disque.
 
-Voir aussi : [gGlobal Kinds](108-gglobal-kinds), [Variables](04-variables), [Updating](18-updating).
+Voir aussi : [Sortes de gGlobal](108-gglobal-kinds), [Variables](04-variables), [Passer à une nouvelle version](18-updating).

@@ -60,4 +60,4 @@ Un Device avec plus d'une méthode de commande, comme une Heating Element (On/Of
 des **Method Clones** (Règle 4.4) : chacun est une tuile qui représente une méthode, avec son propre Label. Ils peuvent aller sur le
 Tab du Device lui-même : **⧉ Clone Device > Method Clone**. Il montre ON seulement tant que le Device est ON dans cette méthode. Un clic sur un Method Clone agit
 exactement comme un clic sur le Device, tout à l'unisson, sans fenêtre : quand il montre ON, le clic éteint le Device ; quand il montre OFF, le
-clic passe le Device à sa méthode et l'allume. Voir [One Heating Element, pick how it heats](150-heating-method).
+clic passe le Device à sa méthode et l'allume. Voir [Une seule résistance, choisissez comment elle chauffe](150-heating-method).

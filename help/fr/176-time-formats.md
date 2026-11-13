@@ -56,4 +56,4 @@ wgt_TM_Boil_BH.showas = ""           back to its Properties' pick
 
 (La deuxième ligne affiche « 45 min » ; la dernière revient au choix de ses Properties.)
 
-Voir aussi [Value, Time and DateTime Widgets](134-value-time-and-datetime-widgets) et [Timer digits](152-skynet-dial-and-timer-digits).
+Voir aussi [Widgets Value, Time et DateTime](134-value-time-and-datetime-widgets) et [Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits).

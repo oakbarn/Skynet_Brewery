@@ -48,7 +48,7 @@ Toutes suivent les règles générales des fenêtres : Name en premier, ✖ Canc
 | gT_Global_Time | **.value** comme `01:30:00` |
 | gD_Global_DateTime | **.value** à partir d'un sélecteur de date et d'heure |
 
-Chaque sorte a aussi **Database and .API** avec un ⬢ pour ses réglages. Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redémarre : voir [gGlobals keep their values](118-gglobals-keep-their-values). La .value que vous tapez est sa première valeur.
+Chaque sorte a aussi **Database and .API** avec un ⬢ pour ses réglages. Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redémarre : voir [Les gGlobals gardent leurs valeurs](118-gglobals-keep-their-values). La .value que vous tapez est sa première valeur.
 
 ## Exemple {#sample}
 

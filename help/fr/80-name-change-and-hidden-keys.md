@@ -21,7 +21,7 @@ La même fenêtre sert à renommer un **Process** (page Processes > **Rename**) 
 
 ## Ce qui suit le nouveau nom {#what-follows-the-new-name}
 
-- **Chaque Process.** `Pump_A = on` devient `Pump_Main = on`, et `Pump_A.visible` devient `Pump_Main.visible`. Seul le nom entier est changé, majuscules et minuscules comprises (voir [Renaming Devices and Widgets](53-renaming) pour les détails).
+- **Chaque Process.** `Pump_A = on` devient `Pump_Main = on`, et `Pump_A.visible` devient `Pump_Main.visible`. Seul le nom entier est changé, majuscules et minuscules comprises (voir [Renommer des Devices et des Widgets](53-renaming) pour les détails).
 - **Un Process qui tourne en ce moment continue de marcher.** Il trouve toujours l'élément par sa clé cachée. La prochaine fois qu'il démarre, il utilise le nouveau nom.
 - **Les Processes qui démarrent d'autres Processes.** Renommez un Process et les lignes qui le démarrent ou l'arrêtent suivent, de même que la liste Autostart.
 - **Les clones.** Un clone se souvient de l'élément dont il a été cloné. Renommez le premier élément et l'ancien nom dans le nom de chaque clone change aussi : renommez `HLT` en `Hot_Liquor_Tank` et `HLT copy` devient `Hot_Liquor_Tank copy`. Un clone que vous avez renommé vous-même, ou dont le nouveau nom est déjà pris, reste tel quel.
@@ -45,4 +45,4 @@ Chaque fenêtre utilise les mêmes boutons, chacun avec une icône et son mot :
 | 🗑 Delete | Supprime (il demande d'abord) |
 | ✔ OK | Ferme un message après que vous l'avez lu |
 
-Voir aussi [Renaming Devices and Widgets](53-renaming), [Allowed names](63-allowed-names) et [Interface, Tab and Device names](46-interface-tab-device-names).
+Voir aussi [Renommer des Devices et des Widgets](53-renaming), [Caractères permis dans les noms](63-allowed-names) et [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).

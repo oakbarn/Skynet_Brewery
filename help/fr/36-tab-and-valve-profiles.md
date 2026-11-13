@@ -15,7 +15,7 @@ Un Tab Background Profile donne à un Tab sa **couleur de fond**, et l'**apparen
 
 Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être qu'une LED ou du Text ; un Gauge l'affiche en Text. Ce qui n'a ni valeur ni état (une image, une étiquette) ne prend que les couleurs. Les pompes et les vannes gardent leurs images.
 
-**L'apparence n'est copiée qu'au moment où le Device ou le Widget est créé.** Ensuite, changez-la dans ses propriétés (dans Edit layout), ou depuis un Process (par exemple `Pump_1.valueColor = "Red"`, voir [The Process language](22-process-language)). Changer le profil plus tard ne change pas ce qui est déjà sur le Tab.
+**L'apparence n'est copiée qu'au moment où le Device ou le Widget est créé.** Ensuite, changez-la dans ses propriétés (dans Edit layout), ou depuis un Process (par exemple `Pump_1.valueColor = "Red"`, voir [Le langage des Processes et les étapes](22-process-language)). Changer le profil plus tard ne change pas ce qui est déjà sur le Tab.
 
 ### Donner son profil à un Tab {#give-a-tab-its-profile}
 
@@ -30,10 +30,10 @@ L'onglet de menu **Default** choisit le Tab Background Profile que reçoit un **
 
 Un Valve Profile est la façon dont commence une nouvelle vanne :
 
-- **Graphic** (la vanne telle qu'elle est dessinée) et, facultatif, **Graphic when open** (image quand elle est ouverte). Les vannes Skynet n'ont pas d'images ouvertes : la vanne garde son image et l'**On overlay** (la superposition « allumé ») montre qu'elle est ouverte ([Retired Skynet pictures](129-retired-skynet-pictures)).
+- **Graphic** (la vanne telle qu'elle est dessinée) et, facultatif, **Graphic when open** (image quand elle est ouverte). Les vannes Skynet n'ont pas d'images ouvertes : la vanne garde son image et l'**On overlay** (la superposition « allumé ») montre qu'elle est ouverte ([Images Skynet retirées et renommées](129-retired-skynet-pictures)).
 - **Orientation** : **Horizontal** (bouts du tuyau à gauche et à droite), **Vertical** (en haut et en bas), **45 degrees Left** (coins en haut à gauche et en bas à droite) ou **45 degrees Right** (en haut à droite et en bas à gauche). Pour Horizontal et Vertical, choisissez des images dessinées dans ce sens. Pour les 45, choisissez les images **verticales** : le panel les tourne de 45 degrés à gauche ou à droite pour vous. Les 45 sont pour une vanne posée sur un coude à 45 degrés.
 
-Les images de vanne de Skynet sont des fichiers SVG dans `Images/samples`, donc elles restent nettes à toutes les tailles et ne peuvent pas être supprimées (voir [Media](07-media)) :
+Les images de vanne de Skynet sont des fichiers SVG dans `Images/samples`, donc elles restent nettes à toutes les tailles et ne peuvent pas être supprimées (voir [Media (images et sons)](07-media)) :
 
 | Image | Fichier |
 |---|---|

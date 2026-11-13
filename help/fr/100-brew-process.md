@@ -87,7 +87,7 @@ L'écran Brew Process montre chaque valeur telle qu'elle est maintenant.
 | `close_all_valves` | ferme chaque vanne de la liste **Close all valves** |
 | `open_all_valves` | ouvre chaque vanne de la liste **Open all valves** (l'état dans lequel on laisse tout après le nettoyage) |
 | `all_pumps_off` | arrête chaque pompe |
-| `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
+| `open_valve DigiBoil_Spigot` | ouvre une seule vanne. Une vanne manuelle (une Manual valve, un Widget Manual Valve, un robinet de DigiBoil ou de Brewzilla) affiche une fenêtre et attend que ce soit fait à la main ; une vanne motorisée est commandée tout de suite. Voir [DigiBoil et Brewzilla, réglées à la main](158-digiboil-and-brewzilla) |
 | `close_valve DigiBoil_Spigot` | ferme une seule vanne, de la même façon |
 
 ## Close all et Open all valves {#close-all-and-open-all-valves}
@@ -113,7 +113,7 @@ Noms des travaux : `HLT_Heater`, `HLT_Probe`, `Mash_Heater`, `Mash_Probe`, `Mash
 
 Une ligne `//About: ...` près du haut est la description du Template sur l'écran Brew Process.
 
-Voir [Process language](22-process-language), [Tap water valves](31-tap-water-valves) et [Mash and Boil Profiles](35-mash-and-boil-profiles).
+Voir [Le langage des Processes et les étapes](22-process-language), [Vannes d'eau du robinet](31-tap-water-valves) et [Mash Profiles et Boil Profiles](35-mash-and-boil-profiles).
 
 ## Anciens processus de brassage {#older-brew-processes}
 

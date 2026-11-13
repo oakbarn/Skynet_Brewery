@@ -21,7 +21,7 @@ et 1.1 avant 1.15 avant 1.2, pour que vous puissiez mettre une Alarm entre deux 
 - **La même Priority :** celle qui est passée sur On la première joue la première, donc une Alarm qui joue n'est jamais coupée par une autre de même Priority.
 - **Deux au même moment** (à moins d'une seconde) avec la même Priority : l'une est **tirée au hasard**, puis l'autre suit.
 - **Un son qui ne se répète pas** (Repeat) laisse jouer le suivant dès qu'il a joué jusqu'au bout, même si son Alarm est toujours affichée On.
-- **Les étapes d'une Alarm Chain attendent leur tour** : voir [The Alarm Chain](172-alarm-chain).
+- **Les étapes d'une Alarm Chain attendent leur tour** : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 - Un Process peut la changer : `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` remet le numéro de ses Properties).
 
 ## En ajouter une {#add-one}
@@ -50,7 +50,7 @@ alm_Hops_1 = false           turn it off
 
 (La faire sonner ; attendre ici que le brasseur l'arrête d'un toucher ; l'arrêter ; déplacer l'ajout de houblon à 20:00 restantes.)
 
-`alm_Hops_1 = On` et `alm_Hops_1 = Off` marchent comme true et false (Règle 16.9). Un Process n'écrit jamais `.active`. Une seule Alarm peut changer son apparence et son son étape par étape : voir [The Alarm Chain](172-alarm-chain).
+`alm_Hops_1 = On` et `alm_Hops_1 = Off` marchent comme true et false (Règle 16.9). Un Process n'écrit jamais `.active`. Une seule Alarm peut changer son apparence et son son étape par étape : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 
 ## Sound Player
 
@@ -62,8 +62,8 @@ play SoundPlayer
 stop SoundPlayer
 ```
 
-Un son peut aussi être un **lien web vers un MP3** (`https://...`), joué directement depuis le web : voir [Sounds from a web link](186-sounds-from-a-web-link).
+Un son peut aussi être un **lien web vers un MP3** (`https://...`), joué directement depuis le web : voir [Des sons depuis un lien web](186-sounds-from-a-web-link).
 
 Il n'y a pas de commande de pause : il se met en pause tout seul pendant qu'une alarme sonne et reprend ensuite. Pour mettre un Sound Player sur un Tab (touchez-le pour jouer ou arrêter), utilisez **Add Widget > On-screen controls > Sound Player**.
 
-Appuyez une fois sur **Enable sound** en haut de chaque écran qui doit jouer des sons (les navigateurs l'exigent). Pour avoir le son actif à chaque ouverture du panel, activez **Turn Sound On when starting** sur **☰ Menu > Default** (voir [The Menu](33-menu)) ; il faut quand même toucher ou cliquer une fois la page avant le premier son, parce que les navigateurs l'exigent aussi.
+Appuyez une fois sur **Enable sound** en haut de chaque écran qui doit jouer des sons (les navigateurs l'exigent). Pour avoir le son actif à chaque ouverture du panel, activez **Turn Sound On when starting** sur **☰ Menu > Default** (voir [Le ☰ Menu](33-menu)) ; il faut quand même toucher ou cliquer une fois la page avant le premier son, parce que les navigateurs l'exigent aussi.

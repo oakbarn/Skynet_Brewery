@@ -34,7 +34,7 @@ Regrouper (bundle) verrouille une cuve et ses IP ensemble comme un seul bloc, po
 
 - Elle montre un 📦 dans Edit layout.
 - Faites glisser la cuve, ou l'un de ses IP, et tout l'ensemble bouge d'un bloc (sur un iPhone, faites glisser avec un doigt).
-- La cuve et ses IP ne peuvent être ni redimensionnés, ni modifiés, ni supprimés. L'ouvrir ne montre que **Bundled**, **Tab** et **Clone** (une copie de la cuve et de ses IP, voir [Clone a Bundled item](48-schema-switching-and-cloning#clone-a-bundled-item)).
+- La cuve et ses IP ne peuvent être ni redimensionnés, ni modifiés, ni supprimés. L'ouvrir ne montre que **Bundled**, **Tab** et **Clone** (une copie de la cuve et de ses IP, voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning#clone-a-bundled-item)).
 
 **Pour dégrouper :** ouvrez la cuve (double-clic, ou gardez le doigt dessus), éteignez **Bundled**, appuyez sur **Save**, puis sur **Save layout**. Vous pouvez de nouveau modifier, déplacer ou supprimer ses IP.
 

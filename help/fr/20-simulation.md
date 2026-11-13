@@ -2,7 +2,7 @@
 
 Le mode simulation (le mode d'essai) vous permet d'essayer toute une journée de brassage sans toucher au matériel. Les Processes, les minuteries, les alarmes et l'écran marchent exactement comme le jour du brassage, mais aucun vrai élément chauffant, aucune pompe ni aucune vanne n'est commuté. Le temps peut aussi passer plus vite, ou sauter en avant, pour que vous n'ayez pas à attendre un empâtage de 60 minutes pour voir ce qui se passe à la minute 50.
 
-Un Admin l'active avec le bouton **🔌 Real / 🧪 Simulator** à côté du ☰ Menu, depuis **☰ Menu > Switch to Simulator**, ou dans **Settings > Simulation** (Aide : [Simulator or Real boards](77-simulator-or-real-boards)).
+Un Admin l'active avec le bouton **🔌 Real / 🧪 Simulator** à côté du ☰ Menu, depuis **☰ Menu > Switch to Simulator**, ou dans **Settings > Simulation** (Aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)).
 
 ## Ce qui se passe quand vous l'activez {#what-happens-when-you-turn-it-on}
 
@@ -18,7 +18,7 @@ L'éteindre fait la même chose à l'envers : chaque Process s'arrête, chaque s
 
 ## Faire passer le temps plus vite {#making-time-go-faster}
 
-**Speed** (vitesse) règle à quelle vitesse tourne l'horloge : normale, 2×, 5×, 10×, 25× et jusqu'à 120× plus vite. Allumer le Simulator démarre à 25× avec Auto skip actif (Aide : [The Simulator bar](85-simulator-bar)). À 10×, un empâtage de 60 minutes prend 6 minutes. Les lignes `sleep` des Processes, les minuteries, les sorties PID et Duty Cycle, et la chauffe et le refroidissement du simulateur la suivent toutes. Changez-la dans Settings ou dans la barre jaune.
+**Speed** (vitesse) règle à quelle vitesse tourne l'horloge : normale, 2×, 5×, 10×, 25× et jusqu'à 120× plus vite. Allumer le Simulator démarre à 25× avec Auto skip actif (Aide : [La barre du simulateur](85-simulator-bar)). À 10×, un empâtage de 60 minutes prend 6 minutes. Les lignes `sleep` des Processes, les minuteries, les sorties PID et Duty Cycle, et la chauffe et le refroidissement du simulateur la suivent toutes. Changez-la dans Settings ou dans la barre jaune.
 
 ## Sauter en avant {#skipping-ahead}
 
@@ -33,7 +33,7 @@ La barre montre aussi quel est le prochain événement et dans combien de temps.
 
 Activez **Auto skip** (dans Settings ou la barre jaune) et le panel saute tout seul, sans tableau à remplir. Chaque étape tourne quelques secondes (**Watch each step for**, 5 secondes si vous ne le changez pas), puis l'horloge saute à quelques secondes avant la prochaine chose qui arrive toute seule : la fin d'un `sleep`, une minuterie qui atteint son temps, ou un compte à rebours qui arrive à zéro. Il regarde chaque Process en marche, y compris ceux qu'un autre Process a lancés et les loopers.
 
-Seul le temps est sauté. Une attente sur un bouton de l'écran ou un interrupteur n'est jamais sautée : appuyez sur le bouton comme le jour du brassage, et le saut automatique reprend de là. Une attente sur une lecture (une température, un niveau, un poids) est considérée comme atteinte après un temps réglé tant que **Pretend readings are reached** est actif (Aide : [Simulator or Real boards](77-simulator-or-real-boards)), et le saut automatique y saute comme pour tout autre événement.
+Seul le temps est sauté. Une attente sur un bouton de l'écran ou un interrupteur n'est jamais sautée : appuyez sur le bouton comme le jour du brassage, et le saut automatique reprend de là. Une attente sur une lecture (une température, un niveau, un poids) est considérée comme atteinte après un temps réglé tant que **Pretend readings are reached** est actif (Aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)), et le saut automatique y saute comme pour tout autre événement.
 
 ## Le tableau des sauts de temps {#time-jumps-table}
 

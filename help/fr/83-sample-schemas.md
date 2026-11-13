@@ -6,9 +6,9 @@ La liste des Schemas (sur la Menu Bar, sur le Tab ☰ Menu > Schema et sur le Ta
 
 Il est tenu à jour de chaque nouvelle Règle, c'est donc l'endroit où essayer les nouveautés. Les autres exemples (Two vessels, one pump et le
 jour de brassage BrewZilla) ont été mis de côté pour l'instant. Chacun revient, un à la fois, dans son propre téléchargement, le **Skynet Sample
-Schemas Setup**, une fois mis à jour des Règles actuelles (voir [The Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup)).
+Schemas Setup**, une fois mis à jour des Règles actuelles (voir [Le Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup)).
 Les exemples de ce Setup sont aussi listés ici, après l'exemple à 3 cuves. (Certains peuvent aussi revenir comme Schema Templates, voir
-[New Schema from a Skynet Template](157-schema-templates).)
+[Nouveau Schema à partir d'un Skynet Template](157-schema-templates).)
 
 ## Vidéos : l'exemple à 3 cuves, pas à pas {#videos-the-3-vessel-sample-step-by-step}
 
@@ -39,7 +39,7 @@ Un exemple arrive toujours comme un Schema à lui. Le Schema que vous utilisiez 
 - Chaque Interface (carte) d'un Schema exemple a **Connection Simulator**, elle parle donc à une carte fictive, jamais à une vraie.
 - Tout le panel passe aussi en **Simulator mode** (🧪 à côté de ☰ Menu), comme pour un nouveau Schema vide. Une fenêtre vous dit quand cela arrive.
 
-Pour faire tourner plus tard un exemple sur vos propres cartes : ouvrez chaque Interface (☰ Menu > 🔌 Interfaces), réglez sa vraie connexion (USB ou réseau) et son port, puis appuyez sur **🔌 Real** à côté de ☰ Menu. Voir [Simulator or Real boards](77-simulator-or-real-boards).
+Pour faire tourner plus tard un exemple sur vos propres cartes : ouvrez chaque Interface (☰ Menu > 🔌 Interfaces), réglez sa vraie connexion (USB ou réseau) et son port, puis appuyez sur **🔌 Real** à côté de ☰ Menu. Voir [Simulateur ou vraies cartes](77-simulator-or-real-boards).
 
 ## Aussi dans Settings {#also-in-settings}
 

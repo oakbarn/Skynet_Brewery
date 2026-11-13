@@ -2,7 +2,7 @@
 
 L'écran **Log** montre les valeurs écrites dans la base de données de brassage (`data/brewlog.db` sur le Brain), et les transforme en fichiers CSV pour Excel, Google Sheets ou LibreOffice.
 
-Ce qui est écrit, et quand, se règle dans les Properties de chaque Device ou Widget, dans la case **Database and .API** : voir [Database and .API](98-database-and-api). Tout Device ou Widget qui a une valeur peut être enregistré. Les lectures sont gardées sous la clé cachée de l'élément, donc un élément renommé montre toujours toutes ses lectures sous son nom actuel.
+Ce qui est écrit, et quand, se règle dans les Properties de chaque Device ou Widget, dans la case **Database and .API** : voir [Base de données et .API sur chaque Device et Widget](98-database-and-api). Tout Device ou Widget qui a une valeur peut être enregistré. Les lectures sont gardées sous la clé cachée de l'élément, donc un élément renommé montre toujours toutes ses lectures sous son nom actuel.
 
 ## Download CSV
 
@@ -12,7 +12,7 @@ La case en haut de la page Log crée un fichier CSV et l'enregistre sur l'ordina
 2. Choisissez le **Time** (la période) : Last hour, Last 4 hours, Last 12 hours, Today, Last 24 hours, Last 7 days, Last 30 days, Everything, ou **From ... To ...** pour votre propre début et fin.
 3. Choisissez le **Layout** (la mise en forme) :
    - **One column per value (for graphs)** : une ligne par instant, avec les colonnes Time, Minutes, puis une colonne par valeur cochée. Les lectures écrites dans la même seconde partagent une ligne. Minutes compte à partir de la première lecture du fichier, donc un empâtage ou une fermentation commence toujours à 0. C'est celle à utiliser pour un graphique : sélectionnez la colonne Minutes et les colonnes de valeurs et insérez un graphique en courbes.
-   - **One row per reading** : Time, Name, Value et Trigger, exactement comme chaque lecture a été écrite. Les lectures d'un [simulated brew](20-simulation) ont un Trigger qui commence par `sim`.
+   - **One row per reading** : Time, Name, Value et Trigger, exactement comme chaque lecture a été écrite. Les lectures d'un [Mode simulation](20-simulation) ont un Trigger qui commence par `sim`.
 4. Appuyez sur **Download CSV**.
 
 Les heures sont à l'heure locale de l'ordinateur ou du téléphone sur lequel vous téléchargez, écrites comme `2026-10-21 14:05:03`, pour qu'Excel et Sheets les lisent comme des dates et des heures.
@@ -47,4 +47,4 @@ Un jeu CSV (CSV set) est une liste de valeurs enregistrée, pour que les valeurs
 
 > Les graphiques à l'écran ne sont pas encore faits. Utilisez **Download CSV** et un graphique dans Excel ou Sheets pour l'instant.
 
-Pour les autres programmes, l'API donne toujours la liste brute à `/api/log.csv` (voir [API](11-api)).
+Pour les autres programmes, l'API donne toujours la liste brute à `/api/log.csv` (voir [API (les autres programmes)](11-api)).

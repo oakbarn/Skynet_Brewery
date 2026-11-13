@@ -6,7 +6,7 @@ L'aide s'ouvre dans une **fenêtre à elle**, pour que vous puissiez lire les é
 
 - Le **?** jaune sur la barre des Tabs, juste à côté de **☰ Menu**, ouvre l'aide de la page des Tabs. Quand un Menu tab du ☰ est ouvert (Default, Vessel, Schema ...), il ouvre l'aide de ce Menu tab.
 - **Help** sur la Menu Bar, et **Help** dans la liste des Pages du ☰ Menu, ouvrent l'aide de la page où vous êtes.
-- Un **clic droit** sur un élément, et chaque **?** jaune, ouvrent l'aide à la partie qui parle de cet élément (voir [Right-click and ? for Help](43-right-click-help)).
+- Un **clic droit** sur un élément, et chaque **?** jaune, ouvrent l'aide à la partie qui parle de cet élément (voir [Clic droit et ? pour l'aide](43-right-click-help)).
 
 Il n'y a jamais qu'**une** fenêtre d'aide, les fenêtres ne s'empilent donc pas. Cliquer sur le panel met le panel devant l'aide, et les navigateurs ne laissent pas une page ramener une autre fenêtre devant. Alors, quand vous redemandez l'aide, le panel ferme la fenêtre d'aide et la rouvre par-dessus, au même endroit et à la même taille, en gardant sa liste **◀ Back**. Une page qu'un admin est en train de modifier n'est jamais fermée : elle affiche à la place sa question sur les changements non enregistrés.
 
@@ -18,7 +18,7 @@ La fenêtre d'aide a sa propre recherche, sa liste des pages, **◀ Back**, **�
 
 ## L'aide en français {#help-in-french}
 
-**🌐 Help language** (langue de l'aide), en haut de la liste des pages, montre l'aide en **English** ou en **Français**. Seule l'aide change : les écrans, les boutons et les étiquettes restent en anglais. Voir [Help in French](192-help-in-french).
+**🌐 Help language** (langue de l'aide), en haut de la liste des pages, montre l'aide en **English** ou en **Français**. Seule l'aide change : les écrans, les boutons et les étiquettes restent en anglais. Voir [L'aide en français](192-help-in-french).
 
 ## Sur un téléphone ou une tablette {#on-a-phone-or-tablet}
 

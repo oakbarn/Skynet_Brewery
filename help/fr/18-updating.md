@@ -2,9 +2,9 @@
 
 **Un seul zip fait les deux :** une première installation et chaque mise à jour. Le zip n'a **pas** de dossiers `config`, `data`, `media` ni `scripts`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. Leurs exemples sont dans un dossier appelé `defaults`, et le panel ne les copie qu'à son tout premier démarrage, dans un dossier que vous n'avez pas encore.
 
-**Les images et les sons Skynet sont un téléchargement à part**, le Skynet Media Setup (Windows) ou le zip Skynet Media. Il n'ajoute que ceux que vous n'avez pas encore et n'en change ni n'en supprime jamais aucun. Voir [The Skynet Media Setup](183-skynet-media-setup).
+**Les images et les sons Skynet sont un téléchargement à part**, le Skynet Media Setup (Windows) ou le zip Skynet Media. Il n'ajoute que ceux que vous n'avez pas encore et n'en change ni n'en supprime jamais aucun. Voir [Le Skynet Media Setup](183-skynet-media-setup).
 
-**D'autres Sample Schemas (Schemas d'exemple) sont aussi un téléchargement à part**, le Skynet Sample Schemas Setup (Windows) ou son zip. Le panel n'est livré qu'avec l'exemple 3 Vessel. Voir [The Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup).
+**D'autres Sample Schemas (Schemas d'exemple) sont aussi un téléchargement à part**, le Skynet Sample Schemas Setup (Windows) ou son zip. Le panel n'est livré qu'avec l'exemple 3 Vessel. Voir [Le Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup).
 
 | Dossier | Ce qu'il contient | Lors d'une mise à jour |
 |---|---|---|
@@ -19,7 +19,7 @@
 
 **Vous voulez retrouver les exemples dans un dossier ?** Relancez le programme d'installation et répondez **No** à « Keep all of them as they are? » (tout garder tel quel ?). Il pose alors la question pour chaque dossier (config, scripts, data) et déplace ceux que vous choisissez vers `backups/<folder>_<date>`. Ou faites-le vous-même : arrêtez le panel et renommez le dossier (par exemple `scripts` en `scripts_old`). Le panel copie les exemples dans un nouveau `scripts` au démarrage suivant. (Les images et les sons ne sont jamais remplacés : renommez `media` seulement si vous voulez le recommencer, puis relancez le Skynet Media Setup.)
 
-> **Les connexions sont gardées.** Une nouvelle version garde chaque utilisateur, mot de passe et le **code de secours**. La seule fois où une mise à jour les supprime, c'est quand vous choisissez **Update the program and reset all users** ou **Start Fresh** dans le programme d'installation et confirmez l'avertissement. Voir [Login, users and passwords](10-login).
+> **Les connexions sont gardées.** Une nouvelle version garde chaque utilisateur, mot de passe et le **code de secours**. La seule fois où une mise à jour les supprime, c'est quand vous choisissez **Update the program and reset all users** ou **Start Fresh** dans le programme d'installation et confirmez l'avertissement. Voir [Connexion, utilisateurs et mots de passe](10-login).
 
 ## Chaque mise à jour : arrêtez d'abord le panel {#every-update-stop-the-panel-first}
 

@@ -20,18 +20,18 @@ Ajoutez des personnes et donnez un rôle à chacune :
 
 ## Simulation (Admins)
 
-Essayez une journée de brassage sans toucher au matériel, avec le temps qui passe plus vite ou qui saute en avant. Voir [Simulation mode](20-simulation).
+Essayez une journée de brassage sans toucher au matériel, avec le temps qui passe plus vite ou qui saute en avant. Voir [Mode simulation](20-simulation).
 
 ## Panel settings (réglages du panel, Admins) {#panel-settings-admins}
 
 - **Title** : le nom en haut de l'écran.
 - **Look (theme)** : l'apparence de tout le Panel (Office Black, Dark Gray, White ou Skynet Night), enregistrée tout de suite. **Use this Look
-  on every Tab** donne à chaque Tab les couleurs du Look, et **Put the Tabs back** l'annule. Voir [Panel Looks (themes)](151-panel-looks).
+  on every Tab** donne à chaque Tab les couleurs du Look, et **Put the Tabs back** l'annule. Voir [Les Looks du panneau (thèmes)](151-panel-looks).
 - **Media folders** : où sont gardés les images et les sons, un par ligne.
-- **API key** : le mot de passe que les autres programmes (Node-RED et autres) doivent envoyer. Voir [API](11-api).
+- **API key** : le mot de passe que les autres programmes (Node-RED et autres) doivent envoyer. Voir [API (les autres programmes)](11-api).
 - **BeerXML mapping** : quelles variables une recette BeerSmith remplit.
 - **Start these processes when the server starts** : cochez les Processes qui doivent toujours tourner.
 
 ## Pictures (images) {#pictures}
 
-Comment les images PNG et JPG reçoivent leurs copies SVG nettes. Voir [Media](07-media).
+Comment les images PNG et JPG reçoivent leurs copies SVG nettes. Voir [Media (images et sons)](07-media).

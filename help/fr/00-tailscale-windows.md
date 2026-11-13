@@ -60,7 +60,7 @@ Ajoutez-la aux **favoris** du navigateur (appuyez sur Ctrl + D) : la prochaine f
 | La page ne se charge jamais | Cliquez sur l'icône Tailscale. Si elle n'indique pas **Connected**, cliquez sur **Connect**. |
 | `brewpi` n'est pas dans la liste des appareils | Le Pi est éteint, ou connecté à un autre compte Tailscale. Vérifiez le compte sur les deux. |
 | `brewpi` est dans la liste mais grisé ou « offline » | Le Pi est éteint ou n'a pas Internet. Vérifiez-le à la maison. |
-| La page de connexion du panel s'affiche, mais votre mot de passe est refusé | C'est la connexion du panel, pas Tailscale. Voir [Login, users and passwords](10-login). |
+| La page de connexion du panel s'affiche, mais votre mot de passe est refusé | C'est la connexion du panel, pas Tailscale. Voir [Connexion, utilisateurs et mots de passe](10-login). |
 | L'ordinateur du travail ou de l'école refuse de l'installer | Leurs règles informatiques peuvent le bloquer. Utilisez plutôt votre téléphone avec l'application Tailscale. |
 
 ## Si l'ordinateur est perdu ou vendu {#if-the-computer-is-lost-or-sold}

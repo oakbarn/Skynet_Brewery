@@ -5,7 +5,7 @@
 **☰ Menu > About** montre :
 
 - **Signed in as** : votre nom d'utilisateur et si vous êtes Viewer, Operator ou Admin.
-- **Schema** : le Schema chargé en ce moment, sous forme de liste déroulante. Choisissez-y un autre Schema pour le charger, directement depuis l'onglet About (Admins). C'est la même liste que sur la Menu Bar et l'onglet **☰ Menu > Schema**, avec les mêmes choix (Add new, Clone, Rename, versions, sauvegardes, Delete). Si un Process tourne, vous êtes d'abord prévenu, et chaque sortie est éteinte avant que l'autre Schema se charge. Voir [Switching and cloning Schemas](48-schema-switching-and-cloning).
+- **Schema** : le Schema chargé en ce moment, sous forme de liste déroulante. Choisissez-y un autre Schema pour le charger, directement depuis l'onglet About (Admins). C'est la même liste que sur la Menu Bar et l'onglet **☰ Menu > Schema**, avec les mêmes choix (Add new, Clone, Rename, versions, sauvegardes, Delete). Si un Process tourne, vous êtes d'abord prévenu, et chaque sortie est éteinte avant que l'autre Schema se charge. Voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
 - **Schema version** : sa version, ou « No version yet » (pas encore de version).
 - **Last saved** : quand le Schema a été enregistré pour la dernière fois.
 

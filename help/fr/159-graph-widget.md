@@ -7,7 +7,7 @@ Chaque Graph dessine jusqu'à **deux** Devices ou Widgets :
 - Le **Channel 1** utilise l'axe de **gauche**.
 - Le **Channel 2** utilise l'axe de **droite**, donc une température et une densité peuvent partager un Graph.
 
-Les lignes viennent des lectures gardées dans la **base de données de brassage** (voir [Database and API](98-database-and-api)). Un Device ou Widget
+Les lignes viennent des lectures gardées dans la **base de données de brassage** (voir [Base de données et .API sur chaque Device et Widget](98-database-and-api)). Un Device ou Widget
 doit être **envoyé à la base de données** (sa case **Database**, par exemple Every 1 minute), sinon sa ligne reste vide, et le Graph le dit.
 
 ## En ajouter un {#add-one}

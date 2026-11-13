@@ -5,7 +5,7 @@ Quand vous changez le **Name** d'un Device ou d'un Widget, chaque Process qui ut
 ## Comment ça marche {#how-it-works}
 
 1. Activez **Edit layout**.
-2. Double-cliquez sur le Device ou le Widget, appuyez sur **✏ Change name** à côté de son **Name** verrouillé, tapez le nouveau nom dans la fenêtre **Name Change** et appuyez sur **💾 Save** là, puis sur **💾 Save** dans ses propriétés (voir [Name Change and hidden keys](80-name-change-and-hidden-keys)).
+2. Double-cliquez sur le Device ou le Widget, appuyez sur **✏ Change name** à côté de son **Name** verrouillé, tapez le nouveau nom dans la fenêtre **Name Change** et appuyez sur **💾 Save** là, puis sur **💾 Save** dans ses propriétés (voir [Changement de nom et clés cachées](80-name-change-and-hidden-keys)).
 3. Appuyez sur **Save** dans la barre Edit layout.
 
 Quand la disposition est enregistrée, le panel passe dans chaque Process et change l'ancien nom pour le nouveau. Un message en bas de l'écran dit quels Processes ont été changés, par exemple :
@@ -32,7 +32,7 @@ Les autres réglages qui pointent vers l'élément renommé le suivent aussi : t
 ## Bon à savoir {#good-to-know}
 
 - **Renommez-en plusieurs à la fois.** Vous pouvez renommer plusieurs Devices et Widgets avant d'appuyer sur Save ; ils sont tous changés d'un coup. Même échanger deux noms (A devient B et B devient A) marche.
-- **Les clones suivent.** Renommez un élément et l'ancien nom dans le nom de chacun de ses clones change aussi (voir [Name Change and hidden keys](80-name-change-and-hidden-keys)).
+- **Les clones suivent.** Renommez un élément et l'ancien nom dans le nom de chacun de ses clones change aussi (voir [Changement de nom et clés cachées](80-name-change-and-hidden-keys)).
 - **Renommez-le deux fois.** Si vous renommez `Pump1` en `Pump_A` puis en `Pump_Main` avant d'enregistrer, les Processes passent directement de `Pump1` à `Pump_Main`.
 - **Annuler.** Si vous quittez Edit layout sans enregistrer, rien n'est renommé et aucun Process n'est changé.
 - **Un Process qui tourne** continue de marcher : il trouve l'élément renommé par sa clé cachée. Il utilise le nouveau nom dès son prochain départ.
@@ -40,4 +40,4 @@ Les autres réglages qui pointent vers l'élément renommé le suivent aussi : t
 - **Autres Schemas.** Les Processes sont partagés par tous les Schemas. Si un autre Schema a encore un Device ou un Widget avec l'ancien nom, le message vous le dit, car le Process changé y cherche maintenant aussi le nouveau nom. Renommez-le aussi dans ce Schema, ou gardez une copie du Process pour lui.
 - **Tabs et Processes.** Renommer un Tab ou un Process est une autre affaire ; cette page parle des Devices et des Widgets.
 
-Voir aussi [Interface, Tab and Device names](46-interface-tab-device-names), [Process language and steps](22-process-language) et [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+Voir aussi [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names), [Le langage des Processes et les étapes](22-process-language) et [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).

@@ -70,7 +70,7 @@ Les anciens choix **Once** et **In a Group** ont disparu (Règle Skynet 6.14). Q
 
 ### Heure et clé cachée {#time-and-hidden-key}
 
-Chaque mesure est gardée avec son **heure** et la **clé cachée** de l'élément (le nom qu'il avait alors est gardé aussi). Donc quand un élément est renommé avec ✏ Change name, l'écran [Log](06-log), les téléchargements CSV et l'API trouvent toujours toutes ses mesures sous le nom d'aujourd'hui. La clé ne quitte jamais le Brain : les listes et les fichiers CSV montrent des noms.
+Chaque mesure est gardée avec son **heure** et la **clé cachée** de l'élément (le nom qu'il avait alors est gardé aussi). Donc quand un élément est renommé avec ✏ Change name, l'écran [Log (la base de données de brassage)](06-log), les téléchargements CSV et l'API trouvent toujours toutes ses mesures sous le nom d'aujourd'hui. La clé ne quitte jamais le Brain : les listes et les fichiers CSV montrent des noms.
 
 La base de données est un fichier SQLite sur le Brain (`data/brewlog.db`) : gratuit, SQL, rien à installer. Sur un Raspberry Pi, utilisez une carte SD assez grande pour les mesures que vous gardez. Envoyer les mesures vers une base de données extérieure (sur votre PC, Mac ou ordinateur Linux, ou une base de données en ligne gratuite ou payante) et vider la copie du Brain est une étape ultérieure.
 
@@ -82,9 +82,9 @@ La base de données est un fichier SQLite sur le Brain (`data/brewlog.db`) : gra
 | **Read Only (Get: outside programs like Node-Red can read it.)** | Peuvent le lire |
 | **Read & Control (Get & Put: outside programs like Node-Red can also control it.)** | Peuvent le lire et le commander (le changer) |
 
-**API_Name** (sous .API dans la fenêtre) est le nom que dit une commande vocale. Il doit être unique et peut être vide (avec un avertissement) : voir [API_Name](144-api-name-for-voice-commands).
+**API_Name** (sous .API dans la fenêtre) est le nom que dit une commande vocale. Il doit être unique et peut être vide (avec un avertissement) : voir [API_Name : le nom que dit une commande vocale](144-api-name-for-voice-commands).
 
-Les adresses et les protections sont sur [API (other programs)](11-api). Une gGlobal n'apparaît dans MQTT et Home Assistant que quand son .API est activé, et ne peut y être changée qu'avec **Read & Control**.
+Les adresses et les protections sont sur [API (les autres programmes)](11-api). Une gGlobal n'apparaît dans MQTT et Home Assistant que quand son .API est activé, et ne peut y être changée qu'avec **Read & Control**.
 
 Les choix s'appelaient Get only et Get and Put jusqu'au 2026-11-06. Skynet utilise d'abord l'anglais simple, avec les mots d'informatique entre ( ) ; ils marchent pareil. Dans les Règles et les autres pages d'aide, Get only veut dire Read Only et Get and Put veut dire Read & Control.
 

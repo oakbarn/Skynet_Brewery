@@ -59,11 +59,11 @@ Appuyez sur **💾 Save**. Skynet demande s'il peut charger le nouveau Schema : 
 
 Ce qu'il reste à faire :
 
-1. **Dessiner les tuyaux** comme sont les vôtres : **☰ Menu > Edit layout > Draw pipe** ([Pipes and hoses](24-pipes-and-hoses)).
-2. **Vérifier chaque tâche** du Brew Day dans **☰ Menu > Brew Process** ([Brew Process](100-brew-process)).
+1. **Dessiner les tuyaux** comme sont les vôtres : **☰ Menu > Edit layout > Draw pipe** ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)).
+2. **Vérifier chaque tâche** du Brew Day dans **☰ Menu > Brew Process** ([Processus de brassage](100-brew-process)).
 3. Essayer tout un Brew Day dans le simulateur avec **▶ Start Brew Day**.
 
-Plus sur chaque question : [New Schema from a Skynet Template](157-schema-templates).
+Plus sur chaque question : [Nouveau Schema à partir d'un Skynet Template](157-schema-templates).
 
 ## Étape 5. Un Schema vide {#step-5-an-empty-schema}
 
@@ -75,14 +75,14 @@ Plus sur chaque question : [New Schema from a Skynet Template](157-schema-templa
 
 ![Votre nouvelle Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 
-Plus sur les cartes : [Interfaces](76-interfaces) et [Simulator or real boards](77-simulator-or-real-boards).
+Plus sur les cartes : [Interfaces](76-interfaces) et [Simulateur ou vraies cartes](77-simulator-or-real-boards).
 
 **5c. Ajouter vos premières choses.** Le Main Tab est vide. Appuyez sur **☰ Menu > ✎ Edit layout**. La barre du haut a un bouton pour chaque sorte de chose : **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** et plus. Choisissez-en un et remplissez sa case : le Label (comment vous l'appelez), l'Interface (votre carte), le Port auquel il est câblé, et le Tab. Puis **Save layout**.
 
 ![La barre Edit layout](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 
-Plus : [The Edit layout bar](82-edit-layout-bar), [Add a vessel](66-add-a-vessel) et [Every Device dialog](148-every-device-dialog).
+Plus : [Barre Edit layout](82-edit-layout-bar), [Ajouter une cuve](66-add-a-vessel) et [Chaque fenêtre de Device ressemble à celle de la pompe](148-every-device-dialog).
 
 ## Revenir à votre ancien Schema {#going-back-to-your-old-schema}
 
-Choisissez-le dans la liste déroulante **Schema**. Chaque Schema reste sur le Brain jusqu'à ce que vous le supprimiez ([Switching and cloning Schemas](48-schema-switching-and-cloning)).
+Choisissez-le dans la liste déroulante **Schema**. Chaque Schema reste sur le Brain jusqu'à ce que vous le supprimiez ([Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning)).

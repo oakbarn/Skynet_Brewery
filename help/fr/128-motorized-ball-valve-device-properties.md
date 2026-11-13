@@ -1,6 +1,6 @@
 # Properties du Device Motorized Ball Valve {#motorized-ball-valve-device-properties}
 
-Ajouter une **Motorized Ball Valve** (vanne à bille motorisée) se fait comme ajouter une pompe (voir [Pump Device Properties](115-pump-device-properties)),
+Ajouter une **Motorized Ball Valve** (vanne à bille motorisée) se fait comme ajouter une pompe (voir [Properties du Device Pump (le détail)](115-pump-device-properties)),
 avec une différence : **une vanne n'a pas de Cover**. (Règle Skynet 18.23)
 
 ## Ajouter une Motorized Ball Valve {#adding-a-motorized-ball-valve}
@@ -35,7 +35,7 @@ avec une différence : **une vanne n'a pas de Cover**. (Règle Skynet 18.23)
 4. **3. Tab** et **4. Name** (le Suggested Name ; vous pouvez taper le vôtre).
 5. **Graphic** et **Path**, puis **Orientation** et **Toggle** sur une ligne (comme sur la pompe).
 6. **Overlay** avec **Database and .API ⬢**.
-7. Les réglages propres à la vanne : **Tap water valve**, **On Close List** et **On Open List**, tous les trois sur une ligne (voir [Tap water valves](31-tap-water-valves)).
+7. Les réglages propres à la vanne : **Tap water valve**, **On Close List** et **On Open List**, tous les trois sur une ligne (voir [Vannes d'eau du robinet](31-tap-water-valves)).
    On Close List : `close_all_valves` dans un Process la ferme. On Open List : `open_all_valves` l'ouvre. Une vanne d'eau du robinet montre son
    **Tap end** (bout robinet) à la place, et est toujours sur la Close List et jamais sur l'Open List.
 8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, et le **Device Type** grisé (**DO@Valve_E** : une vanne électrique, Valve_E, sur une sortie numérique, DO ; le même DO@Valve_E est dans son Suggested Name).

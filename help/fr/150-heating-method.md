@@ -110,7 +110,7 @@ sont changés en Heating Element au chargement, en gardant son nom et ses régla
 
 Quand **deux méthodes ou plus** sont permises, un petit bouton pour chacune s'affiche **sous la résistance** sur son Tab, ou sous son image sur
 un **Vessel Device** quand elle y est intégrée. **Un clic** sur l'un passe la résistance à cette méthode tout de suite ; celle utilisée est en **rouge**, les autres
-en **jaune**. Il n'y a pas de bouton d'arrêt : un clic sur l'image l'arrête. Les boutons sont dans une case invisible aussi large que les méthodes permises, centrée sous l'image, et peuvent afficher des noms courts ([Heating Elements and Valves on the screen](179-heating-element-look)).
+en **jaune**. Il n'y a pas de bouton d'arrêt : un clic sur l'image l'arrête. Les boutons sont dans une case invisible aussi large que les méthodes permises, centrée sous l'image, et peuvent afficher des noms courts ([Les résistances et les vannes à l'écran](179-heating-element-look)).
 **Un clic sur l'image de la résistance** sur son Vessel Device la met **en marche ou à l'arrêt** tout de suite, dans la méthode où elle est, comme une pompe.
 Un clic sur sa **case** (la tuile avec sa lecture) ouvre sa fenêtre, avec **ON**, **OFF** et sa méthode.
 Quand la résistance est **arrêtée**, un clic sur un bouton de méthode change seulement sa méthode ; elle reste arrêtée jusqu'à ce que vous la mettiez en marche.
@@ -192,4 +192,4 @@ méthode de chauffe au lieu d'ajouter un second Device.
 Les anciens Schemas Skynet qui ont déjà deux Devices sur un port continuent de marcher comme avant (le dernier mis en marche l'emporte), et ces
 deux peuvent encore être enregistrés ; vous ne pouvez simplement pas en créer de nouveaux.
 
-Voir aussi : [Heat Hysteresis: what switches the element](181-heat-hysteresis-switched-by) (Règle 6.29).
+Voir aussi : [Hysteresis de chauffe : ce qui commande la résistance](181-heat-hysteresis-switched-by) (Règle 6.29).

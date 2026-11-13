@@ -1,6 +1,6 @@
 # Devices intégrés Skynet {#skynet-integrated-devices}
 
-Un **Skynet_Integrated_Device** est un seul élément avec des Devices intégrés. Le premier est le **tube RIMS** : sa résistance et sa sonde de température en font partie. Le second est la [Basic electric kettle](65-skynet-integrated-electric-kettle). Un **Skynet_Integrated_Widget** est un élément avec des IP intégrés, comme les [Skynet Fittings](60-skynet-fittings) (coudes, tés).
+Un **Skynet_Integrated_Device** est un seul élément avec des Devices intégrés. Le premier est le **tube RIMS** : sa résistance et sa sonde de température en font partie. Le second est la [Bouilloire électrique intégrée Skynet](65-skynet-integrated-electric-kettle). Un **Skynet_Integrated_Widget** est un élément avec des IP intégrés, comme les [Raccords Skynet](60-skynet-fittings) (coudes, tés).
 
 Un élément intégré peut être groupé avec d'autres choses, mais ce qui y est intégré ne peut jamais en être retiré (dégroupé).
 

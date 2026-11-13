@@ -48,7 +48,7 @@ comme `wgt_CV_Kettle~SP_BH (code)`, avec `NOT RUN` et la ligne, et rien du Code 
 ## Properties
 
 Elles ressemblent aux Properties de la pompe (Règle Skynet 18.30), les mêmes que celles d'un Value Widget
-([Value, Time and DateTime Widgets](134-value-time-and-datetime-widgets)). Posez la souris sur le nom d'un champ pour voir à quoi il
+([Widgets Value, Time et DateTime](134-value-time-and-datetime-widgets)). Posez la souris sur le nom d'un champ pour voir à quoi il
 sert (hover help).
 
 - **La ligne de titre :** le cadenas 🔓, **Visible** et **Hidden Locked**.

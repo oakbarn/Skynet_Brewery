@@ -64,7 +64,7 @@ Les broches capables de PWM et de débitmètre font partie des broches numériqu
 | Entrées analogiques (A0-A15) | 16 | Capteurs 0-5 V, transmetteurs de pression, capteurs 4-20 mA (résistance de 250 ohms), thermistances NTC, pH | 10 bits. Une carte ADS1115 ajoute 4 entrées plus fines en I2C. |
 | Broches d'interruption | 6 (D2, D3, D18, D19, D20, D21) | Débitmètres à impulsions, jusqu'à 6 | D18 et D19 sont prises par une liaison ESP32 ; D20 et D21 par l'I2C s'il est utilisé |
 | Bus OneWire | 1 broche (D40 par défaut) | Toutes les sondes de température DS18B20 sur un seul fil | Beaucoup de sondes le partagent ; une résistance de 4,7k. Le panel réserve D40 dès qu'une DS18B20 est configurée. |
-| Bus SPI | D50, D51, D52 + 1 broche de sélection (chip-select) par carte | Cartes MAX31865 (PT100 / PT1000) et MAX31856 / MAX31855 (thermocouple) | Un shield Ethernet utilise aussi le SPI plus D4 et D10. Le panel réserve 50-52 dès qu'une sonde RTD ou un thermocouple est sur la carte (voir [Pins kept for RTD and OneWire probes](46-interface-tab-device-names)). |
+| Bus SPI | D50, D51, D52 + 1 broche de sélection (chip-select) par carte | Cartes MAX31865 (PT100 / PT1000) et MAX31856 / MAX31855 (thermocouple) | Un shield Ethernet utilise aussi le SPI plus D4 et D10. Le panel réserve 50-52 dès qu'une sonde RTD ou un thermocouple est sur la carte (voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names)). |
 | Bus I2C | D20 (SDA), D21 (SCL) | Carte analogique ADS1115 | |
 | Ports série | 4 (Serial0 sur D0/D1 = USB, Serial1 sur D18/D19 = liaison ESP32, Serial2, Serial3 libres) | L'USB vers le Pi, ou le pont ESP32 | |
 | Cellules de charge | 2 broches numériques par balance | Cartes HX711 (poids et volume des cuves) | |
@@ -174,11 +174,11 @@ Coût de base, sans capteurs ni sorties : environ **120-165 $ pour le Système 1
 - **Disposition sur téléphone :** ça marche, mais les grands Tabs sont à l'étroit sur un écran de téléphone.
 - **Pas encore de graphiques** sur la page Log (les données peuvent être téléchargées en fichier de tableur).
 - **Les sons d'alarme** ne jouent que sur les écrans où **Enable sound** a été appuyé une fois (les navigateurs bloquent le son jusqu'à ce que vous cliquiez).
-- **Le WiFi est le maillon le plus faible.** Utilisez l'USB ou l'Ethernet pour tout ce qui chauffe ou pompe. Sur chaque liaison, la carte éteint toutes les sorties si elle n'entend plus rien du Pi pendant son délai de perte de liaison (10 secondes si vous ne le changez pas ; voir [Connection ratings](69-connection-ratings)).
+- **Le WiFi est le maillon le plus faible.** Utilisez l'USB ou l'Ethernet pour tout ce qui chauffe ou pompe. Sur chaque liaison, la carte éteint toutes les sorties si elle n'entend plus rien du Pi pendant son délai de perte de liaison (10 secondes si vous ne le changez pas ; voir [Notes de connexion](69-connection-ratings)).
 - **Un seul Brain à la fois.** Deux panels qui commandent les mêmes cartes se battent entre eux.
 - **Hors de chez vous, seulement par Tailscale.** N'ouvrez jamais de port sur votre box pour le panel.
 - **La carte microSD s'use** avec un enregistrement toute la journée. Un petit onduleur (batterie de secours) et, sur un Pi 5, un SSD à la place de la carte aident. Éteignez toujours le Pi avant de le débrancher.
 - Les mises à jour gardent chaque connexion ; seul le choix **reset all users** ou **Start Fresh** du programme d'installation (confirmé) les supprime.
 - **La sécurité du matériel passe en premier.** Le panel n'est pas un système de sécurité. Gardez des dispositifs de sécurité câblés en dur : un arrêt d'urgence, des interrupteurs à flotteur, une sécurité de flamme pour le brûleur, et un différentiel (GFCI) sur tout ce qui est sur secteur. Faites vérifier le câblage secteur par un électricien.
 
-Voir aussi [Installing the panel](19-installing) et [Devices](03-devices).
+Voir aussi [Installer le panel](19-installing) et [Devices et cartes](03-devices).

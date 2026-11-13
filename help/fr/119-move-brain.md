@@ -24,7 +24,7 @@ Tout ce qui est à vous :
 - **Le journal de brassage** : chaque mesure de la base de données, et les réglages des messages (SMS et e-mail).
 
 Pas déplacés : les connexions des navigateurs (chacun se reconnecte une fois), et les images d'**autres** dossiers media que vous avez ajoutés dans
-Settings > Media folders. Le panel les liste ; copiez-les avec la page [File Move](32-file-move).
+Settings > Media folders. Le panel les liste ; copiez-les avec la page [File Move (copier des fichiers de votre ordinateur vers le Brain)](32-file-move).
 
 ## Faire le fichier de déménagement du Brain {#make-the-brain-move-file}
 
@@ -39,7 +39,7 @@ Faire le fichier ne change rien sur l'ancien Brain. Gardez l'ancien Brain tel qu
 
 ## Le faire entrer sur le nouveau Brain {#bring-it-in-on-the-new-brain}
 
-1. **Installez Skynet** sur le nouveau Brain de la façon normale (sur un Pi : `bash install-skynet-brewer.sh`, voir [Installing](19-installing)),
+1. **Installez Skynet** sur le nouveau Brain de la façon normale (sur un Pi : `bash install-skynet-brewer.sh`, voir [Installer le panel](19-installing)),
    faites la création de l'Admin, et connectez-vous.
 2. Ouvrez **☰ Menu > Move Brain** sur le nouveau Brain. Faites-le depuis un navigateur sur un ordinateur qui a le fichier de déménagement (l'ancien
    ordinateur convient : tapez l'adresse du Pi, par exemple `http://skynet-pi:8080`), ou copiez le fichier avec une clé USB.

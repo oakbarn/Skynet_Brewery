@@ -75,4 +75,4 @@ La ligne est maintenant `if MB_06_DO@Pump_Wort__HS == true`. Une valeur termine 
 - Les **Clones** d'un Device ne sont pas utilisés dans les Processes (voir la page d'aide Cloned Devices), donc ils ne sont jamais dans la liste. Utilisez le nom du Device lui-même.
 - Les **clés cachées** ne quittent jamais le Brain et ne peuvent pas être utilisées dans un Process (voir la page d'aide Name change and hidden keys). Seuls les noms sont proposés.
 
-Voir [Process language and steps](22-process-language) pour ce que fait chaque commande, et [The Process editor](30-process-editor) pour les autres outils de l'éditeur.
+Voir [Le langage des Processes et les étapes](22-process-language) pour ce que fait chaque commande, et [L'éditeur de Processes](30-process-editor) pour les autres outils de l'éditeur.

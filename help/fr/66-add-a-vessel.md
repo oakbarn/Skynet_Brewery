@@ -39,7 +39,7 @@ Les Devices (une résistance, une sonde de température, une vanne) sont placés
 
 La fenêtre a deux groupes :
 
-- **Skynet Integrated Vessels** : leurs Devices sont intégrés, par exemple la [Basic electric kettle](65-skynet-integrated-electric-kettle). La fenêtre New Device demande l'Interface et les Ports, comme pour tout Device. La plupart des gens utiliseront une de celles-ci.
+- **Skynet Integrated Vessels** : leurs Devices sont intégrés, par exemple la [Bouilloire électrique intégrée Skynet](65-skynet-integrated-electric-kettle). La fenêtre New Device demande l'Interface et les Ports, comme pour tout Device. La plupart des gens utiliseront une de celles-ci.
 - **User Bundled Templates** : vos propres cuves. Chacune est construite sur un Skynet Vessel Widget.
 
 ## Faire un Template groupé de l'utilisateur {#making-a-user-bundled-template}

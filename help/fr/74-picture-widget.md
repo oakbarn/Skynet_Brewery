@@ -28,7 +28,7 @@ Double-cliquez sur un Widget Picture pour ouvrir ses Properties. Elles ressemble
 - **Devices et Widgets on / off** : une sortie, un interrupteur, une entrée, une alarme, un lecteur de sons, une minuterie ou une variable vrai / faux. L'image est On tant que celui-ci est On.
 - **Heaters: on while Enabled** (chauffages : On tant qu'ils sont Enabled) : un PID, une Hysteresis, un Duty Cycle ou une sortie PWM. L'image est On tant que le chauffage est **Enabled** (une sortie PWM : tant qu'elle est au-dessus de 0 %), pas seulement pendant que sa sortie chauffe.
 
-Double-cliquez sur la liste pour ouvrir les Properties de celui qui est choisi (voir [Double-click in picker dropdowns](73-double-click-in-pickers)).
+Double-cliquez sur la liste pour ouvrir les Properties de celui qui est choisi (voir [Double-clic dans les listes de choix](73-double-click-in-pickers)).
 
 ## Ses images {#its-pictures}
 
@@ -38,4 +38,4 @@ Double-cliquez sur la liste pour ouvrir les Properties de celui qui est choisi (
 
 Exemple : le **pic_Kettle_Element** de l'exemple à deux cuves s'allume avec **Kettle_Heat** et passe d'une image de résistance à l'autre. Avec la façon préférée, il garderait l'image Off et ajouterait **Glow red** comme superposition On.
 
-Voir aussi [On overlay](58-on-overlay) et [Pictures on items](25-picture-paths).
+Voir aussi [Superposition On](58-on-overlay) et [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).

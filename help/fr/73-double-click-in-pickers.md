@@ -19,4 +19,4 @@ Comment ça marche :
 - Les listes d'images et de sons marchent autrement : elles ont leur propre aperçu et leur sélecteur d'icônes 🖼, donc un double-clic n'y fait rien. Les simples listes de choix (couleurs, sortes Yes / No, tailles) n'ont pas non plus de fenêtre derrière.
 - Les Interfaces (cartes) n'ont pas de fenêtre Properties ; changez-les sur la page Devices.
 
-Voir aussi [Double-click in lists](68-double-click-in-lists).
+Voir aussi [Double-clic dans les listes](68-double-click-in-lists).

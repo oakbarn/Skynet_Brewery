@@ -1,11 +1,11 @@
 # Chaque écran dans le ☰ Menu {#every-screen-in-the-menu}
 
-Le **☰ Menu** liste chaque endroit du panel où vous pouvez aller, donc rien n'est caché. C'est la même liste partout : le ☰ Menu de la page des Tabs, le ☰ de la Menu Bar des autres pages, et le petit ☰ dans le coin d'une fenêtre (voir [The ☰ Menu everywhere](51-menu-everywhere)).
+Le **☰ Menu** liste chaque endroit du panel où vous pouvez aller, donc rien n'est caché. C'est la même liste partout : le ☰ Menu de la page des Tabs, le ☰ de la Menu Bar des autres pages, et le petit ☰ dans le coin d'une fenêtre (voir [Le ☰ Menu partout](51-menu-everywhere)).
 
 La liste a trois parties :
 
 1. **Show Menu Bar** et **Edit layout** (Admins).
-2. **Menu tabs** : Zoom, Default, Equipment Profile, Vessel, les Templates, les Profiles, Schema, About ... dans leur ordre (voir [The ☰ Menu](33-menu)).
+2. **Menu tabs** : Zoom, Default, Equipment Profile, Vessel, les Templates, les Profiles, Schema, About ... dans leur ordre (voir [Le ☰ Menu](33-menu)).
 3. **Pages** : chaque page de la Menu Bar, et sous chaque page, marquées par **↳**, ses parties.
 
 Choisissez une page pour aller en haut de celle-ci. Choisissez une partie **↳** pour y aller directement : la page s'ouvre, défile jusqu'à cette partie et l'éclaire un instant. Une partie qui est une fenêtre (Recycle Bin, Backups ...) ouvre cette fenêtre.

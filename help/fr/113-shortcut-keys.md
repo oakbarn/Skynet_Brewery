@@ -11,7 +11,7 @@ String Entry (la flèche rouge ⬆, Règle 18.1), l'éditeur de Process et Schem
 | **Ctrl + B** | **⌘ + B** | Gras. Avec des mots choisis, met `\b` avant et après eux. Sans rien de choisi, tape `\b\b` avec le curseur entre les deux, pour que vous y tapiez les mots en gras. |
 | **Ctrl + Maj + D** | **⌘ + Maj + D** | Tape **°F** ou **°C**, selon le réglage **Temperatures** du Tab ☰ Menu > **Default**. |
 
-`\n` et `\b` sont des Rich Text Embedded Codes : voir [Text boxes](49-text-boxes) et [Codes inside text](22-process-language).
+`\n` et `\b` sont des Rich Text Embedded Codes : voir [Les zones de texte](49-text-boxes) et [Le langage des Processes et les étapes](22-process-language).
 Tout ce que tapent ces touches peut être annulé avec Annuler, comme toute autre frappe.
 
 ## Touches courantes {#common-keys}

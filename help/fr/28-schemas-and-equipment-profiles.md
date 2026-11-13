@@ -27,8 +27,8 @@ Les Processes, les connexions, MQTT, les dossiers media et les listes derrière 
 
 En bas de la liste déroulante **Schema** :
 
-- **Add new Schema ...** (aussi **☰ Menu > ➕ New Schema…**) : donnez-lui un nom, puis choisissez à partir de quoi il commence. Chaque étape, avec des images : [Step by Step: Add a Schema](188-step-by-step-add-a-schema). **A copy of** (une copie de) le Schema chargé copie tout, ce qui est bien pour essayer des changements. **An empty Schema** (un Schema vide) commence avec seulement un Tab Main et le Tab Equipment. Le nouveau Schema est chargé tout de suite.
-- **Clone a Schema ...** : une copie de n'importe quel Schema sous un nouveau nom, chargée seulement si vous le dites. Voir [Switching and cloning Schemas](48-schema-switching-and-cloning).
+- **Add new Schema ...** (aussi **☰ Menu > ➕ New Schema…**) : donnez-lui un nom, puis choisissez à partir de quoi il commence. Chaque étape, avec des images : [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema). **A copy of** (une copie de) le Schema chargé copie tout, ce qui est bien pour essayer des changements. **An empty Schema** (un Schema vide) commence avec seulement un Tab Main et le Tab Equipment. Le nouveau Schema est chargé tout de suite.
+- **Clone a Schema ...** : une copie de n'importe quel Schema sous un nouveau nom, chargée seulement si vous le dites. Voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
 - **Rename this Schema ...** : donne un nouveau nom au Schema chargé.
 - **Delete a Schema ...** : choisissez-en un qui n'est pas chargé. Il est déplacé dans `config/schemas/deleted`, donc on peut le récupérer.
 
@@ -44,7 +44,7 @@ Les sauvegardes sont dans `config/schemas/backups/<schema name>`.
 
 ## Créer un Equipment Profile {#make-an-equipment-profile}
 
-Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Voir [The ☰ Menu](33-menu) pour la façon dont les onglets de menu s'ouvrent et se ferment.
+Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Voir [Le ☰ Menu](33-menu) pour la façon dont les onglets de menu s'ouvrent et se ferment.
 
 1. Appuyez sur **☰ Menu** et choisissez **Equipment Profile**.
 2. Dans la liste déroulante **Open** (ou la liste déroulante d'un Tab dans la case du haut), choisissez **Add new ...**.
@@ -58,12 +58,12 @@ Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Vo
 - **System Loss (Trub, Chiller Manifold and Hoses)** : ce qui reste en route entre la cuve d'ébullition et le fermenteur (trub, collecteur du refroidisseur et tuyaux).
 - **Cooling shrinkage** (contraction au refroidissement), **Grain absorption** (absorption du grain), **Brewhouse efficiency** (rendement de la brasserie) et **Hop utilization** (utilisation du houblon).
 - **Notes**.
-- **Equipment list** : les Tab_Vessels et Tab_Fittings de son Tab, avec leur type, leur taille, le Template d'où ils viennent et la cuve à laquelle chaque raccord est relié. Vous les mettez sur le Tab depuis les [Vessel and Fitting Templates](50-vessel-and-fitting-templates) (**Add to Tab**) et changez chacun dans ses propriétés sur le Tab.
+- **Equipment list** : les Tab_Vessels et Tab_Fittings de son Tab, avec leur type, leur taille, le Template d'où ils viennent et la cuve à laquelle chaque raccord est relié. Vous les mettez sur le Tab depuis les [Modèles de cuves et de raccords](50-vessel-and-fitting-templates) (**Add to Tab**) et changez chacun dans ses propriétés sur le Tab.
 
 Certains nombres sont sortis du profil (2026-10-20) :
 
 - La **Batch size** (taille du brassin) et les deux eaux d'**ajout** (top up : cuve d'ébullition et fermenteur) se règlent dans la Recipe (bientôt).
-- Le **Boil time** (durée d'ébullition) et le **boil off** (évaporation) sont dans le [Boil Profile](35-mash-and-boil-profiles).
+- Le **Boil time** (durée d'ébullition) et le **boil off** (évaporation) sont dans le [Mash Profiles et Boil Profiles](35-mash-and-boil-profiles).
 - La **taille** et le **volume mort** (dead space) de chaque cuve sont sur l'onglet Vessel, et la **perte de trub du fermenteur** appartient au Fermenter.
 
 ## Modifier ou supprimer un Equipment Profile {#edit-or-delete-an-equipment-profile}
@@ -110,7 +110,7 @@ Si un morceau venant d'un Default Layout a le même nom que quelque chose déjà
 Quand le profil est juste, verrouillez-le pour que rien ne soit dérangé le jour du brassage.
 
 - Allumez **🔒 Locked** à côté du profil du Tab dans la case en haut de l'onglet **Equipment Profile**. Les Operators et les Admins peuvent le faire. Le profil de chaque Tab se verrouille séparément, donc le Tab Fermentation peut rester ouvert pendant que le Hot Side est verrouillé.
-- Ou mettez `lock_Equipment` dans un Process (et `unlock_Equipment` pour déverrouiller). Il verrouille (ou déverrouille) les profils de **tous** les Tabs du Schema chargé. Voir [The Process language](22-process-language).
+- Ou mettez `lock_Equipment` dans un Process (et `unlock_Equipment` pour déverrouiller). Il verrouille (ou déverrouille) les profils de **tous** les Tabs du Schema chargé. Voir [Le langage des Processes et les étapes](22-process-language).
 
 Tant qu'il est verrouillé :
 
@@ -130,7 +130,7 @@ L'**Equipment list**, sous les nombres, montre ce qu'il y a sur le Tab du profil
 
 **Go to the Tab** vous montre le Tab lui-même.
 
-Les profils faits avant les Templates peuvent encore avoir des cuves faites sur l'[Vessel tab](34-vessel-tab). Elles s'affichent sous **Made on the Vessel tab**, avec **Put on Tab** pour les dessiner sur le Tab du profil.
+Les profils faits avant les Templates peuvent encore avoir des cuves faites sur l'[L'onglet Vessel](34-vessel-tab). Elles s'affichent sous **Made on the Vessel tab**, avec **Put on Tab** pour les dessiner sur le Tab du profil.
 
 ## À venir {#coming-next}
 

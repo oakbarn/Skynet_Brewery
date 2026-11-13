@@ -22,7 +22,7 @@ le tuyau commence :
 
 Un clic montre une petite fenêtre avec l'**Out flow color** de la cuve. Choisissez une couleur (Mash, Boil, Red, votre propre RGB ...) et appuyez sur
 **Save** : le débit qui commence à cette cuve prend cette couleur, à travers la pompe et jusqu'où il va
-([Pipe and Hose Flow Colors](116-pipe-and-hose-flow-colors)). Un anneau autour du 🎨 montre la couleur choisie. Appuyez sur **Save layout** pour
+([Couleurs du passage dans les tuyaux et flexibles](116-pipe-and-hose-flow-colors)). Un anneau autour du 🎨 montre la couleur choisie. Appuyez sur **Save layout** pour
 la garder.
 
 C'est le **même réglage** que **Out flow color** dans les Properties de la cuve (double-cliquez sur la cuve, ou cliquez sur son ⚙, et regardez

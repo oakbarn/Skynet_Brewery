@@ -37,7 +37,7 @@ Un Process peut l'activer : `BK_Temp.valueType = "Dial"` (`"Text"`, `"LED"` ou `
 
 ## Les chiffres du minuteur {#timer-digits}
 
-L'aspect d'un minuteur est son **Style** ([Timer Widget](92-timer-widget)). Un **User Style** (➕ Add new User Style…) a maintenant :
+L'aspect d'un minuteur est son **Style** ([Widget Timer](92-timer-widget)). Un **User Style** (➕ Add new User Style…) a maintenant :
 
 - **Back color** : autour du panneau des chiffres, sous la barre de titre.
 - **Text Fore color** : les chiffres. **Text Back color** : le panneau derrière eux.

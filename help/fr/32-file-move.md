@@ -20,10 +20,10 @@ Chaque type de fichier a une seule place sur le Brain, pour que rien n'atterriss
 5. La liste montre chaque fichier, où il va, et ce qui va se passer : **New** (nouveau), **Already on the Brain** (déjà sur le Brain, sauté), ou pourquoi il ne peut pas être copié. Cochez **Only the ones this Schema is missing** pour ne copier que ceux qui manquent à ce Schema.
 6. Cliquez sur **Copy ... to the Brain**. Quand c'est fini, le compte des fichiers manquants en haut diminue.
 
-Un fichier déjà sur le Brain n'est jamais remplacé sauf si vous cochez **Replace files already on the Brain**. Une image SVG (.svg) déjà présente n'est jamais remplacée, même dans ce cas : voir [Media](07-media).
+Un fichier déjà sur le Brain n'est jamais remplacé sauf si vous cochez **Replace files already on the Brain**. Une image SVG (.svg) déjà présente n'est jamais remplacée, même dans ce cas : voir [Media (images et sons)](07-media).
 
 ## Bon à savoir {#good-to-know}
 
 - Des fichiers jusqu'à 300 Mo chacun.
-- Pour une seule image ou un .zip, vous pouvez aussi utiliser l'écran **Media** ([Media](07-media)).
+- Pour une seule image ou un .zip, vous pouvez aussi utiliser l'écran **Media** ([Media (images et sons)](07-media)).
 - Copier depuis le Brain vers un ordinateur (une sauvegarde) n'est pas encore sur cette page.

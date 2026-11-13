@@ -30,4 +30,4 @@ Avec une sonde en °C, les nombres sont convertis : un Optical SSR -0.3 à -1.7 
 - **Le Brain** ne fait jamais tourner une Hysteresis de chauffe hors de sa plage, quoi qu'on ait enregistré.
 - Seule une Hysteresis qui **chauffe** a une plage.
 
-Voir aussi : [The heating method](150-heating-method), [Predictive Hysteresis](168-predictive-hysteresis).
+Voir aussi : [Une seule résistance, choisissez comment elle chauffe](150-heating-method), [Hysteresis prédictive : pas de dépassement](168-predictive-hysteresis).

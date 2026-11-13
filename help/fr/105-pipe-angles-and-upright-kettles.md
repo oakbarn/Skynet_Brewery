@@ -6,7 +6,7 @@ Les tuyaux sont dessinés comme on assemble un vrai tuyau rigide, et les bouillo
 
 - **Un tuyau est une seule pièce droite.** Il va seulement à l'**horizontale**, à la **verticale** ou à **45 degrés**. Rien d'autre.
 - **Un tuyau ne se plie jamais.** Pour changer de direction, il faut un raccord : un **coude à 90°** pour passer de l'horizontale à la verticale, un **coude à 45°** pour passer sur un 45, un **té** ou une **croix** là où les tuyaux se séparent.
-- Les flexibles ne sont pas des tuyaux : un flexible se courbe toujours en douceur (voir [Pipes, hoses and reducers](24-pipes-and-hoses)).
+- Les flexibles ne sont pas des tuyaux : un flexible se courbe toujours en douceur (voir [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)).
 
 ## Tracer un tuyau {#drawing-a-pipe}
 

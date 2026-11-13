@@ -8,7 +8,7 @@ Le Build Tab ne s'affiche que pendant que vous construisez. Il a un bord orange 
 
 1. Appuyez sur **☰ Menu** et choisissez **Edit layout**.
 2. Faites l'une de ces choses :
-   - Choisissez un Device dans **Add Device** (ou un raccourci : **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), un Widget dans **Add Widget**, ou appuyez sur **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** ou **Elbows, Tees …** (voir [Edit layout bar](82-edit-layout-bar)). Le Build Tab s'ouvre tout seul et le nouvel élément y est fait, **jamais sur un Tab normal**. Le Tab que vous choisissez dans sa fenêtre Add est retenu : c'est là qu'il ira à la fin (voir **Où il va** plus bas).
+   - Choisissez un Device dans **Add Device** (ou un raccourci : **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), un Widget dans **Add Widget**, ou appuyez sur **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** ou **Elbows, Tees …** (voir [Barre Edit layout](82-edit-layout-bar)). Le Build Tab s'ouvre tout seul et le nouvel élément y est fait, **jamais sur un Tab normal**. Le Tab que vous choisissez dans sa fenêtre Add est retenu : c'est là qu'il ira à la fin (voir **Où il va** plus bas).
    - Appuyez sur **🔨 Build Tab** dans la barre Edit layout pour l'ouvrir vide.
    - Dans **☰ Menu > Vessel Templates**, **Equipment Templates** ou **Fitting Templates**, ouvrez un Template (un Template Skynet ou un Template groupé de l'utilisateur) et appuyez sur **Add to Tab** ou **Clone**. La copie est faite sur le Build Tab (voir **Copies de Templates** plus bas).
 3. Construisez-le sur le Build Tab : réglez ses propriétés, ajoutez ses IP, tracez ses tuyaux. Tout ce qui est dans la barre Edit layout y marche.
@@ -110,4 +110,4 @@ Un Template est **une cuve** (avec les raccords groupés sur ses orifices) ou **
 - Un raccord groupé sur un de ses orifices qui est encore identique à son Template est utilisé tel quel. Un raccord que vous avez changé sur le Build Tab est d'abord enregistré comme un nouveau **Bundled Fitting Template**, nommé d'après lui.
 - Un Tab_Fitting seul devient un **Bundled Fitting Template**.
 
-Tant que Skynet construit encore ses Templates, il y a un bouton **Skynet Template** (désactivé = un Template groupé de l'utilisateur). Voir [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+Tant que Skynet construit encore ses Templates, il y a un bouton **Skynet Template** (désactivé = un Template groupé de l'utilisateur). Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
