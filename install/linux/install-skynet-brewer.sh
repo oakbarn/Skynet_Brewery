@@ -203,6 +203,10 @@ if [ "$SRC" != "$DEST" ]; then
       echo "The old sample $old was moved to backups/old_samples_$STAMP (the panel ships only the 3 Vessel sample now)."
     fi
   done
+  # Official Skynet (Rule 9.14): the panel makes its program files Read-only once it has checked them; let this update replace them
+  for c in server.js importer.js package.json lib public templates firmware install samples; do
+    if [ -e "$DEST/$c" ]; then chmod -R u+w "$DEST/$c"; fi
+  done
   ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
     case "$f" in
       ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
