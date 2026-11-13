@@ -333,6 +333,12 @@ Section "Skynet Brew Panel" SecMain
       CopyFiles /SILENT "$INSTDIR\help\*.md" "$INSTDIR\help\backups\before_update_$Stamp"
       DetailPrint "Old help pages copied to help\backups\before_update_$Stamp"
     ${EndIf}
+    ; The French Help pages too (Rule 11.11)
+    ${If} ${FileExists} "$INSTDIR\help\fr\*.md"
+      CreateDirectory "$INSTDIR\help\backups\before_update_$Stamp\fr"
+      CopyFiles /SILENT "$INSTDIR\help\fr\*.*" "$INSTDIR\help\backups\before_update_$Stamp\fr"
+      DetailPrint "Old French help pages copied to help\backups\before_update_$Stamp\fr"
+    ${EndIf}
     ${If} $Fresh == 0
       Call AskReplaceFolders
     ${EndIf}

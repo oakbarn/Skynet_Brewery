@@ -1200,14 +1200,16 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown media route');
   }
   // Help tab: everyone reads, admins edit
-  if (p === '/ui/help' && m === 'GET') return ok(res, help.list());
-  if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: help.create(title) }); }
+  // ?lang=fr: the French Help (Rule 11.11); a page not translated yet comes in English
+  const hl = help.translation(url.searchParams.get('lang'));
+  if (p === '/ui/help' && m === 'GET') return ok(res, hl.list());
+  if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: hl.create(title) }); }
   const hp = /^\/ui\/help\/([^/]+)$/.exec(p);
   if (hp) {
     try {
-      if (m === 'GET') return send(res, 200, help.read(hp[1]), 'text/plain; charset=utf-8');
-      if (m === 'PUT') { help.write(hp[1], await readBody(req, 1024 * 1024 + 1)); return ok(res); }
-      if (m === 'DELETE') { help.remove(hp[1]); return ok(res); }
+      if (m === 'GET') return send(res, 200, hl.read(hp[1]), 'text/plain; charset=utf-8');
+      if (m === 'PUT') { hl.write(hp[1], await readBody(req, 1024 * 1024 + 1)); return ok(res); }
+      if (m === 'DELETE') { hl.remove(hp[1]); return ok(res); }
     } catch (e) { return fail(res, e.code === 404 ? 404 : 400, e.message); }
   }
 

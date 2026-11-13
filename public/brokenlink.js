@@ -16,7 +16,7 @@ export function helpIndex(pages) {
   const m = new Map();
   for (const p of pages || []) {
     const parts = new Set();
-    for (const l of String(p.text ?? '').split('\n')) { const h = /^#{1,6}\s+(.*)$/.exec(l); if (h) parts.add(slug(h[1].trim())); }
+    for (const l of String(p.text ?? '').split('\n')) { const h = /^#{1,6}\s+(.*)$/.exec(l); if (h) { const id = /\{#([\w-]+)\}\s*$/.exec(h[1]); parts.add(id ? id[1] : slug(h[1].trim())); } }      // {#id}: a translated heading keeps its English id (Rule 11.11)
     m.set(p.name, parts); if (!m.has(bare(p.name))) m.set(bare(p.name), parts);
   }
   return m;
