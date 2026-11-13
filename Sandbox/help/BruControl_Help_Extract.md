@@ -1308,3 +1308,48 @@ Taken out 2026-11-12 (OakBarn Brewery: "One for Skynet and One for the Importer.
 **Now:**
 
 > alarm and timer sounds
+
+## README polish 2 (OakBarn Brewery, 2026-11-13, markup "Skynet Brew Panel 2a")
+
+### 2a. Variables, the old Global class start-up copy
+
+**Taken out:**
+
+> On start-up the old Schema is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console).
+
+**Now:**
+
+> (nothing)
+
+### 3. Processes, the list under the process lines ("Importer Sandbox Differences from BruControl")
+
+**Taken out:**
+
+> **What Processes do**
+>
+> - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
+> - A `//` comment can contain quote marks.
+> - **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
+> - **Find and Replace.** On the Processes page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open Process; press Save to keep it, Ctrl+Z undoes it. **All Processes** searches every Process and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those Processes. A running Process keeps the old text until it is stopped and started.
+> - **Editor tools** (Help > The Process editor): line numbers and **Go to line** (Ctrl+G); colors by what each word does (Commands blue, Devices magenta, Widgets teal, gGlobals purple, variables black on white, operators orange, comments green), with a **Colors** switch and **Color key**; **Save to file** for the whole Process or the highlighted lines as text or as XML in color, plus a **Notepad++ colors file** (a general one is `docs/Skynet_Process_Notepad++.xml`). Comments can be `//`, `#`, `'` or `/* ... */`. **Delete** moves a Process to the **Recycle Bin** (`scripts/Recycle_Bin`), where admins can restore it or delete it for good; both ask first.
+> - `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
+> - Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
+> - Alarms use `sound` (a path).
+
+**Now:**
+
+> (nothing)
+
+### 3a. Schema.json, first paragraph and Find
+
+**Taken out:**
+
+> The **Schema.json** page (it was called **Config**) shows
+
+> - **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
+
+**Now:**
+
+> The **Schema.json** page shows
+
+> - **Find** (Ctrl+F) and **Replace** (Ctrl+H) work.
