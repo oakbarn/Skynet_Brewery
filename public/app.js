@@ -23,6 +23,7 @@ import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
+import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -1277,7 +1278,7 @@ function vList(key) {
 }
 // Picture lists only offer pictures in media/Images (and its folders); sound lists add what is in media/sounds.
 // Fetched when a dialog needs them.
-let mediaPics = [], mediaSounds = [], picGroups = [];
+let mediaPics = [], mediaSounds = [], picGroups = [], picIds = {};      // picIds: { "Images/Skynet/...": its Skynet Picture number } (Rule 7.22)
 // a picture typed by hand always lands in media/Images: "pump.png", "/images/pump.png" and "media\Images\pump.png" -> "Images/pump.png"
 const imagesPath = p => 'Images/' + p.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^media\//i, '').replace(/^images\//i, '');
 const inImages = list => [...new Set(list)].filter(p => /^Images\//i.test(p));
@@ -1285,8 +1286,16 @@ async function loadMediaPictures() {
   const [pics, snds, grp] = await Promise.all([...['Images', 'sounds'].map(dir => api('GET', `/ui/media/all?root=0&dir=${dir}`).catch(() => null)), api('GET', '/ui/media/groups').catch(() => null)]);
   picGroups = grp?.groups || picGroups;
   mediaPics = (pics?.files || []).filter(f => f.kind === 'picture').map(f => f.use);
+  picIds = Object.fromEntries((pics?.files || []).filter(f => f.id).map(f => [f.use, f.id]));
   mediaSounds = (snds?.files || []).filter(f => f.kind === 'sound').map(f => f.use);
 }
+// What a picture or sound list shows for a path (Rule 7.22, 7.23): only the file name, a Skynet picture's number in front
+// ("24 · Overlay_Bolt.svg"), and the folder only when another file in the list has the same name; a web link shows 🌐 and its file
+const pathText = (p, all = []) => {
+  if (isWebLink(p)) return '🌐 ' + (fileOf(p) || p);
+  const f = fileOf(p).toLowerCase(), twin = all.some(q => q !== p && !isWebLink(q) && fileOf(q).toLowerCase() === f);
+  return pickLabel(p, picIds[p]) + (twin ? ` (${folderOf(p) || 'media'})` : '');
+};
 // Picture groups (Help > Picture groups): every picture list can show one group (a folder in media/Images, or in media/sounds
 // for sounds) or All. The pick is remembered on this computer or phone.
 // Skynet pictures are in Images/Skynet/<group>, yours in Images/<group>; the Show list picks Skynet, Mine or Both.
@@ -8699,17 +8708,42 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const fill = () => {
       const cur = s.value || v || '';
       s.replaceChildren(...(keep ? [h('option', { value: CHAIN_KEEP }, 'No Change')] : []), h('option', { value: '' }, '(none)'),
-        ...os.filter(p => p === cur || (isTint(p) ? overlayFits(p, obj) : p === GREEN_RING ? overlayFits(p, obj) && inGroup(p, g) && inSource(p, src) : inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
+        ...os.filter(p => p === cur || (isTint(p) ? overlayFits(p, obj) : p === GREEN_RING ? overlayFits(p, obj) && inGroup(p, g) && inSource(p, src) : inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, title: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || (isPath ? pathText(p, os) : p))), h('option', { value: '__add__' }, 'Add new ...'));
       s.value = cur;
+      showFolder();
     };
+    // Two-part paths (Rule 7.23, OakBarn Brewery 2026-11-13): the list shows only the file name (a Skynet picture with its number in
+    // front, Rule 7.22) and the Folder box under it shows where it is. A Skynet picture or sound's folder can't be changed; your own
+    // can be typed (normally the folder it is in, or the User Graphic / User Audio folder, is used).
+    const isPath = pic || list === 'sounds', fileVal = p => !!p && p !== CHAIN_KEEP && p !== '__add__' && !isTint(p) && !isWebLink(p) && /\.[a-z0-9]{2,5}$/i.test(p);
+    const fb = isPath ? h('input', { type: 'text', class: 'gpickFolderBox', spellcheck: 'false', 'aria-label': 'Folder' }) : null;
+    const fl = isPath ? h('div', { class: 'gpickFolder' }, h('span', { class: 'muted' }, 'Folder'), fb) : null;
+    function showFolder() {
+      if (!fb) return;
+      const p = s.value, ok = fileVal(p), sky = ok && isSkynetMedia(p), dft = mediaDefaults(S.config)[list === 'sounds' ? 'userAudio' : 'userGraphic'];
+      fl.classList.toggle('hidden', !ok);
+      fb.value = ok ? folderOf(p) : ''; fb.disabled = sky; fb.placeholder = dft;
+      fb.title = sky ? `${DEFAULT_WORDS[list === 'sounds' ? 'skynetAudio' : 'skynetGraphic']} folder: Skynet ${list === 'sounds' ? 'sounds' : 'pictures'} live here, so it can't be changed`
+        : `Where the file is. Normally the folder it is in is used (the ${DEFAULT_WORDS[list === 'sounds' ? 'userAudio' : 'userGraphic']} folder is ${dft}); type another folder in your media folders to use the same file name from there`;
+    }
+    if (fb) fb.addEventListener('change', ev => {
+      ev.stopPropagation();
+      const p = s.value; if (!fileVal(p) || isSkynetMedia(p)) return showFolder();
+      const f = fb.value.trim().replace(/\\/g, '/').replace(/\/+$/, '') || mediaDefaults(S.config)[list === 'sounds' ? 'userAudio' : 'userGraphic'];
+      const bad = userFolderError(f); if (bad) { toast(bad, true); return showFolder(); }
+      const np = joinPath(f, fileOf(p));
+      if (![...s.options].some(o => o.value === np)) s.insertBefore(h('option', { value: np, title: np }, pathText(np, [...os, np])), s.querySelector('option[value="__add__"]'));
+      s.value = np; s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
     fill();
     const gs = groups.length ? h('select', { class: 'gpickGroup', title: 'Show the pictures of one group, or All', onchange: ev => { ev.stopPropagation(); g = gs.value; keepGroup(gk, g); fill(); } },
       h('option', { value: '' }, 'All groups'), ...groups.map(([n, l]) => h('option', { value: n, ...(n === g ? { selected: true } : {}) }, l))) : null;
-    s.addEventListener('change', () => { const sv = s.value === CHAIN_KEEP ? '' : s.value; if (pic && sv !== '__add__') { pv.classList.toggle('hidden', !sv || isTint(sv)); if (sv && !isTint(sv)) pv.src = media(sv); } });
+    s.addEventListener('change', () => { const sv = s.value === CHAIN_KEEP ? '' : s.value; if (pic && sv !== '__add__') { pv.classList.toggle('hidden', !sv || isTint(sv)); if (sv && !isTint(sv)) pv.src = media(sv); } showFolder(); });
     const ss = gk === 'sounds' ? null : h('select', { class: 'gpickGroup', title: 'Show the Skynet pictures, your own, or both', onchange: ev => { ev.stopPropagation(); src = ss.value; keepGroup('src', src); fill(); } },
       ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
-    input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
+    input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv, fl);
+    showFolder();
   }
   else if (kind === 'dbgroups') {   // Database Groups (Rule 6.14, Fritz 2026-11-06): an item can be in more than one Group.
     // The box shows its Groups and 👥 Groups…, which opens the Group list (➕ Add new Group… at the top). A click on a Group shows
@@ -10314,10 +10348,10 @@ function ppFill() {
   const g = $('#ppGroup').value, f = $('#ppFilter').value.toLowerCase(), snd = $('#ppKind').value === 'sounds';
   const src = snd ? 'both' : $('#ppSrc').value;
   $('#ppSrc').hidden = snd;
-  ppShown = ppPaths().filter(p => inGroup(p, g) && inSource(p, src) && (!f || p.toLowerCase().includes(f)));
+  ppShown = ppPaths().filter(p => inGroup(p, g) && inSource(p, src) && (!f || p.toLowerCase().includes(f) || String(picIds[p] ?? '') === f.replace(/^#/, '')));      // a Skynet Picture number finds it too (Rule 7.22)
   if (!ppShown.includes(ppVal)) ppVal = ppShown[0] ?? '';
   $('#ppGrid').replaceChildren(...ppShown.map(p => {
-    const name = p.split('/').pop();
+    const name = pickLabel(p, picIds[p]);
     return h('div', { class: 'ppTile' + (p === ppVal ? ' sel' : ''), 'data-p': p, title: p, onclick: () => ppSelect(p), ondblclick: () => { ppSelect(p); ppInsert(); } },
       snd ? h('div', { class: 'ppSnd' }, '🔊') : h('img', { loading: 'lazy', alt: '', src: media(p) }), h('div', { class: 'ppName' }, name));
   }));
@@ -10332,7 +10366,7 @@ function ppSelect(p) {
 }
 function ppShow() {
   const p = ppVal, snd = $('#ppKind').value === 'sounds';
-  $('#ppPath').textContent = p || 'Nothing here: add pictures on the Media page';
+  $('#ppPath').textContent = p ? (picIds[p] ? `Skynet Picture ${picIds[p]}: ` : '') + p : 'Nothing here: add pictures on the Media page';
   $('#ppAudio').hidden = !snd || !p; if (p && snd) $('#ppAudio').src = soundUrl(p);
   $('#ppInsert').disabled = !p;
 }
@@ -10347,15 +10381,19 @@ function ppKey(ev) {
   ppSelect(ppShown[Math.min(ppShown.length - 1, Math.max(0, (i < 0 ? 0 : i) + step))]);
 }
 function ppInsert() {
-  const p = ppVal; if (!p) return;
+  let p = ppVal; if (!p) return;
   $('#picPickDlg').close('ok');
   if (ppFor) {         // a picture list in Properties: pick it there (and let the list show its preview)
     const sel = ppFor; ppFor = null;
-    if (![...sel.options].some(o => o.value === p)) sel.insertBefore(h('option', { value: p }, p), sel.querySelector('option[value="__add__"]'));
+    if (![...sel.options].some(o => o.value === p)) sel.insertBefore(h('option', { value: p, title: p }, pathText(p, ppPaths())), sel.querySelector('option[value="__add__"]'));
     sel.value = p; sel.dispatchEvent(new Event('change', { bubbles: true })); sel.focus();
     return;
   }
   if (!ppAt) return;
+  // a Process needs only the file name (Rule 7.23): Skynet finds its folder. The whole path only when another file has the same name.
+  const dft = mediaDefaults(S.config)[$('#ppKind').value === 'sounds' ? 'userAudio' : 'userGraphic'].toLowerCase() + '/';
+  const twin = ppPaths().some(q => q !== p && fileOf(q).toLowerCase() === fileOf(p).toLowerCase());
+  if (!twin && (isSkynetMedia(p) || p.toLowerCase().startsWith(dft))) p = fileOf(p);
   const ta = $('#code'), [a, b] = ppAt, before = ta.value[a - 1], after = ta.value[b];
   const text = before === '"' ? p + (after === '"' ? '' : '"') : `"${p}"`;
   editCode(a, b, text); const end = a + text.length + (before === '"' && after === '"' ? 1 : 0); ta.setSelectionRange(end, end);
@@ -11412,6 +11450,7 @@ function renderSettings() {
   renderLook();
   $('#setWarnPaths').checked = c.warnOffBrainPaths !== false;
   $('#setMedia').value = (c.mediaRoots || []).join('\n');
+  { const md = mediaDefaults(c); $('#setDefSkyG').value = md.skynetGraphic; $('#setDefSkyA').value = md.skynetAudio; $('#setDefUserG').value = c.mediaDefaults?.userGraphic || ''; $('#setDefUserA').value = c.mediaDefaults?.userAudio || ''; }      // Rule 7.23
   $('#setKey').value = c.apiKey || '';
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
@@ -11575,7 +11614,7 @@ $('#setLook').onchange = guard(async () => {
 $('#saveSettings').onclick = guard(async () => {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
-    title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
+    title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean), mediaDefaults: { userGraphic: $('#setDefUserG').value.trim(), userAudio: $('#setDefUserA').value.trim() },
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
     restartLimit: Math.min(60, Math.max(1, Math.round(Number($('#setRestartLimit').value)) || 5)), restartAlarm: $('#setRestartAlarm').value,
   });

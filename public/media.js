@@ -65,7 +65,7 @@ async function render(withTree = true) {
     ...files.map(f => {
       const item = el('div', { class: 'mdItem' + (selected.has(f.path) ? ' sel' : ''), 'data-p': f.path, draggable: st.readOnly ? false : 'true', title: f.name, onclick: e => select(e, f.path) },
         f.kind === 'sound' ? el('div', { class: 'mdIcon' }, '🔊') : el('img', { class: 'mdThumb', loading: 'lazy', alt: '', src: `/media?path=${encodeURIComponent(f.use)}&as=original&t=${f.modified}` }),
-        el('div', { class: 'mdName' }, f.name),
+        el('div', { class: 'mdName' }, f.id ? `${f.id} · ${f.name}` : f.name),      // a Skynet picture shows its number (Rule 7.22)
         el('div', { class: 'muted mdMeta' }, `${size(f.size)} · ${when(f.modified)}`),
         f.kind === 'sound' ? el('audio', { controls: true, preload: 'none', src: `/media?path=${encodeURIComponent(f.use)}`, onclick: e => e.stopPropagation() }) : null,
         el('div', { class: 'mdUse muted' }, 'Path to use: ', el('code', {}, f.use)),
@@ -213,3 +213,6 @@ page.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes(
 page.addEventListener('dragleave', e => { if (!page.contains(e.relatedTarget)) page.classList.remove('dropping'); });
 page.addEventListener('drop', e => { page.classList.remove('dropping'); if (e.dataTransfer.files.length) { e.preventDefault(); upload(e.dataTransfer.files); } });
 document.querySelector('#views button[data-view="media"]')?.addEventListener('click', () => render());
+
+// The printable list of Skynet Picture numbers (Rule 7.22) opens in a window of its own
+document.querySelector('#mdPicIds')?.addEventListener('click', () => window.open('/picids.html', 'skynetPicIds', 'width=760,height=860'));

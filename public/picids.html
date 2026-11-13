@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skynet Picture Numbers</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64 256x256">
+<link rel="stylesheet" href="style.css">
+<script src="themeboot.js"></script>
+</head>
+<!-- The printable list of Skynet Picture ID numbers (Rule 7.22, OakBarn Brewery 2026-11-13): each Skynet picture with its fixed number. -->
+<body class="picIdsPage">
+<main>
+  <div class="picIdsBar noPrint">
+    <input id="piFilter" type="search" placeholder="🔍 Find a number or a name">
+    <select id="piGroup" aria-label="Group"><option value="">All groups</option></select>
+    <button id="piPrint" class="primary">🖨 Print</button>
+  </div>
+  <h1>Skynet Picture numbers</h1>
+  <p class="muted">Every picture that comes with Skynet has a number that never changes. Every picture list shows it beside the file name,
+    and a Process can use the number or the file name, for example <code>alm_Brew.setgraphic = 24</code> or <code>alm_Brew.setgraphic = "Overlay_Bolt.svg"</code>.</p>
+  <p id="piCount" class="muted"></p>
+  <table class="grid picIds"><thead><tr><th>Number</th><th>Picture</th><th>File name</th><th>Group</th></tr></thead><tbody id="piBody"></tbody></table>
+</main>
+<script type="module" src="picids.js"></script>
+</body>
+</html>

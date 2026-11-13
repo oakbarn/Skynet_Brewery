@@ -1289,3 +1289,23 @@ dialog.boardTalk { width: min(900px, 96vw); }
 dialog#dlg:has(#dlgBody [data-k="pumpModel"]) { padding-top: 0; }
 dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
 dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar { display: none; }
+/* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
+.gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
+.gpick .gpickFolder.hidden { display: none; }
+.gpick .gpickFolderBox { flex: 1; min-width: 0; padding: 2px 6px; }
+.gpick .gpickFolderBox:disabled { opacity: .65; }
+.mdDefaults { border: 1px solid var(--line, #8884); border-radius: 6px; padding: 6px 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(14em, 1fr)); gap: 4px 12px; }
+.mdDefaults input:disabled { opacity: .65; }
+/* The printable list of Skynet Picture numbers (Rule 7.22, public/picids.html) */
+body.picIdsPage main { max-width: 900px; margin: 0 auto; padding: 12px 16px; }
+.picIdsBar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.picIdsBar input { flex: 1 1 14em; }
+table.picIds { width: 100%; border-collapse: collapse; }
+table.picIds td, table.picIds th { padding: 3px 8px; text-align: left; vertical-align: middle; }
+table.picIds .piNum { font-weight: bold; text-align: right; width: 4em; }
+table.picIds img { width: 48px; height: 48px; object-fit: contain; }
+@media print {
+  .noPrint { display: none !important; }
+  body.picIdsPage { background: #fff; color: #000; }
+  table.picIds tr { break-inside: avoid; }
+}
