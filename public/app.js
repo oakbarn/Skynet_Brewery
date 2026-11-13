@@ -347,6 +347,7 @@ function setView(v, here = false) {
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  showSound();
   // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
   if (v === 'help' && helpFrom !== 'help') helpFrom = prev;
   markOnTabs();
@@ -7215,7 +7216,7 @@ function stepperFields(it) {
 }
 
 // Alarm kind first: a Hop Alarm can sound by itself on a timer, a Pre-Hop Alarm a set time before its Hop Alarm
-const ALARM_KIND_LIST = [['hop', 'Hop Alarm (priority 1: beats every other sound)'], ['brewflow', 'Brew Flow Alarm (2: end of mash, start of boil)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
+const ALARM_KIND_LIST = [['brewflow', 'Brew Flow Alarm (priority 1: beats every other sound; end of mash, start of boil)'], ['hop', 'Hop Alarm (2: hop drops)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
 function alarmFields(item) {
   const k = item.kind ??= 'general';
   return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
@@ -7249,7 +7250,7 @@ const ALM_LABEL_POP = LABEL_POP;
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 // Alarm Priority (Rule 7.18, OakBarn Brewery 2026-11-09)
-const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
+const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
 function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
@@ -9272,7 +9273,7 @@ const INFO = {
     ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
     ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
     ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (wgt_ALM_Label_TabID, Rule 3.14).'],
-    ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
+    ['Alarm settings', ': Kind of alarm (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']],
     attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
       ['.x'], ['.y'], ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.sound'], ['.fileindex']],
@@ -10104,6 +10105,8 @@ const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasB
 let soundTapped = false;
 function showSound() {
   $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
+  // the reminder on the Tab while sound is off (OakBarn Brewery, 2026-11-13: "keep on the Tab and Hamburger Menu if it has not been done")
+  $('#soundNag')?.classList.toggle('hidden', soundOn || view !== 'workspace');
   document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
 }
 function setSound(on) {
@@ -10112,6 +10115,26 @@ function setSound(on) {
   updateAlarms();
 }
 $('#soundBtn').onclick = () => setSound(!soundOn);
+$('#soundNag').onclick = () => setSound(true);
+// Ask when the panel first opens (OakBarn Brewery, 2026-11-13: "Ask when first opens"): browsers play nothing until the page is
+// clicked once, so the answer is that click. Once per opening of the panel, only while sound is off; never on top of another dialog.
+let soundAsked = false;
+function askSound() {
+  if (soundOn || soundAsked) return;
+  const d = $('#valDlg');
+  if (d.open) { d.addEventListener('close', () => setTimeout(askSound, 300), { once: true }); return; }
+  soundAsked = true;
+  d.innerHTML = '';
+  const close = on => { d.oncancel = null; d.close(); if (on) setSound(true); };
+  d.append(h('div', { class: 'vdTitle' }, '🔊 Turn sound on?'),
+    h('p', {}, 'Alarms, hop drops, timers and music on this Panel need sound. Your browser only plays sound after you click once, so Skynet asks.'),
+    h('p', { class: 'muted' }, 'Sound is turned on for this browser. Moving between Tabs keeps it on. To have it on every time, use ☰ Menu > Default > Turn Sound On when starting.'),
+    h('div', { class: 'vdBtns' },
+      h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, '🔊 Turn Sound On'),
+      h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Not now')));
+  d.oncancel = () => { d.oncancel = null; showSound(); };
+  d.showModal();
+}
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
@@ -12221,6 +12244,8 @@ function menuItems(list, go) {
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
+  // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
+  if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -15086,4 +15111,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); setTimeout(askSound, 800); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

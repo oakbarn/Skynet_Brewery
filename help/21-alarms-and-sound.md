@@ -4,13 +4,13 @@ Only **one sound plays at a time**. When two want to play, the one with the lowe
 
 | Kind | Priority | Use it for |
 |---|---|---|
-| **Hop Alarm** | 1 | Hop drops. Beats every other sound. |
-| **Brew Flow Alarm** | 2 | Brew steps: strike, end of mash, start of boil. Waits only for a Hop Alarm. |
+| **Brew Flow Alarm** | 1 | Brew steps: strike, end of mash, start of boil. Beats every other sound. |
+| **Hop Alarm** | 2 | Hop drops. Waits only for a Brew Flow Alarm. |
 | **Pre-Hop Alarm** | 3 | A warning a set time before its Hop Alarm (10 minutes unless you change it). |
 | **General Alarm** | 4 | Anything else. |
 | **Sound only** and the **Sound Player** | 5 | Music and beeps. Pauses while any alarm sounds, then goes on where it stopped. |
 
-Brew Flow is priority 2 because it beats a Pre-Hop Alarm. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
+Brew Flow is priority 1 and Hop is priority 2 (OakBarn Brewery, 2026-11-13). If a Hop drop must come first in your brew, give that Hop Alarm its own Priority, such as 0.9. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
 
 ### Priority: your own order
 
@@ -64,4 +64,4 @@ A sound can also be a **web link to an MP3** (`https://...`), played straight fr
 
 There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Sound Player**.
 
-Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that). To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
+When the panel opens with sound off, Skynet asks **🔊 Turn sound on?**: press **🔊 Turn Sound On** (browsers only play sound after one click, so that click is it). While sound is off, a red **🔇 Sound is off** button stays on the Tab and **🔊 Turn Sound On** is at the top of the **☰ Menu**. It is once per browser, not per Tab. You can also press **Enable sound** on the Menu Bar. To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
