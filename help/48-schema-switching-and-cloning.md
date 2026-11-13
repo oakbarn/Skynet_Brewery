@@ -63,4 +63,4 @@ A Bundled vessel and its IPs can be copied in one go:
 
 If the Tab has an Equipment Profile, the copy is in that profile's **Equipment list** as soon as you save the layout, like everything else on the Tab.
 
-On the **☰ Menu > Equipment Profile** tab each vessel in the **Made on the Vessel tab** list also has a **Clone** button. The copy opens on the Vessel tab as a new one (with the same size, heat, probe, ports and bundle setting). Change what you need, then press **Save** there.
+To copy a vessel, copy it on the Tab in **Edit layout**, or make a Vessel Template from it (**💾 Save Build ... > 📁 Templates**).

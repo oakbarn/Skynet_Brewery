@@ -452,7 +452,6 @@
  "Every default in one place: the Default pipe size, new Tabs, new Recipes, text, sound, phones, a list of the defaults set elsewhere, and the order of the Menu": "Tous les réglages par défaut au même endroit : la taille de tuyau par défaut, les nouveaux Tabs, les nouvelles Recipes, le texte, le son, les téléphones, une liste des réglages par défaut faits ailleurs, et l'ordre du Menu",
  "Equipment Profile": "Equipment Profile",
  "Each Tab's equipment, its losses and its piping": "L'équipement de chaque Tab, ses pertes et sa tuyauterie",
- "One vessel (or chiller, coil, filter): size, heat, probe, ports": "Une cuve (ou un refroidisseur, un serpentin, un filtre) : taille, chauffe, sonde, ports",
  "Vessel Templates": "Vessel Templates",
  "Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab": "Des cuves toutes prêtes (Skynet et les vôtres) : petites icônes, double-clic pour les réglages, Add to Tab",
  "Equipment Templates": "Equipment Templates",
@@ -525,10 +524,6 @@
  "A locked Equipment Profile (its numbers, equipment and pipes) cannot be changed until it is unlocked. A Process can do the same with lock_Equipment and unlock_Equipment (they lock or unlock every Tab's profile).": "Un Equipment Profile verrouillé (ses nombres, son équipement et ses tuyaux) ne peut pas être changé avant d'être déverrouillé. Un Process peut faire de même avec lock_Equipment et unlock_Equipment (ils verrouillent ou déverrouillent le profil de chaque Tab).",
  "Copy the profile and use the copy on this Tab only": "Copier le profil et utiliser la copie sur ce Tab seulement",
  "Double-click for its Properties on the Tab": "Double-cliquez pour ses Properties sur le Tab",
- "Double-click to open it on the Vessel tab": "Double-cliquez pour l'ouvrir sur l'onglet Vessel",
- "Put it on the Tab \"{0}\" (or bring the drawing there up to date), with its ports as IPs": "Le mettre sur le Tab « {0} » (ou y mettre le dessin à jour), avec ses ports comme IPs",
- "Make a copy of it (size, heat, probe, ports, bundle) that opens on the Vessel tab to be saved": "En faire une copie (taille, chauffe, sonde, ports, groupe) qui s'ouvre sur l'onglet Vessel pour être enregistrée",
- "Save it, then put it on the Equipment tab of this Schema with its ports as IPs (or bring the drawing there up to date)": "L'enregistrer, puis le mettre sur le Tab Equipment de ce Schema avec ses ports comme IPs (ou y mettre le dessin à jour)",
  "A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template": "Une copie sous un nouveau nom : elle est d'abord créée sur le Build Tab, puis Save Build ... > As a Template",
  "Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > Move to Tab": "Mettre une copie sur un Tab : elle est d'abord créée sur le Build Tab, puis Save Build ... > Move to Tab",
  "Put it on a port of a Vessel Template": "Le mettre sur un port d'un Vessel Template",
@@ -778,5 +773,7 @@
  "The chill stops at this temperature and the Whirlpool hops of this stand go in.": "Le refroidissement s'arrête à cette température et les houblons Whirlpool de ce stand y vont.",
  "Cooling water off for this long.": "L'eau de refroidissement est coupée pendant ce temps.",
  "A Skynet Boil Profile, one of your own (☰ Menu > Boil Profile), or none. Picking one fills in the Boil Minutes and its Hop Stands.": "Un Skynet Boil Profile, un des vôtres (☰ Menu > Boil Profile), ou aucun. En choisir un remplit les Boil Minutes et ses Hop Stands.",
- "The chill stops at this stand's temperature and this hop goes in. Each stand's temperature and time are on the Recipe tab.": "Le refroidissement s'arrête à la température de ce stand et ce houblon y va. La température et la durée de chaque stand sont sur l'onglet Recipe."
+ "The chill stops at this stand's temperature and this hop goes in. Each stand's temperature and time are on the Recipe tab.": "Le refroidissement s'arrête à la température de ce stand et ce houblon y va. La température et la durée de chaque stand sont sur l'onglet Recipe.",
+ "This profile has pumps or motorized valves this Schema has not got yet. Give each one its Interface and Port; its look and place come from the profile (Rule 19.6).": "Ce profil a des pompes ou des vannes motorisées que ce Schema n'a pas encore. Donnez à chacune son Interface et son Port ; son aspect et sa place viennent du profil (Règle 19.6).",
+ "Put it on the Tab \"{0}\" (or bring the drawing there up to date), with its ports as IPs. Then change it in its Properties on the Tab.": "Le mettre sur le Tab « {0} » (ou mettre le dessin à jour là-bas), avec ses ports comme IP. Puis le changer dans ses Propriétés sur le Tab."
 }
