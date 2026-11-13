@@ -1,0 +1,32 @@
+# Dependabot: watches the free add-on programs Skynet uses (package.json, and the GitHub Actions
+# in .github/workflows) and opens a pull request ONLY when one has a known security hole.
+# It does not open routine "newer version" pull requests (open-pull-requests-limit: 0),
+# so it adds as few PRs as possible to the merge-in-order queue. All security fixes for one
+# kind come together in a single pull request.
+# The "Dependabot alerts" and "Dependabot security updates" switches must be On in
+# Settings > Code security (see docs/Security_Scanning.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns: ['*']
+    commit-message:
+      prefix: 'Security fix'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      actions-security:
+        applies-to: security-updates
+        patterns: ['*']
+    commit-message:
+      prefix: 'Security fix'
