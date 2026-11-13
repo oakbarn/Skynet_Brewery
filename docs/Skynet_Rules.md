@@ -2788,6 +2788,29 @@ details of the Broken link, and a Pop Up Dialog saying that and a button to Send
 - **Both programs:** the Panel and its Help window. The BruControl Import's balloons have no hot spots while its Help is on hold
   (Rule 11.3), so it has no Help links to break.
 
+11.11 **Help in French; the screens stay English, forever** (OakBarn Brewery, 2026-11-13: "French Help Only forever"; "Ballons and
+Hover Help French"):
+- **Only the Help is translated:** the Help pages, the Hover Help balloons and the Help snippets in balloons. The screens, buttons,
+  labels, menus, dropdown choices and messages stay English, in both programs, forever. A French Help page or balloon writes the name
+  of a button, box or menu in English, exactly as it is on the screen (**Save Build**, **Interface ID**), so what you read is what you see.
+- **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français**. The browser remembers it (the Help
+  window, the panel's own Help page and the balloons follow the same choice). English is the default.
+- **French pages:** `help/fr/`, with the same file names as the English pages. They keep everything that is not words: each heading
+  keeps the id of its English heading (`## Pour commencer {#getting-started}`) so links to a part of a page work in both languages, and
+  the links, pictures, code and names are the same. The electrical warning (Rule 6.20) is in French, in red under the red triangle:
+  "⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité.
+  Consultez un électricien qualifié."
+- **English and French never drift apart:** whenever an English Help page changes, its French page is updated **in the same PR**. Each
+  French page records which English text it was made from (`help/fr/_source.json`); a test (test/helpfrench.test.js) fails and names the
+  page while a French page is missing or out of date. `node tools/help-french.js` lists them; `node tools/help-french.js --stamp <page>`
+  marks one brought up to date. The same goes for balloons once they are in French: a balloon change gets its French in the same PR.
+- **On a Brain:** when an Admin edits an English page in the Help window, its French page shows a note that it may be out of date, with a
+  link to the English page. A page not translated yet shows the English page with a note.
+- **Machine translation:** the French was made by machine translation. Every French page ends with a note saying so, and that the
+  English page is the one that counts if in doubt. A French-speaking brewer may review it.
+- **Both programs:** the Skynet Panel's Help (the BruControl Import uses the Panel's Help pages and balloons). The Importer Help is on
+  hold (Rule 11.3); when it is written it gets its French the same way.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -3848,6 +3871,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 11.11 (OakBarn Brewery: "French Help Only forever"; "Ballons and Hover Help French"): the Help pages and the Hover Help are in French as well as English, picked by 🌐 Help language in the Help page list; the screens, buttons and labels stay English forever. French pages in help/fr/ with the same names; an English Help change and its French change go in the same PR (help/fr/_source.json, test/helpfrench.test.js, tools/help-french.js). Machine translated. Help 54, 192. The French balloons follow in their own PR. Checked against both programs: the BruControl Import uses the Panel's Help and balloons; its own Help is on hold (Rule 11.3). (thread "Translate Help to French")
 - 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")

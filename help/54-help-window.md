@@ -16,6 +16,10 @@ On a PC or Mac the Help window opens on the right side of the screen. Move or si
 
 The Help window has its own search, page list, **◀ Back**, **🖨 Print** and, for admins, **✏ Edit page**. **✕ Close** closes the Help window. That row stays **frozen at the top** while you scroll, so Close is always in reach.
 
+## Help in French
+
+**🌐 Help language**, at the top of the page list, shows the Help in **English** or in **Français**. Only the Help changes: the screens, buttons and labels stay English. See [Help in French](192-help-in-french).
+
 ## On a phone or tablet
 
 Phones and tablets open Help as a **new browser tab** instead of a window. Switch between the panel and Help with the browser's tab button.

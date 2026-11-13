@@ -17,6 +17,19 @@ async function call(method, url, body, raw) {
 }
 
 let pages = [], cur = null, trail = [], editing = false;
+// The language of the Help pages (Rule 11.11, OakBarn Brewery, 2026-11-13: "French Help Only forever"): English or French. Only the
+// Help is translated; the screens, buttons and labels stay English. Kept in this browser (the Help window and the panel share it).
+export const LANG_KEY = 'skynet-help-lang';
+export const helpLang = () => { try { return localStorage.getItem(LANG_KEY) === 'fr' ? 'fr' : 'en'; } catch { return 'en'; } };
+let lang = helpLang();
+const lq = () => lang === 'en' ? '' : '?lang=' + lang;
+// the words shown above and below a French page (the page itself is French, so these are too)
+const FR = {
+  missing: 'Cette page n’est pas encore traduite en français : voici la page anglaise.',
+  stale: 'La page anglaise a changé depuis la traduction de cette page : elle n’est peut-être plus à jour.',
+  english: 'Voir la page anglaise',
+  machine: 'Traduction automatique de la page anglaise. Les boutons, les menus et les écrans restent en anglais, comme dans le programme. En cas de doute, la page anglaise fait foi.',
+};
 const bare = n => n.replace(/^\d+[-_]/, '');
 // a Step by Step guide: its title starts "Step by Step:" (Rule 11.9)
 export const isStep = p => /^step by step\s*:/i.test(p.title || '');
@@ -24,7 +37,7 @@ const find = n => n ? pages.find(p => p.name === n) || pages.find(p => bare(p.na
 
 // ---------------- Markdown to HTML (small and safe: every bit of text is escaped, links only go to http(s), mailto or other pages) ----------------
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const slug = s => s.toLowerCase().replace(/<[^>]+>/g, '').replace(/&\w+;/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+export const slug = s => s.toLowerCase().replace(/<[^>]+>/g, '').replace(/&\w+;/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function href(url) {
   url = url.trim();
@@ -58,11 +71,11 @@ function inline(s) {
   return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${esc(codes[i])}</code>`);
 }
 
-// A paragraph that starts with "⚠ Electricity can kill" is the electrical warning (Rule 6.20): red bold words under a red triangle,
+// A paragraph that starts with "⚠ Electricity can kill" (in French Help "⚠ L'électricité peut tuer", Rule 11.11) is the electrical warning (Rule 6.20): red bold words under a red triangle,
 // as in the hover help balloons (OakBarn Brewery, 2026-11-10: "in any Help use the Red Text and the Icon for any Electricity Can Kill")
 export function warnText(s) {
   const m = /^(\*\*)?\s*⚠\s*(.*)$/s.exec(String(s).trim());
-  return m && /^(\*\*)?\s*Electricity can kill/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
+  return m && /^(\*\*)?\s*(Electricity can kill|L['’]électricité peut tuer)/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
 }
 export function markdown(text) {
   const lines = String(text).replace(/\r\n?/g, '\n').split('\n'), out = [];
@@ -78,8 +91,10 @@ export function markdown(text) {
       i++; out.push(`<pre><code>${esc(code.join('\n'))}</code></pre>`); continue;
     }
     if ((m = /^(#{1,6})\s+(.*?)\s*#*$/.exec(l))) {
-      const n = m[1].length, h = inline(m[2]);
-      out.push(`<h${n} id="${slug(h)}">${h}</h${n}>`); i++; continue;
+      // a translated heading keeps the id of its English heading, so links to a part of a page work in every language (Rule 11.11):
+      // "## Pour commencer {#getting-started}"
+      const id = /\s*\{#([\w-]+)\}$/.exec(m[2]), n = m[1].length, h = inline(id ? m[2].slice(0, id.index) : m[2]);
+      out.push(`<h${n} id="${id ? esc(id[1]) : slug(h)}">${h}</h${n}>`); i++; continue;
     }
     if (/^(-{3,}|\*{3,})\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
     if (l.startsWith('>')) {
@@ -165,14 +180,25 @@ function open(name, mark, back = false, section) {
   if (!back && cur && cur !== p.name) trail.push(cur);
   cur = p.name; stopEdit();
   show($('#hpPage'), p.text, mark);
+  if (lang !== 'en') langNotes($('#hpPage'), p);
   const at = section && $('#hpPage').querySelector('#' + CSS.escape(section));
   if (at) at.scrollIntoView(); else if (!mark) window.scrollTo(0, 0);
   $('#hpBack').disabled = !trail.length;
   renderList();
 }
 
+// a French page: a note on top when it is not translated yet or may be out of date, and the machine translation note at the end
+function langNotes(box, p) {
+  const english = el('a', { href: '#', onclick: async e => { e.preventDefault(); const r = await fetch('/ui/help/' + encodeURIComponent(p.name)); if (r.ok) { show(box, await r.text()); box.prepend(el('p', { class: 'hpLangNote' }, el('a', { href: '#', onclick: ev => { ev.preventDefault(); open(p.name, null, true); } }, '🌐 Retour à la page française'))); } } }, FR.english);
+  if (p.missing) box.prepend(el('p', { class: 'hpLangNote' }, '🌐 ' + FR.missing));
+  else {
+    if (p.stale) box.prepend(el('p', { class: 'hpLangNote' }, '⚠ ' + FR.stale + ' ', english));
+    box.append(el('p', { class: 'muted hpMachine' }, '🌐 ' + FR.machine + ' ', p.stale ? null : english));
+  }
+}
+
 async function load(want, section) {
-  pages = await call('GET', '/ui/help');
+  pages = await call('GET', '/ui/help' + lq());
   if (!pages.length) {
     $('#hpPage').innerHTML = '<p class="muted">The manual is empty. Its pages are the <code>.md</code> files in the <code>help</code> folder of the Brew Panel.</p>';
     renderList(); return;
@@ -207,23 +233,30 @@ for (const box of [$('#hpPage'), $('#hpPreview')]) box.addEventListener('click',
 let timer;
 $('#hpText').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => show($('#hpPreview'), $('#hpText').value), 150); });
 $('#hpSearch').addEventListener('input', renderList);
+$('#hpLang').value = lang;
+$('#hpLang').addEventListener('change', e => {
+  if (changed() && !confirm('Throw away your changes to this page?')) { e.target.value = lang; return; }
+  lang = e.target.value === 'fr' ? 'fr' : 'en';
+  try { localStorage.setItem(LANG_KEY, lang); } catch { }
+  stopEdit(); load(cur).catch(err => say(err.message, true));
+});
 $('#hpPick').addEventListener('change', e => open(e.target.value));
 $('#hpBack').onclick = () => { const n = trail.pop(); if (n) open(n, null, true); };
 $('#hpPrint').onclick = () => window.print();
 $('#hpEdit').onclick = startEdit;
 $('#hpCancel').onclick = () => { if (changed() && !confirm('Throw away your changes to this page?')) return; stopEdit(); };
 $('#hpSave').onclick = async () => {
-  try { await call('PUT', '/ui/help/' + encodeURIComponent(cur), $('#hpText').value, true); forgetHelpIndex(); say('Page saved'); await load(cur); }
+  try { await call('PUT', '/ui/help/' + encodeURIComponent(cur) + lq(), $('#hpText').value, true); forgetHelpIndex(); say('Page saved'); await load(cur); }
   catch (e) { say(e.message, true); }
 };
 $('#hpDelete').onclick = async () => {
   if (!confirm(`Delete the page "${find(cur)?.title}"? A copy is kept in help/backups on the Brew Panel computer.`)) return;
-  try { await call('DELETE', '/ui/help/' + encodeURIComponent(cur)); trail = trail.filter(n => n !== cur); cur = null; say('Page deleted'); await load(); }
+  try { await call('DELETE', '/ui/help/' + encodeURIComponent(cur) + lq()); trail = trail.filter(n => n !== cur); cur = null; say('Page deleted'); await load(); }
   catch (e) { say(e.message, true); }
 };
 $('#hpNew').onclick = async () => {
   const title = prompt('Title of the new page'); if (!title?.trim()) return;
-  try { const r = await call('POST', '/ui/help', { title }); await load(r.name); startEdit(); }
+  try { const r = await call('POST', '/ui/help' + lq(), { title }); await load(r.name); startEdit(); }
   catch (e) { say(e.message, true); }
 };
 
