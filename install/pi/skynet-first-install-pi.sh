@@ -13,6 +13,13 @@ PANEL="$HOME/Brewing/BrewPanel"
 PORT=8080
 SERVICE=skynet-brewer
 
+# Any folder name works (Rule 9.15): spaces, accented letters (bière), $, quotes. Each file we write gets the path in that file's own
+# quoting, so the start file, the menu entry and the service find the folder whatever it is called.
+sh_q()      { printf "'%s'" "${1//\'/\'\\\'\'}"; }                                      # for a bash file
+desktop_q() { local s="${1//\\/\\\\\\\\}"; s="${s//\"/\\\\\"}"; s="${s//\`/\\\\\`}"; s="${s//\$/\\\\\$}"; s="${s//%/%%}"; printf '"%s"' "$s"; }
+desktop_s() { local s="${1//\\/\\\\}"; printf '%s' "$s"; }                       # a plain value in a menu entry
+unit_q()    { local s="${1//\\/\\\\}"; s="${s//\"/\\\"}"; s="${s//%/%%}"; s="${s//\$/\$\$}"; printf '"%s"' "$s"; }   # for a systemd service
+unit_dir()  { local s="${1//%/%%}"; printf '%s' "$s"; }
 bold() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 stop() { printf '\n\033[31m%s\033[0m\n\n' "$*"; read -r -p "Press Enter to close. " _; exit 1; }
 
@@ -107,8 +114,8 @@ Wants=network-online.target
 [Service]
 User=$USER
 SupplementaryGroups=dialout
-WorkingDirectory=$PANEL
-ExecStart=$NODE_BIN --no-warnings server.js
+WorkingDirectory=$(unit_dir "$PANEL")
+ExecStart=$(unit_q "$NODE_BIN") --no-warnings server.js
 Restart=always
 RestartSec=5
 
@@ -128,7 +135,7 @@ Type=Application
 Name=Skynet Brewer
 Comment=Open the Skynet Brew Panel
 Exec=xdg-open http://localhost:$PORT
-Icon=$PANEL/install/icon.png
+Icon=$(desktop_s "$PANEL/install/icon.png")
 Terminal=false
 EOF
   chmod +x "$DESKTOP_DIR/skynet-brewer.desktop"
