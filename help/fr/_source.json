@@ -157,6 +157,7 @@
  "162-confirmation-widgets": "3bed91b4efecc251",
  "163-dc-pumps-and-pump-speed": "8d57455aa3014459",
  "164-cool-warm-pump": "4fc5106919460148",
+ "165-importer-item-and-widget-pages": "25c99c2c8ef9c40d",
  "166-vessel-device-builder": "e9166b95125f005f",
  "167-dual-throw": "6a65ef8c03f93e72",
  "168-predictive-hysteresis": "334c0e662272728c",
@@ -180,5 +181,6 @@
  "187-color-picker": "c85bcf814b9f05aa",
  "188-step-by-step-add-a-schema": "c1e4bb036e7d0707",
  "189-list-boxes": "5c06502ff79c25d5",
+ "190-sleep-updates-and-restarts": "224e846704ae5a78",
  "192-help-in-french": "1bfcd5f80c19e577"
 }
