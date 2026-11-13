@@ -2888,6 +2888,10 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
      the Help page shows the same Hover Help words first, then a **technical side** part with the science, using the same signs; the
      electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are the balloon on a Heating
      Element's **Current Method** while it is Hysteresis (after the electrical warning), and the **Hysteresis** part of Help 150.
+  8. **No "how" the user cannot change** (OakBarn Brewery, 2026-11-13: "Telling a user "how" when he cannot change it is TMI (too much
+     information!)"; "All help need to say is that is done in the background without any user input"). When Skynet does something by
+     itself and the user has no say in it, Help and Hover Help only say that it is done in the background, without any user input. How
+     it is done goes in the Rules and the code notes, not in Help. Example: goLine numbers follow their lines (Rule 16.10, Help 22).
 
 11.9 **Step by Step guides** (OakBarn Brewery, 2026-11-11: "Also need Section in Help That is a Step By Step with Pictures on How to do
 something. First Step By Step in Add a Schema as I could not see an easy way to begin."). Help has a **Step by Step** section: it is
@@ -4019,6 +4023,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 11.8 point 8 (OakBarn Brewery: "Telling a user "how" when he cannot change it is TMI"): when Skynet does something by itself that the user cannot change, Help only says it is done in the background without any user input. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
