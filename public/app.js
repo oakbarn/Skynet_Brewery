@@ -12156,7 +12156,7 @@ async function restoreSchema() {
   if (!list.length) return toast('This Schema has no backups or versions yet', true);
   const key = b => (b.version ? 'v:' : 'b:') + b.file;
   const w = { file: key(list[0]) };
-  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
+  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}  (${b.file})`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
   if (!okToSwitch(act.name, 'Restoring and loading again')) return;
@@ -14983,14 +14983,14 @@ function hopAlert(a) {
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 window.addEventListener('beforeunload', e => { if (dirty || (editing && JSON.stringify(draft) !== JSON.stringify(S.config))) { e.preventDefault(); e.returnValue = ''; } });
 // ---------------------------------------------------------------- Config Editor (admin only)
-// Opening it makes a backup copy of the config file first (config/backups). Save checks the JSON before anything is written.
+// A backup copy is made before every save or restore (Rule 9.17), not on opening. Save checks the JSON before anything is written.
 let cfgDirty = false, cfgProblem = null;
 const openConfig = guard(async () => {
   if (cfgDirty) return;                       // keep unsaved work when coming back to the page
   const r = await api('POST', '/ui/config/open');
   setCfgText(r.text);
   $('#cfgFile').textContent = r.file;
-  $('#cfgBackupNote').textContent = (r.made ? 'Backup copy made: ' : 'Backup copy already up to date: ') + 'config/backups/' + r.backup;
+  $('#cfgBackupNote').textContent = 'A backup copy is made in config/backups before every save or restore.';
 });
 function setCfgText(t) { $('#cfgCode').value = t; cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(); fIdx = -1; refreshFind(false); }
 function updateCfgGutter() {

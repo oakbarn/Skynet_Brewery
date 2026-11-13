@@ -26,7 +26,7 @@ Le fichier porte le nom de la version du Schema, par exemple `Main_Brewery_20261
 4. Laissez **Load it now** actif pour y passer tout de suite, ou éteint pour simplement l'ajouter à vos Schemas.
 5. Appuyez sur **Save**.
 
-Le Schema est ajouté sous son propre nom. Si un Schema de ce nom est déjà là, le nouveau reçoit `_2`, `_3` et ainsi de suite :
+Le Schema est ajouté sous son propre nom. Si un Schema de ce nom est déjà là, le nouveau reçoit `#2`, `#3` et ainsi de suite :
 un Schema existant n'est jamais écrasé. Les Processes du fichier sont ajoutés aux Processes partagés ; quand un Process de même
 nom mais avec un texte différent est déjà là, l'ancien est d'abord gardé en sauvegarde. Un court rapport montre ce qui a été ajouté et
 les notes d'importation. Un fichier marqué **first draft** (premier brouillon) vient de l'Importer d'avant que ses étapes de questions soient faites : vérifiez-le avant

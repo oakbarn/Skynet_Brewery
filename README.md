@@ -230,7 +230,7 @@ Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps 
 
 The **Schema.json** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
 
-- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
+- **A backup copy is made every time a change is saved**, named after the Schema, `Name_yyyymmddThhmm.BacUp`. A backup never overwrites another. Skynet does this in the Background and needs no user input.
 - **Find** (Ctrl+F) and **Replace** (Ctrl+H) work.
 - **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running Processes and reconnects the boards.
 - **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.

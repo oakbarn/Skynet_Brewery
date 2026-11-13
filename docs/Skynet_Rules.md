@@ -2755,6 +2755,18 @@ request as the check **Skynet tests**: green = every test passed, red = one fail
 it required before a merge, so the name **Skynet tests** never changes. It changes no code and needs no secrets. Both programs: the
 BruControl Import's tests are in the same suite.
 
+9.17 **A Schema backup every time a change is saved; nothing is ever written over** (OakBarn Brewery, 2026-11-13, README markup
+"Skynet Brew Panel 2a": "Only make a Backup after Build Mode and Changes saved"; "the Schema name and Name_yyyymmddThhmm.BacUp"; "If we
+save a Back up every time a change is made and saved, the daily backup is not needed. That was a feature I wanted in BruControl";
+on a Schema import with a name already taken: "Use the Rule, just cannot overwrite a file"):
+- **Every saved change** (Edit layout > Save Changes and every other layout save, a restore) first keeps the Schema as it was, with its
+  saved values, as `<Schema name>_yyyymmddThhmm.BacUp` in `config/schemas/backups/<id>/`. **Back up this Schema now** makes one at
+  any time. There is **no daily backup** any more. A backup is never written over (a second one in the same minute gets `_2`) and
+  none is ever removed. Help says only that Skynet does this in the Background and needs no user input (Rule 11.13).
+- **Schema.json page:** no copy on opening; a copy is made before every save or restore (`config/backups`).
+- **An import never writes over a Schema:** a Schema whose name is taken is added as `Name #2`, `#3` ... (the same as Rule 9.13).
+- **Both programs:** the Panel's Schemas; the BruControl Import saves its Schema files to the Import folder and never writes over one.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -4050,6 +4062,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 9.17 (OakBarn Brewery, README markup "Skynet Brew Panel 2a" and his answers): a Schema backup, `<Schema name>_yyyymmddThhmm.BacUp`, every time a change is saved; no daily backup; never written over (_2 in the same minute) and never removed; Schema.json makes no copy on opening (before every save or restore only); an imported Schema with a taken name is added as Name #2. Help 28, 30, 42, 44 (and French), README 3a. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 1.33 (OakBarn Brewery: "The only real use for a gGlobal is as a variable with Global Scope"): a gGlobal has no Database and .API box; a Process sends it to the database with send_db / DBSend; never in the web API, MQTT or voice; older files lose the settings on load; the Variables page has no Database, .API or Log now columns. Help 4, 13, 15, 98, 108, 118, 149 (and French). Checked against both programs: the Importer's Interview will ask .API for a Global that becomes a Widget (Sandbox note). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.13 (OakBarn Brewery: "Make that a Help Rule"): a background action the user cannot see and needs no input for gets only "Skynet does this in the Background and needs no user input." in Help; when the user gives one thing first (a file name to import), Help says that after it no other user input is needed and the action takes place in the background. How it is done stays out of Help (TMI). Rule 11.8 point 8 points to it. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
