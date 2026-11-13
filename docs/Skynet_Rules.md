@@ -2940,6 +2940,15 @@ Hover Help French"):
 - **Both programs:** the Skynet Panel's Help (the BruControl Import uses the Panel's Help pages and balloons). The Importer Help is on
   hold (Rule 11.3); when it is written it gets its French the same way.
 
+11.12 **In OakBarn Brewery's markups, { } is an instruction, not text** (OakBarn Brewery, 2026-11-13: "notice that { are
+instruction not verbatim text"; "Make that a Rule"):
+- In a markup or PDF from OakBarn Brewery (the README, a Help page, Hover Help, a dialog), **text inside curly brackets { } is an
+  instruction to Claude**. It is carried out, and never copied into the text.
+- **Everything outside the brackets is his text** and goes in word for word, with only the spelling corrected (Rule 2.37).
+- An instruction can be a change to make, a question to answer, or where text goes (for example **{Importer Sandbox ...}** moves the
+  text inside it to the Importer Sandbox, Rule 11.3). When an instruction is unclear, Claude asks before building it.
+- **Both programs:** the Skynet Panel and the BruControl Import.
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -4000,6 +4009,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
 - 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.
 - 2026-11-13: Added Rule 7.21, the Alarm attributes (OakBarn Brewery, README markup "Skynet Brew Panel 1 a", pages 15 to 19): `.path`, `.label_fore` / `.label_back`, `.x` `.y` `.w` `.h`, the automatic `.visible`, the hidden `.toggle` (a click turns it Off or On), `.loop`, `.state`, `.skynet_Layer_2`; a Brew Flow Alarm holds its Process until it is tapped Off; the new Pre-Hop Alarm (a Combination Alarm and String Box on three Skynet watermarks) and the User Alarm get `.string` and `.playtime`. The spec's `.alarmchain` is `.priority` (Rule 7.18). Help 195 (new), 21, 107.

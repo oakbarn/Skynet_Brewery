@@ -119,9 +119,15 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 
 ## 2a. Variables: gGlobal, and Database and .API on everything
 
-Add them in **Tabs > Edit layout > Select Widget Type > gGlobal variables** (listed by kind with their suggested name prefix). The **Variables** page lists all of them. The prefixes are hints only; any name works. The **Variables Demo** workspace and the `Demo_Variables` process show every kind. gKonstant and gAPI became this one class on 2026-10-30 (Help 98).
+**gGlobal Variable**: Global Scope, Persistent and Non-Volatile. Every process can read and change it, and you can change it on screen.
 
-**gGlobal**: every process can read and change it, and you can change it on screen.
+### Variables
+
+gGlobal Variables are the only Variables with a Global Scope. Most are used only in Processes and have no screen presence other than being listed on the **Variables** page.
+
+### Widgets for the gGlobal kinds
+
+To see or change a gGlobal on a Tab, add its Widget in **Tabs > Edit layout > Select Widget Type > gGlobal variables**. The prefixes are hints only; any name works.
 
 | Kind | Prefix | Notes |
 |---|---|---|
@@ -144,16 +150,27 @@ Add them in **Tabs > Edit layout > Select Widget Type > gGlobal variables** (lis
 - Each reading is kept with its time and the item's hidden key, so a renamed item keeps its history.
 - **.API**: Off, Get only (outside programs read it) or Get and Put (they read and change it), through `/api/items`, MQTT and voice. Ten wrong API keys from one address shut it out for 15 minutes.
 
-
-On start-up the old Schema is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console).
-
 ## 3. Processes
 
 Processes are text files in the `scripts` folder. You can edit them on the **Processes** page or in any text editor.
 
 **The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
-Process lines (the name alone is the main value, other attributes use a dot):
+Process lines (the name alone is the main value or state, other attributes use a dot):
+
+```
+"V_BK_In" = true
+"V_BK_In".state = true
+```
+
+are equivalent, and either may be used.
+
+```
+"V_BK_In".visible = true
+```
+
+The attribute `.visible` must be used to set the `.visible` attribute.
+
 
 ```
 new value vVCount          new string vSMsg     new bool vB_Testing     new time vT     new datetime vDT
@@ -174,18 +191,9 @@ vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:0
 BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
 
-Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
+Names can have no spaces, and this is enforced when a Device, Widget or Template is created. Processes have automatic line numbers.
 
-**What Processes do**
-
-- A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
-- A `//` comment can contain quote marks.
-- **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
-- **Find and Replace.** On the Processes page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open Process; press Save to keep it, Ctrl+Z undoes it. **All Processes** searches every Process and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those Processes. A running Process keeps the old text until it is stopped and started.
-- **Editor tools** (Help > The Process editor): line numbers and **Go to line** (Ctrl+G); colors by what each word does (Commands blue, Devices magenta, Widgets teal, gGlobals purple, variables black on white, operators orange, comments green), with a **Colors** switch and **Color key**; **Save to file** for the whole Process or the highlighted lines as text or as XML in color, plus a **Notepad++ colors file** (a general one is `docs/Skynet_Process_Notepad++.xml`). Comments can be `//`, `#`, `'` or `/* ... */`. **Delete** moves a Process to the **Recycle Bin** (`scripts/Recycle_Bin`), where admins can restore it or delete it for good; both ask first.
-- `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
-- Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
-- Alarms use `sound` (a path).
+Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 
 **Included samples**
 
@@ -203,11 +211,11 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 
 ## 3a. Schema.json (admins only)
 
-The **Schema.json** page (it was called **Config**) shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+The **Schema.json** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
 
 - **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
-- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
-- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running Processes and reconnects the boards.
 - **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
 - **Save as .json file** saves a Schema (its tabs, devices, widgets, pipes and Equipment Profile drawing, no logins or panel settings) to this computer. The file is named after the Schema version, `Name_yyyymmddThhmm.json` (ISO 8601).
 
