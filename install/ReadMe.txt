@@ -74,6 +74,10 @@ own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releas
   Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
              or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
              and start the panel: it copies in the pictures and sounds you do not have yet.
+ORDER, on a First Install and after a Start Fresh or Modified Fresh Start: the panel
+  installer FIRST, then the Media Setup (it needs the panel folder, and a Fresh Start
+  clears folders before anything goes in), then the Sample Schemas Setup if you want it.
+  The Media Setup only adds what is missing, so running it again is always safe.
 They ONLY ADD: a picture or sound you already have, by that name, is never changed, and
 nothing is ever deleted. Your own pictures and sounds are never touched. Run them again
 whenever new pictures come out.

@@ -19,7 +19,7 @@ A brew day is a list of premade **major steps**, done in this order. The list ca
 
 **Whirlpool and Chill** and **Chill** do the same job, so a brew day uses one of them. To whirlpool, pick **Skynet_Whirlpool_and_Chill** for Whirlpool and Chill and **(skip this step)** for Chill.
 
-**The hop stand (both chill steps):** when the Recipe has Whirlpool (aroma) hops, the chill runs in two parts. It chills to the **hop stand temperature**, turns the cooling water off, has you add the Whirlpool hops and holds for the **hop stand time**, then turns the cooling water back on and chills to the pitching temperature. The temperature and time come from the first Whirlpool hop (its whirlpool temperature and minutes, or the Recipe's Whirlpool minutes); a Recipe that gives none uses ☰ Menu > **Default settings** > Hop stand temperature and Hop stand time (180 °F / 82 °C and 20 minutes to start).
+**The Hop Stands (both chill steps):** when the Recipe has Whirlpool (aroma) hops, the chill stops at each of the three **Hop Stands** that has hops, highest first: **High** (180 °F / 82 °C, 10 minutes), **Middle** (154 °F / 68 °C, 20 minutes) and **Low** (the pitch temperature, 30 minutes). At each one it turns the cooling water off, has you add that stand's hops and holds for its time, then turns the cooling water back on. Then it chills to the pitching temperature. Each Whirlpool hop picks its stand on the Recipe's Hops tab; the temperatures and times come from the Recipe, its Boil Profile or ☰ Menu > **Default settings**. See [The three Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands).
 
 **Hop Infuser:** a Whirlpool hop marked **Hop Rocket** on the Recipe's Hops tab goes in the Hop Infuser instead of the kettle. The chill opens the **Hop Infuser valve** (or asks you to put the infuser in line), runs the wort through it, and takes it out of line when the chill is done.
 
@@ -70,7 +70,8 @@ Templates read the Recipe through names that start with **`rcp_`**. They are rea
 | `rcp_Mash_Out_Temp`, `rcp_Sparge_Temp` | mash out (0 = none) and sparge water |
 | `rcp_Boil_Time`, `rcp_Boil_Start_Temp` | the boil (hh:mm:ss), and the temperature it counts as boiling |
 | `rcp_Whirlpool_Minutes` | how long the whirlpool runs (0 = none) |
-| `rcp_Hop_Stand`, `rcp_Hop_Stand_Temp`, `rcp_Hop_Stand_Minutes` | true when there are Whirlpool hops; where the chill stops for them and how long it holds |
+| `rcp_Hop_Stand` | true when there are Whirlpool hops |
+| `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (and `_Middle_`, `_Low_`) | true when that Hop Stand has Whirlpool hops; where the chill stops for them and how long it holds |
 | `rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
 | `rcp_Ferment_Temp` | fermentation and pitching temperature |
 | `rcp_Temp_Units`, `rcp_Volume_Units`, `rcp_Weight_Units` | °F or °C, gal or L, lb or kg |

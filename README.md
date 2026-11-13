@@ -27,6 +27,14 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). **Updates:** a release zip has no `config/`, `data/`, `media/` or `processes/` (their samples are in `defaults/`, copied in by `lib/seed.js` only into a folder that doesn't exist yet), so unzipping it over a panel or running an installer again never replaces them. On an update the installers ask whether to keep those folders (default: keep all). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
 
+**First Install and Fresh Start: the order** (OakBarn Brewery, 2026-11-13). Run the Setups in this order:
+
+1. **Skynet Brewer Setup** (the panel) first. The Media Setup needs the panel's folder to be there, and a **Start Fresh** or **Modified Fresh Start** clears folders before anything else goes in.
+2. **Skynet Media Setup** (the Skynet pictures and sounds) second. It only adds what is missing and never changes or deletes a file, so it is safe to run again after any update or Fresh Start.
+3. **Skynet Sample Schemas Setup** last, only if you want the extra samples (the 3 Vessel sample is always in the panel).
+
+A **Start Fresh** deletes everything of yours, including your own pictures and sounds and the Import folder; the Skynet pictures and sounds stay. A **Modified Fresh Start** keeps your Default settings, own Profiles, Equipment Profiles, Recipes, pictures and sounds, the backups and the Import folder. Run the Media Setup after either one.
+
 **By hand:**
 
 1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22. On Windows you can skip this: `install/windows/Skynet_Brewer.bat` installs Node.js by itself (winget, or the LTS .msi from nodejs.org, checked against its SHA-256) when it is missing or too old.
@@ -38,7 +46,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 4. **Open the panel.** On the same computer go to `http://localhost:8080`. From a tablet or phone, use `http://<computer's IP address>:8080`.
 5. **Create the admin account.** The first time, the panel asks for a user name and password. Then it shows a **recovery code**: save it (copy, download or print), because it is how you get back in if you forget the password. After that everyone signs in. To use the panel away from home, follow [docs/REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) (login, user roles and Tailscale).
 
-   **Updates keep your logins.** Installing a new version keeps every user, password and the recovery code. They are only removed if you pick **Update the program and reset all users** or **Start Fresh** in the installer (and confirm the warning).
+   **Updates keep your logins.** Installing a new version keeps every user, password and the recovery code. They are only removed if you pick **Start Fresh**, **Modified Fresh Start** or **Update the program and reset all users** in the installer (and confirm the warning).
 
 Nothing else needs to be installed for the simulator, processes, API and database.
 

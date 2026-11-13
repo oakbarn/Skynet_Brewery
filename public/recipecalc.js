@@ -2,12 +2,14 @@
 // A Recipe is always kept in kilograms, liters and °C (as BeerXML does). The Default tab says how each amount is shown
 // (Fritz, 2026-10-30): the user only sees the results in their own units.
 
+import { hopStands, standOf } from './brewcalc.js';
 export const KG_LB = 2.20462262, KG_OZ = 35.27396195, L_GAL = 0.264172052, L_QT = 1.05668821, L_FLOZ = 33.8140227;
 export const cToF = c => c * 9 / 5 + 32, fToC = f => (f - 32) * 5 / 9;
 const n = v => Number.isFinite(+v) ? +v : 0;
 const round = (v, d = 2) => Math.round(v * 10 ** d) / 10 ** d;
 
-// how each amount shows: [key, label, choices]. The first choice of each is the US one, the second the Metric one.
+// how each amount shows: [key, label, choices]. The first choice of each is the US one, the second the Metric one (no longer picked:
+// Units decides).
 export const DISPLAY_UNITS = [
   ['grainUnit', 'Grains and other fermentables', { lb: 'pounds (lb)', kg: 'kilograms (kg)', oz: 'ounces (oz)', g: 'grams (g)' }],
   ['hopUnit', 'Hops', { oz: 'ounces (oz)', g: 'grams (g)' }],
@@ -18,7 +20,9 @@ export const DISPLAY_UNITS = [
 ];
 export function displayUnits(d = {}) {
   const metric = d.units === 'Metric', out = {};
-  for (const [k, , ch] of DISPLAY_UNITS) { const keys = Object.keys(ch); out[k] = ch[d[k]] ? d[k] : k === 'miscUnit' ? 'recipe' : keys[metric ? 1 : 0]; }
+  // every amount follows Units, US or Metric (OakBarn Brewery, 2026-11-13: "Come From US or Metric so not needed"); a Misc
+  // ingredient shows in its own unit, picked on its line
+  for (const [k, , ch] of DISPLAY_UNITS) { const keys = Object.keys(ch); out[k] = k === 'miscUnit' ? 'recipe' : keys[metric ? 1 : 0]; }
   return out;
 }
 // recipe defaults a new Recipe starts with (Fritz: "We will provide the first defaults but can be edited by a User on the Default tab")
@@ -38,6 +42,8 @@ export const toRatio = (v, u) => v === null || v === undefined || v === '' ? nul
 
 // Misc ingredient units, as BeerSmith numbers them (F_M_UNITS) and how they turn into grams / milliliters
 export const MISC_UNITS = ['mg', 'g', 'oz', 'lb', 'kg', 'ml', 'tsp', 'tbsp', 'cup', 'pt', 'qt', 'l', 'gal', 'items'];
+// the units a Misc line can pick (OakBarn Brewery, 2026-11-13: "Each its own DDLB Include Tablet, Pack"); MISC_UNITS keeps BeerSmith's order
+export const MISC_LINE_UNITS = [...MISC_UNITS, 'tablet', 'pack'];
 const MISC_G = { mg: 0.001, g: 1, oz: 28.3495, lb: 453.592, kg: 1000 }, MISC_ML = { ml: 1, tsp: 4.92892, tbsp: 14.7868, cup: 236.588, pt: 473.176, qt: 946.353, l: 1000, gal: 3785.41 };
 export function miscShow(amount, unit, how = 'recipe') {
   const u = String(unit || '').toLowerCase();
@@ -289,6 +295,10 @@ export const RECIPE_FIELDS = [
   ['rcp_Boil_Volume', 'PreBoil Volume', (r, u) => lTo(r.volumes?.boilLiters, u.volumeUnit)],
   ['rcp_Boil_Minutes', 'Boil Minutes', r => r.boilTime],
   ['rcp_Whirlpool_Minutes', 'Whirlpool Minutes', r => r.whirlpoolMinutes],
+  ['rcp_Boil_Profile', 'Boil Profile (its id)', r => r.boilProfile ?? ''],
+  // the three Hop Stands: the Recipe's own numbers here (the Brain fills in the rest from the Boil Profile and Default settings)
+  ...[['High', 'High'], ['Middle', 'Middle'], ['Low', 'Low']].flatMap(([k, l]) => [[`rcp_Hop_Stand_${k}_Temp`, `Hop Stand ${l} temperature`, (r, u) => cTo(r.hopStands?.[k]?.tempC, u.tempUnit)],
+    [`rcp_Hop_Stand_${k}_Minutes`, `Hop Stand ${l} minutes`, r => r.hopStands?.[k]?.min]]),
   ['rcp_Pitch_Temp', 'Pitch At', (r, u) => cTo(r.pitchTempC, u.tempUnit)],
   ['rcp_Grain_Ratio', 'Grain Ratio', (r, u) => ratioTo(r.waterToGrain, u.ratioUnit)],
   // Daughter Tabs (their own fields come when Fritz sends each layout)
@@ -308,6 +318,7 @@ export function waterFieldValues(wp) {
 const MASH_STEP_FIELD = /^rcp_Mash_Step_(\d+)_(Name|Temp|Time)$/;
 // The Hops tab: one set of Skynet_Fields for each hop line, N = the line number (rcp_Hop_1_Name, rcp_Hop_2_Name ...), so there
 // is no limit on the hops. [the end of the name, what it is, how to read it (r, hop, display units, the hop schedule, line index)]
+function r_h_stand(r, h) { return h.use === 'whirlpool' ? standOf(h, hopStands(r)) : ''; }
 export const HOP_FIELDS = [
   ['Name', 'Hop N: the hop', (r, h) => h.name ?? ''],
   ['Amount', 'Hop N: the amount in the recipe (oz or g)', (r, h, u) => kgTo(h.kg, u.hopUnit)],
@@ -321,7 +332,8 @@ export const HOP_FIELDS = [
   ['Boil_Group', 'Hop N Boil Group (0 = not a Boil Hop)', (r, h, u, sch, i) => sch.hopGroups[i] ?? 0],
   ['Days', 'Hop N: Secondary or Dry Hop days', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? n(h.dryDays) : 0],
   ['Date', 'Hop N: Secondary or Dry Hop date (YYYY-MM-DD)', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? h.date ?? '' : ''],
-  ['Whirlpool_Temp', 'Hop N: Whirlpool temperature', (r, h, u) => h.use === 'whirlpool' && h.wpTempC != null && h.wpTempC !== '' ? cTo(h.wpTempC, u.tempUnit) : 0],
+  ['Hop_Stand', 'Hop N: its Hop Stand (High, Middle or Low; empty = not a Whirlpool hop)', r_h_stand],
+  ['Whirlpool_Temp', 'Hop N: Whirlpool temperature (its Hop Stand\'s)', (r, h, u) => h.use === 'whirlpool' ? cTo(hopStands(r).find(s => s.key === r_h_stand(r, h)).tempC, u.tempUnit) : 0],
   ['Hop_Rocket', 'Hop N: Whirlpool through the Hop Rocket (true or false)', (r, h) => h.use === 'whirlpool' && !!h.hopRocket],
 ];
 export const HOP_FIELD = /^rcp_Hop_(\d+)_([A-Za-z_]+)$/;

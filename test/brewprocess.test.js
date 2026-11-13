@@ -70,14 +70,19 @@ for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Prob
     });
   }
 }
-// the hop stand (Fritz, 2026-11-07): Whirlpool hops stop the chill at their temperature, cooling water off for their time;
-// Hop Rocket ones go through the Hop Infuser; with none, the Default settings
-rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool', time: 30, wpTempC: 80, hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
-assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
-rv = recipeValues({ brewDefaults: { units: 'Metric', hopStandTempC: 75, hopStandMinutes: 15 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }], fermentables: [] }, mash: { steps: [] } } }, {});
-assert.equal(rv.rcp_Hop_Stand_Temp, 75); assert.equal(rv.rcp_Hop_Stand_Minutes, 15); assert.equal(rv.rcp_Hop_Infuser, false);
+// the Hop Stands (Fritz, 2026-11-07; three 2026-11-13): each Whirlpool hop stops the chill at its stand (High, Middle, Low), cooling
+// water off for that stand's time; Hop Rocket ones go through the Hop Infuser; numbers from the Recipe, Boil Profile, Default settings
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, pitchTempC: 20, hopStands: { Middle: { tempC: 80, min: 30 } }, ingredients: { hops: [{ use: 'whirlpool', stand: 'Middle', hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Middle, true); assert.equal(rv.rcp_Hop_Stand_High, false); assert.equal(rv.rcp_Hop_Stand_Low, false);
+assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Middle_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
+assert.equal(rv.rcp_Hop_Stand_High_Temp, 180); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 10); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 68); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 30);
+rv = recipeValues({ brewDefaults: { units: 'Metric', boilProfile: 'mine', hsHighTempC: 85, hsHighMin: 5 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }, { use: 'whirlpool', stand: 'Low' }], fermentables: [] }, mash: { steps: [] } } },
+  { boil: [{ id: 'mine', units: 'Metric', boilTime: 60, hsLowTemp: 22, hsLowMin: 40 }] });
+assert.equal(rv.rcp_Hop_Stand_High, true, 'no stand picked: High'); assert.equal(rv.rcp_Hop_Stand_High_Temp, 85); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 5);
+assert.equal(rv.rcp_Hop_Stand_Middle, false); assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 67.78);
+assert.equal(rv.rcp_Hop_Stand_Low, true); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 22, 'the Boil Profile\'s'); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 40);
 assert.equal(recipeValues({ brewDefaults: {} }, {}).rcp_Hop_Stand, false, 'no Recipe: no hop stand');
-for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_Temp[\s\S]*sleep rcp_Hop_Stand_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
+for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_High_Temp[\s\S]*sleep rcp_Hop_Stand_High_Minutes \* 60000[\s\S]*rcp_Hop_Stand_Middle_Temp[\s\S]*sleep rcp_Hop_Stand_Low_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
 // the premade list (Rule 16.1): Clean is last; Whirlpool and Chill is skipped to start (a Brew Day uses it or Chill)
 assert.deepEqual(MAJOR_STEPS.map(s => s.key), ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Ferment', 'Clean']);
 assert.deepEqual(brewNames(brewSetup({})), ['Brew_1_PreBrew', 'Brew_2_Heat_Strike', 'Brew_3_Strike', 'Brew_4_Mash', 'Brew_5_Boil', 'Brew_6_Chill', 'Brew_7_Transfer_to_Fermentor', 'Brew_8_Ferment', 'Brew_9_Clean']);
