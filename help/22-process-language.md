@@ -219,7 +219,7 @@ goLine 235
 
 These two lines do the same thing.
 
-**The number follows its line.** When lines are added or taken out and the Process is saved, Skynet updates every goLine number in the background, without any input from you, so it still goes to the same line.
+**The number follows its line** when lines are added or taken out. Skynet does this in the Background and needs no user input.
 
 A goLine to a line the Process does not have is an error, and the Process does not start.
 
