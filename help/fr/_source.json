@@ -151,5 +151,8 @@
  "156-precise-heating": "cb8b423fde36ea37",
  "157-schema-templates": "6799dbae2e6d9b64",
  "158-digiboil-and-brewzilla": "795d4373881bd748",
- "159-graph-widget": "323275136ef3ed5f"
+ "159-graph-widget": "323275136ef3ed5f",
+ "160-setpoint-from-a-temperature": "14620b6e49df2d6e",
+ "161-code-value-widget": "7b9ef90e4dbd25aa",
+ "162-confirmation-widgets": "3bed91b4efecc251"
 }
