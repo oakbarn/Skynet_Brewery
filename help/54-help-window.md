@@ -18,7 +18,7 @@ The Help window has its own search, page list, **◀ Back**, **🖨 Print** and,
 
 ## Help in French
 
-**🌐 Help language**, at the top of the page list, shows the Help in **English** or in **Français**. Only the Help changes: the screens, buttons and labels stay English. See [Help in French](192-help-in-french).
+**🌐 Help language**, at the top of the page list, shows the Help and the balloons in **English** or in **Français**. Only the Help changes: the screens, buttons and labels stay English. See [Help in French](192-help-in-french).
 
 ## On a phone or tablet
 

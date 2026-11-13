@@ -55,7 +55,7 @@ async function render(withTree = true) {
   box.replaceChildren(
     ...folders.map(f => {
       const p = join(dir, f), lock = st.kept?.includes(f), group = /^images$/i.test(dir) && root === 0, sky = group && /^skynet$/i.test(f);
-      const item = el('div', { class: 'mdItem' + (selected.has(p) ? ' sel' : ''), 'data-p': p, draggable: lock ? false : 'true', title: (st.readOnly || sky ? '🔒 Skynet pictures: read only. ' : lock ? '🔒 Standard folder: can\'t be deleted, renamed or moved. ' : '') + 'Open ' + f, ondblclick: () => go(root, p) },
+      const item = el('div', { class: 'mdItem' + (selected.has(p) ? ' sel' : ''), 'data-p': p, draggable: lock ? false : 'true', title: `${st.readOnly || sky ? '🔒 Skynet pictures: read only. ' : lock ? '🔒 Standard folder: can\'t be deleted, renamed or moved. ' : ''}Open ${f}`, ondblclick: () => go(root, p) },
         el('div', { class: 'mdIcon', onclick: () => go(root, p) }, '📁'),
         el('div', { class: 'mdName', onclick: e => { e.stopPropagation(); select(e, p); } }, (lock ? '🔒 ' : '') + f), el('div', { class: 'muted mdMeta' }, sky ? 'Skynet pictures (read only)' : st.readOnly ? 'Skynet group (read only)' : group ? (lock ? 'Standard picture group' : 'Your picture group') : 'Folder'),
         el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: () => go(root, p) }, 'Open'), ...(lock || st.readOnly ? [] : actions(p, f))));

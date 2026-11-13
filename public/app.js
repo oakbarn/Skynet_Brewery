@@ -14,7 +14,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
@@ -8362,7 +8362,7 @@ const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || (is
   return !g ? c : !c || c.toUpperCase() === g ? g : `${g}@${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
-  const tipText = h('p', { style: 'white-space: pre-line' }, ...helpNodes(text));
+  const tipText = h('p', { style: 'white-space: pre-line' }, ...helpNodes(balloonText(text)));      // in French when French is picked in Help (Rule 11.11)
   linkify(tipText);      // its hot spots open their Help page (Rule 2.49)
   const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), tipText,
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Close')));
@@ -14562,7 +14562,7 @@ function rcMain(pane, rc, u, changed) {
       h('b', {}, 'These fields are calculated from the Other Tabs.')),
     h('div', { class: 'rcLower' },
       h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.filter(([k]) => levelShowsTab(rc, k)).map(([k, t, about]) => h('div', { class: 'rcDRow' },
-        h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: 'Opens the ' + t + ' tab' }, t), h('span', {}, about)))),
+        h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: `Opens the ${t} tab` }, t), h('span', {}, about)))),
       h('div', { class: 'rcLegend' }, h('div', { class: 'rcDRow' }, h('span', { class: 'rcTabBtn rcTabDemo' }, 'CLICK Here'), h('span', {}, 'opens the Tab')),
         h('div', { class: 'rcDRow' }, h('span', { class: 'rcCalcBtn rcCalcMini' }, 'Calculate'),
           h('b', {}, 'calculates Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature. It also calculates the Strike Volume and Temperature Grain Temperature and Grain Ratio.')))),
