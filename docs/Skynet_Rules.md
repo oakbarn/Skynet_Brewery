@@ -2737,6 +2737,12 @@ each file the installer writes (the start file, the Skynet Brewer menu entry and
 path in that file's own way of quoting. Applies to the Linux, Raspberry Pi and Mac installers and to the panel itself. Both
 programs: the BruControl Import is Windows only and is installed by the same Setup .exe; nothing changes there.
 
+9.16 **Every pull request runs the Skynet tests** (OakBarn Brewery, 2026-11-13: "do that on 369"). GitHub runs the whole test suite
+(`npm test`) on every pull request to the default branch and after every merge (`.github/workflows/tests.yml`). It shows on the pull
+request as the check **Skynet tests**: green = every test passed, red = one failed (its log names the test). The branch ruleset can make
+it required before a merge, so the name **Skynet tests** never changes. It changes no code and needs no secrets. Both programs: the
+BruControl Import's tests are in the same suite.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3994,6 +4000,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.
 - 2026-11-13: Added Rule 7.21, the Alarm attributes (OakBarn Brewery, README markup "Skynet Brew Panel 1 a", pages 15 to 19): `.path`, `.label_fore` / `.label_back`, `.x` `.y` `.w` `.h`, the automatic `.visible`, the hidden `.toggle` (a click turns it Off or On), `.loop`, `.state`, `.skynet_Layer_2`; a Brew Flow Alarm holds its Process until it is tapped Off; the new Pre-Hop Alarm (a Combination Alarm and String Box on three Skynet watermarks) and the User Alarm get `.string` and `.playtime`. The spec's `.alarmchain` is `.priority` (Rule 7.18). Help 195 (new), 21, 107.
 - 2026-11-13: Sound question (OakBarn Brewery: "Ask when first opens and keep on the Tab and Hamburger Menu if it has not been done"): when the panel opens with sound off it asks 🔊 Turn sound on?; while off, a 🔇 Sound is off button on the Tab and 🔊 Turn Sound On at the top of the ☰ Menu. Help 21, README. Checked against both programs: the Importer's Build page plays no sounds. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 6.14 (OakBarn Brewery: "Name.Attribute DBSend and send_db Name have both"): a Process line `Name.Attribute DBSend` sends that one attribute to the database now; `Name DBSend` = `send_db Name`. DBSend is a reserved word. README BeerSmith row: Boil hops in Hop Groups 1, 2, 3 ... with no limit, the OakBarn group codes stay behind the scenes (text to the Importer Sandbox); README Hoses row written for hoses and QD hoses. Help 22, 98. Checked against both programs: the Importer brings in no DBSend lines. (thread "Polish the Skynet Brew Panel")
