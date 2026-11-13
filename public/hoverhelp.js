@@ -125,6 +125,65 @@ export function linkify(root, doc = globalThis.document) {
   }
   return made;
 }
+// French balloons (Rule 11.11, OakBarn Brewery: "Ballons and Hover Help French"): when the Help language picked in Help is
+// Français, each balloon (and each button's own tip) shows in French. The screens stay English: names of buttons, boxes and Devices
+// in a balloon stay as they are on the screen. The French is in hoverhelp-fr.json, English text → French text, read only when French
+// is picked. A text with {0}, {1}… stands for a text with something put in (a name, a number); the part put in is turned too when it
+// has its own French. A text with no French shows in English.
+export const LANG_KEY = 'skynet-help-lang';      // the same key as the Help window's pick (public/help.js)
+export const balloonLang = () => { try { return globalThis.localStorage?.getItem(LANG_KEY) === 'fr' ? 'fr' : 'en'; } catch { return 'en'; } };
+const reEsc = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// the French list made ready to use: whole texts, texts with {0}…, and long texts that may sit inside a bigger one
+export function compileFrench(dict) {
+  const whole = new Map(), pats = [], subs = [];
+  for (const [en, fr] of Object.entries(dict || {})) {
+    if (typeof fr !== 'string' || !fr) continue;
+    if (/\{\d\}/.test(en)) {
+      const re = new RegExp('^' + en.split(/(\{\d\})/).map(x => /^\{\d\}$/.test(x) ? '([\\s\\S]*?)' : reEsc(x)).join('') + '$');
+      pats.push({ re, nums: [...en.matchAll(/\{(\d)\}/g)].map(m => +m[1]), fr, len: en.length });
+    } else {
+      whole.set(en, fr);
+      if (en.length >= 16 && /\s/.test(en)) subs.push([en, fr]);
+    }
+  }
+  pats.sort((a, b) => b.len - a.len);
+  subs.sort((a, b) => b[0].length - a[0].length);
+  return { whole, pats, subs };
+}
+// one text in French (as much of it as has French)
+export function frenchOf(text, c, depth = 0) {
+  const t = String(text ?? '');
+  if (!c || !t || depth > 3) return t;
+  const w = c.whole.get(t) ?? c.whole.get(t.trim());
+  if (w !== undefined) return w;
+  for (const p of c.pats) {
+    const m = t.match(p.re); if (!m) continue;
+    const got = []; p.nums.forEach((n, k) => { got[n] = m[k + 1]; });
+    return p.fr.replace(/\{(\d)\}/g, (_, n) => frenchOf(got[+n] ?? '', c, depth + 1));
+  }
+  if (t.includes('\n')) return t.split('\n').map(l => frenchOf(l, c, depth + 1)).join('\n');
+  let out = t;
+  for (const [en, fr] of c.subs) if (out.includes(en)) out = out.split(en).join(fr);
+  return out;
+}
+let french = null, frenchLoading = null;
+const frCache = new Map();
+function loadFrench() {
+  frenchLoading ??= fetch('/hoverhelp-fr.json').then(r => (r.ok ? r.json() : {})).then(d => { french = compileFrench(d); }).catch(() => { frenchLoading = null; });
+  return frenchLoading;
+}
+// the language was picked again (the Help window; another window hears it as a storage event)
+export function refreshBalloonLang() { frCache.clear(); if (balloonLang() === 'fr') loadFrench(); }
+// a balloon's words in the language picked in Help
+export function balloonText(text) {
+  if (balloonLang() !== 'fr' || !text) return text;
+  if (!french) { loadFrench(); return text; }
+  if (frCache.has(text)) return frCache.get(text);
+  const out = frenchOf(text, french);
+  if (frCache.size >= 400) frCache.delete(frCache.keys().next().value);      // a small memory (Panel memory: let go of old ones)
+  frCache.set(text, out);
+  return out;
+}
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
   doc._hoverHelp = true;
@@ -140,7 +199,7 @@ function start(doc = globalThis.document) {
     tip.remove();
   };
   const show = el => {
-    const text = helpOf(el); if (!text || !el.isConnected) return;
+    const text = balloonText(helpOf(el)); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
     tip.classList.toggle('hhWide', text.includes('⟪img:'));      // a balloon with pictures is wider, so it fits on the screen
     tip.classList.toggle('hhHasLinks', linkify(tip, doc) > 0);      // hot spots: the mouse may go into the balloon to click one
@@ -158,6 +217,7 @@ function start(doc = globalThis.document) {
   };
   doc.addEventListener('pointerover', ev => {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;       // a finger gets the tap pop-up (Rule 18.16), not a hover
+    frenchTitle(ev.target?.closest?.('[title]'));
     if (on && tip.contains(ev.target)) { clearTimeout(later); return; }      // into the balloon, to click a hot spot
     const el = helpTarget(ev.target);
     if (el === on) { clearTimeout(later); return; }
@@ -178,6 +238,20 @@ function start(doc = globalThis.document) {
     hide();
   }, true);
   tip.addEventListener('click', ev => { if (ev.target.closest?.('.hhLink')) setTimeout(hide); });
+  // French picked in the Help window: the French list is read now, not at the first balloon
+  if (balloonLang() === 'fr') loadFrench();
+  globalThis.addEventListener?.('storage', ev => { if (ev.key === LANG_KEY) refreshBalloonLang(); });
+}
+// a button's own tip (the browser's small box): in French too, turned the first time the mouse comes onto it; back to English
+// when English is picked again
+function frenchTitle(el) {
+  if (!el || el.classList.contains('tipLbl') || el.closest('dialog, [data-hover-titles]')) return;      // those are balloons (above)
+  const now = el.getAttribute('title');
+  if (!now) return;
+  if (el.dataset.titleEn === undefined || (now !== el.dataset.titleFr && now !== el.dataset.titleEn)) { el.dataset.titleEn = now; delete el.dataset.titleFr; }
+  const want = balloonText(el.dataset.titleEn);
+  if (want !== now) el.setAttribute('title', want);
+  if (want !== el.dataset.titleEn) el.dataset.titleFr = want;
 }
 
 // A snippet of a Help page for a dialog's title (Fritz, 2026-11-06: "You can take a snippet of help and have it in the Hover
@@ -188,7 +262,9 @@ export function helpSnippet(md, section = '') {
   let i = 0;
   if (section) {
     const want = String(section).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-    const at = lines.findIndex(l => /^#{1,6}\s/.test(l) && l.replace(/^#+\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === want);
+    // a French page's heading keeps its English id ({#id}, Rule 11.11), so the English section name finds it
+    const norm = x => x.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const at = lines.findIndex(l => /^#{1,6}\s/.test(l) && (norm(l.replace(/^#+\s*/, '').replace(/\s*\{#[\w-]+\}\s*$/, '')) === want || norm(l.match(/\{#([\w-]+)\}\s*$/)?.[1] || '') === want));
     if (at >= 0) i = at + 1;
   }
   const para = [], list = [];
@@ -203,7 +279,7 @@ export function helpSnippet(md, section = '') {
     para.push(l.replace(/^[-*]\s+/, ''));
   }
   if (list.length) para.push(list.join(', ') + '.');
-  let t = para.join(' ').replace(/\s*\([^()]*\b(Rule|Fritz)\b[^()]*\)/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/(\*{1,3}|`)([^*`]+)\1/g, '$2').replace(/\s+/g, ' ').trim();
+  let t = para.join(' ').replace(/\s*\([^()]*\b(Rule|Règle|Fritz)\b[^()]*\)/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/(\*{1,3}|`)([^*`]+)\1/g, '$2').replace(/\s+/g, ' ').trim();
   // the first sentences, up to about 220 letters (a snippet, not the page)
   const sentences = t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [];
   let out = '';
@@ -218,13 +294,14 @@ let pageList = null;
 export async function loadSnippet(topic) {
   const [want, section] = Array.isArray(topic) ? topic : [topic];
   if (!want) return '';
-  const key = want + '#' + (section || '');
+  const lang = balloonLang(), lq = lang === 'fr' ? '?lang=fr' : '';      // the snippet from the French page when French is picked
+  const key = lang + ':' + want + '#' + (section || '');
   if (!snipCache.has(key)) snipCache.set(key, (async () => {
     pageList ??= fetch('/ui/help').then(r => r.json()).catch(() => []);
     const list = await pageList, w = String(want).toLowerCase();
     const page = (Array.isArray(list) ? list : list.pages || []).find(p => p.name === w || p.name.replace(/^\d+-/, '') === w);
     if (!page) return '';
-    const md = await fetch('/ui/help/' + encodeURIComponent(page.name)).then(r => (r.ok ? r.text() : '')).catch(() => '');
+    const md = await fetch('/ui/help/' + encodeURIComponent(page.name) + lq).then(r => (r.ok ? r.text() : '')).catch(() => '');
     return helpSnippet(md, section);
   })());
   return snipCache.get(key);
