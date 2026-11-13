@@ -19,7 +19,7 @@ la vôtre avec **jusqu'à deux décimales** : 1, 1.1, 1.15, 2 ... **La plus bass
 et 1.1 avant 1.15 avant 1.2, pour que vous puissiez mettre une Alarm entre deux autres sans les renuméroter.
 
 - **La même Priority :** celle qui est passée sur On la première joue la première, donc une Alarm qui joue n'est jamais coupée par une autre de même Priority.
-- **Deux au même moment** (à moins d'une seconde) avec la même Priority : l'une est **tirée au hasard**, puis l'autre suit.
+- **Deux au même moment** avec la même Priority : la **première mise sur On joue en premier** (1a), puis la suivante (1b), même dans la même seconde. Dans un Process, c'est l'ordre de leurs lignes.
 - **Un son qui ne se répète pas** (Repeat) laisse jouer le suivant dès qu'il a joué jusqu'au bout, même si son Alarm est toujours affichée On.
 - **Les étapes d'une Alarm Chain attendent leur tour** : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 - Un Process peut la changer : `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` remet le numéro de ses Properties).
@@ -51,6 +51,8 @@ alm_Hops_1 = false           turn it off
 (La faire sonner ; attendre ici que le brasseur l'arrête d'un toucher ; l'arrêter ; déplacer l'ajout de houblon à 20:00 restantes.)
 
 `alm_Hops_1 = On` et `alm_Hops_1 = Off` marchent comme true et false (Règle 16.9). Un Process n'écrit jamais `.active`. Une seule Alarm peut changer son apparence et son son étape par étape : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
+
+**Une Brew Flow Alarm retient son Process :** quand un Process met une Brew Flow Alarm Widget sur On (`alm_Mash_Done = On`), il attend sur cette ligne jusqu'à ce que le brasseur l'arrête d'un toucher, comme si `wait alm_Mash_Done == false` suivait. Tous les attributs d'une Alarm (`.path`, `.string`, `.playtime` ...) sont dans [Les attributs d'une Alarm](195-alarm-attributes).
 
 ## Sound Player
 

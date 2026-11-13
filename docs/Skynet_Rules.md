@@ -2447,7 +2447,7 @@ renumbering"). Only one sound plays at a time. Every Alarm has a **Priority**, a
 places** (1, 1.1, 1.15, 2 ...): **the lower one plays first**, and an Alarm can go in between two others without renumbering. An
 Alarm with no Priority of its own has **its Kind's number** (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5; the Sound
 Player is 5). **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the
-same Priority; **two that go On at the same moment** (within a second) are **picked at random, then the other follows**. A lower
+same Priority; **two that go On at the same moment** follow the same rule: **the first one On plays first** (1a), then the next (1b), even within the same second (in a Process, the order of their lines). *Replaced* (OakBarn Brewery, 2026-11-13: "First one on is priority"): two within a second were picked at random. A lower
 Priority still cuts in at once (a Hop Alarm stops the music). It is the same whether an Alarm was set On by a Process, by its
 Alarm Chain (Rule 7.16) or by both. **Alarm Chain steps wait their turn:** a timer step that comes due while the Alarm still
 sounds the last step waits (the Alarm shows "+1 step waiting") and follows as soon as the last one is tapped off; a Process's
@@ -2482,6 +2482,38 @@ Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-So
 release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
 Import keeps a sound that is already a link as it is and never copies it. Help 186.
 
+7.21 **The Alarm attributes** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew Panel 1 a", pages 15 to 19: "Common
+Attributes to All (SkyNet and User Alarms. Alarms can have additional attributes only applicable to them"; "Your Alarm spec is not
+built yet go wit your recomendtions"). What a Process can use on an Alarm Widget (a Basic Skynet Alarm, a User Alarm or a Pre-Hop
+Alarm), in OakBarn Brewery's words. **Common to all:**
+1. **`.path`**: its sound file (.wav or .mp3, .mp3 preferred). A wrong path plays no sound (Rule 7.20 then plays the Missing Alarm
+   Sound). Audio only plays while the Alarm is On. The older `.sound` still works.
+2. **`.label_fore` and `.label_back`**: the colors of its Label (the same as its Label Attributes' Fore Color and Back Color).
+3. **`.x` and `.y`**: its place on the Tab; **`.h` and `.w`**: its size (the same as `.x_hPosition`, `.y_vPosition`, `.height`, `.width`).
+4. **`.visible` is automatic**: `AlarmName = On` shows it, `AlarmName = Off` hides it. It is not on the Properties dialog and a Process
+   can't set it (it can still read it). In Edit layout a hidden Alarm shows faint so it can be placed. Hidden Locked still works.
+5. **`.toggle`** (hidden, never set by a Process): a click on the Alarm's picture turns it Off, or On, which changes `.state`.
+6. **`.loop`**: true plays the sound and repeats it; false plays it one time.
+7. **`.state`**: its On / Off. `AlarmName = On` and `AlarmName.state = On` are the same.
+8. **`.skynet_Layer_2`**: its Layer 2 picture (its Set Graphic), above the base picture and under Layer 1 (the Active overlay):
+   `AlarmName.skynet_Layer_2 = "Name of Skynet Picture"`, or `AlarmName.skynet_Layer_2 = Skynet_Picture_Number` (its fixed number,
+   Rule 7.22; `.skynet_Layer_2.path` and `.skynet_Layer_2.file` work as Rule 7.23 says). Picked on the Properties dialog or by a
+   Process. The older `.setgraphic` still works.
+**Each kind:**
+- **(1) Brew Flow** and **(2) Hop Drop**: a Basic Skynet Alarm; `.fore` and `.back` color its bell. **A Brew Flow Alarm holds its
+  Process:** `AlarmName = On` (or `.state = On`) in a Process is followed by a hidden `wait AlarmName = Off`, so the Process goes on
+  only once the Alarm is tapped Off (or another Process turns it Off). Stop and Override end the wait as on any wait.
+- **(3) Pre-Hop Drop: a Combination Alarm and String Box Widget** (☰ Add > Pre-Hop Alarm). **`.background`** picks one of **three
+  Skynet watermarks** (1, 2 or 3; the pictures are Skynet's and can't be changed, only picked by a Process: `AlarmName.background = 3`).
+  **`.fore` and `.back`** color its text, **`.string`** sets its text (Rich Text codes work), and **`.playtime`** is how many seconds it
+  stays On; then it turns itself Off. A click turns it Off sooner. Empty or 0 = it stays On until it is tapped.
+- **(4) User Alarm**: `.background` 1, 2 or 3 picks one of **your own three pictures** (Image Path 1 to 3, changed on the Properties
+  dialog or by a Process). **`.fore` and `.back`** color its text, **`.string`** and **`.playtime`** as the Pre-Hop Alarm.
+**Priority:** the spec's `.alarmchain` number is the Alarm's **`.priority`** (Rule 7.18), because Alarm Chain is already the steps
+(Rule 7.16). Kind numbers: Brew Flow 1, Hop 2, Pre-Hop 3, User 4, Sound only 5. The three Pre-Hop watermarks are placeholder drawings
+(`media/Images/Skynet/Alarms/Alarm_PreHop_Mark_1.svg` to `_3`, Skynet Picture numbers 195 to 197) until OakBarn Brewery sends its own; they are not in the Image Library.
+Both programs: the BruControl Import's Build page is the Panel's, so it has the same attributes; imported BruControl Alarms have no
+Alarm Widget kind yet (Rule 7.14) and keep their own `.visible`. Help 195.
 
 7.22 **Skynet Picture numbers** (OakBarn Brewery, 2026-11-13, ReadMe markup "Skynet Brew Panel 1 a" page 16: "for all skynet Pictures,
 a Leading ID Number will be created and remains Unique and not changeable ever. That Number besides the Name will be in all DDLBs for
@@ -2704,6 +2736,12 @@ non official updates", "Explain the Offical Updates in the Help"). Skynet stays 
 each file the installer writes (the start file, the Skynet Brewer menu entry and Desktop icon, the start-by-itself service) gets the
 path in that file's own way of quoting. Applies to the Linux, Raspberry Pi and Mac installers and to the panel itself. Both
 programs: the BruControl Import is Windows only and is installed by the same Setup .exe; nothing changes there.
+
+9.16 **Every pull request runs the Skynet tests** (OakBarn Brewery, 2026-11-13: "do that on 369"). GitHub runs the whole test suite
+(`npm test`) on every pull request to the default branch and after every merge (`.github/workflows/tests.yml`). It shows on the pull
+request as the check **Skynet tests**: green = every test passed, red = one failed (its log names the test). The branch ruleset can make
+it required before a merge, so the name **Skynet tests** never changes. It changes no code and needs no secrets. Both programs: the
+BruControl Import's tests are in the same suite.
 
 ## 10. Testing
 
@@ -3962,6 +4000,9 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
+- 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.
+- 2026-11-13: Added Rule 7.21, the Alarm attributes (OakBarn Brewery, README markup "Skynet Brew Panel 1 a", pages 15 to 19): `.path`, `.label_fore` / `.label_back`, `.x` `.y` `.w` `.h`, the automatic `.visible`, the hidden `.toggle` (a click turns it Off or On), `.loop`, `.state`, `.skynet_Layer_2`; a Brew Flow Alarm holds its Process until it is tapped Off; the new Pre-Hop Alarm (a Combination Alarm and String Box on three Skynet watermarks) and the User Alarm get `.string` and `.playtime`. The spec's `.alarmchain` is `.priority` (Rule 7.18). Help 195 (new), 21, 107.
 - 2026-11-13: Sound question (OakBarn Brewery: "Ask when first opens and keep on the Tab and Hamburger Menu if it has not been done"): when the panel opens with sound off it asks 🔊 Turn sound on?; while off, a 🔇 Sound is off button on the Tab and 🔊 Turn Sound On at the top of the ☰ Menu. Help 21, README. Checked against both programs: the Importer's Build page plays no sounds. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 6.14 (OakBarn Brewery: "Name.Attribute DBSend and send_db Name have both"): a Process line `Name.Attribute DBSend` sends that one attribute to the database now; `Name DBSend` = `send_db Name`. DBSend is a reserved word. README BeerSmith row: Boil hops in Hop Groups 1, 2, 3 ... with no limit, the OakBarn group codes stay behind the scenes (text to the Importer Sandbox); README Hoses row written for hoses and QD hoses. Help 22, 98. Checked against both programs: the Importer brings in no DBSend lines. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "Alarm order. Change the Rule"): the Kind numbers are now Brew Flow 1, Hop 2 (was Hop 1, Brew Flow 2); an Alarm with its own Priority keeps it. Panel (lib/store.js, the Kind list, Hover Help), Help 21 and 107, README. Checked against both programs: the BruControl Import gives each Alarm its Kind's number, so it follows. May change again after the OakBarn sample test. (thread "Polish the Skynet Brew Panel")
