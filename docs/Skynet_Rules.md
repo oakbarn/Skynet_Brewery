@@ -22,18 +22,20 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
      above).
   2. **Always use a meaningless key.** Everything is found by a hidden key that means nothing (Rule 3.10), never by its name, so a
      rename never breaks a link.
-- **Plain terms: no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.";
-  "Plain English and not a Who's on First Confusion where + = - and - = +"): a word, a name or a sign means ONE thing, everywhere: in the
-  dialogs, the saved Schema, the Brain, a Process, the .API and Help. Nothing is turned around in the background (for example the
-  Offset's sign, Rule 6.19). See Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) for what happens when it isn't.
 - **The Programming Rule: KISS, Keep It Simple Stupid** (OakBarn Brewery, 2026-11-10: "Simpler said than Before: Programming Rules:
   KISS Keep It Simple Stupid NO clutter."): no clutter anywhere. The details for dialogs and Help are Rule 11.8.
 - **Plain terms, no "Who's on First?"** (OakBarn Brewery, 2026-11-10: "We need to think in plain terms No Debit a Credit Confusing.
   We need to add a link to an Abbot and Costello Who's on First Script somewhere in Help when we discuss things like this. Maybe 2
   places (Suggested Name) and General Rules"): a name, a sign or a word says what it means, so plus means up and minus means down,
   and nothing reads backward like a debit and a credit. Example: the Hysteresis Offset is always Setpoint + Offset, so heating shows
-  −1 (Rule 6.19). Help links to Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) where it
-  explains this: Help 46 (the Suggested Name) and Help 1 (getting started).
+  −1 (Rule 6.19), in the dialogs, the saved Schema, the Brain, a Process, the .API and Help alike; nothing is turned around in the
+  background. Help links to Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) and a [YouTube video of it](https://www.youtube.com/watch?v=5FsJe4DScDs)
+  (OakBarn Brewery, 2026-11-12: "Add a second link to Youtube Video of it"; a link only, never embedded or copied) where it explains
+  this: Help 46 (the Suggested Name) and Help 1 (getting started).
+- **Outside links open in the default browser** (OakBarn Brewery, 2026-11-12: "The link in the Help On Who's On First used Edge to open
+  the Wikipedia Page and not my default browser"): a web link to another site (Help, Versions on GitHub, Buy a beer, an AI site) opens
+  in the person's own default browser, not in Skynet's clean Edge window (Rule 2.36). On the Brain's own computer the page asks the
+  Brain to hand it over; on a phone or another PC the page opens it as before. Both programs (Panel and BruControl Importer).
 - **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
   about Skynet reads this document before it does anything else. (2026-10-27)
 - **Rule 0a: never open or read any Summary_N document** (Summary_1, Summary_2 ...) unless Fritz
@@ -448,6 +450,27 @@ shows in a balloon. A balloon with hot spots **waits a moment** when the mouse l
 click; one without hot spots goes away at once, as before. The tap pop-up on phones (Rule 18.16) has the same hot spots. A new Help
 page about an item adds its words to the list (Rule 11.2). **Both programs:** the BruControl Import shares the balloons, but its Help is
 on hold (Rule 11.3), so its balloons keep plain words until its Help is made. Help 147.
+**The Help that opens has a frozen Close row** (OakBarn Brewery, 2026-11-12: "When there is a Link to normal Help from a Hover Help :
+have close Button that a frozen row at the Top to close that dialog"): the row with **◀ Back**, **🖨 Print**, **✏ Edit page** and
+**✕ Close** stays frozen at the top of the Help page while it scrolls, in the Help window and on the panel's own Help page, so Close
+is always one click away. The part a hot spot opens shows just under that row, never hidden by it. Help 54, 147.
+
+2.50 **Dual Action click** (OakBarn Brewery, 2026-11-12: "Can an Image be Dual Function: Clicked and Release (Toggle on/off), Push
+Button On only as long as the mouse button was depressed. A delay to know it was not a click. If So Add Dual Action (Both Toggle and
+Push Button) as a Choice. This could be very handy as manually topping off with a small amount is common on a Brew Day"). A Pump's
+**Toggle** choices are **On/Off**, **Push Button**, **Dual Action** and **None**. Dual Action: a click (press and let go within half a
+second) turns it On or Off, the same as On/Off (Rule 2.33, no pop-up, Rule 2.44). Pressed and held for more than half a second
+(500 ms), it is a Push Button: On while held, Off when let go. A press that started as a hold never also counts as a click. Only an
+operator or an admin can use it. **Both programs:** the BruControl Import shares the Pump dialogs; imported pumps keep the choice they
+are given (On/Off). Help 115, 120.
+
+2.51 **A frozen top on the model dialog** (OakBarn Brewery, 2026-11-12, on the Blichmann RipTide Add box: "If this area could be
+frozen on a Dialog ... we could get rid of this", the bottom row of buttons, "even in the middle of long one, you would have the
+Buttons!"). In the **Pump** Add box and Pump Device Properties (the Blichmann RipTide, the model, Rule 18.21) the ☰, the title and the
+row of buttons (🗑 Delete, ✖ Cancel, 💾 Save or ➕ Add Device) stay at the top while the rest scrolls under them, and the same row at
+the bottom is not shown. **Only the model for now:** "This is on the model ... Wait for that until I am 100% Finished with the model";
+every other dialog keeps its buttons at the top and at the bottom until OakBarn Brewery says the model is finished and all dialogs
+follow it. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -925,7 +948,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
-> To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
+> Move to Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
 alm_Hops, sw_1 ... keep working. The **BruControl Import** uses the same pattern when it brings Widgets in (Rule 15.4).
 *Replaced:* pic_ + Label (Picture Widget, Rule 18.27), w_Text_N (Text Widget), alm_ + Label (Alarm), w_Value_N, w_Time_N,
@@ -962,10 +985,43 @@ it is the Label part of the Suggested Name (Rule 3.16). It is never blank (Rule 
 - In the Suggested Name each space or other mark becomes `~`, an accent is dropped and ° stays (Rule 3.4, docs/Special_Characters.md).
 - The same words are in the Label's Hover Help (Help 115).
 
+3.18 **🏷 Suggested Names: convert all names at once** (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be
+converted to a Suggested Name, if you have not chosen to do so earlier" ... "build"). In Edit layout, Admins only, the **🏷 Suggested
+Names** button lists every Device and Widget, on every Tab, whose Name is not its Suggested Name: Tab, Name now, Suggested Name,
+each ticked (☑ Tick all, ☐ Untick all). **💾 Convert** gives each ticked one its Suggested Name, one at a time, so two that would
+get the same name get `_2` (Rule 3.3, names unique). **Save layout** keeps them; Exit without Saving drops them. Every Process
+follows the new names (hidden keys, Rule 3.10), and Clones follow their parent (Rule 3.5). Never changed: Integrated Instances
+(VesselName.DeviceName, Rule 6.28), and items with no Suggested Name (vessels, pipes, fittings, Text, Processes, Schemas). Nothing
+is converted unless the Admin presses Convert (Rule #1, never take away). **Both programs:** the BruControl Import's Build page
+uses the same Edit layout bar, so imported names can be converted the same way after the Import. Help 46, 115.
+
 ## 4. Making things: the Build Tab
 
-4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
-straight on the Tab picked in its Add Device box** (Rule 4.2; Fritz's Add Pump drawing, 2026-11-04). (2026-10-23, PR #97 and PR #99)
+4.1 **Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab** (OakBarn Brewery,
+2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular Tab. It will be moved to the
+Regular Tab at the End of the Build chain."). The Tab picked in its Add box (Rule 4.2) is remembered: its Suggested Name already ends
+with that Tab's ID, and its Properties' **Tab** box shows that Tab (another Tab picked there changes where it will go; it stays on
+the Build Tab). **The end of the Build chain is 💾 Save Build ... > Move to Tab** (Save layout opens it too): the Tab picked for it is
+offered first and it moves there. When the new things on the Build Tab were picked for different Tabs, each goes to its own Tab and
+the rest go to the Tab picked in Save Build.
+- **Its spot on the Build Tab is its spot on its Tab** (OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the
+  Position on the Tab it is sent to when the Build is totally complete"): the Build Tab is at least the size of that Tab, and a build
+  that goes to the Tab picked for it keeps its X and Y. Sent to any other Tab, it goes to the middle of that Tab, as before (Rule 4.3).
+- **The Watermark** (OakBarn Brewery, 2026-11-12: "On the Build a shadow background like a water mark diagram of a selected Tab the
+  item is going to only after the Tab attribute is set with the option to turn it off or on on the Menubar of the Build Tab"): once
+  the picked item's Tab is set, a faint drawing of that Tab (its background picture, a dashed outline and Label for each of its items,
+  its pipes, and "Goes to: Tab name") shows behind everything on the Build Tab, so the new item can be placed where it belongs.
+  Nothing in it can be clicked. **🗺 Watermark On / Off** on the Edit layout bar (only on the Build Tab) turns it on or off; this
+  browser remembers the choice. With nothing picked it shows the Tab every new item on the Build Tab goes to, when they all go to one.
+- **It glows until clicked** (OakBarn Brewery, 2026-11-12: "when first Moved to a Regular Tab ... we need the Border to glow red with a
+  slow pulse so easy to find. As soon as clicked, the Border reverts to normal."): each item Save Build moves onto a regular Tab has a
+  slowly pulsing red glow around it until it is clicked (in Edit layout or on Brew Day). It is never saved; reloading the page ends it.
+- **📁 Templates in the Tab list** (OakBarn Brewery, 2026-11-12: "Also the Option in the Tab DDLB to send to Templates"): the Tab list
+  in the Properties of a vessel, equipment or Tab_Fitting on the Build Tab ends with **📁 Templates**; picked, Save Build ... shows
+  **As a Template** first. Only these can be Templates (Help 55, What can be a Template), so a Device's or Widget's Tab list
+  does not offer it (asked 2026-11-12, Open question 15).
+*Replaced (2026-11-12):* "Every new Widget or copy of a Template is made on the 🔨 Build Tab first, then sent to a Tab. A new Device goes
+straight on the Tab picked in its Add Device box" (2026-11-04, Fritz's Add Pump drawing; before that 2026-10-23, PR #97 and PR #99).
 **A new Tab from the Add Device box** (Fritz, 2026-11-04; the general Rule is 18.14): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
 and keeps what was entered (Label, Interface and Port) for now; the new Tab is named and built in Tab settings; once it is
 saved the Add Device box comes back with that information filled in, the Tab list refreshed and the new Tab picked, and the
@@ -982,7 +1038,7 @@ Tab first (Rule 5.21).
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
-are done (the Label filled in, Rule 18.15). The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
+are done (the Label filled in, Rule 18.15). The Device starts on the 🔨 Build Tab and goes to the picked Tab at Save Build (Rule 4.1), in the middle of the Build Tab unless ☰ Menu > Default sets X and Y, and the rest of its
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
@@ -1005,7 +1061,7 @@ a real PWM signal), so it gets only choice 1.
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
-back where it came from?". Save to Tab places the build in the center of the chosen Tab.
+back where it came from?". Move to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
 
 4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
@@ -1059,6 +1115,17 @@ deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per po
   still shows on row 3.
 *Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
 **Vessel** at the far right (2026-11-03).
+
+4.6 **The Default Interface and Default Tab of a Build** (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1 #2:
+"We need to set on the Defaults the Interface and Tab and have that both on the Default Panel and maybe DDLBs on the Build Tab Menu
+where a User can quickly set the defaults for the Build. These are the same defaults and not unique to the Build Tab."):
+- **☰ Menu > Default settings > New Devices and Widgets (the Build)** has **Default Interface** and **Default Tab**. The Edit layout
+  bar of the 🔨 Build Tab has the same two as dropdowns (**Interface**, **Tab**); a change in either place is the same default.
+- A new Device's Add box starts on the Default Interface (else the one the last new Device went on, else the first, as before), and
+  a new Device or Widget is set to go to the Default Tab at the end of the Build (Rule 4.1; else the Tab the Build Tab came from).
+- **➕ Add new Tab…** in an Add box makes the new Tab, comes back, and sets it as the Default Tab.
+- Kept with the other defaults by its **Interface ID** and **Tab ID**; a Schema with no Interface or Tab of that ID uses the old way.
+- **Both programs:** the BruControl Import's Build page is the Panel's, so it has the same two dropdowns.
 
 ## 5. Templates and Integrated items
 
@@ -1584,7 +1651,7 @@ supply manifolds", Help 146).
   Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
 - **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
   each fitting with all its valves Manual or all Motorized to start. Its **Add box and Properties are the Pump's drill-down**
-  (Rule 18.29). It goes straight on the Tab picked in the Add box (Rule 4.1: it holds Devices) and its Properties open.
+  (Rule 18.29). It starts on the 🔨 Build Tab with its valves, and Save Build ... moves it to the Tab picked in the Add box (Rule 4.1); its Properties open.
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
   name (Rule 3.1), e.g. `MB_22_DO@Valve_E_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
@@ -2210,6 +2277,30 @@ exothermic "Only in the beginning"). A Fermentor Control holds the beer at **one
     from a heating Hysteresis (a plus OnOffset in BruControl) and a cooling Hysteresis (a minus OnOffset in BruControl) on the same probe, keeps the two
     outputs' names and Ports, takes the Setpoint, offsets and the longer of the two On delays, and lists it in the notes. Help 182.
 
+6.31 **Sleep, Windows Update and restarts** (OakBarn Brewery, 2026-11-12: "With a New Build, most people will likely start right on a
+PC Computer and not the Pi as the "Brain", so we need to fix the Sleep Issue and What Happens during an Update and Restart, or even a
+User Introduced Restart"). The Processes and controls run in Skynet Brewer on the Brain, never in the browser, so closing a browser
+never stops a brew. On every Brain (Windows, Mac, Linux, Pi):
+1. **Kept awake while brewing:** while any Process runs or anything is On, Skynet asks the computer not to sleep (the screen may go
+   dark). Nothing is asked when nothing is brewing.
+2. **Off before it stops:** however Skynet is closed (☰ Menu, the window's X, Ctrl+C, Windows shutting down or restarting), every
+   output is turned Off first. A power cut or a crash is covered by each board's Lost link (Rule 6.3).
+3. **Nothing comes back On by itself:** after a restart everything starts Off and no Process carries on where it was (a Process set
+   to start when the panel starts still starts from its top). Woken from sleep during a brew, everything is set Off and every
+   Process is stopped, so a board that talks again is never told to turn something back On.
+   **The Resume button** (OakBarn Brewery, 2026-11-12: "Resume Button"): for **15 minutes after the stop**, the notice has
+   **▶ Resume** (Operator or Admin). One click turns back On what was On (outputs, PWM, controls, running timers) and starts each
+   Process again **at its step** (no step: the line it was on) with its variables; a Stepper never moves by itself. After 15 minutes
+   the button is gone.
+4. **A notice on every screen:** after a stop or a sleep during a brew, it says when, what was On, and which Process was on which
+   step and line; when Windows has an update waiting to restart, a yellow notice says to restart before brewing. ✕ closes it on
+   every screen (Operator or Admin).
+5. **Setup:** "Start Skynet Brewer by itself each time you sign in to Windows?" (a Startup folder shortcut, no admin rights). Skynet
+   never changes Windows settings itself; Help 190 says how to set Active hours, sign-in after an update, the laptop lid and power
+   return.
+6. **Both programs:** the Panel does all of this; the BruControl Import controls nothing, so it needs none of it (its Build page
+   runs no board and shows no notice). The same Setup asks the question for both. Help 190.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2352,7 +2443,7 @@ Alarms ... All 1 go before the first 2. Then within all the 1s, 1.0 goes before 
 between two (two 1.1 random pick one then follow with the other)", "and maybe 2 decimals as you could then insert without
 renumbering"). Only one sound plays at a time. Every Alarm has a **Priority**, a number from 0 to 99 with **up to two decimal
 places** (1, 1.1, 1.15, 2 ...): **the lower one plays first**, and an Alarm can go in between two others without renumbering. An
-Alarm with no Priority of its own has **its Kind's number** (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5; the Sound
+Alarm with no Priority of its own has **its Kind's number** (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5; the Sound
 Player is 5). **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the
 same Priority; **two that go On at the same moment** (within a second) are **picked at random, then the other follows**. A lower
 Priority still cuts in at once (a Hop Alarm stops the music). It is the same whether an Alarm was set On by a Process, by its
@@ -2361,7 +2452,10 @@ sounds the last step waits (the Alarm shows "+1 step waiting") and follows as so
 `.step` still changes it at once. **A sound that does not Repeat lets the next one play** once it has played to its end, while
 its Alarm still shows On. Set in Alarm Widget Properties > Alarm > **Priority**, or by a Process: **`alm_Brew.priority = 1.15`**
 (`""` puts back its Properties' number). `.waiting` (read only) is how many Chain steps wait. *Replaced:* between two of the same
-Kind the newest one played (PR #24). Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
+Kind the newest one played (PR #24). **Brew Flow first** (OakBarn Brewery, 2026-11-13: "Alarm order. Change the Rule. I may change it after I get the
+Oakbarn sample back and create a conflict to see what we should do"): the Kind numbers are **Brew Flow 1, Hop 2**, Pre-Hop 3, General 4,
+Sound only 5. *Replaced:* Hop 1, Brew Flow 2 (2026-11-09). An Alarm with its own Priority keeps it. This may change again once the
+OakBarn sample is back and tested. Both programs: the BruControl Import gives each Alarm its Kind's number. Help 21 and 172.
 
 7.19 **Alarm Digital Outputs: an Alarm can switch 2 Devices** (OakBarn Brewery, 2026-11-09: "Ok, we can add that but add 2 Items to
 contol I assume it was one in BruControl", "And if blank those do nothing"). An Alarm Widget (every kind) has **Digital Output 1** and
@@ -2484,6 +2578,14 @@ into the user's own TEMP folder, never the shared Public folder. What Setup and 
 change. Signing (Rule 9.10) is the real cure; until it is on, a scanner may still guess wrong, and the file can be
 restored and reported to the scanner's maker as a false positive. Both programs (the Importer ships in the same Setup).
 (thread "Stop antivirus flagging the Setup")
+Virus check (OakBarn Brewery, 2026-11-12: "Can a exe be sent to the virus check within github"): after every Release is
+made, a Windows computer at GitHub scans every .exe on it with Microsoft Defender (first proving the scanner works on the
+harmless EICAR test file). Clean: the Release notes get a "Virus check ... nothing found" line. Anything found: the
+Release goes back to a Draft (hidden from the public) and GitHub emails OakBarn Brewery; nothing is deleted.
+Then VirusTotal (OakBarn Brewery, 2026-11-12: "Can skynet have that free account", key in the VIRUSTOTAL_API_KEY secret)
+has about 70 scanners look at every .exe; it only reports (counts and links at the top of the Release notes, a warning
+if any flag a file) and never hides the Release. Skipped until the key is saved.
+(thread "Turn on code scanning for Skynet repo")
 
 9.12 **The Skynet pictures and sounds are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "remove all the graphics and
 have separate exe loader for them ... we might only want to add more graphics (Never Change or Delete!)", "All Media Files"):
@@ -2527,6 +2629,35 @@ change is need add a new Sample with the same Name but at #2"): the Sample Schem
 brewer picks which samples are imported, and has **no All tick box**. A sample that is available is **never deleted**: when a change
 is needed, a new sample is added with the **same Name and #2** at the end (then #3 ...), and the old one stays. The tick boxes are
 built with the first sample put in the Setup (it holds none yet). (thread "Move Sample Schemas to own Setup", Help 184)
+
+9.14 **Official Skynet: the program on a Brain is checked on every start, and a change is reported** (OakBarn Brewery, 2026-11-12:
+"can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "WE
+still want it open source but maybe once on a user computer core code cannot be accessed", "Warn the end user is a good idea for
+non official updates", "Explain the Offical Updates in the Help"). Skynet stays open source (MIT): the code stays public on GitHub.
+1. **The list:** every merge, GitHub writes `skynet_files.json` next to `version.json` (tools/make-file-list.js): the fingerprint
+   (SHA-256) of every **core** program file: `server.js`, `importer.js`, `package.json`, `lib`, `public`, `templates`, `firmware`,
+   `install`, `samples`. Never edited by hand. Not core, never checked or touched: `config`, `data`, `media`, `scripts`, `help`
+   (Admins edit Help pages), `sample_schemas`, `node_modules`, `backups`. (Text files are compared without carriage returns.)
+2. **Every start** (lib/official.js) the panel compares its core files with the list of its own version from **OakBarn Brewery's
+   GitHub** (always oakbarn/Skynet_Brewery, never the repository named in `version.json`); without the internet, with the list that
+   came with it, and says so. **Official** = an OakBarn Brewery version and every core file the same. **Changed** = an OakBarn
+   Brewery version with core files changed, missing or added. **Not Official** = someone else's copy (a fork), or no Panel version.
+3. **Warn the end user:** the Menu Bar version shows **✓ Official**, **⚠ Changed**, **⚠ Not Official** or **⚠ Not checked**; when
+   not Official, a red bar on every screen (Details, Help, ✕ until the next check); **☰ Menu > About > Official Skynet** names the
+   Changed, Missing and Added files, with **🔍 Check again**. The check never stops anything: a running brew carries on.
+4. **Repair** (Admins, when Changed): the official file of the same version for every changed or missing one, from OakBarn Brewery's
+   GitHub, each checked against the official list before use; the replaced and added files are **moved** to
+   `backups/changed_files_<date>`, never deleted (Rule #1). Without the internet: run the Setup of that version again.
+5. **Read-only:** Official and unchanged, the core files are made Read-only, so an editor can't save over one by accident. Not in a
+   developer's copy (a `.git` folder). The Windows Setup (install and uninstall) and the Mac and Linux / Pi installers take
+   Read-only off the core files first; `unzip -o` on a Pi replaces them anyway.
+6. **Honest limit:** whoever is the administrator of a computer can change any file on it, the check included. It finds and
+   reports changes; it can't make them impossible. Replaces the old "+ changes" after the version (the `code` fingerprint in
+   `version.json`, which covered only `lib`, `public`, `server.js` and `package.json`).
+7. **Help 191** explains Official Skynet updates, Repair, the virus checks on every Release (Rule 9.11) and how anyone can check a
+   Setup .exe for free at virustotal.com (named, not linked: Rule 11.10). Both programs: the BruControl Import's files are core
+   files of the same Setup, so the same check covers them; the Panel shows it. The Importer's Build page shows no badge and runs
+   no check of its own.
 
 ## 10. Testing
 
@@ -2686,6 +2817,21 @@ First guide: **Step by Step: Add a Schema** (Help 188). The same day, an easier 
 and a big **➕ New Schema** button (with **❓ Step by step**) on the ☰ Menu > Schema tab; both open the same Add new Schema box as the
 Schema dropdown's Add new Schema (the box itself is not changed, Rule 18.10). Both programs: the Importer uses the Panel's Help and Schema
 list, so nothing else changes there.
+
+11.10 **No outside links in Help unless OakBarn Brewery directs one; a broken Help link opens nothing** (OakBarn Brewery, 2026-11-12,
+Hover Help Blichmann RipTide Dialog 1 #2: "None Links outside of Help unless it is directed By me. If the Help Link in a Hover Help is
+Broken or not set, it opens Bing and takes me to a Page on the WEB. Broken links will be sent to support@oakbarnbrewery.com with the
+details of the Broken link, and a Pop Up Dialog saying that and a button to Send."):
+- **Outside links:** a Help page links to a web page only when OakBarn Brewery directs it. Each one is listed in
+  `docs/Outside_Links.md`; a test fails on any Help web link that is not on the list. Those links open in the default browser
+  ("Outside links open in the default browser", under How Rules work).
+- **A broken Help link:** a hot spot in a Hover Help (Rule 2.49) or a link between Help pages is checked before it opens. When its
+  page or part is not there, or it has none set, **nothing opens and nothing goes to the web**: a pop-up says **This Help link is
+  broken**, shows the details (where, the link, what is wrong, the page, the browser, the time), and has **✖ Close** and **✉ Send**.
+  Send emails the details to **support@oakbarnbrewery.com** from the Brain when its email is set up (Settings > Sending codes);
+  otherwise the computer's own mail program opens with them filled in.
+- **Both programs:** the Panel and its Help window. The BruControl Import's balloons have no hot spots while its Help is on hold
+  (Rule 11.3), so it has no Help links to break.
 
 ## 12. Privacy and sharing
 
@@ -3183,7 +3329,7 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 drill-down dialog standard for Devices"; his drawing [docs/Pump_Drill_Down_Format.png](Pump_Drill_Down_Format.png)). The Pump's
 dialog is the first one changed to Rule 18 (Rule 18.10) and is **the starting standard for all Devices added**; every other
 dialog will work the same way when Fritz commands it, one at a time. From the top:
-1. The title (**Pump Device Properties** and its **?**), then 🗑 Delete, ✖ Cancel, 💾 Save (top and bottom, Rule 2.17).
+1. The title (**Pump Device Properties** and its **?**), then 🗑 Delete, ✖ Cancel, 💾 Save (at the top, frozen while the rest scrolls; no bottom row, Rules 2.17, 2.51).
 2. **Visible**, **Hidden Locked** and the 🔓 lock.
 3. **Pump Properties ⬢**: the hexagon beside the heading opens the **Properties pop-up**: Visible, Hidden Locked, the lock, Tab,
    X Horizontal, Y Vertical, Width, Height, and 🗑 Delete, with ✖ Cancel and 💾 Save.
@@ -3210,7 +3356,7 @@ until 💾 Save on the dialog. (Help 115)
    good** (Fritz, 2026-11-05: it is physical wiring, so a user almost never changes it; the Device keeps its hidden key, Rule 3.10,
    and only its Name changes, with ✏ Change name). To wire it to another board or pin, delete it and add it again. **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
    Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
-The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name) and the pump goes on the picked Tab (Rule 4.1).
+The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name); the pump starts on the 🔨 Build Tab and Save Build ... moves it to the picked Tab (Rule 4.1).
 (Help 115)
 
 18.14 **"Add new ..." in a dialog pauses it and comes back** (Fritz, 2026-11-04, a general Rule): when **➕ Add new ...** (a new
@@ -3611,6 +3757,14 @@ Confirm Button and a Back Button."; "Do Not Lock the Interface or Port until the
   pressed before the Review brings the Review up.
 - **✔ Confirm** greys out the Interface and Available Ports line in the Add box; the rest of the box opens once the Label and Tab are
   filled in too. They are set for good only when **➕ Add Device** saves the Device; **Cancel** before that keeps nothing.
+- **➕ Add Device's own Hover Help** (OakBarn Brewery, 2026-11-12, Dialog 1 #2: "The Hover Help for the Add Device should be the same
+  with Just that the Label or Port needs to be set first"): while it waits, its balloon is the line that says what is missing
+  ("Type a Label first", "Pick the Port first" ...), a blank line, then the same balloon as that box (Label, Interface, Available
+  Ports or Tab).
+- **The Pump's Tab and Device Type Hover Help** (the same PDF) are OakBarn Brewery's own text too, in the Add box and in Pump Device
+  Properties (Dialog 2), the same as Help 115 The Tab and The Device Type. After each Suggested Name Format line comes the same
+  standard text as the Interface balloon (what the name tells you, and Predictive Text). The BruControl comparison he wrote with the
+  Device Type is for the Importer only: it waits in the Importer Sandbox (Rule 11.3).
 - The **Hover Help** of the Pump's Interface and of every Available Ports is OakBarn Brewery's own text (Rule 18.34, word for word,
   the electrical warning in red, Rule 6.20), the same as Help 115 The Port and The Interface. Its examples use **Port 15**
   (BM_15_DO@Pump_Red~Pump_BH): Port 6 is used elsewhere on the 3 Vessel sample. The waiting ➕ Add Device button's balloon keeps
@@ -3699,7 +3853,7 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Heat wrap, Ceramic heat emitter, Heating Element, Light; Freezer or fridge, Glycol pump, Glycol valve). They are built in
    without a spot, beside the vessel. Then the Fermentor Control is made, named after the vessel's Label. In the Importer, a
    Fermentor Control the Import already made on that probe is built in instead of a second one. Help 182.
-Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
+Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 ## Open questions (not Rules yet)
 
@@ -3731,12 +3885,26 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 14. **Universal Properties** (Rule 1.21): *answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all the same attribute (Rule
     1.15, exception to Rule 15.2). Rule 5.14 changed: pipe fittings get `.visible`,
     `.hiddenlock`, `.lock`, `.tab` and a Label. (asked and answered 2026-11-02)
+15. **📁 Templates for a Device or Widget?** OakBarn Brewery asked for "the Option in the Tab DDLB to send to Templates" (2026-11-12).
+    Today a Template holds one vessel or one Bundled Fitting, never a Device or Widget (Help 55). 📁 Templates is in the Tab list of a
+    vessel, equipment or Tab_Fitting on the Build Tab. Should a Device or Widget be able to become a Template too?
 
 ---
 
 ## Change log
 
+- 2026-11-13: Rule 7.18 (OakBarn Brewery: "Alarm order. Change the Rule"): the Kind numbers are now Brew Flow 1, Hop 2 (was Hop 1, Brew Flow 2); an Alarm with its own Priority keeps it. Panel (lib/store.js, the Kind list, Hover Help), Help 21 and 107, README. Checked against both programs: the BruControl Import gives each Alarm its Kind's number, so it follows. May change again after the OakBarn sample test. (thread "Polish the Skynet Brew Panel")
 - 2026-11-12: Rule 9.13 (OakBarn Brewery, README markup "Skynet Brew Panel 1 a"): the Sample Schemas Setup has a tick box per sample and no All tick box; a sample is never deleted, a changed one is added with the same Name and #2. The README is polished from the same markup (the Brain, Official Release, Pumps and Valves split, .API, Predictive text, Suggested Names). Checked against both programs: the Importer does not use Sample Schemas; the README is the Skynet version (Rule 11.3). (thread "Polish the Skynet Brew Panel")
+- 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
+- 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Then VirusTotal (about 70 scanners) reports on each .exe in the Release notes, never hides it; needs the VIRUSTOTAL_API_KEY secret. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
+- 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
+- 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
+- 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
+- 2026-11-12: Rule 3.2 kept as the standard (OakBarn Brewery: "ID Rule ... is standard. Make all comply"): the Pump dialogs' Interface and Tab balloons and Help 115 now say only an Admin can change an ID (best set once), the Interface ID is 1 to 4 letters and the Tab ID exactly 2 letters. Added Rule 2.50 (OakBarn Brewery): Dual Action, a Pump's Toggle choice where a click turns it On or Off and a press held over half a second works as a Push Button. The Pump's Name balloon is his text with each part of the Suggested Name in red, a Predictive Text note and its link (Help 46, 115); its Graphic balloon is his text and a Skynet pump drawing has no Path box; X, Y, Width and Height labels share one font and size. Checked against both programs: the BruControl Import shares the Pump dialogs; its BruControl notes for the Name wait in the Importer Sandbox (Rule 11.3). (thread "Rewrite Add Device Hover Help and add confirm step")
+- 2026-11-12: Added Rule 4.6 (OakBarn Brewery): the Default Interface and Default Tab of a Build, in ☰ Menu > Default settings and as two dropdowns on the 🔨 Build Tab's Edit layout bar (the same defaults); ➕ Add new Tab… in an Add box sets the Default Tab. Added Rule 11.10 (OakBarn Brewery): no outside links in Help unless he directs one (docs/Outside_Links.md, checked by a test); a broken or empty Help link opens nothing and pops up This Help link is broken with ✉ Send to support@oakbarnbrewery.com. Rule 18.35: ➕ Add Device's balloon is the missing line plus that box's own balloon; the Pump's Tab and Device Type balloons are his text (Help 115). Checked against both programs. (thread "Rewrite Add Device Hover Help and add confirm step")
+- 2026-11-12: Rule 2.49 (OakBarn Brewery): the Help that a hot spot opens has its ◀ Back ... ✕ Close row frozen at the top while the page scrolls (the Help window and the panel's own Help page); the part opened shows just under it. Help 54, 147. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3). (thread "Link hover help to full Help")
+- 2026-11-12: Rule 4.1 changed (OakBarn Brewery): every new Device and Widget starts on the 🔨 Build Tab, never on a regular Tab; the Tab picked in its Add box is remembered (Suggested Name with its Tab ID, its Properties' Tab box) and 💾 Save Build ... > To a Tab moves it there (different picked Tabs: each to its own). Its spot on the Build Tab is its spot on that Tab. The 🗺 Watermark (faint drawing of the Tab it goes to, On/Off on the Edit layout bar). A slow red pulsing glow on items just moved to a regular Tab until clicked. 📁 Templates in the Tab list of a vessel, equipment or Tab_Fitting on the Build Tab (Open question 15 for Devices and Widgets). Rules 4.2, 5.35 and 18.13 follow. Help 55 and 82, and the Add steps of Help 128, 136, 137, 138. Checked against both programs: the BruControl Import's Build page uses the same Build Tab; imported items are placed by the Importer, not added, so they are not touched. (thread "Start new Devices and Widgets on Build tab")
+- 2026-11-12: Added Rule 6.31, Sleep, Windows Update and restarts (OakBarn Brewery: "fix the Sleep Issue and What Happens during an Update and Restart"): kept awake while brewing, every output Off before Skynet stops, nothing back On by itself after a restart or a sleep, a notice of what was running with a Resume button for 15 minutes after the stop (OakBarn Brewery picked "Resume Button"), a Windows update waiting notice, and a Setup question to start Skynet at sign-in. Help 190 (new); Help 19 and 95 link to it. Checked against both programs: Panel only; the Importer controls nothing (its Build page runs no board). Next free Help 191. (thread "Keep Skynet brewing through PC sleep and restarts")
 - 2026-11-12: Rule 11.3 (OakBarn Brewery: "Put Updates to the Importer in a Sand Box. We will do a Big Merge"): Importer-only updates go to the Importer Sandbox (`Sandbox/Importer/Importer_Notes.md`) until one Big Merge, unless he says update both, then it goes into the Importer itself; the Skynet version is polished first. README.md is now the Skynet version with no BruControl (its text in Sandbox/help/BruControl_Help_Extract.md). (thread "Add step-by-step guides to Help")
 - 2026-11-12: Added Rule 18.35 (OakBarn Brewery, Hover Help Blichmann RipTide Dialog 1): the Review step, Interface and Port greyed out with Confirm and Back, set only when saved. The Pump's Interface and every Available Ports balloon are his own text (Port 15 in the examples, red electrical warning), Help 115 The Port and The Interface, Help 76 Ports (IO Pins) and The Trigger Signal; new hot spots (Rule 2.49): Port, Ports, IO Pins, true PWM Ports, Trigger Signal, Hardware Type, Direct Output, Predictive Text, List Box. Rule 18.34 points to it. Checked against both programs.
 - 2026-11-12: Rule 4.2 (OakBarn Brewery: "Available Ports: Mark the PWM as Save for PWM for DO that dont need PWM"): in Available Ports a PWM pin offered to a Device that does not need PWM (an On/Off DO, a valve, a probe, Pseudo PWM) reads **Save for PWM** (D5 (Save for PWM), D2 (Save for PWM + Counter)); a PWM Device still sees **PWM**. Port Hover Help and Help 46 say so. Checked against both programs: the Importer uses the same Build page lists. (thread "Mark PWM ports as saved for PWM")
@@ -3768,6 +3936,7 @@ Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is sa
 - 2026-11-10: Rule 6.29: **Switched by** is now called **Hardware Controller** (OakBarn Brewery, with a picture). Saved value unchanged (switchedBy). Help 137, 181, 182. Checked against the BruControl Import program: it sets the same value. (thread "Build Integrated Instances")
 - 2026-11-10: Added the Programming Rule KISS (Keep It Simple Stupid) under How Rules work and Rule 11.8 (OakBarn Brewery): labels of 1 or 2 words, explanations in the Hover Help, plain English in the dialog, its choices and the Hover Help, plain English first then the technical part, the same words in the Help and the Hover Help unless the Help expands, the most technical explanations in the Help only. Rule 11.4 changed to match. Checked against both programs: a Rule for both; no screen changes in this change. (thread "Set the Help format rules")
 - 2026-11-10: Added "Plain terms, no Who's on First?" under How Rules work (OakBarn Brewery), with a link to Abbott and Costello's Who's on First? in Help 1 and Help 46. Checked against both programs: a Rule for both; no screen changes. (thread "Set the Help format rules")
+- 2026-11-12: "Plain terms, no Who's on First?": the two copies of it under How Rules work are one now, with a second link to a YouTube video of the routine (Help 1, Help 46). New "Outside links open in the default browser" (OakBarn Brewery): Skynet's clean window is Edge, so outside links now go to the default browser through the Brain (lib/appwindow.js, public/extlinks.js). Checked against both programs: the BruControl Importer's page does the same (its AI site button). (thread "Fix Process code for Hysteresis Offset")
 - 2026-11-10: Rule 11.8 point 7 built (OakBarn Brewery approved the words): a Heating Element's Current Method balloon, while it is Hysteresis, shows the Hysteresis Hover Help with the HLT element's values (after the electrical warning); Help 150 has a new Hysteresis part with the same words, then the technical side. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and uses its own pages for Heating Elements. (thread "Set the Help format rules")
 - 2026-11-10: Rule 11.8 point 7 (OakBarn Brewery): the Hysteresis Help (Hover Help, then the technical side) is the model for all Help. Rule 6.20: every "⚠ Electricity can kill" in a Help page shows in red bold under the red triangle, as in the balloons, and keeps its OakBarn Brewery words. Checked against both programs: the BruControl Import has no Help pages yet (on hold, Rule 11.3) and its balloons already show the warning in red (shared public/hoverhelp.js). (thread "Set the Help format rules")
 - 2026-11-10: Dropdown choices short and in plain English (OakBarn Brewery: "Keep Choices in DDLB in Plain English when Possible and Short ... On = Red Glow"): the explanation goes in the hover help, not in the choice. Overlay: None, On = Red Glow (a Heating Element's start), Lightning Bolt, Flashing Bolt, Corner Bolt, Big Bolt, Green Glow Ring, Red / Orange / Blue Tint; Switched by: Optical SSR, Contactor, Mechanical relay; Data Display: Status and Setpoint, Output, Reading, Volts; field names Data Display, Switched by, Temperature Probe. Saved values unchanged. Help 58, 121, 174. Checked against the BruControl Import program: it shares these lists. (thread "Build Integrated Instances")

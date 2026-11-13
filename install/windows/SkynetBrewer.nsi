@@ -365,6 +365,11 @@ Section "Skynet Brew Panel" SecMain
   !insertmacro MoveOldSample "brewzilla-brew-day"
   !insertmacro MoveOldSample "oakbarn-brucontrol"
   ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
+  ; Official Skynet (Rule 9.14): the panel makes its program files Read-only once it has checked them, so take that off first
+  ; (only Read-only is taken off; nothing is deleted).
+  ${If} ${FileExists} "$INSTDIR\server.js"
+    Call CoreWritable
+  ${EndIf}
   SetOutPath "$INSTDIR"
   File /r "${SRC}\*.*"
   ${If} $OldPanel != ""
@@ -402,6 +407,7 @@ Section "Skynet Brew Panel" SecMain
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   Call AskImporter
+  Call AskStartWithWindows
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Uninstall Skynet Brewer.lnk" "$INSTDIR\Uninstall Skynet Brewer.exe"
 
@@ -452,6 +458,51 @@ Function AskImporter
     Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
 FunctionEnd
 
+; Official Skynet (Rule 9.14, lib/official.js): the core program files (the same list as CORE there) lose their Read-only mark.
+; Only the core: your config, data, media, scripts and help files are never touched.
+!macro CoreWritable UN
+Function ${UN}CoreWritable
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\server.js"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\importer.js"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\package.json"'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\lib\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\public\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\templates\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\firmware\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\install\*" /S'
+  Pop $0
+  nsExec::Exec '"$SYSDIR\attrib.exe" -R "$INSTDIR\samples\*" /S'
+  Pop $0
+FunctionEnd
+!macroend
+!insertmacro CoreWritable ""
+!insertmacro CoreWritable "un."
+
+; Start with Windows (OakBarn Brewery, 2026-11-12, Rule 6.31): most brewers use a Windows PC as the Brain, and Windows restarts
+; for updates. Yes puts a Skynet Brewer shortcut in your Startup folder, so the panel starts by itself each time you sign in to
+; Windows (with Windows' "Use my sign-in info to automatically finish setting up after an update", that is right after an update
+; restart too). No admin rights are needed. On an update, the answer you gave last time is the default.
+Function AskStartWithWindows
+  ${If} ${FileExists} "$SMSTARTUP\Skynet Brewer.lnk"
+    MessageBox MB_YESNO|MB_ICONQUESTION "Start Skynet Brewer by itself each time you sign in to Windows?$\r$\n$\r$\nYes (recommended for a brewing computer): after Windows restarts, for an update or any other reason, Skynet starts again as soon as you sign in. Everything starts Off.$\r$\nNo: you start Skynet Brewer from its shortcut yourself.$\r$\n$\r$\nYou can change this by running this Setup again." /SD IDYES IDYES add IDNO leave
+  ${Else}
+    MessageBox MB_YESNO|MB_ICONQUESTION "Start Skynet Brewer by itself each time you sign in to Windows?$\r$\n$\r$\nYes (recommended for a brewing computer): after Windows restarts, for an update or any other reason, Skynet starts again as soon as you sign in. Everything starts Off.$\r$\nNo: you start Skynet Brewer from its shortcut yourself.$\r$\n$\r$\nYou can change this by running this Setup again." /SD IDNO IDYES add IDNO leave
+  ${EndIf}
+  add:
+    CreateShortCut "$SMSTARTUP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0 SW_SHOWMINIMIZED
+    DetailPrint "Skynet Brewer starts by itself when you sign in to Windows"
+    Return
+  leave:
+    Delete "$SMSTARTUP\Skynet Brewer.lnk"
+FunctionEnd
+
 Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"
 FunctionEnd
@@ -500,8 +551,11 @@ FunctionEnd
 
 ; ---------------------------------------------------------------- Uninstall
 Section "Uninstall"
+  ; the program files are Read-only (Official Skynet, Rule 9.14): take that off, or Windows would not let them be removed
+  Call un.CoreWritable
   Delete "$DESKTOP\Skynet Brewer.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+  Delete "$SMSTARTUP\Skynet Brewer.lnk"
   ; the Importer shortcut in the Import folder (the folder and your files in it are kept)
   Delete "$INSTDIR\..\Import\Skynet BruControl Importer.lnk"
   Delete "$INSTDIR\Import\Skynet BruControl Importer.lnk"

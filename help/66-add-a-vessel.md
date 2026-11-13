@@ -5,7 +5,7 @@ A Vessel is a Kettle, an HLT, a Mash Tun, a Fermenter and so on. In **Edit layou
 - **Widget**: you add everything to it yourself.
 - **Integrated**: ready-made.
 
-Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Properties open. When it is done, press **💾 Save Build ...** and pick **To a Tab** (or **As a Template**).
+Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Properties open. When it is done, press **💾 Save Build ...** and pick **Move to Tab** (or **As a Template**).
 
 ## Widget
 

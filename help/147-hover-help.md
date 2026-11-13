@@ -18,8 +18,20 @@ Some words in a help box are **blue and underlined**. They are **hot spots**: ea
 - Move the mouse from the name into the help box. A box with hot spots waits a moment, so the mouse can reach it.
 - **Click a hot spot** and the Help window opens at the part about it. Example: in the help for **Interface**, click
   **Interface ID** and Help opens **Interfaces**, at **The Interface ID**.
+- The row at the top of Help, with **◀ Back** and **✕ Close**, stays frozen while you scroll. Click **✕ Close** to close Help and go
+  back to your dialog.
 - Only the first time a word shows in a box is it a hot spot, so the box stays easy to read.
 - The pop-up with **Close** (a click or a tap on the name) has the same hot spots.
+
+### A broken link
+
+A hot spot, or a link from one Help page to another, is checked before it opens. If its page or part is not there (or it has none),
+**nothing opens and nothing goes to the web**. A pop-up says **This Help link is broken** and shows the details: where you clicked,
+the link, what is wrong, the page, the browser and the time. Press **✉ Send** to send them to OakBarn Brewery
+(support@oakbarnbrewery.com) so it can be fixed, or **✖ Close**. Send uses the Brain's email when it is set up (Settings > Sending
+codes); otherwise your own mail program opens with the details filled in, and you press its Send. (Skynet Rule 11.10)
+
+Help links to a web page outside Skynet only where OakBarn Brewery asked for one (Skynet Rule 11.10).
 
 ## On a phone or tablet
 

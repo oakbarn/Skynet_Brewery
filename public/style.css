@@ -487,6 +487,9 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 .showOff { display: none !important; }      /* a field that shows only when it applies (a Pump's Speed Control: PWM pumps only) */
 .fldPair.xywh { flex-wrap: wrap; gap: 4px 6px; }
 .fldPair.xywh .pairLbl { white-space: nowrap; }
+/* X, Y, Width and Height: every label the same font and size, centered on its box (OakBarn Brewery, 2026-11-12: "Center and same fonts and sizes on labels") */
+.fldPair.xywh { align-items: center; }
+.fldPair.xywh .pairLbl, .fldPair.xywh .pairLbl.tipLbl { font: inherit; font-size: inherit; opacity: 1; color: inherit; line-height: normal; text-align: center; align-self: center; }
 .fldPair.xywh > input:not([type="checkbox"]) { width: 3.6em; flex: none; padding-left: 5px; padding-right: 3px; }      /* X, Y, Width and Height on one line, small boxes */
 .fldPair.xywh > input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .fldPair.xywh > input[type=number]::-webkit-inner-spin-button, .fldPair.xywh > input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -548,6 +551,11 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 #hpList .hpGroup { margin: 8px 9px 2px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 #hpList .hpGroup:first-child { margin-top: 0; }
 .hpMain { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 18px 18px; }
+/* the Help tool row (◀ Back ... Close) stays frozen at the top while the page scrolls (OakBarn Brewery, 2026-11-12: "have close Button
+   that a frozen row at the Top to close that dialog", Rule 2.49): Close is always in reach, also after a hot spot in Hover Help opened it */
+.hpTools { position: sticky; top: 0; z-index: 6; background: var(--panel); margin: -10px -18px 10px; padding: 8px 18px;
+  border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; }
+.hpPage :is(h1, h2, h3, h4, h5, h6) { scroll-margin-top: 60px; }      /* a part opened by a link is not hidden under the row */
 .hpPage { max-width: 860px; line-height: 1.55; font-size: 15px; overflow-wrap: anywhere; }
 .hpPage h1 { font-size: 24px; margin: 6px 0 12px; }
 .hpPage h2 { font-size: 19px; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
@@ -578,6 +586,7 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
   .hpSide.searching #hpPick { display: none; }
   body.role-admin #hpNew { display: block; }
   .hpMain { padding: 8px 12px 14px; }
+  .hpTools { margin: -8px -12px 8px; padding: 6px 12px; }
   .hpEditPanes { grid-template-columns: 1fr; }
   #hpText { min-height: 40vh; }
 }
@@ -626,6 +635,13 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
   background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
+/* Brain notices (Rule 6.31): a stop or a sleep during a brew (red), a Windows update waiting to restart (yellow) */
+#brainNotices { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1001; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.brainNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
+.brainNotice.update { background: #f2c94c; color: #1a1a1a; }
+.brainNotice span { flex: 1; }
+.brainNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
+.brainNotice button.resumeBtn { background: #fff; color: #b3261e; font-weight: 700; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
 #dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
 #dlgBody label.greyed + .fldIcons { opacity: 1; } #dlgBody label.greyed + .fldIcons > :first-child { opacity: 0.45; }      /* a greyed out field whose ⬢ still opens (the Probe type, Rule 18.26) */
@@ -804,7 +820,8 @@ button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, 
 .panelVer.small { border-color: transparent; padding: 0 2px; font-size: 14px; }
 .verState.ver-current { color: var(--ok); }
 .verState.ver-old { color: var(--warn); font-weight: 700; }
-.verState.ver-changed { color: var(--warn); }
+/* Official Skynet (Rule 9.14): the files that are not the official ones, in ☰ Menu > About */
+.officialFiles { max-height: 12em; overflow: auto; margin: 4px 0; padding-left: 1.4em; font-size: 12px; }
 
 /* Vessel and Fitting Templates: small icons with names (there will be many), double-click for the pop-up */
 .tplGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -1060,6 +1077,12 @@ dialog.askDiscard { width: min(420px, 94vw); }
 .miniDlg textarea.strEntry { width: 100%; box-sizing: border-box; font: inherit; resize: vertical; }
 /* Add Pump step 2 (Fritz, 2026-11-04): the pump list, each row with its picture */
 dialog.pumpPick { max-width: 560px; width: calc(100% - 32px); }
+/* a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): the details, then Close or Send */
+dialog.brokenLink { max-width: 520px; }
+.brokenDetails { white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 30vh; overflow: auto; padding: 6px 8px; border: 1px solid rgba(127,127,127,.4); border-radius: 6px; }
+/* the Default Interface and Default Tab on the Build Tab's Edit layout bar (Rule 4.4) */
+.buildDefs { display: inline-flex; gap: 8px; align-items: center; }
+.buildDefs select { max-width: 180px; }
 /* the Review step (OakBarn Brewery, 2026-11-12, Rule 18.35): the Interface and Port greyed out, then Confirm or Back */
 dialog.reviewWire { max-width: 460px; }
 .reviewRow { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
@@ -1241,3 +1264,28 @@ dialog.boardTalk { width: min(900px, 96vw); }
 .boardTalk .btWords { opacity: .85; }
 .boardTalk .btLine { width: min(520px, 60vw); font-family: var(--mono); }
 @media (max-width: 600px) { .boardTalk .btRow { grid-template-columns: 5.5em 1.2em 1fr; } .boardTalk .btWords { grid-column: 3; } }
+
+/* Rule 4.1 (2026-11-12): a new item just moved from the Build Tab glows red with a slow pulse until clicked */
+@keyframes freshPulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(220, 30, 30, .9), 0 0 6px 2px rgba(220, 30, 30, .5); } 50% { box-shadow: 0 0 0 3px rgba(220, 30, 30, .35), 0 0 18px 8px rgba(220, 30, 30, .15); } }
+#ws .freshMoved { animation: freshPulse 2.4s ease-in-out infinite; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { #ws .freshMoved { animation: none; box-shadow: 0 0 0 3px rgba(220, 30, 30, .9); } }
+/* the watermark of the Tab a new item goes to, behind everything on the Build Tab (Rule 4.1) */
+#ws .buildMark { position: absolute; left: 0; top: 0; opacity: .18; pointer-events: none; z-index: 0; }
+#ws .buildMark .bmBox { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 6 4; }
+#ws .buildMark .bmPipe { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+#ws .buildMark .bmText { fill: currentColor; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
+#ws .buildMark .bmTitle { fill: currentColor; font-size: 26px; font-weight: bold; }
+
+/* 🏷 Suggested Names (Rule 3.18): the list of names to convert */
+.sugAllDlg { max-width: min(900px, 96vw); }
+.sugAllList { max-height: 55vh; overflow: auto; margin: 8px 0; }
+.sugAllList table { border-collapse: collapse; width: 100%; }
+.sugAllList th, .sugAllList td { text-align: left; padding: 3px 8px; border-bottom: 1px solid rgba(127,127,127,.25); white-space: nowrap; }
+.sugAllList td.sugNew { font-weight: 600; }
+
+/* A frozen top on the model dialog (Rule 2.51): only a Pump's Properties or Add box for now (OakBarn Brewery: "Wait ... until I am
+   100% Finished with the model"). The ☰, title and buttons stay put while the rest scrolls; the bottom row is not shown. */
+#dlg .dlgHead::after { content: ''; display: block; clear: both; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) { padding-top: 0; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar { display: none; }
