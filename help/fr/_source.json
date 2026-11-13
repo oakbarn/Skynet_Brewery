@@ -21,5 +21,9 @@
  "19-installing": "de3d1fd966aae3da",
  "20-simulation": "a5a9811d7048e8db",
  "21-alarms-and-sound": "89c421300031f403",
- "22-process-language": "01f7ab0a84ba9a3f"
+ "22-process-language": "01f7ab0a84ba9a3f",
+ "23-restarting-processes": "7cd1dabd5f9bf0c6",
+ "24-pipes-and-hoses": "51e52e298ed0df7a",
+ "25-picture-paths": "9901f81ed10302e8",
+ "26-tab-background": "6965bd49e0f0d4e3"
 }
