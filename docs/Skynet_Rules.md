@@ -1945,6 +1945,14 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 - It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
 - It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
   (thread "Add unique API_Name for voice commands", Help 144)
+- **.API is the one switch for the web API, MQTT and voice** (OakBarn Brewery, 2026-11-13: "We need to build for all three. API seems
+  to be the place to do it unless there is a need for a separate MQTT and Voice"; "even if they are not true api, the sorta act like
+  it"): **Off** = not shared anywhere; **Read Only** (Get) = the web API, MQTT and voice read it (Home Assistant, and so Alexa, Google
+  Home and Siri, gets it); **Read & Control** (Get and Put) = they can also change it, with the web API's safeguards (board readings
+  and Manual Valve Widgets never; a Widget that switches a Device needs that Device's Read & Control too). There are no separate MQTT
+  and voice ticks per item any more; Settings > MQTT and voice lists the shared items with their .API. Silencing a shared alarm and
+  stopping Processes are always allowed; starting a Process only when ticked there. A gGlobal is never shared (Rule 1.33). Both
+  programs: the Panel (lib/mqtt.js, lib/itemapi.js); the BruControl Import has no MQTT.
 
 6.19 **One Heating Element, the heating method picked** (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
@@ -2765,6 +2773,10 @@ on a Schema import with a name already taken: "Use the Rule, just cannot overwri
   none is ever removed. Help says only that Skynet does this in the Background and needs no user input (Rule 11.13).
 - **Schema.json page:** no copy on opening; a copy is made before every save or restore (`config/backups`).
 - **An import never writes over a Schema:** a Schema whose name is taken is added as `Name #2`, `#3` ... (the same as Rule 9.13).
+- **An import never writes over a Process either** (OakBarn Brewery, 2026-11-13: "Change the way in skynet to something different as I
+  think that is all background and never seen by a user Name(1) is more standard to the Windows World"): an imported Process with the
+  same name as one you have but other text comes in as `Name_1` (`_2` ...), and the imported Schema's Process lines and Process
+  Widgets point to it. `_1` stands in for Windows' `(1)` because a name can't have ( ) (Rule 3.1, docs/Special_Characters.md).
 - **Both programs:** the Panel's Schemas; the BruControl Import saves its Schema files to the Import folder and never writes over one.
 
 ## 10. Testing
@@ -4062,6 +4074,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 6.18 (OakBarn Brewery: "We need to build for all three. API seems to be the place to do it"): .API is the one switch for the web API, MQTT and voice (Off / Read Only / Read & Control); the separate per-item MQTT and voice ticks are gone; every Device and Widget with .API on is shared, Widgets too. Help 15 (and French), docs/MQTT_AND_VOICE.md, README. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 9.17 (OakBarn Brewery, README markup "Skynet Brew Panel 2a" and his answers): a Schema backup, `<Schema name>_yyyymmddThhmm.BacUp`, every time a change is saved; no daily backup; never written over (_2 in the same minute) and never removed; Schema.json makes no copy on opening (before every save or restore only); an imported Schema with a taken name is added as Name #2. Help 28, 30, 42, 44 (and French), README 3a. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 1.33 (OakBarn Brewery: "The only real use for a gGlobal is as a variable with Global Scope"): a gGlobal has no Database and .API box; a Process sends it to the database with send_db / DBSend; never in the web API, MQTT or voice; older files lose the settings on load; the Variables page has no Database, .API or Log now columns. Help 4, 13, 15, 98, 108, 118, 149 (and French). Checked against both programs: the Importer's Interview will ask .API for a Global that becomes a Widget (Sandbox note). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.13 (OakBarn Brewery: "Make that a Help Rule"): a background action the user cannot see and needs no input for gets only "Skynet does this in the Background and needs no user input." in Help; when the user gives one thing first (a file name to import), Help says that after it no other user input is needed and the action takes place in the background. How it is done stays out of Help (TMI). Rule 11.8 point 8 points to it. Checked against both programs. (thread "Polish the Skynet Brew Panel")

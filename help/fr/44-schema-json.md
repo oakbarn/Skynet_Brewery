@@ -28,7 +28,8 @@ Le fichier porte le nom de la version du Schema, par exemple `Main_Brewery_20261
 
 Le Schema est ajouté sous son propre nom. Si un Schema de ce nom est déjà là, le nouveau reçoit `#2`, `#3` et ainsi de suite :
 un Schema existant n'est jamais écrasé. Les Processes du fichier sont ajoutés aux Processes partagés ; quand un Process de même
-nom mais avec un texte différent est déjà là, l'ancien est d'abord gardé en sauvegarde. Un court rapport montre ce qui a été ajouté et
+nom mais avec un texte différent est déjà là, le vôtre n'est jamais écrasé : le nouveau arrive sous un nouveau nom. Skynet le
+fait en coulisse et n'a besoin d'aucune action de votre part. Un court rapport montre ce qui a été ajouté et
 les notes d'importation. Un fichier marqué **first draft** (premier brouillon) vient de l'Importer d'avant que ses étapes de questions soient faites : vérifiez-le avant
 de brasser avec.
 

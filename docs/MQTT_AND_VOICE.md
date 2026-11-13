@@ -97,22 +97,19 @@ mosquitto_pub -h 192.168.1.50 -u brewer -P YOURPASSWORD -t brewpanel/set/gblVBoi
 
 ## 4. Safety: what MQTT and voice may change
 
-The table in **Settings > MQTT and voice** has two ticks per element.
+**.API is the one switch** for the web API, MQTT and voice (Skynet Rule 6.18). It is in every Device's and Widget's Properties, **Database and .API** box:
 
-* **Voice can hear it**: Home Assistant (and so Google, Alexa and Siri) gets this element.
-* **Can change it**: MQTT and voice may change it.
+| .API | MQTT and voice |
+|---|---|
+| **Off** (the start) | Not shared |
+| **Read Only** (Get) | Read it; Home Assistant (and so Google, Alexa and Siri) gets it |
+| **Read & Control** (Get and Put) | Read it and change it, with the same safeguards as the web API |
 
-Out of the box:
-
-| Always allowed | Allowed until you untick it | Not allowed until you tick it |
-|---|---|---|
-| Reading every shared value | Changing gGlobals whose .API is Get and Put and that are not read-only (same as the web API) | Turning outputs and switches on or off (heaters, burners, pumps, valves) |
-| Silencing an alarm | | Starting, stopping or resetting a timer |
-| Stopping processes | | Starting a process (list under the table) |
+Always allowed: silencing a shared alarm, stopping processes. Starting a process: only the processes ticked in **Settings > MQTT and voice**. The table there lists every shared item with its .API. A gGlobal is never shared (it has no .API, Rule 1.33).
 
 Temperatures and other hardware inputs can never be changed from outside. A refused change is written to the panel's console with the reason.
 
-Think twice before ticking a heater or burner: a voice assistant can mishear, and a smart speaker in another room can be talked to by anyone in the house.
+Think twice before giving a heater or burner Read & Control: a voice assistant can mishear, and a smart speaker in another room can be talked to by anyone in the house.
 
 ## 5. Voice: Home Assistant
 
@@ -122,11 +119,11 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
 2. In Home Assistant: **Settings > Devices & services > Add integration > MQTT**. Enter the Brew Panel Pi's address, port 1883, and the broker user name and password.
 3. In the Brew Panel, keep **Announce to Home Assistant** ticked and save. A device named after your panel title (for example *Skynet Brew Panel*) appears in Home Assistant by itself, with:
    * temperatures as sensors,
-   * outputs as on/off status, or as switches if **Can change it** is ticked,
+   * outputs as on/off status, or as switches when their .API is Read & Control,
    * timers as sensors (plus Start / Stop / Reset buttons if allowed),
    * alarms as problem sensors plus a **Silence** button,
    * **Running processes**, **Stop all processes**, and a **Start** button for each process you allowed,
-   * read-only gGlobals (.API on) such as your message panel or *Process status*, and any gGlobal you tick.
+   * every Widget whose .API is on (a Value Widget as a number, a Text Widget as text ...).
 
 Name things the way you will say them: each item's **API_Name** (its Database and .API pop-up, Skynet Rule 6.18) becomes its name in Home Assistant and on your speakers. An API_Name is Unique. An item with a blank API_Name uses its **Label**.
 
@@ -147,8 +144,8 @@ Name things the way you will say them: each item's **API_Name** (its Database an
 | Brew Panel item | In Alexa | Say |
 |---|---|---|
 | Temperature | Temperature sensor | "Alexa, what is the **HLT Temp** temperature?" |
-| Output or switch you ticked **Can change** | Switch | "Alexa, turn on **Red Pump**" / "turn off ..." |
-| Output not ticked | Shown in the app (on/off) | Check it in the Alexa app, or use it in a Routine |
+| Output or switch with .API Read & Control | Switch | "Alexa, turn on **Red Pump**" / "turn off ..." |
+| Output with .API Read Only | Shown in the app (on/off) | Check it in the Alexa app, or use it in a Routine |
 | **Stop all processes**, **Silence** alarm, **Start** process | Scene | "Alexa, turn on **Stop all processes**" |
 | Alarm | Can start a Routine | Alexa app **Routines**: *When* Hop alarm turns on, *Alexa says* "Add the hops" |
 
