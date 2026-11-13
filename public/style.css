@@ -1325,3 +1325,4 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
    Edit layout bar is greyed out too ("Nothing works so just take up space. OR GREYED OUT") */
 body.buildMode .menuBtn { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
 body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); pointer-events: none; }
+.ivBody [data-note]{white-space:pre-line}
