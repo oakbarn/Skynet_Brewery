@@ -221,7 +221,7 @@ goLine 235
 
 Ces deux lignes font la même chose.
 
-**Le numéro suit sa ligne.** Quand des lignes sont ajoutées ou enlevées et que le Process est enregistré, Skynet met à jour chaque numéro de goLine en coulisse, sans rien vous demander, pour qu'il aille toujours à la même ligne.
+**Le numéro suit sa ligne** quand des lignes sont ajoutées ou enlevées. Skynet le fait en coulisse et n'a besoin d'aucune action de votre part.
 
 Un goLine vers une ligne que le Process n'a pas est une erreur, et le Process ne démarre pas.
 

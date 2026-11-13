@@ -206,7 +206,7 @@ or
 goLine 235
 ```
 
-are equivalent. When lines are added or taken out, Skynet updates the goLine number in the background, without any user input.
+are equivalent. The goLine number follows its line when lines are added or taken out. Skynet does this in the Background and needs no user input.
 
 Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 

@@ -2888,10 +2888,7 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
      the Help page shows the same Hover Help words first, then a **technical side** part with the science, using the same signs; the
      electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are the balloon on a Heating
      Element's **Current Method** while it is Hysteresis (after the electrical warning), and the **Hysteresis** part of Help 150.
-  8. **No "how" the user cannot change** (OakBarn Brewery, 2026-11-13: "Telling a user "how" when he cannot change it is TMI (too much
-     information!)"; "All help need to say is that is done in the background without any user input"). When Skynet does something by
-     itself and the user has no say in it, Help and Hover Help only say that it is done in the background, without any user input. How
-     it is done goes in the Rules and the code notes, not in Help. Example: goLine numbers follow their lines (Rule 16.10, Help 22).
+  8. **No "how" the user cannot change:** see Rule 11.13.
 
 11.9 **Step by Step guides** (OakBarn Brewery, 2026-11-11: "Also need Section in Help That is a Step By Step with Pictures on How to do
 something. First Step By Step in Add a Schema as I could not see an easy way to begin."). Help has a **Step by Step** section: it is
@@ -2952,6 +2949,19 @@ instruction not verbatim text"; "Make that a Rule"):
 - An instruction can be a change to make, a question to answer, or where text goes (for example **{Importer Sandbox ...}** moves the
   text inside it to the Importer Sandbox, Rule 11.3). When an instruction is unclear, Claude asks before building it.
 - **Both programs:** the Skynet Panel and the BruControl Import.
+
+11.13 **Background actions: "Skynet does this in the Background and needs no user input."** (OakBarn Brewery, 2026-11-13:
+"Telling a user "how" when he cannot change it is TMI (too much information!)"; "Make that a Help Rule: For things in the Background
+that a user cannot see or needs no user input on the code, needs a Simple "Skynet does this in the Background and needs no user
+input." For something Like providing a file name to import, after you supply Skynet the File Name, no other user input is needed.
+The action takes place in the background."):
+- **Nothing to give:** when Skynet does something the user cannot see and needs no input for, Help and Hover Help say only:
+  **"Skynet does this in the Background and needs no user input."** How it is done is never explained in Help; it goes in the Rules
+  and the code notes. Example: a goLine number follows its line when lines are added or taken out (Rule 16.10, Help 22, Rule 11.13).
+- **Something to give first:** when the user gives one thing and Skynet does the rest, Help says what to give, then that nothing more
+  is needed. Example: an import: **"After you supply Skynet the File Name, no other user input is needed. The action takes place in
+  the background."**
+- **Both programs:** the Skynet Panel and the BruControl Import (its Help is on hold, Rule 11.3).
 
 ## 12. Privacy and sharing
 
@@ -4023,7 +4033,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
-- 2026-11-13: Rule 11.8 point 8 (OakBarn Brewery: "Telling a user "how" when he cannot change it is TMI"): when Skynet does something by itself that the user cannot change, Help only says it is done in the background without any user input. Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 11.13 (OakBarn Brewery: "Make that a Help Rule"): a background action the user cannot see and needs no input for gets only "Skynet does this in the Background and needs no user input." in Help; when the user gives one thing first (a file name to import), Help says that after it no other user input is needed and the action takes place in the background. How it is done stays out of Help (TMI). Rule 11.8 point 8 points to it. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
