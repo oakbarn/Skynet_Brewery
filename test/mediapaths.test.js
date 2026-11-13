@@ -118,6 +118,15 @@ await run('k', 'gG_Pic.path = "Images/Mine/Other.svg"\nSnd_1.path = "ding.mp3"\n
 assert.deepEqual(failed().filter(f => /^[jkl]:/.test(f)), []);
 assert.equal(P('gG_Pic', 'value'), 'Images/Mine/Other.svg'); assert.equal(P('Snd_1', 'path'), 'sounds/ding.mp3');
 assert.equal(P('Pump_1', 'imageoff'), 'Images/Bell.svg');
+// the item's own .path / .file, _2 and _3 (OakBarn Brewery 2026-11-13): Image Path 1, 2 and 3; an Alarm's .path / .file is its sound
+await run('m', 'Pump_1.file = "Bell.svg"\nPump_1.path_2 = "Images/Mine/Other.svg"\nPump_1.file_3 = "MyPump.png"\nalm_Brew.file = "hop.wav"\nalm_Brew.file_2 = "Bell.svg"\n');
+assert.deepEqual(failed().filter(f => /^m:/.test(f)), []);
+assert.equal(P('Pump_1', 'backpath'), 'Images/Bell.svg'); assert.equal(P('Pump_1', 'path'), 'Images/Bell.svg');
+assert.equal(P('Pump_1', 'backpath_2'), 'Images/Mine/Other.svg'); assert.equal(P('Pump_1', 'file_2'), 'Other.svg');
+assert.equal(P('Pump_1', 'backpath_3'), 'Images/Pumps/MyPump.png'); assert.equal(P('Pump_1', 'path_3'), 'Images/Pumps/MyPump.png');
+assert.equal(P('alm_Brew', 'sound'), 'sounds/Hops/hop.wav'); assert.equal(P('alm_Brew', 'path'), 'sounds/Hops/hop.wav');
+assert.equal(P('alm_Brew', 'backpath_2'), 'Images/Bell.svg');
+for (const a of ['path', 'file', 'path_2', 'file_2', 'path_3', 'file_3']) assert.ok(attrsOf(store.get('Pump_1')).includes(a), 'predictive text offers .' + a);
 // words and links are kept as they are
 await run('l', 'alm_Brew.setgraphic = "none"\nSnd_1.path = "https://example.com/a.mp3"\n');
 assert.equal(P('alm_Brew', 'setgraphic'), 'none'); assert.equal(P('Snd_1', 'path'), 'https://example.com/a.mp3');
