@@ -48,7 +48,7 @@ L'aide s'ouvre dans une fenêtre à elle : voir [L'aide dans sa propre fenêtre]
 | Minuterie | [Tabs : les minuteries](02-tabs) |
 | gGlobal, gGlobal List | [Variables](04-variables) |
 | Image | [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths) |
-| Cuve | [L'onglet Vessel](34-vessel-tab) |
+| Cuve | [Réglages d'une cuve](34-vessel-tab) |
 | Refroidisseur, serpentin, filtre, raccord d'équipement, cuve regroupée | [Équipement : cuves, refroidisseurs, serpentins et raccords](14-equipment) |
 | Point IP, raccord de tuyau, tuyau rigide, tuyau souple | [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses) |
 | Label, texte, interrupteur à l'écran, cuve manuelle | [Tabs : changer la disposition](02-tabs) |

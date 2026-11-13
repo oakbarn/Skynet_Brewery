@@ -49,7 +49,7 @@ Equipment Profiles are made on the **Equipment Profile** Menu tab. See [The ☰ 
 
 1. Press **☰ Menu** and pick **Equipment Profile**.
 2. In the **Open** dropdown (or a Tab's dropdown in the box at the top), pick **Add new ...**.
-3. Give it a name, for example "Oak Barn Hot Side" or "Fermentation room", and pick what it starts from: the usual numbers, or a copy of another profile.
+3. Give it a name, for example "Oak Barn Hot Side" or "Fermentation room", and pick what it starts from: **Answer a few questions (the Interview)** (the first choice: it asks for the vessels, pumps and valves and builds them; see [The Equipment Profile Interview](196-equipment-profile-interview)), the usual numbers, or a copy of another profile.
 4. Pick the **Units**: US (gallons, pounds, °F) or Metric (liters, kilograms, °C).
 5. In **Use it on a Tab**, pick the Tab it is for, or **(not now)**.
 6. Press **OK**. The profile opens.
@@ -65,7 +65,7 @@ Some numbers moved out of the profile (2026-10-20):
 
 - **Batch size** and both **top up** waters (kettle and fermenter) are set in the Recipe (coming next).
 - **Boil time** and **boil off** are in the [Boil Profile](35-mash-and-boil-profiles).
-- Each vessel's **size** and **dead space** are on the Vessel tab, and the **fermenter trub loss** belongs to the Fermenter.
+- Each vessel's **size** and **dead space** are in its Properties on the Tab (the [Equipment Profile Interview](196-equipment-profile-interview) asks them), and the **fermenter trub loss** belongs to the Fermenter.
 
 ## Edit or delete an Equipment Profile
 
@@ -131,7 +131,7 @@ The **Equipment list**, under the numbers, shows what is on the profile's Tab.
 
 **Go to the Tab** shows you the Tab itself.
 
-Profiles made before Templates may still have vessels made on the [Vessel tab](34-vessel-tab). They show under **Made on the Vessel tab**, with **Put on Tab** to draw them on the profile's Tab.
+Profiles made before Templates may still have a list of vessels. They show under **Made before Templates**, with **Put on Tab** to draw them on the profile's Tab ([Vessel settings](34-vessel-tab)).
 
 ## Coming next
 

@@ -88,7 +88,7 @@
 
 **Valve Profile**: the graphics and orientation (Horizontal, Vertical, 45 degrees Left or Right) a new valve starts with, picked only when the valve is made.
 
-**Heat Source**: how a vessel is heated: Gas, Electric, RIMS, HERMS, Other or Unheated. See [The Vessel tab](34-vessel-tab).
+**Heat Source**: how a vessel is heated: Gas, Electric, RIMS, HERMS, Other or Unheated. See [Vessel settings](34-vessel-tab).
 
 **Service**: what a valve carries: Gas, Room Temperature Liquid, or High Temperature Liquid (Stainless Steel). A gas valve can be a vessel's heat source.
 
