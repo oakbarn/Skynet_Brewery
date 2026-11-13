@@ -33,7 +33,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 2. **Skynet Media Setup** (the Skynet pictures and sounds) second. It only adds what is missing and never changes or deletes a file, so it is safe to run again after any update or Fresh Start.
 3. **Skynet Sample Schemas Setup** last, only if you want the extra samples (the 3 Vessel sample is always in the panel).
 
-**Why two .exe files?** The panel Setup is small (the program only) and changes with almost every update, so an update downloads in seconds. The pictures and sounds are big and seldom change: a changed picture gets a new file name, so the Media Setup only ever adds files. Keeping them apart means you download the big one once, not with every update, and an update can never touch your pictures and sounds.
+**Why two .exe files?** The panel Setup is small (the program only), so future updates download in seconds. During Beta testing updates may come more than once a day; after the first Public Production they should rarely be needed. The pictures and sounds are big and seldom change: a changed picture gets a new file name, so the Media Setup only ever adds files. Keeping them apart means you download the big one once, not with every future update, and an update can never touch your pictures and sounds.
 
 A **Start Fresh** deletes everything of yours, including your own pictures and sounds and the Import folder; the Skynet pictures and sounds stay. A **Modified Fresh Start** keeps your Default settings, own Profiles, Equipment Profiles, Recipes, pictures and sounds, the backups and the Import folder. Run the Media Setup after either one.
 
