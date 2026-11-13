@@ -111,5 +111,9 @@
  "115-pump-device-properties": "0c655299ed395e05",
  "116-pipe-and-hose-flow-colors": "9139ac0ef8abd406",
  "117-proportional-valves": "5d63431337f61581",
- "118-gglobals-keep-their-values": "2e3c129df58b06c5"
+ "118-gglobals-keep-their-values": "2e3c129df58b06c5",
+ "119-move-brain": "0f51ed352ef9f67d",
+ "120-pump-one-click": "5f95543b9b68f855",
+ "121-valves-and-pumps-on-pipes": "78f1512443493833",
+ "122-own-clean-window": "61794625a9e4372b"
 }
