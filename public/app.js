@@ -346,6 +346,7 @@ function setView(v, here = false) {
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  showSound();
   // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
   if (v === 'help' && helpFrom !== 'help') helpFrom = prev;
   markOnTabs();
@@ -10070,6 +10071,8 @@ const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasB
 let soundTapped = false;
 function showSound() {
   $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
+  // the reminder on the Tab while sound is off (OakBarn Brewery, 2026-11-13: "keep on the Tab and Hamburger Menu if it has not been done")
+  $('#soundNag')?.classList.toggle('hidden', soundOn || view !== 'workspace');
   document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
 }
 function setSound(on) {
@@ -10078,6 +10081,26 @@ function setSound(on) {
   updateAlarms();
 }
 $('#soundBtn').onclick = () => setSound(!soundOn);
+$('#soundNag').onclick = () => setSound(true);
+// Ask when the panel first opens (OakBarn Brewery, 2026-11-13: "Ask when first opens"): browsers play nothing until the page is
+// clicked once, so the answer is that click. Once per opening of the panel, only while sound is off; never on top of another dialog.
+let soundAsked = false;
+function askSound() {
+  if (soundOn || soundAsked) return;
+  const d = $('#valDlg');
+  if (d.open) { d.addEventListener('close', () => setTimeout(askSound, 300), { once: true }); return; }
+  soundAsked = true;
+  d.innerHTML = '';
+  const close = on => { d.oncancel = null; d.close(); if (on) setSound(true); };
+  d.append(h('div', { class: 'vdTitle' }, '🔊 Turn sound on?'),
+    h('p', {}, 'Alarms, hop drops, timers and music on this Panel need sound. Your browser only plays sound after you click once, so Skynet asks.'),
+    h('p', { class: 'muted' }, 'Sound is turned on for this browser. Moving between Tabs keeps it on. To have it on every time, use ☰ Menu > Default > Turn Sound On when starting.'),
+    h('div', { class: 'vdBtns' },
+      h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, '🔊 Turn Sound On'),
+      h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Not now')));
+  d.oncancel = () => { d.oncancel = null; showSound(); };
+  d.showModal();
+}
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
@@ -12181,6 +12204,8 @@ function menuItems(list, go) {
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
+  // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
+  if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -15046,4 +15071,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); setTimeout(askSound, 800); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
