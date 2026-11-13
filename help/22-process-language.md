@@ -30,11 +30,11 @@ my_Widget.visible = false
 tm_Mash.countdown = true
 tm_Mash.label = "Mash rest"
 Kettle_Temp.background = 2
-Pump_Red.image = "Images/RedPump.png"
+Pump_Red.image = "RedPump.png"
 if Hop_Text.visible == true
 ```
 
-`.image` changes the item's picture: the path goes into .backpath and background becomes 1. `.background = 1`, `2` or `3` shows .backpath, .backpath_2 or .backpath_3; 0, blank or any number over 3 shows no background. See [Pictures on items](25-picture-paths).
+`.image` changes the item's picture: the path goes into .backpath and background becomes 1. `.background = 1`, `2` or `3` shows .backpath, .backpath_2 or .backpath_3; 0, blank or any number over 3 shows no background. See [Pictures on items](25-picture-paths). A file name alone is enough (Skynet adds its folder), a Skynet picture can also be given by its number, and every picture or sound has `.path` (the whole path) and `.file` (the file name): see [Two-part paths](194-two-part-paths) and [Skynet Picture numbers](193-skynet-picture-numbers).
 
 Any attribute with only two choices is `true` or `false`:
 
