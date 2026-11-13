@@ -1,57 +1,29 @@
-# The Vessel tab
+# Vessel settings
 
-The **Vessel** tab (in the **☰ Menu**) sets up one vessel of the Equipment Profile at a time. Chillers, coils and trub filters open here too. A profile can have as many vessels as you need.
-
-1. Press **☰ Menu** and pick **Vessel**. It works on the profile open on the Equipment Profile tab, or the profile of the Tab you are on.
-2. Pick a vessel in the dropdown, or **Add new vessel ...**.
-3. Fill in its settings (below), then press **Save**.
-4. **Save and put on Equipment tab** also draws it on the Equipment tab with its ports as IPs.
-
-**Delete** takes it out of the profile. If it is drawn on a tab, the drawing stays there.
+The **Vessel** tab of the **☰ Menu** is gone (OakBarn Brewery, 2026-11-13). The [Equipment Profile Interview](196-equipment-profile-interview) took its place: it asks how many vessels, the type of each, and their size, then puts them on the Tab. Everything else about a vessel is in its **Properties** on the Tab: in **Edit layout**, double-click the vessel.
 
 ## Type
 
-**HLT**, **Brew Kettle**, **Mash Tun**, **RIMS**, **HERMS**, **Fermenter** or **Other**. For Other, type what it is in **Other Type** (for example "Grant").
+**HLT**, **Mash Tun**, **Brew Kettle**, **All In One**, **Whirlpool**, **Fermentor**, **Bright Tank** or **Other**. The Interview asks it; the vessel's Properties show it.
 
 ## Size
 
-- **Size** and **Dead space** (what stays in the bottom), in gallons or liters (the profile's Units).
-- **Extra trub loss**.
-- **Graphic**: the picture drawn on the tab.
+- **Gallons** (Liters when the Units are Metric) and **Dead space** (what stays in the bottom) are in the vessel's Properties, under **Size**. The Interview asks both.
+- A Fermentor has its **Largest batch** and **Smallest batch** instead.
+- How the size draws the vessel: [Vessel size](166-vessel-device-builder).
 
 ## Heat
 
-The **Heat Source** list depends on the Type:
-
-| Type | Heat Sources |
-|---|---|
-| HLT, Brew Kettle, RIMS, HERMS | Gas, Electric, Other |
-| Mash Tun | Gas, Electric, RIMS, HERMS, Other, Unheated |
-| Other | Gas, Electric, RIMS, Other, Unheated |
-| Fermenter | none |
-
-Then pick the device that heats it:
-
-- **Gas**: a valve whose **Service** is **Gas**. Set a valve's Service in its properties (Edit layout, double-click the valve): Gas, Room Temperature Liquid, or High Temperature Liquid (Stainless Steel).
-- **Electric**: an output whose **Kind** is **element (electric heating element)**, or a PID, hysteresis, duty cycle or PWM output.
-- **RIMS** or **HERMS**: a RIMS tube or HERMS vessel in this profile.
-- **Other**: type what it is.
+The **Heating Element** of a vessel is picked in its Properties (or in the [Vessel Device Builder](166-vessel-device-builder)). It glows while it is on.
 
 ## Temperature Probe
 
-The **Temperature Probe** list shows the probes on the same board (interface) as the heat device, so the probe and the heater are on the same Mega. If the vessel is unheated, or no heat device is picked yet, every probe is listed.
-
-## Fermenter
-
-A Fermenter has its own settings:
-
-- **Largest batch** and **Smallest batch** it can hold.
-- **Trub loss** (what stays in the fermenter). The volume check on the Equipment Profile tab uses it.
-- **Graphic**, **Name** and **Temperature Probe**.
-- **Report the temperature every** a number of **Minutes**, **Hours** or **Days**.
-
-The gravity, ABV, CO2 and dates of a batch will go on the Fermentation tab (coming later).
+The **Temperature Probe** is picked in the vessel's Properties: **Select Temperature Probe or None**.
 
 ## Ports and Build
 
-The ports are the same as on the Equipment tab: switch on each port it has, and set its **Position** and **Standard**. Leave **Bundled** on to put it on the tab as one unit with its IPs. See [Equipment](14-equipment).
+The vessel's openings are its **IPs**, set by its Vessel Template or by the [Vessel Device Builder](166-vessel-device-builder). **Bundled** keeps the vessel and its IPs together as one unit.
+
+## Made before Templates
+
+Equipment Profiles made before Vessel Templates may still have a list of vessels. It shows on **☰ Menu > Equipment Profile** under **Made before Templates**, with **Put on Tab** to draw each one on the profile's Tab. After that, change it in its Properties on the Tab.

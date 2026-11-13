@@ -21,6 +21,7 @@ import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, p
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BAUDS, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
@@ -11923,7 +11924,7 @@ function okToSwitch(toName, what = 'Loading') {
 }
 // after another Schema is loaded: start fresh on its first tab
 async function afterSchemaSwitch(msg) {
-  wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false;
+  wsName = null; eqWork = null; eqDirty = false;
   const keep = menuTab;                                  // picked on the Schema or About Menu tab: stay there
   if (!['schema', 'about'].includes(keep)) leaveMenuTab();
   await load(); soundOnStart();
@@ -12212,18 +12213,15 @@ const eqTab = () => { const ws = S.config.workspaces, by = n => ws.find(w => w.n
   return by(eqTabName) || (by(wsName)?.equipmentProfile ? by(wsName) : null) || ws.find(w => w.equipmentProfile) || by(wsName) || ws[0]; };
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const usedOnText = p => (p.usedOn || []).map(u => `${u.schema} (Tab ${u.tab ?? '?'})`).join(', ');
-let vesselWork = null, vesselDirty = false;   // the piece of equipment open on the Vessel tab
 const profWork = { mash: null, boil: null, water: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, water: false, tab: false, valve: false, recipe: false };   // the profile open on each profile tab (recipe: the Recipe tab has changes not saved)
 let menuTab = null;                           // the Menu tab showing now (null: the screen tabs)
 const menuOpen = [];                          // Menu tabs picked and not closed yet
-const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub', 'rims'];
 const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
   { key: 'default', title: 'Default settings', tip: 'Every default in one place: the Default pipe size, new Tabs, new Recipes, text, sound, phones, a list of the defaults set elsewhere, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
-  { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
   { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils, trub filters and RIMS tubes (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
   { key: 'ftemplates', title: 'Fitting Templates', tip: 'Ready-made Bundled Fittings (valve, tee, elbows ...) for vessel ports or a Tab', render: renderTemplatesTab('fitting') },
@@ -12257,7 +12255,7 @@ async function setMenuOrder(key, n) {
   await api('PUT', '/ui/settings', { menuOrder });
   S.config.menuOrder = menuOrder; renderMenu();
 }
-const paneDirty = () => menuTab === 'equipment' ? eqDirty : menuTab === 'vessel' ? vesselDirty : profDirty[menuTab];
+const paneDirty = () => menuTab === 'equipment' ? eqDirty : profDirty[menuTab];
 
 function renderMenu() {
   if (!S?.profiles) return;
@@ -12584,7 +12582,6 @@ function closeMenuTab(k) {
 // unsaved changes are let go (after the question above): the tab shows the saved copy next time
 function dropDirty(k) {
   if (k === 'equipment' && eqDirty) { eqWork = null; eqDirty = false; }
-  if (k === 'vessel' && vesselDirty) { vesselWork = null; vesselDirty = false; }
   if (profDirty[k]) { profWork[k] = null; profDirty[k] = false; }
 }
 function renderMenuPane() {
@@ -12617,7 +12614,7 @@ function menuHelpIcons(box) {
     if (topic) hd.append(' ', helpIcon(topic));
   }
 }
-window.addEventListener('beforeunload', e => { if (eqDirty || vesselDirty || Object.values(profDirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', e => { if (eqDirty || Object.values(profDirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
 
 // a form for a Menu tab: the same fields as the properties dialogs; read only (greyed) when you can't change it
 function paneForm(fields, obj, onChange, ro) {
@@ -13263,6 +13260,8 @@ function tabProfileRow(w) {
     if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return back();
     eqDirty = false; eqWork = null; eqTabName = w.name;
     await api('PUT', '/ui/schema/profile', { tab: w.name, id: pick.value, layout }); await load();
+    const nw = S.config.workspaces.find(x => x.name === w.name), np = S.profiles.find(x => x.id === pick.value);
+    if (np && layout === 'use' && slotsToPort(nw, np).length) return slotPorts(w.name);     // Rule 19.6: its pumps and valves need this Schema's Ports
     toast(!pick.value ? `The Tab "${w.name}" has no Equipment Profile now` : layout === 'keep' ? `The Tab "${w.name}" uses "${profileName(pick.value)}" and keeps its own layout` : `The Tab "${w.name}" uses "${profileName(pick.value)}"`);
   });
   const lock = p ? h('label', { class: 'toggle op-only', title: 'A locked Equipment Profile (its numbers, equipment and pipes) cannot be changed until it is unlocked. A Process can do the same with lock_Equipment and unlock_Equipment (they lock or unlock every Tab\'s profile).' },
@@ -13276,6 +13275,7 @@ function tabProfileRow(w) {
   const own = p && w.layoutFromProfile === false ? ' This Tab keeps its own layout (see the Default Layout tab).' : p ? ` The Tab shows its Default Layout (${p.drawn} equipment, ${plural(p.fittings || 0, 'fitting')}, ${plural(p.pipes, 'pipe')}).` : '';
   return h('div', { class: 'tabProfile' }, h('div', { class: 'bar wrap' }, h('span', {}, 'Tab ', h('b', {}, w.name), ' uses'), pick, lock,
     p ? h('button', { onclick: () => { eqTabName = w.name; openProfile(p.id); } }, 'Open') : '',
+    p && admin && slotsToPort(w, p).length ? h('button', { class: 'primary', title: 'This profile has pumps or motorized valves this Schema has not got yet. Give each one its Interface and Port; its look and place come from the profile (Rule 19.6).', onclick: guard(() => slotPorts(w.name)) }, `🔌 Give ${pvCount(slotsToPort(w, p).length)} their Ports`) : '',
     p && others.length && admin ? h('button', { class: 'admin-only', title: 'Copy the profile and use the copy on this Tab only', onclick: guard(() => makeUnique(w.name)) }, 'Make it unique to this Tab') : ''),
     h('div', { class: 'muted' }, share, own),
     p?.locked ? h('div', { class: 'eqWarn' }, `🔒 Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}${p.lockedAt ? ', ' + new Date(p.lockedAt).toLocaleString() : ''}. Its numbers, equipment and pipes can't be changed until it is unlocked.`) : '');
@@ -13288,16 +13288,49 @@ async function makeUnique(tab) {
   const r = await api('POST', '/ui/equipment', { name, from: p.id, assign: true, tab, layout: w.layoutFromProfile === false ? 'keep' : 'use' });
   eqDirty = false; eqTabName = tab; await load(); openProfile(r.made); toast(`"${name}" is now the Tab's own profile`);
 }
+// ---- A profile's pumps and motorized valves (Rule 19.6): the profile keeps each one's look and place as a slot, never its Interface, Port
+// or Name. A Schema that uses the profile gives each slot its own Interface and Port here; then it is a real Device on its Tab.
+const pvCount = n => n === 1 ? '1 pump or valve' : `${n} pumps and valves`;
+const slotsToPort = (w, p) => !w || w.layoutFromProfile === false ? [] : (p?.devices || []).filter(d => !S.config.elements.some(e => e.eqSlot === d.slot));
+async function slotPorts(tab) {
+  const w = S.config.workspaces.find(x => x.name === tab), p = S.profiles.find(x => x.id === w?.equipmentProfile);
+  const todo = slotsToPort(w, p); if (!todo.length) return toast('Every pump and valve of this profile has its Port');
+  if (editing) return toast('Save or exit Edit layout first', true);
+  if (!S.config.devices?.length) return toast('Add an Interface (board) first: ☰ Menu > Devices', true);
+  const o = { iface: S.config.devices[0].name };
+  if (await dialog(`"${p.name}" on the Tab ${tab}: give its pumps and valves their Ports`, [
+    ['_n', `${pvCount(todo.length)} of this Equipment Profile ${todo.length === 1 ? 'has' : 'have'} no Port in this Schema yet: ${todo.map(d => d.look.label || '?').join(', ')}. Each one takes the next free Port of the Interface you pick, with its look and place from the profile. You can change a Port after in its Properties.`, 'note'],
+    ['iface', 'Interface (the board they are wired to)', 'sel', S.config.devices.map(d => [d.name, d.name])]], o) !== 'ok') return;
+  readFields(o);
+  const iface = S.config.devices.find(d => d.name === o.iface);
+  const tabId = w.id || defaultTabId(tab, S.config.workspaces.map(x => x.id).filter(Boolean));
+  setEditing(true); if (!draft) return;
+  const used = new Set([...draft.elements.map(e => e.name), ...draft.graphics.map(g => g.name)].filter(Boolean).map(n => n.toLowerCase())), made = [];
+  for (const d of todo) {
+    const el = { ...clone(d.look), eqSlot: d.slot, device: iface.name, workspace: tab, label: d.look.label || 'Pump' };
+    const free = freePins(el, draft.elements, draft.devices).filter(q => !draft.elements.some(x => x.device === el.device && String(x.channel ?? '') === String(q)));
+    if (!free.length) { toast(`${iface.name} has no free Port for ${el.label}. The ones before it got theirs: pick another Interface for the rest.`, true); break; }
+    el.channel = free[0];
+    el.name = uniqueName(suggestName({ iface: iface.id, port: el.channel, code: defaultCode(el), type: el.type, label: el.label, tab: tabId }), n => used.has(n.toLowerCase()), tabId);
+    used.add(el.name.toLowerCase()); draft.elements.push(el); made.push(el);
+    for (const g of draft.graphics) if (g.kind === 'pipe') for (const k of ['from', 'to']) if (String(g[k] ?? '').startsWith(`dev:@${d.slot}:`)) g[k] = g[k].replace(`dev:@${d.slot}:`, `dev:${el.name}:`);
+  }
+  wsName = tab;
+  for (const e of made) keepOnBuild(e);       // Rule 4.1: on the 🔨 Build Tab first; Save Build ... > Move to Tab puts each back in its spot
+  renderTabs(); renderWs();
+  if (made.length) toast(`${made.map(e => `${e.label}: Port ${e.channel}`).join(', ')}. They are on the 🔨 Build Tab: press 💾 Save Build ... > Move to Tab, then Save layout.`, false, 10000);
+}
 async function newProfile(tab) {
   if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
   const free = S.config.workspaces.filter(x => !x.equipmentProfile).map(x => x.name);
   if (tab && !free.includes(tab)) free.unshift(tab);
-  const w = { name: '', from: '', units: 'US', tab: tab ?? free[0] ?? '' };
+  const w = { name: '', from: '@interview', units: S.config.brewDefaults?.units || 'US', tab: tab ?? free[0] ?? '' };
   if (await dialog('New Equipment Profile', [['name', 'Name (for example "Oak Barn Hot Side" or "Fermentation room")', 'text'],
-    ['from', 'Start from', 'sel', [['', 'The usual numbers (change them after)'], ...S.profiles.map(p => [p.id, `A copy of "${p.name}"`])]],
+    ['from', 'Start from', 'sel', [['@interview', 'Answer a few questions (the Interview)'], ['', 'The usual numbers (change them after)'], ...S.profiles.map(p => [p.id, `A copy of "${p.name}"`])]],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)],
     ['tab', `Use it on a Tab of the Schema "${S.schemas.active?.name}"`, 'sel', [['', '(not now)'], ...free.map(n => [n, 'Tab ' + n + (S.config.workspaces.find(x => x.name === n)?.equipmentProfile ? ' (instead of its profile now)' : '')])]]], w) !== 'ok') return;
   readFields(w);
+  if (w.from === '@interview') return eqInterview({ name: w.name, tab: w.tab, units: w.units });   // Rule 19.6
   // a new blank profile takes the equipment on its Tab as its Default Layout; a copy keeps a Tab that already has equipment as it is
   const drawn = S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === w.tab);
   const r = await api('POST', '/ui/equipment', { name: w.name, from: w.from || undefined, assign: !!w.tab, tab: w.tab || undefined, layout: w.from && drawn ? 'keep' : 'use' });
@@ -13308,10 +13341,187 @@ async function newProfile(tab) {
   }
   eqDirty = false; await load(); openProfile(r.made); toast(`Equipment Profile "${w.name}" made`);
 }
+// ---- The Equipment Profile Interview (OakBarn Brewery, 2026-11-13, Rule 19.6, Help 196; public/eqinterview.js). One page at a time
+// with ◀ Back and Next ▶; every answer starts from the Default settings, so Next all the way through makes a working profile. It ends
+// with the Review page, then everything goes on the 🔨 Build Tab (Rule 4.1): 💾 Save Build ... > Move to Tab puts it on its Tab.
+function ivPage(title, fields, obj, { first = false, last = false } = {}) {
+  return new Promise(res => {
+    const body = h('div', { class: 'miniBody ivBody' }), d = h('dialog', { class: 'miniDlg ivDlg' });
+    const bar = () => h('div', { class: 'bar' }, h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('span', { class: 'spacer' }),
+      first ? '' : h('button', { type: 'button', onclick: () => done('back') }, '◀ Back'),
+      h('button', { type: 'button', class: 'primary', onclick: () => done('next') }, last ? '🔨 Build' : 'Next ▶'));
+    d.append(h('h3', {}, title), bar(), body);
+    document.body.append(d); bindForm(body, fields, obj);
+    const done = r => { try { readFields(obj, body); } catch (e) { if (r === 'next') return toast(e.message, true); } d.close(); d.remove(); res(r); };
+    const cancel = () => { if (!confirm('Stop the Equipment Profile Interview? Nothing is made.')) return; d.close(); d.remove(); res('cancel'); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
+    d.showModal();
+  });
+}
+const IV_VALVES = () => (TPL?.device || []).filter(t => t.cls === 'skynet' && (t.type || 'digitalOut') === 'digitalOut' && /Valve/i.test(t.name))
+  .map(t => [t.name, `${skyFamily(t)}: ${skyOrientLabel(t)}`]);
+const IV_MANUAL = () => MV_PICS.filter(([p]) => p !== TAP_PIC);
+// the look of a new pump or valve (the same as Add Device makes it)
+function ivLook(kind, x) {
+  if (kind === 'pump') return { type: 'digitalOut', subtype: 'pump', imageOff: pumpPic(x.model), imageOverlay: x.overlay || undefined, cover: x.cover || 'None',
+    w: 150, h: 150, ipIn: 'left', ipOut: 'right', hideValue: true, onText: 'ON', offText: 'OFF' };
+  const e = skyDevPreset(x.template) || { type: 'digitalOut', subtype: 'valve' };
+  return { ...e, imageOverlay: x.overlay || undefined, w: e.w || 150, h: e.h || 150, hideValue: true, onText: 'OPEN', offText: 'CLOSED' };
+}
+async function eqInterview(pre = {}) {
+  if (!can('admin')) return toast('Only an admin can make an Equipment Profile', true);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  if (!TPL) await loadTemplates();
+  const units = pre.units || S.config.brewDefaults?.units || 'US';
+  const free = S.config.workspaces.filter(w => !w.equipmentProfile && !w.build).map(w => w.name);
+  const drawn = n => S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === n);     // a Tab with vessels keeps them: the new ones go beside them
+  const tab0 = pre.tab && free.includes(pre.tab) ? pre.tab : free.find(n => !drawn(n)) || '';
+  const a = ivStart({ name: pre.name || '', tab: tab0 || '__new', units, fields: EQUIP_FIELDS, fermentation: /ferment/i.test(tab0) });
+  a.iface = S.config.devices?.[0]?.name || '';
+  a.newTab = '';
+  const vt = TPL.vessel.filter(t => (t.vesselType || 'vessel') === 'vessel' && !t.integrated && t.name !== GENERAL_TEMPLATE);
+  const u = volUnit(units);
+  // each page: [title, fields, then (what the answers become)]
+  const pages = [
+    () => ['1. Start', [['name', 'Name of the Equipment Profile (for example "My Hot Side")', 'text', null, false, 'b'],
+      ['tab', 'The Tab it is for', 'sel', [...free.map(n => [n, 'Tab ' + n + (drawn(n) ? ' (it has vessels: they stay, the new ones go beside them)' : '')]), ['__new', '➕ A new Tab (name it below)']]],
+      ['newTab', 'Name of the new Tab (only for ➕ A new Tab)', 'text'],
+      ['iface', 'Interface (the board the pumps and valves are wired to): each one takes its next free Port', 'sel', (S.config.devices || []).map(d => [d.name, d.name])],
+      ['_u', `Units: ${UNIT_SYSTEMS[units]} (from ☰ Menu > Default settings).`, 'note']]],
+    () => ['2. How many Vessels?', [['nV', 'How many vessels', 'sel', Array.from({ length: IV_MAX.vessels }, (_, i) => [String(i + 1), String(i + 1)])]], { nV: String(a.vessels.length) }],
+    () => ['3. The type of each Vessel', a.vessels.map((v, i) => ['t' + i, `Vessel ${i + 1}`, 'sel', IV_TYPES.map(t => [t, t])]), Object.fromEntries(a.vessels.map((v, i) => ['t' + i, v.type]))],
+    () => ['4. Pick or build each Vessel', a.vessels.flatMap((v, i) => [['_h' + i, `Vessel ${i + 1}: ${v.type}`, 'head'],
+      ['p' + i, 'Vessel Device or Widget', 'sel', vesselChoices(v.type, vt)], ['l' + i, 'Label', 'text'],
+      ...(v.type === 'Fermentor' || v.type === 'Bright Tank' ? [['mx' + i, `Largest batch (${u})`, 'num'], ['mn' + i, `Smallest batch (${u})`, 'num']]
+        : [['vo' + i, `Size (${u})`, 'num'], ['ds' + i, `Dead space, left in the bottom (${u})`, 'num']])]),
+      Object.fromEntries(a.vessels.flatMap((v, i) => [['p' + i, v.pick || firstPick(v.type, vt)], ['l' + i, v.label || vesselLabel(a.vessels.map(x => x.type), i)],
+        ['vo' + i, v.volume], ['ds' + i, v.deadspace], ['mx' + i, v.maxVolume], ['mn' + i, v.minVolume]]))],
+    () => ['5. How many Pumps?', [['nP', 'How many pumps', 'sel', Array.from({ length: IV_MAX.pumps + 1 }, (_, i) => [String(i), i ? String(i) : 'None'])]], { nP: String(a.pumps.length) }],
+    () => a.pumps.length ? ['6. Each Pump', a.pumps.flatMap((p, i) => [['_h' + i, `Pump ${i + 1}`, 'head'],
+      ['m' + i, 'Type', 'sel', PUMP_MODELS.map(([t, k]) => [k, t])], ['c' + i, 'Cover', 'sel', COVER_CHOICES.filter(([c]) => c !== 'User')],
+      ['o' + i, 'Overlay', 'sel', OVERLAY_CHOICES(p.overlay, { subtype: 'pump' })], ['l' + i, 'Label', 'text'], ['v' + i, 'Label Visible', 'bool'],
+      ['k' + i, 'Toggle', 'sel', PUMP_TAP(p.tap)]]),
+      Object.fromEntries(a.pumps.flatMap((p, i) => [['m' + i, p.model], ['c' + i, p.cover], ['o' + i, p.overlay], ['l' + i, p.label], ['v' + i, p.labelVisible], ['k' + i, p.tap]]))] : null,
+    () => ['7. How many Motorized Valves?', [['nM', 'How many motorized valves', 'sel', Array.from({ length: IV_MAX.valves + 1 }, (_, i) => [String(i), i ? String(i) : 'None'])]], { nM: String(a.valves.length) }],
+    () => a.valves.length ? ['8. Each Motorized Valve', a.valves.flatMap((x, i) => [['_h' + i, `Motorized Valve ${i + 1}`, 'head'],
+      ['m' + i, 'Type (and which way it stands)', 'sel', IV_VALVES()], ['o' + i, 'Overlay', 'sel', OVERLAY_CHOICES(x.overlay, { subtype: 'valve' })],
+      ['l' + i, 'Label', 'text'], ['v' + i, 'Label Visible', 'bool'], ['k' + i, 'Toggle', 'sel', ONE_CLICK_TAP(x.tap)]]),
+      Object.fromEntries(a.valves.flatMap((x, i) => [['m' + i, x.template], ['o' + i, x.overlay], ['l' + i, x.label], ['v' + i, x.labelVisible], ['k' + i, x.tap]]))] : null,
+    () => ['9. Manual Valves', [['nH', 'How many Manual Valves (you turn them by hand; Skynet asks you to, Rule 1.28)', 'sel', Array.from({ length: IV_MAX.manual + 1 }, (_, i) => [String(i), i ? String(i) : 'None'])],
+      ...a.manual.flatMap((x, i) => [['mi' + i, `Manual Valve ${i + 1}: picture`, 'sel', IV_MANUAL()], ['ml' + i, `Manual Valve ${i + 1}: Label`, 'text']])],
+      { nH: String(a.manual.length), ...Object.fromEntries(a.manual.flatMap((x, i) => [['mi' + i, x.image], ['ml' + i, x.label]])) }],
+    () => ['10. And so on', [['recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)], ['chiller', 'Chiller', 'sel', [['none', 'None'], ...Object.entries(CHILLERS)]],
+      ['manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)], ['manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)]],
+      { recirc: a.recirc, chiller: a.chiller, manifold: a.manifold, manifoldKind: a.manifoldKind }],
+    () => ['11. The numbers', EQUIP_FIELDS.map(f => [f[0], `${f[1]} (${unitOf(f, units)})`, 'num']), { ...a.numbers }],
+    () => { const p = ivProblems(ivFinal(a)); let rows = [];
+      try { rows = p.length ? [] : ivDevicesFor(a).map(e => `${e.label}: ${e.name} (Port ${e.channel})`); } catch (e) { p.push(e.message); }
+      return ['12. Review', [['_r', p.length ? '⚠ ' + p.join('\n⚠ ') + '\n\nPress ◀ Back to fix it.' : [`Equipment Profile "${a.name}" on the Tab ${ivTab(a)}.`,
+        `Vessels: ${a.vessels.map(v => v.label + (v.pick === IV_BUILD ? ' (🔨 built after)' : '')).join(', ')}.`,
+        rows.length ? `Pumps and Motorized Valves on ${a.iface}: ${rows.join('; ')}.` : 'No pumps or motorized valves.',
+        a.manual.length ? `Manual Valves: ${a.manual.map(m => m.label).join(', ')}.` : '',
+        '🔨 Build puts them all on the 🔨 Build Tab. Then press 💾 Save Build ... > Move to Tab, and Save layout. Pipes are not drawn: pipe them the way yours are (Draw pipe).'].filter(Boolean).join('\n'), 'note']], {}, p.length > 0]; }];
+  const keep = (i, o) => {     // what each page's answers become
+    if (i === 0) { a.name = String(o.name ?? '').trim(); a.tab = o.tab; a.newTab = String(o.newTab ?? '').trim(); a.iface = o.iface || ''; }
+    if (i === 1) { const n = +o.nV || 1; a.vessels = ivResize(a.vessels, n, () => ({ type: 'Brew Kettle', pick: '', label: '' })); }
+    if (i === 2) a.vessels.forEach((v, k) => { if (o['t' + k] !== v.type) Object.assign(v, { type: o['t' + k], pick: '', label: '' }); });
+    if (i === 3) a.vessels.forEach((v, k) => Object.assign(v, { pick: o['p' + k], label: String(o['l' + k] ?? '').trim(), volume: o['vo' + k] ?? '', deadspace: o['ds' + k] ?? '', maxVolume: o['mx' + k] ?? '', minVolume: o['mn' + k] ?? '' }));
+    if (i === 4) a.pumps = ivResize(a.pumps, o.nP, ivPump);
+    if (i === 5) a.pumps.forEach((p, k) => Object.assign(p, { model: o['m' + k], cover: o['c' + k], overlay: o['o' + k], label: String(o['l' + k] ?? '').trim(), labelVisible: !!o['v' + k], tap: o['k' + k] }));
+    if (i === 6) a.valves = ivResize(a.valves, o.nM, ivValve);
+    if (i === 7) a.valves.forEach((x, k) => Object.assign(x, { template: o['m' + k], overlay: o['o' + k], label: String(o['l' + k] ?? '').trim(), labelVisible: !!o['v' + k], tap: o['k' + k] }));
+    if (i === 8) { a.manual.forEach((x, k) => Object.assign(x, { image: o['mi' + k] ?? x.image, label: String(o['ml' + k] ?? x.label).trim() })); const n = +o.nH || 0; const more = n !== a.manual.length; a.manual = ivResize(a.manual, n, ivManual); return more; }
+    if (i === 9) Object.assign(a, { recirc: o.recirc, chiller: o.chiller, manifold: o.manifold, manifoldKind: o.manifoldKind });
+    if (i === 10) for (const f of EQUIP_FIELDS) a.numbers[f[0]] = o[f[0]];
+    return false;
+  };
+  for (let i = 0; i < pages.length;) {
+    const pg = pages[i](); if (!pg) { i += dir; continue; }
+    const [title, fields, init, stop] = pg, o = init ?? a;
+    const r = await ivPage(`Equipment Profile Interview: ${title}`, fields, o, { first: i === 0, last: i === pages.length - 1 });
+    if (r === 'cancel') return;
+    if (r === 'back') { dir = -1; i--; continue; }
+    if (i === pages.length - 1) { if (stop) { toast('Fix what the Review says first (◀ Back)', true); continue; } break; }
+    dir = 1; if (!keep(i, o)) i++;      // a new number of Manual Valves shows that page again with their rows
+  }
+  return ivBuild(a);
+}
+let dir = 1;
+const ivTab = a => a.tab === '__new' ? a.newTab : a.tab;
+// the answers with the new Tab's name in place, for the checks
+const ivFinal = a => ({ ...a, tab: ivTab(a) });
+function ivDevicesFor(a, elements = S.config.elements, devices = S.config.devices) {
+  const iface = (devices || []).find(d => d.name === a.iface);
+  if (!iface && (a.pumps.length || a.valves.length)) throw new Error('Pick the Interface (board) first');
+  const tab = ivTab(a), tabId = S.config.workspaces.find(w => w.name === tab)?.id || defaultTabId(tab, S.config.workspaces.map(w => w.id).filter(Boolean));
+  const taken = [...(elements || []).map(e => e.name), ...S.config.graphics.map(g => g.name)].filter(Boolean);
+  return iface ? ivDevices(a, { iface, tabId, elements, devices, taken, look: ivLook }) : [];
+}
+// make it: the Tab (if new) and the profile on it, then everything on the 🔨 Build Tab
+async function ivBuild(a) {
+  const tab = ivTab(a);
+  if (a.tab === '__new') {
+    const bad = elementNameError(tab, 'Tab'); if (bad) return toast(bad, true);
+    if (S.config.workspaces.some(w => w.name.toLowerCase() === tab.toLowerCase())) return toast(`There is already a Tab "${tab}"`, true);
+    const id = defaultTabId(tab, S.config.workspaces.map(w => w.id).filter(Boolean));
+    await api('PUT', '/ui/layout', { workspaces: [...clone(S.config.workspaces), { name: tab, id, width: 1600, height: 900, ...tabLook() }], elements: S.config.elements, graphics: S.config.graphics });
+    await load();
+  }
+  const r = await api('POST', '/ui/equipment', { name: a.name, assign: true, tab, layout: 'use' });
+  const p0 = r.list.find(x => x.id === r.made);
+  await api('PUT', `/ui/equipment/${r.made}`, { ...p0, units: a.units, ...Object.fromEntries(EQUIP_FIELDS.map(f => [f[0], a.numbers[f[0]] === '' || a.numbers[f[0]] === undefined ? f[a.units === 'Metric' ? 5 : 4] : +a.numbers[f[0]]])) });
+  eqDirty = false; eqWork = null; await load();
+  setEditing(true); if (!draft) throw new Error('Edit layout did not open: build it on a computer, not a phone');
+  const taken = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
+  const freeName = n => { let x = n, i = 2; while (taken().some(t => t.toLowerCase() === x.toLowerCase())) x = `${n}_${i++}`; return x; };
+  const types = a.vessels.map(v => v.type), plan = { tab, vessels: [], equipment: [], elements: [] }, placed = { v: [], e: [] }, later = [];
+  const nums = (g, v) => { for (const k of ['volume', 'deadspace', 'maxVolume', 'minVolume']) if (v[k] !== '' && v[k] !== undefined && Number.isFinite(+v[k])) g[k] = +v[k]; };
+  a.vessels.forEach((v, i) => {
+    if (v.pick === IV_BUILD) { later.push(v); return; }
+    const t = (v.pick !== IV_PLAIN && tplOf('vessel', v.pick)) || tplOf('vessel', GENERAL_TEMPLATE); if (!t) return;
+    const g = placeTabVessel(t, tab, freeName(`${shortOf(v.type, i, types)}_Vessel`));
+    Object.assign(g, { label: v.label, vtype: v.type === 'Fermentor' ? 'Fermenter' : v.type, units: a.units }); nums(g, v);
+    plan.vessels.push({ label: v.label }); placed.v.push(g);
+  });
+  const addEq = (x, t) => { const g = t && !t.integrated ? placeTabVessel(t, tab, freeName(x.label.replace(/\s+/g, '_'))) : eqWidget(x.kind, tab, freeName(x.label.replace(/\s+/g, '_'))); g.label = x.label; plan.equipment.push(x); placed.e.push(g); };
+  if (a.recirc === 'rims') addEq({ kind: 'rims', label: 'RIMS tube' }, tplOf('vessel', 'RIMS_Tube'));
+  if (a.recirc === 'herms') addEq({ kind: 'herms', label: 'HERMS coil', in: a.vessels.find(v => v.type === 'HLT')?.label }, null);
+  const ch = { immersion: ['ccoil', 'Immersion_Chiller', 'Immersion chiller'], plate: ['pchiller', 'Plate_Chiller', 'Plate chiller'], counterflow: ['pchiller', 'Counterflow_Chiller', 'Counterflow chiller'] }[a.chiller];
+  if (ch) addEq({ kind: ch[0], label: ch[2] }, tplOf('vessel', ch[1]));
+  const devs = ivDevicesFor(a, draft.elements, draft.devices);
+  devs.forEach((e, i) => { e.workspace = tab; e.place = { at: 'pumps', i }; plan.elements.push(e); });
+  draft.elements.push(...devs);
+  for (const m of a.manual) {
+    const g = { id: newId(), kind: 'ip', fitting: 'manualValve', workspace: tab, x: 0, y: 0, w: 75, h: 75, color: '#8a8f96', confirmation: true, label: m.label, labelVisible: true };
+    if (m.image) g.image = m.image;
+    draft.graphics.push(g); giveName(g, draft.graphics);
+    plan.elements.push(g); g.place = { at: 'pumps', i: devs.length + a.manual.indexOf(m) };
+  }
+  let mfG = null;
+  if (a.manifold && a.manifold !== 'none') {
+    const t = tplOf('fitting', a.manifold), ifName = a.iface || draft.devices?.[0]?.name;
+    if (t) {
+      const g = placeTabFitting(t, tab, freeName(MF_TPLS[t.name]?.prefix + '_1'), null), keys = mfKeys(g), mf = { mfIface: ifName };
+      Object.assign(g, { label: mfNext(mfInfo(g).label, draft.graphics.map(x => x.label)), labelVisible: false });
+      const pins = a.manifoldKind === 'motorized' ? freePins({ type: 'digitalOut', subtype: 'valve', device: ifName }, draft.elements, draft.devices) : [];
+      keys.forEach((k, i) => { mf[k + '_mfk'] = a.manifoldKind; if (a.manifoldKind === 'motorized') mf[k + '_mfpin'] = pins[i] ?? ''; });
+      applyMf(g, mf, tab, g.label, true); placeUnitParts(g); mfG = g;
+    }
+  }
+  layoutSchema(plan, placed, mfG);
+  // all of it to the 🔨 Build Tab (Rule 4.1): each piece with everything on it, so Save Build ... puts it back in the same spot on its Tab
+  const onTab = [...draft.elements.filter(e => e.workspace === tab && (devs.includes(e) || placed.v.some(g => e.integratedIn === g.id) || (mfG && e.integratedIn === mfG.id))),
+    ...draft.graphics.filter(g => g.workspace === tab && (placed.v.includes(g) || placed.e.includes(g) || g === mfG || plan.elements.includes(g) || [...placed.v, ...placed.e, mfG].some(v => v && (g.attachTo === v.id || g.onVessel === v.id || g.capOn === v.id || bundleParts(v).includes(g)))))];
+  wsName = tab;
+  for (const x of new Set(onTab)) keepOnBuild(x);
+  renderTabs(); renderWs();
+  toast(`"${a.name}" is made and the Tab ${tab} uses it. Its ${placed.v.length} vessel${placed.v.length === 1 ? '' : 's'}, ${devs.length} pump${devs.length === 1 ? '' : 's'} and valve${devs.length === 1 ? '' : 's'} and the rest are on the 🔨 Build Tab: press 💾 Save Build ... > Move to Tab, then Save layout.`, false, 12000);
+  // 🔨 a new Vessel Device: the Vessel Device Builder opens for each one, its questions filled in from the interview
+  for (const v of later) await vesselBuilder({ label: v.label, vtype: v.type, units: a.units, ...(v.volume !== '' && Number.isFinite(+v.volume) ? { volume: +v.volume } : {}), workspace: tab });
+}
 function openProfile(id) {
   if (eqWork?.id !== id && eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
   const p = S.profiles.find(x => x.id === id); if (!p) return toast('That profile is gone', true);
-  if (eqWork?.id !== id) { vesselWork = null; vesselDirty = false; }
   eqWork = clone(p); eqDirty = false;
   if (menuTab === 'equipment') renderMenuPane(); else openMenuTab('equipment');
 }
@@ -13320,7 +13530,7 @@ async function deleteProfile(id) {
   const used = p.usedOn?.length ? `\n\nIt is used by: ${usedOnText(p)}. Those Tabs will have no Equipment Profile. Their equipment and pipes stay on them.` : '';
   if (!confirm(`Delete the Equipment Profile "${p.name}"?${used}`)) return;
   await api('DELETE', `/ui/equipment/${id}`);
-  if (eqWork?.id === id) { eqWork = null; eqDirty = false; vesselWork = null; vesselDirty = false; }
+  if (eqWork?.id === id) { eqWork = null; eqDirty = false; }
   await load(); toast(`"${p.name}" deleted`);
 }
 async function saveProfile() {
@@ -13338,7 +13548,7 @@ function eqEditor() {
     admin ? h('button', { class: 'primary', onclick: guard(async () => { f.read(); await saveProfile(); }) }, 'Save') : '');
   const fields = w => [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, w.units)})`, 'num']), ['notes', 'Notes', 'area'],
-    ['_m', 'Batch size and top up water are set in the Recipe, boil time and boil off in the Boil Profile, and each vessel\'s size, dead space and trub loss on the Vessel tab.', 'note']];
+    ['_m', 'Batch size and top up water are set in the Recipe, boil time and boil off in the Boil Profile, and each vessel\'s size, dead space and trub loss in its Properties on the Tab (the Equipment Profile Interview asks them).', 'note']];
   const f = paneForm(fields, p, () => { try { f.read(); } catch { } changed(); }, !admin);
   // a volume check: a batch size and a Boil Profile (the Recipe gives these from the next stage)
   const chk = { batchSize: S.config.brewDefaults?.batchSize ?? (p.units === 'Metric' ? 20 : 5), boil: S.config.brewDefaults?.boilProfile || S.boilProfiles[0]?.id || '' };
@@ -13397,153 +13607,20 @@ function eqPane(p) {
   if (p.equipment?.length) out.append(oldEqList(p, w));
   return out;
 }
-// the older list made on the Vessel tab (before Templates); each one opens on the Vessel tab
+// the older list of equipment (made before Vessel Templates): each one can still go on the Tab. The Vessel tab that made them is replaced
+// by the Equipment Profile Interview (Rule 19.6); a new vessel is a Vessel Template, or one built with the Vessel Device Builder (19.5).
 function oldEqList(p, w) {
   const admin = can('admin') && !p.locked, onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
   const u = volUnit(p.units), tab = w?.name || 'Equipment';
-  const rows = (p.equipment || []).map(it => h('tr', { title: 'Double-click to open it on the Vessel tab', ondblclick: rowDbl(guard(() => openVessel(it.id))) },
+  const rows = (p.equipment || []).map(it => h('tr', {},
     h('td', {}, it.name), h('td', {}, `${EQ[it.vesselType]?.title || it.vesselType}${it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : ''}`),
     h('td', {}, it.volume !== undefined ? `${it.volume} ${u}` : ''), h('td', {}, it.heatKind ? HEAT_KINDS[it.heatKind] + (it.heatDevice ? ': ' + it.heatDevice : '') : ''),
     h('td', {}, it.bundled ? '📦 Bundled' : 'Loose'), h('td', {}, onTab(it) ? '✓ on ' + onTab(it).workspace : h('span', { class: 'muted' }, 'not on a tab')),
-    h('td', {}, h('button', { onclick: guard(() => openVessel(it.id)) }, admin ? 'Open in Vessel tab' : 'View'),
-      admin ? h('button', { title: `Put it on the Tab "${tab}" (or bring the drawing there up to date), with its ports as IPs`, onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : `Put on Tab ${tab}`) : '',
-      admin ? h('button', { title: 'Make a copy of it (size, heat, probe, ports, bundle) that opens on the Vessel tab to be saved', onclick: guard(() => cloneVessel(it.id)) }, 'Clone') : '')));
-  const kind = h('select', {}, ...EQ_KINDS.map(k => h('option', { value: k }, EQ[k].title)));
-  return h('div', {}, h('h3', {}, 'Made on the Vessel tab'),
-    h('p', { class: 'muted' }, 'Vessels made on the Vessel tab, before Templates. They go on the Tab with "Put on Tab".'),
+    h('td', {}, admin ? h('button', { title: `Put it on the Tab "${tab}" (or bring the drawing there up to date), with its ports as IPs. Then change it in its Properties on the Tab.`, onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : `Put on Tab ${tab}`) : '')));
+  return h('div', {}, h('h3', {}, 'Made before Templates'),
+    h('p', { class: 'muted' }, 'Equipment made before Vessel Templates. "Put on Tab" draws it on the Tab; then change it in its Properties there.'),
     h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Kind', 'Size', 'Heat', 'Bundle', 'This Schema', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
-    admin ? h('div', { class: 'bar' }, kind, h('button', { onclick: guard(() => newVessel(kind.value)) }, 'Add'),
-      h('button', { onclick: guard(() => placeEqItems(p, p.equipment)) }, `Put all on Tab ${tab}`)) : '');
-}
-
-// ---- Vessel tab: one vessel (or chiller, coil, filter) of the open Equipment Profile
-// Fritz, 2026-10-20: size, dead space, graphic, extra trub loss, type (Other has its own name); the heat source its type allows
-// and the device that heats it; the temperature probe on the same board as that device; a fermenter's largest and smallest
-// batch, trub loss, probe and how often its temperature is reported; the ports, as on the Equipment tab.
-function vesselProfile() {
-  if (!eqWork) { const pid = eqTab()?.equipmentProfile; if (pid && S.profiles.some(x => x.id === pid)) eqWork = clone(S.profiles.find(x => x.id === pid)); }
-  return eqWork;
-}
-function openVessel(id) {
-  if (vesselDirty && vesselWork?.item.id !== id && !confirm('The open vessel has changes that are not saved. Leave them?')) return;
-  const it = eqWork?.equipment?.find(x => x.id === id); if (!it) return;
-  vesselWork = { item: toPortFields(clone(it)), isNew: false }; vesselDirty = false;
-  if (menuTab === 'vessel') renderMenuPane(); else openMenuTab('vessel');
-}
-function newVessel(kind = 'vessel') {
-  if (vesselDirty && !confirm('The open vessel has changes that are not saved. Leave them?')) return;
-  const p = vesselProfile(); if (!p) return toast('Open an Equipment Profile first', true);
-  const n = (p.equipment || []).filter(x => x.vesselType === kind).length + 1;
-  vesselWork = { isNew: true, item: toPortFields({ id: 'e' + Date.now().toString(36), vesselType: kind, name: (kind === 'vessel' ? 'Vessel' : EQ[kind].title) + ' ' + n, vtype: EQ[kind].types[0], image: EQ[kind].image, bundled: true, ports: eqDefaultPorts(kind) }) };
-  vesselDirty = true;
-  if (menuTab === 'vessel') renderMenuPane(); else openMenuTab('vessel');
-}
-// Clone a piece of equipment of the open profile: the copy opens on the Vessel tab as a new one, saved with Save there
-function cloneVessel(id) {
-  if (vesselDirty && !confirm('The open vessel has changes that are not saved. Leave them?')) return;
-  const p = vesselProfile(), it = p?.equipment?.find(x => x.id === id); if (!it) return;
-  const names = new Set(p.equipment.map(x => String(x.name).toLowerCase()));
-  let name = `${it.name} copy`; for (let i = 2; names.has(name.toLowerCase()); i++) name = `${it.name} copy ${i}`;
-  vesselWork = { isNew: true, item: toPortFields({ ...clone(it), id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name }) };
-  vesselDirty = true;
-  if (menuTab === 'vessel') renderMenuPane(); else openMenuTab('vessel');
-  toast(`"${name}" is a copy of "${it.name}". Change what you need, then Save.`);
-}
-// the port settings as flat fields for the form (and back)
-function toPortFields(w) {
-  for (const k of Object.keys(EQ[w.vesselType].ports)) { const q = w.ports?.[k] || {}; w[k + '_on'] = !!q.installed; w[k + '_pos'] = q.position; w[k + '_std'] = q.standard; }
-  return w;
-}
-function fromPortFields(w) {
-  const C = EQ[w.vesselType];
-  w.ports = {};
-  for (const [k, d] of Object.entries(C.ports)) {
-    w.ports[k] = { installed: !!w[k + '_on'], position: w[k + '_pos'] || portDefPos(d), standard: w[k + '_std'] || EQ_STANDARDS[0] };
-    delete w[k + '_on']; delete w[k + '_pos']; delete w[k + '_std'];
-  }
-  return w;
-}
-const ELECTRIC_TYPES = ['pid', 'hysteresis', 'deadband', 'dutyCycle', 'pwmOut'];
-// the devices that can heat a vessel: gas valves (a valve whose Service is Gas) or electric elements (an output of kind
-// element, or a PID, hysteresis, duty cycle or PWM output); RIMS and HERMS: the profile's RIMS tubes or HERMS vessels
-function heatDevices(kind, p) {
-  const els = S.config.elements;
-  if (kind === 'gas') return els.filter(e => e.type === 'digitalOut' && e.subtype === 'valve' && e.service === 'gas').map(e => [e.name, e.name + (e.device ? ` (${e.device})` : '')]);
-  if (kind === 'electric') return els.filter(e => (e.type === 'digitalOut' && e.subtype === 'element') || ELECTRIC_TYPES.includes(e.type)).map(e => [e.name, e.name + (e.device ? ` (${e.device})` : '')]);
-  if (kind === 'rims' || kind === 'herms') return (p.equipment || []).filter(x => x.vtype === (kind === 'rims' ? 'RIMS' : 'HERMS')).map(x => [x.name, x.name]);
-  return [];
-}
-// temperature probes: those on the same board (interface) as the heat device; any probe when there is none (unheated)
-function probesFor(w) {
-  const dev = ['gas', 'electric'].includes(w.heatKind) && S.config.elements.find(e => e.name === w.heatDevice)?.device;
-  const all = S.config.elements.filter(e => e.type === 'temperature');
-  return (dev ? all.filter(e => !e.device || e.device === dev) : all).map(e => [e.name, e.name + (e.device ? ` (${e.device})` : '')]);
-}
-function vesselFields(p) {
-  return w => {
-    const C = EQ[w.vesselType], u = volUnit(p.units), isV = w.vesselType === 'vessel', ferm = isV && w.vtype === 'Fermenter';
-    const types = isV ? Object.keys(VESSEL_TYPES).filter(t => !['MLT', 'Whirlpool'].includes(t) || t === w.vtype) : null;
-    const f = F.vesselNew(w), ports = f.slice(4, f.findIndex(x => x[0] === '_look'));
-    const heat = isV && !ferm ? heatKindsFor(w.vtype) : [];
-    if (heat.length && !heat.includes(w.heatKind)) w.heatKind = heat[0];
-    if (!heat.length) { delete w.heatKind; delete w.heatDevice; delete w.otherHeat; }
-    const devs = heat.length ? heatDevices(w.heatKind, p) : [];
-    const probes = probesFor(ferm ? {} : w);
-    return [['name', 'Name', 'text'],
-      isV ? ['vtype', 'Type', 'sel', types, true] : ['vtype', 'Type', 'vlist', w.vesselType + '.types'],
-      ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
-      ['label', 'Label (never blank)', 'text'], ['labelVisible', 'Show label', 'yn', true], ['image', 'Graphic (picture path)', 'path'],
-      ['_s', 'Size', 'head'],
-      ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
-        : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
-      ...(heat.length ? [['_h', 'Heat', 'head'], ['heatKind', 'Heat Source', 'sel', heat.map(k => [k, HEAT_KINDS[k]]), true],
-        ...(['gas', 'electric', 'rims', 'herms'].includes(w.heatKind) ? [['heatDevice', { gas: 'Gas valve (a valve with Service: Gas)', electric: 'Electric element', rims: 'RIMS tube (in this profile)', herms: 'HERMS vessel (in this profile)' }[w.heatKind], 'sel', [['', devs.length ? '(pick one)' : '(none set up yet)'], ...devs], true]] : []),
-        ...(w.heatKind === 'other' ? [['otherHeat', 'Other heat source (what it is)', 'text']] : [])] : []),
-      ...(isV ? [['_t', 'Temperature', 'head'], ['probe', ferm || !['gas', 'electric'].includes(w.heatKind) ? 'Temperature Probe' : 'Temperature Probe (on the same board as the heat device)', 'sel', [['', probes.length ? '(none)' : '(no probes set up yet)'], ...probes]]] : []),
-      ...(ferm ? [['reportEvery', 'Report the temperature every', 'num'], ['reportUnit', 'Minutes, hours or days', 'sel', Object.entries(REPORT_UNITS)]] : []),
-      ['_p', 'Ports', 'head'], ...ports,
-      ['_b', 'Build', 'head'], ['bundled', 'Bundled (goes on the tab as one unit with its IPs)', 'bool'], ['notes', 'Notes', 'area']];
-  };
-}
-function renderVesselTab(box) {
-  const p = vesselProfile();
-  box.append(h('h3', {}, 'Vessel'));
-  if (!p) return box.append(h('p', { class: 'muted' }, 'This Schema has no Equipment Profile yet. Make or pick one on the Equipment Profile tab first.'));
-  const admin = can('admin') && !p.locked;
-  if (vesselWork && !vesselWork.isNew && !(p.equipment || []).some(x => x.id === vesselWork.item.id)) { vesselWork = null; vesselDirty = false; }
-  const pick = h('select', {}, h('option', { value: '' }, 'Pick one to open ...'),
-    ...(p.equipment || []).map(x => h('option', { value: x.id, ...(x.id === vesselWork?.item.id ? { selected: true } : {}) }, `${x.name} (${EQ[x.vesselType]?.title}${x.vtype ? ': ' + x.vtype : ''})`)),
-    ...(admin ? EQ_KINDS.map(k => h('option', { value: '__new:' + k }, `Add new ${k === 'vessel' ? 'vessel' : EQ[k].title.toLowerCase()} ...`)) : []));
-  pick.onchange = () => { const v = pick.value; if (v.startsWith('__new:')) newVessel(v.slice(6)); else if (v) openVessel(v); };
-  box.append(h('div', { class: 'bar menuPick' }, h('span', {}, `In "${p.name}":`), pick, h('span', { class: 'muted' }, p.locked ? '🔒 The profile is locked' : '')));
-  if (!vesselWork) return box.append(h('p', { class: 'muted' }, 'Pick a vessel above, or Add new.'));
-  const w = vesselWork.item, state = h('span', { class: 'muted' }, vesselDirty ? 'Not saved yet' : 'Saved');
-  const f = paneForm(vesselFields(p), w, () => { vesselDirty = true; state.textContent = 'Not saved yet'; }, !admin);
-  const save = async () => {
-    f.read();
-    const it = fromPortFields(clone(w));
-    it.name = (it.name || '').trim() || EQ[it.vesselType].title;
-    if (!it.label) it.label = it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype;
-    p.equipment ??= [];
-    const i = p.equipment.findIndex(x => x.id === it.id);
-    if (i < 0) p.equipment.push(it); else p.equipment[i] = it;
-    await saveProfile();
-    vesselWork = { item: toPortFields(clone(eqWork.equipment.find(x => x.id === it.id))), isNew: false }; vesselDirty = false;
-    renderMenuPane();
-    return eqWork.equipment.find(x => x.id === it.id);
-  };
-  const del = guard(async () => {
-    if (!confirm(`Take "${w.name}" out of "${p.name}"?\n\nIf it is drawn on a tab, the drawing stays there.`)) return;
-    p.equipment = (p.equipment || []).filter(x => x.id !== w.id);
-    vesselWork = null; vesselDirty = false;
-    await saveProfile(); renderMenuPane();
-  });
-  const onTab = S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === w.id);
-  const buttons = () => saveBar(admin && !vesselWork.isNew ? h('button', { class: 'danger', onclick: del }, 'Delete') : '', h('span', { class: 'spacer' }),
-    admin ? h('button', { onclick: () => { if (vesselDirty && !confirm('Leave the changes that are not saved?')) return; vesselWork = null; vesselDirty = false; renderMenuPane(); } }, 'Cancel') : '',
-    admin ? h('button', { title: 'Save it, then put it on the Equipment tab of this Schema with its ports as IPs (or bring the drawing there up to date)', onclick: guard(async () => { const it = await save(); await placeEqItems(eqWork, [it]); }) }, onTab ? 'Save and update on tab' : 'Save and put on Equipment tab') : '',
-    admin ? h('button', { class: 'primary', onclick: guard(save) }, 'Save') : '');
-  box.append(h('div', { class: 'muted' }, `${EQ[w.vesselType].title} · `, state), buttons(), f.box, buttons());
+    admin ? h('div', { class: 'bar' }, h('button', { onclick: guard(() => placeEqItems(p, p.equipment)) }, `Put all on Tab ${tab}`)) : '');
 }
 
 // ---- Vessel Templates and Bundled Fitting Templates (Fritz, 2026-10-21)

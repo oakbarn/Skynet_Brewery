@@ -13,7 +13,6 @@ Un double-clic sur une case, une liste ou un bouton à l'intérieur d'une ligne 
 | gGlobals | Page Variables | les Properties de la variable |
 | Devices et Widgets pour la voix et Home Assistant | Settings, MQTT | les Properties du Device ou du Widget |
 | Liste d'équipement | ☰ Menu > Equipment Profile | les Properties du Tab_Vessel ou du Tab_Fitting sur son Tab |
-| Faits sur le Tab Vessel | ☰ Menu > Equipment Profile | la cuve, ouverte sur le Tab Vessel |
 | Tabs du Schema | ☰ Menu > Tab Background Profile | les réglages de ce Tab |
 | Templates | ☰ Menu > Vessel, Fitting and Equipment Templates | les réglages du Template |
 
