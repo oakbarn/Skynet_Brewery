@@ -2815,6 +2815,18 @@ that still has only `scripts/` gets it renamed to `processes/` once, on its next
 Start Fresh and start-over also clear an old `scripts/` folder. Help says only that Skynet does this in the Background and needs no
 user input (Rule 11.13). Only the BruControl Importer still says "scripts" where it means BruControl's own Scripts.
 
+9.19 **Uninstall deletes everything** (OakBarn Brewery, 2026-11-13, after an uninstall left `C:\Brewing\Import` with its
+BruControl files and `BrewPanel\data\brewlog.db` behind; picked "All of C:\Brewing, after a warning"). The Windows uninstall
+works like Start Fresh (Rule 9.8), with nothing saved:
+1. One red warning lists what goes. **No** stops and nothing is deleted; to keep something, copy it somewhere else first.
+2. The panel and the BruControl Importer must be stopped first (Retry / Cancel), because Windows can't delete a file a program
+   has open, like the brew log.
+3. Deleted: the panel folder (`C:\Brewing\BrewPanel`: program, config, data, processes, backups, media), the Import folder and
+   everything in it, the shortcuts, and Skynet's own small folder in the user's AppData (the Skynet window's and the Importer's
+   remembered sign-ins and settings). The Brewing folder itself goes only when nothing else is left in it.
+4. If a file still can't be deleted, a notice says to restart the computer and delete the Brewing folder by hand.
+Both programs (the Importer is in the same Setup). The Mac and Linux / Pi installers have no uninstall.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3153,7 +3165,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   should be done").
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
-  their files there too. An uninstall never deletes it.
+  their files there too. An uninstall deletes it with everything in it, after its warning (Rule 9.19).
 - **The import is built step by step** (Fritz, 2026-11-06: "start a new import function and we will build it"). It is a new
   import function; the older import code is described in docs/BruControl_Old_Import_Method.md for reference only. So far:
   - **Names** (page 4): Skynet names (Rule 3.1) by default, or keep the BruControl names after two warnings (Rule 15.1).
@@ -4187,6 +4199,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-13: Added Rule 9.19 (OakBarn Brewery, after an uninstall left the Import folder and the brew log behind; picked "All of C:\\Brewing, after a warning"): the Windows uninstall deletes everything like Start Fresh after one red warning, stops for the panel and the Importer first so no file is locked, and deletes the Import folder too. The Importer note under Rule 15 no longer says an uninstall keeps the Import folder. Help 19, 184 (and French) and install/ReadMe.txt updated. Both programs.
 - 2026-11-13: Rule 9.8 (OakBarn Brewery: "I think that the Fresh Install should also delete the Media files"): Start Fresh deletes the whole media folder too, the Skynet pictures and sounds included; run the Media Setup after it (README install order). lib/skynet_media.json and tools/skynet-media-list.js are gone (no longer needed).
 - 2026-11-13: Added Rules 17.13 (Profiles: Add new ... everywhere, Skynet Boil Profiles 60 / 90 / 30 Minute and No Boil, Boil Off and Brewhouse Efficiency belong to the Equipment Profile, ask each time which Boil Off), 17.14 (Three Hop Stands High / Middle / Low, set in Default settings, Boil Profiles and Recipes; chill stops at each), 17.15 (imported Recipe: Save? then Overwrite with backup or Add new "#2"), 17.16 (amounts follow Units; Misc unit per line with Tablet, Pack; grain weight label locked from Units). Help 35 rewritten with tables (Mash, Boil, Water Profiles, Hop Stands), Help 100. Checked against both programs: the BruControl Import's Build page has no Recipe screens.
 - 2026-11-13: Added Rule 19.6, the Equipment Profile Interview (OakBarn Brewery): Add new Equipment Profile starts with Answer a few questions; Vessels, their type, pick or 🔨 build each, Pumps, Motorized Valves, Manual Valves, And so on, the numbers, Review, then 🔨 Build onto the Build Tab. It replaces the Vessel tab (Help 34 now says where its settings are). A profile keeps its pumps and motorized valves as slots (look and place, never Interface, Port or Name), so a layout can be picked in another Schema, which only gives the Ports. Open question 7 answered (one profile per Tab). Help 196 (new; next free Help 197), Help 13, 28, 33, 34, 43, 48, 68 and their French pages. Checked against both programs: the BruControl Import has no Equipment Profiles.

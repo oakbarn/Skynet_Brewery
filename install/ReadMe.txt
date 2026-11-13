@@ -113,8 +113,8 @@ WINDOWS, THE EASY WAY (INSTALLER)
 4. Start it with "Skynet Brewer" on the Desktop. Your browser opens the panel.
 5. Then run Skynet_Media_Setup_<date>.exe for the Skynet pictures and sounds.
 
-To remove it: Settings > Apps > Skynet Brewer > Uninstall. It asks before deleting
-your brew data.
+To remove it: Settings > Apps > Skynet Brewer > Uninstall. After one red warning it
+deletes EVERYTHING in C:\Brewing, the Import folder too. Copy anything you want to keep first.
 
 
 WINDOWS, BY HAND

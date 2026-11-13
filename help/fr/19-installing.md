@@ -42,7 +42,7 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
    - Si vous aviez avant le panel directement dans `C:\Brewing`, il propose de recopier vos données, votre disposition, vos Processes et vos images. L'ancien dossier n'est pas changé.
 4. Lancez-le avec **Skynet Brewer** sur le Bureau. La fenêtre noire, c'est le panel qui tourne ; votre navigateur ouvre le panel quelques secondes plus tard.
 
-Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinstaller** (Settings > Apps > Uninstall). Il demande avant de supprimer vos données de brassage.
+Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinstaller** (Settings > Apps > Uninstall). Après un avertissement rouge, il supprime **tout** dans `C:\Brewing` : vos Schémas, utilisateurs, journal de brassage, Processus, sauvegardes, images et sons, et le dossier Import avec tous ses fichiers. Copiez ailleurs ce que vous voulez garder. Fermez le panneau avant de commencer, sinon il vous le demande.
 
 ## Windows : à la main, avec un fichier .bat {#windows-by-hand-with-a-bat-file}
 
