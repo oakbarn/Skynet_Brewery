@@ -57,7 +57,7 @@ When the installer finds the panel already there, it asks what this update does.
    - every Schema, Tab, Device, Widget, setting, Profile and Recipe (`config`)
    - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
    - every Process (`processes`) and the `backups` folders
-   - your own pictures and sounds (the Skynet pictures and sounds stay)
+   - every picture and sound (`media`), the Skynet ones too: run the **Media Setup** after it
    - everything in the **Import** folder (`C:\Brewing\Import`)
    - **No** on the warning goes back. Nothing is deleted.
    - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
