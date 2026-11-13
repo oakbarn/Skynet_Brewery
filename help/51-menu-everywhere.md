@@ -17,7 +17,7 @@ Every ☰ (on the Tabs page too) also lists the **Pages** at the end: Tabs, Proc
 Picking a choice from the ☰ in a window closes that window first, the same as pressing **Cancel**, and then takes you there.
 
 - If you changed something in the window and did not save it, the panel asks first: **This window has changes that are not saved. Leave them?** Press Cancel to stay and save.
-- While you are in **Edit layout**, the Menu tabs are greyed out (the note says *Save or exit Edit layout to open a Menu tab*). The pages and **Exit Edit layout** still work.
+- **Build mode:** while you are in **Edit layout**, the **☰ Menu** button itself is greyed out, and the windows that open have no ☰, because nothing on it works while you build. Press **Exit** or **Save layout** on the Edit layout bar to leave Edit layout first. While a window is open, the whole Edit layout bar above the Tab is greyed out too: finish or Cancel the window to use it again (Skynet Rule 2.52).
 
 ## Windows without the ☰
 

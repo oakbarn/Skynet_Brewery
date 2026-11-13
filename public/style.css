@@ -1320,3 +1320,7 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
 .el.alarm.almPre, .el.alarm.almPre.active { animation: none; border-color: transparent; background-size: 100% 100%; }
 .el.alarm.almPre > .onov { animation: almBlink 0.8s steps(2) infinite; }
 .el.alarm.almPre .vl { text-shadow: none; }
+/* Build mode (Edit layout, Rule 2.52, OakBarn Brewery 2026-11-13): the ☰ Menu is greyed out, and while a box is open the whole
+   Edit layout bar is greyed out too ("Nothing works so just take up space. OR GREYED OUT") */
+body.buildMode .menuBtn { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
+body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); pointer-events: none; }

@@ -17,7 +17,7 @@ Chaque ☰ (aussi celui de la page des Tabs) liste aussi les **Pages** à la fin
 Choisir un élément du ☰ dans une fenêtre ferme d'abord cette fenêtre, comme si vous appuyiez sur **Cancel**, puis vous y emmène.
 
 - Si vous avez changé quelque chose dans la fenêtre sans l'enregistrer, le panel demande d'abord : **This window has changes that are not saved. Leave them?** (Cette fenêtre a des changements non enregistrés. Les abandonner ?) Appuyez sur Cancel pour rester et enregistrer.
-- Pendant que vous êtes en **Edit layout**, les Menu tabs sont grisés (la note dit *Save or exit Edit layout to open a Menu tab*, c'est-à-dire enregistrez ou quittez Edit layout pour ouvrir un Menu tab). Les pages et **Exit Edit layout** marchent toujours.
+- **Mode construction :** pendant que vous êtes en **Edit layout**, le bouton **☰ Menu** lui-même est grisé, et les fenêtres qui s'ouvrent n'ont pas de ☰, car rien dedans ne marche pendant que vous construisez. Appuyez sur **Exit** ou **Save layout** dans la barre Edit layout pour quitter Edit layout d'abord. Pendant qu'une fenêtre est ouverte, toute la barre Edit layout au-dessus du Tab est grisée aussi : terminez la fenêtre ou appuyez sur Cancel pour la retrouver (Skynet Rule 2.52).
 
 ## Les fenêtres sans ☰ {#windows-without-the}
 

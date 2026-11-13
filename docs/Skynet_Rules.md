@@ -484,11 +484,22 @@ the bottom is not shown. **Only the model for now:** "This is on the model ... W
 every other dialog keeps its buttons at the top and at the bottom until OakBarn Brewery says the model is finished and all dialogs
 follow it. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
+2.52 **Build mode: only what works while building** (OakBarn Brewery, 2026-11-13, PDF "Blickmann Rip Tide Mode": "GREYOUT in Build
+Mode", "Hamburger Menu does not work in build mode. Get Rid in Build mode", "Entire Area needs to be gone while Building something.
+Nothing works so Just take up space OR GREYED OUT", Label Attributes "DiD not change to the defaults set", its bottom buttons "Don't
+Need"). While **Edit layout** is on (Build mode):
+- the **☰ Menu** button (Menu Bar and Tabs bar) is **greyed out**; a click only says to press **Exit** or **Save layout** first.
+- **dialogs have no ☰** (an exception to Rule 2.3), and a dialog shown again (the Review step's Back) never gets a second ☰.
+- while a dialog is open, the **whole Edit layout bar is greyed out** (nothing on it works until the dialog is finished or Cancelled).
+- the **Label Attributes** Dialog shows the Font, Fore Color and Back Color the Label has now (its own, the Tab Style, then Default
+  settings), like Font Size, and keeps following those defaults until one is changed; its Cancel and Save are at the top only.
+**Both programs:** the BruControl Import's Build page is the same Edit layout.
+
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
 
 2.3 **The ☰ Menu is on almost every dialog** as a way to move around. Only dialogs that must be
-answered first leave it out. (2026-10-21, PR #71)
+answered first leave it out, and no dialog has it in Build mode (Edit layout, Rule 2.52). (2026-10-21, PR #71)
 
 2.4 **The ☰ Menu lists every screen and every part of a screen** you can go to (for example
 Devices ↳ Interfaces). (2026-10-26, PR #106)
@@ -4090,6 +4101,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 2.52 (OakBarn Brewery, PDF "Blickmann Rip Tide Mode"): in Build mode (Edit layout) the ☰ Menu button is greyed out, dialogs have no ☰ (Rule 2.3 changed to say so) and never two after the Review step's Back, the Edit layout bar is greyed out while a dialog is open, and the Label Attributes Dialog shows the Font, Fore Color and Back Color defaults that are set, with Cancel and Save at the top only. Help 51, 115 (and French). Checked against both programs: the Importer's Build page is the same Edit layout. (thread "Build an Equipment Profile interview")
 - 2026-11-13: Rule 9.13 note (OakBarn Brewery: "We need to add a schema version to the 3 vessel. We will change it again when we go to production."): the 3 Vessel sample (sample.json `version`) and the default Schema carry the Schema version `Three_Vessel_Brewery_20261113T1550`; loading the sample sets it. Help 42 (and French). (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.14 (OakBarn Brewery: "pop a Dialog with the Caveat that the Translation was by Machine and not Human in English and the Language Chosen with an Aknowlegement Button"): picking a Help language other than English shows a machine translation notice in English and that language, closed with Acknowledge. Help 192 (and French). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 9.18 (OakBarn Brewery: "Rename to Skynet Terms. That is part of the No Bructrol Rule"): the Processes folder is `processes`, not `scripts`, everywhere (panel, defaults, samples, Brain Move, File Move, installers, MQTT topic `processes/running`); an earlier trial panel's `scripts` folder is renamed once on start. Rule 1.4 updated. Help 1, 5, 18, 19, 30, 32, 44, 53, 63, 119, 184, 191 (and French), README, install/ReadMe.txt. Checked against both programs: the Importer's Build page uses `processes` in its own folder; the Importer still says Scripts for BruControl's. (thread "Polish the Skynet Brew Panel")
