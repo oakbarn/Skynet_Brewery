@@ -199,7 +199,7 @@ These words belong to the Process language, so none of them can be the name of a
 - **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
-- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`
 - **Places:** `tab`, `workspace`
 - **Skynet Constants:** every name that starts with `skc_` (see above)
 
