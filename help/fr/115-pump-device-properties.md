@@ -39,11 +39,12 @@ rien n'est vraiment enregistré tant que vous n'appuyez pas sur **💾 Save** da
 Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre propre pompe User) :
 
 1. Le titre est la pompe, par exemple **Blichmann Riptide**, avec le **cadenas 🔓** (verrouille sa place : pas de glisser ni de redimensionnement),
-   **Visible** et **Hidden Locked** à côté. Puis **Delete**, **Cancel** et **Save**. Le ☰, le titre et ces boutons restent
+   **Visible** et **Hidden Locked** à côté. Puis **Delete**, **Cancel** et **Save**. Le titre et ces boutons (pas de ☰ pendant que vous construisez, Rule 2.52) restent
    en haut pendant que le reste de la fenêtre défile, donc les boutons sont toujours visibles (il n'y a pas de seconde ligne en bas).
 2. **1. Label ⬆ ⬢** : ce qui s'affiche sur le Tab (voir **Le Label** plus bas). Le ⬆ ouvre une fenêtre de texte de Label à 2 lignes ; le ⬢ ouvre
-   la fenêtre **Label Attributes** : Label, Visible, Font Size, Font, Bold, Fore Color, Back Color et Alignment. Font Size montre
-   la taille qu'a le Label maintenant. Alignment est **Left**, **Centered** ou **Right** ; un Label commence Centered. Un Label n'est jamais
+   la fenêtre **Label Attributes** : Label, Visible, Font Size, Font, Bold, Fore Color, Back Color et Alignment. Font Size, Font,
+   Fore Color et Back Color montrent ce qu'a le Label maintenant (votre Tab Style, puis ☰ Menu > Default settings), et ils continuent
+   à suivre ces valeurs par défaut tant que vous ne les changez pas. Ses **Cancel** et **Save** sont en haut seulement. Alignment est **Left**, **Centered** ou **Right** ; un Label commence Centered. Un Label n'est jamais
    vide : laissez-le vide et il devient le Name. **Label Visible** l'affiche ou non.
 3. **2. Interface** et **Available Ports** sur une ligne : grisés une fois ajoutés (la carte et la broche auxquelles il est câblé).
 4. **3. Tab** : le Tab où il est.
