@@ -68,24 +68,24 @@ store.setProp('alm_Note', 'active', true);
 assert.deepEqual(playing(), ['alm_Note'], 'General alarm (4) beats the Sound Player (5)');
 assert.equal(on(SOUND_PLAYER), true, 'the music is still on, only paused');
 store.setProp('alm_Boil', 'active', true);
-assert.deepEqual(playing(), ['alm_Boil'], 'Brew Flow (2) beats General (4)');
+assert.deepEqual(playing(), ['alm_Boil'], 'Brew Flow (1) beats General (4)');
 store.setProp('alm_PreHop1', 'active', true);
-assert.deepEqual(playing(), ['alm_Boil'], 'Pre-Hop (3) waits for Brew Flow (2)');
+assert.deepEqual(playing(), ['alm_Boil'], 'Pre-Hop (3) waits for Brew Flow (1)');
 store.setProp('alm_Hop1', 'active', true);
-assert.deepEqual(playing(), ['alm_Hop1'], 'Hop (1) beats everything');
+assert.deepEqual(playing(), ['alm_Boil'], 'Hop Drop (2) waits for Brew Flow (1) (Rule 7.18, 2026-11-13)');
 store.setProp('alm_Quiet', 'active', true);
-assert.deepEqual(playing(), ['alm_Hop1'], 'an alarm with Sound = None makes no sound, so it never takes the speaker');
-store.setProp('alm_Hop1', 'active', false);
-assert.deepEqual(playing(), ['alm_Boil'], 'the waiting Brew Flow alarm sounds as soon as the Hop alarm is off');
+assert.deepEqual(playing(), ['alm_Boil'], 'an alarm with Sound = None makes no sound, so it never takes the speaker');
 store.setProp('alm_Boil', 'active', false);
+assert.deepEqual(playing(), ['alm_Hop1'], 'the waiting Hop alarm sounds as soon as the Brew Flow alarm is off');
+store.setProp('alm_Hop1', 'active', false);
 assert.deepEqual(playing(), ['alm_PreHop1']);
 store.setProp('alm_PreHop1', 'active', false); store.setProp('alm_Note', 'active', false);
 assert.deepEqual(playing(), [SOUND_PLAYER], 'the music goes on when nothing higher is left');
 await run('e', 'stop SoundPlayer');
 assert.deepEqual(playing(), []);
 // Alarm Priority (Rule 7.18): the same Priority never cuts in; the one playing goes on, and the other follows
-assert.equal(store.getProp('alm_Note', 'priority'), 4, 'its Kind\'s number to start'); assert.equal(store.getProp('alm_Hop1', 'priority'), 1);
-store.setProp('alm_Boil', 'active', true); store.setProp(SOUND_PLAYER, 'active', true);
+assert.equal(store.getProp('alm_Note', 'priority'), 4, 'its Kind\'s number to start'); assert.equal(store.getProp('alm_Hop1', 'priority'), 2); assert.equal(store.getProp('alm_Boil', 'priority'), 1);
+store.setProp('alm_Boil', 'priority', 2); store.setProp('alm_Boil', 'active', true); store.setProp(SOUND_PLAYER, 'active', true);
 store.rt.get('alm_Boil')._on -= 5000;      // Boil went On 5 seconds ago (not "at the same time")
 store.setProp('alm_Note', 'priority', 2); store.setProp('alm_Note', 'active', true);
 assert.deepEqual(playing(), ['alm_Boil'], 'the same Priority: the one already playing goes on');
@@ -95,24 +95,22 @@ assert.deepEqual(playing(), ['alm_Boil'], '1.9 goes before 2.0');
 store.setProp('alm_Boil', 'priority', 1.954); assert.equal(store.getProp('alm_Boil', 'priority'), 1.95, 'two decimal places');
 assert.deepEqual(playing(), ['alm_Boil'], '1.95 slots in before 2 without renumbering');
 assert.throws(() => store.setProp('alm_Boil', 'priority', 'high'), /two decimal places/);
-store.setProp('alm_Boil', 'priority', ''); assert.equal(store.getProp('alm_Boil', 'priority'), 2, '"" puts back its Kind\'s number');
+store.setProp('alm_Boil', 'priority', ''); assert.equal(store.getProp('alm_Boil', 'priority'), 1, '"" puts back its Kind\'s number');
 // a sound that does not repeat and has played to its end lets the next one play
 store.setProp('alm_Boil', 'priority', 1); assert.deepEqual(playing(), ['alm_Boil']);
 store.setProp('alm_Boil', 'finished', true, 'ui'); assert.deepEqual(playing(), ['alm_Note'], 'Boil played to its end: Note plays while Boil still shows');
 assert.throws(() => store.setProp('alm_Boil', 'finished', true), /set by the panel/);
 for (const n of ['alm_Boil', 'alm_Note', SOUND_PLAYER, 'alm_Quiet']) store.setProp(n, 'active', false);
 store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
-// two of the same Priority at the same moment: one is picked at random, then the other
+// two of the same Priority at the same moment: the first one On plays first (1a), then the other (1b) (Rule 7.18, 2026-11-13)
 {
-  const won = new Set();
-  for (let i = 0; i < 40; i++) {
+  for (const [a, b] of [['alm_Boil', 'alm_Note'], ['alm_Note', 'alm_Boil']]) for (let i = 0; i < 10; i++) {
     store.setProp('alm_Boil', 'priority', 2); store.setProp('alm_Note', 'priority', 2);
-    store.setProp('alm_Boil', 'active', true); store.setProp('alm_Note', 'active', true);
-    const first = playing()[0]; won.add(first);
-    store.setProp(first, 'active', false); assert.deepEqual(playing(), [first === 'alm_Boil' ? 'alm_Note' : 'alm_Boil'], 'the other follows');
+    store.setProp(a, 'active', true); store.setProp(b, 'active', true);
+    assert.deepEqual(playing(), [a], 'the first one On plays first');
+    store.setProp(a, 'active', false); assert.deepEqual(playing(), [b], 'the other follows');
     for (const n of ['alm_Boil', 'alm_Note']) store.setProp(n, 'active', false);
   }
-  assert.equal(won.size, 2, 'either one can be picked');
   store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
 }
 

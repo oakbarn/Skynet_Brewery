@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" width="600" height="300">
+  <!-- Skynet Pre-Hop Alarm watermark 1 (Rule 7.21): a pale hop cone. Placeholder drawing, see-through. -->
+  <rect width="600" height="300" rx="24" fill="#f4fbe9"/>
+  <g fill="#cfe9a6" stroke="#b5d982" stroke-width="4" stroke-linejoin="round" transform="translate(300 150)">
+    <path d="M0 -118 C10 -112 14 -104 14 -96" fill="none" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-34 -92 Q0 -112 34 -92 C40 -60 22 -40 0 -30 C-22 -40 -40 -60 -34 -92 Z"/>
+    <path d="M-56 -48 Q-20 -70 14 -48 C18 -14 0 6 -22 16 C-44 6 -60 -14 -56 -48 Z"/>
+    <path d="M-14 -48 Q20 -70 56 -48 C60 -14 44 6 22 16 C0 6 -18 -14 -14 -48 Z"/>
+    <path d="M-50 0 Q-14 -22 20 0 C24 34 6 54 -16 64 C-38 54 -54 34 -50 0 Z"/>
+    <path d="M-20 0 Q14 -22 50 0 C54 34 38 54 16 64 C-6 54 -24 34 -20 0 Z"/>
+    <path d="M-30 48 Q0 30 30 48 C34 78 18 98 0 112 C-18 98 -34 78 -30 48 Z"/>
+  </g>
+</svg>

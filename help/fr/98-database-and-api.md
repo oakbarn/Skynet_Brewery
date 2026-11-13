@@ -35,6 +35,15 @@ send_db "gGV_Mash_pH"
 
 `send_db Name` écrit la mesure tout de suite, quelle que soit sa fréquence, même quand elle est **Off**. C'était `log Name` ; les anciens Processes sont changés en `send_db` quand le Brain démarre (Règle Skynet 15.2).
 
+Pour envoyer **un seul attribut**, mettez **DBSend** après le nom et l'attribut (OakBarn Brewery, 2026-11-13) :
+
+```
+HLT_PID.setpoint DBSend      // sends its .setpoint now
+HLT_Temp DBSend              // the same as send_db HLT_Temp
+```
+
+Les deux façons marchent ; prenez celle qui se lit le mieux pour vous. L'attribut est gardé avec la mesure dans la base de données.
+
 ### Groupes de base de données : envoyer seulement quand vous voulez {#database-groups-send-only-when-you-want}
 
 **Les groupes sont la façon dont un ensemble de Devices et de Widgets est envoyé à la base de données, ou non.** Une ligne de Process commence à envoyer un groupe, et une autre ligne de Process l'arrête :

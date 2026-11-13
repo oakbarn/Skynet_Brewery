@@ -347,6 +347,7 @@ function setView(v, here = false) {
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  showSound();
   // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
   if (v === 'help' && helpFrom !== 'help') helpFrom = prev;
   markOnTabs();
@@ -2370,6 +2371,10 @@ function buildEl(e) {
 const ALM_DIR = 'Images/Skynet/Alarms/';
 const ALM_PICS = { back: ALM_DIR + 'Alarm_Basic_Back.svg', fore: ALM_DIR + 'Alarm_Basic_Fore.svg', lines: ALM_DIR + 'Alarm_Basic_Lines.svg', together: ALM_DIR + 'Alarm_Basic.svg' };
 const ALM_COLORS = { back: '#6ca538', fore: '#8bcf18' };      // Fritz's greens (his Alarm.svg)
+// the Pre-Hop Alarm (Rule 7.21): a Combination Alarm and String Box Widget on one of three Skynet watermarks (.background 1, 2 or 3)
+const PREHOP_MARKS = [1, 2, 3].map(n => ALM_DIR + `Alarm_PreHop_Mark_${n}.svg`);
+const ALM_CLASS_TITLE = { basic: 'Basic Skynet Alarm', user: 'User Alarm', prehop: 'Pre-Hop Alarm' };
+const almHasString = e => e?.type === 'alarm' && (e.alarmClass === 'user' || e.alarmClass === 'prehop');      // .string shows (Rule 7.21)
 const ALM_SET_RE = /(^|\/)Skynet\/Alarms\/Alarm_Set_[^/]+\.svg$/i, ALM_ACTIVE_RE = /(^|\/)Skynet\/Alarms\/Alarm_Active_[^/]+\.svg$/i;
 const isAlmBasic = e => e?.type === 'alarm' && e.alarmClass === 'basic';
 const almName = p => String(p).split('/').pop().replace(/\.svg$/i, '').replace(/^Alarm_(Set|Active)_/, '').replace(/_/g, ' ');
@@ -2574,6 +2579,8 @@ function fillEl(n, e0) {
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
       if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
+      n.classList.toggle('almPre', e.alarmClass === 'prehop');
+      if (almHasString(e)) text = editing ? (e.string ?? '') : (v.string ?? e.string ?? '');      // its .string, with Rich Text codes (Rule 7.21)
       almLayers(n, e, v); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
@@ -2666,7 +2673,7 @@ function fillEl(n, e0) {
     nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
   }
   n.classList.toggle('on', on && e.type !== 'picture');
-  n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true);   // .hidden = true wins over .visible = true
+  n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true || (e.type === 'alarm' && !!e.alarmClass && !v.active));   // .hidden = true wins over .visible = true; an Alarm Widget shows only while it is On (Rule 7.21; faint in Edit layout)
   n.classList.toggle('fault', !!v.fault);
   // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
   // button with white text: show the plain gray button with black text instead
@@ -2676,7 +2683,6 @@ function fillEl(n, e0) {
   n.classList.toggle('img-missing', !!missing);
   const stretch = stretchPic(e, v);
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
-  if (e.alarmClass === 'user' && firstSet(v.backcolor, e.backColor)) n.style.backgroundColor = firstSet(v.backcolor, e.backColor);     // a User Alarm's .backcolor
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   // a probe tee or a thermowell turns with its Rotate (Rule 5.30): turned 90 or 270, its picture is as wide as its box is high
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : img ? elRot(e) : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
@@ -2883,7 +2889,7 @@ async function doTap(e) {
   }
   if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
   if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
-  if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
+  if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); else if (e.type === 'alarm' && e.alarmClass) setProp(e.name, 'active', true); return; }      // an Alarm Widget's hidden .toggle (Rule 7.21): a click turns it Off, or On
   if (act === 'manual') return manualDialog(elByName(targetName) || e);
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
   if (act === 'startStop') return processWidgetTap(e);
@@ -4671,7 +4677,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture Widget', 'picture'],
-    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
+    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Pre-Hop Alarm (a text box on a Skynet watermark)', 'alarm', '', { kind: 'prehop', alarmClass: 'prehop' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Graph (a line graph of recorded readings)', 'chart', 'Graph'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
     [`${PROCESS_WIDGET_WORD} (shows a Process; one click starts or stops it)`, PROCESS_WIDGET_TYPE, 'Script'],      // Rule 1.31
@@ -4717,6 +4723,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
     if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
+    if (e.alarmClass === 'prehop') { Object.assign(e, { w: 240, h: 120, label: 'Pre-Hop', string: 'Get the hops ready', background: '1' }); PREHOP_MARKS.forEach((p, k) => { e[k ? 'backpath_' + (k + 1) : 'backpath'] = p; }); e.name = almSuggest(e, e.label); }      // Rule 7.21
   }
   if (type === PROCESS_WIDGET_TYPE) { Object.assign(e, PROCESS_WIDGET_SIZE); e.label = 'Process_' + i; e.process = ''; }     // the Process Widget (Rule 1.31): a Label from the start
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
@@ -7215,7 +7222,7 @@ function stepperFields(it) {
 }
 
 // Alarm kind first: a Hop Alarm can sound by itself on a timer, a Pre-Hop Alarm a set time before its Hop Alarm
-const ALARM_KIND_LIST = [['hop', 'Hop Alarm (priority 1: beats every other sound)'], ['brewflow', 'Brew Flow Alarm (2: end of mash, start of boil)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
+const ALARM_KIND_LIST = [['brewflow', 'Brew Flow Alarm (priority 1: beats every other sound; end of mash, start of boil)'], ['hop', 'Hop Alarm (2: hop drops)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
 function alarmFields(item) {
   const k = item.kind ??= 'general';
   return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
@@ -7249,27 +7256,33 @@ const ALM_LABEL_POP = LABEL_POP;
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 // Alarm Priority (Rule 7.18, OakBarn Brewery 2026-11-09)
-const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
+const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On: the first one On is 1a, the next 1b, even when they go On in the same second. A Process: alm_Name.priority = 1.15';
+const ALM_STRING_TIP = 'The text the Alarm shows. Rich Text codes work in it. A Process: alm_Name.string = "Add the Flavor Hops"';
+const ALM_PLAYTIME_TIP = 'How many seconds the Alarm stays On; then it turns itself Off. A click turns it Off sooner. Empty or 0 = it stays On until it is tapped. A Process: alm_Name.playtime = 30';
 function alarmWidgetFields(it) {
-  const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
+  const k = it.kind ??= 'general', basic = isAlmBasic(it), pre = it.alarmClass === 'prehop', A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
     ['name', 'Name', 'text', null, false, 'b'],
-    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
+    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : pre ? 'A Pre-Hop Alarm: a text box on a Skynet watermark.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
     ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
     ['priority', 'Priority (lower plays first; empty = its Kind\'s number)', 'num', null, false, false, { tip: ALM_PRIORITY_TIP }],
-    A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
+    A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop,
+    ...(basic ? [] : [['string', 'Text', 'text', null, false, 'b', { up: 4, tip: ALM_STRING_TIP }], ['playTime', 'Play Time', 'num', null, false, false, { tip: ALM_PLAYTIME_TIP }]]),
     ...EMAIL_FIELDS,
     ...ALARM_OUT_FIELDS,      // Alarm Digital Outputs (Rule 7.19)
     ['_gb', 'Graphic', 'box'],
-    ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+    ...(pre ? [['_bg', 'Background: one of three Skynet watermarks. They are set and can\'t be changed; a Process picks one: .background = 1, 2 or 3.', 'note'],
+      ['foreColor', 'Fore color (the text; a Process: .fore)', 'color', null, false, 'b'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color', null, false, 'b'],
+      ['setGraphic', 'Set Graphic (Layer 2, on the watermark; a Process: .skynet_Layer_2)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE)]]
+      : basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
       ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
       ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
       : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
-        ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
+        ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['foreColor', 'Fore color (the text; a Process: .fore)', 'color'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color']]),
     ...chainFields(it),
-    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['_pb', 'Properties', 'box'], ['_vis', 'Visible is automatic: the Alarm shows while it is On and hides while it is Off (faint in Edit layout). A click on it turns it Off.', 'note'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
 }
 // The Alarm Chain (Rule 7.16, OakBarn Brewery 2026-11-09): one Alarm does the work of many stacked ones. Each step can change the
@@ -7281,12 +7294,12 @@ const CHAIN_KEYS = ['label', 'foreColor', 'backColor', 'setGraphic', 'imageOverl
 const CHAIN_TIP = 'The Alarm Chain (Rule 7.16): one Alarm can do the work of many stacked ones. Each step can change its colors, pictures and sound; whatever a step leaves on No Change stays as it is. A Process picks a step: alm_Brew.step = 2, or by its name: alm_Brew.step = "Strike". alm_Brew.step = 0 puts back what these Properties say.';
 const chainChoices = list => [[CHAIN_KEEP, 'No Change'], ...list];
 function chainStepPop(it, n) {
-  const basic = isAlmBasic(it), k = x => `ch${n}_${x}`, keep = { keep: true };
+  const basic = isAlmBasic(it), pre = it.alarmClass === 'prehop', k = x => `ch${n}_${x}`, keep = { keep: true };
   return { title: `Alarm Chain: Step ${n}`, fields: [[k('label'), 'Step name (a Process can use it: .step = "its name")', 'text', null, false, 'b'],
     ['_' + k('n'), 'No Change (the first choice in every list) skips that adjustment for this step: the Alarm keeps what it has.', 'note'],
     [k('foreColor'), basic ? 'Fore color (Layer 3, the bell)' : 'Fore color (its text)', 'color', 'keep'],
-    [k('backColor'), basic ? 'Back color (Layer 4)' : 'Back color (behind the pictures)', 'color', 'keep'],
-    ...(basic ? [[k('setGraphic'), 'Set Graphic (Layer 2, on the bell)', 'sel', chainChoices(almChoices(ALM_SET_RE))], [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'sel', chainChoices(almChoices(ALM_ACTIVE_RE))]]
+    [k('backColor'), basic ? 'Back color (Layer 4)' : 'Back color (behind the text)', 'color', 'keep'],
+    ...(basic || pre ? [[k('setGraphic'), basic ? 'Set Graphic (Layer 2, on the bell)' : 'Set Graphic (Layer 2, on the watermark)', 'sel', chainChoices(almChoices(ALM_SET_RE))], [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'sel', chainChoices(almChoices(ALM_ACTIVE_RE))]]
       : [[k('backpath'), 'Background picture (Image Path 1)', 'gpick', 'pictures', false, false, keep], [k('setGraphic'), 'Set Graphic (Layer 2)', 'gpick', 'pictures', false, false, keep],
         [k('imageOverlay'), 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays', false, false, keep]]),
     [k('sound'), 'Sound file', 'gpick', 'sounds', false, false, keep],
@@ -9272,7 +9285,7 @@ const INFO = {
     ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
     ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
     ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (wgt_ALM_Label_TabID, Rule 3.14).'],
-    ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
+    ['Alarm settings', ': Kind of alarm (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']],
     attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
       ['.x'], ['.y'], ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.sound'], ['.fileindex']],
@@ -9761,7 +9774,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
     if (r === 'delete') {
@@ -10104,6 +10117,8 @@ const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasB
 let soundTapped = false;
 function showSound() {
   $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
+  // the reminder on the Tab while sound is off (OakBarn Brewery, 2026-11-13: "keep on the Tab and Hamburger Menu if it has not been done")
+  $('#soundNag')?.classList.toggle('hidden', soundOn || view !== 'workspace');
   document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
 }
 function setSound(on) {
@@ -10112,6 +10127,26 @@ function setSound(on) {
   updateAlarms();
 }
 $('#soundBtn').onclick = () => setSound(!soundOn);
+$('#soundNag').onclick = () => setSound(true);
+// Ask when the panel first opens (OakBarn Brewery, 2026-11-13: "Ask when first opens"): browsers play nothing until the page is
+// clicked once, so the answer is that click. Once per opening of the panel, only while sound is off; never on top of another dialog.
+let soundAsked = false;
+function askSound() {
+  if (soundOn || soundAsked) return;
+  const d = $('#valDlg');
+  if (d.open) { d.addEventListener('close', () => setTimeout(askSound, 300), { once: true }); return; }
+  soundAsked = true;
+  d.innerHTML = '';
+  const close = on => { d.oncancel = null; d.close(); if (on) setSound(true); };
+  d.append(h('div', { class: 'vdTitle' }, '🔊 Turn sound on?'),
+    h('p', {}, 'Alarms, hop drops, timers and music on this Panel need sound. Your browser only plays sound after you click once, so Skynet asks.'),
+    h('p', { class: 'muted' }, 'Sound is turned on for this browser. Moving between Tabs keeps it on. To have it on every time, use ☰ Menu > Default > Turn Sound On when starting.'),
+    h('div', { class: 'vdBtns' },
+      h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, '🔊 Turn Sound On'),
+      h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Not now')));
+  d.oncancel = () => { d.oncancel = null; showSound(); };
+  d.showModal();
+}
 // the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
 const firstTap = () => {
   soundTapped = true;
@@ -12221,6 +12256,8 @@ function menuItems(list, go) {
   // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
   if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
     { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
+  // sound is off: turn it on from here (OakBarn Brewery, 2026-11-13)
+  if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
@@ -15086,4 +15123,4 @@ async function importSchemaFile() {
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
-load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); setTimeout(askSound, 800); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

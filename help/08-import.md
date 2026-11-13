@@ -5,17 +5,9 @@
 1. In BeerSmith: **File > Export > BeerXML**.
 2. On the **Import** screen, choose the `.xml` file and press **Import**.
 
-The recipe values go into the variables named in **Settings > BeerXML mapping**, including mash steps and hops. Hop uses become group codes:
+The recipe values go into the variables named in **Settings > BeerXML mapping**, including mash steps and hops.
 
-| Hop use | Code |
-|---|---|
-| Mash | -333 |
-| First Wort | -444 |
-| Boil at full boil time | -888 |
-| Other boil hops | 919 |
-| Aroma / Whirlpool | -999 |
-| Dry Hop | -111 |
-| Unused slot | 0 |
+For brew day, use **IMPORT** on the **☰ Menu > Recipe** tab instead: every hop comes in, with no limit, and Skynet puts the Boil hops into Hop Groups 1, 2, 3 ... and sets their warnings and Drops behind the scenes (see [The Recipe tab](99-recipe-tab)).
 
 ## A BruControl Schema (admins)
 

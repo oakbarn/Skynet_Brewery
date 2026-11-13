@@ -188,6 +188,9 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #dlgBody > select, #dlgBody > input { min-width: 0; max-width: 100%; }     /* a long choice (stepper drivers) must not push the labels off the dialog */
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 50; max-width: 90vw; }
 #toast.show { opacity: 1; }
+/* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
+#soundNag { position: fixed; bottom: 16px; left: 16px; z-index: 49; background: var(--panel2); border: 2px solid var(--bad); padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; max-width: calc(100vw - 32px); }
+#soundNag.hidden { display: none; }
 #toast.bad { border-color: var(--bad); color: var(--bad); }
 #wsSizer { position: relative; margin: 0 auto; }
 body.fullscreen header#top { display: none; }
@@ -1311,3 +1314,7 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
   body.picIdsPage { background: #fff; color: #000; }
   table.picIds tr { break-inside: avoid; }
 }
+/* the Pre-Hop Alarm (Rule 7.21): its Skynet watermark stays in view while it sounds; the Active overlay blinks instead of the box */
+.el.alarm.almPre, .el.alarm.almPre.active { animation: none; border-color: transparent; background-size: 100% 100%; }
+.el.alarm.almPre > .onov { animation: almBlink 0.8s steps(2) infinite; }
+.el.alarm.almPre .vl { text-shadow: none; }

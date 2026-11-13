@@ -1,0 +1,36 @@
+# Skynet tests (OakBarn Brewery, 2026-11-13: "do that on 369"): runs Skynet's whole test suite (npm test) on every pull request
+# to the default branch and after every merge, so a pull request shows a green or red "Skynet tests" check before it is merged.
+# The check's name is "Skynet tests". The branch ruleset can require it, so keep that name the same.
+# It never changes any code and needs no secrets.
+name: Skynet tests
+
+on:
+  pull_request:
+    branches: [claude/project-thread-vzxi0a]
+  push:
+    branches: [claude/project-thread-vzxi0a]
+    paths-ignore: [version.json, skynet_files.json]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Skynet tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Run every test
+        run: npm test
