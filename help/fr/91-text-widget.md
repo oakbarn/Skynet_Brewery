@@ -27,7 +27,7 @@ Une ligne au-dessus du Text. Vide = le Name.
 
 ## Dans un Process {#in-a-process}
 
-`nom.attribut = Quelque chose` est la façon dont un Process l'utilise, par exemple `w_Text_1.fore = "Red"`. `""` remet ce que disent ses Properties. Le lire donne ce qu'il est maintenant.
+`name.attribute = Something` (nom.attribut = quelque chose) est la façon dont un Process l'utilise, par exemple `w_Text_1.fore = "Red"`. `""` remet ce que disent ses Properties. Le lire donne ce qu'il est maintenant.
 
 | Attribut | Ce que c'est |
 |---|---|
