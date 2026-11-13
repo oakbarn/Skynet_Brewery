@@ -43,6 +43,14 @@ endif
 - **.path** reads or sets the whole path.
 - **.file** reads or sets only the file name. The file stays in the same folder when it is there; if not, Skynet looks for it as above.
 
+**The item's own .path and .file.** On a Device or Widget, `.path` and `.file` are its Image Path 1 (.backpath), `.path_2` and `.file_2` its Image Path 2, and `.path_3` and `.file_3` its Image Path 3. On an Alarm or a Sound Player, `.path` and `.file` are its sound. On a Graphic gGlobal they are its picture.
+
+```
+Pump_1.file = "MyPump.png"
+Pump_1.path_2 = "Images/Pumps/MyPump_Blue.png"
+alm_Brew.file = "ding.mp3"
+```
+
 Every picture or sound attribute has the two parts: `.image`, `.backpath`, `.backpath_2`, `.backpath_3`, `.imageon`, `.imageoff`, `.imageoverlay`, `.setgraphic`, an Alarm's `.sound`, a Sound Player's sound (`SoundPlayer_1.path`, `SoundPlayer_1.file`) and a Graphic gGlobal (`gG_Pic.path`, `gG_Pic.file`).
 
 ## The technical side
