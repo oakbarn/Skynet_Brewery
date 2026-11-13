@@ -87,5 +87,9 @@
  "88-skynet-device-templates": "2ec48a02530d6fe9",
  "89-build-template-tab": "1960f9a29f226fc1",
  "91-text-widget": "52e3a2f4d43bd2fb",
- "92-timer-widget": "c7f46793fcc93b0d"
+ "92-timer-widget": "c7f46793fcc93b0d",
+ "93-image-block": "192697ec9a94c42d",
+ "94-skynet-constants": "213c48fefbb8f4d7",
+ "95-closing-skynet-brewer": "536b73c7d885c6c6",
+ "96-override-button": "6b6d5be95d4dca95"
 }
