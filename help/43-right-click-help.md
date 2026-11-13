@@ -48,7 +48,7 @@ Help opens in a window of its own: see [Help in its own window](54-help-window).
 | Timer | [Tabs: Timers](02-tabs) |
 | gGlobal, gGlobal List | [Variables](04-variables) |
 | Picture | [Pictures on items](25-picture-paths) |
-| Vessel | [The Vessel tab](34-vessel-tab) |
+| Vessel | [Vessel settings](34-vessel-tab) |
 | Chiller, coil, filter, equipment fitting, bundled vessel | [Equipment](14-equipment) |
 | IP point, pipe fitting, pipe, hose | [Pipes, hoses and reducers](24-pipes-and-hoses) |
 | Label, text, on-screen switch, manual vessel | [Tabs: Changing the layout](02-tabs) |

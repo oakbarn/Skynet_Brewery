@@ -49,7 +49,7 @@ Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Vo
 
 1. Appuyez sur **☰ Menu** et choisissez **Equipment Profile**.
 2. Dans la liste déroulante **Open** (ou la liste déroulante d'un Tab dans la case du haut), choisissez **Add new ...**.
-3. Donnez-lui un nom, par exemple « Oak Barn Hot Side » ou « Fermentation room », et choisissez à partir de quoi il commence : les nombres habituels, ou une copie d'un autre profil.
+3. Donnez-lui un nom, par exemple « Oak Barn Hot Side » ou « Fermentation room », et choisissez à partir de quoi il commence : **Answer a few questions (the Interview)** (le premier choix : il demande les cuves, les pompes et les vannes et les construit ; voir [L'Equipment Profile Interview](196-equipment-profile-interview)), les nombres habituels, ou une copie d'un autre profil.
 4. Choisissez les **Units** (unités) : US (gallons, livres, °F) ou Metric (litres, kilogrammes, °C).
 5. Dans **Use it on a Tab**, choisissez le Tab auquel il est destiné, ou **(not now)** (pas maintenant).
 6. Appuyez sur **OK**. Le profil s'ouvre.
@@ -65,7 +65,7 @@ Certains nombres sont sortis du profil (2026-10-20) :
 
 - La **Batch size** (taille du brassin) et les deux eaux d'**ajout** (top up : cuve d'ébullition et fermenteur) se règlent dans la Recipe (bientôt).
 - Le **Boil time** (durée d'ébullition) et le **boil off** (évaporation) sont dans le [Mash Profiles et Boil Profiles](35-mash-and-boil-profiles).
-- La **taille** et le **volume mort** (dead space) de chaque cuve sont sur l'onglet Vessel, et la **perte de trub du fermenteur** appartient au Fermenter.
+- La **taille** et le **volume mort** (dead space) de chaque cuve sont dans ses Propriétés sur le Tab (l'[Equipment Profile Interview](196-equipment-profile-interview) les demande), et la **perte de trub du fermenteur** appartient au Fermenter.
 
 ## Modifier ou supprimer un Equipment Profile {#edit-or-delete-an-equipment-profile}
 
@@ -131,7 +131,7 @@ L'**Equipment list**, sous les nombres, montre ce qu'il y a sur le Tab du profil
 
 **Go to the Tab** vous montre le Tab lui-même.
 
-Les profils faits avant les Templates peuvent encore avoir des cuves faites sur l'[L'onglet Vessel](34-vessel-tab). Elles s'affichent sous **Made on the Vessel tab**, avec **Put on Tab** pour les dessiner sur le Tab du profil.
+Les profils faits avant les Templates peuvent encore avoir une liste de cuves. Elles s'affichent sous **Made before Templates**, avec **Put on Tab** pour les dessiner sur le Tab du profil ([Réglages d'une cuve](34-vessel-tab)).
 
 ## À venir {#coming-next}
 

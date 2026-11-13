@@ -1,57 +1,29 @@
-# L'onglet Vessel {#the-vessel-tab}
+# Réglages d'une cuve {#vessel-settings}
 
-L'onglet **Vessel** (dans le **☰ Menu**) configure une cuve du Equipment Profile à la fois. Les refroidisseurs, les serpentins et les filtres à trub s'ouvrent aussi ici. Un profil peut avoir autant de cuves qu'il vous faut.
-
-1. Appuyez sur **☰ Menu** et choisissez **Vessel**. Il travaille sur le profil ouvert dans l'onglet Equipment Profile, ou sur le profil du Tab où vous êtes.
-2. Choisissez une cuve dans la liste déroulante, ou **Add new vessel ...**.
-3. Remplissez ses réglages (plus bas), puis appuyez sur **Save**.
-4. **Save and put on Equipment tab** la dessine aussi sur le Tab Equipment avec ses ports en IP.
-
-**Delete** la retire du profil. Si elle est dessinée sur un Tab, le dessin y reste.
+L'onglet **Vessel** du **☰ Menu** n'existe plus (OakBarn Brewery, 2026-11-13). L'[Equipment Profile Interview](196-equipment-profile-interview) a pris sa place : il demande combien de cuves, le type de chacune et leur taille, puis les met sur le Tab. Tout le reste d'une cuve est dans ses **Propriétés** sur le Tab : dans **Edit layout**, double-cliquez sur la cuve.
 
 ## Type
 
-**HLT** (cuve d'eau chaude), **Brew Kettle** (cuve d'ébullition), **Mash Tun** (cuve d'empâtage), **RIMS**, **HERMS**, **Fermenter** (fermenteur) ou **Other** (autre). Pour Other, tapez ce que c'est dans **Other Type** (par exemple « Grant »).
+**HLT**, **Mash Tun**, **Brew Kettle**, **All In One**, **Whirlpool**, **Fermentor**, **Bright Tank** ou **Other**. L'Interview le demande ; les Propriétés de la cuve le montrent.
 
 ## Taille {#size}
 
-- **Size** (taille) et **Dead space** (volume mort, ce qui reste au fond), en gallons ou en litres (les Units du profil).
-- **Extra trub loss** (perte de trub supplémentaire).
-- **Graphic** : l'image dessinée sur le Tab.
+- Les **Gallons** (Liters quand les Units sont Metric) et le **Dead space** (ce qui reste au fond) sont dans les Propriétés de la cuve, sous **Size**. L'Interview demande les deux.
+- Un Fermentor a à la place son **Largest batch** et son **Smallest batch**.
+- Comment la taille dessine la cuve : [Taille de la cuve](166-vessel-device-builder).
 
 ## Chauffe {#heat}
 
-La liste **Heat Source** (source de chaleur) dépend du Type :
-
-| Type | Sources de chaleur |
-|---|---|
-| HLT, Brew Kettle, RIMS, HERMS | Gas, Electric, Other |
-| Mash Tun | Gas, Electric, RIMS, HERMS, Other, Unheated |
-| Other | Gas, Electric, RIMS, Other, Unheated |
-| Fermenter | aucune |
-
-Choisissez ensuite l'appareil qui la chauffe :
-
-- **Gas** : une vanne dont le **Service** est **Gas**. Réglez le Service d'une vanne dans ses propriétés (Edit layout, double-cliquez sur la vanne) : Gas, Room Temperature Liquid (liquide à température ambiante), ou High Temperature Liquid (Stainless Steel) (liquide chaud, inox).
-- **Electric** : une sortie dont le **Kind** est **element (electric heating element)**, ou une sortie PID, hysteresis, duty cycle ou PWM.
-- **RIMS** ou **HERMS** : un tube RIMS ou une cuve HERMS de ce profil.
-- **Other** : tapez ce que c'est.
+Le **Heating Element** d'une cuve se choisit dans ses Propriétés (ou dans le [Vessel Device Builder](166-vessel-device-builder)). Il brille quand il est allumé.
 
 ## Sonde de température {#temperature-probe}
 
-La liste **Temperature Probe** montre les sondes de la même carte (Interface) que l'appareil de chauffe, pour que la sonde et le chauffage soient sur la même Mega. Si la cuve n'est pas chauffée, ou si aucun appareil de chauffe n'est encore choisi, toutes les sondes sont listées.
-
-## Fermenteur {#fermenter}
-
-Un Fermenter a ses propres réglages :
-
-- **Largest batch** et **Smallest batch** : le plus gros et le plus petit brassin qu'il peut contenir.
-- **Trub loss** (ce qui reste dans le fermenteur). La vérification des volumes de l'onglet Equipment Profile l'utilise.
-- **Graphic**, **Name** et **Temperature Probe**.
-- **Report the temperature every** (envoyer la température toutes les) un nombre de **Minutes**, **Hours** ou **Days**.
-
-La densité, l'ABV, le CO2 et les dates d'un brassin iront sur l'onglet Fermentation (plus tard).
+La **Temperature Probe** se choisit dans les Propriétés de la cuve : **Select Temperature Probe or None**.
 
 ## Ports et construction {#ports-and-build}
 
-Les ports sont les mêmes que sur le Tab Equipment : allumez chaque port qu'elle a, et réglez sa **Position** et son **Standard**. Laissez **Bundled** actif pour la mettre sur le Tab comme un seul bloc avec ses IP. Voir [Équipement : cuves, refroidisseurs, serpentins et raccords](14-equipment).
+Les ouvertures de la cuve sont ses **IP**, réglées par son Vessel Template ou par le [Vessel Device Builder](166-vessel-device-builder). **Bundled** garde la cuve et ses IP ensemble, comme un seul bloc.
+
+## Faits avant les Templates {#made-before-templates}
+
+Les Equipment Profiles faits avant les Vessel Templates peuvent encore avoir une liste de cuves. Elle s'affiche dans **☰ Menu > Equipment Profile** sous **Made before Templates**, avec **Put on Tab** pour dessiner chacune sur le Tab du profil. Ensuite, changez-la dans ses Propriétés sur le Tab.
