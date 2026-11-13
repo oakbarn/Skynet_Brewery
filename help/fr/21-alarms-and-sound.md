@@ -4,13 +4,13 @@
 
 | Type | Priorité | À utiliser pour |
 |---|---|---|
-| **Hop Alarm** | 1 | Les ajouts de houblon. Passe avant tous les autres sons. |
-| **Brew Flow Alarm** | 2 | Les étapes de brassage : eau d'empâtage, fin de l'empâtage, début de l'ébullition. N'attend qu'une Hop Alarm. |
+| **Brew Flow Alarm** | 1 | Les étapes de brassage : eau d'empâtage, fin de l'empâtage, début de l'ébullition. Passe avant tous les autres sons. |
+| **Hop Alarm** | 2 | Les ajouts de houblon. N'attend qu'une Brew Flow Alarm. |
 | **Pre-Hop Alarm** | 3 | Un avertissement un temps réglé avant sa Hop Alarm (10 minutes si vous ne le changez pas). |
 | **General Alarm** | 4 | Tout le reste. |
 | **Sound only** et le **Sound Player** | 5 | Musique et bips. Se met en pause pendant qu'une alarme sonne, puis reprend là où il s'était arrêté. |
 
-Brew Flow est en priorité 2 parce qu'il passe avant une Pre-Hop Alarm. Une alarme qui a dû attendre recommence depuis le début quand son tour arrive ; la musique reprend là où elle en était.
+Brew Flow est en priorité 1 et Hop en priorité 2 (OakBarn Brewery, 2026-11-13). Si un ajout de houblon doit passer en premier dans votre brassin, donnez à cette Hop Alarm sa propre Priority, par exemple 0.9. Une alarme qui a dû attendre recommence depuis le début quand son tour arrive ; la musique reprend là où elle en était.
 
 ### Priority : votre propre ordre {#priority-your-own-order}
 
@@ -66,4 +66,4 @@ Un son peut aussi être un **lien web vers un MP3** (`https://...`), joué direc
 
 Il n'y a pas de commande de pause : il se met en pause tout seul pendant qu'une alarme sonne et reprend ensuite. Pour mettre un Sound Player sur un Tab (touchez-le pour jouer ou arrêter), utilisez **Add Widget > On-screen controls > Sound Player**.
 
-Appuyez une fois sur **Enable sound** en haut de chaque écran qui doit jouer des sons (les navigateurs l'exigent). Pour avoir le son actif à chaque ouverture du panel, activez **Turn Sound On when starting** sur **☰ Menu > Default** (voir [Le ☰ Menu](33-menu)) ; il faut quand même toucher ou cliquer une fois la page avant le premier son, parce que les navigateurs l'exigent aussi.
+Quand le panel s'ouvre avec le son coupé, Skynet demande **🔊 Turn sound on?** : appuyez sur **🔊 Turn Sound On** (les navigateurs ne jouent un son qu'après un clic, et ce clic suffit). Tant que le son est coupé, un bouton rouge **🔇 Sound is off** reste sur le Tab et **🔊 Turn Sound On** est en haut du **☰ Menu**. C'est une fois par navigateur, pas par Tab. Vous pouvez aussi appuyer sur **Enable sound** dans la barre de menu. Pour avoir le son actif à chaque ouverture du panel, activez **Turn Sound On when starting** sur **☰ Menu > Default** (voir [Le ☰ Menu](33-menu)) ; il faut quand même toucher ou cliquer une fois la page avant le premier son, parce que les navigateurs l'exigent aussi.
