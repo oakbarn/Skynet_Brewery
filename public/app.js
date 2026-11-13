@@ -10784,7 +10784,7 @@ $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
-  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file scripts/<name>.txt
+  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file processes/<name>.txt
   if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
   await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);

@@ -1,6 +1,6 @@
 # Processes
 
-Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, faire tourner une pompe, attendre une température, lancer une minuterie, faire sonner une alarme. Ce sont des fichiers texte dans le dossier `scripts` du Pi.
+Les Processes sont les étapes automatiques d'un brassage : ouvrir des vannes, faire tourner une pompe, attendre une température, lancer une minuterie, faire sonner une alarme. Ce sont des fichiers texte dans le dossier `processes` du Pi.
 
 ## L'écran Processes {#the-processes-screen}
 

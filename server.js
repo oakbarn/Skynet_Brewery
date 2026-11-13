@@ -39,7 +39,7 @@ import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
 import { blankRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
-import { seedDefaults } from './lib/seed.js';
+import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -75,7 +75,7 @@ import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'));
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
-const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 'scripts'));
+const PROCESSES = path.resolve(process.env.BREWPANEL_PROCESSES ?? path.join(ROOT, 'processes'));
 const PUBLIC = path.join(ROOT, 'public');
 // The 3 Vessel sample ships in the panel (samples/configs); every other Sample Schema comes with the add-only Skynet Sample Schemas
 // Setup into sample_schemas/ (Rule 9.13). Both are listed together.
@@ -90,9 +90,14 @@ const IMPORT_BUILD = process.env.SKYNET_IMPORT_BUILD === '1';
 const IMPORT_KEY = IMPORT_BUILD && String(process.env.SKYNET_IMPORT_KEY ?? '').length >= 32 ? String(process.env.SKYNET_IMPORT_KEY) : '';
 const IMPORT_COOKIE = 'skynet_import_build';
 
+// The processes folder (Rule 9.18): earlier trial versions called it scripts. A panel that still has only scripts/ gets it
+// renamed once, before anything is read, so its Processes are kept.
+if (!IMPORT_BUILD) try { if (renameOldProcessesFolder(PROCESSES)) console.log(`Renamed the scripts folder to ${path.basename(PROCESSES)}`); }
+catch (e) { console.log(`Could not rename the scripts folder to processes: ${e.message}`); }
+
 // Move Brain (Rule 9.9, lib/brainmove.js): a Brain Move file brought in from the old Brain is put in place first, before anything
-// is read. This Brain's own config, data, scripts and media go to backups/before_brain_move_<date>.
-const MOVE_DIRS = { config: path.dirname(CONFIG), data: DATA, scripts: SCRIPTS, media: path.join(path.dirname(CONFIG), '..', 'media') };
+// is read. This Brain's own config, data, processes and media go to backups/before_brain_move_<date>.
+const MOVE_DIRS = { config: path.dirname(CONFIG), data: DATA, processes: PROCESSES, media: path.join(path.dirname(CONFIG), '..', 'media') };
 let moved = null;
 if (!IMPORT_BUILD) try { moved = applyPendingMove(ROOT, MOVE_DIRS); } catch (e) { moved = { lines: [`Brain Move failed: ${e.message}`], failed: true }; }
 if (moved) for (const l of moved.lines) console.log(l);
@@ -105,7 +110,7 @@ store.load();
 // Picture groups: the eleven Skynet folders in media/Images are made (lib/picgroups.js)
 setupPictureGroups(store._findMedia('Images'));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
-const engine = new Engine(store, SCRIPTS, logger);
+const engine = new Engine(store, PROCESSES, logger);
 // Device names given their General Type@ when a Schema loads (Rule 3.1, lib/store.js): every Process follows
 const typeAtProcesses = map => { const r = renameInProcesses(engine, map); if (r.length) console.log(`Processes following the General Type@ names: ${r.map(x => x.name).join(', ')}`); };
 if (store.loadRenames?.size) typeAtProcesses(store.loadRenames);
@@ -146,7 +151,7 @@ store.on('sdcard', m => { engine.print('system', m); broadcast('alert', { text: 
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());
 const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source: store.config.skynetPictures });   // ☰ Menu > Get Skynet pictures        // Media page: add / rename / delete pictures and sounds
-const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], scripts: SCRIPTS, help: HELP }));   // File Move page
+const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], processes: PROCESSES, help: HELP }));   // File Move page
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (moved) for (const l of moved.lines) engine.print('system', l);
@@ -695,7 +700,7 @@ async function route(req, res) {
     const out = { ok: true };
     if (renames.size) {
       out.renamed = [...renames].map(([from, to]) => ({ from, to, clone: clones.has(from) }));
-      out.processes = renameInProcesses(engine, renames);              // the scripts/ folder: shared by every Schema
+      out.processes = renameInProcesses(engine, renames);              // the processes/ folder: shared by every Schema
       if (store.config.logSets) { store.config.logSets = store.config.logSets.map(s => renameElementRefs(s, renames)); store.writeConfig(); }
       out.otherSchemas = schemas.usingNames([...renames.keys()]);   // other Schemas that still have a Device or Widget by the old name
     }
@@ -1064,7 +1069,7 @@ async function route(req, res) {
     }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') {
-      if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)
+      if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file processes/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
       // goLine follows its line (Rule 16.10): lines added or taken out above the line it points at change its number
       const body = await readBody(req), gl = followGoLines(engine.exists(name) ? engine.read(name) : null, body);
@@ -1260,7 +1265,7 @@ const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
   console.log(`Panel version: ${PANEL_VERSION.version || 'not stamped (not from a GitHub merge)'}`);
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
-  console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
+  console.log(`Config:  ${CONFIG}\nProcesses: ${PROCESSES}\nData:    ${DATA}`);
   pictures.start();
   power?.start();
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');

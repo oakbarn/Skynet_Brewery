@@ -194,7 +194,7 @@ export function notepadPlusPlus(words, texts = []) {
   return `<?xml version="1.0" encoding="UTF-8" ?>
 <!-- Skynet Brewery Process colors for Notepad++ (${general ? 'general' : 'made from this brewery'}).
      Notepad++: Language > User Defined Language > Define your language... > Import..., pick this file, then restart Notepad++.
-     Processes (.txt files in the scripts folder) then open in color when you pick Language > Skynet Process. -->
+     Processes (.txt files in the processes folder) then open in color when you pick Language > Skynet Process. -->
 <NotepadPlus>
     <UserLang name="Skynet Process" ext="sky" udlVersion="2.1">
         <Settings>

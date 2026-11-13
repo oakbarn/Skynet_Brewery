@@ -1,6 +1,6 @@
 # Processes
 
-Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `scripts` folder on the Pi.
+Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `processes` folder on the Pi.
 
 ## The Processes screen
 

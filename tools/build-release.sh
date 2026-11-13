@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a Skynet Brewer release in release/ (MIT License, Copyright (c) OakBarn Brewery 2026):
 #   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
-#                                          data/, config/, media/ or scripts/ (their samples are in defaults/), so it never replaces yours
+#                                          data/, config/, media/ or processes/ (their samples are in defaults/), so it never replaces yours
 #   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
 #   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   every Skynet picture and sound, kept out of the panel zip and
 #                                          Setup (OakBarn Brewery, 2026-11-10, Rule 9.12). They only ever ADD files: one you already
@@ -34,11 +34,11 @@ git ls-files -z --cached --others --exclude-standard \
 done
 chmod +x "$STAGE"/install/linux/*.sh "$STAGE"/install/pi/*.sh "$STAGE"/install/mac/*.command
 
-# Your folders (config, media, scripts) are NOT in the zip. Their samples go in defaults/, and the panel copies them
+# Your folders (config, media, processes) are NOT in the zip. Their samples go in defaults/, and the panel copies them
 # into place on its first start (lib/seed.js). So unzipping a new version over a panel can never replace yours.
 # data/ is never in a release at all.
 mkdir -p "$STAGE/defaults"
-for d in config scripts; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/defaults/$d"; done
+for d in config processes; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/defaults/$d"; done
 # The pictures and sounds (media/) are not in the panel zip or Setup: they are the Skynet Media zip and Setup (Rule 9.12)
 MSTAGE="$OUT/stage/media/BrewPanel/defaults"
 mkdir -p "$MSTAGE"

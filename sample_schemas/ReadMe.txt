@@ -18,7 +18,7 @@ HOW THE PANEL USES THIS FOLDER
 WHAT A SAMPLE SCHEMA FOLDER HOLDS
   <name>/sample.json     its name, title, a short description, and what it needs
   <name>/config.json     its Tabs, Devices, Widgets, pipes and Interfaces
-  <name>/scripts/*.txt   its Processes
+  <name>/processes/*.txt   its Processes
 
 A SCHEMA FROM ANOTHER BREWER
   A brewery another brewer shares can be added the same way: put its folder (with the

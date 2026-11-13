@@ -60,7 +60,7 @@ Every Device and Widget has two true / false attributes:
 | --- | --- | --- |
 | Configuration / .brucfg | Schema ("BruControl Schema") | Built (on screen) |
 | Workspace | Tab | Built |
-| Script | Process | Built (on screen; the scripts/ folder keeps its name) |
+| Script | Process | Built (on screen and the `processes/` folder, Rule 9.18) |
 | Element (on a workspace) | Device (has a PLC port) or Widget (app only); never "element" | Built |
 | Interface | Interface (a board) | Built |
 | `DisplayName` (Appearance) | Label | Built |

@@ -50,7 +50,7 @@ Skynet utilise des mots simples qui disent ce qu'ils veulent dire, pour que rien
 
 ## Passer à une nouvelle version {#updating-to-a-new-version}
 
-Arrêtez d'abord le panel, puis relancez le programme d'installation ou décompressez le nouveau zip par-dessus le panel. Le zip ne contient pas de dossiers `config`, `data`, `media` ni `scripts`, donc votre disposition, vos réglages, vos données de brassage, vos utilisateurs, vos images, vos sons et vos Processes ne sont jamais remplacés. Voir [Passer à une nouvelle version](18-updating).
+Arrêtez d'abord le panel, puis relancez le programme d'installation ou décompressez le nouveau zip par-dessus le panel. Le zip ne contient pas de dossiers `config`, `data`, `media` ni `processes`, donc votre disposition, vos réglages, vos données de brassage, vos utilisateurs, vos images, vos sons et vos Processes ne sont jamais remplacés. Voir [Passer à une nouvelle version](18-updating).
 
 ## À propos de ce manuel {#about-this-manual}
 

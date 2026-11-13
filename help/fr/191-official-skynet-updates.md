@@ -41,7 +41,7 @@ La vérification **n'arrête jamais rien**. Un brassage en cours continue, quoi 
 et `samples`.
 
 **Jamais vérifié ni touché (à vous) :** vos Schemas, Tabs, Devices, Widgets et réglages (`config`), les utilisateurs, mots de passe et données de brassage
-(`data`), les images et sons (`media`), les Processes (`scripts`), les pages d'aide (un Admin peut les modifier dans le panneau), les Sample
+(`data`), les images et sons (`media`), les Processes (`processes`), les pages d'aide (un Admin peut les modifier dans le panneau), les Sample
 Schemas supplémentaires (`sample_schemas`) et vos propres Templates.
 
 ## Repair

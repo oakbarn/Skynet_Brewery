@@ -33,7 +33,7 @@ The same folder, `BrewPanel/sample_schemas`, is where a brewery another brewer s
 |---|---|
 | `sample.json` | Its name, title, a short description, and what it needs |
 | `config.json` | Its Tabs, Devices, Widgets, pipes and Interfaces |
-| `scripts/` | Its Processes (`.txt` files) |
+| `processes/` | Its Processes (`.txt` files) |
 
 Put the folder in `sample_schemas` and press **F5**. It comes in exactly like a Skynet sample: as a new Schema, on the simulator. The `ReadMe.txt` in that folder says the same.
 

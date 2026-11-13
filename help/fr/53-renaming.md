@@ -36,7 +36,7 @@ Les autres réglages qui pointent vers l'élément renommé le suivent aussi : t
 - **Renommez-le deux fois.** Si vous renommez `Pump1` en `Pump_A` puis en `Pump_Main` avant d'enregistrer, les Processes passent directement de `Pump1` à `Pump_Main`.
 - **Annuler.** Si vous quittez Edit layout sans enregistrer, rien n'est renommé et aucun Process n'est changé.
 - **Un Process qui tourne** continue de marcher : il trouve l'élément renommé par sa clé cachée. Il utilise le nouveau nom dès son prochain départ.
-- **Sauvegarde.** Avant qu'un Process soit changé, l'ancienne copie est gardée à côté sous le nom `<Process name>.txt.bak` dans le dossier des scripts.
+- **Sauvegarde.** Avant qu'un Process soit changé, l'ancienne copie est gardée à côté sous le nom `<Process name>.txt.bak` dans le dossier processes.
 - **Autres Schemas.** Les Processes sont partagés par tous les Schemas. Si un autre Schema a encore un Device ou un Widget avec l'ancien nom, le message vous le dit, car le Process changé y cherche maintenant aussi le nouveau nom. Renommez-le aussi dans ce Schema, ou gardez une copie du Process pour lui.
 - **Tabs et Processes.** Renommer un Tab ou un Process est une autre affaire ; cette page parle des Devices et des Widgets.
 

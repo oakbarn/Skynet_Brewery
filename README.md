@@ -13,7 +13,7 @@ The **Brain** is the main computer that runs Skynet. It can be a **Windows, Mac 
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
-                           scripts, item API,  SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
+                           Processes, item API, SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
                                                         ──WiFi──> ESP32 ──> Mega
 ```
 
@@ -25,7 +25,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **Download:** the newest version is always at **[Releases > Latest](https://github.com/oakbarn/skynet_brewery/releases/latest)**. On Windows download `Skynet_Brewer_Setup_<version>.exe` and double-click it. Every merge makes a new Release with the installer, the panel zip and the ReadMe attached; you don't need a GitHub account.
 
-**The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). **Updates:** a release zip has no `config/`, `data/`, `media/` or `scripts/` (their samples are in `defaults/`, copied in by `lib/seed.js` only into a folder that doesn't exist yet), so unzipping it over a panel or running an installer again never replaces them. On an update the installers ask whether to keep those folders (default: keep all). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
+**The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). **Updates:** a release zip has no `config/`, `data/`, `media/` or `processes/` (their samples are in `defaults/`, copied in by `lib/seed.js` only into a folder that doesn't exist yet), so unzipping it over a panel or running an installer again never replaces them. On an update the installers ask whether to keep those folders (default: keep all). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
 
 **By hand:**
 
@@ -150,7 +150,7 @@ gGlobals or Variables are sent to the database with a Process Command only. No n
 
 ## 3. Processes
 
-Processes are text files in the `scripts` folder. You can edit them on the **Processes** page or in any text editor.
+Processes are text files in the `processes` folder. You can edit them on the **Processes** page or in any text editor.
 
 **The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
@@ -253,13 +253,13 @@ Any Device or Widget whose **.API** setting is on (its Properties, Database and 
 
 ```
 server.js            the server
-lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml, mqtt
+lib/                 engine (Processes), store (elements), logger (SQLite), hardware, beerxml, mqtt
 public/              the browser app
 config/brewery.json  the loaded Schema (tabs, elements, graphics, devices) and the panel settings (edited by the app; a .bak is kept)
 config/schemas/      one file per Schema (picked in the Schema dropdown), its saved values, daily and by-hand backups
 config/equipment/    Equipment Profiles (☰ Menu > Equipment Profile), used by any Schema
 config/profiles/     Mash, Boil, Tab Background and Valve Profiles (☰ Menu)
-scripts/*.txt        scripts
+processes/*.txt      Processes
 media/Images/        every picture (backgrounds too, e.g. media/Images/brewery_main.png); the
                      File Move page copies a whole folder from your computer
 media/sounds/        alarm and timer sounds
