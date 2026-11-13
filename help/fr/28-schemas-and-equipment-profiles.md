@@ -36,8 +36,9 @@ Charger un exemple dans **Settings > Start from a sample Schema** crée aussi un
 
 ## Sauvegardes {#backups}
 
-- **Chaque jour**, le panel sauvegarde tout seul chaque Schema. Les 30 dernières sauvegardes quotidiennes sont gardées.
-- **Back up this Schema now** dans la liste déroulante Schema en fait une tout de suite. Celles-ci ne sont jamais supprimées.
+- **Chaque fois qu'un changement est enregistré**, le Schema tel qu'il était est gardé comme sauvegarde, nommée `<Schema name>_yyyymmddThhmm.BacUp`. Skynet le fait en coulisse et n'a besoin d'aucune action de votre part.
+- **Back up this Schema now** dans la liste déroulante Schema en fait une tout de suite.
+- Une sauvegarde n'écrase jamais une autre, et aucune n'est jamais supprimée.
 - **Restore a backup ...** montre les sauvegardes du Schema chargé avec leurs dates. Choisissez-en une et appuyez sur **Save**. Le Schema tel qu'il est maintenant est d'abord sauvegardé, donc vous pouvez annuler une restauration en restaurant cette sauvegarde.
 
 Les sauvegardes sont dans `config/schemas/backups/<schema name>`.

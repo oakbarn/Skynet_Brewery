@@ -191,8 +191,7 @@ engine.onRecipe = (cmd, args, by) => {
   if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
 };
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
-const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
-dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema gets one backup a day (config/schemas/backups)
+// no daily backup: a Schema is backed up every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -659,6 +658,8 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    // a backup of the Schema as it was, every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
+    if (schemas.active?.id) { try { schemas.backupSchema(schemas.active.id); } catch (e) { console.log('Schema backup failed: ' + e.message); } }
     // renamed items, found by their hidden key (Fritz, 2026-10-27): old name -> new name. Clones of a renamed item follow it.
     const renames = new Map(), clones = new Map();
     if (body.elements) {
@@ -806,7 +807,8 @@ async function route(req, res) {
   }
   // Config Editor (admin only, see needRole)
   // The Config Editor never shows the hidden keys; on Save each item gets its key back by its name (lib/keys.js)
-  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
+  // no copy on opening: one is made before every save or restore (Rule 9.17)
+  if (p === '/ui/config/open' && m === 'POST') return ok(res, { ok: true, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')), file: path.relative(ROOT, CONFIG) });
   if (p === '/ui/config/check' && m === 'POST') return ok(res, { ok: true, problem: checkConfigText(await readBody(req, 16 * 1024 * 1024), DATA) });
   if (p === '/ui/config' && m === 'PUT') {
     let text = await readBody(req, 16 * 1024 * 1024);

@@ -110,7 +110,6 @@ Tout le monde peut regarder dans la Recycle Bin ; seuls les Admins peuvent resta
 
 La page **Schema.json** (Admins seulement, sur la barre de menus ; elle s'appelait **Config** avant) montre tout le fichier de configuration, `config/brewery.json`, sous forme de texte : Tabs, Devices, Widgets, tuyaux, Interfaces et réglages. Elle a les mêmes **Find**, **Replace** et **Go to line**.
 
-- L'ouvrir copie d'abord le fichier dans `config/backups` (pas de nouvelle copie quand rien n'a changé).
 - **Check** teste le fichier comme le panel le charge au démarrage et montre la ligne qui pose problème.
 - **Save** le vérifie d'abord et n'enregistre pas un fichier que le panel ne peut pas charger. Enregistrer arrête les Processes en marche et reconnecte les cartes. L'ancien fichier est d'abord copié dans `config/backups`.
 - **Save as .json file** enregistre un Schema comme un seul fichier `.json` sur cet ordinateur (voir la page d'aide *Schema.json*).
