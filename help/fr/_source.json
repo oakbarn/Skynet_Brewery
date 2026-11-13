@@ -127,5 +127,8 @@
  "131-valve-standard": "b33fecff5b855bd2",
  "132-probe-tees-and-thermowells-on-pipes": "ef541428629b12c7",
  "133-vessel-widget": "7b2730ca72cd821c",
- "134-value-time-and-datetime-widgets": "125e779fd802f13c"
+ "134-value-time-and-datetime-widgets": "125e779fd802f13c",
+ "135-vessel-sizing": "21e03313cd303162",
+ "136-pwm-and-analog-out-device-properties": "fb9cca04f8c58a38",
+ "137-heating-element-device-properties": "9c413c8c22d4f402"
 }
