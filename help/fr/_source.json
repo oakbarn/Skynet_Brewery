@@ -164,5 +164,9 @@
  "170-hydrometers": "3f095a06a3f2d57f",
  "171-smoothing": "c06a79ecf6b5ab59",
  "172-alarm-chain": "8785ba42a81582c6",
- "173-process-widget": "02115a1d6dcdfb62"
+ "173-process-widget": "02115a1d6dcdfb62",
+ "174-data-display": "79a670cd288fcfbe",
+ "175-alarm-email": "ff2600d9ad683b30",
+ "176-time-formats": "a46b4d3b210c33cb",
+ "178-alarm-digital-outputs": "8ba18eef89b943d5"
 }
