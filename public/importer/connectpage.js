@@ -3,6 +3,7 @@
 // The Importer's page 6, Connect your brewery (Rule 15.4, Fritz 2026-11-07). The rules of the chains, the guesses and reading an
 // AI's answer are in connect.js (shared with the Importer's server); this file only draws the page and keeps the brewer's answers.
 import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath, JOINS, joinOf, setJoin, setFit, addTee, chainVessel, pieceKey, guessVesselTemplate } from './connect.js';
+import { openLink } from '../extlinks.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -349,7 +350,7 @@ function chipUp() {
 async function askAi() {
   const q = aiQuestion({ ...S.parts, vessels: S.parts.vessels });
   try { await navigator.clipboard.writeText(q); } catch { $('#cnAiText').value = q; say('Copy the question from the box below (it could not be copied by itself).'); }
-  window.open($('#cnAiSite').value, '_blank', 'noopener');
+  openLink($('#cnAiSite').value);
   $('#cnAiNote').textContent = 'The question is copied. On the AI site, add your picture, paste the question, then copy its answer back into the box.';
 }
 function readAi() {

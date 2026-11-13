@@ -8,12 +8,39 @@ The Build Tab only shows while you are building. It has a dashed orange edge and
 
 1. Press **☰ Menu** and pick **Edit layout**.
 2. Do one of these:
-   - Pick a Device in **Add Device** (or a shortcut: **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), a Widget in **Add Widget**, or press **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** or **Elbows, Tees …** (see [Edit layout bar](82-edit-layout-bar)). The Build Tab opens by itself and the new item is made there.
+   - Pick a Device in **Add Device** (or a shortcut: **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), a Widget in **Add Widget**, or press **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** or **Elbows, Tees …** (see [Edit layout bar](82-edit-layout-bar)). The Build Tab opens by itself and the new item is made there, **never on a regular Tab**. The Tab you pick in its Add box is remembered: that is where it goes at the end (see **Where it goes** below).
    - Press **🔨 Build Tab** on the Edit layout bar to open it empty.
    - In **☰ Menu > Vessel Templates**, **Equipment Templates** or **Fitting Templates**, open a Template (a Skynet Template or a User Bundled Template) and press **Add to Tab** or **Clone**. The copy is made on the Build Tab (see **Copies of Templates** below).
 3. Build it on the Build Tab: set its properties, add its IPs, draw its pipes. Everything on the Edit layout bar works there.
 
 You can go back and forth between the Build Tab and your other Tabs at any time. The Build Tab is the size of the Tab you came from.
+
+## Where it goes
+
+A new Device or Widget always starts on the Build Tab. The **Tab** you pick in its Add box is where it will go when the build is done:
+
+- Its **Suggested Name** already ends with that Tab's ID (for example `BM_22_DO@Pump_Pump_BH` for Brew House).
+- Its Properties show that Tab in the **Tab** box. Pick another Tab there and it will go to that one instead. It stays on the Build Tab until then.
+- **💾 Save Build ... > Move to Tab** offers that Tab first. Press **Move to Tab** and it moves there. If the new things on the Build Tab were picked for different Tabs, each one goes to its own Tab.
+
+### Its spot on the Build Tab is its spot on its Tab
+
+Where you put it on the Build Tab is where it lands on its Tab. The Build Tab is made at least as big as that Tab, so every spot fits. If you send it to a different Tab in Save Build, it goes to the middle of that Tab instead.
+
+### The Watermark
+
+Once the item's Tab is set, a faint drawing of that Tab shows behind everything on the Build Tab, like a watermark: its background picture, a dashed outline with the Label of each thing on it, its pipes, and **Goes to:** and the Tab name at the top left. Line your new item up with it and it lands in the right place. Nothing in the watermark can be clicked.
+
+- Click an item on the Build Tab to see the watermark of the Tab it goes to. With nothing picked, it shows the Tab when every new item goes to the same one.
+- **🗺 Watermark On** on the Edit layout bar (it shows only on the Build Tab) turns it off; **🗺 Watermark Off** turns it back on. This browser remembers your choice.
+
+### It glows until you click it
+
+When Save Build moves something onto a regular Tab (Brew House in the sample, for example), its border **glows red with a slow pulse**, so it is easy to find. As soon as you click it, the glow stops. The glow is never saved: reloading the page ends it too.
+
+### Templates in the Tab list
+
+A vessel, a piece of equipment or a Tab_Fitting on the Build Tab has **📁 Templates** at the end of the Tab list in its Properties. Pick it and **💾 Save Build ...** shows **As a Template** first. Devices and Widgets can't be Templates (see **What can be a Template** below), so their Tab list doesn't have it.
 
 ## Preview
 
@@ -25,7 +52,7 @@ The Preview works before and after you change an item's Properties, as often as 
 
 A copy of a Template, from a **Skynet Template** or a **User Bundled Template**, is always made on the Build Tab first.
 
-- **Add to Tab**: pick the Tab it goes on and its name. The copy is made on the Build Tab, Bundled. **Save Build ... > Save to Tab** then offers that Tab first.
+- **Add to Tab**: pick the Tab it goes on and its name. The copy is made on the Build Tab, Bundled. **Save Build ... > Move to Tab** then offers that Tab first.
 - **Clone**: give the new Template a name. The copy is made on the Build Tab. Change it there, then **Save Build ...** shows **As a Template** first, with that name filled in. Press **Save as Template** and the new Template is saved. What the Build Tab doesn't show (like each port's Connection Standard) is copied from the Template you cloned.
 
 If you are not in Edit layout yet, it is switched on for you.
@@ -36,7 +63,7 @@ Press **💾 Save Build ...** on the Edit layout bar. A pop-up asks where it sho
 
 | Pick | What happens |
 |---|---|
-| **To a Tab** | Pick the Tab (the one you came from is first) and press **Save to Tab**. Everything on the Build Tab moves there at the size it is now, in the middle of that Tab. Drag it to its place, then press **Save layout**. |
+| **Move to Tab** | Pick the Tab (the one picked for the new item is first; otherwise the one you came from) and press **Move to Tab**. Everything on the Build Tab moves there at the size it is now. To the Tab picked for it, it keeps its spot from the Build Tab; to another Tab it goes to the middle. It glows red until clicked. Then press **Save layout**. |
 | **As a Template** | Type a **Template Name** (no spaces, unique) and press **Save as Template**. It is saved at once in **☰ Menu**, and the Build Tab closes. Use **Add to Tab** on the Template to put it on a Tab. |
 | **Throw it away** | Everything on the Build Tab is deleted (it asks first). |
 | **Keep building** | Back to the Build Tab, nothing changes. |
