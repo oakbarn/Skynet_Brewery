@@ -4,21 +4,19 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readVersion, VersionCheck } from '../lib/version.js';
-import { codeFingerprint } from '../lib/auth.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bp-ver-'));
 fs.mkdirSync(path.join(root, 'lib'));
 fs.writeFileSync(path.join(root, 'server.js'), '// panel');
 assert.deepEqual(readVersion(root), { version: '' }, 'no version.json: not stamped');
 
-const stamp = (v, extra = {}) => fs.writeFileSync(path.join(root, 'version.json'), JSON.stringify({ version: v, merged: '2026-10-21T16:00:00Z', commit: 'abcdef1234', code: codeFingerprint(root), repo: 'oakbarn/Skynet_Brewery', branch: 'claude/project-thread-vzxi0a', ...extra }));
+const stamp = (v, extra = {}) => fs.writeFileSync(path.join(root, 'version.json'), JSON.stringify({ version: v, merged: '2026-10-21T16:00:00Z', commit: 'abcdef1234', repo: 'oakbarn/Skynet_Brewery', branch: 'claude/project-thread-vzxi0a', ...extra }));
 stamp('not a version');
 assert.equal(readVersion(root).version, '', 'a wrong name is ignored');
 stamp('Skynet-v.20261021_16_00');
 const v = readVersion(root);
 assert.equal(v.version, 'Skynet-v.20261021_16_00');
 assert.equal(v.commit, 'abcdef1');
-assert.equal(v.changed, false);
 
 const gh = (version, status = 200) => async url => {
   assert.equal(url, 'https://raw.githubusercontent.com/oakbarn/Skynet_Brewery/claude/project-thread-vzxi0a/version.json');
@@ -54,11 +52,7 @@ stamp('bad name!-v.20261021_16_00');
 assert.equal(readVersion(root).version, '', 'only GitHub user name characters');
 stamp('Skynet-v.20261021_16_00');
 
-// the program files changed after the stamp (a copy of a pull request, or edited by hand)
-fs.writeFileSync(path.join(root, 'lib', 'new.js'), 'export {}');
-const ch = readVersion(root);
-assert.equal(ch.changed, true);
-assert.equal((await new VersionCheck(ch, gh('Skynet-v.20261021_16_00')).latest()).state, 'changed');
+// whether the program files are the official ones: test/official.test.js (Rule 9.14)
 
 // asks GitHub at most every 10 minutes
 let calls = 0;

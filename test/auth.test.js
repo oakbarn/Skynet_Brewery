@@ -1,6 +1,6 @@
 // node test/auth.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
-import { Auth, cleanPasswordRules, describePasswordRules, codeFingerprint, isPrivateAddress, roleAtLeast, parseCookies } from '../lib/auth.js';
+import { Auth, cleanPasswordRules, describePasswordRules, isPrivateAddress, roleAtLeast, parseCookies } from '../lib/auth.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpa'));
 let a = new Auth(d);
 assert.equal(a.needsSetup(), true);
@@ -41,7 +41,6 @@ assert.ok(roleAtLeast('admin', 'operator') && !roleAtLeast('viewer', 'operator')
 for (const ip of ['127.0.0.1', '::1', '192.168.1.5', '10.0.0.2', '172.20.1.1', '100.101.1.2', '::ffff:192.168.0.9', 'fd7a:115c:a1e0::1']) assert.ok(isPrivateAddress(ip), ip);
 for (const ip of ['8.8.8.8', '100.200.1.1', '172.32.0.1', '2001:db8::1', '']) assert.ok(!isPrivateAddress(ip), ip);
 assert.deepEqual(parseCookies('a=1; bp_session=xyz'), { a: '1', bp_session: 'xyz' });
-assert.match(codeFingerprint(path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')), /^[0-9a-f]{16}$/);
 // password rules (Settings > Password rules)
 const d3 = fs.mkdtempSync(path.join(os.tmpdir(), 'bpc'));
 const c = new Auth(d3); let rules = {};

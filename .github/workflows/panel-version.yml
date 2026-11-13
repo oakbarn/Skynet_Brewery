@@ -9,6 +9,9 @@
 # built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
 # Never edit version.json by hand or in a pull request: this workflow owns it.
+# It also writes skynet_files.json (Rule 9.14, tools/make-file-list.js): the fingerprint of every core program file of this version.
+# The panel checks its files against it on every start (lib/official.js), asking this repository for the list of its own version,
+# and says Official Skynet, or Changed with the files named. Never edit skynet_files.json by hand either.
 # Signing: when the Azure Artifact Signing secrets and variables are set (docs/Code_Signing_Setup.md), the Setup .exe and
 # the Uninstall .exe inside it are signed, so Windows Smart App Control lets them run. Until then (or if signing fails)
 # the Setup .exe is built unsigned as before and the release still happens.
@@ -17,7 +20,7 @@ name: Panel version
 on:
   push:
     branches: [claude/project-thread-vzxi0a]
-    paths-ignore: [version.json]
+    paths-ignore: [version.json, skynet_files.json]
   workflow_dispatch:
 
 permissions:
@@ -32,6 +35,8 @@ concurrency:
 jobs:
   stamp:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
     env:
       TZ: UTC
     steps:
@@ -59,15 +64,14 @@ jobs:
           # two merges in the same minute: add _2, _3 ...
           base="$VERSION"; n=2
           while git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; do VERSION="${base}_$n"; n=$((n+1)); done
-          # the fingerprint of the program files, so the panel can tell when its files were changed after this merge
-          CODE=$(node -e "import('./lib/auth.js').then(m => console.log(m.codeFingerprint('.')))")
+          # the fingerprint of every core program file (Rule 9.14), so the panel can tell if its files are the official ones
+          node tools/make-file-list.js
           cat > version.json <<JSON
           {
             "version": "$VERSION",
             "merged": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "owner": "$OWNER",
             "commit": "${GITHUB_SHA}",
-            "code": "$CODE",
             "repo": "${GITHUB_REPOSITORY}",
             "branch": "${GITHUB_REF_NAME}"
           }
@@ -82,7 +86,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.json
+          git add version.json skynet_files.json
           git commit -m "Panel version $VERSION [skip ci]"
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
@@ -175,3 +179,120 @@ jobs:
             release/Skynet_Sample_Schemas_Setup_*.exe release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
             release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt
+
+  # ---- Virus check (Rule 9.11): Microsoft Defender scans every .exe on the new Release, on a Windows computer at GitHub. ----
+  # Clean: a "Virus check" line is added to the Release notes.
+  # Anything found: the Release is turned back into a Draft (hidden from the public), this job turns red
+  # and GitHub emails oakbarn. Nothing is deleted; look at it, then publish the Draft again or remove it.
+  virus-check:
+    needs: stamp
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.stamp.outputs.version }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Get the .exe files from the Release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force scan | Out-Null
+          gh release download $env:VERSION --pattern '*.exe' --dir scan
+          Get-ChildItem scan | Format-Table Name, Length
+
+      - name: Scan them with Microsoft Defender
+        id: scan
+        shell: pwsh
+        run: |
+          $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
+          # GitHub's Windows computers tell Defender to skip their drives; take that off so the scan is real
+          $ex = (Get-MpPreference).ExclusionPath
+          if ($ex) { Remove-MpPreference -ExclusionPath $ex }
+          & $mp -SignatureUpdate | Out-Null
+          # Self-test: the harmless industry test file (EICAR) MUST be caught, or the scan proves nothing
+          New-Item -ItemType Directory -Force selftest | Out-Null
+          $t = Join-Path (Resolve-Path selftest) 'test.txt'
+          [IO.File]::WriteAllBytes($t, [Convert]::FromBase64String('WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNUQU5EQVJELUFOVElWSVJVUy1URVNULUZJTEUhJEgrSCo='))
+          & $mp -Scan -ScanType 3 -File $t -DisableRemediation | Out-Null
+          if ($LASTEXITCODE -ne 2) { throw "Defender self-test failed (code $LASTEXITCODE): the scanner is not working, so no result." }
+          Write-Host "Self-test OK: Defender caught the test file."
+          $sig = (Get-MpComputerStatus).AntivirusSignatureVersion
+          $bad = @()
+          foreach ($f in Get-ChildItem scan -Filter *.exe) {
+            & $mp -Scan -ScanType 3 -File $f.FullName -DisableRemediation | Out-Host
+            if ($LASTEXITCODE -eq 2) { $bad += $f.Name; Write-Host "FOUND SOMETHING: $($f.Name)" }
+            elseif ($LASTEXITCODE -ne 0) { throw "Defender could not scan $($f.Name) (code $LASTEXITCODE)" }
+            else { Write-Host "Clean: $($f.Name)" }
+          }
+          "sig=$sig" >> $env:GITHUB_OUTPUT
+          "bad=$($bad -join ', ')" >> $env:GITHUB_OUTPUT
+          $global:LASTEXITCODE = 0   # a find is handled by the next steps, not by failing here
+
+      - name: Clean - add a line to the Release notes
+        if: steps.scan.outputs.bad == ''
+        shell: pwsh
+        run: |
+          $notes = (gh release view $env:VERSION --json body --jq .body) -join "`n"
+          $line = "**Virus check:** every .exe here was scanned by Microsoft Defender (virus definitions ${{ steps.scan.outputs.sig }}) on $(Get-Date -Format 'yyyy-MM-dd') UTC: nothing found."
+          Set-Content -Path notes.md -Value ($line + "`n`n" + $notes) -Encoding utf8
+          gh release edit $env:VERSION --notes-file notes.md
+
+      - name: Something found - hide the Release
+        if: steps.scan.outputs.bad != ''
+        shell: pwsh
+        run: |
+          gh release edit $env:VERSION --draft=true
+          Write-Host "::error::Microsoft Defender flagged: ${{ steps.scan.outputs.bad }}. The Release $env:VERSION is now a Draft (hidden)."
+          exit 1
+
+  # ---- VirusTotal (Rule 9.11): about 70 virus scanners look at every .exe on the new Release. ----
+  # Skipped until the VIRUSTOTAL_API_KEY secret is saved (docs/Security_Scanning.md).
+  # It only REPORTS: a line with the count and a link goes at the top of the Release notes, and a yellow warning
+  # shows if any scanner flags a file. It never hides the Release (Microsoft Defender above does that), because
+  # one or two of the 70 often guess wrong on a new installer.
+  # Every file sent to VirusTotal is kept there and can be downloaded by its paying members (fine: the Releases are public anyway).
+  virustotal:
+    needs: [stamp, virus-check]
+    if: always() && needs.stamp.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.stamp.outputs.version }}
+      VT_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+    steps:
+      - name: Send the .exe files to VirusTotal
+        run: |
+          set -uo pipefail
+          if [ -z "$VT_KEY" ]; then echo "No VIRUSTOTAL_API_KEY secret yet, so no VirusTotal check (docs/Security_Scanning.md)."; exit 0; fi
+          VT=https://www.virustotal.com/api/v3
+          # the free key allows 4 calls a minute, so every call waits 16 seconds first
+          vt() { sleep 16; curl -sS -H "x-apikey: $VT_KEY" "$@"; }
+          mkdir -p scan && gh release download "$VERSION" --pattern '*.exe' --dir scan
+          LINES=""; FLAGGED=""
+          for f in scan/*.exe; do
+            name=$(basename "$f"); sha=$(sha256sum "$f" | cut -d' ' -f1)
+            # files over 32 MB need their own upload address
+            if [ "$(stat -c %s "$f")" -gt 33000000 ]; then url=$(vt "$VT/files/upload_url" | jq -r .data); else url="$VT/files"; fi
+            id=$(vt -F "file=@$f" "$url" | jq -r '.data.id // empty')
+            if [ -z "$id" ]; then echo "::warning::VirusTotal did not take $name"; LINES+="- $name: VirusTotal did not take the file"$'\n'; continue; fi
+            # wait for the scanners (up to about 15 minutes)
+            for i in $(seq 1 50); do
+              res=$(vt "$VT/analyses/$id")
+              [ "$(echo "$res" | jq -r .data.attributes.status)" = completed ] && break
+            done
+            bad=$(echo "$res" | jq -r '(.data.attributes.stats.malicious // 0) + (.data.attributes.stats.suspicious // 0)')
+            all=$(echo "$res" | jq -r '[.data.attributes.stats[]] | add // 0')
+            echo "$name: $bad of $all scanners flagged it"
+            LINES+="- [$name](https://www.virustotal.com/gui/file/$sha): $bad of $all scanners flagged it"$'\n'
+            [ "$bad" != 0 ] && FLAGGED+="$name ($bad) "
+          done
+          [ -n "$FLAGGED" ] && echo "::warning::VirusTotal: some scanners flagged $FLAGGED- open the links in the Release notes to see which."
+          notes=$(gh release view "$VERSION" --json body --jq .body)
+          printf '**VirusTotal** (%s UTC):\n%s\n%s\n' "$(date -u '+%Y-%m-%d %H:%M')" "$LINES" "$notes" > vt_notes.md
+          gh release edit "$VERSION" --notes-file vt_notes.md
