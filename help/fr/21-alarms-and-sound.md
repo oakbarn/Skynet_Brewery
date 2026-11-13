@@ -52,6 +52,8 @@ alm_Hops_1 = false           turn it off
 
 `alm_Hops_1 = On` et `alm_Hops_1 = Off` marchent comme true et false (Règle 16.9). Un Process n'écrit jamais `.active`. Une seule Alarm peut changer son apparence et son son étape par étape : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 
+**Une Brew Flow Alarm retient son Process :** quand un Process met une Brew Flow Alarm Widget sur On (`alm_Mash_Done = On`), il attend sur cette ligne jusqu'à ce que le brasseur l'arrête d'un toucher, comme si `wait alm_Mash_Done == false` suivait. Tous les attributs d'une Alarm (`.path`, `.string`, `.playtime` ...) sont dans [Les attributs d'une Alarm](195-alarm-attributes).
+
 ## Sound Player
 
 Chaque panel a un **SoundPlayer** intégré pour la musique et les sons simples. Il n'est sur aucun Tab ; les Processes l'utilisent :

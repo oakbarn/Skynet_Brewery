@@ -50,6 +50,8 @@ alm_Hops_1 = false           turn it off
 
 `alm_Hops_1 = On` and `alm_Hops_1 = Off` work the same as true and false (Rule 16.9). A Process never writes `.active`. One Alarm can change its look and sound step by step: see [The Alarm Chain](172-alarm-chain).
 
+**A Brew Flow Alarm holds its Process:** turning a Brew Flow Alarm Widget On in a Process (`alm_Mash_Done = On`) waits on that line until the brewer taps it Off, as if `wait alm_Mash_Done == false` followed it. Every attribute an Alarm has (`.path`, `.string`, `.playtime` ...) is in [The Alarm attributes](195-alarm-attributes).
+
 ## Sound Player
 
 Every panel has one built-in **SoundPlayer** for music and plain sounds. It is not on any tab; Processes use it:

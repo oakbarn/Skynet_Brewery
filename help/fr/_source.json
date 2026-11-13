@@ -20,7 +20,7 @@
  "18-updating": "7138eec4b897e0eb",
  "19-installing": "e3509a34f4a0d39d",
  "20-simulation": "a5a9811d7048e8db",
- "21-alarms-and-sound": "89c421300031f403",
+ "21-alarms-and-sound": "69655416fac3f795",
  "22-process-language": "fbb2469259a9c301",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
  "24-pipes-and-hoses": "51e52e298ed0df7a",
@@ -100,7 +100,7 @@
  "103-hidden-tabs": "b57f09404d74d51a",
  "104-brew-pumps": "5bfea0310cf45a55",
  "105-pipe-angles-and-upright-kettles": "de2e88e8d04bac3b",
- "107-alarm-widget": "6fe230f3f9ad4ec6",
+ "107-alarm-widget": "73c887caa097634b",
  "108-gglobal-kinds": "f40f96f4c7adaf17",
  "109-copper-counterflow-chiller": "fe8cc0c7bf573cef",
  "110-pipe-widgets-from-skynet-drawings": "75ccac915d9d0928",
@@ -186,5 +186,6 @@
  "191-official-skynet-updates": "e8ec769a389645ef",
  "192-help-in-french": "1bfcd5f80c19e577",
  "193-skynet-picture-numbers": "23124c82bc892965",
- "194-two-part-paths": "3a0881e07ace7779"
+ "194-two-part-paths": "3a0881e07ace7779",
+ "195-alarm-attributes": "9cd90714e93c30d1"
 }
