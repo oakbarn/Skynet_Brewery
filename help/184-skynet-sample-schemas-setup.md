@@ -45,4 +45,4 @@ Most of the time another brewer will send you a single `.json` file instead (mad
 
 - Updating the panel never touches `sample_schemas`. Your own Schemas are never touched either.
 - The samples older versions of the panel had (Two vessels, one pump; BrewZilla brew day; OakBarn Brewery) are moved, not deleted, to `backups/old_samples_<date>` the first time you update, so only the 3 Vessel sample is listed. A Schema you already made from one of them is yours and stays.
-- Uninstalling the panel and keeping your data (the recommended No) keeps `sample_schemas` too.
+- Uninstalling the panel deletes `sample_schemas` with everything else (Rule 9.19). Run the Sample Schemas Setup again after a new install.
