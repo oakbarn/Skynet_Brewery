@@ -83,5 +83,9 @@
  "84-gkonstant-and-gapi": "2d1bf3057bafe98d",
  "85-simulator-bar": "b6beb9730482e6ba",
  "86-ip-snap-and-valve-pictures": "a4276323e3350632",
- "87-pipe-fittings-and-manual-valves": "981725843aac3a70"
+ "87-pipe-fittings-and-manual-valves": "981725843aac3a70",
+ "88-skynet-device-templates": "2ec48a02530d6fe9",
+ "89-build-template-tab": "1960f9a29f226fc1",
+ "91-text-widget": "52e3a2f4d43bd2fb",
+ "92-timer-widget": "c7f46793fcc93b0d"
 }
