@@ -11,6 +11,13 @@
 PANEL="$HOME/Brewing/BrewPanel"
 PORT=8080
 
+# Any folder name works (Rule 9.15): spaces, accented letters (bière), $, quotes. Each file we write gets the path in that file's own
+# quoting, so the start file, the menu entry and the service find the folder whatever it is called.
+sh_q()      { printf "'%s'" "${1//\'/\'\\\'\'}"; }                                      # for a bash file
+desktop_q() { local s="${1//\\/\\\\\\\\}"; s="${s//\"/\\\\\"}"; s="${s//\`/\\\\\`}"; s="${s//\$/\\\\\$}"; s="${s//%/%%}"; printf '"%s"' "$s"; }
+desktop_s() { local s="${1//\\/\\\\}"; printf '%s' "$s"; }                       # a plain value in a menu entry
+unit_q()    { local s="${1//\\/\\\\}"; s="${s//\"/\\\"}"; s="${s//%/%%}"; s="${s//\$/\$\$}"; printf '"%s"' "$s"; }   # for a systemd service
+unit_dir()  { local s="${1//%/%%}"; printf '%s' "$s"; }
 bold() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 stop() { printf '\n\033[31m%s\033[0m\n\n' "$*"; read -r -p "Press Enter to close. " _; exit 1; }
 
@@ -97,7 +104,7 @@ cat > "$HOME/Brewing/start-skynet-brewer.sh" <<EOF
 #!/usr/bin/env bash
 # MIT License Granted. Copyright (c) OakBarn Brewery 2026
 # Starts the Skynet Brew Panel and opens it in your browser. Keep this window open while you brew.
-cd "$PANEL" || { echo "The panel is not in $PANEL"; read -r -p "Press Enter to close. " _; exit 1; }
+cd $(sh_q "$PANEL") || { echo "The panel is not in the Brewing/BrewPanel folder"; read -r -p "Press Enter to close. " _; exit 1; }
 ( sleep 4; xdg-open http://localhost:$PORT >/dev/null 2>&1 ) &
 npm start
 read -r -p "The panel has stopped. Press Enter to close this window. " _
@@ -107,8 +114,8 @@ DESKTOP_FILE="[Desktop Entry]
 Type=Application
 Name=Skynet Brewer
 Comment=Skynet Brew Panel
-Exec=\"$HOME/Brewing/start-skynet-brewer.sh\"
-Icon=$PANEL/install/icon.png
+Exec=$(desktop_q "$HOME/Brewing/start-skynet-brewer.sh")
+Icon=$(desktop_s "$PANEL/install/icon.png")
 Terminal=true
 Categories=Utility;
 "

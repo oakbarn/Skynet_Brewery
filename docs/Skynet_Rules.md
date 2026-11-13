@@ -2651,6 +2651,13 @@ non official updates", "Explain the Offical Updates in the Help"). Skynet stays 
    files of the same Setup, so the same check covers them; the Panel shows it. The Importer's Build page shows no badge and runs
    no check of its own.
 
+9.15 **The installers work from and into a folder with any name** (OakBarn Brewery, 2026-11-12, after a brewer on Ubuntu
+24.04 ran the Linux installer from `Brassage bière/.../Skynet Brew Panel`): spaces, accented letters (é, è, ü), apostrophes,
+`$`, `%` and quotes in the folder name never stop an install, an update or the panel. Every path is kept whole (in quotes), and
+each file the installer writes (the start file, the Skynet Brewer menu entry and Desktop icon, the start-by-itself service) gets the
+path in that file's own way of quoting. Applies to the Linux, Raspberry Pi and Mac installers and to the panel itself. Both
+programs: the BruControl Import is Windows only and is installed by the same Setup .exe; nothing changes there.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -3885,6 +3892,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-12: Added Rule 9.15 (OakBarn Brewery): the installers work from and into a folder with any name (spaces, accented letters, $, %, quotes). The Linux and Pi installers now quote the folder correctly in the start file, the Skynet Brewer menu entry/Desktop icon and the start-by-itself service; tested installing from `Brassage bière/Logiciel de brassage de bière/Skynet Brew Panel` into a folder named `Brew Panel ü $x "q" it's 50%`. Checked against both programs: the BruControl Import is Windows only; nothing changes there.
 - 2026-11-12: Added Rule 9.14, Official Skynet (OakBarn Brewery: "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "Warn the end user is a good idea for non official updates"): GitHub writes skynet_files.json (a fingerprint of every core program file) on every merge; the panel checks its files against OakBarn Brewery's list on every start, shows ✓ Official / ⚠ Changed / ⚠ Not Official on the Menu Bar, a red bar on every screen when not Official, the files in ☰ Menu > About, Repair for Admins (old files moved to backups, never deleted), and makes the core files Read-only. Skynet stays open source (MIT); it finds changes, it can't stop an administrator. Replaces the old "+ changes". Help 191 (new): Official Skynet updates, the virus checks and how to check an .exe at virustotal.com; Help 18 and 19 point to it. Checked against both programs: the Importer's files are core files of the same Setup and are covered; its Build page runs no check. Next free Help 192. (thread "Protect official Skynet code on the Brain")
 - 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Then VirusTotal (about 70 scanners) reports on each .exe in the Release notes, never hides it; needs the VIRUSTOTAL_API_KEY secret. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
 - 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
