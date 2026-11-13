@@ -45,4 +45,4 @@ La plupart du temps, un autre brasseur vous enverra plutôt un seul fichier `.js
 
 - Mettre à jour le panneau ne touche jamais `sample_schemas`. Vos propres Schemas ne sont jamais touchés non plus.
 - Les exemples des anciennes versions du panneau (deux cuves une pompe ; jour de brassage BrewZilla ; OakBarn Brewery) sont déplacés, pas supprimés, dans `backups/old_samples_<date>` à la première mise à jour, donc seul l'exemple 3 Vessel est listé. Un Schema que vous avez déjà fait à partir de l'un d'eux est à vous et reste.
-- Désinstaller le panneau en gardant vos données (le Non recommandé) garde aussi `sample_schemas`.
+- Désinstaller le panneau supprime `sample_schemas` avec tout le reste. Relancez le Sample Schemas Setup après une nouvelle installation.

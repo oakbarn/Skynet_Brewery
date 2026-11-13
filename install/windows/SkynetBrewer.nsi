@@ -35,6 +35,9 @@ Unicode true
 !endif
 !define NODE_MIN "22.13.0"
 !define PORT "8080"
+; the BruControl Importer and its Build page (importer.js)
+!define IMPORTER_PORT "8095"
+!define IMPORTER_BUILD_PORT "8096"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\SkynetBrewer"
 
 Name "Skynet Brewer"
@@ -155,16 +158,31 @@ Function NeedNode
 FunctionEnd
 
 ; ---------------------------------------------------------------- Panel still running?
-Function WaitForPanelStopped
+; The install and the uninstall both use it (a file the panel has open, like the brew log, can't be replaced or deleted).
+; The uninstall also waits for the BruControl Importer (ports 8095 and 8096), which has files open in the Import folder.
+!macro WaitForPanelStopped UN
+Function ${UN}WaitForPanelStopped
   check:
     nsExec::ExecToStack '"$SYSDIR\cmd.exe" /c "netstat -ano -p tcp | findstr /r /c:":${PORT} .*LISTENING""'
     Pop $0
     Pop $1
     ${If} $0 == 0
       MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "The panel (or another program) is still running on port ${PORT}.$\r$\n$\r$\nClick its black command window, press Ctrl+C, then close the window. Then click Retry.$\r$\n$\r$\nStill stuck? See Help > Updating to a new version: end Node.js in Task Manager." /SD IDCANCEL IDRETRY check
-      Abort "Stopped. Close the panel and run the installer again."
+      Abort "Stopped. Close the panel and run this again."
     ${EndIf}
+  !if "${UN}" == "un."
+    nsExec::ExecToStack '"$SYSDIR\cmd.exe" /c "netstat -ano -p tcp | findstr /r /c:":${IMPORTER_PORT} .*LISTENING" /c:":${IMPORTER_BUILD_PORT} .*LISTENING""'
+    Pop $0
+    Pop $1
+    ${If} $0 == 0
+      MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "The BruControl Importer is still running.$\r$\n$\r$\nClick its black command window, press Ctrl+C, then close the window. Then click Retry." /SD IDCANCEL IDRETRY check
+      Abort "Stopped. Close the BruControl Importer and run this again."
+    ${EndIf}
+  !endif
 FunctionEnd
+!macroend
+!insertmacro WaitForPanelStopped ""
+!insertmacro WaitForPanelStopped "un."
 
 ; ---------------------------------------------------------------- Your folders on an update
 ; Moves one of your folders to backups\ so the panel starts it again from the samples. $R0 = folder, $R1 = what is in it.
@@ -243,7 +261,8 @@ Function UpdateChoicePage
 FunctionEnd
 
 ; The Brewing folder (C:\Brewing when the panel is in C:\Brewing\BrewPanel): its Import subfolder is the Importer's
-Function FindBrewDir
+!macro FindBrewDir UN
+Function ${UN}FindBrewDir
   ${GetFileName} "$INSTDIR" $0
   ${If} $0 == "BrewPanel"
     ${GetParent} "$INSTDIR" $BrewDir
@@ -251,6 +270,9 @@ Function FindBrewDir
     StrCpy $BrewDir "$INSTDIR"
   ${EndIf}
 FunctionEnd
+!macroend
+!insertmacro FindBrewDir ""
+!insertmacro FindBrewDir "un."
 
 Function UpdateChoiceLeave
   ${NSD_GetState} $RadioUsers $0
@@ -580,40 +602,33 @@ Function FinishLeave
 FunctionEnd
 
 ; ---------------------------------------------------------------- Uninstall
+; Uninstall deletes everything, like Start Fresh (Rule 9.19, OakBarn Brewery 2026-11-13: an uninstall left the Import folder,
+; its BruControl test files and the brew log behind). One red warning first; No cancels and nothing is deleted. The panel
+; and the BruControl Importer must be stopped first, or Windows can't delete the files they have open (the brew log).
 Section "Uninstall"
+  Call un.FindBrewDir
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: UNINSTALL DELETES EVERYTHING.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - Skynet Brewer and the BruControl Importer ($INSTDIR)$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe$\r$\n   - every user, password and sign-in, the brew log and saved values$\r$\n   - every Process and the backups folders$\r$\n   - every picture and sound, your own and the Skynet ones$\r$\n   - everything in the Import folder ($BrewDir\Import), your BruControl files too$\r$\n$\r$\nTo keep something, click No, copy it somewhere else, then uninstall again.$\r$\n$\r$\nYes: delete it all.$\r$\nNo: stop. Nothing is deleted." /SD IDYES IDYES go
+    Abort "Stopped. Nothing was deleted."
+  go:
+  Call un.WaitForPanelStopped
   ; the program files are Read-only (Official Skynet, Rule 9.14): take that off, or Windows would not let them be removed
   Call un.CoreWritable
   Delete "$DESKTOP\Skynet Brewer.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
   Delete "$SMSTARTUP\Skynet Brewer.lnk"
-  ; the Importer shortcut in the Import folder (the folder and your files in it are kept)
-  Delete "$INSTDIR\..\Import\Skynet BruControl Importer.lnk"
-  Delete "$INSTDIR\Import\Skynet BruControl Importer.lnk"
   RMDir /r "$SMPROGRAMS\Skynet Brewer"
   DeleteRegKey HKCU "${UNINST_KEY}"
-
-  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Also delete your brew data, users, layout, processes, pictures and help pages?$\r$\n$\r$\nNo (recommended) keeps them in $INSTDIR." /SD IDNO IDYES everything
-    ; Program files only
-    RMDir /r "$INSTDIR\lib"
-    RMDir /r "$INSTDIR\public"
-    RMDir /r "$INSTDIR\node_modules"
-    RMDir /r "$INSTDIR\firmware"
-    RMDir /r "$INSTDIR\docs"
-    RMDir /r "$INSTDIR\samples"
-    RMDir /r "$INSTDIR\test"
-    RMDir /r "$INSTDIR\tools"
-    RMDir /r "$INSTDIR\install"
-    RMDir /r "$INSTDIR\defaults"
-    Delete "$INSTDIR\server.js"
-    Delete "$INSTDIR\importer.js"
-    Delete "$INSTDIR\Skynet_Importer.bat"
-    Delete "$INSTDIR\package.json"
-    Delete "$INSTDIR\package-lock.json"
-    Delete "$INSTDIR\README.md"
-    Delete "$INSTDIR\Skynet_Brewer.bat"
-    Delete "$INSTDIR\Uninstall Skynet Brewer.exe"
-    Goto done
-  everything:
-    RMDir /r "$INSTDIR"
-  done:
+  ; the Skynet window's own small browser profile (its remembered user name and password)
+  RMDir /r "$LOCALAPPDATA\SkynetBrewer"
+  ; the Uninstall .exe runs from a copy in TEMP, so the whole folder can go
+  RMDir /r "$INSTDIR"
+  RMDir /r "$BrewDir\Import"
+  ; the Brewing folder itself, only when nothing else is left in it (a file of yours there is never touched)
+  ${If} "$BrewDir" != "$INSTDIR"
+    RMDir "$BrewDir"
+  ${EndIf}
+  ${If} ${FileExists} "$INSTDIR\*.*"
+  ${OrIf} ${FileExists} "$BrewDir\Import\*.*"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted: a program still has them open.$\r$\n$\r$\nRestart the computer, then delete $BrewDir by hand." /SD IDOK
+  ${EndIf}
 SectionEnd
