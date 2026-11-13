@@ -161,5 +161,8 @@
  "167-dual-throw": "6a65ef8c03f93e72",
  "168-predictive-hysteresis": "334c0e662272728c",
  "169-calibrations": "96e35ab25f25083a",
- "170-hydrometers": "3f095a06a3f2d57f"
+ "170-hydrometers": "3f095a06a3f2d57f",
+ "171-smoothing": "c06a79ecf6b5ab59",
+ "172-alarm-chain": "8785ba42a81582c6",
+ "173-process-widget": "02115a1d6dcdfb62"
 }
