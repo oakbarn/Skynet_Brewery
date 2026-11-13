@@ -10367,7 +10367,8 @@ function ppSelect(p) {
 function ppShow() {
   const p = ppVal, snd = $('#ppKind').value === 'sounds';
   $('#ppPath').textContent = p ? (picIds[p] ? `Skynet Picture ${picIds[p]}: ` : '') + p : 'Nothing here: add pictures on the Media page';
-  $('#ppAudio').hidden = !snd || !p; if (p && snd) $('#ppAudio').src = soundUrl(p);
+  const known = ppPaths().find(q => q === p);      // only a sound from the Brain's own list is played (never text typed into a box)
+  $('#ppAudio').hidden = !snd || !known; if (known && snd) $('#ppAudio').src = soundUrl(known);
   $('#ppInsert').disabled = !p;
 }
 // arrow keys move through the icons like in Explorer: left / right one, up / down one row
