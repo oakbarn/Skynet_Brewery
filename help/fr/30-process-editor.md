@@ -84,13 +84,13 @@ Pour l'utiliser sur un PC Windows :
 2. Cliquez sur **Language**, puis **User Defined Language**, puis **Define your language...**.
 3. Cliquez sur **Import...**, choisissez `Skynet_Process_Notepad++.xml` et cliquez sur **Open**. Fermez la fenêtre.
 4. Fermez Notepad++ et rouvrez-le.
-5. Ouvrez un Process (un fichier `.txt` du dossier `scripts`), puis cliquez sur **Language** et choisissez **Skynet Process** près du bas de la liste.
+5. Ouvrez un Process (un fichier `.txt` du dossier `processes`), puis cliquez sur **Language** et choisissez **Skynet Process** près du bas de la liste.
 
 Un fichier général qui colore les commandes, les commentaires, les nombres, le texte, les opérateurs et les noms qui commencent par `gG` (les gGlobals) est dans le dossier du panel sous `docs/Skynet_Process_Notepad++.xml`.
 
 ## Delete et la Recycle Bin (corbeille) {#delete-and-the-recycle-bin}
 
-**Delete** n'efface pas un Process. Il demande d'abord, puis déplace le Process dans la **Recycle Bin** (le dossier `scripts/Recycle_Bin` sur le Brain).
+**Delete** n'efface pas un Process. Il demande d'abord, puis déplace le Process dans la **Recycle Bin** (le dossier `processes/Recycle_Bin` sur le Brain).
 
 Appuyez sur **Recycle Bin** sous la liste des Processes pour voir ce qui a été supprimé et quand :
 

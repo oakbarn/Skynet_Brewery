@@ -25,16 +25,17 @@ folder, with server.js inside it. See step 5 of ReadMe_Mac.txt"
 cd "$PANEL" || exit 1
 echo "[1/5] Found the panel in $PANEL"
 
-# Already had the panel here? Its work is in config, data, media and scripts (a new zip has none of them).
+# Already had the panel here? Its work is in config, data, media and processes (a new zip has none of them).
+# scripts: the name the processes folder had in earlier trial versions.
 OLD=""
-for d in config data media scripts; do [ -e "$PANEL/$d" ] && OLD="$OLD $d"; done
+for d in config data media processes scripts; do [ -e "$PANEL/$d" ] && OLD="$OLD $d"; done
 if [ -n "$OLD" ]; then
   printf '\n\033[41;97m %s \033[0m\n' "WARNING: THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
   echo
   echo "Starting over gives you a brand-new panel, as if it had never been installed."
   echo "ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN:"
   echo "  - your Tabs, layout, Devices, pipes and settings   (config)"
-  echo "  - your Processes                                   (scripts)"
+  echo "  - your Processes                                   (processes)"
   echo "  - your pictures and sounds                         (media)"
   echo "  - your brew log, users, passwords and recovery code (data)"
   echo "(As a safety net the old folders are moved to $HOME/Brewing/Old_Panel_<date>,"

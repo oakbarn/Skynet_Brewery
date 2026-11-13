@@ -546,6 +546,8 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .hpSide { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 80px); overflow: auto; }
 .hpSide input, .hpSide select { width: 100%; }
 #hpPick { display: none; }
+.mtNotice { max-width: 480px; }
+.mtNotice p[lang] { margin: 8px 0; }
 .hpLangNote { border-left: 4px solid var(--warn, #c80); padding: 6px 10px; margin: 0 0 12px; background: color-mix(in srgb, var(--warn, #c80) 12%, transparent); border-radius: 4px; }
 .hpMachine { margin-top: 24px; font-size: .9em; }
 #hpList { display: flex; flex-direction: column; gap: 2px; }

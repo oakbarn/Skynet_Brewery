@@ -41,7 +41,7 @@ The check **never stops anything**. A brew that is running carries on, whatever 
 and `samples` folders.
 
 **Never checked or touched (yours):** your Schemas, Tabs, Devices, Widgets and settings (`config`), users, passwords and brew data
-(`data`), pictures and sounds (`media`), Processes (`scripts`), the Help pages (an Admin can edit them in the panel), the extra
+(`data`), pictures and sounds (`media`), Processes (`processes`), the Help pages (an Admin can edit them in the panel), the extra
 Sample Schemas (`sample_schemas`) and your own Templates.
 
 ## Repair

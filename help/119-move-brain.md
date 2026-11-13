@@ -52,7 +52,7 @@ Making the file changes nothing on the old Brain. Keep the old Brain as it is un
    - On a **computer** the Skynet Brewer window closes: double-click **Skynet Brewer** to start it again, then reload the page.
 5. **Sign in with the old Brain's user name and password.** The Processes console says the move is done.
 
-Nothing is deleted: the new Brain's own config, data, scripts and media folders are kept in
+Nothing is deleted: the new Brain's own config, data, processes and media folders are kept in
 `backups/before_brain_move_<date and time>`, with a copy of the Brain Move file.
 
 ## USB ports

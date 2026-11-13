@@ -133,3 +133,11 @@ for (const id of ['three-vessel-one-pump']) {
 }
 console.log('samples tests passed');
 process.exit(0);
+
+// the 3 Vessel sample and the default Schema carry the same Schema version, set by OakBarn Brewery
+{
+  const meta = JSON.parse(fs.readFileSync(new URL('../samples/configs/three-vessel-one-pump/sample.json', import.meta.url), 'utf8'));
+  const def = JSON.parse(fs.readFileSync(new URL('../config/brewery.json', import.meta.url), 'utf8'));
+  assert.match(meta.version, /^Three_Vessel_Brewery_\d{8}T\d{4}$/);
+  assert.equal(def.schema.version, meta.version);
+}

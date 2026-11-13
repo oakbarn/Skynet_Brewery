@@ -8,7 +8,7 @@ Chaque type de fichier a une seule place sur le Brain, pour que rien n'atterriss
 |---|---|---|
 | Images (png, jpg, gif, svg, webp, bmp) | `media/Images` | Les dossiers à l'intérieur de celui que vous choisissez sont gardés, donc `Media\Pumps\a.png` devient `Images/Pumps/a.png`. |
 | Sons (wav, mp3, ogg, m4a) | `media/sounds` | Toujours directement dans `sounds`, donc un dossier `wave` séparé n'est pas nécessaire. |
-| Processes (.txt) | `scripts` | Choisissez d'abord **Processes** dans *Put them in*. |
+| Processes (.txt) | `processes` | Choisissez d'abord **Processes** dans *Put them in*. |
 | Pages d'aide (.md) | `help` | Choisissez d'abord **Help pages** dans *Put them in*. |
 
 ## Copier des images et des sons depuis un dossier {#copying-pictures-and-sounds-from-a-folder}

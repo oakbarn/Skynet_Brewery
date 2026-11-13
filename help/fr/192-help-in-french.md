@@ -23,7 +23,7 @@ Avec **🌐 Français** choisi, les bulles sont aussi en français : la Hover He
 
 - **Pas encore traduite :** une page qui n'a pas encore de page en français montre la page en anglais, avec une note en haut.
 - **Peut-être pas à jour :** quand la page en anglais a été changée après que sa page en français a été faite (par exemple un Admin l'a modifiée), une note en haut le dit, avec un lien vers la page en anglais.
-- **Traduction automatique :** les pages et les bulles en français ont été faites par traduction automatique. Une note à la fin de chaque page le dit. En cas de doute, c'est l'anglais qui fait foi.
+- **Traduction automatique :** les pages et les bulles en français ont été faites par traduction automatique. Une note à la fin de chaque page le dit, et choisir une autre langue que l'anglais montre un avis qui le dit en anglais et dans cette langue : appuyez sur **Acknowledge** pour le fermer. En cas de doute, c'est l'anglais qui fait foi.
 
 ## Pour les Admins {#for-admins}
 

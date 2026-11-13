@@ -23,7 +23,7 @@ With **🌐 Français** picked, the balloons are in French too: the Hover Help t
 
 - **Not translated yet:** a page that has no French page yet shows the English page, with a note at the top.
 - **May be out of date:** when the English page was changed after its French page was made (for example an Admin edited it), a note at the top says so, with a link to the English page.
-- **Machine translation:** the French pages and balloons were made by machine translation. A note at the end of each page says so. If in doubt, the English is the one that counts.
+- **Machine translation:** the French pages and balloons were made by machine translation. A note at the end of each page says so, and picking a language other than English shows a notice that says so in English and in that language: press **Acknowledge** to close it. If in doubt, the English is the one that counts.
 
 ## For Admins
 

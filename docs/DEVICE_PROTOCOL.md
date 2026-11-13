@@ -153,7 +153,7 @@ Every pin the stepper uses (STEP, DIR, ENABLE or IN1-IN4, and the home switch) g
 - **Lowest / Highest position allowed**: moves are kept inside these, and **run** stops at them.
 - **Home switch pin** (on the same board), **Home switch** normally open or normally closed, **Home switch is at the** low or high end, **Homing speed**, **Position at the home switch**, **Stop homing if the switch is not found within**, **Home by itself each time the board connects**.
 
-### Processes (scripts) and the screen
+### Processes and the screen
 
 | Process line | Does |
 |---|---|

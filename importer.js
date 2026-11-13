@@ -55,7 +55,7 @@ async function startBuild() {
   build.key = crypto.randomBytes(32).toString('hex');
   build.child = spawn(process.execPath, ['--no-warnings', path.join(ROOT, 'server.js')], { cwd: ROOT, stdio: 'ignore', windowsHide: true,
     env: { ...process.env, SKYNET_IMPORT_BUILD: '1', SKYNET_IMPORT_KEY: build.key, PORT: String(BUILD_PORT), SKYNET_WINDOW: 'none', SKYNET_MINIMIZE: '',
-      BREWPANEL_CONFIG: BUILD_CONFIG, BREWPANEL_DATA: path.join(BUILD_DIR, 'data'), BREWPANEL_SCRIPTS: path.join(BUILD_DIR, 'scripts') } });
+      BREWPANEL_CONFIG: BUILD_CONFIG, BREWPANEL_DATA: path.join(BUILD_DIR, 'data'), BREWPANEL_PROCESSES: path.join(BUILD_DIR, 'processes') } });
   build.child.on('error', () => {});
   for (let i = 0; i < 60; i++) { if (await buildUp()) return; await new Promise(r => setTimeout(r, 250)); }
   throw new Error('The Build page did not start. Close the Importer and try again.');
