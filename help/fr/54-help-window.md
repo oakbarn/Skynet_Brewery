@@ -18,7 +18,7 @@ La fenêtre d'aide a sa propre recherche, sa liste des pages, **◀ Back**, **�
 
 ## L'aide en français {#help-in-french}
 
-**🌐 Help language** (langue de l'aide), en haut de la liste des pages, montre l'aide en **English** ou en **Français**. Seule l'aide change : les écrans, les boutons et les étiquettes restent en anglais. Voir [L'aide en français](192-help-in-french).
+**🌐 Help language** (langue de l'aide), en haut de la liste des pages, montre l'aide et les bulles en **English** ou en **Français**. Seule l'aide change : les écrans, les boutons et les étiquettes restent en anglais. Voir [L'aide en français](192-help-in-french).
 
 ## Sur un téléphone ou une tablette {#on-a-phone-or-tablet}
 
