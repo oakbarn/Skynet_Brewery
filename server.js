@@ -10,6 +10,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { closeLauncherWindow } from './lib/closewindow.js';
+import { writeStopKey, removeStopKey, stopAllowed } from './lib/stoppanel.js';
 import { openAppWindow, closeAppWindow, openInDefaultBrowser } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, brewNames, isBrewName, SKIP } from './lib/brewprocess.js';
@@ -76,6 +77,8 @@ import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'));
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
+// the key the Setup and the uninstall use to stop the panel (Rule 9.19, lib/stoppanel.js); a new one each start
+const STOP_KEY = writeStopKey(DATA);
 const PROCESSES = path.resolve(process.env.BREWPANEL_PROCESSES ?? path.join(ROOT, 'processes'));
 const PUBLIC = path.join(ROOT, 'public');
 // The 3 Vessel sample ships in the panel (samples/configs); every other Sample Schema comes with the add-only Skynet Sample Schemas
@@ -412,6 +415,15 @@ async function route(req, res) {
   const m = req.method;
   if (m === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE', 'Access-Control-Allow-Headers': 'Content-Type,X-API-Key' }); return res.end(); }
 
+  // The Setup and the uninstall stop the panel before they delete files (Rule 9.19, lib/stoppanel.js): this computer only, with the
+  // key written in data\stop.key at start. The normal stop, every output Off first (Rule 6.31).
+  if (p === '/ui/localstop' && m === 'POST') {
+    if (!stopAllowed(clientIp(req), req.headers, STOP_KEY)) { res.writeHead(403); return res.end('Forbidden'); }
+    console.log('Stopped by the Skynet Setup or uninstall');
+    broadcast('closing', { by: 'Skynet Setup' });
+    ok(res); setTimeout(() => shutdown({ closeWindow: true }), 300);
+    return;
+  }
   const token = parseCookies(req.headers.cookie)[COOKIE];
   // the Importer's Build page: signed in only with the Importer's one-time key (compared in constant time), never with a password
   const importMe = () => { const k = parseCookies(req.headers.cookie)[IMPORT_COOKIE]; return IMPORT_KEY && k && k.length === IMPORT_KEY.length && crypto.timingSafeEqual(Buffer.from(k), Buffer.from(IMPORT_KEY)) ? { name: 'Importer', role: 'admin' } : null; };
@@ -1316,7 +1328,7 @@ function shutdown({ closeWindow = false, reason = 'closed' } = {}) {
   if (stopping) return; stopping = true;
   console.log('Stopping...'); auth.flush(); power?.closing(reason); engine.stopAll(); control.stop(); store.persistNow();
   setTimeout(() => {
-    mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
+    mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); removeStopKey(DATA, STOP_KEY);
     if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
     if (closeWindow) closeLauncherWindow();
     process.exit(0);

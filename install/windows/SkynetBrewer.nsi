@@ -112,6 +112,7 @@ Var Stamp
 Var BrewDir
 Var ImporterAdded
 Var OpenImporter
+Var StopScript
 
 ; ---------------------------------------------------------------- Node.js
 ; Puts 1 in $R9 when a new enough Node.js is on this computer.
@@ -160,8 +161,24 @@ FunctionEnd
 ; ---------------------------------------------------------------- Panel still running?
 ; The install and the uninstall both use it (a file the panel has open, like the brew log, can't be replaced or deleted).
 ; The uninstall also waits for the BruControl Importer (ports 8095 and 8096), which has files open in the Import folder.
+; First Skynet is asked to stop by itself (lib\stoppanel.js, Rule 9.19): only Skynet's own Node.js, never another Node.js
+; program, and the normal way, every output Off first. Only if it is still running after that is the user asked to close it.
 !macro WaitForPanelStopped UN
 Function ${UN}WaitForPanelStopped
+  !if "${UN}" == "un."
+    StrCpy $StopScript "$INSTDIR\lib\stoppanel.js"
+  !else
+    ; the new version's copy: the program files are not in place yet
+    InitPluginsDir
+    File "/oname=$PLUGINSDIR\stoppanel.mjs" "${SRC}\lib\stoppanel.js"
+    StrCpy $StopScript "$PLUGINSDIR\stoppanel.mjs"
+  !endif
+  ${If} ${FileExists} "$StopScript"
+  ${AndIf} ${FileExists} "$INSTDIR\server.js"
+    DetailPrint "Stopping Skynet Brewer if it is running..."
+    nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c "set "PATH=$PROGRAMFILES64\nodejs;%PATH%" & node "$StopScript" "$INSTDIR""'
+    Pop $0
+  ${EndIf}
   check:
     nsExec::ExecToStack '"$SYSDIR\cmd.exe" /c "netstat -ano -p tcp | findstr /r /c:":${PORT} .*LISTENING""'
     Pop $0
