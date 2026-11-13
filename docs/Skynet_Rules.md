@@ -2575,6 +2575,14 @@ into the user's own TEMP folder, never the shared Public folder. What Setup and 
 change. Signing (Rule 9.10) is the real cure; until it is on, a scanner may still guess wrong, and the file can be
 restored and reported to the scanner's maker as a false positive. Both programs (the Importer ships in the same Setup).
 (thread "Stop antivirus flagging the Setup")
+Virus check (OakBarn Brewery, 2026-11-12: "Can a exe be sent to the virus check within github"): after every Release is
+made, a Windows computer at GitHub scans every .exe on it with Microsoft Defender (first proving the scanner works on the
+harmless EICAR test file). Clean: the Release notes get a "Virus check ... nothing found" line. Anything found: the
+Release goes back to a Draft (hidden from the public) and GitHub emails OakBarn Brewery; nothing is deleted.
+Then VirusTotal (OakBarn Brewery, 2026-11-12: "Can skynet have that free account", key in the VIRUSTOTAL_API_KEY secret)
+has about 70 scanners look at every .exe; it only reports (counts and links at the top of the Release notes, a warning
+if any flag a file) and never hides the Release. Skipped until the key is saved.
+(thread "Turn on code scanning for Skynet repo")
 
 9.12 **The Skynet pictures and sounds are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "remove all the graphics and
 have separate exe loader for them ... we might only want to add more graphics (Never Change or Delete!)", "All Media Files"):
@@ -3848,6 +3856,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-12: Rule 9.11 adds a Virus check (OakBarn Brewery: "Can a exe be sent to the virus check within github"): every .exe on a new Release is scanned by Microsoft Defender at GitHub; clean adds a line to the Release notes, a find turns the Release back into a hidden Draft. Then VirusTotal (about 70 scanners) reports on each .exe in the Release notes, never hides it; needs the VIRUSTOTAL_API_KEY secret. Also on: CodeQL code scanning and Dependabot security fixes (docs/Security_Scanning.md). Both programs (the Importer ships in the same Setup). (thread "Turn on code scanning for Skynet repo")
 - 2026-11-12: Added Rule 2.51 (OakBarn Brewery): in the Pump Add box and Pump Device Properties (the model) the top (☰, title, buttons) is frozen while the rest scrolls, and the bottom row is not shown. Only the model for now; all other dialogs wait until OakBarn Brewery is finished with the model. Help 82, 115. Checked against both programs: the BruControl Import's Build page uses the same dialogs. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Renamed (OakBarn Brewery: "Rename the Button"): 💾 Save Build ...'s To a Tab choice and its Save to Tab button are now **Move to Tab**, the name in his Tab Hover Help. Help 55, 66, 133, 137, 155, 166. Checked against both programs: the BruControl Import's Build page uses the same Save Build pop-up. (thread "Rewrite Add Device Hover Help and add confirm step")
 - 2026-11-12: Added Rule 3.18 (OakBarn Brewery): 🏷 Suggested Names on the Edit layout bar (Admins) lists every Device and Widget whose Name is not its Suggested Name, each ticked; 💾 Convert gives the ticked ones their Suggested Names and Save layout keeps them, Processes and Clones follow. Integrated Instances and items with no Suggested Name are left out. Help 46, 115. Checked against both programs: the BruControl Import's Build page has the same Edit layout bar. (thread "Rewrite Add Device Hover Help and add confirm step")
