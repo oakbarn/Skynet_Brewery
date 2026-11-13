@@ -17,8 +17,8 @@
  "15-mqtt-and-voice": "88efea67546588b5",
  "16-stepper-motors": "7dadcdd2e692713f",
  "17-beer-money": "68a08821a7668a8e",
- "18-updating": "51cfc8984ee17b85",
- "19-installing": "de3d1fd966aae3da",
+ "18-updating": "7138eec4b897e0eb",
+ "19-installing": "e3509a34f4a0d39d",
  "20-simulation": "a5a9811d7048e8db",
  "21-alarms-and-sound": "89c421300031f403",
  "22-process-language": "01f7ab0a84ba9a3f",
@@ -183,5 +183,6 @@
  "188-step-by-step-add-a-schema": "c1e4bb036e7d0707",
  "189-list-boxes": "5c06502ff79c25d5",
  "190-sleep-updates-and-restarts": "224e846704ae5a78",
+ "191-official-skynet-updates": "e8ec769a389645ef",
  "192-help-in-french": "1bfcd5f80c19e577"
 }
