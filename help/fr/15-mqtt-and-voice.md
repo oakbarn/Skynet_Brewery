@@ -11,10 +11,14 @@
 
 ## Ce qu'il a le droit de faire {#what-it-may-do}
 
-| Toujours permis | Permis par défaut | Éteint tant que vous ne le cochez pas |
-|---|---|---|
-| Lire des valeurs, faire taire les alarmes, arrêter des Processes | Changer les gGlobals dont le .API est Get and Put et qui ne sont pas en lecture seule (comme l'API web) | Commuter des sorties (chauffe, brûleurs, pompes, vannes), commander les minuteries, lancer des Processes |
+**.API est le seul interrupteur** pour l'API web, MQTT et la voix. Réglez-le dans les Properties de chaque Device ou Widget (sa case **Database and .API**) :
 
-Les entrées matérielles et les températures sont en lecture seule, et un gGlobal dont le .API est Off n'est jamais partagé. Le tableau de la page de réglages a **Voice can hear it** (la voix peut l'entendre) et **Can change it** (peut le changer) pour chaque élément, et une liste des Processes que la voix et MQTT ont le droit de lancer.
+| .API | MQTT et la voix |
+|---|---|
+| **Off** (au départ) | Pas partagé |
+| **Read Only** | Le lisent (un assistant vocal l'entend) |
+| **Read & Control** | Le lisent et le changent |
+
+Les entrées matérielles et les températures sont toujours en lecture seule, et un gGlobal n'est jamais partagé (il n'a pas de .API). Une alarme partagée peut toujours être coupée, et chaque Process peut toujours être arrêté. La page de réglages liste chaque élément partagé avec son .API, et les Processes que la voix et MQTT ont le droit de lancer (cochez-les là).
 
 Le guide complet, avec la liste des sujets (topics) et la configuration d'Alexa, est `docs/MQTT_AND_VOICE.md`.

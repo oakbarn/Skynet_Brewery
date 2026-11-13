@@ -23,5 +23,5 @@ Make a **gGlobal** of the Kind that fits what it holds:
 | a date and time | gD_Global_DateTime |
 
 Use **➕ New gGlobal** on **☰ Menu > Variables**, or a `new gV gV_Name` line in a Process (see
-[Make a gGlobal in a Process](145-make-a-gglobal-in-a-process)), and leave its **Database** and **.API** Off, so nothing
+[Make a gGlobal in a Process](145-make-a-gglobal-in-a-process)). A gGlobal has no .API, so nothing
 outside the Processes can see it. A gGlobal is never on a Tab.

@@ -8,12 +8,11 @@ gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30. Sending reading
 
 | Kind | Processes | On screen | Database and outside programs |
 |---|---|---|---|
-| **gGlobal** | ✓ | ✓ | When its Properties say so (**Database and .API** box) |
+| **gGlobal** | ✓ | ✓ | Database only by a Process line (`send_db`, `DBSend`); no .API |
 
-- Use a **gGlobal** for settings, screen items and readings (pH, gravity, volumes). To log one, or let another program read or change it, set its **Database and .API** box.
-- To pass a value from one process to another, use a gGlobal with **Database** and **.API** both **Off**. Nothing outside the Processes can see it.
+- A **gGlobal** is a variable with Global Scope: use it to pass a value from one Process to another. A Process sends one to the database with `send_db Name` or `Name DBSend`. A gGlobal has no .API, so nothing outside the Processes can see it. Outside programs read a Device's or Widget's own attributes.
 
-The old **Shared variable** class is gone. An older Schema that still has one loads without it. To pass a value between Processes, make a gGlobal of the Kind that fits it (a number gV_Global_Value, text gS_Global_String, true / false gB_Global_Boolean, a time gT_Global_Time, a date and time gD_Global_DateTime) with its Database and .API Off. See [Shared variables became gGlobals](149-shared-variables-became-gglobals).
+The old **Shared variable** class is gone. An older Schema that still has one loads without it. To pass a value between Processes, make a gGlobal of the Kind that fits it (a number gV_Global_Value, text gS_Global_String, true / false gB_Global_Boolean, a time gT_Global_Time, a date and time gD_Global_DateTime). See [Shared variables became gGlobals](149-shared-variables-became-gglobals).
 
 Every gGlobal is **non-volatile**: starting a Process never clears it, and its value is saved on the Brain's disk and comes back when the Brain restarts. See [gGlobals keep their values](118-gglobals-keep-their-values).
 
@@ -38,7 +37,7 @@ The old **Global** class is retired. When an older Schema is loaded, each Global
 
 ## Database and .API
 
-Every gGlobal (and every other Device and Widget with a value) has a **Database and .API** box at the end of its Properties. The Variables screen shows what each gGlobal is set to, and **Log now** sends its value to the database at once. See [Database and .API on every Device and Widget](98-database-and-api).
+Every Device and Widget with a value has a **Database and .API** box at the end of its Properties. A gGlobal does not: a Process sends it to the database with `send_db Name` or `Name DBSend`. See [Database and .API on every Device and Widget](98-database-and-api).
 
 ## gGlobal List (a dropdown on a tab)
 

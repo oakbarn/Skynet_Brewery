@@ -105,13 +105,13 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Devices** | Items tied to a pin on a hobby board (Arduino Mega, ESP32 bridge; hobby modules such as relay boards, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115). **Add** groups them: outputs (digital, PWM %, analog 0-10 V / 4-20 mA), digital inputs (switch, push button that is ON only while held, toggle button that stays ON or OFF until pressed again, pulse button, latch, counter, float / level switch, flow switch, interlock), temperature probes (DS18B20, PT100, PT1000, thermocouple K / J / T and more, NTC thermistor), analog sensors (0-5 V, 0-10 V, 4-20 mA, pressure transducer, level transmitter, pH with two-point calibration), pulse flow meters, vessel scales (HX711 load cells) that show weight and volume with tare, calibration and auto tare when empty, and stepper motors (A4988, DRV8825, TMC2208 / TMC2209, TB6600, DM542 drivers, or a 28BYJ-48 on a ULN2003 board) that a process moves to a position in turns, degrees, mm, mL or % with homing on a switch. The properties dialog shows only the settings the chosen probe or signal needs, plus the live reading for calibration. Wiring and protocol: `docs/DEVICE_PROTOCOL.md`. |
 | **Widgets** | App-only items with no board pin: pictures, on-screen switches, timers, alarms, extra label boxes, Messages and so on.<br><br>There are special Widgets like a Manual Valve Widget that has IPs on the ends like a Regular Valve and can be placed for Flow and operates the same as a Motorized Valve Device, including the ability to command it on or off in a Process Code, but only gets moved on Confirmation by a user that it has been moved to the desired position (Open or Closed). There is no additional coding required for the confirmation, as it is built in for Manual Valves.<br><br>**gGlobal Variables are not Widgets** (see **Variables** below).<br><br>**Suggested Names:** every new Widget gets a Suggested Name, `wgt_Type_Label_TabID`, for example `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget: **PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** Date Time, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm, **GPH** Graph, **PRC** Process Widget, and more. The **Label** is the one you type (a space becomes `~`), and the **TabID** is the Tab it sits on. A taken name gets a number added. You can type a name of your own; it can't be blank.<br><br>**Predictive text:** in the Process editor, Widget names (with your Devices, gGlobals, variables and timers) pop up in the predictive text list as you type. A name also matches on any part after a `_`: typing `DateTime` finds `wgt_DT_DateTime_1_BR`, so you don't need to remember the start of a long name (see **Predictive text** below). |
 | **Predictive text** | The Process editor helps you write a Process by offering what can come next, the way a phone keyboard does. As soon as you type a letter, a list pops up under the cursor: at the start of a line the commands (`if`, `wait`, `start`, `new value` ...) with a short note of what each does; anywhere else the names of your variables, timers, gGlobals, Devices, Widgets and Processes. Each letter you type narrows the list, and a name also matches on any part after a `_`. **Tab**, **Enter** or **Right arrow** takes the pick; **Esc** closes the list. The **Predictive text** switch next to **Colors** turns the pop-up off; **Ctrl+Space** or **💡 Suggest** still opens it when you ask. A beginner can write a whole Process just by picking from the list. See Help > Predictive text. |
-| **Variables** | gGlobal (processes only. A gGlobal has database and API by its .Database and .API attributes).<br><br>gGlobals are simply a Variable with Global Scope that can be used between different Processes.<br><br>gGlobal Variables are persistent and non volatile. Their values are stored, even if the Computer is shut down. They will be available with their values after a computer is restarted. They reside with the "Brain" (see **The "Brain"** at the top). |
+| **Variables** | gGlobal (processes only. A gGlobal is sent to the database with a Process Command only, and has no .API).<br><br>gGlobals are simply a Variable with Global Scope that can be used between different Processes.<br><br>gGlobal Variables are persistent and non volatile. Their values are stored, even if the Computer is shut down. They will be available with their values after a computer is restarted. They reside with the "Brain" (see **The "Brain"** at the top). |
 | **Database** | SQLite file `data/brewlog.db`. Any Device, Widget, gGlobal or Variable can share its value or properties with a Timestamp to an SQLite database.<br><br>Automatic filling of Database inserts is based upon an item's .database attribute.<br><br>Inserts into the database can be:<br>- **Off**: never.<br>- **On demand**: only when you ask (a Process line, **Log now**, or the API).<br>- **On value change**: every time the value changes (at most 10 times a second).<br>- **When Clicked**: each time someone sets it on its Tab.<br>- **When a Process starts**: each time the Process you pick starts.<br>- **At a date and time**: one time, at the date and time you type.<br>- **At clock time**: every day at the clock time you type, like `6:30 PM`.<br>- **Every N ...**: every N milliseconds, seconds, minutes, hours or days, or every `00:05:00`.<br><br>Readings are kept with the time and the item's hidden key, so a renamed item keeps its history. The **Log** page shows the data and downloads CSV. **Database Groups** send a set of items only while a Process has started the Group (`start_db_group Mash`, `stop_db_group Mash`).<br><br>Almost anything can be sent to the Database with the Process Commands `Name.Attribute DBSend`, where the item's (Device, Widget, gGlobal or Variable) .attribute is sent to the Database, and `send_db Name` (the same as `Name DBSend`), which sends its main value, or the attribute picked in **What to send** in its Database and .API box. |
-| **.API** | The **.API** attribute lets programs outside Skynet (Node-RED, Home Assistant, MQTT and voice commands like Alexa, Google Home or Siri) see an item. Every Device, Widget and gGlobal with a value has it, in its Properties, Database and .API box:<br>- **Off**: outside programs can't see it (the start).<br>- **Read Only** (Get): outside programs can read it.<br>- **Read & Control** (Get & Put): outside programs can read it and also change it.<br><br>**API_Name** is the name a Voice Command says; it must be Unique. Programs must send the API key from Settings. Without a key, reading works only from your own network (home or Tailscale), and changes are refused. Ten wrong keys from one address shut it out for 15 minutes. Board readings and Manual Valve Widgets are never changed from outside. The addresses are in **4. API** below. |
+| **.API** | The **.API** attribute lets programs outside Skynet (Node-RED, Home Assistant, MQTT and voice commands like Alexa, Google Home or Siri) see an item. Every Device and Widget with a value has it, in its Properties, Database and .API box (a gGlobal does not):<br>- **Off**: outside programs can't see it (the start).<br>- **Read Only** (Get): outside programs can read it.<br>- **Read & Control** (Get & Put): outside programs can read it and also change it.<br><br>**API_Name** is the name a Voice Command says; it must be Unique. Programs must send the API key from Settings. Without a key, reading works only from your own network (home or Tailscale), and changes are refused. Ten wrong keys from one address shut it out for 15 minutes. Board readings and Manual Valve Widgets are never changed from outside. The addresses are in **4. API** below. |
 | **Alarms** | Sound file by path, `.wav` or `.mp3` (preferred).<br><br>**Common Attributes to All** (Skynet and User Alarms). Alarms can have additional attributes only applicable to them.<br>**`.path`** Attribute where a Path can be set in the Process Coding to set the Audio to any audio file (`.wav` or `.mp3` (preferred)). If the path is invalid, there is no Sound. Audio only plays when `AlarmName = On`.<br>**`.label_fore`** and **`.label_back`** Attributes that change the colors of the Label.<br>**`.x`** and **`.y`** Attributes to set Tab Position. **`.h`** and **`.w`** Attributes to set size.<br>**`.visible`** Attribute that is set Automatically: `AlarmName = On` > `AlarmName.visible = True`; `AlarmName = Off` > `AlarmName.visible = False`. `.visible` attributes are hidden from the User and not visible or settable on the Property Dialog or by Process Command.<br>**`.toggle`** attribute on Image to turn off, turn on with Mouse Click. Changes the `.state` Attribute. `.toggle` attributes are hidden from the User and not visible or settable on the Property Dialog or by Process Command.<br>**`.loop`** Attribute: if True, plays the sound then Repeats. If false, plays the sound track only one time.<br>**`.state`** Attribute is the boolean On/Off state of the Widget. Assumed attribute in a Process Command that has no `.attribute`: `AlarmName = On` and `AlarmName.state = On` are the same.<br>**`.skynet_Layer_2`** attribute. A graphic File set as a transparent above the base Graphic (layer Last) and under Layer 1 (Normally the Overlay). A Selection of Skynet Images that can be displayed as Layer 2 on an Alarm. Can be selected on the Property Dialog or by Process Command: `AlarmName.skynet_Layer_2 = "Name of Skynet Picture"`.<br><br>**`.priority`** Attribute (Rule 7.18): when Alarms are On at the same time, only one sound plays at a time, the lowest number wins, the rest wait. Kinds: **(1) Brew Flow**, **(2) Hop Drop**, **(3) Pre-Hop Drop**, **(4) User**, **(5) Sound only**. Two with the same number play in the order they went On. A Hop Alarm can sound by itself at a time on a timer, a Pre-Hop Alarm a set time before it. In a Process: `alm_Hops = true`, `wait alm_Hops == false`. The built-in **SoundPlayer** plays music (`play SoundPlayer`, `stop SoundPlayer`) and pauses for alarms.<br><br>**(1) Brew Flow Alarm.** Skynet Common Attributes plus: **`.fore`** and **`.back`** Attributes that change the colors of a Skynet Brew Flow Alarm. When turned on in a Process, `AlarmName = On` creates a hidden wait command (`wait AlarmName = Off`) in the Process code until the Brew Flow Alarm is false. `.priority = 1`.<br>**(2) Hop Drop Alarm.** Skynet Common Attributes plus: **`.fore`** and **`.back`** Attributes that change the colors of a Skynet Hop Drop Alarm. `.priority = 2`.<br>**(3) Pre-Hop Drop Alarm: Combination Alarm and String Box Widget.** Common Attributes plus: **`.background`** of 3 Choices for a Background WaterMark. The Background images are Skynet and not changeable except by the Process command `AlarmName.background = 3`. **`.fore`** and **`.back`** Attributes that change the colors of the String Text. **`.string`** Attribute to set the Text; accepts embedded Rich Text Codes. **`.playtime`** Attribute, a Time Value in seconds as how long the Pre-Hop Drop Alarm is On. After the Time, the Alarm is off. Clicking it also causes the Alarm to False. `.priority = 3`.<br>**(4) User Alarm.** Common Attributes plus: **`.background`** of 3 Choices for a Background Graphic. The Background images are User supplied and are changeable by Process Editor (`AlarmName.background = 3`) or the Property Dialog. **`.fore`** and **`.back`** Attributes that change the colors of the String Text. **`.string`** Attribute to set the Text; accepts embedded Rich Text Codes. **`.playtime`** Attribute, a Time Value in seconds as how long the User Alarm is On. After the Time, the Alarm is off. Clicking it also causes the Alarm to False. `.priority = 4`.<br><br>**A Browser item where Skynet CANNOT Control:** browsers **only** play sound after one click. So when the panel opens with sound off, Skynet asks **Turn sound on?**; until it is on, a **🔇 Sound is off** button stays on the Tab and **🔊 Turn Sound On** is in the **☰ Menu**. It is needed once in each browser that should sound alarms or other audio files (each computer, tablet or phone, and each browser window). It is **not** needed for each Tab: once it is on, moving between Tabs keeps it on. To have it on every time the panel opens, turn on **☰ Menu > Default > Turn Sound On when starting**; you still click or tap the page once before the first sound, because browsers insist on that. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then **IMPORT** on the **☰ Menu > Recipe** tab. Every hop comes in, with no limit. The **Boil hops** are put into **Hop Groups 1, 2, 3 ...** by drop time (hops that go in at the same time make one Group), with no top number, so 20 or more hops is fine. Skynet uses each Group behind the scenes to sound the hop **warning** (10 minutes before, unless you change it) and the **Drop** at the correct time. The other hop uses (Mash, First Wort, Whirlpool, Dry Hop) are handled behind the scenes too, and are not something you need to see or set. Dry hop time is converted to days. |
 | **OneWire probes** | The panel's own **OneWire probe index** (Devices page): each probe gets a number and a name, and temperature probe Devices use the number. Probes are recognised by ROM id, not bus position. To replace a probe, pick the new probe's ROM id for that number; nothing else changes. New probes appear under **OneWire probes seen**. |
-| **MQTT and voice** | **Settings > MQTT and voice** shares Devices, and gGlobals whose .API is on, with an MQTT broker such as Mosquitto on the Pi, for ESP32 boards, Node-RED or Home Assistant. Through Home Assistant you can ask **Alexa, Google Home or Siri** for temperatures, timers and status. Turning on heat, pumps or valves, and starting processes, stays off until you allow it per item. Setup: `docs/MQTT_AND_VOICE.md`. |
+| **MQTT and voice** | **Settings > MQTT and voice** shares every Device and Widget whose **.API** is on with an MQTT broker such as Mosquitto on the Pi, for ESP32 boards, Node-RED or Home Assistant. Through Home Assistant you can ask **Alexa, Google Home or Siri** for temperatures, timers and status. Each item's **.API** is the one switch for the web API, MQTT and voice: Off, Read Only, or Read & Control. Starting processes stays off until you tick each one. Setup: `docs/MQTT_AND_VOICE.md`. |
 | **Media paths** | Images and sounds are paths to files inside the **media folders** listed in Settings, for example `valves/open.png` or `D:\Brewing\Pics\kettle.png`. Nothing is stored inside the program. For safety, only files inside those folders are served. |
 | **Media page** | Add pictures and sounds to the Brew Panel computer (the Raspberry Pi) from any browser, PC or phone: pick files or drag them onto the page, several at once, or a `.zip` of them (unpacked keeping its folders). Looks like Windows File Explorer: folder tree on the left, files with thumbnails on the right (Large icons or Details), an address bar and search. Make folders, drag files onto a folder to move them (Move button on phones), preview pictures, play sounds, copy the path to type into a Device or Widget, rename and delete. Only pictures and sounds are accepted, and only inside the media folders. |
 | **SVG pictures** | Every PNG or JPG in a media folder gets an SVG copy next to it (`Pump_On.png` makes `Pump_On.svg`) as soon as it is added, so pictures stay sharp at any size. The original is never changed, and you keep using the `.png` path everywhere. **Settings > Pictures** shows each original beside its SVG: by default the SVG is used for drawing-like pictures and the original for photo-like ones (tracing makes photos blotchy), and you can pick per picture or for all. A hand-made SVG with the same name is used instead and never overwritten. Pictures over 2 megapixels (photo backgrounds) are left as they are. Tracing runs in the background and needs no extra install. |
@@ -119,33 +119,34 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 
 ## 2a. Variables: gGlobal, and Database and .API on everything
 
-Add them in **Tabs > Edit layout > Select Widget Type > gGlobal variables** (listed by kind with their suggested name prefix). The **Variables** page lists all of them. The prefixes are hints only; any name works. The **Variables Demo** workspace and the `Demo_Variables` process show every kind. gKonstant and gAPI became this one class on 2026-10-30 (Help 98).
+**gGlobal Variable**: Global Scope, Persistent and Non-Volatile. Every process can read and change it, and you can change it on screen.
 
-**gGlobal**: every process can read and change it, and you can change it on screen.
+### Variables
+
+gGlobal Variables are the only Variables with a Global Scope. Most are used only in Processes and have no screen presence other than being listed on the **Variables** page.
+
+### The gGlobal Kinds
+
+Each gGlobal is one of six Kinds, the subclasses of a gGlobal. The Kind is picked when it is made (**☰ Menu > Variables > ➕ New gGlobal**, or a Process line such as `new gV gV_Boil_Time = 60`) and never changes. Its prefix starts the name.
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `gG_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"` |
-| String | `gGS_` | |
-| Long String | `gGL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a process saves the file. `"gGL_Notes" file = "notes/other.txt"` links another file. |
-| Value | `gGV_` | |
-| Time | `gGT_` | `00:00:00` |
-| Date Time | `gGDT_` | |
-| Boolean | `gGB_` | |
-| Switch | `gGSW_` | Boolean shown as a slider. It is a toggle: tap it ON and it stays ON, tap it again and it stays OFF. |
-| Push Button | `gGPB_` | LED button that is ON only while held and goes OFF when released (it does not stay on like a toggle). If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
-| Pulse Button | `gGMB_` | Tap (or a process sets it true): true for 100 ms, then off, however long it is held. `wait gGMB_Go == true` always catches it. |
-| List | `gGList_` | A dropdown: Value + Text. |
-| Step | `gGStep_` | Shows the step a Process just reached. |
+| String | `gS_` | Text. |
+| Graphic | `gG_` | A picture: Image Path 1, 2 and 3, Background # and Back Colour. A process can swap it: `gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"` |
+| Value | `gV_` | A number. |
+| Boolean | `gB_` | true / false. |
+| Time | `gT_` | `00:00:00` |
+| Date Time | `gD_` | A date and a time. |
 
-**Database and .API** (the last box in the Properties of every Device and Widget with a value, gGlobals included):
+Switch, Push Button, Pulse Button, List, Step and Long String are Widgets, not gGlobals.
+
+gGlobals or Variables are sent to the database with a Process Command only. No need for API.
+
+**Database and .API** (the last box in the Properties of every Device and Widget with a value):
 
 - **Send to the database**: Off, On demand (`send_db Name` in a process, Log now, or the API), On value change (at most 10 a second), When a Process starts, Once, At a date and time, At clock time (every day at a time like `12 AM`), Every N milliseconds / seconds / minutes / hours / days, or every 00:00:00. **What to send** is its main value or one of its attributes.
 - Each reading is kept with its time and the item's hidden key, so a renamed item keeps its history.
 - **.API**: Off, Get only (outside programs read it) or Get and Put (they read and change it), through `/api/items`, MQTT and voice. Ten wrong API keys from one address shut it out for 15 minutes.
-
-
-On start-up the old Schema is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console).
 
 ## 3. Processes
 
@@ -153,7 +154,21 @@ Processes are text files in the `scripts` folder. You can edit them on the **Pro
 
 **The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
-Process lines (the name alone is the main value, other attributes use a dot):
+Process lines (the name alone is the main value or state, other attributes use a dot):
+
+```
+"V_BK_In" = true
+"V_BK_In".state = true
+```
+
+are equivalent, and either may be used.
+
+```
+"V_BK_In".visible = true
+```
+
+The attribute `.visible` must be used to set the `.visible` attribute.
+
 
 ```
 new value vVCount          new string vSMsg     new bool vB_Testing     new time vT     new datetime vDT
@@ -174,18 +189,24 @@ vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:0
 BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
 
-Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
+Names can have no spaces, and this is enforced when a Device, Widget or Template is created. Processes have automatic line numbers. There is a Process command to go to a line number, similar to going to a section:
 
-**What Processes do**
+```
+234  some Code
+235  [My New Section]
 
-- A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
-- A `//` comment can contain quote marks.
-- **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
-- **Find and Replace.** On the Processes page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open Process; press Save to keep it, Ctrl+Z undoes it. **All Processes** searches every Process and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those Processes. A running Process keeps the old text until it is stopped and started.
-- **Editor tools** (Help > The Process editor): line numbers and **Go to line** (Ctrl+G); colors by what each word does (Commands blue, Devices magenta, Widgets teal, gGlobals purple, variables black on white, operators orange, comments green), with a **Colors** switch and **Color key**; **Save to file** for the whole Process or the highlighted lines as text or as XML in color, plus a **Notepad++ colors file** (a general one is `docs/Skynet_Process_Notepad++.xml`). Comments can be `//`, `#`, `'` or `/* ... */`. **Delete** moves a Process to the **Recycle Bin** (`scripts/Recycle_Bin`), where admins can restore it or delete it for good; both ask first.
-- `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
-- Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
-- Alarms use `sound` (a path).
+goto "My New Section"
+```
+
+or
+
+```
+goLine 235
+```
+
+are equivalent. The goLine number follows its line when lines are added or taken out. Skynet does this in the Background and needs no user input.
+
+Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 
 **Included samples**
 
@@ -203,11 +224,11 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 
 ## 3a. Schema.json (admins only)
 
-The **Schema.json** page (it was called **Config**) shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+The **Schema.json** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
 
-- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
-- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
-- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **A backup copy is made every time a change is saved**, named after the Schema, `Name_yyyymmddThhmm.BacUp`. A backup never overwrites another. Skynet does this in the Background and needs no user input.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running Processes and reconnects the boards.
 - **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
 - **Save as .json file** saves a Schema (its tabs, devices, widgets, pipes and Equipment Profile drawing, no logins or panel settings) to this computer. The file is named after the Schema version, `Name_yyyymmddThhmm.json` (ISO 8601).
 

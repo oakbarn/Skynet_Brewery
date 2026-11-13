@@ -18,6 +18,7 @@ import { isCodeValue } from './public/codevalue.js';
 import { controlMethods, offsetSigns } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize } from './lib/modernize.js';
+import { followGoLines } from './lib/goline.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -60,7 +61,7 @@ import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/nam
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
-import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
+import { renameInProcesses, renameInProcess, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
@@ -190,8 +191,7 @@ engine.onRecipe = (cmd, args, by) => {
   if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
 };
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
-const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
-dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema gets one backup a day (config/schemas/backups)
+// no daily backup: a Schema is backed up every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -658,6 +658,8 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    // a backup of the Schema as it was, every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
+    if (schemas.active?.id) { try { schemas.backupSchema(schemas.active.id); } catch (e) { console.log('Schema backup failed: ' + e.message); } }
     // renamed items, found by their hidden key (Fritz, 2026-10-27): old name -> new name. Clones of a renamed item follow it.
     const renames = new Map(), clones = new Map();
     if (body.elements) {
@@ -805,7 +807,8 @@ async function route(req, res) {
   }
   // Config Editor (admin only, see needRole)
   // The Config Editor never shows the hidden keys; on Save each item gets its key back by its name (lib/keys.js)
-  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
+  // no copy on opening: one is made before every save or restore (Rule 9.17)
+  if (p === '/ui/config/open' && m === 'POST') return ok(res, { ok: true, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')), file: path.relative(ROOT, CONFIG) });
   if (p === '/ui/config/check' && m === 'POST') return ok(res, { ok: true, problem: checkConfigText(await readBody(req, 16 * 1024 * 1024), DATA) });
   if (p === '/ui/config' && m === 'PUT') {
     let text = await readBody(req, 16 * 1024 * 1024);
@@ -861,7 +864,9 @@ async function route(req, res) {
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
   // Open a Schema file (Fritz, 2026-11-06): the files the BruControl Importer saved in the Brewing folder's Import subfolder,
-  // or a .json file sent from this browser. It becomes a new Schema; its Processes are written (an old one that differs is backed up).
+  // or a .json file sent from this browser. It becomes a new Schema; its Processes are written. A Process you already have is never
+  // written over (OakBarn Brewery, 2026-11-13, Rule 9.17): one with the same name but other text comes in as Name_1 (_2 ...), and the
+  // imported Schema's Process lines and Process Widgets point to it.
   if (p === '/ui/schemas/importfolder' && m === 'GET') return ok(res, listSchemaFiles(importFolder(ROOT)));
   if (p === '/ui/schemas/import' && m === 'POST') {
     const pick = url.searchParams.get('file');
@@ -872,15 +877,21 @@ async function route(req, res) {
     } else raw = await readBody(req, 64 * 1024 * 1024);
     let got;
     try { got = readSchemaFile(dropKeys(JSON.parse(raw))); } catch (e) { return fail(res, 400, e instanceof SyntaxError ? 'That file is not a Skynet Schema file (it is not JSON).' : e.message); }
-    const made = schemas.addFromFile(got.schema, { from: pick || got.source || 'a .json file' });
-    const procs = { written: [], backedUp: [], same: [], failed: [] };
+    const procs = { written: [], renamed: [], same: [], failed: [] };
+    const moved = new Map(), taken = new Set([...engine.names(), ...got.processes.map(x => x.name)].map(n => n.toLowerCase()));
     for (const { name, text } of got.processes) {
+      if (!engine.exists(name) || engine.read(name) === text) continue;
+      let i = 1; while (taken.has(`${name}_${i}`.toLowerCase())) i++;
+      moved.set(name, `${name}_${i}`); taken.add(`${name}_${i}`.toLowerCase());
+    }
+    for (const [a, b] of moved) followProcessRename(got.schema.elements, a, b);
+    const made = schemas.addFromFile(got.schema, { from: pick || got.source || 'a .json file' });
+    for (const p of got.processes) {
+      const name = moved.get(p.name) ?? p.name, text = moved.size ? renameInProcess(p.text, moved) : p.text;
       try {
-        if (engine.exists(name)) {
-          if (engine.read(name) === text) { procs.same.push(name); continue; }
-          engine.backup(name); procs.backedUp.push(name);
-        }
+        if (engine.exists(name) && engine.read(name) === text) { procs.same.push(name); continue; }
         engine.write(name, text); procs.written.push(name);
+        if (moved.has(p.name)) procs.renamed.push(`${p.name} → ${name}`);
       } catch (e) { procs.failed.push(`${name} (${e.message})`); }
     }
     if (procs.written.length) engine.renumber();
@@ -1055,11 +1066,13 @@ async function route(req, res) {
     if (!act && m === 'PUT') {
       if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
-      const mod = modernize(await readBody(req), n => store.get(n));
+      // goLine follows its line (Rule 16.10): lines added or taken out above the line it points at change its number
+      const body = await readBody(req), gl = followGoLines(engine.exists(name) ? engine.read(name) : null, body);
+      const mod = modernize(gl.text, n => store.get(n));
       engine.write(name, mod.text);
       engine.renumber();
       const text = engine.read(name);
-      return ok(res, { ...engine.check(text), text, modernized: mod.changed });
+      return ok(res, { ...engine.check(text), text, modernized: mod.changed, golines: gl.changed });
     }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }

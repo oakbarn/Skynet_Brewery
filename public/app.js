@@ -10728,7 +10728,7 @@ const saveScript = guard(async () => {
     ta.setSelectionRange(pos, pos); ta.scrollTop = top;
   }
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter(); refreshFind(false);
-  const note = r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '';
+  const note = (r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '') + (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
   toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length);
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
   for (const x of added) knownPaths.add(x.path);
@@ -10844,7 +10844,7 @@ function logSummary(lg) {
 }
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
-const hasDbValue = e => !['picture', 'label', 'manual'].includes(e?.type);
+const hasDbValue = e => !['picture', 'label', 'manual', 'gGlobal'].includes(e?.type);      // a gGlobal: only send_db / DBSend in a Process (Rule 1.33)
 function dbFields(it) {
   if (!hasDbValue(it)) return [];
   const f = it.db_frequency || 'none', attrs = (S.words?.elements || []).find(x => x.name === it.name)?.attrs || [];
@@ -10912,13 +10912,8 @@ function varRow(e) {
   else val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
   const kindText = e.type === 'gGlobal' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
   const cells = [h('td', {}, e.name), h('td', {}, kindText), h('td', {}, val)];
-  if (e.type === 'gGlobal') {
-    const lg = e.database || { frequency: 'none' };
-    cells.push(h('td', {}, logSummary(lg)), h('td', {}, API_LABEL[e.api || 'off'].replace(/ \(.*\)$/, '')),
-      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now')));
-  }
   const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
-  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
+  return h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(open) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -10927,7 +10922,7 @@ function renderGlobals() {
     tb.append(...of(type).map(e => varRow(e)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
   }
-  // values and "Log now" need an operator
+  // values need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
 // ---------------------------------------------------------------- gGlobal Kinds (Fritz, 2026-11-02)
@@ -11075,15 +11070,7 @@ async function globalDialog(work, orig) {
       body.append(row('.value', inp));
     }
     // no Keep-value switch: every gGlobal keeps its .value when the Brain restarts (Rule 1.22); .value above is its first value
-    // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
-    body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
-      attrIcon('Database and .API settings', async () => {
-        const w2 = { name: work.name, database: work.database, api: work.api, apiName: work.apiName }; dbToWork(w2);
-        const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
-        if (r !== 'ok') return;
-        readFields(w2); dbFromWork(w2, orig);
-        work.database = w2.database; work.api = w2.api; work.apiName = w2.apiName; render();
-      })));
+    // no Database and no .API on a gGlobal (Rule 1.33, OakBarn Brewery 2026-11-13): a Process sends it with send_db / DBSend
   }
   render(); snap0 = snap();
   document.body.append(d); d.showModal();
@@ -11716,8 +11703,8 @@ function renderMqtt() {
   $('#mqHa').checked = c.homeAssistant?.enabled !== false;
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
-    const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    // .API is the one switch (Rule 6.18): set in the item's Properties, shown here
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, it.control ? 'Read & Control' : 'Read Only')));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -11725,7 +11712,6 @@ function renderMqtt() {
 }
 $('#saveMqtt').onclick = guard(async () => {
   const items = {};
-  for (const i of $$('#mqItems input')) (items[i.dataset.name] ??= {})[i.dataset.k] = i.checked;
   const body = {
     enabled: $('#mqEnabled').checked, tls: $('#mqTls').checked, host: $('#mqHost').value.trim(), port: +$('#mqPort').value || 0,
     username: $('#mqUser').value.trim(), baseTopic: $('#mqBase').value.trim(), homeAssistant: { enabled: $('#mqHa').checked },
@@ -12169,7 +12155,7 @@ async function restoreSchema() {
   if (!list.length) return toast('This Schema has no backups or versions yet', true);
   const key = b => (b.version ? 'v:' : 'b:') + b.file;
   const w = { file: key(list[0]) };
-  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
+  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}  (${b.file})`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
   if (!okToSwitch(act.name, 'Restoring and loading again')) return;
@@ -14996,14 +14982,14 @@ function hopAlert(a) {
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 window.addEventListener('beforeunload', e => { if (dirty || (editing && JSON.stringify(draft) !== JSON.stringify(S.config))) { e.preventDefault(); e.returnValue = ''; } });
 // ---------------------------------------------------------------- Config Editor (admin only)
-// Opening it makes a backup copy of the config file first (config/backups). Save checks the JSON before anything is written.
+// A backup copy is made before every save or restore (Rule 9.17), not on opening. Save checks the JSON before anything is written.
 let cfgDirty = false, cfgProblem = null;
 const openConfig = guard(async () => {
   if (cfgDirty) return;                       // keep unsaved work when coming back to the page
   const r = await api('POST', '/ui/config/open');
   setCfgText(r.text);
   $('#cfgFile').textContent = r.file;
-  $('#cfgBackupNote').textContent = (r.made ? 'Backup copy made: ' : 'Backup copy already up to date: ') + 'config/backups/' + r.backup;
+  $('#cfgBackupNote').textContent = 'A backup copy is made in config/backups before every save or restore.';
 });
 function setCfgText(t) { $('#cfgCode').value = t; cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(); fIdx = -1; refreshFind(false); }
 function updateCfgGutter() {
@@ -15113,7 +15099,7 @@ async function importSchemaFile() {
   const r = await api('POST', '/ui/schemas/import?' + q, body ?? '', true);
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,
-    `Processes: ${p.written.length} added${p.backedUp.length ? ` (${p.backedUp.length} older ones backed up as .bak)` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
+    `Processes: ${p.written.length} added${p.renamed?.length ? ` (you already had ${p.renamed.length} with the same name, so these came in under a new name: ${p.renamed.join(', ')})` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
   if (r.draft) lines.push('This is a first draft from the BruControl Importer (made without its questions).');
   if (r.warningCount) lines.push(`${r.warningCount} notes from the import${r.warningCount > 30 ? ' (the first 30)' : ''}:`, ...r.warnings.slice(0, 30).map(x => '• ' + x));
   if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);

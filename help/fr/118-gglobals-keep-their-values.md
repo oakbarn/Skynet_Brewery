@@ -13,7 +13,7 @@ variable de Process :
 
 ## Comment ça marche {#how-it-works}
 
-- Quand une gGlobal change (par un Process, par sa fenêtre, ou par un programme extérieur à travers son .API), Skynet écrit la nouvelle
+- Quand une gGlobal change (par un Process ou par sa fenêtre), Skynet écrit la nouvelle
   valeur sur le disque du Brain en environ un tiers de seconde. Si un Process la change sans arrêt, elle est quand même écrite au moins
   une fois par seconde. Fermer Skynet Brewer (☰ Menu > Close Skynet Brewer) l'écrit une fois de plus.
 - Les valeurs sont dans **data/state.json** sur le Brain, que le Brain soit un Raspberry Pi ou un ordinateur Windows, Linux ou Mac. Chaque écriture est faite sans risque : les nouvelles valeurs vont d'abord dans un nouveau fichier, la dernière

@@ -1,6 +1,6 @@
 # Sortes de gGlobal {#gglobal-kinds}
 
-Une **gGlobal** est une variable à portée globale : chaque Process peut la lire et la changer. Ce **n'est pas un Widget** et elle **n'est pas sur un Tab**. Pour montrer quelque chose sur un Tab, utilisez un Widget (un Widget Text, Picture, Value, Time ou Date Time). Tout Device ou Widget peut déjà aller dans la base de données et être atteint par des programmes extérieurs (sa case **Database and .API**), donc une gGlobal n'est plus nécessaire pour cela non plus.
+Une **gGlobal** est une variable à portée globale : chaque Process peut la lire et la changer. Ce **n'est pas un Widget** et elle **n'est pas sur un Tab**. Pour montrer quelque chose sur un Tab, utilisez un Widget (un Widget Text, Picture, Value, Time ou Date Time). Tout Device ou Widget peut aller dans la base de données et être atteint par des programmes extérieurs (sa case **Database and .API**), donc une gGlobal n'a ni l'un ni l'autre : un Process envoie une gGlobal à la base de données avec `send_db Name` ou `Name DBSend`.
 
 Chaque gGlobal a une **Kind** (sorte). La sorte est choisie quand la gGlobal est faite et **ne peut jamais être changée**. Si la sorte est fausse, supprimez la gGlobal et faites-en une nouvelle.
 
@@ -48,7 +48,7 @@ Toutes suivent les règles générales des fenêtres : Name en premier, ✖ Canc
 | gT_Global_Time | **.value** comme `01:30:00` |
 | gD_Global_DateTime | **.value** à partir d'un sélecteur de date et d'heure |
 
-Chaque sorte a aussi **Database and .API** avec un ⬢ pour ses réglages. Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redémarre : voir [Les gGlobals gardent leurs valeurs](118-gglobals-keep-their-values). La .value que vous tapez est sa première valeur.
+Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redémarre : voir [Les gGlobals gardent leurs valeurs](118-gglobals-keep-their-values). La .value que vous tapez est sa première valeur.
 
 ## Exemple {#sample}
 
