@@ -115,5 +115,9 @@
  "119-move-brain": "0f51ed352ef9f67d",
  "120-pump-one-click": "5f95543b9b68f855",
  "121-valves-and-pumps-on-pipes": "78f1512443493833",
- "122-own-clean-window": "61794625a9e4372b"
+ "122-own-clean-window": "61794625a9e4372b",
+ "123-ball-valve-ips": "54bd3628c45c9d5d",
+ "124-tc-pipe-fittings": "85fc522db78273bc",
+ "125-pump-or-valve-cuts-a-pipe": "17abd2b1b60b91d0",
+ "126-deadband-device": "cef3eaa048f39fa8"
 }
