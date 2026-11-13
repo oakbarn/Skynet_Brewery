@@ -34,15 +34,11 @@ The **Suggested Name** is filled in as you go:
 
 **Interface ID _ Port _ General Type@Device Type ID _ Label _ Tab ID** (one underscore between the parts)
 
-Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
+Each part of the name says one plain thing, always in the same place, so nobody has to guess which is which. Skynet keeps away from names that sound alike or mean the opposite of what they say, the confusion made famous by Abbott and Costello's [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F) ([watch it on YouTube](https://www.youtube.com/watch?v=5FsJe4DScDs)). A sign means one thing too: a minus Offset is a minus in the dialog, the Schema and a Process alike.
 
 The port is always in the name, and the Device Type comes third. The Device Type starts with its **General Type and an `@`**: an On/Off Pump shows its Device Type as **DO@Pump**, so in its name it is `DO@Pump` (a `:` can't be in a name, so `@` stands for it). An On/Off Pump called *Red Pump* on port 22 of the Mega `BM`, on the Brew House tab `BH`, is `BM_22_DO@Pump_Red~Pump_BH`. When the General Type and the Type ID are the same word, it is written once (`PID`, `Hys`). There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
-
-**Plain terms, no "Who's on First?"**: each part of the name, each word in a dialog and each sign means one thing, everywhere in
-Skynet. The name you see is the name a Process uses, and a minus Offset is a minus in the dialog, the Schema and a Process alike.
-When one word means two things, people end up like Abbott and Costello in [Who's on First?](https://en.wikipedia.org/wiki/Who%27s_on_First%3F).
 
 Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_TEMP@1W_HLT_HL`. A probe number can belong to one Device only.
 
@@ -62,6 +58,39 @@ More rules:
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Interface Port, one Device** (Rule 6.1). Two Devices can't use the same port on the same Interface. A heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
 - **Older Schemas:** two Devices that already share a port keep working (the last one turned on wins, the others on that port are turned off) and can still be saved. No new ones can be made.
+
+## What the Suggested Name tells you
+
+Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the
+Device (or Widget) just by the name alone. A Red Pump on Port 15 of the Interface BM (Brewery Mega), on the Brew House Tab BH:
+
+| Part | In the name |
+|---|---|
+| Interfaceid | **BM**_15_DO@Pump_Red~Pump_BH |
+| Port | BM_**15**_DO@Pump_Red~Pump_BH |
+| Type | BM_15_**DO@Pump**_Red~Pump_BH |
+| Label | BM_15_DO@Pump_**Red~Pump**_BH |
+| TABid | BM_15_DO@Pump_Red~Pump_**BH** |
+
+From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery
+Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
+
+**Predictive Text**: in a Process you never type this long name. Type BM and the List Box shows only the Devices on the BM
+Interface; pick Red Pump from it. The Suggested Name is what makes that work.
+
+In Skynet a name can be changed quite easily: each name has its own **💾 Update to Suggested** button (Rule 3.16), and
+**🏷 Suggested Names** converts many at once (below). More in
+[The Name of a pump](115-pump-device-properties#the-name).
+
+## Convert all names to Suggested Names
+
+In **Edit layout**, an Admin presses **🏷 Suggested Names** (on the Edit layout bar). A list shows every Device and Widget, on every
+Tab, whose Name is not its Suggested Name: its Tab, the Name now and the Suggested Name. Each one starts ticked; untick any you want
+to keep (**☑ Tick all** and **☐ Untick all** help). Press **💾 Convert**, then **Save layout**. Every Process that uses a name is
+changed to the new name for you, and Clones follow their parent. **Exit** without saving keeps the old names (Skynet Rule 3.18).
+
+Not in the list: Integrated Instances (their names are VesselName.DeviceName), and things with no Suggested Name, such as vessels,
+pipes, fittings and Text.
 
 ## Pins kept for RTD and OneWire probes
 

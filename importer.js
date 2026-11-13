@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, importFolder, importFileName, buildSchemaFile, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
 import { findParts, itemKind, guessPartDetails, cleanPartDetails, PART_PAGES, findVesselDetails, findProbes, findHeaters, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
-import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
+import { openAppWindow, closeAppWindow, importerProfileDir, openInDefaultBrowser } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
 import { isHeatElem, isCoolPump, HEAT_KEYS, PUMP_METHOD_KEYS } from './public/heatmethod.js';
@@ -212,6 +212,9 @@ async function api(req, res, p, q) {
     const home = CANDIDATES[0] ?? '';
     return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, importFolder: IMPORT_DIR, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
   }
+  // an outside link (an AI site, a Help link) opens in the default browser, not in the Importer's own Edge window (public/extlinks.js);
+  // the Importer only listens on this computer, so the page is always on it
+  if (p === '/api/openlink' && m === 'POST') { let url = ''; try { url = String((await body(req))?.url ?? ''); } catch { /* nothing to open */ } return json(res, 200, { opened: openInDefaultBrowser(url) }); }
   if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(resolveFolder(q.get('folder') ?? '')));
   if (p === '/api/folder' && m === 'POST') {
     const { folder } = await body(req);
@@ -424,7 +427,7 @@ const server = http.createServer(async (req, res) => {
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
     if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/semi.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/hydrometer.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/semi.js', '/vesselbuilder.js', '/links.js', '/heatmethod.js', '/hydrometer.js', '/themes.js', '/themeboot.js', '/extlinks.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });

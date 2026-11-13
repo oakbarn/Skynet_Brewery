@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
@@ -40,6 +41,7 @@ import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GR
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
+import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -99,6 +101,17 @@ async function api(method, url, body, raw) {
 function alertBar(text) {
   const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
   document.body.append(bar);
+}
+// Brain notices (OakBarn Brewery, 2026-11-12, Rule 6.31): Skynet stopped or the computer slept during a brew, or Windows has an
+// update waiting to restart the computer. They stay on every screen until a brewer closes them (closed on one, closed on all).
+// A stop or sleep notice has a Resume button for 15 minutes after the stop (OakBarn Brewery, 2026-11-12: "Resume Button").
+function renderBrainNotices(list) {
+  let box = document.getElementById('brainNotices');
+  if (!box) { box = h('div', { id: 'brainNotices' }); document.body.append(box); }
+  box.replaceChildren(...(list || []).map(n => h('div', { class: 'brainNotice ' + (n.kind || ''), role: 'alert' },
+    h('span', { style: 'white-space:pre-line' }, (n.kind === 'update' ? '🔄 ' : '⚠ ') + n.text),
+    n.resume && can('operator') ? h('button', { class: 'resumeBtn', title: 'Turn back On what was On and start each Process again at its step', onclick: e => { e.target.disabled = true; api('POST', '/ui/brain/resume', { id: n.id }).then(r => { if (r?.failed?.length) alertBar('Not resumed: ' + r.failed.join(', ')); }).catch(err => { e.target.disabled = false; alertBar(err.message); }); } }, '▶ Resume') : null,
+    h('button', { title: 'Close this notice on every screen', onclick: () => api('POST', '/ui/brain/notice', { id: n.id }).catch(e => alertBar(e.message)) }, '✕'))));
 }
 // Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done.
 // A Manual Valve Widget is asked for on a bar at the top instead (not a pop-up that covers the Tab): the valve blinks on its
@@ -228,6 +241,7 @@ const TEXT_NORMAL = 18, TEXT_LARGE = 28;
 const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
+  renderBrainNotices(S.brainNotices);
   for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
@@ -246,6 +260,7 @@ async function load() {
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
+  officialWarn();
   setTextLarge();
   // the Importer's Build Tab pages (OakBarn Brewery, 2026-11-08): the Importer opens one imported Tab at a time (#tab=Name)
   if (S.importBuild && !load.hashTab) {
@@ -311,6 +326,8 @@ function connect() {
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
+  es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
+  es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
@@ -357,6 +374,8 @@ function renderTabs() {
     ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
   $('#previewBuild').classList.toggle('hidden', !buildWs());
+  $('#buildMark')?.classList.toggle('hidden', !(editing && curWs()?.build));
+  drawBuildDefs();
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -479,6 +498,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
   drawMethodSpots(w);
+  markFresh();         // a new item just moved here from the Build Tab glows until clicked (Rule 4.1)
   renderPipes(); fitZoom(); updLockBtn(); renderVbPanel();
 }
 
@@ -936,12 +956,12 @@ function mfFlow(g, k) {
 // tees with valves ... need their property dialog and the Build look and feel like the Pump Drill down", Rules 18.13-18.21).
 // 1 Label (filled in, valve_tee_n ...), 2 Interface, 3 each Valve (Manual or Motorized, a Motorized one with its Port on the same
 // line), 4 Tab, then the Name, the Graphic, its Path, Orientation with Flip, X, Y, Width, Height and the Device Type. ➕ Add Device can
-// always be pressed and says what is missing (Rule 18.15). It goes straight on the Tab picked (Rule 4.1: it holds Devices).
+// always be pressed and says what is missing (Rule 18.15). It starts on the 🔨 Build Tab and Save Build ... moves it to the Tab picked (Rule 4.1).
 async function addMf(tname, kind) {
   const t = tplOf('fitting', tname); if (!t) return toast(`No ${tname} Template`, true);
   const I = MF_TPLS[t.name] || mfInfo({}), used = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
   const fits = clone(t.fittings || []), keys = mfKeys({ fittings: fits }), devs = S.config.devices || [];
-  let tab = wsName; { const b = draft.workspaces.find(w => w.name === wsName); if (b?.build) tab = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || wsName; }
+  const tab = buildGoesTo(wsName);      // the Default Tab, else the Tab the Build Tab came from (Rule 4.6)
   const work = { template: t.name, image: t.image, fittings: fits, label: mfNext(I.label, draft.graphics.map(x => x.label)), labelVisible: false, labelAlign: 'below', labelSize: 12,
     mfIface: defaultIface(devs), workspace: tab, rot: '0', w: t.size?.[0] || 160, h: t.size?.[1] || 262, x: 60, y: 60 };
   for (const k of keys) work[k + '_mfk'] = kind;
@@ -1010,7 +1030,8 @@ async function addMf(tname, kind) {
         } catch (err) { draft.graphics = draft.graphics.filter(x => x !== g && x.attachTo !== g.id); throw err; }
         placeUnitParts(g);
         try { if (work.mfIface) localStorage.setItem(LAST_IFACE_KEY, work.mfIface); } catch { }
-        if (g.workspace !== wsName) { wsName = g.workspace; renderTabs(); }      // the Tab picked in the Add box
+        // on the 🔨 Build Tab first, with its valves and IPs (Rule 4.1); Save Build ... moves it to the Tab picked in the Add box
+        for (const x of [g, ...draft.elements.filter(e => e.integratedIn === g.id), ...draft.graphics.filter(q => q.attachTo === g.id)]) keepOnBuild(x);
         sel = { kind: 'gfx', id: g.id }; renderWs();
         made = g; break;
       } catch (err) { toast(err.message, true); }
@@ -1150,7 +1171,7 @@ function applyMf(g, w, tab, label, loose = false) {
       if (o.name !== e.name) for (const x of draft.elements) if (x.input === o.name) x.input = e.name;
       Object.keys(o).forEach(x => delete o[x]); Object.assign(o, e);
     } else draft.elements.push(e);
-    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > To a Tab adds that Tab's ID (Rule 3.1)
+    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > Move to Tab adds that Tab's ID (Rule 3.1)
   }
 }
 
@@ -2865,7 +2886,7 @@ async function doTap(e) {
   const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
   if (t.type === 'temperature') return probeTap(t);      // a Probe, a Thermowell, or a picture that shows one (Rule 2.43)
   if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
-  if (act === 'toggle' && isBoolEl(t)) {
+  if ((act === 'toggle' || act === 'dual') && isBoolEl(t)) {      // Dual Action: a click is On / Off (Rule 2.50)
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (isConfirmation(t)) return confirmByHand(t, !cur);      // a Confirmation Widget: do it by hand, then Done (Rule 1.28)
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
@@ -2886,9 +2907,24 @@ function release() {
 // A Valve or Heating Element set to Push Button (OakBarn Brewery, 2026-11-09, Rule 2.46): On only while its picture is held down, on
 // the Tab, built into a Vessel Device or in a Valve Tee; when it is already On, Off only while held (the Brain reverses it).
 const isPushHeld = name => { const e = name && elByName(name); return !!e && tapAction(e) === 'hold'; };
+// Dual Action (OakBarn Brewery, 2026-11-12, Rule 2.50): held longer than DUAL_HOLD_MS it is a Push Button (On only while held) and the
+// click that follows the let go is ignored; let go sooner and it is a plain click (On / Off)
+const DUAL_HOLD_MS = 500;
+let dualWait = null, dualSkipClick = false;
+const dualCancel = () => { if (dualWait) { clearTimeout(dualWait); dualWait = null; } };
 $('#ws').addEventListener('pointerdown', ev => {
   if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
   const n = ev.target.closest('.el, .vpPart[data-dev], .mfValve[data-dev]'); const e = n && elByName(n.dataset.name || n.dataset.dev);
+  if (e && tapAction(e) === 'dual' && can('operator')) {
+    dualCancel(); dualSkipClick = false;
+    const name = e.tapTarget || e.name;
+    dualWait = setTimeout(() => {
+      dualWait = null; dualSkipClick = true; release();
+      const send = () => api('POST', '/ui/hold', { name, down: true }).catch(x => { toast(x.message, true); release(); });
+      held = { name, n, t: setInterval(send, 500) }; n.classList.add('pressed'); send();
+    }, DUAL_HOLD_MS);
+    return;
+  }
   if (!e || tapAction(e) !== 'hold') return;
   if (!can('operator')) return toast('Your account is view only', true);
   ev.preventDefault(); release();
@@ -2897,12 +2933,13 @@ $('#ws').addEventListener('pointerdown', ev => {
   held = { name, n, t: setInterval(send, 500) }; n.classList.add('pressed'); send();
   n.setPointerCapture?.(ev.pointerId);
 });
-for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, release);
+for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, () => { dualCancel(); release(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
 $('#ws').addEventListener('contextmenu', ev => { if (!editing && ev.target.closest('.el.k-pushbutton')) ev.preventDefault(); });
 
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
+  if (dualSkipClick) { dualSkipClick = false; return; }       // a Dual Action held as a Push Button: its let go is not a click
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
   const mfv = ev.target.closest('.mfValve');
@@ -4126,7 +4163,9 @@ function openHelp(topic, quiet = false) {
   window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
 }
 // Hot spots in Hover Help (OakBarn Brewery, 2026-11-11, Rule 2.49): a word with its own Help page is a link that opens it
-setHelpLinks(HOT_SPOTS, topic => openHelp(topic));
+// a broken or empty one opens nothing, only the broken link pop-up with Send (OakBarn Brewery, 2026-11-12, Rule 11.10)
+setHelpLinks(HOT_SPOTS, topic => { if (helpLinkOk(topic, 'Hover Help')) openHelp(topic); });
+preloadHelpIndex();
 // Help for what is showing: the Menu tab that is open, else the page you are on
 const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '') || ['menu'] : viewTopic(view);
 // the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
@@ -4694,10 +4733,10 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   }
   if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
-  useTabProfile(e);
+  useTabProfile(e);       // the look of the Tab picked in the Add box
+  keepOnBuild(e);         // it starts on the 🔨 Build Tab; Save Build ... moves it to the Tab picked in the Add box (Rule 4.1, 2026-11-12)
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
-  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
   if (!isDevice(e) && widgetTypeId(e)) {      // a new Widget's name: wgt_Type_Label_TabID (Fritz, 2026-11-06, Rule 3.14); it follows its Label and Tab
     if (!isPicW(e)) e.name = widgetSuggestion(e);      // until a name of its own is typed (the Picture Widget's Add box already named it)
     if (e.name === widgetSuggestion(e)) autoNamed.add(e);
@@ -4711,13 +4750,13 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
 // the Vessel of "Vessel Device Template" built on the 🔨 Build Tab with its Element Placed and linked to the new Heating Element
 function elemVesselBuild(t, e) {
   const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(x => x.name)].filter(Boolean);
-  addTemplateToTab('vessel', t, e.workspace, bundleName(t.name, tabIdOf(e.workspace) || 'Build', taken));
+  addTemplateToTab('vessel', t, e.workspace, bundleName(t.name, tabIdOf(nameTab(e)) || 'Build', taken));
   const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
   if (g) {
     g.ports ||= {}; g.ports.element = { ...(g.ports.element || { position: t.ports.element.position }), installed: true };
     g.heater = e.name; syncVesselPorts(g, null); renderWs(); editItem('gfx', g.id);
   }
-  toast(`${e.name} is on the ${e.workspace} Tab. ${g?.name || t.name} is on the 🔨 Build Tab with its Element linked to it: 💾 Save Build ... > To a Tab puts it on the ${e.workspace} Tab.`, false, 9000);
+  toast(`${e.name} and ${g?.name || t.name} (its Element linked to it) are on the 🔨 Build Tab: 💾 Save Build ... > Move to Tab puts them on the ${nameTab(e)} Tab.`, false, 9000);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
@@ -4945,10 +4984,10 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
-// and Save Build ... > To a Tab adds it, as for a Device
-const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace)) : ''; };
+// and Save Build ... > Move to Tab adds it, as for a Device
+const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 // A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
 const sugSelf = o => (draft || S.config).elements.find(x => x.name === o.name) || o;
@@ -4978,17 +5017,46 @@ const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An 
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
-  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved can never be changed. It is from 1 to 4 Characters. Our example Interface is: BM: Brewery Mega',
+  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our example Interface is: BM: Brewery Mega',
   'The ID is important as it is Part of the Suggested Name.\n⟦BM⟧_15_DO@Pump_Red~Pump_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
   'If you need to add a new Interface, select ➕ Add new Interface in the List Box (Bottom Choice). Create the Interface and Save it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.'].join('\n\n');
 const ifaceTip = e => isPumpDev(e) ? IFACE_PUMP_TIP : DEVICE_TIPS.iface;
-// The Port (OakBarn Brewery, 2026-11-12, the same PDF): what to do, then what Available Ports are. The ➕ Add Device button, while it
-// waits for the Port, keeps its short line and adds these below it, a blank line between (PICK_PORT_WHY).
-const PORT_PICK_TIP = 'Pick a Port. (Available Port) A Port needs to be chosen from the list before proceeding.\n\nClick the small Gray Down Triangle to expand the List of Available Ports.';
+// the standard part after a Suggested Name Format line, the same as the Interface balloon's (OakBarn Brewery, 2026-11-12, Dialog 1 #2:
+// "add the standard like the interface id text here")
+const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).\n\n'
+  + 'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.';
+// The Pump's Tab balloon (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1 #2): his own text, word for word (only the
+// spelling is fixed, Rule 2.37). The same text is Help 115, The Tab.
+const TAB_PUMP_TIP = ['The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.',
+  'A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).\nAnd like a Star Ship, there is an Alternate Bridge and other Compartments of decks.\nThere can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the Bridge.',
+  'Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to control things, but only a workshop to build something to be placed on a Normal User Tab.',
+  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  NAME_STANDARD,
+  'You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.\n➕ Add new Tab… makes a new Tab and comes back here and sets it as the default for the Build Tab.'].join('\n\n');
+// The Pump's Device Type balloon (the same PDF). The BruControl comparison he wrote with it is for the Importer only: it waits in
+// Sandbox/Importer/Importer_Notes.md (Rule 11.3).
+const DEVTYPE_PUMP_TIP = ['Its Device Type: DO@Pump, a Pump (Pump) on a Digital Out, On/Off (DO) port. The General Type comes first, then an @, then the Device Type.\nThe Type is always supplied by Skynet and you cannot change it. All of the Skynet Devices have a set Type.',
+  'The same DO@Pump is the third part of the Suggested Name: DO@Pump. It comes from the Device you added and is set for you.\nBM_15_⟦DO@Pump⟧_Red~Pump_BH\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  NAME_STANDARD].join('\n\n');
+const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : DEVICE_TIPS.tab;
+// The Pump's Name balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text (only the spelling fixed), the
+// Suggested Name read part by part with each part in red, and a short Predictive Text note (its words are a link to that Help).
+// The same text is in Help 46, Device names, and Help 115, The Name.
+const NAME_PUMP_TIP = ['This is how the Device (or a Widget) is referred to as the unique identifier for the Skynet Panel to access and use the Red Pump you just built.\nIn Skynet, there are some standards such as Prohibited Characters such as :, " and others that could interfere with the Computer\'s Operating System or Skynet\'s own background code. No spaces are allowed in Skynet names.',
+  'Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the Device (or Widget) just by the name alone.',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nInterfaceid: ⟦BM⟧_15_DO@Pump_Red~Pump_BH\nPort: BM_⟦15⟧_DO@Pump_Red~Pump_BH\nType: BM_15_⟦DO@Pump⟧_Red~Pump_BH\nLabel: BM_15_DO@Pump_⟦Red~Pump⟧_BH\nTABid: BM_15_DO@Pump_Red~Pump_⟦BH⟧',
+  'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
+  'Predictive Text: in a Process you never type this long name. Type BM and the list shows only the Devices on the BM Interface; pick Red Pump from it. The Suggested Name is what makes that work.',
+  'In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have not chosen to do so earlier.'].join('\n\n');
+const nameTip = e => isPumpDev(e) ? NAME_PUMP_TIP : DEVICE_TIPS.name;
+// The Pump's Port balloon (OakBarn Brewery, 2026-11-12: "Add this to the Port Hover Help on the Blickman Riptide Dialogs in a similar
+// manner as the Label Hover Help"): the Available Ports balloon, then his Suggested Name example with the Port part marked red
+const portTip = e => isPumpDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Pump_Red~Pump_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).' : DEVICE_TIPS.port;
+const devTypeTip = e => isPumpDev(e) && !isPwmDev(e) ? DEVTYPE_PUMP_TIP : typeTip(e);
+// the ➕ Add Device button's first line while it waits for the Port (its balloon then is the Port's own, Rule 18.35)
 const PICK_PORT_WHY = 'Pick the Port first (Available Ports)';
-const PICK_PORT_HELP = PICK_PORT_WHY + '\n\n' + PORT_PICK_TIP + '\n\nAvailable Ports: only the free Ports (pins) on this board that fit this type of Device, for example 22, or A5 = 59. Digital Outputs have the most ports, true PWM Ports are much more limited. Once it is Committed when saved, the Port is greyed out and no longer changeable.';
 // The Review step (OakBarn Brewery, 2026-11-12): once the Interface and Port are picked, a Review pop-up shows them greyed out with
 // this statement (no Hover Help on it), and Confirm or Back. They are greyed out in the Add box only after Confirm, and set for good
 // only when the Device is saved (➕ Add Device).
@@ -5072,10 +5140,39 @@ document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
 // The default Interface of a new Device (Fritz, 2026-11-05: "Then Goes to Interface. There is a Default. User accepts or selects (or
 // creates) an Interface"): the one the last new Device went on, or else the first Interface. Kept in this browser only.
 const LAST_IFACE_KEY = 'skynet.lastIface';
+// The Default Interface and Default Tab of a Build (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1 #2, Rule 4.6):
+// "We need to set on the Defaults the Interface and Tab and have that both on the Default Panel and maybe DDLBs on the Build Tab Menu
+// where a User can quickly set the defaults for the Build. These are the same defaults and not unique to the Build Tab." Kept in
+// ☰ Menu > Default settings (brewDefaults) by Interface ID and Tab ID; a Schema without that ID uses the old way (the last one used).
+const buildDefs = () => S.config.brewDefaults || {};
+const ifaceById = id => id ? (S.config.devices || []).find(d => ifaceIdOf(d.name) === id) : null;
+const tabById = (id, list = L().workspaces) => id ? list.find(w => w.id === id && !w.build && !w.template) : null;
 function defaultIface(devs) {
+  const set = ifaceById(buildDefs().buildIface); if (set && devs.includes(set)) return set.name;
   let last = ''; try { last = localStorage.getItem(LAST_IFACE_KEY) || ''; } catch { }
   return devs.some(d => d.name === last) ? last : devs[0]?.name;
 }
+// the Tab a new thing on the Build Tab goes to: the Default Tab, else the Tab the Build Tab was opened from, else the first Tab
+function buildGoesTo(name) {
+  const b = draft.workspaces.find(w => w.name === name); if (!b?.build) return name;
+  return tabById(buildDefs().buildTab, draft.workspaces)?.name || draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || name;
+}
+async function saveBuildDefs(change) {
+  const d = { ...buildDefs(), ...change };
+  for (const k of Object.keys(change)) if (!d[k]) delete d[k];
+  await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; drawBuildDefs();
+}
+// the two dropdowns on the Edit layout bar, shown on the 🔨 Build Tab only: the same defaults as ☰ Menu > Default settings
+function drawBuildDefs() {
+  const box = $('#buildDefs'); if (!box) return;
+  const on = editing && curWs()?.build; box.classList.toggle('hidden', !on); if (!on) return;
+  const iSel = $('#buildDefIface'), tSel = $('#buildDefTab'), d = buildDefs();
+  iSel.replaceChildren(h('option', { value: '' }, '(last used)'), ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return h('option', { value: id }, `${id}: ${x.name}`); }));
+  tSel.replaceChildren(h('option', { value: '' }, '(Tab it came from)'), ...draft.workspaces.filter(w => !w.build && !w.template && w.id).map(w => h('option', { value: w.id }, `${w.id}: ${w.name}`)));
+  iSel.value = ifaceById(d.buildIface) ? d.buildIface : ''; tSel.value = tabById(d.buildTab, draft.workspaces) ? d.buildTab : '';
+}
+$('#buildDefIface').onchange = guard(() => saveBuildDefs({ buildIface: $('#buildDefIface').value }));
+$('#buildDefTab').onchange = guard(() => saveBuildDefs({ buildTab: $('#buildDefTab').value }));
 // No free PWM pin for a true PWM Device (Fritz, 2026-11-05: "2 choices for User 1. Add Interface, 2 Use Pseudo PWM with explanation
 // of degradation"). Resolves 'iface', 'pseudo' or undefined (Cancel: pick another Interface).
 function pickNoPwm(iface, pseudo) {
@@ -5136,11 +5233,11 @@ async function newDeviceDialog(e, hint, what) {
   if (mbv && e.template) e._orient = orientPick(e);
   // the ⬆ and ⬢ in the Add box too (Blichmann PDF, 2026-11-10)
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
-    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: ifaceTip(e), ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : T.port }] } : {}) }],
+    ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: ifaceTip(e), ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : portTip(e) }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
-    ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
-    ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
+    ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: tabTip(e) }],
+    ['name', n() + 'Name', 'text', null, false, false, { tip: nameTip(e), ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: e.cover || 'None' }, after), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
@@ -5150,7 +5247,7 @@ async function newDeviceDialog(e, hint, what) {
     ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
     ...(isPumpDev(e) ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }]]),      // a Pump: X, Y, Width and Height on one line
-    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: typeTip({ ...e, typeCode: work.typeCode || drillCode(e) }) }]] : [])];
+    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: devTypeTip({ ...e, typeCode: work.typeCode || drillCode(e) }) }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
@@ -5159,7 +5256,7 @@ async function newDeviceDialog(e, hint, what) {
   { const hm = heatMode(e); if (hm != null && !String(work.label ?? '').trim()) work.label = autoLabel(hm ? 'hE_' + hm : 'hE'); }     // a Heating Element: hE_1 (its method can change, Rule 6.19); the old control Devices hE_PID_1 ...
   if (pr && !String(work.label ?? '').trim()) work.label = probeAutoLabel(work.typeCode || defaultCode(e));       // a Temperature Probe: tP_1W_1, tP_RTD_1 ... (Rule 18.26)
   if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
-  { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
+  work.workspace = buildGoesTo(e.workspace);    // the Default Tab, else the Tab it was added from (Rule 4.6)
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; work.apiName = e.apiName; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: pr ? undefined : e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
@@ -5188,7 +5285,10 @@ async function newDeviceDialog(e, hint, what) {
       : !wireKey(w) ? (portSel && portSel.options.length < 2 ? 'This Interface has no free Port for this Device: pick another Interface, or free a Port' : PICK_PORT_WHY)
         : !conf ? CONFIRM_WHY : 'Pick the Tab first (3. Tab)';
     // its Hover Help: the same words; waiting for the Port, OakBarn Brewery's longer help below them (2026-11-12)
-    for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !ok); b.removeAttribute('title'); if (why) b.dataset.help = why === PICK_PORT_WHY ? PICK_PORT_HELP : why; else delete b.dataset.help; }
+    // its Hover Help (OakBarn Brewery, 2026-11-12, Dialog 1 #2: "The Hover Help for the Add Device should be the same with Just that the
+    // Label or Port needs to be set first"): the line that says what is missing, a blank line, then that box's own balloon
+    const same = !lab ? labelTip({ ...e, ...w }, dd ? { up: 2, attr: true } : {}) : !w.device ? ifaceTip(e) : !wireKey(w) ? portTip(e) : !conf ? '' : tabTip(e);
+    for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !ok); b.removeAttribute('title'); if (why) b.dataset.help = same ? why + '\n\n' + same : why; else delete b.dataset.help; }
     for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
     // Confirmed (Rule 18.35): the Interface and Available Ports line is greyed out in the Add box; Cancel to start again. Nothing is
     // set for good until ➕ Add Device saves it.
@@ -5289,6 +5389,7 @@ async function newDeviceDialog(e, hint, what) {
         for (const b of cancels) b.textContent = labels0[1];
         dlgEnterSeq = null;                           // Tab settings: Enter goes field to field there (Rule 18.20)
         work.workspace = (await addTabForDevice()) || was;
+        { const nt = draft.workspaces.find(x => x.name === work.workspace); if (work.workspace !== was && nt?.id) try { await saveBuildDefs({ buildTab: nt.id }); } catch { } }     // and it is the Default Tab now (Rule 4.6)
         for (const b of oks) b.textContent = '➕ Add Device';
         for (const b of cancels) b.textContent = '✖ Cancel';
         continue;
@@ -5456,8 +5557,7 @@ async function newProbeTee(kind) {
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
-  useTabProfile(e); if (!e._keepXY) stackNew(e); delete e._keepXY;
-  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
+  useTabProfile(e); keepOnBuild(e); if (!e._keepXY) stackNew(e); delete e._keepXY;      // on the 🔨 Build Tab first (Rule 4.1)
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 async function newThermowell(length) {
@@ -5468,8 +5568,7 @@ async function newThermowell(length) {
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
-  useTabProfile(e); if (!e._keepXY) stackNew(e); delete e._keepXY;
-  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
+  useTabProfile(e); keepOnBuild(e); if (!e._keepXY) stackNew(e); delete e._keepXY;      // on the 🔨 Build Tab first (Rule 4.1)
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 
@@ -5763,6 +5862,7 @@ function updLockBtn() {
   b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
   const t = $('#itemToBuild'); if (t) t.disabled = !buildable(item);
   updTurnBar(item);
+  drawBuildMark();      // the watermark of the Tab the picked item goes to (Rule 4.1)
 }
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
@@ -5855,6 +5955,63 @@ function lockTab(on) {
     + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
   renderWs(); updLockBtn();
 }
+// 🏷 Suggested Names (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be converted to a Suggested Name, if you
+// have not chosen to do so earlier", Rule 3.18): one list of every Device and Widget whose Name is not its Suggested Name, on every
+// Tab, each ticked; 💾 Convert gives each ticked one its Suggested Name in the layout being edited. Save layout keeps them, and every
+// Process follows the new names (hidden keys, Rule 3.10). Integrated Instances keep theirs (VesselName.DeviceName, Rule 6.28).
+// Not in the list: an item on no Tab (SoundPlayer and other Skynet items a Process calls by their own name).
+const canSuggest = e => hasSuggestion(e) && !isInstance(e) && !!e.workspace;
+// A Device saved with no Device Type ID keeps the one its name already has (BM_30_DO@Chill_Chiller~water_BH stays Chill, never just DO)
+function sugOf(e) {
+  let w = e;
+  if (isDevice(e) && !e.typeCode) {
+    const g = GENERAL_TYPE[e.type], hit = typeCodes(e).map(x => x[0]).filter(c => e.name.includes(`_${g && c.toUpperCase() !== g ? `${g}@${c}` : c}_`) || e.name.includes(`_${c}_`)).sort((a, b) => b.length - a.length)[0];
+    if (hit) w = { ...e, typeCode: hit };
+  }
+  try { return nameSuggestion(w, e) || ''; } catch { return ''; }
+}
+function suggestedRows() {
+  const rows = [];
+  for (const e of draft.elements) {
+    if (!canSuggest(e)) continue;
+    const sug = sugOf(e);
+    if (sug && sug !== e.name) rows.push({ e, sug });
+  }
+  return rows.sort((a, b) => String(a.e.workspace).localeCompare(String(b.e.workspace)) || a.e.name.localeCompare(b.e.name));
+}
+function convertAllNames() {
+  if (!editing || !draft) return;
+  if (!can('admin')) return toast('Only an Admin can change names.', true);
+  const rows = suggestedRows();
+  if (!rows.length) return toast('Every Device and Widget already has its Suggested Name.');
+  const ticks = rows.map(() => h('input', { type: 'checkbox', checked: true }));
+  const count = h('span', { class: 'muted' });
+  const conv = h('button', { type: 'button', class: 'primary' }, '💾 Convert');
+  const recount = () => { const n = ticks.filter(t => t.checked).length; count.textContent = `${n} of ${rows.length} ticked`; conv.disabled = !n; };
+  for (const t of ticks) t.addEventListener('change', recount);
+  const all = on => () => { for (const t of ticks) t.checked = on; recount(); };
+  const d = h('dialog', { class: 'sugAllDlg', 'data-nomenu': true },
+    h('h3', {}, '🏷 Suggested Names'),
+    h('p', {}, 'These Devices and Widgets do not have their Suggested Name. Tick the ones to change, then press 💾 Convert. Press Save layout to keep the new names. Every Process that uses a name is changed to the new name for you.'),
+    h('div', { class: 'bar' }, h('button', { type: 'button', onclick: all(true) }, '☑ Tick all'), h('button', { type: 'button', onclick: all(false) }, '☐ Untick all'), h('span', { class: 'spacer' }), count),
+    h('div', { class: 'sugAllList' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Tab'), h('th', {}, 'Name now'), h('th', {}, 'Suggested Name'))),
+      h('tbody', {}, ...rows.map((r, i) => h('tr', {}, h('td', {}, ticks[i]), h('td', {}, r.e.workspace || ''), h('td', {}, r.e.name), h('td', { class: 'sugNew' }, r.sug)))))),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), conv));
+  conv.onclick = () => {
+    let n = 0;
+    for (const [i, r] of rows.entries()) {
+      if (!ticks[i].checked) continue;
+      const sug = sugOf(r.e);      // again, one at a time: two that would get the same name get _2
+      if (!sug || sug === r.e.name || nameCheck(sug, r.e)) continue;
+      r.e.name = sug; n++;
+    }
+    d.close(); renderWs();
+    toast(n ? `${n} name${n === 1 ? '' : 's'} changed to the Suggested Name. Press Save layout to keep ${n === 1 ? 'it' : 'them'}.` : 'No names were changed.');
+  };
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); recount(); d.showModal();
+}
+$('#sugAllNames').onclick = convertAllNames;
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
@@ -6405,6 +6562,23 @@ $('#addHiddenWs').onclick = () => {
 // the Edit layout draft (never saved) and shows only while you build. Every new Device, Widget, IP, picture, text, piece of
 // equipment and copy of a Template goes on it (Fritz, 2026-10-23). Save Build ... then puts it on a Tab, or saves it as a Template.
 const buildWs = () => draft?.workspaces.find(w => w.build);
+// Rule 4.1 (OakBarn Brewery, 2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular
+// Tab. It will be moved to the Regular Tab at the End of the Build chain."): a new Device or Widget waits on the 🔨 Build Tab and
+// remembers the Tab picked in its Add box (buildTo, never saved); 💾 Save Build ... > Move to Tab moves it there. Its Suggested Name
+// already has that Tab's ID.
+function onBuildTab(x) { return !!x?.workspace && !!draft?.workspaces.find(w => w.name === x.workspace)?.build; }
+function buildToOf(x) { return onBuildTab(x) && x.buildTo && draft.workspaces.some(w => w.name === x.buildTo && !w.build) ? x.buildTo : ''; }
+const TO_TPL = '\0toTemplates';       // "📁 Templates" in the Tab list of a vessel or Tab_Fitting on the Build Tab (OakBarn Brewery, 2026-11-12)
+let wsTplOption = false;              // the Tab list being drawn offers it
+function nameTab(x) { return buildToOf(x) || x?.workspace; }      // the Tab whose ID ends its Suggested Name
+// put a new item on the Build Tab; the regular Tab it was given (the one picked in its Add box) is kept as buildTo
+function keepOnBuild(x) {
+  const b = buildWs() || toBuild(); if (!b || !x) return;
+  const to = x.workspace !== b.name && draft.workspaces.find(w => w.name === x.workspace && !w.build);
+  if (to) { x.buildTo = to.name; b.width = Math.max(+b.width || 1600, +to.width || 1600); b.height = Math.max(+b.height || 900, +to.height || 900); }      // its spot here is its spot there
+  x.workspace = b.name;
+  if (wsName !== b.name) { wsName = b.name; renderTabs(); }
+}
 const buildItems = b => b ? [...draft.elements.filter(e => e.workspace === b.name), ...draft.graphics.filter(g => g.workspace === b.name)] : [];
 // open the Build Tab (made if it is not there yet), the size of the Tab you came from
 function toBuild() {
@@ -6425,7 +6599,7 @@ function toBuild() {
 }
 $('#buildTab').onclick = () => toBuild();
 $('#saveBuild').onclick = guard(saveBuild);
-const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add Device, Add Widget, Add equipment, fittings, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+const BUILD_HINT = '🔨 Build Tab: every new thing starts here (Add Device, Add Widget, Add equipment, fittings, pipes). The faint 🗺 Watermark is the Tab it goes to: its spot here is its spot there. 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on its Tab or save it as a Template.';
 function setPreview(on) {
   if (on && !toBuild()) return;
   previewing = !!on && !!buildWs(); sel = null; drag = null;
@@ -6433,6 +6607,54 @@ function setPreview(on) {
   renderTabs(); renderWs();
 }
 $('#previewBuild').onclick = () => setPreview(!previewing);
+// ---- Rule 4.1 (OakBarn Brewery, 2026-11-12): "when first Moved to a Regular Tab ... the Border to glow red with a slow pulse so easy
+// to find. As soon as clicked, the Border reverts to normal." Kept in this browser only (never saved): 'el:<name>' and 'gfx:<id>'.
+const freshMoved = new Set();
+const freshKey = x => draft?.elements.includes(x) || S.config.elements.includes(x) ? 'el:' + x.name : 'gfx:' + x.id;
+const freshOf = n => n.classList.contains('el') ? (n.dataset.gid ? 'gfx:' + n.dataset.gid : 'el:' + n.dataset.name) : 'gfx:' + n.dataset.gid;
+function markFresh() {
+  if (!freshMoved.size) return;
+  for (const n of $$('#ws .el, #ws .gfx')) n.classList.toggle('freshMoved', freshMoved.has(freshOf(n)));
+}
+$('#ws').addEventListener('pointerdown', ev => {
+  if (!freshMoved.size) return;
+  const n = ev.target.closest('.freshMoved'); if (!n) return;
+  freshMoved.delete(freshOf(n));
+  n.classList.toggle('freshMoved', false);
+}, true);
+// "On the Build a shadow background like a water mark diagram of a selected Tab the item is going to only after the Tab attribute is
+// set with the option to turn it off or on on the Menubar of the Build Tab": a faint drawing of that Tab (its picture, outlines of its
+// items with their Labels and its pipes) behind everything on the Build Tab. Nothing in it can be clicked. 🗺 Watermark switches it.
+let buildMarkOn = true;
+try { buildMarkOn = localStorage.getItem('bp.buildMark') !== '0'; } catch { }
+function buildMarkTab() {
+  const b = curWs(); if (!editing || !b?.build) return null;
+  const it = sel ? findItem(sel.kind, sel.id) : null;
+  let t = it && buildToOf(it);
+  if (!t) { const all = [...new Set(buildItems(b).map(buildToOf).filter(Boolean))]; if (all.length === 1) t = all[0]; }
+  return t ? draft.workspaces.find(w => w.name === t && !w.build) : null;
+}
+function drawBuildMark() {
+  const btn = $('#buildMark'), b = editing && curWs()?.build, to = buildMarkTab();
+  if (btn) { btn.classList.toggle('hidden', !b); btn.classList.toggle('on', buildMarkOn); btn.textContent = buildMarkOn ? '🗺 Watermark On' : '🗺 Watermark Off'; btn.title = buildMarkOn ? 'A faint picture of the Tab the picked item goes to is behind the Build Tab. Click to turn it Off.' : 'Click to turn it On: a faint picture of the Tab the picked item goes to shows behind the Build Tab.'; }
+  const old = $('#ws .buildMark'), drop = () => { if (old) old.replaceWith(); };
+  if (!b || !buildMarkOn || !to || previewing) return drop();
+  const sig = to.name + '|' + draft.elements.length + '|' + draft.graphics.length;
+  if (old?.dataset.sig === sig) return;
+  const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); return n; };
+  const W = to.width || 1600, H = to.height || 900, svg = mk('svg', { class: 'buildMark', width: W, height: H, 'aria-hidden': 'true' });
+  svg.dataset.sig = sig;
+  if (to.background) svg.append(mk('image', { href: media(to.background), x: 0, y: 0, width: W, height: H, preserveAspectRatio: 'none' }));
+  for (const g of draft.graphics.filter(g => g.workspace === to.name && g.kind === 'pipe' && g.points?.length > 1)) svg.append(mk('polyline', { points: g.points.map(c => c.join(',')).join(' '), class: 'bmPipe' }));
+  for (const o of [...draft.graphics.filter(g => g.workspace === to.name && !['pipe', 'ip'].includes(g.kind)), ...draft.elements.filter(e => e.workspace === to.name && !e.integratedIn)]) {
+    const x = +o.x || 0, y = +o.y || 0, w = +o.w || 120, hh = +o.h || 60;
+    svg.append(mk('rect', { x, y, width: w, height: hh, rx: 4, class: 'bmBox' }));
+    const t = mk('text', { x: x + w / 2, y: y + hh / 2, class: 'bmText' }); t.textContent = o.label || o.name || ''; svg.append(t);
+  }
+  const t = mk('text', { x: 16, y: 34, class: 'bmTitle' }); t.textContent = `Goes to: ${to.name}`; svg.append(t);
+  drop(); $('#ws').prepend(svg);
+}
+$('#buildMark').onclick = () => { buildMarkOn = !buildMarkOn; try { localStorage.setItem('bp.buildMark', buildMarkOn ? '1' : '0'); } catch { } drawBuildMark(); };
 function dropBuild() {
   const b = buildWs(); if (!b) return;
   const gone = new Set(buildItems(b));
@@ -6446,15 +6668,28 @@ function swapName(items, from, to) {
   const walk = o => { for (const k of Object.keys(o)) { if (o[k] === from) o[k] = to; else if (o[k] && typeof o[k] === 'object') walk(o[k]); } };
   items.forEach(walk);
 }
-// To a Tab: everything moves there as it is (same size, same spots to each other), in the dead center of the Tab (Fritz, 2026-10-22)
-function moveBuildTo(tab) {
-  const b = buildWs(), to = draft.workspaces.find(w => w.name === tab && !w.build);
-  if (!to) throw new Error(`There is no Tab "${tab}"`);
+// Move to Tab: everything moves there as it is (same size, same spots to each other), in the dead center of the Tab (Fritz, 2026-10-22).
+// own (Rule 4.1, 2026-11-12): when new items picked different Tabs in their Add boxes, each goes to its own Tab, the rest to `tab`.
+// Returns the Tabs they went to, each with how many items.
+function moveBuildTo(tab, own = false) {
+  const b = buildWs(), to0 = draft.workspaces.find(w => w.name === tab && !w.build);
+  if (!to0) throw new Error(`There is no Tab "${tab}"`);
   const items = buildItems(b);
-  if (items.some(x => x.kind === 'override') && ovrHas(to.name, items.find(x => x.kind === 'override'))) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
-  centerOn(items, to);
-  for (const x of items) x.workspace = to.name;
-  if (vMaster(to)) for (const v of items.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
+  const host = x => items.find(o => o !== x && ((x.integratedIn && (o.id === x.integratedIn || o.name === x.integratedIn)) || (x.attachTo && (o.id === x.attachTo || o.name === x.attachTo))));
+  const dest = x => { const t = own && buildToOf(host(x) || x); return (t && draft.workspaces.find(w => w.name === t && !w.build)) || to0; };
+  const groups = new Map();
+  for (const x of items) { const to = dest(x); if (!groups.has(to)) groups.set(to, []); groups.get(to).push(x); }
+  for (const [to, list] of groups) {
+    const ovr = list.find(x => x.kind === 'override');
+    if (ovr && ovrHas(to.name, ovr)) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
+  }
+  for (const [to, list] of groups) {
+    // OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the Position on the Tab it is sent to": a build that goes to
+    // the Tab picked for it (the one its watermark shows) keeps its spot; anything else goes to the middle, as before
+    if (!list.some(x => buildToOf(host(x) || x) === to.name)) centerOn(list, to);
+    for (const x of list) { x.workspace = to.name; delete x.buildTo; }
+    if (vMaster(to)) for (const v of list.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
+  }
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
   // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM@Valve_L_Fly~Sparge_SP, wgt_DT_DateTime_1_BR)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
@@ -6465,9 +6700,10 @@ function moveBuildTo(tab) {
     const n = graphicWidgetName(g);
     if (n && n !== g.name) { swapName(items.filter(x => x !== g), g.name, n); g.name = n; }
   }
+  for (const x of items) if (x.kind !== 'pipe' && !x.integratedIn && !(x.kind === 'ip' && x.attachTo)) freshMoved.add(freshKey(x));      // it glows until clicked
   draft.workspaces = draft.workspaces.filter(w => w !== b);
-  wsName = to.name; sel = null;
-  return items.length;
+  wsName = (groups.has(to0) ? to0 : [...groups.keys()][0]).name; sel = null;
+  return [...groups].map(([to, list]) => ({ tab: to.name, n: list.length }));
 }
 // shift these items as one so the box around them sits in the middle of the Tab (never off its top or left edge)
 function centerOn(items, to) {
@@ -6557,7 +6793,7 @@ async function saveBuildTemplate({ name, skynet }) {
   dropBuild();
   return made;
 }
-// Save Build ...: where does it go? To a Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
+// Save Build ...: where does it go? Move to Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
 async function saveBuild() {
   const b = buildWs(); if (!b) return true;
   // an item un-bundled to the Build Tab: back where it came from (same Tab, spot and size), or saved like a new build
@@ -6576,8 +6812,9 @@ async function saveBuild() {
     if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
     dropBuild(); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
-    const n = moveBuildTo(r.tab);
-    toast(`${n} item${n === 1 ? '' : 's'} moved to the middle of the ${r.tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
+    const went = moveBuildTo(r.tab, r.own), n = went.reduce((a, g) => a + g.n, 0);
+    toast(went.length > 1 ? `Moved to their Tabs: ${went.map(g => `${g.n} to ${g.tab}`).join(', ')}. They glow red until clicked. Press Save layout to keep them.`
+      : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
   } else {
     const made = await saveBuildTemplate(r);
     toast(`Saved as ${made.length > 1 ? 'Templates' : 'a Template'}: ${made.join(', ')}. ☰ Menu > ${r.kind === 'fitting' ? 'Fitting' : 'Vessel or Equipment'} Templates, Add to Tab puts it on a Tab.`, false, 9000);
@@ -6588,9 +6825,12 @@ async function saveBuild() {
 function saveBuildDialog(b) {
   return new Promise(res => {
     const tabs = draft.workspaces.filter(w => !w.build), tk = buildTemplate(b);
+    // the Tabs picked in the Add boxes of the new things here (Rule 4.1): one Tab is offered first; several each take theirs
+    const picks = buildItems(b).filter(x => buildToOf(x)), picked = [...new Set(picks.map(buildToOf))], own = picked.length > 1;
+    const first = picked.length === 1 ? picked[0] : b.from;
     const d = h('dialog', { class: 'tplMini buildDlg' });
     const close = v => { d.close(); d.remove(); res(v); };
-    const tabSel = h('select', {}, ...tabs.map(w => h('option', { value: w.name, ...(w.name === b.from ? { selected: true } : {}) }, w.name)));
+    const tabSel = h('select', {}, ...tabs.map(w => h('option', { value: w.name, ...(w.name === first ? { selected: true } : {}) }, w.name)));
     const tplBox = h('div', { class: 'buildOpt' }, h('b', {}, 'As a Template'));
     if (tk.kind) {
       const cl = b.cloneAs && !tplOf(tk.kind, b.cloneAs) ? b.cloneAs : '';
@@ -6600,11 +6840,12 @@ function saveBuildDialog(b) {
         TPL.locked ? '' : h('label', { class: 'toggle' }, h('span', { class: 'sw' }, sky, h('span', { class: 'swk' })), ' Skynet Template (off = a User Bundled Template)'),
         h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: () => close({ to: 'template', kind: tk.kind, name: nm.value, skynet: sky.checked }) }, 'Save as Template')));
     } else tplBox.append(h('p', { class: 'muted' }, tk.why));
-    const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
-      h('p', { class: 'muted' }, 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
-      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Save to Tab')));
+    const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'Move to Tab'),
+      own ? h('p', { class: 'muted' }, 'Each new item goes to the Tab picked for it, at the spot and size it has on the Build Tab: ' + picked.map(t => `${picks.filter(x => buildToOf(x) === t).map(x => x.label || x.name).join(', ')} to ${t}`).join('; ') + '. Everything else goes to this Tab. Drag them to their place, then press Save layout.')
+        : h('p', { class: 'muted' }, picked.length ? `Everything on the Build Tab moves to this Tab at the size it is now. To ${picked[0]} (the Tab picked for it) it keeps the spot it has on the Build Tab; to another Tab it goes to the middle. Then press Save layout.` : 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
+      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value, own }) }, 'Move to Tab')));
     d.append(h('h3', {}, 'Save Build: where should it go?'),
-      ...(b.cloneAs && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // a clone of a Template is saved as a Template first
+      ...((b.cloneAs || buildItems(b).some(x => x.buildTo === TO_TPL)) && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
         h('button', { title: 'Close this and see the Build Tab the way it looks on Brew Day', onclick: () => { close(null); setPreview(true); } }, '👁 Preview'),
         h('button', { onclick: () => close(null) }, 'Keep building')));
@@ -6627,6 +6868,7 @@ const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
   for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
+  for (const x of [...draft.elements, ...draft.graphics]) delete x.buildTo;      // only for the Build Tab, never saved (Rule 4.1)
   renumberLayers(draft);         // every Tab's Layer Order runs 1, 2, 3 ... with no gaps, new items on top (Rule 1.29)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
@@ -6964,7 +7206,7 @@ function stepperFields(it) {
 }
 
 // Alarm kind first: a Hop Alarm can sound by itself on a timer, a Pre-Hop Alarm a set time before its Hop Alarm
-const ALARM_KIND_LIST = [['hop', 'Hop Alarm (priority 1: beats every other sound)'], ['brewflow', 'Brew Flow Alarm (2: end of mash, start of boil)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
+const ALARM_KIND_LIST = [['brewflow', 'Brew Flow Alarm (priority 1: beats every other sound; end of mash, start of boil)'], ['hop', 'Hop Alarm (2: hop drops)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
 function alarmFields(item) {
   const k = item.kind ??= 'general';
   return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
@@ -6998,7 +7240,7 @@ const ALM_LABEL_POP = LABEL_POP;
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 // Alarm Priority (Rule 7.18, OakBarn Brewery 2026-11-09)
-const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
+const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On; two that go On at the same moment are picked at random, then the other follows. A Process: alm_Name.priority = 1.15';
 function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
@@ -7132,15 +7374,19 @@ const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap ta
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
 const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
-const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
+// Dual Action (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2, Rule 2.50): a click turns it On or Off, and pressed and held it
+// is a Push Button (On only while held), for topping off a vessel by hand
+const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push Button'], ['dual', 'Dual Action'], ['none', 'None'], ...(v && !['toggle', 'hold', 'dual', 'none'].includes(v) ? [[v, v]] : [])];
 // Valves and Heating Elements (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle cannot have None, Default to Toggle", Rule 2.46):
 // Toggle (one click On / Off, the start) or Push Button (On only while the picture is held; reversed when it is already On). No None.
 const ONE_CLICK_TAP = v => [['toggle', 'Toggle'], ['hold', 'Push Button'], ...(v && !['toggle', 'hold', 'none', '', 'default'].includes(v) ? [[v, v]] : [])];
 const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(it.tap);
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
-const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic + (pumpModelOf(it) ? ' The Picture itself cannot be changed.' : ''), ...x }],
-  pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
-    : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
+// OakBarn Brewery, 2026-11-12 (Blichmann RipTide Dialog 2): "Get Rid of Path as useless information" on a Skynet pump drawing; its
+// Graphic balloon is his text. A User pump keeps its one Path (its picture is picked there).
+const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is set by Skynet and cannot be changed.';
+const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: pumpModelOf(it) ? PUMP_GRAPHIC_TIP : DEVICE_TIPS.graphic, ...x }],
+  ...(pumpModelOf(it) ? [] : [['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }]]),
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }], ...PUMP_SPOT_FIELDS(it, x)];
 // The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
 // the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
@@ -7149,10 +7395,16 @@ const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPO
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
-  const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
+  const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: PUMP_TOGGLE_TIP }];
   return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ['coverColor', 'Color (RGB)', 'rgb', null, false, false, { tip: COVER_COLOR_TIP, coverRow: true, ...x }]]
-    : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
+    : [[...tog.slice(0, 4), false, false, { tip: PUMP_TOGGLE_TIP, ...x }]];
 };
+// the Pump's Toggle balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text, only the spelling fixed (Rule 2.37)
+const PUMP_TOGGLE_TIP = ['This is what action is taken when the Pump Image is clicked on the Tab. The Choice can vary depending on what Device or Widget\'s Dialog you are working on. In this example, you are working on a Blichmann RipTide Pump and the choices are listed as On/Off, Push Button, Dual Action or None.',
+  'On/Off: causes the state of the Pump to True (On) or False (Off), controlling the Pump on the Tab with a click. (most Common)',
+  'Push Button: The Pump is only On as long as the Image is clicked and Held (like depressing a real Button). While not very useful on a Blichmann RipTide Pump, it could be if that Red Pump was only used to manually Top Off a vessel.',
+  'Dual Action (both On/Off and Push Button): a click (press and let go) turns the Pump On or Off. Pressed and held for more than half a second, it is a Push Button: On only as long as it is held. Handy for manually topping off with a small amount, which is common on a Brew Day.',
+  'None: Image not interactive.'].join('\n\n');
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
 // Overlay colors by Direction (OakBarn Brewery, 2026-11-10, Rule 6.19): something that heats has no Blue Glow and no Green Glow Ring;
@@ -7225,9 +7477,9 @@ function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: LABEL_VISIBLE_PUMP_TIP }],
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }] }],
-    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
-    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: portTip(it) }] }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: tabTip(it) }],
+    ['name', '4. Name', 'text', null, false, false, { tip: nameTip(it) }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it), ...PUMP_TYPE_FIELDS(it),
     ...PUMP_XYWH()];
@@ -8596,7 +8848,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
       // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => !String(opts).startsWith('addnew') || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.id ? `${w.id}: ${w.name}` : w.name)),      // Fritz, 2026-11-04: "Tab ID: Tab Name", e.g. BH: Brewhouse
-    ...(String(opts).startsWith('addnew') ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));
+    ...(String(opts).startsWith('addnew') ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []),
+    ...(wsTplOption ? [h('option', { value: TO_TPL, ...(v === TO_TPL ? { selected: true } : {}) }, '📁 Templates (Save Build ... saves it as a Template)')] : []));
   else if (kind === 'pinsel') {      // Available Ports: the free pins on the Interface that fit this Device, and its own pin
     input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' });
     input._fill = dev => {
@@ -8985,7 +9238,7 @@ const INFO = {
     ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
     ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
     ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (wgt_ALM_Label_TabID, Rule 3.14).'],
-    ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
+    ['Alarm settings', ': Kind of alarm (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Layer Order (.layer, 1 is on top), Lock and Tab properties.']],
     attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
       ['.x'], ['.y'], ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.sound'], ['.fileindex']],
@@ -9425,7 +9678,7 @@ async function editItem(kind, id) {
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
-    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
+    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: devTypeTip(it) }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.eType }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
@@ -9445,6 +9698,10 @@ async function editItem(kind, id) {
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const fields = fields0 && item.integratedIn ? it => (typeof fields0 === 'function' ? fields0(it) : fields0).filter(f => f[0] !== 'hidden') : fields0;
   const work = clone(item), before0 = item.fitting;
+  const tplOk = onBuildTab(item) && item.kind === 'vessel' && !item.attachTo;      // a vessel, equipment or Tab_Fitting can go to Templates instead
+  const goTo = buildToOf(item) || (tplOk && item.buildTo === TO_TPL ? TO_TPL : '') || (tplOk ? item.workspace : '');      // a new item on the 🔨 Build Tab: its Tab box shows where it goes (Rule 4.1); it stays on the Build Tab
+  if (goTo) work.workspace = goTo;
+  wsTplOption = tplOk;
   if (kind === 'el' && item.type === 'alarm' && item.alarmClass) chainToWork(work);      // the Alarm Chain's steps as boxes (Rule 7.16)
   if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
   const layer0 = work.layer;
@@ -9471,6 +9728,7 @@ async function editItem(kind, id) {
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  wsTplOption = false;
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -9509,6 +9767,7 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
+    if (goTo) { if (work.workspace && work.workspace !== item.workspace) work.buildTo = work.workspace; else delete work.buildTo; work.workspace = item.workspace; }      // another Tab (or 📁 Templates) picked: Save Build ... takes it there
     if (inLayers(item)) {        // a new Layer Order moves it to that place on its Tab and numbers the Tab again, 1, 2, 3 ... (Rule 1.29)
       const n = Math.round(Number(work.layer));
       if (Number.isFinite(n) && n >= 1 && (n !== layer0 || (work.workspace && work.workspace !== item.workspace))) moveLayer(draft, work.workspace || item.workspace, item, n);
@@ -11338,7 +11597,7 @@ function showDonate(preview) {
   $('#donateText').textContent = d.message.trim() || DONATE_MSG;
   $('#donateGo').textContent = d.button.trim() || 'Buy Fritz a beer';
   const close = days => { if (!preview) donateSnooze(days); dlg.close(); };
-  $('#donateGo').onclick = () => { window.open(d.link, '_blank', 'noopener'); close(d.everyDays); };
+  $('#donateGo').onclick = () => { openLink(d.link); close(d.everyDays); };
   $('#donateLater').onclick = () => close(d.everyDays);
   $('#donateDone').onclick = () => { close(d.donatedDays); toast('Thank you, cheers! 🍺'); };
   dlg.oncancel = e => { e.preventDefault(); close(d.everyDays); };   // Esc counts as "Maybe later"
@@ -12158,8 +12417,23 @@ function addDialogMenu(d) {
   wrap.classList.add('dlgMenu');
   host.prepend(wrap);
 }
+// A frozen top on the model dialog (OakBarn Brewery, 2026-11-12: "If this area could be frozen on a Dialog ... we could get rid of
+// this ... even in the middle of long one, you would have the Buttons!", Rule 2.51). For now ONLY the Pump dialogs (Blichmann RipTide,
+// the model): "This is on the model ... Wait for that until I am 100% Finished with the model". The ☰, the title and the buttons of the
+// Properties / Add box are kept together in .dlgHead; the CSS freezes it, and hides the bottom row, only when the box holds a Pump
+// (dialog#dlg:has([data-k="pumpModel"])). Every other dialog looks as before.
+function freezeDialogTop(d) {
+  if (d.id !== 'dlg') return;
+  const host = d.querySelector(':scope > form') || d;
+  if (host.querySelector(':scope > .dlgHead')) return;
+  const kids = [...host.children], top = kids.find(k => k.classList.contains('bar'));
+  if (!top) return;
+  const head = h('div', { class: 'dlgHead' });
+  host.insertBefore(head, kids[0]);
+  for (const k of kids.slice(0, kids.indexOf(top) + 1)) head.append(k);
+}
 const showModalPlain = HTMLDialogElement.prototype.showModal;
-HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
+HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } try { freezeDialogTop(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
 // the Menu Bar's own ☰, for every page but the Tabs (the Tabs have theirs on the tab line)
 $('#top .right').prepend(menuButton());
 async function menuEditLayout() {
@@ -12265,7 +12539,7 @@ function otherDefaults() {
     ['Simulator: a wait on a reading', 'Counted as reached after 60 clock seconds', 'Settings > Simulation', 'Rule 10.4'],
     ['Simulator bar', 'Opens at 25× speed with Auto skip on', 'The Simulator bar', 'Rule 10.7'],
     ['How a Tab shows', 'Fit screen (no up and down scrolling)', 'Zoom tab', 'Rule 2.15'],
-    ['Interface of a new Device', 'The one the last new Device went on, else the first', 'The Add Device box', 'Rule 4.2'],
+    ['Interface of a new Device', 'The Default Interface above, else the one the last new Device went on, else the first', 'The Add Device box', 'Rules 4.2, 4.6'],
     ['A new Schema (not a copy)', 'One pretend Mega on the Simulator', 'Interface settings', 'Rule 10.5'],
     ['Setup: keep users when updating', 'Update and keep everything', 'Setup (the installer)', 'Rules 9.8, 10.1'],
     ['BruControl Import: names', 'Skynet names (keeping BruControl names takes two warnings)', 'The Importer, page 4', 'Rule 15.1'],
@@ -12283,6 +12557,9 @@ function renderDefaultTab(box) {
     ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px; empty = 10). Each Tab can change it in Tab settings', 'num'],
     ['newTabWidth', 'Width of a new Tab (px; empty = 1600)', 'num'],
     ['newTabHeight', 'Height of a new Tab (px; empty = 900)', 'num'],
+    ['_bd', 'New Devices and Widgets (the Build)', 'head'],
+    ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
+    ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
     ['_r', 'New Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -12748,6 +13025,7 @@ function renderAboutTab(box) {
     h('dl', { class: 'aboutGrid' },
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
       ...item('Panel version', panelVersionBox()),
+      ...(S.importBuild ? [] : item('Official Skynet', officialBox())),
       ...item('Signed in as', `${S.me.name} (${S.me.role})${S.me.role === 'admin' && touchRun() ? ', run mode on this phone or tablet (Rule 2.35)' : ''}`),
       ...item('Schema', schemaSelect()),
       ...item('Schema version', act.version || 'No version yet'),
@@ -12765,7 +13043,45 @@ function showPanelVer() {
   n.title = verSmall ? `Skynet Brewer version ${panelVersionName()}. Click to show it.` : 'Skynet Brewer version. Click to make it a small icon. ☰ Menu > About says if it is the latest.';
 }
 $('#panelVer').onclick = () => { verSmall = !verSmall; try { localStorage.setItem('bp.verSmall', verSmall ? '1' : '0'); } catch { } showPanelVer(); };
-const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : '(not stamped)'; };
+const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + officialMark() : '(not stamped)'; };
+// Official Skynet (OakBarn Brewery, 2026-11-12: "Warn the end user is a good idea for non official updates"; Rule 9.14, Help 191):
+// the server checks the program files against OakBarn Brewery's list on every start (lib/official.js). The Menu Bar version
+// gets ✓ Official, or ⚠ Changed / ⚠ Not Official; a red bar tells every screen once per page; About names the files, Admins Repair.
+const OFFICIAL_MARK = { official: ' ✓ Official', changed: ' ⚠ Changed', unofficial: ' ⚠ Not Official', unknown: ' ⚠ Not checked' };
+const officialMark = () => S.importBuild ? '' : OFFICIAL_MARK[S.official?.state] ?? '';
+const officialBad = () => !S.importBuild && ['changed', 'unofficial', 'unknown'].includes(S.official?.state);
+function officialWarn() {
+  document.getElementById('officialBar')?.remove();
+  if (!officialBad() || officialWarn.closed === S.official.checked) return;
+  const o = S.official;
+  const bar = h('div', { id: 'officialBar', class: 'alertBar', role: 'alert' },
+    h('span', {}, '⚠ ' + (o.state === 'changed' ? `Not Official Skynet: ${[[o.changed, 'changed'], [o.missing, 'missing'], [o.added, 'added']].filter(([l]) => l?.length).map(([l, w]) => `${l.length} ${w}`).join(', ')} program file${o.changed.length + o.missing.length + o.added.length === 1 ? '' : 's'}. A changed program could do things OakBarn Brewery never made it do.` : o.text)),
+    h('button', { title: 'See which files, and Repair (☰ Menu > About)', onclick: () => { bar.remove(); openMenuTab('about'); } }, 'Details'),
+    h('button', { title: 'What Official Skynet means (Help)', onclick: () => openHelp(['official-skynet-updates']) }, 'Help'),
+    h('button', { title: 'Close until the next check', onclick: () => { officialWarn.closed = o.checked; bar.remove(); } }, '✕'));
+  document.body.append(bar);
+}
+// ☰ Menu > About: Official Skynet, the files that are not the official ones, Check again and (Admins) Repair
+function officialBox() {
+  const o = S.official || {}, box = h('div', {});
+  const cls = o.state === 'official' ? 'ver-current' : o.state === 'checking' ? '' : 'ver-old';
+  box.append(h('div', { class: 'verState ' + cls }, (o.state === 'official' ? '✓ ' : o.state === 'checking' ? '' : '⚠ ') + (o.text || 'Not checked yet')));
+  if (o.checked) box.append(h('div', { class: 'muted' }, `Checked ${new Date(o.checked).toLocaleString()}` + (o.confirmed ? ', with OakBarn Brewery\'s GitHub' : '')));
+  const list = (title, files) => files?.length ? h('details', {}, h('summary', {}, `${title} (${files.length})`), h('ul', { class: 'officialFiles' }, ...files.slice(0, 200).map(f => h('li', {}, h('code', {}, f))))) : '';
+  box.append(list('Changed', o.changed), list('Missing', o.missing), list('Added', o.added));
+  const again = h('button', { title: 'Check every program file again', onclick: async () => { again.disabled = true; try { S.official = await api('GET', '/ui/official'); showPanelVer(); officialWarn(); renderMenuPane(); } catch (e) { toast(e.message, true); again.disabled = false; } } }, '🔍 Check again');
+  const fix = o.state === 'changed' && can('admin') ? h('button', { class: 'primary', title: 'Put back the official program files of this version from OakBarn Brewery\'s GitHub. The files it replaces go to backups. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.', onclick: async () => {
+    if (!confirm('Repair puts back the official program files of this version, straight from OakBarn Brewery\'s GitHub (it needs the internet).\n\nThe changed and added files are moved to the backups folder, not deleted. Your Schemas, settings, users, brew data, pictures, sounds, Processes and Help pages are not touched.\n\nRepair now?')) return;
+    fix.disabled = true;
+    try {
+      const r = await api('POST', '/ui/official/repair');
+      S.official = r.official; showPanelVer(); officialWarn(); renderMenuPane();
+      alert(`Repair: ${r.fixed.length} file(s) put back` + (r.moved.length ? `, ${r.moved.length} added file(s) moved` : '') + (r.backup ? ` (the old ones are in ${r.backup})` : '') + '.' + (r.failed.length ? `\n\nThese could not be repaired:\n${r.failed.join('\n')}` : '') + '\n\nClose Skynet Brewer and start it again so it uses the repaired files.');
+    } catch (e) { toast(e.message, true); fix.disabled = false; }
+  } }, '🛠 Repair') : '';
+  box.append(h('div', { class: 'bar' }, again, fix, h('button', { title: 'What Official Skynet means', onclick: () => openHelp(['official-skynet-updates']) }, '❓ Help')));
+  return box;
+}
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {
   const v = S.panelVersion || {}, note = h('div', { class: 'muted' }, v.version ? 'Checking GitHub ...' : '');
@@ -13676,7 +13992,7 @@ function openTemplate(kind, name) {
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
     // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
-    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > To a Tab puts it on the Tab.
+    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > Move to Tab puts it on the Tab.
     const taken = () => [...L().graphics.map(g => g.name), ...L().elements.map(e => e.name)].filter(Boolean);
     const cloneIt = guard(async () => {
       const w = { name: copyName(t.name, [...tplNames(kind), ...taken()]) };
@@ -13696,7 +14012,7 @@ function openTemplate(kind, name) {
       const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken());
       w.name = def(w.tab);
       const ok = await miniDialog('Add to Tab', [['tab', 'Tab it goes on', 'sel', tabs.map(x => [x.name, x.name])], ['name', 'Name (change it to what you want)', 'text'],
-        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick To a Tab: this Tab is offered first.', 'note']], w, 'Add');
+        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick Move to Tab: this Tab is offered first.', 'note']], w, 'Add');
       if (!ok) return;
       if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
       const b = current(); finish();
@@ -13718,7 +14034,7 @@ function openTemplate(kind, name) {
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
       admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
-      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > To a Tab', onclick: toTab }, 'Add to Tab') : '',
+      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > Move to Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
       h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
     d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User Bundled'),
@@ -13761,7 +14077,7 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
   toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > As a Template to save the new Template.`
-    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > To a Tab to put it on the ${b.from} tab.`, false, 8000);
+    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > Move to Tab to put it on the ${b.from} tab.`, false, 8000);
 }
 function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;

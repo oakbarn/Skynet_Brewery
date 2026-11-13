@@ -4,13 +4,13 @@ Only **one sound plays at a time**. When two want to play, the one with the lowe
 
 | Kind | Priority | Use it for |
 |---|---|---|
-| **Hop Alarm** | 1 | Hop drops. Beats every other sound. |
-| **Brew Flow Alarm** | 2 | Brew steps: strike, end of mash, start of boil. Waits only for a Hop Alarm. |
+| **Brew Flow Alarm** | 1 | Brew steps: strike, end of mash, start of boil. Beats every other sound. |
+| **Hop Alarm** | 2 | Hop drops. Waits only for a Brew Flow Alarm. |
 | **Pre-Hop Alarm** | 3 | A warning a set time before its Hop Alarm (10 minutes unless you change it). |
 | **General Alarm** | 4 | Anything else. |
 | **Sound only** and the **Sound Player** | 5 | Music and beeps. Pauses while any alarm sounds, then goes on where it stopped. |
 
-Brew Flow is priority 2 because it beats a Pre-Hop Alarm. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
+Brew Flow is priority 1 and Hop is priority 2 (OakBarn Brewery, 2026-11-13). If a Hop drop must come first in your brew, give that Hop Alarm its own Priority, such as 0.9. An alarm that had to wait starts from the beginning when its turn comes; music carries on where it was.
 
 ### Priority: your own order
 
