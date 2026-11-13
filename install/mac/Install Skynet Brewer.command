@@ -82,27 +82,35 @@ if [ "$SRC" != "$DEST" ]; then
     echo "Updating the panel in $DEST"
     echo "Your own folders: config (layout, tabs, devices, settings), data (brew log, users, passwords, logins),"
     echo "media (pictures and sounds) and processes (Processes)."
-    # What this update does (Rule 9.8, Fritz 2026-11-06): 1 Start Fresh, 2 reset all users, 3 keep everything (the original
-    # No: the default, and what a non-interactive run does). 1 and 2 each have a warning with No as the default; No backs out.
+    # What this update does (Rule 9.8, OakBarn Brewery 2026-11-06 and 2026-11-13): 1 Start Fresh (nothing saved, Import emptied
+    # too), 2 Modified Fresh Start (Default settings, own Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups
+    # and Import kept), 3 reset all users, 4 keep everything (the original No: the default, and what a non-interactive run does).
+    # 1, 2 and 3 each have a warning with No as the default; No backs out. Both Fresh Starts run lib/freshstart.js, the same
+    # file every installer runs.
     FRESH=no
     echo ""
     echo "Skynet Brewer is already installed here. The program files are always updated. Pick what this update does:"
-    echo "  1. Start Fresh: delete everything"
-    echo "     Deletes every Schema, setting, user, password, the brew log and every Process, for good."
-    echo "     Kept: pictures and sounds (media) and the backups folder. A warning comes next."
-    echo "  2. Update the program and reset all users"
+    echo "  1. Start Fresh: delete everything, nothing saved"
+    echo "     Like a new install. Every Schema, setting, user, Process, the brew log, the backups, your own pictures"
+    echo "     and sounds, and the Import folder are deleted for good. A warning comes next."
+    echo "  2. Modified Fresh Start"
+    echo "     Deletes every Schema, Process, user and the brew log. Kept: Default settings, your own Mash, Boil and Water"
+    echo "     Profiles, Equipment Profiles, saved Recipes, your own pictures and sounds, the backups and the Import folder."
+    echo "  3. Update the program and reset all users"
     echo "     Deletes every user, password, sign-in and the recovery code. You make the admin account again."
-    echo "     Your Schemas, settings, brew log, Processes, pictures and sounds are kept."
-    echo "  3. Update the program and keep everything (recommended)"
+    echo "     Everything else is kept."
+    echo "  4. Update the program and keep everything (recommended)"
     echo "     Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are."
-    CHOICE=3
+    CHOICE=4
     if [ "${YES:-no}" != yes ] && [ -t 0 ]; then
       while :; do
-        read -r -p "Pick 1, 2 or 3 [3] " CHOICE; CHOICE="${CHOICE:-3}"
-        case "$CHOICE" in 1|2|3) break ;; *) echo "Type 1, 2 or 3." ;; esac
+        read -r -p "Pick 1, 2, 3 or 4 [4] " CHOICE; CHOICE="${CHOICE:-4}"
+        case "$CHOICE" in 1|2|3|4) break ;; *) echo "Type 1, 2, 3 or 4." ;; esac
       done
     fi
-    if [ "$CHOICE" = 2 ]; then
+    # the Import folder: next to the panel folder when it is called BrewPanel (lib/importer.js), else inside it
+    if [ "$(basename "$DEST")" = BrewPanel ]; then IMPORT_DIR="$(dirname "$DEST")/Import"; else IMPORT_DIR="$DEST/Import"; fi
+    if [ "$CHOICE" = 3 ]; then
       printf '\n\033[1;33m%s\033[0m\n' "Reset all users? These are deleted for good, with no backup:"
       echo "  - every user and password, every sign-in (on every computer and phone) and the recovery code"
       echo "Kept: Schemas and settings (config), brew log and saved values (data), Processes (processes), pictures and sounds (media)."
@@ -114,14 +122,27 @@ if [ "$SRC" != "$DEST" ]; then
       fi
     elif [ "$CHOICE" = 1 ]; then
       printf '\n\033[1;31m%s\033[0m\n' "WARNING: ALL EXISTING DATA WILL BE DELETED, for good, with no backup:"
-      echo "  - every Schema, Tab, Device, Widget and setting (config)"
+      echo "  - every Schema, Tab, Device, Widget, setting, Profile and Recipe (config)"
+      echo "  - every user, password, sign-in and the recovery code, the brew log and saved values (data)"
+      echo "  - every Process (processes) and the backups folders"
+      echo "  - your own pictures and sounds (the Skynet ones stay) and everything in $IMPORT_DIR"
+      echo "The panel then starts like a new install: you make the admin account again."
+      if ask "Really delete it all and Start Fresh? (No backs out; nothing is deleted)" N; then
+        node "$SRC/lib/freshstart.js" fresh "$DEST" "$IMPORT_DIR" || echo "Some files could not be deleted (a program still has them open). Run the installer again."
+        FRESH=yes
+      else
+        echo "Backed out. Nothing was deleted."
+      fi
+    elif [ "$CHOICE" = 2 ]; then
+      printf '\n\033[1;33m%s\033[0m\n' "Modified Fresh Start? These are deleted for good, with no backup:"
+      echo "  - every Schema, Tab, Device, Widget and your own Templates (config)"
       echo "  - every user, password, sign-in and the recovery code, the brew log and saved values (data)"
       echo "  - every Process (processes)"
-      echo "Kept: your pictures and sounds (media) and the backups folder. You make the admin account again."
-      if ask "Really delete it all and Start Fresh? (No backs out; nothing is deleted)" N; then
-        rm -rf "$DEST/config" "$DEST/data" "$DEST/processes" "$DEST/scripts"
+      echo "Kept: Default settings, your own Mash, Boil and Water Profiles, Equipment Profiles, saved Recipes, your own"
+      echo "pictures and sounds, the backups folders and the Import folder. You make the admin account again."
+      if ask "Really do a Modified Fresh Start? (No backs out; nothing is deleted)" N; then
+        node "$SRC/lib/freshstart.js" modified "$DEST" "$IMPORT_DIR" || echo "Some files could not be deleted (a program still has them open). Run the installer again."
         FRESH=yes
-        echo "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
       else
         echo "Backed out. Nothing was deleted."
       fi

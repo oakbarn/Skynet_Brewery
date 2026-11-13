@@ -48,16 +48,20 @@ them as they are?". Yes keeps them; No asks about each one and moves any you rep
 to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
 UPDATE CHOICES: before that, the installers ask what the update does:
-  1. Start Fresh: delete everything. A warning says ALL EXISTING DATA WILL BE DELETED
-     (config, data and processes, with no backup; media is kept).
-  2. Update the program and reset all users: deletes every user, password, sign-in
+  1. Start Fresh: delete everything, nothing saved. A warning says ALL EXISTING DATA
+     WILL BE DELETED (config, data, processes, backups, your own pictures and sounds,
+     and the Import folder, with no backup; the Skynet pictures and sounds stay).
+  2. Modified Fresh Start: deletes Schemas, Processes, users and the brew log after a
+     warning. Kept: Default settings, your own Profiles, Equipment Profiles, Recipes,
+     pictures and sounds, the backups and the Import folder.
+  3. Update the program and reset all users: deletes every user, password, sign-in
      and the recovery code after a warning. Schemas, brew log, Processes, pictures
      and sounds are kept. You make the admin account again.
-  3. Update the program and keep everything (the default, already picked).
-  No on either warning backs out with nothing deleted.
+  4. Update the program and keep everything (the default, already picked).
+  No on any warning backs out with nothing deleted.
 Zips from before October 5, 2026 still had those folders inside. If you unzip one
 of those over your panel, choose "Skip these files".
-An update keeps every user, password and sign-in. Only choice 1 or 2 (then
+An update keeps every user, password and sign-in. Only choice 1, 2 or 3 (then
 confirm the warning) removes them. In the panel, Help > "Updating to a new version" has
 the details.
 
