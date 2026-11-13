@@ -822,7 +822,8 @@ button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, 
 .panelVer.small { border-color: transparent; padding: 0 2px; font-size: 14px; }
 .verState.ver-current { color: var(--ok); }
 .verState.ver-old { color: var(--warn); font-weight: 700; }
-.verState.ver-changed { color: var(--warn); }
+/* Official Skynet (Rule 9.14): the files that are not the official ones, in ☰ Menu > About */
+.officialFiles { max-height: 12em; overflow: auto; margin: 4px 0; padding-left: 1.4em; font-size: 12px; }
 
 /* Vessel and Fitting Templates: small icons with names (there will be many), double-click for the pop-up */
 .tplGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }

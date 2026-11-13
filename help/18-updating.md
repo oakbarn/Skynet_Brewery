@@ -82,6 +82,8 @@ The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and 
 2. For extra safety, copy your panel folder: right-click `C:\Brewing\BrewPanel`, **Copy**, then **Paste**.
 3. Right-click `Skynet_BrewPanel_<date>.zip`, choose **Extract All…**, and extract into **`C:\Brewing`** (the folder *above* BrewPanel).
 4. When Windows asks about files with the same name, choose **Replace the files in the destination**. That only replaces program files, help pages and the samples in `defaults`. Your `config`, `data`, `media` and `scripts` aren't in the zip.
+   The program files are **Read-only** (see [Official Skynet updates](191-official-skynet-updates)). If Windows asks about a
+   Read-only file, choose **Yes**. If it still can't replace one, use the Setup instead: it takes Read-only off by itself.
 5. Start the panel again with **Skynet Brewer** on the Desktop.
 
 > **Zips from before October 5, 2026** still had `config`, `media` and `scripts` in them. If you unzip one of those over your panel, choose **Skip these files** (or rename your folders first), or it replaces yours.
