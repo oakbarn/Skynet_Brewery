@@ -2447,7 +2447,7 @@ renumbering"). Only one sound plays at a time. Every Alarm has a **Priority**, a
 places** (1, 1.1, 1.15, 2 ...): **the lower one plays first**, and an Alarm can go in between two others without renumbering. An
 Alarm with no Priority of its own has **its Kind's number** (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5; the Sound
 Player is 5). **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the
-same Priority; **two that go On at the same moment** (within a second) are **picked at random, then the other follows**. A lower
+same Priority; **two that go On at the same moment** follow the same rule: **the first one On plays first** (1a), then the next (1b), even within the same second (in a Process, the order of their lines). *Replaced* (OakBarn Brewery, 2026-11-13: "First one on is priority"): two within a second were picked at random. A lower
 Priority still cuts in at once (a Hop Alarm stops the music). It is the same whether an Alarm was set On by a Process, by its
 Alarm Chain (Rule 7.16) or by both. **Alarm Chain steps wait their turn:** a timer step that comes due while the Alarm still
 sounds the last step waits (the Alarm shows "+1 step waiting") and follows as soon as the last one is tapped off; a Process's
@@ -4000,6 +4000,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
 - 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.
 - 2026-11-13: Added Rule 7.21, the Alarm attributes (OakBarn Brewery, README markup "Skynet Brew Panel 1 a", pages 15 to 19): `.path`, `.label_fore` / `.label_back`, `.x` `.y` `.w` `.h`, the automatic `.visible`, the hidden `.toggle` (a click turns it Off or On), `.loop`, `.state`, `.skynet_Layer_2`; a Brew Flow Alarm holds its Process until it is tapped Off; the new Pre-Hop Alarm (a Combination Alarm and String Box on three Skynet watermarks) and the User Alarm get `.string` and `.playtime`. The spec's `.alarmchain` is `.priority` (Rule 7.18). Help 195 (new), 21, 107.
 - 2026-11-13: Sound question (OakBarn Brewery: "Ask when first opens and keep on the Tab and Hamburger Menu if it has not been done"): when the panel opens with sound off it asks 🔊 Turn sound on?; while off, a 🔇 Sound is off button on the Tab and 🔊 Turn Sound On at the top of the ☰ Menu. Help 21, README. Checked against both programs: the Importer's Build page plays no sounds. (thread "Polish the Skynet Brew Panel")
