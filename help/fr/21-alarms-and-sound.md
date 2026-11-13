@@ -19,7 +19,7 @@ la vôtre avec **jusqu'à deux décimales** : 1, 1.1, 1.15, 2 ... **La plus bass
 et 1.1 avant 1.15 avant 1.2, pour que vous puissiez mettre une Alarm entre deux autres sans les renuméroter.
 
 - **La même Priority :** celle qui est passée sur On la première joue la première, donc une Alarm qui joue n'est jamais coupée par une autre de même Priority.
-- **Deux au même moment** (à moins d'une seconde) avec la même Priority : l'une est **tirée au hasard**, puis l'autre suit.
+- **Deux au même moment** avec la même Priority : la **première mise sur On joue en premier** (1a), puis la suivante (1b), même dans la même seconde. Dans un Process, c'est l'ordre de leurs lignes.
 - **Un son qui ne se répète pas** (Repeat) laisse jouer le suivant dès qu'il a joué jusqu'au bout, même si son Alarm est toujours affichée On.
 - **Les étapes d'une Alarm Chain attendent leur tour** : voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 - Un Process peut la changer : `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` remet le numéro de ses Properties).

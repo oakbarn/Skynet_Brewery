@@ -19,7 +19,7 @@ your own with **up to two decimal places**: 1, 1.1, 1.15, 2 ... **The lower one 
 and 1.1 before 1.15 before 1.2, so you can put an Alarm in between two others without renumbering them.
 
 - **The same Priority:** the one that went On first plays first, so a playing Alarm is never cut off by one of the same Priority.
-- **Two at the same moment** (within a second) with the same Priority: one is **picked at random**, then the other follows.
+- **Two at the same moment** with the same Priority: the **first one On plays first** (1a), then the next (1b), even within the same second. In a Process, that is the order of their lines.
 - **A sound that doesn't Repeat** lets the next one play as soon as it has played to its end, even while its Alarm still shows On.
 - **Alarm Chain steps wait their turn**: see [The Alarm Chain](172-alarm-chain).
 - A Process can change it: `alm_Brew.priority = 1.15` (`alm_Brew.priority = ""` puts back its Properties' number).

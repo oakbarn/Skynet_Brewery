@@ -102,17 +102,15 @@ store.setProp('alm_Boil', 'finished', true, 'ui'); assert.deepEqual(playing(), [
 assert.throws(() => store.setProp('alm_Boil', 'finished', true), /set by the panel/);
 for (const n of ['alm_Boil', 'alm_Note', SOUND_PLAYER, 'alm_Quiet']) store.setProp(n, 'active', false);
 store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
-// two of the same Priority at the same moment: one is picked at random, then the other
+// two of the same Priority at the same moment: the first one On plays first (1a), then the other (1b) (Rule 7.18, 2026-11-13)
 {
-  const won = new Set();
-  for (let i = 0; i < 40; i++) {
+  for (const [a, b] of [['alm_Boil', 'alm_Note'], ['alm_Note', 'alm_Boil']]) for (let i = 0; i < 10; i++) {
     store.setProp('alm_Boil', 'priority', 2); store.setProp('alm_Note', 'priority', 2);
-    store.setProp('alm_Boil', 'active', true); store.setProp('alm_Note', 'active', true);
-    const first = playing()[0]; won.add(first);
-    store.setProp(first, 'active', false); assert.deepEqual(playing(), [first === 'alm_Boil' ? 'alm_Note' : 'alm_Boil'], 'the other follows');
+    store.setProp(a, 'active', true); store.setProp(b, 'active', true);
+    assert.deepEqual(playing(), [a], 'the first one On plays first');
+    store.setProp(a, 'active', false); assert.deepEqual(playing(), [b], 'the other follows');
     for (const n of ['alm_Boil', 'alm_Note']) store.setProp(n, 'active', false);
   }
-  assert.equal(won.size, 2, 'either one can be picked');
   store.setProp('alm_Note', 'priority', ''); store.setProp('alm_Boil', 'priority', '');
 }
 
