@@ -199,11 +199,29 @@ These words belong to the Process language, so none of them can be the name of a
 - **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
-- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`
 - **Places:** `tab`, `workspace`
 - **Skynet Constants:** every name that starts with `skc_` (see above)
 
 The names Windows keeps for itself (CON, PRN, AUX, NUL, COM1 to COM9, LPT1 to LPT9) can't be names either. See [Allowed names](63-allowed-names).
+
+## Go to a line: goLine
+
+Processes have automatic line numbers. `goLine` goes to a line number, the same way `goto` goes to a section (a `[label]`):
+
+```
+234  some Code
+235  [My New Section]
+
+goto "My New Section"
+goLine 235
+```
+
+These two lines do the same thing.
+
+**The number follows its line.** When lines are added or taken out and the Process is saved, Skynet updates every goLine number in the background, without any input from you, so it still goes to the same line.
+
+A goLine to a line the Process does not have is an error, and the Process does not start.
 
 ## Names have no spaces
 

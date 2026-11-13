@@ -18,6 +18,7 @@ import { isCodeValue } from './public/codevalue.js';
 import { controlMethods, offsetSigns } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize } from './lib/modernize.js';
+import { followGoLines } from './lib/goline.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -1055,11 +1056,13 @@ async function route(req, res) {
     if (!act && m === 'PUT') {
       if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
-      const mod = modernize(await readBody(req), n => store.get(n));
+      // goLine follows its line (Rule 16.10): lines added or taken out above the line it points at change its number
+      const body = await readBody(req), gl = followGoLines(engine.exists(name) ? engine.read(name) : null, body);
+      const mod = modernize(gl.text, n => store.get(n));
       engine.write(name, mod.text);
       engine.renumber();
       const text = engine.read(name);
-      return ok(res, { ...engine.check(text), text, modernized: mod.changed });
+      return ok(res, { ...engine.check(text), text, modernized: mod.changed, golines: gl.changed });
     }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }

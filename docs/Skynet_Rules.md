@@ -3276,6 +3276,16 @@ choice kept the old `.active`.
 
 ---
 
+16.10 **goLine: go to a line number, and the number follows its line** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew
+Panel 2a": "There is a Process command to go to a Line Number, similar to going to a Section"; "I would want the goline number updated
+to its new line number"):
+- `goLine 235` goes to line 235, the same as `goto "My New Section"` goes to the `[My New Section]` on that line. A goLine to a line the
+  Process does not have is an error, and the Process does not start.
+- **The number follows its line:** when a Process is saved in Skynet, every goLine that was already there gets the new number of the
+  line it went to. Lines added or taken out above that line change the number; lines below it do not. A goLine typed or changed in
+  this edit is kept as typed. If its line was taken out, it goes to the next line still there (lib/goline.js, server Save).
+- A file changed in another text editor is not checked. Help 22. **Both programs:** the BruControl Import reads Processes with the same reader.
+
 ## 17. Recipes
 
 17.1 **The Recipe tab follows Fritz's layout** (☰ Menu > Recipe, 2026-10-31): IMPORT and NEW at the top, Cancel and Save,
@@ -4009,6 +4019,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
 - 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.
