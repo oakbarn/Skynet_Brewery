@@ -43,7 +43,7 @@ La fenêtre suit les règles générales des fenêtres (Règles Skynet section 1
   grande (2 lignes) pour le taper, et le **⬢** rouge ouvre les **Label attributes** : Label, Visible, Font size, Font, Bold, Fore
   color, Back color et Alignment.
 - **Name** : le Name d'une nouvelle alarme suit son Label (`alm_` + le Label) jusqu'à ce que vous tapiez un nom à vous. Il ne peut pas être vide.
-- **Alarm** : la sorte d'alarme (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), sa minuterie ou Hop Alarm, et le son
+- **Alarm** : la sorte d'alarme (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5), sa minuterie ou Hop Alarm, et le son
   et Repeat. Ils marchent comme avant (voir Alarms and sound).
 - **Graphic** : les couches ci-dessus.
 - **Alarm Chain** : des étapes qui changent ses couleurs, ses images et son son, pour qu'une seule alarme fasse le travail de plusieurs alarmes empilées. Chaque
