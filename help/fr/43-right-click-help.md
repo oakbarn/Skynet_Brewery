@@ -8,7 +8,7 @@ Faites un clic droit (sur un Mac : Contrôle + clic, ou un clic à deux doigts s
 
 - **N'importe quel élément d'un Tab** quand vous n'êtes pas dans Edit layout : une pompe, une vanne, une sonde, une minuterie, une alarme, une cuve, un tuyau, une image ...
 - **Un élément 🔒 verrouillé** dans Edit layout.
-- **Un endroit vide d'un Tab** : ouvre [Tab background picture and color](26-tab-background).
+- **Un endroit vide d'un Tab** : ouvre [Image et couleur de fond d'un Tab](26-tab-background).
 - **La Menu Bar** : la liste Schema, chaque bouton (Tabs, Processes, Devices ...), les Tabs d'écran, le ☰ Menu, et la barre Edit layout.
 
 Dans **Edit layout**, un élément qui n'est **pas** verrouillé garde le bouton droit de la souris pour le faire glisser, comme avant. Le double-clic ouvre toujours les **Properties**.
@@ -33,7 +33,7 @@ Un cercle jaune avec un **?** noir ouvre l'aide à la partie qui parle de la cho
 - Fenêtres **Properties** : à côté du titre, pour chaque Device et Widget, les tuyaux, les IP, l'équipement et Tab settings. Si vous avez changé quelque chose dans la fenêtre, il demande d'abord, car ouvrir l'aide ferme la fenêtre sans enregistrer.
 - Il n'y a **pas** de ? sur un Tab lui-même, pour que vos écrans du jour de brassage restent propres. Le seul ? de la barre des Tabs est à côté de **☰ Menu**, pas sur le Tab.
 
-L'aide s'ouvre dans une fenêtre à elle : voir [Help in its own window](54-help-window).
+L'aide s'ouvre dans une fenêtre à elle : voir [L'aide dans sa propre fenêtre](54-help-window).
 
 ## Où va chaque élément {#where-each-item-goes}
 
@@ -41,16 +41,16 @@ L'aide s'ouvre dans une fenêtre à elle : voir [Help in its own window](54-help
 |---|---|
 | Sortie relais, PWM ou analogique, pompe, vanne simple, entrée, sonde, capteur, débitmètre, balance | [Devices : mettre un Device sur un Tab](03-devices) |
 | Sonde DS18B20 | [Devices : les sondes OneWire](03-devices) |
-| Vanne manuelle | [Manual valves](29-manual-valves) |
-| Vanne d'eau du robinet | [Tap water valves](31-tap-water-valves) |
-| Moteur pas à pas | [Stepper motors](16-stepper-motors) |
-| Alarm, Sound Player | [Alarms and sound](21-alarms-and-sound) |
+| Vanne manuelle | [Vannes manuelles](29-manual-valves) |
+| Vanne d'eau du robinet | [Vannes d'eau du robinet](31-tap-water-valves) |
+| Moteur pas à pas | [Moteurs pas à pas](16-stepper-motors) |
+| Alarm, Sound Player | [Alarmes et son](21-alarms-and-sound) |
 | Minuterie | [Tabs : les minuteries](02-tabs) |
 | gGlobal, gGlobal List | [Variables](04-variables) |
-| Image | [Pictures on items](25-picture-paths) |
-| Cuve | [The Vessel tab](34-vessel-tab) |
-| Refroidisseur, serpentin, filtre, raccord d'équipement, cuve regroupée | [Equipment](14-equipment) |
-| Point IP, raccord de tuyau, tuyau rigide, tuyau souple | [Pipes, hoses and reducers](24-pipes-and-hoses) |
+| Image | [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths) |
+| Cuve | [L'onglet Vessel](34-vessel-tab) |
+| Refroidisseur, serpentin, filtre, raccord d'équipement, cuve regroupée | [Équipement : cuves, refroidisseurs, serpentins et raccords](14-equipment) |
+| Point IP, raccord de tuyau, tuyau rigide, tuyau souple | [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses) |
 | Label, texte, interrupteur à l'écran, cuve manuelle | [Tabs : changer la disposition](02-tabs) |
 
 ## Changer où il va {#changing-where-it-goes}

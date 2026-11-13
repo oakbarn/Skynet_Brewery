@@ -4,11 +4,11 @@ Trois outils de la barre **Edit layout** rendent la construction plus facile : l
 
 ## Le bouton Add {#the-add-button}
 
-La case **➕ Add** a été remplacée le 2026-10-28 par les listes de types de Devices et de Widgets de la barre Edit layout : **Select Device Type**, **Add Device**, et les raccourcis **Pumps**, **Valves**, **Probe**, **Heating Element** et **PWM**. Voir [Edit layout bar](82-edit-layout-bar).
+La case **➕ Add** a été remplacée le 2026-10-28 par les listes de types de Devices et de Widgets de la barre Edit layout : **Select Device Type**, **Add Device**, et les raccourcis **Pumps**, **Valves**, **Probe**, **Heating Element** et **PWM**. Voir [Barre Edit layout](82-edit-layout-bar).
 
 ## La liste Add element (Relay module / SSR ...) {#the-add-element-list-relay-module-ssr}
 
-La longue liste **Add element** est maintenant **Select Device Type** + **Add Device** pour les Devices et **Select Widget Type** + **Add Widget** pour les Widgets. Voir [Edit layout bar](82-edit-layout-bar).
+La longue liste **Add element** est maintenant **Select Device Type** + **Add Device** pour les Devices et **Select Widget Type** + **Add Widget** pour les Widgets. Voir [Barre Edit layout](82-edit-layout-bar).
 
 ## Tourner et retourner un raccord ou une cuve {#turn-and-flip-a-fitting-or-vessel}
 

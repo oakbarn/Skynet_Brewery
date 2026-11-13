@@ -56,7 +56,7 @@ D'autres règles :
 - Un nom qui contient `~` ou `@` marche tel quel dans un Process, sans guillemets : `MB_25_DO@Valve_E_Fly~Sparge_SP = true`.
 - Chaque caractère spécial et ce qu'il fait dans un nom : [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 - Tant qu'un nouveau Device n'est pas encore enregistré, son nom continue de suivre la suggestion si vous changez le Label, le Device Type ou le Tab dans ses propriétés. Une fois que vous tapez votre propre nom, il reste.
-- **Un port d'Interface, un Device** (Règle 6.1). Deux Devices ne peuvent pas utiliser le même port sur la même Interface. Un chauffage est un seul Heating Element et vous choisissez sa méthode de chauffe ([One Heating Element, pick how it heats](150-heating-method)).
+- **Un port d'Interface, un Device** (Règle 6.1). Deux Devices ne peuvent pas utiliser le même port sur la même Interface. Un chauffage est un seul Heating Element et vous choisissez sa méthode de chauffe ([Une seule résistance, choisissez comment elle chauffe](150-heating-method)).
 - **Les Schemas plus anciens :** deux Devices qui partagent déjà un port continuent de marcher (le dernier allumé gagne, les autres sur ce port sont éteints) et peuvent toujours être enregistrés. Aucun nouveau ne peut être créé.
 
 ## Ce que vous apprend le Suggested Name {#what-the-suggested-name-tells-you}
@@ -80,7 +80,7 @@ choisissez-y Red Pump. C'est le Suggested Name qui permet cela.
 
 Dans Skynet, un nom se change très facilement : chaque nom a son propre bouton **💾 Update to Suggested** (Règle 3.16), et
 **🏷 Suggested Names** en convertit beaucoup d'un coup (plus bas). Plus de détails dans
-[The Name of a pump](115-pump-device-properties#the-name).
+[Properties du Device Pump (le détail)](115-pump-device-properties#the-name).
 
 ## Convertir tous les noms en Suggested Names {#convert-all-names-to-suggested-names}
 
@@ -123,7 +123,7 @@ Chaque Device Type ID veut dire une seule chose. Le **General Type** devant dit 
 
 **Éléments chauffants :** `PID`, `DutyCy` duty cycle (rapport cyclique), `Hys` hysteresis, `H_Element` Heating Element (sa méthode choisie par un clic ou un Process) : `DO@H_Element` sur une sortie marche / arrêt, `PWM@H_Element` sur une sortie PWM, `AO@H_Element` sur un gradateur de puissance 0-10 V (SCR / SSVR).
 
-**Marche / arrêt direct :** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (une pompe qu'une température commute, avec une Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` vanne manuelle basse température, `Valve_E` vanne électrique (vanne à boisseau motorisée, basse température), `M_H_Vlv` vanne manuelle haute température, `Valve_E_H` vanne électrique haute température, `Valve_Sgas` électrovanne de gaz, `Mtr` moteur, `LED`, `Light` lumière, `E_Alm` alarme électrique, `Fan` ventilateur, `Chill` compresseur de refroidisseur / glycol / réfrigérateur, `HtPad` ceinture ou tapis chauffant de fermenteur, `Ignit` allumeur de brûleur.
+**Marche / arrêt direct :** `DO`, `H_Element` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (une pompe qu'une température commute, avec une Method, [aide 164](164-cool-warm-pump)), `M_L_Vlv` vanne manuelle basse température, `Valve_E` vanne électrique (vanne à boisseau motorisée, basse température), `M_H_Vlv` vanne manuelle haute température, `Valve_E_H` vanne électrique haute température, `Valve_Sgas` électrovanne de gaz, `Mtr` moteur, `LED`, `Light` lumière, `E_Alm` alarme électrique, `Fan` ventilateur, `Chill` compresseur de refroidisseur / glycol / réfrigérateur, `HtPad` ceinture ou tapis chauffant de fermenteur, `Ignit` allumeur de brûleur.
 
 **Entrées directes :** `DI` simple, `Float` (vrai tant que le flotteur est fermé, faux sans tension), `DIN` bouton poussoir momentané, `PB` bouton poussoir (ON seulement tant qu'on le tient), `Toggle` (bascule), `Latch` (ON jusqu'à remise à zéro), `FlowSw` détecteur de débit, `Intlk` verrouillage de porte / couvercle / sécurité, `EStop` arrêt d'urgence, `Leak` détecteur de fuite, `Count` compteur d'impulsions.
 
@@ -147,7 +147,7 @@ Une thermistance NTC se lit sur une broche analogique avec une résistance en s�
 
 ## Les Devices que vous avez déjà {#devices-you-already-have}
 
-Les Devices faits avant ceci gardent leurs noms, donc vos Processes marchent toujours. Leurs anciens codes de type (`PmP`, `VlV` ...) sont changés tout seuls en nouveaux Device Type IDs. Leurs propriétés montrent le **Suggested Name** ; vous pouvez leur donner ce nom avec **✏ Change name** à côté du **Name** si vous voulez. Vos Processes passent tout seuls au nouveau nom quand vous enregistrez la disposition (voir [Renaming Devices and Widgets](53-renaming)).
+Les Devices faits avant ceci gardent leurs noms, donc vos Processes marchent toujours. Leurs anciens codes de type (`PmP`, `VlV` ...) sont changés tout seuls en nouveaux Device Type IDs. Leurs propriétés montrent le **Suggested Name** ; vous pouvez leur donner ce nom avec **✏ Change name** à côté du **Name** si vous voulez. Vos Processes passent tout seuls au nouveau nom quand vous enregistrez la disposition (voir [Renommer des Devices et des Widgets](53-renaming)).
 
 Les Interfaces et les Tabs d'avant reçoivent un ID tout seuls la première fois que le Schema s'ouvre. Changer un Interface ID ou un Tab ID plus tard ne renomme pas les Devices qui existent déjà.
 
@@ -155,7 +155,7 @@ Les Interfaces et les Tabs d'avant reçoivent un ID tout seuls la première fois
 
 Seul un **Admin** peut modifier un Schema : ajouter ou changer des Interfaces, des Devices, des Widgets et des Tabs, ou déplacer des images dans **Edit layout**. Les Operators font tourner les Processes et commutent les choses ; les Viewers regardent.
 
-Voir aussi [Devices and boards](03-devices) et [Login, users and passwords](10-login).
+Voir aussi [Devices et cartes](03-devices) et [Connexion, utilisateurs et mots de passe](10-login).
 
 ## Pas de broche PWM libre {#no-free-pwm-pin}
 

@@ -1,6 +1,6 @@
 # Clapets anti-retour et débitmètres {#check-valves-and-flow-meters}
 
-Skynet a trois raccords de plus pour la tuyauterie. Comme chaque [Skynet Fitting](60-skynet-fittings), chacun a ses IP intégrés dans ses ouvertures, et vous pouvez le retourner et le tourner.
+Skynet a trois raccords de plus pour la tuyauterie. Comme chaque [Raccords Skynet](60-skynet-fittings), chacun a ses IP intégrés dans ses ouvertures, et vous pouvez le retourner et le tourner.
 
 Mettez-en un sur un Tab depuis **☰ Menu > Fitting Templates** : double-cliquez dessus, puis appuyez sur **Add to Tab**.
 
@@ -25,7 +25,7 @@ Un débitmètre n'arrête **pas** le passage, dans aucun sens. Le liquide le tra
 
 Sur le Tab, ouvrez ses Properties en Edit layout et choisissez :
 
-- **Flow Meter: Select Flow meter Device or None** : le Device Flow meter qui compte ses impulsions (voir [Devices](03-devices)).
+- **Flow Meter: Select Flow meter Device or None** : le Device Flow meter qui compte ses impulsions (voir [Devices et cartes](03-devices)).
 - **Temperature: Select Temperature Probe or None** (Flow_Meter_Temp seulement) : la sonde de température qui est dedans.
 
 Les mesures s'affichent dans une petite case au-dessus de l'image, par exemple `1.20 gal/min · 3.50 gal · 152.0 °F`.

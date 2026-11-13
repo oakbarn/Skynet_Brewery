@@ -141,6 +141,10 @@ if [ "$SRC" != "$DEST" ]; then
       cp -p "$DEST"/help/*.md "$DEST/help/backups/before_update_$STAMP/"
       echo "Help pages are replaced by the new manual. The old ones are in help/backups/before_update_$STAMP"
     fi
+    if ls "$DEST"/help/fr/*.md >/dev/null 2>&1; then
+      mkdir -p "$DEST/help/backups/before_update_$STAMP/fr"
+      cp -p "$DEST"/help/fr/* "$DEST/help/backups/before_update_$STAMP/fr/"
+    fi
   else
     echo "Full install to $DEST"
   fi

@@ -23,7 +23,7 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 - **Mac, Linux, Raspberry Pi avec l'installateur :** mettez `Skynet_Sample_Schemas_<date>.zip` à côté de l'installateur avant de le lancer.
 - **À la main :** décompressez `Skynet_Sample_Schemas_<date>.zip` dans le dossier qui contient `BrewPanel` (sur Mac, Linux et Pi utilisez `unzip -n`, qui ne remplace jamais un fichier). Il ajoute `BrewPanel/sample_schemas`.
 
-Appuyez ensuite sur **F5** dans le panneau. Les nouveaux exemples sont dans la liste déroulante Schema sous **Add a Sample Schema**, après l'exemple 3 Vessel (voir [Add a Sample Schema](83-sample-schemas)). En choisir un ajoute une **copie** comme nouveau Schema à vous, sur le simulateur, donc rien de réel n'est commandé.
+Appuyez ensuite sur **F5** dans le panneau. Les nouveaux exemples sont dans la liste déroulante Schema sous **Add a Sample Schema**, après l'exemple 3 Vessel (voir [Ajouter un Schema exemple](83-sample-schemas)). En choisir un ajoute une **copie** comme nouveau Schema à vous, sur le simulateur, donc rien de réel n'est commandé.
 
 ## Un Schema d'un autre brasseur {#a-schema-from-another-brewer}
 
@@ -37,7 +37,7 @@ Le même dossier, `BrewPanel/sample_schemas`, est l'endroit où va une brasserie
 
 Mettez le dossier dans `sample_schemas` et appuyez sur **F5**. Il arrive exactement comme un exemple Skynet : comme nouveau Schema, sur le simulateur. Le `ReadMe.txt` de ce dossier dit la même chose.
 
-La plupart du temps, un autre brasseur vous enverra plutôt un seul fichier `.json` (fait avec **Export to share ...**). Mettez-le dans le dossier Import et utilisez **Import a brewer's Schema ...** dans la liste des Schemas (voir [Schema.json](44-schema-json)).
+La plupart du temps, un autre brasseur vous enverra plutôt un seul fichier `.json` (fait avec **Export to share ...**). Mettez-le dans le dossier Import et utilisez **Import a brewer's Schema ...** dans la liste des Schemas (voir [Schema.json (enregistrer un Schema dans un fichier .json)](44-schema-json)).
 
 > **Skynet ne vérifie pas ce qu'il y a dans un Schema partagé.** Les images, les sons, les noms et tout le reste, et tout droit d'auteur dessus, sont l'affaire des brasseurs entre eux.
 

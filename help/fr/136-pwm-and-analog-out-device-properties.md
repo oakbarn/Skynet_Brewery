@@ -1,7 +1,7 @@
 # Properties des Devices PWM et sortie analogique {#pwm-and-analog-out-device-properties}
 
 Ajouter une **sortie PWM** ou une **sortie analogique** (0-10 V ou 4-20 mA) se fait comme pour une pompe (voir
-[Pump Device Properties](115-pump-device-properties)), avec quelques différences : elle n'a **pas de Cover**, **pas d'Orientation** (elle n'a pas
+[Properties du Device Pump (le détail)](115-pump-device-properties)), avec quelques différences : elle n'a **pas de Cover**, **pas d'Orientation** (elle n'a pas
 de bouts de tuyau) et **pas de Toggle** (un appui ouvre la case où vous réglez son %). (Règle Skynet 18.25)
 
 ## Ajouter une sortie PWM ou analogique {#adding-a-pwm-or-analog-output}

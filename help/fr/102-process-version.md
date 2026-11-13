@@ -8,4 +8,4 @@ Chaque Process peut avoir une **Version**, pour que vous sachiez quelle copie vo
 - La Version est gardée dans le Schema avec le Process. Renommer un Process garde sa Version.
 - Update Version n'enregistre pas le texte du Process : appuyez sur **Save** pour cela. S'il y a des changements non enregistrés, on vous demande d'abord.
 
-C'est le même format que la version de Skynet Brewer (voir [Panel version](47-panel-version)).
+C'est le même format que la version de Skynet Brewer (voir [La version du panel](47-panel-version)).

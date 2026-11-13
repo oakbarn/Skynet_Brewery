@@ -23,7 +23,7 @@ Une cuve verrouillée 🔒 ne peut pas être déplacée à la souris, mais vous 
 2. Tapez le nouveau **X** (gauche et droite) et le nouveau **Y** (haut et bas). Un de plus, c'est 1 pixel vers la droite (ou vers le bas) ; un de moins, c'est 1 pixel vers la gauche (ou vers le haut).
 3. Appuyez sur **Save**, puis sur **Save layout**.
 
-Les IP de la cuve, ses raccords joints et ses End Caps bougent avec elle, comme pour un glisser, et la cuve reste verrouillée. Les Properties d'une cuve groupée ont aussi X et Y : tout le groupe bouge. Un tuyau droit dont le bout reste en dehors d'un IP déplacé le lâche, comme après un glisser (voir [Pipe angles](105-pipe-angles-and-upright-kettles)).
+Les IP de la cuve, ses raccords joints et ses End Caps bougent avec elle, comme pour un glisser, et la cuve reste verrouillée. Les Properties d'une cuve groupée ont aussi X et Y : tout le groupe bouge. Un tuyau droit dont le bout reste en dehors d'un IP déplacé le lâche, comme après un glisser (voir [Angles des tuyaux et bouilloires debout](105-pipe-angles-and-upright-kettles)).
 
 ## Lock All et Unlock All {#lock-all-and-unlock-all}
 
@@ -52,8 +52,8 @@ Déverrouillez aussi ces éléments (cliquez sur chacun et appuyez sur **🔓 Un
 
 ## Equipment Profile verrouillé {#locked-equipment-profile}
 
-Quand l'**Equipment Profile** du Tab est verrouillé, son équipement, ses IP et ses tuyaux ne peuvent pas changer du tout, donc leurs cadenas non plus. **🔒 Lock All** et **🔓 Unlock All** les sautent alors et disent combien ils en ont sautés. Voir [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+Quand l'**Equipment Profile** du Tab est verrouillé, son équipement, ses IP et ses tuyaux ne peuvent pas changer du tout, donc leurs cadenas non plus. **🔒 Lock All** et **🔓 Unlock All** les sautent alors et disent combien ils en ont sautés. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
 ## Téléphones et tablettes {#phones-and-tablets}
 
-Sur un téléphone ou une tablette, rien ne bouge en Edit layout de toute façon, sauf si l'interrupteur du Tab **Default** le permet. Voir [Phones and tablets](45-phones-and-tablets).
+Sur un téléphone ou une tablette, rien ne bouge en Edit layout de toute façon, sauf si l'interrupteur du Tab **Default** le permet. Voir [Téléphones et tablettes](45-phones-and-tablets).

@@ -31,4 +31,4 @@ Les Schemas exemples à **1, 2 et 3 cuves** peuvent être clonés de la même fa
    - **🧪 Sample: Three vessels, one pump**
 3. Donnez un nom au clone (vide : « <nom de l'exemple> copy ») et appuyez sur **OK**.
 
-Le clone est un **User Schema** à vous : renommez-le, changez-le, clonez-le ou supprimez-le comme n'importe quel autre. Un clone d'exemple est toujours chargé tout de suite, car ses Processes sont écrits à ce moment-là. Chaque Interface qu'il contient est un simulateur et le panel passe en Simulator mode, donc rien de réel n'est commandé (voir [Add a Sample Schema](83-sample-schemas)). L'exemple OakBarn Brewery n'est pas proposé pour l'instant.
+Le clone est un **User Schema** à vous : renommez-le, changez-le, clonez-le ou supprimez-le comme n'importe quel autre. Un clone d'exemple est toujours chargé tout de suite, car ses Processes sont écrits à ce moment-là. Chaque Interface qu'il contient est un simulateur et le panel passe en Simulator mode, donc rien de réel n'est commandé (voir [Ajouter un Schema exemple](83-sample-schemas)). L'exemple OakBarn Brewery n'est pas proposé pour l'instant.

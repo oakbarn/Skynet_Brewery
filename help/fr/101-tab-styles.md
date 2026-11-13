@@ -25,4 +25,4 @@ Un Tab Style **n'écrase jamais** une couleur, une police ou une taille qu'un De
 
 Le Tab **Recipe** de chaque Schema exemple utilise **Tennyson**. Un Schema que vous aviez déjà reçoit Tennyson sur son Tab **Recipe** une fois, la première fois qu'il se charge avec cette version (seulement si ce Tab n'avait pas encore de Tab Style). Ensuite, changez-le dans Tab settings quand vous voulez.
 
-Le Widget Text et les labels des cuves et de l'équipement suivent le Tab Style de la même façon. Voir aussi [Text Widget](91-text-widget) et [Timer Widget](92-timer-widget).
+Le Widget Text et les labels des cuves et de l'équipement suivent le Tab Style de la même façon. Voir aussi [Widget Text](91-text-widget) et [Widget Timer](92-timer-widget).

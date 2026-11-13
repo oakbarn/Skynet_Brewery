@@ -12,7 +12,7 @@ Ajoutez-en un dans **Edit layout > Add Widget > Value, Time and DateTime Widgets
 PLC), a un **Label** jamais vide, et ouvre ses Properties d'un double-clic.
 
 Un **Code Value Widget** est un Value Widget qui exécute aussi quelques lignes de code Process chaque fois que vous le réglez, par exemple pour envoyer
-la valeur au Setpoint d'une résistance : voir [Code Value Widget](161-code-value-widget).
+la valeur au Setpoint d'une résistance : voir [Widget Code Value](161-code-value-widget).
 
 ## Le régler {#setting-it}
 
@@ -31,7 +31,7 @@ Posez la souris sur le nom d'un champ pour voir à quoi il sert (hover help).
 - **1. Label** avec ⬆ (une case plus grande) et ⬢ (la police, la taille, les couleurs et l'alignement du Label), puis **Label Visible**.
 - **2. Tab** et **3. Name** (✏ Change name).
 - **Start value**. Un Value Widget a aussi **Units**, et son ⬢ contient Decimals, le Step pour − et +, le Lowest et le Highest.
-- **Read only**, avec **Database and .API ⬢** sur sa ligne (voir [Database and .API](98-database-and-api)) : **When Clicked**
+- **Read only**, avec **Database and .API ⬢** sur sa ligne (voir [Base de données et .API sur chaque Device et Widget](98-database-and-api)) : **When Clicked**
   l'envoie chaque fois que quelqu'un le règle sur son Tab (même à la même valeur) ; dans un **Database Group** il n'est envoyé que lorsqu'un de ses
   Groups est démarré (`start_db_group Group_Name` ... `stop_db_group Group_Name`).
 - **Fore color** de la valeur, et son ⬢ contient la Back color et l'Alignment.
@@ -42,7 +42,7 @@ Posez la souris sur le nom d'un champ pour voir à quoi il sert (hover help).
 Quand vous mettez une lecture sur un Tab, choisissez ce qui convient à votre brasserie. Skynet ne choisit pas pour vous :
 
 - **Un Device** quand une carte le lit, par exemple un **pH-mètre intelligent** câblé à une Interface : sa lecture arrive toute seule.
-- **Un Clone** de ce Device (voir [Cloned Devices](71-cloned-devices)) quand vous voulez la même lecture sur un autre Tab, par
+- **Un Clone** de ce Device (voir [Devices clonés](71-cloned-devices)) quand vous voulez la même lecture sur un autre Tab, par
   exemple le Tab Reporting. Un Clone affiche toujours la valeur de son Device, sans code Process.
 - **Un Value, Time ou DateTime Widget** quand rien ne le lit pour vous, par exemple un **pH-mètre qui n'est pas intelligent** : vous le lisez
   vous-même et tapez la valeur d'un appui. Un Process peut aussi le régler.

@@ -33,4 +33,4 @@ tm_Mash.displayname = "Mash rest"
 
 Le bouton **Modernize** change `"tm_Mash" displayname = "..."` en `tm_Mash.label = "..."`.
 
-Voir aussi [Text boxes](49-text-boxes) et [Interface, Tab and Device names](46-interface-tab-device-names).
+Voir aussi [Les zones de texte](49-text-boxes) et [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).

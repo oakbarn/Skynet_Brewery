@@ -34,7 +34,7 @@ Pump_Red.image = "Images/RedPump.png"
 if Hop_Text.visible == true
 ```
 
-`.image` change l'image de l'élément : le chemin va dans .backpath et background devient 1. `.background = 1`, `2` ou `3` montre .backpath, .backpath_2 ou .backpath_3 ; 0, vide ou tout nombre au-dessus de 3 ne montre aucun fond. Voir [Pictures on items](25-picture-paths).
+`.image` change l'image de l'élément : le chemin va dans .backpath et background devient 1. `.background = 1`, `2` ou `3` montre .backpath, .backpath_2 ou .backpath_3 ; 0, vide ou tout nombre au-dessus de 3 ne montre aucun fond. Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).
 
 Tout attribut qui n'a que deux choix est `true` ou `false` :
 
@@ -165,13 +165,13 @@ BK_Temp.valueColor = ""
 - `valueType` est `LED`, `Text`, `Gauge` (chiffres LCD) ou `Dial` (le Skynet Dial : un arc avec une aiguille et la lecture dessous, Help 152). Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être que `LED` ou `Text`.
 - `""` remet l'apparence réglée dans ses propriétés.
 
-Chaque zone de texte a aussi `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.x_hPosition` et `.y_vPosition`, par exemple `Pump_1.foreColor = "Red"` ou `Text_1.x_hPosition = 400`. Un Text ajouté avec **+ Text** a aussi un nom (`Text_1`). Voir [Text boxes](49-text-boxes).
+Chaque zone de texte a aussi `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.x_hPosition` et `.y_vPosition`, par exemple `Pump_1.foreColor = "Red"` ou `Text_1.x_hPosition = 400`. Un Text ajouté avec **+ Text** a aussi un nom (`Text_1`). Voir [Les zones de texte](49-text-boxes).
 
-Le changement dure jusqu'au redémarrage du panel. Pour garder une apparence, réglez-la dans les propriétés de l'élément, ou faites commencer les nouveaux éléments avec un [Tab Background Profile](36-tab-and-valve-profiles).
+Le changement dure jusqu'au redémarrage du panel. Pour garder une apparence, réglez-la dans les propriétés de l'élément, ou faites commencer les nouveaux éléments avec un [Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles).
 
 ## Skynet Constants (constantes Skynet) {#skynet-constants}
 
-Des nombres fixes pour les conversions courantes sont intégrés, pour qu'un Process puisse écrire `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. Chacune commence par `skc_` et aucune ne peut être changée. La liste complète est dans [Skynet Constants](94-skynet-constants).
+Des nombres fixes pour les conversions courantes sont intégrés, pour qu'un Process puisse écrire `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. Chacune commence par `skc_` et aucune ne peut être changée. La liste complète est dans [Constantes Skynet](94-skynet-constants).
 
 ## NULL : la valeur vide {#null-the-empty-value}
 
@@ -205,7 +205,7 @@ Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être 
 - **Lieux :** `tab`, `workspace`
 - **Skynet Constants :** chaque nom qui commence par `skc_` (voir plus haut)
 
-Les noms que Windows garde pour lui (CON, PRN, AUX, NUL, COM1 à COM9, LPT1 à LPT9) ne peuvent pas non plus être des noms. Voir [Allowed names](63-allowed-names).
+Les noms que Windows garde pour lui (CON, PRN, AUX, NUL, COM1 à COM9, LPT1 à LPT9) ne peuvent pas non plus être des noms. Voir [Caractères permis dans les noms](63-allowed-names).
 
 ## Les noms n'ont pas d'espaces {#names-have-no-spaces}
 
@@ -213,7 +213,7 @@ Les noms des Devices, des Widgets et des Processes ne peuvent plus contenir d'es
 
 ## Saisie automatique (autofill) {#autofill}
 
-Il y a plus à ce sujet, y compris **Ctrl+Espace** et l'écriture d'une ligne en choisissant, dans [Predictive text](79-predictive-text).
+Il y a plus à ce sujet, y compris **Ctrl+Espace** et l'écriture d'une ligne en choisissant, dans [Texte prédictif dans l'éditeur de Process](79-predictive-text).
 
 Pendant que vous tapez dans un Process, une liste de noms s'ouvre. Les noms que vous avez déjà utilisés plus haut dans ce Process viennent en premier, puis vos Devices, Widgets et Processes. Utilisez **Haut** et **Bas** pour en choisir un, **Entrée** ou **Tab** pour le prendre, et **Échap** pour fermer la liste.
 
@@ -262,4 +262,4 @@ step "Mash in"
 unlock_Equipment
 ```
 
-La sortie du Process dit quels profils ont été verrouillés. Voir [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). Un `lock_BrewDayRecipe` assorti vient avec la Brew Day Recipe.
+La sortie du Process dit quels profils ont été verrouillés. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles). Un `lock_BrewDayRecipe` assorti vient avec la Brew Day Recipe.

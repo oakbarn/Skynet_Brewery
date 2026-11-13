@@ -30,4 +30,4 @@ Quand la ligne s'exécute, chaque écran affiche **✋ Manual valve: OPEN Kettle
 
 Un Brew Day Equipment Profile, où vous passez une vanne en Manual pour une seule journée de brassage sans changer le Equipment Profile, arrive avec le Brew Day.
 
-Un **Manual Valve Widget** (une vanne dessinée sur un Tab, sans broche de carte) marche autrement : un clic dessus sur son Tab est la seule chose qui l'ouvre ou la ferme, et un Process attend ce clic. Voir [Pipe fittings and Manual Valves](87-pipe-fittings-and-manual-valves).
+Un **Manual Valve Widget** (une vanne dessinée sur un Tab, sans broche de carte) marche autrement : un clic dessus sur son Tab est la seule chose qui l'ouvre ou la ferme, et un Process attend ce clic. Voir [Raccords de tuyauterie et vannes manuelles](87-pipe-fittings-and-manual-valves).

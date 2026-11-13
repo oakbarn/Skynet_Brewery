@@ -28,7 +28,7 @@ Chaque méthode a besoin de **Node.js** (gratuit, sur <https://nodejs.org>). Les
 
 Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/BrewPanel`** dans votre dossier personnel sur un Mac, sous Linux ou sur un Pi. Chaque programme d'installation met un raccourci **Skynet Brewer** sur le Bureau.
 
-> **Une mise à jour ?** Arrêtez d'abord le panel, puis relancez le même programme d'installation, ou décompressez le zip par-dessus le panel. Ni l'un ni l'autre ne remplace votre disposition et vos réglages (`config`), vos données de brassage, utilisateurs et mots de passe (`data`), vos images et sons (`media`) ou vos Processes (`scripts`). Voir [Updating to a new version](18-updating).
+> **Une mise à jour ?** Arrêtez d'abord le panel, puis relancez le même programme d'installation, ou décompressez le zip par-dessus le panel. Ni l'un ni l'autre ne remplace votre disposition et vos réglages (`config`), vos données de brassage, utilisateurs et mots de passe (`data`), vos images et sons (`media`) ou vos Processes (`scripts`). Voir [Passer à une nouvelle version](18-updating).
 
 ## Windows : le programme d'installation {#windows-the-installer}
 
@@ -36,7 +36,7 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
 2. Double-cliquez sur `Skynet_Brewer_Setup_<date>.exe`. Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
 3. Gardez le dossier `C:\Brewing\BrewPanel` et cliquez sur **Install**.
    - Si Node.js manque, il propose de l'installer. Windows demande la permission.
-   - Si le panel est déjà là, il demande ce que fait la mise à jour : **1. Start Fresh: delete everything**, **2. Update the program and reset all users**, ou **3. Update the program and keep everything** (le choix normal, déjà choisi). Les choix 1 et 2 montrent d'abord un avertissement, pour que vous puissiez encore reculer (voir [Updating](18-updating)).
+   - Si le panel est déjà là, il demande ce que fait la mise à jour : **1. Start Fresh: delete everything**, **2. Update the program and reset all users**, ou **3. Update the program and keep everything** (le choix normal, déjà choisi). Les choix 1 et 2 montrent d'abord un avertissement, pour que vous puissiez encore reculer (voir [Passer à une nouvelle version](18-updating)).
    - Si vous aviez avant le panel directement dans `C:\Brewing`, il propose de recopier vos données, votre disposition, vos Processes et vos images. L'ancien dossier n'est pas changé.
 4. Lancez-le avec **Skynet Brewer** sur le Bureau. La fenêtre noire, c'est le panel qui tourne ; votre navigateur ouvre le panel quelques secondes plus tard.
 
@@ -48,7 +48,7 @@ Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinsta
 2. Clic droit sur le zip, choisissez **Extraire tout…**, et extrayez dans `C:\Brewing`. Il crée tout seul le sous-dossier `C:\Brewing\BrewPanel`. (Si Windows propose `C:\Brewing\Skynet_BrewPanel_<date>`, changez-le en `C:\Brewing`.)
 3. Copiez `Skynet_Brewer.bat` de la version (il est aussi dans `C:\Brewing\BrewPanel\install\windows`) dans `C:\Brewing`.
 4. Clic droit sur le `.bat`, choisissez **Afficher d'autres options > Envoyer vers > Bureau (créer un raccourci)**, et renommez le raccourci en **Skynet Brewer**.
-5. Double-cliquez dessus. Gardez la fenêtre noire ouverte pendant que vous brassez. Une fois le panel démarré et ouvert par le navigateur, la fenêtre se réduit toute seule dans la barre des tâches (cliquez dessus là pour la revoir). Le navigateur ouvre le panel quelques secondes plus tard. Pour arrêter le panel et fermer la fenêtre, utilisez **☰ Menu > Close Skynet Brewer** (voir [Closing Skynet Brewer](95-closing-skynet-brewer)). Sur un PC qui sert à brasser, lisez aussi [Sleep, Windows Update and restarts](190-sleep-updates-and-restarts).
+5. Double-cliquez dessus. Gardez la fenêtre noire ouverte pendant que vous brassez. Une fois le panel démarré et ouvert par le navigateur, la fenêtre se réduit toute seule dans la barre des tâches (cliquez dessus là pour la revoir). Le navigateur ouvre le panel quelques secondes plus tard. Pour arrêter le panel et fermer la fenêtre, utilisez **☰ Menu > Close Skynet Brewer** (voir [Fermer Skynet Brewer](95-closing-skynet-brewer)). Sur un PC qui sert à brasser, lisez aussi [Veille, Windows Update et redémarrages](190-sleep-updates-and-restarts).
 
 **Vous n'avez pas besoin d'installer Node.js d'abord.** Chaque fois que `Skynet_Brewer.bat` démarre, il vérifie Node.js. S'il manque ou s'il est plus ancien que 22.13, il télécharge la version LTS sur nodejs.org et l'installe, puis continue. Il faut Internet et cela prend quelques minutes ; quand Windows demande *« Voulez-vous autoriser cette application à apporter des modifications à votre appareil ? »*, cliquez sur **Oui**. Il récupère aussi la prise en charge des cartes USB la première fois. Si cela échoue un jour, la fenêtre noire le dit et ouvre la page de téléchargement de Node.js pour que vous l'installiez à la main.
 
@@ -84,11 +84,11 @@ Utilisez Raspberry Pi OS (64 bits recommandé) sur un Pi 4 ou plus récent.
 | Voir ses messages | `journalctl -u skynet-brewer -f` |
 
 **Passer d'un ordinateur Brain à un Pi ?** Installez le Pi comme ceci, puis utilisez **☰ Menu > Move Brain** pour tout ramener
-depuis l'ordinateur : Schemas, réglages, Processes, images, valeurs enregistrées, connexions et journal de brassage. Voir [Move Brain](119-move-brain).
+depuis l'ordinateur : Schemas, réglages, Processes, images, valeurs enregistrées, connexions et journal de brassage. Voir [Déplacer le Brain](119-move-brain).
 
 ## La première fois {#the-first-time}
 
-Le panel vous demande de créer le **compte admin**, puis affiche un **code de secours**. Gardez-le : c'est ainsi que vous revenez si vous oubliez le mot de passe. Voir [Login, users and passwords](10-login). Pour atteindre le panel hors de chez vous, utilisez Tailscale : voir [Installing Tailscale on Windows](00-tailscale-windows). N'ouvrez jamais de port sur votre box pour lui.
+Le panel vous demande de créer le **compte admin**, puis affiche un **code de secours**. Gardez-le : c'est ainsi que vous revenez si vous oubliez le mot de passe. Voir [Connexion, utilisateurs et mots de passe](10-login). Pour atteindre le panel hors de chez vous, utilisez Tailscale : voir [Installer Tailscale sous Windows](00-tailscale-windows). N'ouvrez jamais de port sur votre box pour lui.
 
 ## Faire une version (pour qui construit le panel) {#making-a-release-for-whoever-builds-the-panel}
 

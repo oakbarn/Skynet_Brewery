@@ -29,7 +29,7 @@ Un **changement** de température (une hausse de 2 degrés, une baisse de 10 deg
 
 ## Texte prédictif {#predictive-text}
 
-Là où une valeur peut aller, commencez à taper et les constantes Skynet qui correspondent sont listées avec leur valeur et ce qu'elles font. Taper `skc_` les liste toutes, et taper une unité trouve chaque constante qui l'utilise : `Kg` liste `skc_Kg_To_Lb`, `skc_Lb_To_Kg`, `skc_G_To_Kg` et le reste. Voir [Predictive text](79-predictive-text).
+Là où une valeur peut aller, commencez à taper et les constantes Skynet qui correspondent sont listées avec leur valeur et ce qu'elles font. Taper `skc_` les liste toutes, et taper une unité trouve chaque constante qui l'utilise : `Kg` liste `skc_Kg_To_Lb`, `skc_Lb_To_Kg`, `skc_G_To_Kg` et le reste. Voir [Texte prédictif dans l'éditeur de Process](79-predictive-text).
 
 ## Ce que vous ne pouvez pas faire {#what-you-can-t-do}
 

@@ -18,11 +18,11 @@ Un Process a une clé cachée, donc **Rename** ne change que son nom : chaque au
 
 ## Texte prédictif : Ctrl+Espace {#predictive-text-ctrl-space}
 
-Pendant que vous tapez, une liste propose les commandes et les noms qui conviennent ; appuyez sur **Ctrl+Espace** ou **💡 Suggest** pour voir ce qui peut aller au curseur. Voir [Predictive text](79-predictive-text).
+Pendant que vous tapez, une liste propose les commandes et les noms qui conviennent ; appuyez sur **Ctrl+Espace** ou **💡 Suggest** pour voir ce qui peut aller au curseur. Voir [Texte prédictif dans l'éditeur de Process](79-predictive-text).
 
 ## Chemins d'image : Alt+P {#picture-paths-alt-p}
 
-Appuyez sur **Alt+P** (Option+P sur un Mac) ou sur le bouton **Picture** pour choisir une image ou un son dans une liste, un groupe ou tous, et faire taper son chemin là où est le curseur. Voir [Picture groups](57-picture-groups).
+Appuyez sur **Alt+P** (Option+P sur un Mac) ou sur le bouton **Picture** pour choisir une image ou un son dans une liste, un groupe ou tous, et faire taper son chemin là où est le curseur. Voir [Groupes d'images](57-picture-groups).
 
 ## Couleurs {#colors}
 

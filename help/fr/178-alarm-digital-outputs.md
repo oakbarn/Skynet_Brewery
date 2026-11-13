@@ -21,4 +21,4 @@ Les deux commencent sur **None**. Un emplacement laissé sur None ne fait rien.
 Un Process qui fait sonner l'alarme (`alm_Boil = On`) les commande aussi. Si un Device choisi n'a pas d'état ON / OFF, rien n'est commandé
 et la Console le dit.
 
-Voir aussi [The Alarm Widget](107-alarm-widget) et [Alarm Email](175-alarm-email).
+Voir aussi [Widget Alarm](107-alarm-widget) et [Alarm Email : une alarme peut vous envoyer un e-mail](175-alarm-email).

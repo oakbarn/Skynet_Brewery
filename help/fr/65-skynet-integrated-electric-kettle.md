@@ -1,6 +1,6 @@
 # Bouilloire électrique intégrée Skynet {#skynet-integrated-electric-kettle}
 
-La **Basic electric kettle** (bouilloire électrique de base) est un [Skynet_Integrated_Device](64-skynet-integrated-devices) dessiné à partir d'une image Skynet. C'est la base de chaque bouilloire électrique intégrée Skynet : les suivantes y ajoutent des raccords et une vanne comme parties intégrées.
+La **Basic electric kettle** (bouilloire électrique de base) est un [Devices intégrés Skynet](64-skynet-integrated-devices) dessiné à partir d'une image Skynet. C'est la base de chaque bouilloire électrique intégrée Skynet : les suivantes y ajoutent des raccords et une vanne comme parties intégrées.
 
 Elle a trois trous :
 

@@ -10,7 +10,7 @@ Un raccord de tuyauterie n'a pas d'autres réglages que :
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| **Autosize to pipe** | Activé (par défaut) : le raccord prend la taille des tuyaux joints à ses IP, son corps est donc aussi épais que la plupart des tuyaux dessus (en cas d'égalité, il prend le plus gros). **Width et Height sont grisés** tant qu'il est activé. Un raccord Skynet sans tuyau dessus prend la **Default pipe size** (☰ Menu > Default settings, [Help 155](155-default-settings)). |
+| **Autosize to pipe** | Activé (par défaut) : le raccord prend la taille des tuyaux joints à ses IP, son corps est donc aussi épais que la plupart des tuyaux dessus (en cas d'égalité, il prend le plus gros). **Width et Height sont grisés** tant qu'il est activé. Un raccord Skynet sans tuyau dessus prend la **Default pipe size** (☰ Menu > Default settings, [aide 155](155-default-settings)). |
 | **X, Y** | Où il est, en pixels depuis la gauche et depuis le haut (`.x_hPosition`, `.y_vPosition`). |
 | **Width, Height** | Sa taille. Désactivez d'abord **Autosize to pipe** ; vous pouvez alors les taper, ou faire glisser ses poignées en Edit layout. |
 | 🔒 Lock | Le verrouille en place, comme pour chaque élément. |
@@ -19,9 +19,9 @@ Un raccord de tuyauterie n'a pas d'autres réglages que :
 - **Tournez-le ou retournez-le avec les boutons pour tourner** de la barre Edit layout (ils s'affichent quand il est choisi). Ils ne sont plus dans ses Properties.
 - **Les raccords de tuyauterie n'ont pas de Clone** : ni sur le Tab, ni dans la fenêtre Template d'un Template de raccord Skynet. Ajoutez-en un autre à la place.
 - Un **End Cap** a aussi **Autosize to pipe** : sur une ouverture d'un raccord, il prend la taille de la virole de ce raccord. Sur une réduction, un Valve Tee ou un Supply Manifold, ou une ouverture de cuve, il garde sa taille.
-- **Tout prend la taille de ses tuyaux quand vous enregistrez** (Règle Skynet 5.36) : appuyer sur **Save layout**, ou sur 💾 Save dans les Properties d'un raccord ou d'un tuyau, donne à chaque raccord de chaque Tab la taille qu'ont **la plupart des tuyaux et flexibles qui y sont joints**. En cas d'égalité (un de 1" et un de 1/2"), il prend le plus gros. Passez une ligne de tuyaux à 1" et enregistrez, et ses coudes et tés grandissent à 1". C'est pareil pour les **Valve Tees et Supply Manifolds**, les **tés avec une sonde de température**, les **vannes** et les **débitmètres**, qui n'ont pas d'interrupteur Autosize. Les **pompes** suivent aussi leurs tuyaux (depuis le 2026-11-07). Ce qui n'a pas de tuyau prend la **Default pipe size** réglée dans ☰ Menu > Default settings ([Help 155](155-default-settings)) ; un raccord sur une ouverture de cuve sans tuyau garde sa taille.
+- **Tout prend la taille de ses tuyaux quand vous enregistrez** (Règle Skynet 5.36) : appuyer sur **Save layout**, ou sur 💾 Save dans les Properties d'un raccord ou d'un tuyau, donne à chaque raccord de chaque Tab la taille qu'ont **la plupart des tuyaux et flexibles qui y sont joints**. En cas d'égalité (un de 1" et un de 1/2"), il prend le plus gros. Passez une ligne de tuyaux à 1" et enregistrez, et ses coudes et tés grandissent à 1". C'est pareil pour les **Valve Tees et Supply Manifolds**, les **tés avec une sonde de température**, les **vannes** et les **débitmètres**, qui n'ont pas d'interrupteur Autosize. Les **pompes** suivent aussi leurs tuyaux (depuis le 2026-11-07). Ce qui n'a pas de tuyau prend la **Default pipe size** réglée dans ☰ Menu > Default settings ([aide 155](155-default-settings)) ; un raccord sur une ouverture de cuve sans tuyau garde sa taille.
 - Un **clapet anti-retour** est aussi un raccord de tuyauterie : le passage ne va que dans un sens, et son orientation (la flèche sur son image) montre lequel. Tournez-le ou retournez-le pour orienter la flèche.
-- Une vanne ou un débitmètre dans un raccord est un **Device**, et un té avec doigt de gant (ou un doigt de gant sur un IP de cuve) est une sorte de **Temperature Probe**, ils gardent donc leurs propres réglages pour l'instant : voir [Skynet fittings](60-skynet-fittings).
+- Une vanne ou un débitmètre dans un raccord est un **Device**, et un té avec doigt de gant (ou un doigt de gant sur un IP de cuve) est une sorte de **Temperature Probe**, ils gardent donc leurs propres réglages pour l'instant : voir [Raccords Skynet](60-skynet-fittings).
 
 ## Le Widget Manual Valve {#the-manual-valve-widget}
 
@@ -29,7 +29,7 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
 
 - Son **.state** est vrai (ouverte) ou faux (fermée). Une vanne manuelle fermée arrête le passage dans les tuyaux qui y sont ; une vanne ouverte le laisse passer dans le sens où il allait.
 - **Un clic dessus sur son Tab l'ouvre ou la ferme, à tout moment.** C'est la seule façon dont son .state change. Les Operators et les Admins peuvent cliquer dessus ; les Viewers non. Chaque écran montre le changement.
-- C'est un **Confirmation Widget** (2026-11-08, Règle Skynet 1.28, [Confirmation Widgets](162-confirmation-widgets)) : son interrupteur **.confirmation** dans ses Properties est activé. Un clic affiche une fenêtre, **✋ OPEN Kettle drain by hand, then press Done** (ouvrez la vidange de la bouilloire à la main, puis appuyez sur Done) : ouvrez la vraie vanne, puis appuyez sur **Done**, et seulement alors elle se montre ouverte. **Cancel** la laisse comme elle était. Désactivez .confirmation et un clic l'ouvre ou la ferme tout de suite.
+- C'est un **Confirmation Widget** (2026-11-08, Règle Skynet 1.28, [Widgets de confirmation](162-confirmation-widgets)) : son interrupteur **.confirmation** dans ses Properties est activé. Un clic affiche une fenêtre, **✋ OPEN Kettle drain by hand, then press Done** (ouvrez la vidange de la bouilloire à la main, puis appuyez sur Done) : ouvrez la vraie vanne, puis appuyez sur **Done**, et seulement alors elle se montre ouverte. **Cancel** la laisse comme elle était. Désactivez .confirmation et un clic l'ouvre ou la ferme tout de suite.
 - Tant qu'elle est ouverte, la **superposition ouverte** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, un anneau vert et une coche) est dessinée par-dessus.
 - Elle a **deux IP**, un à chaque bout de tuyau, donc un tuyau se joint de chaque côté (Règle Skynet 5.24, aide 123).
 - Ses Properties : une note avec son nom et son état, **Label** (utilisé dans le message « à la main ») et **Show label**, **.confirmation**, puis **Autosize to pipe**, **X**, **Y**, **Width**, **Height** et 🔒 Lock.
@@ -49,7 +49,7 @@ Avec .confirmation désactivé, elle affiche une barre en haut de chaque écran 
 - Arrêter le Process retire la barre.
 - Un Process peut la lire : `if ManualValve_1 == true`.
 
-L'ancien **Valve type Manual** sur un Device de vanne marche toujours comme avant (fenêtre et **Done**) : voir [Manual valves](29-manual-valves). Il a aussi l'interrupteur **.confirmation** (activé) : un clic dessus demande Done de la même façon.
+L'ancien **Valve type Manual** sur un Device de vanne marche toujours comme avant (fenêtre et **Done**) : voir [Vannes manuelles](29-manual-valves). Il a aussi l'interrupteur **.confirmation** (activé) : un clic dessus demande Done de la même façon.
 
 ## Le Widget Manual Pump {#the-manual-pump-widget}
 

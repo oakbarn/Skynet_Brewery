@@ -26,5 +26,5 @@ Relancez-le chaque fois que de nouvelles images Skynet sortent. On peut le lance
 ## Bon à savoir {#good-to-know}
 
 - Quand un dessin Skynet est refait, il arrive comme une **nouvelle image avec un nouveau nom**. L'ancienne reste, donc chaque Schema qui l'utilise a le même aspect qu'avant.
-- Un Brain sur internet peut aussi obtenir les nouvelles images une à une avec **☰ Menu > Get Skynet pictures** (voir [Get Skynet pictures](59-get-skynet-pictures)).
+- Un Brain sur internet peut aussi obtenir les nouvelles images une à une avec **☰ Menu > Get Skynet pictures** (voir [Obtenir les images Skynet](59-get-skynet-pictures)).
 - Skynet ne livre que des images et des sons qu'il est libre de partager : ses propres dessins, ou ceux du domaine public ou sous une licence libre comme CC0, avec le crédit gardé là où la licence le demande.

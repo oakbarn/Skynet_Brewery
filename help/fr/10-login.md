@@ -4,15 +4,15 @@ Personne ne peut rien voir ni rien commuter sans se connecter. Les téléphones 
 
 ## La première fois {#first-time}
 
-La première fois que le panel s'ouvre, il vous demande de créer le **compte administrateur** (admin account : un nom d'utilisateur et un mot de passe ; par défaut au moins 8 caractères, voir [Password rules](39-password-rules)). Cela ne marche que depuis votre réseau domestique, pour qu'un inconnu ne puisse jamais le créer.
+La première fois que le panel s'ouvre, il vous demande de créer le **compte administrateur** (admin account : un nom d'utilisateur et un mot de passe ; par défaut au moins 8 caractères, voir [Règles des mots de passe](39-password-rules)). Cela ne marche que depuis votre réseau domestique, pour qu'un inconnu ne puisse jamais le créer.
 
-Vous voulez que le panel choisisse un mot de passe pour vous ? Touchez la **clé** dans la case Password. Elle crée un mot de passe solide qui suit les [Password rules](39-password-rules), le met dans les deux cases et l'affiche. **Notez-le** avant de toucher **Create admin account** (le navigateur peut aussi proposer de l'enregistrer quand vous vous connectez). Touchez l'œil pour le cacher. La même clé se trouve dans **Forgot password?**, **Settings > My account** et **Settings > Users** (Add user).
+Vous voulez que le panel choisisse un mot de passe pour vous ? Touchez la **clé** dans la case Password. Elle crée un mot de passe solide qui suit les [Règles des mots de passe](39-password-rules), le met dans les deux cases et l'affiche. **Notez-le** avant de toucher **Create admin account** (le navigateur peut aussi proposer de l'enregistrer quand vous vous connectez). Touchez l'œil pour le cacher. La même clé se trouve dans **Forgot password?**, **Settings > My account** et **Settings > Users** (Add user).
 
 (Edge montrait autrefois sa propre clé ici. Elle a besoin d'Edge connecté et synchronisé, et la fenêtre propre de Skynet ne se synchronise jamais, donc Skynet a maintenant sa propre clé.)
 
 ## Rôles {#roles}
 
-**Viewer** regarde, **Operator** mène une journée de brassage, **Admin** fait tout. Les Admins ajoutent et modifient les utilisateurs dans **Settings > Users** ; voir [Settings](09-settings).
+**Viewer** regarde, **Operator** mène une journée de brassage, **Admin** fait tout. Les Admins ajoutent et modifient les utilisateurs dans **Settings > Users** ; voir [Settings (réglages)](09-settings).
 
 ## Votre code de secours {#your-recovery-code}
 
@@ -40,7 +40,7 @@ Un aide a oublié le sien ? Un Admin en règle un nouveau dans **Settings > User
 
 ## Les mises à jour gardent vos connexions {#updates-keep-your-logins}
 
-Installer une nouvelle version garde chaque utilisateur, mot de passe, connexion et le code de secours. Ils ne sont supprimés que si vous choisissez **Update the program and reset all users** ou **Start Fresh** dans le programme d'installation et confirmez son avertissement (voir [Updating](18-updating)). Le panel vous demande alors de créer à nouveau le compte admin. (L'ancien interrupteur Testing mode, qui effaçait les connexions à chaque nouvelle version, a été retiré le 2026-11-03.)
+Installer une nouvelle version garde chaque utilisateur, mot de passe, connexion et le code de secours. Ils ne sont supprimés que si vous choisissez **Update the program and reset all users** ou **Start Fresh** dans le programme d'installation et confirmez son avertissement (voir [Passer à une nouvelle version](18-updating)). Le panel vous demande alors de créer à nouveau le compte admin. (L'ancien interrupteur Testing mode, qui effaçait les connexions à chaque nouvelle version, a été retiré le 2026-11-03.)
 
 ## Pas de code de secours et aucun Admin ne peut se connecter ? {#no-recovery-code-and-no-admin-can-sign-in}
 
@@ -56,6 +56,6 @@ sudo systemctl restart brewpanel
 
 ## Utiliser le panel hors de chez vous {#using-the-panel-away-from-home}
 
-Utilisez **Tailscale**, un réseau privé gratuit entre vos propres appareils. Installez-le sur le Pi et sur votre téléphone, connectés au même compte, et ouvrez `http://brewpi:8080` de n'importe où. Pour un ordinateur Windows, suivez [Installing Tailscale on Windows](00-tailscale-windows). Les étapes pour le Pi et les téléphones sont dans `docs/REMOTE_ACCESS.md` dans le dossier du panel.
+Utilisez **Tailscale**, un réseau privé gratuit entre vos propres appareils. Installez-le sur le Pi et sur votre téléphone, connectés au même compte, et ouvrez `http://brewpi:8080` de n'importe où. Pour un ordinateur Windows, suivez [Installer Tailscale sous Windows](00-tailscale-windows). Les étapes pour le Pi et les téléphones sont dans `docs/REMOTE_ACCESS.md` dans le dossier du panel.
 
 > **N'ajoutez jamais** de redirection de port pour le panel sur votre box, et ne le mettez jamais sur une adresse web publique. Le panel commande des éléments chauffants, des brûleurs et des pompes.

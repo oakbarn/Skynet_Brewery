@@ -25,4 +25,4 @@ La liste d'équipement n'ouvre les Properties que quand le Tab suit la Default L
 - **Media** et **Picture picker** : un double-clic ouvre un dossier, ou choisit l'image.
 - **Interfaces**, **Users** et **OneWire probes** : leurs réglages se changent directement dans la ligne ; ils n'ont pas de fenêtre Properties.
 
-Voir aussi [Tabs](02-tabs) et [Variables](04-variables).
+Voir aussi [Tabs (les écrans de votre brasserie)](02-tabs) et [Variables](04-variables).

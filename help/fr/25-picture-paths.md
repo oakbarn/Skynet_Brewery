@@ -20,7 +20,7 @@ Chaque élément d'un Tab (un Device ou un Widget) peut montrer une image de fon
 | **4 ou plus** | Pas de fond |
 | **vide** | Il est mis à **0** : pas de fond |
 
-Double-cliquez sur un élément dans **Edit layout** (ou gardez le doigt dessus) pour voir ces champs. Un chemin d'image est un fichier dans l'un de vos dossiers media, par exemple `Images/Skynet/Pumps/Pump_Red_Rip_On.svg` (voir [Media](07-media)).
+Double-cliquez sur un élément dans **Edit layout** (ou gardez le doigt dessus) pour voir ces champs. Un chemin d'image est un fichier dans l'un de vos dossiers media, par exemple `Images/Skynet/Pumps/Pump_Red_Rip_On.svg` (voir [Media (images et sons)](07-media)).
 
 ## Dans un Process {#in-a-process}
 

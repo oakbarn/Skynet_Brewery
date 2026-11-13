@@ -2,8 +2,8 @@
 
 > **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
 
-Ajouter un **Heating Element** se fait comme pour une pompe (voir [Pump Device Properties](115-pump-device-properties)) et une
-vanne à bille motorisée (voir [Motorized Ball Valve Device Properties](128-motorized-ball-valve-device-properties)) : **une résistance chauffante
+Ajouter un **Heating Element** se fait comme pour une pompe (voir [Properties du Device Pump (le détail)](115-pump-device-properties)) et une
+vanne à bille motorisée (voir [Properties du Device Motorized Ball Valve](128-motorized-ball-valve-device-properties)) : **une résistance chauffante
 n'a pas de Cover**. (Règle Skynet 18.24)
 
 ## Ajouter une résistance chauffante {#adding-a-heating-element}
@@ -60,7 +60,7 @@ nom se lit comme `MB_25_DO@H_Element_HLT_BH`.
 5. **Graphic**, **Path**, puis **Orientation** et **Toggle** sur une ligne.
 6. **Overlay** avec **Database and .API ⬢**.
 7. **Heating method** : la méthode de départ (Direct, Duty Cycle, Hysteresis, PID, Deadband ou Precise), sa sonde de température et les réglages de cette
-   méthode. Un clic pendant le brassage ou un Process la change : voir [One Heating Element, pick how it heats](150-heating-method).
+   méthode. Un clic pendant le brassage ou un Process la change : voir [Une seule résistance, choisissez comment elle chauffe](150-heating-method).
 8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, et le **Device Type** grisé (**DO**).
 
 Les résistances intégrées à un RIMS tube ou à une cuve Integrated gardent leur fenêtre actuelle (Règle 18.10), avec la Heating method

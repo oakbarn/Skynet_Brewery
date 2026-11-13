@@ -2,7 +2,7 @@
 
 Répondez à quelques questions, et Skynet crée tout un nouveau Schema prêt à brasser : le Tab Brew House avec ses cuves, vannes, pompes, refroidisseur et Supply Manifold, un Tab Fermentor, chaque Device sur un Port libre de **votre propre** Interface, et le Brew Process avec chaque tâche choisie et le Brew Day construit (Règle Skynet 16.6).
 
-Appuyez sur **☰ Menu > ➕ New Schema…** (ou choisissez **Add new Schema** dans la liste déroulante **Schema**), donnez-lui un nom, et réglez **Start from** sur **A Skynet Schema Template**. (**A copy of** du Schema ouvert est toujours là aussi, pour partir du vôtre.) Nouveau ici ? [Step by Step: Add a Schema](188-step-by-step-add-a-schema) montre chaque étape avec des images.
+Appuyez sur **☰ Menu > ➕ New Schema…** (ou choisissez **Add new Schema** dans la liste déroulante **Schema**), donnez-lui un nom, et réglez **Start from** sur **A Skynet Schema Template**. (**A copy of** du Schema ouvert est toujours là aussi, pour partir du vôtre.) Nouveau ici ? [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema) montre chaque étape avec des images.
 
 ## 1. Choisir un Brew House Tab Template {#1-pick-a-brew-house-tab-template}
 

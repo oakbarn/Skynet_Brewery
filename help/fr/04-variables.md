@@ -1,8 +1,8 @@
 # Variables
 
-Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les six Kinds (types) simples (String, Graphic, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [gGlobal Kinds](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
+Les variables contiennent des valeurs que les Processes et les écrans utilisent. L'écran **Variables** les liste toutes avec leurs valeurs. Les six Kinds (types) simples (String, Graphic, Value, Boolean, Time, Date Time) sont créés sur l'écran **gGlobal** avec **➕ New gGlobal** et ne sont jamais posés sur un Tab : voir [Sortes de gGlobal](108-gglobal-kinds). Les types affichés à l'écran (Switch, Push Button, Pulse Button, List, Step, Long String) s'ajoutent toujours dans **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, puis **Add Widget**. Les préfixes de nom ci-dessous sont des suggestions ; n'importe quel nom marche.
 
-gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Envoyer les lectures à la base de données et laisser des programmes extérieurs atteindre un élément sont maintenant des réglages que chaque Device et chaque Widget possède, donc une classe API séparée n'était plus nécessaire. Les anciens sont convertis au démarrage du Brain : voir [Database and .API on every Device and Widget](98-database-and-api).
+gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Envoyer les lectures à la base de données et laisser des programmes extérieurs atteindre un élément sont maintenant des réglages que chaque Device et chaque Widget possède, donc une classe API séparée n'était plus nécessaire. Les anciens sont convertis au démarrage du Brain : voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
 
 ## Quel type utiliser {#which-kind-to-use}
 
@@ -13,9 +13,9 @@ gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Env
 - Utilisez un **gGlobal** pour les réglages, les éléments d'écran et les lectures (pH, densité, volumes). Pour en enregistrer un dans le journal, ou laisser un autre programme le lire ou le changer, réglez sa case **Database and .API**.
 - Pour passer une valeur d'un Process à un autre, utilisez un gGlobal avec **Database** et **.API** tous les deux sur **Off**. Rien en dehors des Processes ne peut le voir.
 
-L'ancienne classe **Shared variable** a disparu. Un Schema plus ancien qui en a encore une se charge sans elle. Pour passer une valeur entre Processes, créez un gGlobal du type qui lui convient (un nombre gV_Global_Value, du texte gS_Global_String, vrai / faux gB_Global_Boolean, une durée gT_Global_Time, une date et une heure gD_Global_DateTime) avec Database et .API sur Off. Voir [Shared variables became gGlobals](149-shared-variables-became-gglobals).
+L'ancienne classe **Shared variable** a disparu. Un Schema plus ancien qui en a encore une se charge sans elle. Pour passer une valeur entre Processes, créez un gGlobal du type qui lui convient (un nombre gV_Global_Value, du texte gS_Global_String, vrai / faux gB_Global_Boolean, une durée gT_Global_Time, une date et une heure gD_Global_DateTime) avec Database et .API sur Off. Voir [Les variables partagées sont devenues des gGlobals](149-shared-variables-became-gglobals).
 
-Chaque gGlobal est **non volatil** : démarrer un Process ne l'efface jamais, et sa valeur est enregistrée sur le disque du Brain et revient quand le Brain redémarre. Voir [gGlobals keep their values](118-gglobals-keep-their-values).
+Chaque gGlobal est **non volatil** : démarrer un Process ne l'efface jamais, et sa valeur est enregistrée sur le disque du Brain et revient quand le Brain redémarre. Voir [Les gGlobals gardent leurs valeurs](118-gglobals-keep-their-values).
 
 L'ancienne classe **Global** est retirée. Quand un Schema plus ancien est chargé, chaque Global devient un gGlobal, et la liste de ce qui a changé s'affiche sur la page Processes.
 
@@ -23,8 +23,8 @@ L'ancienne classe **Global** est retirée. Quand un Schema plus ancien est charg
 
 | Type | Préfixe | Remarques |
 |---|---|---|
-| gG_Global_Graphic | `gG_` | Les chemins d'image de fond standard. Un Process peut changer l'image. [gGlobal Kinds](108-gglobal-kinds) |
-| gS_Global_String | `gGS_` | Du texte. [gGlobal Kinds](108-gglobal-kinds) |
+| gG_Global_Graphic | `gG_` | Les chemins d'image de fond standard. Un Process peut changer l'image. [Sortes de gGlobal](108-gglobal-kinds) |
+| gS_Global_String | `gGS_` | Du texte. [Sortes de gGlobal](108-gglobal-kinds) |
 | Long String | `gGL_` | Relié à un fichier texte dans un dossier media. Modifiez le fichier et le panel suit en moins d'une seconde. |
 | gV_Global_Value | `gGV_` | Un nombre. |
 | gT_Global_Time | `gGT_` | `00:00:00` |
@@ -38,7 +38,7 @@ L'ancienne classe **Global** est retirée. Quand un Schema plus ancien est charg
 
 ## Database and .API
 
-Chaque gGlobal (et chaque autre Device et Widget qui a une valeur) a une case **Database and .API** à la fin de ses Properties. L'écran Variables montre le réglage de chaque gGlobal, et **Log now** envoie aussitôt sa valeur à la base de données. Voir [Database and .API on every Device and Widget](98-database-and-api).
+Chaque gGlobal (et chaque autre Device et Widget qui a une valeur) a une case **Database and .API** à la fin de ses Properties. L'écran Variables montre le réglage de chaque gGlobal, et **Log now** envoie aussitôt sa valeur à la base de données. Voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
 
 ## gGlobal List (une liste déroulante sur un Tab) {#gglobal-list-a-dropdown-on-a-tab}
 

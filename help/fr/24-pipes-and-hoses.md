@@ -9,7 +9,7 @@ Les **IP** (les points de raccordement ronds sur les pompes, les vannes, les cuv
 ## Tuyaux rigides (Pipes) {#pipes}
 
 1. Choisissez **☰ Menu > Edit layout** et appuyez sur **Draw pipe**.
-2. Double-cliquez (ou touchez) le début, puis double-cliquez (ou touchez) la fin. Un tuyau est un seul morceau droit qui ne va qu'à l'**horizontale, à la verticale ou à 45 degrés** ; il ne tourne qu'à un raccord (un coude, un té ou une croix), que Skynet met là où deux tuyaux se rejoignent. Voir [Pipe angles and upright kettles](105-pipe-angles-and-upright-kettles).
+2. Double-cliquez (ou touchez) le début, puis double-cliquez (ou touchez) la fin. Un tuyau est un seul morceau droit qui ne va qu'à l'**horizontale, à la verticale ou à 45 degrés** ; il ne tourne qu'à un raccord (un coude, un té ou une croix), que Skynet met là où deux tuyaux se rejoignent. Voir [Angles des tuyaux et bouilloires debout](105-pipe-angles-and-upright-kettles).
 3. Double-cliquez sur le tuyau pour ouvrir ses réglages.
 
 ## Tuyaux souples (Hoses) {#hoses}

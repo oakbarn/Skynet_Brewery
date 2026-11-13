@@ -2,7 +2,7 @@
 
 Les images et les sons sont dans des **dossiers media** sur le Pi. Partout dans le panel, une image ou un son est donné par son **chemin** dans un dossier media, par exemple `Images/Skynet/Pumps/Pump_Red_Rip_On.png`. Les dossiers media sont listés dans **Settings > Panel settings**.
 
-**Chaque image est dans `media/Images`**, rangée en **groupes d'images** (un dossier pour Pumps, Valves, Vessels ...), les images Skynet étant gardées à part dans `Images/Skynet` (voir [Picture groups](57-picture-groups)), les fonds aussi. Les listes d'images des fenêtres de propriétés ne montrent que les images de là. **Chaque son est dans `media/sounds`.** Les anciens chemins marchent toujours : `oakbarn/...` (l'ancien nom d'Images), un simple nom d'image comme `brewery_main.png`, les dessins d'exemple `samples/...`, et les sons gardés en `Images/wave/...`.
+**Chaque image est dans `media/Images`**, rangée en **groupes d'images** (un dossier pour Pumps, Valves, Vessels ...), les images Skynet étant gardées à part dans `Images/Skynet` (voir [Groupes d'images](57-picture-groups)), les fonds aussi. Les listes d'images des fenêtres de propriétés ne montrent que les images de là. **Chaque son est dans `media/sounds`.** Les anciens chemins marchent toujours : `oakbarn/...` (l'ancien nom d'Images), un simple nom d'image comme `brewery_main.png`, les dessins d'exemple `samples/...`, et les sons gardés en `Images/wave/...`.
 
 Dans une vraie brasserie, tout cela est sur le Brain (le Pi), dans le dossier du panel : `media/Images` et `media/sounds`. Les téléphones et les PC ne gardent jamais les images ; ils les reçoivent du Brain. Pour copier des images d'un PC vers le Brain, utilisez **File Move** (des dossiers entiers d'un coup) ou cet écran Media.
 

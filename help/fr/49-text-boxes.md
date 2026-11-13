@@ -4,7 +4,7 @@ Chaque morceau de texte sur un Tab est une **zone de texte** (text box), et chaq
 
 - le **Name** et la **Value** de chaque Device et Widget (une pompe, une température, un gGlobal ...)
 - un **Label** (Add > Label dans Edit layout)
-- un **Text Widget** (**+ Text** dans Edit layout ; sa propre page : [Text Widget](91-text-widget))
+- un **Text Widget** (**+ Text** dans Edit layout ; sa propre page : [Widget Text](91-text-widget))
 - le **Label** sur une cuve et sur les autres équipements
 
 ## Les attributs {#the-attributes}
@@ -19,8 +19,8 @@ Chaque morceau de texte sur un Tab est une **zone de texte** (text box), et chaq
 | Position X et Y | sa place en pixels depuis la gauche et le haut du Tab : **x** est **h**orizontal (en travers), **y** est **v**ertical (de haut en bas). Les anciens noms `.xPosition` et `.yPosition` marchent toujours. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
 - **Word wrap as needed** (retour à la ligne si besoin) : un long texte passe sur plusieurs lignes. Sur un Device ou un Widget, il permet à un long Name de passer à la ligne (les Values passent toujours à la ligne). Un Text Widget passe toujours à la ligne.
-- **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Codes inside text](22-process-language).
-- **Les raccourcis clavier** tapent les codes pour vous : Maj+Entrée `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Maj+D (⌘+Maj+D) °F ou °C. Voir [Shortcut keys](113-shortcut-keys).
+- **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Le langage des Processes et les étapes](22-process-language).
+- **Les raccourcis clavier** tapent les codes pour vous : Maj+Entrée `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Maj+D (⌘+Maj+D) °F ou °C. Voir [Raccourcis clavier](113-shortcut-keys).
 - **Name font** et **Name font size** règlent la police des Names, des Labels sur les cuves et des Texts.
 
 Sur un Device ou un Widget, **Fore color**, **Back color** et **Alignment** valent pour tout son texte. **Name color**, **Value color**, **Name alignment** et les autres en dessous sont toujours là, et l'emportent sur Fore color pour cette case-là.
@@ -53,7 +53,7 @@ if w_Text_1.visible == true
 endif
 ```
 
-- Chaque nouveau **Text Widget** commence avec le nom `wgt_TXT_Text_1_BH` (Règle Skynet 3.14 ; les plus anciens sont `w_Text_1`, `w_Text_2` ...) (il peut être changé : voir [Text Widget](91-text-widget)). `w_Text_1 = "..."` (ou `w_Text_1.text = "..."`) change ce qu'il dit.
+- Chaque nouveau **Text Widget** commence avec le nom `wgt_TXT_Text_1_BH` (Règle Skynet 3.14 ; les plus anciens sont `w_Text_1`, `w_Text_2` ...) (il peut être changé : voir [Widget Text](91-text-widget)). `w_Text_1 = "..."` (ou `w_Text_1.text = "..."`) change ce qu'il dit.
 - Les couleurs sont un nom (Red, Black ...) ou un code comme `#ffffff`.
 - L'alignement est `Left`, `Center` ou `Right` (`"Left justified"` et `"Centered"` marchent aussi).
 - Width, Height, X et Y sont des nombres entiers de pixels. En lire un (`if w_Text_1.width > 200`) donne la taille ou la place qu'il a maintenant.

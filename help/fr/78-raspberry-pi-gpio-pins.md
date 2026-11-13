@@ -60,4 +60,4 @@ Le panel les refuse sur une Interface Pi et dit pourquoi.
 | `pins` | Vide = les GPIO 2-27 peuvent être utilisées ; ou une liste des seules broches permises, si un HAT en utilise certaines |
 | `listen` | `0.0.0.0` (par défaut), ou `127.0.0.1` pour que seul le panel de ce même Pi puisse se connecter |
 
-Voir aussi [Connection ratings](69-connection-ratings).
+Voir aussi [Notes de connexion](69-connection-ratings).

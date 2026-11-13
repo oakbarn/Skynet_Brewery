@@ -34,4 +34,4 @@ Ce sont des réglages Windows. Skynet ne les change pas pour vous.
 - Ce qui était en marche et où en était chaque Process est écrit dans `data/brewing_now.json` toutes les quelques secondes pendant le brassage (écrit de façon sûre, donc une coupure de courant laisse la dernière bonne copie). Le démarrage suivant le lit pour l'avis et le bouton Resume. Un moteur pas à pas ne se remet jamais à bouger tout seul.
 - La veille est remarquée quand l'horloge de Skynet saute de plus que le plus court délai Lost link de vos cartes (au moins 3 secondes).
 - « Mise à jour en attente » est lu dans le registre Windows toutes les 30 minutes (pas besoin de droits d'admin).
-- Voir aussi : [Closing Skynet Brewer](95-closing-skynet-brewer).
+- Voir aussi : [Fermer Skynet Brewer](95-closing-skynet-brewer).

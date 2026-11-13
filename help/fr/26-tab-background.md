@@ -31,8 +31,8 @@ Chaque Tab a sa propre **image de fond** (un seul chemin d'image) et sa propre *
 
 ## Mettre votre propre image sur le Pi {#getting-your-own-picture-onto-the-pi}
 
-Mettez-la d'abord sur le Pi avec l'écran [Media](07-media) (dans le dossier `Images`). Rouvrez ensuite **⚙ Tab settings** : la nouvelle image est dans la liste **Background picture**.
+Mettez-la d'abord sur le Pi avec l'écran [Media (images et sons)](07-media) (dans le dossier `Images`). Rouvrez ensuite **⚙ Tab settings** : la nouvelle image est dans la liste **Background picture**.
 
 ## Les images des éléments seuls {#pictures-of-single-items}
 
-Cette page parle du Tab entier. Une pompe, une vanne ou un autre élément a ses propres images (**.backpath**, **.backpath_2**, **.backpath_3**). Voir [Pictures on items](25-picture-paths).
+Cette page parle du Tab entier. Une pompe, une vanne ou un autre élément a ses propres images (**.backpath**, **.backpath_2**, **.backpath_3**). Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).

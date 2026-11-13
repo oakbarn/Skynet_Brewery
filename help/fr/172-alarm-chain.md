@@ -46,7 +46,7 @@ Une **Hop Alarm** a un minuteur. Donnez à une étape une **heure sur ce minuteu
 **Une étape attend son tour.** Si une étape arrive à échéance pendant que l'alarme sonne encore la précédente, elle attend, et l'alarme affiche
 « +1 step waiting » (1 étape en attente). Dès que la précédente est arrêtée d'un appui, l'alarme passe à l'étape en attente et sonne. (Le
 `.step` d'un Process la change toujours tout de suite.) Quand plusieurs alarmes sonnent ensemble, leur **Priority** fixe l'ordre : voir
-[Alarms and sound](21-alarms-and-sound).
+[Alarmes et son](21-alarms-and-sound).
 
 Les étapes sont gardées **dans l'ordre où elles passent à On** : sur un minuteur qui décompte, celle qui a le plus de temps restant vient en premier. Quand vous
 ajoutez une nouvelle étape, elle est mise à sa place dès que vous enregistrez. Les étapes sans heure restent après, dans votre ordre.
@@ -56,4 +56,4 @@ ajoutez une nouvelle étape, elle est mise à sa place dès que vous enregistrez
 Tout ce qui est vrai ou faux peut s'écrire de l'une ou l'autre façon : `alm_Brew = On` est pareil que `alm_Brew = true`. Un Process n'écrit jamais
 `.active`.
 
-Voir aussi [The Alarm Widget](107-alarm-widget) et [Alarms and sound](21-alarms-and-sound).
+Voir aussi [Widget Alarm](107-alarm-widget) et [Alarmes et son](21-alarms-and-sound).

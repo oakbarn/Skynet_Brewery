@@ -1,6 +1,6 @@
 # Properties du Device sonde de température {#temperature-probe-device-properties}
 
-Ajouter une **Temperature Probe** se fait comme pour une pompe (voir [Pump Device Properties](115-pump-device-properties)).
+Ajouter une **Temperature Probe** se fait comme pour une pompe (voir [Properties du Device Pump (le détail)](115-pump-device-properties)).
 Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay**. Ceci couvre toutes les sondes : une sonde simple, un **Thermowell**
 (doigt de gant Short, Medium, Long) et un **té avec une sonde de température** (Instrument Tee ou Long Tee). (Règle Skynet 18.26)
 
@@ -23,7 +23,7 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
    - **Probe type**, grisé : la sorte choisie. Le **⬢** à côté contient ses réglages (fils et résistance de référence d'une
      RTD, type de thermocouple, valeurs de la thermistance, tension de la carte, réglages du simulateur).
    - **Units** (°F ou °C) et **Decimals** sur une ligne.
-   - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)).
+   - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits)).
    - **Calibration offset** (ajouté à chaque lecture) et, sur la même ligne, **Database and .API ⬢** (aide 98).
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le même TEMP@1W est dans son Suggested Name).
    **Entrée** vous fait passer par Label, Interface, Port, Tab, Orientation, puis **➕ Add Device**. Si **➕ Add Device** paraît pâle,
@@ -45,5 +45,5 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
 7. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, et le **Device Type** grisé.
 
 Un Thermowell s'accroche toujours à un IP, s'affiche de face sur un IP tourné vers l'avant, et un té à sonde coupe toujours un tuyau comme le fait un té
-(voir [Probe tees and thermowells on pipes](132-probe-tees-and-thermowells-on-pipes)). Une sonde qui fait partie d'un RIMS tube ou d'une
+(voir [Tés à sonde et doigts de gant sur les tuyaux](132-probe-tees-and-thermowells-on-pipes)). Une sonde qui fait partie d'un RIMS tube ou d'une
 Integrated Electric Kettle garde la fenêtre de ce Device.

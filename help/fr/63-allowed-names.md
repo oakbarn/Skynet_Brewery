@@ -10,7 +10,7 @@ Un nom de Device, Widget, gGlobal, Text, tuyau, cuve ou autre élément n'a que 
 
 - `@` et `~` sont gardés pour le **Suggested Name**. Le programme les y met (`BM_15_DO@Pump_Red~Pump_BH`) ; un nom que vous tapez vous-même ne peut pas en avoir, utilisez donc `_`.
 - `°` est permis : `Temp_°F`.
-- Un mot du langage des Processes (`NULL`, `true`, `if`, `wait` ...) ne peut pas être un nom. Voir [Process language](22-process-language), Reserved words (mots réservés).
+- Un mot du langage des Processes (`NULL`, `true`, `if`, `wait` ...) ne peut pas être un nom. Voir [Le langage des Processes et les étapes](22-process-language), Reserved words (mots réservés).
 - Aucun nom ni **Label** ne peut commencer ou finir par une espace. Un Label est raccourci dès que vous quittez sa case.
 - Un **Label** peut avoir presque n'importe quelle marque, mais pas `©` `®` `™` (réservés aux mentions de copyright et de marque de la licence MIT de Skynet) ni `@` `~` (gardés pour le Suggested Name). Pendant que vous tapez, `©` `®` `™` sont retirés et `@` `~` deviennent une espace. La liste complète, avec la raison pour chaque marque : [Special characters in names](https://github.com/oakbarn/Skynet_Brewery/blob/claude/project-thread-vzxi0a/docs/Special_Characters.md).
 

@@ -9,7 +9,7 @@ En haut : **🗑 Delete**, **COPY**, **✖ Cancel** et **💾 Save** (Delete, Ca
 - **COPY** enregistre vos changements, puis fait une copie de ce Widget Text sur le 🔨 Build Tab, avec tout pareil sauf un nouveau nom (le même nom avec _2, _3 ...). Les Properties de la copie s'ouvrent pour que vous la changiez. **Save Build ...** l'envoie vers un Tab.
 - **Name** : le Label d'un nouveau Widget Text commence à **Text_1**, **Text_2** ... et son nom est **wgt_TXT_** + le Label + l'ID du Tab, par exemple **wgt_TXT_Text_1_BH** (Règle Skynet 3.14). Les anciens gardent leurs noms **w_Text_1**. Vous pouvez le garder, ou lui donner un nom à vous. Une fois enregistré, le nom est verrouillé 🔒 : **✏ Change name** est le seul moyen de le changer (il *met à jour les noms* partout), et chaque Process qui l'utilise change avec lui. Les noms ne servent qu'à trouver l'élément à l'écran et à régler ses `.attributes` dans un Process.
 - Le **?** orange après le nom ouvre une fenêtre avec plus d'informations sur le Widget Text : ses **Properties** et les **Attributes** qu'un Process peut utiliser. (Le **?** jaune près du titre ouvre cette page d'aide.) La fenêtre a **✖ Close** en haut et en bas.
-- **Text** : ce qu'il dit. Les **Rich Text Embedded Codes** (codes de texte enrichi) marchent ici et dans le Label : `\b` gras, `\i` italique, `\n` une nouvelle ligne, `\c{Red}` une couleur et le reste dans [Codes inside text](22-process-language).
+- **Text** : ce qu'il dit. Les **Rich Text Embedded Codes** (codes de texte enrichi) marchent ici et dans le Label : `\b` gras, `\i` italique, `\n` une nouvelle ligne, `\c{Red}` une couleur et le reste dans [Le langage des Processes et les étapes](22-process-language).
 
 ### La case Label {#the-label-box}
 
@@ -68,4 +68,4 @@ Les Widgets Text s'appelaient `Text_1`, `Text_2` ... Quand un ancien Schema se c
 
 Avant, `Text_1.label` voulait dire son texte. Maintenant `.label` est la ligne du Label : utilisez `.text` pour ce qu'il dit.
 
-Voir aussi [Text boxes](49-text-boxes) pour les valeurs par défaut du Tab Default du ☰ Menu.
+Voir aussi [Les zones de texte](49-text-boxes) pour les valeurs par défaut du Tab Default du ☰ Menu.

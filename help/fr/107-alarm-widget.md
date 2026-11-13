@@ -47,7 +47,7 @@ La fenêtre suit les règles générales des fenêtres (Règles Skynet section 1
   et Repeat. Ils marchent comme avant (voir Alarms and sound).
 - **Graphic** : les couches ci-dessus.
 - **Alarm Chain** : des étapes qui changent ses couleurs, ses images et son son, pour qu'une seule alarme fasse le travail de plusieurs alarmes empilées. Chaque
-  choix commence sur **No Change**. Voir [The Alarm Chain](172-alarm-chain).
+  choix commence sur **No Change**. Voir [L'Alarm Chain : une alarme, plusieurs étapes](172-alarm-chain).
 - **Properties** : Visible, Hidden Locked, Tab, X, Y, Width, Height et Lock.
 - **COPY** l'enregistre et en fait une copie sur le 🔨 Build Tab. Le **?** orange liste ses Properties et ses Attributes.
 - **✖ Cancel** dans les fenêtres ⬆ et ⬢ demande d'abord si quelque chose a été changé : abandonner les changements, ou revenir (Règle 18.11).

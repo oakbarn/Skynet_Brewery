@@ -38,7 +38,7 @@ Choisir un Device ouvre la fenêtre **Add Device**. Remplissez-la depuis le haut
 1. **Label** : le texte affiché sur le Tab, et **Label Visible** (il commence à No : activez-le pour afficher le Label).
 2. **Interface** (la carte), et sur la même ligne **Available Ports** : seulement les broches libres de cette carte qui conviennent à ce Device. La dernière ligne de la liste des Interfaces, **➕ Add new Interface…**, ajoute une carte.
 3. **Tab** : le Tab où il va. Il commence avec le Tab où vous étiez. La dernière ligne, **➕ Add new Tab…**, fait un nouveau Tab : tapez son nom, réglez-le dans Tab settings et appuyez sur Save. Vous revenez à la fenêtre Add Device avec ce que vous aviez tapé gardé et le nouveau Tab choisi.
-4. **Name** : une fois 1-3 faits, le Name s'affiche, rempli avec le **Suggested Name** fait à partir du Label, de l'Interface, du Port, du Device Type et du Tab. Vous pouvez le modifier (le panel vous avertit, voir [Interfaces](76-interfaces)). **Entrée** vous fait passer dans la fenêtre dans l'ordre : Label, Interface, Available Ports, Tab, Orientation (une pompe ou une Motorized Ball Valve), puis **➕ Add Device** (Entrée encore l'ajoute) ; choisir dans une de ces listes fait aussi avancer, et le champ où vous êtes a un bord bleu. Dans toute autre fenêtre, Tab et Entrée passent tous deux au champ suivant. Si **➕ Add Device** a l'air pâle, appuyez quand même : il vous dit lequel de 1-3 manque encore. Le **Device Type** affiche d'abord son type général, par exemple **DO@Pump**. Une pompe montre aussi son **Graphic** et son **Orientation** (voir [Pump Device Properties](115-pump-device-properties)), de même qu'une Motorized Ball Valve (voir [Motorized Ball Valve Device Properties](128-motorized-ball-valve-device-properties)).
+4. **Name** : une fois 1-3 faits, le Name s'affiche, rempli avec le **Suggested Name** fait à partir du Label, de l'Interface, du Port, du Device Type et du Tab. Vous pouvez le modifier (le panel vous avertit, voir [Interfaces](76-interfaces)). **Entrée** vous fait passer dans la fenêtre dans l'ordre : Label, Interface, Available Ports, Tab, Orientation (une pompe ou une Motorized Ball Valve), puis **➕ Add Device** (Entrée encore l'ajoute) ; choisir dans une de ces listes fait aussi avancer, et le champ où vous êtes a un bord bleu. Dans toute autre fenêtre, Tab et Entrée passent tous deux au champ suivant. Si **➕ Add Device** a l'air pâle, appuyez quand même : il vous dit lequel de 1-3 manque encore. Le **Device Type** affiche d'abord son type général, par exemple **DO@Pump**. Une pompe montre aussi son **Graphic** et son **Orientation** (voir [Properties du Device Pump (le détail)](115-pump-device-properties)), de même qu'une Motorized Ball Valve (voir [Properties du Device Motorized Ball Valve](128-motorized-ball-valve-device-properties)).
 
 Les Interfaces et les Tabs sont listés sous la forme **ID: Name**, par exemple `BM: Brewery Mega` et `BH: Brew House`. Les noms des champs sont courts : survolez un nom (ou touchez-le) pour en lire plus.
 
@@ -53,10 +53,10 @@ Un **Widget** n'existe que dans l'application, sans broche de carte.
 - **Select Widget Type** et **Add Widget** marchent comme la paire des Devices : Pictures and text, On-screen controls (interrupteur, minuterie, alarme, lecteur de sons), Vessels, Equipment, Fittings and IPs, variables gGlobal.
 - **Picture ➕** et **Text ➕** : un clic chacun.
 - **Manual Valve ➕** : une vanne qu'on tourne à la main. Touchez-la sur le Tab pour la montrer ouverte ou fermée.
-- **Override ➕** ajoute le [Override button](96-override-button) (un par Tab).
+- **Override ➕** ajoute le [Bouton Override](96-override-button) (un par Tab).
 - **Boolean ➕** : d'abord une liste des types ON / OFF, comme la liste Probe : **Switch**, **Push Button**, **Pulse Button** et **LED** (Semi_Widgets_Devices, voir [Semi_Widgets_Devices](112-semi-widgets-devices)). Choisissez-en un et il est fait.
-- **Value ➕**, **Time ➕** et **DateTime ➕** : un clic chacun fait un [Value, Time or DateTime Widget](134-value-time-and-datetime-widgets).
-- **Vessel** (ligne 1, juste avant ⧉ Clone Device) : un Vessel Widget (vous y ajoutez tout), une cuve Integrated (toute prête, voir [Add a Vessel](66-add-a-vessel)) ou une cuve manuelle (BrewZilla, DigiBoil).
+- **Value ➕**, **Time ➕** et **DateTime ➕** : un clic chacun fait un [Widgets Value, Time et DateTime](134-value-time-and-datetime-widgets).
+- **Vessel** (ligne 1, juste avant ⧉ Clone Device) : un Vessel Widget (vous y ajoutez tout), une cuve Integrated (toute prête, voir [Ajouter une cuve](66-add-a-vessel)) ou une cuve manuelle (BrewZilla, DigiBoil).
 - **Add equipment ➕** (ligne 2, après Elbows, Tees …) : refroidisseurs, serpentins, filtre à trub, tube RIMS et raccords de tuyauterie.
 
 La ligne 1 est serrée pour que tout tienne sur la ligne du haut dans une fenêtre d'environ 1900 pixels de large (un écran Full HD). Dans une fenêtre plus étroite, les derniers boutons passent sur une seconde ligne ; ils marchent toujours de la même façon.
@@ -70,8 +70,8 @@ valeurs par défaut que **☰ Menu > Default settings > New Devices and Widgets 
 
 ## Ligne 2 : tuyaux, raccords, verrous et Tabs {#row-2-pipes-fittings-locks-and-tabs}
 
-**Elbows, Tees …** est à côté de **Draw pipe** et **Draw hose** : un point IP, un tuyau, un té, des coudes, une croix, une vanne manuelle, un manchon ou un bouchon. Le reste de la ligne est décrit dans [Tabs](02-tabs) et [Build Tab Add button](75-build-tab-add-button) (tourner et retourner, poignées).
+**Elbows, Tees …** est à côté de **Draw pipe** et **Draw hose** : un point IP, un tuyau, un té, des coudes, une croix, une vanne manuelle, un manchon ou un bouchon. Le reste de la ligne est décrit dans [Tabs (les écrans de votre brasserie)](02-tabs) et [Le bouton Add du Build Tab](75-build-tab-add-button) (tourner et retourner, poignées).
 
 ## ⧉ Clone Device
 
-**⧉ Clone Device** (ligne 1, après les raccourcis et Vessel) liste les Devices déjà sur un autre Tab, groupés par sorte. Choisissez-en un et son Clone apparaît sur ce Tab. Voir [Cloned Devices](71-cloned-devices).
+**⧉ Clone Device** (ligne 1, après les raccourcis et Vessel) liste les Devices déjà sur un autre Tab, groupés par sorte. Choisissez-en un et son Clone apparaît sur ce Tab. Voir [Devices clonés](71-cloned-devices).

@@ -71,4 +71,4 @@ Une ligne que les programmes Skynet n'utilisent pas s'affiche comme « The Skyne
 parle autrement, donc ses lignes n'auront pas de sens ici. Tous les détails sont dans
 docs/DEVICE_PROTOCOL.md.
 
-Voir aussi [Interfaces](76-interfaces) et [Connection ratings](69-connection-ratings).
+Voir aussi [Interfaces](76-interfaces) et [Notes de connexion](69-connection-ratings).

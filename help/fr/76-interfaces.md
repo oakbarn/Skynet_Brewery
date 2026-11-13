@@ -20,7 +20,7 @@ La fenêtre demande :
 - **Name** : quelque chose qui a un sens pour vous, comme *Hot Side*, *Fermentation* ou le nom de votre brasserie. La Skynet Home Brewery, par exemple, a 3 Megas : **Main_Brewery_HotSide**, **Valves** et **Fermentor**.
 - **Interface ID** : voir plus bas.
 - **Board** : Arduino Mega, ESP32 ou une autre carte de type Arduino.
-- **Connection** : USB, Ethernet, WiFi, ou **Simulator** (pas encore de carte : tout ce qui est dessus est fictif). Elle montre la note de connexion (aide : [Connection ratings](69-connection-ratings)).
+- **Connection** : USB, Ethernet, WiFi, ou **Simulator** (pas encore de carte : tout ce qui est dessus est fictif). Elle montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
 - **USB port** ou **Network address** (adresse réseau), pour une carte USB ou réseau.
 
 ## L'Interface ID {#the-interface-id}
@@ -37,8 +37,8 @@ Laissé vide, l'ID est fait des premières lettres du Name (*Hot Side* = HS).
 L'Interface a des **broches IO** qui fournissent le signal de commande. Ce sont les **Ports**. Chaque Device est sur un Port d'une
 Interface, et la liste **Available Ports** de la fenêtre New Device ne montre que les Ports libres de cette carte qui conviennent à ce type de
 Device, par exemple 22, ou A5 = 59. Les Digital Outputs ont le plus de ports, les vrais Ports PWM sont bien plus limités (aide
-[Interface, Tab and Device names](46-interface-tab-device-names)). Une fois un Port confirmé et le Device enregistré, il est grisé
-et ne peut plus être changé : c'est le câblage (aide [Pump Device Properties](115-pump-device-properties)).
+[Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names)). Une fois un Port confirmé et le Device enregistré, il est grisé
+et ne peut plus être changé : c'est le câblage (aide [Properties du Device Pump (le détail)](115-pump-device-properties)).
 
 ## Le signal de commande {#the-trigger-signal}
 
@@ -63,7 +63,7 @@ passe (par le SSR), et s'il est Off, le SSR n'envoie plus de courant. Comme un i
 Quand vous faites un nouveau Schema qui n'est **pas** une copie d'un autre (liste Schema > Add new Schema > *An empty Schema*) :
 
 1. Il commence avec une Interface, un Arduino Mega 2560 fictif (Simulator) appelé **New_Mega_2560_1**. Si un New_Mega_2560_1 existe déjà dans un de vos Schemas, c'est New_Mega_2560_2, et ainsi de suite.
-2. Tout le panel passe en **Simulator mode**, et un message vous le dit (aide : [Simulator or Real boards](77-simulator-or-real-boards)).
+2. Tout le panel passe en **Simulator mode**, et un message vous le dit (aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)).
 3. La fenêtre de l'Interface s'ouvre pour que vous lui donniez un nom qui a un sens pour vous et que vous régliez son Interface ID.
 
 Une copie d'un Schema garde les Interfaces qu'il avait.
@@ -79,4 +79,4 @@ Cliquez sur OK pour garder votre nom, ou sur Cancel pour revenir le changer.
 
 Chaque Interface a aussi des **Board settings** (On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port) et
 **💬 Board Talk** sur la page Devices, qui montre chaque ligne envoyée à la carte et reçue d'elle en mots simples : voir
-[Board settings and Board Talk](177-board-talk).
+[Board settings et Board Talk](177-board-talk).

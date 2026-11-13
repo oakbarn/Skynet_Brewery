@@ -11,7 +11,7 @@ La règle pour chaque Device et Widget (Règle 5.20) :
 
 ## Widgets de tuyauterie {#pipe-widgets}
 
-Ce sont des Templates de raccords de tuyauterie Skynet. Comme chaque raccord de tuyauterie, ils n'ont que X, Y, Width, Height et **Autosize to pipe** ([Pipe fittings and Manual Valves](87-pipe-fittings-and-manual-valves)). Tournez-les et retournez-les avec les boutons pour tourner de la barre Edit layout.
+Ce sont des Templates de raccords de tuyauterie Skynet. Comme chaque raccord de tuyauterie, ils n'ont que X, Y, Width, Height et **Autosize to pipe** ([Raccords de tuyauterie et vannes manuelles](87-pipe-fittings-and-manual-valves)). Tournez-les et retournez-les avec les boutons pour tourner de la barre Edit layout.
 
 | Template | Image | IP |
 |---|---|---|

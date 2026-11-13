@@ -24,8 +24,8 @@ Les pages sont écrites en **Markdown**, du texte simple avec quelques signes :
 | `![Red pump](Images/Skynet/Pumps/Pump_Red_Rip_On.png)` | Une image d'un dossier media |
 | `---` | Une ligne en travers de la page |
 
-Les tableaux sont des lignes de `|` avec une ligne `|---|---|` sous la première ligne, comme celui ci-dessus. Pour une image, ajoutez-la d'abord sur l'écran [Media](07-media), puis utilisez **Copy path**.
+Les tableaux sont des lignes de `|` avec une ligne `|---|---|` sous la première ligne, comme celui ci-dessus. Pour une image, ajoutez-la d'abord sur l'écran [Media (images et sons)](07-media), puis utilisez **Copy path**.
 
 ## Les fichiers {#the-files}
 
-Chaque page est un fichier texte `.md` dans le dossier `help` du panel sur le Pi. Le nombre au début du nom de fichier fixe l'ordre (`05-scripts.md`). Vous pouvez aussi les modifier avec n'importe quel éditeur de texte ; le panel montre le changement la prochaine fois que la page est ouverte. Les pages françaises sont dans `help/fr`, avec les mêmes noms de fichier (voir [Help in French](192-help-in-french)).
+Chaque page est un fichier texte `.md` dans le dossier `help` du panel sur le Pi. Le nombre au début du nom de fichier fixe l'ordre (`05-scripts.md`). Vous pouvez aussi les modifier avec n'importe quel éditeur de texte ; le panel montre le changement la prochaine fois que la page est ouverte. Les pages françaises sont dans `help/fr`, avec les mêmes noms de fichier (voir [L'aide en français](192-help-in-french)).

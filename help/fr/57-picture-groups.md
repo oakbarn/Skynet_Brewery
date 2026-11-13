@@ -29,7 +29,7 @@ Les noms de dossiers ont `_` à la place des espaces, donc un Process peut utili
 
 ## Les images Skynet sont en lecture seule {#the-skynet-pictures-are-read-only}
 
-Rien dans `Images/Skynet` ne peut être ajouté, changé, renommé, déplacé ou supprimé depuis le panel, par personne. Sur l'écran Media, cela montre un 🔒 et une note jaune ; vous pouvez quand même regarder chaque image et faire **Copy path** (copier le chemin). Les nouvelles images Skynet viennent avec une mise à jour de Skynet, ou avec **☰ Menu > Get Skynet pictures** (voir [Get Skynet pictures](59-get-skynet-pictures)).
+Rien dans `Images/Skynet` ne peut être ajouté, changé, renommé, déplacé ou supprimé depuis le panel, par personne. Sur l'écran Media, cela montre un 🔒 et une note jaune ; vous pouvez quand même regarder chaque image et faire **Copy path** (copier le chemin). Les nouvelles images Skynet viennent avec une mise à jour de Skynet, ou avec **☰ Menu > Get Skynet pictures** (voir [Obtenir les images Skynet](59-get-skynet-pictures)).
 
 Pour changer une image Skynet, copiez-la sur votre ordinateur, changez-la, et ajoutez-la sous un nom à elle dans un de vos groupes.
 
@@ -51,7 +51,7 @@ Sur l'écran **Media** (il marche comme l'Explorateur de fichiers de Windows, su
 2. Choisissez les images : cliquez sur une, **Ctrl+clic** (Cmd+clic sur un Mac) pour en ajouter, **Maj+clic** pour en prendre une suite. Sur un téléphone, cochez **Select many** et touchez chacune.
 3. Faites-les glisser sur un groupe à gauche, ou appuyez sur **Move picked** et choisissez le groupe.
 
-**Delete picked** les supprime toutes (il demande d'abord). Les images SVG (`.svg`) ne peuvent toujours pas être supprimées, renommées ou déplacées depuis le panel (voir [Media](07-media)).
+**Delete picked** les supprime toutes (il demande d'abord). Les images SVG (`.svg`) ne peuvent toujours pas être supprimées, renommées ou déplacées depuis le panel (voir [Media (images et sons)](07-media)).
 
 Pour copier tout un dossier d'images de votre ordinateur dans un groupe, utilisez **File Move** et choisissez le groupe dans **Picture group**.
 

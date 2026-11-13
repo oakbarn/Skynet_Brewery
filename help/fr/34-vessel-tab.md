@@ -54,4 +54,4 @@ La densité, l'ABV, le CO2 et les dates d'un brassin iront sur l'onglet Fermenta
 
 ## Ports et construction {#ports-and-build}
 
-Les ports sont les mêmes que sur le Tab Equipment : allumez chaque port qu'elle a, et réglez sa **Position** et son **Standard**. Laissez **Bundled** actif pour la mettre sur le Tab comme un seul bloc avec ses IP. Voir [Equipment](14-equipment).
+Les ports sont les mêmes que sur le Tab Equipment : allumez chaque port qu'elle a, et réglez sa **Position** et son **Standard**. Laissez **Bundled** actif pour la mettre sur le Tab comme un seul bloc avec ses IP. Voir [Équipement : cuves, refroidisseurs, serpentins et raccords](14-equipment).

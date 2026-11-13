@@ -54,7 +54,7 @@ Un **Template Name** n'a pas d'espaces (mettez _ à la place) et doit être uniq
 
 Un **Second Outlet** est une seconde vidange, par exemple au-dessus de la résistance pour qu'elle reste toujours sous l'eau (clonez Kettle_Big_Fatty, activez son Second Outlet et choisissez l'image Vessel_Kettle_BigFatty_TwoDrains.svg).
 
-**Bouilloires tout-en-un** : **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** et **Kettle_Foundry_Electric** ont la résistance intégrée, elles n'existent donc qu'en Templates électriques (voir [Skynet Vessels](62-skynet-vessels)). L'image de la Brewzilla montre son bras de recirculation et sa vanne sur le côté gauche, et son robinet est l'Outlet en bas au milieu. Aucune n'a de doigt de gant, car le panel ne peut pas lire leurs propres thermomètres.
+**Bouilloires tout-en-un** : **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** et **Kettle_Foundry_Electric** ont la résistance intégrée, elles n'existent donc qu'en Templates électriques (voir [Cuves Skynet](62-skynet-vessels)). L'image de la Brewzilla montre son bras de recirculation et sa vanne sur le côté gauche, et son robinet est l'Outlet en bas au milieu. Aucune n'a de doigt de gant, car le panel ne peut pas lire leurs propres thermomètres.
 
 ## Réglages d'un Equipment Template {#equipment-template-settings}
 
@@ -87,7 +87,7 @@ La liste des raccords est fixée par Skynet. Une nouvelle sorte de raccord est a
 
 Le passage dans un raccord groupé va **dans les deux sens**. Le premier raccord est sur l'orifice, mais le liquide peut entrer ou sortir. Par exemple, l'eau du robinet peut passer à l'envers dans une pompe pour l'amorcer.
 
-Les images des Templates Skynet sont des fichiers SVG, et un fichier SVG ne peut pas être supprimé, renommé ou remplacé dans la page Media. Voir [Media](07-media).
+Les images des Templates Skynet sont des fichiers SVG, et un fichier SVG ne peut pas être supprimé, renommé ou remplacé dans la page Media. Voir [Media (images et sons)](07-media).
 
 ## Raccords standard pour la tuyauterie {#standard-fittings-for-piping}
 
@@ -103,9 +103,9 @@ Skynet fournit des raccords simples prêts à mettre dans la tuyauterie, avec le
 | **U_Bend** | Les deux en bas |
 | **End_Cap** | Aucun : faites-le glisser sur une ouverture pour la fermer |
 
-Ajoutez-en un à un Tab (**Add to Tab** dans sa fenêtre), faites-le glisser à sa place et tracez des tuyaux vers ses IP. Sur le Tab c'est un **Skynet Fitting** : chaque ouverture a son IP intégré. Pour le tourner dans un autre sens, ouvrez-le en Edit layout et utilisez **Flip Horizontal**, **Flip Vertical** et **Rotate** (par pas de 45 degrés). L'image et ses IP tournent ensemble, donc un seul Elbow_90 couvre toutes les directions. Voir [Skynet Fittings](60-skynet-fittings).
+Ajoutez-en un à un Tab (**Add to Tab** dans sa fenêtre), faites-le glisser à sa place et tracez des tuyaux vers ses IP. Sur le Tab c'est un **Skynet Fitting** : chaque ouverture a son IP intégré. Pour le tourner dans un autre sens, ouvrez-le en Edit layout et utilisez **Flip Horizontal**, **Flip Vertical** et **Rotate** (par pas de 45 degrés). L'image et ses IP tournent ensemble, donc un seul Elbow_90 couvre toutes les directions. Voir [Raccords Skynet](60-skynet-fittings).
 
-Là où deux tuyaux de tailles différentes se rejoignent sur un IP, le panel dessine tout seul un cône de réduction (voir [Pipes, hoses and reducers](24-pipes-and-hoses)). Utilisez le raccord **Reducer** là où il doit figurer sur la liste d'équipement, ou sur un orifice de cuve qui n'a pas la taille de sa tuyauterie.
+Là où deux tuyaux de tailles différentes se rejoignent sur un IP, le panel dessine tout seul un cône de réduction (voir [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)). Utilisez le raccord **Reducer** là où il doit figurer sur la liste d'équipement, ou sur un orifice de cuve qui n'a pas la taille de sa tuyauterie.
 
 ## Add to Tab {#add-to-tab}
 
@@ -124,7 +124,7 @@ Ouvrez-le en **Edit layout** (double-clic, ou gardez le doigt dessus). Désactiv
 
 Sur un Tab_Fitting vous choisissez :
 
-- **Turn** (un raccord venant d'un Template groupé de l'utilisateur) : 90, 180 ou 270 degrés dans le sens des aiguilles d'une montre. L'image et ses IP tournent ensemble. Un raccord venant d'un Template Skynet a **Flip Horizontal**, **Flip Vertical** et **Rotate** à la place, et pas de réglages d'IP : voir [Skynet Fittings](60-skynet-fittings).
+- **Turn** (un raccord venant d'un Template groupé de l'utilisateur) : 90, 180 ou 270 degrés dans le sens des aiguilles d'une montre. L'image et ses IP tournent ensemble. Un raccord venant d'un Template Skynet a **Flip Horizontal**, **Flip Vertical** et **Rotate** à la place, et pas de réglages d'IP : voir [Raccords Skynet](60-skynet-fittings).
 
 - chaque **Valve** : **Select Device, Widget or None**. Tant que cette vanne est fermée, rien ne passe dans le Tab_Fitting.
 - la **Temperature Probe** de chaque doigt de gant : **Select Temperature Probe or None**.

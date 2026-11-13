@@ -1,6 +1,6 @@
 # Obtenir les images Skynet {#get-skynet-pictures}
 
-Skynet ajoute de temps en temps de nouvelles images (pompes, vannes, cuves ...) sur GitHub. **☰ Menu > Get Skynet pictures** copie celles que votre Brain n'a pas encore, dans `media/Images/Skynet` (voir [Picture groups](57-picture-groups)).
+Skynet ajoute de temps en temps de nouvelles images (pompes, vannes, cuves ...) sur GitHub. **☰ Menu > Get Skynet pictures** copie celles que votre Brain n'a pas encore, dans `media/Images/Skynet` (voir [Groupes d'images](57-picture-groups)).
 
 - Ça marche pareil sur un Raspberry Pi, Windows, Mac ou Linux. Rien à installer : c'est le Brain qui télécharge.
 - **Aucun compte GitHub n'est nécessaire.** Le Brain doit seulement être sur Internet.
@@ -20,5 +20,5 @@ Appuyez sur **Check GitHub** pour redemander. Si tout est déjà là, il dit **N
 - Chaque image est vérifiée avec l'empreinte de GitHub avant d'être enregistrée, donc un téléchargement raté ne remplace jamais une bonne image. Si l'une échoue, elle est listée avec la raison ; appuyez sur **Check GitHub** et obtenez-la à nouveau.
 - Skynet ne change jamais une image qu'il a déjà envoyée. Quand un dessin est refait, il vient comme une nouvelle image avec un nouveau nom, donc chaque Schema qui utilise l'ancienne a le même aspect qu'avant.
 - Si GitHub dit **too many requests** (trop de demandes), attendez une heure : GitHub laisse chaque adresse Internet demander environ 60 fois par heure sans compte.
-- Toutes les images et tous les sons Skynet d'un coup, sans Internet sur le Brain, viennent avec le **Skynet Media Setup** (voir [The Skynet Media Setup](183-skynet-media-setup)).
-- Une toute nouvelle version du panel (les fichiers du programme, pas seulement les images) vient toujours par **Updating** (voir [Updating](18-updating)).
+- Toutes les images et tous les sons Skynet d'un coup, sans Internet sur le Brain, viennent avec le **Skynet Media Setup** (voir [Le Skynet Media Setup](183-skynet-media-setup)).
+- Une toute nouvelle version du panel (les fichiers du programme, pas seulement les images) vient toujours par **Updating** (voir [Passer à une nouvelle version](18-updating)).

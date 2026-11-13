@@ -35,4 +35,4 @@ l'atteindre.
 L'API_Name n'est pas le Name de l'élément : le Name (Règle Skynet 3.1) reste ce qu'utilisent les Processes, et changer l'API_Name
 ne change jamais un Process.
 
-Voir aussi [Database and .API](98-database-and-api).
+Voir aussi [Base de données et .API sur chaque Device et Widget](98-database-and-api).
