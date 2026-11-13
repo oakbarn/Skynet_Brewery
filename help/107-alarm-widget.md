@@ -43,7 +43,7 @@ The dialog follows the General Dialog Rules (Skynet Rules section 18):
   box (2 lines) to type it in, and the red **⬢** opens the **Label attributes**: Label, Visible, Font size, Font, Bold, Fore
   color, Back color and Alignment.
 - **Name**: a new Alarm's Name follows its Label (`alm_` + the Label) until you type a name of your own. It can't be blank.
-- **Alarm**: the Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, and the sound
+- **Alarm**: the Kind of alarm (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, and the sound
   and Repeat. These work as before (see Alarms and sound).
 - **Graphic**: the layers above.
 - **Alarm Chain**: steps that change its colors, pictures and sound, so one Alarm does the work of many stacked ones. Every
