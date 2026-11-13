@@ -4,7 +4,8 @@
 //   node tools/hoverhelp-french.js            lists the English balloon texts with no French in public/hoverhelp-fr.json (and where
 //                                             each one is), and the French whose English text is gone
 //   node tools/hoverhelp-french.js --missing  writes the texts with no French as a JSON list (English → ""), to fill in and add
-//   node tools/hoverhelp-french.js --prune    takes out the French whose English text is gone
+//   node tools/hoverhelp-french.js --prune    takes out the French whose English text is gone (keep the French of a balloon in a
+//                                             PR that is not merged yet)
 // A test (test/hoverfrench.test.js) fails while a balloon has no French, so a balloon change and its French go in the same PR.
 import path from 'node:path';
 import fs from 'node:fs';
@@ -28,5 +29,5 @@ if (arg === '--missing') {
   for (const t of missing) console.log('no French    ', en.get(t)[0], JSON.stringify(t).slice(0, 100));
   for (const t of gone) console.log('not used     ', JSON.stringify(t).slice(0, 100));
   console.log(`${en.size - missing.length} of ${en.size} balloon texts have their French`);
-  process.exit(missing.length || gone.length ? 1 : 0);
+  process.exit(missing.length ? 1 : 0);
 }

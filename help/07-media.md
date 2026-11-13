@@ -14,7 +14,7 @@ It looks like Windows File Explorer: folders on the left, files on the right.
 - **New folder**, **Up**, and **Large icons** or **Details** view.
 - Drag a file onto a folder on the left to move it (on a phone use **Move**).
 - Pick several files with **Ctrl+click** or **Shift+click** (on a phone tick **Select many**), then drag them or press **Move picked** or **Delete picked**.
-- **Images/Skynet** holds the pictures that come with Skynet and is **read only**: nothing in it can be added, renamed, moved or deleted. The 🔒 standard picture groups in Images (for your pictures), and the Images and sounds folders themselves, can't be deleted, renamed or moved.
+- **Images/Skynet** holds the pictures that come with Skynet and is **read only**: nothing in it can be added, renamed, moved or deleted. Each Skynet picture shows its number; **🔢 Skynet Picture numbers** opens the printable list ([Skynet Picture numbers](193-skynet-picture-numbers)). The 🔒 standard picture groups in Images (for your pictures), and the Images and sounds folders themselves, can't be deleted, renamed or moved.
 - Click a file to preview it, play it, **copy its path**, rename or delete it.
 - **SVG pictures (.svg) can't be deleted, renamed, moved or replaced**, not even one you added yourself. The Skynet Templates and the panel are drawn with them, and a missing one would break every Tab that uses it. A folder with an SVG in it can't be renamed or moved either. To change an SVG, add a new one under a name of its own and pick that one instead.
 
