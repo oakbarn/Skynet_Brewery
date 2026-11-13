@@ -4125,6 +4125,29 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Fermentor Control the Import already made on that probe is built in instead of a second one. Help 182.
 Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
+19.6 **The Equipment Profile Interview** (OakBarn Brewery, 2026-11-13: "WE also need to create an interview to build an Equipment
+Profile. 1. Ask How many Vessels 2. Type of each 3. Then Chose an Vessel Device or Widget, and able to choose to build a new Vessel
+Device 4. How Many Pumps (Types, Covers, Overlays, Labels and Names, Normal attributes) 5. How many Motorized Valves 6. And so On";
+Help 196). **☰ Menu > Equipment Profile > Add new ...** starts with **Answer a few questions (the Interview)**. Plain questions,
+one page at a time, with **◀ Back**, **Next ▶** and **✖ Cancel** (nothing is made): Start (Name, Tab or a new Tab, Interface),
+how many Vessels, the type of each, pick or build each one (that type's Vessel Templates first, the plain Skynet Vessel Widget,
+**🔨 Build a new Vessel Device**, which opens the Vessel Device Builder, Rule 19.5, after the Interview; Label, Size, Dead space),
+how many Pumps and each one (Type, Cover, Overlay, Label, Label Visible, Toggle), how many Motorized Valves and each one, Manual
+Valves, **And so on** (recirculation, chiller, Supply Manifold), the profile's numbers, and **Review**. Every answer starts from
+the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to the Tab and puts everything on the 🔨 Build Tab
+(Rule 4.1); each pump and motorized valve is a real Device on the next free Port (Rule 4.2), named by Rule 3.1.
+1. **It replaces the Vessel tab** (OakBarn Brewery, 2026-11-13: "Yes"). A vessel's size, dead space, heater and probe are in its
+   Properties on the Tab. A profile made before Templates keeps its list, with **Put on Tab** only (Help 34).
+2. **The profile keeps its pumps and valves** (OakBarn Brewery, 2026-11-13: "I may have a 3 Vessel 3 Pump Layout that I want in
+   more than a singles Schema, but rather Than having to rebuild it, just select from a DDLB"). Each pump and motorized valve on
+   the profile's Tab is a **slot** of the profile with a meaningless key (Design Rule 2): its look and place, **never its Interface,
+   Port or Name**. Pipes in the profile point at the slot. A Schema that picks the profile and has no Device for a slot is asked
+   for the Interface; each slot gets the next free Port (Tab row: **🔌 Give ... their Ports**) and starts on the Build Tab.
+   A slot another Schema has not given a Port stays in the profile (Design Rule 1); a Device deleted where it was given a Port
+   takes its slot out.
+3. **Both programs:** the BruControl Import has no Equipment Profiles, so the Interview is in the Skynet Panel only. The Import's
+   Build page is not changed.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4139,8 +4162,8 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 5. **RIMS readings:** drop the separate Heat / Temp boxes and show readings on the RIMS picture?
    (asked 2026-10-26)
 6. **RIMS file name "TC1_2":** 1/2 inch or 2 inch TC? The Template still says TC 1.5.
-7. **Equipment Profile:** one per Tab (Hot Side, Fermentation; Fritz 2026-10-21) or one per Schema
-   (PR #44)? Still open in the Brewing rewrite.
+7. *Answered:* **Equipment Profile:** one per Tab (Hot Side, Fermentation; OakBarn Brewery 2026-10-21). Each Tab picks its own
+   profile; Rule 19.6 builds one with the Equipment Profile Interview.
 8. ~~**Phones in Edit layout:** add a warning and an "Allow Edit layout on phones" switch (off)?~~
    Answered 2026-11-04: Rule 2.35 run mode.
 9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
@@ -4164,6 +4187,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 ## Change log
 
 - 2026-11-13: Added Rules 17.13 (Profiles: Add new ... everywhere, Skynet Boil Profiles 60 / 90 / 30 Minute and No Boil, Boil Off and Brewhouse Efficiency belong to the Equipment Profile, ask each time which Boil Off), 17.14 (Three Hop Stands High / Middle / Low, set in Default settings, Boil Profiles and Recipes; chill stops at each), 17.15 (imported Recipe: Save? then Overwrite with backup or Add new "#2"), 17.16 (amounts follow Units; Misc unit per line with Tablet, Pack; grain weight label locked from Units). Help 35 rewritten with tables (Mash, Boil, Water Profiles, Hop Stands), Help 100. Checked against both programs: the BruControl Import's Build page has no Recipe screens.
+- 2026-11-13: Added Rule 19.6, the Equipment Profile Interview (OakBarn Brewery): Add new Equipment Profile starts with Answer a few questions; Vessels, their type, pick or 🔨 build each, Pumps, Motorized Valves, Manual Valves, And so on, the numbers, Review, then 🔨 Build onto the Build Tab. It replaces the Vessel tab (Help 34 now says where its settings are). A profile keeps its pumps and motorized valves as slots (look and place, never Interface, Port or Name), so a layout can be picked in another Schema, which only gives the Ports. Open question 7 answered (one profile per Tab). Help 196 (new; next free Help 197), Help 13, 28, 33, 34, 43, 48, 68 and their French pages. Checked against both programs: the BruControl Import has no Equipment Profiles.
 - 2026-11-13: Rule 9.8 now has four update choices (OakBarn Brewery): 1 Start Fresh is a real fresh start, nothing saved (also the backups, own pictures and sounds, and the Import folder); new 2 Modified Fresh Start keeps the Default settings, own Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import; 3 reset all users; 4 keep everything. lib/freshstart.js does both Fresh Starts in every installer; lib/skynet_media.json lists the Skynet pictures and sounds (tools/skynet-media-list.js). Help 18, 19.
 - 2026-11-13: Added Rule 18.36 (OakBarn Brewery, Default settings markup: "Just put 10 in the Slot and no comments like Empty = 10"): a box with a Skynet default shows the number in it; no "(empty = ...)" in any label; empty = Null; what an empty box means moves to its Hover Help ("Empty: ..."). Added Rule 7.24 (OakBarn Brewery): a missing picture shows the File Not Found picture, Hover Help names the path. Repair (Rule 9.14) now ends with a Skynet notice that this is Official Skynet again; Acknowledge closes About and goes to the opening Tab. ☰ Menu has Help in Français / Help in English. New items on the Build Tab go to the center of what is on screen; the New text X / Y boxes left Default settings. Checked against both programs.
 - 2026-11-13: Added Rule 2.52 (OakBarn Brewery, PDF "Blickmann Rip Tide Mode"): in Build mode (Edit layout) the ☰ Menu button is greyed out, dialogs have no ☰ (Rule 2.3 changed to say so) and never two after the Review step's Back, the Edit layout bar is greyed out while a dialog is open, and the Label Attributes Dialog shows the Font, Fore Color and Back Color defaults that are set, with Cancel and Save at the top only. Help 51, 115 (and French). Checked against both programs: the Importer's Build page is the same Edit layout. (thread "Build an Equipment Profile interview")

@@ -88,7 +88,7 @@
 
 **Valve Profile** (profil de vanne) : les images et l'orientation (Horizontal, Vertical, 45 degrés à gauche ou à droite) avec lesquelles commence une nouvelle vanne, choisies seulement quand la vanne est créée.
 
-**Heat Source** (source de chaleur) : comment une cuve est chauffée : Gas, Electric, RIMS, HERMS, Other ou Unheated. Voir [L'onglet Vessel](34-vessel-tab).
+**Heat Source** (source de chaleur) : comment une cuve est chauffée : Gas, Electric, RIMS, HERMS, Other ou Unheated. Voir [Réglages d'une cuve](34-vessel-tab).
 
 **Service** : ce que transporte une vanne : Gas, Room Temperature Liquid (liquide à température ambiante), ou High Temperature Liquid (Stainless Steel) (liquide chaud, inox). Une vanne de gaz peut être la source de chaleur d'une cuve.
 

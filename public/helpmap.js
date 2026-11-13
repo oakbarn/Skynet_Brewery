@@ -156,7 +156,7 @@ export const ALL_TOPICS = () => [...HOT_SPOTS.map(x => x[1]), ...MENU_ALL(), ...
 const MENU_TOPICS = {
   default: { 'Pipes, hoses': ['default-settings', 'pipes-hoses-and-sizes'], 'Defaults set somewhere': ['default-settings', 'defaults-set-somewhere-else'], 'Default settings': ['default-settings'], Text: ['text-boxes', 'defaults'], 'How amounts show': ['recipe-tab', 'recipe-defaults'], 'Hop alerts': ['recipe-tab', 'recipe-defaults'], _: ['menu', 'the-default-tab'] },
   equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-each-tab-its-equipment-profile'],
-    'Equipment list': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], 'Made on the Vessel tab': ['vessel-tab'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
+    'Equipment list': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], 'Made before Templates': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
   vtemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },

@@ -42,7 +42,7 @@ Les navigateurs (Chrome, Edge, Safari, iPhone et Android) ne laissent une page j
 
 - **Zoom** : la taille d'affichage des Tabs, et le plein écran. Voir [Zoom et plein écran](41-zoom-and-full-screen).
 - **Equipment Profile** : les pertes et le rendement, les cuves, et quel profil utilise chaque Tab du Schema chargé. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
-- **Vessel** : une cuve (ou un refroidisseur, un serpentin, un filtre) à la fois. Voir [L'onglet Vessel](34-vessel-tab).
+- **Vessel** n'existe plus : l'[Equipment Profile Interview](196-equipment-profile-interview) l'a remplacé. Voir [Réglages d'une cuve](34-vessel-tab).
 - **Vessel Templates**, **Equipment Templates** et **Fitting Templates** : des cuves, refroidisseurs, serpentins, filtres à trub et Bundled Fittings tout prêts (Skynet et les vôtres) en petites icônes. Double-cliquez sur l'un pour ses réglages, ou mettez-en une copie sur un Tab. Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
 - **Default Layout** : les cuves et les tuyaux qu'un Tab reçoit avec son Equipment Profile. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** et **Boil Profile** : voir [Mash Profiles et Boil Profiles](35-mash-and-boil-profiles).
