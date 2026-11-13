@@ -194,6 +194,9 @@
   { "id": 191, "file": "Vessels/Vessel_Kettle_BottomDrain_Side_SteamSlayer.svg" },
   { "id": 192, "file": "Vessels/Vessel_Kettle_BottomDrain_Side.svg" },
   { "id": 193, "file": "Vessels/Vessel_Kettle_BottomDrain.svg" },
-  { "id": 194, "file": "Vessels/Vessel_Kettle_Tall.svg" }
+  { "id": 194, "file": "Vessels/Vessel_Kettle_Tall.svg" },
+  { "id": 195, "file": "Alarms/Alarm_PreHop_Mark_1.svg" },
+  { "id": 196, "file": "Alarms/Alarm_PreHop_Mark_2.svg" },
+  { "id": 197, "file": "Alarms/Alarm_PreHop_Mark_3.svg" }
  ]
 }

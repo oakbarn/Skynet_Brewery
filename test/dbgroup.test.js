@@ -73,5 +73,16 @@ assert.equal(renameGroupInText('send_db_group Readings\n  SEND_DB_GROUP "Reading
 // ---- the Database box settings keep the Groups (more than one)
 assert.deepEqual(cleanDatabase({ database: { frequency: 'minutes', every: 1, groups: ['grp_m1', 'grp_b1', 'grp_m1', 'bad key'] } }).database, { frequency: 'minutes', groups: ['grp_m1', 'grp_b1'], every: 1 });
 
+// ---- Name.Attribute DBSend (OakBarn Brewery, 2026-11-13): one attribute now; Name DBSend = send_db Name
+for (const l of ['gGV_Other DBSend', 'gGV_Other.visible DBSend', '"gGV_Other".visible dbsend', 'send_db gGV_Other']) assert.deepEqual(engine.check(l).errors, [], l);
+assert.match(engine.check('gGV_Nope.visible DBSend').errors[0].msg, /gGV_Nope/);
+const before = count('gGV_Other');
+fs.writeFileSync(path.join(d, 'scripts', 'Dbs.txt'), 'gGV_Other DBSend\ngGV_Other.visible DBSend\n');
+engine.start('Dbs'); await wait(300);
+assert.equal(count('gGV_Other'), before + 2, 'DBSend sent twice');
+const rows = logger.db.prepare('SELECT attr, value FROM samples WHERE name = ? ORDER BY id DESC LIMIT 2').all('gGV_Other');
+assert.equal(rows[0].attr, 'visible', 'Name.Attribute DBSend sends that attribute'); assert.notEqual(rows[1].attr, 'visible');
+assert.throws(() => logger.logNow('gGV_Other', 'script', 'nosuchthing'), /no \.nosuchthing|nosuchthing/);
+
 logger.close(); clearTimeout(store._persistTimer);
 console.log('database groups ok');
