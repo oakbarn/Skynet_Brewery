@@ -134,5 +134,8 @@
  "138-temperature-probe-device-properties": "473f40c26f9580df",
  "139-sight-glasses": "b47e7ed1b3ed3c5a",
  "140-label-cannot-be-blank": "dc5fe7bdf518814d",
- "141-tap-water-valve": "eb0da2d42c1c5155"
+ "141-tap-water-valve": "eb0da2d42c1c5155",
+ "142-connect-a-qd-hose-from-a-process": "7f4e428bbab8f6d6",
+ "144-api-name-for-voice-commands": "563e8b1ccbfed20e",
+ "145-make-a-gglobal-in-a-process": "244ad15c8993e6a3"
 }
