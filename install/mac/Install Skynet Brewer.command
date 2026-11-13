@@ -208,13 +208,15 @@ echo "Getting the USB support package (needs internet)"
 ( cd "$DEST" && npm install --no-audit --no-fund ) || echo "Could not get it. The panel still works; for USB boards run 'npm install' in $DEST later."
 
 # ---------------------------------------------------------------- Desktop launcher
+# Any folder name works (Rule 9.15): the start file gets the folder in single quotes, so spaces, accents, $ and quotes are safe.
+sh_q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 LAUNCHER="$HOME/Desktop/Skynet Brewer.command"
 cat > "$LAUNCHER" <<EOF
 #!/bin/bash
 # MIT License Granted. Copyright (c) OakBarn Brewery 2026
 # Starts the Skynet Brew Panel and opens it in your browser. Made by the Skynet Brewer installer.
 export PATH="/opt/homebrew/bin:/usr/local/bin:\$PATH"
-cd "$DEST"
+cd $(sh_q "$DEST") || exit 1
 ( sleep 4; open http://localhost:$PORT ) &
 npm start
 EOF

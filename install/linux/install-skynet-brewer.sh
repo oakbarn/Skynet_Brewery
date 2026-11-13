@@ -46,6 +46,14 @@ ask() {
   case "$a" in [Yy]*) return 0 ;; *) return 1 ;; esac
 }
 
+# Any folder name works (Rule 9.15): spaces, accented letters (bière), $, quotes. Each file we write gets the path in that file's own
+# quoting, so the start file, the menu entry and the service find the folder whatever it is called.
+sh_q()      { printf "'%s'" "${1//\'/\'\\\'\'}"; }                                      # for a bash file
+desktop_q() { local s="${1//\\/\\\\\\\\}"; s="${s//\"/\\\\\"}"; s="${s//\`/\\\\\`}"; s="${s//\$/\\\\\$}"; s="${s//%/%%}"; printf '"%s"' "$s"; }
+desktop_s() { local s="${1//\\/\\\\}"; printf '%s' "$s"; }                       # a plain value in a menu entry
+unit_q()    { local s="${1//\\/\\\\}"; s="${s//\"/\\\"}"; s="${s//%/%%}"; s="${s//\$/\$\$}"; printf '"%s"' "$s"; }   # for a systemd service
+unit_dir()  { local s="${1//%/%%}"; printf '%s' "$s"; }
+
 if [ "$(id -u)" = 0 ]; then
   fail "Please run this without sudo:  bash $0   (it asks for your password when it needs it)"
 fi
@@ -264,8 +272,8 @@ Wants=network-online.target
 
 [Service]
 User=$USER
-WorkingDirectory=$DEST
-ExecStart=$NODE_BIN --no-warnings server.js
+WorkingDirectory=$(unit_dir "$DEST")
+ExecStart=$(unit_q "$NODE_BIN") --no-warnings server.js
 Restart=always
 RestartSec=5
 
@@ -284,7 +292,7 @@ fi
 cat > "$DEST/start-skynet-brewer.sh" <<EOF
 #!/usr/bin/env bash
 # Starts the Skynet Brew Panel and opens it in your browser. Made by install-skynet-brewer.sh
-cd "$DEST"
+cd $(sh_q "$DEST") || exit 1
 if systemctl is-active --quiet $SERVICE_NAME 2>/dev/null; then
   xdg-open http://localhost:$PORT >/dev/null 2>&1 &
   exit 0
@@ -301,8 +309,8 @@ DESKTOP_FILE="[Desktop Entry]
 Type=Application
 Name=Skynet Brewer
 Comment=Skynet Brew Panel
-Exec=\"$DEST/start-skynet-brewer.sh\"
-Icon=$DEST/install/icon.png
+Exec=$(desktop_q "$DEST/start-skynet-brewer.sh")
+Icon=$(desktop_s "$DEST/install/icon.png")
 Terminal=$TERMINAL
 Categories=Utility;
 "
