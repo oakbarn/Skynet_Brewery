@@ -73,5 +73,9 @@
  "73-double-click-in-pickers": "e54a03e8262e3e30",
  "74-picture-widget": "fc9381bba142c93e",
  "75-build-tab-add-button": "92478527e0a0781b",
- "76-interfaces": "babefd9b071bb82d"
+ "76-interfaces": "babefd9b071bb82d",
+ "77-simulator-or-real-boards": "3fc14a525fa235ce",
+ "78-raspberry-pi-gpio-pins": "8d331c749ffdbb6c",
+ "79-predictive-text": "8e7640adc70723bc",
+ "80-name-change-and-hidden-keys": "0596c77a87af3260"
 }
