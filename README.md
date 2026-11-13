@@ -191,7 +191,22 @@ vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:0
 BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
 
-Names can have no spaces, and this is enforced when a Device, Widget or Template is created. Processes have automatic line numbers.
+Names can have no spaces, and this is enforced when a Device, Widget or Template is created. Processes have automatic line numbers. There is a Process command to go to a line number, similar to going to a section:
+
+```
+234  some Code
+235  [My New Section]
+
+goto "My New Section"
+```
+
+or
+
+```
+goLine 235
+```
+
+are equivalent. When lines are added or taken out, Skynet updates the goLine number in the background, without any user input.
 
 Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 
