@@ -1311,3 +1311,7 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
   body.picIdsPage { background: #fff; color: #000; }
   table.picIds tr { break-inside: avoid; }
 }
+/* the Pre-Hop Alarm (Rule 7.21): its Skynet watermark stays in view while it sounds; the Active overlay blinks instead of the box */
+.el.alarm.almPre, .el.alarm.almPre.active { animation: none; border-color: transparent; background-size: 100% 100%; }
+.el.alarm.almPre > .onov { animation: almBlink 0.8s steps(2) infinite; }
+.el.alarm.almPre .vl { text-shadow: none; }

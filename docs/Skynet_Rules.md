@@ -2477,6 +2477,38 @@ Brew Flow Alarms. **The free home for MP3s** is a GitHub Release (tag `Skynet-So
 release, so Releases > Latest stays the Setup); only files with the right to share go there (Rule 9.12). Both programs: the BruControl
 Import keeps a sound that is already a link as it is and never copies it. Help 186.
 
+7.21 **The Alarm attributes** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew Panel 1 a", pages 15 to 19: "Common
+Attributes to All (SkyNet and User Alarms. Alarms can have additional attributes only applicable to them"; "Your Alarm spec is not
+built yet go wit your recomendtions"). What a Process can use on an Alarm Widget (a Basic Skynet Alarm, a User Alarm or a Pre-Hop
+Alarm), in OakBarn Brewery's words. **Common to all:**
+1. **`.path`**: its sound file (.wav or .mp3, .mp3 preferred). A wrong path plays no sound (Rule 7.20 then plays the Missing Alarm
+   Sound). Audio only plays while the Alarm is On. The older `.sound` still works.
+2. **`.label_fore` and `.label_back`**: the colors of its Label (the same as its Label Attributes' Fore Color and Back Color).
+3. **`.x` and `.y`**: its place on the Tab; **`.h` and `.w`**: its size (the same as `.x_hPosition`, `.y_vPosition`, `.height`, `.width`).
+4. **`.visible` is automatic**: `AlarmName = On` shows it, `AlarmName = Off` hides it. It is not on the Properties dialog and a Process
+   can't set it (it can still read it). In Edit layout a hidden Alarm shows faint so it can be placed. Hidden Locked still works.
+5. **`.toggle`** (hidden, never set by a Process): a click on the Alarm's picture turns it Off, or On, which changes `.state`.
+6. **`.loop`**: true plays the sound and repeats it; false plays it one time.
+7. **`.state`**: its On / Off. `AlarmName = On` and `AlarmName.state = On` are the same.
+8. **`.skynet_Layer_2`**: its Layer 2 picture (its Set Graphic), above the base picture and under Layer 1 (the Active overlay):
+   `AlarmName.skynet_Layer_2 = "Name of Skynet Picture"`, or `AlarmName.skynet_Layer_2 = Skynet_Picture_Number` (its fixed number,
+   Rule 7.22; `.skynet_Layer_2.path` and `.skynet_Layer_2.file` work as Rule 7.23 says). Picked on the Properties dialog or by a
+   Process. The older `.setgraphic` still works.
+**Each kind:**
+- **Brew Flow** and **Hop Drop**: a Basic Skynet Alarm; `.fore` and `.back` color its bell. **A Brew Flow Alarm holds its
+  Process:** `AlarmName = On` (or `.state = On`) in a Process is followed by a hidden `wait AlarmName = Off`, so the Process goes on
+  only once the Alarm is tapped Off (or another Process turns it Off). Stop and Override end the wait as on any wait.
+- **(3) Pre-Hop Drop: a Combination Alarm and String Box Widget** (☰ Add > Pre-Hop Alarm). **`.background`** picks one of **three
+  Skynet watermarks** (1, 2 or 3; the pictures are Skynet's and can't be changed, only picked by a Process: `AlarmName.background = 3`).
+  **`.fore` and `.back`** color its text, **`.string`** sets its text (Rich Text codes work), and **`.playtime`** is how many seconds it
+  stays On; then it turns itself Off. A click turns it Off sooner. Empty or 0 = it stays On until it is tapped.
+- **(4) User Alarm**: `.background` 1, 2 or 3 picks one of **your own three pictures** (Image Path 1 to 3, changed on the Properties
+  dialog or by a Process). **`.fore` and `.back`** color its text, **`.string`** and **`.playtime`** as the Pre-Hop Alarm.
+**Priority:** the spec's `.alarmchain` number is the Alarm's **`.priority`** (Rule 7.18), because Alarm Chain is already the steps
+(Rule 7.16). Each Kind has its own number (Rule 7.18). The three Pre-Hop watermarks are placeholder drawings
+(`media/Images/Skynet/Alarms/Alarm_PreHop_Mark_1.svg` to `_3`, Skynet Picture numbers 195 to 197) until OakBarn Brewery sends its own; they are not in the Image Library.
+Both programs: the BruControl Import's Build page is the Panel's, so it has the same attributes; imported BruControl Alarms have no
+Alarm Widget kind yet (Rule 7.14) and keep their own `.visible`. Help 195.
 
 7.22 **Skynet Picture numbers** (OakBarn Brewery, 2026-11-13, ReadMe markup "Skynet Brew Panel 1 a" page 16: "for all skynet Pictures,
 a Leading ID Number will be created and remains Unique and not changeable ever. That Number besides the Name will be in all DDLBs for
@@ -3949,6 +3981,7 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Added Rule 7.21, the Alarm attributes (OakBarn Brewery, README markup "Skynet Brew Panel 1 a", pages 15 to 19): `.path`, `.label_fore` / `.label_back`, `.x` `.y` `.w` `.h`, the automatic `.visible`, the hidden `.toggle` (a click turns it Off or On), `.loop`, `.state`, `.skynet_Layer_2`; a Brew Flow Alarm holds its Process until it is tapped Off; the new Pre-Hop Alarm (a Combination Alarm and String Box on three Skynet watermarks) and the User Alarm get `.string` and `.playtime`. The spec's `.alarmchain` is `.priority` (Rule 7.18). Help 195 (new), 21, 107.
 - 2026-11-13: Added Rule 7.22, Skynet Picture numbers (OakBarn Brewery, ReadMe markup page 16): every Skynet picture has a fixed number that never changes or moves to another picture (lib/skynetpicids.json, 194 pictures; tools/skynet-picture-ids.js gives new ones the next number and writes docs/Skynet_Picture_IDs.md); every picture list, the 🖼 picker and the Media page show number · file name; Media page > 🔢 Skynet Picture numbers is the printable list; a Process can give a picture by its number. Added Rule 7.23, Two-part paths (OakBarn Brewery, ReadMe markup page 17): four default folders (Skynet Graphic, Skynet Audio fixed; User Graphic, User Audio in Settings), lists show only the file name with a Folder line (greyed for Skynet), a file name alone in a Process gets its folder, .path and .file on every picture and sound. Help 193 and 194 (new); Help 7, 22, 25 point to them. Checked against both programs: the BruControl Import's Build page shares the dialogs and the Process reader. Next free Help 196 (Help 195 is taken by the Alarm attributes thread). (thread "Build two-part file paths")
 - 2026-11-13: Added Rule 11.11 (OakBarn Brewery: "French Help Only forever"; "Ballons and Hover Help French"): the Help pages and the Hover Help are in French as well as English, picked by 🌐 Help language in the Help page list; the screens, buttons and labels stay English forever. French pages in help/fr/ with the same names; an English Help change and its French change go in the same PR (help/fr/_source.json, test/helpfrench.test.js, tools/help-french.js). Machine translated. Help 54, 192. The French balloons follow in their own PR. Checked against both programs: the BruControl Import uses the Panel's Help and balloons; its own Help is on hold (Rule 11.3). (thread "Translate Help to French")
 - 2026-11-12: Added Rule 9.15 (OakBarn Brewery): the installers work from and into a folder with any name (spaces, accented letters, $, %, quotes). The Linux and Pi installers now quote the folder correctly in the start file, the Skynet Brewer menu entry/Desktop icon and the start-by-itself service; tested installing from `Brassage bière/Logiciel de brassage de bière/Skynet Brew Panel` into a folder named `Brew Panel ü $x "q" it's 50%`. Checked against both programs: the BruControl Import is Windows only; nothing changes there.
