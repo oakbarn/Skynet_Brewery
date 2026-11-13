@@ -30,11 +30,11 @@ my_Widget.visible = false
 tm_Mash.countdown = true
 tm_Mash.label = "Mash rest"
 Kettle_Temp.background = 2
-Pump_Red.image = "Images/RedPump.png"
+Pump_Red.image = "RedPump.png"
 if Hop_Text.visible == true
 ```
 
-`.image` change l'image de l'élément : le chemin va dans .backpath et background devient 1. `.background = 1`, `2` ou `3` montre .backpath, .backpath_2 ou .backpath_3 ; 0, vide ou tout nombre au-dessus de 3 ne montre aucun fond. Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).
+`.image` change l'image de l'élément : le chemin va dans .backpath et background devient 1. `.background = 1`, `2` ou `3` montre .backpath, .backpath_2 ou .backpath_3 ; 0, vide ou tout nombre au-dessus de 3 ne montre aucun fond. Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths). Le nom du fichier seul suffit (Skynet ajoute son dossier), une image Skynet peut aussi être donnée par son numéro, et chaque image ou son a `.path` (le chemin entier) et `.file` (le nom du fichier) : voir [Chemins en deux parties (.path et .file)](194-two-part-paths) et [Numéros des images Skynet](193-skynet-picture-numbers).
 
 Tout attribut qui n'a que deux choix est `true` ou `false` :
 

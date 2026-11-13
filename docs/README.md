@@ -9,6 +9,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [General Properties Dialog Format](General_Properties_Dialog_Format.png) | Fritz's drawing for the General Dialog Rules (Rule 18). |
 | [Universal Properties](Universal_Properties.md) | The Properties and Process attributes every Device, Widget and Semi-Device has (Rule 1.21). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
+| [Skynet Picture ID numbers](Skynet_Picture_IDs.md) | Every Skynet picture and its fixed number (Rule 7.22), ready to print. |
 | [Special Characters](Special_Characters.md) | Every keyboard mark and what it does in a name: the safe ones (`_` `~` `@`), the free ones, the blocked ones and the trouble ones. |
 | [Outside Links](Outside_Links.md) | Every web link in Help, and whether OakBarn Brewery directed it (Rule 11.10). A test fails on any other. |
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |

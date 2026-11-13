@@ -52,8 +52,8 @@ const fr = JSON.parse(fs.readFileSync(FILE, 'utf8'));
 const en = balloonTexts(root);
 const missing = [...en.keys()].filter(t => typeof fr[t] !== 'string' || !fr[t]);
 assert.deepEqual(missing.map(t => `${en.get(t)[0]} ${JSON.stringify(t).slice(0, 80)}`), [], 'balloon texts with no French (node tools/hoverhelp-french.js; Rule 11.11)');
-const gone = Object.keys(fr).filter(t => !en.has(t));
-assert.deepEqual(gone.map(t => JSON.stringify(t).slice(0, 80)), [], 'French for balloon texts that are gone (node tools/hoverhelp-french.js --prune)');
+// French whose English text is gone does no harm (a balloon of a PR not merged yet may already have its French); the tool lists it
+// and --prune takes it out
 const WARN_EN = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 const WARN_FR = "⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.";
 const bad = [];
