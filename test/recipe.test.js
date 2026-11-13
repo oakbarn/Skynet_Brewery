@@ -1,4 +1,5 @@
 // The Skynet Recipe: BeerSmith .bsmx and BeerXML import, the Recipe tab sums, hop order and merged alerts, Skynet_Fields
+import { hopStands, nearestStand, standOf } from '../public/brewcalc.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -46,6 +47,8 @@ assert.equal(r.mash.steps[0].tempC, 66.67, '152 °F'); assert.equal(r.spargeType
 assert.ok(Math.abs(r.grainKg - 176 / KG_OZ) < 0.001, 'Grain Wt.: grains only, not the sugar');
 assert.equal(r.firstMashC, 66.7); assert.ok(r.ibuCalc > 100 && r.ibuCalc < 200, 'IBU worked out: ' + r.ibuCalc); assert.ok(r.strikeTempC > 72 && r.strikeTempC < 76);
 assert.equal(r.whirlpoolMinutes, 20); assert.equal(r.spargeTempC, 75.6);
+// Three Hop Stands: a whirlpool hop with no temperature goes to Hop Stand High, with the file's time
+assert.equal(byName('Citra').stand, 'High'); assert.deepEqual(r.hopStands, { High: { tempC: null, min: 20 } });
 assert.throws(() => readBsmx('<Recipe></Recipe>'), /No recipe/);
 
 // BeerXML brings every ingredient too
@@ -132,7 +135,7 @@ assert.equal(hf.rcp_Hop_1_Name, 'Magnum'); assert.equal(hf.rcp_Hop_1_AA_Actual, 
 assert.equal(hf.rcp_Hop_3_Drop, 55); assert.ok(hf.rcp_Hop_1_IBU > hf.rcp_Hop_3_IBU && hf.rcp_Hop_3_IBU > 0);
 assert.equal(hf.rcp_Hop_4_Boil_Group, 0, 'a Mash hop is not a Boil Hop'); assert.equal(hf.rcp_Hop_4_IBU, 0);
 assert.equal(hf.rcp_Hop_6_Use, 'secondary'); assert.equal(hf.rcp_Hop_6_Days, 7); assert.equal(hf.rcp_Hop_7_Date, '2026-11-05');
-assert.equal(hf.rcp_Hop_8_Whirlpool_Temp, 176); assert.equal(hf.rcp_Hop_8_Hop_Rocket, true); assert.equal(hf.rcp_Hop_8_Min, 20); assert.equal(hf.rcp_Hop_8_Boil_Group, 4);
+assert.equal(hf.rcp_Hop_8_Hop_Stand, 'High', '80 °C is nearest Hop Stand High'); assert.equal(hf.rcp_Hop_8_Whirlpool_Temp, 180, 'its Hop Stand\'s temperature'); assert.equal(hf.rcp_Hop_8_Hop_Rocket, true); assert.equal(hf.rcp_Hop_8_Min, 20); assert.equal(hf.rcp_Hop_8_Boil_Group, 4);
 assert.equal(recipeField('rcp_Hop_12_IBU')[1], 'Hop 12 IBU', 'any hop line number is a Skynet_Field'); assert.equal(recipeField('rcp_Hop_1_Nope'), undefined);
 assert.ok(HOP_FIELDS.every(([k]) => /^[A-Z][A-Za-z_]+$/.test(k)));
 assert.ok(hopSchedule(hs, { units: 'US' }).groups.some(g => g.label === 'Secondary (7 days)'));
@@ -147,6 +150,10 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'recipes'));
 const lib = new RecipeStore(dir);
 const sv = lib.save(r); assert.equal(sv.id, 'test-ipa'); assert.equal(lib.list()[0].name, 'Test IPA'); assert.equal(lib.get('test-ipa').ingredients.hops.length, 9);
 assert.throws(() => lib.save({ name: '' }), /name/);
+// an imported Recipe with a name already saved: Overwrite keeps the old copy in backups/recipes; Add new is "Name #2"
+assert.equal(lib.byName('test ipa').id, 'test-ipa'); assert.equal(lib.freeName('Test IPA'), 'Test IPA #2');
+const bk = lib.backup('test-ipa'); assert.ok(fs.existsSync(bk) && bk.includes(path.join('backups', 'recipes')));
+lib.save({ ...r, name: 'Test IPA #2' }); assert.equal(lib.freeName('Test IPA'), 'Test IPA #3'); assert.equal(lib.freeName('Test IPA #2'), 'Test IPA #3');
 
 // hop alerts follow a countdown timer: 60 min boil, 45 min left = 15 min in
 let left = 3600, sent = [];
@@ -199,4 +206,10 @@ assert.equal(tap2.tap, true); assert.equal(tap2.chlorine, 'ammonia'); assert.equ
 assert.throws(() => tapStore.save(tap.id, { ...tap, tested: '11/11/2026' }), /yyyy-mm-dd/);
 const tv = recipeValues({ recipe: { ...blankRecipe(), waterProfile: '' } }, { water: tapStore.list() });
 assert.equal(tv.rcp_Water_Ca, 40, 'no Water Profile picked: Tap Water');
+// a whirlpool temperature goes to the nearest stand (154 °F: Middle)
+{
+  const st = hopStands({ pitchTempC: 20 });
+  assert.equal(nearestStand(67.5, st), 'Middle'); assert.equal(nearestStand(85, st), 'High'); assert.equal(nearestStand(25, st), 'Low');
+  assert.equal(standOf({ stand: 'Low', wpTempC: 80 }, st), 'Low', 'its own pick first'); assert.equal(standOf({ wpTempC: 66 }, st), 'Middle'); assert.equal(standOf({}, st), 'High');
+}
 console.log('recipe tests passed');

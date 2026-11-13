@@ -196,7 +196,7 @@ FunctionEnd
 ; ---------------------------------------------------------------- What this update does (Rule 9.8)
 ; Shown only when the panel is already in the chosen folder. Three choices (Fritz, 2026-11-06):
 ;   1 fresh     Start Fresh: a real fresh start, nothing of yours is kept (OakBarn Brewery, 2026-11-13: "A fresh start should be
-;               a real Fresh Start with nothing saved" ... "and the Import"). Only the program and the Skynet pictures and sounds stay.
+;               a real Fresh Start with nothing saved" ... "and the Import"; "also delete the Media files"). Only the program stays.
 ;   2 modified  Modified Fresh Start: Schemas, Processes, users and brew log deleted. Kept: Default settings, your own Mash / Boil /
 ;               Water Profiles, Equipment Profiles and Recipes, your own pictures and sounds, the backups folders and Import.
 ;   3 users     Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
@@ -220,7 +220,7 @@ Function UpdateChoicePage
 
   ${NSD_CreateRadioButton} 0 14u 100% 10u "&1. Start Fresh: delete everything, nothing saved"
   Pop $RadioFresh
-  ${NSD_CreateLabel} 12u 24u 96% 17u "Like a new install. Every Schema, setting, user, Process, the brew log, the backups, your own pictures and sounds, and the Import folder are deleted for good."
+  ${NSD_CreateLabel} 12u 24u 96% 17u "Like a new install. Every Schema, setting, user, Process, the brew log, the backups, every picture and sound, and the Import folder are deleted for good."
   Pop $0
 
   ${NSD_CreateRadioButton} 0 42u 100% 10u "&2. Modified Fresh Start"
@@ -262,7 +262,7 @@ Function UpdateChoiceLeave
   ${EndIf}
   ${NSD_GetState} $RadioFresh $0
   ${If} $0 == ${BST_CHECKED}
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the backups folders$\r$\n   - your own pictures and sounds (the Skynet ones stay)$\r$\n   - everything in the Import folder ($BrewDir\Import)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the backups folders$\r$\n   - every picture and sound (media), the Skynet ones too: run the Media Setup after$\r$\n   - everything in the Import folder ($BrewDir\Import)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
       Abort
     StrCpy $Choice "fresh"
     Return

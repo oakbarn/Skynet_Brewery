@@ -49,8 +49,8 @@ to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
 UPDATE CHOICES: before that, the installers ask what the update does:
   1. Start Fresh: delete everything, nothing saved. A warning says ALL EXISTING DATA
-     WILL BE DELETED (config, data, processes, backups, your own pictures and sounds,
-     and the Import folder, with no backup; the Skynet pictures and sounds stay).
+     WILL BE DELETED (config, data, processes, backups, every picture and sound, and
+     the Import folder, with no backup). Run the Media Setup after it.
   2. Modified Fresh Start: deletes Schemas, Processes, users and the brew log after a
      warning. Kept: Default settings, your own Profiles, Equipment Profiles, Recipes,
      pictures and sounds, the backups and the Import folder.
@@ -74,6 +74,10 @@ own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releas
   Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
              or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
              and start the panel: it copies in the pictures and sounds you do not have yet.
+ORDER, on a First Install and after a Start Fresh or Modified Fresh Start: the panel
+  installer FIRST, then the Media Setup (it needs the panel folder, and a Fresh Start
+  clears folders before anything goes in), then the Sample Schemas Setup if you want it.
+  The Media Setup only adds what is missing, so running it again is always safe.
 They ONLY ADD: a picture or sound you already have, by that name, is never changed, and
 nothing is ever deleted. Your own pictures and sounds are never touched. Run them again
 whenever new pictures come out.

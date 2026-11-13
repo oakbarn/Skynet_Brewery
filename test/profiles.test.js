@@ -28,12 +28,18 @@ assert.throws(() => mash.save(m1.id, { ...m1, steps: [] }), /at least one step/)
 assert.throws(() => mash.save(m1.id, { ...m1, steps: [{ name: 'x', temp: -5, time: 10 }] }), /0 or more/);
 assert.equal(mash.create('Copy', { from: m1.id }).steps.length, 4, 'a copy of another');
 
-// Boil Profile: total time and boil off
+// Boil Profile: total time, its own boil off (empty = the Equipment Profile's), the volume questions and the three Hop Stands
 const b1 = boil.create('60 minute');
-assert.equal(b1.boilTime, 60); assert.equal(b1.boilOffRate, 1);
+assert.equal(b1.boilTime, 60); assert.equal(b1.boilOffRate, undefined, 'no boil off of its own'); assert.equal(b1.askVolumes, true);
 assert.throws(() => boil.save(b1.id, { ...b1, boilTime: '' }), /boil time/);
-assert.equal(boil.save(b1.id, { ...b1, boilTime: 90, boilOffRate: 1.25 }).boilTime, 90);
-boil.remove(b1.id); assert.equal(boil.list().length, 0);
+const b2 = boil.save(b1.id, { ...b1, boilTime: 90, boilOffRate: 1.25, hsMiddleTemp: 150, hsMiddleMin: 25 });
+assert.equal(b2.boilTime, 90); assert.equal(b2.boilOffRate, 1.25); assert.equal(b2.hsMiddleTemp, 150); assert.equal(b2.hsMiddleMin, 25); assert.equal(b2.hsHighTemp, undefined);
+assert.equal(boil.save(b1.id, { ...b2, boilTime: 0 }).boilTime, 0, '0 = No Boil');
+boil.remove(b1.id);
+// the Skynet Boil Profiles (OakBarn Brewery, 2026-11-13): read only, every one asks the volumes, no boil off of their own
+assert.deepEqual(boil.list().map(p => [p.name, p.boilTime]), [['Skynet 60 Minute Boil', 60], ['Skynet 90 Minute Boil', 90], ['Skynet 30 Minute Boil', 30], ['Skynet No Boil', 0]]);
+assert.ok(boil.list().every(p => p.skynet && p.askVolumes && p.boilOffRate === undefined && p.notes));
+assert.throws(() => boil.save('skynet-boil-60', { name: 'x', boilTime: 5 }), /cannot be changed/);
 
 // the volume check takes the batch from the Recipe, the boil from the Boil Profile, the fermenter trub loss from the fermenter
 const v = brewVolumes({ batchSize: 5, boilTime: 60, boilOffRate: 1.25, trubChillerLoss: 0.5, coolingShrinkage: 4, fermenterLoss: 0.5 });
