@@ -70,17 +70,20 @@ assert.throws(() => profiles.save(own.id, { ...own, equipment: [{ vesselType: 'r
 profiles.remove(own.id); schemas.dropProfile(own.id);
 assert.ok(!store.config.workspaces.some(w => w.equipmentProfile === own.id), 'a deleted profile is taken off its Tabs');
 
-// backups: daily once a day, by hand any time, restore puts it back (and backs up first)
+// backups (Rule 9.17): <Schema name>_yyyymmddThhmm.BacUp, never overwritten (a second one in the same minute gets _2), no daily ones;
+// restore puts it back (and backs up first)
 schemas.load(first);
-assert.equal(schemas.dailyBackups().length, 2);
-assert.equal(schemas.dailyBackups().length, 0, 'one a day');
+assert.equal(typeof schemas.dailyBackups, 'undefined', 'no daily backup');
+const b1 = schemas.backupSchema(first), b2 = schemas.backupSchema(first);
+assert.match(b1, /^[\w.-]+_\d{8}T\d{4}\.BacUp$/); assert.notEqual(b1, b2); assert.match(b2, /_2\.BacUp$/);
 store.config.workspaces.push({ name: 'Boil' }); store.writeConfig();
 const tabs = store.config.workspaces.length;
-const daily = schemas.listBackups(first).find(b => b.daily).file;
-schemas.restore(first, daily);
+const n0 = schemas.listBackups(first).length;
+schemas.restore(first, b1);
 assert.equal(store.config.workspaces.length, tabs - 1, 'restored');
 assert.equal(store.config.schema.id, first);
-assert.ok(schemas.listBackups(first).some(b => !b.daily), 'the Schema was backed up before the restore');
+assert.equal(schemas.listBackups(first).length, n0 + 1, 'the Schema was backed up before the restore');
+assert.ok(schemas.listBackups(first).every(b => !b.file.includes('.state.')), 'saved values are not listed as backups');
 assert.throws(() => schemas.restore(first, '../brewery.json'), /Bad backup/);
 
 // delete moves it aside; renaming

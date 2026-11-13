@@ -36,8 +36,9 @@ Loading a sample under **Settings > Start from a sample Schema** also makes a ne
 
 ## Backups
 
-- **Every day** the panel backs up every Schema by itself. The last 30 daily backups are kept.
-- **Back up this Schema now** in the Schema dropdown makes one straight away. These are never removed.
+- **Every time a change is saved**, the Schema as it was is kept as a backup, named `<Schema name>_yyyymmddThhmm.BacUp`. Skynet does this in the Background and needs no user input.
+- **Back up this Schema now** in the Schema dropdown makes one straight away.
+- A backup never writes over another one, and none is ever removed.
 - **Restore a backup ...** shows the loaded Schema's backups with their dates. Pick one and press **Save**. The Schema as it is now is backed up first, so you can undo a restore by restoring that backup.
 
 Backups are in `config/schemas/backups/<schema name>`.

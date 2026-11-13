@@ -170,7 +170,7 @@ assert.equal(importFileName('Oakbarn', new Date(2026, 10, 6, 18, 5, 9).getTime()
   assert.equal(a.name, 'Oak_barn');
   const saved = JSON.parse(fs.readFileSync(sch.file(a.id), 'utf8'));
   assert.equal(saved.importedFrom, 'Oak.json'); assert.equal(saved.elements[0].name, 'Pump_1'); assert.equal(saved.title, 'Oak_barn');
-  assert.equal(sch.addFromFile(f.schema).name, 'Oak_barn_2', 'a taken name gets _2');
+  assert.equal(sch.addFromFile(f.schema).name, 'Oak_barn #2', 'a taken name gets #2 (Rule 9.17)');
   // the Import folder list, newest first
   fs.writeFileSync(path.join(sdir, 'notes.txt'), 'x');
   assert.equal(listSchemaFiles(sdir).files.length, 2);

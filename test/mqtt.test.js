@@ -3,33 +3,36 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 import { EventEmitter } from 'node:events';
 import { Store } from '../lib/store.js'; import { MqttBridge, cleanItems } from '../lib/mqtt.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpm'));
+// .API is the one switch for the web API, MQTT and voice (Rule 6.18, OakBarn Brewery 2026-11-13); a gGlobal is never shared (Rule 1.33)
 fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({ elements: [
-  { name: 'gGV_Boil', type: 'gGlobal', kind: 'value', api: 'getput' }, { name: 'gGS_Status', type: 'gGlobal', kind: 'string', readOnly: true, api: 'getput' },
-  { name: 'gGV_Read', type: 'gGlobal', kind: 'value', api: 'get' }, { name: 'gGV_Off', type: 'gGlobal', kind: 'value' },
-  { name: 'HLT_Element', type: 'digitalOut', device: 'SIM' }, { name: 'Pump', type: 'digitalOut', device: 'SIM' },
-  { name: 'HLT_Temp', type: 'temperature', device: 'SIM', units: '°F' }, { name: 'alm', type: 'alarm' }, { name: 'tm', type: 'timer' },
-  { name: 'gV_Pass', type: 'gGlobal', kind: 'value', api: 'off' }], mqtt: { items: { Pump: { control: true } } } }));
+  { name: 'gGV_Boil', type: 'gGlobal', kind: 'value', api: 'getput' },
+  { name: 'HLT_Element', type: 'digitalOut', device: 'SIM' },                       // .API Off: not shared
+  { name: 'Pump', type: 'digitalOut', device: 'SIM', api: 'getput', apiName: 'Wort Pump' },
+  { name: 'Valve', type: 'digitalOut', device: 'SIM', api: 'get' },
+  { name: 'HLT_Temp', type: 'temperature', device: 'SIM', units: '°F', api: 'getput' },
+  { name: 'alm', type: 'alarm', api: 'get' }, { name: 'tm', type: 'timer', api: 'getput' },
+  { name: 'vw_Boil', type: 'valueWidget', api: 'getput', units: 'min' }], mqtt: { items: { HLT_Element: { voice: true, control: true } } } }));
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
 const engine = Object.assign(new EventEmitter(), { running: new Map(), print() { }, exists: () => true, stopAll() { }, start() { } });
 const b = new MqttBridge(store, engine);
 
-assert.equal(b.setFromMqtt('gGV_Boil', '75'), ''); assert.equal(store.getProp('gGV_Boil', 'value'), 75);
-assert.notEqual(b.setFromMqtt('gGS_Status', 'x'), '');            // read-only gGlobal
-assert.notEqual(b.setFromMqtt('gGV_Read', '1'), '');             // .API Get only: read, never changed
-assert.notEqual(b.setFromMqtt('gGV_Off', '1'), '');              // .API Off: not shared at all
-assert.notEqual(b.setFromMqtt('HLT_Element', 'ON'), '');           // heat is off by default
+assert.notEqual(b.setFromMqtt('gGV_Boil', '75'), '');               // a gGlobal: never
+assert.notEqual(b.setFromMqtt('HLT_Element', 'ON'), '');            // .API Off: an older tick no longer counts
 assert.equal(store.getProp('HLT_Element', 'state'), false);
-assert.equal(b.setFromMqtt('Pump', 'ON'), ''); assert.equal(store.getProp('Pump', 'state'), true);   // ticked
-assert.notEqual(b.setFromMqtt('HLT_Temp', '200'), '');             // hardware input
-assert.notEqual(b.setFromMqtt('gV_Pass', '1'), '');                // a gGlobal that only passes values between Processes: never
+assert.equal(b.setFromMqtt('Pump', 'ON'), ''); assert.equal(store.getProp('Pump', 'state'), true);   // Read & Control
+assert.notEqual(b.setFromMqtt('Valve', 'ON'), ''); assert.equal(store.getProp('Valve', 'state'), false);   // Read Only
+assert.notEqual(b.setFromMqtt('HLT_Temp', '200'), '');              // hardware input, even with Read & Control
+assert.equal(b.setFromMqtt('vw_Boil', '60'), ''); assert.equal(store.getProp('vw_Boil', 'value'), 60);   // a Widget too
 store.setProp('alm', 'active', true, 'ui');
 assert.equal(b.setFromMqtt('alm', 'OFF'), ''); assert.equal(store.getProp('alm', 'active'), false);  // silence always allowed
 assert.notEqual(b.setFromMqtt('alm', 'ON'), '');
 
 const kinds = Object.fromEntries(b.discoveryConfigs().map(([c, x]) => [x.unique_id, c]));
-assert.equal(kinds.brewpanel_HLT_Element, 'binary_sensor'); assert.equal(kinds.brewpanel_Pump, 'switch');
-assert.equal(kinds.brewpanel_HLT_Temp, 'sensor'); assert.equal(kinds.brewpanel_gGS_Status, 'sensor'); assert.equal(kinds.brewpanel_gGV_Read, 'sensor'); assert.equal(kinds.brewpanel_gGV_Off, undefined);
-assert.equal(kinds.brewpanel_gGV_Boil, undefined); assert.equal(kinds.brewpanel_gV_Pass, undefined);
+const names = Object.fromEntries(b.discoveryConfigs().map(([, x]) => [x.unique_id, x.name]));
+assert.equal(kinds.brewpanel_HLT_Element, undefined); assert.equal(kinds.brewpanel_gGV_Boil, undefined);
+assert.equal(kinds.brewpanel_Pump, 'switch'); assert.equal(names.brewpanel_Pump, 'Wort Pump', 'API_Name is what voice says');
+assert.equal(kinds.brewpanel_Valve, 'binary_sensor'); assert.equal(kinds.brewpanel_HLT_Temp, 'sensor');
+assert.equal(kinds.brewpanel_vw_Boil, 'number');
 assert.equal(kinds.brewpanel_stop_all_scripts, 'button');
-assert.deepEqual(cleanItems(store, { Pump: { voice: true, control: true }, HLT_Temp: { voice: false, control: false } }), { Pump: { control: true }, HLT_Temp: { voice: false } });
+assert.deepEqual(cleanItems(store, { Pump: { voice: true, control: true } }), {}, 'no separate ticks any more');
 console.log('mqtt safety tests passed');

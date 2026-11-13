@@ -64,7 +64,7 @@
 
 **gAPI**: retired 2026-10-30, now a **gGlobal**. Any Device or Widget can reach the database and the API with its **Database and .API** settings.
 
-**gGlobal**: the variable class for processes and the screen; its **Database and .API** settings send it to the database or let other programs reach it. Suggested names start with `gG` (`gGV_`, `gGB_` ...). It was gKonstant and gAPI (and before that vKonstant and vAPI).
+**gGlobal**: a variable with Global Scope, for Processes. It has no Database and .API box: a Process sends it to the database with `send_db` or `DBSend`. Suggested names start with `gG` (`gGV_`, `gGB_` ...). It was gKonstant and gAPI (and before that vKonstant and vAPI).
 
 **gKonstant**: retired 2026-10-30, now a **gGlobal**.
 

@@ -11,10 +11,14 @@
 
 ## What it may do
 
-| Always allowed | Allowed by default | Off until you tick it |
-|---|---|---|
-| Reading values, silencing alarms, stopping Processes | Changing gGlobals whose .API is Get and Put and that are not read-only (same as the web API) | Switching outputs (heat, burners, pumps, valves), controlling timers, starting Processes |
+**.API is the one switch** for the web API, MQTT and voice. Set it in each Device's or Widget's Properties (its **Database and .API** box):
 
-Hardware inputs and temperatures are read only, and a gGlobal whose .API is Off is never shared. The table on the settings page has **Voice can hear it** and **Can change it** for each item, and a list of Processes that voice and MQTT may start.
+| .API | MQTT and voice |
+|---|---|
+| **Off** (the start) | Not shared |
+| **Read Only** | Read it (a voice assistant hears it) |
+| **Read & Control** | Read it and change it |
+
+Hardware inputs and temperatures are always read only, and a gGlobal is never shared (it has no .API). A shared alarm can always be silenced, and every Process can always be stopped. The settings page lists every shared item with its .API, and the Processes that voice and MQTT may start (tick them there).
 
 The full guide, with the topic list and Alexa setup, is `docs/MQTT_AND_VOICE.md`.

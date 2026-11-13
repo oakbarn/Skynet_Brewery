@@ -39,9 +39,9 @@ fs.writeFileSync(cfg, JSON.stringify({ elements: [
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.equal(byApiName(store, 'wort pump')?.name, 'Pump_1');
 assert.equal(byApiName(store, 'Wort_Pump')?.name, 'Pump_1', 'an _ in a web address stands for a space');
-assert.equal(byApiName(store, 'gGV_Ph')?.name, 'gGV_Ph', 'the Name still works');
+assert.equal(byApiName(store, 'Pump_1')?.name, 'Pump_1', 'the Name still works');
 assert.equal(apiList(store).find(x => x.name === 'Pump_1').apiName, 'Wort Pump');
-assert.equal('apiName' in apiList(store).find(x => x.name === 'gGV_Ph'), false);
+assert.equal(apiList(store).find(x => x.name === 'gGV_Ph'), undefined, 'a gGlobal has no .API (Rule 1.33)');
 assert.equal(apiItem(store, 'Wort Pump').name, 'Pump_1');
 assert.equal(apiPut(store, 'Wort Pump', null, true).name, 'Pump_1');
 assert.equal(store.getProp('Pump_1', 'state'), true);

@@ -23,5 +23,5 @@ Créez un **gGlobal** de la sorte qui convient à ce qu'il contient :
 | une date et une heure | gD_Global_DateTime |
 
 Utilisez **➕ New gGlobal** dans **☰ Menu > Variables**, ou une ligne `new gV gV_Name` dans un Process (voir
-[Créer un gGlobal dans un Process](145-make-a-gglobal-in-a-process)), et laissez sa **Database** et son **.API** sur Off, pour que rien
-hors des Processes ne puisse le voir. Un gGlobal n'est jamais sur un Tab.
+[Créer un gGlobal dans un Process](145-make-a-gglobal-in-a-process)). Un gGlobal n'a pas de .API, donc rien
+hors des Processes ne peut le voir. Un gGlobal n'est jamais sur un Tab.

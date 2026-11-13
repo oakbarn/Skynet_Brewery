@@ -14,13 +14,14 @@ const d = fs.mkdtempSync(path.join(os.tmpdir(), 'dbgroup'));
 fs.mkdirSync(path.join(d, 'scripts'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ dbGroups: [{ id: 'grp_o1', name: 'Once' }, { id: 'grp_a1', name: 'Readings' }, { id: 'grp_m1', name: 'Mash' }, { id: 'grp_b1', name: 'Boil' }], elements: [
-  { name: 'gGV_Strike', type: 'gGlobal', kind: 'value', initial: 7.5, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
-  { name: 'gGV_pH', type: 'gGlobal', kind: 'value', initial: 5.4, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
-  { name: 'gGV_Other', type: 'gGlobal', kind: 'value', initial: 1 },
-  { name: 'gGV_Old', type: 'gGlobal', kind: 'value', initial: 3, database: { frequency: 'ondemand', groups: ['grp_o1'] } },
+// Value Widgets (a gGlobal has no Database box, Rule 1.33)
+  { name: 'gGV_Strike', type: 'valueWidget', initial: 7.5, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
+  { name: 'gGV_pH', type: 'valueWidget', initial: 5.4, database: { frequency: 'ondemand', groups: ['grp_a1'] } },
+  { name: 'gGV_Other', type: 'valueWidget', initial: 1 },
+  { name: 'gGV_Old', type: 'valueWidget', initial: 3, database: { frequency: 'ondemand', groups: ['grp_o1'] } },
   // Fritz's Mash probe: every N (here 100 ms so the test is quick), in the Groups Mash and Boil
-  { name: 'gGV_MashTemp', type: 'gGlobal', kind: 'value', initial: 152, database: { frequency: 'ms', every: 100, groups: ['grp_m1', 'grp_b1'] } },
-  { name: 'gGV_Free', type: 'gGlobal', kind: 'value', initial: 2, database: { frequency: 'ms', every: 100 } },
+  { name: 'gGV_MashTemp', type: 'valueWidget', initial: 152, database: { frequency: 'ms', every: 100, groups: ['grp_m1', 'grp_b1'] } },
+  { name: 'gGV_Free', type: 'valueWidget', initial: 2, database: { frequency: 'ms', every: 100 } },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const logger = new Logger(store, path.join(d, 'data', 'brewlog.db'));

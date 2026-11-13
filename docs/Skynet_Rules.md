@@ -296,6 +296,18 @@ anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet reall
 so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
 person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
 
+1.33 **A gGlobal has no Database and no .API** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew Panel 2a": "gGlobals or
+Variables sent to database with Process Command Only. No Need for API"; "In BruControl you could only use Globals for API. Since we
+can read a Device or Widget Attributes, there is no need for a Bridge to API like BruControl. The only real use for a gGlobal is as a
+variable with Global Scope."):
+- A gGlobal is a variable with Global Scope, Persistent and Non-Volatile (Rule 1.22). It has **no Database and .API box**: a Process
+  sends it to the database with `send_db Name` or `Name DBSend` (Rule 6.14). It is never in the web API, MQTT or voice (Rule 6.18);
+  outside programs read a Device's or Widget's own attributes.
+- The Variables page lists each gGlobal's Name, Kind and Value (no Database, .API or Log now columns). A gGlobal in an older file
+  loses its Database and .API settings when it loads (before the Public Production: nothing old, How Rules work).
+- **Both programs:** the BruControl Import makes gGlobals with no .API. When it turns a BruControl Global into a Widget, its Interview
+  asks about that Widget's .API (Importer Sandbox note, waits for OakBarn Brewery's OK on the question).
+
 1.32 **NULL, the empty value** (OakBarn Brewery, 2026-11-11: "Could we use NULL", "OK and in the Help about reserved words").
 `X = NULL` empties a Process variable, a gGlobal or a Value Widget of any Kind (number, text, time, date and time, true / false): it
 has **no value at all**, not 0, `false` or `""`. Its box on the Tab shows **blank**, and a gGlobal stays empty after a restart, until
@@ -1933,6 +1945,14 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 - It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
 - It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
   (thread "Add unique API_Name for voice commands", Help 144)
+- **.API is the one switch for the web API, MQTT and voice** (OakBarn Brewery, 2026-11-13: "We need to build for all three. API seems
+  to be the place to do it unless there is a need for a separate MQTT and Voice"; "even if they are not true api, the sorta act like
+  it"): **Off** = not shared anywhere; **Read Only** (Get) = the web API, MQTT and voice read it (Home Assistant, and so Alexa, Google
+  Home and Siri, gets it); **Read & Control** (Get and Put) = they can also change it, with the web API's safeguards (board readings
+  and Manual Valve Widgets never; a Widget that switches a Device needs that Device's Read & Control too). There are no separate MQTT
+  and voice ticks per item any more; Settings > MQTT and voice lists the shared items with their .API. Silencing a shared alarm and
+  stopping Processes are always allowed; starting a Process only when ticked there. A gGlobal is never shared (Rule 1.33). Both
+  programs: the Panel (lib/mqtt.js, lib/itemapi.js); the BruControl Import has no MQTT.
 
 6.19 **One Heating Element, the heating method picked** (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
@@ -2743,6 +2763,22 @@ request as the check **Skynet tests**: green = every test passed, red = one fail
 it required before a merge, so the name **Skynet tests** never changes. It changes no code and needs no secrets. Both programs: the
 BruControl Import's tests are in the same suite.
 
+9.17 **A Schema backup every time a change is saved; nothing is ever written over** (OakBarn Brewery, 2026-11-13, README markup
+"Skynet Brew Panel 2a": "Only make a Backup after Build Mode and Changes saved"; "the Schema name and Name_yyyymmddThhmm.BacUp"; "If we
+save a Back up every time a change is made and saved, the daily backup is not needed. That was a feature I wanted in BruControl";
+on a Schema import with a name already taken: "Use the Rule, just cannot overwrite a file"):
+- **Every saved change** (Edit layout > Save Changes and every other layout save, a restore) first keeps the Schema as it was, with its
+  saved values, as `<Schema name>_yyyymmddThhmm.BacUp` in `config/schemas/backups/<id>/`. **Back up this Schema now** makes one at
+  any time. There is **no daily backup** any more. A backup is never written over (a second one in the same minute gets `_2`) and
+  none is ever removed. Help says only that Skynet does this in the Background and needs no user input (Rule 11.13).
+- **Schema.json page:** no copy on opening; a copy is made before every save or restore (`config/backups`).
+- **An import never writes over a Schema:** a Schema whose name is taken is added as `Name #2`, `#3` ... (the same as Rule 9.13).
+- **An import never writes over a Process either** (OakBarn Brewery, 2026-11-13: "Change the way in skynet to something different as I
+  think that is all background and never seen by a user Name(1) is more standard to the Windows World"): an imported Process with the
+  same name as one you have but other text comes in as `Name_1` (`_2` ...), and the imported Schema's Process lines and Process
+  Widgets point to it. `_1` stands in for Windows' `(1)` because a name can't have ( ) (Rule 3.1, docs/Special_Characters.md).
+- **Both programs:** the Panel's Schemas; the BruControl Import saves its Schema files to the Import folder and never writes over one.
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -2888,6 +2924,7 @@ the Help can Expand More. Most technical Explanations in Help and Not Hover Help
      the Help page shows the same Hover Help words first, then a **technical side** part with the science, using the same signs; the
      electrical warning (Rule 6.20) ends it where wiring comes up. The approved Hysteresis words are the balloon on a Heating
      Element's **Current Method** while it is Hysteresis (after the electrical warning), and the **Hysteresis** part of Help 150.
+  8. **No "how" the user cannot change:** see Rule 11.13.
 
 11.9 **Step by Step guides** (OakBarn Brewery, 2026-11-11: "Also need Section in Help That is a Step By Step with Pictures on How to do
 something. First Step By Step in Add a Schema as I could not see an easy way to begin."). Help has a **Step by Step** section: it is
@@ -2944,6 +2981,28 @@ Hover Help French"):
   English page is the one that counts if in doubt. A French-speaking brewer may review it.
 - **Both programs:** the Skynet Panel's Help and balloons (the BruControl Import's Build page is the Panel's own page). The Importer's
   own pages keep English balloons for now: the Importer Help is on hold (Rule 11.3); when it is written it gets its French the same way.
+
+11.12 **In OakBarn Brewery's markups, { } is an instruction, not text** (OakBarn Brewery, 2026-11-13: "notice that { are
+instruction not verbatim text"; "Make that a Rule"):
+- In a markup or PDF from OakBarn Brewery (the README, a Help page, Hover Help, a dialog), **text inside curly brackets { } is an
+  instruction to Claude**. It is carried out, and never copied into the text.
+- **Everything outside the brackets is his text** and goes in word for word, with only the spelling corrected (Rule 2.37).
+- An instruction can be a change to make, a question to answer, or where text goes (for example **{Importer Sandbox ...}** moves the
+  text inside it to the Importer Sandbox, Rule 11.3). When an instruction is unclear, Claude asks before building it.
+- **Both programs:** the Skynet Panel and the BruControl Import.
+
+11.13 **Background actions: "Skynet does this in the Background and needs no user input."** (OakBarn Brewery, 2026-11-13:
+"Telling a user "how" when he cannot change it is TMI (too much information!)"; "Make that a Help Rule: For things in the Background
+that a user cannot see or needs no user input on the code, needs a Simple "Skynet does this in the Background and needs no user
+input." For something Like providing a file name to import, after you supply Skynet the File Name, no other user input is needed.
+The action takes place in the background."):
+- **Nothing to give:** when Skynet does something the user cannot see and needs no input for, Help and Hover Help say only:
+  **"Skynet does this in the Background and needs no user input."** How it is done is never explained in Help; it goes in the Rules
+  and the code notes. Example: a goLine number follows its line when lines are added or taken out (Rule 16.10, Help 22, Rule 11.13).
+- **Something to give first:** when the user gives one thing and Skynet does the rest, Help says what to give, then that nothing more
+  is needed. Example: an import: **"After you supply Skynet the File Name, no other user input is needed. The action takes place in
+  the background."**
+- **Both programs:** the Skynet Panel and the BruControl Import (its Help is on hold, Rule 11.3).
 
 ## 12. Privacy and sharing
 
@@ -3271,6 +3330,16 @@ rewriteAlarmLines); the choice is shown on the Importer's Script page once that 
 choice kept the old `.active`.
 
 ---
+
+16.10 **goLine: go to a line number, and the number follows its line** (OakBarn Brewery, 2026-11-13, README markup "Skynet Brew
+Panel 2a": "There is a Process command to go to a Line Number, similar to going to a Section"; "I would want the goline number updated
+to its new line number"):
+- `goLine 235` goes to line 235, the same as `goto "My New Section"` goes to the `[My New Section]` on that line. A goLine to a line the
+  Process does not have is an error, and the Process does not start.
+- **The number follows its line:** when a Process is saved in Skynet, every goLine that was already there gets the new number of the
+  line it went to. Lines added or taken out above that line change the number; lines below it do not. A goLine typed or changed in
+  this edit is kept as typed. If its line was taken out, it goes to the next line still there (lib/goline.js, server Save).
+- A file changed in another text editor is not checked. Help 22. **Both programs:** the BruControl Import reads Processes with the same reader.
 
 ## 17. Recipes
 
@@ -4005,6 +4074,12 @@ Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is
 
 ## Change log
 
+- 2026-11-13: Rule 6.18 (OakBarn Brewery: "We need to build for all three. API seems to be the place to do it"): .API is the one switch for the web API, MQTT and voice (Off / Read Only / Read & Control); the separate per-item MQTT and voice ticks are gone; every Device and Widget with .API on is shared, Widgets too. Help 15 (and French), docs/MQTT_AND_VOICE.md, README. Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 9.17 (OakBarn Brewery, README markup "Skynet Brew Panel 2a" and his answers): a Schema backup, `<Schema name>_yyyymmddThhmm.BacUp`, every time a change is saved; no daily backup; never written over (_2 in the same minute) and never removed; Schema.json makes no copy on opening (before every save or restore only); an imported Schema with a taken name is added as Name #2. Help 28, 30, 42, 44 (and French), README 3a. Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 1.33 (OakBarn Brewery: "The only real use for a gGlobal is as a variable with Global Scope"): a gGlobal has no Database and .API box; a Process sends it to the database with send_db / DBSend; never in the web API, MQTT or voice; older files lose the settings on load; the Variables page has no Database, .API or Log now columns. Help 4, 13, 15, 98, 108, 118, 149 (and French). Checked against both programs: the Importer's Interview will ask .API for a Global that becomes a Widget (Sandbox note). (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 11.13 (OakBarn Brewery: "Make that a Help Rule"): a background action the user cannot see and needs no input for gets only "Skynet does this in the Background and needs no user input." in Help; when the user gives one thing first (a file name to import), Help says that after it no other user input is needed and the action takes place in the background. How it is done stays out of Help (TMI). Rule 11.8 point 8 points to it. Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 16.10 (OakBarn Brewery, README markup "Skynet Brew Panel 2a"): `goLine 235` goes to a line number like goto goes to a [label]; when a Process is saved, a goLine that was already there gets the new number of its line (lines added or taken out above it move it). Help 22, README 3. goLine is a reserved word. Checked against both programs. (thread "Polish the Skynet Brew Panel")
+- 2026-11-13: Added Rule 11.12 (OakBarn Brewery: "notice that { are instruction not verbatim text"; "Make that a Rule"): in his markups, text inside { } is an instruction to Claude, not text to copy; everything outside the brackets goes in word for word. The README is polished from the markup "Skynet Brew Panel 2a" (gGlobal Variable, a Variables part, the Widgets for the gGlobal kinds, process lines with `.state` and `.visible`, BruControl text to the Importer Sandbox). Checked against both programs. (thread "Polish the Skynet Brew Panel")
 - 2026-11-13: Rule 11.11 (OakBarn Brewery: "Ballons and Hover Help French"): the balloons (Hover Help) and the buttons' own tips are in French when Français is picked in 🌐 Help language (public/hoverhelp-fr.json, 723 texts); a balloon change gets its French in the same PR (test/hoverfrench.test.js, tools/hoverhelp-french.js). The Help snippet in a dialog's title balloon comes from the French page.
 - 2026-11-13: Rule 7.18 (OakBarn Brewery: "First one on is priority"): two Alarms with the same Priority that go On at the same moment are no longer picked at random; the first one On plays first (1a), then the next (1b). Help 21.
 - 2026-11-13: Added Rule 9.16 (OakBarn Brewery: "do that on 369"): every pull request runs the whole Skynet test suite on GitHub, shown as the check **Skynet tests** (`.github/workflows/tests.yml`), so the branch ruleset can require it.

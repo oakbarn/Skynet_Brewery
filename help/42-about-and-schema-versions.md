@@ -24,7 +24,7 @@ A version is the Schema's name with the date and time it was saved, on the Brain
 
 Each version is kept as its own file, named after the version, in `config/schemas/versions/<Schema>/` on the Brain (spaces in the name become `_`). Old versions are never removed.
 
-The Schema itself is still saved in `config/schemas/<Schema>.json`, as before, so loading Schemas, the daily backups and restoring keep working the same way.
+The Schema itself is still saved in `config/schemas/<Schema>.json`, as before, so loading Schemas, the backups and restoring keep working the same way.
 
 ### Going back to a version
 

@@ -8,12 +8,11 @@ gKonstant et gAPI sont devenus une seule classe, **gGlobal**, le 2026-10-30. Env
 
 | Type | Processes | À l'écran | Base de données et programmes extérieurs |
 |---|---|---|---|
-| **gGlobal** | ✓ | ✓ | Quand ses Properties le disent (case **Database and .API**) |
+| **gGlobal** | ✓ | ✓ | Base de données seulement par une ligne de Process (`send_db`, `DBSend`) ; pas de .API |
 
-- Utilisez un **gGlobal** pour les réglages, les éléments d'écran et les lectures (pH, densité, volumes). Pour en enregistrer un dans le journal, ou laisser un autre programme le lire ou le changer, réglez sa case **Database and .API**.
-- Pour passer une valeur d'un Process à un autre, utilisez un gGlobal avec **Database** et **.API** tous les deux sur **Off**. Rien en dehors des Processes ne peut le voir.
+- Un **gGlobal** est une variable à portée globale : utilisez-le pour passer une valeur d'un Process à un autre. Un Process l'envoie à la base de données avec `send_db Name` ou `Name DBSend`. Un gGlobal n'a pas de .API, donc rien en dehors des Processes ne peut le voir. Les programmes extérieurs lisent les attributs propres d'un Device ou d'un Widget.
 
-L'ancienne classe **Shared variable** a disparu. Un Schema plus ancien qui en a encore une se charge sans elle. Pour passer une valeur entre Processes, créez un gGlobal du type qui lui convient (un nombre gV_Global_Value, du texte gS_Global_String, vrai / faux gB_Global_Boolean, une durée gT_Global_Time, une date et une heure gD_Global_DateTime) avec Database et .API sur Off. Voir [Les variables partagées sont devenues des gGlobals](149-shared-variables-became-gglobals).
+L'ancienne classe **Shared variable** a disparu. Un Schema plus ancien qui en a encore une se charge sans elle. Pour passer une valeur entre Processes, créez un gGlobal du type qui lui convient (un nombre gV_Global_Value, du texte gS_Global_String, vrai / faux gB_Global_Boolean, une durée gT_Global_Time, une date et une heure gD_Global_DateTime). Voir [Les variables partagées sont devenues des gGlobals](149-shared-variables-became-gglobals).
 
 Chaque gGlobal est **non volatil** : démarrer un Process ne l'efface jamais, et sa valeur est enregistrée sur le disque du Brain et revient quand le Brain redémarre. Voir [Les gGlobals gardent leurs valeurs](118-gglobals-keep-their-values).
 
@@ -38,7 +37,7 @@ L'ancienne classe **Global** est retirée. Quand un Schema plus ancien est charg
 
 ## Database and .API
 
-Chaque gGlobal (et chaque autre Device et Widget qui a une valeur) a une case **Database and .API** à la fin de ses Properties. L'écran Variables montre le réglage de chaque gGlobal, et **Log now** envoie aussitôt sa valeur à la base de données. Voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
+Chaque Device et Widget qui a une valeur a une case **Database and .API** à la fin de ses Properties. Un gGlobal ne l'a pas : un Process l'envoie à la base de données avec `send_db Name` ou `Name DBSend`. Voir [Base de données et .API sur chaque Device et Widget](98-database-and-api).
 
 ## gGlobal List (une liste déroulante sur un Tab) {#gglobal-list-a-dropdown-on-a-tab}
 
