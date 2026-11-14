@@ -45,6 +45,8 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
 
 Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinstaller** (Settings > Apps > Uninstall). Après un avertissement rouge, il supprime **tout** dans `C:\Brewing` : vos Schémas, utilisateurs, journal de brassage, Processus, sauvegardes, images et sons, et le dossier Import avec tous ses fichiers. Copiez ailleurs ce que vous voulez garder. Il arrête d'abord le panneau lui-même (toutes les sorties éteintes), pour que rien ne reste.
 
+**Pas supprimés :** les programmes d'aide que vous avez installés, comme **Node.js** ou **Tailscale** (voir [Installer Tailscale sous Windows](00-tailscale-windows)). D'autres programmes peuvent aussi s'en servir, donc la désinstallation n'y touche pas. Si vous n'en voulez plus, supprimez-les vous-même dans **Paramètres > Applications** (Settings > Apps).
+
 ## Windows : à la main, avec un fichier .bat {#windows-by-hand-with-a-bat-file}
 
 1. Créez le dossier `C:\Brewing` et copiez-y `Skynet_BrewPanel_<date>.zip`.
