@@ -28,6 +28,17 @@ dessiné par-dessus la pompe et son Cover, sous l'On overlay. Il sort tout droit
 et va jusqu'à la place, et il tourne avec la pompe quand elle est montrée Left. Une pompe avec votre propre image n'a pas de Hose ni de Pipe (Skynet ne
 sait pas où sont ses orifices), donc ses IP sont simplement sur les places.
 
+**Avec un tuyau ou un flexible joint à l'IP**, ce bout est dessiné comme le tuyau ou le flexible qui y est : même sorte, même
+couleur et même épaisseur, donc les deux se rejoignent en une seule pièce. Sans rien sur l'IP, le Hose ou Pipe choisi ici est dessiné.
+
+**Une IP de coin** (Top Left, Top Right, Bottom Left, Bottom Right) peut être atteinte par le côté ou par le haut ou le bas.
+**Inlet from** et **Outlet from** s'affichent quand l'IP est sur un coin : **Auto** suit le sens du tuyau qui y est joint,
+**Side** arrive le long du côté, et **Top** (ou **Bottom**) arrive le long du haut (ou du bas).
+
+**IP Type In** et **IP Type Out** sont le raccord sur l'entrée et la sortie de la pompe : Tri-Clamp, NPT, BSP ou Quick Disconnect
+(Règle Skynet 5.40). Une pompe commence avec celui que disent ses **Ports** (TC est Tri-Clamp, FPT ou MPT est NPT, BSP est BSP),
+sinon le **Default pipe IP Type**.
+
 ## Tuyaux sur une pompe {#pipes-on-a-pump}
 
 Quand vous choisissez une autre place, un tuyau joint à l'entrée ou à la sortie reste où il est : la pompe se déplace sur sa ligne, et le bout du tuyau
