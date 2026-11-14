@@ -1340,3 +1340,7 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
 body.buildMode .menuBtn { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
 body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); pointer-events: none; }
 .ivBody [data-note]{white-space:pre-line}
+
+/* Default tab: section titles stand out (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight sections") */
+.defTab .dlgHead, .defTab > h3:not(:first-child) { background: var(--accent); color: var(--on-accent); padding: 5px 10px; border-radius: 6px; border-bottom: 0; margin-top: 14px; }
+.defTab .dlgHead .hh, .defTab .dlgHead a { color: var(--on-accent); }

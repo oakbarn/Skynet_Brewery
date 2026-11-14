@@ -33,6 +33,8 @@ really changes.
 | Also | "Default Layer 2 on a new Alarm Template is None" | A new Alarm's Set Graphic (Layer 2) starts at None (Rule 7.12). |
 | Also | "An Exist pump or valve ... have no defaults interaction (only the Pulse Buttton and Theme effect existing. These are for new User Created only" | The Default tab's new part is named **New User Templates and Schemas** and only touches new things (Rule 2.42). |
 
+**Later the same day (OakBarn Brewery):** anything that changes things already made (the Look, Pulse, Tab Style, Menu Bar, Sound, On startup, \L size, Hover Delay, Phones and tablets, the grain labels, Hop alerts, Order of the Menu) is a Setting: it moved to Settings > Panel settings: screen, Tabs and alerts, and the Default tab does not name it. The list at the bottom of the Default tab is now **Skynet Defaults for New User Created Items** ("These defaults are set and cannot be changed, but can be Changed in a New User Template"), and the section titles have a blue back.
+
 The text below is the list as it was reviewed.
 
 ## Two kinds of "other place"

@@ -57,7 +57,7 @@ Une nouvelle installation commence avec :
   avec, puis vous le changez dans ses propriétés. Changer le Default plus tard ne cache, ne déplace ni ne redimensionne ce qui est
   déjà sur vos Tabs.
 - La couleur de texte par défaut laisse les chiffres d'une apparence **LED** ou **Gauge** dans leurs propres couleurs.
-- La taille du grand texte (le code `\L`) est **\L Rich Text Code Size (px)**, sous **Rich Text Embedded Code** sur l'onglet Default.
+- La taille du grand texte (le code `\L`) est **\L Rich Text Code Size (px)**, sous **Rich Text Embedded Code** dans **Settings > Panel settings: screen, Tabs and alerts**.
 
 ## Dans un Process {#in-a-process}
 

@@ -67,7 +67,7 @@ assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw
 assert.ok(app.includes("size: String(hose ? defHoseIn() : defPipeIn()) };"), 'a new pipe or hose starts at the Default size');
 assert.ok(/\['defPipeSize', 'Default pipe size/.test(app) && /\['defHoseSize', 'Default hose size/.test(app), 'the Default settings tab has them');
 assert.ok(app.includes("{ key: 'default', title: 'Default settings',"), 'the Menu tab is called Default settings');
-assert.ok(app.includes("h('h3', {}, 'Defaults set somewhere else (to look at)')"), 'the defaults set elsewhere are listed');
+assert.ok(app.includes("h('h3', {}, 'Skynet Defaults for New User Created Items')"), 'the Skynet Defaults for New User Created Items are listed');
 assert.ok(app.includes('const k = elK(e), w = e.w || 120'), 'a Device is drawn for its pipes');
 for (const [n, b] of [['Valve_Tee', 0.183], ['Supply_Manifold_2', 0.0915], ['Supply_Manifold_3', 0.061]]) assert.equal(tpl(n).body, b, `${n} body`);
 assert.ok(fs.existsSync(new URL('../help/155-default-settings.md', import.meta.url)), 'Help 155');
