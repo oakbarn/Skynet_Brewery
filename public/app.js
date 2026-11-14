@@ -13,7 +13,7 @@ import { dialSvg, DIAL_DEFAULTS } from './dial.js';
 import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
-import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss } from './textbox.js';
+import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -1397,7 +1397,7 @@ function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[d
 // label shared by vessels, equipment and IP widgets: position, color, size, show / hide
 // It is a text box (public/textbox.js): what is not set here comes from the ☰ Menu > Default tab, and the text codes (\b \L \n) work.
 function widgetLabel(g, defPos) {
-  const D = TD(), T = TS(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
+  const D = TDo(g), T = TS(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
   setRich(lb, g.label);
   lb.style.color = firstSet(g.labelColor, T.labelFore, D.labelFore); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.labelBack);
   lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.labelFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.labelFont);
@@ -1408,6 +1408,12 @@ function widgetLabel(g, defPos) {
 }
 // the Default tab's text box settings (colors, alignment, name font ...): public/textbox.js
 const TD = () => textDefaults(S.config.brewDefaults);
+// Defaults are for new things only (OakBarn Brewery, 2026-11-14: "New Things Only", Rule 2.42). An item shows the Default tab's
+// Labels and Text Boxes as they were when it was made (its newLook); one made in this Edit layout (no _old mark) shows today's
+// Default tab until Save layout keeps them on it; an item made before shows the fresh install's look.
+const FRESH_TD = textDefaults({});
+const isNewItem = o => !!(editing && draft && o && !o._old);
+const TDo = o => o?.newLook ? textDefaults(o.newLook) : isNewItem(o) ? TD() : FRESH_TD;
 // the Tab Style of the Tab shown (Fritz, 2026-10-30): what a Device or Widget has of its own wins, then the Tab Style, then the Default tab
 const TS = () => tabStyleOf(curWs(), S.config.brewDefaults, S.config.userStyles) || {};
 const fontPx = v => +v > 0 ? +v : 0;
@@ -1547,7 +1553,7 @@ function buildGfx(g) {
 // comes first, then its own Properties, then the ☰ Menu > Default tab. Word wrap is always on (Fritz, 2026-10-29).
 const gTab = g => (!editing && g.kind === 'text' && g.name && S.values[g.name]?.tab) || g.workspace;
 function fillText(n, g) {
-  const D = TD(), T = TS(), v = (!editing && g.name && S.values[g.name]) || {};
+  const D = TDo(g), T = TS(), v = (!editing && g.name && S.values[g.name]) || {};
   place(n, editing ? g : placeWith(g, v));
   const fnt = (live, own) => tbFontCss(live) || firstSet(own);
   const body = h('div', { class: 'tbody' }); setRich(body, v.text ?? g.text ?? '');
@@ -1691,7 +1697,10 @@ const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
 // item with IPs that has no pipe on it is drawn for the Default pipe size. 1/2" when not set.
 const defPipeIn = () => +S.config.brewDefaults?.defPipeSize > 0 ? +S.config.brewDefaults.defPipeSize : 0.5;
 const defHoseIn = () => +S.config.brewDefaults?.defHoseSize > 0 ? +S.config.brewDefaults.defHoseSize : 0.5;
-const defaultWidth = wsn => pipeSize(wsn) * defPipeIn() / 0.5;       // how thick a pipe of the Default pipe size is on this Tab
+// how thick a pipe of the Default pipe size is on this Tab: the item's own (as the Default tab was when it was made), else today's
+// Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
+const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
+const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
 // a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = 1600 x 900 and 10)
 const newTabSize = () => { const d = S.config.brewDefaults || {}; return { width: +d.newTabWidth || 1600, height: +d.newTabHeight || 900, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
@@ -1711,7 +1720,7 @@ function majorityWidth(pipes) {
 function sizeFitting(g) {
   if (!autoSized(g)) return;
   const on = [g.id, ...(isMv(g) ? eqPorts(g).map(q => q.id) : [])].flatMap(id => pipesOn(id, g.workspace));     // a Manual Valve: the pipes on its two ends
-  const S = 5 * majorityWidth(on) || 5 * defaultWidth(g.workspace), [cx, cy] = ipCenter(g);      // no pipe on it: the Default pipe size
+  const S = 5 * majorityWidth(on) || 5 * defaultWidth(g.workspace, g), [cx, cy] = ipCenter(g);      // no pipe on it: the Default pipe size
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
@@ -1776,7 +1785,7 @@ function elK(e) {
   if (!hasIps(e)) return 1;
   if (!followsPipe(e)) return pipeSize(e.workspace) / 10;
   const w = majorityWidth(['in', 'out'].flatMap(k => pipesOn(`dev:${e.name}:${k}`, e.workspace)));
-  return (w || defaultWidth(e.workspace)) / 10;
+  return (w || defaultWidth(e.workspace, e)) / 10;
 }
 function elGeom(e) {
   const k = elK(e), w = e.w || 120, hh = e.h || 60;
@@ -2427,7 +2436,7 @@ function fontCss(node, f) {
 const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
   if (isAlmBasic(e)) e = { ...e, foreColor: '', backColor: '' };      // a Basic Skynet Alarm's Fore and Back color its picture, not its text
-  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
+  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TDo(e), T = TS();
   // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
   const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.labelFore), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.valueFore));
   const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.labelBack), vb = firstSet(e.valueBg, e.backColor, T.back, D.valueBack);
@@ -3883,7 +3892,7 @@ function renderPipes() {
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
-      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().labelFore || '#e6e6e6', 'font-size': TD().labelFontSize || 14 }); t.textContent = p.label; g.append(t);
+      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TDo(p).labelFore || '#e6e6e6', 'font-size': TDo(p).labelFontSize || 14 }); t.textContent = p.label; g.append(t);
     }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
@@ -3936,6 +3945,7 @@ function setEditing(on) {
   undoList = []; grabWith.clear(); grabNoAsk = false; updUndoBtn();      // ↩ Put back and the grab pop-up start fresh (Rule 5.37)
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (draft) for (const x of [...draft.elements, ...draft.graphics]) if (x) x._old = 1;      // made before this Edit layout (never saved)
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
   if (on) { mvJoinEnds(draft); centerOnPipes(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
@@ -6937,6 +6947,8 @@ const saveLayout = guard(async () => {
   for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
   for (const x of [...draft.elements, ...draft.graphics]) delete x.buildTo;      // only for the Build Tab, never saved (Rule 4.1)
+  const look = lookSnap(S.config.brewDefaults);      // a new item keeps the Default tab as it is now (Rule 2.42: Defaults are for new things only)
+  for (const x of [...draft.elements, ...draft.graphics]) { if (!x) continue; if (!x._old && look && !x.newLook) x.newLook = { ...look }; delete x._old; }
   renumberLayers(draft);         // every Tab's Layer Order runs 1, 2, 3 ... with no gaps, new items on top (Rule 1.29)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
@@ -7296,7 +7308,7 @@ const LABEL_ALIGNS = [['MiddleLeft', 'Left'], ['MiddleCenter', 'Centered'], ['Mi
 // the bottom Cancel and Save "Don't Need", Rule 2.52): each box shows the default it has now (Tab Style, then Default settings), kept
 // empty when it is not changed so it goes on following the defaults; Cancel and Save only at the top
 const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Dialog where you can set its font, size and colors.', noBottom: true,
-  fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(), nameAlign: 'Middle' + labelDefaultAlign(),
+  fill: o => ({ nameFontSize: +o.nameFont?.size || labelShownSize(o) || labelDefaultSize(o), nameAlign: 'Middle' + labelDefaultAlign(o),
     ...labelDefaultLook(o) }),
   fields: [['label', 'Label', 'text', null, false, 'b', { tip: 'The Label shown on the Tab.' }], ['hideName', 'Visible', 'show', null, false, false, { tip: 'On: the Label shows on the Tab. Off: no Label shows.' }],
   ['nameFontSize', 'Font Size', 'num', null, false, false, { tip: 'The size of the Label\'s letters, in pixels.' }],
@@ -7305,15 +7317,15 @@ const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Di
 // the Label's size and alignment when it has none of its own: the Tab Style's, then the Default tab's, then the panel's own
 // the size its Label shows at on the Tab now (pixels), when it is there
 const labelShownSize = o => { try { const n = o?.name && document.querySelector(`#ws .el[data-name="${CSS.escape(o.name)}"] > .nm`); return n ? Math.round(parseFloat(getComputedStyle(n).fontSize)) || 0 : 0; } catch { return 0; } };
-const labelDefaultSize = () => fontPx(TS().labelSize) || TD().labelFontSize || 11;
+const labelDefaultSize = o => fontPx(TS().labelSize) || TDo(o).labelFontSize || 11;
 // the Label's font and colors when it has none of its own: its own Fore and Back color, then the Tab Style's, then Default settings
-const labelDefaultLook = o => { const T = TS(), D = TD(), out = {};
+const labelDefaultLook = o => { const T = TS(), D = TDo(o), out = {};
   const fam = o.nameFont?.family ? '' : firstSet(T.labelFont, D.labelFont), fore = firstSet(o.foreColor, T.labelFore, D.labelFore), back = firstSet(o.backColor, T.labelBack, D.labelBack);
   if (fam && FONTS.some(f => (Array.isArray(f) ? f[0] : f) === fam)) out.nameFontFamily = fam;
   if (fore) out.nameColor = fore;
   if (back) out.nameBg = back;
   return out; };
-const labelDefaultAlign = () => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TD().labelAlign));
+const labelDefaultAlign = o => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TDo(o).labelAlign));
 const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
@@ -12710,8 +12722,8 @@ function hopStandsFromForm(d, tu) {
 // the Labels and Text Boxes boxes' hover help (Rule 2.38; KISS, Rule 11.8: the name is short, the explanation is here)
 const LBL_TIPS = {
   visible: 'On: new Devices, Widgets and Texts start shown. Off: they start hidden. Copied into each new item when it is made.',
-  fore: 'The color of the letters of a Label: the name of a Device or Widget, or the Label on a vessel. An item left on Default follows this, so changing it here changes them all.',
-  back: 'The color behind the letters of a Label. An item left on Default follows this.',
+  fore: 'The color of the letters of a Label: the name of a Device or Widget, or the Label on a vessel. New items start with it; items already made keep theirs (Defaults are for new things).',
+  back: 'The color behind the letters of a Label. New items start with it; items already made keep theirs.',
   align: 'Where the words of a Label sit: left, center or right.',
   bold: 'On: Labels are written in bold letters, unless an item has its own Bold set.',
   font: 'The font of Labels. Tab\'s font: each Tab uses its Tab Style\'s font, and the panel\'s normal font when its Tab Style has none. A font picked here is used where a Tab Style has none.',
@@ -12747,7 +12759,7 @@ function renderDefaultTab(box) {
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
-    ['defPipeSize', 'Default pipe size: a new pipe starts at it, and every Device, Pipe Fitting and item with IPs (pumps too) with no pipe on it is drawn for it. With pipes on it, it takes the size most of them have (Rule 5.36)', 'sel', sizePick(PIPE_SIZES)],
+    ['defPipeSize', 'Default pipe size: a new pipe starts at it, and a new Device, Pipe Fitting or item with IPs (pumps too) is drawn for it until a pipe is on it. With pipes on it, it takes the size most of them have (Rule 5.36). Items already made keep theirs', 'sel', sizePick(PIPE_SIZES)],
     ['defHoseSize', 'Default hose size: a new hose starts at it', 'sel', sizePick(HOSE_SIZES)],
     ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px). Each Tab can change it in Tab settings', 'num', null, false, false, { def: 10 }],
     ['newTabWidth', 'Width of a new Tab (px)', 'num', null, false, false, { def: 1600 }],
@@ -13904,7 +13916,7 @@ function refreshSkyFits() {
 const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
-  const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))) || (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw) return;      // most of its pipes, else the Default pipe size (Rule 5.36)
+  const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))) || (g.onVessel ? 0 : defaultWidth(g.workspace, g)); if (!pw) return;      // most of its pipes, else the Default pipe size (Rule 5.36)
   const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90];
   let w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (isSightGlass(g)) { hh = Math.round(pw / SG_BODY); w = Math.round(hh * sgRatio(g.sgLength)); }       // a Sight Glass: as thick as its pipe, as long as its Length (Rule 5.32)
@@ -13925,7 +13937,7 @@ function sizeToPipes(wsn) {
   if (!draft) return;
   for (const g of draft.graphics.filter(g => g.workspace === wsn && (isPlainUnit(g) || isMf(g)) && !isCap(g) && autoSized(g))) autoSizeUnit(g);
   for (const e of draft.elements.filter(e => e.workspace === wsn && isProbeTee(e))) {
-    const pw = majorityWidth(devIps(e).flatMap(q => pipesOn(q.id, wsn))) || defaultWidth(wsn);     // no pipe on it: the Default pipe size
+    const pw = majorityWidth(devIps(e).flatMap(q => pipesOn(q.id, wsn))) || defaultWidth(wsn, e);     // no pipe on it: the Default pipe size
     if (pw) sizeProbeTee(e, pw);
   }
   for (const c of draft.graphics.filter(c => c.workspace === wsn && isCap(c) && c.capOn && autoSized(c))) sizeCap(c);

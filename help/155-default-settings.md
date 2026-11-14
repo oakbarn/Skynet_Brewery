@@ -10,7 +10,7 @@ else can look.
 
 | Setting | What it does |
 |---|---|
-| **Default pipe size** | 1/2" unless you change it (1/4" to 6", with the mm size beside each). A **new pipe** starts at this size. Every **Device, Pipe Fitting and item with IPs** (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) that has **no pipe on it** is drawn for this size, so a new pump already matches your pipes. |
+| **Default pipe size** | 1/2" unless you change it (1/4" to 6", with the mm size beside each). A **new pipe** starts at this size. A **new Device, Pipe Fitting or item with IPs** (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for this size until a pipe is on it, so a new pump already matches your pipes. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). |
 | **Default hose size** | The size a **new hose** starts at. |
 | **How thick a 1/2" pipe is drawn on a new Tab** | In pixels; empty = 10. Each Tab can still change it in **Tab settings**. |
 | **Width** and **Height of a new Tab** | In pixels; empty = 1600 x 900. |
@@ -62,6 +62,8 @@ These change things already made, or how the whole panel works, so they are Sett
 The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Looks](151-panel-looks)), and Pulse is always 100 ms.
 
 ## The other settings on this tab
+
+**Defaults are for new things only.** Labels, Text Boxes and the Default pipe size are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
 
 New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), New Schema from a Skynet Template, new Tabs and valves (Tab
 Background Profile, Valve Profile), Labels and Text Boxes. See [The Menu](33-menu).
