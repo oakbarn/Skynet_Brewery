@@ -3,6 +3,8 @@
 #   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
 #                                          data/, config/, media/ or processes/ (their samples are in defaults/), so it never replaces yours
 #   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
+#   Skynet_Brewer_Full_Setup_<version>.exe   the same Windows installer with every Skynet picture and sound inside (Rule 9.20),
+#                                          added the Media Setup's add-only way, so a new install needs no separate Media Setup
 #   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   every Skynet picture and sound, kept out of the panel zip and
 #                                          Setup (OakBarn Brewery, 2026-11-10, Rule 9.12). They only ever ADD files: one you already
 #                                          have is never changed or deleted (Rule #1). The zip holds BrewPanel/defaults/media, which
@@ -96,6 +98,11 @@ if command -v makensis >/dev/null; then
   fi
   makensis -V2 -DSRC="$(pwd)/$STAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$EXE"
+  # The Full Setup (OakBarn Brewery, 2026-11-14, Rule 9.20): the same Setup with every Skynet picture and sound inside, so a new
+  # install needs no separate Media Setup. The plain Setup and the Media Setup stay as they are (Rule #1, Never Take Away).
+  FEXE="Skynet_Brewer_Full_Setup_$VERSION.exe"
+  makensis -V2 -DSRC="$(pwd)/$STAGE" -DMEDIA_SRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$FEXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
+  echo "Built $OUT/$FEXE"
   MEXE="Skynet_Media_Setup_$VERSION.exe"
   makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
   echo "Built $OUT/$MEXE"
