@@ -10,6 +10,8 @@
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+; and, only for the Full Setup (Rule 9.20), -DMEDIA_SRC=<the media folder of the Skynet Media Setup>: the same Setup, with every
+; Skynet picture and sound inside it, added the Media Setup's add-only way (a file already there is never changed or deleted).
 ; and, only when signing is set up (docs/Code_Signing_Setup.md), -DSIGN_SCRIPT=<tools/sign-exe.sh>: the Setup .exe and the
 ; Uninstall .exe inside it are then signed with Azure Artifact Signing as they are made (needs NSIS 3.08 or newer).
 
@@ -31,7 +33,11 @@ Unicode true
 !endif
 !ifdef SIGN_SCRIPT
   !uninstfinalize 'bash "${SIGN_SCRIPT}" "%1" "Uninstall Skynet Brewer.exe"'
-  !finalize 'bash "${SIGN_SCRIPT}" "%1" "Setup .exe"'
+  !ifdef MEDIA_SRC
+    !finalize 'bash "${SIGN_SCRIPT}" "%1" "Full Setup .exe"'
+  !else
+    !finalize 'bash "${SIGN_SCRIPT}" "%1" "Setup .exe"'
+  !endif
 !endif
 !define NODE_MIN "22.13.0"
 !define PORT "8080"
@@ -42,10 +48,18 @@ Unicode true
 
 Name "Skynet Brewer"
 OutFile "${OUTFILE}"
+; The Full Setup (Rule 9.20) is this same Setup with the Skynet pictures and sounds inside. Only its names and texts differ here.
+!ifdef MEDIA_SRC
+  !define SETUP_KIND "Full Setup"
+  !define SETUP_FILE "Skynet_Brewer_Full_Setup_${VERSION}.exe"
+!else
+  !define SETUP_KIND "Setup"
+  !define SETUP_FILE "Skynet_Brewer_Setup_${VERSION}.exe"
+!endif
 InstallDir "C:\Brewing\BrewPanel"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
-BrandingText "Skynet Brewer ${VERSION}"
+BrandingText "Skynet Brewer ${SETUP_KIND} ${VERSION}"
 
 ; The file's Details (right-click > Properties > Details). Virus scanners trust a Setup more when these are filled in and
 ; the version is a real number that goes up with each build, so it is the build date and time: 2026.11.9.324 is
@@ -64,19 +78,36 @@ VIFileVersion "${VI_NUM}"
 VIAddVersionKey "ProductName" "Skynet Brewer"
 VIAddVersionKey "CompanyName" "OakBarn Brewery"
 VIAddVersionKey "LegalCopyright" "Copyright (c) OakBarn Brewery 2026, MIT License"
-VIAddVersionKey "FileDescription" "Skynet Brewer Setup"
+!ifdef MEDIA_SRC
+  VIAddVersionKey "FileDescription" "Skynet Brewer Full Setup (with pictures and sounds)"
+  VIAddVersionKey "InternalName" "SkynetBrewerFullSetup"
+!else
+  VIAddVersionKey "FileDescription" "Skynet Brewer Setup"
+  VIAddVersionKey "InternalName" "SkynetBrewerSetup"
+!endif
 VIAddVersionKey "FileVersion" "${VI_NUM}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
-VIAddVersionKey "InternalName" "SkynetBrewerSetup"
-VIAddVersionKey "OriginalFilename" "Skynet_Brewer_Setup_${VERSION}.exe"
+VIAddVersionKey "OriginalFilename" "${SETUP_FILE}"
 VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https://github.com/oakbarn/Skynet_Brewery)"
 
 !define MUI_ICON "skynet.ico"
 !define MUI_UNICON "skynet.ico"
-!define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
-; The opening screen shows the version, so the brewer can see which one this Setup installs (Fritz, 2026-11-07)
-!define MUI_WELCOMEPAGE_TEXT "Version: ${VERSION}$\r$\n$\r$\nThis puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
+; The opening screen shows the version, so the brewer can see which one this Setup installs (OakBarn Brewery, 2026-11-07)
+!ifdef MEDIA_SRC
+  !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer (Full)"
+  !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer, with every Skynet picture and sound, and adds a Skynet Brewer shortcut to your Desktop. You do not need the Skynet Media Setup.$\r$\n$\r$\nPictures and sounds are only added: one you already have is never changed or deleted."
+!else
+  !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
+  !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop."
+!endif
+!define MUI_WELCOMEPAGE_TEXT "Version: ${VERSION}$\r$\n$\r$\n${WELCOME_WHAT}$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
 !define MUI_DIRECTORYPAGE_TEXT_TOP "The panel goes in this folder. C:\Brewing\BrewPanel is recommended."
+; What the Start Fresh warning says about the Skynet pictures and sounds
+!ifdef MEDIA_SRC
+  !define FRESH_MEDIA "this Full Setup puts them back"
+!else
+  !define FRESH_MEDIA "run the Media Setup after"
+!endif
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Start Skynet Brewer now"
 !define MUI_FINISHPAGE_RUN_FUNCTION StartPanel
@@ -84,7 +115,11 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 ; The pictures and sounds (Rule 9.12) and the extra Sample Schemas (Rule 9.13) are their own Setups: the Finish page links to them
-!define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds, and more Sample Schemas"
+!ifdef MEDIA_SRC
+  !define MUI_FINISHPAGE_LINK "Get more Sample Schemas"
+!else
+  !define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds, and more Sample Schemas"
+!endif
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -301,7 +336,7 @@ Function UpdateChoiceLeave
   ${EndIf}
   ${NSD_GetState} $RadioFresh $0
   ${If} $0 == ${BST_CHECKED}
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the backups folders$\r$\n   - every picture and sound (media), the Skynet ones too: run the Media Setup after$\r$\n   - everything in the Import folder ($BrewDir\Import)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (processes)$\r$\n   - the backups folders$\r$\n   - every picture and sound (media), the Skynet ones too: ${FRESH_MEDIA}$\r$\n   - everything in the Import folder ($BrewDir\Import)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
       Abort
     StrCpy $Choice "fresh"
     Return
@@ -455,11 +490,21 @@ Section "Skynet Brew Panel" SecMain
     CopyFiles /SILENT "$OldPanel\help\*.*" "$INSTDIR\help"
   ${EndIf}
 
+!ifdef MEDIA_SRC
+  ; The Full Setup (Rule 9.20): every Skynet picture and sound, added the Media Setup's way (Rule 9.12, Rule #1). A file already
+  ; there by that name is never changed, and nothing is deleted. It comes after a Start Fresh, so a Fresh Start gets them back too.
+  SetOverwrite off
+  SetOutPath "$INSTDIR\media"
+  File /r "${MEDIA_SRC}\*.*"
+  SetOverwrite on
+  DetailPrint "Added the Skynet pictures and sounds this panel did not have yet. Nothing you had was changed."
+!else
   ; The pictures and sounds come with the Skynet Media Setup (Rule 9.12): say so when this panel has none yet
   ${IfNot} ${FileExists} "$INSTDIR\media\Images\Skynet\*.*"
     DetailPrint "No Skynet pictures and sounds yet: get the Skynet Media Setup (the link on the last page, or the Releases page:"
-    DetailPrint "https://github.com/oakbarn/Skynet_Brewery/releases/latest) and run it after this."
+    DetailPrint "https://github.com/oakbarn/Skynet_Brewery/releases/latest) and run it after this, or use the Skynet Brewer Full Setup next time."
   ${EndIf}
+!endif
 
   ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
@@ -624,7 +669,7 @@ FunctionEnd
 ; and the BruControl Importer must be stopped first, or Windows can't delete the files they have open (the brew log).
 Section "Uninstall"
   Call un.FindBrewDir
-  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: UNINSTALL DELETES EVERYTHING.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - Skynet Brewer and the BruControl Importer ($INSTDIR)$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe$\r$\n   - every user, password and sign-in, the brew log and saved values$\r$\n   - every Process and the backups folders$\r$\n   - every picture and sound, your own and the Skynet ones$\r$\n   - everything in the Import folder ($BrewDir\Import), your BruControl files too$\r$\n$\r$\nTo keep something, click No, copy it somewhere else, then uninstall again.$\r$\n$\r$\nYes: delete it all.$\r$\nNo: stop. Nothing is deleted." /SD IDYES IDYES go
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: UNINSTALL DELETES EVERYTHING.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - Skynet Brewer and the BruControl Importer ($INSTDIR)$\r$\n   - every Schema, Tab, Device, Widget and setting, Profile and Recipe$\r$\n   - every user, password and sign-in, the brew log and saved values$\r$\n   - every Process and the backups folders$\r$\n   - every picture and sound, your own and the Skynet ones$\r$\n   - everything in the Import folder ($BrewDir\Import), your BruControl files too$\r$\n$\r$\nNot removed: helper programs you installed, like Node.js or Tailscale. Remove them in Settings > Apps if you no longer want them.$\r$\n$\r$\nTo keep something, click No, copy it somewhere else, then uninstall again.$\r$\n$\r$\nYes: delete it all.$\r$\nNo: stop. Nothing is deleted." /SD IDYES IDYES go
     Abort "Stopped. Nothing was deleted."
   go:
   Call un.WaitForPanelStopped

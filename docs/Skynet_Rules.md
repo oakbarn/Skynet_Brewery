@@ -2915,7 +2915,24 @@ works like Start Fresh (Rule 9.8), with nothing saved:
    everything in it, the shortcuts, and Skynet's own small folder in the user's AppData (the Skynet window's and the Importer's
    remembered sign-ins and settings). The Brewing folder itself goes only when nothing else is left in it.
 4. If a file still can't be deleted, a notice says to restart the computer and delete the Brewing folder by hand.
+5. **Helper programs are not removed** (OakBarn Brewery, 2026-11-14: "Add a Comment about not removing auxiliary programs like
+   Tailscale if you installed them"): Node.js, Tailscale and any other program the user installed stay, because other programs
+   may use them. The red warning, Help 19 and install/ReadMe.txt say so and point to Settings > Apps.
 Both programs (the Importer is in the same Setup). The Mac and Linux / Pi installers have no uninstall.
+
+9.20 **A Full Setup with the pictures and sounds inside** (OakBarn Brewery, 2026-11-14: "Set GitHub to have 2 different Skynet
+Panel Installs. The ones we have now but a new one that is a Full install that also has the media embedded so a new install does
+not need the media exe separate"). Every Release also carries **Skynet_Brewer_Full_Setup_<date>.exe**: the same Skynet Brewer
+Setup (same pages, choices, Uninstall and Rules) with every Skynet picture and sound of the Media Setup inside it. It adds them the
+Media Setup's way (Rule 9.12): a file already there by that name is never changed and nothing is deleted. It adds them after a
+Start Fresh, so a Fresh Start gets them back with no second Setup. Its welcome page says it is the Full one, and its file Details
+say "Full Setup". The plain Skynet Brewer Setup, the Media Setup and the Media zip stay on every Release as they are (Rule #1,
+Never Take Away): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
+(`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
+.exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
+VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
+media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
+Help 19 and 183)
 
 ## 10. Testing
 
@@ -4296,6 +4313,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-14: Rule 2.42 (OakBarn Brewery: "New Things Only"): Labels, Text Boxes and the Default pipe size reach only new items: each item keeps them as they were when made (newLook); once per Schema existing items kept the values of that day. Help 49, 155 (and French).
+- 2026-11-14: Rule 9.19 item 5 (OakBarn Brewery: "Uninstalled worked good. Add a Comment about not removing auxiliary programs like Tailscale if you installed them"): the uninstall warning, Help 19 (and French) and install/ReadMe.txt say helper programs like Node.js and Tailscale are not removed (remove them in Settings > Apps). Wording only. Both programs. (thread "Add a Full Setup with media included")
+- 2026-11-14: Added Rule 9.20 (OakBarn Brewery: "a new one that is a Full install that also has the media embedded so a new install does not need the media exe separate"): every Release also has Skynet_Brewer_Full_Setup_<date>.exe, the same Setup with the Skynet pictures and sounds inside, added the add-only way; the plain Setup and the Media Setup stay. Help 19 and 183 (and French), README, install/ReadMe.txt, Release notes. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Rule 2.42 (OakBarn Brewery): the Default tab is only for new things. Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Phones and tablets, the grain and gravity labels, Hop alerts and the Order of the Menu moved to the new Settings > Panel settings: screen, Tabs and alerts. "Defaults set somewhere else" renamed **Skynet Defaults for New User Created Items** with his text, now the fixed Skynet values. Default tab section titles get a blue back. Help 9, 22, 33, 40, 41, 45, 49, 99, 101, 147, 151, 155, 186 (and French).
 - 2026-11-14: Added Rule 10.10 (OakBarn Brewery: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar"): Settings > Simulation is gone; its settings are on the Simulator bar's new ⚙ Settings panel. Rule 10.4 changed to match. Help 20, 77, 85 (and French).
 - 2026-11-14: OakBarn Brewery's 21 choices on docs/Default_Settings_Other_Places.md. Rule 2.42: new Default tab part **New User Templates and Schemas** (Look of a new Schema, On overlay for a new User Pump and a new User Valve, Push Lockout); "Defaults set somewhere else" cut to 5 rows. Rules 5.14 and 5.36: pipe fittings always size to their pipes, the Autosize switch is gone. Rule 6.3: Lost Link (s) is a must-fill box on the Interface dialog, 10 s on every Interface and sample. Rule 6.7: Push Lockout default. Rule 7.12: a new Alarm's Layer 2 starts at None. Rule 7.15: On overlay defaults. Rule 10.5: a new empty Schema has no Interface.

@@ -12,6 +12,8 @@ The installers get it for you, or tell you how.
 The files in this release:
 
   Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
+  Skynet_Brewer_Full_Setup_<date>.exe  The same Windows installer WITH the Skynet pictures and sounds
+                                    inside: the easy way on a new computer (no Media Setup needed)
   Skynet_BrewPanel_<date>.zip       The panel itself: install or update by hand, or for Mac/Linux/Pi
   Skynet_Media_Setup_<date>.exe     The Skynet pictures and sounds, for Windows (run it after the installer)
   Skynet_Media_<date>.zip           The Skynet pictures and sounds, for Mac/Linux/Pi or by hand
@@ -70,7 +72,8 @@ THE SKYNET PICTURES AND SOUNDS (SEPARATE DOWNLOAD)
 --------------------------------------------------
 The pictures and sounds are not inside the panel zip or the installer. They are their
 own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releases/latest
-  Windows:   run Skynet_Media_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe.
+  Windows:   run Skynet_Media_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe,
+             OR use Skynet_Brewer_Full_Setup_<date>.exe, which has them inside (one file, same order).
   Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
              or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
              and start the panel: it copies in the pictures and sounds you do not have yet.
@@ -112,9 +115,12 @@ WINDOWS, THE EASY WAY (INSTALLER)
    If you had the panel straight in C:\Brewing before, it offers to copy your data across.
 4. Start it with "Skynet Brewer" on the Desktop. Your browser opens the panel.
 5. Then run Skynet_Media_Setup_<date>.exe for the Skynet pictures and sounds.
+   (Used Skynet_Brewer_Full_Setup_<date>.exe in step 2? Then you already have them: skip this.)
 
 To remove it: Settings > Apps > Skynet Brewer > Uninstall. After one red warning it
 deletes EVERYTHING in C:\Brewing, the Import folder too. Copy anything you want to keep first.
+NOT removed: helper programs you installed, like Node.js or Tailscale. Other programs may
+use them too. If you no longer want one, remove it yourself in Settings > Apps.
 
 
 WINDOWS, BY HAND
