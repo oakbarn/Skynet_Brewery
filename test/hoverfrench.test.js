@@ -14,19 +14,25 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // ---- finding the balloon texts in code
 {
-  const got = scriptTexts(`
+  const code = `
     const A_TIP = 'One tip';
     const B_TIPS = { x: 'Two tip', y: \`Three \${n} tip\` };
     h('b', { title: 'Four tip', class: 'x' }, 'Not a tip');
     h('b', { tip: ok ? 'Five tip' : 'Six tip' });
     el.title = 'Seven tip'
-    const notTip = 'Eight';
+    const plain = 'Eight';
+    const B_MSG = 'Twelve tip';
+    const D_TIP = B_MSG;
     document.title = 'Window title';
     el.dataset.help = 'Nine tip' + 'Ten tip';
     const re = /'x'/g, s = \`\${String(t).replace(/[<&"]/g, '')}\`;
     const C_HELP = ['Eleven tip'];
-  `).map(t => t.text);
-  assert.deepEqual(got, ['One tip', 'Two tip', 'Three {0} tip', 'Four tip', 'Five tip', 'Six tip', 'Seven tip', 'Nine tip', 'Ten tip', 'Eleven tip']);
+    function rowTip(n) { return \`Thirteen \${n} tip\`; }
+  `;
+  const refs = new Set(), got = scriptTexts(code, new Set(), refs).map(t => t.text);
+  assert.deepEqual(got, ['One tip', 'Two tip', 'Three {0} tip', 'Four tip', 'Five tip', 'Six tip', 'Seven tip', 'Nine tip', 'Ten tip', 'Eleven tip', 'Thirteen {0} tip']);
+  assert.ok(refs.has('B_MSG'), 'a constant a balloon is made from');
+  assert.ok(scriptTexts(code, refs).some(t => t.text === 'Twelve tip'), 'its texts are balloon texts too');
   assert.deepEqual(pageTexts('<button title="Print this page" data-help=\'Ab &amp; Cd\'>x</button><b title="x.svg">').map(t => t.text), ['Print this page', 'Ab & Cd']);
 }
 
@@ -42,6 +48,11 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
   assert.equal(frenchOf('Close\nClone of X', c), 'Fermer\nClone de X', 'line by line');
   assert.equal(frenchOf('Every Interface at once. More', c), 'Toutes les Interfaces à la fois. More', 'a long text inside a bigger one');
   assert.equal(frenchOf('Not known', c), 'Not known', 'no French: English');
+  const c2 = compileFrench({ 'A long first paragraph\nwith two lines': 'Un long premier paragraphe\nsur deux lignes', 'Close': 'Fermer' });
+  assert.equal(frenchOf('A long first paragraph\nwith two lines\n\nClose', c2), 'Un long premier paragraphe\nsur deux lignes\n\nFermer', 'paragraphs joined together, one over two lines');
+  const c3 = compileFrench({ 'Its name, for example {0}.': 'Son nom, par exemple {0}.', 'Close the door now.': 'Fermez la porte maintenant.' });
+  assert.equal(frenchOf('Its name, for example HLT.\n\nClose the door now.', c3), 'Son nom, par exemple HLT.\n\nFermez la porte maintenant.',
+    'a one-line text with {0} does not swallow the paragraphs after it');
   assert.equal(LANG_KEY, 'skynet-help-lang');
   assert.match(fs.readFileSync(path.join(root, 'public', 'help.js'), 'utf8'), /import \{ LANG_KEY, refreshBalloonLang \} from '\.\/hoverhelp\.js'/, 'the balloons follow the language picked in the Help window');
 }
