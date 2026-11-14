@@ -32,7 +32,7 @@
 
 **.backpath, .backpath_2, .backpath_3** : les trois chemins d'image de fond d'un élément (ils s'appelaient imagePath_1, _2, _3). `background = 1, 2 or 3` en choisit un ; 0, vide ou plus de 3 n'en montre aucun ; `name.image = "path"` change .backpath. Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).
 
-**IP (Initial Point)** (point de départ) : un petit repère rond là où un écoulement commence ou finit (une sortie de pompe, un port de cuve, une vidange). Les tuyaux commencent et finissent sur des IP. Les IP ne s'affichent que dans Edit layout.
+**IP (Initial Point)** (point de départ) : un petit repère rond là où un écoulement commence ou finit (une sortie de pompe, un port de cuve, une vidange). Les tuyaux commencent et finissent sur des IP. Les IP ne s'affichent que dans Edit layout, sous forme de cercle blanc dans un anneau de couleur.
 
 **List box** (liste déroulante, dropdown) : une case avec un ▼ qui ouvre une liste de choix. Tapez une lettre pour sauter à un choix ; **➕ Add new ...** à la fin en crée un nouveau. Voir [Listes déroulantes](189-list-boxes).
 
