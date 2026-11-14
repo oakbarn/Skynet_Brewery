@@ -13,7 +13,7 @@ import { dialSvg, DIAL_DEFAULTS } from './dial.js';
 import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
-import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
+import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -1393,10 +1393,11 @@ function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[d
 function widgetLabel(g, defPos) {
   const D = TD(), T = TS(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
   setRich(lb, g.label);
-  lb.style.color = firstSet(g.labelColor, T.labelFore, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.backColor);
-  lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.nameFont);
-  lb.style.textAlign = firstSet(T.labelAlign, D.align).toLowerCase();
-  if (g.labelBg || T.labelBack || D.backColor) lb.style.textShadow = 'none';
+  lb.style.color = firstSet(g.labelColor, T.labelFore, D.labelFore); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.labelBack);
+  lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.labelFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.labelFont);
+  lb.style.textAlign = firstSet(T.labelAlign, D.labelAlign).toLowerCase();
+  if (D.labelBold) lb.style.fontWeight = '700';
+  if (g.labelBg || T.labelBack || D.labelBack) lb.style.textShadow = 'none';
   return lb;
 }
 // the Default tab's text box settings (colors, alignment, name font ...): public/textbox.js
@@ -1545,7 +1546,7 @@ function fillText(n, g) {
   const fnt = (live, own) => tbFontCss(live) || firstSet(own);
   const body = h('div', { class: 'tbody' }); setRich(body, v.text ?? g.text ?? '');
   n.style.fontSize = (+firstSet(v.size, g.fontSize) || fontPx(T.size) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
-  n.style.fontFamily = fnt(v.font, g.font) || T.font || D.nameFont;
+  n.style.fontFamily = fnt(v.font, g.font) || T.font || D.font;
   n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
   n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
   n.style.textAlign = firstSet(v.alignment, g.align, T.align, D.align).toLowerCase();
@@ -2421,23 +2422,23 @@ function styleEl(n, e) {
   if (isAlmBasic(e)) e = { ...e, foreColor: '', backColor: '' };      // a Basic Skynet Alarm's Fore and Back color its picture, not its text
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
   // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
-  const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.foreColor));
-  const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.backColor), vb = firstSet(e.valueBg, e.backColor, T.back, D.backColor);
+  const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.labelFore), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.valueFore));
+  const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.labelBack), vb = firstSet(e.valueBg, e.backColor, T.back, D.valueBack);
   if (nc) nm.style.color = nc;
   if (nb) nm.style.backgroundColor = nb;
   if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
   if (vb) vl.style.backgroundColor = vb;
   if (isAlmBasic(e)) vl.style.backgroundColor = 'transparent';      // nothing covers its bell: it shows no value text
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
-  if (e.nameBold) nm.style.fontWeight = '700';
+  if (e.nameBold ?? D.labelBold) nm.style.fontWeight = '700';      // its own Bold, else the Default tab's Labels Bold
   // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
-  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.nameFontSize);
+  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.labelFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.labelFontSize);
   if (fam) nm.style.fontFamily = fam;
   if (size) nm.style.fontSize = size + 'px';
-  if (T.font && !e.valueFont?.family) vl.style.fontFamily = T.font;
+  if ((T.font || D.font) && !e.valueFont?.family) vl.style.fontFamily = T.font || D.font;
   if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
-  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, T.align, D.align), nal = firstSet(e.align, T.labelAlign, D.align);
+  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, T.align, D.align), nal = firstSet(e.align, T.labelAlign, D.labelAlign);
   let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else nm.style.textAlign = (nal || 'Center').toLowerCase();      // Centered when nothing is set (Label Attributes)
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
   else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
@@ -3875,7 +3876,7 @@ function renderPipes() {
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
-      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().foreColor || '#e6e6e6', 'font-size': TD().nameFontSize || 14 }); t.textContent = p.label; g.append(t);
+      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().labelFore || '#e6e6e6', 'font-size': TD().labelFontSize || 14 }); t.textContent = p.label; g.append(t);
     }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
@@ -5874,7 +5875,7 @@ $('#addImg').onclick = guard(() => addThing('picture'));
 $('#addText').onclick = () => addText();
 function addText() {
   toBuild();
-  const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }) };
+  const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: D.fontSize || 18, ...(D.visible ? {} : { visible: false }) };
   { let n = 1; while (draft.graphics.some(x => x.kind === 'text' && x.label === 'Text_' + n)) n++; g.label = 'Text_' + n; }      // a Label from the start (Rule 18.15): its name is wgt_TXT_Text_1 ...
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
@@ -7295,15 +7296,15 @@ const LABEL_POP = { title: 'Label Attributes', tip: 'Opens a Label Attributes Di
 // the Label's size and alignment when it has none of its own: the Tab Style's, then the Default tab's, then the panel's own
 // the size its Label shows at on the Tab now (pixels), when it is there
 const labelShownSize = o => { try { const n = o?.name && document.querySelector(`#ws .el[data-name="${CSS.escape(o.name)}"] > .nm`); return n ? Math.round(parseFloat(getComputedStyle(n).fontSize)) || 0 : 0; } catch { return 0; } };
-const labelDefaultSize = () => fontPx(TS().labelSize) || TD().nameFontSize || 11;
+const labelDefaultSize = () => fontPx(TS().labelSize) || TD().labelFontSize || 11;
 // the Label's font and colors when it has none of its own: its own Fore and Back color, then the Tab Style's, then Default settings
 const labelDefaultLook = o => { const T = TS(), D = TD(), out = {};
-  const fam = o.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont), fore = firstSet(o.foreColor, T.labelFore, D.foreColor), back = firstSet(o.backColor, T.labelBack, D.backColor);
+  const fam = o.nameFont?.family ? '' : firstSet(T.labelFont, D.labelFont), fore = firstSet(o.foreColor, T.labelFore, D.labelFore), back = firstSet(o.backColor, T.labelBack, D.labelBack);
   if (fam && FONTS.some(f => (Array.isArray(f) ? f[0] : f) === fam)) out.nameFontFamily = fam;
   if (fore) out.nameColor = fore;
   if (back) out.nameBg = back;
   return out; };
-const labelDefaultAlign = () => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TD().align));
+const labelDefaultAlign = () => (a => ['Left', 'Center', 'Right'].includes(a) ? a : 'Center')(firstSet(TS().labelAlign, TD().labelAlign));
 const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
@@ -12701,10 +12702,35 @@ function hopStandsFromForm(d, tu) {
     const m = d[`hs${k}Min`]; if (m === '' || m === null) delete d[`hs${k}Min`]; else if (m !== undefined && !(+m >= 0)) throw new Error(`Hop Stand ${label} time must be 0 or more minutes`);
   }
 }
+// the Labels and Text Boxes boxes' hover help (Rule 2.38; KISS, Rule 11.8: the name is short, the explanation is here)
+const LBL_TIPS = {
+  visible: 'On: new Devices, Widgets and Texts start shown. Off: they start hidden. Copied into each new item when it is made.',
+  fore: 'The color of the letters of a Label: the name of a Device or Widget, or the Label on a vessel. An item left on Default follows this, so changing it here changes them all.',
+  back: 'The color behind the letters of a Label. An item left on Default follows this.',
+  align: 'Where the words of a Label sit: left, center or right.',
+  bold: 'On: Labels are written in bold letters, unless an item has its own Bold set.',
+  font: 'The font of Labels. Tab\'s font: each Tab uses its Tab Style\'s font, and the panel\'s normal font when its Tab Style has none. A font picked here is used where a Tab Style has none.',
+  size: 'The size of the letters of a Label, in pixels.' };
+const TBX_TIPS = {
+  fore: 'The color of the letters in a Text or a Label Widget. The Value of a Device follows it too, once it is set here.',
+  back: 'The color behind the letters of a Text or a Label Widget. The Value of a Device follows it too, once it is set here.',
+  align: 'Where the words of a Text Box sit: left, center or right.',
+  font: 'The font of Text Boxes. Tab\'s font: each Tab uses its Tab Style\'s font, and the panel\'s normal font when its Tab Style has none.',
+  size: 'The size of the letters of a new Text, in pixels.',
+  width: 'How wide a new Text or Label Widget is, in pixels.',
+  height: 'How tall a new Text or Label Widget is, in pixels.',
+  wrap: 'On: long words go on to the next line inside the box.' };
+const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Process text. Bigger than normal text (${TEXT_NORMAL} px). See Help: Text boxes.`;
+// the Font list of Labels and Text Boxes: empty = the Tab's font (OakBarn Brewery, 2026-11-14: "Should this be Tab's Default Font?" Yes)
+const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the Hover Delay box's own hover help (Rule 2.38)
 const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). 0 or empty: it shows at once. Up to 5000. Phones and tablets have no mouse: a tap still opens the help at once.';
+// what a fresh install starts with, as the Default tab's boxes (public/textbox.js)
+const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align,
+  labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
+  textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...freshTextBoxes(), ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
@@ -12766,20 +12792,27 @@ function renderDefaultTab(box) {
     ['_z', 'On startup', 'head'],
     ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
     ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
-    ['_x', 'Text', 'head'],
-    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Label on a vessel) starts from these. ' +
-      'An item left on Default follows the colors, alignment and name font here, so changing one here changes them all. ' +
-      'Visible, Word wrap, the size and the place are copied into each new item when it is made.', 'note'],
-    ['textVisible', 'Visible (new Devices, Widgets and Texts start shown)', 'bool'],
-    ['textForeColor', 'Fore color (the color of the text)', 'color'],
-    ['textBackColor', 'Back color (behind the text)', 'color'],
-    ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)]],
-    ['textWrap', 'Word wrap as needed', 'bool'],
-    ['nameFont', 'Name font (names, Labels and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
-    ['nameFontSize', 'Name font size (px)', 'num', null, false, false, { tip: 'Empty: the panel\'s normal size.' }],
-    ['textWidth', 'Width of a new Text or Label (px)', 'num', null, false, false, { def: 220 }],
-    ['textHeight', 'Height of a new Text or Label (px)', 'num', null, false, false, { def: 40 }],
-    ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px)`, 'num', null, false, false, { def: TEXT_LARGE }],
+    // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
+    // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
+    ['_lbl', 'Labels', 'head'],
+    ['labelVisible', 'Visible', 'bool', null, false, false, { tip: LBL_TIPS.visible }],
+    ['labelForeColor', 'Fore Color', 'color', null, false, false, { tip: LBL_TIPS.fore }],
+    ['labelBackColor', 'Back Color', 'color', null, false, false, { tip: LBL_TIPS.back }],
+    ['labelAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)], false, false, { tip: LBL_TIPS.align }],
+    ['labelBold', 'Bold', 'bool', null, false, false, { tip: LBL_TIPS.bold }],
+    ['labelFont', 'Font', 'sel', TAB_FONT_PICK, false, false, { tip: LBL_TIPS.font }],
+    ['labelFontSize', 'Font Size (px)', 'num', null, false, false, { tip: LBL_TIPS.size }],
+    ['_tbx', 'Text Boxes', 'head'],
+    ['textForeColor', 'Fore Color', 'color', null, false, false, { tip: TBX_TIPS.fore }],
+    ['textBackColor', 'Back Color', 'color', null, false, false, { tip: TBX_TIPS.back }],
+    ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)], false, false, { tip: TBX_TIPS.align }],
+    ['textFont', 'Font', 'sel', TAB_FONT_PICK, false, false, { tip: TBX_TIPS.font }],
+    ['textFontSize', 'Font Size (px)', 'num', null, false, false, { tip: TBX_TIPS.size }],
+    ['textWidth', 'New Box Width', 'num', null, false, false, { tip: TBX_TIPS.width }],
+    ['textHeight', 'New Box Height', 'num', null, false, false, { tip: TBX_TIPS.height }],
+    ['textWrap', 'Word Wrap', 'bool', null, false, false, { tip: TBX_TIPS.wrap }],
+    ['_rtc', 'Rich Text Embedded Code', 'head'],
+    ['textLarge', '\\L Rich Text Code Size (px)', 'num', null, false, false, { def: TEXT_LARGE, tip: RTC_SIZE_TIP }],
     ['_hh', 'Hover Help', 'head'],
     ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
     ['_p', 'Phones and tablets', 'head'],
@@ -12799,9 +12832,12 @@ function renderDefaultTab(box) {
   const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
   now.onchange = () => setSound(now.checked);
   const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
+  const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
     if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
+    for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];      // empty: what a fresh install has
+    for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     for (const [k, from] of [['waterToGrain', () => toRatio(d._w2g, su.ratioUnit)], ['grainTempC', () => toC(d._grainT, su.tempUnit)], ['strikeOffsetC', () => su.tempUnit === 'F' ? d._strikeOff * 5 / 9 : d._strikeOff]]) {
       const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
@@ -12811,14 +12847,17 @@ function renderDefaultTab(box) {
     delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._grainLabel; delete d.grainLabel;
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
     for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
-    if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
-    for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10]])
+    for (const [k, t, min] of [['labelFontSize', 'Labels Font Size', 6], ['textFontSize', 'Text Boxes Font Size', 6], ['textWidth', 'New Box Width', 10], ['textHeight', 'New Box Height', 10]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
-    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay); renderWs(); toast('Defaults saved'); });
+    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
+    await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
+    renderWs(); renderMenuPane(); toast('Defaults saved'); });
+  const saveBtn = () => admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : '';
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
@@ -12827,8 +12866,8 @@ function renderDefaultTab(box) {
     })));
   const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Default'), h('th', {}, 'Now'), h('th', {}, 'Changed on'), h('th', {}, 'Rule'))),
     h('tbody', {}, ...otherDefaults().map(([what, now, where, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, where), h('td', { class: 'muted' }, rule)))));
-  box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
-    ...tapWaterSection(admin),
+  box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn(), soundNow, f.box, saveBtn()),
+    ...tap.nodes, h('div', { class: 'menuNarrow' }, saveBtn()),
     h('h3', {}, 'Defaults set somewhere else (to look at)'), h('p', { class: 'muted' }, 'These are not changed here. Each one says where it is changed.'), others,
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
@@ -12840,7 +12879,7 @@ function renderDefaultTab(box) {
 const ALK_HCO3 = 1.22, hardnessOf = w => Math.round((2.497 * (+w.ca || 0) + 4.118 * (+w.mg || 0)) * 10) / 10;
 function tapWaterSection(admin) {
   const tw = S.waterProfiles.find(x => x.tap);
-  if (!tw) return [h('h3', {}, 'Tap Water'), h('p', { class: 'muted' }, 'No Tap Water profile yet: it is made when the Brain starts.')];
+  if (!tw) return { nodes: [h('h3', {}, 'Tap Water'), h('p', { class: 'muted' }, 'No Tap Water profile yet: it is made when the Brain starts.')], save: async () => { } };
   const w = clone(tw), r1 = v => Math.round(v * 10) / 10;
   w._alk = r1((+w.hco3 || 0) / ALK_HCO3); w._hard = hardnessOf(w);
   const alkWas = w._alk, hco3Was = w.hco3;
@@ -12866,14 +12905,15 @@ function tapWaterSection(admin) {
   for (const k of ['ca', 'mg']) inp(k)?.addEventListener('input', live);
   inp('_alk')?.addEventListener('input', () => { const a = inp('_alk').value, hc = inp('hco3'); if (hc && a !== '') hc.value = r1(+a * ALK_HCO3); });
   inp('hco3')?.addEventListener('input', () => { const v = inp('hco3').value, al = inp('_alk'); if (al && v !== '') al.value = r1(+v / ALK_HCO3); });
-  const save = guard(async () => {
+  // saved with the Default tab's own Save (OakBarn Brewery, 2026-11-14: "Save Tap Water" button "Not Needed")
+  const save = async () => {
     f.read();
     if (w.hco3 === hco3Was && w._alk !== alkWas && w._alk !== '' && w._alk !== undefined && w._alk !== null) w.hco3 = r1(+w._alk * ALK_HCO3);
     const body = { ...w }; delete body._alk; delete body._hard; delete body._tn;
     const r = await api('PUT', `/ui/profiles/water/${tw.id}`, body);
-    S.waterProfiles = r.list; renderMenuPane(); toast('Tap Water saved');
-  });
-  return [h('h3', {}, 'Tap Water'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save Tap Water')) : '')];
+    S.waterProfiles = r.list;
+  };
+  return { nodes: [h('h3', {}, 'Tap Water'), h('div', { class: 'menuNarrow' }, f.box)], save };
 }
 
 // ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.

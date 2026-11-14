@@ -47,7 +47,7 @@ chaque case de texte) et Phones and tablets. Voir [Le ☰ Menu](33-menu).
 
 ## Tap Water
 
-Votre propre eau du robinet : les chiffres qui comptent pour brasser. Chaque recette commence avec Tap Water sur son Tab Waters, à chaque Level, sauf si vous choisissez une autre eau. Remplissez-les, puis appuyez sur **Save Tap Water**.
+Votre propre eau du robinet : les chiffres qui comptent pour brasser. Chaque recette commence avec Tap Water sur son Tab Waters, à chaque Level, sauf si vous choisissez une autre eau. Remplissez-les, puis appuyez sur **Save** (le seul Save de l'onglet Default, en haut ou en bas).
 
 **Où trouver les chiffres :**
 
