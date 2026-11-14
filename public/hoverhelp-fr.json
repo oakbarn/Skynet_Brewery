@@ -495,7 +495,6 @@
  "The boards your Devices are wired to (Devices page)": "Les cartes auxquelles vos Devices sont câblés (page Devices)",
  "Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator": "Ajouter une carte : un Mega, un ESP32 ... par USB, Ethernet, WiFi, ou un Simulator",
  "Every Interface at once: the simulator (nothing real is switched) or the real boards": "Toutes les Interfaces à la fois : le simulateur (rien de réel n'est commuté) ou les vraies cartes",
- "Stop the panel and close its Command Prompt window on the Brain": "Arrêter le panel et fermer sa fenêtre d'invite de commandes sur le Brain",
  "Menu: Edit layout, the Menu tabs and the pages": "Menu : Edit layout, les onglets du Menu et les pages",
  "The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).": "L'Interface sur laquelle démarre un nouveau Device dans sa boîte Add. La même valeur par défaut que la liste Interface sur le 🔨 Build Tab. Gardée par son Interface ID, donc un Schema sans cette Interface démarre sur la dernière utilisée (Règle 4.6).",
  "The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).": "Le Tab où va un nouveau Device ou Widget quand le Build est fini. La même valeur par défaut que la liste Tab sur le 🔨 Build Tab ; ➕ Add new Tab… dans une boîte Add la règle aussi. Gardé par son Tab ID (Règle 4.6).",
@@ -1237,5 +1236,7 @@
  "The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).": "Le Valve Profile avec lequel cette vanne commence : ses images et son Orientation. Il commence sur celui marqué Default (☰ Menu > Valve Profile).",
  "Pump Profile": "Pump Profile (profil de pompe)",
  "The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types": "L'aspect avec lequel une nouvelle pompe commence : Orientation, Cover, entrée et sortie, Hose ou Pipe, Overlay et IP Types",
- "On: a new one's Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.": "On : la case d'ajout d'un nouvel élément choisit d'abord ce profil. Un seul de la liste est le Default ; l'activer ici le désactive sur les autres."
+ "On: a new one's Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.": "On : la case d'ajout d'un nouvel élément choisit d'abord ce profil. Un seul de la liste est le Default ; l'activer ici le désactive sur les autres.",
+ "Turn everything Off, stop the Brain on this computer and close this window": "Tout éteindre, arrêter le Brain sur cet ordinateur et fermer cette fenêtre",
+ "Turn everything Off and let go of the boards. An Admin starts the Brain again from any screen": "Tout éteindre et lâcher les cartes. Un Admin relance le Brain depuis n'importe quel écran"
 }

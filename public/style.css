@@ -1093,6 +1093,12 @@ dialog.askDiscard { width: min(420px, 94vw); }
 .miniDlg .miniBody .full, .miniDlg .miniBody > textarea, .miniDlg .miniBody > p { grid-column: 1 / -1; }
 .miniDlg textarea.strEntry { width: 100%; box-sizing: border-box; font: inherit; resize: vertical; }
 /* the ⬢ and ⬆ pop-ups of the model dialog (Pump, Rule 2.51): title and buttons frozen at the top, no bottom row */
+/* the Freeze on other updated dialogs (OakBarn Brewery, 2026-11-14: "Apply the Freeze to any dialog that is updated"): the Close and
+   Standby warnings (Rule 6.32) */
+dialog.frozenDlg { padding-top: 0; }
+dialog.frozenDlg .frozenHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 6px; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog.frozenDlg .frozenHead .vdBtns { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; justify-content: center; }
+dialog.frozenDlg .frozenHead .vdBtns button { width: auto; }
 .miniDlg.miniModel { padding-top: 0; }
 .miniDlg.miniModel .miniHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
 /* Add Pump step 2 (Fritz, 2026-11-04): the pump list, each row with its picture */
