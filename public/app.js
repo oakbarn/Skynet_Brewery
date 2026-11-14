@@ -14346,7 +14346,7 @@ function qdPumpsOn(p) {
 // Unhooking a QD hose end (Fritz, 2026-11-14): one pop-up that stays open. 1. A pump on the hose is On: it says to shut it off
 // and keeps checking until it is Off. 2. Then the valves: set so nothing drains by gravity? Yes = go. Exit always closes without moving it.
 function qdSafety(p, end) {
-  const hn = p.label || p.name || 'The hose';
+  const hn = p.label || p.name || 'this hose', Hn = hn[0].toUpperCase() + hn.slice(1);
   const head = h('div', { class: 'bar' }), msg = h('p', {});
   const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true }, h('div', { class: 'grabHead' }, head), msg);
   const btn = (text, cls, fn) => h('button', { type: 'button', class: 'big ' + cls, onclick: () => { fn?.(); d.close(); } }, text);
@@ -14356,7 +14356,7 @@ function qdSafety(p, end) {
     const { pumps, flowing } = qdPumpsOn(p), run = !!(pumps.length || flowing);
     if (run === was) return; was = run;
     if (run) {
-      head.replaceChildren(h('h3', {}, `⚠ ${hn}: shut off the pump`), h('span', { class: 'spacer' }), exit());
+      head.replaceChildren(h('h3', {}, `⚠ ${Hn}: shut off the pump`), h('span', { class: 'spacer' }), exit());
       msg.textContent = `${pumps.length ? pumps.map(e => e.label || e.name).join(', ') + (pumps.length > 1 ? ' are' : ' is') + ' On' : 'Liquid is flowing in ' + hn}. Turn the pump Off before you unhook ${hn}, so it does not spray. This pop-up goes on by itself once the pump is Off.`;
     } else {
       head.replaceChildren(h('h3', {}, `Unhook ${hn}?`), h('span', { class: 'spacer' }), exit(),
