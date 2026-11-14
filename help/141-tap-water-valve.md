@@ -35,5 +35,4 @@ Exactly like every Manual Valve Widget (Skynet Rule 5.15, see the Pipe fittings 
 
 ## Size
 
-**Autosize to pipe** is on to start: the valve takes the size of the hose on it, so its hose thread is as wide as the hose. Switch
-Autosize off in its Properties to type a bigger Width and Height.
+**Autosize to pipe** is always on: the valve takes the size of the hose on it, so its hose thread is as wide as the hose.

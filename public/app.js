@@ -536,7 +536,7 @@ function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else if (o.cloneId) n.append(h('div', { class: 'cloneMark', title: `Clone of ${o.cloneOf}: it moves, its size is its parent's` }, '⧉'));
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
-  else if (autoSized(o)) return;       // a pipe fitting on Autosize to pipe: no grab points until Autosize is switched off
+  else if (autoSized(o)) return;       // a pipe fitting sizes to its pipes (always, Rule 5.36): no grab points
   else if (isVW(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id !== o.id) return;    // Vessel Rules: only the Master Vessel Sizer is resized
   else {
     n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
@@ -1247,6 +1247,12 @@ const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
 // the names (OakBarn Brewery, 2026-11-10): each starts with its own first letter, so typing that letter in the list picks it (Rule 2.38)
+// the On overlay a new pump or a new powered valve starts with (OakBarn Brewery, 2026-11-14: "Default Overlay for a New User Pump
+// Template" and "... Valve Template"): ☰ Menu > Default settings; a Skynet Template keeps its own (Rule 2.42: Defaults are for new things)
+// the lockout a new Pulse button starts with (Rule 6.7): ☰ Menu > Default settings > Push Lockout (s), 3 unless changed
+const newLockout = () => Math.round((+S.config.brewDefaults?.pushLockout > 0 ? +S.config.brewDefaults.pushLockout : 3) * 1000);
+const OVERLAY_DEFAULTS = { pump: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg', valve: BOLT };
+const newOverlay = kind => (v => v === undefined || v === null ? OVERLAY_DEFAULTS[kind] : v)(S.config.brewDefaults?.[kind === 'pump' ? 'newPumpOverlay' : 'newValveOverlay']);
 const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', BOLT_FLASH], ['Corner Badge Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['See Through Lightning Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green Glow Ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -1621,8 +1627,9 @@ const sgPic = g => 'data:image/svg+xml,' + encodeURIComponent(sightGlassSvg((g.w
 const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round((g.h || SG_H) * sgRatio(g.sgLength)); };
 // the Label a new Sight Glass starts with (Rule 18.15; Fritz, 2026-11-05): site_glass_n, the next number not used as a Label or Name
 const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
-const autoSized = g => (isPipeFit(g) || isMv(g) || isMf(g)) && g.autoSize !== false;      // an End Cap (the size of the opening it closes) and a Valve Tee or Supply Manifold too (Rules 5.35, 5.36)
-const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
+// always on (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option) ... Why would we want to allow resize off? We already
+// have a pipe size default"): an End Cap (the size of the opening it closes) and a Valve Tee or Supply Manifold too (Rules 5.35, 5.36)
+const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
 // changes with a click on it on its Tab, at any time. A Process line ManualValve_1.state = true does not change it: it puts up
 // "Open it by hand" on the Tab and waits until someone clicks the valve open. While open it shows the open overlay.
@@ -4747,6 +4754,8 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // Default settings (Rule 2.42)
+  if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout on Default settings
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
   if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'valueWidget' || type === 'codeValueWidget') e.precision = 2; if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
@@ -4762,7 +4771,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (type === 'chart') { e.w = 610; e.h = 190; e.label = 'Graph_' + i; Object.assign(e, { spanSeconds: CHART_DEFAULTS.spanSeconds, refreshInterval: CHART_DEFAULTS.refreshInterval, hGridLines: CHART_DEFAULTS.hGridLines, vGridLines: 0 }); }     // Rule 1.26
   if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
-    if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
+    if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: '', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
     if (e.alarmClass === 'prehop') { Object.assign(e, { w: 240, h: 120, label: 'Pre-Hop', string: 'Get the hops ready', background: '1' }); PREHOP_MARKS.forEach((p, k) => { e[k ? 'backpath_' + (k + 1) : 'backpath'] = p; }); e.name = almSuggest(e, e.label); }      // Rule 7.21
   }
   if (type === PROCESS_WIDGET_TYPE) { Object.assign(e, PROCESS_WIDGET_SIZE); e.label = 'Process_' + i; e.process = ''; }     // the Process Widget (Rule 1.31): a Label from the start
@@ -4772,7 +4781,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     if (pick === 'skyValve') { e.w = extra.w; e.h = extra.h; } else e.w = e.h = 150;      // a Skynet Template keeps its own size
     if (pick === 'pump' && !extra?.imageOff) {      // Add Pump step 2 (Fritz, 2026-11-04): which pump; its drawing is the Picture
       const k = await pickPump(); if (!k) return;
-      e.imageOff = pumpPic(k); delete e.imageOn; e.imageOverlay = 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'; e.cover = 'None';
+      e.imageOff = pumpPic(k); delete e.imageOn; e.imageOverlay = newOverlay('pump'); e.cover = 'None';
       what = PUMP_MODELS.find(m => m[1] === k)[0];
       centerNew(e);       // so the Add box shows where it will go
     }
@@ -5487,7 +5496,7 @@ async function newDeviceDialog(e, hint, what) {
         try { if (e.device) localStorage.setItem(LAST_IFACE_KEY, e.device); } catch { }      // the next new Device's default Interface
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
-        if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= 3000; }
+        if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= newLockout(); }
         if (e.type === 'digitalIn' && work.typeCode === 'Float') e.mode = 'switch';       // true while the float is made, false when not
         const warn = heatingLinkWarning(e, S.config.devices); if (warn) toast(warn, true);   // heating on a network board: allowed, with a warning
         return true;
@@ -6556,7 +6565,7 @@ async function addManualPump() {
   const D = TD(), sump = k === 'sump';
   let i = 1; while (draft.elements.some(e => e.type === MANUAL_PUMP_TYPE && e.label === 'Pump ' + i)) i++;
   const e = { type: MANUAL_PUMP_TYPE, subtype: 'pump', label: 'Pump ' + i, workspace: wsName, x: D.x, y: D.y, w: 150, h: 150, ipIn: 'left', ipOut: 'right',
-    imageOff: sump ? SUMP[3].imageOff : pumpPic(k), ...(sump ? { imageOn: SUMP[3].imageOn } : { cover: 'None' }), imageOverlay: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg',
+    imageOff: sump ? SUMP[3].imageOff : pumpPic(k), ...(sump ? { imageOn: SUMP[3].imageOn } : { cover: 'None' }), imageOverlay: newOverlay('pump'),
     hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF', confirmation: true };
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e); stackNew(e);
@@ -7176,7 +7185,7 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
   return [['_fx', 'Not editable', 'head'], ['name', 'Name (given by Skynet; a Process uses it, e.g. ' + (it.name || 'Pipe_1') + '.flow_Color = Mash)', 'ro'],
     ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
-const FIT_PLACE = it => [AUTOSIZE_FIELD, ...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
+const FIT_PLACE = it => [...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
@@ -11331,7 +11340,7 @@ $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaul
 
 // ---- The Interface pop-up (Fritz, 2026-10-27): Add Interface, from the ☰ Menu, the Devices page and "➕ Add new Interface…" in
 // the New Device box (any Tab). The same pop-up changes an Interface's connection (⚙ on the Devices page) and finishes the
-// New_Mega_2560_N a new empty Schema starts with. It explains the Interface ID: it starts every Suggested Device name.
+// pretend Mega a Skynet Schema Template makes when there is no real Interface. It explains the Interface ID: it starts every Suggested Device name.
 const LINK_CHOICES = [['serial', 'USB'], ['ethernet', 'Ethernet (wired)'], ['esp32', 'WiFi (a Mega: through an ESP32 bridge)'], ['simulator', 'Simulator (no board yet: pretend)']];
 const IFACE_ID_NOTES = [
   'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_DO@Pump_Wort__HS for a pump on pin 25 of the Interface HS.',
@@ -11346,11 +11355,13 @@ const BOARD_TIP = {
   answer: `Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.`,
   logging: 'On: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). For finding a problem; turn it off after.',
   baud: 'How fast the USB line talks. It must be the same as the program on the board: Skynet\'s own programs use 115200.',
+  lost: `Lost Link: if the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF. Must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max}; Skynet uses ${LOST_LINK.def}.`,
   netPort: 'The network port the board listens on. It must be the same as the program on the board: Skynet\'s own programs use 4100.',
 };
 const boardFields = o => [['_bsh', 'Board settings', 'head'], ['enabled', 'On', 'bool', null, false, false, { tip: BOARD_TIP.on }],
   ['paused', 'Pause communications', 'bool', null, false, false, { tip: BOARD_TIP.paused }],
   ['answerSec', 'Answer wait (seconds)', 'num', null, false, false, { tip: BOARD_TIP.answer, def: BOARD_DEFAULTS.answerSec }],
+  ['lostLinkSec', 'Lost Link (s)', 'num', null, false, false, { tip: BOARD_TIP.lost }],      // must be filled in (OakBarn Brewery, 2026-11-14)
   ['logging', 'Diagnostic logging', 'bool', null, false, false, { tip: BOARD_TIP.logging }],
   ...(o.connection === 'serial' ? [['baud', 'Baud (USB speed)', 'sel', BAUDS.map(b => [b, String(b) + (b === BOARD_DEFAULTS.baud ? ' (Skynet)' : '')]), false, false, { tip: BOARD_TIP.baud }]] : []),
   ...(['ethernet', 'esp32'].includes(o.connection) ? [['netPort', 'Network port', 'num', null, false, false, { tip: BOARD_TIP.netPort }]] : []),
@@ -11360,10 +11371,14 @@ function boardStart(w) {
   w.baud = Number(w.baud) || BOARD_DEFAULTS.baud;
   w.netPort = ['ethernet', 'esp32'].includes(w.connection) && Number(w.port) > 0 ? Number(w.port) : BOARD_DEFAULTS.netPort;
   w.answerSec ??= '';
+  w.lostLinkSec = lostLinkSec(w);      // 10 s on a new Interface (Rule 6.3)
 }
 function boardSave(d, w) {
   if (w.enabled === false || w.enabled === 'false') d.enabled = false; else delete d.enabled;
   for (const k of ['paused', 'logging']) if (w[k] === true || w[k] === 'true') d[k] = true; else delete d[k];
+  const ll = String(w.lostLinkSec ?? '').trim(), lln = Math.round(Number(ll));
+  if (ll === '' || !(lln >= LOST_LINK.min && lln <= LOST_LINK.max)) throw new Error(`Lost Link must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max} seconds (Skynet uses ${LOST_LINK.def})`);
+  d.lostLinkSec = lln;
   const a = String(w.answerSec ?? '').trim();
   if (a === '') delete d.answerSec; else { const n = Math.round(Number(a)); if (!(n >= 2 && n <= 600)) throw new Error('Answer wait is 2 to 600 seconds'); d.answerSec = n; }
   if (d.connection === 'serial') d.baud = BAUDS.includes(Number(w.baud)) ? Number(w.baud) : BOARD_DEFAULTS.baud;
@@ -11791,7 +11806,8 @@ $('#saveMqtt').onclick = guard(async () => {
 
 // ---------------------------------------------------------------- simulation mode
 // The striped bar under the menu (everyone sees it; admins get the speed and skip buttons),
-// and Settings > Simulation (switch, speed, Time jumps table, Process timeline).
+// Rule 10.10 (OakBarn Brewery, 2026-11-14): every Simulator setting is ONLY on the Simulator bar: Speed, skips and Auto skip
+// on the bar itself, the rest behind its ⚙ Settings button (lead, watch, Pretend readings, Time jumps, Process timeline).
 const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; };
 const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
 let simPoll = null, simWasOff = false;
@@ -11817,7 +11833,7 @@ function renderSimBar() {
   if (on && simWasOff) showSimBar(true);   // switching the Simulator on opens the bar again
   simWasOff = !on;
   if (on !== was && view === 'workspace') fitZoom();
-  if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
+  if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; $('#simMore').classList.add('hidden'); return; }
   $('#simInfo').textContent = `Clock ${S.sim.speed === 1 ? 'at normal speed' : S.sim.speed + '× faster'}` + (S.sim.skipped ? `, ${fmtT(S.sim.skipped / 1000)} skipped` : '');
   if (document.activeElement !== $('#simSpeed')) speedOpts($('#simSpeed'));
   $('#simAutoBar').checked = !!S.sim.autoSkip;
@@ -11830,8 +11846,8 @@ async function simNextInfo() {
     $('#simNextInfo').textContent = n ? `Next: ${n.what} in ${fmtT(n.in)}` : 'Nothing counting down';
   } catch { /* offline: the connection dot shows it */ }
 }
-$('#simAutoBar').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { autoSkip: ev.target.checked }); renderSimBar(); if ($('#simAuto')) $('#simAuto').checked = ev.target.checked; toast(ev.target.checked ? 'Auto skip on: each step runs a few seconds, then time skips to just before the next one' : 'Auto skip off'); });
-$('#simSpeed').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { speed: +ev.target.value }); renderSimBar(); if ($('#simSpeedSet')) $('#simSpeedSet').value = ev.target.value; });
+$('#simAutoBar').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { autoSkip: ev.target.checked }); renderSimBar(); toast(ev.target.checked ? 'Auto skip on: each step runs a few seconds, then time skips to just before the next one' : 'Auto skip off'); });
+$('#simSpeed').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { speed: +ev.target.value }); renderSimBar(); });
 for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await api('POST', '/ui/sim/skip', { seconds: +b.dataset.skip }); toast(`Skipped ahead ${fmtT(+b.dataset.skip)}`); simNextInfo(); });
 $('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
 
@@ -11840,9 +11856,7 @@ const simCfg = () => ({ on: false, speed: 25, lead: 5, autoSkip: true, watch: 5,
 function renderSimSettings() {
   if (!can('admin')) return;
   const c = simCfg();
-  $('#simOn').checked = !!c.on;
-  speedOpts($('#simSpeedSet')); $('#simSpeedSet').value = c.speed;
-  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; $('#simReach').checked = c.reachWaits !== false; $('#simReachAfter').value = c.reachAfter; renderSimJumps(); }
+  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simWatch').value = c.watch; $('#simReach').checked = c.reachWaits !== false; $('#simReachAfter').value = c.reachAfter; renderSimJumps(); }
   const pick = $('#tlPick'), cur = pick.value; pick.innerHTML = '';
   for (const sc of S.scripts) pick.append(h('option', { value: sc.name, ...(sc.name === cur ? { selected: true } : {}) }, sc.name));
 }
@@ -11864,15 +11878,18 @@ function renderSimJumps() {
   });
   if (!simDraft.length) tb.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No time jumps yet.')));
 }
-for (const id of ['#simAuto', '#simWatch', '#simLead', '#simReach', '#simReachAfter']) $(id).addEventListener('change', () => { simDirty = true; });
+for (const id of ['#simWatch', '#simLead', '#simReach', '#simReachAfter']) $(id).addEventListener('change', () => { simDirty = true; });
 $('#simAddJump').onclick = () => { simDraft.push({ on: true, when: 'timer', name: '', after: 5, jump: '00:50:00', note: '' }); simDirty = true; renderSimJumps(); };
-$('#simSave').onclick = guard(async () => {
+const simMoreOpen = open => { $('#simMore').classList.toggle('hidden', !open); $('#simMoreBtn').setAttribute('aria-expanded', String(open)); if (open) renderSimSettings(); };
+$('#simMoreBtn').onclick = () => simMoreOpen($('#simMore').classList.contains('hidden'));
+$('#simMoreClose').onclick = () => simMoreOpen(false);
+$('#simSave').onclick = $('#simSave2').onclick = guard(async () => {
   for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
-  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, reachWaits: $('#simReach').checked, reachAfter: +$('#simReachAfter').value, jumps: simDraft });
-  simDirty = false; await load(); toast('Simulation settings saved');
+  S.sim = await api('PUT', '/ui/sim', { lead: +$('#simLead').value, watch: +$('#simWatch').value, reachWaits: $('#simReach').checked, reachAfter: +$('#simReachAfter').value, jumps: simDraft });
+  simDirty = false; await load(); toast('Simulator settings saved');
 });
 // Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
-// (Fritz, 2026-10-27), the ☰ Menu and Settings > Simulation. Returns false when the admin said no.
+// (Fritz, 2026-10-27) and the ☰ Menu. Returns false when the admin said no.
 async function setSimulator(on) {
   if (!confirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
     : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.')) return false;
@@ -11880,7 +11897,6 @@ async function setSimulator(on) {
   await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched. 25× speed and Auto skip are on' : '🔌 Real boards: real hardware is used');
   return true;
 }
-$('#simOn').onchange = guard(async ev => { const on = ev.target.checked; ev.target.checked = !on; if (await setSimulator(on)) ev.target.checked = on; });
 $('#barSim').onclick = guard(() => setSimulator(!S.sim?.on));
 
 $('#tlShow').onclick = guard(async () => {
@@ -11900,7 +11916,7 @@ $('#tlShow').onclick = guard(async () => {
 // Time jumps that, after the Process starts, skip to a few seconds before each timed step (chained one after the other)
 $('#tlMake').onclick = () => {
   if (!tlRows) return;
-  const lead = +$('#simLead').value || 5, speed = +$('#simSpeedSet').value || 1;
+  const lead = +$('#simLead').value || 5, speed = S.sim?.speed || 1;
   const times = [...new Set(tlRows.rows.filter(x => !x.after && x.at > 0 && x.what !== 'sleep' && x.what !== 'wait').map(x => x.at))].sort((a, b) => a - b);
   simDraft = simDraft.filter(j => !(j.when === 'process' && j.name === tlRows.name));
   let real = 5, jumped = 0, made = 0;
@@ -11913,7 +11929,7 @@ $('#tlMake').onclick = () => {
     real += Math.ceil(lead / speed) + 5;             // time to watch that step happen
   }
   simDirty = true; renderSimJumps();
-  toast(made ? `${made} time jump${made > 1 ? 's' : ''} added. Check them, then Save simulation settings.` : 'Every step is only seconds apart: no jumps needed');
+  toast(made ? `${made} time jump${made > 1 ? 's' : ''} added. Check them, then press Save.` : 'Every step is only seconds apart: no jumps needed');
 };
 
 // ---------------------------------------------------------------- Schemas (the dropdown at the top)
@@ -11959,8 +11975,9 @@ async function afterSchemaSwitch(msg) {
   if (['schema', 'about'].includes(keep)) openMenuTab(keep); else setView('workspace');
   toast(msg + '. Every output was switched off.');
 }
-// Fritz, 2026-10-27: a new empty Schema (not a copy) starts with one simulated Arduino Mega 2560, New_Mega_2560_N, and the
-// panel switches to Simulator mode. Tell the admin, then ask for a name that means something and the Interface ID.
+// A new Schema from a Skynet Schema Template with no real Interface to use gets one simulated Arduino Mega 2560 (Fritz,
+// 2026-10-27), and the panel switches to Simulator mode. Tell the admin, then ask for a name that means something and the
+// Interface ID. (A new empty Schema has no Interface: OakBarn Brewery, 2026-11-14.)
 async function newSchemaInterface(iface, wasSim) {
   await new Promise(res => {
     const d = $('#valDlg'); d.innerHTML = '';
@@ -12031,7 +12048,7 @@ async function newSchemaFromTemplate(name) {
     ['_d', `Devices on ${plan.devices[0].name}, each on its next free Port (change one in its Properties):\n` + rows.join('; ') + '.', 'note'],
     ['_p', 'Then the Brew Process is set up with these Devices and the Brew Day is built. Pipes are not drawn: pipe the equipment the way yours is (Edit layout > Draw pipe).', 'note']], {}) !== 'ok') return;
   // make the Schema, on the real Interface (or the pretend Mega), in Simulator Mode
-  const r = await api('POST', '/ui/schemas', { name, empty: true, iface: iface?.name || '' });
+  const r = await api('POST', '/ui/schemas', { name, empty: true, iface: iface?.name || '', ...(iface ? {} : { pretend: plan.devices[0] }) });
   await afterSchemaSwitch(`Schema "${name}" made and loaded`);
   setEditing(true); if (!draft) throw new Error('Edit layout did not open: make the Schema from a computer, not a phone');
   const ifName = draft.devices?.[0]?.name || plan.devices[0].name;
@@ -12169,7 +12186,6 @@ async function addNewSchema() {
   if (w.start === 'template') return newSchemaFromTemplate(w.name);
   const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
   await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
-  if (r.simulator) await newSchemaInterface(r.iface, r.wasSim);
 }
 // Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
@@ -12477,7 +12493,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
@@ -12658,29 +12674,15 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}${v === '0.5' ? '  (Skynet default)' : ''}`]);
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
 function otherDefaults() {
-  const look = themeOf(S.config.theme), b = S.config.brewDefaults || {};
+  // OakBarn Brewery's choices, 2026-11-14 (docs/Default_Settings_Other_Places.md): what has a box moved up to the Default tab;
+  // Standards, fixed values and what is already on the Default tab came off this list
+  const look = themeOf(S.config.theme);
   return [
-    ['Look (theme)', `${look.name} (Skynet default: Office Black)`, 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
-    ['A new Tab\'s back color and text colors', `From the Look: ${look.tabBack || 'the Skynet Night blue gray'}, Tab Style ${look.tabStyle}${b.tabStyle ? ' (the Tab Style above wins)' : ''}`, 'Settings > Panel settings > Look (theme), or Tab Style above', 'Rule 2.39'],
-    ['Pump size', 'The Pump Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The pump\'s Width and Height', 'Rules 5.27, 5.36'],
-    ['Valve size', 'The Valve Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The valve\'s Width and Height', 'Rules 5.29, 5.36'],
-    ['Pipe fittings', 'Autosize to pipe on', 'Each fitting\'s Properties', 'Rule 5.14'],
-    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.16'],
-    ['Glow ring on a new pump', 'Green', 'The pump\'s Properties', 'Rules 7.15, 18.13'],
-    ['Pump cover color', 'None', 'The pump\'s Properties', 'Rule 7.13'],
-    ['Flow color (In and Out)', 'None', 'Each vessel, pipe and hose', 'Rule 5.21'],
-    ['Skynet Dial', 'Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red', 'The item\'s Text attributes ⬢', 'Rule 2.40'],
-    ['Pulse button', '100 ms', 'Fixed', 'Rule 1.9'],
-    ['Push button lockout', '3 seconds', 'The button\'s Properties', 'Rule 6.7'],
-    ['Lost board link', 'Outputs turn off after 10 seconds', 'The Interface settings', 'Rule 6.3'],
-    ['Simulator: a wait on a reading', 'Counted as reached after 60 clock seconds', 'Settings > Simulation', 'Rule 10.4'],
-    ['Simulator bar', 'Opens at 25× speed with Auto skip on', 'The Simulator bar', 'Rule 10.7'],
-    ['How a Tab shows', 'Fit screen (no up and down scrolling)', 'Zoom tab', 'Rule 2.15'],
-    ['Interface of a new Device', 'The Default Interface above, else the one the last new Device went on, else the first', 'The Add Device box', 'Rules 4.2, 4.6'],
-    ['A new Schema (not a copy)', 'One pretend Mega on the Simulator', 'Interface settings', 'Rule 10.5'],
+    ['Look (theme) of this Schema', `${look.name}`, 'Settings > Panel settings > Look (theme). A new Schema starts with "Look of a New Schema" above', 'Rule 2.39'],
+    ['Pulse button time', '100 ms. Fixed, and it is used by every Pulse button, the ones already made too', 'Fixed', 'Rule 1.9'],
     ['Setup: keep users when updating', 'Update and keep everything', 'Setup (the installer)', 'Rules 9.8, 10.1'],
     ['BruControl Import: names', 'Skynet names (keeping BruControl names takes two warnings)', 'The Importer, page 4', 'Rule 15.1'],
-    ['BruControl Import: Look', 'The Skynet Look closest to the BruControl theme, else Office Black', 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
+    ['BruControl Import: Look', 'The Skynet Look closest to the BruControl theme, else the Look of a New Schema', 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
   ];
 }
 // The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
@@ -12723,6 +12725,12 @@ const TBX_TIPS = {
 const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Process text. Bigger than normal text (${TEXT_NORMAL} px). See Help: Text boxes.`;
 // the Font list of Labels and Text Boxes: empty = the Tab's font (OakBarn Brewery, 2026-11-14: "Should this be Tab's Default Font?" Yes)
 const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
+// the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
+const NEW_TIPS = {
+  look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in Settings > Panel settings.',
+  pump: 'The On overlay a new User Pump Template starts with: what shows over the pump while it runs. A Skynet Template keeps its own, and pumps already made keep theirs.',
+  valve: 'The On overlay a new User Valve Template (a powered valve) starts with. A Skynet Template keeps its own, and valves already made keep theirs.',
+  lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
 const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). 0 or empty: it shows at once. Up to 5000. Phones and tablets have no mouse: a tap still opens the help at once.';
 // what a fresh install starts with, as the Default tab's boxes (public/textbox.js)
@@ -12730,7 +12738,8 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...freshTextBoxes(), ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...freshTextBoxes(),
+    newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
@@ -12813,6 +12822,11 @@ function renderDefaultTab(box) {
     ['textWrap', 'Word Wrap', 'bool', null, false, false, { tip: TBX_TIPS.wrap }],
     ['_rtc', 'Rich Text Embedded Code', 'head'],
     ['textLarge', '\\L Rich Text Code Size (px)', 'num', null, false, false, { def: TEXT_LARGE, tip: RTC_SIZE_TIP }],
+    ['_nw', 'New User Templates and Schemas', 'head'],
+    ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }],
+    ['newPumpOverlay', 'Pump Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.pump }],
+    ['newValveOverlay', 'Valve Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.valve }],
+    ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { tip: NEW_TIPS.lockout }],
     ['_hh', 'Hover Help', 'head'],
     ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
     ['_p', 'Phones and tablets', 'head'],
@@ -12836,7 +12850,8 @@ function renderDefaultTab(box) {
   const save = guard(async () => {
     f.read();
     if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
-    for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];      // empty: what a fresh install has
+    for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight', 'pushLockout']) if (d[k] === '' || d[k] === null) delete d[k];
+    if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');      // empty: what a fresh install has
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     for (const [k, from] of [['waterToGrain', () => toRatio(d._w2g, su.ratioUnit)], ['grainTempC', () => toC(d._grainT, su.tempUnit)], ['strikeOffsetC', () => su.tempUnit === 'F' ? d._strikeOff * 5 / 9 : d._strikeOff]]) {

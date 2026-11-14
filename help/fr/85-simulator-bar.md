@@ -13,12 +13,23 @@ Tant que le panel est en **Simulator mode** (🧪 à côté de ☰ Menu), une ba
 
 ## Elle commence à 25× avec Auto skip actif {#it-starts-at-25-with-auto-skip-on}
 
-Chaque fois que le panel passe au simulateur (🔌 Real > 🧪 Simulator, le ☰ Menu, Settings, un nouveau Schema vide ou un Schema exemple), la barre s'ouvre avec :
+Chaque fois que le panel passe au simulateur (🔌 Real > 🧪 Simulator, le ☰ Menu, un nouveau Schema vide ou un Schema exemple), la barre s'ouvre avec :
 
 - **Speed 25× plus vite.** Un empâtage de 60 minutes prend environ 2 minutes 24 secondes.
 - **Auto skip actif.** Chaque étape tourne quelques secondes, puis le temps saute jusqu'à juste avant la suivante.
 
-Ensuite, changez-les comme vous voulez sur la barre ou dans Settings > Simulation ; votre choix reste jusqu'à la prochaine fois que le simulateur est activé. 25× est aussi dans la liste des Speed à tout moment.
+Ensuite, changez-les comme vous voulez sur la barre ; votre choix reste jusqu'à la prochaine fois que le simulateur est activé. 25× est aussi dans la liste des Speed à tout moment.
+
+## Chaque réglage du simulateur est sur la barre {#every-simulator-setting-is-on-the-bar}
+
+Chaque réglage du simulateur est sur cette barre, et seulement là. Speed et Auto skip sont sur la barre elle-même et sont enregistrés dès que vous les changez. Appuyez sur **⚙ Settings** sur la barre (Admins) pour le reste :
+
+- **"Skip to next event" stops this many seconds before it** (5 secondes si vous ne le changez pas).
+- **Auto skip: watch each step for (seconds)** (5 secondes si vous ne le changez pas).
+- **Pretend readings are reached** et **after (clock seconds)** (actif, 60 secondes si vous ne le changez pas).
+- Le tableau **Time jumps** et la **Process timeline** (Aide : [Le mode simulation](20-simulation)).
+
+Appuyez sur **Save** en haut ou en bas, ou sur **Close** pour le ranger. Les réglages du simulateur ne sont ni dans Settings ni sur l'onglet Default settings.
 
 ## Cloner un Schema exemple en Schema de l'utilisateur {#clone-a-sample-schema-to-a-user-schema}
 

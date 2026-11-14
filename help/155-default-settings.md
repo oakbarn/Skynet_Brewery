@@ -33,6 +33,19 @@ before that. A fitting sitting on a vessel opening with no pipe keeps its size. 
 They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
 without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
+## New User Templates and Schemas
+
+These are used only by **new** things you make yourself. A Skynet Template keeps its own settings, and pumps and valves already made keep theirs.
+
+| Setting | What it does |
+|---|---|
+| **Look of a New Schema** | The Look (theme) a new empty Schema starts with. The open Schema's own Look is changed in Settings > Panel settings ([Panel Looks](151-panel-looks)). |
+| **Pump Overlay** | The On overlay a new pump starts with: what shows over it while it runs. Green glow ring unless you change it ([On overlay](58-on-overlay)). |
+| **Valve Overlay** | The On overlay a new powered valve starts with. The steady lightning bolt unless you change it. |
+| **Push Lockout (s)** | How long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties. |
+
+Some things have no Default because they are always the same: pipe fittings always size to their pipes, a new pump's cover color is None, a new Alarm's Set Graphic (Layer 2) starts at None, and the flow color is Blue. **Lost Link** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
+
 ## Hover Help
 
 | Setting | What it does |
@@ -73,15 +86,13 @@ The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists
 
 ## Defaults set somewhere else
 
-Some defaults are changed in another place. They are listed here so you can see them all, with **what it is now**, **where it is
-changed** and its **Rule**. Nothing is changed in this list. For example:
+A few defaults are changed in another place. They are listed here so you can see them all, with **what it is now**, **where it is
+changed** and its **Rule**. Nothing is changed in this list:
 
-- the **Look** (Office Black) and a **new Tab's back and text colors**, from Settings > Panel settings > Look ([Panel Looks](151-panel-looks));
-- the **Pump Standard** and **Valve Standard** (drawn 150 x 150 for a 1/2" pipe);
-- the **On overlay** (the steady bolt), the **Green glow ring** on a new pump, **flow colors** (None);
-- the **Skynet Dial** ranges and colors, **Pulse** (100 ms) and the **push button lockout** (3 seconds);
-- the **Simulator** (a wait is counted as reached after 60 seconds; the bar opens at 25x with Auto skip);
-- **Setup** and the **Import** (Skynet names, and its Look).
+- the **Look** of the open Schema, from Settings > Panel settings > Look ([Panel Looks](151-panel-looks));
+- **Pulse** (100 ms): fixed, and used by every Pulse button, the ones already made too;
+- **Setup**: keep the users;
+- the **Import**: its names and its Look.
 
 Whenever a new default is added to Skynet, it is added to this tab too.
 
