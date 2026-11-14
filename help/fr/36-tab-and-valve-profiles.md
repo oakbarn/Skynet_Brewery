@@ -1,6 +1,6 @@
-# Tab Background Profiles et Valve Profiles {#tab-background-and-valve-profiles}
+# Tab Background Profiles et Valve Profiles {#tab-background-valve-and-pump-profiles}
 
-Les deux sont des onglets de menu (**☰ Menu**). Chaque profil est gardé sur le Brain, dans `config/profiles/tab` et `config/profiles/valve`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
+Les trois sont des onglets de menu (**☰ Menu**) : Tab Background Profile, Valve Profile et Pump Profile. Chaque profil est gardé sur le Brain, dans `config/profiles/tab`, `config/profiles/valve` et `config/profiles/pump`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
 
 ## Tab Background Profile
 
@@ -56,4 +56,21 @@ Quand la vanne s'ouvre, son **On overlay** (l'éclair rouge et jaune si vous n'e
 
 Vos propres images peuvent toujours aller par **paires** : choisissez celle fermée (ou éteinte) et sa partenaire ouverte (ou allumée) se remplit toute seule. Ça marche aussi dans l'autre sens, pour toute image dont le nom contient Closed/Open ou Off/On (par exemple Pump_Off.png et Pump_On.png), tant que la partenaire est dans vos images.
 
-Vous ne choisissez le Valve Profile **qu'au moment de créer une nouvelle vanne** : dans Edit layout, **Valves > Motorized valve**, et le panel demande à partir de quel Valve Profile commencer (l'onglet de menu **Default** règle celui qui est choisi d'abord). Ensuite, la vanne se change dans ses propres propriétés, où **Orientation** et les images peuvent être réglées de nouveau.
+Vous ne choisissez le Valve Profile **qu'au moment de créer une nouvelle vanne** : dans Edit layout, **Valves > Motorized valve**, la case d'ajout a une liste **Valve Profile**. Elle commence sur le Valve Profile marqué **Default**, et vous pouvez en choisir un autre ou **(none)**. Ensuite, la vanne se change dans ses propres propriétés, où **Orientation** et les images peuvent être réglées de nouveau.
+
+**Default :** activez **Default** dans un Valve Profile et la case d'ajout le choisit d'abord. Un seul de la liste est le Default : l'activer dans l'un le désactive dans les autres.
+
+## Pump Profile {#pump-profile}
+
+Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient de la pompe choisie (le modèle), donc le profil garde le reste :
+
+- **Orientation** : Right ou Left.
+- **Cover** : None ou une couleur.
+- **Inlet IP** et **Outlet IP** : laquelle des 8 places ([La norme des pompes](130-pump-standard)).
+- **Hose or Pipe** : ce qui est dessiné des orifices de la pompe à ses IP.
+- **Overlay** : ce qui s'affiche dessus quand elle tourne.
+- **IP Type In** et **IP Type Out** : Tri-Clamp, NPT, BSP ou Quick Disconnect. Vide : d'après ses Ports.
+
+La **case d'ajout de pompe** a une liste **Pump Profile**. Elle commence sur le Pump Profile marqué **Default** et remplit les cases en dessous avec lui ; choisissez-en un autre et elles changent. Vous pouvez encore changer chaque case avant **➕ Add Device**. Ensuite, la pompe se change dans ses propres propriétés.
+
+**Default :** comme pour les Valve Profiles, un Pump Profile peut être marqué Default.

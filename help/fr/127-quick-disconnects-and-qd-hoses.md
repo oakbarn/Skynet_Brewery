@@ -37,6 +37,8 @@ toujours par-dessus tout ce qui est sur le Tab.
 
 Tout bout de tuyau souple dont l'**IP Type** est **Quick Disconnect** bouge de la même façon (aide 24), un bout à la fois.
 
+**La sécurité d'abord :** attraper un bout de tuyau ouvre une fenêtre qui reste ouverte. Si une pompe sur le tuyau est en marche (ou si du liquide coule dedans), elle dit d'arrêter la pompe d'abord. Elle continue de vérifier la pompe, et une fois la pompe arrêtée, elle demande si les vannes sont réglées pour que rien ne s'écoule par gravité : **Yes, unhook it** vous laisse faire glisser ce bout pendant les 2 minutes suivantes. **✖ Exit** la ferme à tout moment sans rien déplacer.
+
 Pendant que vous faites glisser, le tuyau **fléchit** : il quitte la pompe comme avant et pend en une courbe passant par plusieurs points de pliage, en pendant davantage plus vous tirez le bout loin. Un **anneau vert** montre où ira le bout. Lâchez sur :
 
 - **un IP ou un Quick Disconnect** : le flexible s'y joint. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous.

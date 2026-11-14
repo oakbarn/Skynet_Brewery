@@ -906,6 +906,14 @@ Help 155).
   then its kept Default. The Importer and Schema Templates made on the Brain start with the fresh look.
 - **Section titles stand out** (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight
   sections"): each section title on the Default tab has a blue back.
+- **Valve and Pump Profiles: the one marked Default** (OakBarn Brewery, 2026-11-14: "New Tabs and Valves defaults add a Pump like the
+  Valve"; "If on the Pump Add, have the default as the selection in the DDLB. Same for Valve"; "So remove them from the Tab"; picked
+  "One marked Default in its list"): ☰ Menu has a **Pump Profile** tab like the Valve Profile (Orientation, Cover, Inlet and Outlet
+  IP, Hose or Pipe, Overlay, IP Type In and Out; the picture comes from the pump picked). One profile in each list can be marked
+  **Default**; turning it on turns it off in the others. The Pump Add box and the Valve Add box have a **Profile** dropdown that
+  starts on the one marked Default; picking another fills the Pump Add box's boxes with it. The Valve Profile pop-up and the
+  Default tab's Valve Profile box are gone (the profile it named became the one marked Default, once); the section is now
+  **New Tabs**.
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -1907,6 +1915,14 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   in Build Mode"; "QD ends: Hoses only and only grab one end at a time"): a hose end whose IP Type is Quick Disconnect can be
   grabbed and moved outside Edit layout like a QD hose's free end (Rule 5.28), one end at a time; the other end stays. Pipes never
   do, whatever their IP Type.
+- **Safety pop-up before unhooking** (OakBarn Brewery, 2026-11-14: "a POP Off telling user to shut down the Pump and any Valves to
+  keep the hose from Spraying or draining from Gravity Feed. If Pump is off, ask about Gravity Draining Valve setting and Go if user
+  says yes"; then "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need
+  an exit button without moving"): grabbing a hose end first opens one pop-up that stays open (frozen top, Rule 2.51). 1. A pump on
+  the hose is On (or liquid flows in it): "Turn the pump Off before you unhook it". Skynet keeps checking the pump's On status (every
+  half second) and, once it is Off, the same pop-up moves on to 2. "The pump is Off. Are the valves set so nothing drains out by
+  gravity?" **Yes, unhook it** lets that end be dragged for 2 minutes. **✖ Exit** is always there and closes it without moving
+  anything. It only warns: it never turns anything On or Off (Rule 2.44).
 - **Pumps:** **IP Type In** and **IP Type Out** in the pump's Properties (OakBarn Brewery: "Add Connection Type for the In and
   Out IPs as above on a Pump"). A pump starts with what its Ports say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
   the Default pipe IP Type; pumps already made took it once.
@@ -4406,6 +4422,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
+- 2026-11-14: Rule 5.40 (OakBarn Brewery: "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need an exit button without moving"): the unhook pop-up stays open, checks the pump live, then asks about the valves; ✖ Exit always closes it without moving.
+- 2026-11-14: Rule 2.42 (OakBarn Brewery: "So remove them from the Tab", picked "One marked Default in its list"): new Pump Profile Menu tab; one Valve and one Pump Profile can be marked Default; the Pump and Valve Add boxes have a Profile dropdown starting on it; the Valve Profile pop-up and the Default tab's Valve Profile box are gone (it became the Default mark once). Rule 5.40: a safety pop-up before a hose end is unhooked (pump running: turn it Off first, no move; else ask about gravity draining, Yes moves). Help 33, 36, 127, 155 (and French). Both programs.
 - 2026-11-14: Added Rule 18.37 (OakBarn Brewery, PDF "Blichmann Riptide Dialogs 3"): every tap pop-up of Hover Help has ✖ Close frozen at the top and none at the bottom; switching a pump's Orientation swaps its Inlet IP and Outlet IP to the mirror spot; the Pump's Interface, Name, Inlet IP, Hose or Pipe, Graphic and Orientation Hover Help are his text and pictures word for word (5 new pictures in media/help_pictures). Help 115 (and French) updated. Both programs.
 - 2026-11-14: Rule 2.51 (OakBarn Brewery: "Apply the Freeze to any dialog that is updated"): every dialog or pop-up that is changed gets the frozen top; the Pipe and Hose Properties and the pipe or hose Move pop-up have it now. Rule 5.37: the Move pop-up of a pipe or hose has a red 🗑 Delete Pipe / Delete Hose ("Add Delete Button to Hose and Pipe Disconnect Dialog"); deleting a pipe or hose takes its own IPs with it (a coupling or IP point on its end with nothing else on it; "I deleted a Pipe but the IPs where still on the Build"). Rule 5.37: a let-go pipe end can be dragged along its line to shorten it ("After a Pipe is disconnected to Move, able to Shorten"). Rule 5.28: a QD hose being moved hangs through several bend points ("add some bend points to make the Hose Movement dynamic"). Help 24, 127 (and French).
 - 2026-11-14: Added Rule 5.40 (OakBarn Brewery: "Pipe and Hose Attributes as to IP Type that are set by the selected Defaults"): every pipe and hose has an IP Type at start and at end (Tri-Clamp, NPT, BSP, Quick Disconnect), the size of the pipe; Default pipe IP Type and Default hose IP Type on the Default tab, beside the sizes; IP Type In and Out on a pump; existing pipes, hoses and pumps took them once. Rule 5.27: a pump's Hose or Pipe is drawn like the pipe joined to its IP, and a corner IP is reached from the Side or Top/Bottom (Auto by default). Ends drawn as their IP Type; a hose end with a Quick Disconnect moves at any time, one end at a time (hoses only). Help 24, 127, 130, 155 (and French). Both programs.
