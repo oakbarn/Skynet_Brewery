@@ -22,6 +22,7 @@ The pop-up asks:
 - **Board**: Arduino Mega, ESP32 or another Arduino-type board.
 - **Connection**: USB, Ethernet, WiFi, or **Simulator** (no board yet: everything on it is pretend). It shows the connection rating (Help: [Connection ratings](69-connection-ratings)).
 - **USB port** or **Network address**, for a USB or a network board.
+- **Lost Link (s)**: must be filled in, 3 to 600 seconds (10 to start). If the board hears nothing from the Brain for this long, it turns all its outputs OFF. Change it here any time.
 
 ## The Interface ID
 
@@ -58,13 +59,11 @@ is on (through the SSR), and if Off the SSR no longer sends power. Similar to a 
 
 **⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to move a board from **Simulator** to its real **USB** port or network address once it is wired, to pick another USB port, or to set the ID. The name of an Interface that has Devices on it stays as it is.
 
-## A new Schema starts with a pretend Mega
+## A new empty Schema has no Interface
 
-When you make a new Schema that is **not** a copy of another one (Schema dropdown > Add new Schema > *An empty Schema*):
+A new Schema that is **not** a copy of another one (Schema dropdown > Add new Schema > *An empty Schema*) starts with **no Interface**. Add your boards with **Add Interface** on the Devices page, or with **➕ Add new Interface…** in the New Device box. Each Device you add carries its Interface.
 
-1. It starts with one Interface, a pretend (Simulator) Arduino Mega 2560 called **New_Mega_2560_1**. If a New_Mega_2560_1 already exists in any of your Schemas, it is New_Mega_2560_2, and so on.
-2. The whole panel switches to **Simulator mode**, and a message tells you so (Help: [Simulator or Real boards](77-simulator-or-real-boards)).
-3. The Interface pop-up opens so you can give it a name that means something to you and set its Interface ID.
+A Skynet Schema Template made with no real board still gets a pretend (Simulator) Mega for its Devices ([New Schema from a Skynet Template](157-schema-templates)).
 
 A copy of a Schema keeps the Interfaces it had.
 

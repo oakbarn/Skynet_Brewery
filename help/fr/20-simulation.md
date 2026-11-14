@@ -2,7 +2,7 @@
 
 Le mode simulation (le mode d'essai) vous permet d'essayer toute une journée de brassage sans toucher au matériel. Les Processes, les minuteries, les alarmes et l'écran marchent exactement comme le jour du brassage, mais aucun vrai élément chauffant, aucune pompe ni aucune vanne n'est commuté. Le temps peut aussi passer plus vite, ou sauter en avant, pour que vous n'ayez pas à attendre un empâtage de 60 minutes pour voir ce qui se passe à la minute 50.
 
-Un Admin l'active avec le bouton **🔌 Real / 🧪 Simulator** à côté du ☰ Menu, depuis **☰ Menu > Switch to Simulator**, ou dans **Settings > Simulation** (Aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)).
+Un Admin l'active avec le bouton **🔌 Real / 🧪 Simulator** à côté du ☰ Menu ou depuis **☰ Menu > Switch to Simulator** (Aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)).
 
 ## Ce qui se passe quand vous l'activez {#what-happens-when-you-turn-it-on}
 
@@ -18,7 +18,7 @@ L'éteindre fait la même chose à l'envers : chaque Process s'arrête, chaque s
 
 ## Faire passer le temps plus vite {#making-time-go-faster}
 
-**Speed** (vitesse) règle à quelle vitesse tourne l'horloge : normale, 2×, 5×, 10×, 25× et jusqu'à 120× plus vite. Allumer le Simulator démarre à 25× avec Auto skip actif (Aide : [La barre du simulateur](85-simulator-bar)). À 10×, un empâtage de 60 minutes prend 6 minutes. Les lignes `sleep` des Processes, les minuteries, les sorties PID et Duty Cycle, et la chauffe et le refroidissement du simulateur la suivent toutes. Changez-la dans Settings ou dans la barre jaune.
+**Speed** (vitesse) règle à quelle vitesse tourne l'horloge : normale, 2×, 5×, 10×, 25× et jusqu'à 120× plus vite. Allumer le Simulator démarre à 25× avec Auto skip actif (Aide : [La barre du simulateur](85-simulator-bar)). À 10×, un empâtage de 60 minutes prend 6 minutes. Les lignes `sleep` des Processes, les minuteries, les sorties PID et Duty Cycle, et la chauffe et le refroidissement du simulateur la suivent toutes. Changez-la sur la barre jaune du simulateur. Chaque réglage du simulateur est sur cette barre, et seulement là : Speed et Auto skip sur la barre elle-même, le reste derrière son bouton **⚙ Settings**.
 
 ## Sauter en avant {#skipping-ahead}
 
@@ -31,17 +31,17 @@ La barre montre aussi quel est le prochain événement et dans combien de temps.
 
 ## Auto skip (saut automatique) {#auto-skip}
 
-Activez **Auto skip** (dans Settings ou la barre jaune) et le panel saute tout seul, sans tableau à remplir. Chaque étape tourne quelques secondes (**Watch each step for**, 5 secondes si vous ne le changez pas), puis l'horloge saute à quelques secondes avant la prochaine chose qui arrive toute seule : la fin d'un `sleep`, une minuterie qui atteint son temps, ou un compte à rebours qui arrive à zéro. Il regarde chaque Process en marche, y compris ceux qu'un autre Process a lancés et les loopers.
+Activez **Auto skip** (sur la barre jaune) et le panel saute tout seul, sans tableau à remplir. Chaque étape tourne quelques secondes (**Watch each step for**, 5 secondes si vous ne le changez pas), puis l'horloge saute à quelques secondes avant la prochaine chose qui arrive toute seule : la fin d'un `sleep`, une minuterie qui atteint son temps, ou un compte à rebours qui arrive à zéro. Il regarde chaque Process en marche, y compris ceux qu'un autre Process a lancés et les loopers.
 
 Seul le temps est sauté. Une attente sur un bouton de l'écran ou un interrupteur n'est jamais sautée : appuyez sur le bouton comme le jour du brassage, et le saut automatique reprend de là. Une attente sur une lecture (une température, un niveau, un poids) est considérée comme atteinte après un temps réglé tant que **Pretend readings are reached** est actif (Aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)), et le saut automatique y saute comme pour tout autre événement.
 
 ## Le tableau des sauts de temps {#time-jumps-table}
 
-Le tableau saute en avant tout seul. Chaque ligne dit : **quand** quelque chose commence (un Process ou une minuterie), **attendre** tant de secondes, puis **sauter en avant** de tant de temps.
+Le tableau est sur la barre du simulateur : appuyez sur **⚙ Settings**. Il saute en avant tout seul. Chaque ligne dit : **quand** quelque chose commence (un Process ou une minuterie), **attendre** tant de secondes, puis **sauter en avant** de tant de temps.
 
 Exemple : *A timer starts* (une minuterie démarre), **tm_Mash**, attendre **5** secondes, sauter de **00:50:00**. Quand l'empâtage commence, il tourne normalement pendant 5 secondes, puis la minuterie d'empâtage passe de 00:00:05 à 00:50:05. Un empâtage de 60 minutes prend environ 15 secondes à regarder au lieu d'une heure.
 
-Utilisez l'interrupteur au début d'une ligne pour désactiver un saut sans le supprimer. Cliquez sur **Save simulation settings** après avoir changé le tableau. Les sauts de temps n'arrivent jamais qu'en mode simulation.
+Utilisez l'interrupteur au début d'une ligne pour désactiver un saut sans le supprimer. Appuyez sur **Save** (barre du simulateur > ⚙ Settings) après avoir changé le tableau. Les sauts de temps n'arrivent jamais qu'en mode simulation.
 
 ## La chronologie d'un Process {#process-timeline}
 
@@ -52,6 +52,6 @@ Le panel peut calculer quand chaque étape d'un Process va arriver, par exemple 
 - Une attente sur autre chose, comme une température ou un bouton, ne peut pas être connue à l'avance. Les étapes qui suivent sont montrées en temps *après* cette ligne.
 - Les étapes à l'intérieur d'un `if` qui ne peuvent pas être connues à l'avance sont marquées **(if)**.
 
-**Make time jumps from this** remplit le tableau des sauts de temps pour ce Process : après son démarrage, il saute à quelques secondes avant chaque étape minutée, l'une après l'autre. Vérifiez les lignes, puis cliquez sur **Save simulation settings**.
+**Make time jumps from this** remplit le tableau des sauts de temps pour ce Process : après son démarrage, il saute à quelques secondes avant chaque étape minutée, l'une après l'autre. Vérifiez les lignes, puis appuyez sur **Save**.
 
 Essayez-le avec le Process **BrewDay_Flow** de l'exemple Three vessels, one pump : ses temps d'empâtage, d'ébullition et de houblonnage deviennent tous des sauts.

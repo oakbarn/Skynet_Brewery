@@ -25,10 +25,10 @@ Le navigateur dit au panel si l'écran est utilisé seulement avec un doigt (un 
 
 Un ordinateur portable à écran tactile compte comme un ordinateur, car il a aussi une souris ou un pavé tactile. Un iPad avec un clavier et un pavé tactile peut aussi compter comme un ordinateur.
 
-**☰ Menu > Default** montre comme quoi compte l'écran sur lequel vous êtes.
+**Settings > Panel settings: screen, Tabs and alerts** montre comme quoi compte l'écran sur lequel vous êtes.
 
 ## Modifier quand même sur un téléphone ou une tablette {#editing-on-a-phone-or-tablet-anyway}
 
-Sur un ordinateur, ouvrez **☰ Menu > Default > Phones and tablets**, allumez **Phones and tablets can edit** et appuyez sur **Save**. C'est pour tous les téléphones et toutes les tablettes. Rechargez ensuite le panel sur le téléphone ou la tablette.
+Sur un ordinateur, ouvrez **Settings > Panel settings: screen, Tabs and alerts > Phones and tablets**, allumez **Phones and tablets can edit** et appuyez sur **Save**. C'est pour tous les téléphones et toutes les tablettes. Rechargez ensuite le panel sur le téléphone ou la tablette.
 
 Avec ce réglage, Edit layout sur un téléphone ou une tablette ne **déplace ni ne redimensionne toujours rien**, pour qu'un doigt ne puisse pas emporter une pompe ou un tuyau par accident : touchez un élément pour le choisir, gardez le doigt dessus pour ses propriétés, et changez-y **X**, **Y**, **Width** et **Height**. Le second interrupteur, **Phones and tablets can move and resize things in Edit layout**, les laisse aussi déplacer.

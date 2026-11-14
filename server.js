@@ -143,7 +143,7 @@ async function runOfficialCheck() {
   return official;
 }
 if (!IMPORT_BUILD) setTimeout(runOfficialCheck, 1500);   // after the panel is up, so the start is not slowed
-const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
+const sim = new Simulation({ store, engine, hw });          // Simulator (settings on the Simulator bar): no real boards, faster time
 sim.apply();
 hw.start();
 const control = new Control(store);
@@ -875,10 +875,11 @@ async function route(req, res) {
     if (b.iface && !real) return fail(res, 400, `There is no Interface called "${b.iface}"`);
     schemas.create(b.name, { empty: !!b.empty });
     if (real) schemas.useInterface(real);
-    // a new empty Schema (not a copy) has only its simulated New_Mega_2560_N: the whole panel goes to Simulator mode (Fritz, 2026-10-27)
-    const wasSim = sim.cfg.on;
-    if (b.empty && !wasSim) sim.save({ on: true });
-    return ok(res, { ...schemaView(), simulator: !!b.empty, wasSim, iface: b.empty ? store.config.devices[0]?.name : undefined, real: !!real });
+    // a new empty Schema has no Interface (OakBarn Brewery, 2026-11-14). A Skynet Schema Template with no real Interface to use
+    // brings its own pretend Mega (b.pretend, public/schemabuild.js): then the whole panel goes to Simulator mode (Fritz, 2026-10-27)
+    const wasSim = sim.cfg.on, pretend = !real && b.pretend && typeof b.pretend === 'object' ? { name: String(b.pretend.name || 'New_Mega_2560_1'), id: String(b.pretend.id || 'NM'), connection: 'simulator', board: 'mega' } : null;
+    if (pretend) { store.config.devices = [pretend]; store.writeConfig(); if (!wasSim) sim.save({ on: true }); }
+    return ok(res, { ...schemaView(), simulator: !!pretend, wasSim, iface: pretend?.name, real: !!real });
   }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }

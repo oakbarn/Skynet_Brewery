@@ -15,7 +15,7 @@ Only your Tabs hide it. Every **☰ Menu** tab (Zoom, Default, Equipment Profile
 
 ## Always showing the Menu Bar
 
-An admin can switch it off in **☰ Menu > Default**: under **Menu Bar**, turn off **Hide the Menu Bar on Tabs** and press **Save**. Then the Menu Bar always shows, and the ☰ Menu has no Show / Hide Menu Bar choice.
+An admin can switch it off in **Settings > Panel settings: screen, Tabs and alerts**: under **Menu Bar**, turn off **Hide the Menu Bar on Tabs** and press **Save**. Then the Menu Bar always shows, and the ☰ Menu has no Show / Hide Menu Bar choice.
 
 ## Alarm sounds
 

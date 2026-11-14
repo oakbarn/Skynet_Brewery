@@ -21,7 +21,7 @@ Un Tab Style **n'écrase jamais** une couleur, une police ou une taille qu'un De
 ## Où le régler {#where-to-set-it}
 
 - **Un Tab :** Edit layout > **Tab settings** > **Tab Style**. Le premier choix, **(the Default tab's Style)**, fait suivre au Tab le Tab Default.
-- **Chaque Tab qui n'en a pas à lui :** ☰ Menu > Tab **Default** > **Tab Style**. Il commence sur Skynet Default.
+- **Chaque Tab qui n'en a pas à lui :** **Settings > Panel settings: screen, Tabs and alerts** > **Tab Style**. Il commence sur Skynet Default.
 
 Le Tab **Recipe** de chaque Schema exemple utilise **Tennyson**. Un Schema que vous aviez déjà reçoit Tennyson sur son Tab **Recipe** une fois, la première fois qu'il se charge avec cette version (seulement si ce Tab n'avait pas encore de Tab Style). Ensuite, changez-le dans Tab settings quand vous voulez.
 

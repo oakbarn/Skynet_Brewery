@@ -18,7 +18,7 @@ La Basic Skynet Alarm est dessinée en couches, de bas en haut :
 |---|---|---|
 | 4 | **Back** : le carré derrière la cloche | **Back color**, ou `.back` dans un Process |
 | 3 | **Fore** : la cloche et son battant | **Fore color**, ou `.fore` dans un Process |
-| 2 | **Set Graphic** : une image Skynet sur la cloche (le cône de houblon au départ) | la liste **Set Graphic** ; **None** (en premier dans la liste) = rien |
+| 2 | **Set Graphic** : une image Skynet sur la cloche (**None** au départ) | la liste **Set Graphic** ; **None** (en premier dans la liste) = rien |
 | 1 | **Active overlay** : par-dessus, clignotante, tant que l'alarme est active | la liste **Active overlay** ; **None** = rien |
 
 L'image de la cloche elle-même est fixée par Skynet et ne peut pas être changée. Elle existe en trois versions : **Together** (Back et Fore),

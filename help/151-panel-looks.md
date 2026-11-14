@@ -24,7 +24,7 @@ sign-in and Help pages use it too.
 ## The Tabs
 
 - **A new Tab** starts with the Look's Tab colors: its back color, and a Tab Style with the Look's Label and text colors
-  (**Skynet Office Black**, **Skynet Dark Gray** or **Skynet White**). A Tab Style picked on **☰ Menu > Default tab** wins, and a Tab
+  (**Skynet Office Black**, **Skynet Dark Gray** or **Skynet White**). A Tab Style picked in **Settings > Panel settings: screen, Tabs and alerts** wins, and a Tab
   Background Profile's color wins over the back color. You can change any of them in **Tab settings**, as before.
 - **Use this Look on every Tab** gives every Tab in the Schema the Look's back color and Tab Style. Pictures and everything on the
   Tabs stay as they are. First it keeps a copy of each Tab's colors.
