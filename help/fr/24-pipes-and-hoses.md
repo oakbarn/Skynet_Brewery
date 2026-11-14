@@ -38,13 +38,41 @@ Chaque tuyau rigide et souple a sa propre **Size** (taille) dans ses réglages. 
 | 5" | 125 mm (DN125) | | |
 | 6" | 150 mm (DN150) | | |
 
-**Custom** vous laisse taper n'importe quelle taille dans les unités choisies. Un nouveau tuyau commence à 1/2".
+**Custom** vous laisse taper n'importe quelle taille dans les unités choisies. Un nouveau tuyau rigide ou souple commence à la **Default pipe size** ou à la **Default hose size** de ☰ Menu > Default settings (1/2" sauf si vous la changez).
 
 Les tailles sont dessinées en proportion : un tuyau de 1" est deux fois plus épais qu'un de 1/2". **Tab… > Pipe size** règle l'épaisseur d'un tuyau de 1/2" sur ce Tab (10 par défaut) ; toutes les autres tailles, et les raccords, grandissent ou rapetissent avec elle.
+
+## Type d'IP {#ip-type}
+
+Chaque tuyau rigide et souple a un **IP Type at start** et un **IP Type at end** : le raccord à chaque bout (Règle Skynet 5.40). Les choix sont :
+
+- **Tri-Clamp**
+- **NPT**
+- **BSP**
+- **Quick Disconnect** (raccord rapide)
+
+Le raccord a toujours la taille du tuyau, donc il n'a pas de case de taille à lui. Le Tri-Clamp n'est pas fabriqué sous 1/2", donc un tuyau de 1/4" ne propose que les trois autres.
+
+Chaque bout est **dessiné selon son IP Type**, pour le voir sur le Tab : une virole et un collier Tri-Clamp, un filetage NPT, un écrou hexagonal BSP, ou un raccord rapide Quick Disconnect avec ses deux leviers. Il n'est pas dessiné là où le bout est sur un raccord, un Quick Disconnect ou un End Cap, qui sont déjà dessinés.
+
+Un bout de **tuyau souple** en **Quick Disconnect** peut être décroché et déplacé à tout moment, pas seulement dans Edit layout, comme un tuyau QD (voir l'aide 127). Attrapez un bout à la fois ; l'autre reste. Les tuyaux rigides ne bougent pas ainsi.
+
+Un nouveau tuyau rigide commence avec le **Default pipe IP Type**, et un nouveau tuyau souple avec le **Default hose IP Type**, aux deux bouts. Les deux sont dans ☰ Menu > Default settings, à côté des tailles. Un tuyau QD (Quick Disconnect hose) est toujours Quick Disconnect aux deux bouts. Changer un réglage par défaut ne change jamais un tuyau déjà fait.
 
 ## Réducteurs {#reducers}
 
 Là où des tuyaux de tailles différentes se rejoignent sur le même IP ou le même raccord, un **réducteur** (reducer) apparaît tout seul : un cône de la plus grande taille vers la plus petite, en proportion des deux côtés. Il n'y a rien à ajouter ni à régler. Un raccord (té, coude, croix, manchon, vanne manuelle) prend la taille du plus gros tuyau qui lui est relié.
+
+## Supprimer un tuyau ou un flexible {#deleting-a-pipe-or-hose}
+
+Supprimez un tuyau rigide ou souple depuis ses Properties (🗑 Delete), ou attrapez-le dans Edit layout : la fenêtre **Move** a un
+bouton rouge **🗑 Delete Pipe** (ou **Delete Hose**). Ses propres IP partent avec lui : un raccord (coupling) ou un point IP à l'un de
+ses bouts est supprimé aussi quand rien d'autre n'y est (pas d'autre tuyau, de Quick Disconnect ni d'End Cap, et pas une ouverture
+de cuve). **↩ Put back** (Ctrl+Z) le remet.
+
+## Raccourcir un tuyau {#shortening-a-pipe}
+
+Attrapez un tuyau dans Edit layout et appuyez sur **🔓 Unlock its ends** : ses bouts se détachent et reçoivent un raccord (coupling). Faites glisser ce raccord (ou la poignée au bout) le long du tuyau pour le raccourcir ou l'allonger. Il reste sur sa propre ligne.
 
 ## Ne montrer que l'écoulement {#showing-only-the-flow}
 
