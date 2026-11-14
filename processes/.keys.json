@@ -6,8 +6,5 @@
  "Demo_Transfer_HLT_to_MLT": "k0a77d279fd0c0c4d",
  "Demo_Variables": "k756d35e9ff3178f3",
  "Hops_Order_Boil": "kfc5f62f5c0658312",
- "looper_LogTemps": "k8e60539dd8f799ee",
- "BrewDay_Flow": "k722b9ec0d5ba49a8",
- "BrewDay_Stop": "kc49b01c6274814f6",
- "looper_Advance_Switch": "ka6f115a4547ee22b"
+ "looper_LogTemps": "k8e60539dd8f799ee"
 }
