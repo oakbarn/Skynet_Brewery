@@ -146,7 +146,7 @@ export function compileFrench(dict) {
     if (typeof fr !== 'string' || !fr) continue;
     if (/\{\d\}/.test(en)) {
       const re = new RegExp('^' + en.split(/(\{\d\})/).map(x => /^\{\d\}$/.test(x) ? '([\\s\\S]*?)' : reEsc(x)).join('') + '$');
-      pats.push({ re, nums: [...en.matchAll(/\{(\d)\}/g)].map(m => +m[1]), fr, len: en.length });
+      pats.push({ re, nums: [...en.matchAll(/\{(\d)\}/g)].map(m => +m[1]), fr, len: en.length, lines: en.includes('\n') });
     } else {
       whole.set(en, fr);
       if (en.length >= 16 && /\s/.test(en)) subs.push([en, fr]);
@@ -159,17 +159,21 @@ export function compileFrench(dict) {
 // one text in French (as much of it as has French)
 export function frenchOf(text, c, depth = 0) {
   const t = String(text ?? '');
-  if (!c || !t || depth > 3) return t;
+  if (!c || !t || depth > 6) return t;
   const w = c.whole.get(t) ?? c.whole.get(t.trim());
   if (w !== undefined) return w;
+  const multi = t.includes('\n');
   for (const p of c.pats) {
+    if (multi && !p.lines) continue;      // a one-line text with {0} is not the whole of a paragraph: its lines are done one by one below
     const m = t.match(p.re); if (!m) continue;
     const got = []; p.nums.forEach((n, k) => { got[n] = m[k + 1]; });
     return p.fr.replace(/\{(\d)\}/g, (_, n) => frenchOf(got[+n] ?? '', c, depth + 1));
   }
-  if (t.includes('\n')) return t.split('\n').map(l => frenchOf(l, c, depth + 1)).join('\n');
+  // a text joined from several (paragraphs, a + b): first the long known texts inside it, even ones over several lines, then each
+  // line that is still a known text on its own
   let out = t;
   for (const [en, fr] of c.subs) if (out.includes(en)) out = out.split(en).join(fr);
+  if (out.includes('\n')) out = out.split('\n').map(l => (l.trim() ? frenchOf(l, c, depth + 1) : l)).join('\n');
   return out;
 }
 let french = null, frenchLoading = null;
