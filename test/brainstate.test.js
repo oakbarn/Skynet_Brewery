@@ -67,21 +67,36 @@ assert.equal(lastLines('a\n\nb\r\nc', 2), 'b\nc');
 const said = [];
 let up = false, spawned = null;
 const child = { on() {}, unref() {} };
-let code = await startBrain(root, { log: t => said.push(t), wait: 5000, isListening: async () => up, spawnFn: (e, a, o) => { spawned = { a, o }; setTimeout(() => { up = true; }, 50); return child; } });
+const opened = [], open = (url, o) => { opened.push({ url, o }); return 'app'; };
+let code = await startBrain(root, { log: t => said.push(t), wait: 5000, open, env: { PATH: 'p' }, isListening: async () => up, spawnFn: (e, a, o) => { spawned = { a, o }; setTimeout(() => { up = true; }, 50); return child; } });
 assert.equal(code, 0);
 assert.ok(spawned.a.at(-1).endsWith('server.js'));
 assert.equal(spawned.o.windowsHide, true);
+// the Brain in the Background never opens the window; the program that was double-clicked does, once the Brain answers
+// (OakBarn Brewery, 2026-11-14: "Full installer only starts the Brain")
+assert.equal(spawned.o.env.SKYNET_WINDOW, 'none');
+assert.deepEqual(opened.map(x => x.url), ['http://localhost:8123']);
 assert.match(said.at(-1), /running in the Background/);
-// already running: started anyway, so the running Brain opens its window again
+// already running (Skynet Panel, or Skynet Brewer double-clicked again): no second Brain, only its window opens
+said.length = 0; opened.length = 0;
+code = await startBrain(root, { log: t => said.push(t), open, isListening: async () => true, spawnFn: () => assert.fail('no second Brain') });
+assert.equal(code, 0); assert.match(said[0], /already running/); assert.equal(opened.length, 1);
+// the Importer's window uses its own profile
+opened.length = 0;
+await startBrain(root, { kind: 'importer', log: () => {}, open, isListening: async () => true });
+assert.equal(opened[0].url, `http://localhost:${IMPORTER_PORT}`); assert.match(String(opened[0].o.profile ?? ''), /ImporterWindow|^$/);
+// no Edge or Chrome and no browser (not Windows): the address to type is shown
 said.length = 0;
-code = await startBrain(root, { log: t => said.push(t), isListening: async () => true, spawnFn: () => child });
-assert.equal(code, 0); assert.match(said[0], /already running/);
+await startBrain(root, { log: t => said.push(t), open: () => 'none', isListening: async () => true });
+assert.ok(said.some(t => /Open http:\/\/localhost:8123 in a browser/.test(t)));
 // did not start: the last lines of its log are shown and the .bat keeps its window open
 said.length = 0;
 const dies = { on(ev, f) { if (ev === 'exit') setTimeout(() => f(1), 20); }, unref() {} };
-code = await startBrain(root, { log: t => said.push(t), wait: 3000, isListening: async () => false, spawnFn: () => { fs.appendFileSync(path.join(root, 'data', 'brain.log'), 'Error: port in use\n'); return dies; } });
+opened.length = 0;
+code = await startBrain(root, { log: t => said.push(t), wait: 3000, open, isListening: async () => false, spawnFn: () => { fs.appendFileSync(path.join(root, 'data', 'brain.log'), 'Error: port in use\n'); return dies; } });
 assert.equal(code, 1);
 assert.ok(said.some(t => /did not start/.test(t)));
 assert.ok(said.some(t => /port in use/.test(t)));
+assert.equal(opened.length, 0, 'no window when the Brain did not start');
 fs.rmSync(dir, { recursive: true, force: true }); fs.rmSync(root, { recursive: true, force: true });
 console.log('brainstate tests passed');

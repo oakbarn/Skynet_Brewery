@@ -109,7 +109,7 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
   !define FRESH_MEDIA "run the Media Setup after"
 !endif
 !define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Start Skynet Brewer now"
+!define MUI_FINISHPAGE_RUN_TEXT "Start the Skynet Brain and open the Skynet Panel now"
 !define MUI_FINISHPAGE_RUN_FUNCTION StartPanel
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\install\ReadMe.txt"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
@@ -510,6 +510,8 @@ Section "Skynet Brew Panel" SecMain
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
   ; Stops the Brain running in the Background (Rule 6.32): Start menu > Skynet Brewer > Stop the Skynet Brain
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Stop_Brain.bat" "$INSTDIR\Skynet_Stop_Brain.bat"
+  ; Opens the panel window (Rule 6.32): Desktop and Start menu > Skynet Panel. Starts the Brain first if it is not running.
+  CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Panel.bat" "$INSTDIR\Skynet_Panel.bat"
   ; The Import folder, always made (Fritz, 2026-11-06): the Brewing folder's Import subfolder (C:\Brewing\Import when the
   ; panel is in C:\Brewing\BrewPanel). The BruControl Importer saves its Schema files there, and later BeerSmith or other
   ; programs can save their files there too. Never deleted by an uninstall: it holds your files.
@@ -520,8 +522,10 @@ Section "Skynet Brew Panel" SecMain
   ; Shortcuts. "Start in" is the panel folder.
   SetOutPath "$INSTDIR"
   CreateShortCut "$DESKTOP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  CreateShortCut "$DESKTOP\Skynet Panel.lnk" "$INSTDIR\Skynet_Panel.bat" "" "$INSTDIR\install\windows\skynet.ico" 0 SW_SHOWMINIMIZED
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Panel.lnk" "$INSTDIR\Skynet_Panel.bat" "" "$INSTDIR\install\windows\skynet.ico" 0 SW_SHOWMINIMIZED
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Stop the Skynet Brain.lnk" "$INSTDIR\Skynet_Stop_Brain.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   Call AskImporter
   Call AskStartWithWindows
@@ -679,6 +683,7 @@ Section "Uninstall"
   ; the program files are Read-only (Official Skynet, Rule 9.14): take that off, or Windows would not let them be removed
   Call un.CoreWritable
   Delete "$DESKTOP\Skynet Brewer.lnk"
+  Delete "$DESKTOP\Skynet Panel.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
   Delete "$SMSTARTUP\Skynet Brewer.lnk"
   RMDir /r "$SMPROGRAMS\Skynet Brewer"
