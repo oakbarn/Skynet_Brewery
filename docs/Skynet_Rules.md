@@ -4241,6 +4241,22 @@ Who's on First Issue. Just put 10 in the Slot and no comments like Empty = 10 / 
   **Hover Help** as "Empty: ...", not in its label.
 Both programs: the BruControl Import's Build page uses the same dialogs.
 
+18.37 **Blichmann Riptide Dialogs 3** (OakBarn Brewery, 2026-11-14, PDF "Blichmann Riptide Dialogs 3", the model, Rule 18.34):
+1. **Every tap pop-up of Hover Help** (the small pop-up a tap or click on a field's name opens, Rule 18.16) has its title and
+   **✖ Close** frozen at the top while it scrolls, and no Close at the bottom ("Close Button Frozen at top of All Hover Help. Get Rid
+   of Bottom Close Buttons"). Every dialog, not only the Pump's. A pop-up with pictures is wider.
+2. **Switching a pump's Orientation swaps its IPs** ("When changing Orientation from Left and Right Have the IPs swap to opposite side
+   as well, Right Become Left Left Becomes Right by at the IP Level"): an Inlet IP or Outlet IP that was picked moves to the mirror
+   spot (Bottom Right becomes Bottom Left, Top Left becomes Top Right; a Top or Bottom Middle stays), and the (start) choice follows by
+   itself. Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right is Inlet Bottom Left, Outlet Top Right. The
+   Orientation Hover Help says so ("Add Help in Orientation that switching orientation causes IPs to follow").
+3. **The Pump Hover Help is OakBarn Brewery's text and pictures, word for word** (only the spelling fixed, Rule 2.37): the Interface's
+   first paragraph, the whole Name balloon (its "Update to Suggest Name Button" names the real buttons, 🏷 Suggested Names > 💾 Convert for all and 💾 Update to Suggested for one: OakBarn Brewery, "Yes"), the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
+   connect to an IP ... within 10 px"), the Hose or Pipe balloon, and the 8 IPs picture on top of the Graphic balloon and the Right /
+   Left pictures on top of the Orientation balloon. The pictures are in `media/help_pictures` (the Media Setup). Help 115 has the same
+   text (Hover Help = Panel Help).
+Both programs: the BruControl Import's Build page uses the same Pump dialogs and tap pop-ups.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4385,6 +4401,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 18.37 (OakBarn Brewery, PDF "Blichmann Riptide Dialogs 3"): every tap pop-up of Hover Help has ✖ Close frozen at the top and none at the bottom; switching a pump's Orientation swaps its Inlet IP and Outlet IP to the mirror spot; the Pump's Interface, Name, Inlet IP, Hose or Pipe, Graphic and Orientation Hover Help are his text and pictures word for word (5 new pictures in media/help_pictures). Help 115 (and French) updated. Both programs.
 - 2026-11-14: Rule 2.51 (OakBarn Brewery: "Apply the Freeze to any dialog that is updated"): every dialog or pop-up that is changed gets the frozen top; the Pipe and Hose Properties and the pipe or hose Move pop-up have it now. Rule 5.37: the Move pop-up of a pipe or hose has a red 🗑 Delete Pipe / Delete Hose ("Add Delete Button to Hose and Pipe Disconnect Dialog"); deleting a pipe or hose takes its own IPs with it (a coupling or IP point on its end with nothing else on it; "I deleted a Pipe but the IPs where still on the Build"). Rule 5.37: a let-go pipe end can be dragged along its line to shorten it ("After a Pipe is disconnected to Move, able to Shorten"). Rule 5.28: a QD hose being moved hangs through several bend points ("add some bend points to make the Hose Movement dynamic"). Help 24, 127 (and French).
 - 2026-11-14: Added Rule 5.40 (OakBarn Brewery: "Pipe and Hose Attributes as to IP Type that are set by the selected Defaults"): every pipe and hose has an IP Type at start and at end (Tri-Clamp, NPT, BSP, Quick Disconnect), the size of the pipe; Default pipe IP Type and Default hose IP Type on the Default tab, beside the sizes; IP Type In and Out on a pump; existing pipes, hoses and pumps took them once. Rule 5.27: a pump's Hose or Pipe is drawn like the pipe joined to its IP, and a corner IP is reached from the Side or Top/Bottom (Auto by default). Ends drawn as their IP Type; a hose end with a Quick Disconnect moves at any time, one end at a time (hoses only). Help 24, 127, 130, 155 (and French). Both programs.
 - 2026-11-14: Added Rule 6.32 (OakBarn Brewery: "Windows PowerShell remains open after Skynet Panel is closed", then "the Brain is in the Back ground", "Admin Only can restart", "Only Admin User can put Brain in standby or remove that status"): the Brain runs in the Background with no window on Windows; ☰ Menu > Put the Brain in Standby (Admins, any other screen and a Pi) with tick box warnings, others connected named, Back; only an Admin starts it again, from any screen; Standby kept across restarts. Rule 2.25 changed: **Close Skynet Panel and the Brain**, only on the Brain's own computer, with the same warnings (no Command Prompt left to close). Rule 2.36: no black window. Start menu > Stop the Skynet Brain. Both programs (the Importer runs in the Background too). Help 95, 19, 118, 122, 143, 190 (and French).
