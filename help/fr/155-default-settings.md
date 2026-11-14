@@ -11,7 +11,9 @@ autres peuvent regarder.
 | Réglage | Ce qu'il fait |
 |---|---|
 | **Default pipe size** | 1/2" sauf si vous le changez (1/4" à 6", avec la taille en mm à côté de chacune). Un **nouveau tuyau** commence à cette taille. Un **nouveau Device, Pipe Fitting ou élément avec des IP** (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour cette taille jusqu'à ce qu'un tuyau y soit, donc une nouvelle pompe correspond déjà à vos tuyaux. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). |
+| **IP Type** (à côté de Default pipe size) | Le raccord d'un **nouveau tuyau** aux deux bouts : Tri-Clamp sauf si vous le changez (Tri-Clamp, NPT, BSP ou Quick Disconnect). Il a la taille du tuyau ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). |
 | **Default hose size** | La taille de départ d'un **nouveau flexible**. |
+| **IP Type** (à côté de Default hose size) | Le raccord d'un **nouveau flexible** aux deux bouts : Quick Disconnect sauf si vous le changez. Il a la taille du flexible. |
 | **How thick a 1/2" pipe is drawn on a new Tab** | En pixels ; vide = 10. Chaque Tab peut encore le changer dans **Tab settings**. |
 | **Width** et **Height of a new Tab** | En pixels ; vide = 1600 x 900. |
 
@@ -63,7 +65,7 @@ Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks
 
 ## Les autres réglages de ce Tab {#the-other-settings-on-this-tab}
 
-**Les réglages par défaut sont seulement pour les nouvelles choses.** Labels, Text Boxes et la Default pipe size sont gardés sur chaque élément quand il est créé, donc les changer ici ne change jamais ce qui est déjà sur vos Tabs.
+**Les réglages par défaut sont seulement pour les nouvelles choses.** Labels, Text Boxes, la Default pipe size et les IP Types sont gardés sur chaque élément quand il est créé, donc les changer ici ne change jamais ce qui est déjà sur vos Tabs.
 
 Nouvelles recettes (Units, Batch size, Profiles, Boil time, efficacité ...), New Schema from a Skynet Template, nouveaux Tabs et vannes (Tab
 Background Profile, Valve Profile), Labels et Text Boxes. Voir [Le Menu](33-menu).
