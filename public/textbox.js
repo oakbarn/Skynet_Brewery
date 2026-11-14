@@ -67,6 +67,24 @@ export function textDefaults(d = {}) {
   };
 }
 
+// Defaults are for new things only (OakBarn Brewery, 2026-11-14: "New Things Only", Rule 2.42): a new item keeps the Default tab's
+// Labels, Text Boxes and Default pipe size as they were when it was made (newLook: only what differs from a fresh install). An item
+// with no newLook shows the fresh install's look, so changing the Default tab never changes what is already made.
+const FRESH_LOOK = { labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align, labelBold: FRESH_LABEL.bold,
+  labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back, textAlign: FRESH_TEXT.align,
+  textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWrap: FRESH_TEXT.wrap, defPipeSize: 0.5 };
+export const LOOK_KEYS = Object.keys(FRESH_LOOK);
+export function lookSnap(d = {}) {
+  const o = {};
+  for (const k of LOOK_KEYS) {
+    const v = d[k];
+    if (v === undefined || v === null || v === '') continue;
+    if (String(v).toLowerCase() === String(FRESH_LOOK[k]).toLowerCase() || (k === 'defPipeSize' && +v === 0.5)) continue;
+    o[k] = v;
+  }
+  return Object.keys(o).length ? o : undefined;
+}
+
 // the first one that is set: what a Process set, then the item's own setting, then the Default ('' = the panel's normal look)
 export const firstSet = (...vals) => vals.find(v => v !== undefined && v !== null && v !== '') ?? '';
 

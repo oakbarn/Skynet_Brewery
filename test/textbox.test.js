@@ -117,3 +117,17 @@ assert.equal(s.getProp('w_Text_1', 'layer'), 2, 'a Text Widget has .layer too');
 assert.ok(attrsOf(s.get('Pump_1')).includes('layer') && attrsOf(s.get('w_Text_1')).includes('layer'), 'predictive text lists .layer');
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('textbox tests passed');
+
+// Defaults are for new things only (OakBarn Brewery, 2026-11-14: "New Things Only", Rule 2.42)
+{
+  const { lookSnap } = await import('../public/textbox.js');
+  assert.equal(lookSnap({}), undefined, 'a fresh install keeps nothing on an item');
+  assert.equal(lookSnap({ labelForeColor: '#FAFAFA', textFontSize: 11, defPipeSize: '0.5' }), undefined, 'fresh values are not kept');
+  assert.deepEqual(lookSnap({ labelForeColor: '#ff0000', defPipeSize: '1', hideMenuBar: true }), { labelForeColor: '#ff0000', defPipeSize: '1' }, 'only Labels, Text Boxes and pipe size that differ');
+  const store = fs.readFileSync(new URL('../lib/store.js', import.meta.url), 'utf8');
+  assert.ok(store.includes('if (!c.newLookKept)'), 'once per Schema, items already made keep the look of that day');
+  const appSrc = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.ok(appSrc.includes("const TDo = o => o?.newLook ? textDefaults(o.newLook) : isNewItem(o) ? TD() : FRESH_TD;"), 'an item uses its kept Default');
+  assert.ok(appSrc.includes('if (!x._old && look && !x.newLook) x.newLook = { ...look }'), 'Save layout keeps the Default on a new item');
+  console.log('new things only ok');
+}
