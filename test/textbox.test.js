@@ -14,10 +14,15 @@ assert.equal(tbAlign('up'), null);
 assert.equal(tbPixels('12.4'), 12);
 assert.equal(tbPixels('x'), null);
 
+// a fresh install (OakBarn Brewery, 2026-11-14, Default tab markup): Labels and Text Boxes White on Black, Centered, 11 px,
+// the Tab's font; a new Text Box 520 x 140
 const d0 = textDefaults({});
-assert.deepEqual([d0.visible, d0.wrap, d0.width, d0.height, d0.x, d0.y, d0.foreColor, d0.nameFontSize], [true, true, 220, 40, 40, 40, '', 0]);
-const d1 = textDefaults({ textVisible: false, textWrap: false, textWidth: 300, textAlign: 'Right', nameFontSize: 14 });
-assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.nameFontSize], [false, false, 40, 300, 'Right', 14]);
+assert.deepEqual([d0.visible, d0.labelFore, d0.labelBack, d0.labelAlign, d0.labelBold, d0.labelFont, d0.labelFontSize], [true, '#fafafa', '#000000', 'Center', false, '', 11]);
+assert.deepEqual([d0.foreColor, d0.backColor, d0.align, d0.font, d0.fontSize, d0.width, d0.height, d0.wrap, d0.x, d0.y], ['#fafafa', '#000000', 'Center', '', 11, 520, 140, true, 40, 40]);
+assert.deepEqual([d0.valueFore, d0.valueBack], ['', ''], 'Values follow the Text Box colors only once they are changed');
+assert.deepEqual((t => [t.valueFore, t.valueBack])(textDefaults({ textForeColor: '#FAFAFA', textBackColor: '#000000' })), ['', ''], 'saved fresh values: still none');
+const d1 = textDefaults({ labelVisible: false, textWrap: false, textWidth: 300, textAlign: 'Right', labelFontSize: 14, labelBold: true, labelBackColor: '', textForeColor: 'Red' });
+assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.labelFontSize, d1.labelBold, d1.labelBack, d1.valueFore], [false, false, 40, 300, 'Right', 14, true, '', 'Red']);
 assert.equal(firstSet('', undefined, 'Red', 'Blue'), 'Red');
 assert.equal(firstSet('', null), '');
 const g = { x: 1, y: 2, w: 3, h: 4 };

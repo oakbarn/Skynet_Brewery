@@ -47,7 +47,7 @@ every text box) and Phones and tablets. See [The Menu](33-menu).
 
 ## Tap Water
 
-Your own tap water: the numbers that matter for brewing. Every Recipe starts with Tap Water on its Waters tab, on every Level, unless you pick another water. Fill them in, then press **Save Tap Water**.
+Your own tap water: the numbers that matter for brewing. Every Recipe starts with Tap Water on its Waters tab, on every Level, unless you pick another water. Fill them in, then press **Save** (the Default tab's one Save, at the top or the bottom).
 
 **Where to find the numbers:**
 

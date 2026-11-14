@@ -844,6 +844,27 @@ Help 155).
   the Import **reads** the Panel's Default settings so nothing is typed twice (OakBarn Brewery, 2026-11-09): the **Units** are picked
   for it when the BruControl file does not say, a valve with no Size starts at the **Default pipe size** when one is set, and its
   Hover Help waits the Panel's **Hover Delay** (Rule 2.38 item 2). It never changes the Panel's settings.
+- **Labels and Text Boxes** (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into
+  2. One for Labels and one for Text Boxes"). The one **Text** part is now two:
+  - **Labels** (the Name of every Device and Widget, the Label on a vessel): Visible, Fore Color, Back Color, Alignment, **Bold**
+    (new), Font, Font Size (px).
+  - **Text Boxes** (a Text, a Label Widget, the Value of a Device or Widget): Fore Color, Back Color, Alignment, Font, Font Size (px),
+    New Box Width, New Box Height, Word Wrap (kept, Design Rule #1).
+  - **In a fresh install:** Labels Visible On, Fore Color White (250, 250, 250), Back Color Black, Centered justified, Bold Off, Font
+    = Tab's font, 11 px. Text Boxes White on Black, Centered justified, Tab's font, 11 px, a new box 520 x 140.
+  - **Font: the Tab's font first** (OakBarn Brewery, 2026-11-14, answering "Should this be Tab's Default Font?": yes; "Also for a new
+    Tab ... So a Tab will always have a setting"): the empty choice is **Tab's font**: each Tab uses its Tab Style's font, else the
+    panel's normal font, so a Tab always has a font. A font picked here is used where a Tab Style has none.
+  - The **Value** of a Device or Widget follows the Text Boxes colors only once they are changed from the fresh-install values, so a fresh install puts no
+    black box behind the values on pictures.
+- **Rich Text Embedded Code** (2026-11-14): the Large text size box is now **\L Rich Text Code Size (px)**, under its own heading.
+- **One Save** (2026-11-14): the Default tab has one **Save**, at the top and the bottom, that also saves Tap Water.
+- **Defaults are for new things** (OakBarn Brewery, 2026-11-14: "Generally Defaults are used for New Things. Existing Templates might
+  have their Properties already set. For an Example, the Blickmann Riptide Template might have it's label attributes set, and the
+  defaults for a New Blickmann would follow the Template settings, not the Default Tab. A new Pump Template (User Created) would use
+  the Defaults when it is built"). A new item starts with the Default tab's values; a new item made from a Template starts with the
+  Template's own settings, and the Default tab only fills in what the Template leaves unset; a new User Template takes the Default
+  tab's values when it is built. An item's own setting always wins over the Default tab.
 - **Hover Help** (2026-11-14): **Hover Delay (ms)**, how long the mouse rests on a name before its Hover Help shows; empty = 0, at
   once (Rule 2.38 item 2).
 
@@ -3533,7 +3554,7 @@ Defaults for the common Water things important for brewing available from the Wa
 on where to find the Water Information (Your Water Department) or a Water Test Kit"). Every Brain has one Water Profile named **Tap
 Water**, made when the Brain first starts (a Water Profile the user already named Tap Water becomes it) and never deleted. Every Recipe,
 on every Level, starts with it on the Waters tab, and so do the Default settings' Water Profile and a Process when no Water Profile is
-picked. Its numbers are filled in on **☰ Menu > Default settings > Tap Water** (its own **Save Tap Water**): From (Water Department or
+picked. Its numbers are filled in on **☰ Menu > Default settings > Tap Water** (saved with the Default tab's one **Save**; OakBarn Brewery, 2026-11-14: the Save Tap Water button "Not Needed"): From (Water Department or
 Test Kit), Date (yyyy-mm-dd), Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate (ppm), Alkalinity (as CaCO3, the same number
 as Bicarbonate: typing one fills the other, Bicarbonate = Alkalinity x 1.22), Hardness (worked out from Calcium and Magnesium, greyed),
 pH, and Chlorine (None, Chlorine, Ammonia + chlorine (Chloramine), Unknown). Each box has Hover Help on what it does for the beer.
@@ -4231,6 +4252,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.42 (OakBarn Brewery's Default tab markup): Text split into **Labels** and **Text Boxes** with fresh-install values (White on Black, Centered, 11 px, Tab's font, new box 520 x 140), Labels **Bold**, Font = Tab's font first (his answer), **Rich Text Embedded Code** heading with **\L Rich Text Code Size (px)**, one Save for the tab (no Save Tap Water), and "Defaults are for new things" (a Template's own settings win). Help 49, 155, 22, 33 (and French). Rule 17.12 Tap Water saved with the one Save.
 - 2026-11-14: Rule 2.38 item 8 (OakBarn Brewery: "Need hover help to not cover any part of the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough so no scroll bars unless it goes off the bottom of the screen"): in a dialog the Hover Help goes to the right of the dialog (else the left; else beside, under or over the name and its field, never covering them), as tall as the window, scroll bar only when taller than the window. Help 147.
 - 2026-11-14: Rule 2.38 item 2 and Rule 2.42 (OakBarn Brewery: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > Hover Help > **Hover Delay (ms)**, 0 to 5000, empty or 0 = at once (the default, no change for anyone who leaves it). The BruControl Import uses the Panel's. Taps never wait. Help 155 and 147 (and their French pages).
 - 2026-11-14: Rule 2.38 item 7 (OakBarn Brewery: "some of the hover help needs slide bars as the box goes off the screen", the Tab and Name hover help on the Blichmann RipTide): a hover help box too tall for the window is cut to fit on the side of its name with more room and gets a scroll bar; the mouse can go into it to scroll. Both programs (the Importer uses the same hover help).
