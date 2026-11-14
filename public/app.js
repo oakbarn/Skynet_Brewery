@@ -12392,9 +12392,13 @@ async function brainStopDialog(kind) {
       if (close) showClosed(S.me?.name); else showStandby({ by: S.me?.name, at: Date.now() });
       done(true);
     });
-    d.append(h('div', { class: 'vdTitle' }, close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?'),
-      h('div', { class: 'vdText', style: 'max-width:480px;margin:8px 0 12px' }, ...warn.map((w, i) => h('label', { style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, ticks[i], h('span', {}, w)))),
-      h('div', { class: 'vdBtns' }, back, go));
+    // the Freeze (OakBarn Brewery, 2026-11-14: "Apply the Freeze to any dialog that is updated", Rule 2.51): the title and the buttons
+    // stay at the top while the warnings scroll under them, and there is no bottom row
+    d.classList.add('frozenDlg');
+    d.addEventListener('close', () => d.classList.remove('frozenDlg'), { once: true });
+    d.append(h('div', { class: 'frozenHead' }, h('div', { class: 'vdTitle' }, close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?'),
+      h('div', { class: 'vdBtns' }, back, go)),
+      h('div', { class: 'vdText', style: 'max-width:480px;margin:8px 0 12px' }, ...warn.map((w, i) => h('label', { style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, ticks[i], h('span', {}, w)))));
     d.oncancel = e => { e.preventDefault(); d.close(); done(false); };
     d.showModal(); back.focus();
   });
