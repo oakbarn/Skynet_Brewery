@@ -16,6 +16,14 @@ const view = { w: 800, h: 600 }, box = { w: 300, h: 80 };
 assert.deepEqual(placeBubble({ left: 100, top: 100, bottom: 120 }, box, view), { left: 100, top: 120 + GAP });
 assert.deepEqual(placeBubble({ left: 100, top: 560, bottom: 580 }, box, view), { left: 100, top: 560 - GAP - 80 });
 assert.equal(placeBubble({ left: 700, top: 100, bottom: 120 }, box, view).left, 800 - 300 - 4);
+// too tall for the window: cut to fit on the side with more room, with a scroll bar (OakBarn Brewery, 2026-11-14)
+const tall = { w: 300, h: 900 };
+assert.deepEqual(placeBubble({ left: 100, top: 100, bottom: 120 }, tall, view), { left: 100, top: 120 + GAP, maxH: 600 - 4 - 120 - GAP });
+assert.deepEqual(placeBubble({ left: 100, top: 500, bottom: 520 }, tall, view), { left: 100, top: 4, maxH: 500 - GAP - 4 });
+const mid = { w: 300, h: 450 };      // fits above, not below: above, whole, no scroll bar
+assert.deepEqual(placeBubble({ left: 100, top: 500, bottom: 520 }, mid, view), { left: 100, top: 500 - GAP - 450 });
+const huge = placeBubble({ left: 100, top: 5, bottom: 595 }, tall, view);      // the name fills the window: the whole window height
+assert.deepEqual(huge, { left: 100, top: 4, maxH: 592 });
 // a snippet of Help for a dialog's title (Fritz: "take a snippet of help and have it in the Hover Dialog")
 const md = '# Value, Time and DateTime Widgets\n\nA **Value Widget** shows one [value](98-x) on a Tab.\nA tap sets it.\n\n## Properties\n\n- **The title line:** the lock.\n';
 assert.equal(helpSnippet(md), 'A Value Widget shows one value on a Tab. A tap sets it.');
