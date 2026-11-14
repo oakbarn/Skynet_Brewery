@@ -2878,6 +2878,9 @@ works like Start Fresh (Rule 9.8), with nothing saved:
    everything in it, the shortcuts, and Skynet's own small folder in the user's AppData (the Skynet window's and the Importer's
    remembered sign-ins and settings). The Brewing folder itself goes only when nothing else is left in it.
 4. If a file still can't be deleted, a notice says to restart the computer and delete the Brewing folder by hand.
+5. **Helper programs are not removed** (OakBarn Brewery, 2026-11-14: "Add a Comment about not removing auxiliary programs like
+   Tailscale if you installed them"): Node.js, Tailscale and any other program the user installed stay, because other programs
+   may use them. The red warning, Help 19 and install/ReadMe.txt say so and point to Settings > Apps.
 Both programs (the Importer is in the same Setup). The Mac and Linux / Pi installers have no uninstall.
 
 9.20 **A Full Setup with the pictures and sounds inside** (OakBarn Brewery, 2026-11-14: "Set GitHub to have 2 different Skynet
@@ -4266,6 +4269,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 9.19 item 5 (OakBarn Brewery: "Uninstalled worked good. Add a Comment about not removing auxiliary programs like Tailscale if you installed them"): the uninstall warning, Help 19 (and French) and install/ReadMe.txt say helper programs like Node.js and Tailscale are not removed (remove them in Settings > Apps). Wording only. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Added Rule 9.20 (OakBarn Brewery: "a new one that is a Full install that also has the media embedded so a new install does not need the media exe separate"): every Release also has Skynet_Brewer_Full_Setup_<date>.exe, the same Setup with the Skynet pictures and sounds inside, added the add-only way; the plain Setup and the Media Setup stay. Help 19 and 183 (and French), README, install/ReadMe.txt, Release notes. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Rule 2.42 (OakBarn Brewery's Default tab markup): Text split into **Labels** and **Text Boxes** with fresh-install values (White on Black, Centered, 11 px, Tab's font, new box 520 x 140), Labels **Bold**, Font = Tab's font first (his answer), **Rich Text Embedded Code** heading with **\L Rich Text Code Size (px)**, one Save for the tab (no Save Tap Water), and "Defaults are for new things" (a Template's own settings win). Help 49, 155, 22, 33 (and French). Rule 17.12 Tap Water saved with the one Save.
 - 2026-11-14: Rule 2.38 item 8 (OakBarn Brewery: "Need hover help to not cover any part of the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough so no scroll bars unless it goes off the bottom of the screen"): in a dialog the Hover Help goes to the right of the dialog (else the left; else beside, under or over the name and its field, never covering them), as tall as the window, scroll bar only when taller than the window. Help 147.

@@ -45,6 +45,8 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
 
 To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. After one red warning it deletes **everything** in `C:\Brewing`: your Schemas, users, brew log, Processes, backups, pictures and sounds, and the Import folder with every file in it. Copy anything you want to keep somewhere else first. It stops the panel by itself first (every output turned Off), so nothing is left behind.
 
+**Not removed:** helper programs you installed, like **Node.js** or **Tailscale** (see [Installing Tailscale on Windows](00-tailscale-windows)). Other programs may use them too, so the uninstall leaves them alone. If you no longer want one, remove it yourself in **Settings > Apps**.
+
 ## Windows: by hand, with a .bat file
 
 1. Make the folder `C:\Brewing` and copy `Skynet_BrewPanel_<date>.zip` into it.
