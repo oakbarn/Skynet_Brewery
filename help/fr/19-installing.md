@@ -34,13 +34,13 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
 
 ## Windows : le programme d'installation {#windows-the-installer}
 
-1. Fermez le panel s'il tourne (**Ctrl + C** dans sa fenêtre noire, puis fermez-la).
+1. Fermez le panel s'il tourne (**☰ Menu > Close Skynet Panel and the Brain**). L'installateur l'arrête aussi tout seul.
 2. Double-cliquez sur `Skynet_Brewer_Setup_<date>.exe`. Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
 3. Gardez le dossier `C:\Brewing\BrewPanel` et cliquez sur **Install**.
    - Si Node.js manque, il propose de l'installer. Windows demande la permission.
    - Si le panel est déjà là, il demande ce que fait la mise à jour : **1. Start Fresh: delete everything, nothing saved**, **2. Modified Fresh Start** (garde vos réglages par défaut, vos propres Profiles, Recipes, images et sons), **3. Update the program and reset all users**, ou **4. Update the program and keep everything** (le choix normal, déjà choisi). Les choix 1, 2 et 3 montrent d'abord un avertissement, pour que vous puissiez encore reculer (voir [Passer à une nouvelle version](18-updating)).
    - Si vous aviez avant le panel directement dans `C:\Brewing`, il propose de recopier vos données, votre disposition, vos Processes et vos images. L'ancien dossier n'est pas changé.
-4. Lancez-le avec **Skynet Brewer** sur le Bureau. La fenêtre noire, c'est le panel qui tourne ; votre navigateur ouvre le panel quelques secondes plus tard.
+4. Lancez-le avec **Skynet Brewer** sur le Bureau. Il démarre le Brain en arrière-plan (aucune fenêtre ne reste ouverte) et ouvre le panel quelques secondes plus tard.
 
 Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinstaller** (Settings > Apps > Uninstall). Après un avertissement rouge, il supprime **tout** dans `C:\Brewing` : vos Schémas, utilisateurs, journal de brassage, Processus, sauvegardes, images et sons, et le dossier Import avec tous ses fichiers. Copiez ailleurs ce que vous voulez garder. Il arrête d'abord le panneau lui-même (toutes les sorties éteintes), pour que rien ne reste.
 
@@ -50,7 +50,7 @@ Pour le désinstaller : **Paramètres > Applications > Skynet Brewer > Désinsta
 2. Clic droit sur le zip, choisissez **Extraire tout…**, et extrayez dans `C:\Brewing`. Il crée tout seul le sous-dossier `C:\Brewing\BrewPanel`. (Si Windows propose `C:\Brewing\Skynet_BrewPanel_<date>`, changez-le en `C:\Brewing`.)
 3. Copiez `Skynet_Brewer.bat` de la version (il est aussi dans `C:\Brewing\BrewPanel\install\windows`) dans `C:\Brewing`.
 4. Clic droit sur le `.bat`, choisissez **Afficher d'autres options > Envoyer vers > Bureau (créer un raccourci)**, et renommez le raccourci en **Skynet Brewer**.
-5. Double-cliquez dessus. Gardez la fenêtre noire ouverte pendant que vous brassez. Une fois le panel démarré et ouvert par le navigateur, la fenêtre se réduit toute seule dans la barre des tâches (cliquez dessus là pour la revoir). Le navigateur ouvre le panel quelques secondes plus tard. Pour arrêter le panel et fermer la fenêtre, utilisez **☰ Menu > Close Skynet Brewer** (voir [Fermer Skynet Brewer](95-closing-skynet-brewer)). Sur un PC qui sert à brasser, lisez aussi [Veille, Windows Update et redémarrages](190-sleep-updates-and-restarts).
+5. Double-cliquez dessus. Une fenêtre noire montre les étapes de la première fois, démarre le Brain en arrière-plan puis se ferme toute seule. Le panel s'ouvre quelques secondes plus tard. Fermer la fenêtre du panel n'arrête pas le Brain. Pour l'arrêter, utilisez **☰ Menu > Close Skynet Panel and the Brain** (voir [Fermer Skynet Brewer et la mise en veille](95-closing-skynet-brewer)). Sur un PC qui sert à brasser, lisez aussi [Veille, Windows Update et redémarrages](190-sleep-updates-and-restarts).
 
 **Vous n'avez pas besoin d'installer Node.js d'abord.** Chaque fois que `Skynet_Brewer.bat` démarre, il vérifie Node.js. S'il manque ou s'il est plus ancien que 22.13, il télécharge la version LTS sur nodejs.org et l'installe, puis continue. Il faut Internet et cela prend quelques minutes ; quand Windows demande *« Voulez-vous autoriser cette application à apporter des modifications à votre appareil ? »*, cliquez sur **Oui**. Il récupère aussi la prise en charge des cartes USB la première fois. Si cela échoue un jour, la fenêtre noire le dit et ouvre la page de téléchargement de Node.js pour que vous l'installiez à la main.
 

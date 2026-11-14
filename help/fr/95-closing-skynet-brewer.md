@@ -1,25 +1,42 @@
-# Fermer Skynet Brewer {#closing-skynet-brewer}
+# Fermer Skynet Brewer et la mise en veille (Standby) {#closing-skynet-brewer-and-standby}
 
-Sous Windows, Skynet Brewer tourne dans une fenêtre noire **Invite de commandes** (Command Prompt) sur le Brain. Votre navigateur ne fait qu'afficher le panel.
+Le **Brain** est l'ordinateur (ou le Raspberry Pi) qui fait tourner Skynet. Sur un PC Windows, le Brain tourne **en arrière-plan**, sans fenêtre à lui (règle Skynet 6.32). La fenêtre du panel, comme chaque téléphone ou autre ordinateur, n'est qu'un navigateur qui affiche le Brain.
 
-Pour arrêter le panel **et** fermer cette fenêtre d'un coup :
+## Fermer la fenêtre du panel {#closing-the-panel-window}
 
-1. Ouvrez **☰ Menu**. En bas, choisissez **⏻ Close Skynet Brewer** (Admins seulement).
-2. Le panel demande d'abord, et dit combien de Processes tournent. Ils s'arrêtent.
-3. Le panel s'arrête et la fenêtre Invite de commandes se ferme toute seule, quel que soit le .bat avec lequel vous l'avez démarré (votre propre .bat dans C:\Brewing marche aussi). Chaque téléphone et ordinateur qui affiche le panel dit **Skynet Brewer is closed** (Skynet Brewer est fermé). La propre fenêtre propre du panel se ferme aussi (voir [Skynet dans sa propre fenêtre propre](122-own-clean-window)).
+Fermer la fenêtre du panel avec son **X**, ou fermer un onglet du navigateur, **n'arrête jamais le Brain**. Votre téléphone, un autre ordinateur ou un Process en cours peut encore s'en servir, et un brassage ne doit pas s'arrêter parce qu'une fenêtre a été fermée. Pour rouvrir la fenêtre du panel, double-cliquez sur **Skynet Brewer** sur le Bureau.
 
-Pour le redémarrer, double-cliquez sur **Skynet Brewer** sur le Bureau.
+## ☰ Menu > ⏻ Close Skynet Panel and the Brain
 
-## Pourquoi fermer le navigateur ne l'arrête pas {#why-closing-the-browser-does-not-stop-it}
+Sur l'ordinateur du Brain lui-même (Admins seulement) :
 
-Fermer un onglet du navigateur n'arrête jamais le panel. Votre téléphone, un autre PC ou un Process qui tourne l'utilise peut-être encore, et un brassage ne doit pas s'arrêter parce qu'un onglet a été fermé.
+1. Ouvrez **☰ Menu**. En bas, choisissez **⏻ Close Skynet Panel and the Brain**.
+2. Une boîte liste ce qui va se passer, chaque point avec une case à cocher : tout s'éteint et chaque Process s'arrête ; **si vous brassez**, ce qui est allumé et quels Process tournent ; **si d'autres écrans ont le panel ouvert**, qui ils sont (par exemple *Dana (iPhone)*). Cochez chaque case pour dire que vous l'avez lue. **Back** ne change rien.
+3. Cliquez sur **⏻ Close the panel and the Brain**. Chaque sortie est éteinte, le Brain s'arrête et la fenêtre du panel se ferme. Chaque autre écran affiche **Skynet Brewer is closed**.
 
-## Quand la fenêtre reste ouverte {#when-the-window-stays-open}
+Pour le relancer, double-cliquez sur **Skynet Brewer** sur cet ordinateur.
 
-- **Le panel s'est arrêté à cause d'une erreur** : la fenêtre reste ouverte pour que vous puissiez lire pourquoi. Appuyez sur une touche pour la fermer.
-- **Un Raspberry Pi réglé comme service** (il démarre tout seul avec le Pi) : il n'y a pas de fenêtre, donc le ☰ Menu n'a pas Close Skynet Brewer. Utilisez `sudo systemctl stop skynet-brewer` (voir [Installer le panel](19-installing)).
-- **Démarré dans Windows Terminal** (Windows 11 peut le faire) : l'onglet peut rester ouvert avec une ligne qui dit que le programme est terminé. Fermez-le avec son X.
+Ce choix n'existe que sur l'ordinateur du Brain. Sur un téléphone, une tablette ou un autre ordinateur, vous avez la mise en veille (Standby) à la place.
 
-Fermer la fenêtre noire avec son **X**, ou **Ctrl + C** dedans, arrête toujours le panel comme avant.
+## ☰ Menu > 💤 Put the Brain in Standby
+
+Sur tout autre écran (et sur un Brain Raspberry Pi), Admins seulement :
+
+1. Ouvrez **☰ Menu**. En bas, choisissez **💤 Put the Brain in Standby**.
+2. La même boîte avec ses cases à cocher, et **Back** pour ne rien changer.
+3. Cliquez sur **💤 Put the Brain in Standby**. Chaque sortie est éteinte, chaque Process s'arrête et le Brain lâche les cartes. Chaque écran n'affiche plus que **The Brain is in Standby**, avec qui l'a mis en veille et quand.
+
+**Le relancer :** sur la page Standby, un Admin clique sur **▶ Start the Brain**, depuis n'importe quel écran, à la maison ou à distance (par exemple par Tailscale). Quelqu'un qui n'est pas Admin voit **Sign in as an Admin**. Le Brain redémarre normalement, avec tout éteint. S'il a été mis en veille pendant un brassage, l'avis rouge dit ce qui était allumé et propose **▶ Resume** pendant 15 minutes (voir [Veille, Windows Update et redémarrages](190-sleep-updates-and-restarts)).
+
+Le Brain reste en veille, même après un redémarrage ou une coupure de courant, jusqu'à ce qu'un Admin le relance.
+
+## Menu Démarrer > Skynet Brewer > Stop the Skynet Brain {#start-menu-skynet-brewer-stop-the-skynet-brain}
+
+Sur un Brain Windows, ceci arrête le Brain qui tourne en arrière-plan, chaque sortie éteinte d'abord, même quand aucune fenêtre du panel n'est ouverte.
+
+## Quand quelque chose ne va pas {#when-something-goes-wrong}
+
+- **Le Brain n'a pas démarré** : la fenêtre noire qu'ouvre **Skynet Brewer** reste ouverte et montre les dernières lignes écrites par Skynet, pour que vous puissiez lire pourquoi. Appuyez sur une touche pour la fermer. Tout ce que le Brain écrit va dans `data\brain.log` dans le dossier du panel.
+- **Un Raspberry Pi réglé comme service** démarre tout seul avec le Pi. Utilisez la mise en veille depuis le panel. Skynet peut aussi être arrêté avec `sudo systemctl stop skynet-brewer` (voir [Installation](19-installing)).
 
 Quelle que soit la façon dont Skynet s'arrête, il éteint d'abord chaque sortie. Ce qui se passe quand le PC se met en veille ou redémarre pendant un brassage : [Veille, Windows Update et redémarrages](190-sleep-updates-and-restarts).

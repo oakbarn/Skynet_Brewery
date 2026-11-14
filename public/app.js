@@ -243,6 +243,7 @@ const TEXT_NORMAL = 18, TEXT_LARGE = 28;
 const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
+  showStandby(S.standby);      // the Brain is in Standby (Rule 6.32): only its Standby page shows
   renderBrainNotices(S.brainNotices);
   for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
@@ -341,6 +342,8 @@ function connect() {
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
   es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
+  es.addEventListener('standby', e => showStandby(JSON.parse(e.data)));      // an Admin put the Brain in Standby (Rule 6.32)
+  es.addEventListener('waking', () => { const m = $('.standbyPage .muted'); if (m) m.textContent = 'An Admin is starting the Brain ... this page comes back by itself.'; waitForBrain(); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -12356,18 +12359,71 @@ function menuItems(list, go) {
     list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(here ? { class: 'menuItem cur' } : {}) }));
     for (const p of pageParts(v)) list.append(item('↳ ' + p.label, p.go, { class: 'menuItem menuSub' + (p.cur ? ' cur' : ''), title: p.tip || '' }));
   }
-  if (can('admin') && S.closable) list.append(h('hr'), item('⏻ Close Skynet Brewer', guard(closePanel), { title: 'Stop the panel and close its Command Prompt window on the Brain' }));
+  // Rule 6.32: on the Brain's own computer an Admin closes the panel and the Brain; on any other screen (and on a Pi) the Brain is put
+  // in Standby. An Admin on a phone (run mode, Rule 2.35) has them too.
+  if (S.me?.role === 'admin' && !S.importBuild) list.append(h('hr'), S.closable && S.onBrain
+    ? item('⏻ Close Skynet Panel and the Brain', guard(() => brainStopDialog('close')), { title: 'Turn everything Off, stop the Brain on this computer and close this window' })
+    : item('💤 Put the Brain in Standby', guard(() => brainStopDialog('standby')), { title: 'Turn everything Off and let go of the boards. An Admin starts the Brain again from any screen' }));
 }
-// Fritz, 2026-10-30: closing Skynet Brewer also closes the Command Prompt window it runs in. Closing a browser tab never
-// stops the panel (phones, other PCs and running Processes still use it), so it is closed from here, and the launcher
-// (Skynet_Brewer.bat) then closes its window. A panel running as a service on a Pi is not offered this (it starts again).
-async function closePanel() {
-  const running = (S.scripts || []).filter(s => s.state === 'running').length;
-  if (!confirm('Close Skynet Brewer?\n\nThe panel stops and its Command Prompt window closes. '
-    + (running ? `${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}. ` : '')
-    + 'Every phone and computer showing the panel loses it until Skynet Brewer is started again.')) return;
-  await api('POST', '/ui/close');
-  showClosed(S.me?.name);
+// ☰ Menu > Close Skynet Panel and the Brain / Put the Brain in Standby (Rule 2.25, Rule 6.32, OakBarn Brewery 2026-11-14: "Give a
+// Warning if others are connected prior to shut down. The Back out above would allow an Admin user to not shut down the Brain").
+// Every warning has its own tick box; the button works only once each is ticked. Back changes nothing.
+async function brainStopDialog(kind) {
+  const info = await api('GET', '/ui/screens');
+  const close = kind === 'close';
+  const warn = [close
+    ? 'Everything is turned Off, every Process stops and the Brain on this computer stops. This window closes.'
+    : 'Everything is turned Off, every Process stops and the Brain lets go of the boards. Every screen shows only "The Brain is in Standby".'];
+  if (info.brewing) warn.push('You are brewing. ' + [info.on.length ? 'On now: ' + info.on.join(', ') + '.' : '', info.processes.length ? 'Running: ' + info.processes.join(', ') + '.' : ''].filter(Boolean).join(' '));
+  if (info.others.length) warn.push(`${plural(info.others.length, 'other screen')} ${info.others.length === 1 ? 'has' : 'have'} the panel open and will lose it: `
+    + info.others.map(o => `${o.name} (${o.device})`).join(', ') + '.');
+  warn.push(close
+    ? 'To start it again, double-click Skynet Brewer on this computer.'
+    : 'Only an Admin can start the Brain again: sign in on any screen, then click Start on the Standby page.');
+  return new Promise(done => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const go = h('button', { type: 'button', class: 'big danger', disabled: true }, close ? '⏻ Close the panel and the Brain' : '💤 Put the Brain in Standby');
+    const back = h('button', { type: 'button', class: 'big primary', onclick: () => { d.close(); done(false); } }, 'Back');
+    const ticks = warn.map(() => h('input', { type: 'checkbox' }));
+    for (const t of ticks) t.onchange = () => { go.disabled = !ticks.every(x => x.checked); };
+    go.onclick = guard(async () => {
+      go.disabled = true; d.close();
+      await api('POST', close ? '/ui/close' : '/ui/standby');
+      if (close) showClosed(S.me?.name); else showStandby({ by: S.me?.name, at: Date.now() });
+      done(true);
+    });
+    d.append(h('div', { class: 'vdTitle' }, close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?'),
+      h('div', { class: 'vdText', style: 'max-width:480px;margin:8px 0 12px' }, ...warn.map((w, i) => h('label', { style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, ticks[i], h('span', {}, w)))),
+      h('div', { class: 'vdBtns' }, back, go));
+    d.oncancel = e => { e.preventDefault(); d.close(); done(false); };
+    d.showModal(); back.focus();
+  });
+}
+// The Standby page (Rule 6.32): covers the whole panel while the Brain is in Standby. An Admin, on any screen, clicks Start.
+function showStandby(st) {
+  if (!st) { for (const n of $$('.standbyPage')) n.replaceWith(); return; }
+  if ($('.standbyPage')) return;
+  for (const dl of $$('dialog[open]')) dl.close();
+  const when = st.at ? new Date(st.at).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' }) : '';
+  const admin = S.me?.role === 'admin', msg = h('p', { class: 'muted' });
+  const start = h('button', { type: 'button', class: 'big primary' }, '▶ Start the Brain');
+  start.onclick = guard(async () => {
+    start.disabled = true; msg.textContent = 'Starting the Brain ... this page comes back by itself in a few seconds.';
+    await api('POST', '/ui/wake');
+    waitForBrain();
+  });
+  const signIn = h('button', { type: 'button', class: 'big' }, 'Sign in as an Admin');
+  signIn.onclick = guard(async () => { try { await api('POST', '/auth/logout'); } catch { } location.href = '/login.html'; });
+  document.body.append(h('div', { class: 'closedPage standbyPage' },
+    h('h2', {}, '💤 The Brain is in Standby'),
+    h('p', {}, `${st.by || 'An Admin'} put the Brain in Standby${when ? ' on ' + when : ''}. Everything is Off and no Process runs.`),
+    admin ? start : h('p', {}, 'Only an Admin can start it again.'),
+    admin ? '' : signIn, msg));
+}
+// After Start: the Brain stops and starts again, then the page loads fresh
+function waitForBrain(tries = 0) {
+  setTimeout(() => api('GET', '/ui/state').then(st => { if (st.standby && tries < 60) return waitForBrain(tries + 1); location.reload(); })
+    .catch(() => { if (tries < 60) waitForBrain(tries + 1); else location.reload(); }), 1500);
 }
 function showClosed(by) {
   if ($('.closedPage')) return;      // the page that closed it hears it twice: from its own click and from the Brain
@@ -12376,7 +12432,7 @@ function showClosed(by) {
   document.body.append(h('div', { class: 'closedPage' },
     h('h2', {}, 'Skynet Brewer is closed'),
     h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
-    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, double-click Skynet Brewer on the Brain\'s desktop, then reload this page.')));
+    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, double-click Skynet Brewer on the Brain\'s computer, then reload this page.')));
   window.close();      // works only when the panel opened this tab itself; otherwise the page above stays
 }
 // ---- Move Brain (Fritz, 2026-11-03, Rule 9.9, lib/brainmove.js): from a Windows, Linux or Mac computer Brain to a Raspberry Pi
@@ -13329,7 +13385,7 @@ function officialBox() {
       const text = (done ? done.charAt(0).toUpperCase() + done.slice(1) + (r.backup ? ` (${r.backup})` : '') + '.\n\n' : '')
         + (ok ? `This is Official Skynet again, exactly as OakBarn Brewery released it in ${S.official.version}.` : (S.official?.text || 'Skynet could not check the files again.'))
         + (r.failed.length ? `\n\nThese could not be repaired:\n${r.failed.join('\n')}` : '')
-        + (r.fixed.length ? '\n\nClose Skynet Brewer and start it again so it uses the repaired files.' : '');
+        + (r.fixed.length ? '\n\nClose Skynet Panel and the Brain (☰ Menu) and start it again so it uses the repaired files.' : '');
       await noticeDialog(ok && !r.failed.length ? '✓ Repair done' : '⚠ Repair', text);
       for (const k of [...menuOpen]) closeMenuTab(k);        // back to the screen
       if (menuTab) leaveMenuTab();

@@ -4,7 +4,7 @@ Sous Windows, Skynet Brewer ouvre le panel dans **une fenêtre à lui** (Règle 
 
 ## Comment ça marche {#how-it-works}
 
-- Double-cliquez sur **Skynet Brewer** sur le Bureau. La fenêtre noire Invite de commandes démarre le panel, et quelques secondes plus tard le panel s'ouvre dans sa fenêtre propre, en plein écran.
+- Double-cliquez sur **Skynet Brewer** sur le Bureau. Il démarre le Brain en arrière-plan (aucune fenêtre noire ne reste ouverte, règle Skynet 6.32), et quelques secondes plus tard le panel s'ouvre dans sa fenêtre propre, en plein écran.
 - La fenêtre est **Microsoft Edge** (ou **Google Chrome** si l'ordinateur n'a pas Edge) en mode « application ».
 - Ni Edge ni Chrome sur l'ordinateur : votre navigateur habituel ouvre le panel, comme avant.
 - Ça marche quel que soit le .bat avec lequel vous démarrez le panel, votre propre .bat dans C:\Brewing aussi.
@@ -23,8 +23,7 @@ Comme elle a son propre profil, **connectez-vous une fois** dans la fenêtre pro
 
 ## Fermer {#closing}
 
-- **☰ Menu > ⏻ Close Skynet Brewer** arrête le panel, ferme la fenêtre noire et ferme aussi la fenêtre propre (voir [Fermer Skynet Brewer](95-closing-skynet-brewer)).
-- Fermer la fenêtre noire avec son **X** ferme aussi la fenêtre propre.
+- **☰ Menu > ⏻ Close Skynet Panel and the Brain** arrête le Brain et ferme aussi la fenêtre propre (voir [Fermer Skynet Brewer et la mise en veille](95-closing-skynet-brewer)).
 - Fermer la **fenêtre propre** avec son X n'arrête **pas** le panel (un brassage ne doit jamais s'arrêter parce qu'une fenêtre a été fermée). Pour la rouvrir, double-cliquez à nouveau sur **Skynet Brewer** : le panel tourne toujours, il ouvre donc simplement sa fenêtre.
 
 ## Autres ordinateurs et téléphones {#other-computers-and-phones}

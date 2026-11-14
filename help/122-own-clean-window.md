@@ -4,7 +4,7 @@ On Windows, Skynet Brewer opens the panel in **a window of its own** (Skynet Rul
 
 ## How it works
 
-- Double-click **Skynet Brewer** on the Desktop. The black Command Prompt window starts the panel, and a few seconds later the panel opens in its clean window, filling the screen.
+- Double-click **Skynet Brewer** on the Desktop. It starts the Brain in the Background (no black window stays open, Skynet Rule 6.32), and a few seconds later the panel opens in its clean window, filling the screen.
 - The window is **Microsoft Edge** (or **Google Chrome** if the computer has no Edge) in "app" mode.
 - No Edge or Chrome on the computer: your normal browser opens the panel, as before.
 - It works whatever .bat you start the panel with, your own .bat in C:\Brewing too.
@@ -23,8 +23,7 @@ Because it has its own profile, **sign in once** in the clean window the first t
 
 ## Closing
 
-- **☰ Menu > ⏻ Close Skynet Brewer** stops the panel, closes the black window and closes the clean window too (see [Closing Skynet Brewer](95-closing-skynet-brewer)).
-- Closing the black window with its **X** also closes the clean window.
+- **☰ Menu > ⏻ Close Skynet Panel and the Brain** stops the Brain and closes the clean window too (see [Closing Skynet Brewer and Standby](95-closing-skynet-brewer)).
 - Closing the **clean window** with its X does **not** stop the panel (a brew must never stop because a window was closed). To open it again, double-click **Skynet Brewer** again: the panel is still running, so it just opens its window.
 
 ## Other computers and phones

@@ -59,8 +59,9 @@ file…** ; **⌂ Documents\BruControl** revient au propre dossier de BruControl
   dans votre propre dossier Windows (`C:\Users\<you>\Downloads`).
 - **Browse et Change folder** ouvrent la propre boîte de Windows devant l'Importer. Tant qu'elle est ouverte, une note le dit ; si vous ne
   la voyez pas, regardez dans la barre des tâches.
-- **« The Importer has stopped »** en haut veut dire que sa fenêtre noire (**Skynet BruControl Importer**) a été fermée, donc aucun bouton
-  ne peut marcher. Fermez la fenêtre de l'Importer et relancez-le depuis son raccourci. Gardez la fenêtre noire ouverte pendant l'import.
+- **« The Importer has stopped »** en haut veut dire que l'Importer ne tourne plus (il a été fermé, ou l'ordinateur a redémarré),
+  donc aucun bouton ne peut marcher. Fermez la fenêtre de l'Importer et relancez-le depuis son raccourci. L'Importer tourne en
+  arrière-plan sans fenêtre noire ; **Close Importer** l'arrête.
 
 - **Pas de fichier de configuration là, ou seulement celui par défaut ?** L'Importer vous demande d'indiquer le dossier qui contient le vôtre : cliquez sur
   **📁 Change folder…** et choisissez le dossier, ou tapez le dossier dans la case et appuyez sur Entrée (ou cliquez sur **Look**). La fois suivante, la

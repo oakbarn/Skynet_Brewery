@@ -125,8 +125,8 @@ SOFTWARE YOU WILL INSTALL
   -----------------  ----------------------------  -----------------------------------
   Node.js (LTS)      YES, always                   The panel runs on it. The two .bat
                                                     files install it for you (step 3).
-                                                    The panel's black window must be
-                                                    RUNNING to use the panel.
+                                                    The Brain runs on it in the
+                                                    Background, with no window.
   A web browser      YES (you already have Edge)   This is how you see the panel.
   USB board driver   Only with an Arduino board    So Windows can talk to the board.
   Tailscale          Only to use it away from home Safe remote access from your phone.
@@ -260,10 +260,12 @@ STEP 7. RUN THE FIRST TIME INSTALL FILE
   [ ] After a few seconds the panel opens in its own clean window (Edge or Chrome,
       no address bar or bookmarks). Your normal browser is not changed.
 
-  The black window IS the panel. Keep it open the whole time you brew.
-  Closing it, or pressing Ctrl+C in it, stops the panel.
+  The black window closes by itself once the Brain is running in the Background.
+  Closing the panel window does NOT stop the Brain: brews and phones carry on.
+  To stop it: Menu > Close Skynet Panel and the Brain (on this PC), or
+  Start menu > Skynet Brewer > Stop the Skynet Brain.
 
-  If the black window shows a message instead, read it. It tells you which step of
+  If the black window stays open with a message, read it. It tells you which step of
   this ReadMe to go back to.
 
 WHAT IS IN THE FIRST TIME INSTALL FILE
@@ -290,8 +292,8 @@ pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
   [ ] Type  KEEP  and press Enter to keep all your work and only finish the
       install (for example when you run it again to get the USB support).
   [ ] Just press Enter to stop without changing anything.
-  If it says the panel is still running, stop it first (close its black window),
-  then run the first install file again.
+  If it says the panel is still running, stop it first (Menu > Close Skynet Panel
+  and the Brain), then run the first install file again.
 
 
 STEP 8. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
@@ -309,8 +311,8 @@ STEP 8. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
 
 STEP 9. STARTING THE PANEL EVERY DAY
 ------------------------------------
-  [ ] Double-click "Skynet Brewer" on the Desktop. The black window opens and the
-      panel's own window opens after a few seconds.
+  [ ] Double-click "Skynet Brewer" on the Desktop. A black window starts the Brain
+      in the Background and closes; the panel's own window opens after a few seconds.
   [ ] If the shortcut is not on the Desktop, make it: open C:\Brewing, right-click
       Skynet_Brewer.bat, choose "Show more options" > "Send to" >
       "Desktop (create shortcut)". Rename the shortcut to  Skynet Brewer
@@ -321,7 +323,10 @@ STEP 9. STARTING THE PANEL EVERY DAY
   If your panel is not in C:\Brewing\BrewPanel, open the file in Notepad and
   change the line  set "PANEL=C:\Brewing\BrewPanel" .
 
-  To stop the panel: click in the black window and press Ctrl+C, or close it.
+  To stop the panel: Menu > Close Skynet Panel and the Brain (on this PC), or
+  Start menu > Skynet Brewer > Stop the Skynet Brain. From a phone or another
+  computer an Admin can put the Brain in Standby, and start it again later.
+  What the Brain writes goes to C:\Brewing\BrewPanel\data\brain.log.
 
 
 STEP 10. KEEP THE PC AWAKE WHILE BREWING
@@ -364,12 +369,12 @@ PROBLEMS
 "The panel is not in C:\Brewing\BrewPanel"
     Do step 6 again. The folder must be exactly C:\Brewing\BrewPanel with server.js inside.
 The browser says "This site can't be reached"
-    The panel takes a few seconds to start. Wait, then press F5. Make sure the black
-    window is still open.
-"Port 8080 is already in use" (or EADDRINUSE) in the black window
-    The panel is already running in another black window. Use that one, or close it first.
+    The panel takes a few seconds to start. Wait, then press F5. If it still does not
+    open, double-click Skynet Brewer again and read its black window.
+"Port 8080 is already in use" (or EADDRINUSE) in data\brain.log
+    Another program uses port 8080. Close it, or change "port" in config\brewery.json.
 The phone cannot open the panel
-    Same WiFi as the PC? Black window open? Then allow it in the firewall:
+    Same WiFi as the PC? Brain running (the panel opens on the PC)? Then allow it in the firewall:
     Start > type "Allow an app through Windows Firewall" > Change settings >
     tick "Private" next to "Node.js JavaScript Runtime" > OK.
     Also check the PC's network is set to Private: Settings > Network & internet >

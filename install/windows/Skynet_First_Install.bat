@@ -115,17 +115,19 @@ if errorlevel 1 (
 echo [5/5] Starting the panel. It opens in its own window in a few seconds.
 echo.
 echo  If Windows asks "Allow Node.js on your networks?": tick Private networks and click Allow.
-echo  KEEP THIS WINDOW OPEN while you brew. Closing it stops the panel.
+echo  The Brain runs in the Background with no window (Rule 6.32). This window closes once it is up.
+echo  To stop it: Menu ^> Close Skynet Panel and the Brain, on this computer.
 echo.
-call npm start
+node --no-warnings lib\startbrain.js "%PANEL%"
+if not errorlevel 1 exit 0
 echo.
-echo The panel has stopped.
+echo  The Brain did not start. The lines above say why.
 pause
-exit /b 0
+exit /b 1
 
 :stillrunning
 echo.
-echo  The panel is still running. Close its black window first, then run this file
+echo  The panel is still running. Close it first (Menu ^> Close Skynet Panel and the Brain), then run this file
 echo  again. Nothing was changed.
 pause
 exit /b 1

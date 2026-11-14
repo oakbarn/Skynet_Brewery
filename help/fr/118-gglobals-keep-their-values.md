@@ -15,7 +15,7 @@ variable de Process :
 
 - Quand une gGlobal change (par un Process ou par sa fenêtre), Skynet écrit la nouvelle
   valeur sur le disque du Brain en environ un tiers de seconde. Si un Process la change sans arrêt, elle est quand même écrite au moins
-  une fois par seconde. Fermer Skynet Brewer (☰ Menu > Close Skynet Brewer) l'écrit une fois de plus.
+  une fois par seconde. Fermer Skynet (☰ Menu > Close Skynet Panel and the Brain, ou Put the Brain in Standby) l'écrit une fois de plus.
 - Les valeurs sont dans **data/state.json** sur le Brain, que le Brain soit un Raspberry Pi ou un ordinateur Windows, Linux ou Mac. Chaque écriture est faite sans risque : les nouvelles valeurs vont d'abord dans un nouveau fichier, la dernière
   bonne copie est gardée sous **data/state.json.bak**, puis le nouveau fichier prend sa place. Si le courant coupe au milieu d'une écriture,
   le panel démarre avec la dernière bonne copie.
