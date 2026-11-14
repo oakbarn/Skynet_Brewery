@@ -716,6 +716,10 @@ Import** (they share these Rules, Rule 15.4):
 5. What **stays on the dialog**: warnings the user must act on (⚠ The Label cannot be blank, Rule 18.28), what something is now
    (the Suggested Name, OPEN / CLOSED), and the dialog's own Help ? (Rule 2.11), which still opens the full Help page.
 6. Words in the hover help follow Rule 2.37 (correct spelling, plain English).
+7. **A hover help box never goes off the screen** (OakBarn Brewery, 2026-11-14, the Tab and Name hover help on the Blichmann RipTide:
+   "some of the hover help needs slide bars as the box goes off the screen"). A box taller than the room under or over its name
+   goes on the side with more room, never over the name, is cut to fit the window and gets a scroll bar. The mouse can go into it
+   to scroll (it waits a moment, like a box with hot spots, Rule 2.49); scrolling it does not close it.
 It is one shared helper (public/hoverhelp.js) that watches every dialog, so a new dialog only has to give each field its tip.
 **Every dialog at once** (Fritz, 2026-11-06: "Yes Hover on all Dialogs"; Rule 18.10's exception): when a dialog opens, a note that
 explains moves into the hover help of the field next to it, a long explanation in ( ) after a field's name moves into its hover help,
@@ -4207,6 +4211,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.38 item 7 (OakBarn Brewery: "some of the hover help needs slide bars as the box goes off the screen", the Tab and Name hover help on the Blichmann RipTide): a hover help box too tall for the window is cut to fit on the side of its name with more room and gets a scroll bar; the mouse can go into it to scroll. Both programs (the Importer uses the same hover help).
 - 2026-11-13: Rule 7.24 (OakBarn Brewery: after the Media Setup ran with the panel open, the pictures stayed File Not Found until the panel was closed and opened again): a missing picture is looked for again when the window comes back to the front, when pictures are added from the panel, and every 20 seconds while one is missing, so it shows by itself. Both programs.
 - 2026-11-13: Added Rule 9.19 (OakBarn Brewery, after an uninstall left the Import folder and the brew log behind; picked "All of C:\\Brewing, after a warning"): the Windows uninstall deletes everything like Start Fresh after one red warning, stops Skynet's own Node.js first (the panel with a key only it knows, the Importer with its Close call; never another Node.js program) so the brew log is not locked, and every Setup update and Fresh Start does the same, and deletes the Import folder too. The Importer note under Rule 15 no longer says an uninstall keeps the Import folder. Help 19, 184 (and French) and install/ReadMe.txt updated. Both programs.
 - 2026-11-13: Rule 9.8 (OakBarn Brewery: "I think that the Fresh Install should also delete the Media files"): Start Fresh deletes the whole media folder too, the Skynet pictures and sounds included; run the Media Setup after it (README install order). lib/skynet_media.json and tools/skynet-media-list.js are gone (no longer needed).
