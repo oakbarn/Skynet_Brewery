@@ -20,6 +20,7 @@ Every version on that page is an **Official Skynet update**: once installed, Sky
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | The same Windows installer with every Skynet picture and sound inside too. The easy way on a new computer: no Media Setup needed. See [The Skynet Media Setup](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. |
 | `Install Skynet Brewer.command` | Mac installer |
 | `install-skynet-brewer.sh` | Linux and Raspberry Pi installer |
@@ -35,7 +36,7 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
 ## Windows: the installer
 
 1. Close the panel if it is running (**Ctrl + C** in its black window, then close it).
-2. Double-click `Skynet_Brewer_Setup_<date>.exe`. Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate. The first screen shows the **Version** it installs, the same name as on the Releases page.
+2. Double-click `Skynet_Brewer_Setup_<date>.exe` (or `Skynet_Brewer_Full_Setup_<date>.exe`, which also brings the Skynet pictures and sounds). Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate. The first screen shows the **Version** it installs, the same name as on the Releases page.
 3. Keep the folder `C:\Brewing\BrewPanel` and click **Install**.
    - If Node.js is missing, it offers to install it. Windows asks for permission.
    - If the panel is already there, it asks what the update does: **1. Start Fresh: delete everything, nothing saved**, **2. Modified Fresh Start** (keeps your Default settings, own Profiles, Recipes, pictures and sounds), **3. Update the program and reset all users**, or **4. Update the program and keep everything** (the normal choice, already picked). Choices 1, 2 and 3 show a warning first, so you can still back out (see [Updating](18-updating)).
