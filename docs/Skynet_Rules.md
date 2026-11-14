@@ -605,13 +605,15 @@ the Image list, Cancel and Save). A typed path that is not found shows blank, wi
 of the list) and can change or delete only those. First used on the **Timer Widget**, which has **no pictures and no
 background**: its look is its Style. (Help 92)
 
-2.25 **Close Skynet Brewer** (Admins) is the last ☰ Menu choice. It stops the panel after asking, and the
-Command Prompt window that started it closes too, **whatever .bat started it** (Skynet_Brewer.bat, an older .bat in
-C:\Brewing, or npm start typed in a Command Prompt): the panel ends that Command Prompt itself as it stops (2026-11-04).
-Only the Command Prompt and npm under it are ended, never Windows Terminal or anything above it. Every open page shows
-"Skynet Brewer is closed", and Skynet's own clean window (Rule 2.36) closes. The window stays open when the panel stops because of an error. Closing a browser tab never
-stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread "Close the command window on
-exit"; 2026-11-04, thread "Close the Command Prompt with Skynet")
+2.25 **Close Skynet Panel and the Brain** (Admins) is the last ☰ Menu choice **on the Brain's own computer** (OakBarn Brewery,
+2026-11-14: "Option on Skynet Panel to Both: Close Skynet Panel and the Brain. This option only available if the Skynet Panel and
+Brain on same computer"). Before it stops anything, a box lists what happens, each with a **tick box**: everything turns Off and
+every Process stops; when brewing, what is On and which Processes run; when other screens have the panel open, who they are ("Give
+a Warning if others are connected prior to shut down"). The button works only once every box is ticked; **Back** changes nothing
+("The Back out ... would allow an Admin user to not shut down the Brain"). Then every output is turned Off, the Brain stops and its
+clean window (Rule 2.36) closes; every other page shows "Skynet Brewer is closed". Any other screen (a phone, another computer) and a
+Brain run as a service (Pi) get **Put the Brain in Standby** instead (Rule 6.32). Closing a browser tab or the panel window never
+stops the Brain. (2026-10-30, thread "Close the command window on exit"; 2026-11-14, thread "Run the Brain in the Background on a PC")
 
 2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
 with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
@@ -683,8 +685,8 @@ screen. It uses **its own small browser profile** (in `%LOCALAPPDATA%\SkynetBrew
 changed**: its bookmarks bar, settings, tabs and sign-ins look exactly as before once Skynet closes ("restore on close"). The panel
 opens the window itself once it is up, **whatever .bat started it** (an older .bat that opens the browser has that browser tab
 stopped, so only the clean window opens). No Edge or Chrome: the normal browser opens the panel, as before. The window closes
-when the panel stops (☰ Menu > Close Skynet Brewer, Rule 2.25, or the black window's X); closing the clean window with its X
-never stops the panel (Rule 2.25), and double-clicking **Skynet Brewer** again opens it again. The first time, sign in once in the
+when the Brain stops (☰ Menu > Close Skynet Panel and the Brain, Rule 2.25); closing the clean window with its X never stops the
+Brain (Rule 6.32: it runs in the Background), and double-clicking **Skynet Brewer** again opens it again. The first time, sign in once in the
 clean window (it keeps its own sign-in). Phones, tablets and other computers open the panel in their browser as before.
 (thread "Open Skynet in its own clean window", Help 122)
 The clean window shows **the Skynet Brewer beer mug** (the same mug as the Desktop shortcut) on the taskbar, also when it is minimized, and in its title bar; the panel's Help window and the Sign in page show it too, and so do browser tabs. (Fritz, 2026-11-05, thread "Show a beer mug icon when minimized")
@@ -2408,6 +2410,27 @@ never stops a brew. On every Brain (Windows, Mac, Linux, Pi):
    return.
 6. **Both programs:** the Panel does all of this; the BruControl Import controls nothing, so it needs none of it (its Build page
    runs no board and shows no notice). The same Setup asks the question for both. Help 190.
+
+6.32 **The Brain runs in the Background; Standby** (OakBarn Brewery, 2026-11-14: "Windows PowerShell remains open after Skynet Panel
+is closed"; "Maybe Change that the Brain is in the Back ground and somewhat separate on a Computer ... the Skynet Panel acts like a
+remote Browser Connection at all times"; "If Pi is Powered, Admin Only can restart"; "Only Admin User can put Brain in standby or
+remove that status"). The Brain is the program that runs the boards, Processes and controls; every panel window, phone and computer
+is only a browser showing it.
+1. **Windows: no window stays open.** Skynet Brewer (Skynet_Brewer.bat) shows its black window only for the first-time steps
+   (Node.js, USB board support), then starts the Brain in the Background with no window (lib/startbrain.js) and closes. The Brain
+   still gets Windows' shut down, restart and sign out message, so everything goes Off first (Rule 6.31). What it writes goes to
+   data\brain.log (a new one each start, the last one kept as .old). It did not start: the black window stays open with the last lines.
+   Double-clicked again while it runs: the panel window opens again. Start menu > Skynet Brewer > **Stop the Skynet Brain** stops it
+   the normal way (lib/stoppanel.js). Skynet never changes Windows settings: no service, no admin rights.
+2. **Close** is only on the Brain's own computer (Rule 2.25).
+3. **Put the Brain in Standby** (☰ Menu, **Admins only**, on any other screen and on a Pi): the same tick box warnings and Back as
+   Rule 2.25. Every output Off, every Process stopped (a brew is written down, Rule 6.31), and the Brain starts again in Standby: **no
+   board connected, no Process, no MQTT, nothing can be changed**, and every screen shows only "The Brain is in Standby" (who, when).
+4. **Only an Admin starts it again**, from **any** screen, near or far (Tailscale too): ▶ Start the Brain on the Standby page. Anyone
+   else sees "Sign in as an Admin". The Brain starts the normal way, everything Off; a brew that was stopped gets its notice and Resume
+   (Rule 6.31). Standby is kept in data\standby.json, so it **stays in Standby after a restart or a power cut** until an Admin starts it.
+5. **Both programs:** the BruControl Import also runs in the Background with no black window, and its own Close Importer button stops
+   it. It controls nothing, so it has no Standby. Help 95.
 
 ## 7. Pictures
 
@@ -4290,6 +4313,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 6.32 (OakBarn Brewery: "Windows PowerShell remains open after Skynet Panel is closed", then "the Brain is in the Back ground", "Admin Only can restart", "Only Admin User can put Brain in standby or remove that status"): the Brain runs in the Background with no window on Windows; ☰ Menu > Put the Brain in Standby (Admins, any other screen and a Pi) with tick box warnings, others connected named, Back; only an Admin starts it again, from any screen; Standby kept across restarts. Rule 2.25 changed: **Close Skynet Panel and the Brain**, only on the Brain's own computer, with the same warnings (no Command Prompt left to close). Rule 2.36: no black window. Start menu > Stop the Skynet Brain. Both programs (the Importer runs in the Background too). Help 95, 19, 118, 122, 143, 190 (and French).
 - 2026-11-14: Rule 2.42 (OakBarn Brewery): the Default tab is only for new things. Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Phones and tablets, the grain and gravity labels, Hop alerts and the Order of the Menu moved to the new Settings > Panel settings: screen, Tabs and alerts. "Defaults set somewhere else" renamed **Skynet Defaults for New User Created Items** with his text, now the fixed Skynet values. Default tab section titles get a blue back. Help 9, 22, 33, 40, 41, 45, 49, 99, 101, 147, 151, 155, 186 (and French).
 - 2026-11-14: Added Rule 10.10 (OakBarn Brewery: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar"): Settings > Simulation is gone; its settings are on the Simulator bar's new ⚙ Settings panel. Rule 10.4 changed to match. Help 20, 77, 85 (and French).
 - 2026-11-14: OakBarn Brewery's 21 choices on docs/Default_Settings_Other_Places.md. Rule 2.42: new Default tab part **New User Templates and Schemas** (Look of a new Schema, On overlay for a new User Pump and a new User Valve, Push Lockout); "Defaults set somewhere else" cut to 5 rows. Rules 5.14 and 5.36: pipe fittings always size to their pipes, the Autosize switch is gone. Rule 6.3: Lost Link (s) is a must-fill box on the Interface dialog, 10 s on every Interface and sample. Rule 6.7: Push Lockout default. Rule 7.12: a new Alarm's Layer 2 starts at None. Rule 7.15: On overlay defaults. Rule 10.5: a new empty Schema has no Interface.

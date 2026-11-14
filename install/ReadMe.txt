@@ -103,7 +103,7 @@ VIDEOS (COMING SOON)
 
 WINDOWS, THE EASY WAY (INSTALLER)
 ---------------------------------
-1. Close the panel if it is running (Ctrl+C in its black window, then close it).
+1. Close the panel if it is running (Menu > Close Skynet Panel and the Brain).
 2. Double-click Skynet_Brewer_Setup_<date>.exe.
    Windows may say "Windows protected your PC". Click "More info", then "Run anyway".
    (A brand-new or unsigned installer does this for a while, that is all.)
@@ -127,8 +127,8 @@ WINDOWS, BY HAND
    C:\Brewing\BrewPanel\install\windows) into C:\Brewing.
 4. Put it on the Desktop: right-click the .bat, "Show more options", "Send to",
    "Desktop (create shortcut)". Rename the shortcut to "Skynet Brewer".
-5. Double-click it. The black window is the panel running; keep it open while you brew.
-   The browser opens http://localhost:8080 after a few seconds.
+5. Double-click it. A black window starts the Brain in the Background and closes by itself.
+   The panel opens after a few seconds. Closing the panel window does not stop the Brain.
 
 You do not need to install Node.js first. Each time Skynet_Brewer.bat starts, it
 checks for Node.js and, if it is missing or too old, downloads the LTS version from

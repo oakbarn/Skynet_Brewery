@@ -8,8 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
-import { closeLauncherWindow } from './lib/closewindow.js';
+import { readStandby, writeStandby, clearStandby, onBrainComputer, otherScreens, startAgain } from './lib/brainstate.js';
 import { writeStopKey, removeStopKey, stopAllowed } from './lib/stoppanel.js';
 import { openAppWindow, closeAppWindow, openInDefaultBrowser } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
@@ -79,6 +78,10 @@ const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'con
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
 // the key the Setup and the uninstall use to stop the panel (Rule 9.19, lib/stoppanel.js); a new one each start
 const STOP_KEY = writeStopKey(DATA);
+// Standby (Rule 6.32, lib/brainstate.js): an Admin put the Brain in Standby. It starts with no board connected, no Process and no
+// MQTT, and every screen shows only "The Brain is in Standby" until an Admin clicks Start. Never on the Importer's Build page.
+const STANDBY = process.env.SKYNET_IMPORT_BUILD === '1' ? null : readStandby(DATA);
+if (STANDBY) console.log(`The Brain is in Standby (put there by ${STANDBY.by || 'an Admin'}). An Admin starts it again from any screen.`);
 const PROCESSES = path.resolve(process.env.BREWPANEL_PROCESSES ?? path.join(ROOT, 'processes'));
 const PUBLIC = path.join(ROOT, 'public');
 // The 3 Vessel sample ships in the panel (samples/configs); every other Sample Schema comes with the add-only Skynet Sample Schemas
@@ -122,7 +125,7 @@ const typeAtProcesses = map => { const r = renameInProcesses(engine, map); if (r
 if (store.loadRenames?.size) typeAtProcesses(store.loadRenames);
 store.on('loadRenames', typeAtProcesses);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
-const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
+const hw = new Hardware(store, { off: IMPORT_BUILD || !!STANDBY });      // the Importer's Build page and a Brain in Standby never connect a board
 hw.logDir = path.join(DATA, 'logs', 'boards');      // Board settings: Diagnostic logging (Rule 6.27)
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
@@ -162,7 +165,7 @@ const help = new Help(HELP);                                        // Help tab:
 engine.on('started', n => logger.scriptStarted(n));
 if (moved) for (const l of moved.lines) engine.print('system', l);
 const mqtt = new MqttBridge(store, engine);
-mqtt.start();
+if (!STANDBY) mqtt.start();
 // Schemas (the Schema dropdown at the top) and Equipment Profiles (☰ Menu > Equipment Profile)
 const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipment'));
 const schemas = new Schemas(store, { engine, hw, profiles });
@@ -206,6 +209,7 @@ if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
+const screens = new Map();       // response -> { ua, ip }: which kind of screen it is (Standby and Close warn about the others, Rule 6.32)
 let pending = {};
 // A browser that stops reading (a phone asleep, a laptop lid closed, WiFi gone without a goodbye) would make the Brain keep
 // every update for it in memory. Once more than 2 MB waits for one browser it is let go; it joins again by itself when it
@@ -267,11 +271,11 @@ store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 // Sleep, Windows Update restarts and restarts (OakBarn Brewery, 2026-11-12, Rule 6.31): kept awake while brewing, a notice after a
 // stop or a sleep during a brew, and one when Windows has an update waiting to restart the computer. Not on the Importer's Build page.
-const power = IMPORT_BUILD ? null : new BrainPower({ store, engine, hw, dataDir: DATA, notify: list => broadcast('brainNotices', list), log: text => { console.log(text); engine.print('system', text); } });
+const power = IMPORT_BUILD || STANDBY ? null : new BrainPower({ store, engine, hw, dataDir: DATA, notify: list => broadcast('brainNotices', list), log: text => { console.log(text); engine.print('system', text); } });
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
-function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
+function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); screens.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of [...clients.keys()]) sse(res, ': ping\n\n'); }, 20000);
 
 // ---------------- helpers ----------------
@@ -421,7 +425,7 @@ async function route(req, res) {
     if (!stopAllowed(clientIp(req), req.headers, STOP_KEY)) { res.writeHead(403); return res.end('Forbidden'); }
     console.log('Stopped by the Skynet Setup or uninstall');
     broadcast('closing', { by: 'Skynet Setup' });
-    ok(res); setTimeout(() => shutdown({ closeWindow: true }), 300);
+    ok(res); setTimeout(() => shutdown(), 300);
     return;
   }
   const token = parseCookies(req.headers.cookie)[COOKIE];
@@ -543,6 +547,7 @@ async function route(req, res) {
   // ===== Public API (Fritz, 2026-10-30): any Device or Widget whose .API is Get only (read) or Get and Put (read and change) =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
+    if (STANDBY && m !== 'GET') return fail(res, 409, 'The Brain is in Standby: an Admin starts it again from the panel');
     if (apiGuard.blocked(ip)) return fail(res, 429, 'Too many wrong API keys from this address. Try again later.');
     const sentKey = req.headers['x-api-key'] ?? url.searchParams.get('key');
     if (!apiKeyOk(req, url)) {
@@ -594,17 +599,20 @@ async function route(req, res) {
   const need = needRole(p, m);
   if (!roleAtLeast(me.role, need)) return fail(res, 403, need === 'admin' ? 'Only an admin can do that' : 'Your account is view only');
   if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
+  // Standby (Rule 6.32): nothing can be changed, only Start (an Admin) and Close on the Brain's own computer
+  if (STANDBY && m !== 'GET' && !['/ui/wake', '/ui/close'].includes(p)) return fail(res, 409, 'The Brain is in Standby: an Admin starts it again from the panel');
 
   // ===== Browser UI =====
   if (p === '/ui/events') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.write('retry: 2000\n\n');
-    clients.set(res, token); req.on('close', () => clients.delete(res));
+    clients.set(res, token); screens.set(res, { ua: String(req.headers['user-agent'] ?? ''), ip: clientIp(req) });
+    req.on('close', () => { clients.delete(res); screens.delete(res); });
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, brainNotices: power?.notices ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), standby: STANDBY, brainNotices: power?.notices ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
@@ -1132,13 +1140,43 @@ async function route(req, res) {
     return ok(res, { opened: local && CLOSABLE ? openInDefaultBrowser(url) : false });
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
-  // ☰ Menu > Close Skynet Brewer (Fritz, 2026-10-30): stops the panel, and the launcher then closes its Command Prompt window.
-  // Every open page is told first, so a phone shows that the panel was closed, not just "lost connection".
+  // ☰ Menu > Close Skynet Panel and the Brain (Rule 2.25): stops the Brain and closes its window. Only on the Brain's own computer
+  // (OakBarn Brewery, 2026-11-14: "This option only available if the Skynet Panel and Brain on same computer"); other screens use
+  // Standby. Every open page is told first, so a phone shows that the Brain was closed, not just "lost connection".
   if (p === '/ui/close' && m === 'POST') {
-    if (!CLOSABLE) return fail(res, 400, 'The panel runs as a service here (it starts by itself with the Brain), so it is not closed from the panel.');
+    if (!CLOSABLE) return fail(res, 400, 'The Brain runs as a service here (it starts by itself), so it is put in Standby instead.');
+    if (!onBrainComputer(clientIp(req), req.headers)) return fail(res, 403, 'Only on the Brain\'s own computer. From here, put the Brain in Standby.');
     console.log(`Closed from the panel by ${me?.name ?? 'an admin'}`);
     broadcast('closing', { by: me?.name ?? '' });
-    ok(res); setTimeout(() => shutdown({ closeWindow: true }), 300);
+    ok(res); setTimeout(() => shutdown(), 300);
+    return;
+  }
+  // The other screens with the panel open now, and whether anything is brewing: the warnings before Standby or Close (Rule 6.32)
+  if (p === '/ui/screens' && m === 'GET') {
+    if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
+    const list = [...clients].map(([r, t]) => ({ token: t, name: auth.check(t)?.name ?? '', ...(screens.get(r) ?? {}) }));
+    const st = power?.status();
+    return ok(res, { others: otherScreens(list, token), brewing: !!st?.brewing, on: st?.on ?? [], processes: (st?.processes ?? []).map(x => x.name) });
+  }
+  // ☰ Menu > Put the Brain in Standby (Rule 6.32, Admins only, from any screen): everything Off, every Process stopped, the boards let
+  // go, and the Brain starts again in Standby. A brew that was running is written down, so Start shows what was On (Rule 6.31).
+  if (p === '/ui/standby' && m === 'POST') {
+    if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
+    if (STANDBY) return fail(res, 409, 'The Brain is already in Standby');
+    writeStandby(DATA, me?.name ?? '');
+    console.log(`Put in Standby by ${me?.name ?? 'an admin'}`);
+    broadcast('standby', { by: me?.name ?? '', at: Date.now() });
+    ok(res); setTimeout(() => shutdown({ reason: 'standby', again: true }), 300);
+    return;
+  }
+  // Start, on the Standby page (Rule 6.32, Admins only, from any screen): the Brain starts again the normal way
+  if (p === '/ui/wake' && m === 'POST') {
+    if (me.role !== 'admin') return fail(res, 403, 'Only an admin can do that');
+    if (!STANDBY) return ok(res, { ok: true, running: true });
+    clearStandby(DATA);
+    console.log(`Started again from Standby by ${me?.name ?? 'an admin'}`);
+    broadcast('waking', { by: me?.name ?? '' });
+    ok(res); setTimeout(() => shutdown({ reason: 'closed', again: true }), 300);
     return;
   }
 
@@ -1179,7 +1217,7 @@ async function route(req, res) {
       try { stageMove(ROOT); } catch (e) { return fail(res, 400, e.message); }
       console.log(`Brain Move started by ${me?.name ?? 'an admin'}: the panel stops and puts the old Brain's files in place when it starts again`);
       broadcast('closing', { by: me?.name ?? '', moving: true, service: !CLOSABLE });
-      ok(res, { ok: true, service: !CLOSABLE }); setTimeout(() => shutdown({ closeWindow: CLOSABLE }), 300);
+      ok(res, { ok: true, service: !CLOSABLE }); setTimeout(() => shutdown(), 300);
       return;
     }
     // USB ports: each old port becomes the new one, in every Schema at once
@@ -1285,20 +1323,25 @@ const server = http.createServer((req, res) => {
   route(req, res).catch(e => { if (!res.headersSent) fail(res, 400, e.message); });
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
+const RESTARTED = process.env.SKYNET_RESTARTED === '1';
 server.listen(PORT, () => {
   console.log(`Panel version: ${PANEL_VERSION.version || 'not stamped (not from a GitHub merge)'}`);
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${PROCESSES}\nData:    ${DATA}`);
   pictures.start();
   power?.start();
+  if (STANDBY) console.log('Standby: no board, no Process, no MQTT.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
-  for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
+  if (!STANDBY) for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
   // Windows: the panel opens in its own clean window, whatever .bat started it (Rule 2.36, lib/appwindow.js)
-  if (CLOSABLE && !IMPORT_BUILD) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
-  if (!IMPORT_BUILD) minimizeWindow();
+  // started again by Standby or Start (SKYNET_RESTARTED): the window is already open, and its page reconnects by itself
+  if (CLOSABLE && !IMPORT_BUILD && !RESTARTED) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
 });
 // Skynet Brewer double-clicked while the panel is already running (its window was closed with its X): open the window again
+let portTries = 0;
 server.on('error', e => {
+  // started again by Standby or Start: the Brain before it may still hold the port for a moment
+  if (e.code === 'EADDRINUSE' && RESTARTED && portTries++ < 40) { setTimeout(() => server.listen(PORT), 500); return; }
   if (e.code === 'EADDRINUSE' && CLOSABLE && !IMPORT_BUILD && process.platform === 'win32') {
     console.log(`The panel is already running on port ${PORT}. Opening its window again.`);
     openAppWindow(`http://localhost:${PORT}`, { port: PORT, list: () => [] });
@@ -1308,30 +1351,20 @@ server.on('error', e => {
   throw e;
 });
 
-// Windows (Fritz, 2026-10-30): once the panel is up and the browser has opened it, Skynet_Brewer.bat's Command Prompt window
-// goes down to the task bar (the .bat sets SKYNET_MINIMIZE=1). PowerShell shares this console, so it minimizes this window.
-function minimizeWindow() {
-  if (process.platform !== 'win32' || process.env.SKYNET_MINIMIZE !== '1') return;
-  const ps = "Add-Type -Name W -Namespace S -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern System.IntPtr GetConsoleWindow(); [DllImport(\"user32.dll\")] public static extern bool ShowWindow(System.IntPtr h, int c);'; [void][S.W]::ShowWindow([S.W]::GetConsoleWindow(), 6)";
-  setTimeout(() => {
-    try { spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', ps], { stdio: 'ignore', windowsHide: false }).on('error', () => {}); } catch { /* the window just stays open */ }
-  }, 6000);
-}
-
 // A panel started as a service (systemd sets INVOCATION_ID, for example on a Pi) restarts by itself, so only a panel started
 // from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.
 const CLOSABLE = !process.env.INVOCATION_ID;
-// closeWindow: closed from ☰ Menu, so on Windows its Command Prompt window closes too, whatever .bat started it (Rule 2.25)
-// reason: 'closed' (☰ Menu, Ctrl+C) or 'system' (Windows or the Pi shut down, restarted, signed out, or the window was closed).
+// reason: 'closed' (☰ Menu, Ctrl+C), 'standby' (☰ Menu > Put the Brain in Standby) or 'system' (Windows or the Pi shut down,
+// restarted or signed out). again: Standby or Start, so the Brain starts again by itself and the clean window stays open (Rule 6.32).
 // Every output is turned Off first and given a moment to reach the boards (Rule 6.31), so nothing waits for the boards' lost link.
 let stopping = false;
-function shutdown({ closeWindow = false, reason = 'closed' } = {}) {
+function shutdown({ reason = 'closed', again = false } = {}) {
   if (stopping) return; stopping = true;
   console.log('Stopping...'); auth.flush(); power?.closing(reason); engine.stopAll(); control.stop(); store.persistNow();
   setTimeout(() => {
     mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); removeStopKey(DATA, STOP_KEY);
+    if (again) { server.close(); startAgain({ dataDir: DATA }); return setTimeout(() => process.exit(0), 200); }
     if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
-    if (closeWindow) closeLauncherWindow();
     process.exit(0);
   }, 400);
 }

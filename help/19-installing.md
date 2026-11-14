@@ -34,13 +34,13 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
 
 ## Windows: the installer
 
-1. Close the panel if it is running (**Ctrl + C** in its black window, then close it).
+1. Close the panel if it is running (**☰ Menu > Close Skynet Panel and the Brain**). The installer also stops it by itself.
 2. Double-click `Skynet_Brewer_Setup_<date>.exe`. Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate. The first screen shows the **Version** it installs, the same name as on the Releases page.
 3. Keep the folder `C:\Brewing\BrewPanel` and click **Install**.
    - If Node.js is missing, it offers to install it. Windows asks for permission.
    - If the panel is already there, it asks what the update does: **1. Start Fresh: delete everything, nothing saved**, **2. Modified Fresh Start** (keeps your Default settings, own Profiles, Recipes, pictures and sounds), **3. Update the program and reset all users**, or **4. Update the program and keep everything** (the normal choice, already picked). Choices 1, 2 and 3 show a warning first, so you can still back out (see [Updating](18-updating)).
    - If you had the panel straight in `C:\Brewing` before, it offers to copy your data, layout, processes and pictures across. The old folder isn't changed.
-4. Start it with **Skynet Brewer** on the Desktop. The black window is the panel running; your browser opens the panel a few seconds later.
+4. Start it with **Skynet Brewer** on the Desktop. It starts the Brain in the Background (no window stays open) and opens the panel a few seconds later.
 
 To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. After one red warning it deletes **everything** in `C:\Brewing`: your Schemas, users, brew log, Processes, backups, pictures and sounds, and the Import folder with every file in it. Copy anything you want to keep somewhere else first. It stops the panel by itself first (every output turned Off), so nothing is left behind.
 
@@ -50,7 +50,7 @@ To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. After one red war
 2. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_<date>`, change it to `C:\Brewing`.)
 3. Copy `Skynet_Brewer.bat` from the release (it is also in `C:\Brewing\BrewPanel\install\windows`) into `C:\Brewing`.
 4. Right-click the `.bat`, choose **Show more options > Send to > Desktop (create shortcut)**, and rename the shortcut to **Skynet Brewer**.
-5. Double-click it. Keep the black window open while you brew. Once the panel is up and the browser has opened it, the window goes down to the task bar by itself (click it there to see it again). The browser opens the panel a few seconds later. To stop the panel and close the window, use **☰ Menu > Close Skynet Brewer** (see [Closing Skynet Brewer](95-closing-skynet-brewer)). On a PC used for brewing, also read [Sleep, Windows Update and restarts](190-sleep-updates-and-restarts).
+5. Double-click it. A black window shows the first-time steps, starts the Brain in the Background and then closes by itself. The panel opens a few seconds later. Closing the panel window does not stop the Brain. To stop it, use **☰ Menu > Close Skynet Panel and the Brain** (see [Closing Skynet Brewer and Standby](95-closing-skynet-brewer)). On a PC used for brewing, also read [Sleep, Windows Update and restarts](190-sleep-updates-and-restarts).
 
 **You don't need to install Node.js first.** Every time `Skynet_Brewer.bat` starts, it checks for Node.js. If it is missing or older than 22.13, it downloads the LTS version from nodejs.org and installs it, then carries on. This needs the internet and takes a few minutes; when Windows asks *"Do you want to allow this app to make changes to your device?"*, click **Yes**. It also gets the USB board support the first time. If that ever fails, the black window says so and opens the Node.js download page so you can install it by hand.
 

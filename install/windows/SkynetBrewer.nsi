@@ -463,6 +463,8 @@ Section "Skynet Brew Panel" SecMain
 
   ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
+  ; Stops the Brain running in the Background (Rule 6.32): Start menu > Skynet Brewer > Stop the Skynet Brain
+  CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Stop_Brain.bat" "$INSTDIR\Skynet_Stop_Brain.bat"
   ; The Import folder, always made (Fritz, 2026-11-06): the Brewing folder's Import subfolder (C:\Brewing\Import when the
   ; panel is in C:\Brewing\BrewPanel). The BruControl Importer saves its Schema files there, and later BeerSmith or other
   ; programs can save their files there too. Never deleted by an uninstall: it holds your files.
@@ -475,6 +477,7 @@ Section "Skynet Brew Panel" SecMain
   CreateShortCut "$DESKTOP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  CreateShortCut "$SMPROGRAMS\Skynet Brewer\Stop the Skynet Brain.lnk" "$INSTDIR\Skynet_Stop_Brain.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   Call AskImporter
   Call AskStartWithWindows
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
