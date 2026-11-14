@@ -21,7 +21,7 @@ A Tab Style **never writes over** a color, font or size a Device or Widget alrea
 ## Where to set it
 
 - **One Tab:** Edit layout > **Tab settings** > **Tab Style**. The first choice, **(the Default tab's Style)**, makes the Tab follow the Default tab.
-- **Every Tab with none of its own:** ☰ Menu > **Default** tab > **Tab Style**. It starts on Skynet Default.
+- **Every Tab with none of its own:** **Settings > Panel settings: screen, Tabs and alerts** > **Tab Style**. It starts on Skynet Default.
 
 The **Recipe** Tab in each sample Schema uses **Tennyson**. A Schema you already had gets Tennyson on its **Recipe** Tab once, the first time it loads with this version (only if that Tab had no Tab Style yet). After that, change it in Tab settings any time.
 

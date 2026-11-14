@@ -8,7 +8,34 @@ This lists every row of **☰ Menu > Default settings > Defaults set somewhere e
 `public/app.js`, Rule 2.42). For each one it gives the value now, the other place where it is set, and what that other place
 really changes.
 
-**Nothing is built yet.** Mark each row, then the Default tab work goes ahead.
+**Reviewed 2026-11-14.** OakBarn Brewery's choices are below, and they are built (see *Your choices*).
+
+## Your choices (2026-11-14)
+
+| Row | Choice (OakBarn Brewery) | Built as |
+|---|---|---|
+| 1, 2 | Recommendations good | Default tab: **Look of a New Schema**. A new Tab keeps taking its colors from the Look. |
+| 3, 4 | "Rule is the default so no need for defaults; remove default choice everywhere" | Off the list. The Pump and Valve Standards (Rules) set the size. |
+| 5 | "Always Resize pipes (no user Option); remove default choice everywhere" | The **Autosize to pipe** switch is gone: every pipe fitting always sizes to its pipes (Rules 5.14, 5.36). |
+| 6a | Default Overlay for a New User Pump Template | Default tab: **Pump Overlay** (Green glow ring). |
+| 6b | Default Overlay for a New User Valve Template | Default tab: **Valve Overlay** (the steady bolt). |
+| 7 | "7 use the 6a only" | Folded into 6a. |
+| 8 | Delete; None on a new User Template; remove default choice everywhere | A new pump's cover color is None. Off the list. |
+| 9 | Set default to Blue, remove default choice everywhere | The flow color is Blue (it already was, #4fb3ff). Off the list. |
+| 10 | Defaults good; set as default, no user option | The Skynet Dial keeps its ranges and colors. Off the list. |
+| 11 | No need for Grey; add a Note that it is applied to every existing Pulse Button | Stays on the list with that note. |
+| 12 | Recommendation good | Default tab: **Push Lockout (s)** (3 s, for new buttons; Rule 6.7). |
+| 13 | Mandatory field on a new Interface, edited on the Interface dialog; set all Interfaces and Templates to the recommended setting | **Lost Link (s)** is a must-fill box on the Interface dialog (3 to 600, 10 to start); the sample and config are set to 10 (Rule 6.3). |
+| 14, 15 | On the Simulator Bar, a user can change; remove the idea of defaults for the Bar. Then: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar" | Settings > Simulation is gone; every Simulator setting is on the bar (⚙ Settings). Off the list (Rule 10.10). |
+| 16, 17 | Recommendations good | Already on the Default tab (16); Default Interface stays (17, Rule 4.6). |
+| 18 | "A Schema does not need an interface default. Users can add devices. Those devices have the Interface on them" | A new empty Schema starts with no Interface (Rule 10.5). Off the list. |
+| 19, 20, 21 | Recommendations good | Stay on the list. |
+| Also | "Default Layer 2 on a new Alarm Template is None" | A new Alarm's Set Graphic (Layer 2) starts at None (Rule 7.12). |
+| Also | "An Exist pump or valve ... have no defaults interaction (only the Pulse Buttton and Theme effect existing. These are for new User Created only" | The Default tab's new part is named **New User Templates and Schemas** and only touches new things (Rule 2.42). |
+
+**Later the same day (OakBarn Brewery):** anything that changes things already made (the Look, Pulse, Tab Style, Menu Bar, Sound, On startup, \L size, Hover Delay, Phones and tablets, the grain labels, Hop alerts, Order of the Menu) is a Setting: it moved to Settings > Panel settings: screen, Tabs and alerts, and the Default tab does not name it. The list at the bottom of the Default tab is now **Skynet Defaults for New User Created Items** ("These defaults are set and cannot be changed, but can be Changed in a New User Template"), and the section titles have a blue back.
+
+The text below is the list as it was reviewed.
 
 ## Two kinds of "other place"
 

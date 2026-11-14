@@ -2,7 +2,7 @@
 
 Simulation mode (the test mode) lets you try a whole brew day without touching any hardware. Processes, timers, alarms and the screen work exactly as on brew day, but no real heater, pump or valve is switched. Time can also run faster, or skip ahead, so you do not have to sit through a 60 minute mash to see what happens at minute 50.
 
-An admin turns it on with the **🔌 Real / 🧪 Simulator** button beside ☰ Menu, from **☰ Menu > Switch to Simulator**, or in **Settings > Simulation** (Help: [Simulator or Real boards](77-simulator-or-real-boards)).
+An admin turns it on with the **🔌 Real / 🧪 Simulator** button beside ☰ Menu or from **☰ Menu > Switch to Simulator** (Help: [Simulator or Real boards](77-simulator-or-real-boards)).
 
 ## What happens when you turn it on
 
@@ -18,7 +18,7 @@ Turning it off does the same in reverse: every Process stops, every output turns
 
 ## Making time go faster
 
-**Speed** sets how fast the clock runs: normal, 2×, 5×, 10×, 25× and up to 120× faster. Switching the Simulator on starts at 25× with Auto skip on (Help: [The Simulator bar](85-simulator-bar)). At 10×, a 60 minute mash takes 6 minutes. Process `sleep` lines, timers, PID and duty cycle outputs, and the simulator's heating and cooling all follow it. Change it in Settings or in the yellow bar.
+**Speed** sets how fast the clock runs: normal, 2×, 5×, 10×, 25× and up to 120× faster. Switching the Simulator on starts at 25× with Auto skip on (Help: [The Simulator bar](85-simulator-bar)). At 10×, a 60 minute mash takes 6 minutes. Process `sleep` lines, timers, PID and duty cycle outputs, and the simulator's heating and cooling all follow it. Change it on the yellow Simulator bar. Every Simulator setting is on that bar, and only there: Speed and Auto skip on the bar itself, the rest behind its **⚙ Settings** button.
 
 ## Skipping ahead
 
@@ -31,17 +31,17 @@ The bar also shows what the next event is and how long until it.
 
 ## Auto skip
 
-Turn on **Auto skip** (in Settings or the yellow bar) and the panel skips by itself, with no table to fill in. Each step runs for a few seconds (**Watch each step for**, 5 seconds unless you change it), then the clock skips to a few seconds before the next thing that happens by itself: a `sleep` ending, a timer reaching its time, or a countdown running out. It looks at every running Process, including ones another Process started and loopers.
+Turn on **Auto skip** (on the yellow bar) and the panel skips by itself, with no table to fill in. Each step runs for a few seconds (**Watch each step for**, 5 seconds unless you change it), then the clock skips to a few seconds before the next thing that happens by itself: a `sleep` ending, a timer reaching its time, or a countdown running out. It looks at every running Process, including ones another Process started and loopers.
 
 Only time is skipped. A wait on a screen button or a switch is never skipped: press the button as on brew day, and auto skip carries on from there. A wait on a reading (a temperature, a level, a weight) is pretended reached after a set time while **Pretend readings are reached** is on (Help: [Simulator or Real boards](77-simulator-or-real-boards)), and auto skip jumps to it like any other event.
 
 ## Time jumps table
 
-The table skips ahead by itself. Each row says: **when** something starts (a Process or a timer), **wait** this many seconds, then **jump ahead** this much time.
+The table is on the Simulator bar: press **⚙ Settings**. It skips ahead by itself. Each row says: **when** something starts (a Process or a timer), **wait** this many seconds, then **jump ahead** this much time.
 
 Example: *A timer starts*, **tm_Mash**, wait **5** seconds, jump ahead **00:50:00**. When the mash starts, it runs normally for 5 seconds, then the mash timer goes from 00:00:05 to 00:50:05. A 60 minute mash takes about 15 seconds of watching instead of an hour.
 
-Use the switch at the start of a row to turn a jump off without deleting it. Click **Save simulation settings** after changing the table. Time jumps only ever happen in simulation mode.
+Use the switch at the start of a row to turn a jump off without deleting it. Press **Save** (Simulator bar > ⚙ Settings) after changing the table. Time jumps only ever happen in simulation mode.
 
 ## Process timeline
 
@@ -52,6 +52,6 @@ The panel can work out when each step of a Process will happen, for example *00:
 - A wait on anything else, like a temperature or a button, cannot be known ahead. The steps after it are shown as time *after* that line.
 - Steps inside an `if` that cannot be known ahead are marked **(if)**.
 
-**Make time jumps from this** fills the Time jumps table for that Process: after it starts, it skips to a few seconds before each timed step, one after the other. Check the rows, then click **Save simulation settings**.
+**Make time jumps from this** fills the Time jumps table for that Process: after it starts, it skips to a few seconds before each timed step, one after the other. Check the rows, then press **Save**.
 
 Try it with the **BrewDay_Flow** Process of the Three vessels, one pump sample: its mash, boil and hop times all become jumps.

@@ -12,7 +12,8 @@
    "realConnection": "serial",
    "port": "/dev/ttyACM0",
    "baud": 115200,
-   "ambient": 64
+   "ambient": 64,
+   "lostLinkSec": 10
   }
  ],
  "workspaces": [
