@@ -14,6 +14,16 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 |---|---|
 | `Skynet_Media_Setup_<date>.exe` | Windows |
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou Windows à la main |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | Windows : le panneau **et** les images et sons dans un seul fichier |
+
+## Le Full Setup : tout dans un seul fichier (Windows) {#the-full-setup-everything-in-one-file-windows}
+
+Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.exe`** au lieu des deux Setups séparés. C'est le même Skynet Brewer Setup, avec toutes les images et tous les sons Skynet dedans : pas besoin du Media Setup.
+
+- Il ajoute les images et les sons comme le Media Setup : une image ou un son que vous avez déjà n'est jamais changé, et rien n'est supprimé.
+- Après un **Start Fresh**, il remet tout seul les images et sons Skynet.
+- Il est plus gros (environ 12 Mo au lieu d'environ 5 Mo). Pour une mise à jour rapide plus tard, le Skynet Brewer Setup simple suffit : vos images et sons restent en place.
+- La désinstallation est la même, quel que soit le Setup utilisé.
 
 ## Comment l'utiliser {#how-to-use-it}
 
