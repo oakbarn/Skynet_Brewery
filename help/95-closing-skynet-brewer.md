@@ -4,7 +4,9 @@ The **Brain** is the computer (or Raspberry Pi) that runs Skynet. On a Windows P
 
 ## Closing the panel window
 
-Closing the panel window with its **X**, or closing a browser tab, **never stops the Brain**. Your phone, another computer or a running Process may still be using it, and a brew must not stop because a window was closed. To open the panel window again, double-click **Skynet Brewer** on the Desktop.
+Closing the panel window with its **X**, or closing a browser tab, **never stops the Brain**. Your phone, another computer or a running Process may still be using it, and a brew must not stop because a window was closed. To open the panel window again, double-click **Skynet Panel** (or **Skynet Brewer**) on the Desktop. If the Brain is not running, it is started first.
+
+The panel window did not open? Type **http://localhost:8080** in Edge or Chrome on the Brain's computer.
 
 ## ☰ Menu > ⏻ Close Skynet Panel and the Brain
 
