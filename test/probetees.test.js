@@ -46,8 +46,9 @@ assert.ok(/for \(const w of draft\.workspaces\) sizeToPipes\(w\.name\);[^\n]*\n\
 assert.ok(app.includes('if (editing && draft) sizeToPipes(w.name);'), 'a Tab drawn in Edit layout sizes its fittings');
 const stp = app.slice(app.indexOf('function sizeToPipes('), app.indexOf('const CAP_BOX'));
 assert.ok(stp.includes('autoSizeUnit(g)') && stp.includes('sizeProbeTee(e, pw)') && stp.includes('sizeCap(c)'), 'fittings, probe tees and End Caps');
-assert.ok(/const autoSized = g => \(isPipeFit\(g\) \|\| isMv\(g\)[^\n]*\) && g\.autoSize !== false;/.test(app) && !/const autoSized[^\n]*isCap/.test(app), 'an End Cap has Autosize to pipe');
-assert.ok(app.includes('const FIT_PLACE = it => [AUTOSIZE_FIELD, '), 'Autosize to pipe in every pipe fitting\'s Properties');
+// Autosize to pipe is always on, with no switch (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option)")
+assert.ok(app.includes('const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);') && !/const autoSized[^\n]*isCap/.test(app), 'an End Cap has Autosize to pipe, always');
+assert.ok(!app.includes('AUTOSIZE_FIELD'), 'no Autosize switch in any pipe fitting\'s Properties');
 assert.ok(/isMf\(o\) \|\| \/Reducer\//.test(app), 'a cap on a Reducer or Valve Tee keeps its size');
 // the majority of the pipes or hoses wins, a tie takes the bigger (Fritz, 2026-11-07, Rule 5.36)
 const mw = app.slice(app.indexOf('function majorityWidth('), app.indexOf('\n}\n', app.indexOf('function majorityWidth(')) + 3);
@@ -58,7 +59,7 @@ assert.equal(majorityWidth([]), 0, 'no pipe: keeps its size');
 const one = { w: 10 }; assert.equal(majorityWidth([one, one, { w: 20 }]), 20, 'one pipe on two IPs counts once');
 // Valve Tees, Supply Manifolds, valves, inline Devices and (since 2026-11-07) pumps size to their pipes too, and with no pipe on
 // them to the Default pipe size (☰ Menu > Default settings, Rules 2.42 and 5.36)
-assert.ok(app.includes('const autoSized = g => (isPipeFit(g) || isMv(g) || isMf(g)) && g.autoSize !== false;'), 'Valve Tees and Manifolds');
+assert.ok(app.includes('const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);'), 'Valve Tees and Manifolds');
 assert.ok(app.includes("const followsPipe = e => hasIps(e) && !isProbeTee(e) && !isThermowell(e);"), 'valves and pumps follow');
 assert.ok(app.includes('return (w || defaultWidth(e.workspace)) / 10;'), 'a Device with no pipe: the Default pipe size');
 assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace)'), 'an IP fitting with no pipe: the Default pipe size');
@@ -66,7 +67,7 @@ assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw
 assert.ok(app.includes("size: String(hose ? defHoseIn() : defPipeIn()) };"), 'a new pipe or hose starts at the Default size');
 assert.ok(/\['defPipeSize', 'Default pipe size/.test(app) && /\['defHoseSize', 'Default hose size/.test(app), 'the Default settings tab has them');
 assert.ok(app.includes("{ key: 'default', title: 'Default settings',"), 'the Menu tab is called Default settings');
-assert.ok(app.includes("h('h3', {}, 'Defaults set somewhere else (to look at)')"), 'the defaults set elsewhere are listed');
+assert.ok(app.includes("h('h3', {}, 'Skynet Defaults for New User Created Items')"), 'the Skynet Defaults for New User Created Items are listed');
 assert.ok(app.includes('const k = elK(e), w = e.w || 120'), 'a Device is drawn for its pipes');
 for (const [n, b] of [['Valve_Tee', 0.183], ['Supply_Manifold_2', 0.0915], ['Supply_Manifold_3', 0.061]]) assert.equal(tpl(n).body, b, `${n} body`);
 assert.ok(fs.existsSync(new URL('../help/155-default-settings.md', import.meta.url)), 'Help 155');

@@ -22,6 +22,7 @@ La fenêtre demande :
 - **Board** : Arduino Mega, ESP32 ou une autre carte de type Arduino.
 - **Connection** : USB, Ethernet, WiFi, ou **Simulator** (pas encore de carte : tout ce qui est dessus est fictif). Elle montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
 - **USB port** ou **Network address** (adresse réseau), pour une carte USB ou réseau.
+- **Lost Link (s)** (lien perdu) : à remplir, de 3 à 600 secondes (10 au départ). Si la carte n'entend rien du Brain pendant ce temps, elle éteint toutes ses sorties. Changez-le ici à tout moment.
 
 ## L'Interface ID {#the-interface-id}
 
@@ -58,13 +59,11 @@ passe (par le SSR), et s'il est Off, le SSR n'envoie plus de courant. Comme un i
 
 **⚙ Change** dans la ligne d'une Interface sur la page Devices ouvre la même fenêtre. Utilisez-le pour faire passer une carte de **Simulator** à son vrai port **USB** ou à son adresse réseau une fois câblée, pour choisir un autre port USB, ou pour régler l'ID. Le nom d'une Interface qui a des Devices reste tel quel.
 
-## Un nouveau Schema commence avec un Mega fictif {#a-new-schema-starts-with-a-pretend-mega}
+## Un nouveau Schema vide n'a pas d'Interface {#a-new-empty-schema-has-no-interface}
 
-Quand vous faites un nouveau Schema qui n'est **pas** une copie d'un autre (liste Schema > Add new Schema > *An empty Schema*) :
+Un nouveau Schema qui n'est **pas** une copie d'un autre (liste Schema > Add new Schema > *An empty Schema*) commence **sans Interface**. Ajoutez vos cartes avec **Add Interface** sur la page Devices, ou avec **➕ Add new Interface…** dans la case New Device. Chaque Device que vous ajoutez porte son Interface.
 
-1. Il commence avec une Interface, un Arduino Mega 2560 fictif (Simulator) appelé **New_Mega_2560_1**. Si un New_Mega_2560_1 existe déjà dans un de vos Schemas, c'est New_Mega_2560_2, et ainsi de suite.
-2. Tout le panel passe en **Simulator mode**, et un message vous le dit (aide : [Simulateur ou vraies cartes](77-simulator-or-real-boards)).
-3. La fenêtre de l'Interface s'ouvre pour que vous lui donniez un nom qui a un sens pour vous et que vous régliez son Interface ID.
+Un Skynet Schema Template fait sans vraie carte reçoit quand même un Mega fictif (Simulator) pour ses Devices ([Nouveau Schema depuis un Skynet Template](157-schema-templates)).
 
 Une copie d'un Schema garde les Interfaces qu'il avait.
 

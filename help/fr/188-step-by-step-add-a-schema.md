@@ -67,17 +67,13 @@ Plus sur chaque question : [Nouveau Schema à partir d'un Skynet Template](157-s
 
 ## Étape 5. Un Schema vide {#step-5-an-empty-schema}
 
-**5a. Mode simulateur.** Votre nouveau Schema a une carte simulée, un Arduino Mega appelé **New_Mega_2560_1**, et le panneau est en mode Simulator, donc rien de réel n'est commandé. Appuyez sur **✔ OK**.
-
-![Vous êtes maintenant en mode Simulator](help_pictures/Step_Add_Schema_09_Simulator.png)
-
-**5b. Votre carte.** La case de cette carte s'ouvre. Donnez-lui un **Name** qui a du sens pour vous (**✏ Change name**), par exemple **Hot_Side**, et un **Interface ID** de 1 à 4 lettres, par exemple **HS**. L'Interface ID commence le nom de chaque Device de cette carte. Choisissez la **Board** que vous avez. Laissez **Connection** sur **Simulator** jusqu'à ce que la carte soit branchée. Appuyez sur **💾 Save**.
+**5a. Votre carte.** Un nouveau Schema vide n'a pas encore de carte (Interface). Sur la page **Devices**, appuyez sur **Add Interface**. Donnez-lui un **Name** qui a du sens pour vous (**✏ Change name**), par exemple **Hot_Side**, et un **Interface ID** de 1 à 4 lettres, par exemple **HS**. L'Interface ID commence le nom de chaque Device de cette carte. Choisissez la **Board** que vous avez. Choisissez **Simulator** pour **Connection** jusqu'à ce que la carte soit branchée, remplissez **Lost Link (s)** (10 au départ), et appuyez sur **💾 Save**.
 
 ![Votre nouvelle Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 
 Plus sur les cartes : [Interfaces](76-interfaces) et [Simulateur ou vraies cartes](77-simulator-or-real-boards).
 
-**5c. Ajouter vos premières choses.** Le Main Tab est vide. Appuyez sur **☰ Menu > ✎ Edit layout**. La barre du haut a un bouton pour chaque sorte de chose : **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** et plus. Choisissez-en un et remplissez sa case : le Label (comment vous l'appelez), l'Interface (votre carte), le Port auquel il est câblé, et le Tab. Puis **Save layout**.
+**5b. Ajouter vos premières choses.** Le Main Tab est vide. Appuyez sur **☰ Menu > ✎ Edit layout**. La barre du haut a un bouton pour chaque sorte de chose : **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** et plus. Choisissez-en un et remplissez sa case : le Label (comment vous l'appelez), l'Interface (votre carte), le Port auquel il est câblé, et le Tab. Puis **Save layout**.
 
 ![La barre Edit layout](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 

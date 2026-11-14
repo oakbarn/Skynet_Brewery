@@ -127,7 +127,7 @@ Every Device Type ID means one thing. The **General Type** in front says what ki
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 
-A **DIN** gives one trigger per press, however long the button is held, and a second or third press within **3 seconds** does nothing. You can change the 3 seconds in its properties (*Pulse: lockout*).
+A **DIN** gives one trigger per press, however long the button is held, and a second or third press within **3 seconds** does nothing. You can change the 3 seconds in its properties (*Pulse: lockout*). A new button starts with ☰ Menu > Default settings > **Push Lockout (s)**.
 
 **PWM:** `PWM` plain, `H_Element` heating PWM, `Valve_L` low temperature proportional valve, `Valve_H` high temperature proportional valve, `Pump` pump speed, `Fan` fan speed, `Mtr` motor speed, `LED` LED / light dimmer (shown as `PWM@Pump` ...).
 

@@ -15,7 +15,7 @@ Seuls vos Tabs la cachent. Chaque onglet du **☰ Menu** (Zoom, Default, Equipme
 
 ## Toujours montrer la Menu Bar {#always-showing-the-menu-bar}
 
-Un Admin peut le couper dans **☰ Menu > Default** : sous **Menu Bar**, éteignez **Hide the Menu Bar on Tabs** et appuyez sur **Save**. La Menu Bar s'affiche alors toujours, et le ☰ Menu n'a plus de choix Show / Hide Menu Bar.
+Un Admin peut le couper dans **Settings > Panel settings: screen, Tabs and alerts** : sous **Menu Bar**, éteignez **Hide the Menu Bar on Tabs** et appuyez sur **Save**. La Menu Bar s'affiche alors toujours, et le ☰ Menu n'a plus de choix Show / Hide Menu Bar.
 
 ## Les sons d'alarme {#alarm-sounds}
 

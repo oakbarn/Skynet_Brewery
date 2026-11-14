@@ -628,6 +628,15 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .simBar .simHide { margin-left: auto; }
 /* Rule 10.7 (2026-11-04): hidden means gone; a small 🧪 on every ☰ Menu button says it is still Simulation */
 .simBar.collapsed { display: none; }
+.simBar { position: relative; z-index: 45; }
+/* Rule 10.10 (2026-11-14): every Simulator setting is on the bar; ⚙ Settings drops this panel down from it */
+.simBar .simMore { position: absolute; right: 8px; top: calc(100% + 4px); z-index: 30; width: min(900px, calc(100vw - 16px));
+  max-height: calc(100vh - 140px); overflow-y: auto; background: var(--panel); color: var(--text); border: 1px solid #b8962a;
+  border-radius: 8px; padding: 8px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+.simBar .simMore .muted { color: var(--muted); }
+.simBar .simMore button, .simBar .simMore select { background: var(--panel2); color: var(--text); border-color: var(--line); }
+.simBar .simMore button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.simBar .simMore.hidden { display: none; }
 body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; margin-left: 2px; }
 .simJumps input.tm { width: 7em; }
 .simJumps input.num { width: 5em; }
@@ -1331,3 +1340,7 @@ table.picIds img { width: 48px; height: 48px; object-fit: contain; }
 body.buildMode .menuBtn { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
 body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); pointer-events: none; }
 .ivBody [data-note]{white-space:pre-line}
+
+/* Default tab: section titles stand out (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight sections") */
+.defTab .dlgHead, .defTab > h3:not(:first-child) { background: var(--accent); color: var(--on-accent); padding: 5px 10px; border-radius: 6px; border-bottom: 0; margin-top: 14px; }
+.defTab .dlgHead .hh, .defTab .dlgHead a { color: var(--on-accent); }
