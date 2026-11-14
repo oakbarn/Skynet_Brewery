@@ -119,6 +119,8 @@ WINDOWS, THE EASY WAY (INSTALLER)
 
 To remove it: Settings > Apps > Skynet Brewer > Uninstall. After one red warning it
 deletes EVERYTHING in C:\Brewing, the Import folder too. Copy anything you want to keep first.
+NOT removed: helper programs you installed, like Node.js or Tailscale. Other programs may
+use them too. If you no longer want one, remove it yourself in Settings > Apps.
 
 
 WINDOWS, BY HAND
