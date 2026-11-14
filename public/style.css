@@ -656,6 +656,11 @@ body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; mar
 #brainNotices { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1001; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .brainNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
 .brainNotice.update { background: #f2c94c; color: #1a1a1a; }
+/* Flame Out (Rule 6.33): a gas burner's gas was shut; red on every screen until closed */
+#flameOutBox { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1002; width: min(640px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.flameOutNotice { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; background: #b3261e; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.45); font-weight: 700; font-size: 1.1em; outline: 3px solid #fff; }
+.flameOutNotice span { flex: 1; }
+.flameOutNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
 .brainNotice span { flex: 1; }
 .brainNotice button { background: transparent; color: inherit; border: 1px solid currentColor; padding: 2px 8px; flex: none; }
 .brainNotice button.resumeBtn { background: #fff; color: #b3261e; font-weight: 700; }

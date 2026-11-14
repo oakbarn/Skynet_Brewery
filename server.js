@@ -58,6 +58,7 @@ import { watchAlarmEmails } from './lib/alarmemail.js';
 import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
 import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update restarts and restarts (Rule 6.31)
+import { FlameWatch } from './lib/flamewatch.js';      // gas burner Flame Out safety (Rule 6.33)
 import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
@@ -278,6 +279,10 @@ store.on('devices', () => broadcast('devices', hw.list()));
 // Sleep, Windows Update restarts and restarts (OakBarn Brewery, 2026-11-12, Rule 6.31): kept awake while brewing, a notice after a
 // stop or a sleep during a brew, and one when Windows has an update waiting to restart the computer. Not on the Importer's Build page.
 const power = IMPORT_BUILD || STANDBY ? null : new BrainPower({ store, engine, hw, dataDir: DATA, notify: list => broadcast('brainNotices', list), log: text => { console.log(text); engine.print('system', text); } });
+// Flame Out safety for gas burners (OakBarn Brewery, 2026-11-14, Rule 6.33): the gas is shut and every screen is told. Not on the
+// Importer's Build page.
+const flame = IMPORT_BUILD ? null : new FlameWatch({ store, notify: list => broadcast('flameOut', list), log: text => { console.log(text); engine.print('system', text); } });
+flame?.start(() => clock.now());      // the simulator's clock, so a faster simulation counts the minutes faster too
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
@@ -375,7 +380,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -618,9 +623,10 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), standby: STANDBY, brainNotices: power?.notices ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
+  if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step
   if (p === '/ui/brain/resume' && m === 'POST') {

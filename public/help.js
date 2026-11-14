@@ -76,11 +76,11 @@ function inline(s) {
   return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${esc(codes[i])}</code>`);
 }
 
-// A paragraph that starts with "⚠ Electricity can kill" (in French Help "⚠ L'électricité peut tuer", Rule 11.11) is the electrical warning (Rule 6.20): red bold words under a red triangle,
+// (the gas warning too, Rule 6.20 gas half, 2026-11-14: "⚠ Gas can explode or kill") A paragraph that starts with "⚠ Electricity can kill" (in French Help "⚠ L'électricité peut tuer", Rule 11.11) is the electrical warning (Rule 6.20): red bold words under a red triangle,
 // as in the hover help balloons (OakBarn Brewery, 2026-11-10: "in any Help use the Red Text and the Icon for any Electricity Can Kill")
 export function warnText(s) {
   const m = /^(\*\*)?\s*⚠\s*(.*)$/s.exec(String(s).trim());
-  return m && /^(\*\*)?\s*(Electricity can kill|L['’]électricité peut tuer)/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
+  return m && /^(\*\*)?\s*(Electricity can kill|L['’]électricité peut tuer|Gas can explode or kill|Le gaz peut exploser ou tuer)/i.test(m[2]) ? m[2].replace(/^\*\*\s*/, '').replace(/\*\*(\s*\(Rule [\d.]+\))?\s*$/, '$1').replace(/\*\*/g, '').trim() : '';
 }
 export function markdown(text) {
   const lines = String(text).replace(/\r\n?/g, '\n').split('\n'), out = [];
