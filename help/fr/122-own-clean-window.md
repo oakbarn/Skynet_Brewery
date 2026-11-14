@@ -4,7 +4,7 @@ Sous Windows, Skynet Brewer ouvre le panel dans **une fenêtre à lui** (Règle 
 
 ## Comment ça marche {#how-it-works}
 
-- Double-cliquez sur **Skynet Brewer** sur le Bureau. Il démarre le Brain en arrière-plan (aucune fenêtre noire ne reste ouverte, règle Skynet 6.32), et quelques secondes plus tard le panel s'ouvre dans sa fenêtre propre, en plein écran.
+- Double-cliquez sur **Skynet Brewer** sur le Bureau. Il démarre le Brain en arrière-plan (aucune fenêtre noire ne reste ouverte, règle Skynet 6.32), et quelques secondes plus tard le panel s'ouvre dans sa fenêtre propre, en plein écran. **Skynet Panel** sur le Bureau ouvre seulement la fenêtre (il démarre d'abord le Brain s'il ne tourne pas).
 - La fenêtre est **Microsoft Edge** (ou **Google Chrome** si l'ordinateur n'a pas Edge) en mode « application ».
 - Ni Edge ni Chrome sur l'ordinateur : votre navigateur habituel ouvre le panel, comme avant.
 - Ça marche quel que soit le .bat avec lequel vous démarrez le panel, votre propre .bat dans C:\Brewing aussi.
