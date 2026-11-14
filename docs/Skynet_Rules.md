@@ -891,6 +891,11 @@ Help 155).
   Default tab (it was "Defaults set somewhere else (to look at)") shows the fixed Skynet values a new item starts with: Pump and Valve
   size (the Standards), pipe fittings always size to their pipes, Pump cover color None, Flow color Blue, the Skynet Dial, Alarm Set
   Graphic (Layer 2) None.
+- **New things only for Labels, Text Boxes and the Default pipe size** (OakBarn Brewery, 2026-11-14: "New Things Only"). Each item
+  keeps the Default tab's Labels, Text Boxes and Default pipe size as they were when it was made (its newLook: only what differs from
+  a fresh install), kept on Save layout. An item made before has the fresh install's look. Once per Schema, every item already made
+  got the Default tab's values of that day, so nothing changed look. Precedence stays: the item's own setting, then its Tab Style,
+  then its kept Default. The Importer and Schema Templates made on the Brain start with the fresh look.
 - **Section titles stand out** (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight
   sections"): each section title on the Default tab has a blue back.
 
@@ -4307,6 +4312,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.42 (OakBarn Brewery: "New Things Only"): Labels, Text Boxes and the Default pipe size reach only new items: each item keeps them as they were when made (newLook); once per Schema existing items kept the values of that day. Help 49, 155 (and French).
 - 2026-11-14: Rule 9.19 item 5 (OakBarn Brewery: "Uninstalled worked good. Add a Comment about not removing auxiliary programs like Tailscale if you installed them"): the uninstall warning, Help 19 (and French) and install/ReadMe.txt say helper programs like Node.js and Tailscale are not removed (remove them in Settings > Apps). Wording only. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Added Rule 9.20 (OakBarn Brewery: "a new one that is a Full install that also has the media embedded so a new install does not need the media exe separate"): every Release also has Skynet_Brewer_Full_Setup_<date>.exe, the same Setup with the Skynet pictures and sounds inside, added the add-only way; the plain Setup and the Media Setup stay. Help 19 and 183 (and French), README, install/ReadMe.txt, Release notes. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Rule 2.42 (OakBarn Brewery): the Default tab is only for new things. Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Phones and tablets, the grain and gravity labels, Hop alerts and the Order of the Menu moved to the new Settings > Panel settings: screen, Tabs and alerts. "Defaults set somewhere else" renamed **Skynet Defaults for New User Created Items** with his text, now the fixed Skynet values. Default tab section titles get a blue back. Help 9, 22, 33, 40, 41, 45, 49, 99, 101, 147, 151, 155, 186 (and French).

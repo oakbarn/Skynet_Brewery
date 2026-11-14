@@ -48,9 +48,9 @@ A new install starts with:
 
 - **Tab's font**: each Tab uses its Tab Style's font, and the panel's normal font when its Tab Style has none. So every Tab always
   has a font. A font picked on the Default tab is used where a Tab Style has none.
-- **Colors, Alignment, Bold and the Font follow the Default.** An item left on **Default** in its properties uses what the Default
-  tab says. Change it there and every item on Default changes with it. Pick a color of its own in the item's properties and that
-  item keeps it.
+- **Defaults are for new things only** (Skynet Rule 2.42). A **new** item left on **Default** in its properties uses what the Default
+  tab said when it was made (its Tab Style still comes first). Changing the Default tab later changes only items made after that:
+  **items already made keep how they look**. Pick a color of its own in the item's properties and that item keeps it.
 - **The Value of a Device or Widget** follows the Text Boxes colors only once you change them from what a new install has, so a new install
   puts no black box behind the values on your pictures.
 - **Visible, Word Wrap, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them,
