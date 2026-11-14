@@ -1115,6 +1115,8 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .hhHead { display: block; font-size: 1.05em; }
 /* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
 .hoverHelp.hhHasLinks { pointer-events: auto; }
+/* a balloon taller than the window is cut to fit and scrolls (OakBarn Brewery, 2026-11-14); the mouse may go into it to scroll */
+.hoverHelp.hhScroll { pointer-events: auto; overflow-y: auto; overscroll-behavior: contain; }
 .hhLink { color: #0b57b0; text-decoration: underline; cursor: pointer; }
 .hhLink:hover { color: #08408a; background: rgba(11,87,176,.1); border-radius: 3px; }
 .tipDlg .hhLink { color: #6cb6ff; }      /* the tap pop-up has the dialog's own (dark) colors */
