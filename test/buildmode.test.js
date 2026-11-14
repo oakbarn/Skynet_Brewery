@@ -20,9 +20,9 @@ const pop = app.slice(app.indexOf('const LABEL_POP = '), app.indexOf('const LABE
 assert.match(pop, /noBottom: true/, 'Label Attributes: Cancel and Save at the top only');
 assert.match(pop, /labelDefaultLook\(o\)/, 'Label Attributes fills Font and colors from the defaults');
 const look = app.slice(app.indexOf('const labelDefaultLook = '), app.indexOf('const labelDefaultAlign = '));
-assert.match(look, /firstSet\(T\.labelFont, D\.nameFont\)/, 'the Font the Tab draws with');
-assert.match(look, /firstSet\(o\.foreColor, T\.labelFore, D\.foreColor\)/, 'the Fore Color the Tab draws with');
-assert.match(look, /firstSet\(o\.backColor, T\.labelBack, D\.backColor\)/, 'the Back Color the Tab draws with');
+assert.match(look, /firstSet\(T\.labelFont, D\.labelFont\)/, 'the Font the Tab draws with');
+assert.match(look, /firstSet\(o\.foreColor, T\.labelFore, D\.labelFore\)/, 'the Fore Color the Tab draws with');
+assert.match(look, /firstSet\(o\.backColor, T\.labelBack, D\.labelBack\)/, 'the Back Color the Tab draws with');
 assert.match(app, /d\.append\(h\('h3', \{\}, title\), bar\(\), body, \.\.\.\(bottom \? \[bar\(\)\] : \[\]\)\)/, 'a layer dialog can leave out its bottom row');
 assert.match(rules, /^2\.52 \*\*Build mode: only what works while building\*\*/m, 'Rule 2.52');
 console.log('buildmode ok');

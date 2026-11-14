@@ -143,7 +143,7 @@ Les codes peuvent s'utiliser ensemble : `"\L\bBOIL\b\L 60 min"`.
 
 Utilisez `\t` et `\n` pour mettre le texte en page, pas des espaces en trop : un Label ne peut ni commencer ni finir par un espace (ils sont retirés).
 
-La taille du grand texte est **Large text size** sur l'onglet **Default** du ☰ Menu, en pixels. Elle doit être plus grande que le texte normal (18), et elle vaut 28 quand la case est vide. Le grand texte est toujours au moins un quart plus grand que le texte autour, pour qu'il ressorte même dans un élément à grosse police.
+La taille du grand texte est **\L Rich Text Code Size (px)** dans **☰ Menu > Default settings** (sous **Rich Text Embedded Code**), en pixels. Elle doit être plus grande que le texte normal (18), et elle vaut 28 quand la case est vide. Le grand texte est toujours au moins un quart plus grand que le texte autour, pour qu'il ressorte même dans un élément à grosse police.
 
 ## Changer l'apparence d'un Device ou d'un Widget {#change-the-look-of-a-device-or-widget}
 

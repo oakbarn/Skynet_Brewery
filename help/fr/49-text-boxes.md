@@ -21,18 +21,43 @@ Chaque morceau de texte sur un Tab est une **zone de texte** (text box), et chaq
 - **Word wrap as needed** (retour à la ligne si besoin) : un long texte passe sur plusieurs lignes. Sur un Device ou un Widget, il permet à un long Name de passer à la ligne (les Values passent toujours à la ligne). Un Text Widget passe toujours à la ligne.
 - **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Le langage des Processes et les étapes](22-process-language).
 - **Les raccourcis clavier** tapent les codes pour vous : Maj+Entrée `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Maj+D (⌘+Maj+D) °F ou °C. Voir [Raccourcis clavier](113-shortcut-keys).
-- **Name font** et **Name font size** règlent la police des Names, des Labels sur les cuves et des Texts.
 
 Sur un Device ou un Widget, **Fore color**, **Back color** et **Alignment** valent pour tout son texte. **Name color**, **Value color**, **Name alignment** et les autres en dessous sont toujours là, et l'emportent sur Fore color pour cette case-là.
 
 ## Valeurs par défaut {#defaults}
 
-Chaque attribut a un **Default** sur l'onglet **Default** du ☰ Menu, sous **Text**. Le Default vaut pour tout ce qui a cet attribut : Devices, Widgets, Labels, Texts et cuves.
+Chaque attribut a un **Default** dans **☰ Menu > Default settings**, en deux parties :
 
-- **Les couleurs, l'Alignment et la Name font suivent le Default.** Un élément laissé sur **Default** dans ses propriétés utilise ce que dit l'onglet Default. Changez-le là et chaque élément sur Default change avec lui. Choisissez une couleur à lui dans les propriétés de l'élément et cet élément la garde.
-- **Visible, Word wrap, la taille et la place sont copiés quand un élément est créé.** Un nouveau Device, Widget ou Text commence avec, puis vous le changez dans ses propriétés. Changer le Default plus tard ne cache, ne déplace ni ne redimensionne ce qui est déjà sur vos Tabs.
+- **Labels** : le Name de chaque Device et Widget, et le Label sur une cuve. Visible, Fore Color, Back Color, Alignment, Bold,
+  Font et Font Size (px).
+- **Text Boxes** : un Text, un Label Widget, et la Value d'un Device ou d'un Widget. Fore Color, Back Color, Alignment, Font, Font Size
+  (px), New Box Width, New Box Height et Word Wrap.
+
+Une nouvelle installation commence avec :
+
+| | Labels | Text Boxes |
+|---|---|---|
+| Visible | On | |
+| Fore Color | Blanc (250, 250, 250) | Blanc (250, 250, 250) |
+| Back Color | Noir | Noir |
+| Alignment | Centré | Centré |
+| Bold | Off | |
+| Font | Tab's font | Tab's font |
+| Font Size (px) | 11 | 11 |
+| New Box Width / Height | | 520 x 140 |
+
+- **Tab's font** : chaque Tab utilise la police de son Tab Style, et la police normale du panel quand son Tab Style n'en a pas. Ainsi
+  chaque Tab a toujours une police. Une police choisie sur l'onglet Default est utilisée là où un Tab Style n'en a pas.
+- **Les couleurs, l'Alignment, Bold et la Font suivent le Default.** Un élément laissé sur **Default** dans ses propriétés utilise ce
+  que dit l'onglet Default. Changez-le là et chaque élément sur Default change avec lui. Choisissez une couleur à lui dans les
+  propriétés de l'élément et cet élément la garde.
+- **La Value d'un Device ou d'un Widget** suit les couleurs des Text Boxes seulement une fois que vous les changez par rapport à
+  une nouvelle installation, donc une nouvelle installation ne met pas de case noire derrière les valeurs sur vos images.
+- **Visible, Word Wrap, la taille et la place sont copiés quand un élément est créé.** Un nouveau Device, Widget ou Text commence
+  avec, puis vous le changez dans ses propriétés. Changer le Default plus tard ne cache, ne déplace ni ne redimensionne ce qui est
+  déjà sur vos Tabs.
 - La couleur de texte par défaut laisse les chiffres d'une apparence **LED** ou **Gauge** dans leurs propres couleurs.
-- **Default** sur l'onglet Default veut dire l'apparence normale du panel, comme avant.
+- La taille du grand texte (le code `\L`) est **\L Rich Text Code Size (px)**, sous **Rich Text Embedded Code** sur l'onglet Default.
 
 ## Dans un Process {#in-a-process}
 

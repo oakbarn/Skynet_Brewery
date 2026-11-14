@@ -3,7 +3,7 @@
 //   \n     a new line
 //   \t     an indent, the width of about four spaces (OakBarn Brewery, 2026-11-12: "\t for indent!")
 //   \b     bold on, the next \b turns it off
-//   \L     large text on / off (the size is "Large text size" on the ☰ Menu Default tab)
+//   \L     large text on / off (the size is "\L Rich Text Code Size (px)" on ☰ Menu > Default settings)
 //   \_     subscript on / off
 //   \^     superscript on / off
 //   \deg   a degree sign °
