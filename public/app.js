@@ -14,7 +14,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
@@ -264,6 +264,7 @@ async function load() {
   showPanelVer();
   officialWarn();
   setTextLarge();
+  setHoverDelay(S.config.brewDefaults?.hoverDelay);      // how long the mouse rests on a name before its hover help shows (Rule 2.38)
   // the Importer's Build Tab pages (OakBarn Brewery, 2026-11-08): the Importer opens one imported Tab at a time (#tab=Name)
   if (S.importBuild && !load.hashTab) {
     load.hashTab = true;
@@ -12693,6 +12694,8 @@ function hopStandsFromForm(d, tu) {
     const m = d[`hs${k}Min`]; if (m === '' || m === null) delete d[`hs${k}Min`]; else if (m !== undefined && !(+m >= 0)) throw new Error(`Hop Stand ${label} time must be 0 or more minutes`);
   }
 }
+// the Hover Delay box's own hover help (Rule 2.38)
+const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). 0 or empty: it shows at once. Up to 5000. Phones and tablets have no mouse: a tap still opens the help at once.';
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
@@ -12770,6 +12773,8 @@ function renderDefaultTab(box) {
     ['textWidth', 'Width of a new Text or Label (px)', 'num', null, false, false, { def: 220 }],
     ['textHeight', 'Height of a new Text or Label (px)', 'num', null, false, false, { def: 40 }],
     ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px)`, 'num', null, false, false, { def: TEXT_LARGE }],
+    ['_hh', 'Hover Help', 'head'],
+    ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
     ['_p', 'Phones and tablets', 'head'],
     ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
@@ -12802,9 +12807,11 @@ function renderDefaultTab(box) {
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
+    if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
+    if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
     for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
-    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
+    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay); renderWs(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });

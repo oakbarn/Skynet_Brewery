@@ -306,11 +306,12 @@ async function api(req, res, p, q) {
   // later"): kept in Brewing\Import\progress.json by config file, and offered again when that file is picked
   // The Panel's own settings on this computer (OakBarn Brewery, 2026-11-09: "both the Installer and the Skynet Panel will be on the same
   // Windows Machine, they can share some of the files so we don't need to duplicate entries"): its Default settings (Rule 2.42) give the
-  // units and the Default pipe size, read only, so the brewer does not type them twice. Nothing of the Panel's is changed.
+  // units, the Default pipe size and the Hover Delay (Rule 2.38), read only, so the brewer does not type them twice. Nothing of the
+  // Panel's is changed.
   if (p === '/api/panel-defaults' && m === 'GET') {
     let d = {};
     try { d = JSON.parse(fs.readFileSync(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'), 'utf8')).brewDefaults ?? {}; } catch { /* no Panel settings yet */ }
-    return json(res, 200, { units: d.units === 'Metric' || d.units === 'US' ? d.units : '', pipeSize: /^\d+(\.\d+)?$/.test(String(d.defPipeSize ?? '')) ? String(d.defPipeSize) : '' });
+    return json(res, 200, { units: d.units === 'Metric' || d.units === 'US' ? d.units : '', pipeSize: /^\d+(\.\d+)?$/.test(String(d.defPipeSize ?? '')) ? String(d.defPipeSize) : '', hoverDelay: d.hoverDelay ?? '' });
   }
   if (p === '/api/progress' && m === 'GET') {
     const all = readProgress(), f = q.get('file') ?? '';
