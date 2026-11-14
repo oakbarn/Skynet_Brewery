@@ -21,18 +21,42 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). A Text Widget always wraps.
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\t` an indent, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
 - **Shortcut keys** type the codes for you: Shift+Enter `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Shift+D (⌘+Shift+D) °F or °C. See [Shortcut keys](113-shortcut-keys).
-- **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 
 On a Device or Widget, **Fore color**, **Back color** and **Alignment** are for all of its text. **Name color**, **Value color**, **Name alignment** and the others below them are still there, and win over Fore color for that one box.
 
 ## Defaults
 
-Every attribute has a **Default** on the ☰ Menu **Default** tab, under **Text**. The Default is for everything that has that attribute: Devices, Widgets, Labels, Texts and vessels.
+Every attribute has a **Default** on **☰ Menu > Default settings**, in two parts:
 
-- **Colors, Alignment and the Name font follow the Default.** An item left on **Default** in its properties uses what the Default tab says. Change it there and every item on Default changes with it. Pick a color of its own in the item's properties and that item keeps it.
-- **Visible, Word wrap, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them, then you change it in its properties. Changing the Default later does not hide, move or resize what is already on your Tabs.
+- **Labels**: the Name of every Device and Widget, and the Label on a vessel. Visible, Fore Color, Back Color, Alignment, Bold,
+  Font and Font Size (px).
+- **Text Boxes**: a Text, a Label Widget, and the Value of a Device or Widget. Fore Color, Back Color, Alignment, Font, Font Size
+  (px), New Box Width, New Box Height and Word Wrap.
+
+A new install starts with:
+
+| | Labels | Text Boxes |
+|---|---|---|
+| Visible | On | |
+| Fore Color | White (250, 250, 250) | White (250, 250, 250) |
+| Back Color | Black | Black |
+| Alignment | Centered justified | Centered justified |
+| Bold | Off | |
+| Font | Tab's font | Tab's font |
+| Font Size (px) | 11 | 11 |
+| New Box Width / Height | | 520 x 140 |
+
+- **Tab's font**: each Tab uses its Tab Style's font, and the panel's normal font when its Tab Style has none. So every Tab always
+  has a font. A font picked on the Default tab is used where a Tab Style has none.
+- **Colors, Alignment, Bold and the Font follow the Default.** An item left on **Default** in its properties uses what the Default
+  tab says. Change it there and every item on Default changes with it. Pick a color of its own in the item's properties and that
+  item keeps it.
+- **The Value of a Device or Widget** follows the Text Boxes colors only once you change them from what a new install has, so a new install
+  puts no black box behind the values on your pictures.
+- **Visible, Word Wrap, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them,
+  then you change it in its properties. Changing the Default later does not hide, move or resize what is already on your Tabs.
 - The Default fore color leaves the digits of an **LED** or **Gauge** look in their own colors.
-- **Default** on the Default tab means the panel's normal look, as before.
+- The size of large text (the `\L` code) is **\L Rich Text Code Size (px)**, under **Rich Text Embedded Code** on the Default tab.
 
 ## In a Process
 
