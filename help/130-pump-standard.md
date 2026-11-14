@@ -28,6 +28,17 @@ drawn over the pump and its Cover, under the On overlay. It runs straight out of
 and out to the spot, and it turns with the pump when it is shown Left. A pump with your own picture has no Hose or Pipe (Skynet does
 not know where its ports are), so its IPs are simply on the spots.
 
+**With a pipe or hose joined to the IP**, that end is drawn like the pipe or hose on it: the same kind, color and thickness, so the
+two meet as one piece. With nothing on the IP, the Hose or Pipe picked here is drawn.
+
+**A corner IP** (Top Left, Top Right, Bottom Left, Bottom Right) can be reached from the side or from the top or bottom. **Inlet
+from** and **Outlet from** show when the IP is on a corner: **Auto** goes the way the pipe joined to it leaves, **Side** comes
+in along the side, and **Top** (or **Bottom**) comes in along the top (or bottom).
+
+**IP Type In** and **IP Type Out** are the connector on the pump's inlet and outlet: Tri-Clamp, NPT, BSP or Quick Disconnect
+(Skynet Rule 5.40). A pump starts with the one its **Ports** say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else the
+**Default pipe IP Type**.
+
 ## Pipes on a pump
 
 When you pick another spot, a pipe joined to the Inlet or Outlet stays where it is: the pump moves onto its line, and the pipe's end
