@@ -10,7 +10,7 @@ autres peuvent regarder.
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| **Default pipe size** | 1/2" sauf si vous le changez (1/4" à 6", avec la taille en mm à côté de chacune). Un **nouveau tuyau** commence à cette taille. Chaque **Device, Pipe Fitting et élément avec des IP** (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) qui n'a **pas de tuyau** est dessiné pour cette taille, donc une nouvelle pompe correspond déjà à vos tuyaux. |
+| **Default pipe size** | 1/2" sauf si vous le changez (1/4" à 6", avec la taille en mm à côté de chacune). Un **nouveau tuyau** commence à cette taille. Un **nouveau Device, Pipe Fitting ou élément avec des IP** (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour cette taille jusqu'à ce qu'un tuyau y soit, donc une nouvelle pompe correspond déjà à vos tuyaux. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). |
 | **Default hose size** | La taille de départ d'un **nouveau flexible**. |
 | **How thick a 1/2" pipe is drawn on a new Tab** | En pixels ; vide = 10. Chaque Tab peut encore le changer dans **Tab settings**. |
 | **Width** et **Height of a new Tab** | En pixels ; vide = 1600 x 900. |
@@ -62,6 +62,8 @@ Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau mar
 Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)), et le Pulse est toujours de 100 ms.
 
 ## Les autres réglages de ce Tab {#the-other-settings-on-this-tab}
+
+**Les réglages par défaut sont seulement pour les nouvelles choses.** Labels, Text Boxes et la Default pipe size sont gardés sur chaque élément quand il est créé, donc les changer ici ne change jamais ce qui est déjà sur vos Tabs.
 
 Nouvelles recettes (Units, Batch size, Profiles, Boil time, efficacité ...), New Schema from a Skynet Template, nouveaux Tabs et vannes (Tab
 Background Profile, Valve Profile), Labels et Text Boxes. Voir [Le Menu](33-menu).
