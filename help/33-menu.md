@@ -4,7 +4,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 
 - **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
-- The **Menu tabs**: Zoom (number 1 to start with), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
+- The **Menu tabs**: Zoom (number 1 to start with), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile, Valve Profile and Pump Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
 - **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
@@ -27,7 +27,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here: what a new thing starts with.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). New User Templates and Schemas. Press **Save**.
+**Every default is set here: what a new thing starts with.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets (the Valve and Pump Profile a new one starts with is the one marked Default in its own list). **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). New User Templates and Schemas. Press **Save**.
 
 What changes things already made, or how the whole panel works, is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes inside text](22-process-language)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
 
@@ -48,7 +48,7 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 - **Vessel Templates**, **Equipment Templates** and **Fitting Templates**: ready-made vessels, chillers, coils, trub filters and Bundled Fittings (Skynet and your own) as small icons. Double-click one for its settings, or put a copy on a Tab. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
 - **Default Layout**: the vessels and pipes a Tab gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
-- **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
+- **Tab Background Profile**, **Valve Profile** and **Pump Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
 - **Move Brain** (Admins): move everything to a new Brain, for example from a computer to a Raspberry Pi, then fix the USB ports. See [Move Brain](119-move-brain).
 - **Schema**: see [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **About**: see [About and Schema versions](42-about-and-schema-versions).

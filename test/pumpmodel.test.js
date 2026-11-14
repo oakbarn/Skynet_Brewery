@@ -66,7 +66,7 @@ assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), '
 assert.doesNotMatch(app, /BM_6_/, 'Port 15 in the examples');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.35 \*\*Review the Interface and Port/m);
 assert.match(app, /select\.orientSel'\) \|\| body\.querySelector\('\.afterStep select, \.afterStep input'\)\)\?\.focus\(\)/, 'focus to Orientation');
-assert.match(app, /\['cover', 'coverColor', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked color is kept');
+assert.match(app, /\['cover', 'coverColor', 'pumpIn', 'pumpOut', 'pumpLink', 'pumpInDir', 'pumpOutDir', 'ipTypeIn', 'ipTypeOut', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked color is kept');
 // Dialog 2 (2026-11-12): Dual Action (Rule 2.50), the Toggle, Graphic and Name balloons, no Path box on a Skynet pump drawing, Rule 3.2 words
 assert.match(app, /\['hold', 'Push Button'\]/); assert.match(app, /\['dual', 'Dual Action'\]/);
 assert.match(app, /const DUAL_HOLD_MS = 500/);

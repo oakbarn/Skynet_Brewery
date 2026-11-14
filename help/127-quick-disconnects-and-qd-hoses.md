@@ -37,6 +37,8 @@ always on top of everything on the Tab.
 
 Any hose end whose **IP Type** is **Quick Disconnect** moves the same way (Help 24), one end at a time.
 
+**Safety first:** grabbing a hose end opens a pop-up that stays open. If a pump on the hose is On (or liquid is flowing in it), it says to turn the pump Off first. It keeps checking the pump, and once the pump is Off it asks whether the valves are set so nothing drains out by gravity: **Yes, unhook it** lets you drag that end for the next 2 minutes. **✖ Exit** closes it at any time without moving anything.
+
 While you drag, the hose **flexes**: it leaves the pump the way it did before and hangs in a curve through several bend points, sagging more the farther you pull the end. A **green ring** shows where the end will go. Let go on:
 
 - **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it.
