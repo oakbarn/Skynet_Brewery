@@ -35,7 +35,9 @@ always on top of everything on the Tab.
 - **Computer:** hold the **right mouse button** on the ring and drag (Rule 2.9: the right button drags).
 - **Phone or tablet:** hold a **finger** on the ring and drag.
 
-While you drag, a **green ring** shows where the end will go. Let go on:
+Any hose end whose **IP Type** is **Quick Disconnect** moves the same way (Help 24), one end at a time.
+
+While you drag, the hose **flexes**: it leaves the pump the way it did before and hangs in a curve through several bend points, sagging more the farther you pull the end. A **green ring** shows where the end will go. Let go on:
 
 - **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it.
 - **anywhere in the top third of a vessel**: the whole top third is one big IP. It is the same as putting the hose in the

@@ -11,7 +11,9 @@ else can look.
 | Setting | What it does |
 |---|---|
 | **Default pipe size** | 1/2" unless you change it (1/4" to 6", with the mm size beside each). A **new pipe** starts at this size. A **new Device, Pipe Fitting or item with IPs** (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for this size until a pipe is on it, so a new pump already matches your pipes. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). |
+| **IP Type** (beside Default pipe size) | The connector a **new pipe** has on both ends: Tri-Clamp unless you change it (Tri-Clamp, NPT, BSP or Quick Disconnect). It is the size of the pipe ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). |
 | **Default hose size** | The size a **new hose** starts at. |
+| **IP Type** (beside Default hose size) | The connector a **new hose** has on both ends: Quick Disconnect unless you change it. It is the size of the hose. |
 | **How thick a 1/2" pipe is drawn on a new Tab** | In pixels; empty = 10. Each Tab can still change it in **Tab settings**. |
 | **Width** and **Height of a new Tab** | In pixels; empty = 1600 x 900. |
 
@@ -63,7 +65,7 @@ The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Look
 
 ## The other settings on this tab
 
-**Defaults are for new things only.** Labels, Text Boxes and the Default pipe size are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
+**Defaults are for new things only.** Labels, Text Boxes, the Default pipe size and the IP Types are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
 
 New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), New Schema from a Skynet Template, new Tabs and valves (Tab
 Background Profile, Valve Profile), Labels and Text Boxes. See [The Menu](33-menu).

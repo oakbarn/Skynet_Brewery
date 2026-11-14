@@ -15,6 +15,7 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
+import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
@@ -1697,6 +1698,40 @@ const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
 // item with IPs that has no pipe on it is drawn for the Default pipe size. 1/2" when not set.
 const defPipeIn = () => +S.config.brewDefaults?.defPipeSize > 0 ? +S.config.brewDefaults.defPipeSize : 0.5;
 const defHoseIn = () => +S.config.brewDefaults?.defHoseSize > 0 ? +S.config.brewDefaults.defHoseSize : 0.5;
+// IP Type (Rule 5.40, public/iptype.js): a new pipe or hose takes the Default pipe or hose IP Type on both ends
+// Each end is drawn as its IP Type (OakBarn Brewery, 2026-11-14: "Connectors: Graphic match Type"), across the end and turned with
+// the pipe: Tri-Clamp a ferrule and its clamp band, NPT a tapered thread, BSP a hex nut on a thread, Quick Disconnect a cam lock
+// with its two arms. Its size follows the pipe. Not drawn where the end sits on a fitting, a Quick Disconnect or End Cap that is
+// drawn already, or on a Quick Disconnect hose's free end (its yellow ring shows there).
+const CONN_NS = 'http://www.w3.org/2000/svg';
+function connShape(t, w) {
+  const g = document.createElementNS(CONN_NS, 'g'), mk = (tag, a) => { const e = document.createElementNS(CONN_NS, tag); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); g.append(e); return e; };
+  const steel = '#d5d9de', edge = '#5b6168', r = w / 2;
+  g.setAttribute('class', 'conn conn_' + t);
+  if (t === 'tc') {              // the ferrule face, then the clamp band round it
+    mk('rect', { x: 0, y: -r * 1.6, width: w * 0.35, height: r * 3.2, rx: 1, fill: steel, stroke: edge, 'stroke-width': 1 });
+    mk('rect', { x: w * 0.08, y: -r * 1.85, width: w * 0.2, height: r * 3.7, rx: 1, fill: '#9aa0a6', stroke: edge, 'stroke-width': 1 });
+  } else if (t === 'npt' || t === 'bsp') {        // thread rings, getting smaller toward the end (NPT is tapered)
+    for (let i = 0; i < 4; i++) { const k = t === 'npt' ? 1.05 + i * 0.07 : 1.15; mk('line', { x1: w * (0.15 + i * 0.22), y1: -r * k, x2: w * (0.15 + i * 0.22), y2: r * k, stroke: edge, 'stroke-width': Math.max(1, w * 0.08) }); }
+    if (t === 'bsp') mk('polygon', { points: [[w, -r * 1.5], [w * 1.25, -r * 1.75], [w * 1.6, -r * 1.75], [w * 1.85, -r * 1.5], [w * 1.85, r * 1.5], [w * 1.6, r * 1.75], [w * 1.25, r * 1.75], [w, r * 1.5]].map(q => q.join(',')).join(' '), fill: steel, stroke: edge, 'stroke-width': 1 });
+  } else if (t === 'qd') {       // the cam lock body and its two arms
+    mk('rect', { x: 0, y: -r * 1.45, width: w * 0.9, height: r * 2.9, rx: w * 0.15, fill: steel, stroke: edge, 'stroke-width': 1 });
+    for (const sg of [-1, 1]) mk('path', { d: `M${w * 0.3},${sg * r * 1.45} L${w * 1.1},${sg * r * 2.1}`, stroke: edge, 'stroke-width': Math.max(1.5, w * 0.18), 'stroke-linecap': 'round', fill: 'none' });
+  }
+  return g;
+}
+function pipeConnectors(p, width) {
+  const pts = p.points || []; if (pts.length < 2) return [];
+  const drawn = id => { const g = id && L().graphics.find(x => x.id === id); return !!g && ((isFitting(g) && g.fitting !== 'coupling') || isQd(g) || L().graphics.some(c => c.capOn === id)); };
+  const out = [];
+  for (const [end, a, b, t] of [['from', pts[0], pts[1], p.ipTypeFrom], ['to', pts[pts.length - 1], pts[pts.length - 2], p.ipTypeTo]]) {
+    if (!t || drawn(p[end]) || (end === 'to' && isQdHose(p))) continue;
+    const ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI, c = connShape(t, width);
+    c.setAttribute('transform', `translate(${a[0]},${a[1]}) rotate(${ang.toFixed(1)})`); out.push(c);
+  }
+  return out;
+}
+const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, { hose: !!p.hose, qd: !!p.qd, inch: sizeInches(p) }); p.ipTypeFrom = t; p.ipTypeTo = t; return p; };
 // how thick a pipe of the Default pipe size is on this Tab: the item's own (as the Default tab was when it was made), else today's
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
 const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
@@ -1897,14 +1932,42 @@ function routeD(pts, r) {
   }
   return d;
 }
-// the Hose (white, like the hoses OakBarn Brewery lined up in BruControl) or the Pipe (stainless), as SVG in the 300 x 300 box
+// the Hose (white, like the hoses OakBarn Brewery lined up in BruControl) or the Pipe (stainless), as SVG in the 300 x 300 box.
+// With a pipe or hose joined to that IP, its end is drawn like that pipe or hose: the same kind, color and thickness, so the
+// two meet as one (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe").
+// A corner IP is reached from the Side or from the Top or Bottom (pumpInDir, pumpOutDir); Auto goes the way its pipe leaves.
+const isCornerSpot = c => /^[TB][LR]$/.test(c);
+function pumpJoined(e, end) {
+  const id = `dev:${e.name}:${end}`;
+  return (L()?.graphics || []).find(g => g.kind === 'pipe' && g.workspace === e.workspace && (g.from === id || g.to === id) && (g.points || []).length > 1) || null;
+}
+// 'h' (from the side) or 'v' (from the top or bottom) for a corner spot; null for a middle spot
+function pumpEndAxis(e, end, spot) {
+  if (!isCornerSpot(spot)) return null;
+  const pick = e[end === 'in' ? 'pumpInDir' : 'pumpOutDir'];
+  if (pick === 'h' || pick === 'v') return pick;
+  const p = pumpJoined(e, end); if (!p) return 'h';
+  const pts = p.points, id = `dev:${e.name}:${end}`, [a, b] = p.from === id ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
+  return Math.abs(b[1] - a[1]) > Math.abs(b[0] - a[0]) ? 'v' : 'h';
+}
+function pumpLinkLooks(e) {
+  const gm = elGeom(e), k = 300 / Math.max(1, gm.w || 150);
+  return ['in', 'out'].map(end => { const p = pumpJoined(e, end);
+    return p ? { hose: !!p.hose, color: p.color || (p.hose ? '#c9ced3' : '#8a8f96'), w: Math.max(2, pipeWidth(p) * k) } : { hose: e.pumpLink !== 'pipe' }; });
+}
 function pumpLinkSvg(e) {
   if (!isStdPump(e)) return '';
-  const [si, so] = pumpSpots(e).map(c => PUMP_SPOTS[flipSpot(c, e.flipH, e.flipV)].map(v => v * 300));
-  const pipe = e.pumpLink === 'pipe', [ti, to] = PUMP_STD.ends.map(([x, y]) => [x * 300, y * 300]);
-  const draw = d => pipe ? `<path d="${d}" fill="none" stroke="#5b6168" stroke-width="17"/><path d="${d}" fill="none" stroke="#c9ced4" stroke-width="13"/><path d="${d}" fill="none" stroke="#eef1f4" stroke-width="3" transform="translate(-2,-2)"/>`
+  const spots = pumpSpots(e), [si, so] = spots.map(c => PUMP_SPOTS[flipSpot(c, e.flipH, e.flipV)].map(v => v * 300));
+  const [ti, to] = PUMP_STD.ends.map(([x, y]) => [x * 300, y * 300]), looks = pumpLinkLooks(e);
+  const draw = (d, lk) => lk.color ? `<path d="${d}" fill="none" stroke="${lk.color}" stroke-width="${+lk.w.toFixed(1)}" stroke-linejoin="${lk.hose ? 'round' : 'miter'}" stroke-linecap="${lk.hose ? 'round' : 'butt'}"/>`
+    : !lk.hose ? `<path d="${d}" fill="none" stroke="#5b6168" stroke-width="17"/><path d="${d}" fill="none" stroke="#c9ced4" stroke-width="13"/><path d="${d}" fill="none" stroke="#eef1f4" stroke-width="3" transform="translate(-2,-2)"/>`
     : `<path d="${d}" fill="none" stroke="#8a8f94" stroke-width="17" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#f7f7f7" stroke-width="13" stroke-linejoin="round"/>`;
-  return `<svg viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible">${draw(routeD(pumpRoute(to, [0, -1], so, si), pipe ? 0 : 18))}${draw(routeD(pumpRoute(ti, [1, 0], si, so), pipe ? 0 : 18))}</svg>`;
+  // the last step into a corner spot is square: along the side, or along the top or bottom
+  const into = (pts, end, spot) => { const ax = pumpEndAxis(e, end, spot); if (!ax || pts.length < 2) return pts;
+    const s = pts[pts.length - 1], t = pts[pts.length - 2], m = ax === 'h' ? [t[0], s[1]] : [s[0], t[1]];
+    return [...pts.slice(0, -1), m, s]; };
+  const route = (tip, dir, spot, avoid, end, i) => { const lk = looks[i]; return draw(routeD(into(pumpRoute(tip, dir, spot, avoid), end, spots[i]), lk.hose ? 18 : 0), lk); };
+  return `<svg viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible">${route(to, [0, -1], so, si, 'out', 1)}${route(ti, [1, 0], si, so, 'in', 0)}</svg>`;
 }
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
   'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
@@ -2640,7 +2703,7 @@ function fillEl(n, e0) {
     if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // A pump's Hose or Pipe to its Inlet and Outlet spots (Rule 5.27): over the picture and its Cover, under the On overlay
-  const lk = pumpLinkSvg(e), lkKey = lk && `${pumpSpots(e)}|${e.pumpLink || ''}|${!!e.flipH}${!!e.flipV}`;
+  const lk = pumpLinkSvg(e), lkKey = lk && `${pumpSpots(e)}|${e.pumpLink || ''}|${!!e.flipH}${!!e.flipV}|${JSON.stringify(pumpLinkLooks(e))}|${pumpEndAxis(e, 'in', pumpSpots(e)[0])}${pumpEndAxis(e, 'out', pumpSpots(e)[1])}`;
   let lo = n.querySelector(':scope > .pumplink');
   if (lk && !lo) { lo = h('div', { class: 'pumplink' }); const o1 = n.querySelector(':scope > .onov'); if (o1) n.insertBefore(lo, o1); else n.append(lo); }
   if (lo) {
@@ -3440,6 +3503,9 @@ let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false, drawOn
 // Quick Disconnects and Quick Disconnect hoses (Rule 5.28; the rest is with the End Cap code further down)
 const isQd = g => g?.kind === 'ip' && g.fitting === 'qd';
 const isQdHose = p => p?.kind === 'pipe' && p.hose && p.qd;
+// a hose end that moves outside Edit layout: a QD hose's free end, or a hose end whose IP Type is Quick Disconnect (Rule 5.40,
+// as lib/qdhose.js qdEndMoves). Hoses only, one end at a time.
+const qdEndMoves = (p, end) => p?.kind === 'pipe' && !!p.hose && (end === 'from' ? p.ipTypeFrom === 'qd' : !!p.qd || p.ipTypeTo === 'qd');
 const vtopOf = id => typeof id === 'string' && id.startsWith('vtop:') ? id.slice(5) : null;
 const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.08)];      // the middle of the vessel's top
 let qdDrag = null;            // a QD hose end being moved outside Edit layout
@@ -3799,6 +3865,13 @@ function grabPopup(it, locked = []) {
     pushUndo(`unlock ${who}`); unlockJoins(joins); grabWith.delete(it.id || it.name); renderWs();
     toast(`🔓 ${who}: ${joins.length} pipe end${joins.length > 1 ? 's' : ''} let go. Grab it again and move it. Drop an IP back on an open end to join it again; ↩ Put back (Ctrl+Z) undoes it.`, false, 7000);
   }, 'big primary');
+  // a pipe or hose: 🗑 Delete Pipe / Delete Hose, red (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect
+  // Dialog"); its own IPs go with it, and ↩ Put back (Ctrl+Z) brings it back
+  const what = it.hose ? 'Hose' : 'Pipe';
+  const delBtn = it.kind !== 'pipe' ? null : btn(`🗑 Delete ${what}`, `Delete ${who} and its own IPs (a coupling or IP on its end with nothing else on it). ↩ Put back (Ctrl+Z) brings it back.`, () => {
+    pushUndo(`delete ${who}`); const n = deletePipe(it); sel = null; renderWs();
+    toast(`🗑 ${who} deleted${n ? ` with ${n === 1 ? 'its IP' : 'its ' + n + ' IPs'}` : ''}. ↩ Put back (Ctrl+Z) brings it back.`, false, 7000);
+  }, 'big danger');
   const withBtn = locked.length || it.kind === 'pipe' ? null : btn('Move it with its pipes', 'As before (Rule 5.19): a pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go. Then grab it again.', () => {
     grabWith.add(it.id || it.name); toast(`Grab ${who} again and move it with its pipes.`);
   });
@@ -3815,13 +3888,14 @@ function grabPopup(it, locked = []) {
   ask.onchange = () => { grabNoAsk = ask.checked; };
   const cancel = () => h('button', { type: 'button', class: 'big', title: 'Nothing changes', onclick: close }, 'Cancel');
   const d = h('dialog', { class: 'infoDlg grabDlg', 'data-nomenu': true },
-    h('div', { class: 'bar' }, h('h3', {}, `Move ${who}?`), h('span', { class: 'spacer' }), cancel()),
+    // the top stays put while the rest scrolls (OakBarn Brewery, 2026-11-14: "Freeze", as on the RipTide pop-ups)
+    h('div', { class: 'grabHead' }, h('div', { class: 'bar' }, h('h3', {}, `Move ${who}?`), h('span', { class: 'spacer' }), cancel()),
+      h('div', { class: 'vdBtns' }, delBtn, unlock, withBtn)),
     h('p', {}, `${who} has ${pipeWord}.`),
     locked.length ? h('p', { class: 'warn' }, `🔒 ${locked.slice(0, 3).map(lockName).join(', ')}${locked.length > 3 ? ` and ${locked.length - 3} more` : ''} ${locked.length > 1 ? 'are' : 'is'} locked, so it can only move alone.`) : null,
-    h('div', { class: 'vdBtns' }, unlock, withBtn),
     pick ? h('div', { class: 'vdBtns' }, pick) : null,
     locked.length || it.kind === 'pipe' ? null : h('label', { class: 'toggle', title: 'Moves go on with their pipes without asking, until you leave Edit layout' }, h('span', { class: 'sw' }, ask, h('span', { class: 'swk' })), ' Don\'t ask again'),
-    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), cancel()));
+    null);         // no bottom row: the top is frozen (Rule 2.51)
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
 }
@@ -3889,6 +3963,7 @@ function renderPipes() {
       g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
     }
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    if (p.baseVisible !== false || editing) for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
@@ -3899,14 +3974,21 @@ function renderPipes() {
       if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
-    if (!editing && isQdHose(p) && !p.locked && p.baseVisible !== false && (p.points || []).length > 1 && can('operator')) {
-      const q = p.points[p.points.length - 1], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
-      grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
+    // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
+    if (!editing && !p.locked && p.baseVisible !== false && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
+      if (!qdEndMoves(p, end)) continue;
+      const q = end === 'to' ? p.points[p.points.length - 1] : p.points[0], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
+      grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, 'data-end': end, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
         style: `left:${q[0] - r}px;top:${q[1] - r}px;width:${2 * r}px;height:${2 * r}px` }));
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      // a pipe end let go (🔓 Unlock its ends) has a handle: drag it along the pipe to shorten or lengthen it (OakBarn Brewery,
+      // 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten")
+      else if (!p.locked && (p.points || []).length > 1) for (const i of [0, p.points.length - 1]) if (openEnd(p, i)) {
+        const q = p.points[i]; g.append(mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }));
+      }
     }
     const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
   }
@@ -4005,6 +4087,12 @@ $('#ws').addEventListener('pointerdown', ev => {
     }
     drawPts.push(c); renderPipes(); return;
   }
+  // the coupling on a let-go pipe end is its handle too: dragging it shortens or lengthens the pipe along its line
+  const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
+  const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
+  if (cp && openEnd(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
+    sel = { kind: 'gfx', id: cp.id }; drag = { mode: 'point', item: cp, i: cp.from === cg.id ? 0 : cp.points.length - 1 }; ev.preventDefault(); return;
+  }
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; if (drag?.item) delete drag.item.qdAuto; ev.preventDefault(); return; }
   const hit = ev.target.closest('.pipes g');
@@ -4092,7 +4180,8 @@ $('#ws').addEventListener('pointermove', ev => {
     const k = !drag.item.kind ? elK(drag.item) : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
     resizeBy(drag, dx, dy, k); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
   if (drag.mode === 'move' || drag.mode === 'resize') showGeo(ev, drag.item);
-  if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
+  if (drag.mode === 'point' && !drag.item.hose) { shortenPipe(drag.item, drag.i, p); renderWs(); }
+  else if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
 const DRAG_DEAD_PX = 4;          // screen pixels
@@ -4536,12 +4625,38 @@ function endCoupling(pts, i, j) {
   const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: wsName, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
   draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
 }
+// Deleting a pipe or hose takes its own IPs with it (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on the
+// Build"; "Check same issue for Hose"): a coupling or plain IP point on one of its ends goes too when nothing else is on it (no other
+// pipe, Quick Disconnect or End Cap, and not an opening on a vessel). Returns how many IPs went.
+// an end of a pipe that is open: on a coupling with nothing else on it (as 🔓 Unlock its ends leaves it)
+function openEnd(p, i) {
+  const id = i === 0 ? p.from : p.to, g = id && L().graphics.find(x => x.id === id);
+  return !!g && g.kind === 'ip' && g.fitting === 'coupling' && !L().graphics.some(x => x !== p && x.kind === 'pipe' && (x.from === id || x.to === id));
+}
+// drag an open end along the pipe's own line: shorter or longer, never off its line (Rule 5.19), at least 10 px; its coupling goes too
+function shortenPipe(p, i, at) {
+  const pts = p.points, n = pts.length, e = pts[i], o = pts[i === 0 ? 1 : n - 2], len = Math.hypot(e[0] - o[0], e[1] - o[1]); if (!len) return;
+  const ux = (e[0] - o[0]) / len, uy = (e[1] - o[1]) / len, d = Math.max(10, (at[0] - o[0]) * ux + (at[1] - o[1]) * uy);
+  pts[i] = [Math.round(o[0] + ux * d), Math.round(o[1] + uy * d)];
+  const c = draft.graphics.find(x => x.id === (i === 0 ? p.from : p.to));
+  if (c) { c.x = pts[i][0] - (c.w || 30) / 2; c.y = pts[i][1] - (c.h || 30) / 2; }
+}
+function deletePipe(p) {
+  draft.graphics = draft.graphics.filter(g => g !== p);
+  const used = id => draft.graphics.some(g => (g.kind === 'pipe' && (g.from === id || g.to === id)) || (isQd(g) && g.qdOn === id) || g.capOn === id);
+  const own = [p.from, p.to].filter(id => typeof id === 'string').map(id => draft.graphics.find(g => g.id === id && g.kind === 'ip'))
+    .filter(g => g && (g.fitting === 'coupling' || !g.fitting || g.fitting === 'point') && !g.port && !g.attachTo && !used(g.id));
+  draft.graphics = draft.graphics.filter(g => !own.includes(g));
+  return own.length;
+}
 function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
   const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
   if (hose) g.hose = true; else g.straight = true;
+  if (qd) g.qd = true;
+  stampIpType(g);
   g.from = from || endCoupling(pts, 0, 1);
   if (qd) {        // a Quick Disconnect hose (Rule 5.28): its free end needs no coupling; it may end in the top of a vessel
     g.qd = true;
@@ -6439,7 +6554,7 @@ function vbDirOf(g, k) {
 }
 function vbPipe(ws, from, to, a, b, size) {
   const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', flowWhen: [], baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
-  giveName(p, draft.graphics); draft.graphics.push(p); return p;
+  stampIpType(p); giveName(p, draft.graphics); draft.graphics.push(p); return p;
 }
 // a TC Pipe Fittings Widget with one end at `at`, its other end going on along D (an Elbow: turning to `turn`)
 function vbPlaceFit(kind, ws, at, D, turn, join) {
@@ -7176,6 +7291,8 @@ const F = {
     ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
+    ['ipTypeFrom', 'IP Type at start', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
+    ['ipTypeTo', 'IP Type at end', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
     ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
     ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
@@ -7488,7 +7605,16 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 // The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
 // the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
 const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
-const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), false, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), false, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
+// a corner IP is reached from the Side or from the Top (Bottom) (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs
+// Side or Top or Side or Bottom"); Auto goes the way the pipe on it leaves. Shown only for a corner spot.
+const PUMP_DIR_CHOICES = spot => [['', 'Auto'], ['h', 'Side'], ['v', spot[0] === 'T' ? 'Top' : 'Bottom']];
+const PUMP_DIR_FIELDS = (it, x = {}) => { const [a, b] = pumpSpots(it), f = [];
+  if (isCornerSpot(a)) f.push(['pumpInDir', 'Inlet from', 'sel', PUMP_DIR_CHOICES(a), false, false, { tip: PUMP_DIR_TIP, ...x }]);
+  if (isCornerSpot(b)) f.push(['pumpOutDir', 'Outlet from', 'sel', PUMP_DIR_CHOICES(b), false, false, { tip: PUMP_DIR_TIP, ...x }]);
+  return f.length === 2 ? [[...f[0].slice(0, 6), { ...f[0][6], with: f[1] }]] : f; };
+const PUMP_DIR_TIP = 'A corner IP: does its Hose or Pipe come into the corner from the Side, or from the Top (or Bottom)? Auto goes the way the pipe joined to it leaves.';
+const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), true, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), true, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
+  ...PUMP_DIR_FIELDS(it, x),
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
@@ -7560,6 +7686,9 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
     ['power', 'Power', 'sel', PUMP_POWER_CHOICES(it), true, false,
       { tip: T.pumpPower + (powerKnown ? ' Known from the model, so it is greyed out.' : ''), with: ['_use', 'Use', 'ro', pumpUseText(it), false, false, { tip: T.pumpUse }], ...(powerKnown ? { disabled: true, known: true } : {}), ...x }],
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
+    // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Ports, else the Default pipe IP Type
+    ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}), it.ipTypeOut ||= it.ipTypeIn,
+      [['ipTypeIn', 'IP Type In', 'sel', IP_TYPES, false, false, { tip: PUMP_IP_TIP, with: ['ipTypeOut', 'IP Type Out', 'sel', IP_TYPES, false, false, { tip: PUMP_IP_TIP }], ...x }]])),
     ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
@@ -8959,7 +9088,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       if (q('cover')) w.cover = q('cover').value;
       if (q('coverColor')) w.coverColor = q('coverColor').value;
       if (q('flipH')) { w.flipH = q('flipH').checked; w.flipV = q('flipV').checked; }
-      for (const k of ['pumpIn', 'pumpOut', 'pumpLink']) if (q(k)) w[k] = q(k).value;
+      for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'pumpInDir', 'pumpOutDir']) if (q(k)) w[k] = q(k).value;
       pic.src = w.imageOff ? media(w.imageOff) : ''; pic.classList.toggle('hidden', !w.imageOff);
       lnk.innerHTML = pumpLinkSvg(w);      // its Hose or Pipe to the Inlet and Outlet spots picked (Rule 5.27)
       const cv = coverOf(w, {});
@@ -9877,7 +10006,7 @@ async function editItem(kind, id) {
         if (pick === undefined) return;
         if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
       } else if (!confirm('Delete this item?')) return;
-      if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
+      if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
       draft.graphics = draft.graphics.filter(g => !kids.includes(g));
@@ -12684,6 +12813,10 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // ---- Default settings tab (Fritz, 2026-11-07: "create that default settings tab (accessed by the Hamburger Menu Only) and let me look
 // at all the Defaults", Rule 2.42): the defaults set here, a list of the defaults set somewhere else, and the order of the Menu.
 // Only ☰ Menu opens it. It belongs to the panel (every Schema), not to one Schema.
+const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of its pipes. A new pump starts from its Ports, else the Default pipe IP Type.';
+const IP_TYPE_TIP = 'The connector on this end: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the same size as the pipe or hose. A new one starts with the Default IP Type on the Default tab, on both ends.';
+const DEF_IP_TIPS = { pipe: 'The connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes already made keep theirs.',
+  hose: 'The connector a new hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses already made keep theirs.' };
 const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}${v === '0.5' ? '  (Skynet default)' : ''}`]);
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
 function otherDefaults() {
@@ -12753,14 +12886,14 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...freshTextBoxes(),
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...NS_DEFAULTS, ...freshTextBoxes(),
     newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
-    ['defPipeSize', 'Default pipe size: a new pipe starts at it, and a new Device, Pipe Fitting or item with IPs (pumps too) is drawn for it until a pipe is on it. With pipes on it, it takes the size most of them have (Rule 5.36). Items already made keep theirs', 'sel', sizePick(PIPE_SIZES)],
-    ['defHoseSize', 'Default hose size: a new hose starts at it', 'sel', sizePick(HOSE_SIZES)],
+    ['defPipeSize', 'Default pipe size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: 'A new pipe starts at it, and a new Device, Pipe Fitting or item with IPs (pumps too) is drawn for it until a pipe is on it. With pipes on it, it takes the size most of them have (Rule 5.36). Items already made keep theirs.', with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
+    ['defHoseSize', 'Default hose size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: 'A new hose starts at it. Hoses already made keep theirs.', with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
     ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px). Each Tab can change it in Tab settings', 'num', null, false, false, { def: 10 }],
     ['newTabWidth', 'Width of a new Tab (px)', 'num', null, false, false, { def: 1600 }],
     ['newTabHeight', 'Height of a new Tab (px)', 'num', null, false, false, { def: 900 }],
@@ -14057,11 +14190,11 @@ function snapQd(q) {
 }
 // Where a Quick Disconnect hose end dropped at c goes: the nearest IP (a Quick Disconnect wins over the IP under it), else the
 // top third of a vessel, else nowhere (a loose end: no flow). Returns { id, c } or null.
-function qdTarget(p, c) {
-  const ws = p.workspace, under = qdOnIps(), r = Math.max(24, pipeWidth(p) * 2);
+function qdTarget(p, c, end = 'to') {
+  const ws = p.workspace, stay = p[end === 'to' ? 'from' : 'to'], under = qdOnIps(), r = Math.max(24, pipeWidth(p) * 2);
   let best = null;
   for (const q of allIps(ws)) {
-    if (q.id === p.from || under.has(q.id)) continue;
+    if (q.id === stay || under.has(q.id)) continue;
     const at = q.c || ipPoint(q.id, ws); if (!at) continue;
     const d = Math.hypot(at[0] - c[0], at[1] - c[1]);
     if (d <= r && (!best || d < best.d)) best = { d, id: q.id, c: at };
@@ -14070,11 +14203,23 @@ function qdTarget(p, c) {
   const v = [...L().graphics].reverse().find(v => isKettle(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
   return v ? { id: 'vtop:' + v.id, c: vtopPoint(v) } : null;
 }
-// a moved hose hangs from its fixed end to its free end with a little sag
-function hoseSag(a, b) {
-  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), sag = Math.min(80, len * 0.2);
-  return [[...a], [Math.round((a[0] + b[0]) / 2), Math.round((a[1] + b[1]) / 2 + sag)], [Math.round(b[0]), Math.round(b[1])]];
+// a moved hose hangs from its fixed end to its free end. It leaves its fixed end the way it did before (lead), then hangs in a curve
+// through several bend points, so it flexes as the end is dragged (OakBarn Brewery, 2026-11-14: "When moving a QD Hose, add some bend
+// points to make the Hose Movement dynamic"): the farther the end, the more it sags; pulled up close, it loops lower under its ends.
+function hoseSag(a, b, lead) {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), r = v => Math.round(v);
+  const ll = lead && Math.hypot(lead[0], lead[1]), out = Math.min(60, Math.max(14, len * 0.18));
+  const s = ll ? [a[0] + lead[0] / ll * out, a[1] + lead[1] / ll * out] : [...a];
+  const sag = Math.min(110, 18 + len * 0.22), n = 6, pts = [[r(a[0]), r(a[1])]];
+  if (ll) pts.push([r(s[0]), r(s[1])]);
+  for (let i = 1; i < n; i++) {
+    const t = i / n, x = s[0] + (b[0] - s[0]) * t, y = s[1] + (b[1] - s[1]) * t + sag * 4 * t * (1 - t);
+    pts.push([r(x), r(y)]);
+  }
+  pts.push([r(b[0]), r(b[1])]);
+  return pts.filter((q, i) => !i || q[0] !== pts[i - 1][0] || q[1] !== pts[i - 1][1]);
 }
+const hoseLead = pts => pts?.length > 1 ? [pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]] : null;
 const qdWhere = (id, ws) => { const vt = vtopOf(id); if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return `in the top of ${v?.name || v?.label || 'the vessel'}`; }
   const g = L().graphics.find(x => x.id === id); if (g) return `on ${g.name || g.label || 'the IP'}`; return `on ${allIps(ws).find(q => q.id === id)?.label || 'the IP'}`; };
 // moving the free end outside Edit layout: a mouse grabs it with the right button (Rule 2.9), a finger just holds and drags it
@@ -14084,35 +14229,38 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (ev.pointerType === 'mouse' && ev.button !== 2) return;
   ev.preventDefault();
   if (!can('operator')) return toast('Only an operator or an admin can move a hose', true);
-  const p = S.config.graphics.find(x => x.id === end.dataset.gid); if (!isQdHose(p) || p.locked) return;
-  qdDrag = { p, pts: clone(p.points), to: p.to, target: null, moved: false, start: [ev.clientX, ev.clientY] };
+  const p = S.config.graphics.find(x => x.id === end.dataset.gid), which = end.dataset.end === 'from' ? 'from' : 'to';
+  if (!qdEndMoves(p, which) || p.locked) return;
+  // the end that stays is where the hose hangs from: the dragged end is always drawn last, then turned back for a 'from' end
+  const fixed = which === 'to' ? p.points : [...p.points].reverse();
+  qdDrag = { p, end: which, pts: clone(p.points), lead: hoseLead(fixed), was: p[which], target: null, moved: false, start: [ev.clientX, ev.clientY] };
 });
 window.addEventListener('pointermove', ev => {
   if (!qdDrag) return;
   if (!qdDrag.moved && Math.hypot(ev.clientX - qdDrag.start[0], ev.clientY - qdDrag.start[1]) < 4) return;
   qdDrag.moved = true;
-  const c = canvasPt(ev), t = qdTarget(qdDrag.p, c);
-  qdDrag.target = t; qdDrag.p.to = null; qdDrag.p.points = hoseSag(qdDrag.p.points[0], t ? t.c : c);
+  const c = canvasPt(ev), d = qdDrag, t = qdTarget(d.p, c, d.end), from = d.end === 'to' ? d.pts[0] : d.pts[d.pts.length - 1];
+  d.target = t; d.p[d.end] = null;
+  const pts = hoseSag(from, t ? t.c : c, d.lead); d.p.points = d.end === 'to' ? pts : pts.reverse();
   renderPipes();
 });
 // iPhone Safari pans or zooms on a finger drag unless the touch is stopped here (touch-action is not honoured on SVG there)
 $('#ws').addEventListener('touchstart', ev => { if (!editing && ev.target.closest?.('div.qdEnd')) ev.preventDefault(); }, { passive: false });
-window.addEventListener('pointercancel', () => { if (!qdDrag) return; Object.assign(qdDrag.p, { points: qdDrag.pts, to: qdDrag.to }); qdDrag = null; renderPipes(); });
+window.addEventListener('pointercancel', () => { if (!qdDrag) return; Object.assign(qdDrag.p, { points: qdDrag.pts, [qdDrag.end]: qdDrag.was }); qdDrag = null; renderPipes(); });
 window.addEventListener('pointerup', async () => {
   if (!qdDrag) return;
   const d = qdDrag; qdDrag = null;
-  if (!d.moved) { Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); return; }
-  d.p.to = d.target?.id ?? null; renderPipes();
+  const back = () => { Object.assign(d.p, { points: d.pts, [d.end]: d.was }); renderPipes(); };
+  if (!d.moved) return back();
+  const at = d.target?.id ?? null; d.p[d.end] = at; renderPipes();
   // a person moved the end by hand: they say the real hose is there too before it is kept (Fritz, 2026-11-06, Rule 5.34)
-  const hn = d.p.label || d.p.name || 'The hose', there = d.p.to ? qdWhere(d.p.to, d.p.workspace) : 'off (loose, no flow)';
+  const hn = d.p.label || d.p.name || 'The hose', there = at ? qdWhere(at, d.p.workspace) : 'off (loose, no flow)';
   await new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));      // the hose shows where it went before the question
-  if (!confirm(`Is the real ${hn} ${there} now?\n\nOK = Yes, it is connected: keep it there.\nCancel = No: put it back where it was.`)) {
-    Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); return;
-  }
+  if (!confirm(`Is the real ${hn} ${there} now?\n\nOK = Yes, it is connected: keep it there.\nCancel = No: put it back where it was.`)) return back();
   try {
-    await api('POST', '/ui/hose', { id: d.p.id, to: d.p.to, points: d.p.points });
-    toast(`${d.p.label || d.p.name || 'The hose'}: ${d.p.to ? 'its end is ' + qdWhere(d.p.to, d.p.workspace) : 'its end is loose (no flow)'}`);
-  } catch (e) { Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); toast(e.message, true); }
+    await api('POST', '/ui/hose', { id: d.p.id, to: at, points: d.p.points, end: d.end });
+    toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose (no flow)'}`);
+  } catch (e) { back(); toast(e.message, true); }
 });
 // a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
 function valveShut(name) {
