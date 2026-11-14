@@ -20,6 +20,19 @@ really changes.
   (Rule 1 of the Old Ways Policy: never force old items to a new standard).
 - **C. Fixed.** It is set nowhere today. It can get a box on the Default tab, or stay fixed.
 
+## Defaults are for new things
+
+OakBarn Brewery, 2026-11-14: "Generally Defaults are used for New Things. Existing Templates might have their Properties already
+set. For an Example, the Blickmann Riptide Template might have it's label attributes set, and the defaults for a New Blickmann
+would follow the Template settings, not the Default Tab. A new Pump Template (User Created) would use the Defaults when it is
+built."
+
+- A **new** item starts with the Default tab's values.
+- A new item made **from a Template** starts with the Template's own settings. The Default tab only fills in what the Template
+  leaves unset.
+- A **new User Template** takes the Default tab's values when it is built, and keeps them from then on.
+- Items and Templates that already exist keep their own settings.
+
 ## The list
 
 | # | Default | Now | Other place | Kind | Your choice: box on the Default tab? Remove the other place? |
