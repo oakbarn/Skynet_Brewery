@@ -2495,6 +2495,10 @@ is only a browser showing it.
    (Node.js, USB board support), then starts the Brain in the Background with no window (lib/startbrain.js) and closes. The Brain
    still gets Windows' shut down, restart and sign out message, so everything goes Off first (Rule 6.31). What it writes goes to
    data\brain.log (a new one each start, the last one kept as .old). It did not start: the black window stays open with the last lines.
+   The Brain must keep running after the program that started it ends (OakBarn Brewery, 2026-11-14: the panel window opened, then
+   "Failed to fetch": Windows had ended the Brain together with Skynet Brewer). On Windows it is started through cmd's `start /b`
+   (lib/brainstate.js spawnInBackground), so it runs on by itself and keeps its hidden window; the same when the Brain starts itself
+   again (Standby, Start).
    The panel window is opened by the program that was double-clicked, never by the Brain in the Background (OakBarn Brewery,
    2026-11-14: "Full installer only starts the Brain": a program with no window can't bring a window to the front). **Skynet Panel**
    (Desktop and Start menu) opens the panel window; the Brain is started first if it is not running. The Setup's last page starts the
@@ -4424,6 +4428,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
 - 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
 - 2026-11-14: Rule 5.40 (OakBarn Brewery: "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need an exit button without moving"): the unhook pop-up stays open, checks the pump live, then asks about the valves; ✖ Exit always closes it without moving.

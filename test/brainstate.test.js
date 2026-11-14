@@ -49,11 +49,20 @@ assert.equal(startAgain({ env: { INVOCATION_ID: 'x' }, dataDir: dir, spawnFn: ()
 let call = null;
 const fake = (exe, args, opt) => { call = { exe, args, opt }; return { on() {}, unref() {} }; };
 assert.equal(startAgain({ env: { PATH: 'p' }, platform: 'win32', dataDir: dir, spawnFn: fake, argv: ['node', 'server.js'], execPath: 'node.exe', execArgv: ['--no-warnings'], cwd: dir }), 'started');
-assert.deepEqual(call.args, ['--no-warnings', 'server.js']);
+// Windows: started through cmd's "start /b", so it outlives this Brain (Node's job group ends what it started, unless detached) and
+// keeps a hidden window (not detached), so it still hears a shut down. OakBarn Brewery 2026-11-14: "Failed to fetch".
+assert.equal(call.exe, 'cmd.exe');
+assert.deepEqual(call.args, ['/d /s /c "start "" /b "node.exe" "--no-warnings" "server.js""']);
+assert.equal(call.opt.windowsVerbatimArguments, true);
 assert.equal(call.opt.env.SKYNET_RESTARTED, '1');
 assert.equal(call.opt.windowsHide, true);
-assert.equal(call.opt.detached, false, 'Windows: its own hidden window, so it still hears a shut down');
+assert.ok(!call.opt.detached, 'Windows: its own hidden window, so it still hears a shut down');
+// the full path of server.js is given from the folder, so the folder name never passes through cmd
+startAgain({ env: { ComSpec: 'C:\\Windows\\cmd.exe' }, platform: 'win32', dataDir: dir, spawnFn: fake, argv: ['node', path.join(dir, 'server.js'), 'x'], execPath: 'node.exe', execArgv: [], cwd: dir });
+assert.equal(call.exe, 'C:\\Windows\\cmd.exe');
+assert.deepEqual(call.args, ['/d /s /c "start "" /b "node.exe" "server.js" "x""']);
 startAgain({ env: {}, platform: 'linux', dataDir: dir, spawnFn: fake, argv: ['node', 'server.js'], execPath: 'node', execArgv: [], cwd: dir });
+assert.equal(call.exe, 'node');
 assert.equal(call.opt.detached, true);
 assert.ok(fs.existsSync(path.join(dir, 'brain.log')));
 
@@ -71,6 +80,16 @@ const opened = [], open = (url, o) => { opened.push({ url, o }); return 'app'; }
 let code = await startBrain(root, { log: t => said.push(t), wait: 5000, open, env: { PATH: 'p' }, isListening: async () => up, spawnFn: (e, a, o) => { spawned = { a, o }; setTimeout(() => { up = true; }, 50); return child; } });
 assert.equal(code, 0);
 assert.ok(spawned.a.at(-1).endsWith('server.js'));
+// Windows: the Brain is started through cmd (see startAgain), and cmd ending at once (code 0) is not the Brain failing
+up = false;
+const cmdChild = { on(ev, f) { if (ev === 'exit') setTimeout(() => f(0), 10); }, unref() {} };
+code = await startBrain(root, { log: () => {}, wait: 5000, open: () => 'app', platform: 'win32', isListening: async () => up, spawnFn: (e, a, o) => { spawned = { e, a, o }; setTimeout(() => { up = true; }, 100); return cmdChild; } });
+assert.equal(code, 0, 'cmd ended at once: still waits for the Brain');
+assert.match(spawned.a[0], /start "" \/b ".*" "--no-warnings" "server\.js"/);
+assert.equal(spawned.o.cwd, root);
+spawned = null; up = false; opened.length = 0;
+code = await startBrain(root, { log: t => said.push(t), wait: 5000, open, env: { PATH: 'p' }, isListening: async () => up, spawnFn: (e, a, o) => { spawned = { a, o }; setTimeout(() => { up = true; }, 50); return child; } });
+assert.equal(code, 0);
 assert.equal(spawned.o.windowsHide, true);
 // the Brain in the Background never opens the window; the program that was double-clicked does, once the Brain answers
 // (OakBarn Brewery, 2026-11-14: "Full installer only starts the Brain")
