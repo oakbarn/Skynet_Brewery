@@ -1,6 +1,6 @@
-# Tab Background and Valve Profiles
+# Tab Background, Valve and Pump Profiles
 
-Both are Menu tabs (**☰ Menu**). Each profile is kept on the Brain, in `config/profiles/tab` and `config/profiles/valve`, so every Schema can use it. Only an Admin can make or change them.
+All three are Menu tabs (**☰ Menu**): Tab Background Profile, Valve Profile and Pump Profile. Each profile is kept on the Brain, in `config/profiles/tab`, `config/profiles/valve` and `config/profiles/pump`, so every Schema can use it. Only an Admin can make or change them.
 
 ## Tab Background Profile
 
@@ -56,4 +56,21 @@ When the valve opens, its **On overlay** (the red and yellow lightning bolt unle
 
 Your own pictures can still come in **pairs**: pick the closed (or off) one and its open (or on) partner fills in by itself. This works the other way round too, for any picture whose name has Closed/Open or Off/On in it (for example Pump_Off.png and Pump_On.png), as long as the partner is in your pictures.
 
-You pick the Valve Profile **only when you make a new valve**: in Edit layout, **Valves > Motorized valve**, and the panel asks which Valve Profile to start from (the **Default** Menu tab sets the one picked first). After that, the valve is changed in its own properties, where **Orientation** and the graphics can be set again.
+You pick the Valve Profile **only when you make a new valve**: in Edit layout, **Valves > Motorized valve**, the Add box has a **Valve Profile** dropdown. It starts on the Valve Profile marked **Default**, and you can pick another or **(none)**. After that, the valve is changed in its own properties, where **Orientation** and the graphics can be set again.
+
+**Default:** switch **Default** on in one Valve Profile and the Add box picks it first. Only one in the list is the Default: turning it on in one turns it off in the others.
+
+## Pump Profile
+
+A Pump Profile is how a new pump starts. Its picture comes from the pump you pick (the model), so the profile holds the rest:
+
+- **Orientation**: Right or Left.
+- **Cover**: None or a color.
+- **Inlet IP** and **Outlet IP**: which of the 8 spots ([The Pump Standard](130-pump-standard)).
+- **Hose or Pipe**: what is drawn from the pump's ports to its IPs.
+- **Overlay**: what shows over it while it runs.
+- **IP Type In** and **IP Type Out**: Tri-Clamp, NPT, BSP or Quick Disconnect. Empty: from its Ports.
+
+The **Pump Add box** has a **Pump Profile** dropdown. It starts on the Pump Profile marked **Default** and fills the boxes below with it; pick another and they change to it. You can still change any box before **➕ Add Device**. After that, the pump is changed in its own properties.
+
+**Default:** as for Valve Profiles, one Pump Profile can be marked Default.
