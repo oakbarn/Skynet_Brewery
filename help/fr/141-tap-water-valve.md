@@ -35,5 +35,4 @@ Exactement comme tout Manual Valve Widget (Règle Skynet 5.15, voir la page Pipe
 
 ## Taille {#size}
 
-**Autosize to pipe** est activé au départ : le robinet prend la taille du flexible qui y est branché, donc son filetage est aussi large que le flexible. Désactivez
-Autosize dans ses Properties pour taper une Width et une Height plus grandes.
+**Autosize to pipe** est toujours activé : le robinet prend la taille du flexible qui y est branché, donc son filetage est aussi large que le flexible.

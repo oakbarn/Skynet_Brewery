@@ -32,6 +32,23 @@ Try a brew day without touching any hardware, with time running faster or skippi
 - **BeerXML mapping**: which variables a BeerSmith recipe fills.
 - **Start these processes when the server starts**: tick processes that should always run.
 
+## Panel settings: screen, Tabs and alerts (admins)
+
+These change things already made and how the whole panel works, for every Schema (they used to be on the Default tab; Skynet Rule 2.42). What a **new** thing starts with is on [Default settings](155-default-settings).
+
+- **Tabs**: **Tab Style**, the look of every Tab that has no Tab Style of its own ([Tab Styles](101-tab-styles)).
+- **Menu Bar**: hide the Menu Bar on Tabs ([The Menu Bar](40-menu-bar)).
+- **Sound**: **Sound on** (this screen, right now) and **Turn Sound On when starting**.
+- **On startup**: the Zoom and Full screen the panel starts with ([Zoom and Full screen](41-zoom-and-full-screen)).
+- **Rich Text Embedded Code**: **\L Rich Text Code Size (px)**.
+- **Hover Help**: **Hover Delay (ms)** ([Hover help in dialogs](147-hover-help)).
+- **Phones and tablets**: can they edit, and move things ([Phones and tablets](45-phones-and-tablets)).
+- **Grain weight label** and the gravity points label ([Recipe tab](99-recipe-tab)).
+- **Hop alerts**: warning minutes, joining alerts, a sound, saying them out loud, and the browser voice.
+- **Order of the Menu**: type a number to move a Menu tab.
+
+Press **Save** under them.
+
 ## Pictures
 
 How PNG and JPG pictures get their sharp SVG copies. See [Media](07-media).

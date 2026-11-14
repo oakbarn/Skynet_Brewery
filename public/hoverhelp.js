@@ -1,11 +1,11 @@
 // Hover help (Skynet Rule 2.38, Fritz 2026-11-06: "Dialogs should be kept as clean as possible. Explanations of what it does
 // need to be in a Hover Help. Hover over the Label of the dropdown or field and pop up Help as long as the hover is there").
 // A field's name (a label with class tipLbl, or anything with data-help) keeps its explanation out of the dialog. Rest the mouse
-// on the name and a small help box shows its explanation (at once, or after the Hover Delay set on ☰ Menu > Default settings); it stays as long as the mouse is on the name and goes away
+// on the name and a small help box shows its explanation (at once, or after the Hover Delay set in Settings > Panel settings); it stays as long as the mouse is on the name and goes away
 // when the mouse moves off. A tap (phones and tablets, Rule 2.35) or a click still opens the small pop-up with Close (Rule 18.16).
 // One shared helper that watches the whole page, so every dialog of the Panel and of the BruControl Import gets it by itself.
 export const HOVER_DELAY_MS = 0;        // the default: Fritz, 2026-11-06: "Help for any Choice is always available instantly"
-export const HOVER_DELAY_MAX = 5000;    // the Hover Delay box on ☰ Menu > Default settings takes 0 to 5000 ms
+export const HOVER_DELAY_MAX = 5000;    // the Hover Delay box in Settings > Panel settings takes 0 to 5000 ms
 // how long the mouse rests on a name before its hover help shows (OakBarn Brewery, 2026-11-14: "Add a Default delay for Hover Help
 // in the Default tab in milliseconds"). Empty or not a number: the default (0, at once). Rounded, and kept from 0 to 5000.
 export function hoverDelayOf(v) {
