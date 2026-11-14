@@ -240,8 +240,8 @@ aux seuls Devices du BM : Brewery Mega Arduino.
 
 Dans Skynet, un nom peut être changé assez facilement. En plus d'un champ normal où vous pouvez écrire votre propre nom libre, il y a un
 bouton qui convertit tous les noms en Suggested Name, si vous n'avez pas choisi d'utiliser le Suggested Name plus tôt. **Important :**
-cliquer sur le bouton Update to Suggested Name change tous les noms en Suggested Name. Les noms peuvent toujours être modifiés un par
-un. Il est fortement conseillé d'utiliser le Suggested Name de Skynet, car certaines fonctions marchent mieux telles qu'elles ont été
+cliquer sur le bouton **🏷 Suggested Names** > **💾 Convert** change tous les noms en Suggested Name. Les noms peuvent toujours être
+modifiés un par un (**💾 Update to Suggested** change un seul nom). Il est fortement conseillé d'utiliser le Suggested Name de Skynet, car certaines fonctions marchent mieux telles qu'elles ont été
 prévues pour ce format. Ces fonctions existent toujours, mais peuvent ne servir à rien si les noms s'écartent du format Suggested Name.
 
 En Edit layout, **🏷 Suggested Names** liste chaque Device et Widget dont le Name n'est pas
