@@ -32,7 +32,7 @@
 
 **.backpath, .backpath_2, .backpath_3**: the three background picture paths of an item (they were imagePath_1, _2, _3). `background = 1, 2 or 3` picks one; 0, blank or over 3 shows none; `name.image = "path"` changes .backpath. See [Pictures on items](25-picture-paths).
 
-**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout.
+**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout, as a white circle inside a colored ring.
 
 **List box** (dropdown, drop down list box): a box with a ▼ that opens a list of choices. Type a letter to jump to a choice; **➕ Add new ...** at the end makes a new one. See [List Boxes (Dropdowns)](189-list-boxes).
 
