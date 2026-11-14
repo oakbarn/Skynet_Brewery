@@ -4,7 +4,9 @@ Le **Brain** est l'ordinateur (ou le Raspberry Pi) qui fait tourner Skynet. Sur 
 
 ## Fermer la fenêtre du panel {#closing-the-panel-window}
 
-Fermer la fenêtre du panel avec son **X**, ou fermer un onglet du navigateur, **n'arrête jamais le Brain**. Votre téléphone, un autre ordinateur ou un Process en cours peut encore s'en servir, et un brassage ne doit pas s'arrêter parce qu'une fenêtre a été fermée. Pour rouvrir la fenêtre du panel, double-cliquez sur **Skynet Brewer** sur le Bureau.
+Fermer la fenêtre du panel avec son **X**, ou fermer un onglet du navigateur, **n'arrête jamais le Brain**. Votre téléphone, un autre ordinateur ou un Process en cours peut encore s'en servir, et un brassage ne doit pas s'arrêter parce qu'une fenêtre a été fermée. Pour rouvrir la fenêtre du panel, double-cliquez sur **Skynet Panel** (ou **Skynet Brewer**) sur le Bureau. Si le Brain ne tourne pas, il est démarré d'abord.
+
+La fenêtre du panel ne s'est pas ouverte ? Tapez **http://localhost:8080** dans Edge ou Chrome sur l'ordinateur du Brain.
 
 ## ☰ Menu > ⏻ Close Skynet Panel and the Brain
 
