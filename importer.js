@@ -16,6 +16,7 @@ import { findParts, itemKind, guessPartDetails, cleanPartDetails, PART_PAGES, fi
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir, openInDefaultBrowser } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
+import { keepConsoleTitle, IMPORTER_TITLE } from './lib/consoletitle.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
 import { isHeatElem, isCoolPump, HEAT_KEYS, PUMP_METHOD_KEYS } from './public/heatmethod.js';
 import { HYDRO_MODELS } from './public/hydrometer.js';
@@ -440,6 +441,7 @@ server.listen(PORT, '127.0.0.1', () => {
   if (how === 'app') console.log('Opened the Importer in its own window.');
   else if (how === 'browser') console.log('Opened the Importer in your browser (no Edge or Chrome found).');
   else console.log(`Open ${url} in a browser.`);
+  keepConsoleTitle(IMPORTER_TITLE);   // its black window keeps its own name, not "Windows PowerShell" (Rule 2.36)
 });
 server.on('error', e => {
   if (e.code === 'EADDRINUSE') {

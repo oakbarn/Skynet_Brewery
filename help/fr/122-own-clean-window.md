@@ -26,6 +26,7 @@ Comme elle a son propre profil, **connectez-vous une fois** dans la fenêtre pro
 - **☰ Menu > ⏻ Close Skynet Brewer** arrête le panel, ferme la fenêtre noire et ferme aussi la fenêtre propre (voir [Fermer Skynet Brewer](95-closing-skynet-brewer)).
 - Fermer la fenêtre noire avec son **X** ferme aussi la fenêtre propre.
 - Fermer la **fenêtre propre** avec son X n'arrête **pas** le panel (un brassage ne doit jamais s'arrêter parce qu'une fenêtre a été fermée). Pour la rouvrir, double-cliquez à nouveau sur **Skynet Brewer** : le panel tourne toujours, il ouvre donc simplement sa fenêtre.
+- Pendant que le panel tourne, la fenêtre noire attend dans la barre des tâches sous le nom **Skynet Brewery Panel - keep open while brewing**. Skynet fait certaines tâches en arrière-plan avec de petits assistants Windows PowerShell, qui la renommaient « Windows PowerShell ». Ce n'est pas une fenêtre oubliée : la fermer arrête le panel.
 
 ## Autres ordinateurs et téléphones {#other-computers-and-phones}
 

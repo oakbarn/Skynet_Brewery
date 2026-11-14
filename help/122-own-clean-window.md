@@ -26,6 +26,7 @@ Because it has its own profile, **sign in once** in the clean window the first t
 - **☰ Menu > ⏻ Close Skynet Brewer** stops the panel, closes the black window and closes the clean window too (see [Closing Skynet Brewer](95-closing-skynet-brewer)).
 - Closing the black window with its **X** also closes the clean window.
 - Closing the **clean window** with its X does **not** stop the panel (a brew must never stop because a window was closed). To open it again, double-click **Skynet Brewer** again: the panel is still running, so it just opens its window.
+- While the panel runs, the black window waits on the task bar named **Skynet Brewery Panel - keep open while brewing**. Skynet does some jobs in the Background with small Windows PowerShell helpers, and those used to rename it "Windows PowerShell". It is not a stray window: closing it stops the panel.
 
 ## Other computers and phones
 
