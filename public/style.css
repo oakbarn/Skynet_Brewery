@@ -1083,6 +1083,9 @@ dialog.askDiscard { width: min(420px, 94vw); }
 .miniDlg .miniBody { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 8px 0; }
 .miniDlg .miniBody .full, .miniDlg .miniBody > textarea, .miniDlg .miniBody > p { grid-column: 1 / -1; }
 .miniDlg textarea.strEntry { width: 100%; box-sizing: border-box; font: inherit; resize: vertical; }
+/* the ⬢ and ⬆ pop-ups of the model dialog (Pump, Rule 2.51): title and buttons frozen at the top, no bottom row */
+.miniDlg.miniModel { padding-top: 0; }
+.miniDlg.miniModel .miniHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
 /* Add Pump step 2 (Fritz, 2026-11-04): the pump list, each row with its picture */
 dialog.pumpPick { max-width: 560px; width: calc(100% - 32px); }
 /* a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): the details, then Close or Send */
@@ -1115,6 +1118,8 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .hhHead { display: block; font-size: 1.05em; }
 /* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
 .hoverHelp.hhHasLinks { pointer-events: auto; }
+/* a balloon taller than the window is cut to fit and scrolls (OakBarn Brewery, 2026-11-14); the mouse may go into it to scroll */
+.hoverHelp.hhScroll { pointer-events: auto; overflow-y: auto; overscroll-behavior: contain; }
 .hhLink { color: #0b57b0; text-decoration: underline; cursor: pointer; }
 .hhLink:hover { color: #08408a; background: rgba(11,87,176,.1); border-radius: 3px; }
 .tipDlg .hhLink { color: #6cb6ff; }      /* the tap pop-up has the dialog's own (dark) colors */
