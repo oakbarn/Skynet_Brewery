@@ -1399,6 +1399,10 @@ Widgets have **no flow direction** (a check valve is still the only one-way fitt
 Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
 IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
 Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+**How an IP marker looks on a Tab** (OakBarn Brewery, 2026-11-14: "Tab IP circles white (250,250,250)"): a white circle
+(250,250,250, the same White as Rule 2.7) inside its colored ring, with black letters, like the IP pictures in Help. The ring keeps
+its color (orange for a plain IP, blue for water and valves, green for pumps, purple for probe tees and thermowells). A live IP
+still fills with its ring color. Both programs.
 
 5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
 - A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
@@ -4417,6 +4421,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
 - 2026-11-14: Rule 5.40 (OakBarn Brewery: "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need an exit button without moving"): the unhook pop-up stays open, checks the pump live, then asks about the valves; ✖ Exit always closes it without moving.
 - 2026-11-14: Rule 2.42 (OakBarn Brewery: "So remove them from the Tab", picked "One marked Default in its list"): new Pump Profile Menu tab; one Valve and one Pump Profile can be marked Default; the Pump and Valve Add boxes have a Profile dropdown starting on it; the Valve Profile pop-up and the Default tab's Valve Profile box are gone (it became the Default mark once). Rule 5.40: a safety pop-up before a hose end is unhooked (pump running: turn it Off first, no move; else ask about gravity draining, Yes moves). Help 33, 36, 127, 155 (and French). Both programs.
 - 2026-11-14: Added Rule 18.37 (OakBarn Brewery, PDF "Blichmann Riptide Dialogs 3"): every tap pop-up of Hover Help has ✖ Close frozen at the top and none at the bottom; switching a pump's Orientation swaps its Inlet IP and Outlet IP to the mirror spot; the Pump's Interface, Name, Inlet IP, Hose or Pipe, Graphic and Orientation Hover Help are his text and pictures word for word (5 new pictures in media/help_pictures). Help 115 (and French) updated. Both programs.
