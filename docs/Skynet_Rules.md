@@ -891,6 +891,11 @@ Help 155).
   Default tab (it was "Defaults set somewhere else (to look at)") shows the fixed Skynet values a new item starts with: Pump and Valve
   size (the Standards), pipe fittings always size to their pipes, Pump cover color None, Flow color Blue, the Skynet Dial, Alarm Set
   Graphic (Layer 2) None.
+- **New things only for Labels, Text Boxes and the Default pipe size** (OakBarn Brewery, 2026-11-14: "New Things Only"). Each item
+  keeps the Default tab's Labels, Text Boxes and Default pipe size as they were when it was made (its newLook: only what differs from
+  a fresh install), kept on Save layout. An item made before has the fresh install's look. Once per Schema, every item already made
+  got the Default tab's values of that day, so nothing changed look. Precedence stays: the item's own setting, then its Tab Style,
+  then its kept Default. The Importer and Schema Templates made on the Brain start with the fresh look.
 - **Section titles stand out** (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight
   sections"): each section title on the Default tab has a blue back.
 
@@ -4290,6 +4295,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.42 (OakBarn Brewery: "New Things Only"): Labels, Text Boxes and the Default pipe size reach only new items: each item keeps them as they were when made (newLook); once per Schema existing items kept the values of that day. Help 49, 155 (and French).
 - 2026-11-14: Rule 2.42 (OakBarn Brewery): the Default tab is only for new things. Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Phones and tablets, the grain and gravity labels, Hop alerts and the Order of the Menu moved to the new Settings > Panel settings: screen, Tabs and alerts. "Defaults set somewhere else" renamed **Skynet Defaults for New User Created Items** with his text, now the fixed Skynet values. Default tab section titles get a blue back. Help 9, 22, 33, 40, 41, 45, 49, 99, 101, 147, 151, 155, 186 (and French).
 - 2026-11-14: Added Rule 10.10 (OakBarn Brewery: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar"): Settings > Simulation is gone; its settings are on the Simulator bar's new ⚙ Settings panel. Rule 10.4 changed to match. Help 20, 77, 85 (and French).
 - 2026-11-14: OakBarn Brewery's 21 choices on docs/Default_Settings_Other_Places.md. Rule 2.42: new Default tab part **New User Templates and Schemas** (Look of a new Schema, On overlay for a new User Pump and a new User Valve, Push Lockout); "Defaults set somewhere else" cut to 5 rows. Rules 5.14 and 5.36: pipe fittings always size to their pipes, the Autosize switch is gone. Rule 6.3: Lost Link (s) is a must-fill box on the Interface dialog, 10 s on every Interface and sample. Rule 6.7: Push Lockout default. Rule 7.12: a new Alarm's Layer 2 starts at None. Rule 7.15: On overlay defaults. Rule 10.5: a new empty Schema has no Interface.

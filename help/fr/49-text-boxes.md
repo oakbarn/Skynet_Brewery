@@ -48,9 +48,10 @@ Une nouvelle installation commence avec :
 
 - **Tab's font** : chaque Tab utilise la police de son Tab Style, et la police normale du panel quand son Tab Style n'en a pas. Ainsi
   chaque Tab a toujours une police. Une police choisie sur l'onglet Default est utilisée là où un Tab Style n'en a pas.
-- **Les couleurs, l'Alignment, Bold et la Font suivent le Default.** Un élément laissé sur **Default** dans ses propriétés utilise ce
-  que dit l'onglet Default. Changez-le là et chaque élément sur Default change avec lui. Choisissez une couleur à lui dans les
-  propriétés de l'élément et cet élément la garde.
+- **Les réglages par défaut sont seulement pour les nouvelles choses** (Règle Skynet 2.42). Un **nouvel** élément laissé sur **Default**
+  dans ses propriétés utilise ce que disait l'onglet Default quand il a été créé (son Tab Style passe quand même en premier). Changer
+  l'onglet Default plus tard ne change que les éléments créés après : **les éléments déjà faits gardent leur aspect**. Choisissez une
+  couleur à lui dans les propriétés de l'élément et cet élément la garde.
 - **La Value d'un Device ou d'un Widget** suit les couleurs des Text Boxes seulement une fois que vous les changez par rapport à
   une nouvelle installation, donc une nouvelle installation ne met pas de case noire derrière les valeurs sur vos images.
 - **Visible, Word Wrap, la taille et la place sont copiés quand un élément est créé.** Un nouveau Device, Widget ou Text commence
