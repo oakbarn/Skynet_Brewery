@@ -10,7 +10,7 @@ After any stop, check your vessels before you turn a heater back On. A heater wi
 
 - **Closing the browser does not stop a brew.** Processes, Hysteresis, PID and the rest run in Skynet Brewer on the Brain, not in the browser.
 - **The PC is kept awake while you brew.** While any Process runs or anything is On (a pump, a heater, a valve, a control), Skynet asks Windows not to sleep. The screen may still go dark; that is fine. When nothing is running, the PC may sleep again as usual.
-- **Everything goes Off when Skynet stops.** When the black window is closed, when Windows shuts down or restarts, or from ☰ Menu > Close Skynet Brewer, Skynet turns every output Off before it stops. If Skynet can't (a power cut, a crash), each board turns its own outputs Off by itself after its **Lost link** delay (10 seconds to start, set on the Devices page).
+- **Everything goes Off when Skynet stops.** When Windows shuts down or restarts, or from ☰ Menu > Close Skynet Panel and the Brain or Put the Brain in Standby, Skynet turns every output Off before it stops. If Skynet can't (a power cut, a crash), each board turns its own outputs Off by itself after its **Lost link** delay (10 seconds to start, set on the Devices page).
 - **After a restart, everything starts Off.** Nothing turns back On by itself, and no Process carries on from where it was until you press **Resume** (below). A Process you set to start when the panel starts still starts, from its top.
 - **A notice tells you what happened.** If Skynet stopped during a brew, a red notice on every screen says when it stopped, what was On, and which Process was on which step and line. Close it with ✕ (it closes on every screen).
 - **▶ Resume.** For **15 minutes after the stop**, the red notice has a **▶ Resume** button (Operators and Admins). One click turns back On what was On (pumps, heaters, valves, PWM, Hysteresis, PID and other controls, running timers) and starts each Process again **at the step it was on**, with its variables as they were. A Process with no step starts again at the line it was on. A sleep or wait at that step starts over. Check your vessels first. After 15 minutes the button is gone, and you turn things back On yourself.
@@ -34,4 +34,4 @@ These are Windows settings. Skynet does not change them for you.
 - What was On and where each Process was is written to `data/brewing_now.json` every few seconds while brewing (written safely, so a power cut leaves the last good copy). The next start reads it for the notice and the Resume button. A Stepper motor never starts moving again by itself.
 - Sleep is noticed when Skynet's clock jumps by more than the shortest Lost link delay of your boards (at least 3 seconds).
 - "Update waiting" is read from the Windows registry every 30 minutes (no admin rights needed).
-- See also: [Closing Skynet Brewer](95-closing-skynet-brewer).
+- See also: [Closing Skynet Brewer and Standby](95-closing-skynet-brewer).
