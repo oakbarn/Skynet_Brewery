@@ -9525,11 +9525,18 @@ async function dbGroupDialog(g, me, cur) {
     document.body.append(d); d.showModal();
   });
 }
+// On the model dialog (the Pump Add box and Pump Properties, the Blichmann RipTide, Rule 2.51) every ⬢ and ⬆ pop-up has its title and
+// buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
+// Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
+const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"]');
 function layerDialog(title, build, canDelete = false, { bottom = true } = {}) {
   return new Promise(res => {
-    const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
-    const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
-    d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
+    const model = onModelDialog();
+    const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' + (model ? ' miniModel' : '') });
+    const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
+      h('button', { type: 'button', class: 'primary', ...(model ? { title: 'Keep these settings and go back to the dialog. They are saved when you Save the dialog.' } : {}), onclick: () => done('ok') }, model ? '💾 Keep' : '💾 Save'));
+    if (model) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
+    else d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
     const done = r => { d.close(); d.remove(); res(r); };
