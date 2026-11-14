@@ -4178,7 +4178,7 @@ Both programs: the BruControl Import's Build page uses the same dialogs.
    itself. Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right is Inlet Bottom Left, Outlet Top Right. The
    Orientation Hover Help says so ("Add Help in Orientation that switching orientation causes IPs to follow").
 3. **The Pump Hover Help is OakBarn Brewery's text and pictures, word for word** (only the spelling fixed, Rule 2.37): the Interface's
-   first paragraph, the whole Name balloon, the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
+   first paragraph, the whole Name balloon (its "Update to Suggest Name Button" names the real buttons, 🏷 Suggested Names > 💾 Convert for all and 💾 Update to Suggested for one: OakBarn Brewery, "Yes"), the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
    connect to an IP ... within 10 px"), the Hose or Pipe balloon, and the 8 IPs picture on top of the Graphic balloon and the Right /
    Left pictures on top of the Orientation balloon. The pictures are in `media/help_pictures` (the Media Setup). Help 115 has the same
    text (Hover Help = Panel Help).
