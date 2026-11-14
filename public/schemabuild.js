@@ -110,7 +110,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     if (heat === 'electric' || heat === 'gas') {
       const el = heat === 'electric'
         ? { label: `${s} element`, onText: 'HEAT', offText: 'idle' }
-        : { label: `${s} burner`, onText: 'FLAME', offText: 'off' };
+        : { label: `${s} burner`, onText: 'FLAME', offText: 'off', gasBurner: true, flameOut: 'on' };      // its Flame Out safety On (Rule 6.33)
       const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: -1, x: cx, y: 500, w: 170, h: 60 });
       probe.sim = { start: 62, heater: h.name, heatRate: 1.2, maxTemp: 212 };
       job((ROLE_JOBS[role]?.heater ?? []).filter(j => !(role === 'All In One' && j === 'Mash_Heater' && a.recirc !== 'none')), h.name);
