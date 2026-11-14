@@ -5088,7 +5088,8 @@ const LABEL_PUMP_TIP = ['⟪b:Label⟫How do you refer to this Pump? Brewing Pum
 // The Pump's Interface balloon (OakBarn Brewery, 2026-11-12, Hover Help Blichmann RipTide Dialog 1): OakBarn Brewery's own text, word
 // for word (only the spelling is fixed, Rule 2.37), with the red electrical warning where marked (Rule 6.20). Port 15 in its examples:
 // Port 6 is used elsewhere on the 3 Vessel sample. The same text is Help 115, The Interface (Hover Help = Panel Help).
-const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an Interface is connected. The Interface is the part of the Bridge between the "Brain" (Skynet Panel) and your Red Pump. If the "Brain" is on a Computer, the computer cannot supply any 120 VAC power for any connected device. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:',
+// Its first paragraph is the one in Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14), word for word.
+const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Red Pump. If the "Brain" cannot supply 120 VAC power for any connected device but only a trigger signal. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:',
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
@@ -5119,12 +5120,14 @@ const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : DEVICE_TIPS.tab;
 // The Pump's Name balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text (only the spelling fixed), the
 // Suggested Name read part by part with each part in red, and a short Predictive Text note (its words are a link to that Help).
 // The same text is in Help 46, Device names, and Help 115, The Name.
+// Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14): the whole Name balloon is his text, word for word (only the spelling is
+// fixed, Rule 2.37: "Update to Suggest Name" is "Update to Suggested Name"); his bold parts of the name are the red parts here.
 const NAME_PUMP_TIP = ['This is how the Device (or a Widget) is referred to as the unique identifier for the Skynet Panel to access and use the Red Pump you just built.\nIn Skynet, there are some standards such as Prohibited Characters such as :, " and others that could interfere with the Computer\'s Operating System or Skynet\'s own background code. No spaces are allowed in Skynet names.',
   'Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the Device (or Widget) just by the name alone.',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nInterfaceid: ⟦BM⟧_15_DO@Pump_Red~Pump_BH\nPort: BM_⟦15⟧_DO@Pump_Red~Pump_BH\nType: BM_15_⟦DO@Pump⟧_Red~Pump_BH\nLabel: BM_15_DO@Pump_⟦Red~Pump⟧_BH\nTABid: BM_15_DO@Pump_Red~Pump_⟦BH⟧',
   'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
-  'Predictive Text: in a Process you never type this long name. Type BM and the list shows only the Devices on the BM Interface; pick Red Pump from it. The Suggested Name is what makes that work.',
-  'In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have not chosen to do so earlier.'].join('\n\n');
+  'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
+  'In Skynet a name can be changed quite easily. Besides a normal edit Field where you can use your own free form name, there is a Button where all Names can be converted to a Suggested Name, if you have not chosen to use Suggested Name earlier. Important: Clicking the Update to Suggested Name Button will change all the names to the Suggested Name. Names can still be edited individually. It is highly recommended to use the Skynet Suggested Name as certain features work best as they were set up to use that format. The features still exist, but may be worthless if the Names vary from the Suggested Name Format.'].join('\n\n');
 const nameTip = e => isPumpDev(e) ? NAME_PUMP_TIP : DEVICE_TIPS.name;
 // The Pump's Port balloon (OakBarn Brewery, 2026-11-12: "Add this to the Port Hover Help on the Blickman Riptide Dialogs in a similar
 // manner as the Label Hover Help"): the Available Ports balloon, then his Suggested Name example with the Port part marked red
@@ -7481,7 +7484,9 @@ const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(i
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
 // OakBarn Brewery, 2026-11-12 (Blichmann RipTide Dialog 2): "Get Rid of Path as useless information" on a Skynet pump drawing; its
 // Graphic balloon is his text. A User pump keeps its one Path (its picture is picked there).
-const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is set by Skynet and cannot be changed.';
+// Blichmann Riptide Dialogs 3: the picture of a pump with its 8 IPs on top of the text
+const PUMP_8_IPS_PIC = '⟪img:help_pictures/Pump_8_IPs.png⟫';
+const PUMP_GRAPHIC_TIP = PUMP_8_IPS_PIC + 'The Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is set by Skynet and cannot be changed.';
 const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: pumpModelOf(it) ? PUMP_GRAPHIC_TIP : DEVICE_TIPS.graphic, ...x }],
   ...(pumpModelOf(it) ? [] : [['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }]]),
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }], ...PUMP_SPOT_FIELDS(it, x)];
@@ -7490,6 +7495,21 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
 const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), false, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), false, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
+// Switching a pump's Orientation (Right <-> Left) swaps its Inlet IP and Outlet IP to the opposite side too (OakBarn Brewery,
+// 2026-11-14, Blichmann Riptide Dialogs 3: "When changing Orientation from Left and Right Have the IPs swap to opposite side as well,
+// Right Become Left Left Becomes Right by at the IP Level"): Bottom Right becomes Bottom Left, Top Left becomes Top Right. A spot left
+// at its start (start) follows by itself; the lists get the new (start) and are drawn again.
+function mirrorPumpSpots(root, obj, flipH, flipV) {
+  const ins = ['pumpIn', 'pumpOut'].map(k => root?.querySelector(`select[data-k="${k}"]`));
+  if (!ins[0] || !ins[1]) return;
+  const now = { ...obj, flipH, flipV }, start = pumpSpotStart(now);
+  ins.forEach((sel, i) => {
+    const v = sel.value, to = v && PUMP_SPOTS[v] ? SPOT_FLIP_H[v] : '';
+    sel.replaceChildren(...PUMP_SPOT_CHOICES(now, i).map(([o, l]) => h('option', { value: o }, l)));
+    sel.value = to && to !== start[i] ? to : '';
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
 // Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
 const PUMP_COVER_TOGGLE = (it, x = {}) => {
   const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: PUMP_TOGGLE_TIP }];
@@ -8464,15 +8484,18 @@ const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || (is
 function fieldTip(name, text) {
   const tipText = h('p', { style: 'white-space: pre-line' }, ...helpNodes(balloonText(text)));      // in French when French is picked in Help (Rule 11.11)
   linkify(tipText);      // its hot spots open their Help page (Rule 2.49)
-  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), tipText,
-    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Close')));
+  // its title and ✖ Close stay at the top while it scrolls, and there is no Close at the bottom (OakBarn Brewery, 2026-11-14, Blichmann
+  // Riptide Dialogs 3: "Close Button Frozen at top of All Hover Help. Get Rid of Bottom Close Buttons")
+  const d = h('dialog', { class: 'tipDlg' + (String(text).includes('⟪img:') ? ' tipWide' : ''), 'data-nomenu': '' },
+    h('div', { class: 'tipHead' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, '✖ Close')), tipText);
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  pumpIn: 'Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab. Example: the 3 Vessel 1 Pump sample pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left. Pipes joined to it slide to meet the new spot.',
-  pumpLink: 'What is drawn from the pump\'s own inlet and outlet to its Inlet IP and Outlet IP: a white Hose, or a stainless Pipe. It is drawn over the pump and its Cover, under the On overlay.',
+  // Inlet IP, Orientation and Hose or Pipe: Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14), his text and pictures word for word
+  pumpIn: '⟪img:help_pictures/Pump_8_IPs.png⟫Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab.\n\nExample 1:⟪img:help_pictures/Pump_IP_Example_1.png⟫Example 2:⟪img:help_pictures/Pump_IP_Example_2.png⟫Pipes or Hose snap connect to an IP in the selected position if the end is within 10 px of that⟪img:help_pictures/IP_Marker.png⟫when drawn.',
+  pumpLink: 'What is drawn from the pump\'s own inlet and outlet to its Inlet IP and Outlet IP: a White Hose, or a stainless Pipe. It is drawn over the pump and its Cover under the On overlay.',
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
   // (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_TEMP@1W_HLT_BH)
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
@@ -8507,7 +8530,7 @@ const DEVICE_TIPS = {
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
   graphic: 'The picture of this Device as it will show on the Tab, with its Cover and Orientation.',
-  orient: 'Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow.',
+  orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow. Switching the Orientation moves the Inlet IP and the Outlet IP to the opposite side as well: Right becomes Left and Left becomes Right (Bottom Right becomes Bottom Left, Top Left becomes Top Right). A Middle IP at the top or bottom stays where it is.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
   overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
@@ -8922,7 +8945,10 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     fh.checked = !!obj.flipH; fv.checked = !!obj.flipV;
     const cur = obj.flipH ? 'h' : '';
     const sel = h('select', { class: 'orientSel' }, ...PUMP_ORIENT.map(([k, t]) => h('option', { value: k, ...(k === cur ? { selected: true } : {}) }, t)));
-    sel.addEventListener('change', () => { fh.checked = sel.value.includes('h'); });
+    sel.addEventListener('change', () => {
+      const was = fh.checked; fh.checked = sel.value.includes('h');
+      if (was !== fh.checked) mirrorPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
+    });
     return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv)];
   }
   else if (kind === 'vorient') {     // a valve's Orientation (Rule 18.23): its own dropdown, in the Enter sequence of a new Device

@@ -4168,6 +4168,22 @@ Who's on First Issue. Just put 10 in the Slot and no comments like Empty = 10 / 
   **Hover Help** as "Empty: ...", not in its label.
 Both programs: the BruControl Import's Build page uses the same dialogs.
 
+18.37 **Blichmann Riptide Dialogs 3** (OakBarn Brewery, 2026-11-14, PDF "Blichmann Riptide Dialogs 3", the model, Rule 18.34):
+1. **Every tap pop-up of Hover Help** (the small pop-up a tap or click on a field's name opens, Rule 18.16) has its title and
+   **✖ Close** frozen at the top while it scrolls, and no Close at the bottom ("Close Button Frozen at top of All Hover Help. Get Rid
+   of Bottom Close Buttons"). Every dialog, not only the Pump's. A pop-up with pictures is wider.
+2. **Switching a pump's Orientation swaps its IPs** ("When changing Orientation from Left and Right Have the IPs swap to opposite side
+   as well, Right Become Left Left Becomes Right by at the IP Level"): an Inlet IP or Outlet IP that was picked moves to the mirror
+   spot (Bottom Right becomes Bottom Left, Top Left becomes Top Right; a Top or Bottom Middle stays), and the (start) choice follows by
+   itself. Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right is Inlet Bottom Left, Outlet Top Right. The
+   Orientation Hover Help says so ("Add Help in Orientation that switching orientation causes IPs to follow").
+3. **The Pump Hover Help is OakBarn Brewery's text and pictures, word for word** (only the spelling fixed, Rule 2.37): the Interface's
+   first paragraph, the whole Name balloon, the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
+   connect to an IP ... within 10 px"), the Hose or Pipe balloon, and the 8 IPs picture on top of the Graphic balloon and the Right /
+   Left pictures on top of the Orientation balloon. The pictures are in `media/help_pictures` (the Media Setup). Help 115 has the same
+   text (Hover Help = Panel Help).
+Both programs: the BruControl Import's Build page uses the same Pump dialogs and tap pop-ups.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4312,6 +4328,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 18.37 (OakBarn Brewery, PDF "Blichmann Riptide Dialogs 3"): every tap pop-up of Hover Help has ✖ Close frozen at the top and none at the bottom; switching a pump's Orientation swaps its Inlet IP and Outlet IP to the mirror spot; the Pump's Interface, Name, Inlet IP, Hose or Pipe, Graphic and Orientation Hover Help are his text and pictures word for word (5 new pictures in media/help_pictures). Help 115 (and French) updated. Both programs.
 - 2026-11-14: Rule 2.42 (OakBarn Brewery: "New Things Only"): Labels, Text Boxes and the Default pipe size reach only new items: each item keeps them as they were when made (newLook); once per Schema existing items kept the values of that day. Help 49, 155 (and French).
 - 2026-11-14: Rule 9.19 item 5 (OakBarn Brewery: "Uninstalled worked good. Add a Comment about not removing auxiliary programs like Tailscale if you installed them"): the uninstall warning, Help 19 (and French) and install/ReadMe.txt say helper programs like Node.js and Tailscale are not removed (remove them in Settings > Apps). Wording only. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Added Rule 9.20 (OakBarn Brewery: "a new one that is a Full install that also has the media embedded so a new install does not need the media exe separate"): every Release also has Skynet_Brewer_Full_Setup_<date>.exe, the same Setup with the Skynet pictures and sounds inside, added the add-only way; the plain Setup and the Media Setup stay. Help 19 and 183 (and French), README, install/ReadMe.txt, Release notes. Both programs. (thread "Add a Full Setup with media included")
