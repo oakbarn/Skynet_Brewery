@@ -482,7 +482,11 @@ Buttons!"). In the **Pump** Add box and Pump Device Properties (the Blichmann Ri
 row of buttons (🗑 Delete, ✖ Cancel, 💾 Save or ➕ Add Device) stay at the top while the rest scrolls under them, and the same row at
 the bottom is not shown. **Only the model for now:** "This is on the model ... Wait for that until I am 100% Finished with the model";
 every other dialog keeps its buttons at the top and at the bottom until OakBarn Brewery says the model is finished and all dialogs
-follow it. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
+follow it. **Its pop-ups too** (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann Riptide (access with the Red Up
+Arrow or Red Octagon Icons, have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue
+back"): every ⬢ and ⬆ pop-up opened from the Pump Add box or Pump Properties has its title and ✖ Cancel and 💾 **Keep** frozen at the
+top and no bottom row; Keep is blue like Save was and puts the settings back into the dialog (the dialog's own 💾 Save saves them).
+Pop-ups of other dialogs keep Save and their bottom row for now. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
 2.52 **Build mode: only what works while building** (OakBarn Brewery, 2026-11-13, PDF "Blickmann Rip Tide Mode": "GREYOUT in Build
 Mode", "Hamburger Menu does not work in build mode. Get Rid in Build mode", "Entire Area needs to be gone while Building something.
@@ -4212,6 +4216,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-14: Rule 2.38 item 7 (OakBarn Brewery: "some of the hover help needs slide bars as the box goes off the screen", the Tab and Name hover help on the Blichmann RipTide): a hover help box too tall for the window is cut to fit on the side of its name with more room and gets a scroll bar; the mouse can go into it to scroll. Both programs (the Importer uses the same hover help).
+- 2026-11-14: Rule 2.51 (OakBarn Brewery: "On any Dialog Popup on the Blickmann Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back"): the ⬢ and ⬆ pop-ups of the Pump Add box and Pump Properties have their title and buttons frozen at the top, no bottom row, and 💾 Keep (blue) in place of Save. Only the model for now. Both programs.
 - 2026-11-13: Rule 7.24 (OakBarn Brewery: after the Media Setup ran with the panel open, the pictures stayed File Not Found until the panel was closed and opened again): a missing picture is looked for again when the window comes back to the front, when pictures are added from the panel, and every 20 seconds while one is missing, so it shows by itself. Both programs.
 - 2026-11-13: Added Rule 9.19 (OakBarn Brewery, after an uninstall left the Import folder and the brew log behind; picked "All of C:\\Brewing, after a warning"): the Windows uninstall deletes everything like Start Fresh after one red warning, stops Skynet's own Node.js first (the panel with a key only it knows, the Importer with its Close call; never another Node.js program) so the brew log is not locked, and every Setup update and Fresh Start does the same, and deletes the Import folder too. The Importer note under Rule 15 no longer says an uninstall keeps the Import folder. Help 19, 184 (and French) and install/ReadMe.txt updated. Both programs.
 - 2026-11-13: Rule 9.8 (OakBarn Brewery: "I think that the Fresh Install should also delete the Media files"): Start Fresh deletes the whole media folder too, the Skynet pictures and sounds included; run the Media Setup after it (README install order). lib/skynet_media.json and tools/skynet-media-list.js are gone (no longer needed).
