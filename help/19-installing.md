@@ -42,7 +42,7 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
    - If you had the panel straight in `C:\Brewing` before, it offers to copy your data, layout, processes and pictures across. The old folder isn't changed.
 4. Start it with **Skynet Brewer** on the Desktop. The black window is the panel running; your browser opens the panel a few seconds later.
 
-To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. After one red warning it deletes **everything** in `C:\Brewing`: your Schemas, users, brew log, Processes, backups, pictures and sounds, and the Import folder with every file in it. Copy anything you want to keep somewhere else first. Close the panel before you start, or it asks you to.
+To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. After one red warning it deletes **everything** in `C:\Brewing`: your Schemas, users, brew log, Processes, backups, pictures and sounds, and the Import folder with every file in it. Copy anything you want to keep somewhere else first. It stops the panel by itself first (every output turned Off), so nothing is left behind.
 
 ## Windows: by hand, with a .bat file
 

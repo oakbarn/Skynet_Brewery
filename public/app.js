@@ -326,6 +326,7 @@ function connect() {
     schedulePipes(); updateMeters(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
+  es.addEventListener('media', () => recheckMissingPics());      // pictures added from the panel (File Move): File Not Found looks again
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1000) S.console.splice(0, 200); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
@@ -2773,6 +2774,24 @@ function imgMissing(url, node) {
   im.src = url;
   return false;
 }
+// A missing picture is looked for again (OakBarn Brewery, 2026-11-13: after the Media Setup ran with the panel open, File Not Found
+// stayed until the panel was closed and opened again; Rule 7.24). Each picture marked missing is tried again when this window
+// comes back to the front (after a Setup or File Move), when pictures are added from the panel, and every 20 seconds while any
+// is missing. Only the missing ones are tried; the Tab is drawn again once one is found.
+let recheckBusy = false;
+async function recheckMissingPics() {
+  const urls = [...imgState].filter(([, st]) => st === true).map(([u]) => u);
+  if (!urls.length || recheckBusy || document.hidden) return;
+  recheckBusy = true;
+  try {
+    const found = await Promise.all(urls.map(u => new Promise(ok => { const im = new Image(); im.onload = () => ok(u); im.onerror = () => ok(null); im.src = u + (u.includes('?') ? '&' : '?') + 'try=' + Date.now(); })));
+    const now = found.filter(Boolean);
+    if (now.length) { for (const u of now) imgState.delete(u); renderWs(); }
+  } finally { recheckBusy = false; }
+}
+window.addEventListener('focus', recheckMissingPics);
+document.addEventListener('visibilitychange', recheckMissingPics);
+setInterval(recheckMissingPics, 20000);
 const simDev = d => !d || S.devices.find(x => x.name === d)?.connection === 'simulator';
 
 // One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
