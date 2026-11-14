@@ -1391,6 +1391,10 @@ Widgets have **no flow direction** (a check valve is still the only one-way fitt
 Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
 IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
 Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+**How an IP marker looks on a Tab** (OakBarn Brewery, 2026-11-14: "Tab IP circles white (250,250,250)"): a white circle
+(250,250,250, the same White as Rule 2.7) inside its colored ring, with black letters, like the IP pictures in Help. The ring keeps
+its color (orange for a plain IP, blue for water and valves, green for pumps, purple for probe tees and thermowells). A live IP
+still fills with its ring color. Both programs.
 
 5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
 - A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
@@ -4401,6 +4405,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
 - 2026-11-14: Added Rule 18.37 (OakBarn Brewery, PDF "Blichmann Riptide Dialogs 3"): every tap pop-up of Hover Help has ✖ Close frozen at the top and none at the bottom; switching a pump's Orientation swaps its Inlet IP and Outlet IP to the mirror spot; the Pump's Interface, Name, Inlet IP, Hose or Pipe, Graphic and Orientation Hover Help are his text and pictures word for word (5 new pictures in media/help_pictures). Help 115 (and French) updated. Both programs.
 - 2026-11-14: Rule 2.51 (OakBarn Brewery: "Apply the Freeze to any dialog that is updated"): every dialog or pop-up that is changed gets the frozen top; the Pipe and Hose Properties and the pipe or hose Move pop-up have it now. Rule 5.37: the Move pop-up of a pipe or hose has a red 🗑 Delete Pipe / Delete Hose ("Add Delete Button to Hose and Pipe Disconnect Dialog"); deleting a pipe or hose takes its own IPs with it (a coupling or IP point on its end with nothing else on it; "I deleted a Pipe but the IPs where still on the Build"). Rule 5.37: a let-go pipe end can be dragged along its line to shorten it ("After a Pipe is disconnected to Move, able to Shorten"). Rule 5.28: a QD hose being moved hangs through several bend points ("add some bend points to make the Hose Movement dynamic"). Help 24, 127 (and French).
 - 2026-11-14: Added Rule 5.40 (OakBarn Brewery: "Pipe and Hose Attributes as to IP Type that are set by the selected Defaults"): every pipe and hose has an IP Type at start and at end (Tri-Clamp, NPT, BSP, Quick Disconnect), the size of the pipe; Default pipe IP Type and Default hose IP Type on the Default tab, beside the sizes; IP Type In and Out on a pump; existing pipes, hoses and pumps took them once. Rule 5.27: a pump's Hose or Pipe is drawn like the pipe joined to its IP, and a corner IP is reached from the Side or Top/Bottom (Auto by default). Ends drawn as their IP Type; a hose end with a Quick Disconnect moves at any time, one end at a time (hoses only). Help 24, 127, 130, 155 (and French). Both programs.
