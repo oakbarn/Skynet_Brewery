@@ -21,12 +21,18 @@ export function helpOf(el) {
   return '';
 }
 
-// where the help box goes: just under the name, or above it when there is no room below; kept on the screen
+// where the help box goes: just under the name, or above it when there is no room below; kept on the screen. A box taller than
+// the room on either side goes on the side with more room and gets maxH: it is cut to fit and shows a scroll bar (OakBarn Brewery,
+// 2026-11-14: "some of the hover help needs slide bars as the box goes off the screen").
 export function placeBubble(r, box, view) {
-  let top = r.bottom + GAP;
-  if (top + box.h > view.h - 4 && r.top - GAP - box.h >= 4) top = r.top - GAP - box.h;
-  const left = Math.max(4, Math.min(r.left, view.w - box.w - 4));
-  return { left: Math.round(left), top: Math.round(Math.max(4, top)) };
+  const left = Math.round(Math.max(4, Math.min(r.left, view.w - box.w - 4)));
+  const below = view.h - 4 - (r.bottom + GAP), above = r.top - GAP - 4;
+  if (box.h <= below) return { left, top: Math.round(r.bottom + GAP) };
+  if (box.h <= above) return { left, top: Math.round(r.top - GAP - box.h) };
+  // too tall for either side: the bigger side (never over the name), or the whole window height only when both sides are tiny
+  if (Math.max(below, above) < 120) return { left, top: 4, maxH: Math.max(40, Math.round(view.h - 8)) };
+  if (below >= above) return { left, top: Math.round(r.bottom + GAP), maxH: Math.max(40, Math.round(below)) };
+  return { left, top: 4, maxH: Math.max(40, Math.round(above)) };
 }
 
 // A box you type in or pick from never shows hover help over itself (OakBarn Brewery, 2026-11-08: "The Hover Help for Connection
@@ -202,6 +208,15 @@ function start(doc = globalThis.document) {
     if (pop) { try { tip.hidePopover(); } catch { } } else tip.classList.remove('show');
     tip.remove();
   };
+  // on the screen; a box too tall for the window is cut to fit and gets a scroll bar, and the mouse may go into it to scroll
+  const place = el => {
+    tip.style.maxHeight = ''; tip.scrollTop = 0;
+    const b = tip.getBoundingClientRect(), p = placeBubble(el.getBoundingClientRect(), { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
+    tip.style.left = p.left + 'px'; tip.style.top = p.top + 'px';
+    if (p.maxH) tip.style.maxHeight = p.maxH + 'px';
+    tip.classList.toggle('hhScroll', !!p.maxH);
+  };
+  const reachable = () => tip.classList.contains('hhHasLinks') || tip.classList.contains('hhScroll');
   const show = el => {
     const text = balloonText(helpOf(el)); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
@@ -210,14 +225,8 @@ function start(doc = globalThis.document) {
     // inside an open dialog it stays a part of it, so its links can be clicked over a dialog that blocks the rest of the page
     (el.closest('dialog[open]') || doc.body).append(tip);
     if (pop) { try { tip.showPopover(); } catch { } } else tip.classList.add('show');
-    const r = el.getBoundingClientRect(), b = tip.getBoundingClientRect();
-    const p = placeBubble(r, { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
-    tip.style.left = p.left + 'px'; tip.style.top = p.top + 'px';
-    for (const im of tip.querySelectorAll('img')) if (!im.complete) im.addEventListener('load', () => {      // placed again once its pictures are in
-      if (!tip.isConnected) return;
-      const b2 = tip.getBoundingClientRect(), p2 = placeBubble(el.getBoundingClientRect(), { w: b2.width, h: b2.height }, { w: innerWidth, h: innerHeight });
-      tip.style.left = p2.left + 'px'; tip.style.top = p2.top + 'px';
-    }, { once: true });
+    place(el);
+    for (const im of tip.querySelectorAll('img')) if (!im.complete) im.addEventListener('load', () => { if (tip.isConnected) place(el); }, { once: true });      // placed again once its pictures are in
   };
   doc.addEventListener('pointerover', ev => {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;       // a finger gets the tap pop-up (Rule 18.16), not a hover
@@ -225,7 +234,7 @@ function start(doc = globalThis.document) {
     if (on && tip.contains(ev.target)) { clearTimeout(later); return; }      // into the balloon, to click a hot spot
     const el = helpTarget(ev.target);
     if (el === on) { clearTimeout(later); return; }
-    if (!el && on && tip.classList.contains('hhHasLinks')) return;      // on the way to the balloon: it waits a moment (below)
+    if (!el && on && reachable()) return;      // on the way to the balloon (hot spots or a scroll bar): it waits a moment (below)
     hide();
     if (!el || !helpOf(el)) return;
     on = el; timer = setTimeout(() => { if (on === el) show(el); }, HOVER_DELAY_MS);
@@ -233,12 +242,12 @@ function start(doc = globalThis.document) {
   doc.addEventListener('pointerout', ev => {
     if (!on) return;
     if (ev.relatedTarget && (on.contains(ev.relatedTarget) || tip.contains(ev.relatedTarget))) return;    // still on the name or its balloon
-    if (!tip.classList.contains('hhHasLinks')) { hide(); return; }
-    clearTimeout(later); later = setTimeout(hide, LINK_WAIT_MS);      // a balloon with hot spots waits, so the mouse can reach it
+    if (!reachable()) { hide(); return; }
+    clearTimeout(later); later = setTimeout(hide, LINK_WAIT_MS);      // a balloon with hot spots or a scroll bar waits, so the mouse can reach it
   });
   // a click, a key, a scroll or a dialog closing puts it away (a click on a hot spot opens its Help first)
   for (const k of ['pointerdown', 'keydown', 'scroll', 'close']) doc.addEventListener(k, ev => {
-    if (!on || (k === 'pointerdown' && tip.contains(ev.target))) return;
+    if (!on || ((k === 'pointerdown' || k === 'scroll') && tip.contains(ev.target))) return;      // scrolling the balloon itself keeps it
     hide();
   }, true);
   tip.addEventListener('click', ev => { if (ev.target.closest?.('.hhLink')) setTimeout(hide); });
