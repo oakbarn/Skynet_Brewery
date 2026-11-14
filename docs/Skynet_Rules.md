@@ -708,7 +708,12 @@ Import** (they share these Rules, Rule 15.4):
    before the first Public Production.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
-   the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
+   the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. **Hover Delay**
+   (OakBarn Brewery, 2026-11-14: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how
+   long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > **Hover Delay (ms)** sets how long the
+   mouse must rest on the name first, 0 to 5000 ms. **0 or empty = at once** (the default, as above). It is the panel's, the same for
+   every Schema; the BruControl Import uses the Panel's Hover Delay on the same computer. A tap on a phone or tablet (item 3) never
+   waits. The wait of a box with hot spots or a scroll bar after the mouse leaves its name (Rule 2.49) is not changed by it. It **stays as long as the mouse is on the name**
    and goes away as soon as the mouse moves off (or on a click, a key or a scroll). It never hides the field it explains. A box you
    type in or pick from (a dropdown) never shows hover help itself, so the help can never cover a choice (OakBarn Brewery, 2026-11-08:
    "The Hover Help for Connection covers the DDLB so no Choice can be made"); its help is on its name or column heading.
@@ -724,6 +729,15 @@ Import** (they share these Rules, Rule 15.4):
    "some of the hover help needs slide bars as the box goes off the screen"). A box taller than the room under or over its name
    goes on the side with more room, never over the name, is cut to fit the window and gets a scroll bar. The mouse can go into it
    to scroll (it waits a moment, like a box with hot spots, Rule 2.49); scrolling it does not close it.
+8. **In a dialog, the box goes beside the dialog, off it** (OakBarn Brewery, 2026-11-14: "Need hover help to not cover any part of
+   the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough
+   so no scroll bars unless it goes off the bottom of the screen"). It goes to the **right** of the dialog, its top level with the
+   name; with no room there, to the **left** (OakBarn Brewery, 2026-11-14: "If there is no screen room on the Right put on Left. If
+   No room on either side, Put on the side so as not to cover the label or field of the Hover Help Subject"); with room on neither
+   side, beside the name and its field (right, then left), and with no room there either, under or over them (item 7), so the
+   name and its field are never covered. Beside the dialog it may
+   be as tall as the window, so it gets a scroll bar only when it is taller than the window. A box with hot spots or a scroll bar
+   waits a little longer there (1.2 s) after the mouse leaves the name, since the mouse has further to go. Both programs.
 It is one shared helper (public/hoverhelp.js) that watches every dialog, so a new dialog only has to give each field its tip.
 **Every dialog at once** (Fritz, 2026-11-06: "Yes Hover on all Dialogs"; Rule 18.10's exception): when a dialog opens, a note that
 explains moves into the hover help of the field next to it, a long explanation in ( ) after a field's name moves into its hover help,
@@ -828,8 +842,10 @@ Help 155).
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
   sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39). On the same computer
   the Import **reads** the Panel's Default settings so nothing is typed twice (OakBarn Brewery, 2026-11-09): the **Units** are picked
-  for it when the BruControl file does not say, and a valve with no Size starts at the **Default pipe size** when one is set. It never
-  changes the Panel's settings.
+  for it when the BruControl file does not say, a valve with no Size starts at the **Default pipe size** when one is set, and its
+  Hover Help waits the Panel's **Hover Delay** (Rule 2.38 item 2). It never changes the Panel's settings.
+- **Hover Help** (2026-11-14): **Hover Delay (ms)**, how long the mouse rests on a name before its Hover Help shows; empty = 0, at
+  once (Rule 2.38 item 2).
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -4215,6 +4231,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.38 item 8 (OakBarn Brewery: "Need hover help to not cover any part of the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough so no scroll bars unless it goes off the bottom of the screen"): in a dialog the Hover Help goes to the right of the dialog (else the left; else beside, under or over the name and its field, never covering them), as tall as the window, scroll bar only when taller than the window. Help 147.
+- 2026-11-14: Rule 2.38 item 2 and Rule 2.42 (OakBarn Brewery: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > Hover Help > **Hover Delay (ms)**, 0 to 5000, empty or 0 = at once (the default, no change for anyone who leaves it). The BruControl Import uses the Panel's. Taps never wait. Help 155 and 147 (and their French pages).
 - 2026-11-14: Rule 2.38 item 7 (OakBarn Brewery: "some of the hover help needs slide bars as the box goes off the screen", the Tab and Name hover help on the Blichmann RipTide): a hover help box too tall for the window is cut to fit on the side of its name with more room and gets a scroll bar; the mouse can go into it to scroll. Both programs (the Importer uses the same hover help).
 - 2026-11-14: Rule 2.51 (OakBarn Brewery: "On any Dialog Popup on the Blickmann Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back"): the ⬢ and ⬆ pop-ups of the Pump Add box and Pump Properties have their title and buttons frozen at the top, no bottom row, and 💾 Keep (blue) in place of Save. Only the model for now. Both programs.
 - 2026-11-13: Rule 7.24 (OakBarn Brewery: after the Media Setup ran with the panel open, the pictures stayed File Not Found until the panel was closed and opened again): a missing picture is looked for again when the window comes back to the front, when pictures are added from the panel, and every 20 seconds while one is missing, so it shows by itself. Both programs.

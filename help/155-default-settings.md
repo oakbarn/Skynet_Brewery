@@ -33,6 +33,12 @@ before that. A fitting sitting on a vessel opening with no pipe keeps its size. 
 They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
 without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
+## Hover Help
+
+| Setting | What it does |
+|---|---|
+| **Hover Delay (ms)** | How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). **0 or empty: it shows at once** (the default). Up to 5000. Try 300 to 500 if Hover Help pops up while you only move the mouse across a dialog. Phones and tablets have no mouse: a tap still opens the help at once. See [Hover help in dialogs](147-hover-help). |
+
 ## The other settings on this tab
 
 New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), how amounts show on the Recipe tab, hop alerts, new Tabs and

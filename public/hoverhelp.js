@@ -1,12 +1,24 @@
 // Hover help (Skynet Rule 2.38, Fritz 2026-11-06: "Dialogs should be kept as clean as possible. Explanations of what it does
 // need to be in a Hover Help. Hover over the Label of the dropdown or field and pop up Help as long as the hover is there").
 // A field's name (a label with class tipLbl, or anything with data-help) keeps its explanation out of the dialog. Rest the mouse
-// on the name and a small help box shows its explanation at once; it stays as long as the mouse is on the name and goes away
+// on the name and a small help box shows its explanation (at once, or after the Hover Delay set on ☰ Menu > Default settings); it stays as long as the mouse is on the name and goes away
 // when the mouse moves off. A tap (phones and tablets, Rule 2.35) or a click still opens the small pop-up with Close (Rule 18.16).
 // One shared helper that watches the whole page, so every dialog of the Panel and of the BruControl Import gets it by itself.
-export const HOVER_DELAY_MS = 0;        // Fritz, 2026-11-06: "Help for any Choice is always available instantly"
+export const HOVER_DELAY_MS = 0;        // the default: Fritz, 2026-11-06: "Help for any Choice is always available instantly"
+export const HOVER_DELAY_MAX = 5000;    // the Hover Delay box on ☰ Menu > Default settings takes 0 to 5000 ms
+// how long the mouse rests on a name before its hover help shows (OakBarn Brewery, 2026-11-14: "Add a Default delay for Hover Help
+// in the Default tab in milliseconds"). Empty or not a number: the default (0, at once). Rounded, and kept from 0 to 5000.
+export function hoverDelayOf(v) {
+  if (v === undefined || v === null || String(v).trim() === '') return HOVER_DELAY_MS;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(HOVER_DELAY_MAX, Math.max(0, Math.round(n))) : HOVER_DELAY_MS;
+}
+let hoverDelay = HOVER_DELAY_MS;
+export const setHoverDelay = v => { hoverDelay = hoverDelayOf(v); return hoverDelay; };      // Panel: from its Default settings; Import: from the Panel's
+export const hoverDelayNow = () => hoverDelay;
 export const GAP = 6;                   // pixels between the name and the help box
-export const LINK_WAIT_MS = 400;        // a balloon with hot spots stays this long after the mouse leaves its name, to reach a link
+export const LINK_WAIT_MS = 400;
+export const BESIDE_WAIT_MS = 1200;     // the same, when the balloon sits beside the dialog: the mouse has further to go        // a balloon with hot spots stays this long after the mouse leaves its name, to reach a link
 
 // the help of an element: data-help, or the old title of a tip label or of anything in a dialog (a button, an icon), moved to
 // data-help so the browser's own tooltip, which comes late and goes away by itself, does not show too (Fritz, 2026-11-06: "add
@@ -24,6 +36,33 @@ export function helpOf(el) {
 // where the help box goes: just under the name, or above it when there is no room below; kept on the screen. A box taller than
 // the room on either side goes on the side with more room and gets maxH: it is cut to fit and shows a scroll bar (OakBarn Brewery,
 // 2026-11-14: "some of the hover help needs slide bars as the box goes off the screen").
+// a name inside a dialog: the box goes to the right of the dialog, off it, so it covers no part of the dialog (OakBarn Brewery,
+// 2026-11-14: "Move Hover Help pop up to the Right Off the Dialog and if there is room"); with no room on the right, to the left of
+// it; with room on neither side, null (sideOf below: "Put on the side so as not to cover the label or field"). Beside the dialog it may use the whole window height, so it gets a
+// scroll bar only when it is taller than the window ("no scroll bars unless it goes off the bottom of the screen"). Its top is
+// level with the name, moved up only as far as needed to stay on the screen.
+export function placeBeside(r, dlg, box, view) {
+  if (!dlg) return null;
+  let left;
+  if (dlg.right + GAP + box.w <= view.w - 4) left = dlg.right + GAP;
+  else if (dlg.left - GAP - box.w >= 4) left = dlg.left - GAP - box.w;
+  else return null;
+  const room = view.h - 8;
+  if (box.h > room) return { left: Math.round(left), top: 4, maxH: Math.max(40, Math.round(room)), beside: true };
+  return { left: Math.round(left), top: Math.round(Math.max(4, Math.min(r.top, view.h - 4 - box.h))), beside: true };
+}
+// no room beside the dialog (or not in one): beside the name and its field (the subject), right first, then left, so neither is
+// covered (OakBarn Brewery, 2026-11-14: "If No room on either side, Put on the side so as not to cover the label or field of the
+// Hover Help Subject"); with no room beside them either, null (placeBubble: under or over them)
+export function sideOf(subj, box, view) {
+  return placeBeside(subj, subj, box, view);
+}
+// the name and its field together (in a dialog the field is the box next to the name, on the same line)
+export function subjectRect(r, field) {
+  if (!field || !field.width || field.top >= r.bottom || field.bottom <= r.top) return r;
+  const top = Math.min(r.top, field.top), bottom = Math.max(r.bottom, field.bottom);
+  return { left: Math.min(r.left, field.left), right: Math.max(r.right, field.right), top, bottom, width: Math.max(r.right, field.right) - Math.min(r.left, field.left), height: bottom - top };
+}
 export function placeBubble(r, box, view) {
   const left = Math.round(Math.max(4, Math.min(r.left, view.w - box.w - 4)));
   const below = view.h - 4 - (r.bottom + GAP), above = r.top - GAP - 4;
@@ -210,11 +249,14 @@ function start(doc = globalThis.document) {
   };
   // on the screen; a box too tall for the window is cut to fit and gets a scroll bar, and the mouse may go into it to scroll
   const place = el => {
-    tip.style.maxHeight = ''; tip.scrollTop = 0;
-    const b = tip.getBoundingClientRect(), p = placeBubble(el.getBoundingClientRect(), { w: b.width, h: b.height }, { w: innerWidth, h: innerHeight });
+    tip.style.maxHeight = ''; tip.scrollTop = 0; tip.style.left = '0px'; tip.style.top = '0px';      // measured at full width first
+    const b = tip.getBoundingClientRect(), r = el.getBoundingClientRect(), box = { w: b.width, h: b.height }, view = { w: innerWidth, h: innerHeight };
+    const dlg = el.closest('dialog[open]'), subj = subjectRect(r, el.nextElementSibling?.getBoundingClientRect());
+    const p = placeBeside(r, dlg?.getBoundingClientRect(), box, view) ?? sideOf(subj, box, view) ?? { ...placeBubble(subj, box, view), beside: false };
     tip.style.left = p.left + 'px'; tip.style.top = p.top + 'px';
     if (p.maxH) tip.style.maxHeight = p.maxH + 'px';
     tip.classList.toggle('hhScroll', !!p.maxH);
+    tip.classList.toggle('hhBeside', p.beside);
   };
   const reachable = () => tip.classList.contains('hhHasLinks') || tip.classList.contains('hhScroll');
   const show = el => {
@@ -237,13 +279,13 @@ function start(doc = globalThis.document) {
     if (!el && on && reachable()) return;      // on the way to the balloon (hot spots or a scroll bar): it waits a moment (below)
     hide();
     if (!el || !helpOf(el)) return;
-    on = el; timer = setTimeout(() => { if (on === el) show(el); }, HOVER_DELAY_MS);
+    on = el; timer = setTimeout(() => { if (on === el) show(el); }, hoverDelay);
   });
   doc.addEventListener('pointerout', ev => {
     if (!on) return;
     if (ev.relatedTarget && (on.contains(ev.relatedTarget) || tip.contains(ev.relatedTarget))) return;    // still on the name or its balloon
     if (!reachable()) { hide(); return; }
-    clearTimeout(later); later = setTimeout(hide, LINK_WAIT_MS);      // a balloon with hot spots or a scroll bar waits, so the mouse can reach it
+    clearTimeout(later); later = setTimeout(hide, tip.classList.contains('hhBeside') ? BESIDE_WAIT_MS : LINK_WAIT_MS);      // a balloon with hot spots or a scroll bar waits, so the mouse can reach it
   });
   // a click, a key, a scroll or a dialog closing puts it away (a click on a hot spot opens its Help first)
   for (const k of ['pointerdown', 'keydown', 'scroll', 'close']) doc.addEventListener(k, ev => {

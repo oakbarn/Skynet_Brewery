@@ -6,8 +6,11 @@ fields themselves. The explanation of a field is in its **hover help**.
 ## See the help of a field
 
 - A field name with a **dotted underline** has hover help.
-- **Rest the mouse on the name** (of a field or a dropdown). A small yellow box shows what the field is for, instantly.
+- **Rest the mouse on the name** (of a field or a dropdown). A small yellow box shows what the field is for, at once. To make it wait a moment first, set **Hover Delay** on **☰ Menu > Default settings** (in milliseconds; see [Default settings](155-default-settings)).
 - **Buttons** (Delete, Cancel, Save, ⬆, ⬢ ...) and the **dialog title** have hover help too. The title shows a short piece of its Help page.
+- In a dialog, the box goes **to the right of the dialog**, so it covers no part of it. With no room on the right it goes to the
+  left; with no room on either side, just under (or over) the name and its box, so it never covers them. Beside the dialog it can be as tall as the screen, so it only
+  gets a scroll bar when it is taller than the screen.
 - The box **stays as long as the mouse is on the name**. Move the mouse off (or click, press a key or scroll) and it goes away.
 - **Click the name** to open the same help in a small pop-up with **Close**, if you want to keep it open while you read.
 
