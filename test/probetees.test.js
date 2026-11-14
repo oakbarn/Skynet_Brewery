@@ -61,9 +61,9 @@ const one = { w: 10 }; assert.equal(majorityWidth([one, one, { w: 20 }]), 20, 'o
 // them to the Default pipe size (☰ Menu > Default settings, Rules 2.42 and 5.36)
 assert.ok(app.includes('const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);'), 'Valve Tees and Manifolds');
 assert.ok(app.includes("const followsPipe = e => hasIps(e) && !isProbeTee(e) && !isThermowell(e);"), 'valves and pumps follow');
-assert.ok(app.includes('return (w || defaultWidth(e.workspace)) / 10;'), 'a Device with no pipe: the Default pipe size');
-assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace)'), 'an IP fitting with no pipe: the Default pipe size');
-assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw) return;'), 'a TC fitting with no pipe: the Default pipe size, on a vessel it keeps its size');
+assert.ok(app.includes('return (w || defaultWidth(e.workspace, e)) / 10;'), 'a Device with no pipe: the Default pipe size');
+assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace, g)'), 'an IP fitting with no pipe: the Default pipe size');
+assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace, g)); if (!pw) return;'), 'a TC fitting with no pipe: the Default pipe size, on a vessel it keeps its size');
 assert.ok(app.includes("size: String(hose ? defHoseIn() : defPipeIn()) };"), 'a new pipe or hose starts at the Default size');
 assert.ok(/\['defPipeSize', 'Default pipe size/.test(app) && /\['defHoseSize', 'Default hose size/.test(app), 'the Default settings tab has them');
 assert.ok(app.includes("{ key: 'default', title: 'Default settings',"), 'the Menu tab is called Default settings');
