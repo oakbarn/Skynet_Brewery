@@ -20,6 +20,7 @@ Chaque version sur cette page est une **mise à jour officielle de Skynet** : un
 | Fichier de la version | À quoi il sert |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | Le même programme d'installation Windows, avec en plus toutes les images et tous les sons Skynet. Le plus simple sur un nouvel ordinateur : pas besoin du Media Setup. Voir [Le Skynet Media Setup](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | Le panel lui-même : une première installation ou une mise à jour à la main, et pour Mac, Linux et le Pi. Il n'a pas de dossiers `config`, `data`, `media` ni `processes`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. |
 | `Install Skynet Brewer.command` | Programme d'installation Mac |
 | `install-skynet-brewer.sh` | Programme d'installation Linux et Raspberry Pi |
@@ -35,7 +36,7 @@ Le panel va dans **`C:\Brewing\BrewPanel`** sous Windows, et dans **`Brewing/Bre
 ## Windows : le programme d'installation {#windows-the-installer}
 
 1. Fermez le panel s'il tourne (**Ctrl + C** dans sa fenêtre noire, puis fermez-la).
-2. Double-cliquez sur `Skynet_Brewer_Setup_<date>.exe`. Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
+2. Double-cliquez sur `Skynet_Brewer_Setup_<date>.exe` (ou `Skynet_Brewer_Full_Setup_<date>.exe`, qui apporte aussi les images et sons Skynet). Windows peut dire **Windows a protégé votre ordinateur** (Windows protected your PC) : cliquez sur **Informations complémentaires** (More info), puis **Exécuter quand même** (Run anyway). Le programme d'installation n'est simplement pas signé avec un certificat payant. Le premier écran montre la **Version** qu'il installe, le même nom que sur la page Releases.
 3. Gardez le dossier `C:\Brewing\BrewPanel` et cliquez sur **Install**.
    - Si Node.js manque, il propose de l'installer. Windows demande la permission.
    - Si le panel est déjà là, il demande ce que fait la mise à jour : **1. Start Fresh: delete everything, nothing saved**, **2. Modified Fresh Start** (garde vos réglages par défaut, vos propres Profiles, Recipes, images et sons), **3. Update the program and reset all users**, ou **4. Update the program and keep everything** (le choix normal, déjà choisi). Les choix 1, 2 et 3 montrent d'abord un avertissement, pour que vous puissiez encore reculer (voir [Passer à une nouvelle version](18-updating)).

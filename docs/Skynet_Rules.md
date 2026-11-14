@@ -2880,6 +2880,20 @@ works like Start Fresh (Rule 9.8), with nothing saved:
 4. If a file still can't be deleted, a notice says to restart the computer and delete the Brewing folder by hand.
 Both programs (the Importer is in the same Setup). The Mac and Linux / Pi installers have no uninstall.
 
+9.20 **A Full Setup with the pictures and sounds inside** (OakBarn Brewery, 2026-11-14: "Set GitHub to have 2 different Skynet
+Panel Installs. The ones we have now but a new one that is a Full install that also has the media embedded so a new install does
+not need the media exe separate"). Every Release also carries **Skynet_Brewer_Full_Setup_<date>.exe**: the same Skynet Brewer
+Setup (same pages, choices, Uninstall and Rules) with every Skynet picture and sound of the Media Setup inside it. It adds them the
+Media Setup's way (Rule 9.12): a file already there by that name is never changed and nothing is deleted. It adds them after a
+Start Fresh, so a Fresh Start gets them back with no second Setup. Its welcome page says it is the Full one, and its file Details
+say "Full Setup". The plain Skynet Brewer Setup, the Media Setup and the Media zip stay on every Release as they are (Rule #1,
+Never Take Away): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
+(`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
+.exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
+VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
+media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
+Help 19 and 183)
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -4252,6 +4266,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 9.20 (OakBarn Brewery: "a new one that is a Full install that also has the media embedded so a new install does not need the media exe separate"): every Release also has Skynet_Brewer_Full_Setup_<date>.exe, the same Setup with the Skynet pictures and sounds inside, added the add-only way; the plain Setup and the Media Setup stay. Help 19 and 183 (and French), README, install/ReadMe.txt, Release notes. Both programs. (thread "Add a Full Setup with media included")
 - 2026-11-14: Rule 2.42 (OakBarn Brewery's Default tab markup): Text split into **Labels** and **Text Boxes** with fresh-install values (White on Black, Centered, 11 px, Tab's font, new box 520 x 140), Labels **Bold**, Font = Tab's font first (his answer), **Rich Text Embedded Code** heading with **\L Rich Text Code Size (px)**, one Save for the tab (no Save Tap Water), and "Defaults are for new things" (a Template's own settings win). Help 49, 155, 22, 33 (and French). Rule 17.12 Tap Water saved with the one Save.
 - 2026-11-14: Rule 2.38 item 8 (OakBarn Brewery: "Need hover help to not cover any part of the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough so no scroll bars unless it goes off the bottom of the screen"): in a dialog the Hover Help goes to the right of the dialog (else the left; else beside, under or over the name and its field, never covering them), as tall as the window, scroll bar only when taller than the window. Help 147.
 - 2026-11-14: Rule 2.38 item 2 and Rule 2.42 (OakBarn Brewery: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > Hover Help > **Hover Delay (ms)**, 0 to 5000, empty or 0 = at once (the default, no change for anyone who leaves it). The BruControl Import uses the Panel's. Taps never wait. Help 155 and 147 (and their French pages).

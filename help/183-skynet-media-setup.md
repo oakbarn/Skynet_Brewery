@@ -14,6 +14,16 @@ On the same download page as the panel: **https://github.com/oakbarn/Skynet_Brew
 |---|---|
 | `Skynet_Media_Setup_<date>.exe` | Windows |
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, or Windows by hand |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | Windows: the panel **and** the pictures and sounds in one file |
+
+## The Full Setup: everything in one file (Windows)
+
+New on this computer? Download **`Skynet_Brewer_Full_Setup_<date>.exe`** instead of the two separate Setups. It is the same Skynet Brewer Setup with every Skynet picture and sound inside, so you do not need the Media Setup.
+
+- It adds the pictures and sounds the same way the Media Setup does: one you already have is never changed, and nothing is deleted.
+- After a **Start Fresh** it puts the Skynet pictures and sounds back by itself.
+- It is bigger (about 12 MB instead of about 5 MB). For a quick update later, the plain Skynet Brewer Setup is enough: your pictures and sounds stay where they are.
+- The Uninstall is the same one, whichever Setup you used.
 
 ## How to use it
 
