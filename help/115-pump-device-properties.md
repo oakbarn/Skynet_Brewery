@@ -49,11 +49,14 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
 4. **3. Tab**: the Tab it is on.
 5. **4. Name**: starts as the Suggested Name (from the Label, Interface, Port, Device Type and Tab); you may type your own. It
    must be unique. A Process uses it: `Pump_Name.state = true`. See **The Name** below.
-6. **Graphic**: the Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is
+6. **Graphic**: ![A pump with its 8 IPs](help_pictures/Pump_8_IPs.png)
+   the Skynet picture of this Device as it will show on the Tab, with its Cover and Orientation. The Skynet Picture is
    set by Skynet and cannot be changed, so a Skynet pump drawing has no Path box. A User pump keeps its **Path** box, so its one
    picture can be changed. The Graphic changes as soon as you pick another Orientation or Cover.
-7. **Orientation**: **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn, and its IPs
-   follow.
+7. **Orientation**: ![Right and Left](help_pictures/Pump_Right_Left.png)
+   **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn, and its IPs
+   follow. Switching the Orientation moves the Inlet IP and the Outlet IP to the opposite side as well: Right becomes Left and
+   Left becomes Right (Bottom Right becomes Bottom Left, Top Left becomes Top Right). A Middle IP at the top or bottom stays where it is.
 8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. The Toggle is what happens when the pump is
    clicked on the Tab: **On/Off** (one click turns it on or off, most common), **Push Button** (on only while held), **Dual
    Action** (a click turns it on or off; pressed and held for more than half a second, it is on only while held, handy for topping
@@ -118,9 +121,9 @@ From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Devi
 ## The Interface
 
 The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an
-Interface is connected. The Interface is the part of the Bridge between the "Brain" (Skynet Panel) and your Red Pump. If the
-"Brain" is on a Computer, the computer cannot supply any 120 VAC power for any connected device. It takes other pieces of
-Hardware, and not just one. There is a Daisy Chain:
+Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Red Pump. If the "Brain" cannot
+supply 120 VAC power for any connected device but only a trigger signal. It takes other pieces of Hardware, and not just one.
+There is a Daisy Chain:
 
 > **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
 
@@ -230,13 +233,43 @@ Suggested Name Format: INTERFACEid_Port_Type_Label_TABid
 From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery
 Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).
 
-**Predictive Text**: in a Process you never type this long name. Type BM and the List Box shows only the Devices on the BM
-Interface; pick Red Pump from it. The Suggested Name is what makes that work.
+And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will
+quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are
+limited only to those devices on the BM: Brewery Mega Arduino.
 
-In Skynet a name can be changed quite easily. There is a Button where all Names can be converted to a Suggested Name, if you have
-not chosen to do so earlier. In Edit layout, **🏷 Suggested Names** lists every Device and Widget whose Name is not
+In Skynet a name can be changed quite easily. Besides a normal edit Field where you can use your own free form name, there is a
+Button where all Names can be converted to a Suggested Name, if you have not chosen to use Suggested Name earlier. **Important:**
+Clicking the Update to Suggested Name Button will change all the names to the Suggested Name. Names can still be edited
+individually. It is highly recommended to use the Skynet Suggested Name as certain features work best as they were set up to use
+that format. The features still exist, but may be worthless if the Names vary from the Suggested Name Format.
+
+In Edit layout, **🏷 Suggested Names** lists every Device and Widget whose Name is not
 its Suggested Name; tick the ones to change and press **💾 Convert**, then **Save layout** (Rule 3.18). One name at a time: **💾 Update
 to Suggested** in its Name Change box (Rule 3.16).
+
+## The Inlet IP, Outlet IP and Hose or Pipe
+
+![A pump with its 8 IPs](help_pictures/Pump_8_IPs.png)
+
+Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its
+place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab.
+
+Example 1:
+
+![Example 1: Right, Inlet Right Middle, Outlet Top Right](help_pictures/Pump_IP_Example_1.png)
+
+Example 2:
+
+![Example 2: Left, Inlet Bottom Right, Outlet Top Left](help_pictures/Pump_IP_Example_2.png)
+
+Pipes or Hose snap connect to an IP in the selected position if the end is within 10 px of that
+![IP](help_pictures/IP_Marker.png) when drawn.
+
+Switching the Orientation moves them to the opposite side as well (see Orientation above): Example 2 switched to Right has its
+Inlet on the Bottom Left and its Outlet on the Top Right.
+
+**Hose or Pipe**: What is drawn from the pump's own inlet and outlet to its Inlet IP and Outlet IP: a White Hose, or a stainless
+Pipe. It is drawn over the pump and its Cover under the On overlay.
 
 ## The ➕ Add Device button
 

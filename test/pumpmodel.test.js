@@ -71,7 +71,7 @@ assert.match(app, /\['cover', 'coverColor', \.\.\.PUMP_TYPE_KEYS\]/, 'the picked
 assert.match(app, /\['hold', 'Push Button'\]/); assert.match(app, /\['dual', 'Dual Action'\]/);
 assert.match(app, /const DUAL_HOLD_MS = 500/);
 assert.match(app, /const PUMP_TOGGLE_TIP = \['This is what action is taken when the Pump Image is clicked on the Tab\./);
-assert.match(app, /const PUMP_GRAPHIC_TIP = 'The Skynet picture of this Device as it will show on the Tab/);
+assert.match(app, /const PUMP_GRAPHIC_TIP = PUMP_8_IPS_PIC \+ 'The Skynet picture of this Device as it will show on the Tab/);
 assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', 'gpick'/, 'a Skynet pump drawing has no Path box');
 assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : DEVICE_TIPS\.name;/);
 assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);

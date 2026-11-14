@@ -50,11 +50,14 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
 4. **3. Tab** : le Tab où il est.
 5. **4. Name** : commence comme le Suggested Name (à partir du Label, de l'Interface, du Port, du Device Type et du Tab) ; vous pouvez taper le vôtre. Il
    doit être unique. Un Process l'utilise : `Pump_Name.state = true`. Voir **Le Name** plus bas.
-6. **Graphic** : l'image Skynet de ce Device telle qu'elle s'affichera sur le Tab, avec son Cover et son Orientation. La Picture Skynet est
+6. **Graphic** : ![Une pompe avec ses 8 IP](help_pictures/Pump_8_IPs.png)
+   l'image Skynet de ce Device telle qu'elle s'affichera sur le Tab, avec son Cover et son Orientation. La Picture Skynet est
    fixée par Skynet et ne peut pas être changée, donc un dessin de pompe Skynet n'a pas de case Path. Une pompe User garde sa case **Path**, donc sa seule
    image peut être changée. Le Graphic change dès que vous choisissez une autre Orientation ou un autre Cover.
-7. **Orientation** : **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent, et ses IP
-   suivent.
+7. **Orientation** : ![Right et Left](help_pictures/Pump_Right_Left.png)
+   **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent, et ses IP
+   suivent. Changer l'Orientation fait passer l'Inlet IP et l'Outlet IP du côté opposé aussi : Right devient Left et Left devient
+   Right (Bottom Right devient Bottom Left, Top Left devient Top Right). Une IP Middle en haut ou en bas reste où elle est.
 8. **Cover** (aide 111, dessins de pompes Skynet seulement) et **Toggle** sur une ligne. Le Toggle est ce qui se passe quand on clique sur la pompe
    sur le Tab : **On/Off** (un clic l'allume ou l'éteint, le plus courant), **Push Button** (allumée seulement tant qu'on appuie), **Dual
    Action** (un clic l'allume ou l'éteint ; appuyée et tenue plus d'une demi-seconde, elle est allumée seulement tant qu'on appuie, pratique pour compléter
@@ -119,8 +122,8 @@ D'après BM_15_DO@Pump_Red~Pump_BH ci-dessus, le Brewmeister d'OakBarn sait que 
 ## L'Interface {#the-interface}
 
 La carte Arduino à laquelle ce Device Pump est raccordé. Une Interface a un nom et un ID. L'ID est donné par vous quand une
-Interface est raccordée. L'Interface fait partie du pont entre le « Brain » (Skynet Panel) et votre pompe rouge. Si le
-« Brain » est sur un ordinateur, l'ordinateur ne peut fournir aucun courant de 120 VAC à un appareil raccordé. Il faut d'autres pièces de
+Interface est raccordée. L'Interface fait partie du pont entre le « Brain » et votre pompe rouge. Si le « Brain » ne peut fournir
+aucun courant de 120 VAC à un appareil raccordé mais seulement un signal de commande. Il faut d'autres pièces de
 matériel, et pas une seule. C'est une chaîne :
 
 > **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
@@ -231,13 +234,43 @@ Format du Suggested Name : INTERFACEid_Port_Type_Label_TABid
 D'après BM_15_DO@Pump_Red~Pump_BH ci-dessus, le Brewmeister d'OakBarn sait que le Device Red Pump est raccordé à l'Interface BM (Brewery
 Mega {Arduino}), sur le Port 15, de type Pump, avec le label Red Pump, et enfin sur le Tab BH (Tab Brew House).
 
-**Texte prédictif** : dans un Process, vous ne tapez jamais ce long nom. Tapez BM et la liste ne montre que les Devices de l'Interface
-BM ; choisissez-y Red Pump. C'est le Suggested Name qui rend cela possible.
+Et ne vous inquiétez pas d'un nom aussi compliqué quand vous écrivez un Process : il pourra être choisi dans une List Box. Vous le
+trouverez vite utile. Grâce au texte prédictif, si vous utilisez le Suggested Name, tapez BM dans la List Box et vos choix se limitent
+aux seuls Devices du BM : Brewery Mega Arduino.
 
-Dans Skynet, un nom peut être changé assez facilement. Il y a un bouton qui convertit tous les noms en Suggested Name, si vous ne l'avez
-pas fait plus tôt. En Edit layout, **🏷 Suggested Names** liste chaque Device et Widget dont le Name n'est pas
+Dans Skynet, un nom peut être changé assez facilement. En plus d'un champ normal où vous pouvez écrire votre propre nom libre, il y a un
+bouton qui convertit tous les noms en Suggested Name, si vous n'avez pas choisi d'utiliser le Suggested Name plus tôt. **Important :**
+cliquer sur le bouton Update to Suggested Name change tous les noms en Suggested Name. Les noms peuvent toujours être modifiés un par
+un. Il est fortement conseillé d'utiliser le Suggested Name de Skynet, car certaines fonctions marchent mieux telles qu'elles ont été
+prévues pour ce format. Ces fonctions existent toujours, mais peuvent ne servir à rien si les noms s'écartent du format Suggested Name.
+
+En Edit layout, **🏷 Suggested Names** liste chaque Device et Widget dont le Name n'est pas
 son Suggested Name ; cochez ceux à changer et appuyez sur **💾 Convert**, puis **Save layout** (Règle 3.18). Un nom à la fois : **💾 Update
 to Suggested** dans sa fenêtre Name Change (Règle 3.16).
+
+## L'Inlet IP, l'Outlet IP et Hose or Pipe {#the-inlet-ip-outlet-ip-and-hose-or-pipe}
+
+![Une pompe avec ses 8 IP](help_pictures/Pump_8_IPs.png)
+
+Chaque pompe a 8 IP : les 4 coins de sa boîte et le milieu de chaque côté, les mêmes sur chaque pompe, pour qu'une autre pompe puisse
+prendre sa place et rester reliée à ses tuyaux. Choisissez laquelle est son entrée (IN) et laquelle sa sortie (OUT), telles qu'on les voit sur le Tab.
+
+Exemple 1 :
+
+![Exemple 1 : Right, Inlet Right Middle, Outlet Top Right](help_pictures/Pump_IP_Example_1.png)
+
+Exemple 2 :
+
+![Exemple 2 : Left, Inlet Bottom Right, Outlet Top Left](help_pictures/Pump_IP_Example_2.png)
+
+Les tuyaux ou tuyaux souples se raccordent à une IP à la position choisie si leur bout est à 10 px ou moins de cette
+![IP](help_pictures/IP_Marker.png) quand on les dessine.
+
+Changer l'Orientation les fait passer du côté opposé aussi (voir Orientation plus haut) : l'exemple 2 passé à Right a son Inlet en
+Bottom Left et son Outlet en Top Right.
+
+**Hose or Pipe** : ce qui est dessiné depuis l'entrée et la sortie de la pompe elle-même jusqu'à son Inlet IP et son Outlet IP : un
+Hose blanc, ou un Pipe en inox. Il est dessiné par-dessus la pompe et son Cover sous l'overlay On.
 
 ## Le bouton ➕ Add Device {#the-add-device-button}
 

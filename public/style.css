@@ -1140,6 +1140,12 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .helpWarn .hhTri { margin-bottom: 6px; }
 .hhTri::after { content: '!'; position: absolute; left: -3px; top: 6px; font: 700 15px/1 Arial, sans-serif; color: #ffd400; }
 dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
+/* the tap pop-up's title and ✖ Close stay at the top while it scrolls; no Close at the bottom (OakBarn Brewery, 2026-11-14) */
+dialog.tipDlg { padding-top: 0; }
+dialog.tipDlg.tipWide { max-width: 580px; }
+dialog.tipDlg .tipHead { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; background: var(--panel); padding: 10px 1em 8px; margin: 0 -1em 6px; border-bottom: 1px solid var(--line); }
+dialog.tipDlg .tipHead h4 { margin: 0; }
+dialog.tipDlg .hhPic { max-width: 100%; }
 .fldPair { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fldPair > select:first-child { flex: 1; min-width: 0; }
 .fldPair .pairLbl { white-space: nowrap; font-size: .9em; opacity: .8; }
