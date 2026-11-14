@@ -4,7 +4,7 @@ Le bouton **☰ Menu** est en haut à droite de la page **Tabs**, là où était
 
 - **Show Menu Bar** / **Hide Menu Bar** : la ligne du haut du panel est cachée sur la page Tabs ; ceci la fait revenir. Voir [La barre de menus (Menu Bar)](40-menu-bar).
 - **Edit layout** (Admins) : change les Tabs. C'est le premier choix. Pendant que vous êtes dans Edit layout, il indique **Exit Edit layout**. Voir [Tabs (les écrans de votre brasserie)](02-tabs).
-- Les **onglets de menu** (Menu tabs) : Zoom (numéro 1 au départ), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile et Valve Profile.
+- Les **onglets de menu** (Menu tabs) : Zoom (numéro 1 au départ), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile, Valve Profile et Pump Profile.
 - **File Move Utility** (Admins) ouvre la page File Move. Voir [File Move (copier des fichiers de votre ordinateur vers le Brain)](32-file-move).
 - **Recipe** et **Fermentation** sont grisés. Ils arrivent dans les prochaines étapes.
 - **Schema** : la liste déroulante Schema (la même que sur la barre de menus), chaque Schema du Brain avec **Load** et **Clone**. Voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
@@ -27,7 +27,7 @@ Tout le monde peut regarder les onglets de menu. Seul un Admin peut les changer 
 
 ## L'onglet Default {#the-default-tab}
 
-**Chaque valeur par défaut se règle ici : ce avec quoi commence une nouvelle chose.** Ce avec quoi commence une nouvelle recette : les Units, la Batch size, l'Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la recette elle-même). Le Tab Background Profile qu'un nouveau Tab reçoit, et le Valve Profile choisi en premier pour une nouvelle vanne. **Labels** et **Text Boxes** : les valeurs par défaut de chaque case de texte (voir [Cases de texte](49-text-boxes)). Les nouveaux Templates de l'utilisateur et Schemas. Appuyez sur **Save**.
+**Chaque valeur par défaut se règle ici : ce avec quoi commence une nouvelle chose.** Ce avec quoi commence une nouvelle recette : les Units, la Batch size, l'Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la recette elle-même). Le Tab Background Profile qu'un nouveau Tab reçoit (le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué Default dans sa propre liste). **Labels** et **Text Boxes** : les valeurs par défaut de chaque case de texte (voir [Cases de texte](49-text-boxes)). Les nouveaux Templates de l'utilisateur et Schemas. Appuyez sur **Save**.
 
 Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes dans le texte](22-process-language)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
 
@@ -48,7 +48,7 @@ Les navigateurs (Chrome, Edge, Safari, iPhone et Android) ne laissent une page j
 - **Vessel Templates**, **Equipment Templates** et **Fitting Templates** : des cuves, refroidisseurs, serpentins, filtres à trub et Bundled Fittings tout prêts (Skynet et les vôtres) en petites icônes. Double-cliquez sur l'un pour ses réglages, ou mettez-en une copie sur un Tab. Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
 - **Default Layout** : les cuves et les tuyaux qu'un Tab reçoit avec son Equipment Profile. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** et **Boil Profile** : voir [Mash Profiles et Boil Profiles](35-mash-and-boil-profiles).
-- **Tab Background Profile** et **Valve Profile** : voir [Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles).
+- **Tab Background Profile**, **Valve Profile** et **Pump Profile** : voir [Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles).
 - **Move Brain** (Admins) : tout déplacer vers un nouveau Brain, par exemple d'un ordinateur vers un Raspberry Pi, puis corriger les ports USB. Voir [Déplacer le Brain](119-move-brain).
 - **Schema** : voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
 - **About** : voir [About et les versions de Schema](42-about-and-schema-versions).
