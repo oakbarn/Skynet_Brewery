@@ -710,7 +710,7 @@ Import** (they share these Rules, Rule 15.4):
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. **Hover Delay**
    (OakBarn Brewery, 2026-11-14: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how
-   long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > **Hover Delay (ms)** sets how long the
+   long a mouse pointer hovers before the Hover Help comes up"): Settings > Panel settings: screen, Tabs and alerts > **Hover Delay (ms)** (moved from the Default tab the same day, Rule 2.42) sets how long the
    mouse must rest on the name first, 0 to 5000 ms. **0 or empty = at once** (the default, as above). It is the panel's, the same for
    every Schema; the BruControl Import uses the Panel's Hover Delay on the same computer. A tap on a phone or tablet (item 3) never
    waits. The wait of a box with hot spots or a scroll bar after the mouse leaves its name (Rule 2.49) is not changed by it. It **stays as long as the mouse is on the name**
@@ -865,7 +865,7 @@ Help 155).
   the Defaults when it is built"). A new item starts with the Default tab's values; a new item made from a Template starts with the
   Template's own settings, and the Default tab only fills in what the Template leaves unset; a new User Template takes the Default
   tab's values when it is built. An item's own setting always wins over the Default tab.
-- **Hover Help** (2026-11-14): **Hover Delay (ms)**, how long the mouse rests on a name before its Hover Help shows; empty = 0, at
+- **Hover Help** (2026-11-14; moved to Settings > Panel settings: screen, Tabs and alerts the same day, see below): **Hover Delay (ms)**, how long the mouse rests on a name before its Hover Help shows; empty = 0, at
   once (Rule 2.38 item 2).
 - **New User Templates and Schemas** (OakBarn Brewery, 2026-11-14, his choices on docs/Default_Settings_Other_Places.md): set on the
   Default tab, used only by **new, user-created** things. Pumps and valves already made (and the Skynet Templates) keep their own; only
@@ -879,8 +879,20 @@ Help 155).
   color is **None** (row 8); a new Alarm's Layer 2 / Set Graphic is **None** (Rule 7.12); the flow color is Blue (row 9); the Pump and Valve Standards follow
   the Rules (rows 3, 4, 10). Lost Link is set on each Interface (row 13, Rule 6.3). A new empty Schema has no Interface (row 18,
   Rule 10.5). The Simulator's settings are only on the Simulator bar (rows 14, 15, Rule 10.10).
-- The **Defaults set somewhere else** list now holds only: the Look of the open Schema, the Pulse button time (**100 ms, fixed, used by
-  every Pulse button, the ones already made too**), Setup's keep-users choice, and the BruControl Import's names and Look.
+- **Settings, not Defaults** (OakBarn Brewery, 2026-11-14: "Move any field that affects existing things like the Theme or Pulse button
+  (and anything that affects existing Device, Tabs etc to only be in settings as the are more Settings than defaults. No need to even
+  mention on Default Tab"). The Default tab is **only for new things**. What changes things already made, or how the whole panel works,
+  is in **Settings > Panel settings: screen, Tabs and alerts**: Tab Style, Menu Bar, Sound (and Sound on now), On startup, \L Rich Text
+  Code Size, Hover Delay, Phones and tablets, the Grain weight and gravity points labels, Hop alerts and the Order of the Menu. The
+  Look of the open Schema stays in Settings > Panel settings; Pulse is fixed at 100 ms. None of them is named on the Default tab. (They
+  are still kept with the Default tab's values on the Brain, so nothing moved there.)
+- **Skynet Defaults for New User Created Items** (OakBarn Brewery, 2026-11-14: "Change Title to Skynet Defaults for New User Created
+  Items. These defaults are set and cannot be changed, but can be Changed in a New User Template"): the list at the bottom of the
+  Default tab (it was "Defaults set somewhere else (to look at)") shows the fixed Skynet values a new item starts with: Pump and Valve
+  size (the Standards), pipe fittings always size to their pipes, Pump cover color None, Flow color Blue, the Skynet Dial, Alarm Set
+  Graphic (Layer 2) None.
+- **Section titles stand out** (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight
+  sections"): each section title on the Default tab has a blue back.
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -4278,6 +4290,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.42 (OakBarn Brewery): the Default tab is only for new things. Tab Style, Menu Bar, Sound, On startup, \L Rich Text Code Size, Hover Delay, Phones and tablets, the grain and gravity labels, Hop alerts and the Order of the Menu moved to the new Settings > Panel settings: screen, Tabs and alerts. "Defaults set somewhere else" renamed **Skynet Defaults for New User Created Items** with his text, now the fixed Skynet values. Default tab section titles get a blue back. Help 9, 22, 33, 40, 41, 45, 49, 99, 101, 147, 151, 155, 186 (and French).
 - 2026-11-14: Added Rule 10.10 (OakBarn Brewery: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar"): Settings > Simulation is gone; its settings are on the Simulator bar's new ⚙ Settings panel. Rule 10.4 changed to match. Help 20, 77, 85 (and French).
 - 2026-11-14: OakBarn Brewery's 21 choices on docs/Default_Settings_Other_Places.md. Rule 2.42: new Default tab part **New User Templates and Schemas** (Look of a new Schema, On overlay for a new User Pump and a new User Valve, Push Lockout); "Defaults set somewhere else" cut to 5 rows. Rules 5.14 and 5.36: pipe fittings always size to their pipes, the Autosize switch is gone. Rule 6.3: Lost Link (s) is a must-fill box on the Interface dialog, 10 s on every Interface and sample. Rule 6.7: Push Lockout default. Rule 7.12: a new Alarm's Layer 2 starts at None. Rule 7.15: On overlay defaults. Rule 10.5: a new empty Schema has no Interface.
 - 2026-11-14: Rule 2.42 (OakBarn Brewery's Default tab markup): Text split into **Labels** and **Text Boxes** with fresh-install values (White on Black, Centered, 11 px, Tab's font, new box 520 x 140), Labels **Bold**, Font = Tab's font first (his answer), **Rich Text Embedded Code** heading with **\L Rich Text Code Size (px)**, one Save for the tab (no Save Tap Water), and "Defaults are for new things" (a Template's own settings win). Help 49, 155, 22, 33 (and French). Rule 17.12 Tap Water saved with the one Save.

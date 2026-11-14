@@ -11565,6 +11565,7 @@ function renderSettings() {
   $('#setRestartAlarm').value = alarms.some(e => e.name === c.restartAlarm) ? c.restartAlarm : '';
   renderDonate();
   renderSimSettings();
+  renderPanelSettings();
   renderPasswordRules();
 }
 // ---- accounts
@@ -12264,7 +12265,7 @@ const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
-  { key: 'default', title: 'Default settings', tip: 'Every default in one place: the Default pipe size, new Tabs, new Recipes, text, sound, phones, a list of the defaults set elsewhere, and the order of the Menu', render: renderDefaultTab },
+  { key: 'default', title: 'Default settings', tip: 'What a new thing starts with: the Default pipe size, new Tabs, new Recipes, Labels and Text Boxes, new User Templates and Schemas, and the Skynet Defaults for New User Created Items', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
   { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils, trub filters and RIMS tubes (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
@@ -12493,7 +12494,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
@@ -12674,15 +12675,17 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}${v === '0.5' ? '  (Skynet default)' : ''}`]);
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
 function otherDefaults() {
-  // OakBarn Brewery's choices, 2026-11-14 (docs/Default_Settings_Other_Places.md): what has a box moved up to the Default tab;
-  // Standards, fixed values and what is already on the Default tab came off this list
-  const look = themeOf(S.config.theme);
+  // Skynet Defaults for New User Created Items (OakBarn Brewery, 2026-11-14: "These defaults are set and cannot be changed, but can
+  // be Changed in a New User Template"). What changes things already made (the Look, Pulse, Setup's users) is not listed here at
+  // all: it is a Setting ("No need to even mention on Default Tab"). Choices in docs/Default_Settings_Other_Places.md.
   return [
-    ['Look (theme) of this Schema', `${look.name}`, 'Settings > Panel settings > Look (theme). A new Schema starts with "Look of a New Schema" above', 'Rule 2.39'],
-    ['Pulse button time', '100 ms. Fixed, and it is used by every Pulse button, the ones already made too', 'Fixed', 'Rule 1.9'],
-    ['Setup: keep users when updating', 'Update and keep everything', 'Setup (the installer)', 'Rules 9.8, 10.1'],
-    ['BruControl Import: names', 'Skynet names (keeping BruControl names takes two warnings)', 'The Importer, page 4', 'Rule 15.1'],
-    ['BruControl Import: Look', 'The Skynet Look closest to the BruControl theme, else the Look of a New Schema', 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
+    ['Pump size', 'Pump Standard: 150 x 150 for a 1/2" pipe, then the size of its pipes', 'Rule 5.27'],
+    ['Valve size', 'Valve Standard: 150 x 150 for a 1/2" pipe, then the size of its pipes', 'Rule 5.29'],
+    ['Pipe fittings', 'Always size to their pipes', 'Rules 5.14, 5.36'],
+    ['Pump cover color', 'None', 'Rule 7.13'],
+    ['Flow color (In and Out)', 'Blue', 'Rule 5.21'],
+    ['Skynet Dial', 'Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red', 'Rule 2.40'],
+    ['Alarm Set Graphic (Layer 2)', 'None', 'Rule 7.12'],
   ];
 }
 // The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
@@ -12742,7 +12745,7 @@ function renderDefaultTab(box) {
     newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
-  const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
+  const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default pipe size: a new pipe starts at it, and every Device, Pipe Fitting and item with IPs (pumps too) with no pipe on it is drawn for it. With pipes on it, it takes the size most of them have (Rule 5.36)', 'sel', sizePick(PIPE_SIZES)],
     ['defHoseSize', 'Default hose size: a new hose starts at it', 'sel', sizePick(HOSE_SIZES)],
@@ -12766,16 +12769,6 @@ function renderDefaultTab(box) {
     ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
     ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
     ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature)`, 'num', null, false, false, { def: 0 }],
-    ['_gl', 'Grain weight label', 'head'],
-    ['_grainLabel', 'Grain weight label (skn_XML_Grain_WT_Standard_Label)', 'text', null, false, false, { known: true, tip: 'The title of the amount box on the Grain and Fermentable tabs. It comes from Units: Pounds for US, Kg for Metric. Locked: it is not typed in.' }],
-    ['grainLabelVisible', 'Grain weight label visible', 'yn', true],
-    ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs. Only changed here', 'text', null, false, false, { tip: 'Empty: PPG>SG.' }],
-    ['_h', 'Hop alerts', 'head'],
-    ['hopWarnMinutes', 'Warning before each hop drop (minutes; 0 = no warning)', 'num', null, false, false, { def: RECIPE_DEFAULTS.hopWarnMinutes }],
-    ['alertMergeMinutes', 'Alerts this close together become one alert (minutes)', 'num', null, false, false, { def: RECIPE_DEFAULTS.alertMergeMinutes }],
-    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
-    ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
-    ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
     ['_ns', 'New Schema from a Skynet Template', 'head'],
     ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
     ['ns_template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
@@ -12791,16 +12784,7 @@ function renderDefaultTab(box) {
     ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
-    ['_m', 'Menu Bar', 'head'],
-    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],
-    ['_s', 'Sound', 'head'],
-    ['soundOnStart', 'Turn Sound On when starting (when the panel opens or a Schema is loaded)', 'bool'],
-    ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note'],
-    ['_z', 'On startup', 'head'],
-    ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
-    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
     // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
     ['_lbl', 'Labels', 'head'],
@@ -12820,19 +12804,11 @@ function renderDefaultTab(box) {
     ['textWidth', 'New Box Width', 'num', null, false, false, { tip: TBX_TIPS.width }],
     ['textHeight', 'New Box Height', 'num', null, false, false, { tip: TBX_TIPS.height }],
     ['textWrap', 'Word Wrap', 'bool', null, false, false, { tip: TBX_TIPS.wrap }],
-    ['_rtc', 'Rich Text Embedded Code', 'head'],
-    ['textLarge', '\\L Rich Text Code Size (px)', 'num', null, false, false, { def: TEXT_LARGE, tip: RTC_SIZE_TIP }],
     ['_nw', 'New User Templates and Schemas', 'head'],
     ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }],
     ['newPumpOverlay', 'Pump Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.pump }],
     ['newValveOverlay', 'Valve Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.valve }],
-    ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { tip: NEW_TIPS.lockout }],
-    ['_hh', 'Hover Help', 'head'],
-    ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
-    ['_p', 'Phones and tablets', 'head'],
-    ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
-    ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
-    ['_pn', `This screen counts as ${touchOnly() ? 'a phone or tablet' : 'a computer (mouse)'}. Computers can always move things.`, 'note']];
+    ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { tip: NEW_TIPS.lockout }]];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
   const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
@@ -12842,14 +12818,11 @@ function renderDefaultTab(box) {
   if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
-  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
-  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
-  now.onchange = () => setSound(now.checked);
-  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
     f.read();
-    if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
+    // what changes things already made is saved in Settings > Panel settings (Rule 2.42): keep what is saved there
+    for (const k of PANEL_SET_KEYS) if (S.config.brewDefaults && k in S.config.brewDefaults) d[k] = S.config.brewDefaults[k]; else delete d[k];
     for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight', 'pushLockout']) if (d[k] === '' || d[k] === null) delete d[k];
     if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');      // empty: what a fresh install has
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
@@ -12873,18 +12846,76 @@ function renderDefaultTab(box) {
     await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
     renderWs(); renderMenuPane(); toast('Defaults saved'); });
   const saveBtn = () => admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : '';
+  const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Skynet Default'), h('th', {}, 'Rule'))),
+    h('tbody', {}, ...otherDefaults().map(([what, now, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, rule)))));
+  box.append(h('div', { class: 'defTab' }, h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn(), f.box, saveBtn()),
+    ...tap.nodes, h('div', { class: 'menuNarrow' }, saveBtn()),
+    h('h3', {}, 'Skynet Defaults for New User Created Items'), h('p', { class: 'muted' }, 'These defaults are set and cannot be changed, but can be Changed in a New User Template.'), others));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
+}
+
+// Settings > Panel settings, the part that was on the Default tab (OakBarn Brewery, 2026-11-14: "Move any field that affects existing
+// things like the Theme or Pulse button (and anything that affects existing Device, Tabs etc to only be in settings as the are more
+// Settings than defaults. No need to even mention on Default Tab"). They change what is already made, so they are Settings (Rule 2.42).
+// Saved with the Default tab's values (brewDefaults), so nothing is moved on the Brain.
+const panelSetFields = w => [
+    ['_ts', 'Tabs', 'head'],
+    ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
+    ['_m', 'Menu Bar', 'head'],
+    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],
+    ['_s', 'Sound', 'head'],
+    ['soundOnStart', 'Turn Sound On when starting (when the panel opens or a Schema is loaded)', 'bool'],
+    ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note'],
+    ['_z', 'On startup', 'head'],
+    ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
+    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
+    ['_rtc', 'Rich Text Embedded Code', 'head'],
+    ['textLarge', '\\L Rich Text Code Size (px)', 'num', null, false, false, { def: TEXT_LARGE, tip: RTC_SIZE_TIP }],
+    ['_hh', 'Hover Help', 'head'],
+    ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
+    ['_p', 'Phones and tablets', 'head'],
+    ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
+    ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
+    ['_pn', `This screen counts as ${touchOnly() ? 'a phone or tablet' : 'a computer (mouse)'}. Computers can always move things.`, 'note'],
+    ['_gl', 'Grain weight label', 'head'],
+    ['_grainLabel', 'Grain weight label (skn_XML_Grain_WT_Standard_Label)', 'text', null, false, false, { known: true, tip: 'The title of the amount box on the Grain and Fermentable tabs. It comes from Units: Pounds for US, Kg for Metric. Locked: it is not typed in.' }],
+    ['grainLabelVisible', 'Grain weight label visible', 'yn', true],
+    ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs. Only changed here', 'text', null, false, false, { tip: 'Empty: PPG>SG.' }],
+    ['_h', 'Hop alerts', 'head'],
+    ['hopWarnMinutes', 'Warning before each hop drop (minutes; 0 = no warning)', 'num', null, false, false, { def: RECIPE_DEFAULTS.hopWarnMinutes }],
+    ['alertMergeMinutes', 'Alerts this close together become one alert (minutes)', 'num', null, false, false, { def: RECIPE_DEFAULTS.alertMergeMinutes }],
+    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
+    ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
+    ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
+const PANEL_SET_KEYS = ['tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'touchEdit', 'touchMove',
+  'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
+function renderPanelSettings() {
+  const box = $('#panelSet'); if (!box) return;
+  box.innerHTML = '';
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
+  d._grainLabel = grainWtLabel(d.units);
+  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
+  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
+  now.onchange = () => setSound(now.checked);
+  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
+  const f = paneForm(panelSetFields, d, () => { }, !admin);
+  const save = guard(async () => {
+    f.read();
+    const cur = { ...(S.config.brewDefaults || {}) };
+    for (const k of PANEL_SET_KEYS) if (d[k] === undefined || d[k] === '' || d[k] === null) delete cur[k]; else cur[k] = d[k];
+    for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (cur[k] !== undefined && !(+cur[k] >= 0 && +cur[k] <= 600)) throw new Error(`${t} must be from 0 to 600 minutes`);
+    if (cur.textLarge !== undefined && !(+cur.textLarge > TEXT_NORMAL && +cur.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    if (cur.hoverDelay !== undefined && !(Number.isInteger(+cur.hoverDelay) && +cur.hoverDelay >= 0 && +cur.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty: at once)`);
+    await api('PUT', '/ui/settings', { brewDefaults: cur }); S.config.brewDefaults = cur;
+    showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
+    renderWs(); renderMenuPane(); toast('Panel settings saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
-  const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Default'), h('th', {}, 'Now'), h('th', {}, 'Changed on'), h('th', {}, 'Rule'))),
-    h('tbody', {}, ...otherDefaults().map(([what, now, where, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, where), h('td', { class: 'muted' }, rule)))));
-  box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn(), soundNow, f.box, saveBtn()),
-    ...tap.nodes, h('div', { class: 'menuNarrow' }, saveBtn()),
-    h('h3', {}, 'Defaults set somewhere else (to look at)'), h('p', { class: 'muted' }, 'These are not changed here. Each one says where it is changed.'), others,
-    h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+  box.append(h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    h('h4', { id: 'sec-menuOrder' }, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
 
 // ---- Tap Water (OakBarn Brewery, 2026-11-11, Rule 17.12): the numbers that matter for brewing, from the Water Department's report

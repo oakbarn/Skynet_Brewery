@@ -1,6 +1,6 @@
 # Default settings
 
-**☰ Menu > Default settings** is the one place to see **every default** in Skynet (Skynet Rule 2.42). It opens only from the
+**☰ Menu > Default settings** is the one place for **every default** in Skynet: what a **new** thing starts with (Skynet Rule 2.42). What changes things already made is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)). It opens only from the
 **☰ Menu**. It used to be called the **Default** tab.
 
 These settings belong to the **panel**, so they are the same in every Schema. **Admins** change them and press **Save**; everyone
@@ -44,19 +44,27 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 | **Valve Overlay** | The On overlay a new powered valve starts with. The steady lightning bolt unless you change it. |
 | **Push Lockout (s)** | How long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties. |
 
-Some things have no Default because they are always the same: pipe fittings always size to their pipes, a new pump's cover color is None, a new Alarm's Set Graphic (Layer 2) starts at None, and the flow color is Blue. **Lost Link** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
+Some things have no box because they are always the same: see **Skynet Defaults for New User Created Items** below. **Lost Link** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
 
-## Hover Help
+## Moved to Settings
 
-| Setting | What it does |
-|---|---|
-| **Hover Delay (ms)** | How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). **0 or empty: it shows at once** (the default). Up to 5000. Try 300 to 500 if Hover Help pops up while you only move the mouse across a dialog. Phones and tablets have no mouse: a tap still opens the help at once. See [Hover help in dialogs](147-hover-help). |
+These change things already made, or how the whole panel works, so they are Settings, not Defaults. They are in **Settings > Panel settings: screen, Tabs and alerts**:
+
+- **Tab Style** (the look of every Tab that has no Tab Style of its own);
+- **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
+- **\L Rich Text Code Size**;
+- **Hover Delay** ([Hover help in dialogs](147-hover-help));
+- **Phones and tablets**;
+- the **Grain weight label** and the gravity points label;
+- **Hop alerts**;
+- the **Order of the Menu**.
+
+The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Looks](151-panel-looks)), and Pulse is always 100 ms.
 
 ## The other settings on this tab
 
-New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), how amounts show on the Recipe tab, hop alerts, new Tabs and
-valves (Tab Background Profile, Tab Style, Valve Profile), the Menu Bar, Sound, On startup (Zoom, Full screen), Text (the look of
-every text box) and Phones and tablets. See [The Menu](33-menu).
+New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), New Schema from a Skynet Template, new Tabs and valves (Tab
+Background Profile, Valve Profile), Labels and Text Boxes. See [The Menu](33-menu).
 
 ## Tap Water
 
@@ -84,18 +92,16 @@ Rest the mouse on a box (or tap its name) to see what it does for the beer.
 
 The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `rcp_Water_...` Skynet_Fields (Help 99).
 
-## Defaults set somewhere else
+## Skynet Defaults for New User Created Items
 
-A few defaults are changed in another place. They are listed here so you can see them all, with **what it is now**, **where it is
-changed** and its **Rule**. Nothing is changed in this list:
+These defaults are set and cannot be changed, but can be Changed in a New User Template.
 
-- the **Look** of the open Schema, from Settings > Panel settings > Look ([Panel Looks](151-panel-looks));
-- **Pulse** (100 ms): fixed, and used by every Pulse button, the ones already made too;
-- **Setup**: keep the users;
-- the **Import**: its names and its Look.
+- **Pump size**: the Pump Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
+- **Valve size**: the Valve Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
+- **Pipe fittings**: always size to their pipes.
+- **Pump cover color**: None.
+- **Flow color** (In and Out): Blue.
+- **Skynet Dial**: Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red.
+- **Alarm Set Graphic (Layer 2)**: None.
 
-Whenever a new default is added to Skynet, it is added to this tab too.
-
-## Order of the Menu
-
-At the bottom, as before: type a number to move a Menu tab.
+The section titles on this tab have a blue back, so each part is easy to find.

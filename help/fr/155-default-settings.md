@@ -1,6 +1,6 @@
 # Réglages par défaut {#default-settings}
 
-**☰ Menu > Default settings** est le seul endroit où voir **tous les réglages par défaut** de Skynet (Règle Skynet 2.42). Il ne s'ouvre que depuis le
+**☰ Menu > Default settings** est le seul endroit pour **tous les réglages par défaut** de Skynet : ce avec quoi commence une **nouvelle** chose (Règle Skynet 2.42). Ce qui change les choses déjà faites est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)). Il ne s'ouvre que depuis le
 **☰ Menu**. Il s'appelait autrefois le Tab **Default**.
 
 Ces réglages appartiennent au **panneau**, donc ils sont les mêmes dans chaque Schema. Les **Admins** les changent et appuient sur **Save** ; tous les
@@ -44,19 +44,27 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 | **Valve Overlay** | La superposition On avec laquelle commence une nouvelle vanne motorisée. L'éclair fixe sauf si vous le changez. |
 | **Push Lockout (s)** | Combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties. |
 
-Certaines choses n'ont pas de réglage par défaut parce qu'elles sont toujours pareilles : les raccords prennent toujours la taille de leurs tuyaux, la couleur de couvercle d'une nouvelle pompe est None, le Set Graphic (Layer 2) d'une nouvelle Alarm commence à None, et la couleur de flux est Blue. Le **Lost Link** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
+Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir **Skynet Defaults for New User Created Items** plus bas. Le **Lost Link** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
 
-## Hover Help {#hover-help}
+## Déplacé dans Settings {#moved-to-settings}
 
-| Réglage | Ce qu'il fait |
-|---|---|
-| **Hover Delay (ms)** | Combien de temps la souris doit rester sur un nom avant que son Hover Help s'affiche, en millisecondes (1000 ms = 1 seconde). **0 ou vide : elle s'affiche tout de suite** (par défaut). Jusqu'à 5000. Essayez 300 à 500 si le Hover Help s'ouvre alors que vous ne faites que passer la souris sur une boîte de dialogue. Les téléphones et tablettes n'ont pas de souris : un toucher ouvre toujours l'aide tout de suite. Voir [L'aide au survol dans les boîtes de dialogue](147-hover-help). |
+Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau marche, donc ce sont des réglages (Settings), pas des réglages par défaut. Ils sont dans **Settings > Panel settings: screen, Tabs and alerts** :
+
+- **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
+- **Menu Bar**, **Sound**, **On startup** (Zoom, plein écran) ;
+- **\L Rich Text Code Size** ;
+- **Hover Delay** ([L'aide au survol dans les boîtes de dialogue](147-hover-help)) ;
+- **Phones and tablets** (téléphones et tablettes) ;
+- le **Grain weight label** et le label des points de densité ;
+- les **Hop alerts** (alertes houblon) ;
+- l'**Ordre du Menu**.
+
+Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)), et le Pulse est toujours de 100 ms.
 
 ## Les autres réglages de ce Tab {#the-other-settings-on-this-tab}
 
-Nouvelles recettes (Units, Batch size, Profiles, Boil time, rendement ...), affichage des quantités sur le Tab Recipe, alertes houblon, nouveaux Tabs et
-vannes (Tab Background Profile, Tab Style, Valve Profile), la Menu Bar, Sound, On startup (Zoom, Full screen), Text (l'aspect de
-chaque case de texte) et Phones and tablets. Voir [Le ☰ Menu](33-menu).
+Nouvelles recettes (Units, Batch size, Profiles, Boil time, efficacité ...), New Schema from a Skynet Template, nouveaux Tabs et vannes (Tab
+Background Profile, Valve Profile), Labels et Text Boxes. Voir [Le Menu](33-menu).
 
 ## Tap Water
 
@@ -84,18 +92,16 @@ Posez la souris sur une case (ou appuyez sur son nom) pour voir ce qu'elle fait 
 
 Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile le liste) créé quand le Brain démarre pour la première fois et jamais supprimé. Une recette ou les Default settings sans Water Profile choisi l'utilisent. Bicarbonate = Alcalinité (en CaCO3) x 1,22. Dureté (en CaCO3) = 2,497 x Calcium + 4,118 x Magnésium. Un Process le lit avec les Skynet_Fields `rcp_Water_...` (aide 99).
 
-## Réglages par défaut définis ailleurs {#defaults-set-somewhere-else}
+## Skynet Defaults for New User Created Items {#skynet-defaults-for-new-user-created-items}
 
-Quelques réglages par défaut se changent à un autre endroit. Ils sont listés ici pour que vous les voyiez tous, avec **ce qu'ils valent maintenant**, **où ils se
-changent** et leur **Règle**. Rien ne se change dans cette liste :
+Ces réglages par défaut sont fixés et ne peuvent pas être changés, mais peuvent être changés dans un nouveau Template de l'utilisateur.
 
-- le **Look** du Schema ouvert, depuis Settings > Panel settings > Look ([Les Looks du panneau (thèmes)](151-panel-looks)) ;
-- le **Pulse** (100 ms) : fixe, et utilisé par chaque bouton Pulse, ceux déjà faits aussi ;
-- le **Setup** : garder les utilisateurs ;
-- l'**Import** : ses noms et son Look.
+- **Pump size** (taille de pompe) : le Pump Standard, 150 x 150 pour un tuyau de 1/2", puis la taille de ses tuyaux.
+- **Valve size** (taille de vanne) : le Valve Standard, 150 x 150 pour un tuyau de 1/2", puis la taille de ses tuyaux.
+- **Pipe fittings** (raccords) : prennent toujours la taille de leurs tuyaux.
+- **Pump cover color** (couleur du couvercle de pompe) : None.
+- **Flow color** (In et Out) : Blue.
+- **Skynet Dial** : plage Cooler et Hotter 2 ; Cold, OK, Hot = Blue, Green, Red.
+- **Alarm Set Graphic (Layer 2)** : None.
 
-Chaque fois qu'un nouveau réglage par défaut est ajouté à Skynet, il est ajouté aussi à ce Tab.
-
-## Ordre du Menu {#order-of-the-menu}
-
-En bas, comme avant : tapez un nombre pour déplacer un Tab du Menu.
+Les titres des parties de ce Tab ont un fond bleu, pour trouver chaque partie facilement.
