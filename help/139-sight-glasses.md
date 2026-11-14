@@ -23,7 +23,6 @@ Drop it on a straight pipe and Skynet cuts the pipe and puts the sight glass in,
 Double-click it to open its Properties. **Length** is in inches, ferrule face to ferrule face (2 to 48). Type a new Length and
 press **Save**: only the **glass** (and the cage) gets longer or shorter. The ferrules keep their size and shape.
 
-- **Autosize to pipe** (on) keeps it as thick as the pipe joined to it.
-- With Autosize to pipe **off**, you can type a Width instead; the Length follows it.
+- **Autosize to pipe** (always on) keeps it as thick as the pipe joined to it.
 
 Turn it upright with the turn buttons on the Edit layout bar. Press **Save layout** to keep your changes.

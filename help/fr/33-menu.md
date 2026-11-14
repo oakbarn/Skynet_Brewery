@@ -23,20 +23,22 @@ Un onglet de menu ne s'affiche qu'une fois que vous l'avez choisi. Il s'ouvre à
 
 Tout le monde peut regarder les onglets de menu. Seul un Admin peut les changer (un Operator peut verrouiller et déverrouiller le Equipment Profile).
 
-**L'onglet Default s'appelle maintenant Default settings** (2026-11-07). En haut, il y a la **Default pipe size** (taille de tuyau par défaut) et la **hose size** (taille de tuyau souple) et la taille d'un nouveau Tab, et près du bas une liste des valeurs par défaut réglées ailleurs. Voir [Réglages par défaut](155-default-settings).
+**L'onglet Default s'appelle maintenant Default settings** (2026-11-07). Il ne contient que ce avec quoi commence une **nouvelle** chose (Règle Skynet 2.42). Voir [Réglages par défaut](155-default-settings).
 
 ## L'onglet Default {#the-default-tab}
 
-**Chaque valeur par défaut se règle ici.** Si la barre de menus est cachée sur les Tabs (voir [La barre de menus (Menu Bar)](40-menu-bar)). Ce avec quoi commence une nouvelle Recipe : les Units, la Batch size, le Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la Recipe elle-même). Le Tab Background Profile que reçoit un nouveau Tab, et le Valve Profile choisi d'abord pour une nouvelle vanne. **On startup** (au démarrage) : le Zoom et le Full screen avec lesquels le panel démarre (voir [Zoom et plein écran](41-zoom-and-full-screen)). **Labels** et **Text Boxes** : les valeurs par défaut de chaque zone de texte (voir [Les zones de texte](49-text-boxes)). **Rich Text Embedded Code** : **\L Rich Text Code Size (px)** est la taille du grand texte `\L` dans un texte de Process (plus de 18, voir [Le langage des Processes et les étapes](22-process-language)). Si **les téléphones et les tablettes peuvent déplacer et redimensionner** dans Edit layout (éteint au départ, voir [Téléphones et tablettes](45-phones-and-tablets)). Appuyez sur **Save**.
+**Chaque valeur par défaut se règle ici : ce avec quoi commence une nouvelle chose.** Ce avec quoi commence une nouvelle recette : les Units, la Batch size, l'Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la recette elle-même). Le Tab Background Profile qu'un nouveau Tab reçoit, et le Valve Profile choisi en premier pour une nouvelle vanne. **Labels** et **Text Boxes** : les valeurs par défaut de chaque case de texte (voir [Cases de texte](49-text-boxes)). Les nouveaux Templates de l'utilisateur et Schemas. Appuyez sur **Save**.
 
-**Sound** (son ; en haut de l'onglet Default et sous les valeurs par défaut) :
+Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes dans le texte](22-process-language)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
+
+**Sound** (son ; dans Settings > Panel settings: screen, Tabs and alerts) :
 
 - **Sound on** : la même chose que le bouton du son en haut de la page. Il active ou coupe le son sur cet écran tout de suite, et n'est pas enregistré.
 - **Turn Sound On when starting** : quand ceci est actif, le son s'active tout seul chaque fois que le panel s'ouvre et chaque fois qu'un Schema est chargé, donc vous n'avez pas à appuyer sur **Enable sound**. Appuyez sur **Save** pour le garder.
 
-Les navigateurs (Chrome, Edge, Safari, iPhone et Android) ne laissent une page jouer aucun son tant que vous ne l'avez pas touchée ou cliquée une fois. Donc quand le panel s'ouvre, le bouton du haut indique **Sound on (tap anywhere)** : touchez ou cliquez une fois n'importe où sur la page et le son joue à partir de là. Une alarme déclenchée avant ce premier toucher commence dès que vous touchez.
+Les navigateurs (Chrome, Edge, Safari, iPhone et Android) ne laissent une page jouer aucun son tant que vous ne l'avez pas touchée ou cliquée une fois. Donc quand le panel s'ouvre, le bouton du haut dit **Sound on (tap anywhere)** : touchez ou cliquez une fois n'importe où sur la page et le son joue à partir de là. Une alarme qui s'est déclenchée avant ce premier toucher commence dès que vous touchez.
 
-**L'ordre du Menu :** chaque onglet de menu a un numéro d'Order. Tapez un nouveau numéro pour y déplacer un onglet de menu. Les autres sont renumérotés pour faire de la place (1, 2, 3 ...), et le Menu et les onglets de menu ouverts se trient tout seuls. Les nouveaux onglets de menu ajoutés plus tard vont à la fin.
+**L'ordre du Menu** (dans Settings > Panel settings: screen, Tabs and alerts) : chaque onglet de menu a un numéro d'Order. Tapez un nouveau numéro pour y déplacer un onglet de menu. Les autres sont renumérotés pour faire de la place (1, 2, 3 ...), et le Menu et les onglets de menu ouverts se trient tout seuls. Les nouveaux onglets de menu ajoutés plus tard vont à la fin.
 
 ## Les autres onglets de menu {#the-other-menu-tabs}
 

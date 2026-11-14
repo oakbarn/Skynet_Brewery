@@ -23,7 +23,6 @@ Posez-le sur un tuyau droit et Skynet coupe le tuyau et y insère le voyant, com
 Double-cliquez dessus pour ouvrir ses Properties. **Length** est en pouces, d'une face de férule à l'autre (2 à 48). Tapez une nouvelle Length et
 appuyez sur **Save** : seul le **verre** (et la cage) s'allonge ou se raccourcit. Les férules gardent leur taille et leur forme.
 
-- **Autosize to pipe** (activé) le garde aussi épais que le tuyau qui y est joint.
-- Avec Autosize to pipe **désactivé**, vous pouvez taper une Width à la place ; la Length la suit.
+- **Autosize to pipe** (toujours activé) le garde aussi épais que le tuyau qui y est joint.
 
 Mettez-le debout avec les boutons de rotation de la barre Edit layout. Appuyez sur **Save layout** pour garder vos changements.

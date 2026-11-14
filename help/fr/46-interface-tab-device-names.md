@@ -127,7 +127,7 @@ Chaque Device Type ID veut dire une seule chose. Le **General Type** devant dit 
 
 **Entrées directes :** `DI` simple, `Float` (vrai tant que le flotteur est fermé, faux sans tension), `DIN` bouton poussoir momentané, `PB` bouton poussoir (ON seulement tant qu'on le tient), `Toggle` (bascule), `Latch` (ON jusqu'à remise à zéro), `FlowSw` détecteur de débit, `Intlk` verrouillage de porte / couvercle / sécurité, `EStop` arrêt d'urgence, `Leak` détecteur de fuite, `Count` compteur d'impulsions.
 
-Un **DIN** donne un seul déclenchement par appui, quelle que soit la durée d'appui sur le bouton, et un deuxième ou troisième appui en moins de **3 secondes** ne fait rien. Vous pouvez changer les 3 secondes dans ses propriétés (*Pulse: lockout*).
+Un **DIN** donne un seul déclenchement par appui, quelle que soit la durée d'appui sur le bouton, et un deuxième ou troisième appui en moins de **3 secondes** ne fait rien. Vous pouvez changer les 3 secondes dans ses propriétés (*Pulse: lockout*). Un nouveau bouton commence avec ☰ Menu > Default settings > **Push Lockout (s)**.
 
 **PWM :** `PWM` simple, `H_Element` chauffage PWM, `Valve_L` vanne proportionnelle basse température, `Valve_H` vanne proportionnelle haute température, `Pump` vitesse de pompe, `Fan` vitesse de ventilateur, `Mtr` vitesse de moteur, `LED` variateur de LED / de lumière (affiché comme `PWM@Pump` ...).
 

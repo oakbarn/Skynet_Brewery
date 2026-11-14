@@ -5,7 +5,7 @@ panel plays it straight from the web, so the file never has to be on your comput
 
 ## Use one
 
-In any sound box (an Alarm's **Sound file**, a **Sound Player**, an Alarm Chain step, or **☰ Menu > Default > Sound before each hop
+In any sound box (an Alarm's **Sound file**, a **Sound Player**, an Alarm Chain step, or **Settings > Panel settings: screen, Tabs and alerts > Sound before each hop
 alert**), pick **Add new ...** and paste the link, for example:
 
 ```
