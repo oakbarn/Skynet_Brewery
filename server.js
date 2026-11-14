@@ -173,6 +173,12 @@ const schemas = new Schemas(store, { engine, hw, profiles });
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
 // Tap Water (Rule 17.12): every Brain has one; a Recipe or the Default tab with no Water Profile picked uses it
 try { brewProfiles.water.ensureTap(store.config.brewDefaults?.units); } catch (e) { console.log('Tap Water profile: ' + e.message); }
+// the Default tab's Valve Profile box is gone (OakBarn Brewery, 2026-11-14: "So remove them from the Tab"): the one it named becomes the
+// Valve Profile marked Default, once, and the box's value goes
+if (store.config.brewDefaults?.valveProfile !== undefined) {
+  try { brewProfiles.valve.markOnce(store.config.brewDefaults.valveProfile); } catch (e) { console.log('Valve Profile: ' + e.message); }
+  delete store.config.brewDefaults.valveProfile; try { store.writeConfig(); } catch { }
+}
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
@@ -977,8 +983,8 @@ async function route(req, res) {
     if (sc[2] === 'open' && m === 'POST') { useRecipe(recipes.get(sc[1])); return ok(res); }
     if (!sc[2] && m === 'DELETE') { recipes.remove(sc[1]); return ok(res, { saved: recipes.list() }); }
   }
-  // Mash, Boil, Water, Tab Background and Valve Profiles: everyone sees them, admins make and change them
-  sc = /^\/ui\/profiles\/(mash|boil|water|tab|valve)(?:\/([a-z0-9-]+))?$/.exec(p);
+  // Mash, Boil, Water, Tab Background, Valve and Pump Profiles: everyone sees them, admins make and change them
+  sc = /^\/ui\/profiles\/(mash|boil|water|tab|valve|pump)(?:\/([a-z0-9-]+))?$/.exec(p);
   if (sc) {
     const ps = brewProfiles[sc[1]];
     if (!sc[2] && m === 'GET') return ok(res, ps.list());

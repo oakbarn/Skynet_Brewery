@@ -274,8 +274,8 @@ async function load() {
     pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } else vbFromHash(); });
   }
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
-  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
-    ...['mash', 'boil', 'water', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
+  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles, S.pumpProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
+    ...['mash', 'boil', 'water', 'tab', 'valve', 'pump'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
@@ -4921,11 +4921,13 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
       e._title = what;
       centerNew(e);
     }
-    const ok = await newDeviceDialog(e, prefix, what); delete e._title;
+    if (pick === 'valve') e._pickedValve = true;       // its Add box has the Valve Profile dropdown
+    const ok = await newDeviceDialog(e, prefix, what); delete e._title; delete e._pickedValve;
     if (!ok) return;
   }
   if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
-  if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
+  if (pick === 'valve' && e._valveProfile) useValveProfile(e, e._valveProfile);      // the Add box's Profile dropdown
+  delete e._valveProfile;
   useTabProfile(e);       // the look of the Tab picked in the Add box
   keepOnBuild(e);         // it starts on the 🔨 Build Tab; Save Build ... moves it to the Tab picked in the Add box (Rule 4.1, 2026-11-12)
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
@@ -5426,6 +5428,8 @@ async function newDeviceDialog(e, hint, what) {
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
+  const profKind = isPumpDev(e) ? 'pump' : e._pickedValve && S.valveProfiles?.length ? 'valve' : null;
+  if (profKind === 'pump') applyPumpProfile(e, markedProfile('pump'));       // the Default Pump Profile, before the box shows it
   if (mbv && e.template) e._orient = orientPick(e);
   // the ⬆ and ⬢ in the Add box too (Blichmann PDF, 2026-11-10)
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
@@ -5435,6 +5439,8 @@ async function newDeviceDialog(e, hint, what) {
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: tabTip(e) }],
     ['name', n() + 'Name', 'text', null, false, false, { tip: nameTip(e), ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
+    // the Profile it starts with: the one marked Default first (Valve and Pump Profiles, 2026-11-14)
+    ...(profKind ? [['useProfile', profKind === 'pump' ? 'Pump Profile' : 'Valve Profile', 'sel', profileChoices(profKind), true, false, { tip: PROFILE_PICK_TIP[profKind], ...after }]] : []),
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: e.cover || 'None' }, after), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
@@ -5456,7 +5462,8 @@ async function newDeviceDialog(e, hint, what) {
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; work.apiName = e.apiName; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: pr ? undefined : e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
-  if (isPumpDev(e)) work.cover = e.cover || 'None';
+  if (isPumpDev(e)) Object.assign(work, { cover: e.cover || 'None', pumpIn: e.pumpIn, pumpOut: e.pumpOut, pumpLink: e.pumpLink, ipTypeIn: e.ipTypeIn, ipTypeOut: e.ipTypeOut });
+  if (profKind) work.useProfile = markedProfile(profKind)?.id ?? '';
   if (pr) Object.assign(work, { units: e.units || '°F', precision: e.precision ?? 1, offset: e.offset, rot: String(elRot(e)), _flip: flipOf(e), backpath: e.backpath, front: e.front, probeTee: e.probeTee, thermowell: e.thermowell, sensor: e.sensor, tcType: e.tcType, r0: e.r0, beta: e.beta });
   if (pwm) { delete work.tap; Object.assign(work, { initial: e.initial, precision: e.precision, signal: e.signal, units: e.units, rangeLow: e.rangeLow, rangeHigh: e.rangeHigh }); }
   if (elem) work.imageOn = e.imageOn;
@@ -5570,6 +5577,7 @@ async function newDeviceDialog(e, hint, what) {
         }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
+        if (ev.type === 'change' && ev.target.dataset?.k === 'useProfile' && profKind === 'pump') return $('#dlg').close('reprofile');      // its boxes take the Pump Profile picked
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w); noPwm(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
@@ -5588,6 +5596,12 @@ async function newDeviceDialog(e, hint, what) {
         { const nt = draft.workspaces.find(x => x.name === work.workspace); if (work.workspace !== was && nt?.id) try { await saveBuildDefs({ buildTab: nt.id }); } catch { } }     // and it is the Default Tab now (Rule 4.6)
         for (const b of oks) b.textContent = '➕ Add Device';
         for (const b of cancels) b.textContent = '✖ Cancel';
+        continue;
+      }
+      if (r === 'reprofile') {      // another Pump Profile picked: the box opens again with its look, keeping what is typed
+        try { readFields(work, body); } catch { }
+        if (!touched) delete work.name;
+        applyPumpProfile(work, (S.pumpProfiles || []).find(p => p.id === work.useProfile));
         continue;
       }
       if (r === 'addIface') {      // ➕ Add new Interface…: the Add Interface pop-up, then back here with the new Interface picked
@@ -5609,7 +5623,8 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover', 'coverColor', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', 'coverColor', 'pumpIn', 'pumpOut', 'pumpLink', 'pumpInDir', 'pumpOutDir', 'ipTypeIn', 'ipTypeOut', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        if (profKind === 'valve') e._valveProfile = work.useProfile;        // applied once the box closes (addThing)
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
           for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
@@ -5978,11 +5993,22 @@ function stackNew(e) {
   const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
   for (let n = 0; n < 50 && at(e.x, e.y); n++) { e.x += 20; e.y += 20; }
 }
-// Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
-async function useValveProfile(e) {
-  const def = S.config.brewDefaults?.valveProfile;
-  const id = await choose('Valve Profile for the new valve', [...S.valveProfiles.map(p => [`${p.name}  (${ORIENTATIONS[p.orientation] || ''})`, p.id]), ['No profile (a plain vertical valve)', '']], def);
-  if (id === undefined) return false;
+// Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties).
+// It is picked in the Add box's Profile dropdown, which starts on the one marked Default (OakBarn Brewery, 2026-11-14: "If on the Pump
+// Add, have the default as the selection in the DDLB. Same for Valve"); there is no pop-up any more.
+const markedProfile = kind => (S[kind + 'Profiles'] || []).find(p => p.isDefault) || null;
+const profileChoices = kind => [['', '(none)'], ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
+const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
+  valve: 'The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).' };
+// a Pump Profile into a new pump (or its Add box): only what the profile says; the picture stays the pump picked
+function applyPumpProfile(o, p) {
+  if (!p) return o;
+  o.flipH = p.flip === 'left'; if (!o.flipH) delete o.flipH;
+  if (p.cover) o.cover = p.cover;
+  for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'imageOverlay', 'ipTypeIn', 'ipTypeOut']) if (p[k]) o[k] = p[k]; else if (k !== 'imageOverlay') delete o[k];
+  return o;
+}
+function useValveProfile(e, id) {
   const p = S.valveProfiles.find(x => x.id === id); if (!p) return true;
   if (p.imageOpen) e.imageOn = p.imageOpen;
   if (p.imageClosed) e.imageOff = p.imageClosed;
@@ -12445,6 +12471,7 @@ const MENU = [
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
+  { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types', render: renderBrewProfileTab('pump') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
   { key: 'water', title: 'Water Profile', tip: 'Your water: its minerals, and how much distilled or RO water it is cut with', render: renderBrewProfileTab('water') },
@@ -13013,9 +13040,8 @@ function renderDefaultTab(box) {
     ['ns_valves', 'Valves', 'sel', Object.entries(VALVES)],
     ['ns_manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)],
     ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
-    ['_t', 'New tabs and valves', 'head'],
+    ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
     // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
     ['_lbl', 'Labels', 'head'],
@@ -14317,6 +14343,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (!can('operator')) return toast('Only an operator or an admin can move a hose', true);
   const p = S.config.graphics.find(x => x.id === end.dataset.gid), which = end.dataset.end === 'from' ? 'from' : 'to';
   if (!qdEndMoves(p, which) || p.locked) return;
+  if (!qdCleared(p, which)) { qdSafety(p, which); return; }      // first the safety pop-up (Rule 5.40)
   // the end that stays is where the hose hangs from: the dragged end is always drawn last, then turned back for a 'from' end
   const fixed = which === 'to' ? p.points : [...p.points].reverse();
   qdDrag = { p, end: which, pts: clone(p.points), lead: hoseLead(fixed), was: p[which], target: null, moved: false, start: [ev.clientX, ev.clientY] };
@@ -14330,6 +14357,44 @@ window.addEventListener('pointermove', ev => {
   const pts = hoseSag(from, t ? t.c : c, d.lead); d.p.points = d.end === 'to' ? pts : pts.reverse();
   renderPipes();
 });
+// Before a hose end is unhooked (OakBarn Brewery, 2026-11-14: "a POP Off telling user to shut down the Pump and any Valves to keep the
+// hose from Spraying or draining from Gravity Feed. If Pump is off, ask about Gravity Draining Valve setting and Go if user says yes";
+// "Dialog Disappears if Pump is On"): with a pump on it running, or flow in the hose, the pop-up says to turn the pump Off and close
+// the valves, and the end does not move. With nothing running, it asks whether the valves are set so nothing drains out by gravity;
+// Yes lets that end be dragged for the next 2 minutes. The top is frozen (Rule 2.51).
+const qdOk = new Map();       // hose id + end -> until when it may be dragged
+const qdCleared = (p, end) => (qdOk.get(p.id + end) || 0) > Date.now();
+function qdPumpsOn(p) {
+  const pumps = ['from', 'to'].map(k => devOfIp(p[k])).filter(n => n !== null).map(elNamed).filter(e => e?.subtype === 'pump' && isOn(e.name));
+  const flowing = (() => { try { return computeFlow(p.workspace).has(p.id); } catch { return false; } })();
+  return { pumps, flowing };
+}
+// Unhooking a QD hose end (Fritz, 2026-11-14): one pop-up that stays open. 1. A pump on the hose is On: it says to shut it off
+// and keeps checking until it is Off. 2. Then the valves: set so nothing drains by gravity? Yes = go. Exit always closes without moving it.
+function qdSafety(p, end) {
+  const hn = p.label || p.name || 'this hose', Hn = hn[0].toUpperCase() + hn.slice(1);
+  const head = h('div', { class: 'bar' }), msg = h('p', {});
+  const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true }, h('div', { class: 'grabHead' }, head), msg);
+  const btn = (text, cls, fn) => h('button', { type: 'button', class: 'big ' + cls, onclick: () => { fn?.(); d.close(); } }, text);
+  const exit = () => btn('✖ Exit', '');
+  let was = null;
+  const step = () => {
+    const { pumps, flowing } = qdPumpsOn(p), run = !!(pumps.length || flowing);
+    if (run === was) return; was = run;
+    if (run) {
+      head.replaceChildren(h('h3', {}, `⚠ ${Hn}: shut off the pump`), h('span', { class: 'spacer' }), exit());
+      msg.textContent = `${pumps.length ? pumps.map(e => e.label || e.name).join(', ') + (pumps.length > 1 ? ' are' : ' is') + ' On' : 'Liquid is flowing in ' + hn}. Turn the pump Off before you unhook ${hn}, so it does not spray. This pop-up goes on by itself once the pump is Off.`;
+    } else {
+      head.replaceChildren(h('h3', {}, `Unhook ${hn}?`), h('span', { class: 'spacer' }), exit(),
+        btn('Yes, unhook it', 'primary', () => { qdOk.set(p.id + end, Date.now() + 120000); toast(`Now drag the end of ${hn} (right mouse button, or a finger).`, false, 6000); }));
+      msg.textContent = `The pump is Off. Are the valves set so nothing drains out of ${hn} by gravity?`;
+    }
+  };
+  step();
+  const tick = setInterval(step, 500);      // the pump's On status, checked while the pop-up is open
+  d.addEventListener('close', () => { clearInterval(tick); d.remove(); });
+  document.body.append(d); d.showModal();
+}
 // iPhone Safari pans or zooms on a finger drag unless the touch is stopped here (touch-action is not honoured on SVG there)
 $('#ws').addEventListener('touchstart', ev => { if (!editing && ev.target.closest?.('div.qdEnd')) ev.preventDefault(); }, { passive: false });
 window.addEventListener('pointercancel', () => { if (!qdDrag) return; Object.assign(qdDrag.p, { points: qdDrag.pts, [qdDrag.end]: qdDrag.was }); qdDrag = null; renderPipes(); });
@@ -14345,6 +14410,7 @@ window.addEventListener('pointerup', async () => {
   if (!confirm(`Is the real ${hn} ${there} now?\n\nOK = Yes, it is connected: keep it there.\nCancel = No: put it back where it was.`)) return back();
   try {
     await api('POST', '/ui/hose', { id: d.p.id, to: at, points: d.p.points, end: d.end });
+    qdOk.delete(d.p.id + d.end);       // the next unhook asks again
     toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose (no flow)'}`);
   } catch (e) { back(); toast(e.message, true); }
 });
@@ -14887,7 +14953,10 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
   tab: { title: 'Tab Background Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
     about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
-    about: 'The pictures and orientation a new valve starts with. You pick the Valve Profile only when you make a new valve; after that, change the valve in its properties.' } };
+    about: 'The pictures and orientation a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
+  pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover', noUnits: true,
+    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and IP Types. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties.' } };
+const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
 const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
 const LED_MODES = { locking: 'Locking (press: ON, press again: OFF)', momentary: 'Momentary (ON only while held)' };
@@ -14903,7 +14972,13 @@ function profFields(kind) {
       ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
       ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
       ['notes', 'Notes', 'area']];
-    if (kind === 'valve') return [['name', 'Name', 'text'], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
+    if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }],
+      ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']]], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])]],
+      ['pumpIn', 'Inlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]], ['pumpOut', 'Outlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]],
+      ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['', '(the Default settings one)'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])]],
+      ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...IP_TYPES]], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...IP_TYPES]],
+      ['notes', 'Notes', 'area']];
+    if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'water') {
@@ -14934,7 +15009,7 @@ function renderBrewProfileTab(kind) {
   return box => {
     const K = PK[kind], list = K.list(), admin = can('admin');
     if (profWork[kind] && !list.some(x => x.id === profWork[kind].id)) { profWork[kind] = null; profDirty[kind] = false; }
-    if (!profWork[kind] && list.length) { const d = S.config.brewDefaults?.[kind + 'Profile']; profWork[kind] = stepsToFields(clone(list.find(x => x.id === d) || list[0])); }
+    if (!profWork[kind] && list.length) { const d = S.config.brewDefaults?.[kind + 'Profile']; profWork[kind] = stepsToFields(clone(list.find(x => x.isDefault) || list.find(x => x.id === d) || list[0])); }
     const pick = h('select', {}, ...(list.length ? [] : [h('option', { value: '' }, '(none yet)')]), ...list.map(x => h('option', { value: x.id, ...(x.id === profWork[kind]?.id ? { selected: true } : {}) }, x.name)),
       ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
     pick.onchange = guard(async () => {
