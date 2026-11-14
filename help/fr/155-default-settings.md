@@ -33,6 +33,12 @@ avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Vo
 Ce sont les deux mêmes listes déroulantes que sur la barre Edit layout du 🔨 Build Tab. Elles sont gardées par l'ID d'Interface et l'ID de Tab, donc un Schema
 sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6)
 
+## Hover Help {#hover-help}
+
+| Réglage | Ce qu'il fait |
+|---|---|
+| **Hover Delay (ms)** | Combien de temps la souris doit rester sur un nom avant que son Hover Help s'affiche, en millisecondes (1000 ms = 1 seconde). **0 ou vide : elle s'affiche tout de suite** (par défaut). Jusqu'à 5000. Essayez 300 à 500 si le Hover Help s'ouvre alors que vous ne faites que passer la souris sur une boîte de dialogue. Les téléphones et tablettes n'ont pas de souris : un toucher ouvre toujours l'aide tout de suite. Voir [L'aide au survol dans les boîtes de dialogue](147-hover-help). |
+
 ## Les autres réglages de ce Tab {#the-other-settings-on-this-tab}
 
 Nouvelles recettes (Units, Batch size, Profiles, Boil time, rendement ...), affichage des quantités sur le Tab Recipe, alertes houblon, nouveaux Tabs et

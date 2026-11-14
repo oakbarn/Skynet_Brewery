@@ -6,8 +6,11 @@ champs eux-mêmes. L'explication d'un champ est dans son **hover help** (l'aide 
 ## Voir l'aide d'un champ {#see-the-help-of-a-field}
 
 - Un nom de champ **souligné en pointillés** a un hover help.
-- **Posez la souris sur le nom** (d'un champ ou d'une liste déroulante). Une petite case jaune montre à quoi sert le champ, immédiatement.
+- **Posez la souris sur le nom** (d'un champ ou d'une liste déroulante). Une petite case jaune montre à quoi sert le champ, immédiatement. Pour la faire attendre un peu avant, réglez **Hover Delay** dans **☰ Menu > Default settings** (en millisecondes ; voir [Default settings](155-default-settings)).
 - Les **boutons** (Delete, Cancel, Save, ⬆, ⬢ ...) et le **titre de la fenêtre** ont aussi un hover help. Le titre montre un court extrait de sa page d'aide.
+- Dans une boîte de dialogue, la case va **à droite de la boîte de dialogue**, pour n'en cacher aucune partie. S'il n'y a pas de place à
+  droite, elle va à gauche ; s'il n'y a de place d'aucun côté, juste sous (ou au-dessus) du nom et de sa case, pour ne jamais les cacher. À côté de la boîte de dialogue, elle peut
+  être aussi haute que l'écran, donc elle n'a une barre de défilement que si elle est plus haute que l'écran.
 - La case **reste tant que la souris est sur le nom**. Écartez la souris (ou cliquez, appuyez sur une touche ou faites défiler) et elle disparaît.
 - **Cliquez sur le nom** pour ouvrir la même aide dans une petite fenêtre avec **Close**, si vous voulez la garder ouverte pendant que vous lisez.
 

@@ -9,6 +9,7 @@ import { vbFromImport } from '../vesselbuilder.js';
 import { BOOL_STYLES } from '../semi.js';
 import { PROCESS_WIDGET_WORD } from '../processwidget.js';
 import { glossBold, GLOSSARY } from './glossary.js';
+import { setHoverDelay } from '../hoverhelp.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -171,6 +172,7 @@ async function init() {
     $('#ver').textContent = state.start.version ? 'Panel version ' + state.start.version : '';
     state.sel = state.start.file || '';
     state.panel = await api('GET', '/api/panel-defaults').catch(() => ({}));      // the Panel's own Default settings on this computer
+    setHoverDelay(state.panel.hoverDelay);      // the same Hover Delay as the Panel (Rule 2.38)
     if (!state.start.windows) $('#pickBtn').title = 'Change folder works on Windows. Type the folder in the box instead.';
   } catch (e) { toast(e.message); }
   show(1);
