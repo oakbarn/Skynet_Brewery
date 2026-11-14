@@ -33,6 +33,19 @@ avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Vo
 Ce sont les deux mêmes listes déroulantes que sur la barre Edit layout du 🔨 Build Tab. Elles sont gardées par l'ID d'Interface et l'ID de Tab, donc un Schema
 sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6)
 
+## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
+
+Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet Template garde ses propres réglages, et les pompes et vannes déjà faites gardent les leurs.
+
+| Réglage | Ce qu'il fait |
+|---|---|
+| **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
+| **Pump Overlay** | La superposition On avec laquelle commence une nouvelle pompe : ce qui s'affiche dessus quand elle tourne. Anneau vert lumineux sauf si vous le changez ([On overlay](58-on-overlay)). |
+| **Valve Overlay** | La superposition On avec laquelle commence une nouvelle vanne motorisée. L'éclair fixe sauf si vous le changez. |
+| **Push Lockout (s)** | Combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties. |
+
+Certaines choses n'ont pas de réglage par défaut parce qu'elles sont toujours pareilles : les raccords prennent toujours la taille de leurs tuyaux, la couleur de couvercle d'une nouvelle pompe est None, le Set Graphic (Layer 2) d'une nouvelle Alarm commence à None, et la couleur de flux est Blue. Le **Lost Link** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
+
 ## Hover Help {#hover-help}
 
 | Réglage | Ce qu'il fait |
@@ -73,15 +86,13 @@ Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile l
 
 ## Réglages par défaut définis ailleurs {#defaults-set-somewhere-else}
 
-Certains réglages par défaut se changent à un autre endroit. Ils sont listés ici pour que vous les voyiez tous, avec **ce qu'ils valent maintenant**, **où ils se
-changent** et leur **Règle**. Rien ne se change dans cette liste. Par exemple :
+Quelques réglages par défaut se changent à un autre endroit. Ils sont listés ici pour que vous les voyiez tous, avec **ce qu'ils valent maintenant**, **où ils se
+changent** et leur **Règle**. Rien ne se change dans cette liste :
 
-- le **Look** (Office Black) et les **couleurs de fond et de texte d'un nouveau Tab**, depuis Settings > Panel settings > Look ([Les Looks du panneau (thèmes)](151-panel-looks)) ;
-- le **Pump Standard** et le **Valve Standard** (dessinés en 150 x 150 pour un tuyau de 1/2") ;
-- l'**On overlay** (l'éclair fixe), l'**anneau vert lumineux** sur une nouvelle pompe, les **flow colors** (None) ;
-- les plages et couleurs du **Skynet Dial**, le **Pulse** (100 ms) et le **verrouillage du bouton poussoir** (3 secondes) ;
-- le **Simulator** (une attente est comptée comme atteinte après 60 secondes ; la barre s'ouvre à 25x avec Auto skip) ;
-- le **Setup** et l'**Import** (noms Skynet, et son Look).
+- le **Look** du Schema ouvert, depuis Settings > Panel settings > Look ([Les Looks du panneau (thèmes)](151-panel-looks)) ;
+- le **Pulse** (100 ms) : fixe, et utilisé par chaque bouton Pulse, ceux déjà faits aussi ;
+- le **Setup** : garder les utilisateurs ;
+- l'**Import** : ses noms et son Look.
 
 Chaque fois qu'un nouveau réglage par défaut est ajouté à Skynet, il est ajouté aussi à ce Tab.
 

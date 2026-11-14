@@ -29,7 +29,7 @@ export const FLOW_COLORS = [
   ['reddishbrown', 'Reddish Brown', '#a0452a', false],
   ['golden', 'Golden', '#e5a823', false],
 ];
-export const FLOW_DEFAULT = '#4fb3ff';       // the standard flow color when every setting is None (the old default)
+export const FLOW_DEFAULT = '#4fb3ff';       // the flow color when every setting is None: the panel's Blue (OakBarn Brewery, 2026-11-14: "Set default to blue"; no Default box)
 export const TAP_BLUE = '#2f80ed';            // flow from a Tap Water Valve (Fritz: always Blue)
 const BY_KEY = new Map(FLOW_COLORS.map(c => [c[0], c]));
 const hex2 = n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');

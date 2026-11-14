@@ -867,6 +867,20 @@ Help 155).
   tab's values when it is built. An item's own setting always wins over the Default tab.
 - **Hover Help** (2026-11-14): **Hover Delay (ms)**, how long the mouse rests on a name before its Hover Help shows; empty = 0, at
   once (Rule 2.38 item 2).
+- **New User Templates and Schemas** (OakBarn Brewery, 2026-11-14, his choices on docs/Default_Settings_Other_Places.md): set on the
+  Default tab, used only by **new, user-created** things. Pumps and valves already made (and the Skynet Templates) keep their own; only
+  the Pulse button time and the Look of the open Schema touch things that already exist.
+  - **Look of a New Schema** (row 1): the Look (theme) a new empty Schema starts with. The open Schema's own Look is still changed in
+    Settings > Panel settings.
+  - **Pump Overlay** (row 6a; row 7 is folded into it): the On overlay of a new User Pump, Green glow ring unless changed.
+  - **Valve Overlay** (row 6b): the On overlay of a new User Valve, the steady Lightning bolt unless changed.
+  - **Push Lockout (s)** (row 12): a new Pulse-mode push button's lockout, 3 seconds unless changed (Rule 6.7).
+- **Fixed, with no Default** (2026-11-14): pipe fittings always size to their pipes (row 5, Rule 5.36); a new User Pump's cover
+  color is **None** (row 8); a new Alarm's Layer 2 / Set Graphic is **None** (Rule 7.12); the flow color is Blue (row 9); the Pump and Valve Standards follow
+  the Rules (rows 3, 4, 10). Lost Link is set on each Interface (row 13, Rule 6.3). A new empty Schema has no Interface (row 18,
+  Rule 10.5). The Simulator's settings are only on the Simulator bar (rows 14, 15, Rule 10.10).
+- The **Defaults set somewhere else** list now holds only: the Look of the open Schema, the Pulse button time (**100 ms, fixed, used by
+  every Pulse button, the ones already made too**), Setup's keep-users choice, and the BruControl Import's names and Look.
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -1267,8 +1281,8 @@ pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it o
 
 5.14 **Pipe fittings are only what they are.** A tee is only a tee (no Top Tee, Suction Tee or other Type),
 an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their settings are **.x, .y, .width,
-.height**, **.visible**, **.hiddenlock**, **.lock**, **.tab** and a **Label** (Rule 1.21; Fritz, 2026-11-02), plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
-Width and Height are greyed out until it is switched off). No Type or Connection Standard; turning and
+.height**, **.visible**, **.hiddenlock**, **.lock**, **.tab** and a **Label** (Rule 1.21; Fritz, 2026-11-02), plus **Autosize to pipe** (always on, 2026-11-14: the fitting takes the size of the pipes joined to its IPs; its Width
+and Height are set by its pipes, and the Autosize switch is gone (OakBarn Brewery: "Always Resize pipes (no user Option)")). No Type or Connection Standard; turning and
 flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** A **check valve
 is a pipe fitting too**: it is always one way, and its orientation shows the way. Valves and flow meters in a fitting
 are **Devices**; a tee with a thermowell, or a thermowell on a vessel IP, is a kind of **Temperature Probe**
@@ -1756,8 +1770,8 @@ pipe on Save", Help 87).
   1" and one 1/2", as on a Reducer, or two of each on a cross) it takes the **bigger** size. With no pipe or hose on it, it keeps its size.
 - On **Save layout** every Tab is checked, and each time a Tab is drawn in Edit layout (so after 💾 Save in any Properties) that Tab
   is. Sized this way, about their bend (Rule 5.25):
-  - every pipe fitting on **Autosize to pipe** (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP
-    fittings, Manual Valves);
+  - every pipe fitting (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP fittings, Manual Valves):
+    **always**, there is no switch (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option)");
   - **Valve Tees and Supply Manifolds** (Rule 5.35; they have no Autosize switch, so they always follow);
   - **tees with a Temperature Probe** (Rule 5.30; no switch either, a Device dialog, Rule 18.10);
   - **valves and inline Devices** (Motorized and other valve Devices, Proportional Valves, flow meters and flow switches): each is drawn
@@ -1856,7 +1870,10 @@ Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
   poor.
 - ESP32: USB best, Ethernet good, WiFi good **as long as no heating is on a pin**.
 - Heating on Ethernet or WiFi is allowed, with a warning. A lost link turns the board's outputs off
-  after a set delay (default 10 seconds).
+  after a set delay.
+- **Lost Link (s) is a must-fill box on the Interface dialog** (OakBarn Brewery, 2026-11-14: "Make it a Mandatory Field on a New
+  Interface, edited on the Interface Dialog. Set all Interfaces and existing Templates to the recommended setting"): 3 to 600
+  seconds, 10 to start. Every Interface and Sample Schema has it set to 10. It is not on the Default tab.
 *Replaced:* Fritz first said "Mega by USB only" the same day, then changed it to this ranking.
 
 6.4 **Switching Schemas turns every output off** before and after the switch (manual valves are
@@ -1868,7 +1885,8 @@ not touched), and warns if Processes are running. (2026-10-21, PR #66)
 6.6 **Remote access is by Tailscale only.** Never open a port on the router. (2026-10-04, PR #8)
 
 6.7 **Digital input push buttons** (Pulse mode) have a 3 second lockout by default. (2026-10-04,
-PR #4)
+PR #4) The default is ☰ Menu > Default settings > **Push Lockout (s)** (0.1 to 60, 3 unless changed; 2026-11-14, Rule 2.42); it is
+used when a new button is made, and each button changes its own in its Properties.
 
 6.8 **Firmware for the boards**: ready firmware for boards that are not on the standard Arduino IDE
 is now a go (2026-10-27, thread "Build firmware for non-Arduino-IDE boards"). Every firmware keeps
@@ -2454,7 +2472,7 @@ Alarm Widget a Template", Help 107):
 - **Basic Skynet Alarm:** a set Skynet bell picture that can't be changed, in three versions (Together, Back only, Fore only;
   Images/Skynet/Alarms/Alarm_Basic*.svg; Fritz will send his own drawings to replace them). It is drawn in layers, bottom up:
   **Layer 4 Back** (colored by **.back**), **Layer 3 Fore** (the bell, colored by **.fore**; never the text), **Layer 2 Set
-  Graphic** (a short list of Skynet pictures, **None first**), **Layer 1 Active overlay** (on top while **.active** is true,
+  Graphic** (a short list of Skynet pictures, **None first**; a new one starts at **None**, OakBarn Brewery 2026-11-14), **Layer 1 Active overlay** (on top while **.active** is true,
   None first). Back and Fore use the standard color list. Standard Label attributes and the standard Alarm attributes.
 - **User Alarm:** its own background picture (Image Path 1), a Set Graphic that is any picture (Layer 2), an Active overlay,
   and **.backcolor** (.back) behind it. Standard Label and Alarm attributes.
@@ -2485,7 +2503,9 @@ steady, not flashing) sits over the middle of the picture while it is On (a valv
 that had no On overlay gets the steady bolt, and one that got the flashing bolt from the first version is changed to the steady one
 (Rule 15.2); one with another overlay keeps it, and picking (none) or the flashing bolt afterwards stays. A Manual valve has no power,
 so it has none. New pumps from the pump picker keep the Green glow ring (Rule 18.13; Fritz: leave it, the default may change later or
-go into Panel Defaults).
+go into Panel Defaults). **2026-11-14:** the On overlay a new pump or valve starts with is ☰ Menu > Default settings > **Pump
+Overlay** (Green glow ring) and **Valve Overlay** (the steady bolt) (Rule 2.42). Pumps and valves already made keep
+theirs.
 *Replaced:* the flashing bolt was the default (2026-11-04, PR #179).
 
 7.16 **The Alarm Chain: one Alarm does the work of many stacked ones** (OakBarn Brewery, 2026-11-09: "Since we can Change the
@@ -2898,15 +2918,15 @@ turns outputs off. (2026-10-05, PR #22)
 
 10.4 **One switch for Simulator or Real boards**, for the whole panel (every Interface at once): the
 🔌 Real / 🧪 Simulator button beside ☰ Menu (Admins), ☰ Menu > Switch to Simulator / Real boards,
-and Settings > Simulation. Timers run as before. **A wait on a reading** (temperature, boil start,
-level, weight, flow) **is pretended reached** after a set time (60 clock seconds by default, Settings
-> Simulation, can be switched off); a wait on a button or switch never is. (2026-10-27, Help 77)
+(Settings > Simulation is gone, Rule 10.10). Timers run as before. **A wait on a reading** (temperature, boil start,
+level, weight, flow) **is pretended reached** after a set time (60 clock seconds to start, Simulator bar
+> ⚙ Settings, can be switched off); a wait on a button or switch never is. (2026-10-27, Help 77)
 
-10.5 **A new Schema that is not a copy starts with a pretend Mega**: one Interface, Connection
-Simulator, named **New_Mega_2560_N** (N = the next number not used in any Schema). The panel switches
-to Simulator mode and says so, then opens the Interface pop-up to give it a meaningful name (example:
-the Skynet Home Brewery's 3 Megas Main_Brewery_HotSide, Valves, Fermentor) and set its Interface ID.
-A copy of a Schema keeps its Interfaces. (2026-10-27, Help 76)
+10.5 **A new empty Schema starts with no Interface** (OakBarn Brewery, 2026-11-14: "A Schema does not need an interface default.
+Users can add devices. Those devices have the Interface on them"). Add the Interfaces on the Devices page. It starts with the Look
+picked in ☰ Menu > Default settings > Look of a New Schema (Rule 2.42). A Skynet Schema Template made with no real Interface still
+gets a pretend Mega for its Devices, on the Simulator. A copy of a Schema keeps its Interfaces.
+*Replaced:* a new Schema that was not a copy started with a pretend Mega named New_Mega_2560_N, on the Simulator (2026-10-27, Help 76).
 
 10.6 **A Sample Schema always comes in as a new Schema** (Schema dropdown > Add a Sample Schema, the
 ☰ Menu > 🗂 Schema tab, or Settings): it never writes over one of yours. Every Interface in it gets
@@ -2939,6 +2959,12 @@ the notice: *"Skynet does not check what is in a Schema file, going out or comin
 else in it, and any copyright on them, are between the brewers."* **Skynet does no checking** of a shared Schema. A shared Schema
 can also be added as a folder in `sample_schemas` (Rule 9.13). Both programs: the BruControl Import saves its Schemas in the same
 Import folder; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 44)
+
+10.10 **Every Simulator setting is ONLY on the Simulator bar** (OakBarn Brewery, 2026-11-14: "All Simulator Bar settings should be
+ONLY!!! on the Simulator Bar"). Speed, the skip buttons and Auto skip are on the bar itself. **⚙ Settings** on the bar (Admins) opens
+the rest: "Skip to next event" lead, Auto skip watch time, Pretend readings are reached and its seconds, the Time jumps table and
+the Process timeline, with Save at the top and the bottom. They are not in Settings or on the Default tab. Switching the Simulator on
+or off stays on the 🔌 Real / 🧪 Simulator button and the ☰ Menu (Rule 10.4). (Help 85, 20, 77)
 
 ## 11. Help pages
 
@@ -4252,6 +4278,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 10.10 (OakBarn Brewery: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar"): Settings > Simulation is gone; its settings are on the Simulator bar's new ⚙ Settings panel. Rule 10.4 changed to match. Help 20, 77, 85 (and French).
+- 2026-11-14: OakBarn Brewery's 21 choices on docs/Default_Settings_Other_Places.md. Rule 2.42: new Default tab part **New User Templates and Schemas** (Look of a new Schema, On overlay for a new User Pump and a new User Valve, Push Lockout); "Defaults set somewhere else" cut to 5 rows. Rules 5.14 and 5.36: pipe fittings always size to their pipes, the Autosize switch is gone. Rule 6.3: Lost Link (s) is a must-fill box on the Interface dialog, 10 s on every Interface and sample. Rule 6.7: Push Lockout default. Rule 7.12: a new Alarm's Layer 2 starts at None. Rule 7.15: On overlay defaults. Rule 10.5: a new empty Schema has no Interface.
 - 2026-11-14: Rule 2.42 (OakBarn Brewery's Default tab markup): Text split into **Labels** and **Text Boxes** with fresh-install values (White on Black, Centered, 11 px, Tab's font, new box 520 x 140), Labels **Bold**, Font = Tab's font first (his answer), **Rich Text Embedded Code** heading with **\L Rich Text Code Size (px)**, one Save for the tab (no Save Tap Water), and "Defaults are for new things" (a Template's own settings win). Help 49, 155, 22, 33 (and French). Rule 17.12 Tap Water saved with the one Save.
 - 2026-11-14: Rule 2.38 item 8 (OakBarn Brewery: "Need hover help to not cover any part of the dialog if possible. Move Hover Help pop up to the Right Off the Dialog and if there is room. Make the Hover help high enough so no scroll bars unless it goes off the bottom of the screen"): in a dialog the Hover Help goes to the right of the dialog (else the left; else beside, under or over the name and its field, never covering them), as tall as the window, scroll bar only when taller than the window. Help 147.
 - 2026-11-14: Rule 2.38 item 2 and Rule 2.42 (OakBarn Brewery: "Add a Default delay for Hover Help in the Default tab in milliseconds. That delay needs to be how long a mouse pointer hovers before the Hover Help comes up"): ☰ Menu > Default settings > Hover Help > **Hover Delay (ms)**, 0 to 5000, empty or 0 = at once (the default, no change for anyone who leaves it). The BruControl Import uses the Panel's. Taps never wait. Help 155 and 147 (and their French pages).

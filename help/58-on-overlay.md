@@ -39,7 +39,7 @@ The colors follow what the item does:
 
 Each name starts with its own letter, so with the list open you can type that letter to pick it.
 
-Pick **None** to turn the overlay off. A Heating Element starts with **Red Glow**: it glows red while it is On. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
+Pick **None** to turn the overlay off. A Heating Element starts with **Red Glow**: it glows red while it is On. A new pump starts with ☰ Menu > Default settings > **Pump Overlay** (Green glow ring unless changed), and a new powered valve with **Valve Overlay** (the steady bolt). Pumps and valves already made keep theirs. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
 
 ## Your own overlay picture
 
