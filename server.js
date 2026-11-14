@@ -10,6 +10,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { closeLauncherWindow } from './lib/closewindow.js';
+import { keepConsoleTitle, PANEL_TITLE } from './lib/consoletitle.js';
 import { writeStopKey, removeStopKey, stopAllowed } from './lib/stoppanel.js';
 import { openAppWindow, closeAppWindow, openInDefaultBrowser } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
@@ -1295,7 +1296,7 @@ server.listen(PORT, () => {
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
   // Windows: the panel opens in its own clean window, whatever .bat started it (Rule 2.36, lib/appwindow.js)
   if (CLOSABLE && !IMPORT_BUILD) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
-  if (!IMPORT_BUILD) minimizeWindow();
+  if (!IMPORT_BUILD) { minimizeWindow(); keepConsoleTitle(PANEL_TITLE); }   // the black window keeps its own name, not "Windows PowerShell" (Rule 2.36)
 });
 // Skynet Brewer double-clicked while the panel is already running (its window was closed with its X): open the window again
 server.on('error', e => {
