@@ -13,9 +13,9 @@ import { setHoverDelay } from '../hoverhelp.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// The Importer runs in the black "Skynet BruControl Importer" window. If that window is closed, nothing on this page can work
-// (Fritz, 2026-11-07: the buttons "do not work"), so the page says so plainly at the top instead of doing nothing.
-const STOPPED = 'The Importer has stopped, so the buttons cannot work. Its black window (Skynet BruControl Importer) was closed. ' +
+// The Importer runs in the Background (Rule 6.32). If it has stopped, nothing on this page can work (OakBarn Brewery, 2026-11-07:
+// the buttons "do not work"), so the page says so plainly at the top instead of doing nothing.
+const STOPPED = 'The Importer has stopped, so the buttons cannot work. ' +
   'Close this window and start Skynet BruControl Importer again from its shortcut.';
 function stopped(on) { const b = document.querySelector('#stopped'); if (b) { b.textContent = STOPPED; b.classList.toggle('hidden', !on); } }
 async function api(method, url, data, { wait = 30000 } = {}) {
