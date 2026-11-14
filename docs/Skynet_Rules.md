@@ -2495,7 +2495,10 @@ is only a browser showing it.
    (Node.js, USB board support), then starts the Brain in the Background with no window (lib/startbrain.js) and closes. The Brain
    still gets Windows' shut down, restart and sign out message, so everything goes Off first (Rule 6.31). What it writes goes to
    data\brain.log (a new one each start, the last one kept as .old). It did not start: the black window stays open with the last lines.
-   Double-clicked again while it runs: the panel window opens again. Start menu > Skynet Brewer > **Stop the Skynet Brain** stops it
+   The panel window is opened by the program that was double-clicked, never by the Brain in the Background (OakBarn Brewery,
+   2026-11-14: "Full installer only starts the Brain": a program with no window can't bring a window to the front). **Skynet Panel**
+   (Desktop and Start menu) opens the panel window; the Brain is started first if it is not running. The Setup's last page starts the
+   Brain and opens the panel. Double-clicked again while it runs: only the panel window opens. Start menu > Skynet Brewer > **Stop the Skynet Brain** stops it
    the normal way (lib/stoppanel.js). Skynet never changes Windows settings: no service, no admin rights.
 2. **Close** is only on the Brain's own computer (Rule 2.25).
 3. **Put the Brain in Standby** (☰ Menu, **Admins only**, on any other screen and on a Pi): the same tick box warnings and Back as
@@ -4421,6 +4424,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
 - 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
 - 2026-11-14: Rule 5.40 (OakBarn Brewery: "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need an exit button without moving"): the unhook pop-up stays open, checks the pump live, then asks about the valves; ✖ Exit always closes it without moving.
 - 2026-11-14: Rule 2.42 (OakBarn Brewery: "So remove them from the Tab", picked "One marked Default in its list"): new Pump Profile Menu tab; one Valve and one Pump Profile can be marked Default; the Pump and Valve Add boxes have a Profile dropdown starting on it; the Valve Profile pop-up and the Default tab's Valve Profile box are gone (it became the Default mark once). Rule 5.40: a safety pop-up before a hose end is unhooked (pump running: turn it Off first, no move; else ask about gravity draining, Yes moves). Help 33, 36, 127, 155 (and French). Both programs.
