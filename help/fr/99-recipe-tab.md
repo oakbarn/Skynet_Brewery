@@ -137,7 +137,7 @@ Une ligne pour chaque houblon, sans limite. **Add Hop +** met une nouvelle ligne
 Les fermentescibles d'une recette sont répartis sur deux onglets. **Grain** contient ceux de type Grain (le type n'est pas montré). **Fermentable** contient tous les autres types, choisis dans la liste **Type** (la liste BeerXML : Adjunct, Extract, Dry Extract, Sugar). Chaque ligne Fermentable a aussi une liste **Measurement** (Pounds, Ounces, Kilograms, Grams) pour sa propre quantité. Les deux listes sont à choix seulement. **Add Grain +** ou **Fermentable +** met une nouvelle ligne en bas ; **Delete** en retire une. Il n'y a pas de limite.
 
 - **Name**, le poids, **Potential** (le rendement, %), **SRM** (la couleur) et **PPG>SG**, ses points de densité (calculés).
-- Le poids s'affiche dans le **standard de poids du grain** choisi dans ☰ Menu > Default (Pounds ou Kg). Un fichier BeerSmith ou BeerXML importé y est aussi montré. Son étiquette, et l'étiquette PPG>SG, ne peuvent être changées que sur le Tab Default.
+- Le poids s'affiche dans le **standard de poids du grain** choisi dans ☰ Menu > Default (Pounds ou Kg). Un fichier BeerSmith ou BeerXML importé y est aussi montré. Son étiquette, et l'étiquette PPG>SG, ne peuvent être changées que dans Settings > Panel settings: screen, Tabs and alerts.
 - **Points de densité** = Potential × 46.214 × livres × rendement ÷ gallons du brassin. Les grains et les adjuvants utilisent le rendement de la brasserie ; les extraits, sucres, fruits et jus donnent tout leur sucre. Les points de chaque ligne s'additionnent dans la case **Expected Gravity** (densité attendue) du Tab Recipe (1 + points ÷ 1000), calculée chaque fois qu'une quantité change, et par Calculate. Il faut la Brew Length.
 - **After Boil** (onglet Fermentable seulement) : un interrupteur, montré seulement pour les types qu'un brasseur ajoute pendant ou après l'ébullition (Extract, Dry Extract, Sugar, Fruit, Juice). Activé veut dire qu'il est ajouté après l'ébullition. Le grain n'est jamais ajouté après l'ébullition, donc l'onglet Grain n'en a pas.
 
@@ -200,12 +200,12 @@ Skynet met les houblons dans l'ordre du jour de brassage : **Top of Mash, 1st Wo
 
 Chaque groupe de houblons d'ébullition (et chaque élément Misc Boil) reçoit :
 
-- un **avertissement** avant d'être ajouté (10 minutes sauf changement sur le Tab Default), et
+- un **avertissement** avant d'être ajouté (10 minutes sauf changement dans Settings > Panel settings: screen, Tabs and alerts), et
 - une alerte d'**ajout** (drop) quand il est ajouté.
 
 Quand deux alertes tombent au même moment, par exemple un ajout et l'avertissement du groupe suivant, Skynet fait **une seule alerte qui contient les deux**. L'onglet Drops les marque avec ⚠ et les liste sous les alertes.
 
-Le jour du brassage, chaque alerte s'affiche comme une barre en haut de chaque écran (verte pour un avertissement, rouge pour un ajout) et reste jusqu'à ce qu'on la ferme. Avec le son activé, elle joue le son d'alerte (s'il y en a un de réglé sur le Tab Default) puis dit l'alerte à voix haute.
+Le jour du brassage, chaque alerte s'affiche comme une barre en haut de chaque écran (verte pour un avertissement, rouge pour un ajout) et reste jusqu'à ce qu'on la ferme. Avec le son activé, elle joue le son d'alerte (s'il y en a un de réglé dans Settings > Panel settings: screen, Tabs and alerts) puis dit l'alerte à voix haute.
 
 Démarrez les alertes depuis un Process (plus bas), ou avec **▶ Start hop alerts** sur l'onglet Drops. Elles peuvent tourner sur la propre horloge de Skynet à partir de ce moment, ou suivre une **minuterie** à rebours comme la minuterie d'ébullition, donc une minuterie en pause ou les sauts de temps du simulateur sont suivis aussi.
 
@@ -227,6 +227,9 @@ Dans **☰ Menu > Default** :
 
 - **Water Profile**, **Boil time**, **Brewhouse efficiency**, **Water to grain ratio**, **Grain temperature** et **Strike offset** : ce avec quoi commence une nouvelle recette. Chacun peut être changé dans la recette.
 - **How amounts show** (comment s'affichent les quantités) : grains (lb, kg, oz, g), houblons (oz, g), volumes (gal, L, qt), températures (°F, °C), eau/grain (qt/lb, L/kg) et éléments divers (comme la recette les donne, métrique, ou US).
+
+Dans **Settings > Panel settings: screen, Tabs and alerts** :
+
 - **Hop alerts** : les minutes d'avertissement avant chaque ajout, à quel point deux alertes doivent être proches pour n'en faire qu'une, un son avant chaque alerte, les dire à voix haute, et quelle voix du navigateur.
 
 ## Dans un Process {#in-a-process}

@@ -18,7 +18,7 @@ The Basic Skynet Alarm is drawn in layers, from the bottom up:
 |---|---|---|
 | 4 | **Back**: the square behind the bell | **Back color**, or `.back` in a Process |
 | 3 | **Fore**: the bell and its clapper | **Fore color**, or `.fore` in a Process |
-| 2 | **Set Graphic**: a Skynet picture on the bell (the hop cone to start) | the **Set Graphic** list; **None** (first in the list) = nothing |
+| 2 | **Set Graphic**: a Skynet picture on the bell (**None** to start) | the **Set Graphic** list; **None** (first in the list) = nothing |
 | 1 | **Active overlay**: on top, blinking, while the alarm is active | the **Active overlay** list; **None** = nothing |
 
 The bell picture itself is set by Skynet and can't be changed. It comes in three versions: **Together** (Back and Fore),

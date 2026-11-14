@@ -56,7 +56,7 @@ A new install starts with:
 - **Visible, Word Wrap, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them,
   then you change it in its properties. Changing the Default later does not hide, move or resize what is already on your Tabs.
 - The Default fore color leaves the digits of an **LED** or **Gauge** look in their own colors.
-- The size of large text (the `\L` code) is **\L Rich Text Code Size (px)**, under **Rich Text Embedded Code** on the Default tab.
+- The size of large text (the `\L` code) is **\L Rich Text Code Size (px)**, under **Rich Text Embedded Code** in **Settings > Panel settings: screen, Tabs and alerts**.
 
 ## In a Process
 

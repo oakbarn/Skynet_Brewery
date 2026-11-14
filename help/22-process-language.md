@@ -141,7 +141,7 @@ Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
 
 Use `\t` and `\n` to lay text out, not extra spaces: a Label can't start or end with a space (they are trimmed).
 
-The size of large text is **\L Rich Text Code Size (px)** on **☰ Menu > Default settings** (under **Rich Text Embedded Code**), in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
+The size of large text is **\L Rich Text Code Size (px)** in **Settings > Panel settings: screen, Tabs and alerts** (under **Rich Text Embedded Code**), in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
 
 ## Change the look of a device or widget
 

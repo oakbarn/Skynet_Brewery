@@ -5,7 +5,7 @@ panneau le joue directement depuis le web, donc le fichier n'a jamais besoin d'�
 
 ## En utiliser un {#use-one}
 
-Dans n'importe quelle case de son (le **Sound file** d'une alarme, un **Sound Player**, une étape d'Alarm Chain, ou **☰ Menu > Default > Sound before each hop
+Dans n'importe quelle case de son (le **Sound file** d'une alarme, un **Sound Player**, une étape d'Alarm Chain, ou **Settings > Panel settings: screen, Tabs and alerts > Sound before each hop
 alert**), choisissez **Add new ...** et collez le lien, par exemple :
 
 ```

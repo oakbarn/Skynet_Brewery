@@ -137,7 +137,7 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown (the BeerXML list: Adjunct, Extract, Dry Extract, Sugar). Each Fermentable line also has a **Measurement** dropdown (Pounds, Ounces, Kilograms, Grams) for its own Amount. Both dropdowns are select only. **Add Grain +** or **Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
 
 - **Name**, the weight, **Potential** (the yield, %), **SRM** (the color) and **PPG>SG**, its gravity points (worked out).
-- The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only on the Default tab.
+- The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only in Settings > Panel settings: screen, Tabs and alerts.
 - **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the brewhouse efficiency; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length.
 - **After Boil** (Fermentable tab only): a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil. Grain is never added after the boil, so the Grain tab has none.
 
@@ -200,12 +200,12 @@ Skynet puts the hops in brew day order: **Top of Mash, 1st Wort, Start of Boil, 
 
 Each boil Hop Group (and each Boil Misc item) gets:
 
-- a **warning** before it goes in (10 minutes unless changed on the Default tab), and
+- a **warning** before it goes in (10 minutes unless changed in Settings > Panel settings: screen, Tabs and alerts), and
 - a **drop** alert when it goes in.
 
 When two alerts land at the same time, for example a drop and the next group's warning, Skynet makes **one alert that has both**. The Drops tab marks those with ⚠ and lists them under the alerts.
 
-On brew day each alert shows as a bar at the top of every screen (green for a warning, red for a drop) and stays until it is closed. With sound on, it plays the alert sound (if one is set on the Default tab) and then says the alert out loud.
+On brew day each alert shows as a bar at the top of every screen (green for a warning, red for a drop) and stays until it is closed. With sound on, it plays the alert sound (if one is set in Settings > Panel settings: screen, Tabs and alerts) and then says the alert out loud.
 
 Start the alerts from a Process (below), or with **▶ Start hop alerts** on the Drops tab. They can run on Skynet's own clock from that moment, or follow a countdown **timer** such as the Boil timer, so a paused timer or the Simulator's time skips are followed too.
 
@@ -227,6 +227,9 @@ On **☰ Menu > Default**:
 
 - **Water Profile**, **Boil time**, **Brewhouse efficiency**, **Water to grain ratio**, **Grain temperature** and **Strike offset**: what a new Recipe starts with. Each can be changed in the Recipe.
 - **How amounts show**: grains (lb, kg, oz, g), hops (oz, g), volumes (gal, L, qt), temperatures (°F, °C), water to grain (qt/lb, L/kg) and misc items (as the recipe gives them, metric, or US).
+
+In **Settings > Panel settings: screen, Tabs and alerts**:
+
 - **Hop alerts**: minutes of warning before each drop, how close two alerts must be to become one, a sound before each alert, saying them out loud, and which browser voice.
 
 ## In a Process

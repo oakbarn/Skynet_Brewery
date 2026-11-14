@@ -23,20 +23,22 @@ A Menu tab only shows once you pick it. It opens next to your screen tabs, with 
 
 Everyone can look at the Menu tabs. Only an Admin can change them (an Operator can lock and unlock the Equipment Profile).
 
-**The Default tab is now called Default settings** (2026-11-07). At its top are the **Default pipe size** and **hose size** and a new Tab's size, and near the bottom a list of the defaults set somewhere else. See [Default settings](155-default-settings).
+**The Default tab is now called Default settings** (2026-11-07). It holds only what a **new** thing starts with (Skynet Rule 2.42). See [Default settings](155-default-settings).
 
 ## The Default tab
 
-**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). **Rich Text Embedded Code**: **\L Rich Text Code Size (px)** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](45-phones-and-tablets)). Press **Save**.
+**Every default is set here: what a new thing starts with.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). New User Templates and Schemas. Press **Save**.
 
-**Sound** (at the top of the Default tab and under the defaults):
+What changes things already made, or how the whole panel works, is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes inside text](22-process-language)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
+
+**Sound** (in Settings > Panel settings: screen, Tabs and alerts):
 
 - **Sound on**: the same as the sound button at the top of the page. It turns sound on or off on this screen right away, and is not saved.
 - **Turn Sound On when starting**: when this is on, sound is on by itself every time the panel opens and every time a Schema is loaded, so you do not have to press **Enable sound**. Press **Save** to keep it.
 
 Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any sound until you tap or click it once. So when the panel opens, the button at the top says **Sound on (tap anywhere)**: tap or click anywhere on the page once and the sound plays from then on. An alarm that went off before that first tap starts as soon as you tap.
 
-**Order of the Menu:** each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
+**Order of the Menu** (in Settings > Panel settings: screen, Tabs and alerts): each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
 
 ## The other Menu tabs
 

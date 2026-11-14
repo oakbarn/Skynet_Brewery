@@ -67,17 +67,13 @@ More about every question: [New Schema from a Skynet Template](157-schema-templa
 
 ## Step 5. An empty Schema
 
-**5a. Simulator mode.** Your new Schema has one pretend board, an Arduino Mega called **New_Mega_2560_1**, and the panel is in Simulator mode, so nothing real is switched. Press **✔ OK**.
-
-![You are now in Simulator mode](help_pictures/Step_Add_Schema_09_Simulator.png)
-
-**5b. Your board.** The box for that board opens. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID** of 1 to 4 letters, for example **HS**. The Interface ID starts the name of every Device on that board. Pick the **Board** you have. Leave **Connection** on **Simulator** until the board is plugged in. Press **💾 Save**.
+**5a. Your board.** A new empty Schema has no board (Interface) yet. On the **Devices** page press **Add Interface**. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID** of 1 to 4 letters, for example **HS**. The Interface ID starts the name of every Device on that board. Pick the **Board** you have. Pick **Simulator** for **Connection** until the board is plugged in, fill in **Lost Link (s)** (10 to start), and press **💾 Save**.
 
 ![Your new Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 
 More about boards: [Interfaces](76-interfaces) and [Simulator or real boards](77-simulator-or-real-boards).
 
-**5c. Add your first things.** The Main Tab is empty. Press **☰ Menu > ✎ Edit layout**. The bar at the top has a button for each kind of thing: **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** and more. Pick one and fill in its box: the Label (what you call it), the Interface (your board), the Port it is wired to, and the Tab. Then **Save layout**.
+**5b. Add your first things.** The Main Tab is empty. Press **☰ Menu > ✎ Edit layout**. The bar at the top has a button for each kind of thing: **Vessel**, **Pumps**, **Valves**, **Probe**, **Heating Element** and more. Pick one and fill in its box: the Label (what you call it), the Interface (your board), the Port it is wired to, and the Tab. Then **Save layout**.
 
 ![The Edit layout bar](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 

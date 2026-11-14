@@ -10,16 +10,16 @@ A pipe fitting has no settings but:
 
 | Setting | What it does |
 |---|---|
-| **Autosize to pipe** | On (the default): the fitting takes the size of the pipes joined to its IPs, so its body is as thick as most of the pipes on it (a tie takes the bigger). **Width and Height are greyed out** while it is on. A Skynet pipe fitting with no pipe on it yet takes the **Default pipe size** (☰ Menu > Default settings, [Help 155](155-default-settings)). |
+| **Autosize to pipe** | Always on, with no switch: the fitting takes the size of the pipes joined to its IPs, so its body is as thick as most of the pipes on it (a tie takes the bigger). Its **Width and Height** are set by its pipes. A Skynet pipe fitting with no pipe on it yet takes the **Default pipe size** (☰ Menu > Default settings, [Help 155](155-default-settings)). |
 | **X, Y** | Where it is, in pixels from the left and from the top (`.x_hPosition`, `.y_vPosition`). |
-| **Width, Height** | How big it is. Switch **Autosize to pipe** off first; then you can type them, or drag its grab points in Edit layout. |
+| **Width, Height** | How big it is. Set by its pipes (Autosize to pipe). |
 | 🔒 Lock | Locks it in place, as on every item. |
 
 - It has **no label**, **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BH ...) shows in its Properties and when you hold the mouse over it.
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
 - An **End Cap** has **Autosize to pipe** too: on an opening of a pipe fitting it takes the size of that fitting's ferrule. On a Reducer, a Valve Tee or Supply Manifold, or a vessel opening it keeps its size.
-- **Everything sizes to its pipes when you save** (Skynet Rule 5.36): pressing **Save layout**, or 💾 Save in a fitting's or a pipe's Properties, sizes every pipe fitting on every Tab to the size **most of the pipes and hoses joined to it** have. On a tie (one 1" and one 1/2") it takes the bigger one. Change a pipe run to 1" and Save, and its elbows and tees grow to 1". The same goes for **Valve Tees and Supply Manifolds**, **tees with a Temperature Probe**, **valves** and **flow meters**, which have no Autosize switch. **Pumps** follow their pipes too (since 2026-11-07). Something with no pipe on it takes the **Default pipe size** set on ☰ Menu > Default settings ([Help 155](155-default-settings)); a fitting on a vessel opening with no pipe keeps its size.
+- **Everything sizes to its pipes when you save** (Skynet Rule 5.36): pressing **Save layout**, or 💾 Save in a fitting's or a pipe's Properties, sizes every pipe fitting on every Tab to the size **most of the pipes and hoses joined to it** have. On a tie (one 1" and one 1/2") it takes the bigger one. Change a pipe run to 1" and Save, and its elbows and tees grow to 1". The same goes for **Valve Tees and Supply Manifolds**, **tees with a Temperature Probe**, **valves** and **flow meters**, which follow their pipes too. **Pumps** follow their pipes too (since 2026-11-07). Something with no pipe on it takes the **Default pipe size** set on ☰ Menu > Default settings ([Help 155](155-default-settings)); a fitting on a vessel opening with no pipe keeps its size.
 - A **check valve** is a pipe fitting too: flow only goes one way, and its orientation (the arrow on its picture) shows which way. Turn or flip it to point the arrow.
 - A valve or flow meter in a fitting is a **Device**, and a tee with a thermowell (or a thermowell on a vessel IP) is a kind of **Temperature Probe**, so those keep their own settings for now: see [Skynet fittings](60-skynet-fittings).
 
@@ -32,7 +32,7 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
 - It is a **Confirmation Widget** (2026-11-08, Skynet Rule 1.28, [Confirmation Widgets](162-confirmation-widgets)): its **.confirmation** switch in its Properties is on. A click shows a pop-up, **✋ OPEN Kettle drain by hand, then press Done**: open the real valve, then press **Done**, and only then does it show open. **Cancel** leaves it as it was. Switch .confirmation off and a click opens or closes it at once.
 - While it is open, the **open overlay** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, a green ring and a tick) is drawn on top of it.
 - It has **two IPs**, one at each pipe end, so a pipe joins each side of it (Skynet Rule 5.24, Help 123).
-- Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, **.confirmation**, then **Autosize to pipe**, **X**, **Y**, **Width**, **Height** and 🔒 Lock.
+- Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, **.confirmation**, then **X**, **Y**, **Width**, **Height** and 🔒 Lock.
 
 ### A Manual Valve in a Process
 
