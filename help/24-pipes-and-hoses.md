@@ -38,13 +38,40 @@ Every pipe and hose has its own **Size** in its settings. First pick **Size unit
 | 5" | 125 mm (DN125) | | |
 | 6" | 150 mm (DN150) | | |
 
-**Custom** lets you type any size in the units you picked. A new pipe or hose starts at 1/2".
+**Custom** lets you type any size in the units you picked. A new pipe or hose starts at the **Default pipe size** or **Default hose size** on ☰ Menu > Default settings (1/2" unless you change it).
 
 Sizes are drawn in proportion: a 1" pipe is twice as thick as a 1/2" one. **Tab… > Pipe size** sets how thick a 1/2" pipe is on that tab (default 10); every other size, and the fittings, grow or shrink with it.
+
+## IP Type
+
+Every pipe and hose has an **IP Type at start** and an **IP Type at end**: the connector on each end (Skynet Rule 5.40). The choices are:
+
+- **Tri-Clamp**
+- **NPT**
+- **BSP**
+- **Quick Disconnect**
+
+The connector is always the size of the pipe or hose, so it has no size box of its own. Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only the other three.
+
+Each end is **drawn as its IP Type**, so you can see it on the Tab: a Tri-Clamp ferrule and clamp, an NPT thread, a BSP hex nut, or a Quick Disconnect cam lock with its two arms. It is not drawn where the end sits on a fitting, a Quick Disconnect or an End Cap, which are drawn already.
+
+A **hose** end that is **Quick Disconnect** can be unhooked and moved at any time, not only in Edit layout, the same way as a QD hose (see Help 127). Grab one end at a time; the other stays. Pipes do not move this way.
+
+A new pipe starts with the **Default pipe IP Type**, and a new hose with the **Default hose IP Type**, on both ends. Both are on ☰ Menu > Default settings, beside the sizes. A Quick Disconnect hose is always Quick Disconnect on both ends. Changing a Default never changes a pipe or hose already made.
 
 ## Reducers
 
 Where pipes or hoses of different sizes meet on the same IP or fitting, a **reducer** appears by itself: a cone from the bigger size down to the smaller one, in proportion to both sides. There is nothing to add or set. A fitting (tee, elbow, cross, coupling, manual valve) takes the size of the biggest pipe joined to it.
+
+## Deleting a pipe or hose
+
+Delete a pipe or hose from its Properties (🗑 Delete), or grab it in Edit layout: the **Move** pop-up has a red **🗑 Delete Pipe**
+(or **Delete Hose**) button. Its own IPs go with it: a coupling or IP point on one of its ends is deleted too when nothing else is on
+it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel). **↩ Put back** (Ctrl+Z) brings it back.
+
+## Shortening a pipe
+
+Grab a pipe in Edit layout and press **🔓 Unlock its ends**: its ends let go and get a coupling. Drag that coupling (or the handle on the end) along the pipe to make it shorter or longer. It stays on its own line.
 
 ## Showing only the flow
 

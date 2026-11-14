@@ -1314,9 +1314,10 @@ dialog.boardTalk { width: min(900px, 96vw); }
 /* A frozen top on the model dialog (Rule 2.51): only a Pump's Properties or Add box for now (OakBarn Brewery: "Wait ... until I am
    100% Finished with the model"). The ☰, title and buttons stay put while the rest scrolls; the bottom row is not shown. */
 #dlg .dlgHead::after { content: ''; display: block; clear: both; }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) { padding-top: 0; }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar { display: none; }
+/* Rule 2.51: the Pump dialogs, and each dialog updated since 2026-11-14 (the Pipe and Hose Properties) */
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]), dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) { padding-top: 0; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgBottomBar { display: none; }
 /* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
 .gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
 .gpick .gpickFolder.hidden { display: none; }
@@ -1350,3 +1351,8 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 /* Default tab: section titles stand out (OakBarn Brewery, 2026-11-14: "Change Titles on Default Tab to Different color or Back to Highlight sections") */
 .defTab .dlgHead, .defTab > h3:not(:first-child) { background: var(--accent); color: var(--on-accent); padding: 5px 10px; border-radius: 6px; border-bottom: 0; margin-top: 14px; }
 .defTab .dlgHead .hh, .defTab .dlgHead a { color: var(--on-accent); }
+/* the Move pop-up's top row (Cancel and its buttons) stays put while the rest scrolls (OakBarn Brewery, 2026-11-14: "Freeze") */
+.grabDlg .grabHead { position: sticky; top: 0; z-index: 5; background: var(--panel); margin: -1em -1em 0; padding: 1em 1em .5em; border-bottom: 1px solid var(--line); }
+.grabDlg button.danger { background: #d32f2f; color: #fff; border-color: #b71c1c; }
+/* IP Type connectors at pipe and hose ends (Rule 5.40): drawn only, never in the way of a click */
+.conn { pointer-events: none; }

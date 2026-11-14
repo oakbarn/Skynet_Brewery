@@ -486,7 +486,12 @@ follow it. **Its pop-ups too** (OakBarn Brewery, 2026-11-14: "On any Dialog Popu
 Arrow or Red Octagon Icons, have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue
 back"): every ⬢ and ⬆ pop-up opened from the Pump Add box or Pump Properties has its title and ✖ Cancel and 💾 **Keep** frozen at the
 top and no bottom row; Keep is blue like Save was and puts the settings back into the dialog (the dialog's own 💾 Save saves them).
-Pop-ups of other dialogs keep Save and their bottom row for now. **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
+Pop-ups of other dialogs keep Save and their bottom row for now. **Any dialog that is updated** (OakBarn Brewery, 2026-11-14:
+"Apply the Freeze to any dialog that is updated"; "Freeze top and get rid of bottom buttons"): from now on, each time a dialog or pop-up is changed, it gets the frozen top too
+(its title and Cancel and Save, or its buttons, stay at the top while the rest scrolls; the bottom row is not shown). Done so far: the
+Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37). Dialogs not changed keep their top and bottom rows: "Once I am
+satisfied with the Blickmann Model, we do a global update as limited by the instructions"; "I will likely do only the Pump
+ones first" (OakBarn Brewery, 2026-11-14). **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
 2.52 **Build mode: only what works while building** (OakBarn Brewery, 2026-11-13, PDF "Blickmann Rip Tide Mode": "GREYOUT in Build
 Mode", "Hamburger Menu does not work in build mode. Get Rid in Build mode", "Entire Area needs to be gone while Building something.
@@ -564,7 +569,8 @@ overlay is the preferred way: see Rule 7.8.
 2.17 **Every dialog uses the same buttons, each an icon and its word:** ✖ Cancel (closes, saves
 nothing), 💾 Save (saves and closes), ✖ Close (a dialog with nothing to save), 🗑 Delete (asks
 first), ✔ OK (closes a message). (2026-10-27, thread "Add hidden keys so names can change") The **Add Device** box
-uses **➕ Add Device** in place of Save. (2026-10-28)
+uses **➕ Add Device** in place of Save. (2026-10-28) Where they go: at the top, frozen, with no bottom row, on every dialog
+changed since 2026-11-14 (Rule 2.51); a dialog not yet changed keeps them at the top and at the bottom until it is.
 
 2.18 **Skynet Standard: Show label.** Every dialog that has a Label also has a **Show label**
 switch with it (Devices, Widgets, the New Device dialog, vessels, Tab_Vessels, Tab_Fittings,
@@ -1530,6 +1536,12 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
 - **Older Schemas** (Rule 15.2, 8 IPs): a Skynet pump with no spots picked starts on the Right Middle and Top Right (mirrored when Left);
   when its Tab is shown, it moves onto its pipes (Rule 5.23) and their ends slide to meet it. The 3 Vessel 1 Pump sample is changed
   (Rule 15.3): its pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left.
+- **Joined pipe look** (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe"):
+  with a pipe or hose joined to an IP, the pump's Hose or Pipe to that IP is drawn like it (same kind, color and thickness), so
+  the two meet as one. With nothing joined, the Hose or Pipe picked is drawn.
+- **Corner IPs** (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs Side or Top or Side or Bottom"): Inlet from
+  and Outlet from (shown for a corner spot): Auto (the way its pipe leaves), Side, or Top / Bottom. The last step into the
+  corner is square.
 - **BruControl Import:** a pump imported as a Skynet Pump Device gets the same 8 IPs and starts on the same spots.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
@@ -1546,6 +1558,9 @@ Help 127).
   over the IP under it); anywhere in the **top third of a vessel** it is the same as putting the hose in the vessel's top (the whole top
   third is one big IP); anywhere else the end is loose and no flow shows. Operators and admins can move it, the move is kept at once
   for every screen, and a 🔒 locked hose does not move.
+- **It flexes as it moves** (OakBarn Brewery, 2026-11-14: "When moving a QD Hose, add some bend points to make the Hose Movement
+  dynamic"): while the end is dragged, the hose leaves its fixed end the way it did before and hangs through several bend points,
+  sagging more the farther the end goes.
 - Flow and Flow Colors are as for every hose (Rules 5.10, 5.21). A hose in a vessel's top is an end of the line like a vessel port;
   flow pumped from it takes that vessel's Out flow color.
 - **Exception to Rule 2.11** (waiting on Fritz's pick: this exception, or a change to Rule 2.11): only the free end of a Quick
@@ -1829,6 +1844,15 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **↩ Put back** on the Edit layout bar, and **Ctrl+Z** (not in a text box): undoes the last move, resize, unlock or swap, up to 30
   steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Properties changes are not in it;
   Exit without saving still undoes everything since the last Save layout.
+- **🗑 Delete Pipe / Delete Hose** (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect Dialog"): the
+  pop-up of a pipe or hose has a red Delete button beside 🔓 Unlock its ends; ↩ Put back (Ctrl+Z) brings it back. Its top is frozen
+  and it has no bottom row (Rule 2.51).
+- **Shorten a let-go pipe** (OakBarn Brewery, 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten"): a pipe end
+  that 🔓 Unlock its ends let go (an open coupling) can be dragged along the pipe's own line to make it shorter or longer (never off
+  its line, at least 10 pixels); its coupling goes with it.
+- **Deleting a pipe or hose takes its own IPs with it** (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on
+  the Build"; "Check same issue for Hose"), from this pop-up or from its Properties: a coupling or IP point on one of its ends goes
+  too when nothing else is on it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel).
 - **BruControl Import:** checked, not changed; it does not move things on a Tab. Schemas it makes get this in the Panel.
 
 5.39 **Hand-set appliance vessels: the DigiBoil and the 65 L Brewzilla** (Fritz, 2026-11-07: "a DigiBoil Widget Vessel. It has its
@@ -1857,6 +1881,32 @@ Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
   Kettle_DigiBoil_Electric and Kettle_Brewzilla_Electric Templates stay for brewers who switch theirs from Skynet.
 - Older Manual vessel Widgets (no appliance) work as before: no pop-up.
 - **BruControl Import:** checked, not changed. BruControl has no DigiBoil or Brewzilla items; its Manual valves import as before.
+
+5.40 **IP Type: the connector on each end of a pipe or hose** (OakBarn Brewery, 2026-11-14: "Need 2 additional Defaults with
+associated IPs Pipe Connector and Hose Connector"; "4 Choices Triclamp, NPT, BSP, or QuickDisconnet"; "Pipe and Hose
+Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
+- Every pipe and hose has an **IP Type at start** and an **IP Type at end**: **Tri-Clamp**, **NPT**, **BSP** or **Quick
+  Disconnect**. Both are in its Properties, under its size. The connector has no size of its own: it is the size of the pipe
+  or hose, so the two can never disagree.
+- A size the connector is not made in is not offered with it: Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only
+  NPT, BSP and Quick Disconnect.
+- **Defaults (Rule 2.42):** ☰ Menu > Default settings has **Default pipe IP Type** (beside Default pipe size; Tri-Clamp unless
+  you change it) and **Default hose IP Type** (beside Default hose size; Quick Disconnect unless you change it). A new pipe or
+  hose takes it on both ends. A Quick Disconnect hose (Rule 5.28) is always Quick Disconnect on both ends.
+- New things only: changing the Default never changes a pipe or hose already made. Once per Schema, each pipe and hose made
+  before this Rule took the Default IP Type of that day on both ends.
+- **Drawn as its type** (OakBarn Brewery, 2026-11-14: "Connectors: Graphic match Type"): each end of a pipe or hose is drawn as
+  its IP Type, across the end and turned with it, its size following the pipe: Tri-Clamp a ferrule and clamp band, NPT a tapered
+  thread, BSP a hex nut on a thread, Quick Disconnect a cam lock with its two arms. Not drawn where the end sits on a fitting, a
+  Quick Disconnect Widget or an End Cap (drawn already), or at a QD hose's free end (its yellow ring is there).
+- **Quick Disconnect hose ends move at any time** (OakBarn Brewery, 2026-11-14: "QD Ends can be disconnected and moved even when not
+  in Build Mode"; "QD ends: Hoses only and only grab one end at a time"): a hose end whose IP Type is Quick Disconnect can be
+  grabbed and moved outside Edit layout like a QD hose's free end (Rule 5.28), one end at a time; the other end stays. Pipes never
+  do, whatever their IP Type.
+- **Pumps:** **IP Type In** and **IP Type Out** in the pump's Properties (OakBarn Brewery: "Add Connection Type for the In and
+  Out IPs as above on a Pump"). A pump starts with what its Ports say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
+  the Default pipe IP Type; pumps already made took it once.
+- **BruControl Import:** BruControl has no connector on its pipes, so imported pipes and hoses take the Defaults.
 
 ---
 
@@ -4024,7 +4074,7 @@ Manifolds, Vessel Device). **Every other Device's Properties** now have the same
 Skynet Motorized Butterfly Valve, the Skynet KLD20T and User Defined Proportional Valves, the heating element PWM, Duty Cycle,
 Hysteresis, PID and Deadband, the digital inputs (Switch, Push, Toggle and Pulse buttons, Latching input, Pulse counter, Float,
 Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), the Flow meter, the Steppers and the Vessel scale:
-1. The lock, **Visible** and **Hidden Locked** in the title line; 🗑 Delete, ✖ Cancel, 💾 Save top and bottom (Rule 2.17).
+1. The lock, **Visible** and **Hidden Locked** in the title line; 🗑 Delete, ✖ Cancel, 💾 Save frozen at the top, no bottom row (Rules 2.17, 2.51).
 2. **1. Label ⬆ ⬢** and **Label Visible**; **2. Interface** with its **Port** (or **Probe #**) on the same line, greyed out for
    good (Rule 18.13), with **Invert** and **One-shot** in its ⬢ where it has them (the Pump's Pin attributes); **3. Tab**;
    **4. Name** and the Suggested Name (Rule 3.1).
@@ -4335,6 +4385,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 2.51 (OakBarn Brewery: "Apply the Freeze to any dialog that is updated"): every dialog or pop-up that is changed gets the frozen top; the Pipe and Hose Properties and the pipe or hose Move pop-up have it now. Rule 5.37: the Move pop-up of a pipe or hose has a red 🗑 Delete Pipe / Delete Hose ("Add Delete Button to Hose and Pipe Disconnect Dialog"); deleting a pipe or hose takes its own IPs with it (a coupling or IP point on its end with nothing else on it; "I deleted a Pipe but the IPs where still on the Build"). Rule 5.37: a let-go pipe end can be dragged along its line to shorten it ("After a Pipe is disconnected to Move, able to Shorten"). Rule 5.28: a QD hose being moved hangs through several bend points ("add some bend points to make the Hose Movement dynamic"). Help 24, 127 (and French).
+- 2026-11-14: Added Rule 5.40 (OakBarn Brewery: "Pipe and Hose Attributes as to IP Type that are set by the selected Defaults"): every pipe and hose has an IP Type at start and at end (Tri-Clamp, NPT, BSP, Quick Disconnect), the size of the pipe; Default pipe IP Type and Default hose IP Type on the Default tab, beside the sizes; IP Type In and Out on a pump; existing pipes, hoses and pumps took them once. Rule 5.27: a pump's Hose or Pipe is drawn like the pipe joined to its IP, and a corner IP is reached from the Side or Top/Bottom (Auto by default). Ends drawn as their IP Type; a hose end with a Quick Disconnect moves at any time, one end at a time (hoses only). Help 24, 127, 130, 155 (and French). Both programs.
 - 2026-11-14: Added Rule 6.32 (OakBarn Brewery: "Windows PowerShell remains open after Skynet Panel is closed", then "the Brain is in the Back ground", "Admin Only can restart", "Only Admin User can put Brain in standby or remove that status"): the Brain runs in the Background with no window on Windows; ☰ Menu > Put the Brain in Standby (Admins, any other screen and a Pi) with tick box warnings, others connected named, Back; only an Admin starts it again, from any screen; Standby kept across restarts. Rule 2.25 changed: **Close Skynet Panel and the Brain**, only on the Brain's own computer, with the same warnings (no Command Prompt left to close). Rule 2.36: no black window. Start menu > Stop the Skynet Brain. Both programs (the Importer runs in the Background too). Help 95, 19, 118, 122, 143, 190 (and French).
 - 2026-11-14: Rule 2.42 (OakBarn Brewery: "New Things Only"): Labels, Text Boxes and the Default pipe size reach only new items: each item keeps them as they were when made (newLook); once per Schema existing items kept the values of that day. Help 49, 155 (and French).
 - 2026-11-14: Rule 9.19 item 5 (OakBarn Brewery: "Uninstalled worked good. Add a Comment about not removing auxiliary programs like Tailscale if you installed them"): the uninstall warning, Help 19 (and French) and install/ReadMe.txt say helper programs like Node.js and Tailscale are not removed (remove them in Settings > Apps). Wording only. Both programs. (thread "Add a Full Setup with media included")

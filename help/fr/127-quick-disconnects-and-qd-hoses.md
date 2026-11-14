@@ -35,7 +35,9 @@ toujours par-dessus tout ce qui est sur le Tab.
 - **Ordinateur :** gardez le **bouton droit de la souris** appuyé sur l'anneau et faites glisser (Règle 2.9 : le bouton droit fait glisser).
 - **Téléphone ou tablette :** gardez un **doigt** sur l'anneau et faites glisser.
 
-Pendant que vous faites glisser, un **anneau vert** montre où ira le bout. Lâchez sur :
+Tout bout de tuyau souple dont l'**IP Type** est **Quick Disconnect** bouge de la même façon (aide 24), un bout à la fois.
+
+Pendant que vous faites glisser, le tuyau **fléchit** : il quitte la pompe comme avant et pend en une courbe passant par plusieurs points de pliage, en pendant davantage plus vous tirez le bout loin. Un **anneau vert** montre où ira le bout. Lâchez sur :
 
 - **un IP ou un Quick Disconnect** : le flexible s'y joint. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous.
 - **n'importe où dans le tiers du haut d'une cuve** : tout le tiers du haut est un seul gros IP. C'est comme mettre le flexible dans le
