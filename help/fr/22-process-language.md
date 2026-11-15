@@ -126,24 +126,7 @@ Vous pouvez mélanger les deux styles dans un même Process. **Save** ne change 
 
 ## Les codes dans le texte {#codes-inside-text}
 
-Le texte entre guillemets peut contenir des codes qui changent son apparence à l'écran. Ils marchent partout où un Process affiche du texte : une valeur texte sur un Tab, un label, les lignes `print` dans la sortie du Process, et les fenêtres comme le message d'une vanne manuelle. Le gras, le grand texte, l'indice et l'exposant sont des bascules : le premier code l'active, le suivant le désactive.
-
-| Code | Ce qu'il fait | Exemple | Affiche |
-|---|---|---|---|
-| `\n` | une nouvelle ligne | `"Mash in\nStir well"` | Mash in, puis Stir well à la ligne suivante |
-| `\t` | un retrait (environ quatre espaces) | `"Mash in\n\tStir well"` | Stir well, en retrait, à la ligne suivante |
-| `\b` | gras activé / désactivé | `"Add \bhops\b now"` | Add **hops** now |
-| `\L` | grand texte activé / désactivé | `"\LSTRIKE\L 165"` | STRIKE en grandes lettres |
-| `\_` | indice activé / désactivé | `"CO\_2\_"` | CO₂ |
-| `\^` | exposant activé / désactivé | `"ft\^3\^"` | ft³ |
-| `\deg` | un signe degré | `"152\degF"` | 152°F |
-| `\\` | une barre oblique inverse | `"C:\\Brewing"` | C:\Brewing |
-
-Les codes peuvent s'utiliser ensemble : `"\L\bBOIL\b\L 60 min"`.
-
-Utilisez `\t` et `\n` pour mettre le texte en page, pas des espaces en trop : un Label ne peut ni commencer ni finir par un espace (ils sont retirés).
-
-La taille du grand texte est **\L Rich Text Code Size (px)** dans **Settings > Panel settings: screen, Tabs and alerts** (sous **Rich Text Embedded Code**), en pixels. Elle doit être plus grande que le texte normal (18), et elle vaut 28 quand la case est vide. Le grand texte est toujours au moins un quart plus grand que le texte autour, pour qu'il ressorte même dans un élément à grosse police.
+Un texte entre guillemets peut porter des codes qui changent son aspect à l'écran : `"\L\bBOIL\b\L 60 min"`, `"Mash at 152\degF"`. Ils marchent partout où un Process montre du texte : une valeur string sur un Tab, un label, les lignes `print` dans la sortie du Process, et les fenêtres comme le message d'une vanne manuelle. Chaque code (gras, italique, couleurs, °F et °C, nouvelles lignes et le reste) est listé dans [Rich Text Embedded Code](90-rich-text-embedded-code).
 
 ## Changer l'apparence d'un Device ou d'un Widget {#change-the-look-of-a-device-or-widget}
 
