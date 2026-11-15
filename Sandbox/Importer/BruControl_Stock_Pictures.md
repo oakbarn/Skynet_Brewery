@@ -30,19 +30,19 @@ So each of the 11 is handled in two ways:
 
 | BruControl picture | What it shows | Normally: the brewer chooses (examples) | Backup: OakBarn picture | What ours shows |
 |---|---|---|---|---|
-| Valve.png | Valve symbol (bow tie) | A Valve Device (motorized ball, butterfly, solenoid ...) | `Skynet_Icon_Valve.svg` | Valve with a handle on top |
-| Pump.png | Impeller in a circle | One of Skynet's own pumps, or a new Pump Device | `Skynet_Icon_Pump.svg` | Pump housing with inlet and outlet |
-| Kettle.png | Pot | One of Skynet's own vessels, or a new one from the Vessel Device Builder (Rule 19.5) | `Skynet_Icon_Kettle.svg` | Pot with handles and liquid |
-| On-Off.png | Power button symbol | A Skynet Boolean Widget (Rule 1.20): Switch, Slider, Checkbox, Lighted Button or LED | `Skynet_Icon_On_Off.svg` | ON slide switch |
-| Liquid Temp.png | Thermometer in liquid | A temperature probe Device | `Skynet_Icon_Liquid_Temp.svg` | Probe dipping into a pot of liquid |
-| Clock.png | Clock face | A Skynet Timer or Time Widget | `Skynet_Icon_Clock.svg` | Stopwatch |
-| Fan.png | Fan blades in a circle | A fan Device (On / Off or PWM) | `Skynet_Icon_Fan.svg` | Four blade fan in a square housing |
-| Guage.png | Dial gauge | A Skynet Gauge Widget | `Skynet_Icon_Gauge.svg` | Half dial with a needle |
-| Liquid Level.png | Water drop with a level line | A level or volume Device | `Skynet_Icon_Liquid_Level.svg` | Tank with liquid and an up/down arrow |
-| PID.png | Sigma sign | A Heating Element with the PID Method | `Skynet_Icon_PID.svg` | The word PID over a settling curve |
-| PWM.png | Square wave | A PWM Device | `Skynet_Icon_PWM.svg` | Square wave with changing widths |
+| Valve.png | Valve symbol (bow tie) | A Valve Device (motorized ball, butterfly, solenoid ...) | `Images/Skynet/Miscellaneous/Skynet_Icon_Valve.svg` (Skynet Picture 208) | Valve with a handle on top |
+| Pump.png | Impeller in a circle | One of Skynet's own pumps, or a new Pump Device | `Images/Skynet/Miscellaneous/Skynet_Icon_Pump.svg` (Skynet Picture 206) | Pump housing with inlet and outlet |
+| Kettle.png | Pot | One of Skynet's own vessels, or a new one from the Vessel Device Builder (Rule 19.5) | `Images/Skynet/Miscellaneous/Skynet_Icon_Kettle.svg` (Skynet Picture 201) | Pot with handles and liquid |
+| On-Off.png | Power button symbol | A Skynet Boolean Widget (Rule 1.20): Switch, Slider, Checkbox, Lighted Button or LED | `Images/Skynet/Miscellaneous/Skynet_Icon_On_Off.svg` (Skynet Picture 204) | ON slide switch |
+| Liquid Temp.png | Thermometer in liquid | A temperature probe Device | `Images/Skynet/Miscellaneous/Skynet_Icon_Liquid_Temp.svg` (Skynet Picture 203) | Probe dipping into a pot of liquid |
+| Clock.png | Clock face | A Skynet Timer or Time Widget | `Images/Skynet/Miscellaneous/Skynet_Icon_Clock.svg` (Skynet Picture 198) | Stopwatch |
+| Fan.png | Fan blades in a circle | A fan Device (On / Off or PWM) | `Images/Skynet/Miscellaneous/Skynet_Icon_Fan.svg` (Skynet Picture 199) | Four blade fan in a square housing |
+| Guage.png | Dial gauge | A Skynet Gauge Widget | `Images/Skynet/Miscellaneous/Skynet_Icon_Gauge.svg` (Skynet Picture 200) | Half dial with a needle |
+| Liquid Level.png | Water drop with a level line | A level or volume Device | `Images/Skynet/Miscellaneous/Skynet_Icon_Liquid_Level.svg` (Skynet Picture 202) | Tank with liquid and an up/down arrow |
+| PID.png | Sigma sign | A Heating Element with the PID Method | `Images/Skynet/Miscellaneous/Skynet_Icon_PID.svg` (Skynet Picture 205) | The word PID over a settling curve |
+| PWM.png | Square wave | A PWM Device | `Images/Skynet/Miscellaneous/Skynet_Icon_PWM.svg` (Skynet Picture 207) | Square wave with changing widths |
 
-The 11 backup pictures are added as Skynet media together with the Daisy Chain pictures (OakBarn Brewery, 2026-11-15: "They can be
+The 11 backup pictures are added as Skynet media (PR #406, media/Images/Skynet/Miscellaneous) together with the Daisy Chain pictures (OakBarn Brewery, 2026-11-15: "They can be
 added with the daisy chain ones"), so they go out in the same Media Setup update, each with its row in docs/Media_Licenses.csv
 (OakBarn Brewery's own). The swap plan itself stays here in the Sandbox until the Big Merge.
 Like every new picture, they go in the Image Library only when OakBarn Brewery says so.
