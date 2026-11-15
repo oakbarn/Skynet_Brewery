@@ -282,21 +282,10 @@
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
     <h3 id="sec-interfaces">Interfaces (boards)</h3>
-    <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID starts the suggested name of every Device on it, for example MB_25_DO@Pump_Wort_BH. The ID follows Rule 3.2: once saved it never changes, not even by an Admin.</p>
-    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Board</th><th>Type</th><th>Connection</th><th title="If the board hears nothing from the Brain this long, it turns all outputs OFF">Lost link: all OFF after</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID starts the suggested name of every Device on it, for example MB_25_DO@Pump_Wort_BH. Interface IDs follow Rule 3.2.</p>
+    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Board</th><th>Type</th><th>Connection</th><th title="Lost Comm: if the board hears nothing from the Brain this long, it turns all outputs OFF">Lost Comm</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
     <h3 id="sec-addInterface" class="admin-only">Add Interface</h3>
-    <div class="bar admin-only"><button id="addIfaceBtn" class="primary">➕ Add Interface…</button><span class="muted">opens the Add Interface pop-up (the same one as "➕ Add new Interface…" in the New Device box), or fill in the row below.</span></div>
-    <div class="form row admin-only">
-      <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
-      <label>Interface ID (Rule 3.2; empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="4" size="6"></label>
-      <label>Board <select id="devBoard"><option value="mega">Arduino Mega</option><option value="esp32">ESP32</option><option value="other">Other Arduino-type board</option><option value="pi">Raspberry Pi (its own GPIO pins)</option></select></label>
-      <label>Type <select id="devType"><option value="serial">USB</option><option value="ethernet">Ethernet (wired)</option><option value="esp32">WiFi (a Mega: through an ESP32 bridge)</option><option value="simulator">Simulator</option></select></label>
-      <span id="devRating" class="linkRating"></span>
-      <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
-      <button id="scanPorts">Scan ports</button>
-      <label>Network address (Ethernet / WiFi) <input id="devHost" placeholder="192.168.1.60"></label>
-      <button id="addDev" class="primary">Add</button>
-    </div>
+    <div class="bar admin-only"><button id="addIfaceBtn" class="primary">➕ Add Interface…</button><span class="muted">opens the Add Interface pop-up (the same one as "➕ Add new Interface…" in the New Device box).</span></div>
     <h3 id="sec-probeIndex">OneWire probe index</h3>
     <p class="muted">Each DS18B20 probe gets a number here, and temperature Devices use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every Device that uses that number follows it, nothing else changes.</p>
     <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
@@ -619,7 +608,6 @@
   <div id="cfgBackupList" class="faList"></div>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
 </form></dialog>
-<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
 <dialog id="sampleDlg" data-nomenu><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <dialog id="donateDlg" data-nomenu><h3>🍺 Beer money</h3><p id="donateText"></p>

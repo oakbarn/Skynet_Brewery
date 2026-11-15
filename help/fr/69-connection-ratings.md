@@ -1,13 +1,13 @@
 # Notes de connexion {#connection-ratings}
 
-Chaque carte (Interface) sur la page **Devices** montre une **note de connexion** : à quel point son lien avec le Brain (le Pi ou le mini PC) est sûr. L'USB est un câble direct vers le Brain. Ethernet et le WiFi dépendent de votre réseau. Sur chaque lien, la carte met toutes ses sorties sur OFF si elle n'entend rien du Brain pendant son **lost link delay** (délai de lien perdu, voir plus bas).
+Chaque carte (Interface) sur la page **Devices** montre une **note de connexion** : à quel point son lien avec le Brain (le Pi ou le mini PC) est sûr. L'USB est un câble direct vers le Brain. Ethernet et le WiFi dépendent de votre réseau. Sur chaque lien, la carte met toutes ses sorties sur OFF si elle n'entend rien du Brain pendant son temps de **Lost Comm** (communication perdue, voir plus bas).
 
-## Arduino Mega (et autres cartes de type Arduino) {#arduino-mega-and-other-arduino-type-boards}
+## Arduino Mega {#arduino-mega}
 
 | Rang | Type | Note |
 |---|---|---|
 | 1 | USB | **Best** (le meilleur) : le plus sûr, le plus fiable |
-| 2 | Ethernet (shield W5500 / W5100, ou un pont Ethernet ESP32) | **OK** : dépend du réseau. Si le réseau tombe, la carte met toutes ses sorties sur OFF après le délai de lien perdu |
+| 2 | Ethernet (shield W5500 / W5100, ou un pont Ethernet ESP32) | **OK** : dépend du réseau. Si le réseau tombe, la carte met toutes ses sorties sur OFF après son temps de Lost Comm |
 | 3 | WiFi (par un pont ESP32) | **Poor** (faible) : le WiFi peut souvent couper |
 
 ## ESP32
@@ -22,15 +22,15 @@ Chaque carte (Interface) sur la page **Devices** montre une **note de connexion*
 
 Un Device de chauffe est une résistance électrique, une vanne de gaz ou un allumeur de brûleur, un tapis chauffant, ou la sortie d'un PID, d'une Hysteresis ou d'un Duty Cycle. Vous **pouvez** en mettre un sur une carte Ethernet ou WiFi, mais le panel vous avertit quand vous l'enregistrez, et la **Connection** de cette carte montre ⚠ avec les Devices de chauffe nommés. En WiFi, la note d'un ESP32 tombe à **Poor**. L'USB est le plus sûr.
 
-## Délai de lien perdu {#lost-link-delay}
+## Lost Comm {#lost-comm}
 
-Chaque carte a sa propre case **Lost link: all OFF after** sur la page **Devices** (Admin). Si la carte n'entend rien du Brain pendant ce nombre de secondes, elle met **toutes ses sorties sur OFF** (chauffages, pompes, vannes, moteurs). C'est 10 secondes sauf si vous le changez, et cela peut aller de 3 à 600 secondes. Le Brain parle à chaque carte toutes les 2 secondes, donc un délai court réagit vite mais peut se déclencher sur un petit hoquet du réseau ; un délai long passe les hoquets mais laisse un chauffage allumé plus longtemps. Pour un Device de chauffe sur une carte réseau, gardez-le court.
+Chaque carte a sa propre case **Lost Comm** sur la page **Devices** et dans la fenêtre de son Interface (Admin). Si la carte n'entend rien du Brain pendant ce nombre de secondes, elle met **toutes ses sorties sur OFF** (chauffages, pompes, vannes, moteurs). C'est 10 secondes sauf si vous le changez, et cela peut aller de 3 à 600 secondes. Le Brain parle à chaque carte toutes les 2 secondes, donc un délai court réagit vite mais peut se déclencher sur un petit hoquet du réseau ; un délai long passe les hoquets mais laisse un chauffage allumé plus longtemps. Pour un Device de chauffe sur une carte réseau, gardez-le court.
 
 La carte reçoit le délai à chaque connexion, donc un changement prend effet tout de suite. Les cartes ont besoin du nouveau sketch (firmware 0.4) pour cela ; un firmware plus ancien garde 10 secondes.
 
 ## Choisir la carte {#picking-the-board}
 
-Quand vous ajoutez une Interface, choisissez sa **Board** (carte) et son **Type** ; la note s'affiche à côté. Pour une Interface ajoutée avant, choisissez sa carte dans la colonne **Board** (un nom contenant « ESP » est pris pour un ESP32, tout le reste pour un Mega).
+Quand vous ajoutez une Interface, choisissez sa **Board** (carte : Arduino Mega, ESP32 ou Raspberry Pi) et sa **Connection** ; les choix suivent la Board, et le Hover Help de la Connection donne sa note. Une carte sans Board choisie montre **(pick the board)** : choisissez-la dans la colonne **Board** ou dans la fenêtre de l'Interface.
 
 ## Broche 10 sur un Mega Ethernet {#pin-10-on-an-ethernet-mega}
 

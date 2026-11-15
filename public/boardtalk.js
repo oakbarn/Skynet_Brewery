@@ -88,6 +88,5 @@ export function cleanTalkLine(s) {
 }
 
 // Board settings (Rule 6.27): plain choices and the defaults
-export const BAUDS = [9600, 19200, 38400, 57600, 115200, 230400, 250000];
 export const BOARD_DEFAULTS = { baud: 115200, netPort: 4100, answerSec: 10 };
 export const answerSec = d => { const n = Math.round(Number(d?.answerSec)); return n >= 2 && n <= 600 ? n : BOARD_DEFAULTS.answerSec; };

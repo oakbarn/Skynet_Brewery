@@ -46,7 +46,7 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 | **Valve Overlay** | The On overlay a new powered valve starts with. The steady lightning bolt unless you change it. |
 | **Push Lockout (s)** | How long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties. |
 
-Some things have no box because they are always the same: see **Skynet Defaults for New User Created Items** below. **Lost Link** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
+Some things have no box because they are always the same: see **Skynet Defaults for New User Created Items** below. **Lost Comm** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
 
 ## Moved to Settings
 

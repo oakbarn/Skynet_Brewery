@@ -51,3 +51,7 @@ assert.ok(!allowedWhileBlank(ctl('button', { dataset: {}, textContent: '➕ Add 
 assert.ok(isSaveButton({ dataset: {}, textContent: '💾 Save' }) && !isSaveButton({ dataset: {}, textContent: '⬢' }));
 assert.ok(isOpenGuard({ dataset: { guard: 'Port' } }) && !isOpenGuard(pulses), 'a needed box still holds the focus');
 console.log('labelguard Rule 18.28 open fields ok');
+// a field's name (a double-click on the Tab's name opens its settings) with a blank Label (OakBarn Brewery, 2026-11-15)
+const fieldName = { closest: q => q === 'dialog' ? {} : null };
+assert.ok(allowedWhileBlank(fieldName, blankLabel), 'the Tab\'s name may be double-clicked with a blank Label');
+console.log('labelguard field names ok');
