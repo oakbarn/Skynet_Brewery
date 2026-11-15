@@ -1421,7 +1421,7 @@
      "BM_28_DO@Valve_E_To~kettle_BH"
     ],
     "followLoss": 1,
-    "cooler": "BM_30_DO@Chill_Chiller~water_BH",
+    "cooler": "BM_22_DO@Pump_Pump_BH",
     "coolRate": 6,
     "coolTo": 58
    },
@@ -1499,21 +1499,6 @@
    "offText": "OFF",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "flipH": true
-  },
-  {
-   "name": "BM_30_DO@Chill_Chiller~water_BH",
-   "type": "digitalOut",
-   "workspace": "Brew House",
-   "device": "Brewery Mega",
-   "channel": 30,
-   "label": "Chiller water",
-   "x": 1545,
-   "y": 520,
-   "w": 170,
-   "h": 60,
-   "look": "dark",
-   "onText": "COOLING",
-   "offText": "off"
   },
   {
    "name": "BM_24_DO@Valve_E_HLT~out_BH",
@@ -2327,9 +2312,9 @@
    "id": "ip_ferm",
    "kind": "ip",
    "workspace": "Brew House",
-   "label": "To fermenter (through the chiller)",
-   "x": 1647,
-   "y": 712,
+   "label": "To fermenter",
+   "x": 1657,
+   "y": 837,
    "w": 26,
    "h": 26,
    "color": "#3fbf6a"
@@ -2669,7 +2654,7 @@
    "kind": "pipe",
    "workspace": "Brew House",
    "from": "gmw2lvfntnf3",
-   "to": "ip_ferm",
+   "to": "g_chill_elbow_start",
    "points": [
     [
      1660,
@@ -4151,6 +4136,246 @@
    "x": 1263,
    "y": 91,
    "label": "End (TC 1.5)"
+  },
+  {
+   "id": "g_chill_elbow",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brew House",
+   "w": 26,
+   "h": 26,
+   "name": "Elbow_11",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "x": 1642,
+   "y": 725,
+   "bundled": true,
+   "rot": 180
+  },
+  {
+   "id": "g_chill_elbow_start",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chill_elbow",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1645,
+   "y": 710,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "g_chill_elbow_end",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chill_elbow",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1627,
+   "y": 728,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "g_chiller",
+   "kind": "vessel",
+   "vesselType": "pchiller",
+   "workspace": "Brew House",
+   "x": 1490,
+   "y": 720,
+   "w": 130,
+   "h": 141,
+   "name": "Chiller",
+   "label": "Chiller",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "template": "Copper_Counterflow_Chiller",
+   "templateCls": "skynet",
+   "vtype": "Counterflow",
+   "image": "Images/Skynet/Chillers/Chiller_Copper_Counterflow.svg",
+   "std": {
+    "type": "MPT",
+    "size": 0.5
+   },
+   "ports": {
+    "wortIn": {
+     "installed": true,
+     "position": "Coil Top End",
+     "standard": "MPT 1/2"
+    },
+    "waterOut": {
+     "installed": true,
+     "position": "Coil Top Branch",
+     "standard": "MPT 1/2"
+    },
+    "waterIn": {
+     "installed": true,
+     "position": "Coil Bottom Branch",
+     "standard": "MPT 1/2"
+    },
+    "wortOut": {
+     "installed": true,
+     "position": "Coil Bottom End",
+     "standard": "MPT 1/2"
+    }
+   },
+   "flipH": true,
+   "bundled": true
+  },
+  {
+   "id": "g_chiller_wortIn",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chiller",
+   "port": "wortIn",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1605,
+   "y": 728,
+   "label": "Wort In (MPT 1/2)"
+  },
+  {
+   "id": "g_chiller_waterOut",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chiller",
+   "port": "waterOut",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1593,
+   "y": 743,
+   "label": "Water Out (MPT 1/2)"
+  },
+  {
+   "id": "g_chiller_waterIn",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chiller",
+   "port": "waterIn",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1593,
+   "y": 820,
+   "label": "Water In (MPT 1/2)"
+  },
+  {
+   "id": "g_chiller_wortOut",
+   "kind": "ip",
+   "workspace": "Brew House",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "g_chiller",
+   "port": "wortOut",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1605,
+   "y": 835,
+   "label": "Wort Out (MPT 1/2)"
+  },
+  {
+   "id": "p_chill_in",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "from": "g_chill_elbow_end",
+   "to": "g_chiller_wortIn",
+   "points": [
+    [
+     1642,
+     743
+    ],
+    [
+     1620,
+     743
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_11"
+  },
+  {
+   "id": "p_chill_out",
+   "kind": "pipe",
+   "workspace": "Brew House",
+   "from": "g_chiller_wortOut",
+   "to": "ip_ferm",
+   "points": [
+    [
+     1620,
+     850
+    ],
+    [
+     1670,
+     850
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_12"
   }
  ],
  "autostart": [],
