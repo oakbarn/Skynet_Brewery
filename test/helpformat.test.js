@@ -41,7 +41,7 @@ assert.ok(he.methodSpot_pid && he.methodSpot_dutyCycle, 'Duty Cycle and PID enab
 assert.equal(cfg.elements.find(e => e.name === he.input)?.integratedIn, he.integratedIn, 'its probe is built into the same vessel');
 
 const tips = app.slice(app.indexOf('const DEVICE_TIPS = {'), app.indexOf('function fieldOne('));
-for (const k of ['heatMethod', 'eHeatProbe', 'switchedBy', 'eMethodShort', 'eMethodSpot', 'eLabel', 'eIface', 'ePort', 'eTab', 'eName', 'eType', 'eVisible', 'eToggle']) {
+for (const k of ['heatMethod', 'eHeatProbe', 'switchedBy', 'eMethodShort', 'eMethodSet', 'useMethod', 'eLabel', 'eIface', 'ePort', 'eTab', 'eName', 'eType', 'eVisible', 'eToggle']) {
   const line = tips.split('\n').find(l => l.startsWith(`  ${k}: `));
   assert.ok(line, `DEVICE_TIPS.${k}`);
   assert.match(line, /HLT/, `DEVICE_TIPS.${k} uses the HLT element as its example`);

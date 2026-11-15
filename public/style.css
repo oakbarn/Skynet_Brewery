@@ -1216,6 +1216,11 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 /* Integrate 5 (OakBarn Brewery, 2026-11-10): the Enabled switches under each method's name, and the Control Method balloons in the dialog */
 .mRow { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: flex-end; }
 .mCol { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; }
+/* Method Settings (Rule 6.19, 2026-11-15): a ⬢ button for each heating method; one not used is greyed */
+.mCol .mSet { white-space: nowrap; }
+.mCol .mSet .mHex { color: #d62828; font-weight: 700; }      /* the red ⬢, as on every Attribute Pop Up (Rule 18.2) */
+.mCol .mUse { font-size: 12px; }
+.mCol.mUnused .mSet, .mCol.mUnused .mUse { opacity: .55; }
 .heatWave { display: inline-flex; align-items: center; flex: none; }
 .elTog { width: 34px; height: 34px; padding: 1px; border: 1px solid #9aa2aa; border-radius: 6px; background: transparent; cursor: pointer; flex: none; }
 .elTog.on { border-color: #d32f2f; box-shadow: 0 0 6px #ff7a00; }
@@ -1319,9 +1324,9 @@ dialog.boardTalk { width: min(900px, 96vw); }
    100% Finished with the model"). The ☰, title and buttons stay put while the rest scrolls; the bottom row is not shown. */
 #dlg .dlgHead::after { content: ''; display: block; clear: both; }
 /* Rule 2.51: the Pump dialogs, and each dialog updated since 2026-11-14 (the Pipe and Hose Properties) */
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]), dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) { padding-top: 0; }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgBottomBar { display: none; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]), dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]), dialog#dlg:has(#dlgBody .mSet) { padding-top: 0; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgHead, dialog#dlg:has(#dlgBody .mSet) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgBottomBar, dialog#dlg:has(#dlgBody .mSet) .dlgBottomBar { display: none; }
 /* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
 .gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
 .gpick .gpickFolder.hidden { display: none; }
