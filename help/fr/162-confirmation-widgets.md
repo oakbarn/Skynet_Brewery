@@ -30,3 +30,19 @@ exception, car la fenêtre n'est pas une question avant de basculer : c'est vous
 
 Chaque Widget qui peut être On ou Off a un interrupteur **.confirmation** dans ses Properties. Quand il est activé, ce Widget est un Confirmation
 Widget. Il commence activé pour les Manual Valves, les Manual Pumps et les flexibles QD, et désactivé pour tout le reste.
+
+## Une Sump Pump que l'on branche {#a-sump-pump-you-plug-in}
+
+La plupart des brasseurs mettent une **pompe de puisard** (sump pump) en marche en la branchant ou en allumant sa prise à la main : pas
+de relais ni de SSR. Dans Skynet c'est une **Manual Pump** avec l'image Sump pump (Règle Skynet 5.15a). Pour en ajouter une, choisissez
+**Sump Pump by hand** dans Select Widget Type > Semi_Widgets_Devices (ou Select Device Type > Pumps). C'est la même chose que choisir
+Manual Pump, puis Sump pump à l'étape 2. Son Label commence à **Sump 1**, donc son nom est `wgt_MP_Sump~1_BR` sur le Tab Brew.
+
+Un clic dessus (ou une ligne de Process comme `wgt_MP_Sump~1_BR.state = true`) vous demande de la mettre en marche à la main. Elle
+affiche **ON** et son flexible montre le débit seulement après votre confirmation.
+
+**Exemple : la boucle d'eau glacée d'OakBarn Brewery.** Une pompe de puisard est posée dans un grand bain de glace (une poubelle remplie
+de glace et d'eau). Elle pompe l'eau glacée à travers un premier refroidisseur à plaques, qui refroidit l'eau du robinet, et l'eau
+glacée retourne dans le bain. L'eau du robinet froide passe ensuite dans un second refroidisseur à plaques, contre le moût, et sert à
+arroser la pelouse.
+L'aide 201, [The Ice Water Can](201-ice-water-can), montre comment la dessiner.
