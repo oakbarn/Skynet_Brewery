@@ -29,7 +29,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 **Every default is set here: what a new thing starts with.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets (the Valve and Pump Profile a new one starts with is the one marked Default in its own list). **Labels** and **Text Boxes**: the Defaults of every text box (see [Text boxes](49-text-boxes)). New User Templates and Schemas. Press **Save**.
 
-What changes things already made, or how the whole panel works, is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes inside text](22-process-language)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
+What changes things already made, or how the whole panel works, is in **Settings > Panel settings: screen, Tabs and alerts** ([Settings](09-settings)): the Menu Bar ([The Menu Bar](40-menu-bar)), **Sound**, **On startup** ([Zoom and Full screen](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Phones and tablets](45-phones-and-tablets)), Hop alerts and the **Order of the Menu**.
 
 **Sound** (in Settings > Panel settings: screen, Tabs and alerts):
 

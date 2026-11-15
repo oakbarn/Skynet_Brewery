@@ -6,25 +6,54 @@
 //   \L     large text on / off (the size is "\L Rich Text Code Size (px)" on ☰ Menu > Default settings)
 //   \_     subscript on / off
 //   \^     superscript on / off
-//   \deg   a degree sign °
+//   \deg   a degree sign °, so \degF is °F and \degC is °C (OakBarn Brewery, 2026-11-15: "\degF and \degC good")
+//   \dFC   °F or °C, whichever the Default Temperatures unit is (US °F, Metric °C) (OakBarn Brewery, 2026-11-15: "maybe \dFC")
+//   \ohm   an Ohm sign Ω
+//   \+-    a plus-minus sign ±
+//   \i     italic on / off, \u underline on / off, \s strikethrough on / off, \S small text on / off (3/4 size)
+//   \c{Red}  text in a panel color name (or #hex) until the next \c; a name that is not a color stays as typed (Rule 3.19)
 //   \\     one backslash
 // Codes that are not on the list stay as they are typed. No imports, so node can load it too (tests).
 
 // an indent: two em spaces, so it is the same width whatever the box does with spaces (a Label is trimmed, Rule 3.3; this is kept)
 export const INDENT = '\u2003\u2003';
-const TOGGLE = { b: 'b', B: 'b', L: 'L', l: 'L', _: 'sub', '^': 'sup' };
+const TOGGLE = { b: 'b', B: 'b', L: 'L', l: 'L', _: 'sub', '^': 'sup', i: 'i', u: 'u', s: 's', S: 'sm' };
+const LOOKS = ['b', 'L', 'sub', 'sup', 'i', 'u', 's', 'sm'];
 
-// text -> [{ t, b, L, sub, sup }]: pieces of text with how each one looks
+// the panel's color names: one list, app.js puts Default and None in front of it for its color dropdowns.
+// White is RGB 250 250 250 in every color picker (Rule 2.7).
+export const NAMED_COLORS = [['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
+  ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#fafafa'], ['Black', '#000000']];
+const colorKey = n => String(n).toLowerCase().replace(/[^a-z]/g, '').replace('gray', 'grey');
+const BY_NAME = Object.fromEntries(NAMED_COLORS.map(([n, c]) => [colorKey(n), c]));
+// a color name (capitals and spaces don't matter, gray = grey) or #hex -> the color, or null when it is not one
+export const textColor = n => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(n).trim()) ? String(n).trim() : BY_NAME[colorKey(n)] || null;
+
+// where \dFC gets the Default Temperatures unit ('F' or 'C'); app.js hands it over, the same one the Ctrl+Shift+D key uses (Rule 2.32)
+let unitOf = () => 'F';
+export const setTempUnitSource = f => { unitOf = typeof f === 'function' ? f : () => 'F'; };
+const degFC = () => { let u = 'F'; try { u = unitOf(); } catch { } return '°' + (String(u).toUpperCase().includes('C') ? 'C' : 'F'); };
+
+// text -> [{ t, b, L, sub, sup, i, u, s, sm, color }]: pieces of text with how each one looks
 export function richRuns(text) {
   text = String(text ?? '');
-  const out = [], st = { b: false, L: false, sub: false, sup: false };
+  const out = [], st = { ...Object.fromEntries(LOOKS.map(k => [k, false])), color: '' };
   let cur = '';
   const flush = () => { if (cur) out.push({ t: cur, ...st }); cur = ''; };
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (c !== '\\') { cur += c; continue; }
     const nx = text[i + 1];
+    if (/^dfc/i.test(text.slice(i + 1, i + 4))) { cur += degFC(); i += 3; continue; }
     if (/^deg/i.test(text.slice(i + 1, i + 4))) { cur += '°'; i += 3; continue; }
+    if (/^ohm/i.test(text.slice(i + 1, i + 4))) { cur += 'Ω'; i += 3; continue; }
+    if (nx === '+' && text[i + 2] === '-') { cur += '±'; i += 2; continue; }
+    if (nx === 'c') {                                      // \c{Red} starts a color, a plain \c ends it
+      const m = /^c\{([^}]*)\}/.exec(text.slice(i + 1));
+      const col = m ? textColor(m[1]) : null;
+      if (m ? !col : !st.color) { cur += c; continue; }    // not a color name, or no color to end: it stays as typed
+      flush(); st.color = m ? col : ''; i += m ? m[0].length : 1; continue;
+    }
     if (nx === 'n') { cur += '\n'; i++; continue; }
     if (nx === 't') { cur += INDENT; i++; continue; }
     if (nx === '\\') { cur += '\\'; i++; continue; }
@@ -54,6 +83,11 @@ export function setRich(node, text) {
     el.textContent = r.t;
     if (r.b) el.classList.add('rt-b');
     if (r.L) el.classList.add('rt-L');
+    if (r.i) el.classList.add('rt-i');
+    if (r.u) el.classList.add('rt-u');
+    if (r.s) el.classList.add('rt-s');
+    if (r.sm) el.classList.add('rt-S');
+    if (r.color) el.style.color = r.color;
     box.append(el);
   }
   node.replaceChildren(box);

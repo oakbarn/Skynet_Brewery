@@ -29,7 +29,7 @@ Tout le monde peut regarder les onglets de menu. Seul un Admin peut les changer 
 
 **Chaque valeur par défaut se règle ici : ce avec quoi commence une nouvelle chose.** Ce avec quoi commence une nouvelle recette : les Units, la Batch size, l'Equipment Profile, le Mash Profile et le Boil Profile (chacun peut être changé dans la recette elle-même). Le Tab Background Profile qu'un nouveau Tab reçoit (le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué Default dans sa propre liste). **Labels** et **Text Boxes** : les valeurs par défaut de chaque case de texte (voir [Cases de texte](49-text-boxes)). Les nouveaux Templates de l'utilisateur et Schemas. Appuyez sur **Save**.
 
-Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Codes dans le texte](22-process-language)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
+Ce qui change les choses déjà faites, ou la façon dont tout le panel marche, est dans **Settings > Panel settings: screen, Tabs and alerts** ([Réglages](09-settings)) : la Menu Bar ([La barre de menus](40-menu-bar)), **Sound**, **On startup** ([Zoom et plein écran](41-zoom-and-full-screen)), **\L Rich Text Code Size** ([Rich Text Embedded Code](90-rich-text-embedded-code)), Hover Delay, Phones and tablets ([Téléphones et tablettes](45-phones-and-tablets)), les Hop alerts et l'**ordre du Menu**.
 
 **Sound** (son ; dans Settings > Panel settings: screen, Tabs and alerts) :
 

@@ -6,7 +6,7 @@ import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
-import { setRich } from './richtext.js';
+import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
 import { dialSvg, DIAL_DEFAULTS } from './dial.js';
@@ -1459,8 +1459,7 @@ const TS = () => tabStyleOf(curWs(), S.config.brewDefaults, S.config.userStyles)
 const fontPx = v => +v > 0 ? +v : 0;
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
-const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
-  ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#fafafa'], ['Black', '#000000']];     // White is RGB 250 250 250 in every color picker (Fritz, 2026-11-05, Rule 2.7)
+const COLORS = [['Default', ''], ['None', 'transparent'], ...NAMED_COLORS];     // the one list of color names, in public/richtext.js (also the \c{Red} code); White is RGB 250 250 250 (Rule 2.7)
 // a color of your own (picked with the Color Picker, Rule 2.48) shows in a color dropdown by its RGB: 'RGB 160 69 42'
 const customColorName = c => rgbText(c) || c;
 // where it starts Centered: Left, Centered or Right, no Default choice (a saved MiddleCenter shows as Centered)
@@ -15433,6 +15432,7 @@ const RC_STYLES = ['American Light Lager', 'American Lager', 'Cream Ale', 'Ameri
 const rcUnits = () => displayUnits(S.config.brewDefaults || {});
 // Shortcut keys in every text box (Fritz, 2026-11-02, Help 113): Shift+Enter \n, Ctrl/⌘+B \b, Ctrl/⌘+Shift+D °F or °C, Ctrl/⌘+Y Redo
 installShortcutKeys(() => rcUnits().tempUnit);
+setTempUnitSource(() => rcUnits().tempUnit);      // the \dFC code shows °F or °C from the same Default (Rule 3.19)
 const rcRound = (v, d = 2) => v === null || v === undefined || v === '' || !Number.isFinite(+v) ? '' : (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
 const TU = u => u === 'F' ? '°F' : '°C';
 const rcFrom = rc => rc.sourceFormat === 'bsmx' ? `BeerSmith ${rc.sourceVersion ? rc.sourceVersion + ' ' : ''}.bsmx` : rc.sourceFormat === 'beerxml' ? 'BeerXML' : 'made here';
