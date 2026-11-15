@@ -1,6 +1,6 @@
 # BruControl stock pictures: swap them for Skynet pictures (Importer only)
 
-Status: **plan only, waiting for OakBarn Brewery's OK.** The Importer is on hold until the Skynet Panel is done, so this sits in the
+Status: **plan only.** The 11 new OakBarn pictures were approved by OakBarn Brewery on 2026-11-15 ("Set B"). The Importer is on hold until the Skynet Panel is done, so this sits in the
 Importer Sandbox (Rule 11.3) until the Big Merge. No Importer code is changed yet.
 
 ## Why
@@ -34,7 +34,7 @@ a rounded coloured square with a white symbol. Names follow the Skynet name char
 | PID.png | Sigma sign | `Skynet_Icon_PID.svg` | The word PID over a settling curve |
 | PWM.png | Square wave | `Skynet_Icon_PWM.svg` | Square wave with changing widths |
 
-The drawings wait in the private project files (brucontrol-stock-pictures/oakbarn_drawings) for OakBarn Brewery's OK. Once OK'd they
+**Approved by OakBarn Brewery, 2026-11-15: "Set B"** (the set shown above). They
 are added as Skynet media together with the Daisy Chain pictures (OakBarn Brewery, 2026-11-15: "They can be added with the daisy
 chain ones"), so they go out in the same Media Setup update, each with its row in docs/Media_Licenses.csv (OakBarn Brewery's own).
 The swap plan itself stays here in the Sandbox until the Big Merge.
