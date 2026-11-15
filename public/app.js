@@ -18,6 +18,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
+import { GAS_WARNING, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
@@ -115,6 +116,22 @@ function renderBrainNotices(list) {
     h('span', { style: 'white-space:pre-line' }, (n.kind === 'update' ? '🔄 ' : '⚠ ') + n.text),
     n.resume && can('operator') ? h('button', { class: 'resumeBtn', title: 'Turn back On what was On and start each Process again at its step', onclick: e => { e.target.disabled = true; api('POST', '/ui/brain/resume', { id: n.id }).then(r => { if (r?.failed?.length) alertBar('Not resumed: ' + r.failed.join(', ')); }).catch(err => { e.target.disabled = false; alertBar(err.message); }); } }, '▶ Resume') : null,
     h('button', { title: 'Close this notice on every screen', onclick: () => api('POST', '/ui/brain/notice', { id: n.id }).catch(e => alertBar(e.message)) }, '✕'))));
+}
+// Flame Out (OakBarn Brewery, 2026-11-14, Rule 6.33): a gas burner's Flame Out safety shut its gas. Every screen shows it in red, with a
+// beep every 2 seconds and the words spoken once, until a brewer closes it (closed on one, closed on all). Nothing turns back on by itself.
+let flameBeep = null;
+function renderFlameOut(list = []) {
+  let box = document.getElementById('flameOutBox');
+  if (!box) { box = h('div', { id: 'flameOutBox' }); document.body.append(box); }
+  const fresh = list.filter(n => !box.querySelector(`[data-id="${CSS.escape(n.id)}"]`));
+  box.replaceChildren(...list.map(n => h('div', { class: 'flameOutNotice', role: 'alert', 'data-id': n.id },
+    h('span', { style: 'white-space:pre-line' }, `🔥 ${n.text}\n${n.why}`),
+    h('button', { title: 'Close this notice on every screen. Check the flame first. Light it, then turn the burner back On with one click.', onclick: () => api('POST', '/ui/flameout/close', { id: n.id }).catch(e => alertBar(e.message)) }, '✕'))));
+  clearInterval(flameBeep); flameBeep = null;
+  if (!list.length) return;
+  const beep = () => { try { const ac = (beep.ac ??= new (window.AudioContext || window.webkitAudioContext)()), o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 880; g.gain.value = 0.2; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 0.4); } catch { } };
+  beep(); flameBeep = setInterval(beep, 2000);
+  for (const n of fresh) try { speechSynthesis.speak(new SpeechSynthesisUtterance(`${n.label}. Burner may be out. Check the flame. Gas is turned off.`)); } catch { }
 }
 // Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done.
 // A Manual Valve Widget is asked for on a bar at the top instead (not a pop-up that covers the Tab): the valve blinks on its
@@ -246,6 +263,7 @@ async function load() {
   S = await api('GET', '/ui/state');
   showStandby(S.standby);      // the Brain is in Standby (Rule 6.32): only its Standby page shows
   renderBrainNotices(S.brainNotices);
+  renderFlameOut(S.flameOut);
   for (const n of chartData.keys()) if (!S.config.elements.some(e => e.name === n)) chartData.delete(n);      // a Graph that is gone: its readings are let go
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
@@ -334,6 +352,7 @@ function connect() {
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('official', e => { S.official = JSON.parse(e.data); showPanelVer(); officialWarn(); if (menuTab === 'about') renderMenuPane(); });
   es.addEventListener('brainNotices', e => renderBrainNotices(JSON.parse(e.data)));
+  es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
@@ -3172,6 +3191,17 @@ function controlDialog(t) {
 // clicked", Rule 6.19). One button per heating method (the one in use is marked), the main setting of that method with - and +
 // (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. Nothing in this pop-up turns on until Set + ON or ON is clicked;
 // a click on the Element itself turns it ON or OFF at once (Rule 2.33). Hysteresis, PID, Deadband and Precise need a Temperature Probe (Properties), so they are greyed out without one.
+// A gas burner's pop-up (Rule 6.33): its Flame Out state and the Pause button, for opening the lid, adding cold water or doughing in.
+// It watches again by itself after the Pause minutes; ▶ Watch now ends the pause early.
+function flamePopRow(t, v, d) {
+  if (!isGasBurner(t)) return [];
+  const s = flameSettings(t), left = Number(v.flameout_paused) || 0, on = String(v.flameout ?? (s.on ? 'On' : 'Off')).toLowerCase() === 'on';
+  const said = v.flameout_tripped ? '🔥 Flame Out shut the gas: check the flame, light it, then turn it ON.' : !on ? 'Flame Out: Off' : left > 0 ? `Flame Out: paused, ${left} min left` : 'Flame Out: watching';
+  return [h('div', { class: 'muted' }, said),
+    h('div', { class: 'vdBtns' }, on ? (left > 0
+      ? h('button', { type: 'button', class: 'big', title: 'Flame Out watches this burner again now', onclick: async () => { d.close(); await setProp(t.name, 'flameout_paused', 0); } }, '▶ Watch now')
+      : h('button', { type: 'button', class: 'big', title: `Stops the Flame Out watch for ${s.flamePause} minutes (open the lid, add cold water, dough in). It watches again by itself after them.`, onclick: async () => { d.close(); await setProp(t.name, 'flameout', `pause ${s.flamePause}`); } }, `⏸ Pause Flame Out (${s.flamePause} min)`)) : null)];
+}
 function heatDialog(t) {
   const title = S.values[t.name]?.label ?? t.name, d = $('#valDlg');
   const v = { ...(S.values[t.name] || {}) };
@@ -3202,6 +3232,7 @@ function heatDialog(t) {
       h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.filter(([k]) => allowedMethods(t).includes(k) || k === now).map(btn)),
       ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
       h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to Direct turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
+      ...flamePopRow(t, v, d),
       h('div', { class: 'vdBtns' },
         h('button', { type: 'button', class: 'big onb' + (v.state ? ' cur' : ''), onclick: () => done(true) }, main ? 'Set + ON' : 'ON'),
         h('button', { type: 'button', class: 'big offb' + (!v.state ? ' cur' : ''), onclick: () => done(false) }, 'OFF'),
@@ -7849,6 +7880,42 @@ function heatFields(it, x = {}) {
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
   ];
 }
+// Flame Out safety for gas burners (OakBarn Brewery, 2026-11-14, Rule 6.33, Help 197). A Heating Element on a gas valve has Gas burner
+// switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.
+const FLAME_TIPS = {
+  gasBurner: 'Gas burner: this Heating Element opens a gas valve (a burner), not an electric element. On, it gets the Flame Out safety. Example: the Kettle burner on a propane valve.',
+  head: GAS_WARNING + '\nFlame Out safety: while the gas is on, Skynet watches the temperature of the pot. A lit burner makes the pot get hotter. If the temperature falls, or does not rise after some minutes of burning, the flame is probably out: Skynet shuts the gas, turns the igniter Off, sounds an alarm on every screen and shows "Burner may be out: check the flame. Gas is turned off." Nothing turns back on by itself. Skynet does not see the flame: this is a backup, not a flame safety device.',
+  flameSafety: 'Flame safety: what shuts the gas by itself if the flame goes out. Thermocouple gas valve (UL or CSA listed): a pilot flame heats a thermocouple; if the pilot goes out, the valve shuts all the gas with no help from Skynet. That is the real flame safety, and Skynet\'s Flame Out is its backup. These valves are made for low-pressure gas (propane about 11 inches of water column), and most brewing burners use a high-pressure regulator, so have a licensed gas professional match the valve and the burner. Three ways (Help 197): 1. high pressure with a 24 V solenoid only: None, the cheapest and the least safe; 2. low pressure with a 24 VAC VR8200 type valve: the best safety for the money, but it heats more slowly; 3. high pressure with a high-pressure thermocouple safety pilot valve (for example BASO H19, costly) and a 24 V solenoid. Recommended: a UL or CSA listed way (2 or 3). Flame-out cutoff: for a cutoff made from parts (a K-type thermocouple and a temperature controller), for information only, not listed and not recommended. None: a plain solenoid valve; Skynet\'s Flame Out is the only guard, so stay with the burner. Skynet cannot check which one you have.',
+  flameOut: 'Flame Out: On (the start) watches this burner while its gas is on. Off for a burner with nothing to watch. A Process can pause it: Kettle_burner.flameout = pause 10.',
+  flameMinutes: 'No rise: after this many minutes of burning (only while the gas valve is really open), the temperature must have risen by the Rise. Example: 5 minutes and 1 °F.',
+  flameRise: 'Rise: how much the temperature must go up in the No rise minutes. Example: 1 °F (0.5 °C).',
+  flameDrop: 'Drop: once the pot is warming, the temperature falling this much below its highest shuts the gas. Example: 1 °F (0.5 °C).',
+  flamePause: 'Pause: how many minutes the Pause button (on the burner\'s pop-up) stops the watch, for opening the lid, adding cold water or doughing in. It watches again by itself after them. Example: 10 minutes.',
+  flameSmooth: 'Smoothing: the reading is averaged over this many seconds, so a probe that wobbles does not shut the gas. A single wild reading (a jump of more than 5 °F in one second, or a probe error) is thrown away. Example: 30 seconds.',
+  flameBoil: 'Boil point: a rolling boil stops rising with the flame on, so within 3 °F of this the No rise test rests (the Drop test still works). Water boils about 1 °F lower for every 500 ft above sea level: 212 °F at sea level, 202 °F at 5,000 ft.',
+  flameIgniter: 'Igniter: the burner\'s igniter (a Burner igniter Device), turned Off with the gas when Flame Out trips. None if it has none.',
+  input: 'Temperature Probe: the probe in the pot this burner heats. Flame Out watches it.',
+};
+function flameFields(it, x = {}) {
+  const els = (draft || S.config).elements, T = FLAME_TIPS;
+  const out = isHeatElem(it) ? [['gasBurner', 'Gas burner', 'bool', null, true, false, { tip: T.gasBurner, ...x }]] : [];
+  if (!isGasBurner(it)) return out;
+  const probe = els.find(e => e.name === it.input), s = flameSettings(it, probe?.units), u = s.c ? '°C' : '°F', d = s.c ? FLAME_DEFAULTS_C : FLAME_DEFAULTS_F;
+  const temps = [['', '(none)'], ...els.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
+  if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
+  const igniters = [['', 'None'], ...els.filter(e => e.type === 'digitalOut' && e.typeCode === 'Ignit' && e.name !== it.name).map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
+  if (it.flameIgniter && !igniters.some(t => t[0] === it.flameIgniter)) igniters.push([it.flameIgniter, it.flameIgniter]);
+  const num = (k, label) => [k, label, 'num', null, false, false, { tip: T[k], def: d[k] }];
+  return [...out,
+    ['_flameHead', 'Flame Out safety', 'head', null, false, false, { tip: T.head, ...x }],
+    ['flameSafety', 'Flame safety', 'sel', FLAME_SAFETY, true, false, { tip: T.flameSafety, ...x }],
+    ['_flameNote', s.safety === 'thermocouple' ? BACKUP_NOTE : s.safety === 'cutoff' ? CUTOFF_NOTE : '⚠ ' + HELPER_NOTE, 'note', null, false, false, x],
+    ...(isHeatElem(it) ? [] : [['input', 'Temperature Probe', 'sel', temps, true, false, { tip: T.input, ...x }]]),
+    ['flameOut', 'Flame Out', 'sel', [['on', 'On'], ['off', 'Off']], false, false, { tip: T.flameOut, with: [['flameIgniter', 'Igniter', 'sel', igniters, false, false, { tip: T.flameIgniter }]], ...x }],
+    ['flameMinutes', 'No rise (minutes)', 'num', null, false, false, { tip: T.flameMinutes, def: d.flameMinutes, with: [num('flameRise', `Rise (${u})`), num('flameDrop', `Drop (${u})`)], ...x }],
+    ['flamePause', 'Pause (minutes)', 'num', null, false, false, { tip: T.flamePause, def: d.flamePause, with: [num('flameSmooth', 'Smoothing (seconds)'), num('flameBoil', `Boil point (${u})`)], ...x }],
+  ];
+}
 // The Cool / Warm Pump's Method (Rule 6.21): a pump's own methods only, Direct (the old On/Off) or Hysteresis (- On offset cools, + warms)
 function pumpMethodFields(it, x = {}) {
   const m = PUMP_METHOD_KEYS.includes(startMethod(it)) ? startMethod(it) : 'onoff', T = DEVICE_TIPS;
@@ -7870,7 +7937,7 @@ function elemDeviceFields(it, item) {
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.eTab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.eName }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
-    ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it), ...heatFields(it),
+    ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it), ...heatFields(it), ...flameFields(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -8382,7 +8449,7 @@ function genDeviceFields(it, item, f) {
       ...(onPic ? [['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: 'A second picture while it is on (optional: the Overlay is the preferred way, Rule 7.8).' }]] : []),
       ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay, it), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }] } : {}) }]] : []),
     ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }]] : []),
-    ...own, ...(isHeatElem(it) ? heatFields(it) : isCoolPump(it) ? pumpMethodFields(it) : []), ...dbLine,
+    ...own, ...(isHeatElem(it) ? [...heatFields(it), ...flameFields(it)] : isCoolPump(it) ? pumpMethodFields(it) : isGasBurner(it) ? flameFields(it) : []), ...dbLine,
     ...(part ? [] : [['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: GEN_TEXT_POP }],
       ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]]),
