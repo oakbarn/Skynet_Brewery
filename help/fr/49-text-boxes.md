@@ -19,7 +19,7 @@ Chaque morceau de texte sur un Tab est une **zone de texte** (text box), et chaq
 | Position X et Y | sa place en pixels depuis la gauche et le haut du Tab : **x** est **h**orizontal (en travers), **y** est **v**ertical (de haut en bas). Les anciens noms `.xPosition` et `.yPosition` marchent toujours. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
 - **Word wrap as needed** (retour à la ligne si besoin) : un long texte passe sur plusieurs lignes. Sur un Device ou un Widget, il permet à un long Name de passer à la ligne (les Values passent toujours à la ligne). Un Text Widget passe toujours à la ligne.
-- **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Le langage des Processes et les étapes](22-process-language).
+- **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Rich Text Embedded Code](90-rich-text-embedded-code).
 - **Les raccourcis clavier** tapent les codes pour vous : Maj+Entrée `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Maj+D (⌘+Maj+D) °F ou °C. Voir [Raccourcis clavier](113-shortcut-keys).
 
 Sur un Device ou un Widget, **Fore color**, **Back color** et **Alignment** valent pour tout son texte. **Name color**, **Value color**, **Name alignment** et les autres en dessous sont toujours là, et l'emportent sur Fore color pour cette case-là.

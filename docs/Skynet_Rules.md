@@ -1134,6 +1134,19 @@ follows the new names (hidden keys, Rule 3.10), and Clones follow their parent (
 is converted unless the Admin presses Convert (Rule #1, never take away). **Both programs:** the BruControl Import's Build page
 uses the same Edit layout bar, so imported names can be converted the same way after the Import. Help 46, 115.
 
+3.19 **Rich Text Embedded Codes** (OakBarn Brewery, 2026-10-29, the list of codes; 2026-11-15: "New pr and \degF and \degC good";
+"maybe \dFC"). A short code that starts with a backslash, typed inside any text the panel shows (a Text, a Label, a Name, a Value, a
+Process string, a `print` line, a pop-up), changes how it looks. The one list is Help 90, Rich Text Embedded Code:
+- **Switches** (the first turns it on, the next turns it off): `\b` bold (`\B` too), `\i` italic, `\u` underline, `\s`
+  strikethrough, `\L` large, `\S` small (three quarters size), `\_` subscript, `\^` superscript.
+- **Color:** `\c{Red}` ... `\c`. A panel color name (the same one list as the color dropdowns, public/richtext.js NAMED_COLORS;
+  capitals and spaces don't matter) or a #hex color. A name that is not a color stays as typed, so the mistake shows.
+- **Signs and spacing:** `\n` a new line, `\t` an indent (Rule 3.17), `\deg` a plain ° (also for angles, a 45° elbow), `\degF` °F,
+  `\degC` °C, `\dFC` °F or °C from the Default Temperatures unit (US °F, Metric °C; the letter only, the number is not changed),
+  `\ohm` Ω, `\+-` ±, `\\` one backslash.
+- **No `\F` or `\C` alone:** a folder path like `C:\Config` must never turn into °Config (Rule 7.23 uses paths everywhere).
+- A code that is not on the list stays as typed. Codes work the same in both programs; the BruControl Import brings in no codes.
+
 ## 4. Making things: the Build Tab
 
 4.1 **Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab** (OakBarn Brewery,
@@ -4734,6 +4747,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 - 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
 - 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) leaves its Inlet IP and Outlet IP where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
+- 2026-11-15: Rule 3.19 added (OakBarn Brewery: "New pr and \degF and \degC good"; "maybe \dFC"): Rich Text Embedded Codes, rebuilt from old PR #133 on today's code. New codes `\i` italic, `\u` underline, `\s` strikethrough, `\S` small, `\c{Red}` ... `\c` color, `\ohm` Ω, `\+-` ±, `\degF` / `\degC` (instead of #133's `\F` / `\C`, so a path like C:\Config stays as typed) and `\dFC` (°F or °C from the Default Temperatures unit). The color names live in one list (public/richtext.js NAMED_COLORS) that the color dropdowns use. Help 90 Rich Text Embedded Code lists every code; Help 22 points to it; Help 33, 49, 91, 113 link to it (and French). Checked against both programs: the Importer shares the Panel's text drawing and brings in no codes.
 - 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Help 130 (and French). Both programs.
 - 2026-11-15: Rule 2.38 changed (OakBarn Brewery: "And Heating Element Like this is Ok for 2.38. That rule needs to be changed to when possible and not mandatory"): each dropdown choice starting with its own first letter is now **when possible**, not a must; choices may share a lead word when that is clearer (Heating Element: DO On/Off, Heating Element: PWM ...). Lists are no longer forced to it before the first Public Production. Checked against both programs: no list changes now (the Importer shares the Panel's lists). (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")

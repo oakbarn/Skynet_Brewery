@@ -9,7 +9,7 @@ At the top: **🗑 Delete**, **COPY**, **✖ Cancel** and **💾 Save** (Delete,
 - **COPY** saves your changes, then makes a copy of this Text Widget on the 🔨 Build Tab, with everything the same but a new name (the same name with _2, _3 ...). The copy's Properties open so you can change it. **Save Build ...** sends it to a Tab.
 - **Name**: a new Text Widget's Label starts as **Text_1**, **Text_2** ... and its name is **wgt_TXT_** + the Label + the Tab ID, for example **wgt_TXT_Text_1_BH** (Skynet Rule 3.14). Older ones keep their **w_Text_1** names. You can keep it, or give it a name of your own. Once it is saved the name is locked 🔒: **✏ Change name** is the only way to change it (it *updates the names* everywhere), and every Process that uses it changes with it. Names are only there to find the item on the screen and to set its `.attributes` in a Process.
 - The orange **?** after the name opens a pop-up with more about the Text Widget: its **Properties** and the **Attributes** a Process can use. (The yellow **?** by the title opens this Help page.) The pop-up has **✖ Close** at the top and the bottom.
-- **Text**: what it says. **Rich Text Embedded Codes** work here and in the Label: `\b` bold, `\i` italic, `\n` a new line, `\c{Red}` a color and the rest in [Codes inside text](22-process-language).
+- **Text**: what it says. **Rich Text Embedded Codes** work here and in the Label: `\b` bold, `\i` italic, `\n` a new line, `\c{Red}` a color and the rest in [Rich Text Embedded Code](90-rich-text-embedded-code).
 
 ### The Label box
 
