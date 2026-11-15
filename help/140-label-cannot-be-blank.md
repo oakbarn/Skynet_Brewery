@@ -16,6 +16,8 @@ The cursor goes back to the Label so you can type one. The pop-up goes away by i
 
 - **✖ Cancel** is always "hot": it works even while the Label is blank, so you can always leave the dialog. (If you changed
   something, it still asks first.) **Esc** works the same way.
+- **🗑 Delete** is "hot" too: it works even while the Label, the Port or any needed box is blank (it still asks "Delete this
+  item?" first).
 - The Label's own **⬆** (bigger box) and **⬢** (Label attributes) icons, since they are for typing the Label.
 
 ## The Port too
