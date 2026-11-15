@@ -546,10 +546,19 @@ button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+*Includes pipe length and hose redrawing (OakBarn Brewery, 2026-11-15: "Rule 2.12 should include the redrawing size and hoses"):*
+changing a pipe's length or redrawing a hose is a move too. Only an **unlocked** pipe or hose can be made shorter or longer or
+redrawn, and only at an end that is let go whose IP is unlocked (No Unlock too); a 🔒 locked pipe or hose keeps its length and
+shape (Rule 5.37). (Help 56, Help 153)
 *Changed (Fritz, 2026-11-05: "Locked Vessels cannot be moved with a Mouse but can be moved by there x y attributes"):* a 🔒
 **locked Vessel** can't be moved with the mouse, but a new **X** or **Y** typed in its Properties moves it, to the pixel (moving
 something 1 pixel left can look much better on the screen). Its IPs, joined fittings and End Caps go with it, as with a drag,
 and it stays locked. A bundled vessel's Properties have X and Y too. Pipe ends left off its IPs let go (Rule 5.19). (Help 56)
+
+*Changed (OakBarn Brewery, 2026-11-15: "Maybe a way to lock Fittings like a QD to an IP... An attribute on IPs that says No Unlock
+individually. So an IP can be locked individually that overrides the Unlock when moving"; "Each IP would need its own No Unlock attribute"):* every IP and every pipe fitting
+has its own **No Unlock** switch in its Properties. On, it locks the item, and **🔓 Unlock All passes it by** (and so does unlocking the vessel it is
+a port of); only its own 🔓 Unlock unlocks it. (Help 56)
 
 2.13 **Phones and tablets do not move pictures** in Edit layout; they only select, and holding a
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
@@ -712,8 +721,10 @@ Import** (they share these Rules, Rule 15.4):
    when Possible and Short"): **Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
    **Each choice in a dropdown starts with its own first letter** (OakBarn Brewery, 2026-11-10, for typing ahead: "Do this for all
    DDLB choices as a Rule for Predictive Text"): with the list open, typing that letter picks it. The word that sets a choice apart
-   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. Lists that break this are brought to it
-   before the first Public Production.
+   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. **This is "when possible", not a must**
+   (OakBarn Brewery, 2026-11-15: "That rule needs to be changed to when possible and not mandatory"): a list whose choices are
+   clearer sharing a lead word may do so, for example **Heating Element: DO On/Off**, **Heating Element: PWM**, **Heating Element:
+   PID** in the Heating Element dropdown.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. **Hover Delay**
@@ -965,10 +976,23 @@ contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruContr
 *Replaced:* a Heating Element on a relay had `DO`, like a plain relay (2026-10-23).
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
-3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
-Admin can change either**; for everyone else the box is greyed out. The panel explains that the
-Interface ID is best set once (it is part of every Suggested Device name) and warns before changing
-one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
+3.2 **The ID Rule** (OakBarn Brewery, 2026-11-15: "IDs for Interfaces, Tabs, and any other Item that has a User Set ID (Always a
+Suggested Unique one on a New Build) 1 to 4 Char Unique Once saved, Never Changed even by an Admin. Used as first text with Name
+(may change to Label on some) Example BH: Brew House for a tab DDLB."; letters and numbers picked the same day). Every **Interface ID**,
+every **Tab ID**, and the ID of **any other item that has a user-set ID**:
+- **Skynet always suggests a unique one** on a new build. The user may type another before the first Save.
+- **1 to 4 characters**: letters and numbers (A to Z, 0 to 9), **starting with a letter** (BH, MB2, F1).
+- **Unique** among its kind (no two Interfaces, no two Tabs, the same ID).
+- **Once saved, never changed, not even by an Admin.** The box shows it read only; the Brain refuses a changed ID. To use another
+  ID, make a new item.
+- **Shown first** in every list, before its Name (on some items its Label): **BH: Brew House**, **BM: Brewery Mega**.
+The ID is part of every Suggested Device name (Rule 3.1), so a name never goes out of date. It is not the item's key: every
+Interface and Tab also has its hidden Meaningless Key (Design Rule #2, Rule 3.10), and Processes follow the key, not the ID.
+Other Rules, Help pages and Hover Help do not repeat these details: they say the ID **follows Rule 3.2** (OakBarn Brewery,
+2026-11-15: "state that Tab IDs follow the Rule #"). Both programs follow it: the BruControl Import suggests the IDs, lets the
+user change them on its Boards and Tabs page, and they are locked once the Schema is saved.
+*Replaced:* Interface ID 1 to 4 letters, Tab ID exactly 2 letters, only an Admin can change either (2026-10-21, PR #61; restated
+2026-10-27, PR #118; kept 2026-11-12).
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 **No space at the start or end of any name or Label** (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label
@@ -1295,7 +1319,7 @@ add to. (2026-10-04, PR #14)
 
 5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
 lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
-only. Fitting bundles flow both ways. Tap water valves push flow on their own. (2026-10-04, PR #3;
+only. Fitting bundles flow both ways. Tap water valves push flow on their own. **A tap water valve is always one way**: from its tap side to its Out side, never back and never both ways. This holds for the Skynet Template tap water valves and every valve made from them too. Its **Tap Water flows** box picks Left to Right / Right to Left when it lies flat or Top to Bottom / Bottom to Top when it stands up (OakBarn Brewery, 2026-11-15: "flow is always from tap source to Out on a Valve"). **Every other Widget or Device with IPs passes flow both ways, except a check valve.** (2026-10-04, PR #3;
 PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
@@ -1347,6 +1371,11 @@ Device's drawing, inlet and outlet IPs, Cover, Overlay and Orientation, and its 
 Interface and Port. `.state` (true = ON) is its value: a click, or a Process line such as `wgt_MP_Pump~1_BR.state = true`, asks for
 it to be turned on by hand, and it shows ON after Done. The BruControl Import will make one for each extra Pump slot (Rule 15.4).
 (thread "Build Confirmation Widgets in the Panel", Help 162)
+- **Sump Pump by hand** (OakBarn Brewery, 2026-11-15: "most brewers just use them by plugging them in and not controlled by the
+  Skynet"; "WE simply turn on the power manually as it is not bis an SSR"): its own row in **Select Widget Type >
+  Semi_Widgets_Devices** and **Select Device Type > Pumps**, so it is easy to find. It is a Manual Pump with the Sump pump picture
+  (the same as Manual Pump, then Sump pump in step 2); its Label starts **Sump 1** (`wgt_MP_Sump~1_BR`). Put inside an Ice Water
+  Can, it draws the can's water (Rule 19.8). (thread "Add a manual Sump Pump widget", Help 162 and 201)
 
 
 5.16 **Skynet Templates and Daughter Templates are set and can't be changed by a user.** A user makes
@@ -1863,6 +1892,16 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **Shorten a let-go pipe** (OakBarn Brewery, 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten"): a pipe end
   that 🔓 Unlock its ends let go (an open coupling) can be dragged along the pipe's own line to make it shorter or longer (never off
   its line, at least 10 pixels); its coupling goes with it.
+- **Change a saved pipe's length, redraw a saved hose** (OakBarn Brewery, 2026-11-15: "Ability to change the Length of a Pipe once
+  it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to
+  be Redrawn after its IPs are unlocked"; Help 153): once an end of a pipe or hose is let go (🔓 Unlock its ends, or 🔓 Unlock its IPs
+  on what it was joined to), that end has a round handle and can be dragged, saved or not: a **pipe** end along the pipe's own line
+  (shorter or longer, as above), a **hose** end **anywhere** (the hose bends to follow; the round handles in its middle change its
+  bends). The let-go end can be grabbed even where it sits on a pump, valve, vessel or fitting IP: it comes first. Dropped within 14
+  pixels of an IP, that end joins it at once (only that end; the other stays as it is); anywhere else it stays open. Skynet does
+  this in the Background and needs no user input. Nothing else changes: an end still joined, a 🔒 locked pipe or hose, and an end
+  whose IP is 🔒 locked (No Unlock too, Rule 2.12) do not move. ↩ Put back (Ctrl+Z) undoes each drag; Save layout keeps it.
+  **Both programs:** the BruControl Import's Build page is the Panel's Edit layout, so it works the same there.
 - **Deleting a pipe or hose takes its own IPs with it** (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on
   the Build"; "Check same issue for Hose"), from this pop-up or from its Properties: a coupling or IP point on one of its ends goes
   too when nothing else is on it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel).
@@ -1944,8 +1983,8 @@ Special Widget", Help 14).
   an open Tap Water Valve, Rule 5.33), and stops when nothing does. Where the flow comes from is up to how it is piped, so it can
   be hooked up any way in a manifold, including from a valve that is always left open.
 - **Each path is its own pipe.** A plate or counterflow chiller has two paths that never mix, **Wort In to Wort Out** and **Water
-  In to Water Out** (4 IPs), each with its own source. An Immersion coil has one path, **In to Out** (2 IPs); a Chillzilla has two
-  (4 IPs).
+  In to Water Out** (4 IPs), each with its own source. An Immersion coil has one path, **In to Out** (2 IPs). A **Chillzilla is a counterflow chiller**
+  with 4 IPs (OakBarn Brewery, 2026-11-15), not an immersion chiller.
 - **Nothing a pipe doesn't have:** no Size, Units or Dead space in its Template, and no built-in Thermowell. A probe for the chilled
   wort goes in the pipe beside it (a probe tee, Rule 5.30).
 - The Brew Day's **Chiller cooling water** job (Rule 16.3) picks the **source** of the water (the valve or pump that feeds Water In),
@@ -1961,6 +2000,24 @@ Special Widget", Help 14).
   the Boil Kettle and draws its hoses, and takes it away again. A **motorized Tap Water
   Valve** on Port 30 bypasses the chiller and feeds the pump's suction line through a tee. The Brew Day Process asks the brewer to
   open and close the Chiller water tap.
+
+5.42 **The Chiller Overlay: a Process places a chiller in a vessel and takes it off again** (OakBarn Brewery, 2026-11-15: "A Chiller
+is normally manually placed into a Brew Kettle"; "Could almost be an Overlay type when placed on the screen and maybe a command to
+move it to the Brew Kettle"; "a snippet of Code where a Skynet Chiller Template is chosen and it is superimposed on a Device vessel
+from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, vessel"; Help 200).
+- `place_Chiller = Immersion_Chiller, BK_Vessel` draws that **Chiller Template** (a chiller that goes into a vessel: an immersion chiller
+  with 2 IPs, In and Out, such as Immersion_Chiller; never a plate or counterflow chiller, a Chillzilla included) **over that vessel**, on top of it, with **two hoses**: In from the Tap Water Valve on the vessel's
+  Tab (Rule 5.33; one with "chill" in its Label first) and Out to the Tab's drain IP ("Drain" or "outside" in its Label). Flow
+  passes only while that tap is open (Rule 5.41). A chiller already placed on that vessel is taken off first.
+- `remove_Chiller = BK_Vessel` takes that chiller, its IPs and its hoses off; `remove_Chiller` alone takes off every one a Process placed.
+- **Only the drawing changes; the Process does not wait.** An `ask` line after it waits for the brewer.
+- The chiller's **Suggested Name and Label come from its Template** (`wgt_CHL_Immersion~chiller_BH`, Label Immersion chiller; Rule
+  3.14); its hoses get the next free Hose_n with Label hose_n.
+- The **Process editor** lists the Chiller Templates after `place_Chiller =`, then the Vessels with the **Brew Kettle first**. The
+  Process Check reports a missing Template, Vessel, Tap Water Valve or drain IP before the Process runs.
+- **3 Vessel sample:** the Brew Day places the Immersion chiller in the Boil kettle 15 minutes before the end of the boil and takes
+  it off after chilling.
+- **BruControl Import:** BruControl has no chillers; the Importer does not run Processes.
 
 ## 6. Devices, connections and safety
 
@@ -2187,13 +2244,28 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
-- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5): **Current Method** (a dropdown) and **Short Label** (a
-  switch) on one line; then **Enabled**, a switch under each method's name: **a method must be enabled to be used** (the Current Method
-  and Direct are always on, greyed); then **Control Method**, a balloon for each enabled method, the Current Method **Red** and the others
+- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5; Method Settings 2026-11-15): **Current Method** (a dropdown
+  holding only the methods in use), **Short Label** (a switch) and a red **⬢** that opens the Current Method's own Settings (OakBarn Brewery,
+  2026-11-15: "a Icon that pops current properties methods") on one line; then **Method Settings**, a **⬢** button for each method
+  with ✔ Used or Not used under it (*replaced 2026-11-15:* the row of **Enabled** switches); then **Control Method**, a balloon for each method in use, the Current Method **Red** and the others
   **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
   the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
   is in now. The explanations are in hover help, so the dialog stays clean.
-- **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4): **Temperature Probe** and **Setpoint** on one line; **Direction**
+- **One settings dialog for each method** (OakBarn Brewery, 2026-11-15: "When a user switches from Hysteresis to Duty Cycle there would
+  need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle to set the parameters for the new method. One for each
+  method. Include a Use Method Boolean so it allows the method to be selected in a Process or DDLB. Is set to [No], Hide all the
+  Attributes on that Property sheet. Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): each
+  method's ⬢ opens its own dialog, **"Duty Cycle Settings"** and so on, with its title, ✖ Cancel and 💾 Keep frozen at the top and no
+  bottom row (Rule 2.51); Keep puts its settings in the Properties, saved with them. At its top is **Use Method**, a switch: **On**, the
+  method may be picked in the Current Method dropdown, by its balloon (dialog and Tab), by a Method Clone and by a Process; **Off**, it
+  may not, and **every other setting on that dialog is hidden** (the settings are kept). **Direct** and the **Current Method** are always On
+  (greyed); a new Current Method keeps the one before in use. Use Method is the same setting the Enabled switches were (saved as
+  methodSpot_<method>), so nothing saved changes. Direct has nothing to set. The Temperature Probe and the Setpoint are shared by the
+  methods that use them. **Processes:** `.method = "X"` and the short `.DutyC` ... may only pick a method in use: the Process editor offers
+  only those and its check shows a plain error before brewing; the Brain refuses it if it runs anyway. Switching Use Method On never turns
+  the Element On. The Heating Element Properties have the frozen top too, with no bottom row. **Both programs:** the BruControl Import
+  uses the same dialogs and switches Use Method On for each joined BruControl control. Help 150.
+- **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4; in the Hysteresis Settings dialog since 2026-11-15): **Temperature Probe** and **Setpoint** on one line; **Direction**
   (Heating, greyed) with **Offset** beside it, picked from a list of every half degree its Hardware Controller allows (Rule 6.29);
   **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
   Setpoint (blue) and the Offset (yellow). Data Display calls the probe reading **Temperature**. A Device built into a Vessel Device
@@ -2855,6 +2927,20 @@ Image that says File Not Found when the path does not work"; "Looks good use it"
   seconds while one is missing; no closing, no F5. Skynet does this in the Background and needs no user input (Rule 11.13).
 Both programs: the BruControl Import's Build page shows it too.
 
+7.25 **Help pictures stay sharp** (OakBarn Brewery, 2026-11-15: "All of the graphics in the Hover Help ... are very poor and hard to read"):
+- Pictures in `media/help_pictures` (Help pages and Hover Help) are **never swapped for a traced SVG copy** (Settings > Pictures,
+  lib/vectorize.js). A traced copy turns small words into blobs. They show the picture itself, whatever Settings > Pictures is
+  set to, unless a **hand-made SVG** of the same name sits next to it; then that drawing is used, since it is sharp at any size.
+- Help pictures are not traced at all, so no copies are made for them.
+- **Words in a Help picture are real text, never part of the graphic** (OakBarn Brewery, 2026-11-15: "And any text has to be
+  text and not just part of a grahic"): the picture is a hand-made SVG whose words are &lt;text&gt;, so they stay sharp at any size
+  and can be translated.
+- **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
+  or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
+  (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
+Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
+the pictures themselves (and the hand-made SVGs). Help 7.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -3463,6 +3549,13 @@ only when Fritz says the program is set. (2026-10-26)
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
 finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
 
+14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
+Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
+both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
+Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
+
 ## 15. Importing
 
 15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
@@ -3531,7 +3624,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     °F, inches) or Metric (Liters, °C, cm), on the Names page; when BruControl's probe ports show °F or °C, that one is picked and the
     question is a confirmation. Every temperature, size and volume after it uses it.
     **The brewer confirms what comes in, in small steps** (a drill-down, OakBarn Brewery 2026-11-08): first the Interfaces found (read
-    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (up to 4 letters, 2 preferred, Rule 3.2) and
+    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (Rule 3.2, 2 preferred) and
     **Accept**, then **the Tabs** (one row per Tab: ID, Items, a column for each kind of Placeholder, an **Import Tab** box, and **Accept**;
     OakBarn Brewery 2026-11-08: "Layout the Tab ... different Place Holder type, a Check box and accept Button"; "The Empty Tabs Unchecked";
     "allow user to check Uncheck": a Tab with items starts ticked, an empty one unticked, and any box can be ticked or unticked; an unticked
@@ -4081,7 +4174,7 @@ Valve drill-down dialog", Help 128):
    copy of the Pump dialogs": two fields on one line in the Pump's dialogs are on one line here too. Enter goes Label,
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
-   valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
+   valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap Water flows instead, Rule 6.15).
 5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
    upgraded on load, the stored Type ID and the name (Rule 15.2). The other electric valves follow (OakBarn Brewery, 2026-11-11:
    "Valve_E_H and Valve_Sgas"): a High Temperature Electric Valve is **Valve_E_H** (**DO@Valve_E_H**, was E_H_Vlv) and a Solenoid Gas
@@ -4556,6 +4649,24 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 - **Both programs:** the BruControl Import's Build page is the Panel's own, so it has both. BruControl has no stove top pot, so an
   import never makes one.
 
+19.8 **The Ice Water Can: cold water for a Sump Pump, drawn for its box** (OakBarn Brewery, 2026-11-15: "Also need a Sump Pump widget
+similar to a Manual Valve as most brewers just use them by plugging them in and not controlled by the Skynet"; "we have a sump pump in
+chilled water that recycles back to a large trash can with Ice and Water"; "the Iced Water Is pass through a Plate Chiller to Cool Tap
+Water. That tap water is sent to another Plate Chiller for the WORT ... The Ice Water is retuned to the Large Ice Bath and the Waste tap
+water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sump Pump widget", Help 201).
+- **Ice Water Can, in Add equipment:** a big trash can (or tub or cooler) of ice and water. A Widget with **no Devices and no IPs of
+  its own**. Name `Ice_Water_Can_1` (as the Stove Top Vessel's, Rule 19.7); Label starts **Ice Water**.
+- **Hose hang top:** its top third is one big IP, as on every vessel (Rules 5.28 and 5.34): a Quick Disconnect hose dropped there, or
+  a Process line `Hose_1.connect = Ice_Water_Can_1`, hangs over the rim and brings the water back.
+- **A pump inside it draws from it:** a running pump whose inlet sits inside the can, with nothing joined to that inlet (the **Sump
+  Pump by hand**, Rule 5.15a), pulls the can's water. Its flow takes the can's **Out flow color** (Rule 5.21), which starts **Blue**
+  because the water is cold.
+- **Its picture is drawn by Skynet for its box:** a grey can a little wider at the top, rim, two side handles, blue water and ice
+  cubes, no text (the Label is its only text). A Graphic picked by the user is used instead. No Gallons: it is not brewing liquid,
+  so it is sized by dragging and does not follow the Master Vessel Sizer.
+- **Both programs:** the BruControl Import's Build page is the Panel's own, so it has it. BruControl has no ice bath, so an import
+  never makes one.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4594,8 +4705,20 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
-- 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) no longer swaps its Inlet IP and Outlet IP to the opposite side. They stay where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
-- 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Old Schemas drop any side picked. Help 130 (and French). Both programs.
+- 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) leaves its Inlet IP and Outlet IP where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
+- 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Help 130 (and French). Both programs.
+- 2026-11-15: Rule 2.38 changed (OakBarn Brewery: "And Heating Element Like this is Ok for 2.38. That rule needs to be changed to when possible and not mandatory"): each dropdown choice starting with its own first letter is now **when possible**, not a must; choices may share a lead word when that is clearer (Heating Element: DO On/Off, Heating Element: PWM ...). Lists are no longer forced to it before the first Public Production. Checked against both programs: no list changes now (the Importer shares the Panel's lists). (thread "Create the Panel Updates sandbox")
+- 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")
+- 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
+- 2026-11-15: Rule 2.12 now says it includes changing a pipe's length and redrawing a hose (OakBarn Brewery: "Rule 2.12 should include the redrawing size and hoses"): only an unlocked pipe or hose, at a let-go end with an unlocked IP, changes. Help 56 (and French) updated. (thread "Let saved pipes and hoses be resized")
+- 2026-11-15: Rule 5.37 extended (OakBarn Brewery: "Ability to change the Length of a Pipe once it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to be Redrawn after its IPs are unlocked"): a let-go end of a saved pipe or hose has a handle and can be dragged, a pipe end along its line (length), a hose end anywhere (redraw); it comes before the pump, valve, vessel or fitting IP it sits on; dropped on an IP, that end joins it. Locked pipes, hoses and IPs (No Unlock too) stay put. Help 153 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Let saved pipes and hoses be resized")
+- 2026-11-15: **Rule 3.2 rewritten: The ID Rule** (OakBarn Brewery: "Another Rule about IDs for Interfaces, Tabs, and any other Item that has a User Set ID ... Once saved, Never Changed even by an Admin"; "Remove that Rule or state that Tab IDs follow the Rule #"; letters and numbers picked on a decision card). Every user-set ID: a unique suggestion on a new build, 1 to 4 letters or numbers starting with a letter, unique, never changed once saved (not even by an Admin), shown first in lists (BH: Brew House). A taken Interface suggestion is now MB2 (was MB_2, which broke the 4 characters). Help 13, 46, 76, 115, 188, the Device Library and the Interface and Tab balloons now say IDs follow Rule 3.2 instead of repeating it. Checked against both programs: the Panel's Tab settings, Interface pop-up and Devices page lock a saved ID and the Brain refuses a changed one; the BruControl Import's Boards and Tabs page uses the same check (public/naming.js). Older Schemas: before the first Public Production (No old ways), a saved ID that breaks the Rule (MB_2) gets a new one once when its Schema loads. (thread "Add a Rule for permanent user IDs")
+- 2026-11-15: Added Rule 7.25 Help pictures stay sharp (OakBarn Brewery: "All of the graphics in the Hover Help ... are very poor and hard to read"): Help pictures are never swapped for the panel's traced SVG copies (they smeared the words); Words in Help pictures are real text, and any Help picture from a PNG or PDF is redrawn. Pump_8_IPs, Pump_Right_Left, Red_Pump_Label, Label_Visible_Switch, IP_Marker and Pump_IP_Example_1/2 redrawn as hand-made SVGs. Help 7 (and French). Checked against both programs. (thread "Sharpen Hover Help pictures")
+- 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
+- 2026-11-15: Rule 2.12 changed (OakBarn Brewery: "An attribute on IPs that says No Unlock individually. So an IP can be locked individually that overrides the Unlock when moving"): an IP or pipe fitting has a **No Unlock** switch; 🔓 Unlock All (and unlocking its vessel) passes it by, and only its own 🔓 Unlock unlocks it. Help 56 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Rules 5.41 and 5.42 corrected (OakBarn Brewery: "A Chillzilla is a counter flow chiller and not an immersion chiller so place_Chiller could not place a counter flow chiller. A Chillzilla also has 4 IPs"): place_Chiller places only an immersion chiller with 2 IPs (Immersion_Chiller); a Chillzilla is a counterflow chiller with 4 IPs. Help 200 (and French) updated. Checked against both programs: the Panel's Brain runs it; the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Added Rule 5.42, the Chiller Overlay (OakBarn Brewery: "Could almost be an Overlay type when placed on the screen"; "a Skynet Chiller Template is chosen and it is superimposed on a Device vessel from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, vessel"): `place_Chiller = Immersion_Chiller, BK_Vessel` draws a Chiller Template over a vessel with an In hose from the Tab's Tap Water Valve and an Out hose to its drain IP; `remove_Chiller = BK_Vessel` (or `remove_Chiller` for all) takes it off. Only the drawing changes; the Process does not wait. Name and Label from the Template (wgt_CHL_, Rule 3.14). The Process editor lists the Chiller Templates, then the Vessels with the Brew Kettle first. The 3 Vessel sample's Brew Day places and removes it. Help 200 new (next free Help 201), Help 14 and 22 and their French pages. Checked against both programs: the Panel's Brain runs it; BruControl has no chillers, and the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Rule 5.10 (OakBarn Brewery: "Tap water on a tap water valve is one way from the valve, one side tap supply and other side tap water out only"; "Any other widget, Device with IPs direction is bi directional except a check valve"; "a Skynet Template Tap water valves follow that rule and any created from them do as well"): a tap water valve is always one way, tap side to Out. **Both ways** is taken off **Tap Water flows** (Old Ways Policy: nothing old kept before Public Production; a valve saved with it reads as one way). A Skynet Template valve's **Tap end** box is now **Tap Water flows** too, with the same choices by how it sits (saved key unchanged). Help 31, 88, 128 (and French) and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")

@@ -2,20 +2,31 @@
 
 Chaque Interface et chaque Tab a un court **ID**, et un nouveau Device reçoit un nom fait à partir d'eux. Vous voyez d'un coup d'œil à quelle carte, quel port et quel Tab appartient un Device.
 
+## La règle des ID (Rule 3.2) {#the-id-rule-rule-3-2}
+
+Chaque Interface, chaque Tab, et tout autre élément auquel vous donnez un ID suit cette seule règle :
+
+- **Skynet en propose toujours un** quand vous en créez un nouveau. La suggestion est toujours unique. Vous pouvez taper le vôtre à la place.
+- **1 à 4 caractères** : des lettres et des chiffres (A à Z, 0 à 9), en commençant par une lettre. Par exemple `BH`, `MB2`, `F1`.
+- **Unique** : deux Interfaces, ou deux Tabs, ne peuvent pas avoir le même ID.
+- **Une fois enregistré, il ne change jamais, même pas par un Admin.** Vérifiez-le avant d'enregistrer. Pour utiliser un autre ID, créez-en un nouveau.
+- Les listes affichent l'ID d'abord, puis le nom : **BH: Brew House**, **BM: Brewery Mega**.
+
+L'ID fait partie de chaque Suggested Name de Device, donc le nom d'un Device n'est jamais dépassé. L'ID n'est pas la clé cachée de l'élément (Design Rule #2) : les Processes trouvent un élément par sa clé, jamais par son ID.
+
 ## Interface ID
 
 Une **Interface** est une carte (automate, PLC) à laquelle les Devices sont câblés : une Mega en USB, une Mega en Ethernet, un ESP32 et ainsi de suite. Les Interfaces sont sur la page **Devices**.
 
-- L'ID fait **de 1 à 4 lettres**, et s'écrit avec un tiret bas après : `MB_`.
-- Chacun doit être **unique**.
-- Une nouvelle Interface reçoit la première lettre des deux premiers mots de son nom. **Main Brewery Mega USB** reçoit `MB_`.
-- Si cet ID est pris, la suivante reçoit `MB_2`, puis `MB_3`.
-- Un Admin peut taper un autre ID en ajoutant l'Interface, ou le changer dans la case **ID** du tableau. Par exemple `MBUB` pour la Mega en USB et `MBET` pour celle en Ethernet.
+- Dans un nom, l'ID s'écrit avec un tiret bas après : `MB_`.
+- La suggestion pour une nouvelle Interface est la première lettre des deux premiers mots de son nom. **Main Brewery Mega USB** reçoit `MB`.
+- Si cet ID est pris, la suggestion est `MB2`, puis `MB3`.
+- Vous le réglez en ajoutant l'Interface. Par exemple `MBUB` pour la Mega en USB et `MBET` pour celle en Ethernet.
 
 ## Tab ID
 
-- Le Tab ID fait **exactement 2 lettres**, et chacun doit être **unique**. **Sparge** reçoit `SP`, **Batch Hops** reçoit `BH`.
-- Un Admin le change dans **Tab settings** (Edit layout, double-cliquez sur un endroit vide du Tab).
+- **Sparge** reçoit `SP`, **Batch Hops** reçoit `BH`.
+- La suggestion pour un nouveau Tab peut être changée dans **Tab settings** (Edit layout, double-cliquez sur un endroit vide du Tab) jusqu'à ce que vous enregistriez.
 - Renommer un Tab garde son ID.
 
 ## Les noms des Devices {#device-names}
@@ -149,7 +160,7 @@ Une thermistance NTC se lit sur une broche analogique avec une résistance en s�
 
 Les Devices faits avant ceci gardent leurs noms, donc vos Processes marchent toujours. Leurs anciens codes de type (`PmP`, `VlV` ...) sont changés tout seuls en nouveaux Device Type IDs. Leurs propriétés montrent le **Suggested Name** ; vous pouvez leur donner ce nom avec **✏ Change name** à côté du **Name** si vous voulez. Vos Processes passent tout seuls au nouveau nom quand vous enregistrez la disposition (voir [Renommer des Devices et des Widgets](53-renaming)).
 
-Les Interfaces et les Tabs d'avant reçoivent un ID tout seuls la première fois que le Schema s'ouvre. Changer un Interface ID ou un Tab ID plus tard ne renomme pas les Devices qui existent déjà.
+Les Interfaces et les Tabs d'avant reçoivent un ID tout seuls la première fois que le Schema s'ouvre. Une fois enregistré, un ID ne change jamais (Rule 3.2), donc le nom d'un Device correspond toujours à son Interface et à son Tab.
 
 ## Qui peut changer les choses {#who-can-change-things}
 

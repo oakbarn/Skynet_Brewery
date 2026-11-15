@@ -4,7 +4,7 @@
 // 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
 import { startConnect, connectState, resetConnect } from './connectpage.js';
 import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED, onePower, methodName } from './connect.js';
-import { parseLabel, widgetTypeId } from '../naming.js';
+import { parseLabel, widgetTypeId, ID_RE, ID_RULE } from '../naming.js';
 import { vbFromImport } from '../vesselbuilder.js';
 import { BOOL_STYLES } from '../semi.js';
 import { PROCESS_WIDGET_WORD } from '../processwidget.js';
@@ -768,27 +768,27 @@ function sub5(which) {
   if (which === 'id') {
     const ex = r.renames.find(x => /_\d+_/.test(x.to))?.to || 'MP_45_DO_M~HLT~Pump_MD';
     box.innerHTML = `<div class="cards two"><div class="card"><table class="ifTable"><tr><th>Interface</th><th>ID</th></tr>
-      ${r.interfaces.filter(d => ifOn(d.name)).map(d => row([esc(d.name), `<input class="ifId" data-name="${esc(d.name)}" value="${esc(d.id)}" maxlength="4" size="5" spellcheck="false" title="Up to 4 letters (A to Z); 2 is best" aria-label="ID for ${esc(d.name)}">`])).join('')}</table>
+      ${r.interfaces.filter(d => ifOn(d.name)).map(d => row([esc(d.name), `<input class="ifId" data-name="${esc(d.name)}" value="${esc(d.id)}" maxlength="4" size="5" spellcheck="false" title="Rule 3.2: up to 4 letters or numbers, starting with a letter; 2 is best. Once the Schema is saved it never changes." aria-label="ID for ${esc(d.name)}">`])).join('')}</table>
       <p class="small" id="idNote"></p></div>
       <div class="card idHelp"><p><b>The ID column is something new in Skynet.</b> Skynet gives every Interface (board) a short <b>ID</b> of up to
-        four letters. The ID becomes the first part of the <b>suggested Skynet name</b> of every Device on that board, so you can tell at a
+        four letters or numbers (Rule 3.2). The ID becomes the first part of the <b>suggested Skynet name</b> of every Device on that board, so you can tell at a
         glance which board a Device is wired to.</p>
         <p>The suggested Skynet name is always unique, and it is built from five parts, with one <code>_</code> between them:</p>
         <ol><li><b>Interface ID</b>: the board, for example <code>MP</code> for Main Panel.</li>
           <li><b>Port</b>: the pin it is wired to, for example <code>45</code> or <code>A0</code>.</li>
           <li><b>Type ID</b>: what kind of Device it is, for example <code>DO</code> (a digital output), <code>H_Element</code> (a Heating Element), <code>10KNTC</code> (a probe).</li>
           <li><b>Label</b>: your own name for it, the BruControl DisplayName. A space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
-          <li><b>Tab ID</b>: the two letters of the Tab (old Workspace) it is on.</li></ol>
+          <li><b>Tab ID</b>: the ID of the Tab (old Workspace) it is on (Rule 3.2).</li></ol>
         <p>For example <code>${esc(ex)}</code>. Because of the <b>One Port, One Device</b> Rule, two suggested names can never come out the same.</p>
-        <p><b>The Importer chose these IDs for you.</b> You may change them: up to 4 letters, but <b>2 are preferred</b>, because a short ID keeps every
-        name short. Each ID must be different. Accept them, or change them and then Accept, before going on. After this, an ID is best left as it is,
-        because it is part of every Device name on that board.</p></div></div>
+        <p><b>The Importer chose these IDs for you.</b> You may change them now: up to 4 letters or numbers, starting with a letter, but <b>2 are preferred</b>, because a short ID keeps every
+        name short. Each ID must be different. Accept them, or change them and then Accept, before going on. <b>Once the Schema is saved, an ID can never
+        be changed, not even by an Admin</b> (Rule 3.2), because it is part of every Device name on that board.</p></div></div>
 `;
     const check = () => {
       const vals = [...box.querySelectorAll('.ifId')].map(i => i.value.trim().toUpperCase());
-      const bad = vals.some(v => !/^[A-Z]{1,4}$/.test(v)), dup = new Set(vals).size !== vals.length, long = vals.some(v => v.length > 2);
-      $('#idNote').innerHTML = bad ? '<span class="note">Use 1 to 4 letters (A to Z), no numbers or spaces.</span>' : dup ? '<span class="note">Each ID must be different.</span>'
-        : long ? 'An ID longer than 2 letters is allowed; 2 letters keep the names shorter.' : '';
+      const bad = vals.some(v => !ID_RE.test(v)), dup = new Set(vals).size !== vals.length, long = vals.some(v => v.length > 2);
+      $('#idNote').innerHTML = bad ? `<span class="note">Use ${ID_RULE} (Rule 3.2), no spaces.</span>` : dup ? '<span class="note">Each ID must be different.</span>'
+        : long ? 'An ID longer than 2 characters is allowed; 2 keep the names shorter.' : '';
       for (const id of ['#next5', '#next5a']) $(id).disabled = bad || dup;
     };
     box.oninput = e => { if (e.target.classList.contains('ifId')) { e.target.value = e.target.value.toUpperCase(); check(); } };
