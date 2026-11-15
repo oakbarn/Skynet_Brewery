@@ -32,8 +32,8 @@ sait pas où sont ses orifices), donc ses IP sont simplement sur les places.
 couleur et même épaisseur, donc les deux se rejoignent en une seule pièce. Sans rien sur l'IP, le Hose ou Pipe choisi ici est dessiné.
 
 **Une IP de coin** (Top Left, Top Right, Bottom Left, Bottom Right) peut être atteinte par le côté ou par le haut ou le bas.
-**Inlet from** et **Outlet from** s'affichent quand l'IP est sur un coin : **Auto** suit le sens du tuyau qui y est joint,
-**Side** arrive le long du côté, et **Top** (ou **Bottom**) arrive le long du haut (ou du bas).
+Skynet la choisit pour vous : le Hose ou Pipe arrive du même sens que le tuyau ou le flexible joint à cette IP. Sans rien de
+joint, il arrive le long du côté, et il tourne pour suivre dès qu'un tuyau ou un flexible est joint. Il n'y a rien à choisir.
 
 **IP Type In** et **IP Type Out** sont le raccord sur l'entrée et la sortie de la pompe : Tri-Clamp, NPT, BSP ou Quick Disconnect
 (Règle Skynet 5.40). Une pompe commence avec celui que disent ses **Ports** (TC est Tri-Clamp, FPT ou MPT est NPT, BSP est BSP),

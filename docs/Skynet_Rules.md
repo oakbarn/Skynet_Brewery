@@ -1580,9 +1580,10 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
 - **Joined pipe look** (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe"):
   with a pipe or hose joined to an IP, the pump's Hose or Pipe to that IP is drawn like it (same kind, color and thickness), so
   the two meet as one. With nothing joined, the Hose or Pipe picked is drawn.
-- **Corner IPs** (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs Side or Top or Side or Bottom"): Inlet from
-  and Outlet from (shown for a corner spot): Auto (the way its pipe leaves), Side, or Top / Bottom. The last step into the
-  corner is square.
+- **Corner IPs** (OakBarn Brewery, 2026-11-15, Blichmann RipTide: "the side for a corner is set by the hose or pipe joining, we
+  would not need a user selectible DDLB"): the Hose or Pipe inside the pump comes into a corner IP from the Side or from the Top /
+  Bottom, the same way as the pipe or hose joined to that IP leaves. Skynet sets it; there is nothing to pick. With nothing joined,
+  it comes in from the Side, and it turns as soon as a pipe or hose is joined. The last step into the corner is square.
 - **BruControl Import:** a pump imported as a Skynet Pump Device gets the same 8 IPs and starts on the same spots.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
@@ -4125,7 +4126,8 @@ DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-ty
 18.19 **A Device dialog shows its Graphic with its Orientation** (Fritz, 2026-11-04, the Pump first): the Add box and the
 Properties show the **Graphic** (the picture as it will be on the Tab, with its Cover) and an **Orientation** dropdown (a pump: **Right**, as
 drawn, or **Left**, mirrored; Fritz's screens 7-9). Changing the Orientation flips the Graphic on the dialog and the Device on the Tab,
-and its IPs follow (Rule 5.5). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
+and its IPs follow (Rule 5.5); a pump's Inlet IP and Outlet IP stay where they are and the Hose or Pipe inside it is drawn again
+(Rule 18.37). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
 greyed out with its pump name. A **User pump** (its own picture) has **one path only**, its Image Path (an exception to Rule
 7.10's three paths). Cover is for the Skynet pump drawings only (Rule 7.13). (Help 115)
 
@@ -4513,11 +4515,11 @@ Both programs: the BruControl Import's Build page uses the same dialogs.
 1. **Every tap pop-up of Hover Help** (the small pop-up a tap or click on a field's name opens, Rule 18.16) has its title and
    **✖ Close** frozen at the top while it scrolls, and no Close at the bottom ("Close Button Frozen at top of All Hover Help. Get Rid
    of Bottom Close Buttons"). Every dialog, not only the Pump's. A pop-up with pictures is wider.
-2. **Switching a pump's Orientation swaps its IPs** ("When changing Orientation from Left and Right Have the IPs swap to opposite side
-   as well, Right Become Left Left Becomes Right by at the IP Level"): an Inlet IP or Outlet IP that was picked moves to the mirror
-   spot (Bottom Right becomes Bottom Left, Top Left becomes Top Right; a Top or Bottom Middle stays), and the (start) choice follows by
-   itself. Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right is Inlet Bottom Left, Outlet Top Right. The
-   Orientation Hover Help says so ("Add Help in Orientation that switching orientation causes IPs to follow").
+2. **Switching a pump's Orientation leaves its IPs where they are** (OakBarn Brewery, 2026-11-15: "flipping IPs would need lots of
+   pipe or hose joins to move ... internal redraw is the way to go"). The Inlet IP
+   and Outlet IP stay on the same spots on the Tab, so the pipes and hoses joined to them never move; only the Hose or Pipe drawn
+   inside the pump is drawn again to reach them (Rule 5.27). Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right
+   keeps Inlet Bottom Right, Outlet Top Left. The Orientation Hover Help says so.
 3. **The Pump Hover Help is OakBarn Brewery's text and pictures, word for word** (only the spelling fixed, Rule 2.37): the Interface's
    first paragraph, the whole Name balloon (its "Update to Suggest Name Button" names the real buttons, 🏷 Suggested Names > 💾 Convert for all and 💾 Update to Suggested for one: OakBarn Brewery, "Yes"), the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
    connect to an IP ... within 10 px"), the Hose or Pipe balloon, and the 8 IPs picture on top of the Graphic balloon and the Right /
@@ -4731,6 +4733,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ## Change log
 
 - 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
+- 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) leaves its Inlet IP and Outlet IP where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
+- 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Help 130 (and French). Both programs.
 - 2026-11-15: Rule 2.38 changed (OakBarn Brewery: "And Heating Element Like this is Ok for 2.38. That rule needs to be changed to when possible and not mandatory"): each dropdown choice starting with its own first letter is now **when possible**, not a must; choices may share a lead word when that is clearer (Heating Element: DO On/Off, Heating Element: PWM ...). Lists are no longer forced to it before the first Public Production. Checked against both programs: no list changes now (the Importer shares the Panel's lists). (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
