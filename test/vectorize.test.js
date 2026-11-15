@@ -46,3 +46,20 @@ assert.ok(two.status().pictures.find(p => p.path === 'Pumps/Bell.png').svg.start
 two.forget(outside); assert.equal(fs.existsSync(copy), false, 'copy removed when the picture goes');
 two.stop();
 console.log('vectorize tests passed');
+
+// Rule 7.25: Help pictures are never swapped for a traced copy (it smears their words); a hand-made SVG still wins
+{
+  const h = fs.mkdtempSync(path.join(os.tmpdir(), 'bpvh')), hp = path.join(h, 'help_pictures'); fs.mkdirSync(hp);
+  fs.copyFileSync(path.join(ROOT, 'media/Images/Skynet/Alarms/AlarmBitter.png'), path.join(hp, 'Shot.png'));
+  fs.writeFileSync(path.join(hp, 'Shot.svg'), traceFile(path.join(hp, 'Shot.png')).svg);          // an old traced copy left on a Brain
+  const hs = new Pictures({ config: {}, writeConfig() {} }, () => [h]);
+  assert.equal(hs.pick(path.join(hp, 'Shot.png')), path.join(hp, 'Shot.png'), 'Help picture: the picture itself, not the traced copy');
+  hs.setMode('all'); assert.equal(hs.pick(path.join(hp, 'Shot.png')), path.join(hp, 'Shot.png'), 'not even with All');
+  fs.writeFileSync(path.join(hp, 'Shot.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"/>');
+  assert.equal(hs.pick(path.join(hp, 'Shot.png')), path.join(hp, 'Shot.svg'), 'a hand-made SVG is used');
+  hs.stop();
+  for (const f of ['Pump_8_IPs', 'Pump_Right_Left', 'Red_Pump_Label', 'Label_Visible_Switch', 'IP_Marker', 'Pump_IP_Example_1', 'Pump_IP_Example_2']) {
+    const t = fs.readFileSync(path.join(ROOT, 'media/help_pictures', f + '.svg'), 'utf8');
+    assert.ok(!t.includes('data-brewpanel-traced') && /<text/.test(t), f + '.svg is hand-made with real words');
+  }
+}
