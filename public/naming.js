@@ -1,8 +1,8 @@
 // Interface IDs, Tab IDs and suggested Device names. Used by the browser (app.js) and the server (lib/store.js).
 //
-// Interface ID: 1 to 4 letters, unique. A new Interface gets the first letter of its first two words ("Main Brewery Mega USB" = MB),
-//   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
-// Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
+// Interface ID and Tab ID (Rule 3.2, OakBarn Brewery, 2026-11-15): 1 to 4 characters (A to Z and 0 to 9, starting with a letter), unique,
+//   always a unique suggestion on a new one, and once saved NEVER changed, not even by an Admin (lockedIdError). A new Interface gets the
+//   first letter of its first two words ("Main Brewery Mega USB" = MB), or MB2, MB3 ... when MB is taken. A new Tab: "Sparge" = SP.
 // Device name (Fritz, 2026-10-23; single _ 2026-11-05; General Type@ 2026-11-11): InterfaceID_Port_GeneralType@TypeID_ParsedLabel_TabID,
 //   e.g. MB_25_DO@Valve_E_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
@@ -193,34 +193,48 @@ function initials(name) {
 }
 const takenSet = taken => new Set([...(taken ?? [])].filter(Boolean).map(t => String(t).toUpperCase()));
 
-// ---- Interface IDs ----
-export function cleanInterfaceId(id) {
+// ---- Interface IDs and Tab IDs (Rule 3.2) ----
+// The one pattern for every user-set ID: 1 to 4 characters, A to Z and 0 to 9, starting with a letter.
+export const ID_RE = /^[A-Z][A-Z0-9]{0,3}$/;
+export const ID_RULE = '1 to 4 letters or numbers (A to Z, 0 to 9), starting with a letter';
+const cleanId = (what, ex) => id => {
   const s = String(id ?? '').trim().toUpperCase().replace(/_+$/, '');
-  if (!/^[A-Z]{1,4}(_\d+)?$/.test(s)) throw new Error(`Interface ID "${String(id ?? '').trim()}": use 1 to 4 letters (A-Z), for example MB`);
+  if (!ID_RE.test(s)) throw new Error(`${what} ID "${String(id ?? '').trim()}": use ${ID_RULE}, for example ${ex}`);
   return s;
+};
+// a unique ID that fits in 4: the base, then base + 2, 3 ... 9, then base + a letter, then any free one
+function freeId(base, taken) {
+  const t = takenSet(taken), b = String(base || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^[0-9]+/, '').slice(0, 4);
+  if (b && !t.has(b)) return b;
+  const stem = (b || 'X').slice(0, 3);
+  for (let i = 2; i <= 9; i++) if (!t.has(stem + i)) return stem + i;
+  for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') if (!t.has(stem + c)) return stem + c;
+  for (const a of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') if (!t.has(a + c)) return a + c;
+  return '';
 }
-export function defaultInterfaceId(name, taken) {
-  const t = takenSet(taken), base = initials(name) || 'IF';
-  if (!t.has(base)) return base;
-  let i = 2; while (t.has(`${base}_${i}`)) i++;
-  return `${base}_${i}`;
-}
-
-// ---- Tab IDs ----
-export function cleanTabId(id) {
-  const s = String(id ?? '').trim().toUpperCase();
-  if (!/^[A-Z]{2}$/.test(s)) throw new Error(`Tab ID "${String(id ?? '').trim()}": use exactly 2 letters (A-Z), for example SP`);
-  return s;
-}
+export const cleanInterfaceId = cleanId('Interface', 'MB');
+export function defaultInterfaceId(name, taken) { return freeId(initials(name) || 'IF', taken); }
+export const cleanTabId = cleanId('Tab', 'BH');
+// a Tab's suggestion: 2 letters when one is free (Sparge = SP, then SA ...), else one that fits in 4
 export function defaultTabId(name, taken) {
   const t = takenSet(taken), w = words(name).join('').toUpperCase(), first = initials(name)[0] || 'T';
   const tries = [initials(name), ...[...w.slice(1)].map(c => first + c), ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => first + c)];
   for (const x of tries) if (x.length === 2 && !t.has(x)) return x;
-  for (const a of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') for (const b of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') if (!t.has(a + b)) return a + b;
+  return freeId(initials(name) || 'T', taken);
+}
+// Once saved, an ID is never changed, not even by an Admin (Rule 3.2). before / after: the saved list and the one being saved;
+// an item is the same item when its hidden key matches (names only when neither has a key). A message, or ''.
+export function lockedIdError(before, after, what) {
+  const keyOf = x => x?._key || x?._ref || '';
+  for (const b of after ?? []) {
+    const a = keyOf(b) ? (before ?? []).find(x => x.id && keyOf(x) === keyOf(b)) : (before ?? []).find(x => x.id && !keyOf(x) && x.name === b.name);
+    if (a && String(b.id ?? '').toUpperCase() !== String(a.id).toUpperCase())
+      return `The ${what} ID ${a.id} of ${a.name} can never be changed, not even by an Admin (Rule 3.2). To use another ID, make a new ${what}.`;
+  }
   return '';
 }
 
-// Interfaces and tabs without a (good) ID get one, and old type codes are brought up to date; a second use of the same ID gets a new one. True when something changed.
+// Interfaces and tabs without a (good) ID get one (a saved good ID is never touched, Rule 3.2), and old type codes are brought up to date; a second use of the same ID gets a new one. True when something changed.
 export function assignIds(c) {
   let changed = false;
   const fill = (list, clean, def) => {

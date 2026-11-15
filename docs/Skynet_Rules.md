@@ -970,10 +970,23 @@ contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruContr
 *Replaced:* a Heating Element on a relay had `DO`, like a plain relay (2026-10-23).
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
-3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
-Admin can change either**; for everyone else the box is greyed out. The panel explains that the
-Interface ID is best set once (it is part of every Suggested Device name) and warns before changing
-one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
+3.2 **The ID Rule** (OakBarn Brewery, 2026-11-15: "IDs for Interfaces, Tabs, and any other Item that has a User Set ID (Always a
+Suggested Unique one on a New Build) 1 to 4 Char Unique Once saved, Never Changed even by an Admin. Used as first text with Name
+(may change to Label on some) Example BH: Brew House for a tab DDLB."; letters and numbers picked the same day). Every **Interface ID**,
+every **Tab ID**, and the ID of **any other item that has a user-set ID**:
+- **Skynet always suggests a unique one** on a new build. The user may type another before the first Save.
+- **1 to 4 characters**: letters and numbers (A to Z, 0 to 9), **starting with a letter** (BH, MB2, F1).
+- **Unique** among its kind (no two Interfaces, no two Tabs, the same ID).
+- **Once saved, never changed, not even by an Admin.** The box shows it read only; the Brain refuses a changed ID. To use another
+  ID, make a new item.
+- **Shown first** in every list, before its Name (on some items its Label): **BH: Brew House**, **BM: Brewery Mega**.
+The ID is part of every Suggested Device name (Rule 3.1), so a name never goes out of date. It is not the item's key: every
+Interface and Tab also has its hidden Meaningless Key (Design Rule #2, Rule 3.10), and Processes follow the key, not the ID.
+Other Rules, Help pages and Hover Help do not repeat these details: they say the ID **follows Rule 3.2** (OakBarn Brewery,
+2026-11-15: "state that Tab IDs follow the Rule #"). Both programs follow it: the BruControl Import suggests the IDs, lets the
+user change them on its Boards and Tabs page, and they are locked once the Schema is saved.
+*Replaced:* Interface ID 1 to 4 letters, Tab ID exactly 2 letters, only an Admin can change either (2026-10-21, PR #61; restated
+2026-10-27, PR #118; kept 2026-11-12).
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 **No space at the start or end of any name or Label** (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label
@@ -3572,7 +3585,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     °F, inches) or Metric (Liters, °C, cm), on the Names page; when BruControl's probe ports show °F or °C, that one is picked and the
     question is a confirmation. Every temperature, size and volume after it uses it.
     **The brewer confirms what comes in, in small steps** (a drill-down, OakBarn Brewery 2026-11-08): first the Interfaces found (read
-    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (up to 4 letters, 2 preferred, Rule 3.2) and
+    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (Rule 3.2, 2 preferred) and
     **Accept**, then **the Tabs** (one row per Tab: ID, Items, a column for each kind of Placeholder, an **Import Tab** box, and **Accept**;
     OakBarn Brewery 2026-11-08: "Layout the Tab ... different Place Holder type, a Check box and accept Button"; "The Empty Tabs Unchecked";
     "allow user to check Uncheck": a Tab with items starts ticked, an empty one unticked, and any box can be ticked or unticked; an unticked
@@ -4652,6 +4665,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: **Rule 3.2 rewritten: The ID Rule** (OakBarn Brewery: "Another Rule about IDs for Interfaces, Tabs, and any other Item that has a User Set ID ... Once saved, Never Changed even by an Admin"; "Remove that Rule or state that Tab IDs follow the Rule #"; letters and numbers picked on a decision card). Every user-set ID: a unique suggestion on a new build, 1 to 4 letters or numbers starting with a letter, unique, never changed once saved (not even by an Admin), shown first in lists (BH: Brew House). A taken Interface suggestion is now MB2 (was MB_2, which broke the 4 characters). Help 13, 46, 76, 115, 188, the Device Library and the Interface and Tab balloons now say IDs follow Rule 3.2 instead of repeating it. Checked against both programs: the Panel's Tab settings, Interface pop-up and Devices page lock a saved ID and the Brain refuses a changed one; the BruControl Import's Boards and Tabs page uses the same check (public/naming.js). Older Schemas: before the first Public Production (No old ways), a saved ID that breaks the Rule (MB_2) gets a new one once when its Schema loads. (thread "Add a Rule for permanent user IDs")
 - 2026-11-15: Added Rule 7.25 Help pictures stay sharp (OakBarn Brewery: "All of the graphics in the Hover Help ... are very poor and hard to read"): Help pictures are never swapped for the panel's traced SVG copies (they smeared the words); Words in Help pictures are real text, and any Help picture from a PNG or PDF is redrawn. Pump_8_IPs, Pump_Right_Left, Red_Pump_Label, Label_Visible_Switch, IP_Marker and Pump_IP_Example_1/2 redrawn as hand-made SVGs. Help 7 (and French). Checked against both programs. (thread "Sharpen Hover Help pictures")
 - 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
 - 2026-11-15: Rule 2.12 changed (OakBarn Brewery: "An attribute on IPs that says No Unlock individually. So an IP can be locked individually that overrides the Unlock when moving"): an IP or pipe fitting has a **No Unlock** switch; 🔓 Unlock All (and unlocking its vessel) passes it by, and only its own 🔓 Unlock unlocks it. Help 56 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
