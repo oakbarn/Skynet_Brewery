@@ -1992,17 +1992,16 @@ function routeD(pts, r) {
 // the Hose (white, like the hoses OakBarn Brewery lined up in BruControl) or the Pipe (stainless), as SVG in the 300 x 300 box.
 // With a pipe or hose joined to that IP, its end is drawn like that pipe or hose: the same kind, color and thickness, so the
 // two meet as one (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe").
-// A corner IP is reached from the Side or from the Top or Bottom (pumpInDir, pumpOutDir); Auto goes the way its pipe leaves.
+// A corner IP is reached from the Side or from the Top or Bottom: always the way the pipe or hose joined to it leaves (no box to pick;
+// OakBarn Brewery, 2026-11-15, Blichmann RipTide: "we would not need a user selectible DDLB"). Nothing joined yet: from the Side.
 const isCornerSpot = c => /^[TB][LR]$/.test(c);
 function pumpJoined(e, end) {
   const id = `dev:${e.name}:${end}`;
   return (L()?.graphics || []).find(g => g.kind === 'pipe' && g.workspace === e.workspace && (g.from === id || g.to === id) && (g.points || []).length > 1) || null;
 }
-// 'h' (from the side) or 'v' (from the top or bottom) for a corner spot; null for a middle spot
+// 'h' (from the side) or 'v' (from the top or bottom) for a corner spot, set by the joined pipe or hose; null for a middle spot
 function pumpEndAxis(e, end, spot) {
   if (!isCornerSpot(spot)) return null;
-  const pick = e[end === 'in' ? 'pumpInDir' : 'pumpOutDir'];
-  if (pick === 'h' || pick === 'v') return pick;
   const p = pumpJoined(e, end); if (!p) return 'h';
   const pts = p.points, id = `dev:${e.name}:${end}`, [a, b] = p.from === id ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
   return Math.abs(b[1] - a[1]) > Math.abs(b[0] - a[0]) ? 'v' : 'h';
@@ -5749,7 +5748,7 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover', 'coverColor', 'pumpIn', 'pumpOut', 'pumpLink', 'pumpInDir', 'pumpOutDir', 'ipTypeIn', 'ipTypeOut', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', 'coverColor', 'pumpIn', 'pumpOut', 'pumpLink', 'ipTypeIn', 'ipTypeOut', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (profKind === 'valve') e._valveProfile = work.useProfile;        // applied once the box closes (addThing)
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
@@ -7781,29 +7780,20 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 // The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
 // the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
 const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
-// a corner IP is reached from the Side or from the Top (Bottom) (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs
-// Side or Top or Side or Bottom"); Auto goes the way the pipe on it leaves. Shown only for a corner spot.
-const PUMP_DIR_CHOICES = spot => [['', 'Auto'], ['h', 'Side'], ['v', spot[0] === 'T' ? 'Top' : 'Bottom']];
-const PUMP_DIR_FIELDS = (it, x = {}) => { const [a, b] = pumpSpots(it), f = [];
-  if (isCornerSpot(a)) f.push(['pumpInDir', 'Inlet from', 'sel', PUMP_DIR_CHOICES(a), false, false, { tip: PUMP_DIR_TIP, ...x }]);
-  if (isCornerSpot(b)) f.push(['pumpOutDir', 'Outlet from', 'sel', PUMP_DIR_CHOICES(b), false, false, { tip: PUMP_DIR_TIP, ...x }]);
-  return f.length === 2 ? [[...f[0].slice(0, 6), { ...f[0][6], with: f[1] }]] : f; };
-const PUMP_DIR_TIP = 'A corner IP: does its Hose or Pipe come into the corner from the Side, or from the Top (or Bottom)? Auto goes the way the pipe joined to it leaves.';
 const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), true, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), true, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
-  ...PUMP_DIR_FIELDS(it, x),
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
-// Switching a pump's Orientation (Right <-> Left) swaps its Inlet IP and Outlet IP to the opposite side too (OakBarn Brewery,
-// 2026-11-14, Blichmann Riptide Dialogs 3: "When changing Orientation from Left and Right Have the IPs swap to opposite side as well,
-// Right Become Left Left Becomes Right by at the IP Level"): Bottom Right becomes Bottom Left, Top Left becomes Top Right. A spot left
-// at its start (start) follows by itself; the lists get the new (start) and are drawn again.
-function mirrorPumpSpots(root, obj, flipH, flipV) {
+// Switching a pump's Orientation (Right <-> Left) leaves its Inlet IP and Outlet IP where they are on the Tab, so the pipes and hoses
+// joined to them never have to move; only the Hose or Pipe drawn inside the pump is drawn again to reach them (OakBarn Brewery,
+// 2026-11-15: "flipping IPs would need lots of pipe or hose joins to move ... internal redraw is the way to go and get rid of rule").
+// A spot left at its start (start) would follow the Orientation, so it is set to the spot it was on; the lists get the new (start).
+function keepPumpSpots(root, obj, flipH, flipV) {
   const ins = ['pumpIn', 'pumpOut'].map(k => root?.querySelector(`select[data-k="${k}"]`));
   if (!ins[0] || !ins[1]) return;
+  const was = pumpSpots({ ...obj, flipH: !flipH, flipV, pumpIn: ins[0].value, pumpOut: ins[1].value });
   const now = { ...obj, flipH, flipV }, start = pumpSpotStart(now);
   ins.forEach((sel, i) => {
-    const v = sel.value, to = v && PUMP_SPOTS[v] ? SPOT_FLIP_H[v] : '';
     sel.replaceChildren(...PUMP_SPOT_CHOICES(now, i).map(([o, l]) => h('option', { value: o }, l)));
-    sel.value = to && to !== start[i] ? to : '';
+    sel.value = was[i] !== start[i] ? was[i] : '';
     sel.dispatchEvent(new Event('change', { bubbles: true }));
   });
 }
@@ -8896,7 +8886,7 @@ const DEVICE_TIPS = {
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
   graphic: 'The picture of this Device as it will show on the Tab, with its Cover and Orientation.',
-  orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow. Switching the Orientation moves the Inlet IP and the Outlet IP to the opposite side as well: Right becomes Left and Left becomes Right (Bottom Right becomes Bottom Left, Top Left becomes Top Right). A Middle IP at the top or bottom stays where it is.',
+  orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it. Switching the Orientation leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside the pump is drawn again to reach them.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
   overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
@@ -9315,7 +9305,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const sel = h('select', { class: 'orientSel' }, ...PUMP_ORIENT.map(([k, t]) => h('option', { value: k, ...(k === cur ? { selected: true } : {}) }, t)));
     sel.addEventListener('change', () => {
       const was = fh.checked; fh.checked = sel.value.includes('h');
-      if (was !== fh.checked) mirrorPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
+      if (was !== fh.checked) keepPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
     });
     return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv)];
   }
@@ -9353,7 +9343,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       if (q('cover')) w.cover = q('cover').value;
       if (q('coverColor')) w.coverColor = q('coverColor').value;
       if (q('flipH')) { w.flipH = q('flipH').checked; w.flipV = q('flipV').checked; }
-      for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'pumpInDir', 'pumpOutDir']) if (q(k)) w[k] = q(k).value;
+      for (const k of ['pumpIn', 'pumpOut', 'pumpLink']) if (q(k)) w[k] = q(k).value;
       pic.src = w.imageOff ? media(w.imageOff) : ''; pic.classList.toggle('hidden', !w.imageOff);
       lnk.innerHTML = pumpLinkSvg(w);      // its Hose or Pipe to the Inlet and Outlet spots picked (Rule 5.27)
       const cv = coverOf(w, {});
