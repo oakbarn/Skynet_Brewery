@@ -31,9 +31,9 @@ not know where its ports are), so its IPs are simply on the spots.
 **With a pipe or hose joined to the IP**, that end is drawn like the pipe or hose on it: the same kind, color and thickness, so the
 two meet as one piece. With nothing on the IP, the Hose or Pipe picked here is drawn.
 
-**A corner IP** (Top Left, Top Right, Bottom Left, Bottom Right) can be reached from the side or from the top or bottom. **Inlet
-from** and **Outlet from** show when the IP is on a corner: **Auto** goes the way the pipe joined to it leaves, **Side** comes
-in along the side, and **Top** (or **Bottom**) comes in along the top (or bottom).
+**A corner IP** (Top Left, Top Right, Bottom Left, Bottom Right) can be reached from the side or from the top or bottom. Skynet
+picks it for you: the Hose or Pipe comes in the same way as the pipe or hose joined to that IP. With nothing joined yet, it comes
+in along the side, and it turns to follow as soon as a pipe or hose is joined. There is nothing to pick.
 
 **IP Type In** and **IP Type Out** are the connector on the pump's inlet and outlet: Tri-Clamp, NPT, BSP or Quick Disconnect
 (Skynet Rule 5.40). A pump starts with the one its **Ports** say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else the

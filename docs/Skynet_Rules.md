@@ -1551,9 +1551,12 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
 - **Joined pipe look** (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe"):
   with a pipe or hose joined to an IP, the pump's Hose or Pipe to that IP is drawn like it (same kind, color and thickness), so
   the two meet as one. With nothing joined, the Hose or Pipe picked is drawn.
-- **Corner IPs** (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs Side or Top or Side or Bottom"): Inlet from
-  and Outlet from (shown for a corner spot): Auto (the way its pipe leaves), Side, or Top / Bottom. The last step into the
-  corner is square.
+- **Corner IPs** (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs Side or Top or Side or Bottom"; changed
+  2026-11-15, Blichmann RipTide: "If the Outlet from is set to auto and the side for a corner is set by the hose or pipe joining,
+  we would not need a user selectible DDLB"): a corner IP is reached from the Side or from the Top / Bottom, always the way the
+  pipe or hose joined to it leaves. There is no box to pick it (no Inlet from / Outlet from). With nothing joined yet, it comes
+  in from the Side, and it follows the pipe or hose as soon as one is joined. The last step into the corner is square. Old
+  Schemas drop any side they had picked.
 - **BruControl Import:** a pump imported as a Skynet Pump Device gets the same 8 IPs and starts on the same spots.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
@@ -4592,6 +4595,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Old Schemas drop any side picked. Help 130 (and French). Both programs.
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
