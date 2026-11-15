@@ -35,8 +35,12 @@ assert.ok(moveHoseEnd(cfg, { id: 'h', end: 'to', to: 'a', points: [[5, 5], [0, 0
 assert.ok(moveHoseEnd(cfg, { id: 'p', end: 'from', to: 'c', points: [[5, 5], [10, 0]] }).error, 'a pipe does not move');
 console.log('qd ends ok');
 
-// Corner IPs (OakBarn Brewery, 2026-11-15): no Inlet from / Outlet from box; the joined pipe or hose sets the side, and old picks are dropped
+// Corner IPs (OakBarn Brewery, 2026-11-15): no Inlet from / Outlet from box; the joined pipe or hose sets the side
 assert.ok(!/pumpInDir|pumpOutDir|PUMP_DIR_|'Outlet from'|'Inlet from'/.test(app), 'no Inlet from / Outlet from box');
 assert.match(app, /function pumpEndAxis\(e, end, spot\) \{\n  if \(!isCornerSpot\(spot\)\) return null;\n  const p = pumpJoined\(e, end\); if \(!p\) return 'h';/, 'the joined pipe sets the side, else the Side');
-assert.match(fs.readFileSync(new URL('../lib/store.js', import.meta.url), 'utf8'), /\['pumpInDir', 'pumpOutDir'\]\) if \(e && k in e\) \{ delete e\[k\]/, 'old picks dropped');
 console.log('corner IP side set by the joined pipe: ok');
+
+// Rule 18.37 item 2 (changed 2026-11-15): a Left/Right switch leaves the Inlet IP and Outlet IP where they are; only the inside Hose or Pipe is drawn again
+assert.ok(!app.includes('mirrorPumpSpots') && app.includes('keepPumpSpots('), 'the IPs stay put on a flip');
+assert.match(app, /const was = pumpSpots\(\{ \.\.\.obj, flipH: !flipH, flipV, pumpIn: ins\[0\]\.value, pumpOut: ins\[1\]\.value \}\)/, 'a (start) spot is pinned where it was');
+console.log('pump IPs stay put on a flip: ok');

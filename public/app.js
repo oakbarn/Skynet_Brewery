@@ -7718,18 +7718,18 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
 const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
 const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), true, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), true, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
-// Switching a pump's Orientation (Right <-> Left) swaps its Inlet IP and Outlet IP to the opposite side too (OakBarn Brewery,
-// 2026-11-14, Blichmann Riptide Dialogs 3: "When changing Orientation from Left and Right Have the IPs swap to opposite side as well,
-// Right Become Left Left Becomes Right by at the IP Level"): Bottom Right becomes Bottom Left, Top Left becomes Top Right. A spot left
-// at its start (start) follows by itself; the lists get the new (start) and are drawn again.
-function mirrorPumpSpots(root, obj, flipH, flipV) {
+// Switching a pump's Orientation (Right <-> Left) leaves its Inlet IP and Outlet IP where they are on the Tab, so the pipes and hoses
+// joined to them never have to move; only the Hose or Pipe drawn inside the pump is drawn again to reach them (OakBarn Brewery,
+// 2026-11-15: "flipping IPs would need lots of pipe or hose joins to move ... internal redraw is the way to go and get rid of rule").
+// A spot left at its start (start) would follow the Orientation, so it is set to the spot it was on; the lists get the new (start).
+function keepPumpSpots(root, obj, flipH, flipV) {
   const ins = ['pumpIn', 'pumpOut'].map(k => root?.querySelector(`select[data-k="${k}"]`));
   if (!ins[0] || !ins[1]) return;
+  const was = pumpSpots({ ...obj, flipH: !flipH, flipV, pumpIn: ins[0].value, pumpOut: ins[1].value });
   const now = { ...obj, flipH, flipV }, start = pumpSpotStart(now);
   ins.forEach((sel, i) => {
-    const v = sel.value, to = v && PUMP_SPOTS[v] ? SPOT_FLIP_H[v] : '';
     sel.replaceChildren(...PUMP_SPOT_CHOICES(now, i).map(([o, l]) => h('option', { value: o }, l)));
-    sel.value = to && to !== start[i] ? to : '';
+    sel.value = was[i] !== start[i] ? was[i] : '';
     sel.dispatchEvent(new Event('change', { bubbles: true }));
   });
 }
@@ -8792,7 +8792,7 @@ const DEVICE_TIPS = {
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
   graphic: 'The picture of this Device as it will show on the Tab, with its Cover and Orientation.',
-  orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow. Switching the Orientation moves the Inlet IP and the Outlet IP to the opposite side as well: Right becomes Left and Left becomes Right (Bottom Right becomes Bottom Left, Top Left becomes Top Right). A Middle IP at the top or bottom stays where it is.',
+  orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it. Switching the Orientation leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside the pump is drawn again to reach them.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
   overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
@@ -9209,7 +9209,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const sel = h('select', { class: 'orientSel' }, ...PUMP_ORIENT.map(([k, t]) => h('option', { value: k, ...(k === cur ? { selected: true } : {}) }, t)));
     sel.addEventListener('change', () => {
       const was = fh.checked; fh.checked = sel.value.includes('h');
-      if (was !== fh.checked) mirrorPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
+      if (was !== fh.checked) keepPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
     });
     return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv)];
   }

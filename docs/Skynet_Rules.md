@@ -1551,12 +1551,10 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
 - **Joined pipe look** (OakBarn Brewery, 2026-11-14: "Improve IPs Connection on Pumps for Better Alignment of a Hose Or Pipe"):
   with a pipe or hose joined to an IP, the pump's Hose or Pipe to that IP is drawn like it (same kind, color and thickness), so
   the two meet as one. With nothing joined, the Hose or Pipe picked is drawn.
-- **Corner IPs** (OakBarn Brewery, 2026-11-14: "Also might need to add to corner IPs Side or Top or Side or Bottom"; changed
-  2026-11-15, Blichmann RipTide: "If the Outlet from is set to auto and the side for a corner is set by the hose or pipe joining,
-  we would not need a user selectible DDLB"): a corner IP is reached from the Side or from the Top / Bottom, always the way the
-  pipe or hose joined to it leaves. There is no box to pick it (no Inlet from / Outlet from). With nothing joined yet, it comes
-  in from the Side, and it follows the pipe or hose as soon as one is joined. The last step into the corner is square. Old
-  Schemas drop any side they had picked.
+- **Corner IPs** (OakBarn Brewery, 2026-11-15, Blichmann RipTide: "the side for a corner is set by the hose or pipe joining, we
+  would not need a user selectible DDLB"): the Hose or Pipe inside the pump comes into a corner IP from the Side or from the Top /
+  Bottom, the same way as the pipe or hose joined to that IP leaves. Skynet sets it; there is nothing to pick. With nothing joined,
+  it comes in from the Side, and it turns as soon as a pipe or hose is joined. The last step into the corner is square.
 - **BruControl Import:** a pump imported as a Skynet Pump Device gets the same 8 IPs and starts on the same spots.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
@@ -4035,7 +4033,8 @@ DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-ty
 18.19 **A Device dialog shows its Graphic with its Orientation** (Fritz, 2026-11-04, the Pump first): the Add box and the
 Properties show the **Graphic** (the picture as it will be on the Tab, with its Cover) and an **Orientation** dropdown (a pump: **Right**, as
 drawn, or **Left**, mirrored; Fritz's screens 7-9). Changing the Orientation flips the Graphic on the dialog and the Device on the Tab,
-and its IPs follow (Rule 5.5). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
+and its IPs follow (Rule 5.5); a pump's Inlet IP and Outlet IP stay where they are and the Hose or Pipe inside it is drawn again
+(Rule 18.37). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
 greyed out with its pump name. A **User pump** (its own picture) has **one path only**, its Image Path (an exception to Rule
 7.10's three paths). Cover is for the Skynet pump drawings only (Rule 7.13). (Help 115)
 
@@ -4418,11 +4417,11 @@ Both programs: the BruControl Import's Build page uses the same dialogs.
 1. **Every tap pop-up of Hover Help** (the small pop-up a tap or click on a field's name opens, Rule 18.16) has its title and
    **✖ Close** frozen at the top while it scrolls, and no Close at the bottom ("Close Button Frozen at top of All Hover Help. Get Rid
    of Bottom Close Buttons"). Every dialog, not only the Pump's. A pop-up with pictures is wider.
-2. **Switching a pump's Orientation swaps its IPs** ("When changing Orientation from Left and Right Have the IPs swap to opposite side
-   as well, Right Become Left Left Becomes Right by at the IP Level"): an Inlet IP or Outlet IP that was picked moves to the mirror
-   spot (Bottom Right becomes Bottom Left, Top Left becomes Top Right; a Top or Bottom Middle stays), and the (start) choice follows by
-   itself. Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right is Inlet Bottom Left, Outlet Top Right. The
-   Orientation Hover Help says so ("Add Help in Orientation that switching orientation causes IPs to follow").
+2. **Switching a pump's Orientation leaves its IPs where they are** (OakBarn Brewery, 2026-11-15: "flipping IPs would need lots of
+   pipe or hose joins to move ... internal redraw is the way to go"). The Inlet IP
+   and Outlet IP stay on the same spots on the Tab, so the pipes and hoses joined to them never move; only the Hose or Pipe drawn
+   inside the pump is drawn again to reach them (Rule 5.27). Example 2 (Left, Inlet Bottom Right, Outlet Top Left) switched to Right
+   keeps Inlet Bottom Right, Outlet Top Left. The Orientation Hover Help says so.
 3. **The Pump Hover Help is OakBarn Brewery's text and pictures, word for word** (only the spelling fixed, Rule 2.37): the Interface's
    first paragraph, the whole Name balloon (its "Update to Suggest Name Button" names the real buttons, 🏷 Suggested Names > 💾 Convert for all and 💾 Update to Suggested for one: OakBarn Brewery, "Yes"), the Inlet IP balloon (the 8 IPs picture, Example 1 and Example 2, and "Pipes or Hose snap
    connect to an IP ... within 10 px"), the Hose or Pipe balloon, and the 8 IPs picture on top of the Graphic balloon and the Right /
@@ -4595,6 +4594,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) no longer swaps its Inlet IP and Outlet IP to the opposite side. They stay where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
 - 2026-11-15: Rule 5.27 Corner IPs: the **Inlet from** and **Outlet from** boxes are gone (OakBarn Brewery, Blichmann RipTide: "we would not need a user selectible DDLB"). A corner IP is always reached the way the pipe or hose joined to it leaves; with nothing joined, from the Side. Old Schemas drop any side picked. Help 130 (and French). Both programs.
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")

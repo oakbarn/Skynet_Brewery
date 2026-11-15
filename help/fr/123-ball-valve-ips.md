@@ -42,7 +42,8 @@ Ils sont sur deux des **8 IP** de la pompe (les 4 coins et le milieu de chaque c
 sortie en haut à droite, avec un flexible ou un tuyau tracé depuis ses vrais orifices jusqu'à eux. La pompe de puisard garde les siens : le milieu de la
 grille en bas (IN) et le haut de la colonne montante à droite (OUT).
 
-L'Orientation **Left** fait un miroir de la pompe, et ses IP aussi.
+L'Orientation **Left** fait un miroir de la pompe. Une pompe ajoutée en Left commence avec son Inlet en Left Middle et son Outlet en Top Left.
+Changer l'Orientation plus tard laisse ses IP où elles sont, et le Hose ou Pipe dans la pompe est redessiné pour les rejoindre.
 
 ## Anciens Schemas {#older-schemas}
 

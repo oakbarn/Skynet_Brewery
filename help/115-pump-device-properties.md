@@ -54,9 +54,9 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    set by Skynet and cannot be changed, so a Skynet pump drawing has no Path box. A User pump keeps its **Path** box, so its one
    picture can be changed. The Graphic changes as soon as you pick another Orientation or Cover.
 7. **Orientation**: ![Right and Left](help_pictures/Pump_Right_Left.png)
-   **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn, and its IPs
-   follow. Switching the Orientation moves the Inlet IP and the Outlet IP to the opposite side as well: Right becomes Left and
-   Left becomes Right (Bottom Right becomes Bottom Left, Top Left becomes Top Right). A Middle IP at the top or bottom stays where it is.
+   **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn. Switching the Orientation
+   leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside
+   the pump is drawn again to reach them.
 8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. The Toggle is what happens when the pump is
    clicked on the Tab: **On/Off** (one click turns it on or off, most common), **Push Button** (on only while held), **Dual
    Action** (a click turns it on or off; pressed and held for more than half a second, it is on only while held, handy for topping
@@ -267,8 +267,8 @@ Example 2:
 Pipes or Hose snap connect to an IP in the selected position if the end is within 10 px of that
 ![IP](help_pictures/IP_Marker.png) when drawn.
 
-Switching the Orientation moves them to the opposite side as well (see Orientation above): Example 2 switched to Right has its
-Inlet on the Bottom Left and its Outlet on the Top Right.
+Switching the Orientation leaves them where they are (see Orientation above): Example 2 switched to Right keeps its Inlet on the
+Bottom Right and its Outlet on the Top Left, and the Hose or Pipe inside the pump is drawn again to reach them.
 
 **Hose or Pipe**: What is drawn from the pump's own inlet and outlet to its Inlet IP and Outlet IP: a White Hose, or a stainless
 Pipe. It is drawn over the pump and its Cover under the On overlay.
