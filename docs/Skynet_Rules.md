@@ -1352,6 +1352,11 @@ Device's drawing, inlet and outlet IPs, Cover, Overlay and Orientation, and its 
 Interface and Port. `.state` (true = ON) is its value: a click, or a Process line such as `wgt_MP_Pump~1_BR.state = true`, asks for
 it to be turned on by hand, and it shows ON after Done. The BruControl Import will make one for each extra Pump slot (Rule 15.4).
 (thread "Build Confirmation Widgets in the Panel", Help 162)
+- **Sump Pump by hand** (OakBarn Brewery, 2026-11-15: "most brewers just use them by plugging them in and not controlled by the
+  Skynet"; "WE simply turn on the power manually as it is not bis an SSR"): its own row in **Select Widget Type >
+  Semi_Widgets_Devices** and **Select Device Type > Pumps**, so it is easy to find. It is a Manual Pump with the Sump pump picture
+  (the same as Manual Pump, then Sump pump in step 2); its Label starts **Sump 1** (`wgt_MP_Sump~1_BR`). Put inside an Ice Water
+  Can, it draws the can's water (Rule 19.8). (thread "Add a manual Sump Pump widget", Help 162 and 201)
 
 
 5.16 **Skynet Templates and Daughter Templates are set and can't be changed by a user.** A user makes
@@ -4592,6 +4597,24 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 - **Both programs:** the BruControl Import's Build page is the Panel's own, so it has both. BruControl has no stove top pot, so an
   import never makes one.
 
+19.8 **The Ice Water Can: cold water for a Sump Pump, drawn for its box** (OakBarn Brewery, 2026-11-15: "Also need a Sump Pump widget
+similar to a Manual Valve as most brewers just use them by plugging them in and not controlled by the Skynet"; "we have a sump pump in
+chilled water that recycles back to a large trash can with Ice and Water"; "the Iced Water Is pass through a Plate Chiller to Cool Tap
+Water. That tap water is sent to another Plate Chiller for the WORT ... The Ice Water is retuned to the Large Ice Bath and the Waste tap
+water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sump Pump widget", Help 201).
+- **Ice Water Can, in Add equipment:** a big trash can (or tub or cooler) of ice and water. A Widget with **no Devices and no IPs of
+  its own**. Name `Ice_Water_Can_1` (as the Stove Top Vessel's, Rule 19.7); Label starts **Ice Water**.
+- **Hose hang top:** its top third is one big IP, as on every vessel (Rules 5.28 and 5.34): a Quick Disconnect hose dropped there, or
+  a Process line `Hose_1.connect = Ice_Water_Can_1`, hangs over the rim and brings the water back.
+- **A pump inside it draws from it:** a running pump whose inlet sits inside the can, with nothing joined to that inlet (the **Sump
+  Pump by hand**, Rule 5.15a), pulls the can's water. Its flow takes the can's **Out flow color** (Rule 5.21), which starts **Blue**
+  because the water is cold.
+- **Its picture is drawn by Skynet for its box:** a grey can a little wider at the top, rim, two side handles, blue water and ice
+  cubes, no text (the Label is its only text). A Graphic picked by the user is used instead. No Gallons: it is not brewing liquid,
+  so it is sized by dragging and does not follow the Master Vessel Sizer.
+- **Both programs:** the BruControl Import's Build page is the Panel's own, so it has it. BruControl has no ice bath, so an import
+  never makes one.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4631,6 +4654,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 ## Change log
 
 - 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
+- 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
 - 2026-11-15: Rule 2.12 changed (OakBarn Brewery: "An attribute on IPs that says No Unlock individually. So an IP can be locked individually that overrides the Unlock when moving"): an IP or pipe fitting has a **No Unlock** switch; 🔓 Unlock All (and unlocking its vessel) passes it by, and only its own 🔓 Unlock unlocks it. Help 56 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rules 5.41 and 5.42 corrected (OakBarn Brewery: "A Chillzilla is a counter flow chiller and not an immersion chiller so place_Chiller could not place a counter flow chiller. A Chillzilla also has 4 IPs"): place_Chiller places only an immersion chiller with 2 IPs (Immersion_Chiller); a Chillzilla is a counterflow chiller with 4 IPs. Help 200 (and French) updated. Checked against both programs: the Panel's Brain runs it; the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Added Rule 5.42, the Chiller Overlay (OakBarn Brewery: "Could almost be an Overlay type when placed on the screen"; "a Skynet Chiller Template is chosen and it is superimposed on a Device vessel from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, vessel"): `place_Chiller = Immersion_Chiller, BK_Vessel` draws a Chiller Template over a vessel with an In hose from the Tab's Tap Water Valve and an Out hose to its drain IP; `remove_Chiller = BK_Vessel` (or `remove_Chiller` for all) takes it off. Only the drawing changes; the Process does not wait. Name and Label from the Template (wgt_CHL_, Rule 3.14). The Process editor lists the Chiller Templates, then the Vessels with the Brew Kettle first. The 3 Vessel sample's Brew Day places and removes it. Help 200 new (next free Help 201), Help 14 and 22 and their French pages. Checked against both programs: the Panel's Brain runs it; BruControl has no chillers, and the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
