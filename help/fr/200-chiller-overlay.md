@@ -9,9 +9,9 @@ Tab avec deux lignes (règle Skynet 5.42) :
 
 ## place_Chiller = template, vessel {#place-chiller-template-vessel}
 
-- **template** est un Template de refroidisseur : un refroidisseur qui va dans une cuve (un serpentin à immersion). Skynet a
-  **Immersion_Chiller** et **Chillzilla**. Les refroidisseurs à plaques et à contre-courant restent hors de la cuve sur leurs
-  propres tuyaux, ils ne sont donc pas placés de cette façon.
+- **template** est un Template de refroidisseur : un refroidisseur qui va dans une cuve (un refroidisseur à immersion à 2 IP, In et Out). Skynet a
+  **Immersion_Chiller**. Les refroidisseurs à plaques et à contre-courant, Chillzilla compris (un refroidisseur à contre-courant
+  à 4 IP), restent hors de la cuve sur leurs propres tuyaux, ils ne sont donc pas placés de cette façon.
 - **vessel** est le Name de la cuve où il va (un Label marche aussi quand une seule cuve l'a).
 
 Le refroidisseur est dessiné **par-dessus la cuve**. Deux flexibles sont dessinés avec lui :

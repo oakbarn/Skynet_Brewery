@@ -9,8 +9,9 @@ let the water out down a drain or outside. Then they take it out again. A Proces
 
 ## place_Chiller = template, vessel
 
-- **template** is a Chiller Template: a chiller that goes into a vessel (an immersion coil). Skynet has **Immersion_Chiller**
-  and **Chillzilla**. Plate and counterflow chillers sit outside the kettle on their own pipes, so they are not placed this way.
+- **template** is a Chiller Template: a chiller that goes into a vessel (an immersion chiller with 2 IPs, In and Out). Skynet has
+  **Immersion_Chiller**. Plate and counterflow chillers, a Chillzilla included (a counterflow chiller with 4 IPs), sit outside
+  the kettle on their own pipes, so they are not placed this way.
 - **vessel** is the Name of the vessel it goes into (a Label works too when only one vessel has it).
 
 The chiller is drawn **over the vessel**, on top of it. Two hoses are drawn with it:
