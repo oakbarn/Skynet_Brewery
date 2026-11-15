@@ -965,10 +965,23 @@ contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruContr
 *Replaced:* a Heating Element on a relay had `DO`, like a plain relay (2026-10-23).
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
-3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
-Admin can change either**; for everyone else the box is greyed out. The panel explains that the
-Interface ID is best set once (it is part of every Suggested Device name) and warns before changing
-one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
+3.2 **The ID Rule** (OakBarn Brewery, 2026-11-15: "IDs for Interfaces, Tabs, and any other Item that has a User Set ID (Always a
+Suggested Unique one on a New Build) 1 to 4 Char Unique Once saved, Never Changed even by an Admin. Used as first text with Name
+(may change to Label on some) Example BH: Brew House for a tab DDLB."; letters and numbers picked the same day). Every **Interface ID**,
+every **Tab ID**, and the ID of **any other item that has a user-set ID**:
+- **Skynet always suggests a unique one** on a new build. The user may type another before the first Save.
+- **1 to 4 characters**: letters and numbers (A to Z, 0 to 9), **starting with a letter** (BH, MB2, F1).
+- **Unique** among its kind (no two Interfaces, no two Tabs, the same ID).
+- **Once saved, never changed, not even by an Admin.** The box shows it read only; the Brain refuses a changed ID. To use another
+  ID, make a new item.
+- **Shown first** in every list, before its Name (on some items its Label): **BH: Brew House**, **BM: Brewery Mega**.
+The ID is part of every Suggested Device name (Rule 3.1), so a name never goes out of date. It is not the item's key: every
+Interface and Tab also has its hidden Meaningless Key (Design Rule #2, Rule 3.10), and Processes follow the key, not the ID.
+Other Rules, Help pages and Hover Help do not repeat these details: they say the ID **follows Rule 3.2** (OakBarn Brewery,
+2026-11-15: "state that Tab IDs follow the Rule #"). Both programs follow it: the BruControl Import suggests the IDs, lets the
+user change them on its Boards and Tabs page, and they are locked once the Schema is saved.
+*Replaced:* Interface ID 1 to 4 letters, Tab ID exactly 2 letters, only an Admin can change either (2026-10-21, PR #61; restated
+2026-10-27, PR #118; kept 2026-11-12).
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 **No space at the start or end of any name or Label** (OakBarn Brewery, 2026-11-11: "Hunt for Beginning or trailing spaces in a label
@@ -3530,7 +3543,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     °F, inches) or Metric (Liters, °C, cm), on the Names page; when BruControl's probe ports show °F or °C, that one is picked and the
     question is a confirmation. Every temperature, size and volume after it uses it.
     **The brewer confirms what comes in, in small steps** (a drill-down, OakBarn Brewery 2026-11-08): first the Interfaces found (read
-    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (up to 4 letters, 2 preferred, Rule 3.2) and
+    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (Rule 3.2, 2 preferred) and
     **Accept**, then **the Tabs** (one row per Tab: ID, Items, a column for each kind of Placeholder, an **Import Tab** box, and **Accept**;
     OakBarn Brewery 2026-11-08: "Layout the Tab ... different Place Holder type, a Check box and accept Button"; "The Empty Tabs Unchecked";
     "allow user to check Uncheck": a Tab with items starts ticked, an empty one unticked, and any box can be ticked or unticked; an unticked
@@ -4592,6 +4605,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: **Rule 3.2 rewritten: The ID Rule** (OakBarn Brewery: "Another Rule about IDs for Interfaces, Tabs, and any other Item that has a User Set ID ... Once saved, Never Changed even by an Admin"; "Remove that Rule or state that Tab IDs follow the Rule #"; letters and numbers picked on a decision card). Every user-set ID: a unique suggestion on a new build, 1 to 4 letters or numbers starting with a letter, unique, never changed once saved (not even by an Admin), shown first in lists (BH: Brew House). A taken Interface suggestion is now MB2 (was MB_2, which broke the 4 characters). Help 13, 46, 76, 115, 188, the Device Library and the Interface and Tab balloons now say IDs follow Rule 3.2 instead of repeating it. Checked against both programs: the Panel's Tab settings, Interface pop-up and Devices page lock a saved ID and the Brain refuses a changed one; the BruControl Import's Boards and Tabs page uses the same check (public/naming.js). Older Schemas: before the first Public Production (No old ways), a saved ID that breaks the Rule (MB_2) gets a new one once when its Schema loads. (thread "Add a Rule for permanent user IDs")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")

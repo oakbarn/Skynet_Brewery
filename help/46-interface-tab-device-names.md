@@ -2,20 +2,31 @@
 
 Every Interface and every tab has a short **ID**, and a new Device gets a name made from them. You can tell at a glance which board, port and tab a Device belongs to.
 
+## The ID Rule (Rule 3.2)
+
+Every Interface, every Tab, and any other item you give an ID follows this one Rule:
+
+- **Skynet always suggests one** when you make a new one. The suggestion is always unique. You may type your own instead.
+- **1 to 4 characters**: letters and numbers (A to Z, 0 to 9), starting with a letter. For example `BH`, `MB2`, `F1`.
+- **Unique**: no two Interfaces, and no two Tabs, may have the same ID.
+- **Once saved, it never changes, not even by an Admin.** Check it before you Save. To use another ID, make a new one.
+- Lists show the ID first, then the name: **BH: Brew House**, **BM: Brewery Mega**.
+
+The ID is part of every Suggested Device name, so a Device's name never goes out of date. The ID is not the item's hidden key (Design Rule #2): Processes find an item by its key, never by its ID.
+
 ## Interface ID
 
 An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Mega on Ethernet, an ESP32 and so on. Interfaces are on the **Devices** page.
 
-- The ID is **1 to 4 letters**, and is written with an underscore after it: `MB_`.
-- Each one must be **unique**.
-- A new Interface gets the first letter of the first two words of its name. **Main Brewery Mega USB** gets `MB_`.
-- If that ID is taken, the next one gets `MB_2`, then `MB_3`.
-- An Admin can type another ID when adding the Interface, or change it in the **ID** box in the table. For example `MBUB` for the USB Mega and `MBET` for the Ethernet one.
+- The ID is written with an underscore after it in a name: `MB_`.
+- A new Interface's suggestion is the first letter of the first two words of its name. **Main Brewery Mega USB** gets `MB`.
+- If that ID is taken, the suggestion is `MB2`, then `MB3`.
+- You set it when you add the Interface. For example `MBUB` for the USB Mega and `MBET` for the Ethernet one.
 
 ## Tab ID
 
-- The Tab ID is **exactly 2 letters**, and each one must be **unique**. **Sparge** gets `SP`, **Batch Hops** gets `BH`.
-- An Admin changes it in **Tab settings** (Edit layout, double-click an empty spot on the tab).
+- **Sparge** gets `SP`, **Batch Hops** gets `BH`.
+- A new Tab's suggestion can be changed in **Tab settings** (Edit layout, double-click an empty spot on the tab) until you Save.
 - Renaming a tab keeps its ID.
 
 ## Device names
@@ -149,7 +160,7 @@ An NTC thermistor is read on an analog pin with a series resistor, using its **o
 
 Devices made before this keep their names, so your Processes still work. Their old type codes (`PmP`, `VlV` ...) are changed to the new Device Type IDs by themselves. Their properties show the **Suggested Name**; you can give it that name with **✏ Change name** beside the **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
 
-Interfaces and tabs from before get an ID by themselves the first time the Schema opens. Changing an Interface ID or Tab ID later does not rename Devices that already exist.
+Interfaces and tabs from before get an ID by themselves the first time the Schema opens. Once saved, an ID never changes (Rule 3.2), so a Device's name always matches its Interface and Tab.
 
 ## Who can change things
 
