@@ -221,3 +221,11 @@ export function sightGlassSvg(ratio, caged) {
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${SG_H}" preserveAspectRatio="none" data-ips="0,0.5 1,0.5">` + fer + glass + cage + '</svg>';
 }
+
+// the spot on the line from a through e that is level with c, when c is no more than off pixels off that line and ahead of a
+// (an IP a pixel off a pipe's line, as on a picture: a pipe end dropped by it stops level with it and joins it, Rule 5.37)
+export function inLine(a, e, c, off = 1.5) {
+  const L = Math.hypot(e[0] - a[0], e[1] - a[1]); if (!L) return null;
+  const ux = (e[0] - a[0]) / L, uy = (e[1] - a[1]) / L, t = (c[0] - a[0]) * ux + (c[1] - a[1]) * uy, d = Math.abs((c[0] - a[0]) * uy - (c[1] - a[1]) * ux);
+  return d <= off && t > 0 ? [Math.round(a[0] + ux * t), Math.round(a[1] + uy * t)] : null;
+}
