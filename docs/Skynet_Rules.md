@@ -4527,6 +4527,27 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 3. **Both programs:** the BruControl Import has no Equipment Profiles, so the Interview is in the Skynet Panel only. The Import's
    Build page is not changed.
 
+19.7 **The Stove Top Vessel: a Widget with IPs and a hose hang top, drawn for its Height and Width** (OakBarn Brewery, 2026-11-13:
+"We need stove top Vessel with the Hose hang top and size attributes H_w and Gallons and make the Graphic Dynamic top"; 2026-11-15:
+"Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones. 1 no Outlets, 2. Outlet at Bottom with the conector types
+like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build the Stove Top Vessel", Help 199).
+- **Two of them, next to Add equipment:** **Stove Top Vessel** (no outlets) and **Stove Top Vessel, Bottom Outlet** (one IP at the
+  center of the bottom). Both are Widgets with IPs and **no Devices**. They are the only choices there besides the Skynet equipment
+  Widgets: the older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller are gone (OakBarn
+  Brewery, 2026-11-13: "remove for now. We will build several Vessel Template Devices where these would be").
+- **Hose hang top:** its top third is one big IP, as on every vessel (Rules 5.28 and 5.34): a Quick Disconnect hose dropped there, or
+  a Process line `Hose_1.connect = Stove_Top_Vessel_1`, hangs over the rim into the pot.
+- **Size (Vessel Rules):** Units, **Gallons** (5 to start), **Height**, **Width** (across the pot) and a read only **Calculated
+  Volume**. Both Height and Width typed: drawn by its real size and shape (as the Diameter method, Rule 19.2). Either empty: a stock pot
+  as tall as it is wide, sized by its Gallons. It follows the Tab's Master Vessel Sizer (Rule 19.3) and can be the Master.
+- **Its picture is drawn by Skynet for its box** (the "Graphic Dynamic"): pot body, rim and two side handles, flat grey #808080 with a
+  black outline and no text (the Label is its only text). A Graphic picked by the user is used instead.
+- **The Bottom Outlet IP** has a **Bottom Outlet IP Type**: Tri-Clamp, NPT, BSP or Quick Disconnect, like a pipe end (Rule 5.40). It
+  starts as the Default pipe IP Type, is drawn as its type under the pot, and is the size of the pipe or hose joined to it (a pipe end
+  on it draws no second connector).
+- **Both programs:** the BruControl Import's Build page is the Panel's own, so it has both. BruControl has no stove top pot, so an
+  import never makes one.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4566,6 +4587,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-15: Added Rule 9.21 (OakBarn Brewery: "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"): the Media Setup and Media zip are made new only when something in media/ changed since the last ones; otherwise each Release carries the last ones unchanged, with their own date. The plain Setup and Full Setup are still made on every merge; Run workflow > rebuild media forces new ones. Rule 9.20 points to it. Help 183 (and French).
+- 2026-11-15: Added Rule 19.7 Stove Top Vessel (OakBarn Brewery: "Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones"; "Center Bottom on Stove Top Widget and it gets IP"): Stove Top Vessel and Stove Top Vessel, Bottom Outlet next to Add equipment; hose hang top, Gallons, Height, Width, a drawing made for its Height and Width, Bottom Outlet IP Type (Rule 5.40). The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller choices removed (OakBarn Brewery, 2026-11-13: "remove for now"). Help 199. (thread "Build the Stove Top Vessel")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
