@@ -30,3 +30,18 @@ exception, because the pop-up is not a question before switching: it is you tell
 
 Every Widget that can be On or Off has a **.confirmation** switch in its Properties. When it is on, that Widget is a Confirmation
 Widget. It starts on for Manual Valves, Manual Pumps and QD Hoses, and off for everything else.
+
+## A Sump Pump you plug in
+
+Most brewers turn a **sump pump** on by plugging it in or switching its outlet by hand: no relay or SSR. In Skynet it is a
+**Manual Pump** with the Sump pump picture (Skynet Rule 5.15a). To add one, pick **Sump Pump by hand** in Select Widget Type >
+Semi_Widgets_Devices (or Select Device Type > Pumps). It is the same as picking Manual Pump, then Sump pump in step 2. Its Label
+starts **Sump 1**, so its name is `wgt_MP_Sump~1_BR` on the Brew Tab.
+
+A click on it (or a Process line such as `wgt_MP_Sump~1_BR.state = true`) asks you to turn it on by hand. It shows **ON** and its
+hose shows flow only after you confirm.
+
+**Example: the OakBarn Brewery ice water loop.** A sump pump sits in a large ice bath (a trash can of ice and water). It pumps
+the ice water through a first plate chiller, which cools the tap water, and the ice water goes back into the bath. The cold tap
+water then runs through a second plate chiller, against the wort, and goes out to water the lawn. Help 201,
+[The Ice Water Can](201-ice-water-can), shows how to draw it.

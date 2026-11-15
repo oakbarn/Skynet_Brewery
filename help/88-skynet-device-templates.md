@@ -33,9 +33,9 @@ If anything tries to change one of these, the Brain puts it back when the layout
 - **Interface and Pin**, Invert, One-shot.
 - **Orientation**: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The picture and its IPs follow.
 - **Flip Horizontal** and **Flip Vertical**: switches that mirror the picture and its IPs.
-- **Tap water valve**: off by default. Switched on, **Tap water flows out of** asks which end is the tap:
-  - on a vertical valve: **Tap Water Source Top** or **Tap Water Source Bottom**
-  - on a horizontal or 45 degree valve: **Tap Water Source Left** or **Tap Water Source Right**
+- **Tap water valve**: off by default. Switched on, **Tap Water flows** asks which way the water goes, always from the tap side to the Out side:
+  - on a vertical valve: **Top to Bottom** or **Bottom to Top**
+  - on a horizontal or 45 degree valve: **Left to Right** or **Right to Left**
 
   If you change the Orientation or a Flip while Tap water is on, it goes back to **Needs setting**. Until it is set again, no tap
   water flows from it.

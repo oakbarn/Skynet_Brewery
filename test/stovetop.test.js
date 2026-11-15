@@ -40,7 +40,7 @@ assert.match(outs[1], /<line /, 'NPT shows its thread');
 assert.match(outs[2], /<polygon /, 'BSP shows its hex nut');
 
 // the Panel (and the Importer's Build page, which is the Panel's): two Special Widgets with IPs only, in the Add equipment list
-assert.match(app, /stoveTop: 'Stove Top Vessel', stoveTopOut: 'Stove Top Vessel, Bottom Outlet' \};/, 'next to Add equipment');
+assert.match(app, /stoveTop: 'Stove Top Vessel', stoveTopOut: 'Stove Top Vessel, Bottom Outlet',\n/, 'next to Add equipment');
 for (const old of ['electric', 'gas', 'mashTun', 'coil', 'plateChiller']) assert.ok(!new RegExp(`\\b${old}: '`).test(app.slice(app.indexOf('const VESSELS'), app.indexOf('const V_HIGH'))), `${old} is gone`);
 assert.ok(!/v-electric|v-gas|v-coil|v-plateChiller/.test(read('public/style.css')), 'their drawings are gone');
 assert.match(app, /stoveTop: \{ title: 'Stove Top Vessel', [^\n]*ports: \{\} \}/, 'no outlets');
@@ -55,8 +55,8 @@ assert.match(app, /if \(isStove\(g\)\) return stoveAspect\(g\.vheight, g\.diamet
 assert.match(app, /stovePic\(g\.w, g\.h, stoveOutType\(g\)\)/, 'drawn for its own box, with its outlet');
 assert.match(app, /\['vheight', `Height \(\$\{u\}; empty = a stock pot shape\)`, 'num'\], \['diameter', `Width \(\$\{u\}, across the pot/, 'Height and Width fields');
 assert.match(app, /\|\| stoveOutIp\(g\)\); \};/, 'a pipe end on its outlet does not draw a second connector');
-assert.match(app, /isSkyV\(v\) \|\| isStove\(v\)\) && v !== g\) return v;/, 'its IP is fixed: it moves with the pot');
-assert.match(app, /!isStove\(item\) && \(placed\.length \|\| before\.isNew\)\) vesselPopup/, 'no "check where the IPs went" pop-up');
+assert.match(app, /isSkyV\(v\) \|\| isStove\(v\) \|\| isIceCan\(v\)\) && v !== g\) return v;/, 'its IP is fixed: it moves with the pot');
+assert.match(app, /!isStove\(item\) && !isIceCan\(item\) && \(placed\.length \|\| before\.isNew\)\) vesselPopup/, 'no "check where the IPs went" pop-up');
 assert.match(app, /if \(isStove\(g\)\) \{        \/\/ a Stove Top Vessel's Bottom Outlet stays at the center of its bottom/, 'resized: its outlet stays at the center of the bottom');
 assert.match(app, /isStove\(g\) \? `\$\{eqClass\(g\)\.ports\[k\]\.name\} \(\$\{IP_TYPES/, 'its IP is labelled with its IP Type');
 assert.match(app, /\.includes\(k\)\)\.map\(\(\[k, t\]\) => \[t, \(\) => addEquipment\(k\)\]\);/, 'Add equipment rows show their plain names and work');
