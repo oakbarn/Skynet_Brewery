@@ -79,9 +79,15 @@ add to the list of interface types?"
 **6.1.3.** "In the Interface Element below, there are additional issues that may come up with an interface IDE as BruControl created
 his own firmware."
 
-> **Analyst's Review Note (6.1.1 to 6.1.3):** Open questions for OakBarn Brewery. They belong with the firmware plan (thread "Plan
-> Skynet firmware for all boards"): Skynet firmware for every board on the list, matching BruControl Firmware 46 so no one
-> rewires (Rule 6.16), loaded once from inside Skynet. A board that is not on the list is a question for that plan too.
+> **Analyst's Review Note (6.1.1 to 6.1.3):** Answered in the firmware plan, section **"Questions from the General Import
+> Rules"** (`docs/Skynet_Firmware_Plan.md` in the project files; thread "Plan Skynet firmware for all boards"), not yet approved by
+> OakBarn Brewery. In short:
+> - **6.1.1** A board the Importer can't tell gets the Interview question "Which board is this?". A board not on the list comes in as
+>   **Other**, turned Off, with a send-to-support button. Users can't add boards to the list; OakBarn Brewery adds them in updates.
+> - **6.1.2** No Arduino IDE is needed. The Importer's last step offers the **Load firmware** page for each board, with a warning that
+>   BruControl then stops talking to that board.
+> - **6.1.3** A board still on BruControl firmware shows "still has BruControl firmware". An ESP32's WiFi is set again on its
+>   Skynet setup page, its IP address is kept, and its port changes from 5000 to 4100. Pins match BruControl Firmware 46 (Rule 6.16).
 
 **6.2.** "Workspaces are created as Tabs, SkyNet parses the name to create a Unique Tab id (1 to 4 Char). The user confirms or edits
 for his own id."
