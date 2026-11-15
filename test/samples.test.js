@@ -63,6 +63,8 @@ for (const sm of list) {
   // every pipe joins two IPs, every picture exists
   const ips = new Set(c.graphics.filter(g => g.kind === 'ip').map(g => g.id));
   for (const e of c.elements) if (e.subtype === 'pump' || e.subtype === 'valve') { ips.add(`dev:${e.name}:in`); ips.add(`dev:${e.name}:out`); }
+  // a Manual Valve Widget's own IPs (a Tap Water Valve has only its hose outlet, Rule 5.33)
+  for (const g of c.graphics) if (g.kind === 'ip' && g.fitting === 'manualValve') { ips.add(`eq:${g.id}:in`); ips.add(`eq:${g.id}:out`); }
   for (const p of c.graphics.filter(g => g.kind === 'pipe')) {
     assert.ok(ips.has(p.from) && ips.has(p.to), `${sm.id}: pipe ${p.id} ends ${p.from} -> ${p.to}`);
     for (const n of p.flowWhen ?? []) assert.ok(store.has(n));

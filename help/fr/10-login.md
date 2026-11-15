@@ -16,7 +16,7 @@ Vous voulez que le panel choisisse un mot de passe pour vous ? Touchez la **clé
 
 ## Votre code de secours {#your-recovery-code}
 
-Juste après la création du compte admin, le panel affiche un **code de secours** (recovery code) comme `K7QM-3XPD-9RTA-WF2H`. Il n'est montré qu'une fois, alors faites **Copy**, **Download** ou **Print**, et cochez **I saved my recovery code** pour continuer. Gardez-le loin du Pi (dans votre portefeuille ou un gestionnaire de mots de passe).
+Juste après la création du compte admin, le panel affiche un **code de secours** (recovery code) comme `K7QM-3XPD-9RTA-WF2H`. Il n'est montré qu'une fois, alors faites **Copy**, **Download** ou **Print**, et cochez **I saved my recovery code** pour continuer. Gardez-le loin du Brain, le Pi ou le PC qui fait tourner Skynet (dans votre portefeuille ou un gestionnaire de mots de passe).
 
 Un Admin peut créer un nouveau code dans **Settings > Recovery code**. L'ancien cesse de marcher.
 
@@ -34,9 +34,29 @@ Chaque utilisateur peut régler son propre e-mail et son propre numéro. Les cod
 
 ## Mot de passe oublié ? {#forgot-your-password}
 
-**Le plus simple :** sur la page de connexion, touchez **Forgot password?** et entrez votre nom d'utilisateur, le code de secours et un nouveau mot de passe. Cela ne marche que depuis votre réseau domestique ou par Tailscale. Vous êtes connecté, et le panel affiche un **nouveau** code de secours (chacun ne marche qu'une fois), alors enregistrez aussi celui-là.
+Un mot de passe ne se change que sur votre propre Skynet. Il y a trois façons :
 
-Un aide a oublié le sien ? Un Admin en règle un nouveau dans **Settings > Users**.
+1. **Votre code de secours (le plus simple) :** sur la page de connexion, touchez **Forgot password?** et entrez votre nom d'utilisateur, le code de secours et un nouveau mot de passe. Cela ne marche que depuis votre réseau domestique ou par Tailscale. Vous êtes connecté, et le panel affiche un **nouveau** code de secours (chacun ne marche qu'une fois), alors enregistrez aussi celui-là.
+2. **Votre Admin :** un Admin règle un nouveau mot de passe pour n'importe quel utilisateur dans **Settings > Users**.
+3. **Sur le Brain lui-même :** quand il n'y a pas de code de secours et qu'aucun Admin ne peut se connecter, utilisez l'outil reset-password (voir plus bas).
+
+## Appareils approuvés {#approved-devices}
+
+Un bon mot de passe ne suffit pas : chaque téléphone, tablette ou ordinateur doit aussi être **approuvé** une fois par un Admin. Ainsi, un mot de passe volé ne suffit à personne pour entrer.
+
+1. Connectez-vous sur le nouvel appareil. S'il n'est pas encore approuvé, il affiche **This device is waiting for an Admin to approve it**.
+2. Un Admin ouvre **Settings > Approved Devices** et touche **Approve** (ou **Refuse**) à côté de lui.
+3. Connectez-vous à nouveau sur le nouvel appareil.
+
+L'ordinateur du Brain lui-même est toujours approuvé, donc un Admin peut toujours approuver depuis là. L'appareil qui a créé le compte admin, et un appareil qui utilise le code de secours, sont approuvés d'eux-mêmes. Téléphone perdu ou vendu ? Touchez **Remove** : il est déconnecté tout de suite. **Rename** donne à un appareil un nom simple, comme Tablette de la brasserie.
+
+Un Admin peut mettre **Approved Devices** sur Off ; alors un bon mot de passe suffit pour se connecter. Si aucun appareil approuvé ne peut se connecter, lancez `node tools/reset-password.js --devices-off` sur le Brain (voir plus bas).
+
+## Les e-mails au sujet de votre mot de passe sont une arnaque {#emails-about-your-password-are-a-scam}
+
+**OakBarn Brewery ne vous envoie jamais d'e-mail au sujet de votre mot de passe.** OakBarn Brewery ne l'a pas : vos utilisateurs et vos mots de passe restent sur votre propre Brain. Un e-mail qui dit venir d'OakBarn Brewery et vous demande de changer votre mot de passe, de vous connecter ou d'envoyer un code est une arnaque (phishing, hameçonnage). Ne cliquez pas sur ses liens ; supprimez-le.
+
+Votre propre panel peut vous envoyer des e-mails, mais seulement ce que vous avez activé dans ses Settings : les **codes de connexion** (plus haut) et les alarmes. Ils viennent de votre propre compte e-mail, au nom de **Brew Panel**, jamais d'OakBarn Brewery.
 
 ## Les mises à jour gardent vos connexions {#updates-keep-your-logins}
 
@@ -44,7 +64,9 @@ Installer une nouvelle version garde chaque utilisateur, mot de passe, connexion
 
 ## Pas de code de secours et aucun Admin ne peut se connecter ? {#no-recovery-code-and-no-admin-can-sign-in}
 
-Sur le Pi, dans le dossier du panel :
+Sur le Brain lui-même, dans le dossier du panel.
+
+**Sur un Pi ou sous Linux :**
 
 ```
 node tools/reset-password.js            (lists the users)
@@ -53,6 +75,16 @@ sudo systemctl restart brewpanel
 ```
 
 (La première ligne liste les utilisateurs ; la deuxième demande un nouveau mot de passe pour l'utilisateur Brewer ; la troisième redémarre le panel.)
+
+**Sur un PC Windows :** ouvrez **Command Prompt** (l'invite de commandes), puis :
+
+```
+cd /d C:\Brewing\BrewPanel
+node tools\reset-password.js            (lists the users)
+node tools\reset-password.js Brewer      (asks for a new password for the user Brewer)
+```
+
+Puis **Start menu > Skynet Brewer > Stop the Skynet Brain** et redémarrez **Skynet Brewer**.
 
 ## Utiliser le panel hors de chez vous {#using-the-panel-away-from-home}
 

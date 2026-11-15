@@ -264,7 +264,8 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 
 ### Plate chiller
 - Picture: Images/Skynet/Chillers/plate_chiller.svg, 110 x 200. Types: Brazed plate 20, 30, 40, Counterflow.
-- Ports: Wort In (Top Left), Wort Out (Bottom Right), Water In (Bottom Left), Water Out (Top Right); any corner. Wort and water never mix. Thermowell (not an IP): Wort Out or Water Out.
+- Ports: Wort In (Top Left), Wort Out (Bottom Right), Water In (Bottom Left), Water Out (Top Right); any corner. Wort and water never mix. No built-in Thermowell (Rule 5.41): a probe tee goes in the pipe beside it.
+- **A Chiller is the same as a pipe, no more, no less** (Rule 5.41, 2026-11-15): IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream (a running pump or an open Tap Water Valve). No Size, Units or Dead space in its Template. Same for the Chilling coil below.
 - Port tip positions of the Skynet Copper Counterflow Chiller picture (2026-11-02): Coil Top End, Coil Top Branch, Coil Bottom Branch, Coil Bottom End.
 
 ### Chilling coil
@@ -395,7 +396,7 @@ Templates live in a library, not on a Tab. **Skynet Templates** ship in template
 | Type, Other Type | |
 | Graphic | Picture path |
 | Units | US (gallons, pounds, °F) or Metric (liters, kilograms, °C) |
-| Size, Dead space, Extra trub loss | Fermenter instead: Largest batch, Smallest batch, Trub loss |
+| Size, Dead space, Extra trub loss | Not on a Plate chiller or Chilling coil (Rule 5.41). Fermenter instead: Largest batch, Smallest batch, Trub loss |
 | Heat Source, Other heat source | Gas, Electric, RIMS, HERMS, Other, Unheated (by Type). The heating Device and probe are picked on the Tab. |
 | Connection Standard + Size | Default for every port and Bundled Fitting |
 | Ports | Installed, Position, Bundled Fitting on that port (Outlet, Second Outlet, Tangential Inlet, Steam Slayer, CIP Inlet take one), own Connection Standard |
@@ -588,3 +589,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-09: Skynet Dial gets Gauge settings (shape, tick marks, color styles) and the Skynet Bar look (Rule 2.40 point 4, Help 152). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Alarm Widget gets Digital Output 1 and 2 (Rule 7.19, Help 178). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Chart Widget: a Hydrometer's line has an SG / °P / °Bx switch right on the Graph (Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
+- 2026-11-15: A Chiller (Plate chiller, Chilling coil) is the same as a pipe (Rule 5.41): no On / Off, no Size, Units or Dead space, no built-in Thermowell. (thread "Make the Chiller a flexible Special Widget")

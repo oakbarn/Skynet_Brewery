@@ -2,6 +2,7 @@
 //   node tools/reset-password.js            lists the users
 //   node tools/reset-password.js Fritz      sets a new password for Fritz (creates Fritz as an admin if there is no such user)
 // Then restart the panel: sudo systemctl restart brewpanel
+//   node tools/reset-password.js --devices-off   turns Approved Devices Off (Rule 8.6), when no approved device can sign in
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +12,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
 const auth = new Auth(DATA);
 const name = process.argv[2];
+
+if (name === '--devices-off') {
+  const { Devices } = await import('../lib/devices.js');
+  new Devices(DATA).setOn(false);
+  console.log('Approved Devices is Off. Restart the Brain, sign in, and turn it On again in Settings > Approved Devices.');
+  process.exit(0);
+}
 
 if (!name) {
   console.log(auth.users.length ? auth.listUsers().map(u => `${u.name}  (${u.role})`).join('\n') : 'No users yet. Open the panel in a browser to create the admin account.');
