@@ -16,6 +16,8 @@ la température **baisse**, ou **ne monte pas** après quelques minutes de chauf
 remarquer une flamme éteinte. Utilisez un brûleur avec sa propre sécurité de flamme (une vanne de gaz à thermocouple homologuée UL ou CSA, ou un détecteur de flamme).
 Ne brassez jamais au gaz à l'intérieur sans air frais, et ne laissez jamais un brûleur allumé sans surveillance.
 
+**Ce n'est pas une sécurité homologuée UL et il ne faut pas s'y fier. Surveillez toujours le brûleur.**
+
 ## Quels brûleurs l'ont {#which-burners-have-it}
 
 - Un **élément chauffant** avec **Gas burner** activé dans ses Properties (un brûleur sur une vanne de gaz). Les brûleurs à gaz du
