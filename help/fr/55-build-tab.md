@@ -48,6 +48,16 @@ Appuyez sur **👁 Preview** dans la barre Edit layout (il s'affiche tant qu'il 
 
 Le Preview marche avant et après que vous changiez les Properties d'un élément, aussi souvent que vous voulez, jusqu'à ce que la construction soit envoyée vers un Tab ou un Template. Aller sur un autre Tab l'arrête aussi. La fenêtre **Save Build** a aussi un bouton **👁 Preview**, pour un dernier coup d'œil avant de choisir où ça va.
 
+## Partir un moment, revenir au Build {#leave-for-a-moment-come-back-to-the-build}
+
+Vous pouvez quitter ce que vous construisez et y revenir. Rien n'est perdu :
+
+- **Dans une boîte Add** (par exemple la première boîte de la Blichmann RipTide), un double-clic sur un choix dans une liste, comme **Brew House** dans la liste **Tab**, ouvre les réglages de ce Tab (ou les Properties de ce Device). La boîte Add se met de côté et garde tout ce que vous avez tapé et choisi. Quand vous fermez l'autre boîte (**💾 Save** ou **✖ Cancel**), la boîte Add revient, sur le Tab où vous étiez.
+- **Dans les Properties d'une chose déjà faite**, le même double-clic demande d'abord si vous avez changé quelque chose. Quand l'autre boîte se ferme, vous êtes de retour sur votre Tab et ses Properties s'ouvrent à nouveau.
+- **Dans la barre des Tabs**, un double-clic sur le nom d'un Tab ouvre ses réglages. Si vous étiez sur le 🔨 Build Tab, vous revenez au Build Tab quand vous les fermez.
+
+**➕ Add new Tab…** et **📁 Templates** dans une liste de Tabs sont des choix : un double-clic dessus n'ouvre rien.
+
 ## Copies de Templates {#copies-of-templates}
 
 Une copie de Template, d'un **Template Skynet** ou d'un **Template groupé de l'utilisateur**, est toujours faite d'abord sur le Build Tab.
