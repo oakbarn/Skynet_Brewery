@@ -126,6 +126,8 @@ Interface est raccordée. L'Interface fait partie du pont entre le « Brain » e
 aucun courant de 120 VAC à un appareil raccordé mais seulement un signal de commande. Il faut d'autres pièces de
 matériel, et pas une seule. C'est une chaîne :
 
+![La chaîne: Brain, Arduino, SSR, Red Pump](help_pictures/Pump_Daisy_Chain.png)
+
 > **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
 
 Brain -> IO de l'Arduino (Port) -> Commande (le Brain dit d'allumer la pompe rouge) -> signal de 5 V ou 3.3 V envoyé à -> SSR ou contacteur (le
