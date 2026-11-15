@@ -1954,8 +1954,10 @@ Special Widget", Help 14).
 - **3 Vessel sample** (OakBarn Brewery, 2026-11-15: "Replace with Chiller Widget and no on/off in 3 vessel"; "A Chiller is normally
   manually placed into a Brew Kettle and chilling water (Tap or Chilled Water depending on the User) and the outlet dumped down a drain
   or outside"; "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose
-  on other side"): the old Chiller water On/Off Device is gone. An **Immersion chiller** sits in the Boil Kettle. A **manual Tap Water
-  Valve** (Rule 5.33, "Chiller water") feeds its In by a hose, and its Out hose ends open, "Drain or outside". A **motorized Tap Water
+  on other side"): the old Chiller water On/Off Device is gone. A **manual Tap Water Valve** (Rule 5.33, "Chiller water") and an open end,
+  "Drain or outside", wait for the chiller. **No Chiller Widget is on the Tab** (OakBarn Brewery, 2026-11-15: "Remove Chiller widget
+  from 3 Vessels. It will be placed and removed with Process code and we need to re draw the hoses to it"): a Process places it in
+  the Boil Kettle and draws its hoses, and takes it away again. A **motorized Tap Water
   Valve** on Port 30 bypasses the chiller and feeds the pump's suction line through a tee. The Brew Day Process asks the brewer to
   open and close the Chiller water tap.
 
@@ -4552,6 +4554,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
