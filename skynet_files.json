@@ -103,7 +103,7 @@
   "lib/timeline.js": "7db4584475a5cd90031abf6c500096ab4a3c970971c43e801fe225d5454e4c6a",
   "lib/values.js": "d2d4666b6372cf8da85e0f3772d59e7fb7db24d11690a4e7a90acc2bad0bb084",
   "lib/vectorize-worker.js": "5cf8d17715877051541717fd1fc9db8d5a638ebb4d1321d386a9970eb1ec4ffa",
-  "lib/vectorize.js": "ce9fd0616a734ac2f34aa73cfa76028968950b607fa90e7b30bc9c8c36737a6a",
+  "lib/vectorize.js": "c333b101e653644feb6e09db29e9b3e01ee1eb49e2724d3f1ebc3f7481d225f2",
   "lib/vendor/LICENSES.txt": "0280789a79a17fd8c091905dbfcb2fa2d5fd31ccf5cee58577888030a8cf4f7e",
   "lib/vendor/README.md": "eb237d984ce8c15db4436c41d8e72b953b4723ff33fa6d24525646ea2cc77976",
   "lib/vendor/imagetracer.js": "1f7e21062196c53f2565120fc0708eac197c8403ec1bea28b381056ea0c3fdb9",
