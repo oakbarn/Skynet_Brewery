@@ -18,7 +18,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
-import { GAS_WARNING, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
+import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
@@ -380,7 +380,7 @@ function setView(v, here = false) {
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
@@ -3201,7 +3201,7 @@ function flamePopRow(t, v, d) {
   if (!isGasBurner(t)) return [];
   const s = flameSettings(t), left = Number(v.flameout_paused) || 0, on = String(v.flameout ?? (s.on ? 'On' : 'Off')).toLowerCase() === 'on';
   const said = v.flameout_tripped ? '🔥 Flame Out shut the gas: check the flame, light it, then turn it ON.' : !on ? 'Flame Out: Off' : left > 0 ? `Flame Out: paused, ${left} min left` : 'Flame Out: watching';
-  return [h('div', { class: 'muted' }, said),
+  return [h('div', { class: 'muted' }, said), h('div', { class: 'muted' }, '⚠ Flame Out: ' + NOT_UL),
     h('div', { class: 'vdBtns' }, on ? (left > 0
       ? h('button', { type: 'button', class: 'big', title: 'Flame Out watches this burner again now', onclick: async () => { d.close(); await setProp(t.name, 'flameout_paused', 0); } }, '▶ Watch now')
       : h('button', { type: 'button', class: 'big', title: `Stops the Flame Out watch for ${s.flamePause} minutes (open the lid, add cold water, dough in). It watches again by itself after them.`, onclick: async () => { d.close(); await setProp(t.name, 'flameout', `pause ${s.flamePause}`); } }, `⏸ Pause Flame Out (${s.flamePause} min)`)) : null)];
@@ -7888,7 +7888,7 @@ function heatFields(it, x = {}) {
 // switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.
 const FLAME_TIPS = {
   gasBurner: 'Gas burner: this Heating Element opens a gas valve (a burner), not an electric element. On, it gets the Flame Out safety. Example: the Kettle burner on a propane valve.',
-  head: GAS_WARNING + '\nFlame Out safety: while the gas is on, Skynet watches the temperature of the pot. A lit burner makes the pot get hotter. If the temperature falls, or does not rise after some minutes of burning, the flame is probably out: Skynet shuts the gas, turns the igniter Off, sounds an alarm on every screen and shows "Burner may be out: check the flame. Gas is turned off." Nothing turns back on by itself. Skynet does not see the flame: this is a backup, not a flame safety device.',
+  head: GAS_WARNING + '\nFlame Out safety: while the gas is on, Skynet watches the temperature of the pot. A lit burner makes the pot get hotter. If the temperature falls, or does not rise after some minutes of burning, the flame is probably out: Skynet shuts the gas, turns the igniter Off, sounds an alarm on every screen and shows "Burner may be out: check the flame. Gas is turned off." Nothing turns back on by itself. Skynet does not see the flame: this is a backup, not a flame safety device. This is not a UL listed safety and should not be relied on. Always monitor the burner.',
   flameSafety: 'Flame safety: what shuts the gas by itself if the flame goes out. Thermocouple gas valve (UL or CSA listed): a pilot flame heats a thermocouple; if the pilot goes out, the valve shuts all the gas with no help from Skynet. That is the real flame safety, and Skynet\'s Flame Out is its backup. These valves are made for low-pressure gas (propane about 11 inches of water column), and most brewing burners use a high-pressure regulator, so have a licensed gas professional match the valve and the burner. Three ways (Help 197): 1. high pressure with a 24 V solenoid only: None, the cheapest and the least safe; 2. low pressure with a 24 VAC VR8200 type valve: the best safety for the money, but it heats more slowly; 3. high pressure with a high-pressure thermocouple safety pilot valve (for example BASO H19, costly) and a 24 V solenoid. Recommended: a UL or CSA listed way (2 or 3). Flame-out cutoff: for a cutoff made from parts (a K-type thermocouple and a temperature controller), for information only, not listed and not recommended. None: a plain solenoid valve; Skynet\'s Flame Out is the only guard, so stay with the burner. Skynet cannot check which one you have.',
   flameOut: 'Flame Out: On (the start) watches this burner while its gas is on. Off for a burner with nothing to watch. A Process can pause it: Kettle_burner.flameout = pause 10.',
   flameMinutes: 'No rise: after this many minutes of burning (only while the gas valve is really open), the temperature must have risen by the Rise. Example: 5 minutes and 1 °F.',
@@ -7913,7 +7913,7 @@ function flameFields(it, x = {}) {
   return [...out,
     ['_flameHead', 'Flame Out safety', 'head', null, false, false, { tip: T.head, ...x }],
     ['flameSafety', 'Flame safety', 'sel', FLAME_SAFETY, true, false, { tip: T.flameSafety, ...x }],
-    ['_flameNote', s.safety === 'thermocouple' ? BACKUP_NOTE : s.safety === 'cutoff' ? CUTOFF_NOTE : '⚠ ' + HELPER_NOTE, 'note', null, false, false, x],
+    ['_flameNote', `⚠ Flame Out: ${NOT_UL} ` + (s.safety === 'thermocouple' ? BACKUP_NOTE : s.safety === 'cutoff' ? CUTOFF_NOTE.replace(/^⚠ /, '') : HELPER_NOTE), 'note', null, false, false, x],
     ...(isHeatElem(it) ? [] : [['input', 'Temperature Probe', 'sel', temps, true, false, { tip: T.input, ...x }]]),
     ['flameOut', 'Flame Out', 'sel', [['on', 'On'], ['off', 'Off']], false, false, { tip: T.flameOut, with: [['flameIgniter', 'Igniter', 'sel', igniters, false, false, { tip: T.flameIgniter }]], ...x }],
     ['flameMinutes', 'No rise (minutes)', 'num', null, false, false, { tip: T.flameMinutes, def: d.flameMinutes, with: [num('flameRise', `Rise (${u})`), num('flameDrop', `Drop (${u})`)], ...x }],
@@ -11886,6 +11886,90 @@ async function renderRecovery() {
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
 }
+// ---- Approved Devices (Rule 8.6, lib/devices.js): Approve or Refuse a waiting device, Rename, Remove; the On / Off switch
+async function renderApproved() {
+  if (!can('admin')) return;
+  const r = await api('GET', '/auth/devices');
+  $('#apdOn').checked = r.on;
+  const tb = $('#apdBody'); tb.innerHTML = '';
+  const when = t => t ? new Date(t).toLocaleString() : '';
+  const list = [...r.list].sort((a, c) => (a.state === 'waiting' ? 0 : 1) - (c.state === 'waiting' ? 0 : 1));
+  for (const d of list) {
+    const put = body => api('PUT', '/auth/devices/' + d.key, body).then(renderApproved);
+    const btns = d.state === 'waiting'
+      ? [h('button', { class: 'primary', onclick: guard(() => put({ state: 'approved' }).then(() => toast(`${d.name} is approved. ${d.user || 'They'} can sign in now.`))) }, 'Approve'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { await api('DELETE', '/auth/devices/' + d.key); renderApproved(); }) }, 'Refuse')]
+      : [h('button', { onclick: guard(async () => { const n = prompt('A name for this device (for example: Brew room tablet)', d.name); if (n) await put({ name: n }); }) }, 'Rename'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`)) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
+    tb.append(h('tr', {}, h('td', {}, d.name + (d.thisDevice ? ' (this device)' : '')), h('td', {}, d.user || ''),
+      h('td', {}, d.state === 'waiting' ? h('b', { class: 'bad' }, `Waiting since ${when(d.asked)}`) : 'Approved'),
+      h('td', {}, when(d.seen || d.approved)), h('td', {}, ...btns)));
+  }
+  if (!list.length) tb.append(h('tr', {}, h('td', { colspan: 5, class: 'muted' }, 'No devices yet.')));
+}
+$('#apdOn').onchange = guard(async ev => {
+  if (!ev.target.checked && !confirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.')) { ev.target.checked = true; return; }
+  await api('PUT', '/auth/devices', { on: ev.target.checked });
+  toast(ev.target.checked ? 'Approved Devices is On. This device is approved.' : 'Approved Devices is Off');
+  renderApproved();
+});
+// ---- the Patron Level (Rule 12.4, lib/patron.js, Help 198): an Admin pastes the Patron code from OakBarn Brewery; it unlocks the
+// Patron perks until its end date. A Patron code holds no email address; Patron emails are sent by OakBarn Brewery from outside Skynet.
+const PATRON_PAGE = 'https://oakbarnbrewery.com/#patron';
+const perkMark = st => ({ done: '', outside: ' (from oakbarnbrewery.com)', coming: ' (coming)' }[st] ?? '');
+function patronPerksList(levels) {
+  return levels.map(l => h('div', {}, h('b', {}, `${l.name}: ${l.price}`),
+    h('ul', {}, ...l.perks.map(p => h('li', {}, h('b', {}, p.name), perkMark(p.state), ': ', p.text)))));
+}
+async function renderPatron() {
+  const st = await api('GET', '/ui/patron'), box = $('#patronBox'); box.innerHTML = '';
+  if (st.active) box.append(h('p', {}, '⭐ ', h('b', {}, `${st.levelName}`), ` for ${st.name || 'this Brain'}, until ${st.expires}. Thank you for helping Skynet grow!`));
+  else if (st.hasCode && st.ok) box.append(h('p', { class: 'bad' }, `The Patron code ended on ${st.expires}. Renew on oakbarnbrewery.com, then paste the new code here.`));
+  else if (st.hasCode) box.append(h('p', { class: 'bad' }, st.error));
+  else box.append(h('p', { class: 'muted' }, 'Skynet is free. A Patron helps pay for it, and gets a few extras:'));
+  box.append(...patronPerksList(st.levels));
+  if (!st.active) box.append(h('p', {}, h('a', { href: PATRON_PAGE, target: '_blank', rel: 'noopener' }, 'Become a Patron on oakbarnbrewery.com'), h('span', { class: 'muted' }, ' (coming soon)')));
+  if (!can('admin')) return;
+  const inp = h('input', { placeholder: 'SKYPATRON1....', autocomplete: 'off', spellcheck: 'false', style: 'width:100%' });
+  box.append(h('label', {}, 'Patron code (from the email OakBarn Brewery sent you)', inp),
+    h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: guard(async () => { await api('PUT', '/ui/patron', { code: inp.value }); toast('Thank you! The Patron perks are unlocked.'); renderPatron(); }) }, 'Save Patron code'),
+      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!confirm('Remove the Patron code from this Brain? The Patron perks lock again.')) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
+    h('p', { class: 'muted' }, 'The code holds only the name to show, the level and the end date: never an email address. Patron emails come from OakBarn Brewery, never from your Brain.'));
+}
+// a pop-up with a title, any content, ✖ Close at the top and an optional main button; resolves true when the main button is pressed
+function infoPop(title, body, okText) {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const close = v => { d.close(); res(v); };
+    d.append(h('div', { class: 'vdTitle bar' }, h('span', {}, title), h('button', { type: 'button', onclick: () => close(false) }, '✖ Close')), body,
+      okText ? h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, okText)) : '');
+    d.oncancel = () => res(false);
+    d.showModal();
+  });
+}
+// a friendly note for a perk that needs the Patron Level (shown each time a Patron perk is tried)
+async function patronNudge(perkName) {
+  const st = await api('GET', '/ui/patron');
+  const body = h('div', {}, h('p', {}, h('b', {}, perkName), ' is a Patron perk. Skynet is free; a Patron helps pay for it and gets a few extras:'),
+    ...patronPerksList(st.levels), h('p', {}, h('a', { href: PATRON_PAGE, target: '_blank', rel: 'noopener' }, 'Become a Patron on oakbarnbrewery.com'), h('span', { class: 'muted' }, ' (coming soon)')),
+    h('p', { class: 'muted' }, 'Already a Patron? An Admin pastes your Patron code in Settings > Patron.'));
+  await infoPop('⭐ Patron perk', body);
+}
+// ☰ Menu > Request a Feature (a Patron perk)
+async function requestFeature() {
+  const st = await api('GET', '/ui/patron');
+  if (!st.active) return patronNudge('Request a Feature');
+  const t = h('input', { maxlength: 200, style: 'width:100%' }), d = h('textarea', { rows: 6, maxlength: 8000, style: 'width:100%' });
+  const body = h('div', {}, h('label', {}, 'Title (a few words)', t), h('label', {}, 'What should it do? (the more the better)', d));
+  if (!(await infoPop('⭐ Request a Feature', body, 'Send to OakBarn Brewery'))) return;
+  const title = t.value.trim(), text = d.value.trim();
+  if (!title || !text) return toast('Give the feature a short title and say what it should do', true);
+  const r = await api('POST', '/ui/patron/feature', { title, text });
+  if (r.sent) return toast('Sent. Thank you! The OakBarn Brewery team reads every request.');
+  // no email account set up on this Brain: the user's own mail program, filled in
+  location.href = `mailto:support@oakbarnbrewery.com?subject=${encodeURIComponent('Skynet feature request: ' + title)}&body=${encodeURIComponent(text)}`;
+  toast('Your mail program opens with the request filled in: press Send there.', false, 8000);
+}
 // ---- sign-in codes: where they go (each user) and how they are sent (admin)
 async function renderContact(who) {
   who = who || $('#ctUser').value || S.me.name;
@@ -12609,6 +12693,7 @@ function menuItems(list, go) {
     list.append(item('➕ Add Interface…', guard(() => addInterfaceDialog()), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
     list.append(item(S.sim?.on ? '🔌 Switch to Real boards' : '🧪 Switch to Simulator', guard(() => setSimulator(!S.sim?.on)), { title: 'Every Interface at once: the simulator (nothing real is switched) or the real boards' }));
   }
+  list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
   list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
@@ -12818,8 +12903,8 @@ const PAGE_PARTS = {
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
-    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
+    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };

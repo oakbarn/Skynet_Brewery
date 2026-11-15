@@ -9,7 +9,7 @@
  "07-media": "cd2cba48534d8adc",
  "08-import": "7e51289d961c126e",
  "09-settings": "b3b6640c11db2d40",
- "10-login": "9980b1d838c99a80",
+ "10-login": "6d86e529fff854fd",
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "84aa1d5a3f3fa2c2",
  "13-glossary": "64300781a8f7c7a8",
@@ -189,5 +189,6 @@
  "194-two-part-paths": "25640c03fec2a1df",
  "195-alarm-attributes": "9cd90714e93c30d1",
  "196-equipment-profile-interview": "aab2f1d2c077350a",
- "197-flame-out-safety": "cb435e30796568ac"
+ "197-flame-out-safety": "83c45c507d7d7d1d",
+ "198-patron": "bb68c2e6f760854d"
 }

@@ -16,6 +16,8 @@ the temperature **falls**, or **does not rise** after some minutes of burning, t
 flame out. Use a burner with its own flame safety (a UL or CSA listed thermocouple gas valve, or a flame sensor). Never brew with
 gas indoors without fresh air, and never leave a lit burner alone.
 
+**This is not a UL listed safety and should not be relied on. Always monitor the burner.**
+
 ## Which burners have it
 
 - A **Heating Element** with **Gas burner** switched On in its Properties (a burner on a gas valve). The Schema Builder's gas

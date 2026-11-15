@@ -66,6 +66,9 @@ import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/db
 import { renameInProcesses, renameInProcess, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
+import { Patron } from './lib/patron.js';
+import { lockDataFolder } from './lib/lockdata.js';
+import { Devices, DEVICE_COOKIE, isBrainItself } from './lib/devices.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
@@ -112,6 +115,7 @@ if (moved) for (const l of moved.lines) console.log(l);
 // A release has its samples in defaults/: a folder you don't have yet (first start) gets a copy; yours are never touched
 const seeded = IMPORT_BUILD ? [] : seedDefaults(ROOT);
 if (seeded.length) console.log(`First start: copied the samples into ${seeded.join(', ')}`);
+lockDataFolder(DATA);         // only this computer account can open the data folder (Rule 8.5, lib/lockdata.js)
 useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
@@ -132,6 +136,9 @@ const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
 const messaging = new Messaging(DATA);
+const devices = new Devices(DATA);
+const patron = new Patron(DATA);        // the Patron Level (Rule 12.4, lib/patron.js): a Patron code unlocks the Patron perks      // Approved Devices (Rule 8.6, lib/devices.js)
+const clientDev = new Map();            // event stream -> its device cookie, so removing a device signs it out at once
 // Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
 const PANEL_VERSION = readVersion(ROOT);
 const versionCheck = new VersionCheck(PANEL_VERSION);
@@ -286,6 +293,10 @@ flame?.start(() => clock.now());      // the simulator's clock, so a faster simu
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
+// add a Set-Cookie line without losing one already set (the device cookie and the sign-in cookie can go together)
+function addCookie(res, line) { const had = res.getHeader('Set-Cookie'); res.setHeader('Set-Cookie', had ? [].concat(had, line) : line); }
+// a device that was removed (or the switch turned On) is signed out at once
+function dropUnapprovedDevices() { for (const [res, dev] of clientDev) if (!devices.on ? false : !devices.approved(dev) && !res._brainItself) { res.end(); clients.delete(res); screens.delete(res); clientDev.delete(res); } }
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); screens.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of [...clients.keys()]) sse(res, ': ping\n\n'); }, 20000);
 
@@ -385,6 +396,7 @@ function needRole(p, m) {
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/openlink') return 'viewer';
+  if (p === '/ui/patron/feature') return 'viewer';      // a Patron's Request a Feature (Rule 12.4): anyone signed in on a Patron Brain
   if (p === '/ui/brokenlink') return 'viewer';      // anyone who can read Help can report a broken link (Rule 11.10)      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
@@ -448,25 +460,41 @@ async function route(req, res) {
     const q = new URL(req.url, 'http://x').searchParams, tab = q.get('tab') ?? '', vb = q.get('vb') ?? '';      // the Importer's Build Tab page for one Tab, or the Vessel Device Builder for one vessel
     res.writeHead(302, { 'Set-Cookie': `${IMPORT_COOKIE}=${k}; Path=/; HttpOnly; SameSite=Strict`, Location: vb ? `/#vb=${encodeURIComponent(vb.slice(0, 4000))}` : tab ? `/#tab=${encodeURIComponent(tab)}` : '/' }); return res.end();
   }
-  const me = IMPORT_BUILD ? importMe() : auth.check(token);
+  // Approved Devices (Rule 8.6): signed in AND an approved device, the Brain's own computer, or the switch Off
+  const dev = IMPORT_BUILD ? null : devices.idOf(parseCookies(req.headers.cookie), viaHttps(req));
+  if (dev?.set) addCookie(res, dev.set);
+  const deviceOk = u => { if (!u || !dev) return u; if (!devices.allowed(req, dev.token)) return null; devices.seen(dev.token); return u; };
+  const me = IMPORT_BUILD ? importMe() : deviceOk(auth.check(token));
   const ip = clientIp(req);
 
   // ===== Sign in / out, first-time setup, users =====
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
-    const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady(), passwordRules: passwordRulesView() });
+    const login = (tok, extra = {}) => { addCookie(res, auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
+    // a right password (or code) from a device that is not approved: no sign-in; the device waits for an Admin (Rule 8.6)
+    const gate = (tok, extra = {}) => {
+      const who = auth.check(tok);
+      if (IMPORT_BUILD || !dev) return login(tok, extra);
+      if (!devices.anyApproved() && who?.role === 'admin' && isPrivateAddress(ip)) { devices.approve(dev.token, who.name, req.headers['user-agent'], 'first Admin device'); return login(tok, extra); }
+      if (devices.allowed(req, dev.token)) return login(tok, extra);
+      auth.logout(tok);
+      const d = devices.ask(dev.token, who?.name ?? '', req.headers['user-agent'], ip);
+      return send(res, 403, { ok: false, waiting: true, device: d.name, error: `This ${d.name} is waiting for an Admin to approve it. Ask your Admin to open Settings > Approved Devices, then sign in again.` });
+    };
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, deviceWaiting: !!(dev && devices.on && !devices.allowed(req, dev.token) && devices.find(dev.token)?.state === 'waiting'), setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady(), passwordRules: passwordRulesView() });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
       const { name, password } = await jsonBody(req);
       auth.addUser(name, password, 'admin');
+      if (dev) devices.approve(dev.token, auth.findUser(name).name, req.headers['user-agent'], 'first Admin setup');
       return login(auth.newSession(auth.findUser(name).name), { recoveryCode: auth.makeRecoveryCode() });
     }
     if (p === '/auth/recover' && m === 'POST') {
       if (!isPrivateAddress(ip)) return fail(res, 403, 'Password recovery only works from your own network (home WiFi or Tailscale)');
       const { name, code, password } = await jsonBody(req);
       const r = auth.recover(name, code, password, ip); dropEndedSessions();
+      if (dev) devices.approve(dev.token, r.name, req.headers['user-agent'], 'recovery code');      // the recovery code proves it (Rule 8.6)
       return login(auth.newSession(r.name), { recoveryCode: r.code });
     }
     // sign in with a code sent by email or text. The answer is the same whether or not the user exists.
@@ -486,9 +514,9 @@ async function route(req, res) {
       }
       return ok(res, said);
     }
-    if (p === '/auth/code/login' && m === 'POST') { const { name, code } = await jsonBody(req); return login(auth.loginWithCode(name, code, ip)); }
-    if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return login(auth.login(name, password, ip)); }
-    if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); res.setHeader('Set-Cookie', auth.clearCookie()); return ok(res); }
+    if (p === '/auth/code/login' && m === 'POST') { const { name, code } = await jsonBody(req); return gate(auth.loginWithCode(name, code, ip)); }
+    if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return gate(auth.login(name, password, ip)); }
+    if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); addCookie(res, auth.clearCookie()); return ok(res); }
     if (!me) return fail(res, 401, 'Please sign in');
     if (p === '/auth/password' && m === 'POST') {
       const { current, password } = await jsonBody(req);
@@ -511,6 +539,12 @@ async function route(req, res) {
       return ok(res, { ok: true, sent: sent.map(t => `${t.kind} to ${t.to}`) });
     }
     if (p === '/auth/users' && m === 'GET') return ok(res, auth.listUsers());
+    // Approved Devices (Rule 8.6): the list, the On/Off switch, Approve, Rename, Refuse / Remove
+    if (p === '/auth/devices' && m === 'GET') return ok(res, { ...devices.view(dev?.token), brainItself: isBrainItself(req) });
+    if (p === '/auth/devices' && m === 'PUT') { const b = await jsonBody(req); if ('on' in b) devices.setOn(b.on); if (b.on && dev) devices.approve(dev.token, me.name, req.headers['user-agent'], me.name); dropUnapprovedDevices(); return ok(res); }
+    const dv = /^\/auth\/devices\/([0-9a-f]{12})$/.exec(p);
+    if (dv && m === 'PUT') { const b = await jsonBody(req); if (b.state === 'approved') devices.setState(dv[1], 'approved', me.name); if (b.name) devices.rename(dv[1], b.name); return ok(res); }
+    if (dv && m === 'DELETE') { devices.setState(dv[1], 'removed', me.name); dropUnapprovedDevices(); return ok(res); }
     if (p === '/auth/recovery' && m === 'GET') return ok(res, auth.recoveryInfo());
     if (p === '/auth/recovery' && m === 'POST') return ok(res, { ok: true, code: auth.makeRecoveryCode() });
     if (p === '/auth/users' && m === 'POST') { const { name, password, role } = await jsonBody(req); auth.addUser(name, password, role); return ok(res); }
@@ -617,7 +651,9 @@ async function route(req, res) {
   if (p === '/ui/events') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.write('retry: 2000\n\n');
-    clients.set(res, token); screens.set(res, { ua: String(req.headers['user-agent'] ?? ''), ip: clientIp(req) });
+    clients.set(res, token); if (dev) { clientDev.set(res, dev.token); res._brainItself = isBrainItself(req); }
+    req.on('close', () => clientDev.delete(res));
+    screens.set(res, { ua: String(req.headers['user-agent'] ?? ''), ip: clientIp(req) });
     req.on('close', () => { clients.delete(res); screens.delete(res); });
     return;
   }
@@ -1138,6 +1174,21 @@ async function route(req, res) {
   }
   // a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): ✉ Send in its pop-up emails the details to OakBarn Brewery support
   // when this Brain has email set up (Settings > Messaging); otherwise the page opens the computer's own mail program instead
+  // ===== the Patron Level (Rule 12.4): GET for everyone signed in; an Admin pastes or removes the Patron code
+  if (p === '/ui/patron' && m === 'GET') return ok(res, { ...patron.status(), emailReady: messaging.emailReady() });
+  if (p === '/ui/patron' && m === 'PUT') { const { code } = await jsonBody(req); try { patron.set(code); } catch (e) { return fail(res, 400, e.message); } return ok(res, patron.status()); }
+  if (p === '/ui/patron' && m === 'DELETE') { patron.clear(); return ok(res, patron.status()); }
+  // Request a Feature (a Patron perk): sent to OakBarn Brewery from this Brain's own email account; without one, the panel
+  // opens the user's own mail program instead. Nothing is kept on the Brain.
+  if (p === '/ui/patron/feature' && m === 'POST') {
+    if (!patron.has('feature')) return fail(res, 403, 'Request a Feature is a Patron perk');
+    const b = await jsonBody(req), title = String(b?.title ?? '').trim().slice(0, 200), text = String(b?.text ?? '').trim().slice(0, 8000);
+    if (!title || !text) return fail(res, 400, 'Give the feature a short title and say what it should do');
+    if (!messaging.emailReady()) return ok(res, { sent: false });
+    const st = patron.status();
+    try { await messaging.sendEmail('support@oakbarnbrewery.com', `Skynet feature request: ${title}`, `${text}\n\nPatron: ${st.name} (${st.levelName}, until ${st.expires})\nUser: ${me?.name ?? ''}\nSkynet: ${(() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'version.json'), 'utf8')).version; } catch { return ''; } })()}`); return ok(res, { sent: true }); }
+    catch (e) { return ok(res, { sent: false, error: e.message }); }
+  }
   if (p === '/ui/brokenlink' && m === 'POST') {
     let details = ''; try { details = String((await jsonBody(req))?.details ?? '').slice(0, 4000); } catch { /* nothing sent */ }
     if (!details || !messaging.emailReady()) return ok(res, { sent: false });
