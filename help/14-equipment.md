@@ -18,6 +18,16 @@ The same list has **Plate chiller**, **Chilling coil**, **HERMS coil**, **Trub f
 
 > Pipes only join IPs on the same tab.
 
+## A Chiller is a pipe
+
+A **Chiller** (Plate chiller, Counterflow chiller, Immersion coil or Chillzilla) works **the same as a pipe, no more, no less**:
+
+- It has an **IP at each inlet and outlet**, and nothing else.
+- It has **no On / Off**. Flow simply passes through it.
+- Flow comes from a **source** upstream, the same as in a pipe: a running pump, or an open Tap Water Valve. Pipe it up any way you like, for example from a valve that is always left open.
+- A plate or counterflow chiller has **two paths that never mix**: Wort In to Wort Out, and Water In to Water Out. Each path needs its own source. An Immersion coil has one path, In to Out.
+- To read the chilled wort, put a probe tee in the pipe beside it.
+
 ## Bundle a vessel with its IPs
 
 Bundling locks a vessel and its IPs together as one unit, so nothing gets bumped out of place. Bundle it once the IPs sit where you want them.
