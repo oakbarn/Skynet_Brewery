@@ -27,6 +27,7 @@ Un **refroidisseur** (Plate chiller, Counterflow chiller, Immersion coil ou Chil
 - L'écoulement vient d'une **source** en amont, comme dans un tuyau : une pompe en marche, ou une Tap Water Valve ouverte. Raccordez-le comme vous voulez, par exemple depuis une vanne toujours laissée ouverte.
 - Un refroidisseur à plaques ou à contre-courant a **deux passages qui ne se mélangent jamais** : Wort In vers Wort Out, et Water In vers Water Out. Chaque passage a besoin de sa propre source. Un Immersion coil a un seul passage, In vers Out.
 - Pour lire le moût refroidi, mettez un té à sonde dans le tuyau à côté.
+- Un refroidisseur à immersion mis à la main dans la cuve est placé et retiré par un Process : `place_Chiller = Immersion_Chiller, BK_Vessel` et `remove_Chiller = BK_Vessel` (voir [Chiller Overlay](200-chiller-overlay)).
 
 ## Regrouper une cuve avec ses IP (Bundle) {#bundle-a-vessel-with-its-ips}
 
