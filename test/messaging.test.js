@@ -167,4 +167,22 @@ if (cert) {
   dv.setState(d.key, 'removed', 'Admin'); assert.ok(!dv.allowed(far, token));
   dv.setOn(false); assert.ok(dv.allowed(far, token), 'switch Off: a password alone');
 }
+// ---- Rule 12.4: the Patron Level (a code signed by OakBarn Brewery unlocks the perks; no email address in it)
+{
+  const crypto = await import('node:crypto');
+  const { readCode, makeCode, Patron, PATRON_PUBLIC_KEY } = await import('../lib/patron.js');
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+  const pub = publicKey.export({ type: 'spki', format: 'der' }).toString('base64'), pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  const code = makeCode({ name: 'Dana', expires: '2027-05-15', privateKeyPem: pem });
+  const r = readCode(code, Date.parse('2027-01-01'), pub);
+  assert.ok(r.ok && r.active && r.name === 'Dana' && r.level === 'patron');
+  assert.ok(!/@/.test(Buffer.from(code.split('.')[1], 'base64url').toString()), 'no email address in a Patron code');
+  assert.ok(!readCode(code, Date.parse('2027-05-16T12:00:00'), pub).active, 'ended after its end date');
+  assert.ok(!readCode(code.slice(0, -2) + 'AA', Date.now(), pub).ok, 'a changed letter fails');
+  assert.ok(!readCode(code, Date.now(), PATRON_PUBLIC_KEY).ok, 'a code signed with another key fails');
+  assert.ok(!readCode('hello').ok);
+  const pd = fs.mkdtempSync(path.join(os.tmpdir(), 'bpp')), pt = new Patron(pd);
+  assert.ok(!pt.has('feature'));
+  assert.throws(() => pt.set('nope'), /not a Patron code/);
+}
 console.log('messaging tests passed');
