@@ -67,7 +67,7 @@ More about every question: [New Schema from a Skynet Template](157-schema-templa
 
 ## Step 5. An empty Schema
 
-**5a. Your board.** A new empty Schema has no board (Interface) yet. On the **Devices** page press **Add Interface**. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID** of 1 to 4 letters, for example **HS**. The Interface ID starts the name of every Device on that board. Pick the **Board** you have. Pick **Simulator** for **Connection** until the board is plugged in, fill in **Lost Link (s)** (10 to start), and press **💾 Save**.
+**5a. Your board.** A new empty Schema has no board (Interface) yet. On the **Devices** page press **Add Interface**. Give it a **Name** that means something to you (**✏ Change name**), for example **Hot_Side**, and an **Interface ID**, for example **HS** (Rule 3.2: once saved it never changes). The Interface ID starts the name of every Device on that board. Pick the **Board** you have. Pick **Simulator** for **Connection** until the board is plugged in, fill in **Lost Link (s)** (10 to start), and press **💾 Save**.
 
 ![Your new Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 
