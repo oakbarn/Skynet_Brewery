@@ -7914,7 +7914,7 @@ function heatFields(it, x = {}) {
   // (methodEntry), with its Use Method switch (saved as methodSpot_<key>, the old Enabled). The Current Method list offers only the methods in use.
   const on = HEAT_METHODS.filter(([k]) => allowedMethods(it).includes(k));
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['heatMethod', 'Current Method', 'sel', on.map(([k, w]) => [k, w]), true, 'b', { tip: m === 'hysteresis' ? HYS_HOVER_TIP : T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, true, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
+    ['heatMethod', 'Current Method', 'sel', on.map(([k, w]) => [k, w]), true, 'b', { tip: m === 'hysteresis' ? HYS_HOVER_TIP : T.heatMethod, methodPop: true, with: [['methodShort', 'Short Label', 'bool', null, true, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Hardware Controller', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
     ['_msHead', 'Method Settings', 'head', null, false, false, { tip: T.eMethodSet, ...x }],
@@ -7933,14 +7933,14 @@ function methodSetFields(k, it) {
   const T = DEVICE_TIPS, locked = k === 'onoff' || k === startMethod(it), use = locked || !!it['methodSpot_' + k];
   const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
-  const head = locked ? ['_useLock', 'Use Method', 'bool', null, false, false, { tip: T.useMethod, disabled: true }]
+  const head = locked ? ['_useLock', 'Use Method', 'bool', true, false, false, { tip: T.useMethod, disabled: true }]
     : ['methodSpot_' + k, 'Use Method', 'bool', null, true, false, { tip: T.useMethod }];
   if (!use) return [head];
   if (k === 'onoff') return [head, ['_doNote', 'Direct has nothing to set: it is simply full On or Off.', 'note']];
   const probe = NEEDS_PROBE.includes(k) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] }]] : [];
   const rest = k === 'hysteresis' ? [
     ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (-)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']] }],
-    PREDICTIVE_FIELD({ tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay') }], ['_waveD', '', 'wave', 'delay']] })]
+    PREDICTIVE_FIELD({ tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay'), def: heatDefault(k, 'ondelay') }], ['_waveD', '', 'wave', 'delay']] })]
     : HEAT_SETTINGS[k].filter(([, key]) => !(key === 'target' && probe.length)).map(([p, key, label]) => [key, label, 'num', null, false, false, { ...(elemTip(key) ? { tip: elemTip(key) } : {}), def: heatDefault(k, p) }]);      // each box shows its Skynet start (Rule 18.36)
   return [head, ...probe, ...rest,
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
@@ -8737,6 +8737,9 @@ function field(f, obj) {
     const nm = String(f[1] || '').replace(/^\d+\.\s*/, '');
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Opens a ${x.up} Line ${nm} Text Dialog`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.tip || x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
+    // the Current Method's own Settings (OakBarn Brewery, 2026-11-15: "a Icon that pops current properties methods"): the red ⬢ beside
+    // Current Method opens the Settings dialog of the method picked there (Rule 6.19)
+    if (x.methodPop) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: `${heatMethodWord(startMethod(obj))} Settings: the settings of the Current Method`, onclick: ev => { ev.preventDefault(); methodEntry(startMethod(obj), obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
   if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
