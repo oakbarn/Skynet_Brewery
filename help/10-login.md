@@ -16,7 +16,7 @@ Want the panel to pick a password for you? Tap the **key** in the Password box. 
 
 ## Your recovery code
 
-Right after the admin account is made, the panel shows a **recovery code** like `K7QM-3XPD-9RTA-WF2H`. It is shown only once, so **Copy**, **Download** or **Print** it, and tick **I saved my recovery code** to go on. Keep it away from the Pi (your wallet or a password manager).
+Right after the admin account is made, the panel shows a **recovery code** like `K7QM-3XPD-9RTA-WF2H`. It is shown only once, so **Copy**, **Download** or **Print** it, and tick **I saved my recovery code** to go on. Keep it away from the Brain, the Pi or PC that runs Skynet (your wallet or a password manager).
 
 An admin can make a new code in **Settings > Recovery code**. The old one stops working.
 
@@ -34,9 +34,29 @@ Each user can set their own email and number. Codes are limited to one a minute 
 
 ## Forgot your password?
 
-**Easiest:** on the sign-in page tap **Forgot password?** and enter your user name, the recovery code and a new password. This works only from your home network or through Tailscale. You are signed in, and the panel shows a **new** recovery code (each one works once), so save that one too.
+A password is reset only on your own Skynet. There are three ways:
 
-A helper forgot theirs? An admin sets a new one in **Settings > Users**.
+1. **Your recovery code (easiest):** on the sign-in page tap **Forgot password?** and enter your user name, the recovery code and a new password. This works only from your home network or through Tailscale. You are signed in, and the panel shows a **new** recovery code (each one works once), so save that one too.
+2. **Your Admin:** an Admin sets a new password for any user in **Settings > Users**.
+3. **At the Brain itself:** when there is no recovery code and no Admin can sign in, use the reset-password tool (see below).
+
+## Approved Devices
+
+A right password is not enough: each phone, tablet or computer must also be **approved** once by an Admin. This way a stolen password alone gets nobody in.
+
+1. Sign in on the new device. If it is not approved yet, it says **This device is waiting for an Admin to approve it**.
+2. An Admin opens **Settings > Approved Devices** and taps **Approve** (or **Refuse**) beside it.
+3. Sign in again on the new device.
+
+The Brain's own computer is always approved, so an Admin can always approve from there. The device that made the admin account, and a device that uses the recovery code, are approved by themselves. Lost or sold a phone? **Remove** it: it is signed out at once. **Rename** gives a device a plain name, such as Brew room tablet.
+
+An Admin can turn **Approved Devices** Off; then a right password alone signs in. If no approved device can sign in, run `node tools/reset-password.js --devices-off` at the Brain (see below).
+
+## Emails about your password are a scam
+
+**OakBarn Brewery never emails you about your password.** OakBarn Brewery does not have it: your users and passwords stay on your own Brain. An email that says it is from OakBarn Brewery and asks you to reset your password, sign in or send a code is a scam (phishing). Do not click its links; delete it.
+
+Your own panel can email you, but only what you turned on in its Settings: **sign-in codes** (above) and alarms. Those come from your own email account, named **Brew Panel**, never from OakBarn Brewery.
 
 ## Updates keep your logins
 
@@ -44,13 +64,25 @@ Installing a new version keeps every user, password, sign-in and the recovery co
 
 ## No recovery code and no admin can sign in?
 
-On the Pi, in the panel folder:
+At the Brain itself, in the panel folder.
+
+**On a Pi or Linux:**
 
 ```
 node tools/reset-password.js            (lists the users)
 node tools/reset-password.js Brewer      (asks for a new password for the user Brewer)
 sudo systemctl restart brewpanel
 ```
+
+**On a Windows PC:** open **Command Prompt**, then:
+
+```
+cd /d C:\Brewing\BrewPanel
+node tools\reset-password.js            (lists the users)
+node tools\reset-password.js Brewer      (asks for a new password for the user Brewer)
+```
+
+Then **Start menu > Skynet Brewer > Stop the Skynet Brain** and start **Skynet Brewer** again.
 
 ## Using the panel away from home
 

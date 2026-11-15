@@ -82,7 +82,9 @@ function showCode(code, name, isNew) {
   if (isNew) $('#codeTitle').textContent = 'Password changed. Save your NEW recovery code';
   codeText = `${st.title} recovery code\n\nUser: ${name}\nRecovery code: ${code}\nMade: ${new Date().toLocaleString()}\n\n` +
     'If you forget your password: on the sign-in page tap "Forgot password?", type your user name, this code and a new password.\n' +
-    'Each code works once; you then get a new one. Works from your home WiFi or Tailscale.\n';
+    'Each code works once; you then get a new one. Works from your home WiFi or Tailscale.\n' +
+    'An admin can also set a new password for any user in Settings > Users.\n\n' +
+    'OakBarn Brewery never emails you about your password. An email that says it is from us and asks you to reset it is a scam (phishing).\n';
   $('#codeBox').classList.remove('hidden');
   window.scrollTo(0, 0);
 }
@@ -112,6 +114,8 @@ async function init() {
   $('#lgTitle').textContent = st.title;
   document.title = 'Sign in - ' + st.title;
   setMode(st.setup ? 'setup' : 'login');
+  // Approved Devices (Rule 8.6): this device signed in with a right password and waits for an Admin
+  if (st.deviceWaiting) $('#lgError').textContent = 'This device is waiting for an Admin to approve it. Ask your Admin to open Settings > Approved Devices, then sign in again.';
 }
 
 $('#lgForgot').onclick = ev => { ev.preventDefault(); setMode('forgot'); };

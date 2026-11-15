@@ -25,11 +25,12 @@
   <a href="#" id="lgCodeLink" class="lgLink hidden">Email or text me a code instead</a>
   <a href="#" id="lgForgot" class="lgLink">Forgot password?</a>
   <a href="#" id="lgBack" class="lgLink hidden">Back to sign in</a>
+  <p class="muted lgPhish">OakBarn Brewery never emails you about your password. An email that says it is from us and asks you to reset it is a scam (phishing).</p>
 </form>
 <div id="codeBox" class="loginBox codeBox hidden">
   <p id="codeStep" class="step">Step 2 of 2</p>
   <h2 id="codeTitle">Save your recovery code</h2>
-  <p><b>This code is the only way back in if you forget your password.</b> It is shown only now.</p>
+  <p><b>With this code you can set a new password yourself if you forget it.</b> It is shown only now.</p>
   <div id="codeShow" class="recoveryCode big"></div>
   <div class="codeBtns">
     <button type="button" id="codeCopy">Copy</button>
@@ -43,8 +44,10 @@
       <li>Type your user name, this code and a new password.</li>
       <li>You get a new code. Save that one too (each code works once).</li>
     </ol>
-    This works from your home WiFi or Tailscale. An admin can make a new code any time in <b>Settings &gt; Recovery code</b>.
+    This works from your home WiFi or Tailscale. An admin can make a new code any time in <b>Settings &gt; Recovery code</b>,
+    and can set a new password for any user in <b>Settings &gt; Users</b>.
   </div>
+  <p class="muted lgPhish">OakBarn Brewery never emails you about your password. An email that says it is from us and asks you to reset it is a scam (phishing).</p>
   <label class="toggle saved"><input type="checkbox" class="swc" id="codeSaved"> I saved my recovery code somewhere safe</label>
   <button id="codeDone" class="primary" disabled>Continue to the panel</button>
 </div>

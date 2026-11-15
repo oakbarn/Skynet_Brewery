@@ -380,7 +380,7 @@ function setView(v, here = false) {
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
@@ -11882,6 +11882,90 @@ async function renderRecovery() {
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
 }
+// ---- Approved Devices (Rule 8.6, lib/devices.js): Approve or Refuse a waiting device, Rename, Remove; the On / Off switch
+async function renderApproved() {
+  if (!can('admin')) return;
+  const r = await api('GET', '/auth/devices');
+  $('#apdOn').checked = r.on;
+  const tb = $('#apdBody'); tb.innerHTML = '';
+  const when = t => t ? new Date(t).toLocaleString() : '';
+  const list = [...r.list].sort((a, c) => (a.state === 'waiting' ? 0 : 1) - (c.state === 'waiting' ? 0 : 1));
+  for (const d of list) {
+    const put = body => api('PUT', '/auth/devices/' + d.key, body).then(renderApproved);
+    const btns = d.state === 'waiting'
+      ? [h('button', { class: 'primary', onclick: guard(() => put({ state: 'approved' }).then(() => toast(`${d.name} is approved. ${d.user || 'They'} can sign in now.`))) }, 'Approve'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { await api('DELETE', '/auth/devices/' + d.key); renderApproved(); }) }, 'Refuse')]
+      : [h('button', { onclick: guard(async () => { const n = prompt('A name for this device (for example: Brew room tablet)', d.name); if (n) await put({ name: n }); }) }, 'Rename'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`)) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
+    tb.append(h('tr', {}, h('td', {}, d.name + (d.thisDevice ? ' (this device)' : '')), h('td', {}, d.user || ''),
+      h('td', {}, d.state === 'waiting' ? h('b', { class: 'bad' }, `Waiting since ${when(d.asked)}`) : 'Approved'),
+      h('td', {}, when(d.seen || d.approved)), h('td', {}, ...btns)));
+  }
+  if (!list.length) tb.append(h('tr', {}, h('td', { colspan: 5, class: 'muted' }, 'No devices yet.')));
+}
+$('#apdOn').onchange = guard(async ev => {
+  if (!ev.target.checked && !confirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.')) { ev.target.checked = true; return; }
+  await api('PUT', '/auth/devices', { on: ev.target.checked });
+  toast(ev.target.checked ? 'Approved Devices is On. This device is approved.' : 'Approved Devices is Off');
+  renderApproved();
+});
+// ---- the Patron Level (Rule 12.4, lib/patron.js, Help 198): an Admin pastes the Patron code from OakBarn Brewery; it unlocks the
+// Patron perks until its end date. A Patron code holds no email address; Patron emails are sent by OakBarn Brewery from outside Skynet.
+const PATRON_PAGE = 'https://oakbarnbrewery.com/#patron';
+const perkMark = st => ({ done: '', outside: ' (from oakbarnbrewery.com)', coming: ' (coming)' }[st] ?? '');
+function patronPerksList(levels) {
+  return levels.map(l => h('div', {}, h('b', {}, `${l.name}: ${l.price}`),
+    h('ul', {}, ...l.perks.map(p => h('li', {}, h('b', {}, p.name), perkMark(p.state), ': ', p.text)))));
+}
+async function renderPatron() {
+  const st = await api('GET', '/ui/patron'), box = $('#patronBox'); box.innerHTML = '';
+  if (st.active) box.append(h('p', {}, '⭐ ', h('b', {}, `${st.levelName}`), ` for ${st.name || 'this Brain'}, until ${st.expires}. Thank you for helping Skynet grow!`));
+  else if (st.hasCode && st.ok) box.append(h('p', { class: 'bad' }, `The Patron code ended on ${st.expires}. Renew on oakbarnbrewery.com, then paste the new code here.`));
+  else if (st.hasCode) box.append(h('p', { class: 'bad' }, st.error));
+  else box.append(h('p', { class: 'muted' }, 'Skynet is free. A Patron helps pay for it, and gets a few extras:'));
+  box.append(...patronPerksList(st.levels));
+  if (!st.active) box.append(h('p', {}, h('a', { href: PATRON_PAGE, target: '_blank', rel: 'noopener' }, 'Become a Patron on oakbarnbrewery.com'), h('span', { class: 'muted' }, ' (coming soon)')));
+  if (!can('admin')) return;
+  const inp = h('input', { placeholder: 'SKYPATRON1....', autocomplete: 'off', spellcheck: 'false', style: 'width:100%' });
+  box.append(h('label', {}, 'Patron code (from the email OakBarn Brewery sent you)', inp),
+    h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: guard(async () => { await api('PUT', '/ui/patron', { code: inp.value }); toast('Thank you! The Patron perks are unlocked.'); renderPatron(); }) }, 'Save Patron code'),
+      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!confirm('Remove the Patron code from this Brain? The Patron perks lock again.')) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
+    h('p', { class: 'muted' }, 'The code holds only the name to show, the level and the end date: never an email address. Patron emails come from OakBarn Brewery, never from your Brain.'));
+}
+// a pop-up with a title, any content, ✖ Close at the top and an optional main button; resolves true when the main button is pressed
+function infoPop(title, body, okText) {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const close = v => { d.close(); res(v); };
+    d.append(h('div', { class: 'vdTitle bar' }, h('span', {}, title), h('button', { type: 'button', onclick: () => close(false) }, '✖ Close')), body,
+      okText ? h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, okText)) : '');
+    d.oncancel = () => res(false);
+    d.showModal();
+  });
+}
+// a friendly note for a perk that needs the Patron Level (shown each time a Patron perk is tried)
+async function patronNudge(perkName) {
+  const st = await api('GET', '/ui/patron');
+  const body = h('div', {}, h('p', {}, h('b', {}, perkName), ' is a Patron perk. Skynet is free; a Patron helps pay for it and gets a few extras:'),
+    ...patronPerksList(st.levels), h('p', {}, h('a', { href: PATRON_PAGE, target: '_blank', rel: 'noopener' }, 'Become a Patron on oakbarnbrewery.com'), h('span', { class: 'muted' }, ' (coming soon)')),
+    h('p', { class: 'muted' }, 'Already a Patron? An Admin pastes your Patron code in Settings > Patron.'));
+  await infoPop('⭐ Patron perk', body);
+}
+// ☰ Menu > Request a Feature (a Patron perk)
+async function requestFeature() {
+  const st = await api('GET', '/ui/patron');
+  if (!st.active) return patronNudge('Request a Feature');
+  const t = h('input', { maxlength: 200, style: 'width:100%' }), d = h('textarea', { rows: 6, maxlength: 8000, style: 'width:100%' });
+  const body = h('div', {}, h('label', {}, 'Title (a few words)', t), h('label', {}, 'What should it do? (the more the better)', d));
+  if (!(await infoPop('⭐ Request a Feature', body, 'Send to OakBarn Brewery'))) return;
+  const title = t.value.trim(), text = d.value.trim();
+  if (!title || !text) return toast('Give the feature a short title and say what it should do', true);
+  const r = await api('POST', '/ui/patron/feature', { title, text });
+  if (r.sent) return toast('Sent. Thank you! The OakBarn Brewery team reads every request.');
+  // no email account set up on this Brain: the user's own mail program, filled in
+  location.href = `mailto:support@oakbarnbrewery.com?subject=${encodeURIComponent('Skynet feature request: ' + title)}&body=${encodeURIComponent(text)}`;
+  toast('Your mail program opens with the request filled in: press Send there.', false, 8000);
+}
 // ---- sign-in codes: where they go (each user) and how they are sent (admin)
 async function renderContact(who) {
   who = who || $('#ctUser').value || S.me.name;
@@ -12605,6 +12689,7 @@ function menuItems(list, go) {
     list.append(item('➕ Add Interface…', guard(() => addInterfaceDialog()), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
     list.append(item(S.sim?.on ? '🔌 Switch to Real boards' : '🧪 Switch to Simulator', guard(() => setSimulator(!S.sim?.on)), { title: 'Every Interface at once: the simulator (nothing real is switched) or the real boards' }));
   }
+  list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
   list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
@@ -12814,8 +12899,8 @@ const PAGE_PARTS = {
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
-    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
+    ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Patron', '#sec-patron'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
