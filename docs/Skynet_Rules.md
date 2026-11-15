@@ -2882,6 +2882,20 @@ Image that says File Not Found when the path does not work"; "Looks good use it"
   seconds while one is missing; no closing, no F5. Skynet does this in the Background and needs no user input (Rule 11.13).
 Both programs: the BruControl Import's Build page shows it too.
 
+7.25 **Help pictures stay sharp** (OakBarn Brewery, 2026-11-15: "All of the graphics in the Hover Help ... are very poor and hard to read"):
+- Pictures in `media/help_pictures` (Help pages and Hover Help) are **never swapped for a traced SVG copy** (Settings > Pictures,
+  lib/vectorize.js). A traced copy turns small words into blobs. They show the picture itself, whatever Settings > Pictures is
+  set to, unless a **hand-made SVG** of the same name sits next to it; then that drawing is used, since it is sharp at any size.
+- Help pictures are not traced at all, so no copies are made for them.
+- **Words in a Help picture are real text, never part of the graphic** (OakBarn Brewery, 2026-11-15: "And any text has to be
+  text and not just part of a grahic"): the picture is a hand-made SVG whose words are &lt;text&gt;, so they stay sharp at any size
+  and can be translated.
+- **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
+  or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
+  (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
+Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
+the pictures themselves (and the hand-made SVGs). Help 7.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -4638,6 +4652,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Added Rule 7.25 Help pictures stay sharp (OakBarn Brewery: "All of the graphics in the Hover Help ... are very poor and hard to read"): Help pictures are never swapped for the panel's traced SVG copies (they smeared the words); Words in Help pictures are real text, and any Help picture from a PNG or PDF is redrawn. Pump_8_IPs, Pump_Right_Left, Red_Pump_Label, Label_Visible_Switch, IP_Marker and Pump_IP_Example_1/2 redrawn as hand-made SVGs. Help 7 (and French). Checked against both programs. (thread "Sharpen Hover Help pictures")
 - 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
 - 2026-11-15: Rule 2.12 changed (OakBarn Brewery: "An attribute on IPs that says No Unlock individually. So an IP can be locked individually that overrides the Unlock when moving"): an IP or pipe fitting has a **No Unlock** switch; 🔓 Unlock All (and unlocking its vessel) passes it by, and only its own 🔓 Unlock unlocks it. Help 56 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rules 5.41 and 5.42 corrected (OakBarn Brewery: "A Chillzilla is a counter flow chiller and not an immersion chiller so place_Chiller could not place a counter flow chiller. A Chillzilla also has 4 IPs"): place_Chiller places only an immersion chiller with 2 IPs (Immersion_Chiller); a Chillzilla is a counterflow chiller with 4 IPs. Help 200 (and French) updated. Checked against both programs: the Panel's Brain runs it; the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
