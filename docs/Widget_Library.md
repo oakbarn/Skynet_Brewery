@@ -90,6 +90,7 @@ A brass household hose bib with a green cross handle (Images/Skynet/Valves/Tap_W
 
 ### Manual Pump Widget (`manualPump`, 2026-11-08, Rules 1.28 and 5.15a, Help 162)
 A pump plugged into a wall outlet and switched **by hand**: no Interface or Port turns it. Added from Select Device Type > Pumps or Select Widget Type > Semi_Widgets_Devices; step 2 picks the pump from the same list as Add Pump (March 809 / 815, Chugger, Blichmann Riptide, Topsflo TD5, KegLand MKII) or the Sump pump. Name `wgt_MP_Label_TabID` (Label starts Pump 1, Pump 2 ...). 150 x 150.
+**Sump Pump by hand** (2026-11-15, Help 162): its own row in the same two lists, a Manual Pump with the Sump pump picture made in one step; its Label starts Sump 1 (`wgt_MP_Sump~1_BR`). Inside an Ice Water Can it draws the can's water.
 
 | Setting | Notes |
 |---|---|
@@ -296,6 +297,13 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 - Settings: Name, Type (Brew Kettle, HLT, Mash Tun, Other), Label, Units, Gallons (`volume`, 5 to start), Height (`vheight`), Width (`diameter`), Calculated Volume (read only), Bottom Outlet IP Type (`ipTypeOut`: tc, npt, bsp, qd), Graphic, Out flow color, Label look, Tab, X, Y, Width, Height (Master Vessel Sizer only), Lock position.
 - Hose hang top: its top third is one IP for a Quick Disconnect hose (Rules 5.28, 5.34).
 - The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller kinds were removed on 2026-11-15.
+
+### Ice Water Can (Rule 19.8, Help 201)
+- A big trash can (or tub or cooler) of ice and water, in Add equipment: a Widget with no Devices and no IPs of its own. `vesselType` `iceCan`. Name `Ice_Water_Can_1`, Label starts Ice Water.
+- Picture drawn by Skynet for its box (public/icecan.js): grey can, rim, two handles, blue water, ice cubes. Graphic empty = drawn.
+- Settings: Name, Type (Ice Water, Other), Label, Graphic, Out flow color (starts Blue), Label look, Tab, X, Y, Width, Height, Lock position. No Gallons (not brewing liquid; sized by dragging).
+- Hose hang top: its top third is one IP for a Quick Disconnect hose (Rules 5.28, 5.34).
+- A running pump whose inlet sits inside it, with nothing joined to that inlet (the Sump Pump by hand), draws its water: the flow takes its Out flow color.
 
 ---
 
@@ -590,3 +598,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-09: Alarm Widget gets Digital Output 1 and 2 (Rule 7.19, Help 178). (thread "Find BruControl properties missing in Skynet")
 - 2026-11-09: Chart Widget: a Hydrometer's line has an SG / °P / °Bx switch right on the Graph (Rule 6.25, Help 170). (thread "Add Hydrometer Device with templates")
 - 2026-11-15: A Chiller (Plate chiller, Chilling coil) is the same as a pipe (Rule 5.41): no On / Off, no Size, Units or Dead space, no built-in Thermowell. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Sump Pump by hand row (a Manual Pump with the Sump pump picture, Label Sump 1) and the new Ice Water Can (Rule 19.8, Help 201). (thread "Add a manual Sump Pump widget")

@@ -205,7 +205,7 @@ What each ID means:
   - Valve type: **Electro_Mechanical** (switched by its pin) or **Manual** (turned by hand; a Process shows a pop-up and waits for Done)
   - Orientation: by its shape, Horizontal, Vertical, 45° Left, 45° Right
   - Service (what flows through it; a Gas valve can heat a vessel)
-  - Tap water valve (open = tap water flows, no pump needed): on / off; Tap Water flows: Left to Right / Right to Left (lying flat) or Top to Bottom / Bottom to Top (standing up), or Both ways
+  - Tap water valve (open = tap water flows, no pump needed): on / off; Tap Water flows: Left to Right / Right to Left (lying flat) or Top to Bottom / Bottom to Top (standing up); always one way, tap side to Out
   - On the Close all valves list / On the Open all valves list (Rule 6.15): on / on to start. A tap water valve is always on
     Close all and never on Open all (no switches shown); a Manual valve is on neither.
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
@@ -222,7 +222,7 @@ What each ID means:
   Look normal, Ask before changing, background / .backpath, _2, _3, Digits, Hide value.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
   Interface, Pin, Invert, One-shot, Dual Throw (Rule 6.22), **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
-  **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
+  **Tap water valve** (off by default) with **Tap Water flows**: Top to Bottom / Bottom to Top (vertical) or Left to Right / Right to Left
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
 - Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88. At **45 degrees** they turn with the picture and stay on
