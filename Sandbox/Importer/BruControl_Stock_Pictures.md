@@ -23,8 +23,8 @@ So each of the 11 is handled in two ways:
 1. **Normally: the brewer chooses a Skynet Device or Widget** (an Interview question, see below). The item becomes that Device or
    Widget, drawn by Skynet. OakBarn Brewery, 2026-11-15: "actally for Pump need to select one of our Pumps!", "Sam with Kettle, Pick
    or create in impoter" and "snd and On Off choose a Skynet Boolean Widget".
-2. **Backup: the new OakBarn picture** ("Set B", approved by OakBarn Brewery 2026-11-15), used when the brewer does not choose a
-   Device or Widget, so the item still shows a picture. All 11 are drawn from scratch (not traced or copied), the same shape as
+2. **Backup: the new OakBarn picture** ("Set B", approved by OakBarn Brewery 2026-11-15), only when the brewer still wants a
+   picture after the Importer steers them toward a Device or Widget. All 11 are drawn from scratch (not traced or copied), the same shape as
    BruControl's (160 x 128, a rounded coloured square with a white symbol) so they sit in the same spot on an imported Tab.
    Names follow the Skynet name characters (letters, numbers, _ only).
 
@@ -49,8 +49,15 @@ Like every new picture, they go in the Image Library only when OakBarn Brewery s
 
 ## The Interview question
 
+OakBarn Brewery, 2026-11-15: "Keep as Backups but steer user in import away from use."
+
 When the Importer finds a stock picture, it asks the brewer what the item should become, naming the BruControl item and Tab:
-the Devices or Widgets in the "Normally" column for that picture, plus **"Keep a picture: use the OakBarn picture"** (the backup).
+
+1. **First, and recommended:** the Devices or Widgets in the "Normally" column for that picture. The first one is picked
+   (the default), marked "Recommended".
+2. **Last, below a line:** "Keep a picture: use the OakBarn picture". Under it, a plain grey note steers the brewer away:
+   "Not recommended. A picture only shows; it does not control or read anything. A Skynet Device or Widget does."
+
 Until answered, the item keeps a Placeholder. Not built yet: show OakBarn Brewery the question wording before building (like the
 other Interview questions in `Sandbox/Importer/Interview_Questions.md`).
 
