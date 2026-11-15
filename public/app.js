@@ -1,7 +1,7 @@
 import { addEyes } from './eye.js';
 import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -3820,17 +3820,19 @@ function letGoBentEnds(skip = null) {
 // REJOIN_PX of an IP joins it again. A straight pipe joins only if it stays Horizontal, Vertical or 45; if not, a free IP point
 // with no other pipe on it moves back onto the pipe end instead. Returns how many ends joined.
 const REJOIN_PX = 14;
-function rejoinEnds(only = null) {
+function rejoinEnds(only = null, one = null, end = null) {
   if (!draft) return 0;
   let n = 0;
-  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) {
-    for (const k of ['from', 'to']) {
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2 && (!one || g === one))) {
+    for (const k of end ? [end] : ['from', 'to']) {
       const own = p[k] && ownCoupling(p[k], p); if (!own) continue;
       const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
       const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other && (!only || only.has(q.id))).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
         .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
       for (const q of near) {
+        const lined = p.straight && pts.length === 2 ? inLine(pts[j], e, q.c, OFF_PX) : null;
         if (!p.straight || pts.length !== 2 || onAngle(q.c, pts[j], 0.5)) pts[i] = [...q.c];
+        else if (lined) pts[i] = lined;         // an IP a pixel off the pipe's line (a picture's IP): the end stops level with it
         else {
           const g = draft.graphics.find(x => x.id === q.id && x.kind === 'ip');
           if (!g || isFitting(g) || g.attachTo || g.locked || pipesOn(g.id, p.workspace).length) continue;
@@ -3948,10 +3950,11 @@ function grabPopup(it, locked = []) {
     : `${nPipes} pipe${nPipes > 1 ? 's' : ''} joined to it`;
   const close = () => d.close();
   const btn = (text, title, fn, cls = 'big') => h('button', { type: 'button', class: cls, title, onclick: () => { fn(); close(); } }, text);
-  const unlock = btn(it.kind === 'pipe' ? '🔓 Unlock its ends' : '🔓 Unlock its IPs', it.kind === 'pipe' ? 'Its ends let go of what they are joined to and stay open, so the pipe moves alone. Then grab it again.'
+  const unlock = btn(it.kind === 'pipe' ? '🔓 Unlock its ends' : '🔓 Unlock its IPs', it.kind === 'pipe' ? (it.hose ? 'Its ends let go of what they are joined to and stay open, so the hose moves alone. Then grab it again, or drag an open end to redraw where the hose goes.' : 'Its ends let go of what they are joined to and stay open, so the pipe moves alone. Then grab it again, or drag an open end to make the pipe shorter or longer.')
     : 'Its pipe ends let go and stay where they are (open ends), so it moves alone and the pipes and fittings stay. Then grab it again and move it. ↩ Put back (Ctrl+Z) joins them again.', () => {
     pushUndo(`unlock ${who}`); unlockJoins(joins); grabWith.delete(it.id || it.name); renderWs();
-    toast(`🔓 ${who}: ${joins.length} pipe end${joins.length > 1 ? 's' : ''} let go. Grab it again and move it. Drop an IP back on an open end to join it again; ↩ Put back (Ctrl+Z) undoes it.`, false, 7000);
+    toast(it.kind === 'pipe' ? `🔓 ${who}: ${joins.length} end${joins.length > 1 ? 's' : ''} let go. Grab it again and move it, or drag an open end to ${it.hose ? 'redraw where the hose goes' : 'make the pipe shorter or longer'}. An end dropped on an IP joins it; ↩ Put back (Ctrl+Z) undoes it.`
+      : `🔓 ${who}: ${joins.length} pipe end${joins.length > 1 ? 's' : ''} let go. Grab it again and move it. Drop an IP back on an open end to join it again; ↩ Put back (Ctrl+Z) undoes it.`, false, 7000);
   }, 'big primary');
   // a pipe or hose: 🗑 Delete Pipe / Delete Hose, red (OakBarn Brewery, 2026-11-14: "Add Delete Button to Hose and Pipe Disconnect
   // Dialog"); its own IPs go with it, and ↩ Put back (Ctrl+Z) brings it back
@@ -4071,12 +4074,14 @@ function renderPipes() {
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
-      // a pipe end let go (🔓 Unlock its ends) has a handle: drag it along the pipe to shorten or lengthen it (OakBarn Brewery,
-      // 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten")
-      else if (!p.locked && (p.points || []).length > 1) for (const i of [0, p.points.length - 1]) if (openEnd(p, i)) {
-        const q = p.points[i]; g.append(mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }));
-      }
+      // a hose's bends always have a handle; an end of a pipe or hose has one once it is let go (🔓 Unlock its ends or Unlock its IPs):
+      // drag it to change the length of a pipe (along its line) or to redraw where a hose goes (OakBarn Brewery, 2026-11-14: "After a
+      // Pipe is disconnected to Move, able to Shorten"; 2026-11-15: "Ability to change the Length of a Pipe once it has been saved";
+      // "Hose also need to be Redrawn after its IPs are unlocked", Rule 5.37)
+      if (!p.locked && (p.points || []).length > 1) (p.points || []).forEach((q, i) => {
+        if (!(i > 0 && i < p.points.length - 1 && p.hose) && !endMoves(p, i)) return;
+        g.append(mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }));
+      });
     }
     const own = layers.get(p.id); if (own) own.append(g); else { const n = pipeLayer(p.id); n.append(g); mine.push(n); }      // in its own place in the Layer Order (Rule 1.29)
   }
@@ -4175,10 +4180,13 @@ $('#ws').addEventListener('pointerdown', ev => {
     }
     drawPts.push(c); renderPipes(); return;
   }
+  // a let-go end under the pointer wins over the valve, pump, vessel or fitting IP it sits on, so it can always be grabbed
+  const oe = !noMove() && openEndAt(p);
+  if (oe) { sel = { kind: 'gfx', id: oe.p.id }; drag = { mode: 'point', item: oe.p, i: oe.i }; delete oe.p.qdAuto; ev.preventDefault(); return; }
   // the coupling on a let-go pipe end is its handle too: dragging it shortens or lengthens the pipe along its line
   const cpl = ev.target.closest?.('[data-gid]'), cg = cpl && draft?.graphics.find(x => x.id === cpl.dataset.gid && x.kind === 'ip' && x.fitting === 'coupling');
   const cp = cg && draft.graphics.find(x => x.kind === 'pipe' && !x.hose && !x.locked && (x.from === cg.id || x.to === cg.id));
-  if (cp && openEnd(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
+  if (cp && endMoves(cp, cp.from === cg.id ? 0 : cp.points.length - 1) && !noMove()) {
     sel = { kind: 'gfx', id: cp.id }; drag = { mode: 'point', item: cp, i: cp.from === cg.id ? 0 : cp.points.length - 1 }; ev.preventDefault(); return;
   }
   const handle = ev.target.closest('circle.handle');
@@ -4269,7 +4277,7 @@ $('#ws').addEventListener('pointermove', ev => {
     resizeBy(drag, dx, dy, k); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
   if (drag.mode === 'move' || drag.mode === 'resize') showGeo(ev, drag.item);
   if (drag.mode === 'point' && !drag.item.hose) { shortenPipe(drag.item, drag.i, p); renderWs(); }
-  else if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
+  else if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; endCouplingTo(drag.item, drag.i); renderWs(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
 const DRAG_DEAD_PX = 4;          // screen pixels
@@ -4335,6 +4343,7 @@ window.addEventListener('pointerup', () => {
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
   }
+  else if (drag?.mode === 'point' && drag.moved && (drag.i === 0 || drag.i === drag.item.points.length - 1)) rejoinEnds(null, drag.item, drag.i === 0 ? 'from' : 'to');     // the let-go end dropped on an IP joins it (Rule 5.37); the other end stays as it is
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
   drag = null;
 });
@@ -4728,6 +4737,33 @@ function shortenPipe(p, i, at) {
   pts[i] = [Math.round(o[0] + ux * d), Math.round(o[1] + uy * d)];
   const c = draft.graphics.find(x => x.id === (i === 0 ? p.from : p.to));
   if (c) { c.x = pts[i][0] - (c.w || 30) / 2; c.y = pts[i][1] - (c.h || 30) / 2; }
+}
+// a pipe or hose end that can be dragged in Edit layout: the pipe or hose is not 🔒 locked, and the end is let go (an open end whose
+// coupling is not 🔒 locked either, so an IP set to No Unlock stays put, Rule 2.12), or it is a Quick Disconnect hose's free end
+function endMoves(p, i) {
+  if (!p || p.locked || (p.points || []).length < 2 || (i !== 0 && i !== p.points.length - 1)) return false;
+  if (isQdHose(p) && i === p.points.length - 1) return true;
+  if (!openEnd(p, i)) return false;
+  return !L().graphics.find(x => x.id === (i === 0 ? p.from : p.to))?.locked;
+}
+// the let-go end nearest the pointer (within END_GRAB_PX), on this Tab: { p, i }
+const END_GRAB_PX = 12;
+function openEndAt(c) {
+  let best = null;
+  for (const p of (draft?.graphics || [])) {
+    if (p.kind !== 'pipe' || p.workspace !== wsName || p.locked || (p.points || []).length < 2) continue;
+    for (const i of [0, p.points.length - 1]) {
+      const q = p.points[i], d = Math.hypot(q[0] - c[0], q[1] - c[1]);
+      if (d <= END_GRAB_PX && (!best || d < best.d) && endMoves(p, i)) best = { p, i, d };
+    }
+  }
+  return best;
+}
+// a hose end moved by hand: its open-end coupling goes with it (a pipe end's goes in shortenPipe)
+function endCouplingTo(p, i) {
+  if (i !== 0 && i !== p.points.length - 1) return;
+  const g = ownCoupling(i === 0 ? p.from : p.to, p); if (!g) return;
+  g.x = p.points[i][0] - (g.w || 30) / 2; g.y = p.points[i][1] - (g.h || 30) / 2;
 }
 function deletePipe(p) {
   draft.graphics = draft.graphics.filter(g => g !== p);

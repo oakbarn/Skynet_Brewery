@@ -1,7 +1,7 @@
 // Rule 5.19 (Fritz, 2026-11-02): pipes run only Horizontal, Vertical or 45 and turn only at a fitting
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dirOf, onAngle, angledEnd, alongLine, fitFor } from '../public/pipefit.js';
+import { dirOf, onAngle, angledEnd, alongLine, fitFor, inLine } from '../public/pipefit.js';
 import { straightenPipes } from '../lib/pipes.js';
 
 test('only Horizontal, Vertical and 45 are allowed angles', () => {
@@ -149,4 +149,19 @@ test('a tee dropped over an open end makes the pipe shorter; over a joined end i
 test('a Skynet pipe fitting is drawn once', async () => {
   const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /else if \(g\.image && !isUnit\(\{ \.\.\.g, loose: false \}\)\) n\.style\.backgroundImage/);
+});
+
+// A saved pipe's length, a saved hose's shape (OakBarn Brewery, 2026-11-15, Rule 5.37): a let-go end has a handle and can be dragged,
+// it is grabbed before the pump, valve or vessel IP it sits on, and dropped on an IP that end (only) joins it
+test('a let-go end of a pipe or hose can be dragged and joins an IP it is dropped on', async () => {
+  assert.deepEqual(inLine([1208, 680], [1388, 680], [1385, 681]), [1385, 680], 'an IP a pixel off the line: the end stops level with it');
+  assert.equal(inLine([1208, 680], [1388, 680], [1385, 690]), null, 'off to the side: no join');
+  assert.equal(inLine([1208, 680], [1388, 680], [1100, 680]), null, 'behind the other end: no join');
+  const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const oe = !noMove\(\) && openEndAt\(p\);/, 'a let-go end comes first on a press');
+  assert.ok(app.indexOf('const oe = !noMove() && openEndAt(p);') < app.indexOf("const pip = ev.target.closest('.devip');"), '... before a pump or valve IP');
+  assert.match(app, /return !L\(\)\.graphics\.find\(x => x\.id === \(i === 0 \? p\.from : p\.to\)\)\?\.locked;/, 'an end on a locked IP (No Unlock too) stays put');
+  assert.match(app, /if \(!p \|\| p\.locked/, 'a locked pipe or hose stays put');
+  assert.match(app, /endCouplingTo\(drag\.item, drag\.i\)/, 'a hose end takes its coupling with it');
+  assert.match(app, /rejoinEnds\(null, drag\.item, drag\.i === 0 \? 'from' : 'to'\)/, 'dropped on an IP, only that end joins');
 });

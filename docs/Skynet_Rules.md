@@ -546,6 +546,10 @@ button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+*Includes pipe length and hose redrawing (OakBarn Brewery, 2026-11-15: "Rule 2.12 should include the redrawing size and hoses"):*
+changing a pipe's length or redrawing a hose is a move too. Only an **unlocked** pipe or hose can be made shorter or longer or
+redrawn, and only at an end that is let go whose IP is unlocked (No Unlock too); a 🔒 locked pipe or hose keeps its length and
+shape (Rule 5.37). (Help 56, Help 153)
 *Changed (Fritz, 2026-11-05: "Locked Vessels cannot be moved with a Mouse but can be moved by there x y attributes"):* a 🔒
 **locked Vessel** can't be moved with the mouse, but a new **X** or **Y** typed in its Properties moves it, to the pixel (moving
 something 1 pixel left can look much better on the screen). Its IPs, joined fittings and End Caps go with it, as with a drag,
@@ -1885,6 +1889,16 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **Shorten a let-go pipe** (OakBarn Brewery, 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten"): a pipe end
   that 🔓 Unlock its ends let go (an open coupling) can be dragged along the pipe's own line to make it shorter or longer (never off
   its line, at least 10 pixels); its coupling goes with it.
+- **Change a saved pipe's length, redraw a saved hose** (OakBarn Brewery, 2026-11-15: "Ability to change the Length of a Pipe once
+  it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to
+  be Redrawn after its IPs are unlocked"; Help 153): once an end of a pipe or hose is let go (🔓 Unlock its ends, or 🔓 Unlock its IPs
+  on what it was joined to), that end has a round handle and can be dragged, saved or not: a **pipe** end along the pipe's own line
+  (shorter or longer, as above), a **hose** end **anywhere** (the hose bends to follow; the round handles in its middle change its
+  bends). The let-go end can be grabbed even where it sits on a pump, valve, vessel or fitting IP: it comes first. Dropped within 14
+  pixels of an IP, that end joins it at once (only that end; the other stays as it is); anywhere else it stays open. Skynet does
+  this in the Background and needs no user input. Nothing else changes: an end still joined, a 🔒 locked pipe or hose, and an end
+  whose IP is 🔒 locked (No Unlock too, Rule 2.12) do not move. ↩ Put back (Ctrl+Z) undoes each drag; Save layout keeps it.
+  **Both programs:** the BruControl Import's Build page is the Panel's Edit layout, so it works the same there.
 - **Deleting a pipe or hose takes its own IPs with it** (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on
   the Build"; "Check same issue for Hose"), from this pop-up or from its Properties: a coupling or IP point on one of its ends goes
   too when nothing else is on it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel).
@@ -4665,6 +4679,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Rule 2.12 now says it includes changing a pipe's length and redrawing a hose (OakBarn Brewery: "Rule 2.12 should include the redrawing size and hoses"): only an unlocked pipe or hose, at a let-go end with an unlocked IP, changes. Help 56 (and French) updated. (thread "Let saved pipes and hoses be resized")
+- 2026-11-15: Rule 5.37 extended (OakBarn Brewery: "Ability to change the Length of a Pipe once it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to be Redrawn after its IPs are unlocked"): a let-go end of a saved pipe or hose has a handle and can be dragged, a pipe end along its line (length), a hose end anywhere (redraw); it comes before the pump, valve, vessel or fitting IP it sits on; dropped on an IP, that end joins it. Locked pipes, hoses and IPs (No Unlock too) stay put. Help 153 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Let saved pipes and hoses be resized")
 - 2026-11-15: **Rule 3.2 rewritten: The ID Rule** (OakBarn Brewery: "Another Rule about IDs for Interfaces, Tabs, and any other Item that has a User Set ID ... Once saved, Never Changed even by an Admin"; "Remove that Rule or state that Tab IDs follow the Rule #"; letters and numbers picked on a decision card). Every user-set ID: a unique suggestion on a new build, 1 to 4 letters or numbers starting with a letter, unique, never changed once saved (not even by an Admin), shown first in lists (BH: Brew House). A taken Interface suggestion is now MB2 (was MB_2, which broke the 4 characters). Help 13, 46, 76, 115, 188, the Device Library and the Interface and Tab balloons now say IDs follow Rule 3.2 instead of repeating it. Checked against both programs: the Panel's Tab settings, Interface pop-up and Devices page lock a saved ID and the Brain refuses a changed one; the BruControl Import's Boards and Tabs page uses the same check (public/naming.js). Older Schemas: before the first Public Production (No old ways), a saved ID that breaks the Rule (MB_2) gets a new one once when its Schema loads. (thread "Add a Rule for permanent user IDs")
 - 2026-11-15: Added Rule 7.25 Help pictures stay sharp (OakBarn Brewery: "All of the graphics in the Hover Help ... are very poor and hard to read"): Help pictures are never swapped for the panel's traced SVG copies (they smeared the words); Words in Help pictures are real text, and any Help picture from a PNG or PDF is redrawn. Pump_8_IPs, Pump_Right_Left, Red_Pump_Label, Label_Visible_Switch, IP_Marker and Pump_IP_Example_1/2 redrawn as hand-made SVGs. Help 7 (and French). Checked against both programs. (thread "Sharpen Hover Help pictures")
 - 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
