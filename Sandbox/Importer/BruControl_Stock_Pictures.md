@@ -16,15 +16,16 @@ The pictures themselves are **not** in this repo (it is public). OakBarn Brewery
 Each is a white symbol on a coloured square, 640 x 512 pixels.
 
 OakBarn Brewery (2026-11-15): "I generally did not use them but I know user who did. I think there are some in Tartan other users did
-so we have to come up with our own 11." So **every one of the 11 gets an OakBarn picture**, one for one: 10 new drawings, drawn from scratch
-(not traced or copied), and for Pump one of Skynet's own pump pictures (OakBarn Brewery, 2026-11-15: "actally for Pump need to select one of our Pumps!"). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
+so we have to come up with our own 11." So **every one of the 11 gets an OakBarn picture**, one for one: 9 new drawings, drawn from scratch
+(not traced or copied), and for Pump and Kettle the brewer picks or creates one of Skynet's own (OakBarn Brewery, 2026-11-15:
+"actally for Pump need to select one of our Pumps!" and "Sam with Kettle, Pick or create in impoter"). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
 a rounded coloured square with a white symbol. Names follow the Skynet name characters (letters, numbers, _ only).
 
 | BruControl picture | What it shows | New OakBarn drawing | What ours shows |
 |---|---|---|---|
 | Valve.png | Valve symbol (bow tie) | `Skynet_Icon_Valve.svg` | Valve with a handle on top |
-| Pump.png | Impeller in a circle | `Images/Skynet/Pumps/Pump_Red_Rip_Off.svg` (one of our own pump pictures; which one is still being picked) | A RipTide pump, Off |
-| Kettle.png | Pot | `Skynet_Icon_Kettle.svg` | Pot with handles and liquid |
+| Pump.png | Impeller in a circle | **The brewer picks or creates it in the Importer** (see below) | One of Skynet's own pumps |
+| Kettle.png | Pot | **The brewer picks or creates it in the Importer** (see below) | One of Skynet's own vessels |
 | On-Off.png | Power button symbol | `Skynet_Icon_On_Off.svg` | ON slide switch |
 | Liquid Temp.png | Thermometer in liquid | `Skynet_Icon_Liquid_Temp.svg` | Probe dipping into a pot of liquid |
 | Clock.png | Clock face | `Skynet_Icon_Clock.svg` | Stopwatch |
@@ -39,6 +40,19 @@ are added as Skynet media together with the Daisy Chain pictures (OakBarn Brewer
 chain ones"), so they go out in the same Media Setup update, each with its row in docs/Media_Licenses.csv (OakBarn Brewery's own).
 The swap plan itself stays here in the Sandbox until the Big Merge.
 Like every new picture, they go in the Image Library only when OakBarn Brewery says so.
+
+## Pump and Kettle: the brewer picks or creates one (Interview question)
+
+A BruControl Pump or Kettle picture is not swapped for one fixed picture. When the Importer finds one, it asks the brewer
+(an Interview question, Rule 15.4) to choose:
+
+- **Pump:** pick one of Skynet's own pumps (the RipTide, March, Chugger, KegLand, Topsflo ... pictures in Images/Skynet/Pumps), or
+  create one with the Pump Device (its Template and Cover Color).
+- **Kettle:** pick one of Skynet's own vessels (Images/Skynet/Vessels), or create one with the Vessel Device Builder (Rule 19.5).
+
+The question names the BruControl item and Tab so the brewer knows which one it is. Until answered, the item keeps a Placeholder.
+Not built yet: show OakBarn Brewery the question wording before building (like the other Interview questions in
+`Sandbox/Importer/Interview_Questions.md`).
 
 ## How the Importer will spot them (when built)
 
@@ -66,7 +80,7 @@ Fingerprints of the copies OakBarn Brewery sent:
 
 What happens to a caught picture:
 
-- It is **not copied**. The item points to its new OakBarn drawing instead.
+- It is **not copied**. The item points to its new OakBarn drawing instead (Pump and Kettle: the one the brewer picked or created).
 - The import report lists each swap: "BruControl stock picture Valve.png swapped for Skynet_Icon_Valve.svg".
 - The brewer's BruControl files are never touched (Rule 15.4: originals stay where they were).
 
