@@ -42,7 +42,8 @@ They are on two of the pump's **8 IPs** (the 4 corners and the middle of each si
 Outlet on the Top Right, with a Hose or Pipe drawn from its real ports to them. The sump pump keeps its own: the middle of the
 screen at its bottom (IN) and the top of the riser on its right (OUT).
 
-Orientation **Left** mirrors the pump, and its IPs mirror with it.
+Orientation **Left** mirrors the pump. A pump added as Left starts with its Inlet on the Left Middle and its Outlet on the Top Left.
+Switching the Orientation later leaves its IPs where they are, and the Hose or Pipe inside the pump is drawn again to reach them.
 
 ## Older Schemas
 
