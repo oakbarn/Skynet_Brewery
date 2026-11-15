@@ -89,3 +89,12 @@ assert.match(app, /function freezeDialogTop\(d\)/); assert.match(app, /try \{ fr
 assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\) \.dlgBottomBar, dialog#dlg:has\(#dlgBody \[data-k="ipTypeFrom"\]\) \.dlgBottomBar(, [^{]*)? \{ display: none; \}/, 'the Pump dialog (the model) and each dialog updated since (Rule 2.51: the Pipe and Hose Properties) lose their bottom row');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.51 \*\*A frozen top on the model dialog\*\*/m);
 console.log('pump model tests passed');
+// Blichmann RipTide Dialog 1 focus order (OakBarn Brewery, 2026-11-15, Rule 18.38): Enter only between the Label and the Port, the Tab key
+// cycles the box's own fields, Interface and Tab are never jumped to
+assert.match(app, /const pumpFocus = dd && isPumpDev\(e\);/, 'the Pump Add box');
+assert.match(app, /if \(t === lab\) \{ if \(labOk && ps && !ps\.disabled\) ps\.focus\(\); return true; \}/, 'Enter: Label to Port, a blank Label stays');
+assert.match(app, /if \(pumpFocus && !confirmed && body\.contains\(t\)\) return pumpEnter\(t\);/, 'until Confirmed');
+assert.match(app, /&& \(!pumpFocus \|\| confirmed \|\| ev\.target\.dataset\?\.k === 'device'\)\)/, 'only a new Interface goes on by itself');
+assert.match(app, /if \(!pumpFocus && tab && !tab\.value && tab\.offsetParent !== null\)/, 'the Tab is never jumped to');
+assert.match(app, /if \(pumpFocus\) dlgEl\.addEventListener\('keydown', pumpTabKey, true\);/, 'the Tab key cycle');
+console.log('RipTide Dialog 1 focus order ok');

@@ -12,7 +12,10 @@ The idea: the things you set most are on the dialog itself. Everything else is o
    KegLand MKII. The picture you pick is the pump's Picture.
 3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
    and colors) and **Label Visible**, 2 the **Interface** (the board), 3 an **Available Port**, 4 the **Tab**. Then 5 the
-   **Suggested Name** shows, made from them. The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
+   **Suggested Name** shows, made from them. The cursor starts in the **Label**. **Enter** goes only between the **Label** and the
+   **Port** (Enter in an empty Label stays there). The **Tab** key goes Label, ⬆, ⬢, Label Visible, Interface, Port, Tab and back
+   to the Label, and you can click any of them at any time, even before the Label is typed. The ? Help, ✖ Cancel and ➕ Add Device
+   are for the mouse (Skynet Rule 18.38). The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
    Once the **Interface** and **Port** are picked, the **Review** pop-up shows them greyed out with: *You MUST Confirm the
    Interface and Port Number. Once Confirmed, they cannot be changed. If a Change is needed now, Click the Back Button.*
    **✔ Confirm** greys out the **Interface** and **Available Ports** line (it is the wiring; press Cancel to start again);

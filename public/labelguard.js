@@ -1,8 +1,9 @@
-// The Label can't be blank (Skynet Rule 18.28, Fritz 2026-11-05): in any dialog with a Label field, when the Label is blank and
-// the user clicks (or taps, or Tabs / Enters to) any other field or icon, except Cancel and Delete, a small pop-up says
-// "The Label cannot be blank." and goes away by itself after 5 seconds. The click does nothing and the Label keeps the focus.
-// The same for a Port, when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the user is
-// on a blank Port, every other field but the ones before it (the Label and the Interface) gets the pop-up "The Port cannot be blank."
+// The Label can't be blank (Skynet Rule 18.28, OakBarn Brewery 2026-11-15, Blichmann RipTide Dialog 1): in any dialog with a Label
+// field, while the Label is blank the Tab key and the mouse still reach every other field and icon of the dialog (a user may want
+// the ⬆ two-line box, the ⬢, the Interface or the Tab first). Only Save / ➕ Add (and a box that gets no focus: greyed out or read
+// only) wait for it: a small pop-up says "The Label cannot be blank." and goes away by itself after 5 seconds, and the Label gets
+// the focus back. Enter on a blank Label stays on it, and leaving it for nothing (a click on empty space) gives it the focus back.
+// The same for a Port, when the Device needs one, except that a blank Port never keeps the focus.
 // One shared helper for every Device and Widget dialog: it watches the whole page, so a dialog needs no code of its own for the
 // Label. A Port is marked by its dialog with data-guard="Port" and data-guard-allow="label device" (the fields it may go back to).
 export const LABEL_WARN = 'The Label cannot be blank.';
@@ -20,6 +21,10 @@ const isLabelField = t => t?.dataset?.k === 'label' && !!t.closest?.('dialog[ope
 export const isDeleteButton = b => !!b && (b.dataset?.close === 'delete' || b.value === 'delete' || /^[^\p{L}\p{N}]*delete\b/iu.test(String(b.textContent ?? '').trim()));
 export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
 
+// Save, ➕ Add Device, ➕ Add Widget ...: the button that keeps what is in the dialog
+export const isSaveButton = b => !!b && (b.value === 'ok' || b.dataset?.close === 'ok' || /^[^\p{L}\p{N}]*(save|add)\b/iu.test(String(b.textContent ?? '').trim()));
+// the Label and the Port follow Rule 18.28; a box the program needs (Rule 18.33, data-guard-now) still holds the focus
+export const isOpenGuard = f => !f?.dataset?.guardNow && (f?.dataset?.k === 'label' || f?.dataset?.guard === 'Port');
 const showing = i => !i.disabled && !i.readOnly && i.offsetParent !== null;
 // the field that guards this spot: the blank, editable, showing Label of the open dialog it is in; or else a blank Port the user is on
 export function guardingField(t) {
@@ -39,6 +44,12 @@ export function allowedWhileBlank(t, field) {
   if (t.closest?.('.labelWarn')) return true;
   if (isCancelButton(t.closest?.('button'))) return true;
   if (isDeleteButton(t.closest?.('button'))) return true;      // Delete just deletes (it asks first, on its own)
+  if (isOpenGuard(field)) {
+    const b = t.closest?.('button');
+    if (b) return !isSaveButton(b);       // ⬆ ⬢ ? and the rest; Save / ➕ Add wait
+    const c = t.closest?.('input, select, textarea, label.sw');
+    if (c) { const i = c.matches?.('label.sw') ? c.querySelector?.('input') : c; return !!i && !i.disabled && !i.readOnly; }
+  }
   const back = String(field.dataset?.guardAllow ?? '').split(/\s+/).filter(Boolean);
   if (back.length) {
     const k = t.closest?.('[data-k]')?.dataset?.k ?? t.closest?.('.fldIcons')?.querySelector('[data-k]')?.dataset?.k;
@@ -82,10 +93,17 @@ export function installLabelGuard(doc = document) {
     const t = ev.target;
     if (!['Tab', 'Enter'].includes(ev.key) || !t?.dataset || guardingField(t) !== t) return;
     if (ev.shiftKey && ev.key === 'Tab' && t.dataset.guardAllow) return;      // a Port may go back to the Interface
+    if (isOpenGuard(t) && (ev.key === 'Tab' || t.dataset.k !== 'label')) return;      // Tab goes on; Enter stays only on a blank Label
     ev.preventDefault(); ev.stopImmediatePropagation();
     showWarn(t);
   }, true);
   doc.addEventListener('focusin', ev => { if (ev.target?.dataset?.guard) ev.target.dataset.visited = '1'; }, true);
+  // a blank Label left for nothing (a click on empty space, a title, a greyed out box) gets the focus back
+  doc.addEventListener('focusout', ev => {
+    const t = ev.target, to = ev.relatedTarget, d = t?.closest?.('dialog[open]');
+    if (!d || t.dataset?.k !== 'label' || guardingField(t) !== t || (to && (!d.contains(to) || to.matches?.('input, select, textarea, button')))) return;
+    setTimeout(() => { const a = doc.activeElement; if (d.open && t.isConnected && (!a || a === doc.body || (d.contains(a) && !a.matches('input, select, textarea, button')))) t.focus(); }, 0);
+  }, true);
   // © ® ™ @ ~ typed or pasted in a Label are taken out at once (@ ~ become a space), and the same small box says why (Rule 3.4)
   doc.addEventListener('input', ev => {
     const t = ev.target;

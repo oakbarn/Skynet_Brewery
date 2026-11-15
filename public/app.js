@@ -5553,6 +5553,7 @@ async function newDeviceDialog(e, hint, what) {
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
+  const pumpFocus = dd && isPumpDev(e);      // the Blichmann RipTide Dialog 1 focus order (Rule 18.38)
   const profKind = isPumpDev(e) ? 'pump' : e._pickedValve && S.valveProfiles?.length ? 'valve' : null;
   if (profKind === 'pump') applyPumpProfile(e, markedProfile('pump'));       // the Default Pump Profile, before the box shows it
   if (mbv && e.template) e._orient = orientPick(e);
@@ -5634,6 +5635,18 @@ async function newDeviceDialog(e, hint, what) {
     return why;
   };
   let portSel = null;
+  // the Pump (Rule 18.38): the Tab key cycles through the fields of the box only (the ? Help, ✖ Cancel and ➕ Add Device are for the
+  // mouse), last back to first. A blank Label keeps the focus when it is left for nothing (public/labelguard.js, Rule 18.28).
+  const dlgEl = $('#dlg');
+  const pumpTabKey = ev => {
+    if (ev.key !== 'Tab' || ev.altKey || ev.ctrlKey || ev.metaKey || !dlgEl.contains(ev.target)) return;
+    const l = [...body.querySelectorAll('input, select, textarea, button')].filter(x => !x.disabled && x.type !== 'hidden' && x.tabIndex >= 0 && x.offsetParent !== null);
+    if (!l.length) return;
+    ev.preventDefault();
+    const i = l.indexOf(ev.target), n = l.length;
+    l[i < 0 ? 0 : (i + (ev.shiftKey ? n - 1 : 1)) % n].focus();
+  };
+  if (pumpFocus) dlgEl.addEventListener('keydown', pumpTabKey, true);
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
@@ -5676,7 +5689,7 @@ async function newDeviceDialog(e, hint, what) {
         if (!yes) { setTimeout(() => ps?.focus(), 0); return; }
         confirmed = k; gate();
         const tab = body.querySelector('[data-k="workspace"]');
-        if (tab && !tab.value && tab.offsetParent !== null) setTimeout(() => tab.focus(), 0);
+        if (!pumpFocus && tab && !tab.value && tab.offsetParent !== null) setTimeout(() => tab.focus(), 0);      // the Pump: never jumped to (Rule 18.38)
       };
       // Fritz's Blichmann Pump Sequence (2026-11-04, Rule 18.20): Enter goes 1 Label, 2 Interface, 3 Available Ports, 4 Tab,
       // then Orientation (a Pump) and last the ➕ Add Device button; picking from a dropdown of the sequence goes on to the next one.
@@ -5684,17 +5697,33 @@ async function newDeviceDialog(e, hint, what) {
         body.querySelector('select[data-k="typeCode"]'), body.querySelector('[data-k="workspace"]'), body.querySelector('select.orientSel')]
         .filter(x => x && !x.disabled && x.offsetParent !== null);
       const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
+      // Blichmann RipTide Dialog 1 (OakBarn Brewery, 2026-11-15, Rule 18.38): until the Interface and Port are Confirmed, the Enter key
+      // stops only on the Label and the Port ("All"). ⬆, ⬢, Label Visible, Interface and Tab are reached by the Tab key or the mouse
+      // only ("TMF"), at any time, and are never jumped to. Device Type gets no focus ("NF"). The ? Help, ✖ Cancel and ➕ Add Device
+      // are left out of the Tab key cycle (the mouse uses them).
+      const pumpLab = pumpFocus && body.querySelector('[data-k="label"]'), pumpPort = () => pumpFocus && body.querySelector(`[data-k="${port[0]}"]`);
+      const pumpEnter = t => {
+        const lab = pumpLab, ps = pumpPort(), labOk = !!String(lab?.value ?? '').trim();
+        if (t === lab) { if (labOk && ps && !ps.disabled) ps.focus(); return true; }       // an empty Label: Enter stays on it
+        if (t === ps) { const w = { ...work }; try { readFields(w, body); } catch { }
+          if (labOk && wireKey(w) && confirmed !== wireKey(w)) askReview(w); else lab?.focus(); return true; }
+        // a TMF field: Enter goes on to the next All field after it (Label Visible and Interface: the Port; the Tab: back to the Label)
+        const before = ps && (t.compareDocumentPosition(ps) & Node.DOCUMENT_POSITION_FOLLOWING);
+        (before && !ps.disabled ? ps : lab)?.focus(); return true;
+      };
       dlgEnterSeq = t => {
+        if (pumpFocus && !confirmed && body.contains(t)) return pumpEnter(t);
         if (dd && t?.dataset?.k === port[0]) { const w = { ...work }; try { readFields(w, body); } catch { } if (wireKey(w) && confirmed !== wireKey(w)) { askReview(w); return true; } }
         if (seq().includes(t)) { seqNext(t); return true; } return false;
       };
       // Fritz, 2026-11-05: a blank Label gets the focus; a Label Skynet filled in is skipped (taken as accepted, still editable) and
       // the focus goes to the Interface, which has its default to accept or change
       { const l = seq(), lab = body.querySelector('[data-k="label"]'), dv = body.querySelector('[data-k="device"]');
-        (lab && !String(lab.value ?? '').trim() ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
+        (lab && (pumpFocus || !String(lab.value ?? '').trim()) ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
       body.oninput = body.onchange = ev => {
         gate();
-        if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)) { const t = ev.target; setTimeout(() => seqNext(t), 0); }
+        if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)
+          && (!pumpFocus || confirmed || ev.target.dataset?.k === 'device')) { const t = ev.target; setTimeout(() => seqNext(t), 0); }      // the Pump: only a new Interface goes on to its Port (Rule 18.38)
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === '_orient') {      // a Skynet valve turned: its Template's size (Rule 5.17)
           const sp = skyOrientPic(ev.target.value);
@@ -5773,7 +5802,7 @@ async function newDeviceDialog(e, hint, what) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; delete b.dataset.help; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
+  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; dlgEl.removeEventListener('keydown', pumpTabKey, true); for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; delete b.dataset.help; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
 }
 // ---- The Add Widget box of a Picture Widget (Fritz, 2026-11-05, Rule 18.27): the Add Device box's look and sequence for a Widget.
 // 1 Label (⬢) and Label Visible, 2 Picture, 3 Tab (the 🔨 Build Tab, Rule 4.1; greyed out), then the Name and the rest show. Enter
