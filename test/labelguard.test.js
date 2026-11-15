@@ -40,3 +40,14 @@ assert.ok(allowedWhileBlank({ closest: q => q === 'button' ? delBtn : null }, bl
 assert.ok(allowedWhileBlank({ closest: q => q === 'button' ? { dataset: {}, textContent: '🗑 Delete Hose' } : null }, pulses), 'Delete works with a blank needed box');
 assert.ok(!allowedWhileBlank({ closest: q => q === 'button' ? { dataset: {}, value: 'ok', textContent: 'Save' } : null }, blankLabel), 'Save still waits for the Label');
 console.log('labelguard ok');
+// Rule 18.28 (OakBarn Brewery, 2026-11-15, Blichmann RipTide Dialog 1): a blank Label or Port lets the Tab key and the mouse reach
+// every other field and icon; only Save / ➕ Add and a greyed out box wait. A needed box (Rule 18.33) still holds the focus.
+const { isSaveButton, isOpenGuard } = await import('../public/labelguard.js');
+const ctl = (tag, extra = {}) => ({ closest: q => (q === 'button' ? (tag === 'button' ? extra : null) : q.includes(tag) && tag !== 'button' ? { matches: () => false, ...extra } : null) });
+assert.ok(allowedWhileBlank(ctl('select', { disabled: false, readOnly: false }), blankLabel), 'the Interface or Tab with a blank Label');
+assert.ok(allowedWhileBlank(ctl('button', { dataset: {}, textContent: '⬆' }), blankLabel), 'the ⬆ with a blank Label');
+assert.ok(!allowedWhileBlank(ctl('select', { disabled: true, readOnly: false }), blankLabel), 'a greyed out box gets no focus');
+assert.ok(!allowedWhileBlank(ctl('button', { dataset: {}, textContent: '➕ Add Device' }), blankLabel), 'Add Device waits for the Label');
+assert.ok(isSaveButton({ dataset: {}, textContent: '💾 Save' }) && !isSaveButton({ dataset: {}, textContent: '⬢' }));
+assert.ok(isOpenGuard({ dataset: { guard: 'Port' } }) && !isOpenGuard(pulses), 'a needed box still holds the focus');
+console.log('labelguard Rule 18.28 open fields ok');
