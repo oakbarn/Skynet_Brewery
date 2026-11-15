@@ -66,6 +66,7 @@ import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/db
 import { renameInProcesses, renameInProcess, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
+import { Patron } from './lib/patron.js';
 import { lockDataFolder } from './lib/lockdata.js';
 import { Devices, DEVICE_COOKIE, isBrainItself } from './lib/devices.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
@@ -135,7 +136,8 @@ const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
 const messaging = new Messaging(DATA);
-const devices = new Devices(DATA);      // Approved Devices (Rule 8.6, lib/devices.js)
+const devices = new Devices(DATA);
+const patron = new Patron(DATA);        // the Patron Level (Rule 12.4, lib/patron.js): a Patron code unlocks the Patron perks      // Approved Devices (Rule 8.6, lib/devices.js)
 const clientDev = new Map();            // event stream -> its device cookie, so removing a device signs it out at once
 // Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
 const PANEL_VERSION = readVersion(ROOT);
@@ -394,6 +396,7 @@ function needRole(p, m) {
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/openlink') return 'viewer';
+  if (p === '/ui/patron/feature') return 'viewer';      // a Patron's Request a Feature (Rule 12.4): anyone signed in on a Patron Brain
   if (p === '/ui/brokenlink') return 'viewer';      // anyone who can read Help can report a broken link (Rule 11.10)      // an outside link opens in the default browser (anyone who can read Help)
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
@@ -1171,6 +1174,21 @@ async function route(req, res) {
   }
   // a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): ✉ Send in its pop-up emails the details to OakBarn Brewery support
   // when this Brain has email set up (Settings > Messaging); otherwise the page opens the computer's own mail program instead
+  // ===== the Patron Level (Rule 12.4): GET for everyone signed in; an Admin pastes or removes the Patron code
+  if (p === '/ui/patron' && m === 'GET') return ok(res, { ...patron.status(), emailReady: messaging.emailReady() });
+  if (p === '/ui/patron' && m === 'PUT') { const { code } = await jsonBody(req); try { patron.set(code); } catch (e) { return fail(res, 400, e.message); } return ok(res, patron.status()); }
+  if (p === '/ui/patron' && m === 'DELETE') { patron.clear(); return ok(res, patron.status()); }
+  // Request a Feature (a Patron perk): sent to OakBarn Brewery from this Brain's own email account; without one, the panel
+  // opens the user's own mail program instead. Nothing is kept on the Brain.
+  if (p === '/ui/patron/feature' && m === 'POST') {
+    if (!patron.has('feature')) return fail(res, 403, 'Request a Feature is a Patron perk');
+    const b = await jsonBody(req), title = String(b?.title ?? '').trim().slice(0, 200), text = String(b?.text ?? '').trim().slice(0, 8000);
+    if (!title || !text) return fail(res, 400, 'Give the feature a short title and say what it should do');
+    if (!messaging.emailReady()) return ok(res, { sent: false });
+    const st = patron.status();
+    try { await messaging.sendEmail('support@oakbarnbrewery.com', `Skynet feature request: ${title}`, `${text}\n\nPatron: ${st.name} (${st.levelName}, until ${st.expires})\nUser: ${me?.name ?? ''}\nSkynet: ${(() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'version.json'), 'utf8')).version; } catch { return ''; } })()}`); return ok(res, { sent: true }); }
+    catch (e) { return ok(res, { sent: false, error: e.message }); }
+  }
   if (p === '/ui/brokenlink' && m === 'POST') {
     let details = ''; try { details = String((await jsonBody(req))?.details ?? '').slice(0, 4000); } catch { /* nothing sent */ }
     if (!details || !messaging.emailReady()) return ok(res, { sent: false });
