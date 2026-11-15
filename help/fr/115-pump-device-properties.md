@@ -55,9 +55,9 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
    fixée par Skynet et ne peut pas être changée, donc un dessin de pompe Skynet n'a pas de case Path. Une pompe User garde sa case **Path**, donc sa seule
    image peut être changée. Le Graphic change dès que vous choisissez une autre Orientation ou un autre Cover.
 7. **Orientation** : ![Right et Left](help_pictures/Pump_Right_Left.png)
-   **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent, et ses IP
-   suivent. Changer l'Orientation fait passer l'Inlet IP et l'Outlet IP du côté opposé aussi : Right devient Left et Left devient
-   Right (Bottom Right devient Bottom Left, Top Left devient Top Right). Une IP Middle en haut ou en bas reste où elle est.
+   **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent. Changer l'Orientation
+   laisse l'Inlet IP et l'Outlet IP où elles sont, donc les tuyaux et les flexibles qui y sont joints ne bougent pas ; le Hose ou
+   Pipe dans la pompe est redessiné pour les rejoindre.
 8. **Cover** (aide 111, dessins de pompes Skynet seulement) et **Toggle** sur une ligne. Le Toggle est ce qui se passe quand on clique sur la pompe
    sur le Tab : **On/Off** (un clic l'allume ou l'éteint, le plus courant), **Push Button** (allumée seulement tant qu'on appuie), **Dual
    Action** (un clic l'allume ou l'éteint ; appuyée et tenue plus d'une demi-seconde, elle est allumée seulement tant qu'on appuie, pratique pour compléter
@@ -268,8 +268,8 @@ Exemple 2 :
 Les tuyaux ou tuyaux souples se raccordent à une IP à la position choisie si leur bout est à 10 px ou moins de cette
 ![IP](help_pictures/IP_Marker.png) quand on les dessine.
 
-Changer l'Orientation les fait passer du côté opposé aussi (voir Orientation plus haut) : l'exemple 2 passé à Right a son Inlet en
-Bottom Left et son Outlet en Top Right.
+Changer l'Orientation les laisse où elles sont (voir Orientation plus haut) : l'exemple 2 passé à Right garde son Inlet en
+Bottom Right et son Outlet en Top Left, et le Hose ou Pipe dans la pompe est redessiné pour les rejoindre.
 
 **Hose or Pipe** : ce qui est dessiné depuis l'entrée et la sortie de la pompe elle-même jusqu'à son Inlet IP et son Outlet IP : un
 Hose blanc, ou un Pipe en inox. Il est dessiné par-dessus la pompe et son Cover sous l'overlay On.
