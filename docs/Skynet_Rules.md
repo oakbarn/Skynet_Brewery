@@ -3139,12 +3139,25 @@ Setup (same pages, choices, Uninstall and Rules) with every Skynet picture and s
 Media Setup's way (Rule 9.12): a file already there by that name is never changed and nothing is deleted. It adds them after a
 Start Fresh, so a Fresh Start gets them back with no second Setup. Its welcome page says it is the Full one, and its file Details
 say "Full Setup". The plain Skynet Brewer Setup, the Media Setup and the Media zip stay on every Release as they are (Rule #1,
-Never Take Away): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
+Never Take Away; the Media Setup and zip are made new only when media changed, Rule 9.21): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
 (`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
 .exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
 VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
 media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
 Help 19 and 183)
+
+9.21 **The Media Setup and Media zip are made new only when Skynet pictures or sounds are added** (OakBarn Brewery, 2026-11-15:
+"Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"). On every merge the release workflow
+looks at the last Media Setup on a published Release. If nothing in `media/` (and nothing in the Media Setup's own script,
+`install/windows/SkynetMedia.nsi`) changed since it was made, the new Release carries **that same Media Setup and Media zip,
+unchanged, with their own older date in the name**, and its notes say so. If a picture or sound was added (or anything in `media/`
+changed), both are made new with the new date. Media stays add-only (Rule 9.12): a changed drawing is a new file with a new name, so
+any change means new media. The Media Setup and zip are still on every Release, so the Latest Release always has them (Rule #1,
+Never Take Away). The plain Skynet Brewer Setup and the Full Setup are made on every merge as before, and the Full Setup always
+carries every picture and sound (Rule 9.20). OakBarn Brewery can force a new Media Setup with **Actions > Panel version > Run
+workflow > rebuild media** (for example once signing is set up, Rule 9.10, so the Media Setup gets signed). If the last one cannot be
+found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is in the same Setup; nothing
+changes there). (thread "Rebuild Media Setup only when media changes", Help 183)
 
 ## 10. Testing
 
@@ -4516,6 +4529,27 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 3. **Both programs:** the BruControl Import has no Equipment Profiles, so the Interview is in the Skynet Panel only. The Import's
    Build page is not changed.
 
+19.7 **The Stove Top Vessel: a Widget with IPs and a hose hang top, drawn for its Height and Width** (OakBarn Brewery, 2026-11-13:
+"We need stove top Vessel with the Hose hang top and size attributes H_w and Gallons and make the Graphic Dynamic top"; 2026-11-15:
+"Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones. 1 no Outlets, 2. Outlet at Bottom with the conector types
+like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build the Stove Top Vessel", Help 199).
+- **Two of them, next to Add equipment:** **Stove Top Vessel** (no outlets) and **Stove Top Vessel, Bottom Outlet** (one IP at the
+  center of the bottom). Both are Widgets with IPs and **no Devices**. They are the only choices there besides the Skynet equipment
+  Widgets: the older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller are gone (OakBarn
+  Brewery, 2026-11-13: "remove for now. We will build several Vessel Template Devices where these would be").
+- **Hose hang top:** its top third is one big IP, as on every vessel (Rules 5.28 and 5.34): a Quick Disconnect hose dropped there, or
+  a Process line `Hose_1.connect = Stove_Top_Vessel_1`, hangs over the rim into the pot.
+- **Size (Vessel Rules):** Units, **Gallons** (5 to start), **Height**, **Width** (across the pot) and a read only **Calculated
+  Volume**. Both Height and Width typed: drawn by its real size and shape (as the Diameter method, Rule 19.2). Either empty: a stock pot
+  as tall as it is wide, sized by its Gallons. It follows the Tab's Master Vessel Sizer (Rule 19.3) and can be the Master.
+- **Its picture is drawn by Skynet for its box** (the "Graphic Dynamic"): pot body, rim and two side handles, flat grey #808080 with a
+  black outline and no text (the Label is its only text). A Graphic picked by the user is used instead.
+- **The Bottom Outlet IP** has a **Bottom Outlet IP Type**: Tri-Clamp, NPT, BSP or Quick Disconnect, like a pipe end (Rule 5.40). It
+  starts as the Default pipe IP Type, is drawn as its type under the pot, and is the size of the pipe or hose joined to it (a pipe end
+  on it draws no second connector).
+- **Both programs:** the BruControl Import's Build page is the Panel's own, so it has both. BruControl has no stove top pot, so an
+  import never makes one.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4557,9 +4591,12 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Added Rule 9.21 (OakBarn Brewery: "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"): the Media Setup and Media zip are made new only when something in media/ changed since the last ones; otherwise each Release carries the last ones unchanged, with their own date. The plain Setup and Full Setup are still made on every merge; Run workflow > rebuild media forces new ones. Rule 9.20 points to it. Help 183 (and French).
+- 2026-11-15: Added Rule 19.7 Stove Top Vessel (OakBarn Brewery: "Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones"; "Center Bottom on Stove Top Widget and it gets IP"): Stove Top Vessel and Stove Top Vessel, Bottom Outlet next to Add equipment; hose hang top, Gallons, Height, Width, a drawing made for its Height and Width, Bottom Outlet IP Type (Rule 5.40). The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller choices removed (OakBarn Brewery, 2026-11-13: "remove for now"). Help 199. (thread "Build the Stove Top Vessel")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-14: Skynet pictures: 11 new small pictures of Skynet's own (OakBarn Brewery: "BruControl Images we need to remove", "we have to come up with our own 11", picked "Set B", "Keep as Backups but steer user in import away from use"): Images/Skynet/Miscellaneous/Skynet_Icon_Valve, _Pump, _Kettle, _On_Off, _Liquid_Temp, _Clock, _Fan, _Gauge, _Liquid_Level, _PID and _PWM (.svg), drawn new, MIT. None of BruControl's stock pictures is in Skynet; the BruControl Import steers the brewer to a Skynet Device or Widget and offers these only as a backup (Importer Sandbox). Picture numbers added (Rule 7.22). Both programs.
 - 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Added Rule 12.4 The Patron Level (OakBarn Brewery: "Set up Patron Level and we will adjust after seeing it in action"; Patron emails outside Skynet): a Patron code signed by OakBarn Brewery, pasted in Settings > Patron, unlocks the perks until its end date; it holds no email address; ☰ Menu > ⭐ Request a Feature; non-Patrons see the perks and a link. Help 198 (and French). Both programs.
 - 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
