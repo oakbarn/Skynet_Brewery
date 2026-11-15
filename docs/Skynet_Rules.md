@@ -721,8 +721,10 @@ Import** (they share these Rules, Rule 15.4):
    when Possible and Short"): **Red Glow**, not *Glow (it glows while on; the start)*. What a choice does goes in the hover help.
    **Each choice in a dropdown starts with its own first letter** (OakBarn Brewery, 2026-11-10, for typing ahead: "Do this for all
    DDLB choices as a Rule for Predictive Text"): with the list open, typing that letter picks it. The word that sets a choice apart
-   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. Lists that break this are brought to it
-   before the first Public Production.
+   comes first: **Red Glow**, **Orange Glow**, **Blue Glow**, not *Glow red*, *Glow orange*. **This is "when possible", not a must**
+   (OakBarn Brewery, 2026-11-15: "That rule needs to be changed to when possible and not mandatory"): a list whose choices are
+   clearer sharing a lead word may do so, for example **Heating Element: DO On/Off**, **Heating Element: PWM**, **Heating Element:
+   PID** in the Heating Element dropdown.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. **Hover Delay**
@@ -3546,6 +3548,13 @@ only when Fritz says the program is set. (2026-10-26)
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
 finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
 
+14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
+Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
+both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
+Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
+
 ## 15. Importing
 
 15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
@@ -4694,6 +4703,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Rule 2.38 changed (OakBarn Brewery: "And Heating Element Like this is Ok for 2.38. That rule needs to be changed to when possible and not mandatory"): each dropdown choice starting with its own first letter is now **when possible**, not a must; choices may share a lead word when that is clearer (Heating Element: DO On/Off, Heating Element: PWM ...). Lists are no longer forced to it before the first Public Production. Checked against both programs: no list changes now (the Importer shares the Panel's lists). (thread "Create the Panel Updates sandbox")
+- 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
 - 2026-11-15: Rule 2.12 now says it includes changing a pipe's length and redrawing a hose (OakBarn Brewery: "Rule 2.12 should include the redrawing size and hoses"): only an unlocked pipe or hose, at a let-go end with an unlocked IP, changes. Help 56 (and French) updated. (thread "Let saved pipes and hoses be resized")
 - 2026-11-15: Rule 5.37 extended (OakBarn Brewery: "Ability to change the Length of a Pipe once it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to be Redrawn after its IPs are unlocked"): a let-go end of a saved pipe or hose has a handle and can be dragged, a pipe end along its line (length), a hose end anywhere (redraw); it comes before the pump, valve, vessel or fitting IP it sits on; dropped on an IP, that end joins it. Locked pipes, hoses and IPs (No Unlock too) stay put. Help 153 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Let saved pipes and hoses be resized")

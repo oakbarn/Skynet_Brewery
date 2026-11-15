@@ -6,6 +6,8 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | Document | What it holds |
 |---|---|
 | [Skynet Rules](Skynet_Rules.md) | Every Skynet Rule. Read before building anything. |
+| [Panel Updates Sandbox](../Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked until the Blichmann RipTide dialogs and Help are done (Rule 14.4). |
+| [Importer Sandbox](../Sandbox/Importer/Importer_Notes.md) | Notes for the BruControl Importer version only, kept for the Big Merge (Rule 11.3). |
 | [General Properties Dialog Format](General_Properties_Dialog_Format.png) | Fritz's drawing for the General Dialog Rules (Rule 18). |
 | [Universal Properties](Universal_Properties.md) | The Properties and Process attributes every Device, Widget and Semi-Device has (Rule 1.21). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
