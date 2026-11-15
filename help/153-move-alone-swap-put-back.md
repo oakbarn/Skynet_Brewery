@@ -17,7 +17,23 @@ a small pop-up asks what you want:
 - **Cancel**: nothing changes.
 
 **Don't ask again** moves things with their pipes without asking until you leave Edit layout. On a Pipe the pop-up offers
-**🔓 Unlock its ends** (the pipe lets go of what it is joined to and moves alone) or Cancel.
+**🔓 Unlock its ends** (the pipe lets go of what it is joined to and moves alone), **🗑 Delete Pipe** or Cancel.
+
+## Making a pipe shorter or longer, and redrawing a hose
+
+A pipe or hose can change after it is saved, once its ends are let go:
+
+1. In **Edit layout**, grab the pipe or hose and pick **🔓 Unlock its ends** (or grab what it is joined to and pick **🔓 Unlock its
+   IPs**).
+2. Each end that let go has a small round handle. Drag it:
+   - a **pipe** end slides along the pipe's own line, so the pipe gets **shorter or longer** and stays Horizontal, Vertical or 45
+     (Rule 5.19). It is never shorter than 10 pixels.
+   - a **hose** end goes **anywhere**, and the hose bends to follow. The round handles in the middle of a hose change its bends.
+3. Drop the end on an IP (within 14 pixels) and it joins that IP. Dropped anywhere else, it stays an open end.
+
+A let-go end can be grabbed even where it sits on a pump, valve or vessel IP. An end that is still joined, a 🔒 locked pipe or hose,
+and an end on a 🔒 locked IP (one set to No Unlock too) do not move. **↩ Put back** (Ctrl+Z) undoes each drag, and **Save layout**
+keeps the new length or shape.
 
 ## Putting a new pump in place of an old one
 
