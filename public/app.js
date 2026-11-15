@@ -398,10 +398,19 @@ const isHiddenTab = w => !!w && !w.build && String(w.name).startsWith(HIDDEN_TAB
 const shownTabs = () => L().workspaces.filter(w => editing || !isHiddenTab(w));
 const curWs = () => shownTabs().find(w => w.name === wsName) || shownTabs()[0] || L().workspaces[0];
 
+// Rule 4.7 (OakBarn Brewery, 2026-11-15): a double-click on a Tab's name opens its Tab settings, but its first click already moved
+// the screen to that Tab. Started from the 🔨 Build Tab, the screen goes back to the Build Tab when Tab settings close, with
+// everything on it as it was.
+let tabLeft = null;
+function tabDblClick() {
+  const from = tabLeft && Date.now() - tabLeft.at < 1000 ? tabLeft.from : null; tabLeft = null;
+  const fromBuild = !!from && !!draft?.workspaces.find(w => w.name === from)?.build;
+  return editWorkspace().finally(() => { if (fromBuild && editing && wsName !== from && draft?.workspaces.some(w => w.name === from)) { wsName = from; sel = null; renderTabs(); renderWs(); } });
+}
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of shownTabs()) t.append(h('button', { class: (w === curWs() && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : '') + (isHiddenTab(w) ? ' hiddenTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
+  for (const w of shownTabs()) t.append(h('button', { class: (w === curWs() && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : '') + (isHiddenTab(w) ? ' hiddenTab' : ''), onclick: () => { if (w.name !== wsName) tabLeft = { from: wsName, at: Date.now() }; wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) tabDblClick(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
   $('#previewBuild').classList.toggle('hidden', !buildWs());
   $('#buildMark')?.classList.toggle('hidden', !(editing && curWs()?.build));
@@ -1038,6 +1047,7 @@ async function addMf(tname, kind) {
     for (;;) {
       let touched = !!work.name, last = mfNext(I.prefix, used());
       if (!touched) work.name = last;
+      dlgDetour = true;          // Rule 4.7: a double-click on a choice comes back here
       const shown = dialog(I.what, it => mfDrillFields(it, null, true), work, false, ['valve-tees-and-supply-manifolds']);
       const base = body.onchange;         // the form's own: a Valve changed redraws its line (its Port shows for Motorized)
       gate();
@@ -1054,6 +1064,12 @@ async function addMf(tname, kind) {
       };
       const r = await shown;
       body.oninput = body.onchange = null; dlgEnterSeq = null;
+      if (r === 'detour') {        // Rule 4.7: other Properties opened by a double-click; keep what is typed, then back here
+        try { readFields(work, body); } catch { }
+        for (const b of oks) b.textContent = was[0]; for (const b of cancels) b.textContent = was[1];
+        await detourAndBack($('#dlg')._detourGo);
+        setBtns(); continue;
+      }
       if (r === 'addTab' || r === 'addIface') {        // Rule 18.14: keep what is typed, make the new one, come back with it picked
         const prev = r === 'addTab' ? work.workspace : work.mfIface;
         try { readFields(work, body); } catch { }
@@ -5650,6 +5666,7 @@ async function newDeviceDialog(e, hint, what) {
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
+      dlgDetour = true;          // a double-click on a Tab (or other) choice opens its Properties and comes back here (Rule 4.7)
       const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
@@ -5752,6 +5769,18 @@ async function newDeviceDialog(e, hint, what) {
         for (const b of cancels) b.textContent = '✖ Cancel';
         continue;
       }
+      if (r === 'detour') {        // Rule 4.7: a double-click opened other Properties; keep what is typed, then back here on this Tab
+        try { readFields(work, body); } catch { }
+        if (!touched) delete work.name;
+        body.oninput = body.onchange = null;          // the other dialog uses the same box: its own buttons and handlers while it is open
+        for (const b of oks) { b.textContent = labels0[0]; b.disabled = false; b.title = ''; }
+        for (const b of cancels) b.textContent = labels0[1];
+        dlgEnterSeq = null;
+        await detourAndBack($('#dlg')._detourGo);
+        for (const b of oks) b.textContent = '➕ Add Device';
+        for (const b of cancels) b.textContent = '✖ Cancel';
+        continue;
+      }
       if (r === 'reprofile') {      // another Pump Profile picked: the box opens again with its look, keeping what is typed
         try { readFields(work, body); } catch { }
         if (!touched) delete work.name;
@@ -5826,6 +5855,7 @@ async function newPictureDialog(e) {
   try {
     for (;;) {
       let last = picSuggest(e, work.label), touched = !!work.name && work.name !== last;
+      dlgDetour = true;          // Rule 4.7
       const shown = dialog('Picture Widget', it => pictureWidgetFields(it, e, true), work, false, ['picture-widget', 'adding-a-picture-widget']);
       const base = body.onchange;          // the form's own: Add new ... in a picture list, and Turns on with greying the Overlay
       const nameBox = () => body.querySelector('[data-k="name"]');
@@ -5844,6 +5874,14 @@ async function newPictureDialog(e) {
         if (ev.type === 'change' && t.tagName === 'SELECT' && !dlgArrowKey && t.isConnected && seq().includes(t) && !['', '__add__'].includes(t.value)) setTimeout(() => seqNext(t), 0);
       };
       const r = await shown;
+      if (r === 'detour') {        // Rule 4.7: other Properties opened by a double-click; keep what is typed, then back here
+        try { readFields(work, body); } catch { }
+        body.oninput = body.onchange = null;
+        for (const b of oks) b.textContent = was[0]; for (const b of cancels) b.textContent = was[1];
+        await detourAndBack($('#dlg')._detourGo);
+        for (const b of oks) b.textContent = '➕ Add Widget'; for (const b of cancels) b.textContent = '✖ Cancel';
+        continue;
+      }
       if (r !== 'ok') return false;
       try {
         const missing = gate();
@@ -9862,6 +9900,7 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     for (const b of $$('#dlg .dlgCopy')) b.classList.toggle('hidden', !canCopy);
     const d = $('#dlg');
+    d._back = dlgBack; d._detour = dlgDetour; dlgBack = null; dlgDetour = false;      // Rule 4.7: how a double-click in it comes back here
     // Delete and Cancel are plain buttons so Enter in a field always means Save.
     // Cancel (or Esc) with changes made asks first: discard them, or go back to save (Rule 18.11, Fritz 2026-11-02)
     const cancel = async () => { if (formSnap() === d._snap || await askDiscard()) d.close('cancel'); };
@@ -10164,11 +10203,33 @@ const PICK_OPEN = { ws: v => openTabProps(v), elem: v => openProps('el', v), mul
 const pickName = (kind, v) => kind === 'ws' ? `the ${v} Tab settings` : `the Properties of ${kind === 'elem' || kind === 'multi' ? v : (draft || S.config).graphics.find(g => g.id === v.replace(/^eq:([^:]+).*/, '$1'))?.label || 'that item'}`;
 function pickerOpen(inp, v) {
   const kind = inp.dataset.kind, go = PICK_OPEN[kind];
-  if (!go || !v) return;
+  if (!go || !v || String(v).startsWith('\0')) return;          // ➕ Add new Tab… and 📁 Templates are choices, not things with Properties
   const d = $('#dlg'), inDlg = d.open && d.contains(inp);
+  // Rule 4.7 (OakBarn Brewery, 2026-11-15): an Add box (the new thing is not made yet) is never closed for good by a double-click:
+  // it steps aside with everything typed kept, the other Properties open, and when they close the Add box comes back on the same Tab
+  if (inDlg && d._detour) { d._detourGo = () => go(v); d.close('detour'); return; }
   if (inDlg && formSnap() !== (d._snap ?? formSnap()) && !confirm(`Leave these Properties without saving your changes, and open ${pickName(kind, v)}?`)) return;
+  const back = inDlg ? d._back : null;
   if (inDlg) d.close('cancel');
-  setTimeout(() => go(v), 0);
+  setTimeout(() => comeBack(() => go(v), back), 0);
+}
+// Rule 4.7: Properties opened by a double-click from inside a dialog (or from the 🔨 Build Tab) never leave you somewhere else. When
+// they close, the screen goes back to the Tab you were on, and the Properties you came from open again (their item still there).
+let dlgBack = null, dlgDetour = false;       // set just before dialog(): how to open it again / it is an Add box
+// an Add box stepped aside (Rule 4.7): the other Properties, then the screen back on this Tab; the Add box opens again after
+async function detourAndBack(open) {
+  if (typeof open !== 'function') return;
+  const keep = wsName;
+  try { await open(); } catch (e) { toast(e.message, true); }
+  if (draft?.workspaces.some(w => w.name === keep) && wsName !== keep) wsName = keep;
+  sel = null; renderTabs(); renderWs();
+}
+async function comeBack(open, back) {
+  const keep = wsName, ed = editing;
+  try { await open(); } finally {
+    if (editing && ed && draft?.workspaces.some(w => w.name === keep) && wsName !== keep) { wsName = keep; sel = null; renderTabs(); renderWs(); }
+  }
+  if (back && editing && !$('#dlg').open) back();
 }
 function pickerDbl(root) {
   if (root._pickerDbl) return; root._pickerDbl = true;
@@ -10195,7 +10256,7 @@ function openProps(kind, id) {
   if (item.workspace && L().workspaces.some(w => w.name === item.workspace)) wsName = item.workspace;
   if (view !== 'workspace') setView('workspace');
   if (!editing) setEditing(true);
-  sel = { kind, id }; renderTabs(); renderWs(); editItem(kind, id);
+  sel = { kind, id }; renderTabs(); renderWs(); return editItem(kind, id);
 }
 // the Tab settings of one Tab, from a list of Tabs
 function openTabProps(name) {
@@ -10203,7 +10264,7 @@ function openTabProps(name) {
   if (menuTab) leaveMenuTab();
   wsName = name; if (view !== 'workspace') setView('workspace');
   if (!editing) setEditing(true);
-  sel = null; renderTabs(); renderWs(); editWorkspace();
+  sel = null; renderTabs(); renderWs(); return editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
 const TYPE_TITLE = { hydrometer: 'Hydrometer', valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
@@ -10277,6 +10338,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
+  dlgBack = () => { if (findItem(kind, id)) { sel = { kind, id }; renderWs(); editItem(kind, id); } };      // Rule 4.7: come back to these Properties
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {

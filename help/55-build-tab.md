@@ -48,6 +48,16 @@ Press **👁 Preview** on the Edit layout bar (it shows while there is a Build T
 
 The Preview works before and after you change an item's Properties, as often as you like, until the build is sent to a Tab or a Template. Going to another Tab ends it too. The **Save Build** pop-up also has a **👁 Preview** button, so you can have one more look before you pick where it goes.
 
+## Leave for a moment, come back to the Build
+
+You can step away from what you are building and come back to it. Nothing is lost:
+
+- **In an Add box** (for example the Blichmann RipTide's first box), a double-click on a choice in a list, like **Brew House** in the **Tab** list, opens that Tab's settings (or that Device's Properties). The Add box steps aside with everything you typed and picked kept. When you close the other box (**💾 Save** or **✖ Cancel**), the Add box comes back, on the Tab you were on.
+- **In the Properties of something already made**, the same double-click asks first if you changed something. When the other box closes, you are back on your Tab and its Properties open again.
+- **On the Tab bar**, a double-click on a Tab's name opens its Tab settings. If you were on the 🔨 Build Tab, you go back to the Build Tab when you close them.
+
+**➕ Add new Tab…** and **📁 Templates** in a Tab list are choices, so a double-click on them opens nothing.
+
 ## Copies of Templates
 
 A copy of a Template, from a **Skynet Template** or a **User Bundled Template**, is always made on the Build Tab first.
