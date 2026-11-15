@@ -124,24 +124,7 @@ You can mix both styles in one Process. **Save** never changes one style into th
 
 ## Codes inside text
 
-Text in quotes can carry codes that change how it looks on the screen. They work wherever a Process shows text: a string value on a Tab, a label, `print` lines in the Process output, and pop-ups such as a manual valve's message. Bold, large, subscript and superscript are switches: the first code turns it on, the next one turns it off.
-
-| Code | What it does | Example | Shows |
-|---|---|---|---|
-| `\n` | a new line | `"Mash in\nStir well"` | Mash in, then Stir well on the next line |
-| `\t` | an indent (about four spaces wide) | `"Mash in\n\tStir well"` | Stir well, pushed in, on the next line |
-| `\b` | bold on / off | `"Add \bhops\b now"` | Add **hops** now |
-| `\L` | large text on / off | `"\LSTRIKE\L 165"` | STRIKE in large letters |
-| `\_` | subscript on / off | `"CO\_2\_"` | CO₂ |
-| `\^` | superscript on / off | `"ft\^3\^"` | ft³ |
-| `\deg` | a degree sign | `"152\degF"` | 152°F |
-| `\\` | one backslash | `"C:\\Brewing"` | C:\Brewing |
-
-Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
-
-Use `\t` and `\n` to lay text out, not extra spaces: a Label can't start or end with a space (they are trimmed).
-
-The size of large text is **\L Rich Text Code Size (px)** in **Settings > Panel settings: screen, Tabs and alerts** (under **Rich Text Embedded Code**), in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
+Text in quotes can carry codes that change how it looks on the screen: `"\L\bBOIL\b\L 60 min"`, `"Mash at 152\degF"`. They work wherever a Process shows text: a string value on a Tab, a label, `print` lines in the Process output, and pop-ups such as a manual valve's message. Every code (bold, italic, colors, °F and °C, new lines and the rest) is listed in [Rich Text Embedded Code](90-rich-text-embedded-code).
 
 ## Change the look of a device or widget
 

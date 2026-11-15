@@ -11,7 +11,7 @@ Entry Dialogs (the red ⬆ Up Arrow, Rule 18.1), the Process editor and Schema.j
 | **Ctrl + B** | **⌘ + B** | Bold. With words picked, puts `\b` before and after them. With nothing picked, types `\b\b` with the cursor in between, so you type the bold words there. |
 | **Ctrl + Shift + D** | **⌘ + Shift + D** | Types **°F** or **°C**, whichever **Temperatures** is set to on the ☰ Menu > **Default** tab. |
 
-`\n` and `\b` are Rich Text Embedded Codes: see [Text boxes](49-text-boxes) and [Codes inside text](22-process-language).
+`\n` and `\b` are Rich Text Embedded Codes: see [Text boxes](49-text-boxes) and [Rich Text Embedded Code](90-rich-text-embedded-code).
 Everything these keys type can be taken back with Undo, like any other typing.
 
 ## Common keys
