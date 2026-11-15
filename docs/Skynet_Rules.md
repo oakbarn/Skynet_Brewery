@@ -3375,6 +3375,20 @@ every Patron payment goes to one collecting account and a Prime Developer runs a
 (Option A). The Patron accounts and percents are changed only by the Prime Developers as a group, on
 GitHub, and **every** Prime Developer must approve (100%). Rule 12.2 covers Buy a Beer only. (Fritz, 2026-11-02, thread "Expand Buy a Beer and Patron support")
 
+12.4 **The Patron Level** (OakBarn Brewery, 2026-11-14: "Set up Patron Level and we will adjust after seeing it in action"; "WE will
+be building the Patron e mail system external to skynet. Patron level might unlock something on Skynet, but those brains would not
+have any patron e mails on them"):
+- A Patron gets a **Patron code** from OakBarn Brewery; an Admin pastes it in **Settings > Patron**. The Brain checks OakBarn Brewery's
+  signature (lib/patron.js holds only the public half of the key; the private half never goes on GitHub or a Brain;
+  tools/patron-code.js makes codes) and unlocks the Patron perks until the code's end date.
+- A Patron code holds only the name to show, the level and the end date: **never an email address**. Patron emails (New Releases and
+  the like, with their tick boxes) are OakBarn Brewery's own system outside Skynet; no Brain holds them.
+- **Patron: $10 every 6 months** (Rule 12.3). Perks: **Request a Feature** (☰ Menu > ⭐ Request a Feature, sent from the Brain's own
+  email account to support@oakbarnbrewery.com, or the user's mail program), **Email alert for new Releases** (outside Skynet), **Send
+  your pump to OakBarn Brewery** (coming with My Pumps). A non-Patron who tries a perk sees a friendly note with the levels and
+  perks and a link to oakbarnbrewery.com, each time. The levels and perks are a first try, to be adjusted.
+Both programs (Settings is the same). (thread "Let users build their own Pump Templates", Help 198)
+
 ## 13. Libraries (reference documents)
 
 13.1 **Device Library** (docs/Device_Library.md in the project folder): when a new unique Device is
@@ -4511,6 +4525,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
+- 2026-11-14: Added Rule 12.4 The Patron Level (OakBarn Brewery: "Set up Patron Level and we will adjust after seeing it in action"; Patron emails outside Skynet): a Patron code signed by OakBarn Brewery, pasted in Settings > Patron, unlocks the perks until its end date; it holds no email address; ☰ Menu > ⭐ Request a Feature; non-Patrons see the perks and a link. Help 198 (and French). Both programs.
 - 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
 - 2026-11-14: Added Rule 8.5 (OakBarn Brewery: "Reword all about Password to the way it works", "Can we encrypt all passwords, reset codes and e mails"): passwords, recovery and sign-in codes stay one-way scrambled; the email app password, Twilio token and users' email addresses and mobile numbers are now locked (encrypted) on disk with data/seal.key; the Brain locks its data folder to the computer account that runs it; a password is reset only on your own Skynet (three ways); OakBarn Brewery never emails about passwords (phishing warning on the sign-in page, recovery code screen, Help 10, oakbarnbrewery.com). Help 10 (and French): the three ways, the warning, Windows steps for the reset-password tool. Both programs.
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
