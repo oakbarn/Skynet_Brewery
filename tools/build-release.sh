@@ -5,7 +5,8 @@
 #   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
 #   Skynet_Brewer_Full_Setup_<version>.exe   the same Windows installer with every Skynet picture and sound inside (Rule 9.20),
 #                                          added the Media Setup's add-only way, so a new install needs no separate Media Setup
-#   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   every Skynet picture and sound, kept out of the panel zip and
+#   Skynet_Media_<version>.zip / Skynet_Media_Setup_<version>.exe   (only when SKYNET_MEDIA_BUILD is not "no", Rule 9.21)
+#                                          every Skynet picture and sound, kept out of the panel zip and
 #                                          Setup (OakBarn Brewery, 2026-11-10, Rule 9.12). They only ever ADD files: one you already
 #                                          have is never changed or deleted (Rule #1). The zip holds BrewPanel/defaults/media, which
 #                                          the panel copies into media/ on its next start, adding only what is missing (lib/seed.js).
@@ -63,10 +64,18 @@ ZIP="Skynet_BrewPanel_$VERSION.zip"
 rm -f "$OUT"/Skynet_BrewPanel_*.zip
 ( cd "$OUT/stage" && zip -qr -X "../$ZIP" BrewPanel )
 echo "Built $OUT/$ZIP"
-MZIP="Skynet_Media_$VERSION.zip"
-rm -f "$OUT"/Skynet_Media_*.zip
-( cd "$OUT/stage/media" && zip -qr -X "../../$MZIP" BrewPanel )
-echo "Built $OUT/$MZIP"
+# The Media zip and Media Setup are made new only when the Skynet pictures or sounds changed (Rule 9.21). The release workflow
+# sets SKYNET_MEDIA_BUILD=no when nothing in media/ changed since the last Media Setup, and puts that one on the Release instead.
+# The pictures and sounds are still staged above, because the Full Setup always carries them (Rule 9.20).
+MEDIA_BUILD="${SKYNET_MEDIA_BUILD:-yes}"
+if [ "$MEDIA_BUILD" != no ]; then
+  MZIP="Skynet_Media_$VERSION.zip"
+  rm -f "$OUT"/Skynet_Media_*.zip
+  ( cd "$OUT/stage/media" && zip -qr -X "../../$MZIP" BrewPanel )
+  echo "Built $OUT/$MZIP"
+else
+  echo "No new Skynet pictures or sounds: the Media zip and Media Setup are not made again (Rule 9.21)."
+fi
 SZIP="Skynet_Sample_Schemas_$VERSION.zip"
 rm -f "$OUT"/Skynet_Sample_Schemas_*.zip
 ( cd "$OUT/stage/samples" && zip -qr -X "../../$SZIP" BrewPanel )
@@ -103,9 +112,11 @@ if command -v makensis >/dev/null; then
   FEXE="Skynet_Brewer_Full_Setup_$VERSION.exe"
   makensis -V2 -DSRC="$(pwd)/$STAGE" -DMEDIA_SRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$FEXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$FEXE"
-  MEXE="Skynet_Media_Setup_$VERSION.exe"
-  makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
-  echo "Built $OUT/$MEXE"
+  if [ "$MEDIA_BUILD" != no ]; then
+    MEXE="Skynet_Media_Setup_$VERSION.exe"
+    makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
+    echo "Built $OUT/$MEXE"
+  fi
   SEXE="Skynet_Sample_Schemas_Setup_$VERSION.exe"
   makensis -V2 -DSRC="$(pwd)/$SSTAGE/sample_schemas" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$SEXE" "${SIGN[@]}" install/windows/SkynetSampleSchemas.nsi
   echo "Built $OUT/$SEXE"
