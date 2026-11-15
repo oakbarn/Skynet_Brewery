@@ -2854,6 +2854,20 @@ Image that says File Not Found when the path does not work"; "Looks good use it"
   seconds while one is missing; no closing, no F5. Skynet does this in the Background and needs no user input (Rule 11.13).
 Both programs: the BruControl Import's Build page shows it too.
 
+7.25 **Help pictures stay sharp** (OakBarn Brewery, 2026-11-15: "All of the graphics in the Hover Help ... are very poor and hard to read"):
+- Pictures in `media/help_pictures` (Help pages and Hover Help) are **never swapped for a traced SVG copy** (Settings > Pictures,
+  lib/vectorize.js). A traced copy turns small words into blobs. They show the picture itself, whatever Settings > Pictures is
+  set to, unless a **hand-made SVG** of the same name sits next to it; then that drawing is used, since it is sharp at any size.
+- Help pictures are not traced at all, so no copies are made for them.
+- **Words in a Help picture are real text, never part of the graphic** (OakBarn Brewery, 2026-11-15: "And any text has to be
+  text and not just part of a grahic"): the picture is a hand-made SVG whose words are &lt;text&gt;, so they stay sharp at any size
+  and can be translated.
+- **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
+  or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
+  (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
+Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
+the pictures themselves (and the hand-made SVGs). Help 7.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -4592,6 +4606,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Added Rule 7.25 Help pictures stay sharp (OakBarn Brewery: "All of the graphics in the Hover Help ... are very poor and hard to read"): Help pictures are never swapped for the panel's traced SVG copies (they smeared the words); Words in Help pictures are real text, and any Help picture from a PNG or PDF is redrawn. Pump_8_IPs, Pump_Right_Left, Red_Pump_Label, Label_Visible_Switch, IP_Marker and Pump_IP_Example_1/2 redrawn as hand-made SVGs. Help 7 (and French). Checked against both programs. (thread "Sharpen Hover Help pictures")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
