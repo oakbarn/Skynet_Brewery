@@ -73,6 +73,7 @@ import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClone
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
+import { chillerTemplates, chillerVessels } from './lib/chiller.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -189,6 +190,7 @@ if (store.config.brewDefaults?.valveProfile !== undefined) {
 }
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
+engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vessel picks a Chiller Template (Rule 5.42)
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
@@ -387,6 +389,9 @@ function processWords() {
       { name: 'tab', type: 'tab', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }],
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
+    // place_Chiller = (the Chiller Templates), (the Vessels, the Brew Kettle first); remove_Chiller = (the Vessels) (Rule 5.42)
+    chillers: chillerTemplates(templates).map(t => t.name),
+    vessels: chillerVessels(store.config).map(g => g.name),
   };
 }
 
