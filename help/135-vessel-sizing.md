@@ -33,8 +33,8 @@ kept with the vessel too.
 
 ## Master Vessel Sizer
 
-A Tab can name one Vessel its **Master Vessel Sizer**: double-click an empty spot on the Tab in Edit layout (**Tab settings**) and
-pick it under **Master Vessel Sizer**. The Master shows a 📏 in its corner in Edit layout.
+A Tab can name one Vessel its **Master Vessel Sizer**: double-click an empty spot on the Tab in Edit layout (**Tab Settings**) and
+pick it under **Size > Vessel Sizer**. The Master shows a 📏 in its corner in Edit layout.
 
 - **Only the Master can be resized**, with its grab points or its Width and Height. Every other Vessel on that Tab follows: they
   all keep the same scale, so a 5 gallon kettle always looks half the volume of a 10 gallon one.
