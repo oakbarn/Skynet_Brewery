@@ -26,10 +26,8 @@ La fenêtre demande :
 
 ## L'Interface ID {#the-interface-id}
 
-- L'Interface ID (1 à 4 lettres) **devient une partie du Suggested Name de chaque Device sur cette Interface**. C'est le début du nom : une pompe sur la broche 25 de l'Interface **HS** est proposée sous le nom `HS_25_DO@Pump_Wort__HS`.
-- Il **doit être unique** : deux Interfaces ne peuvent pas avoir le même ID.
-- **Seul un Admin peut le changer.** Pour tous les autres, la case ID de la page Devices est grisée.
-- **Réglez-le une fois et n'y touchez plus.** Les Devices faits avant un changement gardent l'ancien ID dans leur nom, donc un changement laisse un mélange de noms. Le panel demande avant de changer l'ID d'une Interface qui a déjà des Devices.
+- L'Interface ID **devient une partie du Suggested Name de chaque Device sur cette Interface**. C'est le début du nom : une pompe sur la broche 25 de l'Interface **HS** est proposée sous le nom `HS_25_DO@Pump_Wort_HS`.
+- Les Interface IDs suivent la **Rule 3.2** : voir [La règle des ID](46-interface-tab-device-names). Une fois enregistré, il ne change jamais, même pas par un Admin.
 
 Laissé vide, l'ID est fait des premières lettres du Name (*Hot Side* = HS).
 
