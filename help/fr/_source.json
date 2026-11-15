@@ -176,7 +176,7 @@
  "180-integrated-instances": "3b9c515812dcde93",
  "181-heat-hysteresis-switched-by": "a2a596c8532814e8",
  "182-fermentor-control": "ed463f5658000c1a",
- "183-skynet-media-setup": "b5d494ee34a211cf",
+ "183-skynet-media-setup": "d88f78b2390e46f6",
  "184-skynet-sample-schemas-setup": "4d298c741dcefd0a",
  "186-sounds-from-a-web-link": "934b0f2252c3e441",
  "187-color-picker": "c85bcf814b9f05aa",
@@ -190,5 +190,6 @@
  "195-alarm-attributes": "9cd90714e93c30d1",
  "196-equipment-profile-interview": "aab2f1d2c077350a",
  "197-flame-out-safety": "83c45c507d7d7d1d",
- "198-patron": "bb68c2e6f760854d"
+ "198-patron": "bb68c2e6f760854d",
+ "199-stove-top-vessel": "3b7b4d65504f8776"
 }
