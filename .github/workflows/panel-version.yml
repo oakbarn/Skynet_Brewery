@@ -13,6 +13,9 @@
 # It also writes skynet_files.json (Rule 9.14, tools/make-file-list.js): the fingerprint of every core program file of this version.
 # The panel checks its files against it on every start (lib/official.js), asking this repository for the list of its own version,
 # and says Official Skynet, or Changed with the files named. Never edit skynet_files.json by hand either.
+# The Media Setup and Media zip are made new only when something in media/ (or the Media Setup's own script) changed since the
+# last ones were made (OakBarn Brewery, 2026-11-15, Rule 9.21). Otherwise this Release carries the last ones, unchanged, with
+# their own date in the name. The plain Setup and the Full Setup (with every picture and sound inside) are made on every merge.
 # Signing: when the Azure Artifact Signing secrets and variables are set (docs/Code_Signing_Setup.md), the Setup .exe and
 # the Uninstall .exe inside it are signed, so Windows Smart App Control lets them run. Until then (or if signing fails)
 # the Setup .exe is built unsigned as before and the release still happens.
@@ -23,6 +26,11 @@ on:
     branches: [claude/project-thread-vzxi0a]
     paths-ignore: [version.json, skynet_files.json]
   workflow_dispatch:
+    inputs:
+      rebuild_media:
+        description: "Make the Media Setup and Media zip new even if no picture or sound changed (Rule 9.21)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -145,9 +153,39 @@ jobs:
             echo "SKYNET_SIGN_TOKEN=$TOKEN"
           } >> "$GITHUB_ENV"
 
+      # ---- Media only when it changed (Rule 9.21) ----
+      - name: Did the Skynet pictures or sounds change?
+        id: media
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+          FORCE: ${{ github.event.inputs.rebuild_media }}
+        run: |
+          mkdir -p release
+          build() { echo "$1"; echo "build=yes" >> "$GITHUB_OUTPUT"; echo "version=$VERSION" >> "$GITHUB_OUTPUT"; exit 0; }
+          [ "$FORCE" = "true" ] && build "Asked to make the Media Setup new (Run workflow > rebuild media)."
+          # the newest published Release that carries a Media Setup: "<release tag> <Media Setup file name>"
+          LAST=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '[.[] | select(.draft | not) | {t: .tag_name, a: ([.assets[].name | select(test("^Skynet_Media_Setup_.+\\.exe$"))] | first)} | select(.a != null)] | first // empty | "\(.t) \(.a)"' 2>/dev/null || true)
+          [ -n "$LAST" ] || build "No earlier Media Setup found, so it is made new."
+          FROM="${LAST%% *}"; MEXE="${LAST#* }"
+          MV="${MEXE#Skynet_Media_Setup_}"; MV="${MV%.exe}"
+          # MV is the version the Media Setup was made at; its tag marks the code it was made from
+          git rev-parse -q --verify "refs/tags/$MV^{commit}" >/dev/null || build "No tag $MV to compare with, so the Media Setup is made new."
+          if ! git diff --quiet "$MV" HEAD -- media install/windows/SkynetMedia.nsi; then
+            git diff --stat "$MV" HEAD -- media install/windows/SkynetMedia.nsi | tail -20
+            build "Pictures or sounds changed since $MV, so the Media Setup and Media zip are made new."
+          fi
+          gh release download "$FROM" --pattern "$MEXE" --pattern "Skynet_Media_$MV.zip" --dir release \
+            || build "Could not get the last Media Setup from $FROM, so it is made new."
+          [ -f "release/$MEXE" ] && [ -f "release/Skynet_Media_$MV.zip" ] || build "The last Media Setup or zip is missing from $FROM, so both are made new."
+          echo "No picture or sound changed since $MV: this Release carries that Media Setup and zip, unchanged."
+          { echo "build=no"; echo "version=$MV"; } >> "$GITHUB_OUTPUT"
+
       - name: Build the installer and zip
         env:
           VERSION: ${{ steps.v.outputs.version }}
+          SKYNET_MEDIA_BUILD: ${{ steps.media.outputs.build }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq nsis zip
@@ -159,7 +197,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.v.outputs.version }}
+          MV: ${{ steps.media.outputs.version }}
         run: |
+          if [ "$MV" = "$VERSION" ]; then MSAME=""; else
+            MSAME=" No pictures or sounds changed since \`$MV\`, so these are the same files as on that Release (Rule 9.21)."
+          fi
           if grep -q "^signed Setup .exe" release/signing.log 2>/dev/null; then
             WARN="This installer is signed (Microsoft Artifact Signing). For the first few weeks Windows may still say *Windows protected your PC* while it learns the new signature: click **More info**, then **Run anyway**."
           else
@@ -172,7 +214,7 @@ jobs:
 
           **Mac, Linux, Raspberry Pi or by hand:** download \`Skynet_BrewPanel_$VERSION.zip\` and \`ReadMe.txt\`.
 
-          **Pictures and sounds:** \`Skynet_Media_Setup_$VERSION.exe\` (Windows, run it after the Setup) or \`Skynet_Media_$VERSION.zip\`. They only add the ones you do not have: nothing you have is changed or deleted.
+          **Pictures and sounds:** \`Skynet_Media_Setup_$MV.exe\` (Windows, run it after the Setup) or \`Skynet_Media_$MV.zip\`. They only add the ones you do not have: nothing you have is changed or deleted.$MSAME
 
           **More Sample Schemas:** \`Skynet_Sample_Schemas_Setup_$VERSION.exe\` (Windows) or \`Skynet_Sample_Schemas_$VERSION.zip\`. The panel comes with the 3 Vessel sample; more samples are added here one at a time. Add-only, like the pictures and sounds.
 

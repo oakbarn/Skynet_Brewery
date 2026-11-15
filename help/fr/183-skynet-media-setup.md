@@ -16,6 +16,8 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou Windows à la main |
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Windows : le panneau **et** les images et sons dans un seul fichier |
 
+Le Media Setup et le zip ne sont refaits que quand Skynet ajoute des images ou des sons. En attendant, chaque nouvelle Release porte les mêmes, donc la date dans leur nom peut être plus ancienne que celle du panneau. C'est normal : ce sont toujours les images et les sons les plus récents.
+
 ## Le Full Setup : tout dans un seul fichier (Windows) {#the-full-setup-everything-in-one-file-windows}
 
 Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.exe`** au lieu des deux Setups séparés. C'est le même Skynet Brewer Setup, avec toutes les images et tous les sons Skynet dedans : pas besoin du Media Setup.

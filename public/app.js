@@ -31,6 +31,7 @@ import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
+import { STOVE_SIDE, STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
@@ -543,7 +544,7 @@ function bundleOf(g) {
   if (!g) return null;
   let v = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo && x.kind === 'vessel') : isBfit(g) && g.onVessel ? g : null;
   if (isBfit(v) && v.onVessel) v = draft.graphics.find(x => x.id === v.onVessel && x.kind === 'vessel') || v;
-  if ((v?.bundled || isSkyV(v)) && v !== g) return v;        // a Skynet vessel is always one bundle with its IPs and fittings
+  if ((v?.bundled || isSkyV(v) || isStove(v)) && v !== g) return v;        // a Skynet vessel (and a Stove Top Vessel, Rule 19.7) is always one bundle with its IPs and fittings
   const u = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo) : null;
   return isUnit(u) ? u : null;          // the IPs of a Skynet Fitting are part of it: they never move on their own
 }
@@ -555,12 +556,12 @@ const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo
 const RS_DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 const RS_TIP = { n: 'top', s: 'bottom', e: 'right', w: 'left', nw: 'top left', ne: 'top right', se: 'bottom right', sw: 'bottom left' };
 function editDeco(n, o) {
-  if (isVW(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id === o.id) n.append(h('div', { class: 'vMaster', title: 'Master Vessel Sizer: resize it and every Vessel on this Tab follows' }, '📏'));
+  if (isSized(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id === o.id) n.append(h('div', { class: 'vMaster', title: 'Master Vessel Sizer: resize it and every Vessel on this Tab follows' }, '📏'));
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else if (o.cloneId) n.append(h('div', { class: 'cloneMark', title: `Clone of ${o.cloneOf}: it moves, its size is its parent's` }, '⧉'));
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
   else if (autoSized(o)) return;       // a pipe fitting sizes to its pipes (always, Rule 5.36): no grab points
-  else if (isVW(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id !== o.id) return;    // Vessel Rules: only the Master Vessel Sizer is resized
+  else if (isSized(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id !== o.id) return;    // Vessel Rules: only the Master Vessel Sizer is resized
   else {
     n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
   }
@@ -570,7 +571,10 @@ function editDeco(n, o) {
 // a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
 const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter', rims: 'RIMS tube',
   bfit: 'Tab_Fitting (Bundled Fitting)', eqTee: 'Pipe tee', eqElbow90: 'Pipe 90° elbow', eqElbow45: 'Pipe 45° elbow', eqCross: 'Pipe cross',
-  electric: 'Electric heated vessel (older)', gas: 'Gas heated vessel (older)', mashTun: 'Unheated mash tun (older)', coil: 'Cooling coil (older)', plateChiller: 'Plate chiller (older)' };
+  // the Stove Top Vessel (OakBarn Brewery, 2026-11-15, Rule 19.7): two of them. The older Electric heated vessel, Gas heated vessel,
+  // Unheated mash tun, Cooling coil and Plate chiller are gone (OakBarn Brewery, 2026-11-13: "remove for now. We will build several
+  // Vessel Template Devices where these would be")
+  stoveTop: 'Stove Top Vessel', stoveTopOut: 'Stove Top Vessel, Bottom Outlet' };
 // Equipment widgets (Fritz's spec): a picture with a Name, a Type, a Label and ports. Every port except a thermowell is an IP:
 // it is created on screen near its Position when installed, and stays attached to the widget. Each list (types, positions,
 // standards) can be added to; the additions are kept in the settings (vesselLists). Fritz will refine the choices later.
@@ -629,6 +633,14 @@ const EQ = {
     ports: { inlet: pt('Wort In', RIMS_POS, { on: true, def: 'Top Left', circuit: 'a' }), outlet: pt('Wort Out', RIMS_POS, { on: true, def: 'Bottom Right', circuit: 'a' }),
       thermowell: pt('Thermowell (probe)', [['Left End', 0, 0.5], ['Right End', 1, 0.5]], { ip: false, on: true, def: 'Left End' }),
       element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5], ['Element Housing', 0.65, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
+  // The Stove Top Vessel (OakBarn Brewery, 2026-11-15: "Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones.
+  // 1 no Outlets, 2. Outlet at Bottom with the conector types like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; Rule 19.7):
+  // a pot on the kitchen stove, a Special Widget with IPs and no Devices. Its top third is the hose hang IP, where a Quick Disconnect
+  // hose hangs over the rim (Rules 5.28 and 5.34). Skynet draws it for its Height and Width (public/stovetop.js).
+  stoveTop: { title: 'Stove Top Vessel', types: ['Brew Kettle', 'HLT', 'Mash Tun', 'Other'], image: '', size: [200, 200], tab: 'Equipment', ports: {} },
+  // the Bottom Outlet one: one IP at the center of the bottom, with its IP Type (Tri-Clamp, NPT, BSP or Quick Disconnect, Rule 5.40)
+  stoveTopOut: { title: 'Stove Top Vessel Bottom Outlet', types: ['Brew Kettle', 'HLT', 'Mash Tun', 'Other'], image: '', size: [200, 200], tab: 'Equipment',
+    ports: { outlet: pt('Bottom Outlet', [['Center Bottom', 0.5, 1]], { on: true }) } },
   eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
   eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', size: [90, 90],
@@ -1359,7 +1371,8 @@ function vPortXY(g, k, pos) {
   return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
 }
 // a port's Label: a Vessel Widget IP's own Label (it starts the same as its Name, Fritz 2026-11-05), else its Name and Standard
-const vPortLabel = (g, k, p) => p.label ? p.label : `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
+const vPortLabel = (g, k, p) => p.label ? p.label : isStove(g) ? `${eqClass(g).ports[k].name} (${IP_TYPES.find(([t]) => t === stoveOutType(g))?.[1] || 'IP'})`      // its IP Type (Rule 19.7)
+  : `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
 // the starting port settings of a new widget
 const eqDefaultPorts = c => Object.fromEntries(Object.entries(EQ[c].ports).filter(([, d]) => d.on).map(([k, d]) => [k, { installed: true, position: portDefPos(d), standard: EQ_STANDARDS[0] }]));
 // Create, move or remove a widget's port IPs to match its settings. Returns the ports that were placed or moved.
@@ -1402,16 +1415,9 @@ function vesselPopup(g, placed) {
   };
   document.body.append(box);
 }
-// Cooling coils and plate chillers have IPs built in. Flow passes through each circuit: the coil has one (in -> out),
-// the plate chiller has two that never mix (wort in -> wort out, water in -> water out).
+// the built-in IPs drawn by the panel: a Manual Valve's ends (a vessel's ports are IP Widgets of their own)
 function eqPorts(g) {
   if (isMv(g)) return mvEnds(g);
-  if (g.kind !== 'vessel') return [];
-  const x = g.x || 0, y = g.y || 0, w = g.w || 200, hh = g.h || 260, L_ = g.label || VESSELS[g.vesselType];
-  const port = (k, text, circuit, cx, cy) => ({ id: `eq:${g.id}:${k}`, label: `${L_} ${text.toLowerCase()}`, text, circuit, c: [Math.round(cx), Math.round(cy)] });
-  if (g.vesselType === 'coil') return [port('in', 'IN', 'a', x, y + hh * 0.25), port('out', 'OUT', 'a', x, y + hh * 0.75)];
-  if (g.vesselType === 'plateChiller') return [port('wortIn', 'WORT IN', 'wort', x, y + hh * 0.2), port('wortOut', 'WORT OUT', 'wort', x + w, y + hh * 0.8),
-    port('waterIn', 'WATER IN', 'water', x + w, y + hh * 0.2), port('waterOut', 'WATER OUT', 'water', x, y + hh * 0.8)];
   return [];
 }
 function buildEqIp(g, q) {
@@ -1454,7 +1460,7 @@ const customColorName = c => rgbText(c) || c;
 const ALIGN_LCR = [['MiddleLeft', 'Left'], ['', 'Centered', 'MiddleCenter'], ['MiddleRight', 'Right']];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
-  const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
+  const t = VESSELS[g.vesselType] ? g.vesselType : 'vessel';
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : '') + (g.visibility === 'hidden' || g.hidden === true ? ' vhidden' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${isSightGlass({ ...g, loose: false }) ? sgPic(g) : media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated (a Sight Glass drawn for its Length, Rule 5.32)
@@ -1464,8 +1470,8 @@ function buildVessel(g) {
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
   }
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
+  else if (!g.image && isStove(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${stovePic(g.w, g.h, stoveOutType(g))}")`; }     // a Stove Top Vessel: drawn for its own box (Rule 19.7)
   else if (g.image && !isUnit({ ...g, loose: false })) n.style.backgroundImage = `url("${media(g.image)}")`;     // a Skynet Fitting is drawn once only, by its .bfImg above (not a second time, unturned, behind it)
-  if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
   if (g.vwidget && isSkyV(g)) n.append(...vwParts(g));       // a Vessel Widget draws its Probe and Element, and in Edit layout what is not Placed
   for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
     const p = g.ports?.[k]; if (d.ip || !p?.installed || (g.vwidget && isSkyV(g))) continue;
@@ -1517,23 +1523,30 @@ function vwParts(g) {
 // follows it. Changing the Master's own Gallons grows or shrinks only the Master.
 const V1_GAL = [197, 237];       // Fritz's plain vessel, the One Gallon start (Fritz, 2026-11-05): Proportional uses its Width to Height
 const isVW = g => g?.kind === 'vessel' && !!g.vwidget && !g.integrated && isSkyV(g);
+// the Stove Top Vessel (Rule 19.7) is sized like a Vessel Widget: by its Gallons, or by its real size once its Height and Width are typed
+const isStove = g => g?.kind === 'vessel' && (g.vesselType === 'stoveTop' || g.vesselType === 'stoveTopOut');
+// the IP Type of a Stove Top Vessel's Bottom Outlet (Rule 5.40), '' when it has none; it starts as the Default pipe IP Type
+const stoveOutType = g => g?.vesselType === 'stoveTopOut' && g.ports?.outlet?.installed !== false ? g.ipTypeOut || defaultIpType(S.config.brewDefaults || {}) : '';
+const isSized = g => isVW(g) || isStove(g);
+const vDia = g => (g.sizeMethod === 'diameter' || isStove(g)) && +g.diameter > 0 && +g.vheight > 0;       // drawn by its real size
 const vGal = g => { const v = +(g.volume ?? g.maxVolume) > 0 ? +(g.volume ?? g.maxVolume) : 10; return g.units === 'Metric' ? v / 3.78541 : v; };
 function vAspect(g) {        // its shape: Height / Width of its box
-  if (g.sizeMethod === 'diameter' && +g.diameter > 0 && +g.vheight > 0) return +g.vheight / +g.diameter;
+  if (isStove(g)) return stoveAspect(g.vheight, g.diameter, g.vesselType === 'stoveTopOut');        // its handles and rim are in the box too
+  if (vDia(g)) return +g.vheight / +g.diameter;
   return V1_GAL[1] / V1_GAL[0];
 }
 const V1_SCALE = V1_GAL[0] * Math.cbrt(V1_GAL[1] / V1_GAL[0]);        // with no Master yet: 1 gallon is 197 x 237
 const vScaleFor = tab => { const ws = draft?.workspaces.find(w => w.name === tab), m = vMaster(ws); return !m ? V1_SCALE : +ws.vScale > 0 ? ws.vScale : vScaleOf(m); };
-const vMaster = ws => { const id = ws?.vSizer; return id ? draft?.graphics.find(g => g.id === id && isVW(g) && g.workspace === ws.name) || null : null; };
+const vMaster = ws => { const id = ws?.vSizer; return id ? draft?.graphics.find(g => g.id === id && isSized(g) && g.workspace === ws.name) || null : null; };
 // the gallons it is drawn for: a Diameter vessel is drawn by its real size (OakBarn Brewery, 2026-11-09: "if we use the size rather than
 // the gallons it will draw better in proportion", Rule 19.2): the gallons a cylinder of that Diameter and Height holds; otherwise its Gallons
 const vDrawGal = g => {
-  const real = g.sizeMethod === 'diameter' ? vbRealGallons(g.diameter, g.vheight, g.units === 'Metric') : 0;
+  const real = vDia(g) ? vbRealGallons(g.diameter, g.vheight, g.units === 'Metric') : 0;
   return real || vGal(g);
 };
 // the Calculated Volume of a Diameter vessel, from its Diameter and Height (OakBarn Brewery, 2026-11-09: "Advertized gallons could also be
 // wrong. Easy to calculate the real Volume based on the height and diameter"; "add that as a Field (Read and Display Only)")
-const vCalcVol = g => { const gal = g.sizeMethod === 'diameter' ? vbRealGallons(g.diameter, g.vheight, g.units === 'Metric') : 0, metric = g.units === 'Metric'; return gal ? `${(metric ? gal * 3.78541 : gal).toFixed(1)} ${metric ? 'Liters' : 'Gallons'}` : 'type the Diameter and Height'; };
+const vCalcVol = g => { const gal = vDia(g) ? vbRealGallons(g.diameter, g.vheight, g.units === 'Metric') : 0, metric = g.units === 'Metric'; return gal ? `${(metric ? gal * 3.78541 : gal).toFixed(1)} ${metric ? 'Liters' : 'Gallons'}` : `type the ${isStove(g) ? 'Width' : 'Diameter'} and Height`; };
 const vScaleOf = m => (m.w || VW_W) / Math.cbrt(vDrawGal(m) / vAspect(m));         // the width of a 1 gallon vessel of square shape
 function vBox(g, c) { const a = vAspect(g), w = c * Math.cbrt(vDrawGal(g) / a); return [Math.max(20, Math.round(w)), Math.max(20, Math.round(w * a))]; }
 // after a Vessel's Properties are saved: the Master's new Width or Height sets the Tab's scale; new Gallons or Method resize it
@@ -1556,7 +1569,7 @@ function vSizeTab(ws, fromMaster) {
   const m = vMaster(ws); if (!m) { if (ws) delete ws.vScale; return 0; }
   if (fromMaster || !(+ws.vScale > 0)) { const a = vAspect(m); m.h = Math.round((m.w || VW_W) * a); ws.vScale = vScaleOf(m); }
   let n = 0;
-  for (const g of draft.graphics.filter(g => isVW(g) && g.workspace === ws.name)) if (vResize(g, ...vBox(g, ws.vScale)) || g === m) n++;
+  for (const g of draft.graphics.filter(g => isSized(g) && g.workspace === ws.name)) if (vResize(g, ...vBox(g, ws.vScale)) || g === m) n++;
   return n;
 }
 // an IP dropped on a vessel becomes one of its ports
@@ -1748,7 +1761,7 @@ function connShape(t, w) {
 }
 function pipeConnectors(p, width) {
   const pts = p.points || []; if (pts.length < 2) return [];
-  const drawn = id => { const g = id && L().graphics.find(x => x.id === id); return !!g && ((isFitting(g) && g.fitting !== 'coupling') || isQd(g) || L().graphics.some(c => c.capOn === id)); };
+  const drawn = id => { const g = id && L().graphics.find(x => x.id === id); return !!g && ((isFitting(g) && g.fitting !== 'coupling') || isQd(g) || L().graphics.some(c => c.capOn === id) || stoveOutIp(g)); };
   const out = [];
   for (const [end, a, b, t] of [['from', pts[0], pts[1], p.ipTypeFrom], ['to', pts[pts.length - 1], pts[pts.length - 2], p.ipTypeTo]]) {
     if (!t || drawn(p[end]) || (end === 'to' && isQdHose(p))) continue;
@@ -1757,6 +1770,8 @@ function pipeConnectors(p, width) {
   }
   return out;
 }
+// the Bottom Outlet IP of a Stove Top Vessel: the vessel draws its connector (Rule 19.7), so a pipe end on it does not draw a second one
+const stoveOutIp = g => g?.kind === 'ip' && g.port === 'outlet' && L().graphics.find(v => v.id === g.attachTo)?.vesselType === 'stoveTopOut';
 const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, { hose: !!p.hose, qd: !!p.qd, inch: sizeInches(p) }); p.ipTypeFrom = t; p.ipTypeTo = t; return p; };
 // how thick a pipe of the Default pipe size is on this Tab: the item's own (as the Default tab was when it was made), else today's
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
@@ -3556,7 +3571,7 @@ const eqPort = (id, ws) => { const gid = eqOfIp(id); const g = gid && L().graphi
 function ipPoint(id, ws) {
   if (!id) return null;
   const vt = vtopOf(id);           // a Quick Disconnect hose put in the top of a vessel (Rule 5.28)
-  if (vt !== null) { const v = L().graphics.find(x => x.id === vt && isKettle(x) && (!ws || x.workspace === ws)); return v ? vtopPoint(v) : null; }
+  if (vt !== null) { const v = L().graphics.find(x => x.id === vt && hasTop(x) && (!ws || x.workspace === ws)); return v ? vtopPoint(v) : null; }
   if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
   const pn = devOfIp(id);
   if (pn !== null) { const e = elNamed(pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
@@ -3623,9 +3638,9 @@ function ipNode(id, ws) {
 // Where the flow in a pipe began (Rule 5.21): a Vessel with an Out flow color, or a Tap Water Valve (always Blue)
 function vesselFlowOf(ipId) {
   const vt = vtopOf(ipId);         // a hose in the top of a vessel: flow from (or into) that vessel
-  if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return isKettle(v) ? flowKey(v.flowColor) || '' : ''; }
+  if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return hasTop(v) ? flowKey(v.flowColor) || '' : ''; }
   const g = L().graphics.find(x => x.id === ipId && x.kind === 'ip'), v = g?.attachTo && L().graphics.find(x => x.id === g.attachTo);
-  return isKettle(v) ? flowKey(v.flowColor) || '' : '';
+  return hasTop(v) ? flowKey(v.flowColor) || '' : '';
 }
 // the Flow Color of a Tab (Rule 5.21): tab.flow_Color set by a Process wins over the Tab settings one ("tab" is the Tab on the screen)
 const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
@@ -4277,7 +4292,7 @@ window.addEventListener('pointerup', () => {
     if (isQd(drag.item)) { snapQd(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
-  if (drag?.mode === 'resize' && drag.moved && isVW(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
+  if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)); if (ids.size && rejoinLetGo(drag.item) + rejoinEnds(ids)) renderWs(); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
@@ -5129,7 +5144,8 @@ const WGT_TYPES = () => [
 ];
 const VESSEL_ROWS = [['🔨 Build a Vessel Device (step by step) ...', () => vesselBuilder()], ['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
-const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k))     // pipe fittings are TC Pipe Fittings now (Rule 5.25).map(([k, t]) => [t, () => addEquipment(k)]);
+// pipe fittings are TC Pipe Fittings now (Rule 5.25). Each row shows its plain name (it showed the hidden key, and did nothing, before)
+const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k)).map(([k, t]) => [t, () => addEquipment(k)]);
 const FIT_ROWS = () => Object.entries(FITTINGS).filter(([k]) => !TC_FIT_TPL[k] && k !== 'manualValve').map(([k, t]) => [t, () => addIpFit(k)]);     // elbows, tees and crosses are TC Pipe Fittings (Rule 5.25)
 // a dropdown whose first line is its name; picking a row runs it and the dropdown shows its name again
 function fillPick(sel, head, groups) {
@@ -6282,10 +6298,13 @@ function addVesselWidget(c) {
   const C = EQ[c];
   toBuild();
   const tab = wsName;
-  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === C.title + ' ' + i)) i++;
+  const base = C.title.replace(/[^A-Za-z0-9]+/g, '_');       // a Name has no spaces (Rule 3.1): Stove_Top_Vessel_1, Unheated_mash_tun_1
+  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === base + '_' + i)) i++;
   const n = draft.graphics.filter(g => eqClass(g) && g.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: c, workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
-    name: C.title + ' ' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
+    name: base + '_' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
+  if (c === 'stoveTopOut') g.ipTypeOut = defaultIpType(S.config.brewDefaults || {});         // its Bottom Outlet's connector (Rule 5.40)
+  if (EQ[c] && isStove({ kind: 'vessel', vesselType: c })) { Object.assign(g, { volume: STOVE_GALLONS, units: 'US' }); [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab)); }      // drawn at its Gallons (Rule 19.7)
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
 }
 // Add equipment ➕ (a chiller, coil, filter, RIMS tube, pipe fitting ...): its Widget on the Build Tab
@@ -6293,9 +6312,9 @@ function addEquipment(t) {
   if (t === 'vessel') return addVessel();
   if (EQ[t]) return addVesselWidget(t);
   toBuild();
-  const base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
+  const base = VESSELS[t] || 'Vessel';
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
-  const size = { coil: [160, 160], plateChiller: [90, 160] }[t] || [200, 260];
+  const size = [200, 260];
   const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
@@ -7384,15 +7403,23 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
 const FIT_PLACE = it => [...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
-const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
+const VESSEL_FLOW = it => hasTop(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'], ['image', 'Graphic (picture path)', 'path'],
-  ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
+F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'],
+  ...(isStove(it) ? stoveSizeFields(it) : []),
+  ['image', isStove(it) ? 'Graphic (picture path; empty = drawn by Skynet for its Height and Width)' : 'Graphic (picture path)', 'path'],
+  ...(hasTop(it) && !isKettle(it) ? [['_top', `Hose hang top: its top third is one big IP. A Quick Disconnect hose dropped there hangs over the rim, and a Process line Hose_1.connect = ${it.name || 'its Name'} puts it there (Rules 5.28 and 5.34).`, 'note']] : []),
+  // a Stove Top Vessel's one IP is fixed at the center of its bottom: only its IP Type is set (Rule 19.7)
+  ...(it.vesselType === 'stoveTopOut' ? [['ipTypeOut', 'Bottom Outlet IP Type', 'sel', IP_TYPES, true, false, { tip: STOVE_IP_TIP }]] : []),
+  ...Object.entries(isStove(it) ? {} : EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px)', 'num', null, false, false, { tip: 'Empty: the Name font size on the Default tab.' }],
-  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
-  ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
+  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
+  ...(isStove(it) && vMaster(draft?.workspaces.find(w => w.name === it.workspace))?.id !== it.id ? [['_wh', `Width ${it.w} x Height ${it.h}: set by its size and the Tab's Master Vessel Sizer (only the Master is resized).`, 'note']]
+    : [['w', 'Width', 'num'], ['h', 'Height', 'num']]),
+  ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
+  ...(isStove(it) ? [] : [['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']])];      // a Stove Top Vessel is always one with its IP
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
 // the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
@@ -10371,8 +10398,8 @@ async function editItem(kind, id) {
       const placed = syncVesselPorts(item, before.isNew ? null : before);
       if (isSkyV(item)) turnVesselParts(item, before);         // flipped or rotated: its IPs and fittings turn with it
       placeUnitParts(item);
-      if (isVW(item)) vSizeAfterEdit(item, before);
-      if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
+      if (isSized(item)) vSizeAfterEdit(item, before);
+      if (!bf && !isSkyV(item) && !isStove(item) && (placed.length || before.isNew)) vesselPopup(item, placed);      // a Stove Top Vessel's IP is fixed: nothing to check
       delete item.isNew;
     }
     if (moveX || moveY) { renderWs(); letGoBentEnds(offBefore); }     // as after a drag: a pipe never bends to follow (Rule 5.19)
@@ -10420,7 +10447,7 @@ async function editWorkspace() {
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
     ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num'],
-    ['vSizer', 'Master Vessel Sizer: resize this Vessel and every Vessel on the Tab follows (None = no Vessel can be resized)', 'sel', [['', 'None'], ...draft.graphics.filter(g => isVW(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])]],
+    ['vSizer', 'Master Vessel Sizer: resize this Vessel and every Vessel on the Tab follows (None = no Vessel can be resized)', 'sel', [['', 'None'], ...draft.graphics.filter(g => isSized(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])]],
     ['_flHead', 'Flow Color', 'head'],
     ['flowColor', 'Flow Color of every pipe and hose on this Tab (tab.flow_Color in a Process)', 'flowc', 'tab'],
     ['_flNote', 'Mash, Boil, Whirlpool and Ferment: a pipe with its own Flow color keeps it. Tap, Strike and the plain colors: every pipe takes it. Always: flow from a Tap Water Valve is Blue, and flow that began at a Vessel with an Out flow color takes that color. A Process line tab.flow_Color = Mash sets it on the Tab the screen shows.', 'note']], work, draft.workspaces.length > 1, TAB_SPOT);
@@ -13083,6 +13110,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // at all the Defaults", Rule 2.42): the defaults set here, a list of the defaults set somewhere else, and the order of the Menu.
 // Only ☰ Menu opens it. It belongs to the panel (every Schema), not to one Schema.
 const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of its pipes. A new pump starts from its Ports, else the Default pipe IP Type.';
+const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP: Tri-Clamp, NPT, BSP or Quick Disconnect. It is drawn as its type, and it is the size of the pipe or hose on it. A new one starts with the Default pipe IP Type on the Default tab.';
 const IP_TYPE_TIP = 'The connector on this end: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the same size as the pipe or hose. A new one starts with the Default IP Type on the Default tab, on both ends.';
 const DEF_IP_TIPS = { pipe: 'The connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes already made keep theirs.',
   hose: 'The connector a new hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses already made keep theirs.' };
@@ -14258,6 +14286,9 @@ const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.in
 // may Flip Horizontal, never Flip Vertical, and is not turned (turned 180 is the same as upside down). Chillers, coils, the
 // RIMS tube and other equipment keep every turn and flip.
 const isKettle = g => g?.kind === 'vessel' && !isBfit(g) && (g.vesselType || 'vessel') === 'vessel';
+// a vessel with a hose hang top (Rules 5.28 and 5.34): its top third is one big IP. Every kettle, and both Stove Top Vessels (OakBarn
+// Brewery, 2026-11-15: "Stove Top is widget with IPs with Top IP to hang a hose"; Rule 19.7)
+const hasTop = g => isKettle(g) || isStove(g);
 function uprightKettles(gs) {
   const fixed = [];
   for (const g of gs.filter(g => isKettle(g) && (g.flipV || unitRot(g)))) {
@@ -14286,6 +14317,14 @@ const picWH = g => sideways(g) ? [g.h || 90, g.w || 90] : [g.w || 90, g.h || 90]
 // put a Skynet Fitting's IPs back on its openings (after a resize, a flip or a rotate), and the End Caps on them
 function placeUnitParts(g) {
   if (isSkyV(g)) return placeVesselParts(g);
+  if (isStove(g)) {        // a Stove Top Vessel's Bottom Outlet stays at the center of its bottom when it is resized (Rule 19.7)
+    for (const ip of draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port && eqClass(g).ports[x.port])) {
+      const [cx, cy] = vPortXY(g, ip.port, g.ports?.[ip.port]?.position);
+      Object.assign(ip, { workspace: g.workspace, x: Math.round(cx - (ip.w || 30) / 2), y: Math.round(cy - (ip.h || 30) / 2) });
+      const n = $(`#ws .gfx[data-gid="${CSS.escape(ip.id)}"]`); if (n) place(n, ip);
+    }
+    return;
+  }
   if (!isUnit(g)) return;
   const caps = draft.graphics.filter(isCap);
   for (const ip of draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port && eqClass(g).ports[x.port])) {
@@ -14468,7 +14507,7 @@ function qdTarget(p, c, end = 'to') {
     if (d <= r && (!best || d < best.d)) best = { d, id: q.id, c: at };
   }
   if (best) return { id: best.id, c: best.c };
-  const v = [...L().graphics].reverse().find(v => isKettle(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
+  const v = [...L().graphics].reverse().find(v => hasTop(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
   return v ? { id: 'vtop:' + v.id, c: vtopPoint(v) } : null;
 }
 // a moved hose hangs from its fixed end to its free end. It leaves its fixed end the way it did before (lead), then hangs in a curve
@@ -14982,11 +15021,22 @@ const vwShows = (it, k) => !!it.vwShowAll || vwPlacedNow(it, k) || !!it.ports?.[
 const hidN = it => Object.keys(it.ports || {}).filter(k => !vwShows(it, k)).length;
 // a Vessel Widget's size (Rule 5.32): Gallons, Method, and for Diameter its Diameter and Height
 const V_METHODS = [['proportional', 'Proportional (the plain vessel shape: 1 gallon is 197 x 237)'], ['diameter', 'Diameter (its Diameter and Height give the shape)']];
-function vSizeFields(it) {
-  const metric = it.units === 'Metric', ws = draft?.workspaces.find(w => w.name === it.workspace), m = vMaster(ws);
-  const who = !m ? `This Tab has no Master Vessel Sizer yet (Tab settings: double-click an empty spot on the Tab).`
+function vSizerWho(it) {
+  const ws = draft?.workspaces.find(w => w.name === it.workspace), m = vMaster(ws);
+  return !m ? `This Tab has no Master Vessel Sizer yet (Tab settings: double-click an empty spot on the Tab).`
     : m.id === it.id ? `This Vessel is the Master Vessel Sizer of the ${ws.name} Tab: resizing it resizes every Vessel on the Tab.`
     : `The Master Vessel Sizer of the ${ws.name} Tab is ${m.label || m.name}: this Vessel follows its scale.`;
+}
+// the Stove Top Vessel's size (Rule 19.7): Gallons, and its Height and Width (Width = across the pot). Both typed: drawn by its real size.
+function stoveSizeFields(it) {
+  const metric = it.units === 'Metric', u = metric ? 'cm' : 'inches';
+  return [['_sz', 'Size', 'head'], ['units', 'Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true], ['volume', metric ? 'Liters' : 'Gallons', 'num'],
+    ['vheight', `Height (${u}; empty = a stock pot shape)`, 'num'], ['diameter', `Width (${u}, across the pot; empty = a stock pot shape)`, 'num'],
+    ['_calcVol', 'Calculated Volume (from its Width and Height; read only)', 'ro', vCalcVol(it)],
+    ['_szn', `${vDia(it) ? 'Drawn by its real size (the Calculated Volume), the shape of its Height and Width.' : 'Drawn as a stock pot (as tall as it is wide) for its Gallons. Type its Height and Width to draw it by its real size.'} ${vSizerWho(it)}`, 'note']];
+}
+function vSizeFields(it) {
+  const metric = it.units === 'Metric', who = vSizerWho(it);
   return [['_sz', 'Size', 'head'], ['volume', metric ? 'Liters' : 'Gallons', 'num'], ['sizeMethod', 'Method', 'sel', V_METHODS, true],
     ...(it.sizeMethod === 'diameter' ? [['diameter', `Diameter (${metric ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${metric ? 'cm' : 'inches'})`, 'num'],
       ['_calcVol', 'Calculated Volume (from its Diameter and Height; read only)', 'ro', vCalcVol(it)]] : []),
