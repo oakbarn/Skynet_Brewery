@@ -10,9 +10,9 @@
 
 **Background (of a tab)**: the picture and color behind everything on a tab. Set in **⚙ Tab settings** with Edit layout on. See [Tab background picture and color](26-tab-background).
 
-**Interface**: a board (PLC) Devices are wired to. Its **Interface ID** (1-4 letters, like `MB_`) starts the names of its Devices. See [Interface, Tab and Device names](46-interface-tab-device-names).
+**Interface**: a board (PLC) Devices are wired to. Its **Interface ID** (like `MB_`, Rule 3.2) starts the names of its Devices. See [Interface, Tab and Device names](46-interface-tab-device-names).
 
-**Tab ID**: the 2 letters (like `SP`) that end the names of new Devices on a tab. See [Interface, Tab and Device names](46-interface-tab-device-names).
+**Tab ID**: the short ID (like `SP`) that ends the names of new Devices on a tab; it follows Rule 3.2. See [Interface, Tab and Device names](46-interface-tab-device-names).
 
 **BeerXML**: the recipe file BeerSmith exports. See [Import](08-import).
 

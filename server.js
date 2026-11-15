@@ -59,7 +59,7 @@ import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
 import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update restarts and restarts (Rule 6.31)
 import { FlameWatch } from './lib/flamewatch.js';      // gas burner Flame Out safety (Rule 6.33)
-import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
+import { checkIds, lockedIdError, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
@@ -738,7 +738,9 @@ async function route(req, res) {
     { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
-    if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: Rule 3.2, unique (public/naming.js)
+    // once saved, an Interface ID or Tab ID is never changed, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2)
+    { const bad = (body.devices && lockedIdError(store.config.devices, body.devices, 'Interface')) || (body.workspaces && lockedIdError(store.config.workspaces, body.workspaces, 'Tab')); if (bad) return fail(res, 400, bad); }
     // a backup of the Schema as it was, every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
     if (schemas.active?.id) { try { schemas.backupSchema(schemas.active.id); } catch (e) { console.log('Schema backup failed: ' + e.message); } }
     // renamed items, found by their hidden key (Fritz, 2026-10-27): old name -> new name. Clones of a renamed item follow it.

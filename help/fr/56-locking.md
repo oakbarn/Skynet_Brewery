@@ -2,6 +2,8 @@
 
 Un élément verrouillé ne peut être ni déplacé ni redimensionné, même en **Edit layout**. Seuls les éléments déverrouillés bougent. Un élément verrouillé montre un cadenas 🔒 en Edit layout.
 
+Cela couvre aussi **changer la longueur d'un tuyau** et **redessiner un tuyau souple** (Règle Skynet 2.12) : seul un tuyau ou tuyau souple déverrouillé, avec son bout détaché et l'IP de ce bout déverrouillé, peut être rendu plus court ou plus long ou redessiné (voir [Move alone, Swap, Put back](153-move-alone-swap-put-back)).
+
 Vous pouvez quand même ouvrir les propriétés d'un élément verrouillé (double-cliquez dessus) et le changer là, y compris son **X**, son **Y**, sa **Width** (largeur) et sa **Height** (hauteur).
 
 ## Verrouiller ou déverrouiller un élément {#lock-or-unlock-one-item}

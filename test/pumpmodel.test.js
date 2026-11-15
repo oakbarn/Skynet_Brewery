@@ -75,8 +75,8 @@ assert.match(app, /const PUMP_GRAPHIC_TIP = PUMP_8_IPS_PIC \+ 'The Skynet pictur
 assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', 'gpick'/, 'a Skynet pump drawing has no Path box');
 assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : DEVICE_TIPS\.name;/);
 assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);
-assert.doesNotMatch(app, /once saved can never be changed|1 to 4 Characters/, 'Rule 3.2: only an Admin changes an ID; a Tab ID is 2 letters');
-assert.match(app, /It is exactly 2 letters\. Our example Tab is: BH/);
+assert.doesNotMatch(app, /only an Admin can change it|It is exactly 2 letters/, 'Rule 3.2 (2026-11-15): a saved ID never changes, not even by an Admin');
+assert.match(app, /Tab IDs follow Rule 3\.2\. Our example Tab is: BH/);
 assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /el\.tap === 'hold' \|\| el\.tap === 'dual'/);
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.50 \*\*Dual Action click\*\*/m);
 // 🏷 Suggested Names (Rule 3.18): convert all names at once
