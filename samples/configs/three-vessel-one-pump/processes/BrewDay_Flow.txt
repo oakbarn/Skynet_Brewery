@@ -828,6 +828,7 @@ endif
 if vVLeft <= 15 * vVScale
 	if vVStep != -1
 		gblS_Hop_Warning = "Put the chiller in to sanitize it, and add Whirlfloc."
+		place_Chiller = Immersion_Chiller, BK_Vessel
 		start "wgt_ALM_Warning_BH"
 		vVStep = -1
 	endif
@@ -1010,6 +1011,7 @@ sleep 1000
 step 1.00026 "SectionBrew604"
 gblV_Brew_Status = 604
 vSMsg = "Close the Chiller water tap. Enter the Original Gravity and the volume in the fermenter on the Reporting Tab."
+remove_Chiller = BK_Vessel
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "OG Entered?"
 gblS_Advance_Label.background = 4
