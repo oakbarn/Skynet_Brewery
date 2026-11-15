@@ -2558,6 +2558,9 @@ method: while its pin is on), the Brain watches its probe about once a second:
   only). Help 197 has two Process snippets (gas burner control, and the software backup in Process words), each with the gas warning
   (Rule 6.20).
 - The gas warning (Rule 6.20, the gas half) starts the Flame Out section's balloon.
+- **Not a UL safety** (OakBarn Brewery, 2026-11-15: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the
+  Flame Out's Properties note, its balloon, the burner pop-up and Help 197 say "This is not a UL listed safety and should not be relied on. Always monitor the burner." (the same words
+  in the BruControl Import's burner question).
 
 ## 7. Pictures
 
@@ -4507,6 +4510,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
 - 2026-11-14: Added Rule 8.5 (OakBarn Brewery: "Reword all about Password to the way it works", "Can we encrypt all passwords, reset codes and e mails"): passwords, recovery and sign-in codes stay one-way scrambled; the email app password, Twilio token and users' email addresses and mobile numbers are now locked (encrypted) on disk with data/seal.key; the Brain locks its data folder to the computer account that runs it; a password is reset only on your own Skynet (three ways); OakBarn Brewery never emails about passwords (phishing warning on the sign-in page, recovery code screen, Help 10, oakbarnbrewery.com). Help 10 (and French): the three ways, the warning, Windows steps for the reset-password tool. Both programs.
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
