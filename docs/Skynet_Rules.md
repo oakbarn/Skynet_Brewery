@@ -4135,7 +4135,8 @@ greyed out with its pump name. A **User pump** (its own picture) has **one path 
 saves from a field. **Exception, a new Device:** until it is added, Enter (or picking from one of its dropdowns) jumps to the next
 field of its sequence: 1 Label, 2 Interface, 3 Available Ports, 4 Tab, then Orientation (a Pump), then the **➕ Add Device**
 button, where Enter adds it. The Name, Cover, X, Y, Width and Height are skipped by Enter (Tab or a click reaches them). The box
-opens with the focus on the first empty field of the sequence. Arrow keys change a dropdown without jumping on. (Help 82)
+opens with the focus on the first empty field of the sequence. Arrow keys change a dropdown without jumping on. (Help 82) The Pump
+Add box has its own order of focus (Rule 18.38).
 
 18.21 **Pump Device Properties are Fritz's screen 9** (2026-11-04, [docs/Blichmann_Pump_Sequence.png](Blichmann_Pump_Sequence.png)):
 the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
@@ -4275,23 +4276,27 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
   Path 1-3), Hide value, Look, Digits, When tapped, Tap target and Ask before changing. Database and .API are not offered: a
   picture has no value (Rule 6.14).
 
-18.28 **A blank Label (or Port) can't be left: a pop-up says so** (Fritz, 2026-11-05: "If the Label Field is Blank and the User
-clicks any other field or Icon but the Cancel Button, A Pop Up Dialog that States the Label Cannot be Blank. Dialog self distructs
-after 5 seconds." Thread "Warn when Label is left blank", Help 140). In **every** Add / Build and Properties dialog that has a
-Label (every Device and Widget, Rule 18.15):
-- While the **Label is blank**, a click or tap on **any other field or icon** (Save, ➕ Add Device, the ? Help icon, a switch, a
-  dropdown ...) does nothing: a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label. Tab or
-  Enter from a blank Label does the same. The pop-up **goes away by itself after 5 seconds** (or when tapped).
+18.28 **A blank Label (or Port): only Save waits for it** (Fritz, 2026-11-05: "If the Label Field is Blank ... A Pop Up Dialog that
+States the Label Cannot be Blank. Dialog self distructs after 5 seconds"; OakBarn Brewery, 2026-11-15, Blichmann RipTide Dialog 1:
+"Best to be able to change Inter face and also the tab anytime"; "If a user wanted to use the 2 Lines for the label, why prevent";
+"Rule 18.28 please". Help 140). In **every** Add / Build and Properties dialog that has a Label (every Device and Widget, Rule 18.15):
+- While the **Label is blank**, the **Tab key and the mouse reach every other field and icon** of the dialog at any time (the ⬆
+  two-line box, the ⬢, Label Visible, the Interface, the Port, the Tab, the ? Help ...).
+- Only **Save / ➕ Add Device / ➕ Add Widget** and a box that gets no focus (greyed out or read only, like Device Type) wait for the
+  Label: a click on them does nothing, a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label.
+  The pop-up **goes away by itself after 5 seconds** (or when tapped).
+- **Enter** on a blank Label stays on it. A blank Label left for nothing (a click on empty space, a title, a greyed out box) gets
+  the focus back.
 - **The Cancel button is "hot"** (Fritz, 2026-11-05: "The Cancel Button is Hot is part of the Rule"): ✖ Cancel (and Esc) always
   work, even while the Label or the Port is blank (Rule 18.11 still asks first when something was changed).
 - **Delete is "hot" too** (OakBarn Brewery, 2026-11-14: "I also tried to delete a Hose that had no label but the Delete button warned
   it needed one. Have Delete Delete without those types of issues"): a Delete button (Properties Delete, 🗑 Delete, 🗑 Delete Pipe /
   Hose, top or bottom) always works, in every dialog, even while the Label, the Port or any needed box (Rule 18.33) is blank. It
   still asks "Delete this item?" first. Both programs.
-- The Label's own **⬆** and **⬢** icons work too, since they are ways of typing the Label.
-- **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the
-  user is on a blank Port, every other field or icon gives the pop-up **"⚠ The Port cannot be blank."**, except Cancel and the
-  fields before it (the Label and the Interface), so the user can still go back and pick another Interface.
+- **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): Save / ➕ Add
+  waits for it with **"⚠ The Port cannot be blank."**, and a blank Port never keeps the focus ("If Port is Nul, it does not retain
+  focus ... this allows for an Interface Change").
+- A **needed box** (Rule 18.33) still keeps the focus until it is filled.
 - **➕ Add new Interface…** (extends Rule 18.14, Fritz 2026-11-05: "If you choose to create a new Interface. that new Interface pops
   into the DDLB. If the new Interface is aborted, the default Interface is posted back to the DDLB"): the new Interface is picked in
   the Interface dropdown; if the new Interface is cancelled, the default Interface (the one that was there before) is put back.
@@ -4520,6 +4525,28 @@ Both programs: the BruControl Import's Build page uses the same dialogs.
    text (Hover Help = Panel Help).
 Both programs: the BruControl Import's Build page uses the same Pump dialogs and tap pop-ups.
 
+18.38 **Blichmann RipTide Dialog 1: the order of focus** (OakBarn Brewery, 2026-11-15, "Blichmann Riptide Dialog 1 Final", the model,
+Rule 18.34). In the Pump Add box, until the Interface and Port are Confirmed (Rule 18.35). **All** = the Enter key, the Tab key or
+the mouse; **TMF** = the Tab key or the mouse only; **NF** = no focus:
+1. **Label**: All. It has the focus when the box opens.
+2. **⬆** (two-line box): TMF.
+3. **⬢** (Label attributes): TMF.
+4. **Label Visible**: TMF.
+5. **Interface**: TMF ("Best to be able to change Inter face and also the tab anytime ... not go to them but require the tab cycle or
+   mouse"). Picking a new Interface goes on to its Port.
+6. **Port**: All.
+7. **Tab**: TMF. Never jumped to.
+8. **Device Type**: NF.
+- The **Enter key** goes only between the Label and the Port. Enter on a blank Label stays on it; with the Label filled in, Enter
+  goes to the Port. With both filled in, Enter on the Port asks for the Review (Confirm or Back, Rule 18.35). From a TMF field,
+  Enter goes to the next All field (the Port, or from the Tab back to the Label).
+- The **Tab key** cycles through 1 to 7, the last back to the first. The **? Help**, **✖ Cancel** and **➕ Add Device** are not in
+  the cycle: they are for the mouse.
+- A blank Label or Port never stops the Tab key or the mouse (Rule 18.28). Once Confirmed, the rest of the box opens with the focus
+  on the Orientation (Rule 18.20).
+- The Pump first; the other Device dialogs follow once the Pump dialog, the model, is done. Both programs: the BruControl Import's
+  Build page uses the same dialog.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4703,6 +4730,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
 - 2026-11-15: Rule 2.38 changed (OakBarn Brewery: "And Heating Element Like this is Ok for 2.38. That rule needs to be changed to when possible and not mandatory"): each dropdown choice starting with its own first letter is now **when possible**, not a must; choices may share a lead word when that is clearer (Heating Element: DO On/Off, Heating Element: PWM ...). Lists are no longer forced to it before the first Public Production. Checked against both programs: no list changes now (the Importer shares the Panel's lists). (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
