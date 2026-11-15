@@ -2210,7 +2210,8 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
 - **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5; Method Settings 2026-11-15): **Current Method** (a dropdown
-  holding only the methods in use) and **Short Label** (a switch) on one line; then **Method Settings**, a **⬢** button for each method
+  holding only the methods in use), **Short Label** (a switch) and a red **⬢** that opens the Current Method's own Settings (OakBarn Brewery,
+  2026-11-15: "a Icon that pops current properties methods") on one line; then **Method Settings**, a **⬢** button for each method
   with ✔ Used or Not used under it (*replaced 2026-11-15:* the row of **Enabled** switches); then **Control Method**, a balloon for each method in use, the Current Method **Red** and the others
   **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
   the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element

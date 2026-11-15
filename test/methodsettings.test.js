@@ -19,12 +19,14 @@ assert.ok(!/'menabled'|'Enabled', 'head'/.test(heat), 'no Enabled row any more: 
 // ---- each method's dialog
 const fields = heat.slice(heat.indexOf('function methodSetFields('), heat.indexOf('async function methodEntry('));
 assert.match(fields, /\['methodSpot_' \+ k, 'Use Method', 'bool', null, true/, 'Use Method is a switch that redraws the dialog');
-assert.match(fields, /\['_useLock', 'Use Method', 'bool', null, false, false, \{ tip: T\.useMethod, disabled: true \}\]/, 'Direct and the Current Method: always On, greyed');
+assert.match(fields, /\['_useLock', 'Use Method', 'bool', true, false, false, \{ tip: T\.useMethod, disabled: true \}\]/, 'Direct and the Current Method: always On, greyed');
 assert.match(fields, /if \(!use\) return \[head\];/, 'Use Method No: every other setting hidden');
 assert.match(fields, /k === 'hysteresis' \? \[\s*\['_dir', 'Direction'/, 'Hysteresis keeps its Integrate_4 rows');
 const entry = heat.slice(heat.indexOf('async function methodEntry('));
 assert.match(entry, /layerDialog\(`\$\{heatMethodWord\(k\)\} Settings`[\s\S]*\{ model: true \}\)/, 'frozen top with Keep (Rule 2.51)');
 assert.match(entry, /\$\('#dlgBody'\)\._rebuild\?\.\(\)/, 'the Properties redraw after Keep');
+assert.match(app, /if \(x\.methodPop\) icons\.push\([^\n]*methodEntry\(startMethod\(obj\), obj\)/, 'the ⬢ beside Current Method opens its Settings');
+assert.match(heat, /T\.heatMethod, methodPop: true, with:/);
 assert.match(app, /const model = asModel \|\| onModelDialog\(\);/);
 assert.match(app, /build\(\); body\._rebuild = build;/);
 assert.match(app, /if \(t\.dataset\.k === 'heatMethod' && isHeatElem\(obj\) && was && was !== obj\.heatMethod[^\n]*obj\['methodSpot_' \+ heatMethodKey\(was\)\] = true;/, 'a new Current Method keeps the one before in use');

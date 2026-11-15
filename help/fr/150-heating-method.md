@@ -89,7 +89,8 @@ La façon dont la résistance est câblée décide quelles méthodes ont du sens
 Quand vous la construisez (et plus tard dans ses Properties), la partie **Heating method** a ces lignes :
 
 - **Current Method** : la méthode où elle est. La liste ne contient que les méthodes utilisées (voir Use Method plus bas). La fenêtre
-  s'ouvre sur celle où elle est maintenant. À côté, **Short Label** passe ses bulles en noms courts (DO, DutyC, HYS ...).
+  s'ouvre sur celle où elle est maintenant. À côté, **Short Label** passe ses bulles en noms courts (DO, DutyC, HYS ...). Le **⬢**
+  rouge au bout de la ligne ouvre les **Settings de la Current Method** (par exemple Hysteresis Settings).
 - **On / Off** : sur la même ligne, une petite image de la résistance. Un clic la met en marche ou à l'arrêt tout de suite, comme un clic dessus sur
   le Tab. On / Off est la résistance elle-même ; **Direct** est une méthode (simplement marche ou arrêt), donc une résistance en Direct en marche chauffe à 100 %.
 - **Method Settings** : un bouton **⬢** pour chaque méthode (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), avec **✔ Used** ou

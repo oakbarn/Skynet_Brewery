@@ -89,7 +89,8 @@ How the element is wired decides which methods make sense (the hover help on the
 When you build it (and later in its Properties), the **Heating method** part has these rows:
 
 - **Current Method**: the method it is in. The list holds only the methods in use (see Use Method below). The dialog opens on the one
-  it is in now. Beside it, **Short Label** switches its balloons to short names (DO, DutyC, HYS ...).
+  it is in now. Beside it, **Short Label** switches its balloons to short names (DO, DutyC, HYS ...). The red **⬢** at the end of
+  the line opens the **Current Method's own Settings** (for example Hysteresis Settings).
 - **On / Off**: on the same line, a small picture of the Element. One click turns it On or Off at once, like one click on it on
   the Tab. On / Off is the Element itself; **Direct** is a method (simply On or Off), so a Direct Element that is On heats at 100 %.
 - **Method Settings**: a **⬢** button for each method (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), with **✔ Used** or
