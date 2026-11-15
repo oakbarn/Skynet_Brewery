@@ -2186,13 +2186,27 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
-- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5): **Current Method** (a dropdown) and **Short Label** (a
-  switch) on one line; then **Enabled**, a switch under each method's name: **a method must be enabled to be used** (the Current Method
-  and Direct are always on, greyed); then **Control Method**, a balloon for each enabled method, the Current Method **Red** and the others
+- **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5; Method Settings 2026-11-15): **Current Method** (a dropdown
+  holding only the methods in use) and **Short Label** (a switch) on one line; then **Method Settings**, a **⬢** button for each method
+  with ✔ Used or Not used under it (*replaced 2026-11-15:* the row of **Enabled** switches); then **Control Method**, a balloon for each method in use, the Current Method **Red** and the others
   **Yellow**, the same balloons as under the Element on its Tab. **The balloons work together:** one click on a balloon in the dialog or on
   the Tab makes it the Current Method in both places at once, and the one before turns Yellow. The dialog opens on the method the Element
   is in now. The explanations are in hover help, so the dialog stays clean.
-- **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4): **Temperature Probe** and **Setpoint** on one line; **Direction**
+- **One settings dialog for each method** (OakBarn Brewery, 2026-11-15: "When a user switches from Hysteresis to Duty Cycle there would
+  need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle to set the parameters for the new method. One for each
+  method. Include a Use Method Boolean so it allows the method to be selected in a Process or DDLB. Is set to [No], Hide all the
+  Attributes on that Property sheet. Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): each
+  method's ⬢ opens its own dialog, **"Duty Cycle Settings"** and so on, with its title, ✖ Cancel and 💾 Keep frozen at the top and no
+  bottom row (Rule 2.51); Keep puts its settings in the Properties, saved with them. At its top is **Use Method**, a switch: **On**, the
+  method may be picked in the Current Method dropdown, by its balloon (dialog and Tab), by a Method Clone and by a Process; **Off**, it
+  may not, and **every other setting on that dialog is hidden** (the settings are kept). **Direct** and the **Current Method** are always On
+  (greyed); a new Current Method keeps the one before in use. Use Method is the same setting the Enabled switches were (saved as
+  methodSpot_<method>), so nothing saved changes. Direct has nothing to set. The Temperature Probe and the Setpoint are shared by the
+  methods that use them. **Processes:** `.method = "X"` and the short `.DutyC` ... may only pick a method in use: the Process editor offers
+  only those and its check shows a plain error before brewing; the Brain refuses it if it runs anyway. Switching Use Method On never turns
+  the Element On. The Heating Element Properties have the frozen top too, with no bottom row. **Both programs:** the BruControl Import
+  uses the same dialogs and switches Use Method On for each joined BruControl control. Help 150.
+- **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4; in the Hysteresis Settings dialog since 2026-11-15): **Temperature Probe** and **Setpoint** on one line; **Direction**
   (Heating, greyed) with **Offset** beside it, picked from a list of every half degree its Hardware Controller allows (Rule 6.29);
   **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
   Setpoint (blue) and the Offset (yellow). Data Display calls the probe reading **Temperature**. A Device built into a Vessel Device
@@ -4592,6 +4606,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 6.19 (OakBarn Brewery: "When a user switches from Hysteresis to Duty Cycle there would need to be Property Dialog for the Hysteresis attributes and one For Duty Cycle ... One for each method. Include a Use Method Boolean ... Is set to [No], Hide all the Attributes ... Standard Close Frozen on the dialogs"; "And also the process commands to change a method"): a Heating Element's Properties have **Method Settings**, a ⬢ for each method opening its own settings dialog (frozen top, 💾 Keep, no bottom row) with a **Use Method** switch on top; Off hides the rest. It replaces the Enabled switches (same saved setting). The Current Method dropdown, balloons, Method Clones and Processes offer only methods in use; the Process editor now flags `.method = "X"` / `.DutyC` for a method not in use before brewing. Heating Element Properties frozen (Rule 2.51). Help 150 (and French). Checked against the BruControl Import program: same dialogs; it already switches Use Method On for joined controls.
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")

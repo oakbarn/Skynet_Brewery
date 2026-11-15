@@ -86,25 +86,46 @@ How the element is wired decides which methods make sense (the hover help on the
 
 ## Its main method and the other methods allowed
 
-When you build it (and later in its Properties), the **Heating method** part has three rows:
+When you build it (and later in its Properties), the **Heating method** part has these rows:
 
-- **Current Method**: the method it is in. The dialog opens on the one it is in now. Beside it, **Short Label** switches its
-  balloons to short names (DO, DutyC, HYS ...).
-- **Hysteresis**: the **Temperature Probe** and its **Setpoint** sit on one line. **Direction** is Heating, with the **Offset (-)** beside it (-1 turns it on 1 degree below the Setpoint),
-  picked from a list (every half degree its Hardware Controller allows). **Predictive** has the **Delay** beside it. A small drawing
-  beside each shows the temperature (red) going between the Setpoint (blue) and the Offset (yellow).
+- **Current Method**: the method it is in. The list holds only the methods in use (see Use Method below). The dialog opens on the one
+  it is in now. Beside it, **Short Label** switches its balloons to short names (DO, DutyC, HYS ...).
 - **On / Off**: on the same line, a small picture of the Element. One click turns it On or Off at once, like one click on it on
   the Tab. On / Off is the Element itself; **Direct** is a method (simply On or Off), so a Direct Element that is On heats at 100 %.
-- **Enabled**: a switch under each method's name. **A method must be enabled to be used.** The Current Method and **Direct**
-  (full power) are always on. The pop-up, the balloons, Method Clones and Processes offer only the enabled ones, and a Process asking
-  for another one stops with a plain message.
-- **Control Method**: a balloon for each enabled method, the Current Method **red**, the others **yellow**. These are the same
+- **Method Settings**: a **⬢** button for each method (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), with **✔ Used** or
+  **Not used** under it. **Each method has its own settings dialog**: click its ⬢ to open it. See [Each method's settings](#each-method-s-settings).
+- **Control Method**: a balloon for each method in use, the Current Method **red**, the others **yellow**. These are the same
   balloons as under the Element on its Tab, and they work together: **click Duty Cycle here or on the Tab** and Duty Cycle becomes the
   Current Method in both places, red, and the one before turns yellow.
 
 An Element **built into a Vessel Device or RIMS tube** works the same way: open its Properties (double-click it, or its ⚙) for
 its Heating method and the other methods allowed. Older Schemas whose built in Element was a separate Hysteresis or PID Device
 are changed to a Heating Element when they load, keeping its name and settings.
+
+## Each method's settings
+
+Each method keeps its own settings, so you can set up the next method before you switch to it. Example: the HLT element is in
+Hysteresis. To boil in Duty Cycle, click **⬢ Duty Cycle**, switch **Use Method** On, set the **Duty cycle %** and click **💾 Keep**.
+Then **💾 Save** the Properties. Now Duty Cycle is in the Current Method list, it has a balloon, and a Process may switch to it.
+
+Its dialog has its title, **✖ Cancel** and **💾 Keep** frozen at the top while the rest scrolls (no buttons at the bottom). Keep puts
+the settings in the Properties; they are saved when you Save the Properties.
+
+- **Use Method** (a switch, at the top): **On** lets the method be picked: in the Current Method list, by its balloon here and on the
+  Tab, by a Method Clone and by a Process. **Off**: it can't be picked, and **all its other settings are hidden** (they are kept for
+  later). **Direct** and the **Current Method** are always On (greyed). When you pick a new Current Method, the one before stays in use.
+- **Direct**: nothing to set; it is simply full On or Off.
+- **Duty Cycle**: **Duty cycle %** and **Cycle time (ms)**.
+- **Hysteresis**: the **Temperature Probe** and its **Setpoint** on one line. **Direction** is Heating, with the **Offset (-)** beside
+  it (-1 turns it on 1 degree below the Setpoint), picked from a list (every half degree its Hardware Controller allows).
+  **Predictive** has the **Delay** beside it. A small drawing beside each shows the temperature (red) going between the Setpoint (blue)
+  and the Offset (yellow).
+- **PID**, **Deadband** and **Precise**: the **Temperature Probe** and its **Setpoint**, then their own numbers (Kp, Ki, Kd, Max
+  output ...), **Reversed** (cooling) and **PWM pin**. Precise also says whether its probe can see 0.1 degree.
+
+The **Temperature Probe** and the **Setpoint** are shared: set them in one method's dialog and the others use the same ones.
+
+Picking a method, or switching its Use Method On, **never turns the Element On** (Rule 6.19).
 
 ## One-click method spots
 
@@ -148,7 +169,11 @@ MB_25_DO@H_Element_HLT_BH.HYS
 MB_25_DO@H_Element_HLT_BH.DutyC
 ```
 
-The codes are **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** and **DeadB** (Deadband). The Process editor offers them after the name.
+The codes are **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) and **PREC** (Precise). The Process editor offers them after the name.
+
+**Only methods in use:** a Process may only switch to a method whose **Use Method** is On (Direct and the Current Method always are).
+The Process editor offers only those, and its check shows a plain error before you brew, for example: *hE_HLT_1 may only use Direct,
+Duty Cycle, Hysteresis: the Use Method of PID is Off*. If such a line still runs, the Brain refuses it with the same kind of message.
 
 ## Its name
 
@@ -176,9 +201,9 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 
 ## In its Properties
 
-Under **Heating method**: the method it **starts with**, the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise), and
-that method's settings. Pick another method and its settings show; the others are kept. A PID or Deadband can also be
-**Reversed** (cooling) and use a **PWM pin**. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
+Under **Heating method**: the method it **starts with** and **Method Settings**, one ⬢ dialog for each method with its
+**Use Method** switch, the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise) and that method's settings
+([Each method's settings](#each-method-s-settings)). A PID, Deadband or Precise can also be **Reversed** (cooling) and use a **PWM pin**. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
 same settings.
 
 ## One Interface Port, one Device
