@@ -4435,6 +4435,27 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 3. **Both programs:** the BruControl Import has no Equipment Profiles, so the Interview is in the Skynet Panel only. The Import's
    Build page is not changed.
 
+19.7 **The Stove Top Vessel: a Widget with IPs and a hose hang top, drawn for its Height and Width** (OakBarn Brewery, 2026-11-13:
+"We need stove top Vessel with the Hose hang top and size attributes H_w and Gallons and make the Graphic Dynamic top"; 2026-11-15:
+"Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones. 1 no Outlets, 2. Outlet at Bottom with the conector types
+like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build the Stove Top Vessel", Help 199).
+- **Two of them, next to Add equipment:** **Stove Top Vessel** (no outlets) and **Stove Top Vessel, Bottom Outlet** (one IP at the
+  center of the bottom). Both are Widgets with IPs and **no Devices**. They are the only choices there besides the Skynet equipment
+  Widgets: the older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller are gone (OakBarn
+  Brewery, 2026-11-13: "remove for now. We will build several Vessel Template Devices where these would be").
+- **Hose hang top:** its top third is one big IP, as on every vessel (Rules 5.28 and 5.34): a Quick Disconnect hose dropped there, or
+  a Process line `Hose_1.connect = Stove_Top_Vessel_1`, hangs over the rim into the pot.
+- **Size (Vessel Rules):** Units, **Gallons** (5 to start), **Height**, **Width** (across the pot) and a read only **Calculated
+  Volume**. Both Height and Width typed: drawn by its real size and shape (as the Diameter method, Rule 19.2). Either empty: a stock pot
+  as tall as it is wide, sized by its Gallons. It follows the Tab's Master Vessel Sizer (Rule 19.3) and can be the Master.
+- **Its picture is drawn by Skynet for its box** (the "Graphic Dynamic"): pot body, rim and two side handles, flat grey #808080 with a
+  black outline and no text (the Label is its only text). A Graphic picked by the user is used instead.
+- **The Bottom Outlet IP** has a **Bottom Outlet IP Type**: Tri-Clamp, NPT, BSP or Quick Disconnect, like a pipe end (Rule 5.40). It
+  starts as the Default pipe IP Type, is drawn as its type under the pot, and is the size of the pipe or hose joined to it (a pipe end
+  on it draws no second connector).
+- **Both programs:** the BruControl Import's Build page is the Panel's own, so it has both. BruControl has no stove top pot, so an
+  import never makes one.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -4473,6 +4494,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Added Rule 19.7 Stove Top Vessel (OakBarn Brewery: "Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones"; "Center Bottom on Stove Top Widget and it gets IP"): Stove Top Vessel and Stove Top Vessel, Bottom Outlet next to Add equipment; hose hang top, Gallons, Height, Width, a drawing made for its Height and Width, Bottom Outlet IP Type (Rule 5.40). The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller choices removed (OakBarn Brewery, 2026-11-13: "remove for now"). Help 199. (thread "Build the Stove Top Vessel")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
 - 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
