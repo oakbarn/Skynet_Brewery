@@ -86,6 +86,6 @@ assert.match(fs.readFileSync(new URL('../public/index.html', import.meta.url), '
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^3\.18 \*\*🏷 Suggested Names/m);
 // A frozen top on every dialog (Rule 2.51): the bottom row is gone from #dlg, and paired rows are frozen at the top
 assert.match(app, /function freezeDialogTop\(d\)/); assert.match(app, /try \{ freezeDialogTop\(this\); \}/);
-assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\) \.dlgBottomBar, dialog#dlg:has\(#dlgBody \[data-k="ipTypeFrom"\]\) \.dlgBottomBar \{ display: none; \}/, 'the Pump dialog (the model) and each dialog updated since (Rule 2.51: the Pipe and Hose Properties) lose their bottom row');
+assert.match(fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8'), /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\) \.dlgBottomBar, dialog#dlg:has\(#dlgBody \[data-k="ipTypeFrom"\]\) \.dlgBottomBar(, [^{]*)? \{ display: none; \}/, 'the Pump dialog (the model) and each dialog updated since (Rule 2.51: the Pipe and Hose Properties) lose their bottom row');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^2\.51 \*\*A frozen top on the model dialog\*\*/m);
 console.log('pump model tests passed');

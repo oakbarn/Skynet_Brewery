@@ -19,7 +19,7 @@ import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
@@ -3027,7 +3027,7 @@ async function methodCloneTap(g) {
   if (!can('operator')) return toast('Your account is view only', true);
   const p = L().elements.find(e => e.name === g.of); if (!p) return;
   const k = heatMethodKey(g.method);
-  if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: tick it in its Properties`, true);
+  if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: switch its Use Method On (Properties, Method Settings, ⬢ ${heatMethodWord(k)})`, true);
   if (NEEDS_PROBE.includes(k) && !p.input) return toast(`${p.label || p.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
   const inMethod = heatMethodKey(S.values[p.name]?.method) === k;
   if (inMethod && S.values[p.name]?.state) return setProp(p.name, 'state', false);
@@ -7964,32 +7964,57 @@ function heatFields(it, x = {}) {
   const liveM = heatMethodKey(S.values[it.name]?.method);
   if (it.name && !liveSeen.has(it)) { liveSeen.add(it); if (liveM && allowedMethods(it).includes(liveM)) it.heatMethod = liveM; }
   const m = startMethod(it), T = DEVICE_TIPS;
-  const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
-  if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
-  // Integrate 5 (OakBarn Brewery, 2026-11-10): Current Method and Short Label on one line; the Enabled switches; the Control Method
-  // balloons. The explanations (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
-  const on = HEAT_METHODS.filter(([k]) => k === 'onoff' || k === m || it['methodSpot_' + k]);
+  // Integrate 5 (OakBarn Brewery, 2026-11-10): Current Method and Short Label on one line; the Control Method balloons. The explanations
+  // (and the electrical warning, Rule 6.20) are in the balloons, so the dialog stays clean.
+  // Method Settings (OakBarn Brewery, 2026-11-15: "When a user switches from Hysteresis to Duty Cycle there would need to be Property
+  // Dialog for the Hysteresis attributes and one For Duty Cycle to set the parameters for the new method. One for each method. Include a
+  // Use Method Boolean so it allows the method to be selected in a Process or DDLB"): each method's settings are in its own ⬢ dialog
+  // (methodEntry), with its Use Method switch (saved as methodSpot_<key>, the old Enabled). The Current Method list offers only the methods in use.
+  const on = HEAT_METHODS.filter(([k]) => allowedMethods(it).includes(k));
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
-    ['heatMethod', 'Current Method', 'sel', HEAT_METHODS.map(([k, w]) => [k, w]), true, 'b', { tip: m === 'hysteresis' ? HYS_HOVER_TIP : T.heatMethod, with: [['methodShort', 'Short Label', 'bool', null, true, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
+    ['heatMethod', 'Current Method', 'sel', on.map(([k, w]) => [k, w]), true, 'b', { tip: m === 'hysteresis' ? HYS_HOVER_TIP : T.heatMethod, methodPop: true, with: [['methodShort', 'Short Label', 'bool', null, true, false, { tip: T.eMethodShort }], ['_onTog', 'On / Off', 'elemtog', null, false, false, { tip: T.elemTog }]], ...x }],
     // what switches it sets its Hysteresis range (OakBarn Brewery, 2026-11-10, Rule 6.29)
     ['switchedBy', 'Hardware Controller', 'sel', switchedByChoices(), true, false, { tip: T.switchedBy, ...x }],
-    ['_enHead', 'Enabled', 'head', null, false, false, { tip: T.eMethodSpot, ...x }],
-    ['_enabled', '', 'menabled', HEAT_METHODS.map(([k, w]) => [k, w, k === 'onoff' || k === m]), false, false, x],
+    ['_msHead', 'Method Settings', 'head', null, false, false, { tip: T.eMethodSet, ...x }],
+    ['_msets', '', 'msets', HEAT_METHODS.map(([k, w]) => [k, w]), false, false, x],
     ...(on.length > 1 ? [['_cmHead', 'Control Method', 'head', null, false, false, { tip: T.controlMethod(it, m), ...x }], ['_balloons', '', 'mballoons', on, false, false, x]] : []),
-    // Integrate_4 (OakBarn Brewery, 2026-11-10): the Temperature Probe and its Setpoint on one line; for Hysteresis, Direction (Heating)
-    // with its Offset picked from a list, and Predictive with its Delay, each with a small wave drawing
-    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, ...(HEAT_SETTINGS[m].some(([, k]) => k === 'target') ? { with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] } : {}), ...x }]] : []),
-    ...(m === 'hysteresis' ? [
-      ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (-)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']], ...x }],
-      PREDICTIVE_FIELD({ ...x, tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay') }], ['_waveD', '', 'wave', 'delay']] })]
-      : HEAT_SETTINGS[m].filter(([, key]) => !(key === 'target' && NEEDS_PROBE.includes(m))).map(([, key, label]) => [key, label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x])),
-    // Hysteresis enabled but not the Current Method: its On offset and On delay still show, so its range can be met (Rule 6.29)
-    ...(m !== 'hysteresis' && allowedMethods(it).includes('hysteresis') ? HEAT_SETTINGS.hysteresis.filter(([p]) => p !== 'target').map(([, key, label]) => [key, 'Hysteresis ' + label, 'num', null, false, false, elemTip(key) ? { tip: elemTip(key), ...x } : x]) : []),
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', { ...x, tip: ELEM_DISPLAY_TIP })] : []),
-    // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
-    ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
-    ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
   ];
+}
+// The keys a method's ⬢ dialog sets: its Use Method switch, the Probe the methods share, and its own settings
+const methodSetKeys = k => ['methodSpot_' + k, ...(NEEDS_PROBE.includes(k) ? ['input'] : []), ...HEAT_SETTINGS[k].map(s => s[1]),
+  ...(k === 'hysteresis' ? ['predictive'] : []), ...(PERCENT_METHODS.includes(k) ? ['reversed', 'pwm'] : [])];
+// One method's own dialog (Rule 6.19, OakBarn Brewery, 2026-11-15): Use Method on top; set to No, every other setting is hidden (they are
+// kept). Direct and the Current Method are always in use (greyed). Hysteresis keeps its Integrate_4 rows (Probe and Setpoint on one line,
+// Direction with its Offset, Predictive with its Delay, each with its wave).
+function methodSetFields(k, it) {
+  const T = DEVICE_TIPS, locked = k === 'onoff' || k === startMethod(it), use = locked || !!it['methodSpot_' + k];
+  const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
+  if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
+  const head = locked ? ['_useLock', 'Use Method', 'bool', true, false, false, { tip: T.useMethod, disabled: true }]
+    : ['methodSpot_' + k, 'Use Method', 'bool', null, true, false, { tip: T.useMethod }];
+  if (!use) return [head];
+  if (k === 'onoff') return [head, ['_doNote', 'Direct has nothing to set: it is simply full On or Off.', 'note']];
+  const probe = NEEDS_PROBE.includes(k) ? [['input', 'Temperature Probe', 'sel', temps, false, false, { tip: T.eHeatProbe, with: ['target', 'Setpoint', 'num', null, false, false, { tip: elemTip('target') }] }]] : [];
+  const rest = k === 'hysteresis' ? [
+    ['_dir', 'Direction', 'ro', 'Heating', false, false, { tip: T.eDirection, with: [['onOffset', 'Offset (-)', 'numsel', offsetChoices(it), false, false, { tip: elemTip('onOffset') }], ['_waveO', '', 'wave', 'offset']] }],
+    PREDICTIVE_FIELD({ tip: ELEM_PREDICTIVE_TIP, with: [['onDelay', 'Delay', 'num', null, false, false, { tip: elemTip('onDelay'), def: heatDefault(k, 'ondelay') }], ['_waveD', '', 'wave', 'delay']] })]
+    : HEAT_SETTINGS[k].filter(([, key]) => !(key === 'target' && probe.length)).map(([p, key, label]) => [key, label, 'num', null, false, false, { ...(elemTip(key) ? { tip: elemTip(key) } : {}), def: heatDefault(k, p) }]);      // each box shows its Skynet start (Rule 18.36)
+  return [head, ...probe, ...rest,
+    // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
+    ...(k === 'precise' && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note']] : []),
+    ...(PERCENT_METHODS.includes(k) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, {}], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, {}]] : [])];
+}
+// The ⬢ of one method (OakBarn Brewery, 2026-11-15): its dialog on top of the Properties, frozen top with ✖ Cancel and 💾 Keep, no bottom
+// row (Rule 2.51, the model). It works on a copy; Keep puts its settings in the Properties (saved when the Properties are Saved).
+async function methodEntry(k, obj) {
+  try { readFields(obj); } catch { }
+  const w = clone(obj); let body;
+  const r = await layerDialog(`${heatMethodWord(k)} Settings`, b => { body = b; b.classList.add('attrBody'); bindForm(b, it => methodSetFields(k, it), w); }, false, { model: true });
+  if (r !== 'ok') return;
+  try { readFields(w, body); } catch (e) { return toast(e.message, true); }
+  for (const key of methodSetKeys(k)) { if (w[key] === undefined) delete obj[key]; else obj[key] = w[key]; }
+  $('#dlgBody')._rebuild?.();
 }
 // Flame Out safety for gas burners (OakBarn Brewery, 2026-11-14, Rule 6.33, Help 197). A Heating Element on a gas valve has Gas burner
 // switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.
@@ -8770,6 +8795,9 @@ function field(f, obj) {
     const nm = String(f[1] || '').replace(/^\d+\.\s*/, '');
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Opens a ${x.up} Line ${nm} Text Dialog`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.tip || x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
+    // the Current Method's own Settings (OakBarn Brewery, 2026-11-15: "a Icon that pops current properties methods"): the red ⬢ beside
+    // Current Method opens the Settings dialog of the method picked there (Rule 6.19)
+    if (x.methodPop) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: `${heatMethodWord(startMethod(obj))} Settings: the settings of the Current Method`, onclick: ev => { ev.preventDefault(); methodEntry(startMethod(obj), obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
   if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
@@ -8843,7 +8871,9 @@ const DEVICE_TIPS = {
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
   eMethodShort: 'On: its Control Method balloons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC. A Process uses the same short names: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.HYS. Off: the full names.',
   methodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
-  eMethodSpot: 'A method must be enabled to be used (only the Current Method, Direct and the methods switched on here). Each enabled method gets a Control Method balloon here and under the Element on its Tab (or under it on its Vessel Device); one click on one switches the Element to that method at once. Example: the HLT element has Hysteresis as its Current Method, with Duty Cycle and PID switched on too, so it has four balloons: Direct, Duty Cycle, Hysteresis and PID. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  // Method Settings (OakBarn Brewery, 2026-11-15, Rule 6.19): one dialog for each method, with its Use Method switch
+  eMethodSet: 'Method Settings: each heating method has its own settings. Click its ⬢ to open them. Use Method On: the method can be picked in the Current Method list, by its balloon, by a Method Clone and by a Process. Use Method Off: it can\'t, and its settings are hidden (they are kept). Direct and the Current Method are always used. Example: the HLT element is in Hysteresis. To boil in Duty Cycle, click ⬢ Duty Cycle, switch Use Method On, set the Duty cycle % and click Keep. Then Save. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  useMethod: 'Use Method: On lets this method be picked: in the Current Method list, by its balloon here and on the Tab, by a Method Clone and by a Process (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "Duty Cycle", or .DutyC). Off: it can\'t be picked, and its settings are hidden here (they are kept). Direct and the Current Method are always On.',
   eLabel: 'The name shown on the Tab, for example HLT element. It is the start of the Suggested Name: a space becomes ~, so HLT element is HLT~element in BM_8_DO@H_Element_HLT~element_BH. The ⬢ beside it sets its font, size and colors.',
   eLabelVisible: 'On: its Label (for example HLT element) shows on the Tab. Off: no Label shows.',
   eIface: 'The board this Heating Element is wired to, for example Brewery Mega. Its ID, BM, starts the Suggested Name: BM_8_DO@H_Element_HLT~element_BH.',
@@ -9255,12 +9285,14 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     return [null, b];
   }
-  else if (kind === 'menabled') {   // the Enabled row (OakBarn Brewery, 2026-11-10, Integrate 5): a switch under each method's name
-    // opts = [[key, word, locked]]; a locked one is on and greyed (Direct always, and the Current Method); only switched-on methods can be used
-    return [h('div', { class: 'full mRow' }, ...opts.map(([k, word, locked]) => {
-      const cb = h('input', { type: 'checkbox', class: 'swc', 'data-rerender': '1', ...(k === 'onoff' ? {} : { 'data-k': 'methodSpot_' + k, 'data-kind': 'bool' }) });
-      cb.checked = locked || !!obj['methodSpot_' + k]; if (locked) { cb.disabled = true; cb.title = k === 'onoff' ? 'Direct is always enabled (Rule 6.19)' : 'The Current Method is always enabled'; }
-      return h('label', { class: 'mCol' }, h('span', { class: 'mWord' }, word), cb);
+  else if (kind === 'msets') {      // Method Settings (OakBarn Brewery, 2026-11-15, Rule 6.19): a ⬢ button for each method opens its own dialog
+    // (its Use Method switch and its settings); under it, Used or Not used. Direct and the Current Method are always used.
+    const cur = startMethod(obj);
+    return [h('div', { class: 'full mRow' }, ...opts.map(([k, word]) => {
+      const used = k === 'onoff' || k === cur || !!obj['methodSpot_' + k];
+      return h('div', { class: 'mCol' + (used ? '' : ' mUnused') },
+        h('button', { type: 'button', class: 'mSet', 'data-m': k, title: `${word} Settings`, onclick: ev => { ev.preventDefault(); methodEntry(k, obj); } }, h('span', { class: 'mHex' }, '⬢'), ' ' + word),
+        h('span', { class: 'mUse' }, used ? '✔ Used' : 'Not used'));
     }))];
   }
   else if (kind === 'mballoons') {  // the Control Method balloons (Integrate 5): one for each enabled method; the Current Method is Red, the others Yellow.
@@ -9549,7 +9581,7 @@ function bindForm(body, fields, obj, onChange) {
     }
     menuHelpIcons(body);
   };
-  build();
+  build(); body._rebuild = build;      // a pop-up on top (a heater method's ⬢, Rule 6.19) redraws the dialog after Keep
   // Rule 3.16 (OakBarn Brewery, 2026-11-09): a change in the Label (or the Interface, Port, Type or Tab) updates the Suggested Name at once,
   // and the Label's balloon with it
   body.addEventListener('input', () => liveNames(body, obj));
@@ -9571,7 +9603,10 @@ function bindForm(body, fields, obj, onChange) {
       if (obj[k] === undefined) delete obj[k];
       build();
     } else if (t.dataset?.rerender) {
+      const was = obj.heatMethod;
       try { readFields(obj, body); } catch { }
+      // a new Current Method keeps the one before in use (its Use Method On, Rule 6.19), so it stays in the list and its balloon stays
+      if (t.dataset.k === 'heatMethod' && isHeatElem(obj) && was && was !== obj.heatMethod && heatMethodKey(was) !== 'onoff') obj['methodSpot_' + heatMethodKey(was)] = true;
       // picking a Hardware Controller sets the Offset and the On delay to its values (OakBarn Brewery, 2026-11-10, Rule 6.29: Optical SSR
       // -0.5 and 0 s, Contactor or Mechanical relay -1 and 10 s); nothing else about them changes
       if (t.dataset.k === 'switchedBy' && isHeatElem(obj)) { const r = heatHysRange(obj, (draft || S.config).elements.find(e => e.name === obj.input)); obj.onOffset = -r.start; obj.onDelay = r.startDelay; }
@@ -9913,9 +9948,9 @@ async function dbGroupDialog(g, me, cur) {
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
 const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"]');
-function layerDialog(title, build, canDelete = false, { bottom = true } = {}) {
+function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false } = {}) {
   return new Promise(res => {
-    const model = onModelDialog();
+    const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' + (model ? ' miniModel' : '') });
     const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
       h('button', { type: 'button', class: 'primary', ...(model ? { title: 'Keep these settings and go back to the dialog. They are saved when you Save the dialog.' } : {}), onclick: () => done('ok') }, model ? '💾 Keep' : '💾 Save'));
