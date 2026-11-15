@@ -1961,6 +1961,24 @@ Special Widget", Help 14).
   Valve** on Port 30 bypasses the chiller and feeds the pump's suction line through a tee. The Brew Day Process asks the brewer to
   open and close the Chiller water tap.
 
+5.42 **The Chiller Overlay: a Process places a chiller in a vessel and takes it off again** (OakBarn Brewery, 2026-11-15: "A Chiller
+is normally manually placed into a Brew Kettle"; "Could almost be an Overlay type when placed on the screen and maybe a command to
+move it to the Brew Kettle"; "a snippet of Code where a Skynet Chiller Template is chosen and it is superimposed on a Device vessel
+from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, vessel"; Help 200).
+- `place_Chiller = Immersion_Chiller, BK_Vessel` draws that **Chiller Template** (a chiller that goes into a vessel: an immersion coil,
+  Immersion_Chiller or Chillzilla) **over that vessel**, on top of it, with **two hoses**: In from the Tap Water Valve on the vessel's
+  Tab (Rule 5.33; one with "chill" in its Label first) and Out to the Tab's drain IP ("Drain" or "outside" in its Label). Flow
+  passes only while that tap is open (Rule 5.41). A chiller already placed on that vessel is taken off first.
+- `remove_Chiller = BK_Vessel` takes that chiller, its IPs and its hoses off; `remove_Chiller` alone takes off every one a Process placed.
+- **Only the drawing changes; the Process does not wait.** An `ask` line after it waits for the brewer.
+- The chiller's **Suggested Name and Label come from its Template** (`wgt_CHL_Immersion~chiller_BH`, Label Immersion chiller; Rule
+  3.14); its hoses get the next free Hose_n with Label hose_n.
+- The **Process editor** lists the Chiller Templates after `place_Chiller =`, then the Vessels with the **Brew Kettle first**. The
+  Process Check reports a missing Template, Vessel, Tap Water Valve or drain IP before the Process runs.
+- **3 Vessel sample:** the Brew Day places the Immersion chiller in the Boil kettle 15 minutes before the end of the boil and takes
+  it off after chilling.
+- **BruControl Import:** BruControl has no chillers; the Importer does not run Processes.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -4588,6 +4606,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Added Rule 5.42, the Chiller Overlay (OakBarn Brewery: "Could almost be an Overlay type when placed on the screen"; "a Skynet Chiller Template is chosen and it is superimposed on a Device vessel from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, vessel"): `place_Chiller = Immersion_Chiller, BK_Vessel` draws a Chiller Template over a vessel with an In hose from the Tab's Tap Water Valve and an Out hose to its drain IP; `remove_Chiller = BK_Vessel` (or `remove_Chiller` for all) takes it off. Only the drawing changes; the Process does not wait. Name and Label from the Template (wgt_CHL_, Rule 3.14). The Process editor lists the Chiller Templates, then the Vessels with the Brew Kettle first. The 3 Vessel sample's Brew Day places and removes it. Help 200 new (next free Help 201), Help 14 and 22 and their French pages. Checked against both programs: the Panel's Brain runs it; BruControl has no chillers, and the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.10 (OakBarn Brewery: "Tap water on a tap water valve is one way from the valve, one side tap supply and other side tap water out only"; "Any other widget, Device with IPs direction is bi directional except a check valve"; "a Skynet Template Tap water valves follow that rule and any created from them do as well"): a tap water valve is always one way, tap side to Out. **Both ways** is taken off **Tap Water flows** (Old Ways Policy: nothing old kept before Public Production; a valve saved with it reads as one way). A Skynet Template valve's **Tap end** box is now **Tap Water flows** too, with the same choices by how it sits (saved key unchanged). Help 31, 88, 128 (and French) and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
