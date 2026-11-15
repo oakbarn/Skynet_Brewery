@@ -16,7 +16,8 @@ assert.ok(compile('place_Chiller = Immersion_Chiller').errors.length, 'a Vessel 
 assert.ok(compile('place_Chiller Immersion_Chiller, BK_Vessel').errors.length, 'the = is needed');
 
 // the Chiller Templates are the immersion coils; the Brew Kettle comes first
-assert.deepEqual(chillerTemplates().map(t => t.name).sort(), ['Chillzilla', 'Immersion_Chiller']);
+assert.deepEqual(chillerTemplates().map(t => t.name).sort(), ['Immersion_Chiller'], 'only immersion chillers: a Chillzilla is a counterflow chiller with 4 IPs');
+assert.match(placeError(cfg, null, 'Chillzilla', 'BK_Vessel'), /no Chiller Template/);
 assert.equal(chillerVessels(cfg)[0].name, 'BK_Vessel');
 assert.match(placeError(cfg, null, 'Counterflow_Chiller', 'BK_Vessel'), /no Chiller Template/);
 assert.match(placeError(cfg, null, 'Immersion_Chiller', 'Nope'), /no Vessel/);
