@@ -17,7 +17,7 @@ assert.equal(pumpIpType('BSP1/2'), 'bsp'); assert.equal(pumpIpType('', { defPipe
 const store = fs.readFileSync(new URL('../lib/store.js', import.meta.url), 'utf8');
 assert.ok(store.includes('if (!c.ipTypeKept)'), 'once per Schema, pipes, hoses and pumps already made get it');
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-for (const k of ['ipTypeFrom', 'ipTypeTo', 'ipTypeIn', 'ipTypeOut', 'defPipeIp', 'defHoseIp', 'pumpInDir', 'pumpOutDir']) assert.ok(app.includes(`'${k}'`), k + ' is a box');
+for (const k of ['ipTypeFrom', 'ipTypeTo', 'ipTypeIn', 'ipTypeOut', 'defPipeIp', 'defHoseIp']) assert.ok(app.includes(`'${k}'`), k + ' is a box');
 assert.ok(app.includes('stampIpType(g)') && app.includes('stampIpType(p)'), 'a new pipe or hose takes the Default');
 console.log('iptype ok');
 
@@ -34,3 +34,13 @@ assert.equal(cfg.graphics[3].from, 'c'); assert.equal(cfg.graphics[3].to, 'b', '
 assert.ok(moveHoseEnd(cfg, { id: 'h', end: 'to', to: 'a', points: [[5, 5], [0, 0]] }).error, 'its NPT end does not move');
 assert.ok(moveHoseEnd(cfg, { id: 'p', end: 'from', to: 'c', points: [[5, 5], [10, 0]] }).error, 'a pipe does not move');
 console.log('qd ends ok');
+
+// Corner IPs (OakBarn Brewery, 2026-11-15): no Inlet from / Outlet from box; the joined pipe or hose sets the side
+assert.ok(!/pumpInDir|pumpOutDir|PUMP_DIR_|'Outlet from'|'Inlet from'/.test(app), 'no Inlet from / Outlet from box');
+assert.match(app, /function pumpEndAxis\(e, end, spot\) \{\n  if \(!isCornerSpot\(spot\)\) return null;\n  const p = pumpJoined\(e, end\); if \(!p\) return 'h';/, 'the joined pipe sets the side, else the Side');
+console.log('corner IP side set by the joined pipe: ok');
+
+// Rule 18.37 item 2 (changed 2026-11-15): a Left/Right switch leaves the Inlet IP and Outlet IP where they are; only the inside Hose or Pipe is drawn again
+assert.ok(!app.includes('mirrorPumpSpots') && app.includes('keepPumpSpots('), 'the IPs stay put on a flip');
+assert.match(app, /const was = pumpSpots\(\{ \.\.\.obj, flipH: !flipH, flipV, pumpIn: ins\[0\]\.value, pumpOut: ins\[1\]\.value \}\)/, 'a (start) spot is pinned where it was');
+console.log('pump IPs stay put on a flip: ok');
