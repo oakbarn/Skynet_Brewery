@@ -3137,12 +3137,25 @@ Setup (same pages, choices, Uninstall and Rules) with every Skynet picture and s
 Media Setup's way (Rule 9.12): a file already there by that name is never changed and nothing is deleted. It adds them after a
 Start Fresh, so a Fresh Start gets them back with no second Setup. Its welcome page says it is the Full one, and its file Details
 say "Full Setup". The plain Skynet Brewer Setup, the Media Setup and the Media zip stay on every Release as they are (Rule #1,
-Never Take Away): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
+Never Take Away; the Media Setup and zip are made new only when media changed, Rule 9.21): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
 (`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
 .exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
 VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
 media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
 Help 19 and 183)
+
+9.21 **The Media Setup and Media zip are made new only when Skynet pictures or sounds are added** (OakBarn Brewery, 2026-11-15:
+"Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"). On every merge the release workflow
+looks at the last Media Setup on a published Release. If nothing in `media/` (and nothing in the Media Setup's own script,
+`install/windows/SkynetMedia.nsi`) changed since it was made, the new Release carries **that same Media Setup and Media zip,
+unchanged, with their own older date in the name**, and its notes say so. If a picture or sound was added (or anything in `media/`
+changed), both are made new with the new date. Media stays add-only (Rule 9.12): a changed drawing is a new file with a new name, so
+any change means new media. The Media Setup and zip are still on every Release, so the Latest Release always has them (Rule #1,
+Never Take Away). The plain Skynet Brewer Setup and the Full Setup are made on every merge as before, and the Full Setup always
+carries every picture and sound (Rule 9.20). OakBarn Brewery can force a new Media Setup with **Actions > Panel version > Run
+workflow > rebuild media** (for example once signing is set up, Rule 9.10, so the Media Setup gets signed). If the last one cannot be
+found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is in the same Setup; nothing
+changes there). (thread "Rebuild Media Setup only when media changes", Help 183)
 
 ## 10. Testing
 
@@ -4573,6 +4586,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Added Rule 9.21 (OakBarn Brewery: "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"): the Media Setup and Media zip are made new only when something in media/ changed since the last ones; otherwise each Release carries the last ones unchanged, with their own date. The plain Setup and Full Setup are still made on every merge; Run workflow > rebuild media forces new ones. Rule 9.20 points to it. Help 183 (and French).
 - 2026-11-15: Added Rule 19.7 Stove Top Vessel (OakBarn Brewery: "Stove Top is widget with IPs with Top IP to hang a hose. 2 different ones"; "Center Bottom on Stove Top Widget and it gets IP"): Stove Top Vessel and Stove Top Vessel, Bottom Outlet next to Add equipment; hose hang top, Gallons, Height, Width, a drawing made for its Height and Width, Bottom Outlet IP Type (Rule 5.40). The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller choices removed (OakBarn Brewery, 2026-11-13: "remove for now"). Help 199. (thread "Build the Stove Top Vessel")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
