@@ -3109,12 +3109,25 @@ Setup (same pages, choices, Uninstall and Rules) with every Skynet picture and s
 Media Setup's way (Rule 9.12): a file already there by that name is never changed and nothing is deleted. It adds them after a
 Start Fresh, so a Fresh Start gets them back with no second Setup. Its welcome page says it is the Full one, and its file Details
 say "Full Setup". The plain Skynet Brewer Setup, the Media Setup and the Media zip stay on every Release as they are (Rule #1,
-Never Take Away): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
+Never Take Away; the Media Setup and zip are made new only when media changed, Rule 9.21): the plain Setup is the small one for updates. Built by tools/build-release.sh from the same SkynetBrewer.nsi
 (`-DMEDIA_SRC`); signed the same way when signing is set up (Rule 9.10); scanned by Microsoft Defender and VirusTotal like every
 .exe on the Release (Rule 9.11). Size: about 12 MB (the plain Setup about 5 MB); GitHub allows up to 2 GB per Release file, and
 VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
 media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
 Help 19 and 183)
+
+9.21 **The Media Setup and Media zip are made new only when Skynet pictures or sounds are added** (OakBarn Brewery, 2026-11-15:
+"Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"). On every merge the release workflow
+looks at the last Media Setup on a published Release. If nothing in `media/` (and nothing in the Media Setup's own script,
+`install/windows/SkynetMedia.nsi`) changed since it was made, the new Release carries **that same Media Setup and Media zip,
+unchanged, with their own older date in the name**, and its notes say so. If a picture or sound was added (or anything in `media/`
+changed), both are made new with the new date. Media stays add-only (Rule 9.12): a changed drawing is a new file with a new name, so
+any change means new media. The Media Setup and zip are still on every Release, so the Latest Release always has them (Rule #1,
+Never Take Away). The plain Skynet Brewer Setup and the Full Setup are made on every merge as before, and the Full Setup always
+carries every picture and sound (Rule 9.20). OakBarn Brewery can force a new Media Setup with **Actions > Panel version > Run
+workflow > rebuild media** (for example once signing is set up, Rule 9.10, so the Media Setup gets signed). If the last one cannot be
+found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is in the same Setup; nothing
+changes there). (thread "Rebuild Media Setup only when media changes", Help 183)
 
 ## 10. Testing
 
@@ -4524,6 +4537,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Added Rule 9.21 (OakBarn Brewery: "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"): the Media Setup and Media zip are made new only when something in media/ changed since the last ones; otherwise each Release carries the last ones unchanged, with their own date. The plain Setup and Full Setup are still made on every merge; Run workflow > rebuild media forces new ones. Rule 9.20 points to it. Help 183 (and French).
 - 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Added Rule 12.4 The Patron Level (OakBarn Brewery: "Set up Patron Level and we will adjust after seeing it in action"; Patron emails outside Skynet): a Patron code signed by OakBarn Brewery, pasted in Settings > Patron, unlocks the perks until its end date; it holds no email address; ☰ Menu > ⭐ Request a Feature; non-Patrons see the perks and a link. Help 198 (and French). Both programs.
 - 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
