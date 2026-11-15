@@ -2835,6 +2835,40 @@ Settings > Users > Add user) has Skynet's own **key** button that makes a strong
 "Suggest strong password" key needs the browser signed in and syncing, and the clean window never syncs (Rule 9.8).
 (thread "Restore generate password Key on fresh install", Help 10)
 
+8.5 **Passwords are never kept; what must be read back is locked; OakBarn Brewery never emails about passwords** (OakBarn Brewery,
+2026-11-14: "Reword all about Password to the way it works", "Can we encrypt all passwords, reset codes and e mails"):
+- **Never kept:** passwords, recovery codes, sign-in codes and sign-ins are saved only as a one-way scramble (a salted hash); nobody can
+  turn one back into the password.
+- **Locked (encrypted):** what the Brain must read back to send a message: the email account's app password, the Twilio token, and each
+  user's email address and mobile number. They are locked with a key kept on the Brain (data/seal.key), so a file or backup copied
+  without it cannot be read. Plain ones from before are locked when the Brain starts. Moving the Brain (Rule 9.9) takes the key along.
+  Messages the Brain sends go over a locked connection (TLS).
+- **The Brain's data folder is the Brain's own:** at each start the Brain locks its data folder so only the computer account that runs it
+  (and the computer's Administrators and the system) can open it; other people signed in to that computer with their own account cannot
+  (Windows: its permissions; Pi, Linux, Mac: owner only). Inside Skynet, only Admins change things (Rule 8.1).
+- **A password is reset only on your own Skynet:** the recovery code (made when the first Admin account is set up, Rule 8.2; a new one
+  each time it is used), an Admin in Settings > Users, or the reset-password tool at the Brain itself.
+- **OakBarn Brewery never emails anyone about a password.** An email that says it is from OakBarn Brewery and asks to reset a password,
+  sign in or send a code is a scam (phishing). This warning is on the sign-in page, the recovery code screen and its saved file, Help 10
+  and oakbarnbrewery.com. A Skynet panel's own emails (sign-in codes, alarms) come from the user's own email account as "Brew Panel".
+Both programs (the Importer signs in the same way). (thread "Let users build their own Pump Templates", Help 10)
+
+8.6 **Approved Devices** (OakBarn Brewery, 2026-11-14: "Is there a Key that we can add so only an Official skynet Panel can access the
+brain", "Set that up and I will see how painful for a user but internet safety may trump that"). A key hidden in the Panel cannot
+work (the Brain sends the Panel to every browser, so anyone could read it); instead each phone, tablet or computer must be approved:
+- A right password (or sign-in code) from a device not approved yet does **not** sign in: the device waits on **Settings > Approved
+  Devices** until an Admin **Approves** or **Refuses** it, then signs in again. A stolen password alone gets nobody in.
+- **Always approved:** the Brain's own computer (never through a proxy, Rule 6.32). **Approved by themselves:** the device that makes
+  the first Admin account, a device that uses the recovery code (Rule 8.5), and, while no device is approved yet, the first Admin to
+  sign in from your own network (so a Pi with no screen never locks everyone out).
+- **Remove** a lost or sold device: it is signed out at once. **Rename** gives it a plain name. Each device has its own device cookie
+  (a long random number); only its hash is kept, in data/devices.json.
+- **On** by default; an Admin can turn it Off (a password alone then signs in). Last resort at the Brain:
+  `node tools/reset-password.js --devices-off`.
+- Programs and gadgets with the API key (voice control, hydrometers) are not devices and are unchanged.
+OakBarn Brewery tries it to see how much trouble it is for a user. Both programs (the Importer's Build page signs in with its own
+one-time key, so it is not asked). (thread "Let users build their own Pump Templates", Help 10)
+
 ## 9. Delivery: PRs and zips
 
 9.1 **Every code change ships as a pull request (PR)** on GitHub. (2026-10-21)
@@ -4469,6 +4503,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
+- 2026-11-14: Added Rule 8.5 (OakBarn Brewery: "Reword all about Password to the way it works", "Can we encrypt all passwords, reset codes and e mails"): passwords, recovery and sign-in codes stay one-way scrambled; the email app password, Twilio token and users' email addresses and mobile numbers are now locked (encrypted) on disk with data/seal.key; the Brain locks its data folder to the computer account that runs it; a password is reset only on your own Skynet (three ways); OakBarn Brewery never emails about passwords (phishing warning on the sign-in page, recovery code screen, Help 10, oakbarnbrewery.com). Help 10 (and French): the three ways, the warning, Windows steps for the reset-password tool. Both programs.
 - 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
 - 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
