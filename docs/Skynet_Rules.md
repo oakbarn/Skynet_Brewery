@@ -1931,6 +1931,34 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
 ---
 
 
+5.41 **A Chiller is the same as a pipe, no more, no less** (OakBarn Brewery, 2026-11-15: "A chiller is not really a Device but a
+Special Widget with IOs"; "a chiller could be hooked up quite a few different ways in a manifold and would need to be flexible as
+where the flow supply came from, like a permanently open valve"; "Treat a Chiller like a pipe. IPs at the Inlets Outlets. No on/off,
+simply flow. It would need a source for flow"; "Chiller same as a pipe, no more, no less"; thread "Make the Chiller a flexible
+Special Widget", Help 14).
+- A **Chiller** (Plate chiller, Counterflow chiller, the Copper Counterflow Chiller, an Immersion coil or a Chillzilla) is a
+  **Widget** with no Port (Rule 1.2). It has **IPs at its inlets and outlets** and nothing else.
+- **No On / Off.** It has no On / Off state, and a Process never turns it on or off.
+- **Flow simply passes through it, the same as a pipe:** it flows when a **source** upstream pushes flow in (a running pump, or
+  an open Tap Water Valve, Rule 5.33), and stops when nothing does. Where the flow comes from is up to how it is piped, so it can
+  be hooked up any way in a manifold, including from a valve that is always left open.
+- **Each path is its own pipe.** A plate or counterflow chiller has two paths that never mix, **Wort In to Wort Out** and **Water
+  In to Water Out** (4 IPs), each with its own source. An Immersion coil has one path, **In to Out** (2 IPs); a Chillzilla has two
+  (4 IPs).
+- **Nothing a pipe doesn't have:** no Size, Units or Dead space in its Template, and no built-in Thermowell. A probe for the chilled
+  wort goes in the pipe beside it (a probe tee, Rule 5.30).
+- The Brew Day's **Chiller cooling water** job (Rule 16.3) picks the **source** of the water (the valve or pump that feeds Water In),
+  never the Chiller.
+- **BruControl Import:** BruControl has no chillers, so nothing is imported as one; the Importer's Build page is the Panel's, so a
+  Chiller works the same there.
+- **3 Vessel sample** (OakBarn Brewery, 2026-11-15: "Replace with Chiller Widget and no on/off in 3 vessel"; "A Chiller is normally
+  manually placed into a Brew Kettle and chilling water (Tap or Chilled Water depending on the User) and the outlet dumped down a drain
+  or outside"; "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose
+  on other side"): the old Chiller water On/Off Device is gone. An **Immersion chiller** sits in the Boil Kettle. A **manual Tap Water
+  Valve** (Rule 5.33, "Chiller water") feeds its In by a hose, and its Out hose ends open, "Drain or outside". A **motorized Tap Water
+  Valve** on Port 30 bypasses the chiller and feeds the pump's suction line through a tee. The Brew Day Process asks the brewer to
+  open and close the Chiller water tap.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -4524,6 +4552,9 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-14: Skynet pictures: 11 new small pictures of Skynet's own (OakBarn Brewery: "BruControl Images we need to remove", "we have to come up with our own 11", picked "Set B", "Keep as Backups but steer user in import away from use"): Images/Skynet/Miscellaneous/Skynet_Icon_Valve, _Pump, _Kettle, _On_Off, _Liquid_Temp, _Clock, _Fan, _Gauge, _Liquid_Level, _PID and _PWM (.svg), drawn new, MIT. None of BruControl's stock pictures is in Skynet; the BruControl Import steers the brewer to a Skynet Device or Widget and offers these only as a backup (Importer Sandbox). Picture numbers added (Rule 7.22). Both programs.
 - 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Added Rule 12.4 The Patron Level (OakBarn Brewery: "Set up Patron Level and we will adjust after seeing it in action"; Patron emails outside Skynet): a Patron code signed by OakBarn Brewery, pasted in Settings > Patron, unlocks the perks until its end date; it holds no email address; ☰ Menu > ⭐ Request a Feature; non-Patrons see the perks and a link. Help 198 (and French). Both programs.
