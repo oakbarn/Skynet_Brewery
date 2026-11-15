@@ -178,7 +178,12 @@ if (cert) {
   assert.ok(r.ok && r.active && r.name === 'Dana' && r.level === 'patron');
   assert.ok(!/@/.test(Buffer.from(code.split('.')[1], 'base64url').toString()), 'no email address in a Patron code');
   assert.ok(!readCode(code, Date.parse('2027-05-16T12:00:00'), pub).active, 'ended after its end date');
-  assert.ok(!readCode(code.slice(0, -2) + 'AA', Date.now(), pub).ok, 'a changed letter fails');
+  // a changed letter fails: flip one letter in the signature and one in the data (always a different letter, never the last one,
+  // whose low bits base64 does not use)
+  const flip = (str, i) => str.slice(0, i) + (str[i] === 'A' ? 'B' : 'A') + str.slice(i + 1);
+  const [pre, data, sig] = code.split('.');
+  assert.ok(!readCode(`${pre}.${data}.${flip(sig, 10)}`, Date.now(), pub).ok, 'a changed letter in the signature fails');
+  assert.ok(!readCode(`${pre}.${flip(data, 5)}.${sig}`, Date.now(), pub).ok, 'a changed letter in the data fails');
   assert.ok(!readCode(code, Date.now(), PATRON_PUBLIC_KEY).ok, 'a code signed with another key fails');
   assert.ok(!readCode('hello').ok);
   const pd = fs.mkdtempSync(path.join(os.tmpdir(), 'bpp')), pt = new Patron(pd);
