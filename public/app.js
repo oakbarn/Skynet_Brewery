@@ -18,7 +18,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
-import { GAS_WARNING, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
+import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
@@ -3197,7 +3197,7 @@ function flamePopRow(t, v, d) {
   if (!isGasBurner(t)) return [];
   const s = flameSettings(t), left = Number(v.flameout_paused) || 0, on = String(v.flameout ?? (s.on ? 'On' : 'Off')).toLowerCase() === 'on';
   const said = v.flameout_tripped ? '🔥 Flame Out shut the gas: check the flame, light it, then turn it ON.' : !on ? 'Flame Out: Off' : left > 0 ? `Flame Out: paused, ${left} min left` : 'Flame Out: watching';
-  return [h('div', { class: 'muted' }, said),
+  return [h('div', { class: 'muted' }, said), h('div', { class: 'muted' }, '⚠ Flame Out: ' + NOT_UL),
     h('div', { class: 'vdBtns' }, on ? (left > 0
       ? h('button', { type: 'button', class: 'big', title: 'Flame Out watches this burner again now', onclick: async () => { d.close(); await setProp(t.name, 'flameout_paused', 0); } }, '▶ Watch now')
       : h('button', { type: 'button', class: 'big', title: `Stops the Flame Out watch for ${s.flamePause} minutes (open the lid, add cold water, dough in). It watches again by itself after them.`, onclick: async () => { d.close(); await setProp(t.name, 'flameout', `pause ${s.flamePause}`); } }, `⏸ Pause Flame Out (${s.flamePause} min)`)) : null)];
@@ -7884,7 +7884,7 @@ function heatFields(it, x = {}) {
 // switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.
 const FLAME_TIPS = {
   gasBurner: 'Gas burner: this Heating Element opens a gas valve (a burner), not an electric element. On, it gets the Flame Out safety. Example: the Kettle burner on a propane valve.',
-  head: GAS_WARNING + '\nFlame Out safety: while the gas is on, Skynet watches the temperature of the pot. A lit burner makes the pot get hotter. If the temperature falls, or does not rise after some minutes of burning, the flame is probably out: Skynet shuts the gas, turns the igniter Off, sounds an alarm on every screen and shows "Burner may be out: check the flame. Gas is turned off." Nothing turns back on by itself. Skynet does not see the flame: this is a backup, not a flame safety device.',
+  head: GAS_WARNING + '\nFlame Out safety: while the gas is on, Skynet watches the temperature of the pot. A lit burner makes the pot get hotter. If the temperature falls, or does not rise after some minutes of burning, the flame is probably out: Skynet shuts the gas, turns the igniter Off, sounds an alarm on every screen and shows "Burner may be out: check the flame. Gas is turned off." Nothing turns back on by itself. Skynet does not see the flame: this is a backup, not a flame safety device. This is not a UL listed safety and should not be relied on. Always monitor the burner.',
   flameSafety: 'Flame safety: what shuts the gas by itself if the flame goes out. Thermocouple gas valve (UL or CSA listed): a pilot flame heats a thermocouple; if the pilot goes out, the valve shuts all the gas with no help from Skynet. That is the real flame safety, and Skynet\'s Flame Out is its backup. These valves are made for low-pressure gas (propane about 11 inches of water column), and most brewing burners use a high-pressure regulator, so have a licensed gas professional match the valve and the burner. Three ways (Help 197): 1. high pressure with a 24 V solenoid only: None, the cheapest and the least safe; 2. low pressure with a 24 VAC VR8200 type valve: the best safety for the money, but it heats more slowly; 3. high pressure with a high-pressure thermocouple safety pilot valve (for example BASO H19, costly) and a 24 V solenoid. Recommended: a UL or CSA listed way (2 or 3). Flame-out cutoff: for a cutoff made from parts (a K-type thermocouple and a temperature controller), for information only, not listed and not recommended. None: a plain solenoid valve; Skynet\'s Flame Out is the only guard, so stay with the burner. Skynet cannot check which one you have.',
   flameOut: 'Flame Out: On (the start) watches this burner while its gas is on. Off for a burner with nothing to watch. A Process can pause it: Kettle_burner.flameout = pause 10.',
   flameMinutes: 'No rise: after this many minutes of burning (only while the gas valve is really open), the temperature must have risen by the Rise. Example: 5 minutes and 1 °F.',
@@ -7909,7 +7909,7 @@ function flameFields(it, x = {}) {
   return [...out,
     ['_flameHead', 'Flame Out safety', 'head', null, false, false, { tip: T.head, ...x }],
     ['flameSafety', 'Flame safety', 'sel', FLAME_SAFETY, true, false, { tip: T.flameSafety, ...x }],
-    ['_flameNote', s.safety === 'thermocouple' ? BACKUP_NOTE : s.safety === 'cutoff' ? CUTOFF_NOTE : '⚠ ' + HELPER_NOTE, 'note', null, false, false, x],
+    ['_flameNote', `⚠ Flame Out: ${NOT_UL} ` + (s.safety === 'thermocouple' ? BACKUP_NOTE : s.safety === 'cutoff' ? CUTOFF_NOTE.replace(/^⚠ /, '') : HELPER_NOTE), 'note', null, false, false, x],
     ...(isHeatElem(it) ? [] : [['input', 'Temperature Probe', 'sel', temps, true, false, { tip: T.input, ...x }]]),
     ['flameOut', 'Flame Out', 'sel', [['on', 'On'], ['off', 'Off']], false, false, { tip: T.flameOut, with: [['flameIgniter', 'Igniter', 'sel', igniters, false, false, { tip: T.flameIgniter }]], ...x }],
     ['flameMinutes', 'No rise (minutes)', 'num', null, false, false, { tip: T.flameMinutes, def: d.flameMinutes, with: [num('flameRise', `Rise (${u})`), num('flameDrop', `Drop (${u})`)], ...x }],

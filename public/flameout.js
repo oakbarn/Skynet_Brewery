@@ -12,6 +12,8 @@
 // The gas warning (Rule 6.20, the gas half; OakBarn Brewery, 2026-11-14: "Text is good"): shown first, in red bold under the red triangle, wherever Skynet talks about gas.
 export const GAS_WARNING = '⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional.';
 // The honest line under it: what the Flame Out safety is not
+// OakBarn Brewery, 2026-11-15: "it is not a UL Safety and should not be relied on. Monitor the Burner." (the same words in the Importer)
+export const NOT_UL = 'This is not a UL listed safety and should not be relied on. Always monitor the burner.';
 export const HELPER_NOTE = 'The Flame Out safety is a helper, not a flame safety device. It can take minutes to notice a flame out. Use a burner with its own flame safety (a UL or CSA listed thermocouple gas valve, or a flame sensor). Never brew with gas indoors without fresh air, and never leave a lit burner alone.';
 export const BACKUP_NOTE = 'Your listed thermocouple gas valve is the flame safety. Skynet\'s Flame Out is a backup.';
 // a flame-out cutoff made from parts: For Information Only, not listed, not recommended (OakBarn Brewery, 2026-11-14: "Big Caveat with this one.
