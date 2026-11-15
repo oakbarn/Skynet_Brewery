@@ -197,6 +197,17 @@
   { "id": 194, "file": "Vessels/Vessel_Kettle_Tall.svg" },
   { "id": 195, "file": "Alarms/Alarm_PreHop_Mark_1.svg" },
   { "id": 196, "file": "Alarms/Alarm_PreHop_Mark_2.svg" },
-  { "id": 197, "file": "Alarms/Alarm_PreHop_Mark_3.svg" }
+  { "id": 197, "file": "Alarms/Alarm_PreHop_Mark_3.svg" },
+  { "id": 198, "file": "Miscellaneous/Skynet_Icon_Clock.svg" },
+  { "id": 199, "file": "Miscellaneous/Skynet_Icon_Fan.svg" },
+  { "id": 200, "file": "Miscellaneous/Skynet_Icon_Gauge.svg" },
+  { "id": 201, "file": "Miscellaneous/Skynet_Icon_Kettle.svg" },
+  { "id": 202, "file": "Miscellaneous/Skynet_Icon_Liquid_Level.svg" },
+  { "id": 203, "file": "Miscellaneous/Skynet_Icon_Liquid_Temp.svg" },
+  { "id": 204, "file": "Miscellaneous/Skynet_Icon_On_Off.svg" },
+  { "id": 205, "file": "Miscellaneous/Skynet_Icon_PID.svg" },
+  { "id": 206, "file": "Miscellaneous/Skynet_Icon_Pump.svg" },
+  { "id": 207, "file": "Miscellaneous/Skynet_Icon_PWM.svg" },
+  { "id": 208, "file": "Miscellaneous/Skynet_Icon_Valve.svg" }
  ]
 }
