@@ -143,7 +143,7 @@ is Direct Output. If the State of the Device is true, the power is on (through t
 power. Similar to a Light Switch.
 
 When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a
-free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our
+free form Field that you can Edit. Interface IDs follow Rule 3.2 ([The ID Rule](46-interface-tab-device-names)). Our
 example Interface is: BM: Brewery Mega
 
 The ID is important as it is Part of the Suggested Name.
@@ -177,7 +177,7 @@ are available on that Tab), there are also Special Skynet Tabs (like this Build 
 control things, but only a workshop to build something to be placed on a Normal User Tab.
 
 When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form
-Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab
+Field that you can Edit. Tab IDs follow Rule 3.2 ([The ID Rule](46-interface-tab-device-names)). Our example Tab
 is: BH: Brew House
 The ID is important as it is Part of the Suggested Name.
 BM_15_DO@Pump_Red~Pump_**BH**

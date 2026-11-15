@@ -17,7 +17,23 @@ une petite fenêtre demande ce que vous voulez :
 - **Cancel** : rien ne change.
 
 **Don't ask again** déplace les choses avec leurs tuyaux sans demander jusqu'à ce que vous quittiez Edit layout. Sur un Pipe, la fenêtre propose
-**🔓 Unlock its ends** (le tuyau se détache de ce à quoi il est joint et bouge seul) ou Cancel.
+**🔓 Unlock its ends** (le tuyau se détache de ce à quoi il est joint et bouge seul), **🗑 Delete Pipe** ou Cancel.
+
+## Rendre un tuyau plus court ou plus long, et redessiner un tuyau souple {#making-a-pipe-shorter-or-longer-and-redrawing-a-hose}
+
+Un tuyau (pipe) ou un tuyau souple (hose) peut changer après avoir été enregistré, une fois ses bouts détachés :
+
+1. En **Edit layout**, attrapez le tuyau ou le tuyau souple et choisissez **🔓 Unlock its ends** (ou attrapez ce à quoi il est joint et choisissez **🔓 Unlock its
+   IPs**).
+2. Chaque bout détaché a une petite poignée ronde. Traînez-la :
+   - un bout de **tuyau** glisse le long de la propre ligne du tuyau, donc le tuyau devient **plus court ou plus long** et reste Horizontal, Vertical ou à 45
+     (Règle 5.19). Il n'est jamais plus court que 10 pixels.
+   - un bout de **tuyau souple** va **n'importe où**, et le tuyau souple se courbe pour suivre. Les poignées rondes au milieu d'un tuyau souple changent ses courbes.
+3. Lâchez le bout sur un IP (à moins de 14 pixels) et il se joint à cet IP. Lâché ailleurs, il reste un bout ouvert.
+
+Un bout détaché peut être attrapé même là où il est posé sur un IP de pompe, de vanne ou de cuve. Un bout encore joint, un tuyau ou tuyau souple 🔒 verrouillé,
+et un bout sur un IP 🔒 verrouillé (aussi un IP réglé sur No Unlock) ne bougent pas. **↩ Put back** (Ctrl+Z) annule chaque glissement, et **Save layout**
+garde la nouvelle longueur ou forme.
 
 ## Mettre une nouvelle pompe à la place d'une ancienne {#putting-a-new-pump-in-place-of-an-old-one}
 

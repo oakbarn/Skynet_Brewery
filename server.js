@@ -59,7 +59,7 @@ import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
 import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update restarts and restarts (Rule 6.31)
 import { FlameWatch } from './lib/flamewatch.js';      // gas burner Flame Out safety (Rule 6.33)
-import { checkIds, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
+import { checkIds, lockedIdError, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
@@ -73,6 +73,7 @@ import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClone
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
+import { chillerTemplates, chillerVessels } from './lib/chiller.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -189,6 +190,7 @@ if (store.config.brewDefaults?.valveProfile !== undefined) {
 }
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
+engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vessel picks a Chiller Template (Rule 5.42)
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
@@ -387,6 +389,9 @@ function processWords() {
       { name: 'tab', type: 'tab', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }],
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
+    // place_Chiller = (the Chiller Templates), (the Vessels, the Brew Kettle first); remove_Chiller = (the Vessels) (Rule 5.42)
+    chillers: chillerTemplates(templates).map(t => t.name),
+    vessels: chillerVessels(store.config).map(g => g.name),
   };
 }
 
@@ -733,7 +738,9 @@ async function route(req, res) {
     { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
-    if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: Rule 3.2, unique (public/naming.js)
+    // once saved, an Interface ID or Tab ID is never changed, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2)
+    { const bad = (body.devices && lockedIdError(store.config.devices, body.devices, 'Interface')) || (body.workspaces && lockedIdError(store.config.workspaces, body.workspaces, 'Tab')); if (bad) return fail(res, 400, bad); }
     // a backup of the Schema as it was, every time a change is saved (OakBarn Brewery, 2026-11-13, Rule 9.17)
     if (schemas.active?.id) { try { schemas.backupSchema(schemas.active.id); } catch (e) { console.log('Schema backup failed: ' + e.message); } }
     // renamed items, found by their hidden key (Fritz, 2026-10-27): old name -> new name. Clones of a renamed item follow it.
