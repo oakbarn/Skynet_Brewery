@@ -2257,6 +2257,12 @@ In **every Help page** the warning shows the same way: red bold words under the 
 "If Possible in any Help use the Red Text and the Icon for any Electricity Can Kill"; "And Oakbarn is fine here as well", so the
 warning keeps its OakBarn Brewery words, an approved OakBarn entry under Rule 11.6). A paragraph that starts with
 "⚠ Electricity can kill" is drawn this way by the Help page (public/help.js).
+**The gas half** (OakBarn Brewery, 2026-11-13: "a disclaimer that we are not plumbers or Electricians"; 2026-11-14: "Text is good"):
+wherever Skynet talks about gas burners, gas valves or gas wiring (a gas burner's Flame Out safety in its Properties and its balloon,
+Help 197, the Process snippets, the BruControl Import's burner question), it shows, the same way (first, red bold, red triangle):
+**"⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed
+Electrician, Plumber or HVAC professional."** (public/flameout.js GAS_WARNING). A paragraph that starts with "⚠ Gas can explode or
+kill" is drawn in red by the Help page too.
 
 6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
 Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
@@ -2509,6 +2515,45 @@ is only a browser showing it.
    (Rule 6.31). Standby is kept in data\standby.json, so it **stays in Standby after a restart or a power cut** until an Admin starts it.
 5. **Both programs:** the BruControl Import also runs in the Background with no black window, and its own Close Importer button stops
    it. It controls nothing, so it has no Standby. Help 95.
+
+6.33 **Flame Out safety for gas burners** (OakBarn Brewery, 2026-11-13: "WE could have a sfety built in if the temperature decrease
+while a Gas Burner is on"; 2026-11-14: "Yes to both", "Also in Skynet have the software backup of decreasing Temp (with smoothing for
+false feedback)"). A **gas burner** is a Heating Element with **Gas burner** switched On (a burner on a gas valve) or a **Solenoid Gas
+Valve** (DO@Valve_Sgas, with its Temperature Probe picked). While its gas valve is **really open** (Direct: while On; a control
+method: while its pin is on), the Brain watches its probe about once a second:
+- **Smoothing:** the reading is averaged over **30 seconds**; one wild reading (more than 5 °F in one second, or a probe error) is
+  thrown away; one that stays 10 seconds is real.
+- **No rise:** after **5 minutes** of burning the average must have risen **1 °F** (0.5 °C); it rests within 3 °F of the **Boil point**
+  (212 °F to start; lower at altitude).
+- **Drop:** once the pot has started warming after the valve opened, a fall of **1 °F** (0.5 °C) below its highest trips it.
+- **Pause:** **10 minutes** (the burner pop-up's **⏸ Pause Flame Out**, or `name.flameout = "pause 10"`), for the lid, cold water or
+  doughing in; it watches again by itself.
+- **A trip** turns the gas Off and the burner's **Igniter** Off, sets `.flameout_tripped`, and shows **"Burner may be out: check the
+  flame. Gas is turned off."** in red on every screen, beeping and spoken once, until closed. **Nothing turns back on by itself**
+  (as Rule 6.31); turning the burner back On clears `.flameout_tripped`.
+- **Flame safety** (the brewer picks it; Skynet cannot check it): **Thermocouple gas valve (UL or CSA listed)**, the real flame safety
+  (a pilot heats a 0 to 30 mV thermocouple; the valve shuts all gas by itself; it is switched by 24 VDC (preferred, only a valve
+  labelled 24 VDC) or by a true 24 VAC step-down transformer, through a relay on a Digital Out), or **None (plain solenoid valve)**.
+  These standing pilot valves are made for **low-pressure** gas (propane about 11 inches of water column); most brewing burners use a
+  high-pressure regulator, so Help and the balloon say plainly to have a licensed gas professional match the valve, regulator and burner.
+  Three ways in Help 197 (OakBarn Brewery, 2026-11-14: "Baso $$$$ so not for Home Brewer"; "high pressure propane is more standard
+  for a Home Brewer"): 1. high pressure + 24 V solenoid only (None: cheapest, only the slow Flame Out); 2. low pressure + 24 VAC VR8200
+  type valve (real flame safety, the best for the money, heats more slowly); 3. high pressure + a high-pressure thermocouple safety
+  pilot valve (for example BASO H19, costly) + 24 V solenoid (real flame safety).
+  **Recommended: the UL or CSA listed way (2 or 3).** **For Information Only** (OakBarn Brewery, 2026-11-14: "Big Caveat with this one.
+  For Information Only. One Way some Hpme Brewers do it with high pressure and then recoomend th UL Way"; "No mention of Skynet or
+  Aokbarn only to say were are NOT..."): a high-pressure daisy chain some home brewers build (a K-type thermocouple in the flame, a
+  stand-alone temperature controller's relay in series with the brew controller's relay ahead of a 24 V high-pressure gas solenoid, a
+  timed ignition bypass of 10 seconds to start (OakBarn Brewery: "10 sec might be good starting point"), at most 3 tries a minute
+  apart). Help 197 shows it under a big caveat, never as recommended, supported or endorsed by Skynet or OakBarn Brewery, which are
+  named there only in the gas warning. Flame safety list: **Flame-out cutoff (K-type thermocouple and controller, not listed)**, whose
+  note says it is not listed and not recommended.
+  Flame Out stays On as the software backup either way, and the dialog says which: "a backup", or "a helper, not a flame safety device".
+- **Flame Out** is **On to start** for every gas burner and for the Schema Builder's gas burners; it can be switched Off.
+- Process words: `.flameout` (On / Off / "pause 10"), `.flameout_paused` (minutes left, 0 ends a pause), `.flameout_tripped` (read
+  only). Help 197 has two Process snippets (gas burner control, and the software backup in Process words), each with the gas warning
+  (Rule 6.20).
+- The gas warning (Rule 6.20, the gas half) starts the Flame Out section's balloon.
 
 ## 7. Pictures
 
@@ -4424,6 +4469,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
 - 2026-11-14: Rule 5.20: IP markers on a Tab are white (250,250,250) inside their colored ring, with black letters, like the IP pictures in Help (OakBarn Brewery: "Tab IP circles white (250,250,250)"). Help 13 Glossary (and French). Both programs.
 - 2026-11-14: Rule 5.40 (OakBarn Brewery: "If Pump is On, Tell User to shut it off (keep checking Pump On Status and then the Valve Acknowledgement.) Will need an exit button without moving"): the unhook pop-up stays open, checks the pump live, then asks about the valves; ✖ Exit always closes it without moving.
