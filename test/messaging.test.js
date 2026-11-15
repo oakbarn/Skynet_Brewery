@@ -121,4 +121,50 @@ if (cert) {
   const e = a.codes.get('fritz'); e.sent = [1, 2, 3, 4, 5].map(i => Date.now() - 600e3 - i);
   assert.throws(() => a.makeSignInCode('Fritz'), /Too many codes/);
 }
+// ---- Rule 8.5: the app password, the Twilio token and each user's email and mobile number are locked on disk
+{
+  const { seal, unseal, isSealed, _forgetKeys } = await import('../lib/seal.js');
+  const sd = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));
+  // a plain file from before the Rule is read, then locked
+  fs.writeFileSync(path.join(sd, 'messaging.json'), JSON.stringify({ smtpHost: 'smtp.x', smtpPass: 'app-pass-1', twilioToken: 'tok-9' }));
+  fs.writeFileSync(path.join(sd, 'users.json'), JSON.stringify({ users: [{ name: 'Brewer', role: 'admin', contact: { email: 'b@x.com', phone: '555-123-4567', textVia: 'tmobile' } }] }));
+  const m = new Messaging(sd), a = new Auth(sd);
+  assert.equal(m.cfg.smtpPass, 'app-pass-1'); assert.equal(m.cfg.twilioToken, 'tok-9');
+  assert.equal(a.getContact('Brewer').email, 'b@x.com'); assert.equal(a.getContact('Brewer').phone, '555-123-4567');
+  const mj = fs.readFileSync(path.join(sd, 'messaging.json'), 'utf8'), uj = fs.readFileSync(path.join(sd, 'users.json'), 'utf8');
+  for (const plain of ['app-pass-1', 'tok-9']) assert.ok(!mj.includes(plain), 'locked on disk: ' + plain);
+  for (const plain of ['b@x.com', '555-123-4567']) assert.ok(!uj.includes(plain), 'locked on disk: ' + plain);
+  assert.ok(isSealed(JSON.parse(mj).smtpPass) && isSealed(JSON.parse(uj).users[0].contact.email));
+  assert.equal(JSON.parse(mj).smtpHost, 'smtp.x');      // not a secret: stays plain
+  // saving and reading again keeps them
+  m.save({ smtpPass: 'app-pass-2' }); a.setContact('Brewer', { email: 'c@x.com' });
+  _forgetKeys();
+  assert.equal(new Messaging(sd).cfg.smtpPass, 'app-pass-2'); assert.equal(new Auth(sd).getContact('Brewer').email, 'c@x.com');
+  assert.equal(new Messaging(sd).publicSettings().smtpPass, '********');
+  // a copy without its key cannot be read
+  const other = fs.mkdtempSync(path.join(os.tmpdir(), 'bpo'));
+  assert.equal(unseal(other, JSON.parse(fs.readFileSync(path.join(sd, 'messaging.json'), 'utf8')).smtpPass), '');
+  assert.equal(seal(sd, ''), ''); assert.equal(unseal(sd, 'plain'), 'plain');
+}
+// ---- Rule 8.6: Approved Devices
+{
+  const { Devices, deviceName } = await import('../lib/devices.js');
+  const dd = fs.mkdtempSync(path.join(os.tmpdir(), 'bpd'));
+  assert.equal(deviceName('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/604.1'), 'iPhone, Safari');
+  assert.equal(deviceName('Mozilla/5.0 (Windows NT 10.0) Chrome/120 Edg/120'), 'Windows PC, Edge');
+  const dv = new Devices(dd), far = { socket: { remoteAddress: '192.168.1.9' }, headers: {} }, here = { socket: { remoteAddress: '127.0.0.1' }, headers: {} };
+  const proxied = { socket: { remoteAddress: '127.0.0.1' }, headers: { 'x-forwarded-for': '100.64.1.2' } };
+  const { token, set } = dv.idOf({}, false);
+  assert.ok(set.includes('HttpOnly') && token.length > 30);
+  assert.equal(dv.idOf({ bp_device: token }).set, null);
+  assert.ok(dv.on, 'On by default');
+  assert.ok(!dv.allowed(far, token) && dv.allowed(here, token) && !dv.allowed(proxied, token), 'the Brain\'s own computer only, not through a proxy');
+  const d = dv.ask(token, 'Dana', 'iPhone Safari/1', '192.168.1.9');
+  assert.equal(d.state, 'waiting'); assert.ok(!dv.allowed(far, token));
+  dv.setState(d.key, 'approved', 'Admin');
+  assert.ok(new Devices(dd).allowed(far, token), 'kept on disk');
+  assert.ok(!fs.readFileSync(path.join(dd, 'devices.json'), 'utf8').includes(token), 'only a hash of the device cookie is kept');
+  dv.setState(d.key, 'removed', 'Admin'); assert.ok(!dv.allowed(far, token));
+  dv.setOn(false); assert.ok(dv.allowed(far, token), 'switch Off: a password alone');
+}
 console.log('messaging tests passed');

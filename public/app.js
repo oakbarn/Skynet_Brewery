@@ -380,7 +380,7 @@ function setView(v, here = false) {
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
@@ -11882,6 +11882,33 @@ async function renderRecovery() {
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
 }
+// ---- Approved Devices (Rule 8.6, lib/devices.js): Approve or Refuse a waiting device, Rename, Remove; the On / Off switch
+async function renderApproved() {
+  if (!can('admin')) return;
+  const r = await api('GET', '/auth/devices');
+  $('#apdOn').checked = r.on;
+  const tb = $('#apdBody'); tb.innerHTML = '';
+  const when = t => t ? new Date(t).toLocaleString() : '';
+  const list = [...r.list].sort((a, c) => (a.state === 'waiting' ? 0 : 1) - (c.state === 'waiting' ? 0 : 1));
+  for (const d of list) {
+    const put = body => api('PUT', '/auth/devices/' + d.key, body).then(renderApproved);
+    const btns = d.state === 'waiting'
+      ? [h('button', { class: 'primary', onclick: guard(() => put({ state: 'approved' }).then(() => toast(`${d.name} is approved. ${d.user || 'They'} can sign in now.`))) }, 'Approve'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { await api('DELETE', '/auth/devices/' + d.key); renderApproved(); }) }, 'Refuse')]
+      : [h('button', { onclick: guard(async () => { const n = prompt('A name for this device (for example: Brew room tablet)', d.name); if (n) await put({ name: n }); }) }, 'Rename'), ' ',
+        h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`)) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
+    tb.append(h('tr', {}, h('td', {}, d.name + (d.thisDevice ? ' (this device)' : '')), h('td', {}, d.user || ''),
+      h('td', {}, d.state === 'waiting' ? h('b', { class: 'bad' }, `Waiting since ${when(d.asked)}`) : 'Approved'),
+      h('td', {}, when(d.seen || d.approved)), h('td', {}, ...btns)));
+  }
+  if (!list.length) tb.append(h('tr', {}, h('td', { colspan: 5, class: 'muted' }, 'No devices yet.')));
+}
+$('#apdOn').onchange = guard(async ev => {
+  if (!ev.target.checked && !confirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.')) { ev.target.checked = true; return; }
+  await api('PUT', '/auth/devices', { on: ev.target.checked });
+  toast(ev.target.checked ? 'Approved Devices is On. This device is approved.' : 'Approved Devices is Off');
+  renderApproved();
+});
 // ---- sign-in codes: where they go (each user) and how they are sent (admin)
 async function renderContact(who) {
   who = who || $('#ctUser').value || S.me.name;
@@ -12814,7 +12841,7 @@ const PAGE_PARTS = {
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
-    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
+    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],
     ['Panel settings', '#sec-panel'], ['Panel settings: screen, Tabs and alerts', '#sec-panelSet'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
