@@ -2558,6 +2558,9 @@ method: while its pin is on), the Brain watches its probe about once a second:
   only). Help 197 has two Process snippets (gas burner control, and the software backup in Process words), each with the gas warning
   (Rule 6.20).
 - The gas warning (Rule 6.20, the gas half) starts the Flame Out section's balloon.
+- **Not a UL safety** (OakBarn Brewery, 2026-11-15: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the
+  Flame Out's Properties note, its balloon, the burner pop-up and Help 197 say "This is not a UL listed safety and should not be relied on. Always monitor the burner." (the same words
+  in the BruControl Import's burner question).
 
 ## 7. Pictures
 
@@ -4473,6 +4476,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 18.37: the Pump's Interface Hover Help and Help 115 show a Daisy Chain picture after "There is a Daisy Chain:" (OakBarn Brewery: "Your suggestion is good use a Blickmann Riptide with Red Cover", "Use a Hocky Puck SSR", "Swap line order Pix on Top", "That one is a go"): pictures on top (brain, Arduino Mega with Port 15, SSR-40 DA, Red Pump), the words below (Brain, Arduino, SSR or Contactor, Red Pump), with the Electricity can kill line. media/help_pictures/Pump_Daisy_Chain.png. Help 115 (and French). Both programs.
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
 - 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
