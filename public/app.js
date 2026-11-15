@@ -6253,21 +6253,24 @@ $('#lockItem').onclick = () => {
   const item = sel && findItem(sel.kind, sel.id); if (!item) return toast('Select an item first', true);
   const frozen = profileFrozen(item); if (frozen) return toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
   const on = !item.locked;
-  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) setLock(g, on);   // a vessel's ports and joined fittings go with it
+  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) if (on || g === item || !g.noUnlock) setLock(g, on);   // a vessel's ports and joined fittings go with it (one set to No Unlock stays)
   toast(on ? 'Locked in place' : 'Unlocked'); renderWs(); updLockBtn();
 };
 // 🔒 Lock All / 🔓 Unlock All (Fritz, 2026-10-22): actions, not a switch. Every item on this Tab is locked (or unlocked) once;
-// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button.
+// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button. 🔓 Unlock All passes by an IP or fitting
+// set to No Unlock (Rule 2.12).
 function lockTab(on) {
   const mine = o => o.workspace === wsName;
-  let n = 0, kept = 0;
+  let n = 0, kept = 0, stay = 0;
   for (const o of [...draft.elements.filter(mine), ...draft.graphics.filter(mine)]) {
     if (!!o.locked === on) continue;
     if (profileFrozen(o)) { kept++; continue; }
+    if (!on && o.noUnlock) { stay++; continue; }      // 🔒 No Unlock: only its own 🔓 Unlock unlocks it (Rule 2.12)
     setLock(o, on); n++;
   }
   toast((n ? `${on ? '🔒 Locked' : '🔓 Unlocked'} ${n} item${n === 1 ? '' : 's'} on "${wsName}". Save layout keeps it.` : `Everything on "${wsName}" was already ${on ? 'locked' : 'unlocked'}.`)
-    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
+    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : '')
+    + (stay ? ` ${stay} item${stay === 1 ? '' : 's'} set to No Unlock stayed locked (click ${stay === 1 ? 'it' : 'each one'} and press 🔓 Unlock).` : ''));
   renderWs(); updLockBtn();
 }
 // 🏷 Suggested Names (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be converted to a Suggested Name, if you
@@ -7410,7 +7413,7 @@ const F = {
       ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['noUnlock', 'No Unlock (🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it)', 'bool']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label (never blank: it starts as its Name in small letters, pipe_1, Rule 3.14)', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
@@ -7442,7 +7445,7 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
     ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
 const FIT_PLACE = it => [...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
-  ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+  ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['noUnlock', 'No Unlock (🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it)', 'bool']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => hasTop(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
@@ -10231,6 +10234,9 @@ async function editItem(kind, id) {
       if (hasLayer(item)) work.layer = item.layer; else delete work.layer;
     }
     if (kind !== 'el' && ownLabel(item) && !String(work.label ?? '').trim()) work.label = defLabel({ name: work.name || item.name });      // never blank (Rule 3.14)
+    // No Unlock (OakBarn Brewery, 2026-11-15, Rule 2.12: "An attribute on IPs that says No Unlock individually"): switched on, it
+    // locks the IP or fitting, and 🔓 Unlock All passes it by
+    if (work.noUnlock) work.locked = true; else delete work.noUnlock;
     if (kind === 'el') dbFromWork(work, item);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
