@@ -18,6 +18,16 @@ La même liste contient **Plate chiller** (refroidisseur à plaques), **Chilling
 
 > Les tuyaux ne relient que des IP du même Tab.
 
+## Un refroidisseur est un tuyau {#a-chiller-is-a-pipe}
+
+Un **refroidisseur** (Plate chiller, Counterflow chiller, Immersion coil ou Chillzilla) marche **exactement comme un tuyau, ni plus, ni moins** :
+
+- Il a un **IP à chaque entrée et sortie**, et rien d'autre.
+- Il n'a **ni marche ni arrêt**. L'écoulement le traverse, tout simplement.
+- L'écoulement vient d'une **source** en amont, comme dans un tuyau : une pompe en marche, ou une Tap Water Valve ouverte. Raccordez-le comme vous voulez, par exemple depuis une vanne toujours laissée ouverte.
+- Un refroidisseur à plaques ou à contre-courant a **deux passages qui ne se mélangent jamais** : Wort In vers Wort Out, et Water In vers Water Out. Chaque passage a besoin de sa propre source. Un Immersion coil a un seul passage, In vers Out.
+- Pour lire le moût refroidi, mettez un té à sonde dans le tuyau à côté.
+
 ## Regrouper une cuve avec ses IP (Bundle) {#bundle-a-vessel-with-its-ips}
 
 Regrouper (bundle) verrouille une cuve et ses IP ensemble comme un seul bloc, pour que rien ne soit déplacé par accident. Regroupez-la une fois que les IP sont là où vous les voulez.
