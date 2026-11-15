@@ -15,7 +15,7 @@ A pipe fitting has no settings but:
 | **Width, Height** | How big it is. Set by its pipes (Autosize to pipe). |
 | 🔒 Lock | Locks it in place, as on every item. |
 
-- It has **no label**, **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BH ...) shows in its Properties and when you hold the mouse over it.
+- It has a **Label** that is never blank: it starts as its Skynet name in small letters (tee_1, elbow_1) and you can change it in its Properties. It has **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BH ...) shows in its Properties and when you hold the mouse over it.
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
 - An **End Cap** has **Autosize to pipe** too: on an opening of a pipe fitting it takes the size of that fitting's ferrule. On a Reducer, a Valve Tee or Supply Manifold, or a vessel opening it keeps its size.

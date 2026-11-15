@@ -72,7 +72,8 @@ tab.flow_Color = None
 ## Label, Name, position et taille {#label-name-position-and-size}
 
 Un tuyau ou un flexible a un **Label** comme tout autre Widget : double-cliquez dessus, tapez le Label et activez **Show label**, et il s'affiche
-au milieu du tuyau. Son **Name** est donné par Skynet (Pipe_1, Hose_1 ...) et c'est ce qu'utilise un Process.
+au milieu du tuyau. Son **Name** est donné par Skynet (Pipe_1, Hose_1 ...) et c'est ce qu'utilise un Process. Le Label n'est jamais vide :
+il commence comme le Name en minuscules (pipe_1, hose_1) jusqu'à ce que vous tapiez le vôtre.
 
 Un tuyau n'a **pas de cases de position ni de taille** : il est là où vous l'avez tracé, donc X, Y, Width et Height sont cachés. Déplacez ou étirez un tuyau sur
 le Tab en Edit layout, comme avant.

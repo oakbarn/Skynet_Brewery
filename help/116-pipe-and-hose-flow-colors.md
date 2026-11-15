@@ -72,7 +72,8 @@ tab.flow_Color = None
 ## Label, Name, Position and Size
 
 A Pipe or Hose has a **Label** like every other Widget: double-click it, type the Label and switch **Show label** on, and it shows
-in the middle of the pipe. Its **Name** is given by Skynet (Pipe_1, Hose_1 ...) and is what a Process uses.
+in the middle of the pipe. Its **Name** is given by Skynet (Pipe_1, Hose_1 ...) and is what a Process uses. The Label is never blank: it
+starts as the Name in small letters (pipe_1, hose_1) until you type your own.
 
 A pipe has **no Position or Size boxes**: it is where you drew it, so X, Y, Width and Height are hidden. Move or stretch a pipe on
 the Tab in Edit layout, as before.

@@ -15,7 +15,7 @@ Un raccord de tuyauterie n'a pas d'autres réglages que :
 | **Width, Height** | Sa taille. Donnée par ses tuyaux (Autosize to pipe). |
 | 🔒 Lock | Le verrouille en place, comme pour chaque élément. |
 
-- Il n'a **pas de label**, **pas de Type** et **pas de Connection Standard**. Son nom Skynet (Tee_1, Elbow_1, bndl1_Tee_BH ...) s'affiche dans ses Properties et quand vous tenez la souris dessus.
+- Il a un **Label** qui n'est jamais vide : il commence comme son nom Skynet en minuscules (tee_1, elbow_1) et vous pouvez le changer dans ses Properties. Il n'a **pas de Type** et **pas de Connection Standard**. Son nom Skynet (Tee_1, Elbow_1, bndl1_Tee_BH ...) s'affiche dans ses Properties et quand vous tenez la souris dessus.
 - **Tournez-le ou retournez-le avec les boutons pour tourner** de la barre Edit layout (ils s'affichent quand il est choisi). Ils ne sont plus dans ses Properties.
 - **Les raccords de tuyauterie n'ont pas de Clone** : ni sur le Tab, ni dans la fenêtre Template d'un Template de raccord Skynet. Ajoutez-en un autre à la place.
 - Un **End Cap** a aussi **Autosize to pipe** : sur une ouverture d'un raccord, il prend la taille de la virole de ce raccord. Sur une réduction, un Valve Tee ou un Supply Manifold, ou une ouverture de cuve, il garde sa taille.
