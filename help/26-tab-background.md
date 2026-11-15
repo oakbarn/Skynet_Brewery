@@ -1,38 +1,74 @@
-# Tab background picture and color
+# Tab Settings
 
-Each tab has its own **background picture** (one picture path) and **background color**. Both are in **⚙ Tab settings**, which only shows while **Edit layout** is on. Only an **Admin** can change them.
+**⚙ Tab Settings** holds everything about one Tab: its name and Tab ID, its background, its look, its size and its pipes. It only opens while **Edit layout** is on, and only an **Admin** can change it. The example is the **Brew House** Tab (Tab ID **BH**) of the 3 Vessel 1 Pump sample.
 
-## On a PC or Mac
+Each box has a short name. Rest the mouse on the name (dotted underline) for its Hover Help; on a phone or tablet, tap the name. The words below are the same as the Hover Help.
 
-1. Open the **Tabs** screen and click the tab you want to change (its button at the top).
-2. Press **☰ Menu** at the top right and pick **Edit layout**. A dashed bar of buttons appears.
-3. Open **⚙ Tab settings** in one of these ways:
-   - press the **⚙ Tab settings** button in the dashed bar, or
-   - **double-click an empty spot** on the tab (not on a pump, valve or pipe), or
-   - double-click the tab's name at the top.
-4. The **Background** part is at the top of the box (see below).
-5. Press **Save** in the box, then **Save layout** in the dashed bar.
+## Open it
 
-## On an iPhone, iPad or Android phone
+On a PC or Mac:
 
-1. Open the **Tabs** screen and tap the tab you want to change.
-2. Tap **Edit layout**.
-3. **Hold your finger on an empty spot** of the tab for about half a second (not on a pump, valve or pipe). **⚙ Tab settings** opens. You can also tap the **⚙ Tab settings** button in the dashed bar.
-4. Change the **Background** part (see below).
-5. Tap **Save** in the box, then **Save layout**.
+1. Click the Tab you want to change (its button at the top).
+2. Turn on **Edit layout** (the blue Edit layout button beside **☰ Menu**). A dashed bar of buttons appears.
+3. Open **⚙ Tab Settings** in one of these ways:
+   - press **⚙ Tab settings** in the dashed bar, or
+   - **double-click an empty spot** on the Tab (not on a pump, valve or pipe), or
+   - double-click the Tab's name at the top.
 
-## The Background part
+On an iPhone, iPad or Android phone: turn on Edit layout, then **hold your finger on an empty spot** of the Tab for about half a second, or tap **⚙ Tab settings** in the dashed bar.
 
-| Setting | What it does |
+When you are done, press **💾 Save** at the top of the box, then **Save layout** in the dashed bar.
+
+## The buttons and the keys
+
+- **🗑 Delete**, **✖ Cancel** and **💾 Save** stay at the top while the rest of the box scrolls; there is no second row at the bottom. Delete takes the Tab and everything on it away (it asks first; it is not there when this is the only Tab). Cancel asks first when something was changed.
+- The **Name** has the focus when the box opens.
+- The **Enter** key goes only between the **Name** and the **Tab ID** (a new Tab). Enter on a blank Name stays on it. From any other box, Enter goes back to the Name.
+- The **Tab** key goes through every box, the last one back to the first. The ? Help, Delete, Cancel and Save are for the mouse.
+- A blank Name, or a Tab ID that can't be used, only stops **Save**: a small ⚠ box says why, the box gets the focus, and the ⚠ box goes away by itself after 5 seconds. Everything else can still be reached.
+
+## Name and Tab ID
+
+| Box | What it does |
 |---|---|
-| **Background color** | **Default** (the panel's normal color), **None** (no color), a color by name with a swatch, or **Custom (add new) ...** for any other color. The color shows wherever the picture does not cover. |
-| **Background picture** | The picture path. The list shows the pictures in the panel's `media` folder and its `Images` folder, with a small preview. **Add new ...** lets you type any other path. Pick **(none)** for no picture. |
-| **Picture left / top / width / height** | Leave all four **empty** to stretch the picture over the whole tab. Fill them in to put the picture at one spot and size, for example to leave room at the side; the color shows around it. |
+| **Name** | The name of this Tab, shown on its button at the top of the panel, for example Brew House. Each Tab needs a name of its own, and it cannot be blank. A Hidden Tab's name always starts with Hidden_. Renaming a Tab is safe: everything on it goes with it, and the Suggested Names of its Devices use the Tab ID, not the name. A saved Tab shows 🔒 and **✏ Change name**. |
+| **Tab ID** | A short code for this Tab, for example BH for Brew House. It comes first in every list of Tabs (BH: Brew House) and last in the Suggested Name of every Device on this Tab (..._BH). Skynet suggests a unique one, and it follows the Name until you type your own. The Tab ID follows Rule 3.2. Check it before you Save. Once it is saved, it is greyed out. |
 
-## Getting your own picture onto the Pi
+## Background
 
-Put it on the Pi first with the [Media](07-media) screen (into the `Images` folder). Then open **⚙ Tab settings** again: the new picture is in the **Background picture** list.
+| Box | What it does |
+|---|---|
+| **Profile** | The Tab Background Profile of this Tab. It gives the Tab its background color, and the look (colors and value style) that a new Device or Widget on this Tab starts with. None = no Profile. Profiles are made on ☰ Menu > Tab Background Profile ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). The look is copied only when a Device or Widget is made: changing the Profile later does not change what is already on the Tab. |
+| **Color** | The color behind everything on this Tab. It shows wherever the Picture does not cover. Default = the color of this Tab's Profile (with no Profile, the panel's normal color). None = no color. Custom opens the Color Picker for a color of your own, and its **Color (RGB)** box shows below it. |
+| **Picture** | A picture behind everything on this Tab. Pick Skynet pictures or your own, a group, then the picture. None = no picture. Add new ... takes the name of another picture in media/Images; the [File Move](32-file-move) page copies a picture from your computer there. The Color shows wherever the picture does not cover. |
+| **Picture Left** / **Picture Top** | Where the left edge and the top edge of the Picture go, in pixels from the left and the top of the Tab. |
+| **Picture Width** / **Picture Height** | How wide and how tall the Picture is drawn, in pixels. |
 
-## Pictures of single items
+Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.
 
-This page is about the whole tab. A pump, valve or other item has its own pictures (**.backpath**, **.backpath_2**, **.backpath_3**). See [Pictures on items](25-picture-paths).
+## Look
+
+| Box | What it does |
+|---|---|
+| **Tab Style** | The Tab Style: the colors, fonts and sizes of the Labels, Devices and Widgets on this Tab. Default = the Tab Style picked on ☰ Menu > Default settings. A Device or Widget with a color, font or size of its own keeps it; only the rest take the Tab Style. Skynet Styles 🔒 can never be changed. ➕ Add new User Style… makes your own, and ✏ Edit changes it ([Tab Styles](101-tab-styles)). |
+
+## Size
+
+| Box | What it does |
+|---|---|
+| **Width** | How wide this Tab is, in pixels. A new Tab starts at 1600. |
+| **Height** | How tall this Tab is, in pixels. A new Tab starts at 900. |
+| **Vessel Sizer** | The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout ([Vessel sizing](135-vessel-sizing)). |
+
+## Pipes
+
+| Box | What it does |
+|---|---|
+| **Pipe Size** | How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it. |
+| **Flow Color** | The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color. RGB opens the Color Picker ([Pipe and hose flow colors](116-pipe-and-hose-flow-colors)). |
+
+## The technical side
+
+- A Process sets the Flow Color with `tab.flow_Color = Mash`, on the Tab the screen shows; `tab.flow_Color = None` hands it back to Tab Settings.
+- Devices, Widgets and Processes find a Tab by its hidden key, which never changes, so a new Name never breaks a link.
+- To get your own picture onto the Brain, use the [Media](07-media) screen (into the `Images` folder); it is then in the **Picture** list. A pump, valve or other item has its own pictures (**.backpath**, **.backpath_2**, **.backpath_3**): see [Pictures on items](25-picture-paths).

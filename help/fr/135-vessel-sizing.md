@@ -33,8 +33,8 @@ aussi gardés avec la cuve.
 
 ## Master Vessel Sizer
 
-Un Tab peut désigner une cuve comme son **Master Vessel Sizer** : double-cliquez sur un endroit vide du Tab en Edit layout (**Tab settings**) et
-choisissez-la sous **Master Vessel Sizer**. Le Master affiche un 📏 dans son coin en Edit layout.
+Un Tab peut désigner une cuve comme son **Master Vessel Sizer** : double-cliquez sur un endroit vide du Tab en Edit layout (**Tab Settings**) et
+choisissez-la sous **Size > Vessel Sizer**. Le Master affiche un 📏 dans son coin en Edit layout.
 
 - **Seul le Master peut être redimensionné**, avec ses poignées ou ses Width et Height. Toutes les autres cuves de ce Tab suivent : elles
   gardent toutes la même échelle, donc une cuve de 5 gallons paraît toujours moitié moins volumineuse qu'une de 10 gallons.

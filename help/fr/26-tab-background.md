@@ -1,38 +1,74 @@
-# Image et couleur de fond d'un Tab {#tab-background-picture-and-color}
+# Tab Settings
 
-Chaque Tab a sa propre **image de fond** (un seul chemin d'image) et sa propre **couleur de fond**. Les deux sont dans **⚙ Tab settings**, qui ne s'affiche que tant que **Edit layout** est actif. Seul un **Admin** peut les changer.
+**⚙ Tab Settings** contient tout ce qui concerne un Tab : son nom et son Tab ID, son fond, son aspect, sa taille et ses tuyaux. La fenêtre ne s'ouvre que tant que **Edit layout** est actif, et seul un **Admin** peut la changer. L'exemple est le Tab **Brew House** (Tab ID **BH**) de l'exemple 3 Vessel 1 Pump.
 
-## Sur un PC ou un Mac {#on-a-pc-or-mac}
+Chaque case a un nom court. Laissez la souris sur le nom (souligné en pointillés) pour voir son aide au survol (Hover Help) ; sur un téléphone ou une tablette, touchez le nom. Les mots ci-dessous sont les mêmes que ceux de l'aide au survol.
 
-1. Ouvrez l'écran **Tabs** et cliquez sur le Tab que vous voulez changer (son bouton en haut).
-2. Appuyez sur **☰ Menu** en haut à droite et choisissez **Edit layout**. Une barre de boutons en pointillés apparaît.
-3. Ouvrez **⚙ Tab settings** de l'une de ces façons :
-   - appuyez sur le bouton **⚙ Tab settings** dans la barre en pointillés, ou
+## L'ouvrir {#open-it}
+
+Sur un PC ou un Mac :
+
+1. Cliquez sur le Tab que vous voulez changer (son bouton en haut).
+2. Activez **Edit layout** (le bouton bleu Edit layout à côté de **☰ Menu**). Une barre de boutons en pointillés apparaît.
+3. Ouvrez **⚙ Tab Settings** de l'une de ces façons :
+   - appuyez sur **⚙ Tab settings** dans la barre en pointillés, ou
    - **double-cliquez sur un endroit vide** du Tab (pas sur une pompe, une vanne ou un tuyau), ou
    - double-cliquez sur le nom du Tab en haut.
-4. La partie **Background** est en haut de la fenêtre (voir plus bas).
-5. Appuyez sur **Save** dans la fenêtre, puis sur **Save layout** dans la barre en pointillés.
 
-## Sur un iPhone, un iPad ou un téléphone Android {#on-an-iphone-ipad-or-android-phone}
+Sur un iPhone, un iPad ou un téléphone Android : activez Edit layout, puis **gardez le doigt sur un endroit vide** du Tab pendant environ une demi-seconde, ou touchez **⚙ Tab settings** dans la barre en pointillés.
 
-1. Ouvrez l'écran **Tabs** et touchez le Tab que vous voulez changer.
-2. Touchez **Edit layout**.
-3. **Gardez le doigt sur un endroit vide** du Tab pendant environ une demi-seconde (pas sur une pompe, une vanne ou un tuyau). **⚙ Tab settings** s'ouvre. Vous pouvez aussi toucher le bouton **⚙ Tab settings** dans la barre en pointillés.
-4. Changez la partie **Background** (voir plus bas).
-5. Touchez **Save** dans la fenêtre, puis **Save layout**.
+Quand vous avez fini, appuyez sur **💾 Save** en haut de la fenêtre, puis sur **Save layout** dans la barre en pointillés.
 
-## La partie Background {#the-background-part}
+## Les boutons et les touches {#the-buttons-and-the-keys}
 
-| Réglage | Ce qu'il fait |
+- **🗑 Delete**, **✖ Cancel** et **💾 Save** restent en haut pendant que le reste de la fenêtre défile ; il n'y a pas de deuxième rangée en bas. Delete supprime le Tab et tout ce qu'il contient (il demande d'abord ; il n'est pas là quand c'est le seul Tab). Cancel demande d'abord quand quelque chose a été changé.
+- Le **Name** a le focus quand la fenêtre s'ouvre.
+- La touche **Entrée** va seulement entre le **Name** et le **Tab ID** (un nouveau Tab). Entrée sur un Name vide y reste. Depuis toute autre case, Entrée revient au Name.
+- La touche **Tab** passe par toutes les cases, de la dernière à la première. Le ? (aide), Delete, Cancel et Save sont pour la souris.
+- Un Name vide, ou un Tab ID qui ne peut pas servir, bloque seulement **Save** : une petite fenêtre ⚠ dit pourquoi, la case reçoit le focus, et la fenêtre ⚠ disparaît d'elle-même après 5 secondes. Tout le reste reste accessible.
+
+## Name et Tab ID {#name-and-tab-id}
+
+| Case | Ce qu'elle fait |
 |---|---|
-| **Background color** | **Default** (la couleur normale du panel), **None** (aucune couleur), une couleur par nom avec un échantillon, ou **Custom (add new) ...** pour toute autre couleur. La couleur se voit partout où l'image ne couvre pas. |
-| **Background picture** | Le chemin de l'image. La liste montre les images du dossier `media` du panel et de son dossier `Images`, avec un petit aperçu. **Add new ...** vous laisse taper n'importe quel autre chemin. Choisissez **(none)** pour aucune image. |
-| **Picture left / top / width / height** | Laissez les quatre **vides** pour étirer l'image sur tout le Tab. Remplissez-les pour mettre l'image à un endroit et une taille précis, par exemple pour laisser de la place sur le côté ; la couleur se voit autour. |
+| **Name** | Le nom de ce Tab, affiché sur son bouton en haut du panel, par exemple Brew House. Chaque Tab a besoin de son propre nom, et il ne peut pas être vide. Le nom d'un Hidden Tab commence toujours par Hidden_. Renommer un Tab est sans risque : tout ce qu'il contient le suit, et les Suggested Names de ses Devices utilisent le Tab ID, pas le nom. Un Tab enregistré montre 🔒 et **✏ Change name**. |
+| **Tab ID** | Un code court pour ce Tab, par exemple BH pour Brew House. Il vient en premier dans chaque liste de Tabs (BH: Brew House) et en dernier dans le Suggested Name de chaque Device de ce Tab (..._BH). Skynet en propose un unique, et il suit le Name jusqu'à ce que vous tapiez le vôtre. Le Tab ID suit la Règle 3.2. Vérifiez-le avant Save. Une fois enregistré, il est grisé. |
 
-## Mettre votre propre image sur le Pi {#getting-your-own-picture-onto-the-pi}
+## Background
 
-Mettez-la d'abord sur le Pi avec l'écran [Media (images et sons)](07-media) (dans le dossier `Images`). Rouvrez ensuite **⚙ Tab settings** : la nouvelle image est dans la liste **Background picture**.
+| Case | Ce qu'elle fait |
+|---|---|
+| **Profile** | Le Tab Background Profile de ce Tab. Il donne au Tab sa couleur de fond, et l'aspect (couleurs et style de valeur) avec lequel un nouveau Device ou Widget de ce Tab commence. None = aucun Profile. Les Profiles se font dans ☰ Menu > Tab Background Profile ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). L'aspect n'est copié que quand un Device ou un Widget est créé : changer le Profile plus tard ne change pas ce qui est déjà sur le Tab. |
+| **Color** | La couleur derrière tout ce qui est sur ce Tab. Elle se voit partout où la Picture ne couvre pas. Default = la couleur du Profile de ce Tab (sans Profile, la couleur normale du panel). None = aucune couleur. Custom ouvre le Color Picker pour une couleur à vous, et sa case **Color (RGB)** s'affiche en dessous. |
+| **Picture** | Une image derrière tout ce qui est sur ce Tab. Choisissez les images Skynet ou les vôtres, un groupe, puis l'image. None = aucune image. Add new ... prend le nom d'une autre image dans media/Images ; la page [File Move](32-file-move) y copie une image depuis votre ordinateur. La Color se voit partout où l'image ne couvre pas. |
+| **Picture Left** / **Picture Top** | Où vont le bord gauche et le bord haut de la Picture, en pixels depuis la gauche et le haut du Tab. |
+| **Picture Width** / **Picture Height** | La largeur et la hauteur de la Picture, en pixels. |
 
-## Les images des éléments seuls {#pictures-of-single-items}
+Laissez Picture Left, Top, Width et Height tous vides pour étirer la Picture sur tout le Tab ; remplissez-les pour la mettre à un endroit et une taille précis.
 
-Cette page parle du Tab entier. Une pompe, une vanne ou un autre élément a ses propres images (**.backpath**, **.backpath_2**, **.backpath_3**). Voir [Images de fond (.backpath, .backpath_2, .backpath_3)](25-picture-paths).
+## Look
+
+| Case | Ce qu'elle fait |
+|---|---|
+| **Tab Style** | Le Tab Style : les couleurs, polices et tailles des Labels, Devices et Widgets de ce Tab. Default = le Tab Style choisi dans ☰ Menu > Default settings. Un Device ou un Widget qui a sa propre couleur, police ou taille la garde ; seuls les autres prennent le Tab Style. Les Skynet Styles 🔒 ne peuvent jamais être changés. ➕ Add new User Style… crée le vôtre, et ✏ Edit le change ([Tab Styles](101-tab-styles)). |
+
+## Size
+
+| Case | Ce qu'elle fait |
+|---|---|
+| **Width** | La largeur de ce Tab, en pixels. Un nouveau Tab commence à 1600. |
+| **Height** | La hauteur de ce Tab, en pixels. Un nouveau Tab commence à 900. |
+| **Vessel Sizer** | Le Master Vessel Sizer : choisissez une Vessel de ce Tab. Seule cette Vessel peut être redimensionnée, et toutes les autres Vessels du Tab la suivent à la même échelle. None = aucune Vessel ne peut être redimensionnée. Le Master montre 📏 dans Edit layout ([Vessel sizing](135-vessel-sizing)). |
+
+## Pipes
+
+| Case | Ce qu'elle fait |
+|---|---|
+| **Pipe Size** | L'épaisseur d'un tuyau de 1/2" dessiné sur ce Tab, en pixels. Un nouveau Tab commence à 10. Toutes les autres tailles de tuyau et de tuyau souple, les réductions et les raccords sont dessinés à l'échelle à partir de lui. |
+| **Flow Color** | La couleur du flux dans chaque tuyau et tuyau souple de ce Tab. None = chaque tuyau garde sa propre Flow Color. Mash, Boil, Whirlpool et Ferment : un tuyau qui a sa propre Flow Color la garde. Tap, Strike et les couleurs simples : chaque tuyau la prend. Le flux d'une Tap Water Valve est toujours bleu, et le flux qui part d'une Vessel avec une Out Flow Color prend cette couleur. RGB ouvre le Color Picker ([Pipe and hose flow colors](116-pipe-and-hose-flow-colors)). |
+
+## Le côté technique {#the-technical-side}
+
+- Un Process règle la Flow Color avec `tab.flow_Color = Mash`, sur le Tab que l'écran montre ; `tab.flow_Color = None` la rend à Tab Settings.
+- Les Devices, les Widgets et les Processes trouvent un Tab par sa clé cachée, qui ne change jamais, donc un nouveau Name ne casse jamais un lien.
+- Pour mettre votre propre image sur le Brain, utilisez l'écran [Media](07-media) (dans le dossier `Images`) ; elle est ensuite dans la liste **Picture**. Une pompe, une vanne ou un autre élément a ses propres images (**.backpath**, **.backpath_2**, **.backpath_3**) : voir [Pictures on items](25-picture-paths).
