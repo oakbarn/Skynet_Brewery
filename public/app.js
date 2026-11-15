@@ -1788,7 +1788,14 @@ function sizeFitting(g) {
 // its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
 const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', primingTee: 'PrimingTee', coupling: 'Coupling', qd: 'QD', cap: 'Cap' };
 const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'w_Text' : null;
-function giveName(g, all) {
+// Every Widget has a Name and a Label, and the Label is never blank (OakBarn Brewery, 2026-11-15: "All Widgets get a name and label",
+// Rule 3.14). Pipes, hoses and pipe fittings keep their own Names (Pipe_1, Hose_1, Tee_1, Elbow_1); a blank Label starts as the Name in
+// small letters (pipe_1, elbow_1), the Type_n pattern of Rule 18.15. Older ones get it here and keep it with the next Save layout.
+const ownLabel = g => g.kind === 'pipe' || isIpFit(g) || (g.kind === 'vessel' && g.vesselType === 'bfit');
+const defLabel = g => String(g.name || '').toLowerCase();
+const giveLabel = g => { if (ownLabel(g) && g.name && !String(g.label ?? '').trim()) g.label = defLabel(g); };
+function giveName(g, all) { giveName0(g, all); giveLabel(g); }
+function giveName0(g, all) {
   // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
   if (!g.name && widgetTypeId(g, isTapMv(g))) { g.name = graphicWidgetName(g); autoNamed.add(g); return; }      // a new one: wgt_Type_Label_TabID (Rule 3.14)
   const p = autoPrefix(g); if (!p || (g.name && (g.kind === 'text' || g.name.startsWith(p + '_') || (g.name.startsWith('wgt_') && widgetTypeId(g, isTapMv(g)))))) return;
@@ -1802,7 +1809,7 @@ function graphicWidgetName(g, self = g) {
   const L0 = draft || S.config, taken = n => [...L0.elements, ...L0.graphics].some(x => x !== self && x.name && x.name.toLowerCase() === n.toLowerCase());
   return uniqueName(suggestWidgetName({ code, label: g.label, tab: tabIdOf(g.workspace) }), taken, tabIdOf(g.workspace));
 }
-const nameAll = gs => { for (const g of gs || []) giveName(g, gs); };
+const nameAll = gs => { for (const g of gs || []) { giveName(g, gs); giveLabel(g); } };
 const ipName = g => g.name ? (g.label && g.label !== g.name ? `${g.name} (${g.label})` : g.name) : (g.label || g.id);
 
 function buildIp(g) {
@@ -3585,8 +3592,17 @@ function allIps(ws) {
 // my_Valve.tapwater set by a Process wins over the valve's setting until the valve is saved again or the panel restarts
 const tapWater = e => !!(editing ? e.tapwater : S.values[e.cloneOf || e.name]?.tapwater ?? e.tapwater);
 // which end tap water leaves by: 'out' (the second end, right or bottom), 'in' (the first end, left or top) or 'both'
-const TAP_OUT = [['out', 'The second end (right or bottom), one way'], ['in', 'The first end (left or top), one way'], ['both', 'Both ends']];
-const tapOut = e => e.tapwaterOut === 'none' ? 'none' : TAP_OUT.some(([k]) => k === e.tapwaterOut) ? e.tapwaterOut : 'out';    // none: a Skynet valve's Tap water source Needs setting
+const TAP_OUT = ['out', 'in', 'both'];      // the saved keys; tapOutChoices shows them as directions
+// "Tap Water flows" picks a direction, and only the two that fit the way the valve sits (OakBarn Brewery, 2026-11-15): Left to Right /
+// Right to Left when its ends are side by side, Top to Bottom / Bottom to Top when one is above the other. The saved key stays out / in / both.
+function tapOutChoices(e) {
+  const [a, b] = (e ? devIps({ ...e, tapwater: false }) : []).map(q => q.c);
+  const flat = a && b ? Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) : (e?.w || 120) >= (e?.h || 60);
+  const fwd = a && b ? (flat ? b[0] >= a[0] : b[1] >= a[1]) : true;       // the 'out' end is right of (or below) the 'in' end
+  const [p, q] = flat ? ['Left to Right', 'Right to Left'] : ['Top to Bottom', 'Bottom to Top'];
+  return [fwd ? ['out', p] : ['in', p], fwd ? ['in', q] : ['out', q], ['both', 'Both ways']];
+}
+const tapOut = e => e.tapwaterOut === 'none' ? 'none' : TAP_OUT.includes(e.tapwaterOut) ? e.tapwaterOut : 'out';    // none: a Skynet valve's Tap water source Needs setting
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
@@ -6742,7 +6758,7 @@ function addIpFit(fit, kind) {
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
-  if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
+  if (isIpFit(g)) delete g.label;          // a pipe fitting's Label starts as its Skynet name in small letters (tee_1, Rule 3.14): giveName below
   if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); }       // the Tap Water Valve (Rule 5.33)
   if (fit === 'manualValve') g.confirmation = true;       // a Confirmation Widget to start (Rule 1.28)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
@@ -7272,7 +7288,7 @@ const F = {
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ...IP_AT_FIELDS,
-    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap Water flows (a tap water valve only; the choices follow the way it sits)', 'sel', tapOutChoices(it)], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Device controlled first (None = it only shows its own .state)
   switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
@@ -7344,7 +7360,7 @@ const F = {
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: plain drawn vessel.' }], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
-  ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
+  ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its Label, its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ['label', 'Label (never blank: it starts as its Name in small letters, tee_1, Rule 3.14)', 'text'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
       ['label', 'Label (shown in the "by hand" message; never blank)', 'text'], ['labelVisible', 'Show label', 'yn'],
       ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
@@ -7352,7 +7368,7 @@ const F = {
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
-    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
+    ['label', 'Label (never blank: it starts as its Name in small letters, pipe_1, Rule 3.14)', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
     ['_flN', 'None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.', 'note'],
     ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
@@ -7997,7 +8013,7 @@ const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', O
 const MBV_OWN = (it, x = {}) => [it.tapwater ? ((it._tapClose = true), (it._tapOpen = false), ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap,
       with: [['_tapClose', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }], ['_tapOpen', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }]], ...x }])
     : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
-  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap Water flows', 'sel', tapOutChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
     ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -8782,7 +8798,7 @@ const DEVICE_TIPS = {
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
-  vTapEnd: 'Which end the tap water comes in at; it flows out of the other end.',
+  vTapEnd: 'Which way the tap water flows through it. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
   pNum: 'Probe #: the OneWire probe number of this DS18B20 (Devices page > OneWire probes). All DS18B20 probes share one data pin.',
   tpGraphic: 'The picture of this probe as it will show on the Tab, turned to its Orientation. A Thermowell snaps onto an IP; on a front facing IP it shows from the front. A probe tee cuts a pipe as a tee does (Rule 5.30).',
@@ -10162,6 +10178,7 @@ async function editItem(kind, id) {
       if (Number.isFinite(n) && n >= 1 && (n !== layer0 || (work.workspace && work.workspace !== item.workspace))) moveLayer(draft, work.workspace || item.workspace, item, n);
       if (hasLayer(item)) work.layer = item.layer; else delete work.layer;
     }
+    if (kind !== 'el' && ownLabel(item) && !String(work.label ?? '').trim()) work.label = defLabel({ name: work.name || item.name });      // never blank (Rule 3.14)
     if (kind === 'el') dbFromWork(work, item);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
