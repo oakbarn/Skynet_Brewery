@@ -23,3 +23,5 @@ Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a.
 ## Sharp SVG pictures
 
 Every PNG or JPG gets an SVG copy next to it, so it stays sharp at any size. A picture kept in another folder (for example `D:\Pictures`, added in **Settings > Media folders**) gets its copy with the Brain instead, in the hidden `media\.svg` folder, so nothing is written into that folder. The original is never changed (other programs can still use it), and you keep typing the `.png` path. **Settings > Pictures** shows each original beside its SVG and lets you pick which one is used. Photo-like pictures look better as the original.
+
+**Help pictures are never swapped for a copy.** A copy turns small words in a picture into blobs, so Help and Hover Help always show the picture itself (the `help_pictures` folder). Where a Help picture has a hand-made Skynet SVG next to it, that drawing is used instead, since it is sharp at any size.
