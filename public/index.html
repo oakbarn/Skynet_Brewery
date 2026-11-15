@@ -464,9 +464,13 @@
       <h3 id="sec-recovery">Recovery code</h3>
       <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
       <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
-      <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
+      <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Brain (the Pi or PC that runs Skynet). It is shown only this once. Any older code no longer works.</p></div>
+      <h3 id="sec-devices">Approved Devices</h3>
+      <p class="muted">A right password is not enough: each phone, tablet or computer must also be approved here once. A new one that signs in waits on this list until an Admin approves it, so a stolen password alone gets nobody in. The Brain's own computer is always approved. Remove a device you lost or sold: it is signed out at once.</p>
+      <div class="bar"><label class="toggle"><input type="checkbox" class="swc" id="apdOn"> Approved Devices On</label></div>
+      <div class="tblScroll"><table class="grid"><thead><tr><th>Device</th><th>User</th><th>State</th><th>Last used</th><th></th></tr></thead><tbody id="apdBody"></tbody></table></div>
       <h3 id="sec-sending">Sending codes and Alarm emails (email and text)</h3>
-      <p class="muted">The panel sends sign-in codes and Alarm emails (an Alarm's Email Notification) from your own email account, through the mail server you pick here: Gmail, Outlook.com or any other. Texts are sent free through your phone carrier's email-to-text address, or through <a href="https://www.twilio.com" target="_blank" rel="noopener">Twilio</a> (a paid service, about a cent per text, works with every carrier). Passwords here are kept on the Pi only.</p>
+      <p class="muted">The panel sends sign-in codes and Alarm emails (an Alarm's Email Notification) from your own email account, through the mail server you pick here: Gmail, Outlook.com or any other. Texts are sent free through your phone carrier's email-to-text address, or through <a href="https://www.twilio.com" target="_blank" rel="noopener">Twilio</a> (a paid service, about a cent per text, works with every carrier). Passwords here are locked (encrypted) and kept on the Brain only.</p>
       <div class="form row">
         <button id="msGmail" type="button">Fill in for Gmail</button>
         <button id="msOutlook" type="button">Fill in for Outlook.com</button>
