@@ -546,6 +546,10 @@ button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+*Includes pipe length and hose redrawing (OakBarn Brewery, 2026-11-15: "Rule 2.12 should include the redrawing size and hoses"):*
+changing a pipe's length or redrawing a hose is a move too. Only an **unlocked** pipe or hose can be made shorter or longer or
+redrawn, and only at an end that is let go whose IP is unlocked (No Unlock too); a 🔒 locked pipe or hose keeps its length and
+shape (Rule 5.37). (Help 56, Help 153)
 *Changed (Fritz, 2026-11-05: "Locked Vessels cannot be moved with a Mouse but can be moved by there x y attributes"):* a 🔒
 **locked Vessel** can't be moved with the mouse, but a new **X** or **Y** typed in its Properties moves it, to the pixel (moving
 something 1 pixel left can look much better on the screen). Its IPs, joined fittings and End Caps go with it, as with a drag,
@@ -4602,6 +4606,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 2.12 now says it includes changing a pipe's length and redrawing a hose (OakBarn Brewery: "Rule 2.12 should include the redrawing size and hoses"): only an unlocked pipe or hose, at a let-go end with an unlocked IP, changes. Help 56 (and French) updated. (thread "Let saved pipes and hoses be resized")
 - 2026-11-15: Rule 5.37 extended (OakBarn Brewery: "Ability to change the Length of a Pipe once it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to be Redrawn after its IPs are unlocked"): a let-go end of a saved pipe or hose has a handle and can be dragged, a pipe end along its line (length), a hose end anywhere (redraw); it comes before the pump, valve, vessel or fitting IP it sits on; dropped on an IP, that end joins it. Locked pipes, hoses and IPs (No Unlock too) stay put. Help 153 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Let saved pipes and hoses be resized")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
