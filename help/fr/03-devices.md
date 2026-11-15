@@ -9,12 +9,12 @@ Ici, « PLC » veut dire des cartes de loisir : les cartes compatibles Arduino (
 
 ## Ajouter une carte (Interface) {#adding-a-board-interface}
 
-Une carte s'appelle une **Interface**. Sur l'écran **Devices**, sous **Add Interface** :
+Une carte s'appelle une **Interface**. Sur l'écran **Devices**, sous **Add Interface**, appuyez sur **➕ Add Interface…** :
 
-1. Donnez-lui un **Name**, par exemple `Main Brewery Mega USB`. Son **Interface ID** (`MB`) est rempli à partir du nom ; voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
-2. Choisissez la **Board** (Arduino Mega, ESP32 ou une autre carte de type Arduino) et le **Type** : USB, Ethernet, WiFi, ou le **Simulator** (sans matériel ; pratique pour essayer). La **note de connexion** (connection rating) à côté indique à quel point ce lien est sûr ; voir [Notes de connexion](69-connection-ratings).
-3. Pour l'USB, appuyez sur **Scan ports** et choisissez le port (Windows : `COM3` ; Pi : `/dev/ttyACM0`). Pour l'Ethernet ou le WiFi, tapez son adresse réseau.
-4. Appuyez sur **Add**.
+1. Donnez-lui un **Name**, par exemple `Main Brewery Mega USB`. Son **Interface ID** (`MB`) est proposé à partir du nom ; voir [Interfaces](76-interfaces).
+2. Choisissez la **Board** (Arduino Mega, ESP32 ou Raspberry Pi) et sa **Connection** : les choix suivent la Board (USB, Ethernet ou WiFi). Le Hover Help de la Connection donne la **note de connexion** (connection rating), à quel point ce lien est sûr ; voir [Notes de connexion](69-connection-ratings).
+3. Pour l'USB, le numéro du **USB Port** : Skynet en propose un libre qu'il a trouvé (Windows : `7` est COM7 ; Pi : `/dev/ttyACM0`). Pour l'Ethernet ou le WiFi, tapez son adresse réseau.
+4. Appuyez sur **Add**. Ensuite **⚙ Change** et **🔌 Test Communication** vérifient que le Brain et la carte se parlent.
 
 Le tableau du haut montre chaque carte, sa note de connexion et si elle est connectée.
 

@@ -5,31 +5,35 @@ Une **Interface** est une carte (PLC) à laquelle vos Devices sont câblés : un
 ## Les trouver {#finding-them}
 
 - **☰ Menu > 🔌 Interfaces (boards)** ouvre la page Devices à la liste des Interfaces.
-- La page **Devices** liste chaque Interface : son ID, son nom, sa carte, sa connexion, sa note, son délai de lien perdu et son état.
+- La page **Devices** liste chaque Interface : son ID, son nom, sa carte, sa connexion, sa note, son Lost Comm et son état.
 
 ## Ajouter une Interface {#adding-an-interface}
 
 Il y a trois façons d'y entrer, et les trois ouvrent la même fenêtre **Add Interface** :
 
 1. **☰ Menu > ➕ Add Interface…**
-2. **Page Devices > Add Interface > ➕ Add Interface…** (la ligne de cases en dessous marche toujours aussi)
+2. **Page Devices > Add Interface > ➕ Add Interface…**
 3. Dans la fenêtre **New Device** sur n'importe quel Tab : ouvrez **1. Interface** et choisissez **➕ Add new Interface…** en bas. Quand vous cliquez sur Add, vous revenez à la fenêtre New Device avec la nouvelle Interface déjà choisie. La fenêtre New Device d'un tube RIMS ou d'une bouilloire électrique a le même choix.
 
-La fenêtre demande :
+La fenêtre demande (posez la souris sur chaque nom pour son Hover Help) :
 
 - **Name** : quelque chose qui a un sens pour vous, comme *Hot Side*, *Fermentation* ou le nom de votre brasserie. La Skynet Home Brewery, par exemple, a 3 Megas : **Main_Brewery_HotSide**, **Valves** et **Fermentor**.
 - **Interface ID** : voir plus bas.
-- **Board** : Arduino Mega, ESP32 ou une autre carte de type Arduino.
-- **Connection** : USB, Ethernet, WiFi, ou **Simulator** (pas encore de carte : tout ce qui est dessus est fictif). Elle montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
-- **USB port** ou **Network address** (adresse réseau), pour une carte USB ou réseau.
-- **Lost Link (s)** (lien perdu) : à remplir, de 3 à 600 secondes (10 au départ). Si la carte n'entend rien du Brain pendant ce temps, elle éteint toutes ses sorties. Changez-le ici à tout moment.
+- **Board** : Arduino Mega, ESP32 ou Raspberry Pi. Skynet a un programme pour chacune.
+- **Connection** : les choix suivent la Board. Un Arduino Mega : USB, Ethernet (avec un Shield W5100 ou W5500) ou WiFi (par un pont ESP32). Un ESP32 : USB, Ethernet ou WiFi. Un Raspberry Pi : Ethernet (ou le Brain lui-même) ou WiFi. Son Hover Help montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
+- **USB Port** (une carte USB) ou **Network address** (adresse réseau, Ethernet ou WiFi). Voir [Le USB Port, le côté technique](#the-usb-port-the-technical-side).
+- **Board Settings** : **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** et **Diagnostic Logging** (et le **Network Port** en Ethernet ou WiFi) : voir [Board Settings](#board-settings) plus bas.
+
+Le **Simulator** n'est pas une Connection : il appartient au panel, pas à une carte. Il s'allume et s'éteint sur la barre du simulateur.
+
+**Les touches.** Le **Name** et le **USB Port** (ou la **Network address**) sont les cases où va la touche **Entrée** : Entrée sur le Name va au USB Port, et Entrée sur un USB Port rempli, avec un Name, ajoute (ou enregistre) l'Interface. La touche **Tab** fait le tour de chaque case de la fenêtre, de la dernière à la première. Le **?** Help, **✖ Cancel** et **Add** sont pour la souris. Le même ordre que le [Blichmann RipTide Dialog 1](115-pump-device-properties) (Rule 18.39).
 
 ## L'Interface ID {#the-interface-id}
 
 - L'Interface ID **devient une partie du Suggested Name de chaque Device sur cette Interface**. C'est le début du nom : une pompe sur la broche 25 de l'Interface **HS** est proposée sous le nom `HS_25_DO@Pump_Wort_HS`.
 - Les Interface IDs suivent la **Rule 3.2** : voir [La règle des ID](46-interface-tab-device-names). Une fois enregistré, il ne change jamais, même pas par un Admin.
 
-Laissé vide, l'ID est fait des premières lettres du Name (*Hot Side* = HS).
+Skynet propose l'ID à partir du Name pendant que vous le tapez : les premières lettres de ses deux premiers mots (*Hot Side* = **HS**). Quand cet ID est pris, 3 lettres (**HSI**), et seulement quand tous les 3 sont pris, 4. Son Hover Help est le même que le Hover Help de l'Interface de la Pump, avec l'ID (en rouge) et le Name de cette Interface.
 
 ## Ports (broches IO) {#ports-io-pins}
 
@@ -55,13 +59,13 @@ passe (par le SSR), et s'il est Off, le SSR n'envoie plus de courant. Comme un i
 
 ## Changer une Interface {#changing-an-interface}
 
-**⚙ Change** dans la ligne d'une Interface sur la page Devices ouvre la même fenêtre. Utilisez-le pour faire passer une carte de **Simulator** à son vrai port **USB** ou à son adresse réseau une fois câblée, pour choisir un autre port USB, ou pour régler l'ID. Le nom d'une Interface qui a des Devices reste tel quel.
+**⚙ Change** dans la ligne d'une Interface sur la page Devices ouvre la même fenêtre. Utilisez-le pour donner à une carte fictive son vrai **USB Port** ou son adresse réseau une fois câblée, pour choisir un autre USB Port, pour changer ses Board Settings ou pour faire un **Test Communication**. Le nom d'une Interface qui a des Devices reste tel quel, et un ID enregistré ne change jamais (Rule 3.2).
 
 ## Un nouveau Schema vide n'a pas d'Interface {#a-new-empty-schema-has-no-interface}
 
 Un nouveau Schema qui n'est **pas** une copie d'un autre (liste Schema > Add new Schema > *An empty Schema*) commence **sans Interface**. Ajoutez vos cartes avec **Add Interface** sur la page Devices, ou avec **➕ Add new Interface…** dans la case New Device. Chaque Device que vous ajoutez porte son Interface.
 
-Un Skynet Schema Template fait sans vraie carte reçoit quand même un Mega fictif (Simulator) pour ses Devices ([Nouveau Schema depuis un Skynet Template](157-schema-templates)).
+Un Skynet Schema Template fait sans vraie carte reçoit quand même un Mega fictif pour ses Devices ([Nouveau Schema depuis un Skynet Template](157-schema-templates)). Il reste fictif jusqu'à ce que son USB Port ou sa Network address soit rempli et enregistré.
 
 Une copie d'un Schema garde les Interfaces qu'il avait.
 
@@ -74,6 +78,39 @@ La fenêtre New Device propose un nom à partir de l'Interface ID, du Port, du D
 
 Cliquez sur OK pour garder votre nom, ou sur Cancel pour revenir le changer.
 
-Chaque Interface a aussi des **Board settings** (On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port) et
-**💬 Board Talk** sur la page Devices, qui montre chaque ligne envoyée à la carte et reçue d'elle en mots simples : voir
-[Board settings et Board Talk](177-board-talk).
+## Board Settings
+
+- **On** : le panel parle à cette carte. **Off** : le panel ne l'ouvre jamais, et ses Devices apparaissent comme non connectés. Quand une carte est Off, aucun de ses Devices ne fonctionne. Une carte doit être On et en communication avec le Brain (les deux se parlent) pour faire la moindre action.
+- **🔌 Test Communication** : une vérification pas à pas que le Brain et la carte se parlent. Voir [Test Communication](#test-communication).
+- **Answer Wait (seconds)** : si la carte ne dit rien pendant ce nombre de secondes, la page Devices affiche « no answer ». 2 à 600.
+- **Lost Comm (s)** : une sécurité. Si la carte n'entend rien du Brain pendant ce nombre de secondes, elle met toutes ses sorties sur OFF, pour qu'un chauffage ou une pompe ne reste pas allumé quand le Brain, le câble ou le réseau lâche. À remplir : 3 à 600 secondes (10 au départ). **Lost Comm est une sécurité de secours, pas votre sécurité : vous êtes responsable de surveiller votre brasserie pendant qu'elle tourne. Vous êtes la première sécurité.**
+- **Diagnostic Logging** : normalement **Off**. Ne l'activez que pour trouver un problème : chaque ligne vers et depuis cette carte est écrite, avec des mots simples, dans un fichier par jour dans le dossier des données (`logs/boards`). Utilisez-le quand vous savez ce que le journal veut dire. Skynet ne donne pas d'aide pour les problèmes de communication : le journal est seulement un moyen pour vous, ou pour quelqu'un qui vous aide, de trouver le problème. Désactivez-le après.
+- **Network Port** (Ethernet ou WiFi) : le port réseau sur lequel la carte écoute. Les programmes de Skynet utilisent 4100.
+
+Il n'y a pas de case Baud (vitesse USB) : elle vient de la carte. Chaque programme de carte Skynet parle à 115200.
+
+## Test Communication
+
+**🔌 Test Communication** dans la fenêtre de l'Interface (⚙ Change sur la page Devices) ouvre une vérification pas à pas. Rien sur la carte n'est mis sur On ou Off. Une Interface en cours d'ajout se teste après avoir été ajoutée.
+
+1. **La carte est-elle On et parle-t-elle ?** Elle montre ce que le Brain voit maintenant : *Talking*, *no answer*, *Off* ou *Not connected* avec la raison.
+2. **👋 Say Hello.** Skynet envoie `HELLO`. Une carte avec le programme Skynet répond avec son nom et la version de son programme en moins de 5 secondes.
+3. **Exemples de réponses :**
+
+| La carte dit | Ce que cela veut dire |
+|---|---|
+| `HELLO MEGA1 0.5` | Bien : la carte MEGA1 a répondu, et elle a le programme Skynet, version 0.5. |
+| `DI 22 0` | Bien : la carte donne ses entrées après Hello (l'entrée 22 est Off). |
+| `ERR ADS1115 not found on I2C` | La carte parle, mais une de ses pièces n'est pas trouvée : vérifiez le câblage de cette pièce. |
+| (rien) | Pas de réponse : voir l'étape 4. |
+| des lettres étranges (ÿ?¿) | La carte a un programme qui n'est pas celui de Skynet : chargez le programme Skynet dessus. |
+
+4. **Quoi vérifier quand il n'y a pas de réponse.** Une carte USB : le numéro du USB Port est celui où la carte est branchée ; le câble USB transporte des données (certains câbles ne font que charger) ; aucun autre programme n'a la carte ouverte (le Serial Monitor du programme Arduino, un autre programme de brassage) ; la carte a le programme Skynet. Une carte réseau : elle a du courant et son voyant réseau est allumé ; la Network address est bien la sienne et le Brain est sur le même réseau ; le Network Port est celui de son programme (4100) ; elle a le programme Skynet.
+
+**💬 Board Talk** sur la page Devices montre chaque ligne vers et depuis la carte, en mots simples : voir [Board settings et Board Talk](177-board-talk).
+
+## Le USB Port, le côté technique {#the-usb-port-the-technical-side}
+
+Une carte USB apparaît sur le Brain comme un **port série**. Sous Windows il s'appelle **COM** et un numéro (COM3, COM7 ...) : tapez le numéro seul (7) et Skynet en fait COM7. Windows les numérote de 1 à 256 et donne à chaque carte son propre numéro la première fois qu'elle est branchée ; la même carte dans la même prise USB garde son numéro. Sur un Raspberry Pi ou sous Linux, le port est un nom comme `/dev/ttyACM0` (un Arduino Mega) ou `/dev/ttyUSB0` (une carte avec une puce USB-série) ; tapez-le tel quel.
+
+Quand la fenêtre s'ouvre, Skynet cherche les cartes branchées et propose la première qu'aucune autre Interface n'utilise. Pour trouver le numéro de votre carte : débranchez-la, ouvrez la fenêtre et regardez les numéros trouvés, rebranchez-la et ouvrez-la à nouveau. Le nouveau numéro est votre carte. Un seul programme à la fois peut utiliser un port : fermez le Serial Monitor du programme Arduino et tout autre programme de brassage avant que Skynet se connecte.

@@ -213,7 +213,21 @@ function freeId(base, taken) {
   return '';
 }
 export const cleanInterfaceId = cleanId('Interface', 'MB');
-export function defaultInterfaceId(name, taken) { return freeId(initials(name) || 'IF', taken); }
+// An Interface's suggestion (OakBarn Brewery, 2026-11-15, Add Interface markup: "Suggested Unique Id Based on Name. Try 2 Char and then
+// 3 and then 4 char if needed to make unique"): from the Name, 2 characters (the first letters of its first two words, or a one-word
+// Name's first two), then 3, then 4, each time the next letters of the Name; only if every one is taken, one that fits in 4 (MB2).
+export function defaultInterfaceId(name, taken) {
+  const t = takenSet(taken), ws = words(name).map(w => w.toUpperCase()), two = initials(name);
+  if (!two) return freeId('IF', taken);
+  const ok = x => x && ID_RE.test(x) && !t.has(x);
+  if (ok(two)) return two;
+  // the letters that come after the first two: the second word's own letters, then the words after it (one word: the rest of it)
+  const rest = ws.length > 1 ? ws[1].slice(1) + ws.slice(2).join('') : ws[0].slice(2);
+  const three = [...(ws.length > 2 ? [ws[0][0] + ws[1][0] + ws[2][0]] : []), ...[...rest].map(c => two + c)];
+  for (const x of three) if (ok(x)) return x;
+  for (const b of three) { const i = rest.indexOf(b[2]); for (const c of rest.slice(i + 1)) if (ok(b + c)) return b + c; }
+  return freeId(two, taken);
+}
 export const cleanTabId = cleanId('Tab', 'BH');
 // a Tab's suggestion: 2 letters when one is free (Sparge = SP, then SA ...), else one that fits in 4
 export function defaultTabId(name, taken) {

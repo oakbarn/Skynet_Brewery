@@ -49,6 +49,9 @@ export function allowedWhileBlank(t, field) {
     if (b) return !isSaveButton(b);       // ⬆ ⬢ ? and the rest; Save / ➕ Add wait
     const c = t.closest?.('input, select, textarea, label.sw');
     if (c) { const i = c.matches?.('label.sw') ? c.querySelector?.('input') : c; return !!i && !i.disabled && !i.readOnly; }
+    // a field's name (its balloon; a double-click on it opens what it picked, like the Tab's settings) and anything else in the
+    // dialog that is not a box: only Save / ➕ Add wait (OakBarn Brewery, 2026-11-15: a double-click on the Tab, Label blank, gave the warning)
+    if (t.closest?.('dialog')) return true;
   }
   const back = String(field.dataset?.guardAllow ?? '').split(/\s+/).filter(Boolean);
   if (back.length) {
