@@ -16,14 +16,14 @@ The pictures themselves are **not** in this repo (it is public). OakBarn Brewery
 Each is a white symbol on a coloured square, 640 x 512 pixels.
 
 OakBarn Brewery (2026-11-15): "I generally did not use them but I know user who did. I think there are some in Tartan other users did
-so we have to come up with our own 11." So **every one of the 11 gets its own new OakBarn drawing**, one for one, drawn from scratch
-(not traced or copied). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
+so we have to come up with our own 11." So **every one of the 11 gets an OakBarn picture**, one for one: 10 new drawings, drawn from scratch
+(not traced or copied), and for Pump one of Skynet's own pump pictures (OakBarn Brewery, 2026-11-15: "actally for Pump need to select one of our Pumps!"). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
 a rounded coloured square with a white symbol. Names follow the Skynet name characters (letters, numbers, _ only).
 
 | BruControl picture | What it shows | New OakBarn drawing | What ours shows |
 |---|---|---|---|
 | Valve.png | Valve symbol (bow tie) | `Skynet_Icon_Valve.svg` | Valve with a handle on top |
-| Pump.png | Impeller in a circle | `Skynet_Icon_Pump.svg` | Pump housing with inlet and outlet |
+| Pump.png | Impeller in a circle | `Images/Skynet/Pumps/Pump_Red_Rip_Off.svg` (one of our own pump pictures; which one is still being picked) | A RipTide pump, Off |
 | Kettle.png | Pot | `Skynet_Icon_Kettle.svg` | Pot with handles and liquid |
 | On-Off.png | Power button symbol | `Skynet_Icon_On_Off.svg` | ON slide switch |
 | Liquid Temp.png | Thermometer in liquid | `Skynet_Icon_Liquid_Temp.svg` | Probe dipping into a pot of liquid |
