@@ -586,6 +586,11 @@ const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left',
 // the wort tube runs straight out through each tee, the water side leaves by the tee's branch; every tip faces left (Rule 5.19)
 const CF_COPPER = [['Coil Top End', 0, 0.1633], ['Coil Top Branch', 0.0889, 0.2694], ['Coil Bottom Branch', 0.0889, 0.8163], ['Coil Bottom End', 0, 0.9224]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
+// A Chiller (plate, counterflow, immersion or Chillzilla coil) is the same as a pipe, no more, no less (OakBarn Brewery, 2026-11-15,
+// Rule 5.41): IPs at its inlets and outlets, no On / Off, flow simply passes through each of its paths from a source upstream.
+// So it has no Size, Units, Dead space or built-in Thermowell; a probe goes in a pipe beside it (a probe tee, Rule 5.30).
+const isChillerKind = k => k === 'pchiller' || k === 'ccoil';
+const CHILLER_NO_SIZE = ['_s', 'units', 'volume', 'maxVolume', 'minVolume', 'extraTrub', 'sizeMethod', 'diameter', 'vheight', 'deadspace'];
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
@@ -608,7 +613,6 @@ const EQ = {
     ports: {
       wortIn: pt('Wort In', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Right', circuit: 'wort' }),
       waterIn: pt('Water In', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Right', circuit: 'water' }),
-      thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
     ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
@@ -5240,7 +5244,7 @@ const LABEL_PUMP_TIP = ['⟪b:Label⟫How do you refer to this Pump? Brewing Pum
 // for word (only the spelling is fixed, Rule 2.37), with the red electrical warning where marked (Rule 6.20). Port 15 in its examples:
 // Port 6 is used elsewhere on the 3 Vessel sample. The same text is Help 115, The Interface (Hover Help = Panel Help).
 // Its first paragraph is the one in Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14), word for word.
-const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Red Pump. If the "Brain" cannot supply 120 VAC power for any connected device but only a trigger signal. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:',
+const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Red Pump. If the "Brain" cannot supply 120 VAC power for any connected device but only a trigger signal. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:⟪img:help_pictures/Pump_Daisy_Chain.png⟫',
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
@@ -14664,6 +14668,7 @@ function vesselTplToFields(t) {
 }
 function vesselTplFromFields(w, old) {
   const C = EQ[w.vesselType] || EQ.vessel;
+  if (isChillerKind(w.vesselType)) for (const k of CHILLER_NO_SIZE) delete w[k];      // a Chiller has no Size (Rule 5.41)
   w.ports = {};
   for (const [k, d] of Object.entries(C.ports)) {
     const p = { installed: !!w[k + '_on'], position: w[k + '_pos'] || portDefPos(d) };
@@ -14682,8 +14687,10 @@ function vesselTplFields(w) {
   const heat = isV && !ferm ? heatKindsFor(w.vtype || types[0]) : [];
   if (heat.length && !heat.includes(w.heatKind)) w.heatKind = heat[0];
   const equip = w.vesselType !== 'vessel', twoOrFour = C.ports.in2 && C.ports.out2;
+  // a Chiller is the same as a pipe, no more, no less (Rule 5.41): it has no Size, Units or Dead space
+  const chiller = isChillerKind(w.vesselType);
   const fits = [['', '(none)'], ...(TPL?.fitting || []).map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User Bundled)')]), ['__new', 'New ...'], ['__clone', 'Clone ...']];
-  return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
+  const out = [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
     ['vesselType', 'Kind', 'sel', Object.entries(VESSEL_KINDS).filter(([k]) => equip === (k !== 'vessel')), true],
     ...(twoOrFour ? [['liquidPorts', 'Liquid ports', 'sel', [['2', '2 (1 in, 1 out)'], ['4', '4 (2 ins, 2 outs: two circuits that never mix)']], true]]
       : equip ? [['_lp', `Liquid ports: ${Object.values(C.ports).filter(d => d.ip).length} (${w.vesselType === 'pchiller' ? '2 ins, 2 outs: wort and water never mix' : '1 in, 1 out'})`, 'note']] : []),
@@ -14705,6 +14712,7 @@ function vesselTplFields(w) {
       ...(w[k + '_on'] ? [[k + '_pos', portTitle(k, d) + ' position', 'sel', d.pos.map(q => q[0])],
         ...(FITTING_PORTS[k] ? [[k + '_fit', `Bundled Fitting on the ${portTitle(k, d)}`, 'sel', fits]] : [])] : [])]),
     ['notes', 'Notes', 'area']];
+  return chiller ? out.filter(f => !CHILLER_NO_SIZE.includes(f[0])) : out;
 }
 function fittingTplFields(w) {
   return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],

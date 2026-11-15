@@ -1931,6 +1931,34 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
 ---
 
 
+5.41 **A Chiller is the same as a pipe, no more, no less** (OakBarn Brewery, 2026-11-15: "A chiller is not really a Device but a
+Special Widget with IOs"; "a chiller could be hooked up quite a few different ways in a manifold and would need to be flexible as
+where the flow supply came from, like a permanently open valve"; "Treat a Chiller like a pipe. IPs at the Inlets Outlets. No on/off,
+simply flow. It would need a source for flow"; "Chiller same as a pipe, no more, no less"; thread "Make the Chiller a flexible
+Special Widget", Help 14).
+- A **Chiller** (Plate chiller, Counterflow chiller, the Copper Counterflow Chiller, an Immersion coil or a Chillzilla) is a
+  **Widget** with no Port (Rule 1.2). It has **IPs at its inlets and outlets** and nothing else.
+- **No On / Off.** It has no On / Off state, and a Process never turns it on or off.
+- **Flow simply passes through it, the same as a pipe:** it flows when a **source** upstream pushes flow in (a running pump, or
+  an open Tap Water Valve, Rule 5.33), and stops when nothing does. Where the flow comes from is up to how it is piped, so it can
+  be hooked up any way in a manifold, including from a valve that is always left open.
+- **Each path is its own pipe.** A plate or counterflow chiller has two paths that never mix, **Wort In to Wort Out** and **Water
+  In to Water Out** (4 IPs), each with its own source. An Immersion coil has one path, **In to Out** (2 IPs); a Chillzilla has two
+  (4 IPs).
+- **Nothing a pipe doesn't have:** no Size, Units or Dead space in its Template, and no built-in Thermowell. A probe for the chilled
+  wort goes in the pipe beside it (a probe tee, Rule 5.30).
+- The Brew Day's **Chiller cooling water** job (Rule 16.3) picks the **source** of the water (the valve or pump that feeds Water In),
+  never the Chiller.
+- **BruControl Import:** BruControl has no chillers, so nothing is imported as one; the Importer's Build page is the Panel's, so a
+  Chiller works the same there.
+- **3 Vessel sample** (OakBarn Brewery, 2026-11-15: "Replace with Chiller Widget and no on/off in 3 vessel"; "A Chiller is normally
+  manually placed into a Brew Kettle and chilling water (Tap or Chilled Water depending on the User) and the outlet dumped down a drain
+  or outside"; "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose
+  on other side"): the old Chiller water On/Off Device is gone. An **Immersion chiller** sits in the Boil Kettle. A **manual Tap Water
+  Valve** (Rule 5.33, "Chiller water") feeds its In by a hose, and its Out hose ends open, "Drain or outside". A **motorized Tap Water
+  Valve** on Port 30 bypasses the chiller and feeds the pump's suction line through a tee. The Brew Day Process asks the brewer to
+  open and close the Chiller water tap.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -4538,10 +4566,14 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 ## Change log
 
 - 2026-11-15: Added Rule 9.21 (OakBarn Brewery: "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"): the Media Setup and Media zip are made new only when something in media/ changed since the last ones; otherwise each Release carries the last ones unchanged, with their own date. The plain Setup and Full Setup are still made on every merge; Run workflow > rebuild media forces new ones. Rule 9.20 points to it. Help 183 (and French).
+- 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
+- 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 6.33 (OakBarn Brewery: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the Flame Out says "This is not a UL listed safety and should not be relied on. Always monitor the burner." in its Properties, balloon, the burner pop-up and Help 197 (and French). Checked against the BruControl Import program: its burner question uses the same words (public/flameout.js NOT_UL). (thread "Add gas burner flame-out safety")
 - 2026-11-14: Added Rule 12.4 The Patron Level (OakBarn Brewery: "Set up Patron Level and we will adjust after seeing it in action"; Patron emails outside Skynet): a Patron code signed by OakBarn Brewery, pasted in Settings > Patron, unlocks the perks until its end date; it holds no email address; ☰ Menu > ⭐ Request a Feature; non-Patrons see the perks and a link. Help 198 (and French). Both programs.
 - 2026-11-14: Added Rule 8.6 Approved Devices (OakBarn Brewery: "only an Official skynet Panel can access the brain", "Set that up and I will see how painful for a user"): a new phone, tablet or computer waits for an Admin to approve it in Settings > Approved Devices before a right password signs it in; the Brain's own computer always approved; first Admin setup, the recovery code and the first Admin device approve themselves; Remove signs a device out at once; On by default with an Off switch; reset-password tool --devices-off. Help 10 (and French). Both programs.
 - 2026-11-14: Added Rule 8.5 (OakBarn Brewery: "Reword all about Password to the way it works", "Can we encrypt all passwords, reset codes and e mails"): passwords, recovery and sign-in codes stay one-way scrambled; the email app password, Twilio token and users' email addresses and mobile numbers are now locked (encrypted) on disk with data/seal.key; the Brain locks its data folder to the computer account that runs it; a password is reset only on your own Skynet (three ways); OakBarn Brewery never emails about passwords (phishing warning on the sign-in page, recovery code screen, Help 10, oakbarnbrewery.com). Help 10 (and French): the three ways, the warning, Windows steps for the reset-password tool. Both programs.
+- 2026-11-14: Rule 18.37: the Pump's Interface Hover Help and Help 115 show a Daisy Chain picture after "There is a Daisy Chain:" (OakBarn Brewery: "Your suggestion is good use a Blickmann Riptide with Red Cover", "Use a Hocky Puck SSR", "Swap line order Pix on Top", "That one is a go"): pictures on top (brain, Arduino Mega with Port 15, SSR-40 DA, Red Pump), the words below (Brain, Arduino, SSR or Contactor, Red Pump), with the Electricity can kill line. media/help_pictures/Pump_Daisy_Chain.png. Help 115 (and French). Both programs.
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
 - 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
