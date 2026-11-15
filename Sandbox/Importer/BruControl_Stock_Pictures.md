@@ -35,7 +35,9 @@ a rounded coloured square with a white symbol. Names follow the Skynet name char
 | PWM.png | Square wave | `Skynet_Icon_PWM.svg` | Square wave with changing widths |
 
 The drawings wait in the private project files (brucontrol-stock-pictures/oakbarn_drawings) for OakBarn Brewery's OK. Once OK'd they
-come into the repo with the Importer at the Big Merge, each with its row in docs/Media_Licenses.csv (OakBarn Brewery's own).
+are added as Skynet media together with the Daisy Chain pictures (OakBarn Brewery, 2026-11-15: "They can be added with the daisy
+chain ones"), so they go out in the same Media Setup update, each with its row in docs/Media_Licenses.csv (OakBarn Brewery's own).
+The swap plan itself stays here in the Sandbox until the Big Merge.
 Like every new picture, they go in the Image Library only when OakBarn Brewery says so.
 
 ## How the Importer will spot them (when built)
