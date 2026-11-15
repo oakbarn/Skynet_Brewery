@@ -4176,6 +4176,10 @@ Label (every Device and Widget, Rule 18.15):
   Enter from a blank Label does the same. The pop-up **goes away by itself after 5 seconds** (or when tapped).
 - **The Cancel button is "hot"** (Fritz, 2026-11-05: "The Cancel Button is Hot is part of the Rule"): ✖ Cancel (and Esc) always
   work, even while the Label or the Port is blank (Rule 18.11 still asks first when something was changed).
+- **Delete is "hot" too** (OakBarn Brewery, 2026-11-14: "I also tried to delete a Hose that had no label but the Delete button warned
+  it needed one. Have Delete Delete without those types of issues"): a Delete button (Properties Delete, 🗑 Delete, 🗑 Delete Pipe /
+  Hose, top or bottom) always works, in every dialog, even while the Label, the Port or any needed box (Rule 18.33) is blank. It
+  still asks "Delete this item?" first. Both programs.
 - The Label's own **⬆** and **⬢** icons work too, since they are ways of typing the Label.
 - **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the
   user is on a blank Port, every other field or icon gives the pop-up **"⚠ The Port cannot be blank."**, except Cancel and the
@@ -4552,6 +4556,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-14: Rule 18.28 (OakBarn Brewery: "I also tried to delete a Hose that had no label but the Delete button warned it needed one. Have Delete Delete without those types of issues"): Delete is "hot" like Cancel: it works in every dialog while the Label, Port or a needed box is blank, and still asks first. Both programs.
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Have the Tap Water valve by Pass the chiller. Have a manual Tap Water Valve go to one side of the chiller and open Hose on other side"; "dumped down a drain or outside"): an Immersion chiller in the Boil Kettle, fed by a manual Tap Water Valve, its outlet hose open to a drain or outside; a motorized Tap Water Valve on Port 30 feeds the pump suction line. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 (OakBarn Brewery: "Replace with Chiller Widget and no on/off in 3 vessel"): the 3 Vessel sample's Chiller water On/Off Device (Port 30) is replaced by a Skynet Copper Counterflow Chiller on the wort line to the fermenter; the Brew Day Process tells the brewer to turn the chiller water on and off. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")

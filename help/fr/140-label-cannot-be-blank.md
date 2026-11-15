@@ -16,6 +16,8 @@ un interrupteur, une liste déroulante, **Save**, **➕ Add Device**, une icône
 
 - **✖ Cancel** est toujours « actif » : il marche même quand le Label est vide, donc vous pouvez toujours quitter la fenêtre. (Si vous avez changé
   quelque chose, il demande quand même d'abord.) **Échap** marche de même.
+- **🗑 Delete** est aussi « actif » : il marche même quand le Label, le Port ou une case nécessaire est vide (il demande quand
+  même « Delete this item? » d'abord).
 - Les icônes **⬆** (case plus grande) et **⬢** (attributs du Label) du Label lui-même, puisqu'elles servent à taper le Label.
 
 ## Le Port aussi {#the-port-too}
