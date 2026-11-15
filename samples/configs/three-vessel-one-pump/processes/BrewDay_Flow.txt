@@ -54,6 +54,7 @@ BM_28_DO@Valve_E_To~kettle_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
 BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
+BM_30_DO@Valve_E_Tap~water_BH = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
 gblV_Brew_Status = 100
@@ -946,7 +947,7 @@ gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
-vSMsg = "Turn the chiller water on. Chilling to " + gblV_Pitch_Temp + " °F, still whirlpooling."
+vSMsg = "Open the Chiller water tap. Chilling to " + gblV_Pitch_Temp + " °F, still whirlpooling."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
@@ -1008,7 +1009,7 @@ sleep 1000
 [SectionBrew604]
 step 1.00026 "SectionBrew604"
 gblV_Brew_Status = 604
-vSMsg = "Turn the chiller water off. Enter the Original Gravity and the volume in the fermenter on the Reporting Tab."
+vSMsg = "Close the Chiller water tap. Enter the Original Gravity and the volume in the fermenter on the Reporting Tab."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "OG Entered?"
 gblS_Advance_Label.background = 4
