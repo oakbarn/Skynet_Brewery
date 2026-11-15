@@ -1279,6 +1279,22 @@ where a User can quickly set the defaults for the Build. These are the same defa
 - Kept with the other defaults by its **Interface ID** and **Tab ID**; a Schema with no Interface or Tab of that ID uses the old way.
 - **Both programs:** the BruControl Import's Build page is the Panel's, so it has the same two dropdowns.
 
+4.7 **A double-click never loses the Build: you always come back to it** (OakBarn Brewery, 2026-11-15: "When I open the Build Tab,
+my new Blickmannn Pump is gone because it was not saved yet. WE need to have the Builld tab keep in Build mode and be able to come
+back to it rather than a different tab"; "May also be on any other double click property tab"). A double-click that opens other
+Properties (a Tab's Tab settings, a Device, a Widget, a vessel, an IP) from a dropdown in a dialog, or from the Tab bar:
+1. **In an Add box** (the new thing is not made yet, like Blichmann RipTide Dialog 1): the Add box steps aside with everything typed
+   or picked kept, the other Properties open, and when they close (Save or Cancel) the Add box comes back on the Tab you were on.
+   It is never closed for good, and nothing is asked.
+2. **In the Properties of something already made:** with changes, it asks first, as before ("Leave these Properties without saving
+   your changes ...?"). When the other Properties close, the screen goes back to the Tab you were on and the Properties you came from
+   open again.
+3. **On the Tab bar,** a double-click on a Tab's name opens its Tab settings (its first click moves to that Tab). Started from the
+   🔨 Build Tab, the screen goes back to the Build Tab when Tab settings close, everything on it as it was.
+4. **➕ Add new Tab…** and **📁 Templates** in a Tab list are choices, not Tabs: a double-click on them opens nothing.
+Edit layout (Build mode, Rule 2.52) stays on the whole time; the Build Tab is only in the draft until Save Build (Rule 4.1), so
+nothing on it is lost by going to another Tab and back. **Both programs:** the BruControl Import's Build page is the same Edit layout.
+
 ## 5. Templates and Integrated items
 
 5.1 **Two kinds of Template:** Skynet Templates (come with Skynet, read only, cannot be deleted,
@@ -4745,6 +4761,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Rule 4.7 added (OakBarn Brewery: "WE need to have the Builld tab keep in Build mode and be able to come back to it rather than a different tab"). A double-click in an Add box's Tab list closed the Add box as a Cancel and the new pump was gone; now the Add box steps aside and comes back with everything kept, on the same Tab. Properties of things already made open again after the other Properties close, and a Tab bar double-click from the Build Tab comes back to the Build Tab.
 - 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
 - 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) leaves its Inlet IP and Outlet IP where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.
 - 2026-11-15: Rule 3.19 added (OakBarn Brewery: "New pr and \degF and \degC good"; "maybe \dFC"): Rich Text Embedded Codes, rebuilt from old PR #133 on today's code. New codes `\i` italic, `\u` underline, `\s` strikethrough, `\S` small, `\c{Red}` ... `\c` color, `\ohm` Ω, `\+-` ±, `\degF` / `\degC` (instead of #133's `\F` / `\C`, so a path like C:\Config stays as typed) and `\dFC` (°F or °C from the Default Temperatures unit). The color names live in one list (public/richtext.js NAMED_COLORS) that the color dropdowns use. Help 90 Rich Text Embedded Code lists every code; Help 22 points to it; Help 33, 49, 91, 113 link to it (and French). Checked against both programs: the Importer shares the Panel's text drawing and brings in no codes.
