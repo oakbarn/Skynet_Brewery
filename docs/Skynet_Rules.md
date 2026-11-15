@@ -1295,7 +1295,7 @@ add to. (2026-10-04, PR #14)
 
 5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
 lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
-only. Fitting bundles flow both ways. Tap water valves push flow on their own. (2026-10-04, PR #3;
+only. Fitting bundles flow both ways. Tap water valves push flow on their own. **A tap water valve is always one way**: from its tap side to its Out side, never back and never both ways. This holds for the Skynet Template tap water valves and every valve made from them too. Its **Tap Water flows** box picks Left to Right / Right to Left when it lies flat or Top to Bottom / Bottom to Top when it stands up (OakBarn Brewery, 2026-11-15: "flow is always from tap source to Out on a Valve"). **Every other Widget or Device with IPs passes flow both ways, except a check valve.** (2026-10-04, PR #3;
 PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
@@ -4079,7 +4079,7 @@ Valve drill-down dialog", Help 128):
    copy of the Pump dialogs": two fields on one line in the Pump's dialogs are on one line here too. Enter goes Label,
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
-   valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
+   valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap Water flows instead, Rule 6.15).
 5. Its Type ID is **Valve_E** (OakBarn Brewery, 2026-11-11: "Change ON Off Motorized Valves to DO@Valve_E"; was eVlv, before that E_L_Vlv; the Device Type reads **DO@Valve_E**). Older valves are
    upgraded on load, the stored Type ID and the name (Rule 15.2). The other electric valves follow (OakBarn Brewery, 2026-11-11:
    "Valve_E_H and Valve_Sgas"): a High Temperature Electric Valve is **Valve_E_H** (**DO@Valve_E_H**, was E_H_Vlv) and a Solenoid Gas
@@ -4588,6 +4588,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 5.10 (OakBarn Brewery: "Tap water on a tap water valve is one way from the valve, one side tap supply and other side tap water out only"; "Any other widget, Device with IPs direction is bi directional except a check valve"; "a Skynet Template Tap water valves follow that rule and any created from them do as well"): a tap water valve is always one way, tap side to Out. **Both ways** is taken off **Tap Water flows** (Old Ways Policy: nothing old kept before Public Production; a valve saved with it reads as one way). A Skynet Template valve's **Tap end** box is now **Tap Water flows** too, with the same choices by how it sits (saved key unchanged). Help 31, 88, 128 (and French) and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
