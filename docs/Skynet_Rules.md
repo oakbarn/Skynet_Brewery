@@ -1862,6 +1862,16 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
 - **Shorten a let-go pipe** (OakBarn Brewery, 2026-11-14: "After a Pipe is disconnected to Move, able to Shorten"): a pipe end
   that 🔓 Unlock its ends let go (an open coupling) can be dragged along the pipe's own line to make it shorter or longer (never off
   its line, at least 10 pixels); its coupling goes with it.
+- **Change a saved pipe's length, redraw a saved hose** (OakBarn Brewery, 2026-11-15: "Ability to change the Length of a Pipe once
+  it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to
+  be Redrawn after its IPs are unlocked"; Help 153): once an end of a pipe or hose is let go (🔓 Unlock its ends, or 🔓 Unlock its IPs
+  on what it was joined to), that end has a round handle and can be dragged, saved or not: a **pipe** end along the pipe's own line
+  (shorter or longer, as above), a **hose** end **anywhere** (the hose bends to follow; the round handles in its middle change its
+  bends). The let-go end can be grabbed even where it sits on a pump, valve, vessel or fitting IP: it comes first. Dropped within 14
+  pixels of an IP, that end joins it at once (only that end; the other stays as it is); anywhere else it stays open. Skynet does
+  this in the Background and needs no user input. Nothing else changes: an end still joined, a 🔒 locked pipe or hose, and an end
+  whose IP is 🔒 locked (No Unlock too, Rule 2.12) do not move. ↩ Put back (Ctrl+Z) undoes each drag; Save layout keeps it.
+  **Both programs:** the BruControl Import's Build page is the Panel's Edit layout, so it works the same there.
 - **Deleting a pipe or hose takes its own IPs with it** (OakBarn Brewery, 2026-11-14: "I deleted a Pipe but the IPs where still on
   the Build"; "Check same issue for Hose"), from this pop-up or from its Properties: a coupling or IP point on one of its ends goes
   too when nothing else is on it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel).
@@ -4592,6 +4602,7 @@ like a Pipe"; "Center Bottom on Stove Top Widget and it gets IP"; thread "Build 
 
 ## Change log
 
+- 2026-11-15: Rule 5.37 extended (OakBarn Brewery: "Ability to change the Length of a Pipe once it has been saved. In the Build Mode, pipe Length need to be unlocked so the size can change after IPs Unlocked. Hose also need to be Redrawn after its IPs are unlocked"): a let-go end of a saved pipe or hose has a handle and can be dragged, a pipe end along its line (length), a hose end anywhere (redraw); it comes before the pump, valve, vessel or fitting IP it sits on; dropped on an IP, that end joins it. Locked pipes, hoses and IPs (No Unlock too) stay put. Help 153 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Let saved pipes and hoses be resized")
 - 2026-11-15: The tap water valve's **Tap water flows out of** dropdown is now **Tap Water flows** (OakBarn Brewery: "Change label to Tap Water flows") and its choices are directions, "Choice limited by Orientation": **Left to Right** / **Right to Left** when the valve's ends are side by side, **Top to Bottom** / **Bottom to Top** when one is above the other, plus **Both ways** (kept: Rule #1, Never Take Away). The saved key (out / in / both) is unchanged, so valves made before keep working. Help 31 and the Device Library updated. Checked against both programs: the Panel shows it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 3.14 changed (OakBarn Brewery: "All Widgets get a name and label"): every Widget gets a Suggested Name and a never-blank Label. Pipes, hoses and fittings keep Pipe_1 / Hose_1 / Tee_1 names; their Label starts as the Name in small letters (pipe_1, tee_1). Preset .attributes of a Template Widget (a Chiller) come from its Template. The 3 Vessel sample's pipes, hoses and fittings got names and labels. Help 87 and 116 updated. Checked against both programs: the Panel gives the Labels when an item is made, loaded or saved; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rule 5.41 3 Vessel sample (OakBarn Brewery: "Remove Chiller widget from 3 Vessels. It will be placed and removed with Process code"): the Immersion chiller and its two hoses are taken off the Tab; the manual Tap Water Valve and the "Drain or outside" end stay. (thread "Make the Chiller a flexible Special Widget")
