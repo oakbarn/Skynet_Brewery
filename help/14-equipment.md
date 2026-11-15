@@ -27,6 +27,7 @@ A **Chiller** (Plate chiller, Counterflow chiller, Immersion coil or Chillzilla)
 - Flow comes from a **source** upstream, the same as in a pipe: a running pump, or an open Tap Water Valve. Pipe it up any way you like, for example from a valve that is always left open.
 - A plate or counterflow chiller has **two paths that never mix**: Wort In to Wort Out, and Water In to Water Out. Each path needs its own source. An Immersion coil has one path, In to Out.
 - To read the chilled wort, put a probe tee in the pipe beside it.
+- An immersion chiller that is put in the kettle by hand is placed and taken off by a Process: `place_Chiller = Immersion_Chiller, BK_Vessel` and `remove_Chiller = BK_Vessel` (see [Chiller Overlay](200-chiller-overlay)).
 
 ## Bundle a vessel with its IPs
 

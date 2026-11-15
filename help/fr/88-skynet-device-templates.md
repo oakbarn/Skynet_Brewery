@@ -33,9 +33,9 @@ Si quelque chose essaie d'en changer un, le Brain le remet quand la disposition 
 - **Interface et Pin**, Invert, One-shot.
 - **Orientation** : Horizontal, Vertical Left, Vertical Right, Front ou 45 degrees. L'image et ses IP suivent.
 - **Flip Horizontal** et **Flip Vertical** : des interrupteurs qui font un miroir de l'image et de ses IP.
-- **Tap water valve** (vanne d'eau du robinet) : désactivé par défaut. Activé, **Tap water flows out of** demande quel bout est le robinet :
-  - sur une vanne verticale : **Tap Water Source Top** ou **Tap Water Source Bottom**
-  - sur une vanne horizontale ou à 45 degrés : **Tap Water Source Left** ou **Tap Water Source Right**
+- **Tap water valve** (vanne d'eau du robinet) : désactivé par défaut. Activé, **Tap Water flows** demande dans quel sens va l'eau, toujours du côté robinet vers le côté sortie :
+  - sur une vanne verticale : **Top to Bottom** (de haut en bas) ou **Bottom to Top** (de bas en haut)
+  - sur une vanne horizontale ou à 45 degrés : **Left to Right** (de gauche à droite) ou **Right to Left** (de droite à gauche)
 
   Si vous changez l'Orientation ou un Flip tant que Tap water est activé, il revient à **Needs setting** (à régler). Tant qu'il n'est pas réglé à nouveau, aucune
   eau du robinet n'en sort.

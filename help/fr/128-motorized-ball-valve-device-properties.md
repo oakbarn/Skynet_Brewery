@@ -37,7 +37,7 @@ avec une différence : **une vanne n'a pas de Cover**. (Règle Skynet 18.23)
 6. **Overlay** avec **Database and .API ⬢**.
 7. Les réglages propres à la vanne : **Tap water valve**, **On Close List** et **On Open List**, tous les trois sur une ligne (voir [Vannes d'eau du robinet](31-tap-water-valves)).
    On Close List : `close_all_valves` dans un Process la ferme. On Open List : `open_all_valves` l'ouvre. Une vanne d'eau du robinet montre son
-   **Tap end** (bout robinet) à la place, et est toujours sur la Close List et jamais sur l'Open List.
+   **Tap Water flows** (sens de l'eau du robinet) à la place, et est toujours sur la Close List et jamais sur l'Open List.
 8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, et le **Device Type** grisé (**DO@Valve_E** : une vanne électrique, Valve_E, sur une sortie numérique, DO ; le même DO@Valve_E est dans son Suggested Name).
 
 Le Suggested Name suit le format de nommage (Règle 3.1) : Interface ID, Port, `Valve_E`, Label, ID du Tab, comme
