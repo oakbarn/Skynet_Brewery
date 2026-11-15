@@ -3490,6 +3490,13 @@ only when Fritz says the program is set. (2026-10-26)
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
 finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
 
+14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
+Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
+both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
+Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
+
 ## 15. Importing
 
 15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
@@ -4638,6 +4645,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Added Rule 14.4, the Panel Updates Sandbox (OakBarn Brewery: "Create a sandbox for General SkyNet that will be used AFTER Blickmann Dialogs and Help are done. Call Panel Updates"): `Sandbox/Panel_Updates/Panel_Updates.md` holds general Panel updates, parked and not built until the Blichmann RipTide dialogs and Help are done. First entry: PWM rows for Heaters and Valves in the PWM, Valves and Heating Element dropdowns. Checked against both programs: notes only, nothing in either program changes. (thread "Create the Panel Updates sandbox")
 - 2026-11-15: Added Rule 19.8, the Ice Water Can, and a **Sump Pump by hand** row under Rule 5.15a (OakBarn Brewery: "Also need a Sump Pump widget similar to a Manual Valve as most brewers just use them by plugging them in"; "we have a sump pump in chilled water that recycles back to a large trash can with Ice and Water"). The Manual Pump Widget already had the Sump pump picture; it now has its own row in Select Widget Type > Semi_Widgets_Devices and Select Device Type > Pumps (Label Sump 1). New Ice Water Can in Add equipment: no Devices or IPs, hose hang top, drawn by Skynet, Out flow color Blue; a running pump with its inlet inside it and nothing joined to that inlet draws its water. Help 201 new (next free Help 202), Help 162 (the OakBarn Brewery two plate chiller ice bath loop) and their French pages, Widget Library, README. Checked against both programs: the Panel has both; the Importer's Build page reuses the Panel's code, and BruControl has no ice bath. (thread "Add a manual Sump Pump widget")
 - 2026-11-15: Rule 2.12 changed (OakBarn Brewery: "An attribute on IPs that says No Unlock individually. So an IP can be locked individually that overrides the Unlock when moving"): an IP or pipe fitting has a **No Unlock** switch; 🔓 Unlock All (and unlocking its vessel) passes it by, and only its own 🔓 Unlock unlocks it. Help 56 (and French) updated. Checked against both programs: the Panel's Edit layout has it; the Importer's Build page reuses the Panel's code. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-15: Rules 5.41 and 5.42 corrected (OakBarn Brewery: "A Chillzilla is a counter flow chiller and not an immersion chiller so place_Chiller could not place a counter flow chiller. A Chillzilla also has 4 IPs"): place_Chiller places only an immersion chiller with 2 IPs (Immersion_Chiller); a Chillzilla is a counterflow chiller with 4 IPs. Help 200 (and French) updated. Checked against both programs: the Panel's Brain runs it; the Importer does not run Processes. (thread "Make the Chiller a flexible Special Widget")
