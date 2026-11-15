@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag, pinLabel, rtdPinError, RTD_CS_PINS, ethernetPinError } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, lockedIdError, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag, pinLabel, rtdPinError, RTD_CS_PINS, ethernetPinError } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -39,21 +39,24 @@ for (const [type, list] of Object.entries(TYPE_CODES)) for (const [c, l] of list
 
 // Interface IDs
 assert.equal(defaultInterfaceId('Main Brewery Mega USB', []), 'MB');
-assert.equal(defaultInterfaceId('Main Brewery Mega Ethernet', ['MB']), 'MB_2', 'a second MB is MB_2');
-assert.equal(defaultInterfaceId('Main Brewery Mega WiFi', ['MB', 'MB_2']), 'MB_3');
+assert.equal(defaultInterfaceId('Main Brewery Mega Ethernet', ['MB']), 'MB2', 'a second MB is MB2 (Rule 3.2: 1 to 4 characters)');
+assert.equal(defaultInterfaceId('Main Brewery Mega WiFi', ['MB', 'MB2']), 'MB3');
 assert.equal(defaultInterfaceId('MEGA1', []), 'ME', 'one word: its first two letters');
 assert.equal(cleanInterfaceId('mbub'), 'MBUB');
 assert.equal(cleanInterfaceId('MB_'), 'MB', 'the underscore after the ID is not part of it');
-assert.throws(() => cleanInterfaceId('MBUSB'), /1 to 4 letters/);
-assert.throws(() => cleanInterfaceId('M1'), /1 to 4 letters/);
+assert.throws(() => cleanInterfaceId('MBUSB'), /1 to 4 letters or numbers/);
+assert.equal(cleanInterfaceId('m1'), 'M1', 'letters and numbers (Rule 3.2)');
+assert.throws(() => cleanInterfaceId('1M'), /starting with a letter/);
+assert.throws(() => cleanInterfaceId('MB_2'), /1 to 4/, 'an underscore is not part of an ID');
 
 // Tab IDs
 assert.equal(defaultTabId('Sparge', []), 'SP');
 assert.equal(defaultTabId('Batch Hops', []), 'BH');
 assert.equal(defaultTabId('Sparge 2', ['SP']), 'SA', 'still 2 letters when SP is taken');
 assert.equal(cleanTabId('sp'), 'SP');
-assert.throws(() => cleanTabId('S'), /exactly 2 letters/);
-assert.throws(() => cleanTabId('SPA'), /exactly 2 letters/);
+assert.equal(cleanTabId('S'), 'S', 'a Tab ID is 1 to 4 characters (Rule 3.2)');
+assert.equal(cleanTabId('SPA2'), 'SPA2');
+assert.throws(() => cleanTabId('SPARG'), /1 to 4 letters or numbers/);
 
 // IDs given to older Schemas, and checked when saved
 const c = { devices: [{ name: 'Main Brewery Mega USB' }, { name: 'Main Brewery Mega Ethernet' }, { name: 'X', id: 'bad id' }], workspaces: [{ name: 'Brewery' }, { name: 'Batch Hops' }, { name: 'Boil', id: 'BR' }],
@@ -61,7 +64,7 @@ const c = { devices: [{ name: 'Main Brewery Mega USB' }, { name: 'Main Brewery M
 assert.equal(assignIds(c), true);
 assert.equal(c.elements[0].typeCode, 'Pump', 'an old type code is updated');
 assert.equal(c.elements[0].name, 'MB_25_PmP_Wort_BR', 'the Device keeps its name');
-assert.deepEqual(c.devices.map(d => d.id), ['MB', 'MB_2', 'X']);
+assert.deepEqual(c.devices.map(d => d.id), ['MB', 'MB2', 'X']);
 assert.deepEqual(c.workspaces.map(w => w.id), ['BR', 'BH', 'BO'], 'a second BR gets a new ID');
 assert.equal(assignIds(c), false, 'nothing changes the second time');
 assert.throws(() => checkIds([{ name: 'A', id: 'MB' }, { name: 'B', id: 'mb' }], 'interface'), /used twice/);
@@ -261,4 +264,16 @@ console.log('naming tests passed');
   assert.equal(upgradeCode({ type: 'pwmOut', typeCode: 'P_H_Vlv' }), 'Valve_H', 'was P_H_Vlv'); assert.equal(nameType('analogOut', 'Valve_L'), 'AO@Valve_L');
   assert.equal(typeAtName({ name: 'MB_25_P_L_Vlv_Fly~Sparge_SP', type: 'pwmOut', subtype: 'propValve', typeCode: 'Valve_L' }), 'MB_25_PWM@Valve_L_Fly~Sparge_SP');
   console.log('General Type@ name tests passed');
+}
+
+// Rule 3.2 (OakBarn Brewery, 2026-11-15): once saved, an ID never changes, not even by an Admin
+{
+  const before = [{ name: 'Brew House', id: 'BH', _key: 'k1' }, { name: 'Sparge', id: 'SP', _key: 'k2' }];
+  assert.equal(lockedIdError(before, [{ name: 'Brew House', id: 'BH', _key: 'k1' }, { name: 'Sparge', id: 'SP', _key: 'k2' }], 'Tab'), '', 'same IDs: fine');
+  assert.equal(lockedIdError(before, [{ name: 'Brewhouse', id: 'bh', _key: 'k1' }], 'Tab'), '', 'renamed Tab keeps its ID');
+  assert.match(lockedIdError(before, [{ name: 'Brew House', id: 'BR', _key: 'k1' }], 'Tab'), /can never be changed/);
+  assert.match(lockedIdError(before, [{ name: 'Brew House', id: '', _key: 'k1' }], 'Tab'), /can never be changed/, 'a saved ID can not be emptied');
+  assert.equal(lockedIdError(before, [{ name: 'Brew House', id: 'BR', _key: 'k9' }], 'Tab'), '', 'a new Tab (new key) with an old name is a new item');
+  assert.equal(lockedIdError(before, [{ name: 'Mash', id: 'MA', _key: 'k3' }], 'Tab'), '', 'a new Tab picks its own');
+  assert.match(lockedIdError([{ name: 'Mega', id: 'MB' }], [{ name: 'Mega', id: 'MX' }], 'Interface'), /Interface ID MB of Mega/, 'no keys: found by name');
 }

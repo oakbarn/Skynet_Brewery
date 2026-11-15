@@ -2,6 +2,8 @@
 
 A locked item can't be dragged or resized, not even in **Edit layout**. Only unlocked items move. A locked item shows a 🔒 padlock in Edit layout.
 
+This also covers **changing a pipe's length** and **redrawing a hose** (Skynet Rule 2.12): only an unlocked pipe or hose, with its end let go and that end's IP unlocked, can be made shorter or longer or redrawn (see [Move alone, Swap, Put back](153-move-alone-swap-put-back)).
+
 You can still open a locked item's properties (double-click it) and change it there, including its **X**, **Y**, **Width** and **Height**.
 
 ## Lock or unlock one item
