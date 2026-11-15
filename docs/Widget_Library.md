@@ -290,8 +290,12 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 - Types: Equal / Reducing (tee, cross); Short radius / Long radius (elbows).
 - Ports: Tee = Run A, Run B, Branch. Elbows = End A, End B. Cross = End A, B, C, D. Flow passes between all of them.
 
-### Older vessel kinds (kept for old Schemas)
-Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil, Plate chiller (older). Settings: Kind, Background picture path, Label, Show label, Label position / color / back color / size, Heater (an element or burner output; the vessel glows when it is on), Tab, X, Y, Width, Height, Lock position.
+### Stove Top Vessel and Stove Top Vessel, Bottom Outlet (Rule 19.7, Help 199)
+- A pot on the kitchen stove: a Widget with IPs and no Devices. `vesselType` `stoveTop` (no outlets) or `stoveTopOut` (one IP, Bottom Outlet, at the center of the bottom).
+- Picture drawn by Skynet for its box (public/stovetop.js): body, rim, two handles; the Bottom Outlet with its connector. Graphic empty = drawn.
+- Settings: Name, Type (Brew Kettle, HLT, Mash Tun, Other), Label, Units, Gallons (`volume`, 5 to start), Height (`vheight`), Width (`diameter`), Calculated Volume (read only), Bottom Outlet IP Type (`ipTypeOut`: tc, npt, bsp, qd), Graphic, Out flow color, Label look, Tab, X, Y, Width, Height (Master Vessel Sizer only), Lock position.
+- Hose hang top: its top third is one IP for a Quick Disconnect hose (Rules 5.28, 5.34).
+- The older Electric heated vessel, Gas heated vessel, Unheated mash tun, Cooling coil and Plate chiller kinds were removed on 2026-11-15.
 
 ---
 
