@@ -1,5 +1,5 @@
 // The Label can't be blank (Skynet Rule 18.28, Fritz 2026-11-05): in any dialog with a Label field, when the Label is blank and
-// the user clicks (or taps, or Tabs / Enters to) any other field or icon, except Cancel, a small pop-up says
+// the user clicks (or taps, or Tabs / Enters to) any other field or icon, except Cancel and Delete, a small pop-up says
 // "The Label cannot be blank." and goes away by itself after 5 seconds. The click does nothing and the Label keeps the focus.
 // The same for a Port, when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the user is
 // on a blank Port, every other field but the ones before it (the Label and the Interface) gets the pop-up "The Port cannot be blank."
@@ -13,6 +13,11 @@ export const isBlank = v => !String(v ?? '').trim();
 import { LABEL_NO, labelNoMsg, cleanLabel } from './naming.js';
 const isLabelField = t => t?.dataset?.k === 'label' && !!t.closest?.('dialog[open]');
 // a Cancel button: data-close="cancel" (Properties), value="cancel", or a button whose text is Cancel / ✖ Cancel (the Rule 18 pop-ups)
+// a Delete button: data-close="delete" (Properties, top and bottom), value="delete", or a button whose text starts with Delete / 🗑 Delete
+// (Delete Pipe, Delete Hose ...). Delete never asks for a Label or a Port first (OakBarn Brewery, 2026-11-14: "I also tried to delete a
+// Hose that had no label but the Delete button warned it needed one. Have Delete Delete without those types of issues"); its own
+// "are you sure" still comes up
+export const isDeleteButton = b => !!b && (b.dataset?.close === 'delete' || b.value === 'delete' || /^[^\p{L}\p{N}]*delete\b/iu.test(String(b.textContent ?? '').trim()));
 export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
 
 const showing = i => !i.disabled && !i.readOnly && i.offsetParent !== null;
@@ -33,6 +38,7 @@ export function allowedWhileBlank(t, field) {
   const icons = field.closest?.('.fldIcons'); if (icons && icons.contains(t)) return true;
   if (t.closest?.('.labelWarn')) return true;
   if (isCancelButton(t.closest?.('button'))) return true;
+  if (isDeleteButton(t.closest?.('button'))) return true;      // Delete just deletes (it asks first, on its own)
   const back = String(field.dataset?.guardAllow ?? '').split(/\s+/).filter(Boolean);
   if (back.length) {
     const k = t.closest?.('[data-k]')?.dataset?.k ?? t.closest?.('.fldIcons')?.querySelector('[data-k]')?.dataset?.k;
