@@ -125,6 +125,8 @@ Interface is connected. The Interface is the part of the Bridge between the "Bra
 supply 120 VAC power for any connected device but only a trigger signal. It takes other pieces of Hardware, and not just one.
 There is a Daisy Chain:
 
+![The Daisy Chain: Brain, Arduino, SSR, Red Pump](help_pictures/Pump_Daisy_Chain.png)
+
 > **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
 
 Brain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook
