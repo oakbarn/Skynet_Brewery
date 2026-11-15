@@ -144,7 +144,7 @@ est Direct Output. Si l'état du Device est vrai, le courant passe (par le SSR),
 courant. Comme un interrupteur de lumière.
 
 Quand une Interface est ajoutée au Brain, elle a un ID. L'ID est un champ obligatoire de Skynet, et même si une suggestion est faite, c'est un
-champ libre que vous pouvez modifier, mais il doit être unique, et une fois enregistré seul un Admin peut le changer (le mieux est de le régler une fois et de ne plus y toucher). Il fait de 1 à 4 lettres. Notre
+champ libre que vous pouvez modifier. Les Interface IDs suivent la Rule 3.2 ([La règle des ID](46-interface-tab-device-names)). Notre
 Interface d'exemple est : BM: Brewery Mega
 
 L'ID est important car il fait partie du Suggested Name.
@@ -178,7 +178,7 @@ sont sur ce Tab), il y a aussi des Tabs spéciaux Skynet (comme ce Build Tab) au
 commander, seulement d'atelier pour construire quelque chose qui sera placé sur un Tab normal de l'utilisateur.
 
 Quand un Tab est ajouté au Brain, il a un ID. L'ID est un champ obligatoire de Skynet, et même si une suggestion est faite, c'est un champ
-libre que vous pouvez modifier, mais il doit être unique, et une fois enregistré seul un Admin peut le changer (le mieux est de le régler une fois et de ne plus y toucher). Il fait exactement 2 lettres. Notre Tab d'exemple
+libre que vous pouvez modifier. Les Tab IDs suivent la Rule 3.2 ([La règle des ID](46-interface-tab-device-names)). Notre Tab d'exemple
 est : BH: Brew House
 L'ID est important car il fait partie du Suggested Name.
 BM_15_DO@Pump_Red~Pump_**BH**
