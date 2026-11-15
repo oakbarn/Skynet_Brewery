@@ -18,7 +18,6 @@ BM_28_DO@Valve_E_To~kettle_BH = false
 BM_29_DO@Valve_E_To~fermenter_BH = false
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = off
 BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = off
-BM_30_DO@Chill_Chiller~water_BH = false
 gblV_Brew_Status = 0
 gblS_Advance_Label = "Stopped"
 gblS_Advance_Label.background = 8
