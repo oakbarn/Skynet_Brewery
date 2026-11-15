@@ -10,9 +10,9 @@
 
 **Background (d'un Tab)** (fond) : l'image et la couleur derrière tout ce qui est sur un Tab. Se règle dans **⚙ Tab settings** avec Edit layout actif. Voir [Image et couleur de fond d'un Tab](26-tab-background).
 
-**Interface** : une carte (automate, PLC) à laquelle les Devices sont câblés. Son **Interface ID** (1 à 4 lettres, comme `MB_`) commence le nom de ses Devices. Voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
+**Interface** : une carte (automate, PLC) à laquelle les Devices sont câblés. Son **Interface ID** (comme `MB_`, Rule 3.2) commence le nom de ses Devices. Voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
 
-**Tab ID** : les 2 lettres (comme `SP`) qui terminent le nom des nouveaux Devices d'un Tab. Voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
+**Tab ID** : l'ID court (comme `SP`) qui termine le nom des nouveaux Devices d'un Tab ; il suit la Rule 3.2. Voir [Les noms des Interfaces, des Tabs et des Devices](46-interface-tab-device-names).
 
 **BeerXML** : le fichier de recette qu'exporte BeerSmith. Voir [Import](08-import).
 

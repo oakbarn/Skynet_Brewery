@@ -32,6 +32,7 @@ import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTi
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { STOVE_SIDE, STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
+import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the Ice Water Can (Rule 19.8)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
@@ -544,7 +545,7 @@ function bundleOf(g) {
   if (!g) return null;
   let v = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo && x.kind === 'vessel') : isBfit(g) && g.onVessel ? g : null;
   if (isBfit(v) && v.onVessel) v = draft.graphics.find(x => x.id === v.onVessel && x.kind === 'vessel') || v;
-  if ((v?.bundled || isSkyV(v) || isStove(v)) && v !== g) return v;        // a Skynet vessel (and a Stove Top Vessel, Rule 19.7) is always one bundle with its IPs and fittings
+  if ((v?.bundled || isSkyV(v) || isStove(v) || isIceCan(v)) && v !== g) return v;        // a Skynet vessel (and a Stove Top Vessel, Rule 19.7) is always one bundle with its IPs and fittings
   const u = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo) : null;
   return isUnit(u) ? u : null;          // the IPs of a Skynet Fitting are part of it: they never move on their own
 }
@@ -574,7 +575,9 @@ const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chil
   // the Stove Top Vessel (OakBarn Brewery, 2026-11-15, Rule 19.7): two of them. The older Electric heated vessel, Gas heated vessel,
   // Unheated mash tun, Cooling coil and Plate chiller are gone (OakBarn Brewery, 2026-11-13: "remove for now. We will build several
   // Vessel Template Devices where these would be")
-  stoveTop: 'Stove Top Vessel', stoveTopOut: 'Stove Top Vessel, Bottom Outlet' };
+  stoveTop: 'Stove Top Vessel', stoveTopOut: 'Stove Top Vessel, Bottom Outlet',
+  // the Ice Water Can (OakBarn Brewery, 2026-11-15, Rule 19.8): cold water for a Sump Pump to send through a chiller and back
+  iceCan: 'Ice Water Can (cold water for a Sump Pump and chiller)' };
 // Equipment widgets (Fritz's spec): a picture with a Name, a Type, a Label and ports. Every port except a thermowell is an IP:
 // it is created on screen near its Position when installed, and stays attached to the widget. Each list (types, positions,
 // standards) can be added to; the additions are kept in the settings (vesselLists). Fritz will refine the choices later.
@@ -641,6 +644,10 @@ const EQ = {
   // the Bottom Outlet one: one IP at the center of the bottom, with its IP Type (Tri-Clamp, NPT, BSP or Quick Disconnect, Rule 5.40)
   stoveTopOut: { title: 'Stove Top Vessel Bottom Outlet', types: ['Brew Kettle', 'HLT', 'Mash Tun', 'Other'], image: '', size: [200, 200], tab: 'Equipment',
     ports: { outlet: pt('Bottom Outlet', [['Center Bottom', 0.5, 1]], { on: true }) } },
+  // The Ice Water Can (OakBarn Brewery, 2026-11-15: "we have a sump pump in chilled water that recycles back to a large trash can with
+  // Ice and Water"; Rule 19.8): a Special Widget with no IPs of its own. A Sump Pump put inside it draws its cold water, and a hose
+  // dropped in its top brings the water back (the hose hang top, Rules 5.28 and 5.34). Skynet draws it for its box (public/icecan.js).
+  iceCan: { title: 'Ice Water Can', types: ['Ice Water', 'Other'], image: '', size: ICECAN_SIZE, tab: 'Equipment', ports: {} },
   eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
   eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', size: [90, 90],
@@ -1470,6 +1477,7 @@ function buildVessel(g) {
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
   }
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
+  else if (!g.image && isIceCan(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${iceCanPic(g.w, g.h)}")`; }     // the Ice Water Can: drawn for its own box (Rule 19.8)
   else if (!g.image && isStove(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${stovePic(g.w, g.h, stoveOutType(g))}")`; }     // a Stove Top Vessel: drawn for its own box (Rule 19.7)
   else if (g.image && !isUnit({ ...g, loose: false })) n.style.backgroundImage = `url("${media(g.image)}")`;     // a Skynet Fitting is drawn once only, by its .bfImg above (not a second time, unturned, behind it)
   if (g.vwidget && isSkyV(g)) n.append(...vwParts(g));       // a Vessel Widget draws its Probe and Element, and in Edit layout what is not Placed
@@ -1525,6 +1533,7 @@ const V1_GAL = [197, 237];       // Fritz's plain vessel, the One Gallon start (
 const isVW = g => g?.kind === 'vessel' && !!g.vwidget && !g.integrated && isSkyV(g);
 // the Stove Top Vessel (Rule 19.7) is sized like a Vessel Widget: by its Gallons, or by its real size once its Height and Width are typed
 const isStove = g => g?.kind === 'vessel' && (g.vesselType === 'stoveTop' || g.vesselType === 'stoveTopOut');
+const isIceCan = g => g?.kind === 'vessel' && g.vesselType === 'iceCan';        // the Ice Water Can (Rule 19.8)
 // the IP Type of a Stove Top Vessel's Bottom Outlet (Rule 5.40), '' when it has none; it starts as the Default pipe IP Type
 const stoveOutType = g => g?.vesselType === 'stoveTopOut' && g.ports?.outlet?.installed !== false ? g.ipTypeOut || defaultIpType(S.config.brewDefaults || {}) : '';
 const isSized = g => isVW(g) || isStove(g);
@@ -2175,7 +2184,7 @@ const devIps = e => {
     return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : us ? us[0] : sidePt(e, e.ipIn || 'left') },
       { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : us ? us[1] : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
-  const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
+  const tap = e.subtype === 'valve' && e.tapwater && tapOut(e) !== 'none' ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
   // the Valve Standard (Rule 5.29) puts them on the same spots for every valve picture, a user's own too; a valve with no picture
@@ -3606,16 +3615,18 @@ function allIps(ws) {
 // A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
 // my_Valve.tapwater set by a Process wins over the valve's setting until the valve is saved again or the panel restarts
 const tapWater = e => !!(editing ? e.tapwater : S.values[e.cloneOf || e.name]?.tapwater ?? e.tapwater);
-// which end tap water leaves by: 'out' (the second end, right or bottom), 'in' (the first end, left or top) or 'both'
-const TAP_OUT = ['out', 'in', 'both'];      // the saved keys; tapOutChoices shows them as directions
+// which end tap water leaves by: 'out' (the second end, right or bottom) or 'in' (the first end, left or top). Always one way, from
+// the tap side to the Out side (OakBarn Brewery, 2026-11-15: "flow is always from tap source to Out on a Valve"); an old 'both' reads as 'out'.
+const TAP_OUT = ['out', 'in'];      // the saved keys; tapOutChoices shows them as directions
 // "Tap Water flows" picks a direction, and only the two that fit the way the valve sits (OakBarn Brewery, 2026-11-15): Left to Right /
-// Right to Left when its ends are side by side, Top to Bottom / Bottom to Top when one is above the other. The saved key stays out / in / both.
+// Right to Left when its ends are side by side, Top to Bottom / Bottom to Top when one is above the other. The saved key stays out / in.
 function tapOutChoices(e) {
+  if (e?.tapwater && !TAP_OUT.includes(e.tapwaterOut)) e.tapwaterOut = 'out';     // an old 'both' (or none): one way now
   const [a, b] = (e ? devIps({ ...e, tapwater: false }) : []).map(q => q.c);
   const flat = a && b ? Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) : (e?.w || 120) >= (e?.h || 60);
   const fwd = a && b ? (flat ? b[0] >= a[0] : b[1] >= a[1]) : true;       // the 'out' end is right of (or below) the 'in' end
   const [p, q] = flat ? ['Left to Right', 'Right to Left'] : ['Top to Bottom', 'Bottom to Top'];
-  return [fwd ? ['out', p] : ['in', p], fwd ? ['in', q] : ['out', q], ['both', 'Both ways']];
+  return [fwd ? ['out', p] : ['in', p], fwd ? ['in', q] : ['out', q]];
 }
 const tapOut = e => e.tapwaterOut === 'none' ? 'none' : TAP_OUT.includes(e.tapwaterOut) ? e.tapwaterOut : 'out';    // none: a Skynet valve's Tap water source Needs setting
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
@@ -3629,7 +3640,7 @@ function ipNode(id, ws) {
     const e = elNamed(dn), on = isOn(e.cloneOf || dn), end = id.slice(id.lastIndexOf(':') + 1);
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
-    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === 'both' || tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
+    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
     if (isThermowell(e)) return { closed: true };       // a thermowell fills its opening: no flow (Rule 5.30)
     if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
@@ -3729,6 +3740,14 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
     }
   };
   for (const [k, n] of nodes) if (n.pull) trace(k, false);      // first what each pump pulls in, so its outlet knows where the flow began
+  // a running pump whose inlet sits inside a vessel and has nothing joined to it (a Sump Pump down in an Ice Water Can, Rule 19.8)
+  // draws from that vessel: its flow takes the vessel's Out flow color
+  for (const [k, n] of nodes) {
+    if (!n.pull || pumpSrc.get(devOfIp(k)) || (radj.get(k) || []).length) continue;
+    const c = ipPoint(k, ws), v = c && L().graphics.find(g => g.workspace === ws && isIceCan(g) && c[0] >= g.x && c[0] <= g.x + (g.w || 0) && c[1] >= g.y && c[1] <= g.y + (g.h || 0));
+    const col = v && flowKey(v.flowColor);
+    if (col) pumpSrc.set(devOfIp(k), { vessel: col });
+  }
   for (const [k, n] of nodes) if (n.push) trace(k, true);
   return dir;
 }
@@ -5088,12 +5107,13 @@ const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual v
   : it.tapwater ? [['_tapClose', 'On the Close all valves list (always, for a tap water valve)', 'bool', true, false, false, { disabled: true }], ['_tapOpen', 'On the Open all valves list (never, for a tap water valve)', 'bool', true, false, false, { disabled: true }],
     ['_vl', 'A tap water valve is always on the Close all valves list and never on the Open all valves list (Rule 6.15): these can\'t be changed.', 'note']]
     : [['closeAll', 'On the Close all valves list (close_all_valves in a Process, PreBrew house cleaning)', 'bool', true], ['openAll', 'On the Open all valves list (open_all_valves, e.g. after cleaning)', 'bool', true]];
-// where the Tap water source can be: Top / Bottom on a vertical valve, Left / Right on a horizontal or 45 degree one
+// Tap Water flows on a Skynet valve: Top to Bottom / Bottom to Top on a vertical valve, Left to Right / Right to Left on a horizontal or
+// 45 degree one (the saved key is still the tap end)
 const tapKey = e => `${e.orientation}|${!!e.flipH}|${!!e.flipV}`;
 function tapChoices(e) {
   const [a, b] = devIps({ ...e, tapwater: false }), v = e.orientation === 'v', first = v ? a.c[1] <= b.c[1] : a.c[0] <= b.c[0];
-  const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];
-  return [['', 'Needs setting'], [lo, v ? 'Tap Water Source Top' : 'Tap Water Source Left'], [hi, v ? 'Tap Water Source Bottom' : 'Tap Water Source Right']];
+  const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];       // the tap end: the top (or left) one, or the bottom (or right) one
+  return [['', 'Needs setting'], [lo, v ? 'Top to Bottom' : 'Left to Right'], [hi, v ? 'Bottom to Top' : 'Right to Left']];
 }
 // Orientation (Fritz, 2026-11-03): one pick for how the valve stands. Each choice is one Template of the set, so the picture and
 // its IPs follow; the main Template also turns 45 degrees (Rule 5.5).
@@ -5129,7 +5149,7 @@ function skyDevFields(it, f) {
   const own = {
     orientation: [['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
     tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
-      ...(it.tapwater ? [['tapSource', 'Tap water flows out of (a tap water valve only; the other end is the tap): pick the tap end', 'sel', tapChoices(it)]] : [])],
+      ...(it.tapwater ? [['tapSource', 'Tap Water flows (a tap water valve only; the choices follow the way it sits)', 'sel', tapChoices(it)]] : [])],
     onText: [['showOnOffText', 'Text On/Off (on = the On or Off text shows on the Tab)', 'bool', undefined, true],
       ...(it.showOnOffText ? [['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']] : [])],
   };
@@ -5159,13 +5179,16 @@ const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: '
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
 // the Manual Pump Widget (Rule 1.28): in the Pumps list too, as the Manual Valve Widget is in the Valves list; it stays a Widget
 const MANUAL_PUMP_ROW = ['Manual Pump (Widget, no Port: you switch it by hand and confirm)', () => addManualPump()];
+// the Sump Pump by hand (OakBarn Brewery, 2026-11-15: "most brewers just use them by plugging them in", Rule 5.15a): a Manual Pump
+// Widget with the Sump pump picture, its own row so it is easy to find (the same as Manual Pump, then Sump pump in step 2)
+const SUMP_BY_HAND_ROW = ['Sump Pump by hand (Manual Pump Widget, no Port: you plug it in and confirm)', () => addManualPump('sump')];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'H_Element'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
 const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'H_Element'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
-    ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP, MANUAL_PUMP_ROW]],
+    ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP, MANUAL_PUMP_ROW, SUMP_BY_HAND_ROW]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
     ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')],
@@ -5185,7 +5208,7 @@ const WGT_TYPES = () => [
   ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [d.menu ?? `${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + (d.lbl ?? d.word))])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
   ['semi', 'Boolean Widgets (Switch, Slider, Checkbox, buttons, LED) and the Manual Valve', [...amGroup('Boolean Widgets').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
-    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')], MANUAL_PUMP_ROW,
+    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')], MANUAL_PUMP_ROW, SUMP_BY_HAND_ROW,
     ['Tap Water Valve (household hose bib Manual Valve Widget)', () => addIpFit('manualValve', 'tap')]]],
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
   ['vessels', 'Vessels', VESSEL_ROWS],
@@ -5316,7 +5339,7 @@ const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An 
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
-  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our example Interface is: BM: Brewery Mega',
+  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. Our example Interface is: BM: Brewery Mega',
   'The ID is important as it is Part of the Suggested Name.\n⟦BM⟧_15_DO@Pump_Red~Pump_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
@@ -5331,7 +5354,7 @@ const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeis
 const TAB_PUMP_TIP = ['The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.',
   'A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).\nAnd like a Star Ship, there is an Alternate Bridge and other Compartments of decks.\nThere can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the Bridge.',
   'Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to control things, but only a workshop to build something to be placed on a Normal User Tab.',
-  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Tab IDs follow Rule 3.2. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD,
   'You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.\n➕ Add new Tab… makes a new Tab and comes back here and sets it as the default for the Build Tab.'].join('\n\n');
 // The Pump's Device Type balloon (the same PDF). The BruControl comparison he wrote with it is for the Importer only: it waits in
@@ -6266,21 +6289,24 @@ $('#lockItem').onclick = () => {
   const item = sel && findItem(sel.kind, sel.id); if (!item) return toast('Select an item first', true);
   const frozen = profileFrozen(item); if (frozen) return toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
   const on = !item.locked;
-  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) setLock(g, on);   // a vessel's ports and joined fittings go with it
+  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) if (on || g === item || !g.noUnlock) setLock(g, on);   // a vessel's ports and joined fittings go with it (one set to No Unlock stays)
   toast(on ? 'Locked in place' : 'Unlocked'); renderWs(); updLockBtn();
 };
 // 🔒 Lock All / 🔓 Unlock All (Fritz, 2026-10-22): actions, not a switch. Every item on this Tab is locked (or unlocked) once;
-// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button.
+// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button. 🔓 Unlock All passes by an IP or fitting
+// set to No Unlock (Rule 2.12).
 function lockTab(on) {
   const mine = o => o.workspace === wsName;
-  let n = 0, kept = 0;
+  let n = 0, kept = 0, stay = 0;
   for (const o of [...draft.elements.filter(mine), ...draft.graphics.filter(mine)]) {
     if (!!o.locked === on) continue;
     if (profileFrozen(o)) { kept++; continue; }
+    if (!on && o.noUnlock) { stay++; continue; }      // 🔒 No Unlock: only its own 🔓 Unlock unlocks it (Rule 2.12)
     setLock(o, on); n++;
   }
   toast((n ? `${on ? '🔒 Locked' : '🔓 Unlocked'} ${n} item${n === 1 ? '' : 's'} on "${wsName}". Save layout keeps it.` : `Everything on "${wsName}" was already ${on ? 'locked' : 'unlocked'}.`)
-    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
+    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : '')
+    + (stay ? ` ${stay} item${stay === 1 ? '' : 's'} set to No Unlock stayed locked (click ${stay === 1 ? 'it' : 'each one'} and press 🔓 Unlock).` : ''));
   renderWs(); updLockBtn();
 }
 // 🏷 Suggested Names (OakBarn Brewery, 2026-11-12: "There is a Button where all Names can be converted to a Suggested Name, if you
@@ -6356,6 +6382,7 @@ function addVesselWidget(c) {
   const g = { id: newId(), kind: 'vessel', vesselType: c, workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
     name: base + '_' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
   if (c === 'stoveTopOut') g.ipTypeOut = defaultIpType(S.config.brewDefaults || {});         // its Bottom Outlet's connector (Rule 5.40)
+  if (c === 'iceCan') { g.flowColor = ICECAN_FLOW; g.label = 'Ice Water'; }      // cold water: its Out flow starts Blue (Rule 19.8)
   if (EQ[c] && isStove({ kind: 'vessel', vesselType: c })) { Object.assign(g, { volume: STOVE_GALLONS, units: 'US' }); [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab)); }      // drawn at its Gallons (Rule 19.7)
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
 }
@@ -6821,13 +6848,14 @@ function addIpFit(fit, kind) {
 // ➕ Manual Pump Widget (OakBarn Brewery, 2026-11-08: "create Manual Pump Wizard. The same types as Pump Devices", Rule 1.28): step 2
 // picks the pump from the same list as Add Pump (and the Sump pump); its drawing, IPs, Cover and Overlay are a Pump Device's. No
 // Interface or Port: it is switched by hand, so it is a Confirmation Widget (.confirmation on). Made on the 🔨 Build Tab (Rule 4.1).
-async function addManualPump() {
+async function addManualPump(pick) {
   toBuild();
-  const k = await pickModel('2. Pick the pump (a Manual Pump: you switch it by hand)', [...PUMP_MODELS.map(([t, k]) => [t, k, pumpPic(k)]), ['Sump pump', 'sump', SUMP[3].imageOff]]);
+  const k = pick || await pickModel('2. Pick the pump (a Manual Pump: you switch it by hand)', [...PUMP_MODELS.map(([t, k]) => [t, k, pumpPic(k)]), ['Sump pump', 'sump', SUMP[3].imageOff]]);
   if (!k) return;
   const D = TD(), sump = k === 'sump';
-  let i = 1; while (draft.elements.some(e => e.type === MANUAL_PUMP_TYPE && e.label === 'Pump ' + i)) i++;
-  const e = { type: MANUAL_PUMP_TYPE, subtype: 'pump', label: 'Pump ' + i, workspace: wsName, x: D.x, y: D.y, w: 150, h: 150, ipIn: 'left', ipOut: 'right',
+  const word = sump ? 'Sump ' : 'Pump ';       // a Sump pump's Label starts Sump 1, Sump 2 ... (wgt_MP_Sump~1_BR)
+  let i = 1; while (draft.elements.some(e => e.type === MANUAL_PUMP_TYPE && e.label === word + i)) i++;
+  const e = { type: MANUAL_PUMP_TYPE, subtype: 'pump', label: word + i, workspace: wsName, x: D.x, y: D.y, w: 150, h: 150, ipIn: 'left', ipOut: 'right',
     imageOff: sump ? SUMP[3].imageOff : pumpPic(k), ...(sump ? { imageOn: SUMP[3].imageOn } : { cover: 'None' }), imageOverlay: newOverlay('pump'),
     hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF', confirmation: true };
   if (!D.visible) e.visibility = 'hidden';
@@ -6858,7 +6886,7 @@ function makeTab() {
   const bad = elementNameError(n, 'Tab'); if (bad) { toast(bad, true); return null; }      // the same name rules as every other name (Rule 3.11)
   if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
-  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
+  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // a unique suggestion (Rule 3.2); it can be changed in Tab settings until the first Save
   const w = { name: n, id, ...newTabSize(), ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
   if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Background Profile's color wins
   draft.workspaces.push(w); return w;
@@ -6866,7 +6894,7 @@ function makeTab() {
 $('#addWs').onclick = () => {
   const w = makeTab(); if (!w) return;
   wsName = w.name; renderTabs(); renderWs();
-  toast(`Tab ${w.name} added, Tab ID ${w.id} (change it in Tab settings)`);
+  toast(`Tab ${w.name} added, Tab ID ${w.id}. Change it in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
 };
 // ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
 // built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
@@ -7421,7 +7449,7 @@ const F = {
       ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['noUnlock', 'No Unlock (🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it)', 'bool']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label (never blank: it starts as its Name in small letters, pipe_1, Rule 3.14)', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
@@ -7453,17 +7481,17 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
     ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
 const FIT_PLACE = it => [...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
-  ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+  ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['noUnlock', 'No Unlock (🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it)', 'bool']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => hasTop(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
 F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'],
   ...(isStove(it) ? stoveSizeFields(it) : []),
-  ['image', isStove(it) ? 'Graphic (picture path; empty = drawn by Skynet for its Height and Width)' : 'Graphic (picture path)', 'path'],
+  ['image', isStove(it) || isIceCan(it) ? 'Graphic (picture path; empty = drawn by Skynet for its Height and Width)' : 'Graphic (picture path)', 'path'],
   ...(hasTop(it) && !isKettle(it) ? [['_top', `Hose hang top: its top third is one big IP. A Quick Disconnect hose dropped there hangs over the rim, and a Process line Hose_1.connect = ${it.name || 'its Name'} puts it there (Rules 5.28 and 5.34).`, 'note']] : []),
   // a Stove Top Vessel's one IP is fixed at the center of its bottom: only its IP Type is set (Rule 19.7)
   ...(it.vesselType === 'stoveTopOut' ? [['ipTypeOut', 'Bottom Outlet IP Type', 'sel', IP_TYPES, true, false, { tip: STOVE_IP_TIP }]] : []),
-  ...Object.entries(isStove(it) ? {} : EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
+  ...Object.entries(isStove(it) || isIceCan(it) ? {} : EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px)', 'num', null, false, false, { tip: 'Empty: the Name font size on the Default tab.' }],
@@ -7471,7 +7499,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
   ...(isStove(it) && vMaster(draft?.workspaces.find(w => w.name === it.workspace))?.id !== it.id ? [['_wh', `Width ${it.w} x Height ${it.h}: set by its size and the Tab's Master Vessel Sizer (only the Master is resized).`, 'note']]
     : [['w', 'Width', 'num'], ['h', 'Height', 'num']]),
   ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
-  ...(isStove(it) ? [] : [['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']])];      // a Stove Top Vessel is always one with its IP
+  ...(isStove(it) || isIceCan(it) ? [] : [['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']])];      // a Stove Top Vessel is always one with its IP
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
 // the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
@@ -8076,7 +8104,7 @@ const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', O
 const MBV_OWN = (it, x = {}) => [it.tapwater ? ((it._tapClose = true), (it._tapOpen = false), ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap,
       with: [['_tapClose', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }], ['_tapOpen', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }]], ...x }])
     : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
-  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap Water flows', 'sel', tapOutChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap Water flows', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap Water flows', 'sel', tapOutChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
     ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -8861,7 +8889,7 @@ const DEVICE_TIPS = {
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
-  vTapEnd: 'Which way the tap water flows through it. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
+  vTapEnd: 'Which way the tap water flows through it: always one way, from the tap side to the Out side. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
   pNum: 'Probe #: the OneWire probe number of this DS18B20 (Devices page > OneWire probes). All DS18B20 probes share one data pin.',
   tpGraphic: 'The picture of this probe as it will show on the Tab, turned to its Orientation. A Thermowell snaps onto an IP; on a front facing IP it shows from the front. A probe tee cuts a pipe as a tee does (Rule 5.30).',
@@ -10242,6 +10270,9 @@ async function editItem(kind, id) {
       if (hasLayer(item)) work.layer = item.layer; else delete work.layer;
     }
     if (kind !== 'el' && ownLabel(item) && !String(work.label ?? '').trim()) work.label = defLabel({ name: work.name || item.name });      // never blank (Rule 3.14)
+    // No Unlock (OakBarn Brewery, 2026-11-15, Rule 2.12: "An attribute on IPs that says No Unlock individually"): switched on, it
+    // locks the IP or fitting, and 🔓 Unlock All passes it by
+    if (work.noUnlock) work.locked = true; else delete work.noUnlock;
     if (kind === 'el') dbFromWork(work, item);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
@@ -10452,7 +10483,7 @@ async function editItem(kind, id) {
       if (isSkyV(item)) turnVesselParts(item, before);         // flipped or rotated: its IPs and fittings turn with it
       placeUnitParts(item);
       if (isSized(item)) vSizeAfterEdit(item, before);
-      if (!bf && !isSkyV(item) && !isStove(item) && (placed.length || before.isNew)) vesselPopup(item, placed);      // a Stove Top Vessel's IP is fixed: nothing to check
+      if (!bf && !isSkyV(item) && !isStove(item) && !isIceCan(item) && (placed.length || before.isNew)) vesselPopup(item, placed);      // a Stove Top Vessel's IP is fixed: nothing to check
       delete item.isNew;
     }
     if (moveX || moveY) { renderWs(); letGoBentEnds(offBefore); }     // as after a drag: a pipe never bends to follow (Rule 5.19)
@@ -10485,9 +10516,11 @@ function checkWidgetCode(it) {
 async function editWorkspace() {
   if (!editing) return;
   const w = curWs(); const work = clone(w), before = clone(w);
+  // a saved Tab's ID is never changed, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2); a new Tab's suggestion can be edited until the first Save
+  const idLocked = !!(w.id && w._ref && (S.config.workspaces || []).some(x => x._ref === w._ref && x.id));
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
-    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly~Sparge_SP)', 'text'],
+    idLocked ? ['id', 'Tab ID (saved: it never changes, Rule 3.2)', 'ro'] : ['id', 'Tab ID (follows Rule 3.2; once saved it never changes)', 'text'],
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
@@ -10519,7 +10552,7 @@ async function editWorkspace() {
       if (isHiddenTab(w) && !String(work.name).startsWith(HIDDEN_TAB)) work.name = HIDDEN_TAB + String(work.name).trim().replace(/^hidden_?/i, '');   // a Hidden_ Tab's name always starts with Hidden_
       if (work.name === HIDDEN_TAB) throw new Error('Type a name after Hidden_');
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
-      work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
+      work.id = idLocked ? w.id : work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
     } catch (e) { toast(e.message, true); return null; }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
@@ -11596,12 +11629,8 @@ function renderDevices() {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realConnection, ...rest }) => ({ ...rest, connection: realConnection }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
-    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
-      onchange: guard(async ev => {
-        const id = cleanInterfaceId(ev.target.value);
-        if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
-        await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, id } : x) }); await load(); toast(`Interface ID is now ${id}_ (Devices made before keep their names)`);
-      }) });
+    // a saved Interface's ID never changes, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2)
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 4, disabled: true, title: 'Interface ID (Rule 3.2): it starts the suggested name of each Device on this Interface (MB_25_...). Once saved it never changes, not even by an Admin. To use another ID, make a new Interface.' });
     // board and connection rating (public/links.js): USB best; a heating Device on a WiFi link is flagged
     const boardSel = h('select', { disabled: !can('admin'), title: 'The board, for the connection rating', onchange: guard(async ev => {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, board: ev.target.value } : x) }); await load();
@@ -11690,9 +11719,8 @@ $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaul
 // pretend Mega a Skynet Schema Template makes when there is no real Interface. It explains the Interface ID: it starts every Suggested Device name.
 const LINK_CHOICES = [['serial', 'USB'], ['ethernet', 'Ethernet (wired)'], ['esp32', 'WiFi (a Mega: through an ESP32 bridge)'], ['simulator', 'Simulator (no board yet: pretend)']];
 const IFACE_ID_NOTES = [
-  'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_DO@Pump_Wort__HS for a pump on pin 25 of the Interface HS.',
-  'It must be unique: no two Interfaces may have the same ID.',
-  'Set it once, now, and do not change it. Devices made before a change keep the old ID in their names, so a change leaves a mix of names.'];
+  'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_DO@Pump_Wort_HS for a pump on pin 25 of the Interface HS.',
+  'It follows Rule 3.2: once saved it never changes, not even by an Admin.'];
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
 // ---- Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
@@ -11779,8 +11807,8 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
       ...(intro ? [['_in', intro, 'note']] : []),
       ['_a', 'An Interface is a board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 and the like.', 'note'],
       ...(renamable ? [['_nh', 'Give it a name that means something to you: Hot Side, Fermentation, your brewery name.', 'note'], ['name', 'Name', 'text']] : [['_nm', `Name: ${o.name} (Devices use it, so it stays)`, 'note']]),
-      ['id', 'Interface ID (1 to 4 letters)', 'text'],
-      ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note'],
+      ...(old?.id ? [['id', 'Interface ID (saved: it never changes, Rule 3.2)', 'ro']] : [['id', 'Interface ID (follows Rule 3.2)', 'text'],
+        ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note']]),
       ...IFACE_ID_NOTES.map((t, i) => ['_id' + i, '• ' + t, 'note']),
       ['board', 'Board', 'sel', BOARDS, true],
       ['connection', 'Connection', 'sel', LINK_CHOICES, true],
@@ -11803,9 +11831,8 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
         if (S.config.devices.some(d => d !== old && d.name.toLowerCase() === name.toLowerCase())) throw new Error(`There is already an Interface called ${name}`);
         const bad = elementNameError(name, 'Interface'); if (bad) throw new Error(bad);
         const taken = S.config.devices.filter(d => d !== old).map(x => x.id), typed = String(w.id ?? '').trim();
-        const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
+        const id = old?.id ? old.id : typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);      // a saved ID never changes (Rule 3.2)
         if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
-        if (old?.id && id !== old.id && ifaceUsers(old.name) && !confirm(`Change the Interface ID from ${old.id}_ to ${id}_?\n\n${ifaceUsers(old.name)} Device(s) on this Interface keep ${old.id}_ in their names, so the names will be a mix. It is best to set the ID once and leave it.\n\nOK = change it anyway.  Cancel = keep ${old.id}_.`)) { w.id = old.id; continue; }
         const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
         if (w.connection === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
@@ -13933,7 +13960,7 @@ async function slotPorts(tab) {
   const o = { iface: S.config.devices[0].name };
   if (await dialog(`"${p.name}" on the Tab ${tab}: give its pumps and valves their Ports`, [
     ['_n', `${pvCount(todo.length)} of this Equipment Profile ${todo.length === 1 ? 'has' : 'have'} no Port in this Schema yet: ${todo.map(d => d.look.label || '?').join(', ')}. Each one takes the next free Port of the Interface you pick, with its look and place from the profile. You can change a Port after in its Properties.`, 'note'],
-    ['iface', 'Interface (the board they are wired to)', 'sel', S.config.devices.map(d => [d.name, d.name])]], o) !== 'ok') return;
+    ['iface', 'Interface (the board they are wired to)', 'sel', S.config.devices.map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])]], o) !== 'ok') return;
   readFields(o);
   const iface = S.config.devices.find(d => d.name === o.iface);
   const tabId = w.id || defaultTabId(tab, S.config.workspaces.map(x => x.id).filter(Boolean));
@@ -14019,7 +14046,7 @@ async function eqInterview(pre = {}) {
     () => ['1. Start', [['name', 'Name of the Equipment Profile (for example "My Hot Side")', 'text', null, false, 'b'],
       ['tab', 'The Tab it is for', 'sel', [...free.map(n => [n, 'Tab ' + n + (drawn(n) ? ' (it has vessels: they stay, the new ones go beside them)' : '')]), ['__new', '➕ A new Tab (name it below)']]],
       ['newTab', 'Name of the new Tab (only for ➕ A new Tab)', 'text'],
-      ['iface', 'Interface (the board the pumps and valves are wired to): each one takes its next free Port', 'sel', (S.config.devices || []).map(d => [d.name, d.name])],
+      ['iface', 'Interface (the board the pumps and valves are wired to): each one takes its next free Port', 'sel', (S.config.devices || []).map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])],
       ['_u', `Units: ${UNIT_SYSTEMS[units]} (from ☰ Menu > Default settings).`, 'note']]],
     () => ['2. How many Vessels?', [['nV', 'How many vessels', 'sel', Array.from({ length: IV_MAX.vessels }, (_, i) => [String(i + 1), String(i + 1)])]], { nV: String(a.vessels.length) }],
     () => ['3. The type of each Vessel', a.vessels.map((v, i) => ['t' + i, `Vessel ${i + 1}`, 'sel', IV_TYPES.map(t => [t, t])]), Object.fromEntries(a.vessels.map((v, i) => ['t' + i, v.type]))],
@@ -14340,8 +14367,8 @@ const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.in
 // RIMS tube and other equipment keep every turn and flip.
 const isKettle = g => g?.kind === 'vessel' && !isBfit(g) && (g.vesselType || 'vessel') === 'vessel';
 // a vessel with a hose hang top (Rules 5.28 and 5.34): its top third is one big IP. Every kettle, and both Stove Top Vessels (OakBarn
-// Brewery, 2026-11-15: "Stove Top is widget with IPs with Top IP to hang a hose"; Rule 19.7)
-const hasTop = g => isKettle(g) || isStove(g);
+// Brewery, 2026-11-15: "Stove Top is widget with IPs with Top IP to hang a hose"; Rule 19.7), and the Ice Water Can (Rule 19.8)
+const hasTop = g => isKettle(g) || isStove(g) || isIceCan(g);
 function uprightKettles(gs) {
   const fixed = [];
   for (const g of gs.filter(g => isKettle(g) && (g.flipV || unitRot(g)))) {

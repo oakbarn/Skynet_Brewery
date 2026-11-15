@@ -37,6 +37,8 @@ const COMMANDS = [
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
   ['take_reading', 'a gravity read by hand (Refractometer or Glass), waits for it'],
+  // the Chiller Overlay (OakBarn Brewery, 2026-11-15, Rule 5.42): picking one opens the list of Chiller Templates, then of Vessels
+  ['place_Chiller', 'draw a Chiller Template in a vessel, with its hoses'], ['remove_Chiller', 'take a placed chiller off again'],
 ];
 // words that fit anywhere on a line, not only at its start
 const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['NULL', 'empty: no value'], ['and', ''], ['or', ''], ['not', '']];
@@ -44,6 +46,7 @@ const NEW_KINDS = [['value', 'a number'], ['string', 'a text'], ['bool', 'true o
 // new gGlobalValue -> new gGlobalValue gV_ (the start of a gGlobal's name comes with its word, Rule 1.24)
 const G_PREFIX = Object.fromEntries(Object.values(G_DECLARE).flatMap(d => [[d.long.toLowerCase(), d.prefix], [d.short.toLowerCase(), d.prefix]]));
 const G_TEXT = Object.fromEntries(Object.values(G_DECLARE).map(d => [`new ${d.long}`, `new ${d.long} ${d.prefix}`]));
+G_TEXT.place_Chiller = 'place_Chiller = '; G_TEXT.remove_Chiller = 'remove_Chiller = ';      // the = comes with it (Rule 5.42)
 const ON_OFF = [['true', 'on'], ['false', 'off'], ['on', ''], ['off', '']];
 const IDENT = /[A-Za-z_][A-Za-z0-9_~@°]*$/;
 const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~@°]*$/;
@@ -138,6 +141,14 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (forced && inCond && /(\btrue|\bfalse|\bon|\boff|\bnow|\d|")\s+$/i.test(pre) && !/(==|!=|<=|>=|<|>|=)\s*$/.test(pre)) return { list: JOIN.map(([text, hint]) => ({ text, hint })), typed: 0 };
   }
 
+  // place_Chiller = (a Chiller Template), (a Vessel: the Brew Kettle first) and remove_Chiller = (a Vessel) (Rule 5.42)
+  const chl = /^\s*(place_chiller|remove_chiller)\s*=\s*(?:([^,\n]*?)\s*,\s*)?$/i.exec(pre);
+  if (chl && !q) {
+    const place = chl[1].toLowerCase() === 'place_chiller';
+    if (place && chl[2] === undefined) { for (const t of W.chillers || []) add(t + ', ', 'Chiller Template', t); return done(); }
+    (W.vessels || []).forEach((v, i) => add(v, i === 0 ? 'Vessel (the Brew Kettle comes first)' : 'Vessel'));
+    return done();
+  }
   // new gGlobalValue (or new gV) typed by hand: the start of the name, gV_
   const gw = /^\s*(?:new|declare)\s+(\w+)\s+$/i.exec(pre)?.[1].toLowerCase();
   if (gw && G_PREFIX[gw] && !q) { add(G_PREFIX[gw], 'a gGlobal name starts with this'); return done(); }

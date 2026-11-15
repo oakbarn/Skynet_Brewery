@@ -67,7 +67,7 @@ Plus sur chaque question : [Nouveau Schema à partir d'un Skynet Template](157-s
 
 ## Étape 5. Un Schema vide {#step-5-an-empty-schema}
 
-**5a. Votre carte.** Un nouveau Schema vide n'a pas encore de carte (Interface). Sur la page **Devices**, appuyez sur **Add Interface**. Donnez-lui un **Name** qui a du sens pour vous (**✏ Change name**), par exemple **Hot_Side**, et un **Interface ID** de 1 à 4 lettres, par exemple **HS**. L'Interface ID commence le nom de chaque Device de cette carte. Choisissez la **Board** que vous avez. Choisissez **Simulator** pour **Connection** jusqu'à ce que la carte soit branchée, remplissez **Lost Link (s)** (10 au départ), et appuyez sur **💾 Save**.
+**5a. Votre carte.** Un nouveau Schema vide n'a pas encore de carte (Interface). Sur la page **Devices**, appuyez sur **Add Interface**. Donnez-lui un **Name** qui a du sens pour vous (**✏ Change name**), par exemple **Hot_Side**, et un **Interface ID**, par exemple **HS** (Rule 3.2 : une fois enregistré, il ne change jamais). L'Interface ID commence le nom de chaque Device de cette carte. Choisissez la **Board** que vous avez. Choisissez **Simulator** pour **Connection** jusqu'à ce que la carte soit branchée, remplissez **Lost Link (s)** (10 au départ), et appuyez sur **💾 Save**.
 
 ![Votre nouvelle Interface](help_pictures/Step_Add_Schema_10_Interface.png)
 

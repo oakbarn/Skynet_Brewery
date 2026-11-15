@@ -52,6 +52,20 @@ Un élément déverrouillé reste aussi en place quand le déplacer ferait bouge
 
 Déverrouillez aussi ces éléments (cliquez sur chacun et appuyez sur **🔓 Unlock**), ou appuyez sur **🔓 Unlock All**.
 
+## No Unlock : une IP ou un raccord que Unlock All laisse de côté {#no-unlock-an-ip-or-fitting-that-unlock-all-passes-by}
+
+Une IP ou un raccord de tuyau (un Quick Disconnect, un té, un coude, une Manual Valve ...) peut être réglé sur **No Unlock**
+(pas de déverrouillage, règle Skynet 2.12). **🔓 Unlock All** le laisse alors de côté, et il reste à sa place pendant que vous
+déplacez tout le reste.
+
+1. Dans **Edit layout**, double-cliquez sur l'IP ou le raccord pour ouvrir ses Properties.
+2. Activez **No Unlock** et appuyez sur **Save**. Cela le verrouille aussi.
+3. Appuyez sur **Save layout**.
+
+Pour le déplacer plus tard, cliquez dessus et appuyez sur son propre **🔓 Unlock**. Déverrouiller une cuve ne déverrouille pas non
+plus une IP de port réglée sur No Unlock. Désactivez **No Unlock** dans ses Properties pour qu'il marche de nouveau comme tous
+les autres éléments.
+
 ## Equipment Profile verrouillé {#locked-equipment-profile}
 
 Quand l'**Equipment Profile** du Tab est verrouillé, son équipement, ses IP et ses tuyaux ne peuvent pas changer du tout, donc leurs cadenas non plus. **🔒 Lock All** et **🔓 Unlock All** les sautent alors et disent combien ils en ont sautés. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
