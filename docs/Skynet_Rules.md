@@ -1931,6 +1931,27 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
 ---
 
 
+5.41 **A Chiller is the same as a pipe, no more, no less** (OakBarn Brewery, 2026-11-15: "A chiller is not really a Device but a
+Special Widget with IOs"; "a chiller could be hooked up quite a few different ways in a manifold and would need to be flexible as
+where the flow supply came from, like a permanently open valve"; "Treat a Chiller like a pipe. IPs at the Inlets Outlets. No on/off,
+simply flow. It would need a source for flow"; "Chiller same as a pipe, no more, no less"; thread "Make the Chiller a flexible
+Special Widget", Help 14).
+- A **Chiller** (Plate chiller, Counterflow chiller, the Copper Counterflow Chiller, an Immersion coil or a Chillzilla) is a
+  **Widget** with no Port (Rule 1.2). It has **IPs at its inlets and outlets** and nothing else.
+- **No On / Off.** It has no On / Off state, and a Process never turns it on or off.
+- **Flow simply passes through it, the same as a pipe:** it flows when a **source** upstream pushes flow in (a running pump, or
+  an open Tap Water Valve, Rule 5.33), and stops when nothing does. Where the flow comes from is up to how it is piped, so it can
+  be hooked up any way in a manifold, including from a valve that is always left open.
+- **Each path is its own pipe.** A plate or counterflow chiller has two paths that never mix, **Wort In to Wort Out** and **Water
+  In to Water Out** (4 IPs), each with its own source. An Immersion coil has one path, **In to Out** (2 IPs); a Chillzilla has two
+  (4 IPs).
+- **Nothing a pipe doesn't have:** no Size, Units or Dead space in its Template, and no built-in Thermowell. A probe for the chilled
+  wort goes in the pipe beside it (a probe tee, Rule 5.30).
+- The Brew Day's **Chiller cooling water** job (Rule 16.3) picks the **source** of the water (the valve or pump that feeds Water In),
+  never the Chiller.
+- **BruControl Import:** BruControl has no chillers, so nothing is imported as one; the Importer's Build page is the Panel's, so a
+  Chiller works the same there.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
@@ -4473,6 +4494,7 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
 
 ## Change log
 
+- 2026-11-15: Added Rule 5.41 (OakBarn Brewery: "Chiller same as a pipe, no more, no less"): a Chiller is a Widget with IPs at its inlets and outlets, no On / Off; flow passes through each path from a source upstream, like a pipe. Chiller Templates lost Size, Units and Dead space; the Plate chiller lost its built-in Thermowell. Help 14 (and French). Checked against the BruControl Import program: no chillers are imported; its Build page is the Panel's, so the same. (thread "Make the Chiller a flexible Special Widget")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Failed to fetch" on the first admin account after the Setup): on Windows the Brain was ended together with Skynet Brewer, which ends a moment after opening the panel window, so the page drew but nothing it sent was answered. The Brain (and a Brain starting itself again after Standby or Start) is now started so it keeps running by itself. Both programs (the Importer the same way).
 - 2026-11-14: Added Rule 6.33 Flame Out safety for gas burners (OakBarn Brewery: "WE could have a sfety built in if the temperature decrease while a Gas Burner is on"; "Yes to both"; "Also in Skynet have the software backup of decreasing Temp (with smoothing for false feedback)"), and the gas half of Rule 6.20 (OakBarn Brewery: "Text is good"): "⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional." Help 197 (and French) with two Process snippets (OakBarn Brewery: "create a Process snippet for gas valve control and softeare backup"). Checked against the BruControl Import program: it shares public/flameout.js; its "Turn on the Flame Out safety for this burner?" question is built in its own thread. (thread "Add gas burner flame-out safety")
 - 2026-11-14: Rule 6.32 item 1 (OakBarn Brewery: "Full installer only starts the Brain", "The desktop only points to the Brain"): the panel window is opened by Skynet Brewer (the program double-clicked), not by the Brain in the Background, so it shows; new **Skynet Panel** shortcut on the Desktop and Start menu; the Setup's last page says "Start the Skynet Brain and open the Skynet Panel now". Help 95, 122 (and French). Both programs (the Importer's window the same way).
