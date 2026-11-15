@@ -5280,7 +5280,7 @@ const IFACE_PUMP_TIP = ['The Arduino board this Pump Device is connected to. An 
   '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Turn on Red Pump) -> 5 V or 3.3 V signal sent to -> SSR or Contactor (Hook the 120 VAC Here) -> Pump Gets Power',
   'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the SSR. An electrician wired the SSR and set up the Red Pump Circuit. If there is an On/Off switch on the Pump, it must be left On.',
   'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The pump selected is a Blichmann RipTide and it is an On/Off type of hardware. The Hardware Type is DO@Pump: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the SSR), and if Off the SSR no longer sends power. Similar to a Light Switch.',
-  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is from 1 to 4 letters. Our example Interface is: BM: Brewery Mega',
+  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. Our example Interface is: BM: Brewery Mega',
   'The ID is important as it is Part of the Suggested Name.\n⟦BM⟧_15_DO@Pump_Red~Pump_BH',
   'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
@@ -5295,7 +5295,7 @@ const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeis
 const TAB_PUMP_TIP = ['The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.',
   'A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).\nAnd like a Star Ship, there is an Alternate Bridge and other Compartments of decks.\nThere can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the Bridge.',
   'Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to control things, but only a workshop to build something to be placed on a Normal User Tab.',
-  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit, but it must be unique, and once saved only an Admin can change it (it is best set once and left alone). It is exactly 2 letters. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Tab IDs follow Rule 3.2. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Pump_Red~Pump_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD,
   'You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.\n➕ Add new Tab… makes a new Tab and comes back here and sets it as the default for the Build Tab.'].join('\n\n');
 // The Pump's Device Type balloon (the same PDF). The BruControl comparison he wrote with it is for the Importer only: it waits in
@@ -6822,7 +6822,7 @@ function makeTab() {
   const bad = elementNameError(n, 'Tab'); if (bad) { toast(bad, true); return null; }      // the same name rules as every other name (Rule 3.11)
   if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
-  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
+  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // a unique suggestion (Rule 3.2); it can be changed in Tab settings until the first Save
   const w = { name: n, id, ...newTabSize(), ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
   if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Background Profile's color wins
   draft.workspaces.push(w); return w;
@@ -6830,7 +6830,7 @@ function makeTab() {
 $('#addWs').onclick = () => {
   const w = makeTab(); if (!w) return;
   wsName = w.name; renderTabs(); renderWs();
-  toast(`Tab ${w.name} added, Tab ID ${w.id} (change it in Tab settings)`);
+  toast(`Tab ${w.name} added, Tab ID ${w.id}. Change it in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
 };
 // ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
 // built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
@@ -10449,9 +10449,11 @@ function checkWidgetCode(it) {
 async function editWorkspace() {
   if (!editing) return;
   const w = curWs(); const work = clone(w), before = clone(w);
+  // a saved Tab's ID is never changed, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2); a new Tab's suggestion can be edited until the first Save
+  const idLocked = !!(w.id && w._ref && (S.config.workspaces || []).some(x => x._ref === w._ref && x.id));
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
-    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly~Sparge_SP)', 'text'],
+    idLocked ? ['id', 'Tab ID (saved: it never changes, Rule 3.2)', 'ro'] : ['id', 'Tab ID (follows Rule 3.2; once saved it never changes)', 'text'],
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
@@ -10483,7 +10485,7 @@ async function editWorkspace() {
       if (isHiddenTab(w) && !String(work.name).startsWith(HIDDEN_TAB)) work.name = HIDDEN_TAB + String(work.name).trim().replace(/^hidden_?/i, '');   // a Hidden_ Tab's name always starts with Hidden_
       if (work.name === HIDDEN_TAB) throw new Error('Type a name after Hidden_');
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
-      work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
+      work.id = idLocked ? w.id : work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
     } catch (e) { toast(e.message, true); return null; }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
@@ -11560,12 +11562,8 @@ function renderDevices() {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realConnection, ...rest }) => ({ ...rest, connection: realConnection }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
-    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
-      onchange: guard(async ev => {
-        const id = cleanInterfaceId(ev.target.value);
-        if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
-        await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, id } : x) }); await load(); toast(`Interface ID is now ${id}_ (Devices made before keep their names)`);
-      }) });
+    // a saved Interface's ID never changes, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2)
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 4, disabled: true, title: 'Interface ID (Rule 3.2): it starts the suggested name of each Device on this Interface (MB_25_...). Once saved it never changes, not even by an Admin. To use another ID, make a new Interface.' });
     // board and connection rating (public/links.js): USB best; a heating Device on a WiFi link is flagged
     const boardSel = h('select', { disabled: !can('admin'), title: 'The board, for the connection rating', onchange: guard(async ev => {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, board: ev.target.value } : x) }); await load();
@@ -11654,9 +11652,8 @@ $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaul
 // pretend Mega a Skynet Schema Template makes when there is no real Interface. It explains the Interface ID: it starts every Suggested Device name.
 const LINK_CHOICES = [['serial', 'USB'], ['ethernet', 'Ethernet (wired)'], ['esp32', 'WiFi (a Mega: through an ESP32 bridge)'], ['simulator', 'Simulator (no board yet: pretend)']];
 const IFACE_ID_NOTES = [
-  'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_DO@Pump_Wort__HS for a pump on pin 25 of the Interface HS.',
-  'It must be unique: no two Interfaces may have the same ID.',
-  'Set it once, now, and do not change it. Devices made before a change keep the old ID in their names, so a change leaves a mix of names.'];
+  'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_DO@Pump_Wort_HS for a pump on pin 25 of the Interface HS.',
+  'It follows Rule 3.2: once saved it never changes, not even by an Admin.'];
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
 // ---- Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
@@ -11743,8 +11740,8 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
       ...(intro ? [['_in', intro, 'note']] : []),
       ['_a', 'An Interface is a board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 and the like.', 'note'],
       ...(renamable ? [['_nh', 'Give it a name that means something to you: Hot Side, Fermentation, your brewery name.', 'note'], ['name', 'Name', 'text']] : [['_nm', `Name: ${o.name} (Devices use it, so it stays)`, 'note']]),
-      ['id', 'Interface ID (1 to 4 letters)', 'text'],
-      ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note'],
+      ...(old?.id ? [['id', 'Interface ID (saved: it never changes, Rule 3.2)', 'ro']] : [['id', 'Interface ID (follows Rule 3.2)', 'text'],
+        ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note']]),
       ...IFACE_ID_NOTES.map((t, i) => ['_id' + i, '• ' + t, 'note']),
       ['board', 'Board', 'sel', BOARDS, true],
       ['connection', 'Connection', 'sel', LINK_CHOICES, true],
@@ -11767,9 +11764,8 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
         if (S.config.devices.some(d => d !== old && d.name.toLowerCase() === name.toLowerCase())) throw new Error(`There is already an Interface called ${name}`);
         const bad = elementNameError(name, 'Interface'); if (bad) throw new Error(bad);
         const taken = S.config.devices.filter(d => d !== old).map(x => x.id), typed = String(w.id ?? '').trim();
-        const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
+        const id = old?.id ? old.id : typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);      // a saved ID never changes (Rule 3.2)
         if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
-        if (old?.id && id !== old.id && ifaceUsers(old.name) && !confirm(`Change the Interface ID from ${old.id}_ to ${id}_?\n\n${ifaceUsers(old.name)} Device(s) on this Interface keep ${old.id}_ in their names, so the names will be a mix. It is best to set the ID once and leave it.\n\nOK = change it anyway.  Cancel = keep ${old.id}_.`)) { w.id = old.id; continue; }
         const d = { ...(old || {}), name, id, connection: w.connection, board: w.board };
         delete d.port; delete d.host; delete d.baud; delete d.realConnection;
         if (w.connection === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
@@ -13897,7 +13893,7 @@ async function slotPorts(tab) {
   const o = { iface: S.config.devices[0].name };
   if (await dialog(`"${p.name}" on the Tab ${tab}: give its pumps and valves their Ports`, [
     ['_n', `${pvCount(todo.length)} of this Equipment Profile ${todo.length === 1 ? 'has' : 'have'} no Port in this Schema yet: ${todo.map(d => d.look.label || '?').join(', ')}. Each one takes the next free Port of the Interface you pick, with its look and place from the profile. You can change a Port after in its Properties.`, 'note'],
-    ['iface', 'Interface (the board they are wired to)', 'sel', S.config.devices.map(d => [d.name, d.name])]], o) !== 'ok') return;
+    ['iface', 'Interface (the board they are wired to)', 'sel', S.config.devices.map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])]], o) !== 'ok') return;
   readFields(o);
   const iface = S.config.devices.find(d => d.name === o.iface);
   const tabId = w.id || defaultTabId(tab, S.config.workspaces.map(x => x.id).filter(Boolean));
@@ -13983,7 +13979,7 @@ async function eqInterview(pre = {}) {
     () => ['1. Start', [['name', 'Name of the Equipment Profile (for example "My Hot Side")', 'text', null, false, 'b'],
       ['tab', 'The Tab it is for', 'sel', [...free.map(n => [n, 'Tab ' + n + (drawn(n) ? ' (it has vessels: they stay, the new ones go beside them)' : '')]), ['__new', '➕ A new Tab (name it below)']]],
       ['newTab', 'Name of the new Tab (only for ➕ A new Tab)', 'text'],
-      ['iface', 'Interface (the board the pumps and valves are wired to): each one takes its next free Port', 'sel', (S.config.devices || []).map(d => [d.name, d.name])],
+      ['iface', 'Interface (the board the pumps and valves are wired to): each one takes its next free Port', 'sel', (S.config.devices || []).map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])],
       ['_u', `Units: ${UNIT_SYSTEMS[units]} (from ☰ Menu > Default settings).`, 'note']]],
     () => ['2. How many Vessels?', [['nV', 'How many vessels', 'sel', Array.from({ length: IV_MAX.vessels }, (_, i) => [String(i + 1), String(i + 1)])]], { nV: String(a.vessels.length) }],
     () => ['3. The type of each Vessel', a.vessels.map((v, i) => ['t' + i, `Vessel ${i + 1}`, 'sel', IV_TYPES.map(t => [t, t])]), Object.fromEntries(a.vessels.map((v, i) => ['t' + i, v.type]))],

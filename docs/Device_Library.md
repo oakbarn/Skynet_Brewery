@@ -24,8 +24,8 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 
 Example: `MB_25_DO@Valve_E_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID Valve_E, Label "Fly/Sparge In", Tab SP).
 
-- **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
-- **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
+- **Interface ID:** follows Rule 3.2 (for example MB).
+- **Tab ID:** follows Rule 3.2 (for example SP).
 - **Label in the name:** spaces become `~` (2026-11-07, so `_` only separates the parts); the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
 - **Port in the name:** analog pins use BruControl numbers (A0 = 54 ... A15 = 69, so A5 = 59). A OneWire probe uses its virtual port (700+). An ADS1115 channel is ADS0 to ADS3.
 - **Unique:** a name already in use gets `_2`, `_3` ... after the Label. No spaces in Device names.
