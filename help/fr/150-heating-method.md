@@ -86,25 +86,49 @@ La façon dont la résistance est câblée décide quelles méthodes ont du sens
 
 ## Sa méthode principale et les autres méthodes permises {#its-main-method-and-the-other-methods-allowed}
 
-Quand vous la construisez (et plus tard dans ses Properties), la partie **Heating method** a trois lignes :
+Quand vous la construisez (et plus tard dans ses Properties), la partie **Heating method** a ces lignes :
 
-- **Current Method** : la méthode où elle est. La fenêtre s'ouvre sur celle où elle est maintenant. À côté, **Short Label** passe ses
-  bulles en noms courts (DO, DutyC, HYS ...).
-- **Hysteresis** : la **Temperature Probe** et son **Setpoint** sont sur une ligne. **Direction** est Heating, avec l'**Offset (-)** à côté (-1 la met en marche 1 degré sous le Setpoint),
-  choisi dans une liste (chaque demi-degré que permet son Hardware Controller). **Predictive** a le **Delay** à côté. Un petit dessin
-  à côté de chacun montre la température (rouge) allant entre le Setpoint (bleu) et l'Offset (jaune).
+- **Current Method** : la méthode où elle est. La liste ne contient que les méthodes utilisées (voir Use Method plus bas). La fenêtre
+  s'ouvre sur celle où elle est maintenant. À côté, **Short Label** passe ses bulles en noms courts (DO, DutyC, HYS ...). Le **⬢**
+  rouge au bout de la ligne ouvre les **Settings de la Current Method** (par exemple Hysteresis Settings).
 - **On / Off** : sur la même ligne, une petite image de la résistance. Un clic la met en marche ou à l'arrêt tout de suite, comme un clic dessus sur
   le Tab. On / Off est la résistance elle-même ; **Direct** est une méthode (simplement marche ou arrêt), donc une résistance en Direct en marche chauffe à 100 %.
-- **Enabled** : un interrupteur sous le nom de chaque méthode. **Une méthode doit être activée pour être utilisée.** La Current Method et **Direct**
-  (pleine puissance) sont toujours activées. La fenêtre, les bulles, les Method Clones et les Processes ne proposent que celles activées, et un Process qui demande
-  une autre s'arrête avec un message simple.
-- **Control Method** : une bulle pour chaque méthode activée, la Current Method en **rouge**, les autres en **jaune**. Ce sont les mêmes
+- **Method Settings** : un bouton **⬢** pour chaque méthode (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), avec **✔ Used** ou
+  **Not used** dessous. **Chaque méthode a sa propre fenêtre de réglages** : cliquez sur son ⬢ pour l'ouvrir. Voir [Les réglages de chaque méthode](#each-method-s-settings).
+- **Control Method** : une bulle pour chaque méthode utilisée, la Current Method en **rouge**, les autres en **jaune**. Ce sont les mêmes
   bulles que sous la résistance sur son Tab, et elles marchent ensemble : **cliquez sur Duty Cycle ici ou sur le Tab** et Duty Cycle devient la
   Current Method aux deux endroits, en rouge, et la précédente passe en jaune.
 
 Une résistance **intégrée à un Vessel Device ou à un RIMS tube** marche de même : ouvrez ses Properties (double-cliquez dessus, ou sur son ⚙) pour
 sa Heating method et les autres méthodes permises. Les anciens Schemas dont la résistance intégrée était un Device Hysteresis ou PID séparé
 sont changés en Heating Element au chargement, en gardant son nom et ses réglages.
+
+## Les réglages de chaque méthode {#each-method-s-settings}
+
+Chaque méthode garde ses propres réglages, donc vous pouvez préparer la méthode suivante avant d'y passer. Exemple : l'élément du HLT
+est en Hysteresis. Pour faire bouillir en Duty Cycle, cliquez sur **⬢ Duty Cycle**, mettez **Use Method** sur On, réglez le
+**Duty cycle %** et cliquez sur **💾 Keep**. Puis **💾 Save** les Properties. Duty Cycle est alors dans la liste Current Method, il a une
+bulle, et un Process peut y passer.
+
+Sa fenêtre a son titre, **✖ Cancel** et **💾 Keep** figés en haut pendant que le reste défile (pas de boutons en bas). Keep met les
+réglages dans les Properties ; ils sont enregistrés quand vous faites Save dans les Properties.
+
+- **Use Method** (un interrupteur, en haut) : **On** permet de choisir la méthode : dans la liste Current Method, par sa bulle ici et
+  sur le Tab, par un Method Clone et par un Process. **Off** : elle ne peut pas être choisie, et **tous ses autres réglages sont
+  cachés** (ils sont gardés pour plus tard). **Direct** et la **Current Method** sont toujours sur On (grisés). Quand vous choisissez une
+  nouvelle Current Method, la précédente reste utilisée.
+- **Direct** : rien à régler ; elle est simplement tout On ou tout Off.
+- **Duty Cycle** : **Duty cycle %** et **Cycle time (ms)**.
+- **Hysteresis** : la **Temperature Probe** et son **Setpoint** sur une ligne. **Direction** est Heating, avec l'**Offset (-)** à
+  côté (-1 la met en marche 1 degré sous le Setpoint), choisi dans une liste (chaque demi-degré que permet son Hardware Controller).
+  **Predictive** a le **Delay** à côté. Un petit dessin à côté de chacun montre la température (rouge) allant entre le Setpoint (bleu)
+  et l'Offset (jaune).
+- **PID**, **Deadband** et **Precise** : la **Temperature Probe** et son **Setpoint**, puis leurs propres nombres (Kp, Ki, Kd, Max
+  output ...), **Reversed** (refroidissement) et **PWM pin**. Precise dit aussi si sa sonde peut voir 0,1 degré.
+
+La **Temperature Probe** et le **Setpoint** sont partagés : réglez-les dans la fenêtre d'une méthode et les autres utilisent les mêmes.
+
+Choisir une méthode, ou mettre son Use Method sur On, **ne met jamais la résistance en marche** (Règle 6.19).
 
 ## Boutons de méthode en un clic {#one-click-method-spots}
 
@@ -150,7 +174,12 @@ MB_25_DO@H_Element_HLT_BH.HYS
 MB_25_DO@H_Element_HLT_BH.DutyC
 ```
 
-Les codes sont **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** et **DeadB** (Deadband). L'éditeur de Process les propose après le nom.
+Les codes sont **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) et **PREC** (Precise). L'éditeur de Process les propose après le nom.
+
+**Seulement les méthodes utilisées :** un Process ne peut passer qu'à une méthode dont le **Use Method** est sur On (Direct et la
+Current Method le sont toujours). L'éditeur de Process ne propose que celles-là, et sa vérification montre une erreur simple avant de
+brasser, par exemple : *hE_HLT_1 may only use Direct, Duty Cycle, Hysteresis: the Use Method of PID is Off*. Si une telle ligne tourne
+quand même, le Brain la refuse avec le même genre de message.
 
 ## Son nom {#its-name}
 
@@ -178,9 +207,10 @@ Elle est câblée directement à son port, vers un SSR ou un contacteur, ou vers
 
 ## Dans ses Properties {#in-its-properties}
 
-Sous **Heating method** : la méthode avec laquelle elle **démarre**, la **Temperature Probe** qu'elle lit (Hysteresis, PID, Deadband et Precise), et
-les réglages de cette méthode. Choisissez une autre méthode et ses réglages s'affichent ; les autres sont gardés. Un PID ou un Deadband peut aussi être
-**Reversed** (refroidissement) et utiliser une **broche PWM**. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
+Sous **Heating method** : la méthode avec laquelle elle **démarre** et **Method Settings**, une fenêtre ⬢ pour chaque méthode avec
+son interrupteur **Use Method**, la **Temperature Probe** qu'elle lit (Hysteresis, PID, Deadband et Precise) et les réglages de cette
+méthode ([Les réglages de chaque méthode](#each-method-s-settings)). Un PID, un Deadband ou un Precise peut aussi être **Reversed**
+(refroidissement) et utiliser une **broche PWM**. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
 mêmes réglages.
 
 ## Un port d'Interface, un Device {#one-interface-port-one-device}
