@@ -16,9 +16,10 @@ The pictures themselves are **not** in this repo (it is public). OakBarn Brewery
 Each is a white symbol on a coloured square, 640 x 512 pixels.
 
 OakBarn Brewery (2026-11-15): "I generally did not use them but I know user who did. I think there are some in Tartan other users did
-so we have to come up with our own 11." So **every one of the 11 gets an OakBarn picture**, one for one: 9 new drawings, drawn from scratch
-(not traced or copied), and for Pump and Kettle the brewer picks or creates one of Skynet's own (OakBarn Brewery, 2026-11-15:
-"actally for Pump need to select one of our Pumps!" and "Sam with Kettle, Pick or create in impoter"). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
+so we have to come up with our own 11." So **every one of the 11 gets an OakBarn picture**, one for one: 8 new drawings, drawn from scratch
+(not traced or copied); for Pump and Kettle the brewer picks or creates one of Skynet's own, and for On-Off the brewer chooses a
+Skynet Boolean Widget (OakBarn Brewery, 2026-11-15: "actally for Pump need to select one of our Pumps!", "Sam with Kettle, Pick or
+create in impoter" and "snd and On Off choose a Skynet Boolean Widget"). Same shape as BruControl's (160 x 128, the same 5 x 4 look) so it sits in the same spot on an imported Tab:
 a rounded coloured square with a white symbol. Names follow the Skynet name characters (letters, numbers, _ only).
 
 | BruControl picture | What it shows | New OakBarn drawing | What ours shows |
@@ -26,7 +27,7 @@ a rounded coloured square with a white symbol. Names follow the Skynet name char
 | Valve.png | Valve symbol (bow tie) | `Skynet_Icon_Valve.svg` | Valve with a handle on top |
 | Pump.png | Impeller in a circle | **The brewer picks or creates it in the Importer** (see below) | One of Skynet's own pumps |
 | Kettle.png | Pot | **The brewer picks or creates it in the Importer** (see below) | One of Skynet's own vessels |
-| On-Off.png | Power button symbol | `Skynet_Icon_On_Off.svg` | ON slide switch |
+| On-Off.png | Power button symbol | **The brewer chooses a Skynet Boolean Widget in the Importer** (see below) | A Switch, Slider, Checkbox, Lighted Button or LED (Rule 1.20) |
 | Liquid Temp.png | Thermometer in liquid | `Skynet_Icon_Liquid_Temp.svg` | Probe dipping into a pot of liquid |
 | Clock.png | Clock face | `Skynet_Icon_Clock.svg` | Stopwatch |
 | Fan.png | Fan blades in a circle | `Skynet_Icon_Fan.svg` | Four blade fan in a square housing |
@@ -41,14 +42,16 @@ chain ones"), so they go out in the same Media Setup update, each with its row i
 The swap plan itself stays here in the Sandbox until the Big Merge.
 Like every new picture, they go in the Image Library only when OakBarn Brewery says so.
 
-## Pump and Kettle: the brewer picks or creates one (Interview question)
+## Pump, Kettle and On-Off: the brewer chooses (Interview question)
 
-A BruControl Pump or Kettle picture is not swapped for one fixed picture. When the Importer finds one, it asks the brewer
+A BruControl Pump, Kettle or On-Off picture is not swapped for one fixed picture. When the Importer finds one, it asks the brewer
 (an Interview question, Rule 15.4) to choose:
 
 - **Pump:** pick one of Skynet's own pumps (the RipTide, March, Chugger, KegLand, Topsflo ... pictures in Images/Skynet/Pumps), or
   create one with the Pump Device (its Template and Cover Color).
 - **Kettle:** pick one of Skynet's own vessels (Images/Skynet/Vessels), or create one with the Vessel Device Builder (Rule 19.5).
+- **On-Off:** choose a Skynet Boolean Widget (Rule 1.20): Switch, Slider, Checkbox, Lighted Button or LED. The item becomes that
+  Widget, drawn by Skynet, so it needs no picture.
 
 The question names the BruControl item and Tab so the brewer knows which one it is. Until answered, the item keeps a Placeholder.
 Not built yet: show OakBarn Brewery the question wording before building (like the other Interview questions in
@@ -80,7 +83,7 @@ Fingerprints of the copies OakBarn Brewery sent:
 
 What happens to a caught picture:
 
-- It is **not copied**. The item points to its new OakBarn drawing instead (Pump and Kettle: the one the brewer picked or created).
+- It is **not copied**. The item points to its new OakBarn drawing instead (Pump, Kettle and On-Off: what the brewer chose).
 - The import report lists each swap: "BruControl stock picture Valve.png swapped for Skynet_Icon_Valve.svg".
 - The brewer's BruControl files are never touched (Rule 15.4: originals stay where they were).
 
