@@ -43,4 +43,5 @@ console.log('corner IP side set by the joined pipe: ok');
 // Rule 18.37 item 2 (changed 2026-11-15): a Left/Right switch leaves the Inlet IP and Outlet IP where they are; only the inside Hose or Pipe is drawn again
 assert.ok(!app.includes('mirrorPumpSpots') && app.includes('keepPumpSpots('), 'the IPs stay put on a flip');
 assert.match(app, /const was = pumpSpots\(\{ \.\.\.obj, flipH: !flipH, flipV, pumpIn: ins\[0\]\.value, pumpOut: ins\[1\]\.value \}\)/, 'a (start) spot is pinned where it was');
+assert.ok(app.includes("root?.querySelector(`input[data-k=\"${k}\"]`)") && app.includes("h('input', { type: 'hidden', 'data-k': k, 'data-kind': 'text', value: obj[k] || '' })"), 'the spots ride hidden in the Orientation');
 console.log('pump IPs stay put on a flip: ok');
