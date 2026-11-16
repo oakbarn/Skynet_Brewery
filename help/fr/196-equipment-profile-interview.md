@@ -21,7 +21,7 @@ Lancez-le depuis **☰ Menu > Equipment Profile > Open > Add new ...** (ou **Add
 
 ## 🔨 Build
 
-**🔨 Build** fait le profil, le donne au Tab et met tout sur le **🔨 Build Tab** ([Build Tab](55-build-tab)). Chaque pompe et vanne motorisée est un vrai Device et prend le prochain Port libre de l'Interface. Ensuite appuyez sur **💾 Save Build ... > Move to Tab**, puis **Save layout**. Les tuyaux ne sont pas dessinés : dessinez-les comme les vôtres sont branchés (**Draw pipe**).
+**🔨 Build** fait le profil, le donne au Tab et met tout sur le **🔨 Build Tab** ([Build Tab](55-build-tab)). Chaque pompe et vanne motorisée est un vrai Device et prend le prochain Port libre de l'Interface. Ensuite appuyez sur **✅ Finish Build ... > Move to Tab**, puis **Save layout**. Les tuyaux ne sont pas dessinés : dessinez-les comme les vôtres sont branchés (**Draw pipe**).
 
 ## Utiliser le même plan dans un autre Schema {#use-the-same-layout-in-another-schema}
 

@@ -408,6 +408,13 @@ function processWords() {
   };
 }
 
+// keep (or, with null, let go of) the unfinished Build: a Build Tab with the Devices, Widgets and graphics on it
+function setBuildDraft(v) {
+  const good = v && typeof v === 'object' && v.workspace && typeof v.workspace.name === 'string' && Array.isArray(v.elements) && Array.isArray(v.graphics);
+  if (good) store.config.buildDraft = { workspace: { ...v.workspace, build: true }, elements: v.elements, graphics: v.graphics };
+  else delete store.config.buildDraft;
+  store.writeConfig();
+}
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
@@ -734,6 +741,13 @@ async function route(req, res) {
     hold(el.name, down);
     return ok(res);
   }
+  // An unfinished Build (Rule 4.1, OakBarn Brewery, 2026-11-16: "I want to add things to an existing Build and leave in Build Mode"):
+  // kept in the Schema as buildDraft, never run or shown on Brew Day, until ✅ Finish Build puts it on a Tab or it is thrown away
+  if (p === '/ui/build' && m === 'PUT') {
+    const body = await jsonBody(req, true);
+    setBuildDraft(body.buildDraft);
+    return ok(res, { ok: true });
+  }
   if (p === '/ui/layout' && m === 'PUT') {
     const body = await jsonBody(req, true);
     // each item gets the hidden key of the item it stands for; a copy gets a new one and remembers its first item (lib/keys.js)
@@ -787,6 +801,7 @@ async function route(req, res) {
     // the browser already changed what points to a name it renamed; a clone renamed here needs the same done on the Brain
     if (clones.size) for (const g of body.graphics ?? store.config.graphics) renameGraphicRefs(g, clones);
     store.saveLayout({ ...body, renames });
+    if ('buildDraft' in body) setBuildDraft(body.buildDraft);      // an unfinished Build is kept, never run (Rule 4.1)
     if (body.devices) { store.config.devices = body.devices.map(d => ({ ...d })); store.writeConfig(); hw.restart(); }
     const out = { ok: true };
     if (renames.size) {

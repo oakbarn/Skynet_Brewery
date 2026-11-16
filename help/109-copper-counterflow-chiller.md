@@ -21,7 +21,7 @@ Draw a pipe to an IP and its end snaps on (IP snap, 10 px). The IPs stay on the 
 
 1. Open the **🔨 Build Tab** (new Widgets are made there first).
 2. ☰ Menu > **Equipment Templates**, pick **Copper_Counterflow_Chiller** and put a copy on the Build Tab (or **Add equipment ➕** on the Edit layout bar).
-3. Pipe it up, then **Save Build** to send it to its Tab.
+3. Pipe it up, then **Finish Build** to send it to its Tab.
 
 It is a Skynet Template: its picture and port places are set (fixed). Its Type is **Plate chiller, Counterflow** with **MPT 1/2"** ports, the same as the other counterflow chillers.
 

@@ -489,7 +489,7 @@ top and no bottom row; Keep is blue like Save was and puts the settings back int
 Pop-ups of other dialogs keep Save and their bottom row for now. **Any dialog that is updated** (OakBarn Brewery, 2026-11-14:
 "Apply the Freeze to any dialog that is updated"; "Freeze top and get rid of bottom buttons"): from now on, each time a dialog or pop-up is changed, it gets the frozen top too
 (its title and Cancel and Save, or its buttons, stay at the top while the rest scrolls; the bottom row is not shown). Done so far: the
-Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37); the ☰ Menu > Default settings Tab (2026-11-16, Rule 2.42). Dialogs not changed keep their top and bottom rows: "Once I am
+Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37); the ☰ Menu > Default settings Tab (2026-11-16, Rule 2.42); the ☰ Menu > Pump Profile tab and the other profile tabs that share its screen (Valve, Tab Background, Mash, Boil, Water Profile; 2026-11-16, OakBarn Brewery: "bring up to Blickman Model"). Dialogs not changed keep their top and bottom rows: "Once I am
 satisfied with the Blickmann Model, we do a global update as limited by the instructions"; "I will likely do only the Pump
 ones first" (OakBarn Brewery, 2026-11-14). **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
@@ -503,6 +503,13 @@ Need"). While **Edit layout** is on (Build mode):
 - the **Label Attributes** Dialog shows the Font, Fore Color and Back Color the Label has now (its own, the Tab Style, then Default
   settings), like Font Size, and keeps following those defaults until one is changed; its Cancel and Save are at the top only.
 **Both programs:** the BruControl Import's Build page is the same Edit layout.
+
+2.53 **A rare action may take a second click, and what it throws away can be put back** (OakBarn Brewery, 2026-11-16: "Always good to
+have a Restore in some case even if violates the On Click Rule, but it is something you only do rarely so fits 2 click rule any
+way"). What you do every day stays one click away (Rule 2.44). Something done only now and then, and above all something that throws
+work away, may take a second click (a Throw away? question, or an ↩ Undo right after it). First use: 🗑 Discard Build on a kept Build
+(Rule 4.1) is one click, and **↩ Undo** shows for a few seconds after it. This is not a Confirmation Widget (Rule 1.28): those stand
+for something on the brewery done by hand.
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -988,6 +995,37 @@ pick. Only how it shows changes: the value a Process reads is the same. Both pro
 Format, and a Time or DateTime Global's Format rides along in its Globals list for when Globals are imported (each becomes a
 Time or DateTime Widget with that format). Help 176.
 
+2.54 **"✔ Saved" for 2 seconds** (OakBarn Brewery, 2026-11-16: "When something is saved but just stays on same screen Pop Up a
+Quick "Saved" Dialog up for 2 seconds and then goes out on its own. Pump Profile was where I was testing"). Every **Save** that keeps
+you on the same screen (a ☰ Menu tab such as a Pump, Valve, Mash, Boil, Water or Tab Background Profile, Default settings, the
+Equipment Profile, the Recipe, Settings > Panel settings, Contact, Sending, Pop-ups, MQTT and voice, Simulator, Password rules, the
+Probe index, the Brew Process, a Template, Schema.json, a Process saved in the editor with no problems) shows a **✔ Saved** box in the
+middle of the screen, with what was saved under it, for **2 seconds**; it then goes away on its own. It is a notice, not a question
+(Rule 2.44): nothing to click, and it never stops you working. It is the same notice box every short note uses (OakBarn Brewery,
+2026-11-16: "There already is a small save that pops up at the Bottom ... Change its background and Middle of Screen for these types of
+Info or Warnings and Larger. It was small and I did not even see it"): every short info, warning or "✔ Saved" shows big, in the middle
+of the screen, on a strong background (green for ✔ Saved, blue for info, red for a warning or problem). A Save with a problem shows
+the problem instead. The BruControl Import program's own notice keeps its look (Importer Sandbox, Rule 11.3). Help 33. **Both programs:** the BruControl Import's
+Build page shares the Panel code. (A Rule 14.4 exception, OakBarn Brewery picked "Build it now".)
+**Save, Undo and Close** (OakBarn Brewery, 2026-11-16: "Has a close button just move that next to the other buttons", "and Cancel
+as Undo?", "Good"): on a ☰ Menu tab whose Save keeps you there, the three sit together at the top: **Save** saves, shows ✔ Saved
+and stays open; **Undo** goes back to the last Save and stays open (it replaces Cancel, and asks first when there are changes);
+**Close** closes, and asks first when anything is not saved. **All the buttons sit together, frozen in the upper right corner,
+always in the same order: Delete · Save · Undo · Close · ✕**, so each one is in the same exact place on every screen (OakBarn
+Brewery, 2026-11-16: "I like to have some buttons on any Dialog in same exact place on different Dialogs. A better Option would be to
+move all the Buttons to the Upper Right and Freeze", "Do it now", "Delete Button also"; a Rule 14.4 exception). Close and the boxed ✕
+are the Menu tab's own, at the far right corner where they always were. A screen without one of the buttons leaves it out; the
+others keep their order. Done so far: Default settings, Equipment Profile (its buttons are now only at the top, frozen), Recipe, and the Pump,
+Valve, Tab Background, Mash, Boil and Water Profile tabs.
+2.55 **The purple + Add New button is for Profiles only** (OakBarn Brewery, 2026-11-16: "Need Add New Button to the Right Of the
+Open DDLB on the pump profile with the Purple + Not Frozen but does same as Add New in the DDLB which can stay", "And a Rule: Any
+Profile Like The Pump One gets the Add New Button For now that is only Profiles", "No may not use anywhere else is the rule now and
+no need to fix now, sandbox"). A Profile screen (a ☰ Menu tab with an **Open** list, like the Pump Profile) gets a **+ Add New**
+button, with a purple +, just right of its Open list. It does the same as **Add new ...** in the Open list, which stays. It is not
+part of the frozen button group (Rule 2.54). **It may not be used anywhere else.** Built so far: the Pump Profile. The other
+Profiles get it later (Panel Updates Sandbox, entry 22). Help 36. **Both programs:** the BruControl Import's Build page shares the
+Panel code.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -1124,7 +1162,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 **PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PRC** Process Widget (Rule 1.31),
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
-gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
+gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Finish Build ...
 > Move to Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Every Widget gets a Suggested Name and a Label, and the Label is never blank** (OakBarn Brewery, 2026-11-15: "All Widgets get a name and label"). Vessels, pipes, hoses and fittings keep their own name patterns (Pipe_1, Hose_1, Tee_1, Elbow_1); their Label starts as their Name in small letters (pipe_1, tee_1) and can be changed, but never left blank. A Widget made from a Template (a Chiller, Rule 5.41) gets its Suggested Name, Label and any preset .attributes from that Template. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
 alm_Hops, sw_1 ... keep working. The **BruControl Import** uses the same pattern when it brings Widgets in (Rule 15.4).
@@ -1189,11 +1227,24 @@ Process string, a `print` line, a pop-up), changes how it looks. The one list is
 
 4.1 **Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab** (OakBarn Brewery,
 2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular Tab. It will be moved to the
-Regular Tab at the End of the Build chain."). The Tab picked in its Add box (Rule 4.2) is remembered: its Suggested Name already ends
-with that Tab's ID, and its Properties' **Tab** box shows that Tab (another Tab picked there changes where it will go; it stays on
-the Build Tab). **The end of the Build chain is 💾 Save Build ... > Move to Tab** (Save layout opens it too): the Tab picked for it is
-offered first and it moves there. When the new things on the Build Tab were picked for different Tabs, each goes to its own Tab and
-the rest go to the Tab picked in Save Build.
+Regular Tab at the End of the Build chain."). **Saving never ends a Build** (OakBarn Brewery, 2026-11-16: "IT is a bug because I was
+Not finished Building. I want to add things to an existing Build and leave in Build Mode so needs to be fixed."; "Lets do A"):
+- **💾 Save layout** saves the regular Tabs. The Build stays open on the 🔨 Build Tab and you stay in Edit layout, to keep adding to it.
+- **An unfinished Build is kept on the Brain**, in the Schema, never run and never shown on Brew Day. It survives a restart and
+  comes back on the 🔨 Build Tab the next time Edit layout opens. Leaving Edit layout (with or without saving) keeps it too. Its
+  Devices keep their Ports: Available Ports never offers a Port a Device in the Build has.
+- **A kept Build that comes back says so, with one click to 🗑 Discard Build** (OakBarn Brewery, 2026-11-16: "even if the Build was
+  still in the Build mode after restarting, one click to discard"): Discard lets its Ports go, and **↩ Undo** shows for a few seconds
+  after (Rule 2.53).
+- **Only ✅ Finish Build ... ends it** (it was 💾 Save Build ...): **Move to Tab** (one Tab for the whole Build; the Tab picked in an
+  Add box is only offered first, OakBarn Brewery: "Saving to the Tab (and I might have wanted to change the tab when saving) could be
+  a nightmare for a User"), **As a Template**, **Throw it away** (asks first; its Ports go free), or **Keep building**. After Move to
+  Tab, Save layout keeps it on that Tab.
+The Tab picked in its Add box (Rule 4.2) is remembered: its Suggested Name already ends with that Tab's ID, and its Properties' **Tab**
+box shows that Tab (another Tab picked there changes the Tab offered first; it stays on the Build Tab).
+*Replaced (2026-11-16):* "The end of the Build chain is 💾 Save Build ... > Move to Tab (Save layout opens it too): the Tab picked for
+it is offered first and it moves there. When the new things on the Build Tab were picked for different Tabs, each goes to its own Tab
+and the rest go to the Tab picked in Save Build."
 - **Its spot on the Build Tab is its spot on its Tab** (OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the
   Position on the Tab it is sent to when the Build is totally complete"): the Build Tab is at least the size of that Tab, and a build
   that goes to the Tab picked for it keeps its X and Y. Sent to any other Tab, it goes to the middle of that Tab, as before (Rule 4.3).
@@ -1204,10 +1255,10 @@ the rest go to the Tab picked in Save Build.
   Nothing in it can be clicked. **🗺 Watermark On / Off** on the Edit layout bar (only on the Build Tab) turns it on or off; this
   browser remembers the choice. With nothing picked it shows the Tab every new item on the Build Tab goes to, when they all go to one.
 - **It glows until clicked** (OakBarn Brewery, 2026-11-12: "when first Moved to a Regular Tab ... we need the Border to glow red with a
-  slow pulse so easy to find. As soon as clicked, the Border reverts to normal."): each item Save Build moves onto a regular Tab has a
+  slow pulse so easy to find. As soon as clicked, the Border reverts to normal."): each item Finish Build moves onto a regular Tab has a
   slowly pulsing red glow around it until it is clicked (in Edit layout or on Brew Day). It is never saved; reloading the page ends it.
 - **📁 Templates in the Tab list** (OakBarn Brewery, 2026-11-12: "Also the Option in the Tab DDLB to send to Templates"): the Tab list
-  in the Properties of a vessel, equipment or Tab_Fitting on the Build Tab ends with **📁 Templates**; picked, Save Build ... shows
+  in the Properties of a vessel, equipment or Tab_Fitting on the Build Tab ends with **📁 Templates**; picked, Finish Build ... shows
   **As a Template** first. Only these can be Templates (Help 55, What can be a Template), so a Device's or Widget's Tab list
   does not offer it (asked 2026-11-12, Open question 15).
 *Replaced (2026-11-12):* "Every new Widget or copy of a Template is made on the 🔨 Build Tab first, then sent to a Tab. A new Device goes
@@ -1228,7 +1279,7 @@ Tab first (Rule 5.21).
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
-are done (the Label filled in, Rule 18.15). The Device starts on the 🔨 Build Tab and goes to the picked Tab at Save Build (Rule 4.1), in the middle of the Build Tab unless ☰ Menu > Default sets X and Y, and the rest of its
+are done (the Label filled in, Rule 18.15). The Device starts on the 🔨 Build Tab and goes to the picked Tab at Finish Build (Rule 4.1), in the middle of the Build Tab unless ☰ Menu > Default sets X and Y, and the rest of its
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
@@ -1250,7 +1301,7 @@ a real PWM signal), so it gets only choice 1.
 *Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
-4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
+4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Finish Build then asks "Put it
 back where it came from?". Move to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
 
@@ -1300,7 +1351,7 @@ deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per po
   **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
 - **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
-  works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
+  works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Finish Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
   still shows on row 3.
 *Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
@@ -1330,8 +1381,9 @@ Properties (a Tab's Tab settings, a Device, a Widget, a vessel, an IP) from a dr
 3. **On the Tab bar,** a double-click on a Tab's name opens its Tab settings (its first click moves to that Tab). Started from the
    🔨 Build Tab, the screen goes back to the Build Tab when Tab settings close, everything on it as it was.
 4. **➕ Add new Tab…** and **📁 Templates** in a Tab list are choices, not Tabs: a double-click on them opens nothing.
-Edit layout (Build mode, Rule 2.52) stays on the whole time; the Build Tab is only in the draft until Save Build (Rule 4.1), so
-nothing on it is lost by going to another Tab and back. **Both programs:** the BruControl Import's Build page is the same Edit layout.
+Edit layout (Build mode, Rule 2.52) stays on the whole time, so nothing on the Build Tab is lost by going to another Tab and back.
+**Save layout and leaving Edit layout never end or lose the Build** (OakBarn Brewery, 2026-11-16): it is kept until ✅ Finish Build
+(Rule 4.1). **Both programs:** the BruControl Import's Build page is the same Edit layout.
 
 ## 5. Templates and Integrated items
 
@@ -1900,7 +1952,7 @@ supply manifolds", Help 146).
   Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
 - **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
   each fitting with all its valves Manual or all Motorized to start. Its **Add box and Properties are the Pump's drill-down**
-  (Rule 18.29). It starts on the 🔨 Build Tab with its valves, and Save Build ... moves it to the Tab picked in the Add box (Rule 4.1); its Properties open.
+  (Rule 18.29). It starts on the 🔨 Build Tab with its valves, and Finish Build ... moves it to the Tab picked in the Add box (Rule 4.1); its Properties open.
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
   name (Rule 3.1), e.g. `MB_22_DO@Valve_E_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
@@ -3574,7 +3626,7 @@ details of the Broken link, and a Pop Up Dialog saying that and a button to Send
 Hover Help French"):
 - **Only the Help is translated:** the Help pages, the Hover Help balloons and the Help snippets in balloons. The screens, buttons,
   labels, menus, dropdown choices and messages stay English, in both programs, forever. A French Help page or balloon writes the name
-  of a button, box or menu in English, exactly as it is on the screen (**Save Build**, **Interface ID**), so what you read is what you see.
+  of a button, box or menu in English, exactly as it is on the screen (**Finish Build**, **Interface ID**), so what you read is what you see.
 - **Picked by 🌐 Help language** at the top of the Help page list: **English** or **Français**. The browser remembers it (the Help
   window, the panel's own Help page and the balloons follow the same choice). English is the default.
 - **French pages:** `help/fr/`, with the same file names as the English pages. They keep everything that is not words: each heading
@@ -4226,7 +4278,7 @@ until 💾 Save on the dialog. (Help 115)
    good** (Fritz, 2026-11-05: it is physical wiring, so a user almost never changes it; the Device keeps its hidden key, Rule 3.10,
    and only its Name changes, with ✏ Change name). To wire it to another board or pin, delete it and add it again. **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
    Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
-The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name); the pump starts on the 🔨 Build Tab and Save Build ... moves it to the picked Tab (Rule 4.1).
+The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name); the pump starts on the 🔨 Build Tab and Finish Build ... moves it to the picked Tab (Rule 4.1).
 (Help 115)
 
 18.14 **"Add new ..." in a dialog pauses it and comes back** (Fritz, 2026-11-04, a general Rule): when **➕ Add new ...** (a new
@@ -4846,7 +4898,7 @@ result will be the same look and feel Skynet Panel or Importer"; thread "Build t
    Heat wrap, Ceramic heat emitter, Heating Element, Light; Freezer or fridge, Glycol pump, Glycol valve). They are built in
    without a spot, beside the vessel. Then the Fermentor Control is made, named after the vessel's Label. In the Importer, a
    Fermentor Control the Import already made on that probe is built in instead of a second one. Help 182.
-Once **💾 Save Build ... > Move to Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
+Once **✅ Finish Build ... > Move to Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 19.6 **The Equipment Profile Interview** (OakBarn Brewery, 2026-11-13: "WE also need to create an interview to build an Equipment
 Profile. 1. Ask How many Vessels 2. Type of each 3. Then Chose an Vessel Device or Widget, and able to choose to build a new Vessel
@@ -4949,6 +5001,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ## Change log
 
 - 2026-11-16: Rules 5.34 and 5.40 changed (OakBarn Brewery: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): a Quick Disconnect hose end moves with one right-button hold (or finger) on its yellow ring. No pop-up when nothing flows; a warning that blocks the move only while a pump on the hose is On or liquid flows in it (closes by itself once nothing flows). Letting go keeps the end where it is (on an IP, a Quick Disconnect, a vessel top, or loose) with no "Is the real hose there now?" question ("Maybe something like the Yellow flashes red and yelloe when locked to an IP for 2 seconds"; "No Ip stays yellow"): locked onto an IP, Quick Disconnect or vessel top, the ring flashes red and yellow for 2 seconds; left in the air it stays yellow; a Process .connect line still waits for Done. Fixed: letting go of the right button over a vessel opened its Help page, and the hose went back. Flow (Rule 5.21; "No Flow when in the air and Hose bib on"; "Connected to a Pipe and has flow to the Pipe but no flow into the Pipe"): a hose end left in the air is open, so what pushes into the hose (a Tap Water Valve that is On, a running pump) pours out and the hose shows flow; nothing is pulled in through it. A plain IP at the open end of a pipe, with a hose or another pipe joined to it, passes flow on into that pipe, like a coupling. Tried in a browser. Any open pipe or hose end can flow ("Any open pipe in the air can Flow!! Only endcaps, and valves stop flow"); where flow pours out of an open end, Skynet's own water splash is drawn ("a graphic of water spurting out the end"; "blue and white details ... original art"; "maybe match the color of the flow"): drawn in code, in the flow color with white details, lighter and slower for gravity flow. The timed Fire Hose (open a valve for 20 s, 1 min, 2 min or a set time) is parked in the Process Updates Sandbox, entry 6 (Rule 14.5). Help 127, 142 (and French). Checked against the BruControl Import program: it has no QD hose dragging outside its Build page and needs nothing.
+- 2026-11-16: Rule 4.1 changed, Rule 4.7 and new Rule 2.53 (OakBarn Brewery: "IT is a bug because I was Not finished Building. I want to add things to an existing Build and leave in Build Mode so needs to be fixed. Saving to the Tab (and I might have wanted to change the tab when saving) could be a nightmare for a User"; picked "A: Kept on the Brain"; "even if the Build was still in the Build mode after restarting, one click to discard"; "Always good to have a Restore ... fits 2 click rule"): Save layout saves the regular Tabs and never ends the Build; an unfinished Build is kept on the Brain in the Schema (buildDraft), never run, comes back the next time Edit layout opens, and its Devices keep their Ports; one click 🗑 Discard Build with ↩ Undo; 💾 Save Build ... is now ✅ Finish Build ..., and Move to Tab sends the whole Build to one Tab (the Add box Tab only offered first). Rule 2.53: a rare action may take a second click, and what it throws away can be put back (checked against Rule 1.28: not a Confirmation Widget). Help 55 and every Help page that named Save Build (and French). Checked against the BruControl Import program: its Build page is the same Edit layout; imported items are placed by the Importer, not built, so nothing changes there.
 - 2026-11-16: Rule 4.1 kept, fix (OakBarn Brewery: "Need to keep adding to the open Build tab and never leave with out a Warning that you will lose the work if not saved"): Edit layout opened again while it is open never starts over, so the open 🔨 Build Tab and its unsaved work are kept; every Add path is checked to go to the open Build Tab (test/buildfirst.test.js). Leaving Edit layout already asks to Save, and closing the page warns. Checked against the BruControl Import program: its Build page shares this code.
 - 2026-11-16: Rule 5.40 changed (OakBarn Brewery: "IPs Types will need to be expanded to have size  TC1.5  TC3/4   TC2  ....   NPT to MPT1  MPT1/2  MPT 2"; "FPT1.   A list of the sizes and type in Defualts with a TickBox to show in the List.  Have sizes from  1/8 to 6 " ( and if there are odd Metrics Those too."; "Do A with all Unclicked in the Default"; "Make all the IPs on the 3 Vessel  Pipes TC1.5  Allow TC2,  Hose FMSSQD1/2 wher they are on a Pipe or Pump and a MSSQD1/2 on the other end"; "Adapter is what I use"): sized IP Types (TC, FPT, MPT, BSP, DN, FMSSQD, MSSQD), Default settings > IP Types tick boxes (none ticked), ends on pumps and Stove Top outlets fit by themselves, hose QD ends female on a pipe or pump, fit warning ring, older Schemas convert once; 3 Vessel sample TC1.5. A divided pipe keeps every setting on both pieces, and a new pipe drawn on to a pipe takes its size, IP Type and color ("the pipe is devided in two pipes and all the IPs and other properties are set and proties inheietrd"; "Good check that auto always works"), tested. New Rule 5.43 ("Any fittings are not samples as only real world thinks go on a tab or Process unless as Virtual."): only real things on a Tab or in a Process, no sample-only fittings, Skynet never assumes a part. An IP Interview and Default IP Profiles wait in the Panel Updates Sandbox (entries 19, 20). Help 24, 130, 155 (and French). Checked against the BruControl Import program: imported pipes take the Defaults in their own size, its pumps are Skynet Pump Devices.
 - 2026-11-16: Rule 5.21 Gravity flow added (OakBarn Brewery: "Assume gravity flow"; on how it looks, picked "Lighter and slower"): with no pump moving it, liquid runs out of a vessel's low opening along every open path, drawn lighter and slower than pumped flow. Help 24 (and French). Checked against the BruControl Import program: it draws pipes the same way and needs nothing.
@@ -4958,6 +5011,9 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
+- 2026-11-16: First test of the Blichmann Model on another dialog (OakBarn Brewery: "Blickmann Dialog #1 and #2 Complete so it is the Model", "Update the March 809 Poly 90 Degree to the Model"): the Pump dialog is one dialog for every pump, so the March 809 poly 90° inlet already has the Model's frozen top, Hover Help, focus order and pop-ups. Fixed: a longer title no longer pushes Hidden Locked to a second line (the title switches sit a little closer, and each stays whole). Self Priming: No on every March pump (809 AC, 809 DC, 815; OakBarn Brewery: "All march pumps are not self priming"), so they show the priming note like the RipTide. The ⬢ Pump facts now say **Where from** for every listed pump (OakBarn Brewery: "We can always use what you found, Just add a Caveat that the Properties came from Internet searches and not an Official Websites and they are Informational rather than facts", "Since the dialog is small maybe add where from for data"): the site, and either "From the maker's own website" or "Internet search, not the maker's official website: information, not facts". The Model's Hover Help stays OakBarn Brewery's own words. Help 163.
+- 2026-11-16: Added Rule 2.55 (OakBarn Brewery): the purple + **Add New** button is for Profiles only, right of the Open list, the same as Add new ... in the list (which stays); may not be used anywhere else. Built on the Pump Profile; the other Profiles wait in the Panel Updates Sandbox, entry 22.
+- 2026-11-16: Added Rule 2.54 (OakBarn Brewery: "When something is saved but just stays on same screen Pop Up a Quick \"Saved\" Dialog up for 2 seconds and then goes out on its own", built now as a Rule 14.4 exception): a **✔ Saved** box for 2 seconds on 19 Saves that keep you on the same screen; it reuses the short notice, now big, in the middle and on a strong background for every info and warning note ("It was small and I did not even see it"). Rule 2.51: the ☰ Menu > Pump Profile tab (and the other profile tabs sharing its screen) brought to the Blichmann model ("bring up to Blickman Model"): title, Open list and Delete / Save / Undo / Close frozen at the top, no bottom row, a need-to-know note on top (Rule 11.8), Hover Help on Name, Orientation, Cover, Hose or Pipe and Notes (the Pump dialog's own Hover Help for Orientation, Cover and Hose or Pipe), ? Help goes to the Pump Profile section. Help 33 and 36 (and French). Then ("Has a close button just move that next to the other buttons", "and Cancel as Undo?", "Good"): Delete · Save · Undo (replaces Cancel) · Close · ✕ together, frozen in the upper right corner, in that order on every screen, on Default settings, Equipment Profile, Recipe and the six profile tabs (Rule 2.54). Checked against the BruControl Import program: same code, same behaviour.
 - 2026-11-16: Rule 2.42 changed (OakBarn Brewery: "Add PX size for Hose Separate from Pipe. Hoses need to be smaller than a pipe in most cases"): the Pixels box is split into **How many Pixels are Pipes to be drawn on a Tab?** (10) and **How many Pixels are Hoses to be drawn on a Tab?** (6), each shown in Pipes, Hoses and Sizes and in New Tabs; Tab Settings gets **Hose Size** next to Pipe Size. A new Tab gets both; a Tab without a Hose Size (every Tab made before) draws its hoses at its Pipe Size, so nothing already made changes. Help 26 and 155 (and French). Checked against the BruControl Import program: an imported Tab has no Hose Size, so its hoses draw as before; the Importer's Build page shares this code.
 - 2026-11-16: Rule 2.42 changed (OakBarn Brewery: "Resizing to screen resolution 1920 x 1040 presents well so a New Size to Screen Resolution works very well at Zoom Full Screen", then picked Match the screen + sample Tabs): a new Tab's Width and Height start at the usable size of the screen it is made on (the screen less the taskbar; 1920 x 1040 on a 1920 x 1080 Windows screen; 1920 x 1040 if the screen cannot be read), not 1600 x 900. Default settings shows that size in the boxes and does not save it, so new Tabs keep matching their screen; a different number typed there is kept. Tab Settings keeps typed Width and Height and gets a **🖥 Fit Screen** button (label Screen size) that fills both with this screen's usable size (OakBarn Brewery: "Still allow manual change on the Tabs but make clear the Hover help and maybe a button on the tab properties to set to screen resolution"); Help 26 (and French). The 3 Vessel sample's Brew House, Recipe and Reporting Tabs are now 1920 x 1040 (were 1720 x 745 and 1800 x 785). Help 155 (and French). Checked against the BruControl Import program: an imported Tab keeps the size it brings; the Importer's Build page shares this code.
 - 2026-11-16: Added Rule 14.5, the Process Updates Sandbox (OakBarn Brewery: "New sand Box for Process and put things there till we build those Processes"): `Sandbox/Process_Updates/Process_Updates.md` holds Brew Day, sample Process and Process command ideas, not built until the Skynet Process setup starts. First entries, moved from the Panel Updates Sandbox: the PreBrew grain temperature and Strike Offset boxes, the "Boil Started" button in the sample Brew Day Process, and waiting on the boil temperature from the air pressure. Checked against both programs: notes only, nothing in either program changes.

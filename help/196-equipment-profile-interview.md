@@ -21,7 +21,7 @@ Start it from **☰ Menu > Equipment Profile > Open > Add new ...** (or **Add ne
 
 ## 🔨 Build
 
-**🔨 Build** makes the profile, gives it to the Tab, and puts everything on the **🔨 Build Tab** ([Build Tab](55-build-tab)). Each pump and motorized valve is a real Device and takes the next free Port of the Interface. Then press **💾 Save Build ... > Move to Tab**, and **Save layout**. Pipes are not drawn: draw them the way yours are piped (**Draw pipe**).
+**🔨 Build** makes the profile, gives it to the Tab, and puts everything on the **🔨 Build Tab** ([Build Tab](55-build-tab)). Each pump and motorized valve is a real Device and takes the next free Port of the Interface. Then press **✅ Finish Build ... > Move to Tab**, and **Save layout**. Pipes are not drawn: draw them the way yours are piped (**Draw pipe**).
 
 ## Use the same layout in another Schema
 

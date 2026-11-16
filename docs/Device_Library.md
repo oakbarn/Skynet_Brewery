@@ -17,7 +17,7 @@ A reference list of every Device the panel can make today, with its settings. Pa
 4. **Label**: the text shown on the Tab (for example "Fly Sparge"); it was called Display Name. A **Show label** switch hides it.
 5. **Suggested Name**: filled in for you. An Admin may type another.
 
-Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properties open. **Save Build** sends it to a Tab.
+Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properties open. **Finish Build** sends it to a Tab.
 
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)

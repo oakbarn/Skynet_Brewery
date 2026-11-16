@@ -26,7 +26,7 @@ d'un Slider, d'une LED, etc. Mettez un Slider sur n'importe quel Tab, liez-le à
 ## En ajouter un {#adding-one}
 
 En Edit layout, **Select Widget Type > Semi_Widgets_Devices**, puis choisissez Switch, Slider, Checkbox, Lighted Button, Push Button,
-Pulse Button, LED ou Manual Valve Widget (ou utilisez **Boolean ➕** dans la barre Edit layout). Comme chaque nouveau Widget, il est fait sur le 🔨 Build Tab et ses Properties s'ouvrent ; **Save Build ...** l'envoie vers un Tab.
+Pulse Button, LED ou Manual Valve Widget (ou utilisez **Boolean ➕** dans la barre Edit layout). Comme chaque nouveau Widget, il est fait sur le 🔨 Build Tab et ses Properties s'ouvrent ; **Finish Build ...** l'envoie vers un Tab.
 Les nouveaux noms sont `wgt_SW_...`, `wgt_SLD_...` (Slider), `wgt_CHK_...` (Checkbox), `wgt_LTB_...` (Lighted Button), `wgt_PB_...`, `wgt_PL_...` et `wgt_LED_...`, puis le Label et l'ID du Tab (Règle Skynet 3.14), par exemple `wgt_SW_Mash_Stir_BH` ; un Widget Manual Valve est `wgt_MV_...` et une Tap Water Valve `wgt_TWV_...`. Les anciens noms (`sw_1`, `ManualValve_1`) continuent de marcher.
 
 ## Linked Device

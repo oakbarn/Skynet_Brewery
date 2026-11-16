@@ -62,7 +62,7 @@ You pick the Valve Profile **only when you make a new valve**: in Edit layout, *
 
 ## Pump Profile
 
-A Pump Profile is how a new pump starts. Its picture comes from the pump you pick (the model), so the profile holds the rest:
+A Pump Profile is how a new pump starts. Its picture comes from the pump you pick (the model), so the profile holds the rest. Changing a Pump Profile never changes the pumps already on a Tab. Every box has its Hover Help, and the title and the **Open** list stay at the top, and the buttons (**Delete**, **Save**, **Undo**, **Close**, **✕**) stay in the upper right corner, while the rest scrolls (the Blichmann model, Skynet Rule 2.51; the other profiles too). Right of the **Open** list, **+ Add New** (the purple +) makes a new Pump Profile, the same as **Add new ...** in the list (Skynet Rule 2.55). The profile holds:
 
 - **Orientation**: Right or Left.
 - **Cover**: None or a color.

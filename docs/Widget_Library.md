@@ -213,7 +213,7 @@ Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the readi
 | Decimals | The item's own Decimals, 0 to 2 |
 
 ### Override button Widget (`kind: override`, 2026-10-30, Help 96)
-One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Save Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.
+One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Finish Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.
 
 | Setting | Notes |
 |---|---|
