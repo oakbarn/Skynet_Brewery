@@ -126,7 +126,7 @@ Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le 
 
 La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
 
-Le côté technique : de 200 à 20000 pixels ; vide = 1600 x 900. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). La case **How many Pixels are Pipes and Hoses to be drawn on a Tab?** est ici aussi (voir plus haut).
+Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). La case **How many Pixels are Pipes and Hoses to be drawn on a Tab?** est ici aussi (voir plus haut).
 
 ## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
 

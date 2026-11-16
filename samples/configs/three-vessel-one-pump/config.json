@@ -13,21 +13,21 @@
   {
    "name": "Brew House",
    "id": "BH",
-   "width": 1720,
-   "height": 745,
+   "width": 1920,
+   "height": 1040,
    "vSizer": "v_HLT",
    "vScale": 128.3514
   },
   {
    "name": "Recipe",
    "style": "sky_tab_tennyson",
-   "width": 1800,
-   "height": 785
+   "width": 1920,
+   "height": 1040
   },
   {
    "name": "Reporting",
-   "width": 1720,
-   "height": 745
+   "width": 1920,
+   "height": 1040
   }
  ],
  "elements": [

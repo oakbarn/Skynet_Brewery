@@ -56,8 +56,9 @@ Leave Picture Left, Top, Width and Height all empty to stretch the Picture over 
 
 | Box | What it does |
 |---|---|
-| **Width** | How wide this Tab is, in pixels. A new Tab starts at 1600. |
-| **Height** | How tall this Tab is, in pixels. A new Tab starts at 900. |
+| **Width** | How wide this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as wide as the screen it is made on (1920 on most screens), unless ☰ Menu > Default settings gives a Width. |
+| **Height** | How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless ☰ Menu > Default settings gives a Height. |
+| **Screen size: 🖥 Fit Screen** | One click sets this Tab's Width and Height to the usable size of THIS screen (the screen less the taskbar), so the whole Tab fills the screen at Zoom Fit screen with no scroll bars. Press Save to keep it. You can still type your own Width and Height. Pick the screen of the computer you brew from: a Tab sized on a small laptop is drawn smaller on a big screen. |
 | **Vessel Sizer** | The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout ([Vessel sizing](135-vessel-sizing)). |
 
 ## Pipes
