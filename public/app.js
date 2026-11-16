@@ -16,7 +16,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
 import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText } from './pumps.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
@@ -7984,7 +7984,11 @@ const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump
   + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.';
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
-  ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.'],
+  // the cavitation caveat (OakBarn Brewery, 2026-11-16: "add the little caveat on that proprtues that Boiling Liquids are not recomened
+  // to be Pumps because of Cavitation")
+  ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.\n\n⚠ Boiling liquids are not recommended to be pumped because of cavitation (the hot liquid turns to steam bubbles inside the pump, so it loses its flow and can be damaged).'],
+  // Self Priming (OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for a Riotide it is no")
+  ['pumpSelfPrime', 'selfPrime', 'Self Priming', 'Can the pump start pumping on its own when it sits above the liquid? Most brewery pumps cannot (No): the pump has to sit lower than the liquid it pulls from, and be filled with liquid (primed) before it is turned On, or it runs dry and can be damaged. To prime it, let the liquid flow in and open its air vent until liquid comes out.'],
   ['pumpPorts', 'ports', 'Ports', PORTS_TIP]];
 // Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
 // make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
@@ -7997,16 +8001,20 @@ function pumpPortField(o, f, tip) {
 // The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
 // Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
 // was. A User Defined pump (Other) has no facts to show, so its facts are still typed here.
+const PRIME_NOTE = '⚠ Not self priming: put the pump lower than the liquid, and fill it (prime it) before you turn it On.';
 const PUMP_VIEW_ROWS = PUMP_FACT_ROWS.filter(r => r[1] !== 'ports');
 const pumpFactsView = o => !!factsOf(o) && o.pumpModel !== 'other';
 const PUMP_FACTS_POP = { title: 'Pump facts', view: pumpFactsView, redraw: 'pumpModel', fields: o => {
   const f = factsOf(o), T = DEVICE_TIPS;
   const power = ['_power', 'Power', 'ro', powerText(powerOf(o)) || 'Not set', false, false, { tip: T.pumpPower }], use = ['_use', 'Use', 'ro', pumpUseText(o), false, false, { tip: T.pumpUse }];
   if (pumpFactsView(o)) return [['_pfn', `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}`, 'note', null, false, false, { keep: true }], power, use,
-    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }])];
+    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', k === 'selfPrime' ? ({ true: 'Yes', false: 'No' })[selfPrimeOf(o)] || 'Not known' : String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }]),
+    // the need-to-know priming note under a greyed Self Priming of No (OakBarn Brewery, 2026-11-16: "Maybe add that note about Primimg
+    // under the Greyed Out SelfPrimimg for pimps that have ano self Priming"; Rule 11.8 item 2 exception)
+    ...(selfPrimeOf(o) === false ? [['_primeNote', PRIME_NOTE, 'note', null, false, false, { keep: true }]] : [])];
   return [['_pfn', 'User Defined pump: type what you know.', 'note', null, false, false, { keep: true }],
     ['power', 'Power', 'sel', PUMP_POWERS, false, false, { tip: T.pumpPower }], use,
-    ...PUMP_VIEW_ROWS.map(([key, , label, tip]) => [key, label, 'text', null, false, false, { tip }])];
+    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [key, label, k === 'selfPrime' ? 'bool' : 'text', null, false, false, { tip }])];      // Self Priming Yes/No is a switch (true/false = a switch)
 } };
 function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   const T = DEVICE_TIPS;
@@ -8026,7 +8034,7 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
 const PUMP_XYWH = (x = {}) => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, pairCls: 'xywh',
   with: [['y', 'Y (Vertical)', 'num', null, false, false, { tip: DEVICE_TIPS.xy }], ['w', 'Width', 'num', null, false, false, { tip: DEVICE_TIPS.size }], ['h', 'Height', 'num', null, false, false, { tip: DEVICE_TIPS.size }]], ...x }]];
-const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpPorts'];
+const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpSelfPrime', 'pumpPorts'];
 // can this Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin)
 const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 // Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
