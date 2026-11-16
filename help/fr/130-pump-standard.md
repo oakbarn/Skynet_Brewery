@@ -13,10 +13,12 @@ place et rester jointe à ses tuyaux.
 | **Au milieu à gauche** | (la pompe) | **Au milieu à droite** |
 | **En bas à gauche** | **En bas au milieu** | **En bas à droite** |
 
-Choisissez lequel est son entrée (IN) et lequel sa sortie (OUT), vu sur le Tab, dans la fenêtre Add ou les Properties de la pompe :
+Les tuyaux et les flexibles fixent lequel est son entrée (IN) et lequel sa sortie (OUT), vu sur le Tab. Il n'y a rien à choisir :
 
-- **Inlet IP** et **Outlet IP** (sur une ligne). Le premier choix de chaque liste, marqué **(start)**, est là où il commence : une pompe Skynet
-  commence avec son entrée **au milieu à droite** et sa sortie **en haut à droite** ; avec l'Orientation **Left**, c'est **au milieu à
+- **Dessinez ou déposez un bout de tuyau ou de flexible sur la pompe ou près d'elle** et il rejoint la plus proche des 8 IP ; le bout
+  libre de la pompe (IN ou OUT sans rien de joint) va là. Avec les deux bouts libres, celui qui est le plus près de cette place y va
+  (OakBarn Brewery, 2026-11-16 : « Pipe and hose changes are always auto » ; « nearest where the user places it »).
+- **Avant que rien ne soit joint**, une pompe Skynet commence avec son entrée **au milieu à droite** et sa sortie **en haut à droite** ; avec l'Orientation **Left**, c'est **au milieu à
   gauche** et **en haut à gauche**. Une pompe avec votre propre image commence au milieu de ses côtés gauche et droit.
 - Les deux ne sont jamais à la même place, donc on voit toujours clairement lequel est In et lequel est Out, même quand les deux sont du même côté.
 - Exemple : la pompe de l'exemple 3 Vessel 1 Pump (montrée Left) a son entrée au milieu à gauche et sa sortie en haut à gauche.
@@ -60,9 +62,9 @@ Le Hose ou le Pipe commence là.
 
 ## Remplacer une pompe {#replacing-a-pump}
 
-1. Ouvrez **Edit layout** et notez le **X**, le **Y**, l'**Inlet IP** et l'**Outlet IP** de l'ancienne pompe (et sa taille, 150 x 150 au départ).
-2. Ajoutez la nouvelle pompe avec la même Orientation, le même Inlet IP et le même Outlet IP, et mettez-la au même X et Y (ou supprimez d'abord l'ancienne).
-3. Son entrée et sa sortie tombent sur les mêmes bouts de tuyau. **Save layout**.
+1. Ouvrez **Edit layout** et notez le **X** et le **Y** de l'ancienne pompe (et sa taille, 150 x 150 au départ).
+2. Ajoutez la nouvelle pompe avec la même Orientation, et mettez-la au même X et Y (ou utilisez 🔁 Swap places, Règle 5.37).
+3. Son entrée et sa sortie libres vont aux places les plus proches quand les bouts de tuyau la rejoignent. **Save layout**.
 
 ## Anciens Schemas {#older-schemas}
 

@@ -13,10 +13,12 @@ place and stay joined to its pipes.
 | **Left Middle** | (the pump) | **Right Middle** |
 | **Bottom Left** | **Bottom Middle** | **Bottom Right** |
 
-Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab, in the pump's Add box or Properties:
+The pipes and hoses set which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab. There is nothing to pick:
 
-- **Inlet IP** and **Outlet IP** (on one line). The first choice in each list, marked **(start)**, is where it starts: a Skynet pump
-  starts with its Inlet on the **Right Middle** and its Outlet on the **Top Right**; with Orientation **Left** that is the **Left
+- **Draw or drop a pipe or hose end on or near the pump** and it joins the nearest of the 8 IPs; the pump's free end (IN or OUT
+  with nothing joined yet) moves there. With both ends free, the one nearer that spot moves (OakBarn Brewery, 2026-11-16: "Pipe and
+  hose changes are always auto"; "nearest where the user places it").
+- **Before anything is joined**, a Skynet pump starts with its Inlet on the **Right Middle** and its Outlet on the **Top Right**; with Orientation **Left** that is the **Left
   Middle** and the **Top Left**. A pump with your own picture starts on the middle of its left and right sides.
 - The two are never on the same spot, so it is always clear which is In and which is Out, even when both are on one side.
 - Example: the 3 Vessel 1 Pump sample pump (shown Left) has its Inlet on the Left Middle and its Outlet on the Top Left.
@@ -60,9 +62,9 @@ The Hose or Pipe starts there.
 
 ## Replacing a pump
 
-1. Open **Edit layout** and note the old pump's **X**, **Y**, **Inlet IP** and **Outlet IP** (and its size, 150 x 150 to start).
-2. Add the new pump with the same Orientation, Inlet IP and Outlet IP, and put it at the same X and Y (or delete the old one first).
-3. Its inlet and outlet land on the same pipe ends. **Save layout**.
+1. Open **Edit layout** and note the old pump's **X** and **Y** (and its size, 150 x 150 to start).
+2. Add the new pump with the same Orientation, and put it at the same X and Y (or use 🔁 Swap places, Rule 5.37).
+3. Its free inlet and outlet go to the nearest spots as the pipe ends join it. **Save layout**.
 
 ## Older Schemas
 

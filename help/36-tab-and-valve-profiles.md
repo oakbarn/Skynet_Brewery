@@ -66,7 +66,6 @@ A Pump Profile is how a new pump starts. Its picture comes from the pump you pic
 
 - **Orientation**: Right or Left.
 - **Cover**: None or a color.
-- **Inlet IP** and **Outlet IP**: which of the 8 spots ([The Pump Standard](130-pump-standard)).
 - **Hose or Pipe**: what is drawn from the pump's ports to its IPs.
 - **Overlay**: what shows over it while it runs.
 - **IP Type In** and **IP Type Out**: Tri-Clamp, NPT, BSP or Quick Disconnect. Empty: from its Ports.

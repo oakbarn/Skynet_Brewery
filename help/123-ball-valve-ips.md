@@ -38,7 +38,7 @@ Every Skynet Pump has an **IP on its inlet** (IN) and an **IP on its outlet** (O
 with any Cover (Skynet Rule 5.24).
 
 They are on two of the pump's **8 IPs** (the 4 corners and the middle of each side of its box, the same on every pump): its
-**Inlet IP** and **Outlet IP**, picked in its Properties (Help 130). A Skynet pump starts with its Inlet on the Right Middle and its
+**Inlet IP** and **Outlet IP**, set by the pipe or hose joined to it (Help 130). A Skynet pump starts with its Inlet on the Right Middle and its
 Outlet on the Top Right, with a Hose or Pipe drawn from its real ports to them. The sump pump keeps its own: the middle of the
 screen at its bottom (IN) and the top of the riser on its right (OUT).
 

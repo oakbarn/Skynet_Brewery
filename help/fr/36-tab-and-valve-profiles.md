@@ -66,7 +66,6 @@ Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient 
 
 - **Orientation** : Right ou Left.
 - **Cover** : None ou une couleur.
-- **Inlet IP** et **Outlet IP** : laquelle des 8 places ([La norme des pompes](130-pump-standard)).
 - **Hose or Pipe** : ce qui est dessiné des orifices de la pompe à ses IP.
 - **Overlay** : ce qui s'affiche dessus quand elle tourne.
 - **IP Type In** et **IP Type Out** : Tri-Clamp, NPT, BSP ou Quick Disconnect. Vide : d'après ses Ports.
