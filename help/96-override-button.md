@@ -16,10 +16,10 @@ Only an operator or an admin can press it. Each Process that moved on writes a l
 
 ## Adding one
 
-In Edit layout press **Override ➕** on the Edit layout bar. It is made on the 🔨 Build Tab, like every new Widget, and its Properties open. **Save Build ...** sends it to a Tab.
+In Edit layout press **Override ➕** on the Edit layout bar. It is made on the 🔨 Build Tab, like every new Widget, and its Properties open. **Finish Build ...** sends it to a Tab.
 
 - **Only one Override button on a Tab.** The panel won't put a second one on a Tab that has one.
-- **It can be on several Tabs.** Press **COPY** in its Properties, then **Save Build ...** to another Tab. Each Tab's button has its **own Label and look**, and they all do the same thing.
+- **It can be on several Tabs.** Press **COPY** in its Properties, then **Finish Build ...** to another Tab. Each Tab's button has its **own Label and look**, and they all do the same thing.
 
 ## Override Button Widget Properties
 

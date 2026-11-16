@@ -86,3 +86,7 @@ Attrapez un tuyau dans Edit layout et appuyez sur **🔓 Unlock its ends** : ses
 ## Les tuyaux se voient toujours {#pipes-always-show}
 
 Un tuyau ou un flexible se voit toujours sur son Tab, qu'il y ait du passage ou non, parce qu'il est vraiment là.
+
+## Écoulement par gravité {#gravity-flow}
+
+Sans pompe pour le pousser, le liquide sort par gravité de la sortie basse d'une cuve, le long de chaque chemin ouvert, en s'éloignant de la cuve. Une vanne fermée l'arrête, un clapet anti-retour (Check Valve) ne le laisse passer que dans son propre sens, et une pompe à l'arrêt (Off) le laisse passer, donc l'amorçage d'une pompe par retour se voit aussi. Skynet ne connaît pas la hauteur réelle des choses, donc l'écoulement par gravité est dessiné **plus clair et plus lent** que l'écoulement pompé. Quand une pompe déplace le liquide, c'est l'écoulement pompé qui s'affiche.

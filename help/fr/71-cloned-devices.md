@@ -16,7 +16,7 @@ Le seul moyen de faire un Clone est le bouton **⧉ Clone Device** dans la barre
 2. La liste contient les Devices déjà placés sur un Tab (pas ceux déjà sur ce Tab), groupés par type : Pumps, Valves, Heat, Temperature probes, Other outputs, Motors, Inputs and sensors.
 3. Choisissez-en un et appuyez sur **Save**. Le Clone apparaît sur le Tab ; faites-le glisser à sa place.
 
-Un Clone fait sur le Build Tab va vers un Tab avec **Save Build**, comme tout ce qui y est construit.
+Un Clone fait sur le Build Tab va vers un Tab avec **Finish Build**, comme tout ce qui y est construit.
 
 ## Le nom du Clone {#the-clone-s-name}
 

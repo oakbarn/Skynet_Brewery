@@ -246,7 +246,7 @@ function renderMvAsks(list) {
       tab && tab !== curWs()?.name ? h('button', { onclick: () => { wsName = tab; setView('workspace'); renderTabs(); renderWs(); renderValves(S.valves); } }, `Go to ${tab}`) : ''));
   }
 }
-// Rule 2.53 (OakBarn Brewery, 2026-11-16: "When something is saved but just stays on same screen Pop Up a Quick \"Saved\" Dialog up for 2
+// Rule 2.54 (OakBarn Brewery, 2026-11-16: "When something is saved but just stays on same screen Pop Up a Quick \"Saved\" Dialog up for 2
 // seconds and then goes out on its own"): a notice, not a question (Rule 2.44): nothing to click, it never blocks the screen
 const SAVED_MS = 2000;
 // the same notice as every other short note (OakBarn Brewery, 2026-11-16: reuse the small note, bigger, in the middle), in green
@@ -419,7 +419,7 @@ function tabDblClick() {
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
   for (const w of shownTabs()) t.append(h('button', { class: (w === curWs() && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : '') + (isHiddenTab(w) ? ' hiddenTab' : ''), onclick: () => { if (w.name !== wsName) tabLeft = { from: wsName, at: Date.now() }; wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) tabDblClick(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
+    ondblclick: () => { if (editing) tabDblClick(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Finish Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
   $('#previewBuild').classList.toggle('hidden', !buildWs());
   $('#buildMark')?.classList.toggle('hidden', !(editing && curWs()?.build));
@@ -1025,7 +1025,7 @@ function mfFlow(g, k) {
 // tees with valves ... need their property dialog and the Build look and feel like the Pump Drill down", Rules 18.13-18.21).
 // 1 Label (filled in, valve_tee_n ...), 2 Interface, 3 each Valve (Manual or Motorized, a Motorized one with its Port on the same
 // line), 4 Tab, then the Name, the Graphic, its Path, Orientation with Flip, X, Y, Width, Height and the Device Type. ➕ Add Device can
-// always be pressed and says what is missing (Rule 18.15). It starts on the 🔨 Build Tab and Save Build ... moves it to the Tab picked (Rule 4.1).
+// always be pressed and says what is missing (Rule 18.15). It starts on the 🔨 Build Tab and Finish Build ... moves it to the Tab picked (Rule 4.1).
 async function addMf(tname, kind) {
   const t = tplOf('fitting', tname); if (!t) return toast(`No ${tname} Template`, true);
   const I = MF_TPLS[t.name] || mfInfo({}), used = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
@@ -1106,7 +1106,7 @@ async function addMf(tname, kind) {
         } catch (err) { draft.graphics = draft.graphics.filter(x => x !== g && x.attachTo !== g.id); throw err; }
         placeUnitParts(g);
         try { if (work.mfIface) localStorage.setItem(LAST_IFACE_KEY, work.mfIface); } catch { }
-        // on the 🔨 Build Tab first, with its valves and IPs (Rule 4.1); Save Build ... moves it to the Tab picked in the Add box
+        // on the 🔨 Build Tab first, with its valves and IPs (Rule 4.1); Finish Build ... moves it to the Tab picked in the Add box
         for (const x of [g, ...draft.elements.filter(e => e.integratedIn === g.id), ...draft.graphics.filter(q => q.attachTo === g.id)]) keepOnBuild(x);
         sel = { kind: 'gfx', id: g.id }; renderWs();
         made = g; break;
@@ -1247,7 +1247,7 @@ function applyMf(g, w, tab, label, loose = false) {
       if (o.name !== e.name) for (const x of draft.elements) if (x.input === o.name) x.input = e.name;
       Object.keys(o).forEach(x => delete o[x]); Object.assign(o, e);
     } else draft.elements.push(e);
-    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > Move to Tab adds that Tab's ID (Rule 3.1)
+    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Finish Build ... > Move to Tab adds that Tab's ID (Rule 3.1)
   }
 }
 
@@ -3740,7 +3740,9 @@ const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
 const ipFlowOf = id => { const g = L().graphics.find(x => x.id === id && x.kind === 'ip'); return g ? (!editing && g.name && S.flow?.ips?.[g.name]) || flowKey(g.flowColor) || '' : ''; };
 const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowKey(p.flowColor) || '';
 const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
-function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here)
+// a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
+const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
+function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -3813,6 +3815,25 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
     if (col) pumpSrc.set(devOfIp(k), { vessel: col });
   }
   for (const [k, n] of nodes) if (n.push) trace(k, true);
+  // Gravity flow (Rule 5.21, OakBarn Brewery, 2026-11-16: "Assume gravity flow"): with no pump moving it, liquid runs out of a
+  // vessel's low opening along every open path, away from the vessel. A closed valve stops it, a Check Valve only lets it go its
+  // own way, and an Off pump lets it through. Skynet does not know real heights, so it is drawn lighter and slower (Fritz's pick).
+  if (grav) for (const g of L().graphics.filter(x => x.kind === 'ip' && x.workspace === ws && GRAV_PORTS.has(x.port))) {
+    const v = L().graphics.find(x => x.id === g.attachTo);
+    if (!hasTop(v) || !nodes.has(g.id) || !nodes.get(g.id).end) continue;
+    const col = vesselFlowOf(g.id), prev = new Map([[g.id, null]]), queue = [g.id];
+    while (queue.length) {
+      const u = queue.shift(), n = nodes.get(u);
+      if (u !== g.id && !n.pass) {
+        if (n.end) for (let k = u; prev.get(k); k = prev.get(k).from) {
+          const st = prev.get(k); if (dir.has(st.p.id) || grav.has(st.p.id)) continue;
+          grav.set(st.p.id, st.d); if (col && !src.has(st.p.id)) src.set(st.p.id, { vessel: col });
+        }
+        continue;
+      }
+      for (const { v: w, p, d } of adj.get(u) || []) if (!prev.has(w)) { prev.set(w, { from: u, p, d }); queue.push(w); }
+    }
+  }
   return dir;
 }
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square (a hose just bends).
@@ -4105,20 +4126,20 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
+  const srcs = new Map(), grav = new Map(), flow = computeFlow(w.name, srcs, grav), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
-    const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
+    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
     for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
@@ -4184,6 +4205,10 @@ function findItem(kind, id) { return kind === 'el' ? draft.elements.find(e => e.
 const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 function setEditing(on) {
+  // Edit layout already open: never start a new draft over it, so an unsaved Build (the 🔨 Build Tab and everything on it) is never
+  // lost (OakBarn Brewery, 2026-11-16: "Need to keep adding to the open Build tab and never leave with out a Warning that you will
+  // lose the work if not saved"). Leaving goes through leaveLayout, which asks to Save first.
+  if (on && editing && draft) { renderTabs(); renderWs(); return; }
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
@@ -4192,6 +4217,8 @@ function setEditing(on) {
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (draft) for (const x of [...draft.elements, ...draft.graphics]) if (x) x._old = 1;      // made before this Edit layout (never saved)
+  if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
+  if (!on) $('#buildBack')?.remove();
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
   if (on) { mvJoinEnds(draft); centerOnPipes(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
@@ -4931,8 +4958,9 @@ function versionSwitch() {
 async function leaveLayout() {
   if (!layoutChanged()) return setEditing(false);
   const r = await leaveLayoutDialog();
-  if (r === 'save') return saveLayout();
-  if (r === 'discard') return setEditing(false);
+  if (r === 'save') return saveLayout({ leave: true });
+  // Exit without Saving: the unfinished Build is still kept on the Brain (Rule 4.1), so it comes back next time
+  if (r === 'discard') { const snap = buildSnap(); if (snap) { await keepBuild(snap); toast('Not saved. Your Build is kept: it comes back on the 🔨 Build Tab the next time you open Edit layout.', false, 8000); } return setEditing(false); }
   $('#editMode').checked = true;
 }
 $('#editMode').addEventListener('change', e => {
@@ -5125,7 +5153,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (pick === 'valve' && e._valveProfile) useValveProfile(e, e._valveProfile);      // the Add box's Profile dropdown
   delete e._valveProfile;
   useTabProfile(e);       // the look of the Tab picked in the Add box
-  keepOnBuild(e);         // it starts on the 🔨 Build Tab; Save Build ... moves it to the Tab picked in the Add box (Rule 4.1, 2026-11-12)
+  keepOnBuild(e);         // it starts on the 🔨 Build Tab; Finish Build ... moves it to the Tab picked in the Add box (Rule 4.1, 2026-11-12)
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
   if (!isDevice(e) && widgetTypeId(e)) {      // a new Widget's name: wgt_Type_Label_TabID (Fritz, 2026-11-06, Rule 3.14); it follows its Label and Tab
@@ -5147,7 +5175,7 @@ function elemVesselBuild(t, e) {
     g.ports ||= {}; g.ports.element = { ...(g.ports.element || { position: t.ports.element.position }), installed: true };
     g.heater = e.name; syncVesselPorts(g, null); renderWs(); editItem('gfx', g.id);
   }
-  toast(`${e.name} and ${g?.name || t.name} (its Element linked to it) are on the 🔨 Build Tab: 💾 Save Build ... > Move to Tab puts them on the ${nameTab(e)} Tab.`, false, 9000);
+  toast(`${e.name} and ${g?.name || t.name} (its Element linked to it) are on the 🔨 Build Tab: ✅ Finish Build ... > Move to Tab puts them on the ${nameTab(e)} Tab.`, false, 9000);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
@@ -5362,7 +5390,7 @@ function cloneHere(name, byMethod) {
 for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventListener(ev, () => { if (!$('#cloneDev').value) fillClones(); });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
-// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_PWM@Valve_L_Fly~Sparge_SP (public/naming.js). An Admin may
+// ✅ Finish Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_PWM@Valve_L_Fly~Sparge_SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
@@ -5382,7 +5410,7 @@ function portForName(e) {
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
-// and Save Build ... > Move to Tab adds it, as for a Device
+// and Finish Build ... > Move to Tab adds it, as for a Device
 const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 // A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
@@ -6301,7 +6329,7 @@ function useTabProfile(e) {
 }
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : type === 'dial' ? 'dial' : type === 'bar' ? 'bar' : 'normal';
-// Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
+// Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Finish Build ... sends it to a Tab
 // Fritz, 2026-11-05 (Rule 18.27): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
 // already on a Tab keep working, and a Picture Widget that turns on with None is a still picture)
 $('#addImg').onclick = guard(() => addThing('picture'));
@@ -6317,7 +6345,7 @@ function addText() {
 $('#addOverride').onclick = () => addOverride();
 function addOverride() {
   const tab = toBuild(); if (!tab) return;
-  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Save Build ... sends it to a Tab.', true);
+  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Finish Build ... sends it to a Tab.', true);
   const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -6330,7 +6358,7 @@ function copyGraphic(g) {
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
   sel = { kind: 'gfx', id: c.id }; renderTabs(); renderWs();
-  toast(`Copied: ${c.name || 'the ' + (g.kind === 'override' ? 'Override button' : 'copy')} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  toast(`Copied: ${c.name || 'the ' + (g.kind === 'override' ? 'Override button' : 'copy')} is on the 🔨 Build Tab. Finish Build ... sends it to a Tab.`);
   editItem('gfx', c.id);
 }
 // COPY of a Device-less Widget (a Timer): the same, under the next free name (Timer_1 -> Timer_2), on the 🔨 Build Tab
@@ -6344,7 +6372,7 @@ function copyElement(e) {
   if (e.label && e.label === e.name) c.label = c.name;
   draft.elements.push(c);
   sel = { kind: 'el', id: c.name }; renderTabs(); renderWs();
-  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Finish Build ... sends it to a Tab.`);
   editItem('el', c.name);
 }
 $('#finishPipe').onclick = () => finishPipe();
@@ -6513,7 +6541,7 @@ $('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
 $('#drawQdHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; drawQd = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Quick Disconnect hose: click the pump IP it hangs from, a few points to bend through, then the IP, Quick Disconnect or vessel top it goes to (or double-click to leave the end loose). Its end can be moved at any time.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
-// a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
+// a new equipment widget (pipe fittings too): made on the Build Tab, then Finish Build ... puts it on a Tab
 function addVesselWidget(c) {
   const C = EQ[c];
   toBuild();
@@ -6543,7 +6571,7 @@ function addEquipment(t) {
 // Widget: pick one of the Skynet Vessel Widgets (a picture with its IPs built in and nothing else; the Template itself is set
 // and can only be cloned) or a Blank Vessel. Its picture is the Widget's to start with, and it is edited like any other Widget.
 // Integrated: a Skynet Integrated Vessel (its Devices built in), or a User Bundled Template. A User Bundled vessel Template is
-// always built on a Skynet Vessel Widget: picked as a Widget, built and bundled on the Build Tab, then Save Build ... > As a
+// always built on a Skynet Vessel Widget: picked as a Widget, built and bundled on the Build Tab, then Finish Build ... > As a
 // Template. There is no other way to make one. Everything new is made on the 🔨 Build Tab first.
 async function addVessel(how) {      // how: 'widget' or 'integrated' (the Vessel list on the Edit layout bar); asked when not given
   if (!TPL) await loadTemplates();
@@ -6566,7 +6594,7 @@ async function addVessel(how) {      // how: 'widget' or 'integrated' (the Vesse
   const k = await pickVessel('Add a Vessel: pick an Integrated one', [
     { head: 'Skynet Integrated Vessels', note: 'Their Devices are built in: the New Device box asks the Interface and Ports.', items: TPL.vessel.filter(isIntegratedVessel).map(t => icon(t)), empty: 'No Skynet Integrated Vessels yet.' },
     { head: 'User Bundled Templates', note: 'Your own, each built on a Skynet Vessel Widget.', items: user.map(t => icon(t, `${t.name}, built on ${t.base}`)),
-      empty: 'None yet. To make one: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, add and Bundle what it needs on the 🔨 Build Tab, then 💾 Save Build ... > As a Template.' }]);
+      empty: 'None yet. To make one: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, add and Bundle what it needs on the 🔨 Build Tab, then ✅ Finish Build ... > As a Template.' }]);
   if (k === undefined) return;
   const t = tplOf('vessel', k);
   return isIntegratedVessel(t) ? newIntegratedDevice(t.name) : vesselToBuild(t);
@@ -7061,11 +7089,11 @@ $('#addHiddenWs').onclick = () => {
 
 // ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
 // the Edit layout draft (never saved) and shows only while you build. Every new Device, Widget, IP, picture, text, piece of
-// equipment and copy of a Template goes on it (Fritz, 2026-10-23). Save Build ... then puts it on a Tab, or saves it as a Template.
+// equipment and copy of a Template goes on it (Fritz, 2026-10-23). Finish Build ... then puts it on a Tab, or saves it as a Template.
 const buildWs = () => draft?.workspaces.find(w => w.build);
 // Rule 4.1 (OakBarn Brewery, 2026-11-12: "When adding a new Device or Widget, automatically Start on the Build Tab and not a Regular
 // Tab. It will be moved to the Regular Tab at the End of the Build chain."): a new Device or Widget waits on the 🔨 Build Tab and
-// remembers the Tab picked in its Add box (buildTo, never saved); 💾 Save Build ... > Move to Tab moves it there. Its Suggested Name
+// remembers the Tab picked in its Add box (buildTo, never saved); ✅ Finish Build ... > Move to Tab moves it there. Its Suggested Name
 // already has that Tab's ID.
 function onBuildTab(x) { return !!x?.workspace && !!draft?.workspaces.find(w => w.name === x.workspace)?.build; }
 function buildToOf(x) { return onBuildTab(x) && x.buildTo && draft.workspaces.some(w => w.name === x.buildTo && !w.build) ? x.buildTo : ''; }
@@ -7092,7 +7120,7 @@ function toBuild() {
     draft.workspaces.push(b);
   }
   if (wsName === b.name) return b;
-  if (!curWs()?.build) b.from = wsName;           // Save Build ... offers this Tab first
+  if (!curWs()?.build) b.from = wsName;           // Finish Build ... offers this Tab first
   wsName = b.name; sel = null;
   $('#editHint').textContent = BUILD_HINT;
   renderTabs(); renderWs();
@@ -7100,11 +7128,11 @@ function toBuild() {
 }
 $('#buildTab').onclick = () => toBuild();
 $('#saveBuild').onclick = guard(saveBuild);
-const BUILD_HINT = '🔨 Build Tab: every new thing starts here (Add Device, Add Widget, Add equipment, fittings, pipes). The faint 🗺 Watermark is the Tab it goes to: its spot here is its spot there. 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on its Tab or save it as a Template.';
+const BUILD_HINT = '🔨 Build Tab: every new thing starts here (Add Device, Add Widget, Add equipment, fittings, pipes). The faint 🗺 Watermark is the Tab it goes to: its spot here is its spot there. 👁 Preview shows how it looks on Brew Day. Then press ✅ Finish Build ... to put it on its Tab or save it as a Template.';
 function setPreview(on) {
   if (on && !toBuild()) return;
   previewing = !!on && !!buildWs(); sel = null; drag = null;
-  $('#editHint').textContent = previewing ? '👁 Preview: this is how the build looks on Brew Day. Nothing can be moved or changed here: press ✏ Back to building to change it, or 💾 Save Build ... when it is ready.' : BUILD_HINT;
+  $('#editHint').textContent = previewing ? '👁 Preview: this is how the build looks on Brew Day. Nothing can be moved or changed here: press ✏ Back to building to change it, or ✅ Finish Build ... when it is ready.' : BUILD_HINT;
   renderTabs(); renderWs();
 }
 $('#previewBuild').onclick = () => setPreview(!previewing);
@@ -7156,6 +7184,41 @@ function drawBuildMark() {
   drop(); $('#ws').prepend(svg);
 }
 $('#buildMark').onclick = () => { buildMarkOn = !buildMarkOn; try { localStorage.setItem('bp.buildMark', buildMarkOn ? '1' : '0'); } catch { } drawBuildMark(); };
+// An unfinished Build (Rule 4.1, OakBarn Brewery, 2026-11-16: "Lets do A"): kept on the Brain in the Schema (config.buildDraft), never
+// run or shown on Brew Day; its Devices keep their Ports (Available Ports never offers them) until it is finished or thrown away
+function buildSnap() {
+  const b = buildWs(), items = buildItems(b); if (!b || !items.length) return null;
+  const strip = x => { const c = clone(x); delete c._old; return c; };
+  return { workspace: strip(b), elements: draft.elements.filter(x => items.includes(x)).map(strip), graphics: draft.graphics.filter(x => items.includes(x)).map(strip) };
+}
+async function keepBuild(snap) { await api('PUT', '/ui/build', { buildDraft: snap || null }); if (snap) S.config.buildDraft = snap; else delete S.config.buildDraft; }
+function restoreBuild() {
+  const k = S.config.buildDraft; if (!draft || !k?.workspace || buildWs()) return;
+  const was = k.workspace.name, names = new Set(draft.elements.map(e => String(e.name ?? '').toLowerCase())), ids = new Set(draft.graphics.map(g => g.id));
+  let n = was || 'Build Tab', i = 2; while (draft.workspaces.some(w => w.name === n)) n = 'Build Tab ' + i++;
+  draft.workspaces.push({ ...clone(k.workspace), name: n, build: true });
+  const on = x => ({ ...clone(x), ...(x.workspace === was ? { workspace: n } : {}) });
+  for (const e of k.elements || []) if (!names.has(String(e.name ?? '').toLowerCase())) draft.elements.push(on(e));
+  for (const g of k.graphics || []) if (!ids.has(g.id)) draft.graphics.push(on(g));
+  return true;
+}
+// A kept Build that comes back says so, with one click to Discard it (OakBarn Brewery, 2026-11-16: "even if the Build was still in the
+// Build mode after restarting, one click to discard"). Discard lets its Ports go; ↩ Undo shows for a few seconds after.
+function buildBackNote() {
+  $('#buildBack')?.remove();
+  const b = buildWs(); if (!editing || !b) return;
+  const bar = h('div', { id: 'buildBack', role: 'status' });
+  const close = () => { clearTimeout(bar._t); bar.remove(); };
+  const show = (...kids) => bar.replaceChildren(...kids, h('button', { type: 'button', class: 'bbX', title: 'Close this note', onclick: close }, '✕'));
+  const undo = snap => guard(async () => { close(); S.config.buildDraft = snap; restoreBuild(); await keepBuild(snap); const nb = buildWs(); if (nb) wsName = nb.name; renderTabs(); renderWs(); toast('↩ Your Build is back on the 🔨 Build Tab'); });
+  const discard = guard(async () => {
+    const snap = buildSnap(); dropBuild(); await keepBuild(null); renderTabs(); renderWs();
+    show(h('span', {}, 'Build discarded: its Ports are free again.'), snap ? h('button', { type: 'button', onclick: undo(snap) }, '↩ Undo') : '');
+    clearTimeout(bar._t); bar._t = setTimeout(close, 8000);
+  });
+  show(h('span', {}, `Your unfinished Build is back on the 🔨 ${b.name}.`), h('button', { type: 'button', class: 'danger', title: 'Throw this Build away and free its Ports (↩ Undo shows for a few seconds)', onclick: discard }, '🗑 Discard Build'));
+  document.body.append(bar);
+}
 function dropBuild() {
   const b = buildWs(); if (!b) return;
   const gone = new Set(buildItems(b));
@@ -7294,7 +7357,7 @@ async function saveBuildTemplate({ name, skynet }) {
   dropBuild();
   return made;
 }
-// Save Build ...: where does it go? Move to Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
+// Finish Build ...: where does it go? Move to Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
 async function saveBuild() {
   const b = buildWs(); if (!b) return true;
   // an item un-bundled to the Build Tab: back where it came from (same Tab, spot and size), or saved like a new build
@@ -7311,9 +7374,9 @@ async function saveBuild() {
   if (r.to === 'trash') {
     const came = buildItems(b).filter(g => g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
     if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
-    dropBuild(); toast('The Build Tab was thrown away');
+    dropBuild(); await keepBuild(null); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
-    const went = moveBuildTo(r.tab, r.own), n = went.reduce((a, g) => a + g.n, 0);
+    const went = moveBuildTo(r.tab), n = went.reduce((a, g) => a + g.n, 0);
     toast(went.length > 1 ? `Moved to their Tabs: ${went.map(g => `${g.n} to ${g.tab}`).join(', ')}. They glow red until clicked. Press Save layout to keep them.`
       : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
   } else {
@@ -7327,8 +7390,9 @@ function saveBuildDialog(b) {
   return new Promise(res => {
     const tabs = draft.workspaces.filter(w => !w.build), tk = buildTemplate(b);
     // the Tabs picked in the Add boxes of the new things here (Rule 4.1): one Tab is offered first; several each take theirs
-    const picks = buildItems(b).filter(x => buildToOf(x)), picked = [...new Set(picks.map(buildToOf))], own = picked.length > 1;
-    const first = picked.length === 1 ? picked[0] : b.from;
+    // one Tab for the whole Build (OakBarn Brewery, 2026-11-16): the Tab picked in the Add boxes is only offered first
+    const picks = buildItems(b).filter(x => buildToOf(x)), picked = [...new Set(picks.map(buildToOf))];
+    const first = picked[0] || b.from;
     const d = h('dialog', { class: 'tplMini buildDlg' });
     const close = v => { d.close(); d.remove(); res(v); };
     const tabSel = h('select', {}, ...tabs.map(w => h('option', { value: w.name, ...(w.name === first ? { selected: true } : {}) }, w.name)));
@@ -7342,10 +7406,9 @@ function saveBuildDialog(b) {
         h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: () => close({ to: 'template', kind: tk.kind, name: nm.value, skynet: sky.checked }) }, 'Save as Template')));
     } else tplBox.append(h('p', { class: 'muted' }, tk.why));
     const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'Move to Tab'),
-      own ? h('p', { class: 'muted' }, 'Each new item goes to the Tab picked for it, at the spot and size it has on the Build Tab: ' + picked.map(t => `${picks.filter(x => buildToOf(x) === t).map(x => x.label || x.name).join(', ')} to ${t}`).join('; ') + '. Everything else goes to this Tab. Drag them to their place, then press Save layout.')
-        : h('p', { class: 'muted' }, picked.length ? `Everything on the Build Tab moves to this Tab at the size it is now. To ${picked[0]} (the Tab picked for it) it keeps the spot it has on the Build Tab; to another Tab it goes to the middle. Then press Save layout.` : 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
-      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value, own }) }, 'Move to Tab')));
-    d.append(h('h3', {}, 'Save Build: where should it go?'),
+      h('p', { class: 'muted' }, `Everything on the Build Tab moves to the one Tab picked here, at the size it is now.${picked.length ? ` ${picked[0]} is offered first because it was picked in an Add box.` : ''} To the Tab picked in an Add box it keeps the spot it has on the Build Tab; to another Tab it goes to the middle. Then press Save layout.`),
+      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Move to Tab')));
+    d.append(h('h3', {}, 'Finish Build: where should it go?'),
       ...((b.cloneAs || buildItems(b).some(x => x.buildTo === TO_TPL)) && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
         h('button', { title: 'Close this and see the Build Tab the way it looks on Brew Day', onclick: () => { close(null); setPreview(true); } }, '👁 Preview'),
@@ -7365,18 +7428,26 @@ function renameNote(r) {
   if (r.otherSchemas?.length) t += ` Note: ${r.otherSchemas.map(o => `Schema ${o.schema} still has ${o.name}`).join('; ')}.`;
   return t;
 }
-const saveLayout = guard(async () => {
-  if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
+// Save layout (Rule 4.1, OakBarn Brewery, 2026-11-16: "I want to add things to an existing Build and leave in Build Mode"): it saves
+// the regular Tabs and never ends the Build. An unfinished Build is kept on the Brain (config.buildDraft, never run) and stays open:
+// you stay in Edit layout on the 🔨 Build Tab. leave: Edit layout closes after the save (the Build is still kept for next time).
+const saveLayout = guard(async ({ leave = false } = {}) => {
+  const snap = buildSnap(), onB = new Set(buildItems(buildWs()));
   for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
-  for (const x of [...draft.elements, ...draft.graphics]) delete x.buildTo;      // only for the Build Tab, never saved (Rule 4.1)
+  for (const x of [...draft.elements, ...draft.graphics]) if (x && !onB.has(x)) delete x.buildTo;      // only for the Build Tab (Rule 4.1)
   const look = lookSnap(S.config.brewDefaults);      // a new item keeps the Default tab as it is now (Rule 2.42: Defaults are for new things only)
-  for (const x of [...draft.elements, ...draft.graphics]) { if (!x) continue; if (!x._old && look && !x.newLook) x.newLook = { ...look }; delete x._old; }
+  for (const x of [...draft.elements, ...draft.graphics]) { if (!x || onB.has(x)) continue; if (!x._old && look && !x.newLook) x.newLook = { ...look }; delete x._old; }
   renumberLayers(draft);         // every Tab's Layer Order runs 1, 2, 3 ... with no gaps, new items on top (Rule 1.29)
+  const bTab = buildWs()?.name;
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
-  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
+  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces.filter(w => !w.build), elements: draft.elements.filter(x => !onB.has(x)), graphics: draft.graphics.filter(x => !onB.has(x)), buildDraft: snap, updateVersion: $('#updateVersion').checked });
   const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
-  toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note, false, note ? 9000 : 0); editing = false; await load(); setEditing(false);
+  const kept = snap ? (leave ? ' Your Build is kept: it comes back on the 🔨 Build Tab the next time you open Edit layout.' : ' Your Build stays open on the 🔨 Build Tab: ✅ Finish Build ... when it is done.') : '';
+  toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note + kept, false, note || kept ? 9000 : 0);
+  editing = false; await load();
+  if (snap && !leave) { setEditing(true); const b = buildWs(); if (b) { wsName = b.name; $('#editHint').textContent = BUILD_HINT; renderTabs(); renderWs(); } else if (bTab) wsName = bTab; }
+  else setEditing(false);
 });
 // the Update Version switch is remembered on this browser
 try { $('#updateVersion').checked = localStorage.getItem('bp.updateVersion') === '1'; } catch { }
@@ -9529,7 +9600,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => !String(opts).startsWith('addnew') || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.id ? `${w.id}: ${w.name}` : w.name)),      // Fritz, 2026-11-04: "Tab ID: Tab Name", e.g. BH: Brewhouse
     ...(String(opts).startsWith('addnew') ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []),
-    ...(wsTplOption ? [h('option', { value: TO_TPL, ...(v === TO_TPL ? { selected: true } : {}) }, '📁 Templates (Save Build ... saves it as a Template)')] : []));
+    ...(wsTplOption ? [h('option', { value: TO_TPL, ...(v === TO_TPL ? { selected: true } : {}) }, '📁 Templates (Finish Build ... saves it as a Template)')] : []));
   else if (kind === 'pinsel') {      // Available Ports: the free pins on the Interface that fit this Device, and its own pin
     input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' });
     input._fill = dev => {
@@ -9948,7 +10019,7 @@ const INFO = {
     example: 'w_Text_1.fore = "Red"' },
   override: { title: 'Override Button Widget', properties: [
     ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
-    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Save Build ... to another Tab); each has its own Label and look.'],
+    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Finish Build ... to another Tab); each has its own Label and look.'],
     ['Label', ' (Override to start), with its font, size, bold, fore color, back color and alignment. Rich Text Embedded Codes work in it.'],
     ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
     attributes: [['none', 'a Process does not use it: a person presses it']],
@@ -10215,8 +10286,8 @@ async function editBundle(v) {
   }
   if (!work.bundled) {
     delete v.bundled;
-    // Fritz (2026-10-22): before un-bundling, offer to take it to the Build Tab; its Tab, spot and size are remembered for Save Build ...
-    if (!draft.workspaces.find(w => w.name === v.workspace)?.build && confirm(`Move ${v.label || v.name} to the 🔨 Build Tab to work on it?\n\nIts Tab, spot and size are remembered, so Save Build ... can put it back in the same place.\n\nOK = Yes, move it to the Build Tab.\nCancel = No, un-bundle it here.`))
+    // Fritz (2026-10-22): before un-bundling, offer to take it to the Build Tab; its Tab, spot and size are remembered for Finish Build ...
+    if (!draft.workspaces.find(w => w.name === v.workspace)?.build && confirm(`Move ${v.label || v.name} to the 🔨 Build Tab to work on it?\n\nIts Tab, spot and size are remembered, so Finish Build ... can put it back in the same place.\n\nOK = Yes, move it to the Build Tab.\nCancel = No, un-bundle it here.`))
       return unbundleToBuild(v);
     toast('Un-bundled: the vessel and its IPs can be edited again');
   }
@@ -10224,7 +10295,7 @@ async function editBundle(v) {
 }
 // 🔨 To Build Tab (Fritz, 2026-10-29): when editing a Tab, any item on it can be worked on on the Build Tab. It goes there
 // with its bundled parts, in the same spot; buildFrom remembers its Tab, spot, size and whether it was bundled, and
-// Save Build ... offers to put it back. Pipes and the parts of a bundle don't go by themselves.
+// Finish Build ... offers to put it back. Pipes and the parts of a bundle don't go by themselves.
 function isEl(x) { return !!draft?.elements.includes(x); }
 function buildHead(item) { return item && (isEl(item) ? item : bundleOf(item) || item); }
 function buildable(item) { const v = buildHead(item); return !!v && (isEl(v) || v.kind !== 'pipe') && !draft?.workspaces.find(w => w.name === v.workspace)?.build; };
@@ -10241,7 +10312,7 @@ function itemToBuild() {
   for (const g of [v, ...parts]) g.workspace = b.name;
   const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
   sel = el ? { kind: 'el', id: v.name } : { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
-  toast(`${v.label || v.name || 'It'} is on the Build Tab.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press 💾 Save Build ... to put it back.', false, 8000);
+  toast(`${v.label || v.name || 'It'} is on the Build Tab.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press ✅ Finish Build ... to put it back.', false, 8000);
 }
 $('#itemToBuild').onclick = () => itemToBuild();
 // an un-bundled item goes to the Build Tab with its parts, in the same spot; buildFrom remembers where it came from
@@ -10254,9 +10325,9 @@ function unbundleToBuild(v) {
   for (const g of [v, ...parts]) g.workspace = b.name;
   const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
   sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
-  toast(`${v.label || v.name} is on the Build Tab, un-bundled.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press 💾 Save Build ... to put it back.', false, 8000);
+  toast(`${v.label || v.name} is on the Build Tab, un-bundled.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press ✅ Finish Build ... to put it back.', false, 8000);
 }
-// Save Build ... > Yes: back on the Tab it came from, in the same spot and at the same size, bundled again.
+// Finish Build ... > Yes: back on the Tab it came from, in the same spot and at the same size, bundled again.
 // Its IPs keep their place on the picture; pipes drawn on the Build Tab between its own IPs go along.
 function putBack(v, to) {
   if (isEl(v)) { Object.assign(v, { x: v.buildFrom.x, y: v.buildFrom.y, w: v.buildFrom.w, h: v.buildFrom.h, workspace: to.name }); delete v.buildFrom; return; }   // a Device or Widget
@@ -10494,7 +10565,7 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
-    if (goTo) { if (work.workspace && work.workspace !== item.workspace) work.buildTo = work.workspace; else delete work.buildTo; work.workspace = item.workspace; }      // another Tab (or 📁 Templates) picked: Save Build ... takes it there
+    if (goTo) { if (work.workspace && work.workspace !== item.workspace) work.buildTo = work.workspace; else delete work.buildTo; work.workspace = item.workspace; }      // another Tab (or 📁 Templates) picked: Finish Build ... takes it there
     if (inLayers(item)) {        // a new Layer Order moves it to that place on its Tab and numbers the Tab again, 1, 2, 3 ... (Rule 1.29)
       const n = Math.round(Number(work.layer));
       if (Number.isFinite(n) && n >= 1 && (n !== layer0 || (work.workspace && work.workspace !== item.workspace))) moveLayer(draft, work.workspace || item.workspace, item, n);
@@ -13038,7 +13109,7 @@ async function newSchemaFromTemplate(name) {
   }
   layoutSchema(plan, placed, mfG);
   renderTabs(); renderWs();
-  await saveLayout();
+  await saveLayout({ leave: true });
   // the Brew Process: every job picked, Whirlpool and Chill or Chill, then Build the Brew Day
   await api('PUT', '/ui/brewprocess', { templates: plan.templates, fields: plan.fields });
   const built = await api('POST', '/ui/brewprocess/build'); BP = null;
@@ -13626,7 +13697,7 @@ function leaveMenuTab() {
   markOnTabs(); showMenuBar(false);
   renderMenu(); renderTabs(); fitZoom();
 }
-// Save, Undo and Close, all at the top (OakBarn Brewery, 2026-11-16, Rule 2.53): Save saves and stays open (✔ Saved); Undo goes
+// Save, Undo and Close, all at the top (OakBarn Brewery, 2026-11-16, Rule 2.54): Save saves and stays open (✔ Saved); Undo goes
 // back to the last Save and stays open (it replaces Cancel); Close closes, asking first when there are changes that are not saved
 // (closeMenuTab). All the buttons sit together, frozen, in the upper right corner, always in the same order, so each is in the same
 // exact place on every screen (OakBarn Brewery, 2026-11-16: "I like to have some buttons on any Dialog in same exact place on
@@ -13636,7 +13707,7 @@ function leaveMenuTab() {
 const UNDO_TIP = 'Goes back to the last Save. The changes made since then are let go, and this stays open.';
 const CLOSE_TIP = 'Closes this Menu tab and goes back to your Tabs. If there are changes that are not saved, Skynet asks first.';
 const closeSlot = () => h('span', { class: 'closeSlot' });
-// the purple + Add New button (OakBarn Brewery, 2026-11-16, Rule 2.54): only on a Profile screen, right of its Open list. It may not
+// the purple + Add New button (OakBarn Brewery, 2026-11-16, Rule 2.55): only on a Profile screen, right of its Open list. It may not
 // be used anywhere else. Today only the Pump Profile has it; the other Profiles wait in the Panel Updates Sandbox.
 const ADD_NEW_PUMP_TIP = 'Makes a new Pump Profile, the same as Add new ... in the Open list.';
 const addNewBtn = (tip, onclick) => h('button', { type: 'button', class: 'addNewBtn', title: tip, onclick }, h('span', { class: 'plus', 'aria-hidden': 'true' }, '+'), ' Add New');
@@ -14526,9 +14597,9 @@ async function slotPorts(tab) {
     for (const g of draft.graphics) if (g.kind === 'pipe') for (const k of ['from', 'to']) if (String(g[k] ?? '').startsWith(`dev:@${d.slot}:`)) g[k] = g[k].replace(`dev:@${d.slot}:`, `dev:${el.name}:`);
   }
   wsName = tab;
-  for (const e of made) keepOnBuild(e);       // Rule 4.1: on the 🔨 Build Tab first; Save Build ... > Move to Tab puts each back in its spot
+  for (const e of made) keepOnBuild(e);       // Rule 4.1: on the 🔨 Build Tab first; Finish Build ... > Move to Tab puts each back in its spot
   renderTabs(); renderWs();
-  if (made.length) toast(`${made.map(e => `${e.label}: Port ${e.channel}`).join(', ')}. They are on the 🔨 Build Tab: press 💾 Save Build ... > Move to Tab, then Save layout.`, false, 10000);
+  if (made.length) toast(`${made.map(e => `${e.label}: Port ${e.channel}`).join(', ')}. They are on the 🔨 Build Tab: press ✅ Finish Build ... > Move to Tab, then Save layout.`, false, 10000);
 }
 async function newProfile(tab) {
   if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
@@ -14553,7 +14624,7 @@ async function newProfile(tab) {
 }
 // ---- The Equipment Profile Interview (OakBarn Brewery, 2026-11-13, Rule 19.6, Help 196; public/eqinterview.js). One page at a time
 // with ◀ Back and Next ▶; every answer starts from the Default settings, so Next all the way through makes a working profile. It ends
-// with the Review page, then everything goes on the 🔨 Build Tab (Rule 4.1): 💾 Save Build ... > Move to Tab puts it on its Tab.
+// with the Review page, then everything goes on the 🔨 Build Tab (Rule 4.1): ✅ Finish Build ... > Move to Tab puts it on its Tab.
 function ivPage(title, fields, obj, { first = false, last = false } = {}) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody ivBody' }), d = h('dialog', { class: 'miniDlg ivDlg' });
@@ -14630,7 +14701,7 @@ async function eqInterview(pre = {}) {
         `Vessels: ${a.vessels.map(v => v.label + (v.pick === IV_BUILD ? ' (🔨 built after)' : '')).join(', ')}.`,
         rows.length ? `Pumps and Motorized Valves on ${a.iface}: ${rows.join('; ')}.` : 'No pumps or motorized valves.',
         a.manual.length ? `Manual Valves: ${a.manual.map(m => m.label).join(', ')}.` : '',
-        '🔨 Build puts them all on the 🔨 Build Tab. Then press 💾 Save Build ... > Move to Tab, and Save layout. Pipes are not drawn: pipe them the way yours are (Draw pipe).'].filter(Boolean).join('\n'), 'note']], {}, p.length > 0]; }];
+        '🔨 Build puts them all on the 🔨 Build Tab. Then press ✅ Finish Build ... > Move to Tab, and Save layout. Pipes are not drawn: pipe them the way yours are (Draw pipe).'].filter(Boolean).join('\n'), 'note']], {}, p.length > 0]; }];
   const keep = (i, o) => {     // what each page's answers become
     if (i === 0) { a.name = String(o.name ?? '').trim(); a.tab = o.tab; a.newTab = String(o.newTab ?? '').trim(); a.iface = o.iface || ''; }
     if (i === 1) { const n = +o.nV || 1; a.vessels = ivResize(a.vessels, n, () => ({ type: 'Brew Kettle', pick: '', label: '' })); }
@@ -14719,13 +14790,13 @@ async function ivBuild(a) {
     }
   }
   layoutSchema(plan, placed, mfG);
-  // all of it to the 🔨 Build Tab (Rule 4.1): each piece with everything on it, so Save Build ... puts it back in the same spot on its Tab
+  // all of it to the 🔨 Build Tab (Rule 4.1): each piece with everything on it, so Finish Build ... puts it back in the same spot on its Tab
   const onTab = [...draft.elements.filter(e => e.workspace === tab && (devs.includes(e) || placed.v.some(g => e.integratedIn === g.id) || (mfG && e.integratedIn === mfG.id))),
     ...draft.graphics.filter(g => g.workspace === tab && (placed.v.includes(g) || placed.e.includes(g) || g === mfG || plan.elements.includes(g) || [...placed.v, ...placed.e, mfG].some(v => v && (g.attachTo === v.id || g.onVessel === v.id || g.capOn === v.id || bundleParts(v).includes(g)))))];
   wsName = tab;
   for (const x of new Set(onTab)) keepOnBuild(x);
   renderTabs(); renderWs();
-  toast(`"${a.name}" is made and the Tab ${tab} uses it. Its ${placed.v.length} vessel${placed.v.length === 1 ? '' : 's'}, ${devs.length} pump${devs.length === 1 ? '' : 's'} and valve${devs.length === 1 ? '' : 's'} and the rest are on the 🔨 Build Tab: press 💾 Save Build ... > Move to Tab, then Save layout.`, false, 12000);
+  toast(`"${a.name}" is made and the Tab ${tab} uses it. Its ${placed.v.length} vessel${placed.v.length === 1 ? '' : 's'}, ${devs.length} pump${devs.length === 1 ? '' : 's'} and valve${devs.length === 1 ? '' : 's'} and the rest are on the 🔨 Build Tab: press ✅ Finish Build ... > Move to Tab, then Save layout.`, false, 12000);
   // 🔨 a new Vessel Device: the Vessel Device Builder opens for each one, its questions filled in from the interview
   for (const v of later) await vesselBuilder({ label: v.label, vtype: v.type, units: a.units, ...(v.volume !== '' && Number.isFinite(+v.volume) ? { volume: +v.volume } : {}), workspace: tab });
 }
@@ -15420,7 +15491,7 @@ async function newTemplate(kind, { from, body, std, init, what = TEMPLATE_KINDS[
   if (!ok) return null;
   const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
   if (kind === 'vessel' && !from && !init?.vesselType && (TPL.locked || !w.skynet))      // Fritz, 2026-10-23: no blank User vessel Templates
-    throw new Error('A User Bundled vessel Template is always built on a Skynet Vessel Widget. Add equipment > Vessel > Widget, pick one, build and Bundle it on the Build Tab, then 💾 Save Build ... > As a Template.');
+    throw new Error('A User Bundled vessel Template is always built on a Skynet Vessel Widget. Add equipment > Vessel > Widget, pick one, build and Bundle it on the Build Tab, then ✅ Finish Build ... > As a Template.');
   let r = await api('POST', `/ui/templates/${kind}`, { name, from, skynet: TPL.locked ? false : !!w.skynet });
   if (body || std || init) r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...(init || {}), ...(body || {}), ...(std && !body ? { std } : {}), name });   // a clone gets the settings showing in the pop-up
   setTPL(r);
@@ -15471,12 +15542,12 @@ function openTemplate(kind, name) {
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
     // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
-    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > Move to Tab puts it on the Tab.
+    // there, then Finish Build ... > As a Template saves it under the new name. Add to Tab: Finish Build ... > Move to Tab puts it on the Tab.
     const taken = () => [...L().graphics.map(g => g.name), ...L().elements.map(e => e.name)].filter(Boolean);
     const cloneIt = guard(async () => {
       const w = { name: copyName(t.name, [...tplNames(kind), ...taken()]) };
       const ok = await miniDialog(`Clone ${t.name}`, [['name', 'Name of the new Template (no spaces, use _ instead; it must be unique)', 'text'],
-        ['_n', 'The copy is made on the 🔨 Build Tab first. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick As a Template to save it under this name.', 'note']], w, 'Clone');
+        ['_n', 'The copy is made on the 🔨 Build Tab first. Change it there and look at it with 👁 Preview, then press ✅ Finish Build ... and pick As a Template to save it under this name.', 'note']], w, 'Clone');
       if (!ok) return;
       const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
       if (tplOf(kind, name)) throw new Error(`There is already a ${TEMPLATE_KINDS[kind]} called "${name}"`);
@@ -15491,7 +15562,7 @@ function openTemplate(kind, name) {
       const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken());
       w.name = def(w.tab);
       const ok = await miniDialog('Add to Tab', [['tab', 'Tab it goes on', 'sel', tabs.map(x => [x.name, x.name])], ['name', 'Name (change it to what you want)', 'text'],
-        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick Move to Tab: this Tab is offered first.', 'note']], w, 'Add');
+        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press ✅ Finish Build ... and pick Move to Tab: this Tab is offered first.', 'note']], w, 'Add');
       if (!ok) return;
       if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
       const b = current(); finish();
@@ -15512,8 +15583,8 @@ function openTemplate(kind, name) {
     });
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
-      admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
-      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > Move to Tab', onclick: toTab }, 'Add to Tab') : '',
+      admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Finish Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
+      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Finish Build ... > Move to Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
       h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
     d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User Bundled'),
@@ -15544,7 +15615,7 @@ function renderTemplatesTab(kind, group) { return box => {
   box.append(grid);
 }; }
 
-// Add to Tab and Clone: the copy is made on the Build Tab (in Edit layout, Bundled). Save Build ... then offers the Tab it is
+// Add to Tab and Clone: the copy is made on the Build Tab (in Edit layout, Bundled). Finish Build ... then offers the Tab it is
 // going to first (Add to Tab), or As a Template under the new name (Clone).
 function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
   if (menuTab) leaveMenuTab();
@@ -15555,8 +15626,8 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
   const g = kind === 'vessel' ? placeTabVessel(t, b.name, name) : placeTabFitting(t, b.name, name, null);
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
-  toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > As a Template to save the new Template.`
-    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > Move to Tab to put it on the ${b.from} tab.`, false, 8000);
+  toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press ✅ Finish Build ... > As a Template to save the new Template.`
+    : `${name} is on the 🔨 Build Tab. Change it there, then press ✅ Finish Build ... > Move to Tab to put it on the ${b.from} tab.`, false, 8000);
 }
 function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
@@ -15753,7 +15824,7 @@ async function placeEqItems(p, items) {
     if (it.bundled) g.bundled = true; else delete g.bundled;
     wsName = g.workspace;
   }
-  await saveLayout();
+  await saveLayout({ leave: true });
   if (editing) return;                            // the save failed: Edit layout stays open with the message
   setView('workspace'); renderTabs(); renderWs();
   toast(`${made ? made + ' put on the tab' : ''}${made && updated ? ', ' : ''}${updated ? updated + ' brought up to date' : ''}. Drag the IPs onto the picture if they need it (switch Bundled off first).`);
@@ -15867,7 +15938,7 @@ function renderBrewProfileTab(kind) {
       profWork[kind] = stepsToFields(clone(list.find(x => x.id === pick.value))); profDirty[kind] = false; renderMenuPane();
     });
     // the title, the Open list and the buttons stay frozen at the top while the rest scrolls (Rule 2.51, the Blichmann model)
-    // the purple + Add New button right of the Open list (Rule 2.54, Profiles only): the same as Add new ... in the list, which stays
+    // the purple + Add New button right of the Open list (Rule 2.55, Profiles only): the same as Add new ... in the list, which stays
     const addNew = kind === 'pump' && admin ? addNewBtn(ADD_NEW_PUMP_TIP, guard(async () => {
       if (profDirty[kind] && !confirm(`The open ${K.title} has changes that are not saved. Leave them?`)) return;
       return newBrewProfile(kind);
