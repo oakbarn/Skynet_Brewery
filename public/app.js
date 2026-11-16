@@ -16,7 +16,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
 import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed } from './pumps.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
@@ -2785,7 +2785,8 @@ function fillEl(n, e0) {
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
   const lit = on || (e.type === 'alarm' && !!v.active), ovlRaw = v.imageoverlay || e.imageOverlay, ovl = lit && (ovlRaw === 'none' ? '' : ovlRaw);      // 'none': an Alarm Chain step took it off (Rule 7.16), or Overlay None
-  if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
+  // a pump On with Overlay None and no on picture shows its own picture (it showed an empty box, found 2026-11-16 making the Overlay picture)
+  if ((ovl || (lit && isPumpDev(e))) && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
   // a Heating Element with Overlay None (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None"): nothing changes on its picture
   // while it is On, not even the glow of its on picture. Its Glow (the start) is its on picture, as before.
   if (lit && ovlRaw === 'none' && isHeatElem(e)) img = (v.imageoff || e.imageOff) || pic;
@@ -5360,6 +5361,17 @@ const IFACE_PUMP_PARTS = ['The Arduino board this Pump Device is connected to. A
   'If you need to add a new Interface, select ➕ Add new Interface in the List Box (Bottom Choice). Create the Interface and Save it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.'];
 const IFACE_PUMP_TIP = IFACE_PUMP_PARTS.join('\n\n');
 const ifaceTip = e => isPumpDev(e) ? IFACE_PUMP_TIP : DEVICE_TIPS.iface;
+// the greyed out Interface and Available Ports (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Hover Help after Updated and Greyed out need
+// to basically explain that the Interface and Port combination are saved, they cannot be changed for both Hover Help"): this line
+// first in both balloons, then the box's own balloon
+const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed. They are the board and the pin (Port) this Device is wired to.';
+const CONFIRMED_WIRE_TIP = 'Confirmed: the Interface and Port combination is saved for this Device, and they cannot be changed. To use another Interface or Port, ✖ Cancel this Add box and start again.';
+function setWireTips(pair, lead) {      // pair: the Interface box (its line holds the Available Ports too)
+  const line = pair?.closest('.fldPair') || pair, lbl = line?.previousElementSibling;
+  for (const l of [lbl, ...(line?.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {
+    l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = lead + (l.dataset.help ? '\n\n' + l.dataset.help : '');
+  }
+}
 // the standard part after a Suggested Name Format line, the same as the Interface balloon's (OakBarn Brewery, 2026-11-12, Dialog 1 #2:
 // "add the standard like the interface id text here")
 const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).\n\n'
@@ -5641,6 +5653,7 @@ async function newDeviceDialog(e, hint, what) {
       const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
       for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.title = 'Confirmed: the board and pin it is wired to. Cancel to change it.'; }
       dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
+      setWireTips(dv, CONFIRMED_WIRE_TIP);
     }
     // the rest of the Add box is open (OakBarn Brewery, 2026-11-11, the second Blichmann Pump Build Dialog): the Label and Tab can
     // still change (the Suggested Name follows), and the focus goes to the first box that was not on the first part: the Orientation
@@ -6189,7 +6202,9 @@ function stackNew(e) {
 // It is picked in the Add box's Profile dropdown, which starts on the one marked Default (OakBarn Brewery, 2026-11-14: "If on the Pump
 // Add, have the default as the selection in the DDLB. Same for Valve"); there is no pop-up any more.
 const markedProfile = kind => (S[kind + 'Profiles'] || []).find(p => p.isDefault) || null;
-const profileChoices = kind => [['', '(none)'], ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
+// a Pump Profile list has no (none): one is always the Default (OakBarn Brewery, 2026-11-16, Dialog 2 #3: "We need to create a Default
+// so None Choice goes away")
+const profileChoices = kind => [...(kind === 'pump' && (S.pumpProfiles || []).length ? [] : [['', '(none)']]), ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
 const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
   valve: 'The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).' };
 // a Pump Profile into a new pump (or its Add box): only what the profile says; the picture stays the pump picked
@@ -6197,7 +6212,8 @@ function applyPumpProfile(o, p) {
   if (!p) return o;
   o.flipH = p.flip === 'left'; if (!o.flipH) delete o.flipH;
   if (p.cover) o.cover = p.cover;
-  for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'imageOverlay', 'ipTypeIn', 'ipTypeOut']) if (p[k]) o[k] = p[k]; else if (k !== 'imageOverlay') delete o[k];
+  for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'ipTypeIn', 'ipTypeOut']) if (p[k]) o[k] = p[k]; else delete o[k];
+  if (p.imageOverlay) o.imageOverlay = p.imageOverlay === 'none' ? '' : p.imageOverlay;      // every Pump Profile names its Overlay ('none' = None)
   return o;
 }
 function useValveProfile(e, id) {
@@ -7895,9 +7911,6 @@ const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f =
 // RipTide (AC)", with no "From the drawing (...)" round it; the same name is not listed twice.
 const PUMP_MODEL_CHOICES = (v, it) => { const d = it && !it.pumpModel ? factsOf(it) : null;
   return [['', d ? d.name : '(not set)'], ...PUMP_FACTS.filter(f => f.key !== d?.key).map(f => [f.key, f.name]), ['other', 'Other (type its facts in the ⬢)'], ...(v && v !== 'other' && !pumpFacts(v) ? [[v, v]] : [])]; };
-// the Power the model gives shows by its own words, "AC 120 V (house power)", with no "From the model (...)" round it (KISS)
-const PUMP_POWER_CHOICES = it => { const m = !it.power && factsOf(it)?.power;
-  return PUMP_POWERS.filter(([k]) => !(m && k === m)).map(([k, t]) => [k, k === '' && m ? PUMP_POWERS.find(p => p[0] === m)[1] : t]); };
 // Use is greyed out (OakBarn Brewery's drawing, 2026-11-11): Hot & Cool, or Cold for a glycol pump; it is not changed in the dialog
 const pumpUseText = it => useOf(it) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool';
 // Speed Control and Speed % show for PWM pumps only (OakBarn Brewery's drawing, 2026-11-11): a DC pump, or one already set to PWM
@@ -7905,10 +7918,18 @@ const pumpPwmShown = it => !!it.pwm || isDcPower(powerOf(it));
 // Pump facts (OakBarn Brewery, 2026-11-11: "If the data is Known, fill it in and Grey Out for Know values"; "For a User defined pump
 // Useful"): a fact the model knows is filled in and greyed out; a fact it doesn't know, or every fact of a User Defined pump (Other,
 // or no model), is a box to type in. A fact typed before stays the brewer's own and can still be changed (Rule #1).
+// Ports (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Use Paragraphs or Bullets for different Configurations Start by Match YOUR Pump fittings.")
+const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump has now, with any fitting you added on it.\n'
+  + '• Tri-Clamp (TC): a flat flange held on by a clamp. TC1.5 is a 1.5 inch Tri-Clamp, the most common on a brewery pump.\n'
+  + '• Female Pipe Thread (FPT): the threads are inside the port. FPT1/2 is 1/2 inch.\n'
+  + '• Male Pipe Thread (MPT): the threads are on the outside of the port.\n'
+  + '• BSP: the British pipe thread, on many pumps made outside the USA.\n'
+  + '• Metric (DN): a metric size, for example DN15.\n'
+  + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.';
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
   ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.'],
-  ['pumpPorts', 'ports', 'Ports', 'Its inlet and outlet: Tri-Clamp (TC), Female or Male Pipe Thread (FPT, MPT), BSP or metric (DN), and size. A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.']];
+  ['pumpPorts', 'ports', 'Ports', PORTS_TIP]];
 // Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
 // make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
 function pumpPortField(o, f, tip) {
@@ -7917,22 +7938,29 @@ function pumpPortField(o, f, tip) {
   const hint = f?.ports ? ` The model: ${f.ports}.` : '';
   return ['pumpPorts', 'Ports', 'sel', [['', '(pick)'], ...PUMP_PORTS.map(p => [p, p]), ...(own && !PUMP_PORTS.includes(own) ? [[own, own]] : [])], false, false, { tip: tip + hint }];
 }
-const PUMP_FACTS_POP = { title: 'Pump facts', fields: o => {
-  const f = factsOf(o), known = k => k === 'ports' ? !!(f?.port && isTcPort(f.port) && String(o.pumpPorts ?? '').trim() === '') : !!(f?.[k] && (o[PUMP_FACT_ROWS.find(r => r[1] === k)[0]] ?? '') === '');
-  const some = PUMP_FACT_ROWS.some(r => known(r[1])), open = PUMP_FACT_ROWS.some(r => !known(r[1]));
-  return [['_pfn', f ? `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}${some ? ' Known facts are filled in and greyed out.' : ''}${open ? ' Type what you know in the others.' : ''}` : 'User Defined pump: type what you know.', 'note', null, false, false, { keep: true }],
-    ...PUMP_FACT_ROWS.map(([key, k, label, tip]) => k === 'ports' ? pumpPortField(o, f, tip)
-      : known(k) ? [`_${key}`, label, 'ro', f[k], false, false, { tip: tip + ' Known from the model, so it is greyed out.' }] : [key, label, 'text', null, false, false, { tip }])];
+// The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
+// Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
+// was. A User Defined pump (Other) has no facts to show, so its facts are still typed here.
+const PUMP_VIEW_ROWS = PUMP_FACT_ROWS.filter(r => r[1] !== 'ports');
+const pumpFactsView = o => !!factsOf(o) && o.pumpModel !== 'other';
+const PUMP_FACTS_POP = { title: 'Pump facts', view: pumpFactsView, redraw: 'pumpModel', fields: o => {
+  const f = factsOf(o), T = DEVICE_TIPS;
+  const power = ['_power', 'Power', 'ro', powerText(powerOf(o)) || 'Not set', false, false, { tip: T.pumpPower }], use = ['_use', 'Use', 'ro', pumpUseText(o), false, false, { tip: T.pumpUse }];
+  if (pumpFactsView(o)) return [['_pfn', `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}`, 'note', null, false, false, { keep: true }], power, use,
+    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }])];
+  return [['_pfn', 'User Defined pump: type what you know.', 'note', null, false, false, { keep: true }],
+    ['power', 'Power', 'sel', PUMP_POWERS, false, false, { tip: T.pumpPower }], use,
+    ...PUMP_VIEW_ROWS.map(([key, , label, tip]) => [key, label, 'text', null, false, false, { tip }])];
 } };
 function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   const T = DEVICE_TIPS;
   if (it.pwm === true) it.pwm = 'pwm';
   // known values are filled in and greyed out (OakBarn Brewery, 2026-11-11: "If the data is Known, fill it in and Grey Out for Know
   // values"): the Model a Skynet pump drawing picks, and the Power that model runs on. The ⬢ Pump facts stays open.
-  const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it)), powerKnown = !!(!it.power && factsOf(it)?.power);
-  return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel + (known ? ' Known from the pump drawing, so it is greyed out.' : ''), attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
-    ['power', 'Power', 'sel', PUMP_POWER_CHOICES(it), true, false,
-      { tip: T.pumpPower + (powerKnown ? ' Known from the model, so it is greyed out.' : ''), with: ['_use', 'Use', 'ro', pumpUseText(it), false, false, { tip: T.pumpUse }], ...(powerKnown ? { disabled: true, known: true } : {}), ...x }],
+  const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it));
+  return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
+    // Ports, where Power was (Dialog 2 #3, 2026-11-16); Power and Use are in the Model's ⬢ Pump facts
+    (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpPortField(it, factsOf(it), PORTS_TIP)),
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
     // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Ports, else the Default pipe IP Type
     ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}), it.ipTypeOut ||= it.ipTypeIn,
@@ -8818,7 +8846,7 @@ function field(f, obj) {
       if (w[6]?.disabled && o2[1]) for (const i of [o2[1], ...o2[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
       if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
       const lbl = h('span', { class: 'pairLbl' }, w[1]);
-      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.dataset.help = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
+      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.dataset.help = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], lbl.dataset.help || w[6].tip)); }
       parts.push(lbl, o2[1]);
     }
     out[1] = h('div', { class: 'fldPair' + (x.pairCls ? ' ' + x.pairCls : '') }, ...parts);
@@ -8831,7 +8859,7 @@ function field(f, obj) {
     return [];
   }
   if (x?.dbPop && out[1]) {      // Database and .API on the same line, its settings in a pop-up (Fritz's screen 7)
-    out[1] = h('div', { class: 'fldPair' }, out[1], h('span', { class: 'pairLbl dbPopLbl' }, 'Database and .API'),
+    out[1] = h('div', { class: 'fldPair' }, out[1], (l => { l.addEventListener('click', () => fieldTip('Database and .API', DB_TIPS.line)); return l; })(h('span', { class: 'pairLbl dbPopLbl tipLbl', 'data-help': DB_TIPS.line }, 'Database and .API')),
       h('button', { type: 'button', class: 'fldIcon fldAttr', title: 'Database and .API: send to the database, and .API', onclick: ev => { ev.preventDefault(); attrEntry(DB_POP, obj); } }, '⬢'));
   }
   if (f[0] === 'label' && x?.tip && out[0] && hasSuggestion(obj)) { x.tip = labelTip(obj, x); out[0].dataset.labelTip = `${x.attr ? 'a' : ''}${x.up || ''}`; }      // made for where it is
@@ -8845,6 +8873,9 @@ function field(f, obj) {
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
     for (const i of ins()) { i.disabled = true; i.title = 'Set when it was added: the board and pin it is wired to'; }
     out[0].classList.add('greyed');
+    for (const l of [out[0], ...(box.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {      // both balloons say it first (Dialog 2 #3)
+      l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = SET_WIRE_TIP + ((l.dataset.help || (l === out[0] ? x.tip : '')) ? '\n\n' + (l.dataset.help || x.tip) : '');
+    }
   }
   if (x && out[1]) {
     const icons = []; let wrap;
@@ -8949,17 +8980,20 @@ const DEVICE_TIPS = {
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
   type: 'Its Device Type: the General Type, an @, then the Device Type, for example DO@Pump, an On/Off Pump (Pump on a Digital Out, DO), or PWM@Pump, a Pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: BM_22_DO@Pump_Pump_BH. A new Device fills it in.',
-  cover: 'A colored cover drawn over the pump picture (the Skynet pump drawings only). None to start.',
+  // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): "Need Graphic in Hover help with and without cover Pump"
+  cover: '⟪img:help_pictures/Pump_Cover.png⟫A colored cover drawn over the pump picture (the Skynet pump drawings only). Above: the same pump with No Cover and with the Red Cover. A new pump starts with the Cover of the Pump Profile picked in its Add box (the Default Pump Profile: None).',
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
   graphic: 'The picture of this Device as it will show on the Tab, with its Cover and Orientation.',
   orient: '⟪img:help_pictures/Pump_Right_Left.png⟫Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it. Switching the Orientation leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside the pump is drawn again to reach them.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
-  overlay: 'Drawn on top of the pump while it is On: Lightning Bolt (the steady red and yellow bolt) to start; Flashing Lightning Bolt and the others are choices, None for no overlay.',
-  pumpModel: 'Which pump this is. Its facts (power, flow, lift, hottest liquid, ports) show when you hold the mouse on the pump. A Skynet pump drawing picks its model by itself. The ⬢ beside it holds the facts; type your own to change one.',
+  // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): "Needs a Graphic with all of the Choices depicted"
+  overlay: '⟪img:help_pictures/Pump_Overlays.png⟫Drawn on top of the pump while it is On. Above: every choice, each on a pump that is On (Flashing Lightning Bolt flashes on the Tab). None: no overlay, the pump looks the same On and Off. A new pump starts with the Overlay of the Pump Profile picked in its Add box (the Default Pump Profile: the Default settings Pump Overlay, the Green Glow Ring unless it was changed).',
+  // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): "TMI Simpler"
+  pumpModel: 'The Pump Model you choose from Available Common Brewery Pumps. Its Properties can be displayed with the ⬢.',
   pumpPower: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nWhat the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
-  pumpUse: 'What it pumps. Hot & Cool: wort, hot water and cold water. Cold: glycol or ice water (cooling a fermenter). Set by the model; it is not changed here.',
+  pumpUse: 'What it pumps. Hot & Cool: wort, hot water and cold water. Cold: glycol or ice water (cooling a fermenter). Set by the model.',
   pumpSpeedCtl: 'On/Off only: the pin turns the pump on and off. PWM speed: a DC pump on a PWM pin (with a MOSFET module) runs at its Speed % while it is On. A brushless DC pump with its own driver may not like PWM: try it at a slow speed first.',
   pumpSpeed: 'How fast it runs while it is On, 0 to 100 %. A Process can change it: Pump_Name.speed = 60.',
   toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
@@ -10009,18 +10043,21 @@ async function dbGroupDialog(g, me, cur) {
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
 const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"]');
-function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false } = {}) {
+function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false } = {}) {
   return new Promise(res => {
     const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' + (model ? ' miniModel' : '') });
     const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
       h('button', { type: 'button', class: 'primary', ...(model ? { title: 'Keep these settings and go back to the dialog. They are saved when you Save the dialog.' } : {}), onclick: () => done('ok') }, model ? '💾 Keep' : '💾 Save'));
-    if (model) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
+    // a pop-up to look at only (the Model's ⬢ Pump facts, Dialog 2 #3): one ◀ Back button, nothing to change
+    const viewBar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Back to the dialog', onclick: () => done('cancel') }, '◀ Back'));
+    if (view) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), viewBar()), body);
+    else if (model) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
     else d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
     const done = r => { d.close(); d.remove(); res(r); };
-    const cancel = () => { if (snap() !== before && !discardOk()) return; done('cancel'); };
+    const cancel = () => { if (!view && snap() !== before && !discardOk()) return; done('cancel'); };
     d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
     d.showModal();
   });
@@ -10059,10 +10096,12 @@ async function attrEntry(attr, obj) {
   const fill = Object.entries(attr.fill?.(obj) ?? {}).filter(([k]) => obj[k] === undefined || obj[k] === null || obj[k] === '');
   for (const [k, v] of fill) obj[k] = v;
   const unfill = () => { for (const [k, v] of fill) if (String(obj[k] ?? '') === String(v)) obj[k] = ''; };
-  const r = await layerDialog(titleCase(attr.title), b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete, { bottom: !attr.noBottom });
+  const view = !!attr.view?.(obj);
+  const r = await layerDialog(titleCase(attr.title), b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete && !view, { bottom: !attr.noBottom, view });
   if (r === 'delete') { unfill(); return $('#dlg').close('delete'); }      // the Properties pop-up's Delete is the dialog's Delete (it asks first)
   if (r !== 'ok') return unfill();
   readFields(obj, body); unfill();
+  if (attr.redraw) { const t = $('#dlgBody [data-k="' + attr.redraw + '"]'); if (t) t.dispatchEvent(new Event('change', { bubbles: true })); }      // what it changed shows on the dialog (a User pump's Power and Speed Control)
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     if (!body.querySelector(`[data-k="${k}"]`)) continue;
@@ -11511,23 +11550,52 @@ function logSummary(lg) {
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
 const hasDbValue = e => !['picture', 'label', 'manual', 'gGlobal'].includes(e?.type);      // a gGlobal: only send_db / DBSend in a Process (Rule 1.33)
+// Database and .API Hover Help (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Expand Help and on the Dialogs it Pops Up have very Poor Help
+// do better on those as well"): the name on the dialog line, and every box in its ⬢ pop-up, has its own balloon
+const DB_TIPS = {
+  line: 'Database and .API: the ⬢ beside it opens its settings. Both are Off to start.\n'
+    + '• Database: Skynet writes this item\'s readings to the brew database, each with its time, so you can look back at a brew day or show them on a Graph. You pick when a reading is written.\n'
+    + '• .API: lets programs outside Skynet (a web page, Node-RED, MQTT or a voice assistant) read this item, or read and control it.\n'
+    + '• API_Name: the words a Voice Command says for this item.\n'
+    + 'More in Help: Database and .API.',
+  freq: 'When a reading is written to the brew database:\n'
+    + '• Off: never (to start).\n'
+    + '• On demand: only when asked, by a send_db line in a Process, Log now on the Variables screen, or the API.\n'
+    + '• On value change: every time the value changes.\n'
+    + '• When Clicked: each time someone sets it on its Tab.\n'
+    + '• When a Process starts: each time the Process you pick starts.\n'
+    + '• At a date and time (once), or At clock time (every day).\n'
+    + '• Every second, minute, hour or day, every N of them, or every 00:00:00 you type.',
+  process: 'The Process that sends this reading each time it starts.',
+  every: 'How many: for Every N minutes, 5 sends it every 5 minutes. A whole number, 1 or more. The fastest is 100 milliseconds.',
+  interval: 'The time between readings, in hours:minutes:seconds. 00:05:00 sends it every 5 minutes.',
+  clock: 'The time of day it is sent, every day: 12 AM, 6:30 PM or 18:30.',
+  date: 'The one time it is sent: the date, a T, then the time. 2026-11-01T06:00 is 6 AM on November 1, 2026.',
+  what: 'What is written: its main value (a probe\'s temperature, a pump\'s On or Off, a timer\'s time), or one of its other attributes, like a PID\'s .setpoint.',
+  groups: 'Optional. A Database Group sends a set of items only when you want: in a Group, this item is sent by its Send setting above only while one of its Groups is started (start_db_group Mash in a Process starts the Group Mash, stop_db_group Mash stops it). On demand always works. 👥 Groups… puts it in a Group, or makes a new one.',
+  api: 'Who outside Skynet may reach this item (a web page, Node-RED, MQTT or a voice assistant):\n'
+    + '• Off: nobody (to start).\n'
+    + '• Read Only: they can read it.\n'
+    + '• Read & Control: they can also change it, for example turn a pump On. Give Read & Control only to what you want controlled from outside Skynet.',
+  apiName: 'The words a Voice Command says for this item, for example HLT Heater. It must be Unique in the Schema. Blank: no Voice Command can be used for it.',
+  kept: 'Each reading is kept with its time and the item\'s hidden key, so a reading still belongs to it after its name changes. In a Process, send_db Name sends it now (always, even when Off or in a stopped Group); send_db_group Group_Name sends every item of that Group now, once.',
+};
 function dbFields(it) {
   if (!hasDbValue(it)) return [];
   const f = it.db_frequency || 'none', attrs = (S.words?.elements || []).find(x => x.name === it.name)?.attrs || [];
   return [['', 'Database and .API', 'box'],
-    ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
-    ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
-    ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
-    ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
-    ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
-    ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
-    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]],
-      ['db_groups', 'Database Groups (optional): in a Group, it is sent by the setting above only while one of its Groups is started. On demand always works.', 'dbgroups']] : []),
-    ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL), false, false, hydroWeb(it) ? { grey: 'This Hydrometer talks to Skynet through the web, so its .API is always on (Read only): Rule 6.25' } : undefined],
+    ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true, false, { tip: DB_TIPS.freq + '\n\n' + DB_TIPS.kept }],
+    ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])], false, false, { tip: DB_TIPS.process }]] : []),
+    ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N', 'num', null, false, false, { tip: DB_TIPS.every }]] : []),
+    ...(f === 'hms' ? [['db_interval', 'Every', 'text', null, false, false, { tip: DB_TIPS.interval }]] : []),
+    ...(f === 'clock' ? [['db_at', 'At clock time', 'text', null, false, false, { tip: DB_TIPS.clock }]] : []),
+    ...(f === 'datetime' ? [['db_at', 'Date and time', 'text', null, false, false, { tip: DB_TIPS.date }]] : []),
+    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])], false, false, { tip: DB_TIPS.what }],
+      ['db_groups', 'Database Groups', 'dbgroups', null, false, false, { tip: DB_TIPS.groups }]] : []),
+    ['api', '.API', 'sel', Object.entries(API_LABEL), false, false, hydroWeb(it) ? { grey: 'This Hydrometer talks to Skynet through the web, so its .API is always on (Read only): Rule 6.25', tip: DB_TIPS.api } : { tip: DB_TIPS.api }],
     // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
-    ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],
+    ['apiName', 'API_Name', 'text', null, true, false, { tip: DB_TIPS.apiName }],
     ...(cleanApiName(it.apiName) ? [] : [['_apiw', '⚠ API_Name is blank: a Voice Command can\'t be used for this item.', 'note']]),
-    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now (always, even Off or in a stopped Group); send_db_group Group_Name sends every item of that Group now, once.', 'note'],
     ['', '', 'boxend']];
 }
 function dbToWork(work) {
@@ -13563,7 +13631,8 @@ const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
   look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in Settings > Panel settings.',
-  pump: 'The On overlay a new User Pump Template starts with: what shows over the pump while it runs. A Skynet Template keeps its own, and pumps already made keep theirs.',
+  // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): "What the Default Pump overlay is, and The default Pump Overlay only applies to new Pump Profiles"
+  pump: 'The Default Pump Overlay is the On overlay: what shows over a pump while it runs. Skynet starts with the Green Glow Ring.\nThe Default Pump Overlay only applies to new Pump Profiles: a new Pump Profile starts with it, and each new pump takes the Overlay of the Pump Profile picked in its Add box. Pump Profiles already made, and pumps already made, keep theirs.',
   valve: 'The On overlay a new User Valve Template (a powered valve) starts with. A Skynet Template keeps its own, and valves already made keep theirs.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
@@ -15554,9 +15623,12 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
     about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
     about: 'The pictures and orientation a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
-  pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover', noUnits: true,
-    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and IP Types. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties.' } };
+  pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover, Hose, the Default settings Pump Overlay', noUnits: true,
+    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and IP Types. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
+// Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
+const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile first. There is always one Default Pump Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Pump Profile, turn its Default On and Save: this one is then no longer the Default.';
+const PUMP_PROF_OVERLAY_TIP = 'The On overlay a new pump made with this Pump Profile starts with: what shows over the pump while it runs. A new Pump Profile starts with the Default settings Pump Overlay (☰ Menu > Default settings).';
 const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
 const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
 const LED_MODES = { locking: 'Locking (press: ON, press again: OFF)', momentary: 'Momentary (ON only while held)' };
@@ -15572,10 +15644,10 @@ function profFields(kind) {
       ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
       ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
       ['notes', 'Notes', 'area']];
-    if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }],
+    if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']]], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])]],
       ['pumpIn', 'Inlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]], ['pumpOut', 'Outlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]],
-      ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['', '(the Default settings one)'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])]],
+      ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
       ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...IP_TYPES]], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...IP_TYPES]],
       ['notes', 'Notes', 'area']];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],

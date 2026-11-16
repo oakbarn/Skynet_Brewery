@@ -73,4 +73,6 @@ Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient 
 
 La **case d'ajout de pompe** a une liste **Pump Profile**. Elle commence sur le Pump Profile marqué **Default** et remplit les cases en dessous avec lui ; choisissez-en un autre et elles changent. Vous pouvez encore changer chaque case avant **➕ Add Device**. Ensuite, la pompe se change dans ses propres propriétés.
 
-**Default :** comme pour les Valve Profiles, un Pump Profile peut être marqué Default.
+**Default :** il y a toujours un Pump Profile par défaut, donc la liste Pump Profile n'a pas de (none). Skynet fait le premier, **Default Pump Profile** : Right, pas de Cover, Hose (tuyau souple), et le Pump Overlay des Default settings. Changez-le comme vous voulez. Son interrupteur **Default** ne peut pas être mis sur Off et il ne peut pas être supprimé : pour qu'un autre devienne le Default, ouvrez-le, mettez son **Default** sur On et faites Save.
+
+**Overlay d'un nouveau Pump Profile :** un nouveau Pump Profile commence avec le **Pump Overlay** de ☰ Menu > Default settings (l'anneau lumineux vert sauf si vous le changez). Le Pump Overlay des Default settings ne s'applique qu'aux nouveaux Pump Profiles : les Pump Profiles et les pompes déjà faits gardent le leur. Une nouvelle pompe prend l'Overlay du Pump Profile choisi dans sa case d'ajout.

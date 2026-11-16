@@ -925,6 +925,14 @@ Help 155).
   starts on the one marked Default; picking another fills the Pump Add box's boxes with it. The Valve Profile pop-up and the
   Default tab's Valve Profile box are gone (the profile it named became the one marked Default, once); the section is now
   **New Tabs**.
+- **There is always a Default Pump Profile** (OakBarn Brewery, 2026-11-16, Blichmann RipTide Dialog 2 #3: "We need to create a Default
+  so None Choice goes away. the first Default Profile can be copied from this one. Orientation Right, no Cover, Hose and over lay as
+  the Default Pump Overlay"). When no Pump Profile is marked Default, Skynet makes **Default Pump Profile** (Right, no Cover, Hose, the
+  Default settings Pump Overlay) and marks it. The Pump Add box's Pump Profile list has no **(none)**. The Default Pump Profile's
+  Default switch can not be turned Off and it can not be deleted: another Pump Profile is marked Default first. Every Pump Profile
+  names its own Overlay (None is a choice). **The Default settings Pump Overlay only applies to new Pump Profiles** (OakBarn Brewery:
+  "The default Pump Overlay only applies to new Pump Profiles"): a new Pump Profile starts with it; Pump Profiles and pumps already
+  made keep theirs.
 
 2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
 Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
@@ -4438,9 +4446,11 @@ Go. I think that any of the Pumps can be controlled (On/Off or PWM if it can) an
 have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 163). Every Pump's Add box and Properties have,
 below the Overlay:
 - **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
-  holding the **Pump facts** (Flow, Lift, Hottest liquid, Ports: the model's, or typed by the brewer).
-- **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V; empty = the model's) with **Use** on its line, greyed out: **Hot & Cool**, or
-  Cold for a glycol pump (OakBarn Brewery's drawing, 2026-11-11).
+  holding the **Pump facts**: **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V), **Use** (**Hot & Cool**, or Cold for a glycol pump),
+  Flow, Lift and Hottest liquid. For a model in the list the Pump facts are to look at only, with one **◀ Back** button; for Other
+  they are typed in (Rule 18.40).
+- **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
+  is filled in and greyed out.
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
   or one already set to PWM; OakBarn Brewery's drawing, 2026-11-11). An AC pump is On/Off only. A PWM pump needs a true PWM Port (Rule
   4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
@@ -4620,6 +4630,24 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
   with a Name adds (or saves) it. The Tab key cycles through the boxes only, last back to first; the ? Help, ✖ Cancel and Add are for
   the mouse. Opened from the New Device box (➕ Add new Interface…), it comes back to that box with its own keys as they were.
 - No Simulator note at the bottom (OakBarn Brewery: "Remove").
+
+18.40 **Blichmann RipTide Dialog 2 #3** (OakBarn Brewery, 2026-11-16, PDF "Blichmann_Riptide_Dialog_2_3", the model, Rule 18.34).
+The Pump Add box (Dialog 2) and Pump Device Properties:
+- **Greyed out Interface and Available Ports**: once they are Confirmed (the Add box) or set (Properties), both Hover Helps start by
+  saying the Interface and Port combination is saved and can not be changed ("Hover Help after Uodated and Greyed out need to basically
+  explain that the Interface and Port combination are saved, they cannot be changed for both Hover Help").
+- **A double-click on the Tab list before anything is saved** asks nothing: the Add box steps aside, the Tab settings open, and the Add
+  box comes back with everything typed (Rule 4.7; "Do not want to save yet because any changes to the Tab might affect Suggested Name").
+- **Pump Profile**: always one marked Default, no (none) choice (Rule 2.42).
+- **Cover** and **Overlay** Hover Help have a picture: the pump with and without a cover ("Need Graphic in Hover help with and without
+  cover Pump"), and every Overlay choice on a pump that is On ("Needs a Graphic with all of the Choices depicted").
+- **Database and .API**: the name on the dialog line has its own Hover Help, and every box in its ⬢ pop-up has its own short name and
+  Hover Help ("Expand Help and on the Dialogs it Pops Up have very Poor Help do better on those as well").
+- **Model** Hover Help: "The Pump Model you choose from Available Common Brewery Pumps. Its Properties can be displayed with the ⬢."
+- **Model ⬢ (Pump facts)**: to look at only, with **◀ Back** in place of Keep ("Change Keep to Back and no Edits Just View and Ports
+  move"). **Power** and **Use** moved into it ("Move to Facts"); Use can not be changed, period. **Ports** moved to the dialog, where
+  Power was; its Hover Help starts "Match YOUR Pump fittings" and has a bullet for each kind of port.
+- A pump that is On with Overlay None shows its own picture.
 
 ## 19. Vessel Rules
 
@@ -4804,6 +4832,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 18.40 added, Rules 2.42 and 18.32 changed (OakBarn Brewery, PDF "Blichmann_Riptide_Dialog_2_3"): there is always a Default Pump Profile (no (none) choice); the Default settings Pump Overlay only applies to new Pump Profiles; the Model's ⬢ Pump facts are to look at only with ◀ Back and hold Power and Use; Ports is on the dialog where Power was; the greyed Interface and Available Ports Hover Help say the combination is saved; Cover and Overlay Hover Help have pictures; Database and .API Hover Help.
 - 2026-11-15: Rule 18.39 added, Rules 3.2, 6.3, 6.27 and 18.28 changed (OakBarn Brewery, Add Interface markup: "Rule #1 Follow Blicmann RipTide Model"; "do this in the next PR"). The Add Interface pop-up: its own Hover Help on every name (the Interface ID's is on the Interface ID, not the Board, and is Dialog 1's with this Interface's ID and Name put in live); Interface IDs suggested 2, then 3, then 4 characters (Rule 3.2); Board list is boards only (no "other"); Connection choices follow the Board, no Simulator; the USB Port suggests a free port, takes the number alone on Windows and links to its technical side; On, Lost Comm (was Lost Link) and Diagnostic Logging have new Hover Help; Pause communications became 🔌 Test Communication (a step by step check, Rule 6.27; Pause stays in Board Talk); the Baud box is gone (every Skynet program talks at 115200; the BruControl Import no longer copies Baud); the Simulator note is gone; the Enter and Tab keys follow the Dialog 1 model. The Devices page's second "add" row of boxes is gone: ➕ Add Interface… is the one way in. Rule 18.28: a field's name may be clicked or double-clicked with a blank Label (OakBarn Brewery: a double-click on the Tab gave the blank Label warning). Checked against both programs: the BruControl Import's Build page uses the same pop-up; a BruControl board it cannot tell comes in as "(pick the board)". Help 3, 69, 76, 155, 177, 188 and their French pages. (thread "Polish the Blichmann RipTide pump dialog")
 - 2026-11-15: Rule 4.7 added (OakBarn Brewery: "WE need to have the Builld tab keep in Build mode and be able to come back to it rather than a different tab"). A double-click in an Add box's Tab list closed the Add box as a Cancel and the new pump was gone; now the Add box steps aside and comes back with everything kept, on the same Tab. Properties of things already made open again after the other Properties close, and a Tab bar double-click from the Build Tab comes back to the Build Tab.
 - 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
