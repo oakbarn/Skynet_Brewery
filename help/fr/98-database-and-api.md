@@ -4,6 +4,17 @@ Depuis le 2026-10-30, tout Device ou Widget qui a une valeur peut envoyer ses me
 
 Les images, les Labels et les cuves manuelles n'ont pas de valeur, ils n'ont donc pas de case.
 
+## Le ⬢ Database and .API dans une fenêtre {#the-database-and-api-in-a-dialog}
+
+Sur une pompe (et les autres Devices faits comme elle), **Database and .API** est sur la ligne de l'Overlay, avec un **⬢** rouge à côté. Posez la souris sur le nom pour son Hover Help ; cliquez sur le ⬢ pour ses réglages. Les deux commencent sur **Off**. Chaque case de la fenêtre a son propre Hover Help :
+
+- **Send to the Database** : quand une lecture est écrite (le tableau plus bas). Chaque lecture est gardée avec son heure.
+- **Process**, **N**, **Every**, **At clock time**, **Date and time** : ne s'affichent que pour le choix qui en a besoin.
+- **What to send** : sa valeur principale, ou un de ses autres attributs, comme le `.setpoint` d'un PID.
+- **Database Groups** : facultatif ; envoie un ensemble d'éléments seulement pendant que leur Group est démarré (plus bas).
+- **.API** : qui, en dehors de Skynet, peut l'atteindre : **Off**, **Read Only** (lecture seule), ou **Read & Control** (ils peuvent aussi le changer, par exemple allumer une pompe).
+- **API_Name** : les mots qu'une commande vocale dit pour lui. Il doit être unique ; vide veut dire pas de commande vocale pour lui.
+
 ## Base de données {#database}
 
 **Send to the database** (envoyer à la base de données) dit quand une mesure est écrite :

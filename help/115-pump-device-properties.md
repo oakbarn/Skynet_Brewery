@@ -18,7 +18,8 @@ The idea: the things you set most are on the dialog itself. Everything else is o
    are for the mouse (Skynet Rule 18.38). The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
    Once the **Interface** and **Port** are picked, the **Review** pop-up shows them greyed out with: *You MUST Confirm the
    Interface and Port Number. Once Confirmed, they cannot be changed. If a Change is needed now, Click the Back Button.*
-   **✔ Confirm** greys out the **Interface** and **Available Ports** line (it is the wiring; press Cancel to start again);
+   **✔ Confirm** greys out the **Interface** and **Available Ports** line (it is the wiring; press Cancel to start again). Their
+   Hover Help then starts by saying the Interface and Port combination is saved and can not be changed;
    **◀ Back** goes back to the Port so you can change it. Nothing is set for good until **➕ Add Device** saves the Device.
    Once 1 to 4 are done and Confirmed, the rest of the box opens: the **Label** and **Tab** can still be changed and the
    Suggested Name follows them, and the focus goes to **Orientation**. The **Graphic** is the picture of this Device as it will show on the Tab, with its Cover
@@ -48,7 +49,8 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    Fore Color and Back Color show what the Label has now (your Tab Style, then ☰ Menu > Default settings), and they go on following
    those defaults until you change them. Its **Cancel** and **Save** are at the top only. Alignment is **Left**, **Centered** or **Right**; a Label starts Centered. A Label is never
    blank: leave it empty and it becomes the Name. **Label Visible** switches it on or off.
-3. **2. Interface** and **Available Ports** on one line: greyed out once it is added (the board and pin it is wired to).
+3. **2. Interface** and **Available Ports** on one line: greyed out once it is added (the board and pin it is wired to). Both
+   Hover Helps start by saying the Interface and Port combination is saved and can not be changed.
 4. **3. Tab**: the Tab it is on.
 5. **4. Name**: starts as the Suggested Name (from the Label, Interface, Port, Device Type and Tab); you may type your own. It
    must be unique. A Process uses it: `Pump_Name.state = true`. See **The Name** below.
@@ -60,12 +62,14 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn. Switching the Orientation
    leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside
    the pump is drawn again to reach them.
-8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. The Toggle is what happens when the pump is
+8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. ![No Cover and Red Cover](help_pictures/Pump_Cover.png) The Toggle is what happens when the pump is
    clicked on the Tab: **On/Off** (one click turns it on or off, most common), **Push Button** (on only while held), **Dual
    Action** (a click turns it on or off; pressed and held for more than half a second, it is on only while held, handy for topping
    off a vessel by hand) or **None** (the picture does nothing when clicked). Rule 2.50.
-   Just below them, **Overlay**: what is drawn on top while the pump is On (the steady lightning bolt, the flashing bolt,
-   the Green glow ring, or None). On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
+   Just below them, **Overlay**: what is drawn on top while the pump is On. ![Every Overlay choice](help_pictures/Pump_Overlays.png)
+   On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
+   Below them, **Model** (the Pump Model you choose from Available Common Brewery Pumps; its Properties can be displayed with the
+   ⬢, to look at only, with **◀ Back**: Power, Use, Flow, Lift and Hottest Liquid) and **Ports** (match YOUR pump fittings). Help 163.
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
 10. The **Device Type** greyed out and filled in for you: **DO@Pump** for an On/Off pump like the Blichmann RipTide (a Pump on a Digital Out, DO), **PWM@Pump** for a pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: `BM_22_DO@Pump_Pump_BH`.
 

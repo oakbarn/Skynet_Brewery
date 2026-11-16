@@ -73,4 +73,20 @@ assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Ope
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
 
+// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default, Right, no Cover, Hose, the Default settings Pump Overlay
+const pumps = new ProfileStore(path.join(dir, 'pump'), 'pump');
+pumps.seed = () => ({ imageOverlay: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg' });
+const pd = pumps.ensureDefault();
+assert.equal(pd.name, 'Default Pump Profile'); assert.equal(pd.isDefault, true); assert.equal(pd.flip, 'right'); assert.equal(pd.cover, 'None');
+assert.equal(pd.pumpLink, undefined, 'Hose'); assert.match(pd.imageOverlay, /Overlay_Glow_Ring/);
+assert.equal(pumps.ensureDefault().id, pd.id, 'made once'); assert.equal(pumps.own().length, 1);
+assert.throws(() => pumps.save(pd.id, { ...pd, isDefault: false }), /stays the Default/);
+assert.throws(() => pumps.remove(pd.id), /can not be deleted/);
+pumps.seed = () => ({ imageOverlay: 'tint:red' });
+const p2 = pumps.create('Left pump');
+assert.equal(p2.imageOverlay, 'tint:red', 'a new Pump Profile starts with the Default settings Pump Overlay'); assert.equal(p2.isDefault, undefined);
+assert.equal(pumps.save(p2.id, { ...p2, imageOverlay: '' }).imageOverlay, 'none', 'no Overlay is None');
+pumps.save(p2.id, { ...p2, isDefault: true });
+assert.equal(pumps.marked().id, p2.id); pumps.remove(pd.id); assert.equal(pumps.own().length, 1, 'no longer the Default: it can go');
+
 console.log('profiles tests passed');

@@ -4,6 +4,17 @@ Since 2026-10-30 any Device or Widget that has a value can send its readings to 
 
 Pictures, Labels and manual vessels have no value, so they have no box.
 
+## The Database and .API ⬢ in a dialog
+
+On a Pump (and the other Devices made like it) **Database and .API** sits on the Overlay's line, with a red **⬢** beside it. Rest the mouse on the name for its Hover Help; click the ⬢ for its settings. Both start **Off**. Every box in the pop-up has its own Hover Help:
+
+- **Send to the Database**: when a reading is written (the table below). Each reading is kept with its time.
+- **Process**, **N**, **Every**, **At clock time**, **Date and time**: show only for the choice that needs them.
+- **What to send**: its main value, or one of its other attributes, like a PID's `.setpoint`.
+- **Database Groups**: optional; sends a set of items only while their Group is started (below).
+- **.API**: who outside Skynet may reach it: **Off**, **Read Only**, or **Read & Control** (they can also change it, for example turn a pump On).
+- **API_Name**: the words a Voice Command says for it. It must be Unique; blank means no Voice Command for it.
+
 ## Database
 
 **Send to the database** says when a reading is written:

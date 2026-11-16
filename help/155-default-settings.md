@@ -42,7 +42,7 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 | Setting | What it does |
 |---|---|
 | **Look of a New Schema** | The Look (theme) a new empty Schema starts with. The open Schema's own Look is changed in Settings > Panel settings ([Panel Looks](151-panel-looks)). |
-| **Pump Overlay** | The On overlay a new pump starts with: what shows over it while it runs. Green glow ring unless you change it ([On overlay](58-on-overlay)). |
+| **Pump Overlay** | The Default Pump Overlay: the On overlay, what shows over a pump while it runs. Green glow ring unless you change it ([On overlay](58-on-overlay)). It only applies to new Pump Profiles: a new Pump Profile starts with it, and a new pump takes the Overlay of its Pump Profile ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). |
 | **Valve Overlay** | The On overlay a new powered valve starts with. The steady lightning bolt unless you change it. |
 | **Push Lockout (s)** | How long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties. |
 

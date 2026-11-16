@@ -73,4 +73,6 @@ A Pump Profile is how a new pump starts. Its picture comes from the pump you pic
 
 The **Pump Add box** has a **Pump Profile** dropdown. It starts on the Pump Profile marked **Default** and fills the boxes below with it; pick another and they change to it. You can still change any box before **➕ Add Device**. After that, the pump is changed in its own properties.
 
-**Default:** as for Valve Profiles, one Pump Profile can be marked Default.
+**Default:** there is always one Default Pump Profile, so the Pump Profile list has no (none). Skynet makes the first one, **Default Pump Profile**: Right, no Cover, Hose, and the Default settings Pump Overlay. Change it as you like. Its **Default** switch can not be turned Off and it can not be deleted: to make another one the Default, open that one, turn its **Default** on and Save.
+
+**Overlay of a new Pump Profile:** a new Pump Profile starts with the **Pump Overlay** of ☰ Menu > Default settings (the Green Glow Ring unless you change it). The Default settings Pump Overlay only applies to new Pump Profiles: Pump Profiles and pumps already made keep theirs. A new pump takes the Overlay of the Pump Profile picked in its Add box.
