@@ -21,10 +21,12 @@ The pop-up asks (rest the mouse on each name for its Hover Help):
 - **Interface ID**: see below.
 - **Board**: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each of them.
 - **Connection**: the choices follow the Board. An Arduino Mega: USB, Ethernet (with a W5100 or W5500 Shield) or WiFi (through an ESP32 bridge). An ESP32: USB, Ethernet or WiFi. A Raspberry Pi: Ethernet (or the Brain itself) or WiFi. Its Hover Help shows the connection rating (Help: [Connection ratings](69-connection-ratings)).
-- **USB Port** (a USB board) or **Network address** (Ethernet or WiFi). See [The USB Port, the technical side](#the-usb-port-the-technical-side).
+- **USB Port** (a USB board) or **Network address** (Ethernet or WiFi). See [The USB Port, the technical side](#the-usb-port-the-technical-side) and [The Network address](#the-network-address). While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over the USB Port: to test the real connection, switch to 🔌 Real, add the Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.
 - **Board Settings**: **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** and **Diagnostic Logging** (and the **Network Port** for Ethernet or WiFi): see [Board Settings](#board-settings) below.
 
 The **Simulator** is not a Connection: it belongs to the panel, not to a board. It is switched on and off on the Simulator bar.
+
+**The buttons** (✖ Cancel and Add) are frozen at the top, with the title, and there is no row of buttons at the bottom: the model (Rule 2.51). Picking another Connection keeps the suggested Interface ID.
 
 **The keys.** The **Name** and the **USB Port** (or **Network address**) are the boxes the **Enter** key goes to: Enter on the Name goes to the USB Port, and Enter on a filled-in USB Port with a Name adds (or saves) the Interface. The **Tab** key goes round every box of the pop-up, the last back to the first. The **?** Help, **✖ Cancel** and **Add** are for the mouse. The same order as the [Blichmann RipTide Dialog 1](115-pump-device-properties) (Rule 18.39).
 
@@ -83,11 +85,37 @@ Click OK to keep your own name, or Cancel to go back and change it.
 - **On**: the panel talks to this board. **Off**: the panel never opens it, and its Devices show as not connected. When a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.
 - **🔌 Test Communication**: a step by step check that the Brain and the board are talking. See [Test Communication](#test-communication).
 - **Answer Wait (seconds)**: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.
-- **Lost Comm (s)**: a safety. If the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. It must be filled in: 3 to 600 seconds (10 to start). **Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.**
-- **Diagnostic Logging**: normally **Off**. Turn it On only to find a problem: every line to and from this board is written, with plain words, to a file a day in the data folder (`logs/boards`). Use it when you know what the log means. Skynet gives no help with communication problems: the log is only a way for you, or someone helping you, to find the problem. Turn it Off after.
+- **Lost Comm (s)**: a safety. If the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. It must be filled in: 3 to 600 seconds (10 to start).
+
+  ⚠ **You are the Safety. Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.**
+- **Diagnostic Logging**: normally **Off**. Turn it On only to find a problem: every line to and from this board is written, with plain words, to a file a day in the data folder (`logs/boards`). Use it when you know what the log means. Turn it Off after.
+
+  Skynet gives no help with communication problems: the log is only a way for you, or someone helping you, to find the problem.
 - **Network Port** (Ethernet or WiFi): the network port the board listens on. Skynet's own programs use 4100.
 
 There is no Baud (USB speed) box: it comes from the board. Every Skynet board program talks at 115200.
+
+## The Network address
+
+If you do not understand Networks and protocols, call a friend to help.
+
+**What it is.** The Network Address (IP Address) is the board's own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.
+
+**Ethernet (a network cable).**
+- No WiFi name (SSID) or password is needed: the cable plugs the board into your router or network switch.
+- An Arduino Mega with an Ethernet Shield uses the address written in the Skynet program on the board: 192.168.1.60 to start. Type that same address. If the addresses on your network start with other numbers (for example 10.0.0.), the address in the program is changed to one of yours and the program is loaded on the board again.
+- An ESP32 with an Ethernet jack gets its address from your router (How to find it, below).
+- A Raspberry Pi that is the Brain itself: 127.0.0.1 (the Brain talking to itself).
+
+**WiFi.**
+- Yes, the WiFi name (SSID) and its password are needed, but not in Skynet: they are typed into the Skynet program on the board (the ESP32) before the program is loaded on it, so the board can join your WiFi. Skynet never asks for them and never keeps them.
+- A Raspberry Pi board joins your WiFi in its own WiFi settings, set on the Pi when it is set up.
+- Your router then gives the board its address. When the board starts, it shows its address in the Arduino program's Serial Monitor (with the USB cable plugged in), and your router lists it too.
+- WiFi has to reach the board where it sits. A USB cable or a network cable is safer.
+
+**How to find it.** Open your router's app or its web page and look at its list of connected devices: the board is there with its address. Then, in the router, reserve that address for the board (it may be called a DHCP reservation, a fixed or a static address), so it never changes. Without that, the board can get a new address after a power cut and the Brain can no longer find it.
+
+**Windows, Mac, Linux or a Raspberry Pi.** It is the same on all of them: the address belongs to the board and your router, not to the Brain's computer, and nothing more is installed. The Brain only has to be on the same network (the same router) as the board. The **Network Port** must be the same as the program on the board (Skynet's own programs use 4100).
 
 ## Test Communication
 
