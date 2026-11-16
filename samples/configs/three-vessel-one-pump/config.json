@@ -1511,7 +1511,9 @@
    "offText": "OFF",
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
    "flipH": true,
-   "layer": 74
+   "layer": 74,
+   "ipTypeIn": "TC1.5",
+   "ipTypeOut": "TC1.5"
   },
   {
    "name": "BM_24_DO@Valve_E_HLT~out_BH",
@@ -2401,7 +2403,9 @@
    "straight": true,
    "layer": 122,
    "name": "Pipe_14",
-   "label": "pipe_14"
+   "label": "pipe_14",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_2",
@@ -2424,7 +2428,9 @@
    "straight": true,
    "layer": 121,
    "name": "Pipe_15",
-   "label": "pipe_15"
+   "label": "pipe_15",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_3",
@@ -2447,7 +2453,9 @@
    "straight": true,
    "layer": 120,
    "name": "Pipe_16",
-   "label": "pipe_16"
+   "label": "pipe_16",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_4",
@@ -2470,7 +2478,9 @@
    "straight": true,
    "layer": 119,
    "name": "Pipe_17",
-   "label": "pipe_17"
+   "label": "pipe_17",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_4_2",
@@ -2493,7 +2503,9 @@
    "straight": true,
    "label": "pipe_1",
    "name": "Pipe_1",
-   "layer": 118
+   "layer": 118,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_5",
@@ -2516,7 +2528,9 @@
    "straight": true,
    "layer": 117,
    "name": "Pipe_18",
-   "label": "pipe_18"
+   "label": "pipe_18",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_6",
@@ -2539,7 +2553,9 @@
    "straight": true,
    "layer": 116,
    "name": "Pipe_19",
-   "label": "pipe_19"
+   "label": "pipe_19",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_6_2",
@@ -2562,7 +2578,9 @@
    "straight": true,
    "label": "pipe_2",
    "name": "Pipe_2",
-   "layer": 115
+   "layer": 115,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_6_3",
@@ -2585,7 +2603,9 @@
    "straight": true,
    "label": "pipe_3",
    "name": "Pipe_3",
-   "layer": 114
+   "layer": 114,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_6_4",
@@ -2608,7 +2628,9 @@
    "straight": true,
    "label": "pipe_4",
    "name": "Pipe_4",
-   "layer": 113
+   "layer": 113,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_7",
@@ -2631,7 +2653,9 @@
    "straight": true,
    "layer": 112,
    "name": "Pipe_20",
-   "label": "pipe_20"
+   "label": "pipe_20",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_8",
@@ -2654,7 +2678,9 @@
    "straight": true,
    "layer": 111,
    "name": "Pipe_21",
-   "label": "pipe_21"
+   "label": "pipe_21",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_8_2",
@@ -2677,7 +2703,9 @@
    "straight": true,
    "label": "pipe_5",
    "name": "Pipe_5",
-   "layer": 110
+   "layer": 110,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_9",
@@ -2700,7 +2728,9 @@
    "straight": true,
    "layer": 109,
    "name": "Pipe_22",
-   "label": "pipe_22"
+   "label": "pipe_22",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_10",
@@ -2723,7 +2753,9 @@
    "straight": true,
    "layer": 108,
    "name": "Pipe_23",
-   "label": "pipe_23"
+   "label": "pipe_23",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_11",
@@ -2746,7 +2778,9 @@
    "straight": true,
    "layer": 107,
    "name": "Pipe_24",
-   "label": "pipe_24"
+   "label": "pipe_24",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_11_2",
@@ -2769,7 +2803,9 @@
    "straight": true,
    "label": "pipe_6",
    "name": "Pipe_6",
-   "layer": 106
+   "layer": 106,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_12",
@@ -2792,7 +2828,9 @@
    "straight": true,
    "layer": 105,
    "name": "Pipe_25",
-   "label": "pipe_25"
+   "label": "pipe_25",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_13",
@@ -2815,7 +2853,9 @@
    "straight": true,
    "layer": 104,
    "name": "Pipe_26",
-   "label": "pipe_26"
+   "label": "pipe_26",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_13_2",
@@ -2838,7 +2878,9 @@
    "straight": true,
    "label": "pipe_7",
    "name": "Pipe_7",
-   "layer": 103
+   "layer": 103,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_14",
@@ -2861,7 +2903,9 @@
    "straight": true,
    "layer": 102,
    "name": "Pipe_27",
-   "label": "pipe_27"
+   "label": "pipe_27",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_14_2",
@@ -2884,7 +2928,9 @@
    "straight": true,
    "label": "pipe_8",
    "name": "Pipe_8",
-   "layer": 101
+   "layer": 101,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_15",
@@ -2907,7 +2953,9 @@
    "straight": true,
    "layer": 100,
    "name": "Pipe_28",
-   "label": "pipe_28"
+   "label": "pipe_28",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_15_2",
@@ -2930,7 +2978,9 @@
    "straight": true,
    "label": "pipe_9",
    "name": "Pipe_9",
-   "layer": 99
+   "layer": 99,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_16",
@@ -2953,7 +3003,9 @@
    "straight": true,
    "layer": 98,
    "name": "Pipe_29",
-   "label": "pipe_29"
+   "label": "pipe_29",
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_Brewhouse_16_2",
@@ -2976,7 +3028,9 @@
    "straight": true,
    "label": "pipe_10",
    "name": "Pipe_10",
-   "layer": 97
+   "layer": 97,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "gmw2lvfnomiv",
@@ -4561,7 +4615,9 @@
    "straight": true,
    "label": "pipe_11",
    "name": "Pipe_11",
-   "layer": 96
+   "layer": 96,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_tap_2",
@@ -4584,7 +4640,9 @@
    "straight": true,
    "label": "pipe_12",
    "name": "Pipe_12",
-   "layer": 95
+   "layer": 95,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   },
   {
    "id": "p_tap_3",
@@ -4607,7 +4665,9 @@
    "straight": true,
    "label": "pipe_13",
    "name": "Pipe_13",
-   "layer": 94
+   "layer": 94,
+   "ipTypeFrom": "TC1.5",
+   "ipTypeTo": "TC1.5"
   }
  ],
  "autostart": [],
@@ -4650,5 +4710,11 @@
    "strike": "gblV_Desired_Strike",
    "units": "F"
   }
- }
+ },
+ "ipAllow": [
+  "TC1.5",
+  "TC2",
+  "FMSSQD1/2",
+  "MSSQD1/2"
+ ]
 }
