@@ -3741,10 +3741,9 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
   };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
-    if (!(p.flowWhen || []).every(isOn)) continue;
     const a = node(p.from), b = node(p.to);
     if (a.closed || b.closed || a.key === b.key) continue;
-    if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
+    if (a.end && b.end) continue;
     link(a.key, b.key, p);
   }
   // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
@@ -4111,7 +4110,7 @@ function renderPipes() {
       for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
       g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
     }
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     if (p.baseVisible !== false || editing) for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
@@ -4836,7 +4835,7 @@ function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
   if (hose) g.hose = true; else g.straight = true;
   if (qd) g.qd = true;
   stampIpType(g);
@@ -6856,7 +6855,7 @@ function vbDirOf(g, k) {
   return [0, 1];
 }
 function vbPipe(ws, from, to, a, b, size) {
-  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', flowWhen: [], baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
+  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
   stampIpType(p); giveName(p, draft.graphics); draft.graphics.push(p); return p;
 }
 // a TC Pipe Fittings Widget with one end at `at`, its other end going on along D (an Elbow: turning to `turn`)
@@ -7592,12 +7591,11 @@ const F = {
     ['label', 'Label (never blank: it starts as its Name in small letters, pipe_1, Rule 3.14)', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
     ['_flN', 'None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.', 'note'],
-    ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['from', 'Starts at IP', 'ip'], ['to', 'Ends at IP', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
     ['ipTypeFrom', 'IP Type at start', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
     ['ipTypeTo', 'IP Type at end', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
-    ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
     ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
@@ -10656,7 +10654,6 @@ async function editItem(kind, id) {
       if (isFermentor(work)) { const bad = fermProblems(work, n => draft.elements.some(e => e.name === n)); if (bad.length) throw new Error(bad.join(' ')); }      // Rule 6.30
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
-        if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
         if (g.heater === item.name) g.heater = work.name;
         for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
