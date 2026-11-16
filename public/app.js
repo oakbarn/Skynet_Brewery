@@ -12031,6 +12031,11 @@ const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device ===
 // Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
 const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help.\n\n'
   + '⟪b:What it is⟫The Network Address (IP Address) is the board\'s own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.\n\n';
+// Before you add it, and the suggested address (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address
+// based on the Brian's IP address"; "Ok we need to make at least the Hint and Discuss the Fixed address and to best to hook in the
+// Board or Power it on (ESP 32)")
+const NET_HELP_BEFORE = '⟪b:Before you add it⟫Plug the board in, or power it on (an ESP32 too), before you add it, so it is on your network and 🔌 Test Communication can reach it.\n\n'
+  + '⟪b:The suggested address⟫Skynet suggests an address on the Brain\'s own network: the first three numbers are the Brain\'s, and the last is one no other Interface uses (60 to start, the address in Skynet\'s Mega program). It is only a suggestion: the board decides its own address. Make it a fixed address, so it never changes: write it in the board\'s Skynet program, or reserve it for the board in your router (How to find it, below).\n\n';
 const NET_HELP_FIND = '\n⟪b:How to find it⟫Open your router\'s app or its web page and look at its list of connected devices: the board is there with its address. Then, in the router, reserve that address for the board (it may be called a DHCP reservation, a fixed or a static address), so it never changes. Without that, the board can get a new address after a power cut and the Brain can no longer find it.\n';
 const NET_HELP_SAME = '\n⟪b:Windows, Mac, Linux or a Raspberry Pi⟫It is the same on all of them: the address belongs to the board and your router, not to the Brain\'s computer, and nothing more is installed. The Brain only has to be on the same network (the same router) as the board. The Network port below must be the same as the program on the board (Skynet\'s own programs use 4100).';
 const IFACE_TIP = {
@@ -12042,13 +12047,13 @@ const IFACE_TIP = {
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
   // differ for the Pi, Linux, Windows and the Mac"): one for Ethernet, one for WiFi
-  hostEth: NET_HELP_START + '⟪b:Ethernet (a network cable)⟫'
+  hostEth: NET_HELP_START + NET_HELP_BEFORE + '⟪b:Ethernet (a network cable)⟫'
     + '• No WiFi name (SSID) or password is needed: the cable plugs the board into your router or network switch.\n'
     + '• An Arduino Mega with an Ethernet Shield uses the address written in the Skynet program on the board: 192.168.1.60 to start. Type that same address here. If the addresses on your network start with other numbers (for example 10.0.0.), the address in the program is changed to one of yours and the program is loaded on the board again.\n'
     + '• An ESP32 with an Ethernet jack gets its address from your router: see How to find it, below.\n'
     + '• A Raspberry Pi that is the Brain itself: 127.0.0.1 (the Brain talking to itself).\n'
     + NET_HELP_FIND + NET_HELP_SAME,
-  hostWifi: NET_HELP_START + '⟪b:WiFi⟫'
+  hostWifi: NET_HELP_START + NET_HELP_BEFORE + '⟪b:WiFi⟫'
     + '• Yes, the WiFi name (SSID) and its password are needed, but not here: they are typed into the Skynet program on the board (the ESP32) before the program is loaded on it, so the board can join your WiFi. Skynet never asks for them and never keeps them.\n'
     + '• A Raspberry Pi board joins your WiFi in its own WiFi settings, set on the Pi when it is set up.\n'
     + '• Your router then gives the board its address. When the board starts, it shows its address in the Arduino program\'s Serial Monitor (with the USB cable plugged in), and your router lists it too: see How to find it, below.\n'
@@ -12195,6 +12200,17 @@ function ifaceIdTip(name, id, board) {
     `Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above ${i}_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface ${i} (${nm} {${b}}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).`,
     `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`].join('\n\n');
 }
+// The Network address Skynet suggests for a new Interface (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the
+// Brian's IP address"): the Brain's first three numbers and a last one no other Interface (or the Brain) uses, 60 first (the address
+// in Skynet's Mega program, 192.168.1.60), then 61, 62 ... With no home address known for the Brain: 192.168.1.60.
+function suggestHost(ips = [], devices = []) {
+  const ip = (ips || []).find(a => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+  if (!ip) return '192.168.1.60';
+  const net = ip.split('.').slice(0, 3).join('.'), used = new Set([...(ips || []), ...(devices || []).map(d => String(d.host ?? '').trim())]);
+  for (let n = 60; n < 255; n++) if (!used.has(`${net}.${n}`)) return `${net}.${n}`;
+  for (let n = 2; n < 60; n++) if (!used.has(`${net}.${n}`)) return `${net}.${n}`;
+  return `${net}.60`;
+}
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
 async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
@@ -12217,6 +12233,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   const fields = o => {
     const conns = connChoices(o.board);
     if (!conns.some(([c]) => c === o.connection)) o.connection = conns[0][0];      // the Connection follows the Board
+    if (!old && o.connection !== 'serial' && !String(o.host ?? '').trim()) o.host = suggestHost(S.brainIps, S.config.devices);      // on the Brain's network (Rule 18.39)
     const rt = rating({ board: o.board, connection: o.connection });
     return [
       ...(renamable ? [['name', 'Name', 'text', null, false, false, { tip: IFACE_TIP.name }]] : [['_nm', `Name: ${o.name} (Devices use it, so it stays)`, 'note']]),
