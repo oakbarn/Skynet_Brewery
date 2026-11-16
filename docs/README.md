@@ -7,6 +7,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 |---|---|
 | [Skynet Rules](Skynet_Rules.md) | Every Skynet Rule. Read before building anything. |
 | [Panel Updates Sandbox](../Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked until the Blichmann RipTide dialogs and Help are done (Rule 14.4). |
+| [Process Updates Sandbox](../Sandbox/Process_Updates/Process_Updates.md) | Brew Day step, sample Process and Process command ideas, parked until the Skynet Process setup starts (Rule 14.5). |
 | [Dialog Model Learning: Tab Settings](Dialog_Model_Learning/Tab_Settings.md) | The Tab Settings dialog before and after its update to the Blichmann RipTide Dialog 1 model, the reason for each change, and room for OakBarn Brewery's corrections. |
 | [Importer Sandbox](../Sandbox/Importer/Importer_Notes.md) | Notes for the BruControl Importer version only, kept for the Big Merge (Rule 11.3). |
 | [General Properties Dialog Format](General_Properties_Dialog_Format.png) | Fritz's drawing for the General Dialog Rules (Rule 18). |
