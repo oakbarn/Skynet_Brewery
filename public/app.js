@@ -4085,7 +4085,7 @@ function reducers(pipes, ws) {
 }
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
-  if (editing && draft) takePumpSpots();      // a pipe or hose put down on a pump's spot joins the pump there (Rule 5.27)
+  if (editing && draft && takePumpSpots()) { renderWs(); return; }      // a pipe or hose put down on a pump's spot joins the pump there (Rule 5.27); the pump is drawn again
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
