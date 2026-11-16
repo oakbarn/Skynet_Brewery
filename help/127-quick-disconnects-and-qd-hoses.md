@@ -37,17 +37,23 @@ always on top of everything on the Tab.
 
 Any hose end whose **IP Type** is **Quick Disconnect** moves the same way (Help 24), one end at a time.
 
-**Safety first:** grabbing a hose end opens a pop-up that stays open. If a pump on the hose is On (or liquid is flowing in it), it says to turn the pump Off first. It keeps checking the pump, and once the pump is Off it asks whether the valves are set so nothing drains out by gravity: **Yes, unhook it** lets you drag that end for the next 2 minutes. **✖ Exit** closes it at any time without moving anything.
+That is all it takes: hold the ring and drag. Nothing pops up first.
+
+**Safety:** if a pump on the hose is On (or liquid is flowing in it), a warning pops up instead and the end does not move. It says to turn the pump Off first, so the hose does not spray. It keeps checking, and closes by itself once nothing flows; then hold the ring again. **✖ Exit** closes it at any time.
 
 While you drag, the hose **flexes**: it leaves the pump the way it did before and hangs in a curve through several bend points, sagging more the farther you pull the end. A **green ring** shows where the end will go. Let go on:
 
-- **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it.
+- **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it. On the open end of a pipe,
+  flow goes on from the hose into that pipe.
 - **anywhere in the top third of a vessel**: the whole top third is one big IP. It is the same as putting the hose in the
   top of the vessel, and the hose end goes to the middle of the vessel's top.
-- **anywhere else**: the end is loose and no flow shows in the hose.
+- **anywhere else**: the end is loose, hanging in the air. If something pushes water into the hose (a Tap Water Valve that is On,
+  or a running pump), it pours out of the open end, so the hose shows flow and a
+  water splash in the color of the flow.
 
-When you let go, Skynet asks **"Is the real hose there now?"** (Rule 5.34). **OK** keeps it there; **Cancel** puts the end back
-where it was. A Process can move the hose too, with `Hose_1.connect = QD_1` (Help: *Connect a QD hose from a Process*).
+When you let go, the end **stays where it is**: joined to the IP, Quick Disconnect or vessel top under it, or hanging loose.
+Nothing is asked. When it locks onto an IP, a Quick Disconnect or a vessel top, its ring **flashes red and yellow for 2
+seconds**; left in the air, the ring just stays yellow. To put it back, drag it back. A Process can move the hose too, with `Hose_1.connect = QD_1` (Help: *Connect a QD hose from a Process*).
 
 A message says where the end went. Every screen sees the move at once and it is kept (no Save layout needed).
 Operators and admins can move it; a viewer can't. A **locked** hose (🔒) does not move.
