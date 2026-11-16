@@ -85,3 +85,15 @@ assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: null, points: [[0, 'x']] }).error, 
 }
 console.log('qdhose tests passed');
 process.exit(0);
+
+// ---- One right-button hold moves the end; no confirmations; letting go never opens Help (OakBarn Brewery, 2026-11-16) ----
+{
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.ok(!/confirm\(`Is the real/.test(app), 'letting go of a hose end asks nothing');
+  assert.ok(!/Yes, unhook it/.test(app), 'no gravity question before unhooking');
+  assert.ok(/qdDrag \|\| Date\.now\(\) - qdDragEnded < 1500\)\) \{ ev\.preventDefault\(\); return; \}/.test(app), 'the right button let go over a vessel does not open its Help');
+  assert.ok(/if \(pumps\.length \|\| flowing\) \{ qdSafety\(p, which\); return; \}/.test(app), 'a warning only while liquid flows');
+  assert.ok(/qdLocked/.test(app) && /qdLocked/.test(readFileSync(new URL('../public/style.css', import.meta.url), 'utf8')), 'the ring flashes when it locks onto an IP');
+}
+console.log('qdhose ok (no confirmations)');

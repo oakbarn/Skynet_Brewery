@@ -28,10 +28,10 @@ Hose_1.connect = none          // take it off: the end is loose, no flow
 If the hose is already there, nothing is asked and the Process goes straight on. **Stop** on the Process takes the pop-up away.
 The Override button does not pass it: the hose has to be placed.
 
-## Moving it by hand asks too
+## Moving it by hand
 
-When a person drags the hose end (right mouse button, or a finger, Help 127), Skynet asks **"Is the real hose there now?"**.
-**OK** keeps it; **Cancel** puts the end back where it was. So the screen always shows where the real hose is.
+When a person drags the hose end (right mouse button, or a finger, Help 127), nothing is asked: the end stays where it is let go.
+Only a Process line waits for **Done**.
 
 ## Predictive text and Check
 

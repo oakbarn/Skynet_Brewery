@@ -37,17 +37,23 @@ toujours par-dessus tout ce qui est sur le Tab.
 
 Tout bout de tuyau souple dont l'**IP Type** est **Quick Disconnect** bouge de la même façon (aide 24), un bout à la fois.
 
-**La sécurité d'abord :** attraper un bout de tuyau ouvre une fenêtre qui reste ouverte. Si une pompe sur le tuyau est en marche (ou si du liquide coule dedans), elle dit d'arrêter la pompe d'abord. Elle continue de vérifier la pompe, et une fois la pompe arrêtée, elle demande si les vannes sont réglées pour que rien ne s'écoule par gravité : **Yes, unhook it** vous laisse faire glisser ce bout pendant les 2 minutes suivantes. **✖ Exit** la ferme à tout moment sans rien déplacer.
+C'est tout : gardez l'anneau appuyé et faites glisser. Rien ne s'ouvre avant.
+
+**Sécurité :** si une pompe sur le tuyau est en marche (ou si du liquide coule dedans), un avertissement s'ouvre à la place et le bout ne bouge pas. Il dit d'arrêter la pompe d'abord, pour que le tuyau ne gicle pas. Il continue de vérifier et se ferme tout seul quand plus rien ne coule ; gardez alors l'anneau appuyé de nouveau. **✖ Exit** le ferme à tout moment.
 
 Pendant que vous faites glisser, le tuyau **fléchit** : il quitte la pompe comme avant et pend en une courbe passant par plusieurs points de pliage, en pendant davantage plus vous tirez le bout loin. Un **anneau vert** montre où ira le bout. Lâchez sur :
 
-- **un IP ou un Quick Disconnect** : le flexible s'y joint. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous.
+- **un IP ou un Quick Disconnect** : le flexible s'y joint. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous. Sur le bout
+  ouvert d'un tuyau, le passage continue du flexible dans ce tuyau.
 - **n'importe où dans le tiers du haut d'une cuve** : tout le tiers du haut est un seul gros IP. C'est comme mettre le flexible dans le
   haut de la cuve, et le bout du flexible va au milieu du haut de la cuve.
-- **n'importe où ailleurs** : le bout est libre et aucun passage ne s'affiche dans le flexible.
+- **n'importe où ailleurs** : le bout est libre, il pend en l'air. Si quelque chose pousse de l'eau dans le flexible (une Tap Water
+  Valve ouverte, ou une pompe en marche), elle coule par le bout ouvert, donc le flexible montre un passage et
+  une éclaboussure d'eau de la couleur du passage.
 
-Quand vous lâchez, Skynet demande **"Is the real hose there now?"** (le vrai flexible est-il là maintenant ? Règle 5.34). **OK** le garde là ; **Cancel** remet le bout
-où il était. Un Process peut aussi déplacer le flexible, avec `Hose_1.connect = QD_1` (aide : *Connect a QD hose from a Process*).
+Quand vous lâchez, le bout **reste où il est** : joint à l'IP, au Quick Disconnect ou au haut de la cuve en dessous, ou libre.
+Rien n'est demandé. Quand il se fixe sur un IP, un Quick Disconnect ou le haut d'une cuve, son anneau **clignote rouge et jaune pendant 2
+secondes** ; laissé en l'air, l'anneau reste simplement jaune. Pour le remettre, faites-le glisser de nouveau. Un Process peut aussi déplacer le flexible, avec `Hose_1.connect = QD_1` (aide : *Connect a QD hose from a Process*).
 
 Un message dit où est allé le bout. Chaque écran voit le déplacement tout de suite et il est gardé (pas besoin de Save layout).
 Les operators et les admins peuvent le déplacer ; un viewer non. Un flexible **verrouillé** (🔒) ne bouge pas.

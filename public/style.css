@@ -67,6 +67,9 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 /* the free end of a Quick Disconnect hose (Rule 5.28): grabbed outside Edit layout with the right mouse button or a finger */
 #ws > .qdEnd { position: absolute; z-index: 50; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.15); border: 3px dashed #ffd24a; cursor: grab; touch-action: none; }
 #ws > .qdEnd:hover { background: rgba(255,210,74,.35); }
+/* the end just locked onto an IP: the ring flashes red and yellow for 2 seconds (OakBarn Brewery, 2026-11-16) */
+#ws > .qdEnd.qdLocked { border-style: solid; animation: qdLock .25s steps(1) 8; }
+@keyframes qdLock { 0% { border-color: #e53935; background: rgba(229,57,53,.35); } 50% { border-color: #ffd24a; background: rgba(255,210,74,.35); } }
 #ws .gfx.ip.qd { background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 3; filter: drop-shadow(0 0 2px #000); }
 .pipes .qdTarget { fill: none; stroke: #3ddc84; stroke-width: 4; pointer-events: none; filter: drop-shadow(0 0 2px #000); }
 .pipes .pipe, .pipes .flow, .pipes .drawing, .pipes .reducer { pointer-events: none; }
@@ -1391,3 +1394,15 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 .ipTickRow b { display: block; font-size: .9em; margin-bottom: 2px; }
 .ipTickBoxes { display: flex; flex-wrap: wrap; gap: 2px 12px; }
 .ipTick { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; font-size: .9em; }
+/* water spurting out of an open pipe or hose end (OakBarn Brewery, 2026-11-16): Skynet's own blue and white splash, drawn in code */
+.pipes .spout { pointer-events: none; --spc: #3d9be9; }     /* --spc: the flow color */
+.pipes .spout .spoutBody { transform-box: fill-box; transform-origin: 0% 50%; animation: spoutPulse .5s ease-in-out infinite alternate; }
+.pipes .spout .spoutFill { fill: color-mix(in srgb, var(--spc) 72%, white); stroke: color-mix(in srgb, var(--spc) 55%, black); stroke-width: 2.4; stroke-linejoin: round; }
+.pipes .spout .spoutHi { fill: none; stroke: #ffffff; stroke-width: 2.6; stroke-linecap: round; opacity: .9; stroke-dasharray: 14 8; animation: flow .4s linear infinite; }
+.pipes .spout .spoutDrop { fill: color-mix(in srgb, var(--spc) 60%, white); stroke: color-mix(in srgb, var(--spc) 55%, black); stroke-width: 1.6; transform-box: fill-box; transform-origin: center; animation: spoutDrop .8s ease-in infinite; }
+.pipes .spout .spoutDrop.d1 { animation-delay: -.15s; } .pipes .spout .spoutDrop.d2 { animation-delay: -.3s; }
+.pipes .spout .spoutDrop.d3 { animation-delay: -.45s; } .pipes .spout .spoutDrop.d4 { animation-delay: -.6s; } .pipes .spout .spoutDrop.d5 { animation-delay: -.7s; }
+@keyframes spoutPulse { from { transform: scale(.94, .9); } to { transform: scale(1.03, 1.04); } }
+@keyframes spoutDrop { 0% { opacity: 0; translate: -6px -2px; } 25% { opacity: 1; } 100% { opacity: 0; translate: 6px 6px; } }
+.pipes .spout.grav { opacity: .55; }
+.pipes .spout.grav .spoutBody, .pipes .spout.grav .spoutHi, .pipes .spout.grav .spoutDrop { animation-duration: 1.6s; }
