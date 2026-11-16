@@ -1,7 +1,7 @@
 import { addEyes } from './eye.js';
 import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -2351,12 +2351,7 @@ function applySplit(it, p, plan, who, rule) {
   });
   const idOf = k => k === 'A' || k === 'B' ? ends[k] : /^J\d$/.test(k) ? joints[+k[1]] : k;
   const made = [];
-  plan.pieces.forEach((pc, i) => {
-    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
-    if (i) { delete q.name; delete q.label; delete q.labelVisible; }
-    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
-    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
-  });
+  cutPieces(p, plan.pieces, idOf, newId).forEach((q, i) => { if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); } });      // every piece keeps the pipe's settings
   return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule ${rule}).`
     : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule ${rule}).` };
 }
@@ -4730,14 +4725,8 @@ function tcFitOnPipe(u) {
   const ends = { A: p.from, B: p.to };
   if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
   const idOf = k => k === 'A' || k === 'B' ? ends[k] : k;
-  const pieces = [], made = [];
-  plan.pieces.forEach((pc, i) => {
-    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
-    if (i) { delete q.name; delete q.label; delete q.labelVisible; delete q._key; }
-    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
-    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
-    pieces.push(q);
-  });
+  const made = [], pieces = cutPieces(p, plan.pieces, idOf, newId);      // every piece keeps the pipe's settings
+  pieces.forEach((q, i) => { if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); } });
   if (autoSized(u)) autoSizeUnit(u);             // it takes the pipe's size, about its bend (its ends stay on the pipe's line)
   const armIds = new Set(A0.arms.map(q => q.id));
   for (const q of pieces) for (const [k, i] of [['from', 0], ['to', 1]]) {
@@ -4854,13 +4843,10 @@ function finishPipe(to) {
   // a new pipe joined to a pipe takes that pipe's size (OakBarn Brewery, 2026-11-16: "if you are building a Manifold out of pipe in
   // the real world, the logical choice is the next pipe is the same size"); it starts end first. Hoses never auto size ("No auto
   // sizing of Hoses is correct"): a hose keeps the Default Hose Size.
+  // It also takes that pipe's IP Type at the joint and its color (takeNeighbour, public/pipefit.js).
   if (!hose) {
-    const nb = [g.from, g.to].map(id => typeof id === 'string' ? draft.graphics.find(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)) : null).find(Boolean);
-    if (nb?.size && nb.size !== g.size) {
-      g.size = nb.size;
-      if (nb.size === 'custom') { g.sizeCustom = nb.sizeCustom; g.sizeUnits = nb.sizeUnits; }
-      stampIpType(g);
-    }
+    const id = [g.from, g.to].find(id => typeof id === 'string' && draft.graphics.some(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)));
+    if (id) takeNeighbour(g, draft.graphics.find(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)), id);
   }
   giveName(g, draft.graphics);
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);

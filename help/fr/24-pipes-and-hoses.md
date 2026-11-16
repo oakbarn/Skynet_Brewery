@@ -75,6 +75,10 @@ bouton rouge **🗑 Delete Pipe** (ou **Delete Hose**). Ses propres IP partent a
 ses bouts est supprimé aussi quand rien d'autre n'y est (pas d'autre tuyau, de Quick Disconnect ni d'End Cap, et pas une ouverture
 de cuve). **↩ Put back** (Ctrl+Z) le remet.
 
+## Raccords sur un tuyau {#fittings-on-a-pipe}
+
+Quand un té, une croix, une pompe ou une vanne va sur un tuyau, ou qu'un tuyau tourne à un coude, le tuyau est divisé en deux tuyaux. Leurs IP sont réglés et chaque réglage de l'ancien tuyau est gardé sur les deux (taille, IP Types, couleurs) : Skynet le fait en arrière-plan, sans rien vous demander. Chaque nouveau tuyau reçoit son propre Name. Un nouveau tuyau dessiné au bout d'un tuyau prend sa taille, son IP Type et sa couleur de la même façon.
+
 ## Raccourcir un tuyau {#shortening-a-pipe}
 
 Attrapez un tuyau dans Edit layout et appuyez sur **🔓 Unlock its ends** : ses bouts se détachent et reçoivent un raccord (coupling). Faites glisser ce raccord (ou la poignée au bout) le long du tuyau pour le raccourcir ou l'allonger. Il reste sur sa propre ligne.
