@@ -44,20 +44,25 @@ Les tailles sont dessinées en proportion : un tuyau de 1" est deux fois plus é
 
 ## Type d'IP {#ip-type}
 
-Chaque tuyau rigide et souple a un **IP Type at start** et un **IP Type at end** : le raccord à chaque bout (Règle Skynet 5.40). Les choix sont :
+Chaque tuyau et flexible a un **IP Type at start** et un **IP Type at end** : le raccord à chaque bout, avec sa taille (Règle Skynet 5.40). Les types sont :
 
-- **Tri-Clamp**
-- **NPT**
-- **BSP**
-- **Quick Disconnect** (raccord rapide)
+- **Tri-Clamp** : TC1/2, TC3/4, TC1.5, TC2 ... jusqu'à TC6. Un Tri-Clamp se mesure par son collier : les tubes de 1/2", 3/4" et 1" utilisent souvent tous le **TC1.5** courant.
+- **Filetage de tuyau (NPT)** : **FPT** est femelle et **MPT** est mâle, de 1/8" à 6" (FPT1/2, MPT1 ...). Un MPT va sur un FPT de même taille.
+- **BSP** (filetage britannique), de 1/8" à 6". Il ne va pas sur du NPT.
+- **Tuyau métrique (DN)** : DN6 à DN150.
+- **Quick Disconnect**, inox : **FMSSQD** est femelle et **MSSQD** est mâle, de 1/2" à 3".
 
-Le raccord a toujours la taille du tuyau, donc il n'a pas de case de taille à lui. Le Tri-Clamp n'est pas fabriqué sous 1/2", donc un tuyau de 1/4" ne propose que les trois autres.
+**Seules les tailles que vous cochez apparaissent dans les listes.** Cochez-les dans ☰ Menu > Default settings > **IP Types**. Aucune n'est cochée au départ. Une taille déjà utilisée dans le Schema apparaît toujours aussi.
 
-Chaque bout est **dessiné selon son IP Type**, pour le voir sur le Tab : une virole et un collier Tri-Clamp, un filetage NPT, un écrou hexagonal BSP, ou un raccord rapide Quick Disconnect avec ses deux leviers. Il n'est pas dessiné là où le bout est sur un raccord, un Quick Disconnect ou un End Cap, qui sont déjà dessinés.
+**Les bouts qui s'ajustent d'eux-mêmes :** un bout de tuyau sur une pompe, ou sur la sortie d'une Stove Top Vessel, va avec elle (un bout MPT1/2 sur un port FPT1/2). Son IP Type est grisé ; changez l'IP Type de la pompe pour le changer. Le bout Quick Disconnect d'un flexible est femelle (**FMSSQD**) là où il est sur un tuyau ou une pompe, et mâle (**MSSQD**) à son autre bout. Sur un tuyau ou une pompe Tri-Clamp, ajoutez le vrai adaptateur à cet endroit (le plus courant est TC1.5 vers MSSQD1/2) : en attendant, l'anneau orange ci-dessous s'affiche.
 
-Un bout de **tuyau souple** en **Quick Disconnect** peut être décroché et déplacé à tout moment, pas seulement dans Edit layout, comme un tuyau QD (voir l'aide 127). Attrapez un bout à la fois ; l'autre reste. Les tuyaux rigides ne bougent pas ainsi.
+**Quand des bouts ne vont pas ensemble :** dans Edit layout, un anneau orange marque deux bouts de tuyau sur le même IP qui ne peuvent pas se joindre sans adaptateur (Tri-Clamp vers NPT, MPT vers MPT). Posez la souris dessus pour voir pourquoi. C'est seulement un avertissement.
 
-Un nouveau tuyau rigide commence avec le **Default pipe IP Type**, et un nouveau tuyau souple avec le **Default hose IP Type**, aux deux bouts. Les deux sont dans ☰ Menu > Default settings, à côté des tailles. Un tuyau QD (Quick Disconnect hose) est toujours Quick Disconnect aux deux bouts. Changer un réglage par défaut ne change jamais un tuyau déjà fait.
+Chaque bout est **dessiné selon son IP Type**, pour que vous le voyiez sur le Tab : une virole et un collier Tri-Clamp, un filetage NPT, un écrou hexagonal BSP, ou un raccord à cames Quick Disconnect avec ses deux bras. Il n'est pas dessiné là où le bout est sur un raccord, un Quick Disconnect ou un End Cap, déjà dessinés.
+
+Un bout de **flexible** en **Quick Disconnect** peut être décroché et déplacé à tout moment, pas seulement dans Edit layout, comme un flexible QD (voir Help 127). Prenez un bout à la fois ; l'autre reste. Les tuyaux rigides ne bougent pas ainsi.
+
+Un nouveau tuyau commence avec le **Default pipe IP Type**, et un nouveau flexible avec le **Default hose IP Type**, à sa propre taille, aux deux bouts. Les deux sont dans ☰ Menu > Default settings, à côté des tailles. Un flexible QD est toujours Quick Disconnect aux deux bouts. Changer un Default ne change jamais un tuyau ou un flexible déjà fait.
 
 ## Réducteurs {#reducers}
 
@@ -69,6 +74,10 @@ Supprimez un tuyau rigide ou souple depuis ses Properties (🗑 Delete), ou attr
 bouton rouge **🗑 Delete Pipe** (ou **Delete Hose**). Ses propres IP partent avec lui : un raccord (coupling) ou un point IP à l'un de
 ses bouts est supprimé aussi quand rien d'autre n'y est (pas d'autre tuyau, de Quick Disconnect ni d'End Cap, et pas une ouverture
 de cuve). **↩ Put back** (Ctrl+Z) le remet.
+
+## Raccords sur un tuyau {#fittings-on-a-pipe}
+
+Quand un té, une croix, une pompe ou une vanne va sur un tuyau, ou qu'un tuyau tourne à un coude, le tuyau est divisé en deux tuyaux. Leurs IP sont réglés et chaque réglage de l'ancien tuyau est gardé sur les deux (taille, IP Types, couleurs) : Skynet le fait en arrière-plan, sans rien vous demander. Chaque nouveau tuyau reçoit son propre Name. Un nouveau tuyau dessiné au bout d'un tuyau prend sa taille, son IP Type et sa couleur de la même façon.
 
 ## Raccourcir un tuyau {#shortening-a-pipe}
 
