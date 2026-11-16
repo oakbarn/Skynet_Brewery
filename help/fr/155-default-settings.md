@@ -8,14 +8,41 @@ autres peuvent regarder.
 
 ## Tuyaux, flexibles et tailles {#pipes-hoses-and-sizes}
 
-| Réglage | Ce qu'il fait |
-|---|---|
-| **Default pipe size** | 1/2" sauf si vous le changez (1/4" à 6", avec la taille en mm à côté de chacune). Un **nouveau tuyau** commence à cette taille. Un **nouveau Device, Pipe Fitting ou élément avec des IP** (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour cette taille jusqu'à ce qu'un tuyau y soit, donc une nouvelle pompe correspond déjà à vos tuyaux. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). |
-| **IP Type** (à côté de Default pipe size) | Le raccord d'un **nouveau tuyau** aux deux bouts : Tri-Clamp sauf si vous le changez (Tri-Clamp, NPT, BSP ou Quick Disconnect). Il a la taille du tuyau ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). |
-| **Default hose size** | La taille de départ d'un **nouveau flexible**. |
-| **IP Type** (à côté de Default hose size) | Le raccord d'un **nouveau flexible** aux deux bouts : Quick Disconnect sauf si vous le changez. Il a la taille du flexible. |
-| **How thick a 1/2" pipe is drawn on a new Tab** | En pixels ; vide = 10. Chaque Tab peut encore le changer dans **Tab settings**. |
-| **Width** et **Height of a new Tab** | En pixels ; vide = 1600 x 900. |
+### Default Pipe Size {#default-pipe-size}
+
+La taille la plus courante des tuyaux à placer sur un nouveau Tab. Les raccords de tuyau sont ajoutés tout seuls et prennent la taille du tuyau qui y est joint. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau.
+
+Les IP s'emboîtent et sont verrouillées.
+
+Les IP se verrouillent toutes seules, et les IP d'un tuyau doivent être déverrouillées pour le déplacer ou changer sa taille. Cela ne se fait qu'en mode Construction pour les tuyaux.
+
+Les tuyaux ont une simulation de débit.
+
+### IP Type (pour les tuyaux) {#ip-type-for-pipes}
+
+Le raccord par défaut qu'un nouveau tuyau a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau. Une fois placés, les tuyaux gardent leur type de raccord. Les IP de chaque bout d'un tuyau peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux comme la plupart de vos tuyaux sont montés. Pour les tuyaux de brassage, le plus courant est le Tri-Clamp 1,5 po. (TC1.5)
+
+### Default Hose Size {#default-hose-size}
+
+La taille la plus courante des tuyaux souples à placer sur un nouveau Tab. La taille de chaque tuyau souple peut être changée une fois placé. Les tuyaux souples peuvent se joindre aux tuyaux, aux raccords et à tout ce qui a des IP, mais gardent leur taille, au contraire d'un tuyau. Les tuyaux souples ne changent pas de taille tout seuls. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux souples les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau souple.
+
+Les IP s'emboîtent et sont verrouillées.
+
+Les tuyaux souples joints par des IP à Raccord rapide peuvent être vite déverrouillés et déplacés, même pendant le brassage.
+
+Les tuyaux souples ont une simulation de débit.
+
+### IP Type (pour les flexibles) {#ip-type-for-hoses}
+
+Le raccord par défaut qu'un nouveau tuyau souple a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau souple. Une fois placés, les tuyaux souples gardent leur type de raccord. Les IP de chaque bout d'un tuyau souple peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux souples comme la plupart de vos tuyaux souples sont montés.
+
+### How many Pixels are Pipes and Hoses to be drawn on a Tab? {#how-many-pixels-are-pipes-and-hoses-to-be-drawn-on-a-tab}
+
+C'est seulement la façon dont les tuyaux et tuyaux souples sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 10 est un bon départ. Cela vaut pour les nouveaux tuyaux et tuyaux souples placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
+
+Cette case est à deux endroits, ici et dans **New Tabs**. C'est un seul réglage : taper dans l'une change l'autre. Chaque Tab peut encore changer le sien dans **Tab Settings**.
+
+Le côté technique : les tailles vont de 1/4" à 6", avec la taille en mm à côté de chacune ; Skynet commence à 1/2" pour les deux, Tri-Clamp pour les tuyaux et Quick Disconnect pour les flexibles ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). Un nouveau Device, Pipe Fitting ou élément avec des IP (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour la Default Pipe Size jusqu'à ce qu'un tuyau y soit. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). La case des pixels va de 2 à 100 (vide = 10).
 
 ### Comment les choses se dimensionnent selon leurs tuyaux {#how-things-size-to-their-pipes}
 
@@ -35,6 +62,68 @@ avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Vo
 Ce sont les deux mêmes listes déroulantes que sur la barre Edit layout du 🔨 Build Tab. Elles sont gardées par l'ID d'Interface et l'ID de Tab, donc un Schema
 sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6)
 
+## New User Recipes {#new-user-recipes}
+
+Ce avec quoi commence une nouvelle Recette quand vous appuyez sur **NEW** sur le Tab Recipe. Vous pouvez changer chaque chose dans la Recette. **Units** (US ou Métrique) n'est pas ici : c'est un réglage du Skynet Panel, dans **Settings > Panel settings** ([Réglages](09-settings)).
+
+### Batch Size (Gallons) ou Batch Size (Liters) {#batch-size-gallons-or-batch-size-liters}
+
+Ne touche que les nouvelles Recettes de l'utilisateur. C'est votre taille de brassin habituelle quand vous faites une Recette à la main dans Skynet. Skynet ne prétend pas être un logiciel de recettes : il importe un fichier Beer.xml standard des logiciels de recettes connus, sans rien programmer dans Skynet. Faites simplement la recette dans votre logiciel de recettes préféré, ou prenez-en une sur un forum ou chez un ami, et importez-la. Tant que le fichier suit la norme beer.xml, Skynet devrait l'importer. Si vous ne comptez jamais faire de Recette ici, vous pouvez ignorer toute cette partie : elle a déjà les valeurs les plus courantes.
+
+### Mash Profile {#mash-profile}
+
+Le Profil d'empâtage d'une nouvelle Recette. Skynet Single Step, Batch Sparge : un palier à 152 °F (67 °C) pendant 60 minutes, l'empâtage habituel de la plupart des bières.
+
+**Température d'empâtage (Strike)**
+L'eau est chauffée plus que la température d'empâtage (la température Strike), car le grain la refroidit en entrant. La cuve d'empâtage absorbe aussi un peu de chaleur : c'est le Décalage de l'équipement. Un grain froid refroidit l'eau davantage : si votre grain est plus froid le Jour de brassage que prévu dans la recette (72 °F), vous serez sous la température d'empâtage.
+
+**Ajouter le grain**
+Ajoutez le grain lentement en remuant, pour éviter les grumeaux secs (boules de pâte), jusqu'à la température d'empâtage. Chauffez l'eau (le Pré-Strike) un peu plus que la température Strike et laissez-la refroidir jusqu'à Strike avant d'ajouter le grain : refroidir est facile, réchauffer une cuve pleine est difficile.
+
+**Durée et température de l'empâtage**
+Une température plus basse (148 à 150 °F) donne une bière plus sèche et légère ; une plus haute (154 à 158 °F), une bière plus douce et ronde. 60 minutes suffisent pour la plupart des malts d'aujourd'hui. Bonne pratique : gardez l'empâtage à sa température tout du long, couvercle mis ou chauffage allumé.
+
+**Rinçage (sparge)**
+Après l'empâtage, on rince le sucre du grain (le rinçage). Rinçage par lots : vidanger, ajouter de l'eau chaude, remuer, laisser reposer, vidanger encore. Rinçage continu : l'eau chaude est versée en pluie sur le dessus pendant que le moût s'écoule lentement par le bas ; plus lent, souvent un peu plus de sucre. Type Brewzilla (sac ou panier) : sortez le grain et versez de l'eau chaude dessus. Chacun change la quantité de sucre tirée du grain (le rendement).
+
+### Boil Profile {#boil-profile}
+
+Le Profil d'ébullition d'une nouvelle Recette. C'est surtout la durée d'ébullition : combien de temps le moût bout (Skynet 60 Minute Boil, c'est 60 minutes). Il peut aussi avoir sa propre évaporation, et chaque Profil d'ébullition Skynet demande le volume de la cuve au début et à la fin de l'ébullition.
+
+### Water Profile {#water-profile}
+
+L'eau d'une nouvelle Recette. L'Eau du robinet, sauf si vous en choisissez une autre.
+
+Ce qu'il y a dans votre eau change la bière : le Calcium et le Magnésium (la dureté) aident l'empâtage et la levure, le Sulfate rend le houblon plus vif et plus amer, le Chlorure rend le malt plus plein et plus rond, et le Bicarbonate (l'alcalinité) convient aux bières foncées mais peut ternir les blondes. Le chlore donne un goût de médicament.
+
+Le rapport sur la qualité de l'eau de votre service des eaux donne les chiffres, ou utilisez une trousse d'analyse d'eau. Vous pouvez aussi faire votre propre « eau » pour imiter une région brassicole célèbre : partez d'eau osmosée (RO) ou distillée et ajoutez des sels de brassage.
+
+Et si vous brassez avec l'eau du robinet et faites de la Bonne bière, pourquoi tout chambouler ?
+
+### Hop Stands {#hop-stands}
+
+La température et la durée des trois Hop Stands (High, Middle, Low) d'une nouvelle Recette ([Profils d'empâtage, d'ébullition et d'eau](35-mash-and-boil-profiles), Règle Skynet 17.14).
+
+### Water to Grain Ratio {#water-to-grain-ratio}
+
+Combien d'eau va dans l'empâtage pour chaque livre (ou kilogramme) de grain (le ratio eau/grain). Sert à calculer la température Strike le Jour de brassage.
+
+Un empâtage épais (moins d'eau, environ 1,25 qt/lb ou 2,6 L/kg) garde bien la chaleur et se remue facilement. Un empâtage fluide (plus d'eau, 1,5 à 2 qt/lb ou 3 à 4 L/kg) passe mieux dans une pompe et laisse plus d'eau pour un rinçage par lots. Le brassage en sac utilise toute l'eau d'un coup. Tout ce qui est entre les deux fait de la bonne bière.
+
+Le côté technique : une nouvelle Recette commence avec un brassin de 5 gallons (18,93 litres), **Skynet Single Step, Batch Sparge** (152 °F pendant 60 minutes), **Skynet 60 Minute Boil** (sa durée d'ébullition vient du Boil Profile) et Tap Water. La Batch Size est gardée en litres et affichée en Gallons ou en Liters selon Units. Le Brewhouse Efficiency (72 %) et le Strike Offset appartiennent à l'Equipment Profile, pas à la Recette, et la Grain Temperature est de 72 °F (22,2 °C) pour prévoir. L'étiquette dit Gallons pour US et Liters pour Métrique.
+
+## New Tabs {#new-tabs}
+
+### Width of a New Tab (px) {#width-of-a-new-tab-px}
+
+Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le Tab tient à l'écran, et s'il lui faut des barres de défilement horizontales parce qu'une partie du Tab sort de l'écran quand la valeur est trop grande. Le mieux est de n'avoir aucune barre de défilement sur un Tab. Changer la résolution de l'écran ou utiliser un ordinateur à distance peut aussi changer l'affichage, avec ou sans barres de défilement. Les téléphones et tablettes s'ajustent à leur taille, et vous n'avez presque pas de contrôle si vous en utilisez un à distance. Réglez-les pour l'ordinateur de votre brasserie qui suit le Skynet Panel. Pour une résolution d'écran de 1920 x 1040, 1600 x 900 est un bon départ, mais il faudra peut-être l'ajuster un peu pour VOTRE ordinateur. La Largeur ne touche que la barre de défilement horizontale.
+
+### Height of a New Tab (px) {#height-of-a-new-tab-px}
+
+Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le Tab tient à l'écran, et s'il lui faut des barres de défilement verticales parce qu'une partie du Tab sort de l'écran quand la valeur est trop grande. Le mieux est de n'avoir aucune barre de défilement sur un Tab. Changer la résolution de l'écran ou utiliser un ordinateur à distance peut aussi changer l'affichage, avec ou sans barres de défilement. Les téléphones et tablettes s'ajustent à leur taille, et vous n'avez presque pas de contrôle si vous en utilisez un à distance. Réglez-les pour l'ordinateur de votre brasserie qui suit le Skynet Panel. Pour une résolution d'écran de 1920 x 1040, 1600 x 900 est un bon départ, mais il faudra peut-être l'ajuster un peu pour VOTRE ordinateur. La Hauteur ne touche que la barre de défilement verticale.
+
+Le côté technique : de 200 à 20000 pixels ; vide = 1600 x 900. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). La case **How many Pixels are Pipes and Hoses to be drawn on a Tab?** est ici aussi (voir plus haut).
+
 ## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
 
 Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet Template garde ses propres réglages, et les pompes et vannes déjà faites gardent les leurs.
@@ -52,6 +141,7 @@ Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir
 
 Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau marche, donc ce sont des réglages (Settings), pas des réglages par défaut. Ils sont dans **Settings > Panel settings: screen, Tabs and alerts** :
 
+- **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
 - **Menu Bar**, **Sound**, **On startup** (Zoom, plein écran) ;
 - **\L Rich Text Code Size** ;
@@ -67,12 +157,11 @@ Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks
 
 **Les réglages par défaut sont seulement pour les nouvelles choses.** Labels, Text Boxes, la Default pipe size et les IP Types sont gardés sur chaque élément quand il est créé, donc les changer ici ne change jamais ce qui est déjà sur vos Tabs.
 
-Nouvelles recettes (Units, Batch size, Profiles, Boil time, efficacité ...), New Schema from a Skynet Template, nouveaux Tabs (Tab
-Background Profile), Labels et Text Boxes. Le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué **Default** dans sa propre liste ([Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles)). Voir [Le Menu](33-menu).
+New Schema from a Skynet Template, nouveaux Tabs (Tab Background Profile), Labels et Text Boxes. Le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué **Default** dans sa propre liste ([Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles)). Voir [Le Menu](33-menu).
 
 ## Tap Water
 
-Votre propre eau du robinet : les chiffres qui comptent pour brasser. Chaque recette commence avec Tap Water sur son Tab Waters, à chaque Level, sauf si vous choisissez une autre eau. Remplissez-les, puis appuyez sur **Save** (le seul Save de l'onglet Default, en haut ou en bas).
+Votre propre eau du robinet : les chiffres qui comptent pour brasser. Chaque recette commence avec Tap Water sur son Tab Waters, à chaque Level, sauf si vous choisissez une autre eau. Remplissez-les, puis appuyez sur **Save** (le seul Save de l'onglet Default, en haut).
 
 **Où trouver les chiffres :**
 
@@ -108,4 +197,4 @@ Ces réglages par défaut sont fixés et ne peuvent pas être changés, mais peu
 - **Skynet Dial** : plage Cooler et Hotter 2 ; Cold, OK, Hot = Blue, Green, Red.
 - **Alarm Set Graphic (Layer 2)** : None.
 
-Les titres des parties de ce Tab ont un fond bleu, pour trouver chaque partie facilement.
+Les titres des parties de ce Tab ont un fond bleu, pour trouver chaque partie facilement. Le titre et **Save** restent en haut pendant que le reste défile (Règle Skynet 2.51).

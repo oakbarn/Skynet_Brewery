@@ -1380,3 +1380,6 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 .grabDlg button.danger { background: #d32f2f; color: #fff; border-color: #b71c1c; }
 /* IP Type connectors at pipe and hose ends (Rule 5.40): drawn only, never in the way of a click */
 .conn { pointer-events: none; }
+/* Default settings Tab: Freeze (OakBarn Brewery, 2026-11-16, Default Tab 3; Rule 2.51): the title and Save stay at the top while the rest scrolls */
+.defTab .defFreeze { position: sticky; top: -10px; z-index: 5; background: var(--panel); padding: 6px 0 4px; margin-top: -6px; border-bottom: 1px solid var(--line); }
+.defTab .defFreeze .bar { margin: 0; }
