@@ -21,7 +21,7 @@ n'a pas de Cover**. (Règle Skynet 18.24)
    - **Overlay** (**Red Glow** au départ : elle rougeoie en marche ; **None** n'affiche rien) et, sur la même ligne, **Database and .API ⬢** (aide 98).
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (**DO**).
    **Entrée** vous fait passer par Label, Interface, Available Ports, Tab, Orientation, puis **➕ Add Device**.
-4. Appuyez sur **➕ Add Device**. La résistance est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **💾 Save Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port**
+4. Appuyez sur **➕ Add Device**. La résistance est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port**
    sont maintenant grisés et fixés (c'est le câblage). Sur le Tab, un clic dessus la met en marche ou à l'arrêt tout de suite, comme une pompe (Règle 2.33).
 
 ## Vessel Device Template : choisir, puis construire {#vessel-device-template-choose-then-build}
@@ -32,7 +32,7 @@ Dans la liste **Heating Element**, **Vessel Device Template** remplace *Electric
    autre Vessel Template qui a un Element Port.
 2. **Choisissez la résistance** et remplissez la case d'ajout, comme plus haut. Son titre dit pour quelle cuve elle est.
 3. **➕ Add Device** les construit sur le **🔨 Build Tab** : la résistance et une copie de la cuve avec son **Element placé**
-   et lié à la nouvelle résistance (l'Element rougeoie quand elle est en marche). Appuyez sur **💾 Save Build ... > Move to Tab** : le Tab que vous
+   et lié à la nouvelle résistance (l'Element rougeoie quand elle est en marche). Appuyez sur **✅ Finish Build ... > Move to Tab** : le Tab que vous
    avez choisi est proposé en premier, et les deux y vont.
 
 La cuve n'a toujours pas de Devices à elle (Règle 5.7) : la résistance est son propre Device, et l'emplacement Element de la cuve s'y lie

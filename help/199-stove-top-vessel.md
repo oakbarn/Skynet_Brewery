@@ -13,7 +13,7 @@ In **Edit layout**, open **Add equipment ➕** and pick one:
 | **Stove Top Vessel** | No outlets. Only its hose hang top. |
 | **Stove Top Vessel, Bottom Outlet** | Its hose hang top, and one **Bottom Outlet** IP at the center of the bottom. |
 
-Like every new Widget it is made on the 🔨 Build Tab first (Rule 4.1); **💾 Save Build ... > Move to Tab** puts it on its Tab.
+Like every new Widget it is made on the 🔨 Build Tab first (Rule 4.1); **✅ Finish Build ... > Move to Tab** puts it on its Tab.
 
 ## The hose hang top
 

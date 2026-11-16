@@ -60,6 +60,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .pipes .flow { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 14; animation: flow 0.9s linear infinite; }
 .pipes .flow.rev { animation-direction: reverse; }
 .pipes .flow.off { display: none; }
+.pipes .flow.grav { opacity: 0.45; animation-duration: 2.4s; }     /* gravity flow (Rule 5.21): lighter and slower than pumped flow */
 .pipes .hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: none; }
 #ws.editing .pipes .hit { pointer-events: stroke; }
 .pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
@@ -188,13 +189,16 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #dlgBody textarea[data-k="code"], dialog textarea[data-k="code"] { width: 100%; box-sizing: border-box; min-height: 6em; font-family: ui-monospace, Consolas, monospace; resize: vertical; }      /* Code Value Widget Code (Rule 1.27) */
 #dlgBody > select, #dlgBody > input { min-width: 0; max-width: 100%; }     /* a long choice (stepper drivers) must not push the labels off the dialog */
 /* the short notice (OakBarn Brewery, 2026-11-16: "Change its background and Middle of Screen for these types of Info or Warnings and
-   Larger. It was small and I did not even see it"): every short info, warning and "✔ Saved" (Rule 2.53) shows here, big, in the
+   Larger. It was small and I did not even see it"): every short info, warning and "✔ Saved" (Rule 2.54) shows here, big, in the
    middle of the screen, on a strong background, then goes on its own. Nothing to click: it never blocks the screen under it. */
 #toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fff; border: 2px solid #fff; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
 #toast.show { opacity: 1; }
 #toast.ok { background: #1e7a34; }
 #toast b { display: block; font-size: 1.3em; }
 #toast span { display: block; margin-top: 4px; font-size: 0.85em; }
+/* a kept Build came back (Rule 4.1): one click to Discard it, then ↩ Undo for a few seconds */
+#buildBack { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
+#buildBack .bbX { padding: 2px 8px; }
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
 #soundNag { position: fixed; bottom: 16px; left: 16px; z-index: 49; background: var(--panel2); border: 2px solid var(--bad); padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; max-width: calc(100vw - 32px); }
 #soundNag.hidden { display: none; }
@@ -1393,10 +1397,10 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 .defTab .defFreeze .bar { margin: 0; }
 .profFreeze { position: sticky; top: -10px; z-index: 5; background: var(--panel); padding: 6px 0 4px; margin-top: -6px; border-bottom: 1px solid var(--line); }
 .profFreeze .bar { margin: 4px 0 0; }
-/* the purple + Add New button (Rule 2.54): Profiles only, right of the Open list, not frozen */
+/* the purple + Add New button (Rule 2.55): Profiles only, right of the Open list, not frozen */
 .addNewBtn { display: inline-flex; align-items: center; gap: 4px; }
 .addNewBtn .plus { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #7e3fbf; color: #fff; font-weight: bold; font-size: 16px; line-height: 1; }
-/* every button together, frozen in the upper right corner, always in the same order (Rule 2.53): Delete · Save · Undo · Close · ✕ */
+/* every button together, frozen in the upper right corner, always in the same order (Rule 2.54): Delete · Save · Undo · Close · ✕ */
 .dlgBtns { float: right; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; margin: 0 0 4px 12px; }
 .dlgBtns .paneClose { display: inline-flex; gap: 6px; }
 /* Default settings > IP Types (Rule 5.40): a row of tick boxes for each type */

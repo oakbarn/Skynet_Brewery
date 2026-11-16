@@ -86,7 +86,7 @@ caché et aucun tuyau ni flexible ne peut s'y joindre. Seuls les IP ouverts s'af
 **Serpentin HERMS :** choisissez **Left**, **Right**, ou un serpentin croisé (**Outlet Right & Inlet Left**, **Outlet Left & Inlet Right**). Le serpentin est dessiné sous les IP **HERMS In** et **HERMS Out** de ce côté, avec une forme adaptée
 à eux, et les deux IP deviennent les deux bouts du serpentin : ce qui entre par l'un sort par l'autre.
 
-**Une fois construite et enregistrée, pas de retour en arrière.** Après 💾 Save Build ... > Move to Tab et Save layout, ses IP, les pièces intégrées
+**Une fois construite et enregistrée, pas de retour en arrière.** Après ✅ Finish Build ... > Move to Tab et Save layout, ses IP, les pièces intégrées
 et son serpentin HERMS sont verrouillés pour toujours, et elle ne peut pas être dégroupée. Son Name, ses Labels, ses Gallons, son Tab et sa position peuvent encore
 changer. (Une exception aux Règles Skynet 5.7 et 5.31.)
 
