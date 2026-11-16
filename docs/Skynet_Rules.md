@@ -3467,7 +3467,11 @@ Bloviating, not on the Dialog. Plain English in Both Dialog, Dialog DDLB Choices
 then maybe but always follow by plain English in Help and Hover Help. Make the Help and Hover Help be the same for the same topic unless
 the Help can Expand More. Most technical Explanations in Help and Not Hover Help."). In both programs:
   1. **A field's label is 1 or 2 words**, the label of a dropdown too. Nothing else is written on the dialog to explain it (Rule 2.38).
-  2. **Explanations go in the Hover Help**, never on the dialog.
+  2. **Explanations go in the Hover Help**, not on the dialog. **Exception: a need-to-know note** (OakBarn Brewery, 2026-11-16: "Change
+     the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short,
+     plain English note that the brewer must see to be safe or to set up right may show on the dialog, so it is seen with no extra
+     click (Rule 2.44). Use it rarely: one or two sentences, only for safety or setup, and the full explanation stays in the Hover Help
+     and the Help. Example: under a greyed Self Priming of No, the priming note (Rule 18.32).
   3. **Plain English everywhere:** the dialog, its dropdown choices (short, Rule 2.38) and the Hover Help. A technical word may follow
      the plain words, in ( ) (Rule 2.37).
   4. **Plain English first, then the technical part.** Where a topic needs a more technical explanation, the plain English comes first,
@@ -4483,8 +4487,12 @@ have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 
 below the Overlay:
 - **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
   holding the **Pump facts**: **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V), **Use** (**Hot & Cool**, or Cold for a glycol pump),
-  Flow, Lift and Hottest liquid. For a model in the list the Pump facts are to look at only, with one **◀ Back** button; for Other
-  they are typed in (Rule 18.40).
+  Flow, Lift, Hottest liquid and **Self Priming** (Yes / No / Not known; OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for
+  a Riotide it is no"; a switch on a User Defined pump). For a model in the list the Pump facts are to look at only, with one **◀ Back**
+  button; for Other they are typed in (Rule 18.40). Hottest liquid's Hover Help ends with the caveat that boiling liquids are not
+  recommended to be pumped because of cavitation (OakBarn Brewery, 2026-11-16). A fact is filled in only from the maker's own words:
+  the RipTide's Hottest liquid stays Not known until Blichmann's own number is found (blichmannengineering.com now goes to MoreBeer,
+  whose RipTide pages give none).
 - **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
   is filled in and greyed out.
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
@@ -4886,6 +4894,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 11.8 item 2 changed (OakBarn Brewery: "Change the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short need-to-know note (safety or setup) may show on the dialog, rarely, with the full explanation still in the Hover Help and Help. First use: the priming note under a greyed Self Priming of No in the Pump facts (Rule 18.32). Checked against both programs: the BruControl Import shows the same Pump facts pop-up; nothing else changes there.
+- 2026-11-16: Rule 18.32 changed (OakBarn Brewery: "add the little caveat on that proprtues that Boiling Liquids are not recomened to be Pumps because of Cavitation"; "a Prperty of Self Priming   for a Riotide it is no"): Hottest Liquid Hover Help gets the cavitation caveat; new Pump fact Self Priming (RipTide No; bayite BYT-7A006 No, from its own note; the rest Not known until checked). The RipTide's Hottest Liquid stays Not known: no number found from Blichmann. Help 115, 163 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and show the same facts.
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
