@@ -10,7 +10,7 @@ autres peuvent regarder.
 
 ### Default Pipe Size {#default-pipe-size}
 
-La taille la plus courante des tuyaux à placer sur un nouveau Tab. Les raccords de tuyau sont ajoutés tout seuls et prennent la taille du tuyau qui y est joint. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau.
+La taille la plus courante des tuyaux à placer sur un nouveau Tab. Les raccords de tuyau sont ajoutés tout seuls et prennent la taille du tuyau qui y est joint. La taille de chaque tuyau peut être changée une fois placé, et tout nouveau tuyau joint à un tuyau d'une autre taille prend la taille de ce tuyau. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau.
 
 Les IP s'emboîtent et sont verrouillées.
 
@@ -118,9 +118,13 @@ Le côté technique : une nouvelle Recette commence avec un brassin de 5 gallons
 
 Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le Tab tient à l'écran, et s'il lui faut des barres de défilement horizontales parce qu'une partie du Tab sort de l'écran quand la valeur est trop grande. Le mieux est de n'avoir aucune barre de défilement sur un Tab. Changer la résolution de l'écran ou utiliser un ordinateur à distance peut aussi changer l'affichage, avec ou sans barres de défilement. Les téléphones et tablettes s'ajustent à leur taille, et vous n'avez presque pas de contrôle si vous en utilisez un à distance. Réglez-les pour l'ordinateur de votre brasserie qui suit le Skynet Panel. Pour une résolution d'écran de 1920 x 1040, 1600 x 900 est un bon départ, mais il faudra peut-être l'ajuster un peu pour VOTRE ordinateur. La Largeur ne touche que la barre de défilement horizontale.
 
+La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
+
 ### Height of a New Tab (px) {#height-of-a-new-tab-px}
 
 Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le Tab tient à l'écran, et s'il lui faut des barres de défilement verticales parce qu'une partie du Tab sort de l'écran quand la valeur est trop grande. Le mieux est de n'avoir aucune barre de défilement sur un Tab. Changer la résolution de l'écran ou utiliser un ordinateur à distance peut aussi changer l'affichage, avec ou sans barres de défilement. Les téléphones et tablettes s'ajustent à leur taille, et vous n'avez presque pas de contrôle si vous en utilisez un à distance. Réglez-les pour l'ordinateur de votre brasserie qui suit le Skynet Panel. Pour une résolution d'écran de 1920 x 1040, 1600 x 900 est un bon départ, mais il faudra peut-être l'ajuster un peu pour VOTRE ordinateur. La Hauteur ne touche que la barre de défilement verticale.
+
+La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
 
 Le côté technique : de 200 à 20000 pixels ; vide = 1600 x 900. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). La case **How many Pixels are Pipes and Hoses to be drawn on a Tab?** est ici aussi (voir plus haut).
 
