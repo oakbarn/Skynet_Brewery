@@ -9047,13 +9047,13 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
     const mine = () => S.config.userStyles?.[opts] ?? [];
-    // a Tab's own Style list starts with "(the Default tab's Style)"; the ☰ Menu > Default tab's own list does not
+    // a Tab's own Style list starts with "Default (the Default tab's Style)"; the ☰ Menu > Default tab's own list does not
     const blank = opts === 'tab' && key !== 'tabStyle';
     const cur = blank ? obj[key] ?? '' : opts === 'tab' ? obj[key] || SKYNET_STYLES.tab[0].id : styleOf(opts, obj, S.config.userStyles)?.id ?? '';
     const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
     const dflt = () => tabStyleOf({}, S.config.brewDefaults, S.config.userStyles)?.name ?? '';
     const fill = id => s.replaceChildren(
-      ...(blank ? [h('option', { value: '', ...(id ? {} : { selected: true }) }, `(the Default tab's Style: ${dflt()})`)] : []),
+      ...(blank ? [h('option', { value: '', ...(id ? {} : { selected: true }) }, `Default (${dflt()})`)] : []),
       h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
       ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
       h('option', { value: '__add__' }, '➕ Add new User Style…'));
@@ -9190,12 +9190,13 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
     const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
     const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
-    const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
+    const s = h('select', {}, opt('', opts === 'tab' ? 'None' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
       ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
     let last = s.value;
     const row = rgbRow(rgb ? cur : '', val, {
       onSet: c => { s.value = 'rgb'; last = 'rgb'; set(c); },
       onCancel: () => { s.value = last; set(last === 'rgb' ? row.hex() : last); row.show(last === 'rgb'); } });
+    row.show(rgb);      // its Color (RGB) box shows only while RGB is picked (Rule 2.48), like a Color's Custom
     s.onchange = () => { if (s.value === 'rgb') { row.show(true); row.pick(); } else { last = s.value; set(s.value); row.show(false); } };      // RGB opens the Color Picker at once (Rule 2.44)
     return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
@@ -9682,7 +9683,9 @@ function bindForm(body, fields, obj, onChange) {
 function lockedName(key, label, obj) {
   const input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: obj[key], readonly: true, class: 'lockedName', title: 'The name is locked. Press ✏ Change name to change it.' });
   const btn = h('button', { type: 'button', class: 'nameBtn', title: 'Open the Name Change pop-up', onclick: async () => {
-    const to = await nameChange(input.value, { check: n => nameCheck(n, obj), suggest: liveSuggestion(obj, input.closest('#dlgBody, .dlgBody, form') || undefined) });
+    // a Tab's name is a shown name, so it keeps its spaces (Brew House, not Brew_House; Tab Settings, OakBarn Brewery 2026-11-15)
+    const tab = !!obj._ref && (draft || S.config).workspaces.some(w => w._ref === obj._ref);
+    const to = await nameChange(input.value, { check: n => nameCheck(n, obj), spaces: tab, suggest: tab ? '' : liveSuggestion(obj, input.closest('#dlgBody, .dlgBody, form') || undefined) });
     if (to === null) return;
     input.value = to;
     for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true }));
@@ -10629,30 +10632,122 @@ function checkWidgetCode(it) {
     .catch(() => { });
 }
 
+// Tab Settings, updated to the Blichmann RipTide Dialog 1 model (OakBarn Brewery, 2026-11-15: "Update this tab using Blickmann Dialog 1
+// Model"; learning record docs/Dialog_Model_Learning/Tab_Settings.md): short Title Case names of 1 or 2 words (Rules 11.8, 18.34), every
+// explanation in the Hover Help of its name (Rule 2.38), short plain dropdown choices, the frozen top with no bottom row (Rule 2.51),
+// the focus order of Rule 18.38 (Name and Tab ID take Enter; every other box the Tab key or the mouse), a blank Name only stops Save
+// (Rule 18.28) and a new Tab's ID suggestion follows its Name until one is typed (Rule 3.2). Hover Help = Help 26 (Rule 11.4).
+const TAB_TIPS = {
+  name: 'The name of this Tab, shown on its button at the top of the panel, for example Brew House. Each Tab needs a name of its own, and it cannot be blank. A Hidden Tab\'s name always starts with Hidden_.\n\nRenaming a Tab is safe: everything on it goes with it, and the Suggested Names of its Devices use the Tab ID, not the name.',
+  id: 'A short code for this Tab, for example BH for Brew House. It comes first in every list of Tabs (BH: Brew House) and last in the Suggested Name of every Device on this Tab (..._BH). Skynet suggests a unique one, and it follows the Name until you type your own. The Tab ID follows Rule 3.2. Check it before you Save.',
+  idSaved: 'A short code for this Tab, for example BH for Brew House. It comes first in every list of Tabs (BH: Brew House) and last in the Suggested Name of every Device on this Tab (..._BH). The Tab ID follows Rule 3.2. It is saved, so it is greyed out.',
+  tabProfile: 'The Tab Background Profile of this Tab. It gives the Tab its background color, and the look (colors and value style) that a new Device or Widget on this Tab starts with. None = no Profile. Profiles are made on ☰ Menu > Tab Background Profile.\n\nThe look is copied only when a Device or Widget is made: changing the Profile later does not change what is already on the Tab.',
+  color: 'The color behind everything on this Tab. It shows wherever the Picture does not cover. Default = the color of this Tab\'s Profile (with no Profile, the panel\'s normal color). None = no color. Custom opens the Color Picker for a color of your own.',
+  background: 'A picture behind everything on this Tab. Pick Skynet pictures or your own, a group, then the picture. None = no picture. Add new ... takes the name of another picture in media/Images; the File Move page copies a picture from your computer there. The Color shows wherever the picture does not cover.',
+  bgX: 'Where the left edge of the Picture goes, in pixels from the left of the Tab. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
+  bgY: 'Where the top edge of the Picture goes, in pixels from the top of the Tab. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
+  bgW: 'How wide the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
+  bgH: 'How tall the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
+  style: 'The Tab Style: the colors, fonts and sizes of the Labels, Devices and Widgets on this Tab. Default = the Tab Style picked on ☰ Menu > Default settings. A Device or Widget with a color, font or size of its own keeps it; only the rest take the Tab Style. Skynet Styles 🔒 can never be changed. ➕ Add new User Style… makes your own, and ✏ Edit changes it.',
+  width: 'How wide this Tab is, in pixels. A new Tab starts at 1600.',
+  height: 'How tall this Tab is, in pixels. A new Tab starts at 900.',
+  vSizer: 'The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout.',
+  pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it.',
+  flowColor: 'The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color.\n\nThe technical side: a Process sets it with tab.flow_Color = Mash, on the Tab the screen shows.',
+};
+// the small ⚠ box of Rule 18.28 (public/labelguard.js), for a box of this dialog that Save waits for; it goes away after 5 seconds
+function dlgWarn(field, say, then) {
+  const d = field.closest('dialog'); if (!d) return;
+  let w = d.querySelector(':scope > .labelWarn');
+  if (!w) { w = h('div', { class: 'labelWarn', role: 'alert' }); w.onclick = () => w.remove(); d.append(w); }
+  w.replaceChildren(h('b', {}, '⚠ ' + say), h('span', {}, then));
+  clearTimeout(w._t); w._t = setTimeout(() => w.remove(), 5000);
+  field.classList.add('labelBlank'); field.focus();
+}
 async function editWorkspace() {
   if (!editing) return;
   const w = curWs(); const work = clone(w), before = clone(w);
   // a saved Tab's ID is never changed, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2); a new Tab's suggestion can be edited until the first Save
   const idLocked = !!(w.id && w._ref && (S.config.workspaces || []).some(x => x._ref === w._ref && x.id));
+  const others = () => draft.workspaces.filter(x => x !== w), otherIds = () => others().map(x => x.id);
   await loadMediaPictures();
-  const r = await dialog('Tab settings', [['name', 'Name', 'text'],
-    idLocked ? ['id', 'Tab ID (saved: it never changes, Rule 3.2)', 'ro'] : ['id', 'Tab ID (follows Rule 3.2; once saved it never changes)', 'text'],
+  const T = TAB_TIPS, tip = (k, more) => ({ tip: T[k], ...more });
+  const shown = dialog('Tab Settings', [['name', 'Name', 'text', null, false, false, tip('name')],
+    idLocked ? ['id', 'Tab ID', 'ro', null, false, false, tip('idSaved')] : ['id', 'Tab ID', 'text', null, false, false, tip('id')],
     ['_bgHead', 'Background', 'head'],
-    ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
-    ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
-    ['_stHead', 'Tab Style', 'head'],
-    ['style', 'Tab Style (Label and Device or Widget colors, fonts and sizes)', 'stylesel', 'tab'],
-    ['_stNote', 'Only a Device or Widget with no color, font or size of its own takes the Tab Style; one with its own keeps it. Skynet Styles 🔒 can never be changed; ➕ Add new User Style… makes your own.', 'note'],
-    ['background', 'Background picture', 'gpick', 'backgrounds'],
-    ['_bgPlace', 'The list shows the pictures in media/Images and its folders (Add new ... takes another picture name there; the File Move page copies pictures from your computer). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
-    ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
+    ['tabProfile', 'Profile', 'sel', [['', 'None'], ...(S.tabProfiles || []).map(p => [p.id, p.name])], false, false, tip('tabProfile')],
+    ['color', 'Color', 'color', null, false, false, tip('color')],
+    ['background', 'Picture', 'gpick', 'backgrounds', false, false, tip('background')],
+    ['bgX', 'Picture Left', 'num', null, false, false, tip('bgX')], ['bgY', 'Picture Top', 'num', null, false, false, tip('bgY')],
+    ['bgW', 'Picture Width', 'num', null, false, false, tip('bgW')], ['bgH', 'Picture Height', 'num', null, false, false, tip('bgH')],
+    ['_lookHead', 'Look', 'head'],
+    ['style', 'Tab Style', 'stylesel', 'tab', false, false, tip('style')],
     ['_sizeHead', 'Size', 'head'],
-    ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
-    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num'],
-    ['vSizer', 'Master Vessel Sizer: resize this Vessel and every Vessel on the Tab follows (None = no Vessel can be resized)', 'sel', [['', 'None'], ...draft.graphics.filter(g => isSized(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])]],
-    ['_flHead', 'Flow Color', 'head'],
-    ['flowColor', 'Flow Color of every pipe and hose on this Tab (tab.flow_Color in a Process)', 'flowc', 'tab'],
-    ['_flNote', 'Mash, Boil, Whirlpool and Ferment: a pipe with its own Flow color keeps it. Tap, Strike and the plain colors: every pipe takes it. Always: flow from a Tap Water Valve is Blue, and flow that began at a Vessel with an Out flow color takes that color. A Process line tab.flow_Color = Mash sets it on the Tab the screen shows.', 'note']], work, draft.workspaces.length > 1, TAB_SPOT);
+    ['width', 'Width', 'num', null, false, false, tip('width', { def: 1600 })], ['height', 'Height', 'num', null, false, false, tip('height', { def: 900 })],
+    ['vSizer', 'Vessel Sizer', 'sel', [['', 'None'], ...draft.graphics.filter(g => isSized(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])], false, false, tip('vSizer')],
+    ['_pipeHead', 'Pipes', 'head'],
+    ['pipeSize', 'Pipe Size', 'num', null, false, false, tip('pipeSize', { def: 10 })],
+    ['flowColor', 'Flow Color', 'flowc', 'tab', false, false, tip('flowColor')]], work, draft.workspaces.length > 1, TAB_SPOT);
+  // the boxes, as the dialog shows them now
+  const dlgEl = $('#dlg'), body = $('#dlgBody'), nameBox = body.querySelector('[data-k="name"]'), idBox = idLocked ? null : body.querySelector('[data-k="id"]');
+  // what would stop the Save: the box to go back to and what to say, or null
+  const problem = () => {
+    const nm = String(nameBox?.value ?? '').trim();
+    let n = nm;
+    if (!n) return [nameBox, 'The Name cannot be blank.', 'Type a Name, or press Cancel.'];
+    if (isHiddenTab(w) && !n.startsWith(HIDDEN_TAB)) n = HIDDEN_TAB + n.replace(/^hidden_?/i, '');
+    if (n === HIDDEN_TAB) return [nameBox, 'Type a name after Hidden_.', 'Or press Cancel.'];
+    if (n !== w.name) { const bad = elementNameError(n, 'Tab'); if (bad) return [nameBox, bad, 'Change the Name, or press Cancel.']; }
+    if (others().some(x => x.name === n)) return [nameBox, `There is already a Tab called ${n}.`, 'Change the Name, or press Cancel.'];
+    if (idBox) {
+      let id = String(idBox.value ?? '').trim();
+      if (!id) return [idBox, 'The Tab ID cannot be blank.', 'Type a Tab ID, or press Cancel.'];
+      try { id = cleanTabId(id); } catch (e) { return [idBox, e.message, 'Change the Tab ID, or press Cancel.']; }
+      const o = others().find(x => String(x.id).toUpperCase() === id);
+      if (o) return [idBox, `Tab ID ${id} is used by the ${o.name} Tab.`, 'Change the Tab ID, or press Cancel.'];
+    }
+    return null;
+  };
+  // Save waits for a good Name and Tab ID (Rule 18.28): the small ⚠ box says why and the box gets the focus; nothing else is stopped
+  const saveGuard = ev => {
+    const b = ev.target?.closest?.('button[value="ok"]'); if (!b || !dlgEl.contains(b)) return;
+    const p = problem(); if (!p) return;
+    ev.preventDefault(); ev.stopImmediatePropagation();
+    dlgWarn(...p);
+  };
+  // the order of focus (Rule 18.38's model): the Name and the Tab ID take the Enter key ("All"), every other box only the Tab key or the
+  // mouse ("TMF"); a saved Tab ID gets no focus ("NF"). Enter on a blank Name stays on it. ? Help, Delete, Cancel and Save are for the
+  // mouse: the Tab key cycles through the boxes only, the last back to the first.
+  const tabKey = ev => {
+    if (ev.key !== 'Tab' || ev.altKey || ev.ctrlKey || ev.metaKey || !dlgEl.contains(ev.target)) return;
+    const l = [...body.querySelectorAll('input, select, textarea, button')].filter(x => !x.disabled && x.type !== 'hidden' && x.tabIndex >= 0 && x.offsetParent !== null);
+    if (!l.length) return;
+    ev.preventDefault();
+    const i = l.indexOf(ev.target), n = l.length;
+    l[i < 0 ? 0 : (i + (ev.shiftKey ? n - 1 : 1)) % n].focus();
+  };
+  // a new Tab's ID follows its Name until one is typed (Rule 3.2: Skynet always suggests a unique one)
+  let idOwn = !!idBox && !!String(idBox.value ?? '').trim() && String(idBox.value).toUpperCase() !== defaultTabId(w.name, otherIds());
+  const followName = () => { if (idBox && !idOwn) idBox.value = defaultTabId(String(nameBox.value ?? '').trim() || 'Tab', otherIds()); };
+  const ownId = () => { idOwn = !!String(idBox.value ?? '').trim(); if (!idOwn) followName(); };
+  const upId = () => { const v = String(idBox.value ?? '').toUpperCase(); if (v !== idBox.value) idBox.value = v; };
+  dlgEnterSeq = t => {
+    if (!body.contains(t)) return false;
+    const nameOk = !!String(nameBox?.value ?? '').trim();
+    if (t === nameBox) { if (nameOk && idBox) idBox.focus(); return true; }       // a blank Name: Enter stays on it
+    nameBox?.focus(); return true;                                                 // the Tab ID, or a TMF box: back to the Name
+  };
+  dlgEl.addEventListener('click', saveGuard, true);
+  dlgEl.addEventListener('keydown', tabKey, true);
+  if (idBox) { nameBox?.addEventListener('input', followName); idBox.addEventListener('input', ownId); idBox.addEventListener('change', upId); }
+  setTimeout(() => nameBox?.focus(), 0);      // the Name has the focus when the box opens
+  let r;
+  try { r = await shown; }
+  finally {
+    dlgEnterSeq = null;
+    dlgEl.removeEventListener('click', saveGuard, true); dlgEl.removeEventListener('keydown', tabKey, true);
+    if (idBox) { nameBox?.removeEventListener('input', followName); idBox.removeEventListener('input', ownId); idBox.removeEventListener('change', upId); }
+  }
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
