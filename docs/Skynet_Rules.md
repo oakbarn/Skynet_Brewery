@@ -1613,8 +1613,13 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
   between Middle / Bottom Top and Side / side Middle so we can easily substitute a Different Pump ... All Pumps get 8 IPs"; thread
   "Add pump hose stubs for inlet and outlet"): the **4 corners** of its box and the **middle of each side**: Top Left, Top Middle,
   Top Right, Right Middle, Bottom Right, Bottom Middle, Bottom Left, Left Middle. Its **Inlet IP** and **Outlet IP** are each on one
-  of them, picked in its Add box and Properties (as seen on the Tab), so it is always known which is In and which is Out, even with
-  both on one side; they are never on the same spot. A **Skynet pump** starts with its Inlet on the **Right Middle** and its Outlet on
+  of them (as seen on the Tab), so it is always known which is In and which is Out, even with both on one side; they are never on the
+  same spot.
+- **The pipe or hose sets them** (OakBarn Brewery, 2026-11-16: "Pipe and hose changes are always auto"; "nearest where the user places
+  it"): there is no Inlet IP or Outlet IP box (not in the Add box, Properties or the Pump Profile). A pipe or hose end drawn or dropped
+  on or near a pump (a Quick Disconnect hose end too) joins the nearest of its 8 IPs, and the pump's free end (its IN or OUT with
+  nothing joined yet) moves there; with both free, the one now nearer that spot moves; with both joined, nothing moves. A spot the
+  other end is on is never taken. A **Skynet pump** starts with its Inlet on the **Right Middle** and its Outlet on
   the **Top Right** (Orientation Left: Left Middle and Top Left), the spots nearest its ports; a **User pump** on the middle of its
   left and right sides, as before.
 - **A Hose or Pipe to the spot** (OakBarn Brewery, 2026-11-09: "something on a Pump that looks like a Hose or Pipe ... so it looks
@@ -4230,9 +4235,9 @@ Add box has its own order of focus (Rule 18.38).
 the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
 ✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
 (greyed out for good, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
-Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Inlet IP** with **Outlet IP** on the
-same line and **Hose or Pipe** below them (Rule 5.27; OakBarn Brewery, 2026-11-11: every pump has 8 IPs; Hose or Pipe on a Skynet
-pump drawing only); **Cover** with **Toggle** (On/Off, Push
+Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Hose or Pipe** below it (Rule 5.27;
+OakBarn Brewery, 2026-11-11: every pump has 8 IPs; Hose or Pipe on a Skynet pump drawing only; 2026-11-16: no Inlet IP / Outlet IP
+box, the pipe or hose joined sets them); **Cover** with **Toggle** (On/Off, Push
 button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
 2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
 the hexagon opens the Database and .API settings in a pop-up, in the Add box and the Properties (Fritz's screen 7); **X, Y, Width, Height**; the **Device
@@ -4873,6 +4878,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
 - 2026-11-16: Added Rule 14.5, the Process Updates Sandbox (OakBarn Brewery: "New sand Box for Process and put things there till we build those Processes"): `Sandbox/Process_Updates/Process_Updates.md` holds Brew Day, sample Process and Process command ideas, not built until the Skynet Process setup starts. First entries, moved from the Panel Updates Sandbox: the PreBrew grain temperature and Strike Offset boxes, the "Boil Started" button in the sample Brew Day Process, and waiting on the boil temperature from the air pressure. Checked against both programs: notes only, nothing in either program changes.
 - 2026-11-16: Rules 2.42 and 2.51 changed (OakBarn Brewery, PDF "Default Tab 3"): the Default settings Tab is frozen (title and Save at the top, no Save further down); Default Pipe Size, Default Hose Size and both IP Types have his Hover Help word for word; the size lists are one line with no "(Skynet default)"; "How many Pixels are Pipes and Hoses to be drawn on a Tab?" replaces the 1/2" pipe thickness label and shows in Pipes, Hoses and Sizes and in New Tabs (one setting); Width and Height of a New Tab moved to New Tabs with his Hover Help; New Recipes is now **New User Recipes**: Units moved to Settings > Panel settings, Batch Size (Gallons/Liters) kept in liters, a new Recipe starts at 5 gallons, Skynet Single Step Batch Sparge and Skynet 60 Minute Boil (Boil Time from the Boil Profile); Equipment Profile, Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are off the tab; Hover Help written for Mash, Boil and Water Profile and Water to Grain Ratio. Help 155 (and French). Sentences about things not built yet, the Hop Stand change, the Brew Day grain temperature question and the scroll bar pictures wait in Sandbox/Panel_Updates/Panel_Updates.md (Rule 14.4). Checked against the BruControl Import program: it reads the Panel's Units from the same saved setting (unchanged) and has no Recipe screens.

@@ -261,7 +261,12 @@ to Suggested** in its Name Change box (Rule 3.16).
 ![A pump with its 8 IPs](help_pictures/Pump_8_IPs.png)
 
 Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its
-place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab.
+place and stay joined to its pipes.
+
+The pipes and hoses set its Inlet (IN) and Outlet (OUT), as seen on the Tab (OakBarn Brewery: "Pipe and hose changes are always
+auto"; "nearest where the user places it"): draw or drop a pipe or hose end on or near the pump and it joins the nearest of the 8
+IPs, and the pump's free end (its IN or OUT with nothing joined yet) moves there. With both ends free, the one nearer that spot
+moves. A spot the other end is on is never taken. There is no Inlet IP or Outlet IP box to pick.
 
 Example 1:
 
@@ -271,14 +276,14 @@ Example 2:
 
 ![Example 2: Left, Inlet Bottom Right, Outlet Top Left](help_pictures/Pump_IP_Example_2.png)
 
-Pipes or Hose snap connect to an IP in the selected position if the end is within 10 px of that
-![IP](help_pictures/IP_Marker.png) when drawn.
+Pipes or Hose snap connect to the nearest IP when the end is put on or near the pump; an end within 10 px of an
+![IP](help_pictures/IP_Marker.png) joins that IP.
 
 Switching the Orientation leaves them where they are (see Orientation above): Example 2 switched to Right keeps its Inlet on the
 Bottom Right and its Outlet on the Top Left, and the Hose or Pipe inside the pump is drawn again to reach them.
 
 **Hose or Pipe**: What is drawn from the pump's own inlet and outlet to its Inlet IP and Outlet IP: a White Hose, or a stainless
-Pipe. It is drawn over the pump and its Cover under the On overlay.
+Pipe. A pipe or hose joined to the IP sets this too. It is drawn over the pump and its Cover under the On overlay.
 
 ## The ➕ Add Device button
 
