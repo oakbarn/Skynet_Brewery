@@ -259,7 +259,13 @@ to Suggested** dans sa fenêtre Name Change (Règle 3.16).
 ![Une pompe avec ses 8 IP](help_pictures/Pump_8_IPs.png)
 
 Chaque pompe a 8 IP : les 4 coins de sa boîte et le milieu de chaque côté, les mêmes sur chaque pompe, pour qu'une autre pompe puisse
-prendre sa place et rester reliée à ses tuyaux. Choisissez laquelle est son entrée (IN) et laquelle sa sortie (OUT), telles qu'on les voit sur le Tab.
+prendre sa place et rester reliée à ses tuyaux.
+
+Les tuyaux et les flexibles fixent son entrée (IN) et sa sortie (OUT), telles qu'on les voit sur le Tab (OakBarn Brewery : « Pipe and
+hose changes are always auto » ; « nearest where the user places it ») : dessinez ou déposez un bout de tuyau ou de flexible sur la
+pompe ou près d'elle, et il rejoint la plus proche des 8 IP, et le bout libre de la pompe (son IN ou son OUT sans rien de joint) va
+là. Avec les deux bouts libres, celui qui est le plus près de cette place y va. Une place où est l'autre bout n'est jamais prise. Il
+n'y a pas de case Inlet IP ni Outlet IP à choisir.
 
 Exemple 1 :
 
@@ -269,14 +275,14 @@ Exemple 2 :
 
 ![Exemple 2 : Left, Inlet Bottom Right, Outlet Top Left](help_pictures/Pump_IP_Example_2.png)
 
-Les tuyaux ou tuyaux souples se raccordent à une IP à la position choisie si leur bout est à 10 px ou moins de cette
-![IP](help_pictures/IP_Marker.png) quand on les dessine.
+Les tuyaux ou tuyaux souples se raccordent à l'IP la plus proche quand leur bout est mis sur la pompe ou près d'elle ; un bout à 10 px ou moins d'une
+![IP](help_pictures/IP_Marker.png) rejoint cette IP.
 
 Changer l'Orientation les laisse où elles sont (voir Orientation plus haut) : l'exemple 2 passé à Right garde son Inlet en
 Bottom Right et son Outlet en Top Left, et le Hose ou Pipe dans la pompe est redessiné pour les rejoindre.
 
 **Hose or Pipe** : ce qui est dessiné depuis l'entrée et la sortie de la pompe elle-même jusqu'à son Inlet IP et son Outlet IP : un
-Hose blanc, ou un Pipe en inox. Il est dessiné par-dessus la pompe et son Cover sous l'overlay On.
+Hose blanc, ou un Pipe en inox. Un tuyau ou un flexible joint à l'IP le fixe aussi. Il est dessiné par-dessus la pompe et son Cover sous l'overlay On.
 
 ## Le bouton ➕ Add Device {#the-add-device-button}
 

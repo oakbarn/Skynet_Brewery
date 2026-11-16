@@ -1972,6 +1972,43 @@ function pumpSpots(e) {
   return [a, b];
 }
 // a Skynet pump drawing's flow with its two IPs on its spots (as parts of the picture before it is flipped; flipPt flips them)
+// Hose or Pipe sets the Inlet and Outlet IPs (OakBarn Brewery, 2026-11-16: "Pipe and hose changes are always auto"; "nearest where
+// the user places it"; Rule 5.27): there are no Inlet IP / Outlet IP boxes. A pipe or hose end put on or near a pump goes on the
+// nearest of its 8 IPs, and the pump's free end (its IN or OUT with nothing joined yet) moves there. With both free, the one now
+// nearer that spot moves; with both joined, nothing moves. A spot the other end is on is never taken (never both on one spot).
+// While it is being drawn the end is a "pspot:<pump>:<in|out>:<spot>" IP; takePumpSpots makes it the pump's own IP when it is put down.
+const pspotOf = id => { if (typeof id !== 'string' || !id.startsWith('pspot:')) return null; const [, name, end, code] = id.split(':'); return { name, end, code }; };
+const spotPump = e => e && e.subtype === 'pump' && !e.cloneOf && !isInline(e) && hasIps(e);
+function pumpEndAt(e, end, code) { const k = end === 'in' ? 'pumpIn' : 'pumpOut'; return devIps({ ...e, [k]: code }).find(q => q.id === `dev:${e.name}:${end}`)?.c || null; }
+function pumpSpotHit(ws, p, r, inside = false) {
+  let best = null;
+  for (const e of (L().elements || []).filter(e => spotPump(e) && e.workspace === ws)) {
+    const free = ['in', 'out'].filter(end => !pipesOn(`dev:${e.name}:${end}`, ws).length); if (!free.length) continue;
+    const cur = pumpSpots(e), gm = elGeom(e);
+    const inBox = inside && p[0] >= (gm.x || 0) && p[0] <= (gm.x || 0) + (gm.w || 120) && p[1] >= (gm.y || 0) && p[1] <= (gm.y || 0) + (gm.h || 60);
+    for (const code of Object.keys(PUMP_SPOTS).filter(c => !cur.includes(c))) {
+      const at = spotPt(e, code), d = Math.hypot(at[0] - p[0], at[1] - p[1]); if (d > r && !inBox) continue;
+      const end = free.length === 1 ? free[0] : [...free].sort((a, b) => { const o = c => Math.hypot(...spotPt(e, cur[c === 'in' ? 0 : 1]).map((v, i) => v - at[i])); return o(a) - o(b); })[0];
+      const c = pumpEndAt(e, end, code);
+      if (c && (!best || d < best.d)) best = { d, id: `pspot:${e.name}:${end}:${code}`, c: c.map(Math.round) };
+    }
+  }
+  return best;
+}
+// a pipe or hose put down on a pump's spot: the pump's IN or OUT moves there and the end joins it
+function takePumpSpots(lay = draft) {
+  if (!lay) return 0;
+  let n = 0;
+  for (const p of lay.graphics.filter(g => g.kind === 'pipe')) for (const k of ['from', 'to']) {
+    const ps = pspotOf(p[k]); if (!ps) continue;
+    const e = lay.elements.find(x => x.name === ps.name);
+    if (!e || !PUMP_SPOTS[ps.code]) { delete p[k]; continue; }
+    const key = ps.end === 'in' ? 'pumpIn' : 'pumpOut', st = pumpSpotStart(e)[ps.end === 'in' ? 0 : 1];
+    if (ps.code === st) delete e[key]; else e[key] = ps.code;
+    p[k] = `dev:${e.name}:${ps.end}`; n++;
+  }
+  return n;
+}
 const pumpSpotFlow = (e, f) => f?.std && e?.subtype === 'pump' ? { ...f, ends: pumpSpots(e).map(c => PUMP_SPOTS[flipSpot(c, e.flipH, e.flipV)]) } : f;
 // The Hose or Pipe from a pump's own port to its spot (in the 300 x 300 box, before flips): straight out of the port to a lane just
 // inside the box, round the lane the shorter way (the other way when that would pass the other IP), then out to the spot. When the
@@ -3601,6 +3638,7 @@ const eqOfIp = id => (typeof id === 'string' && id.startsWith('eq:')) ? id.slice
 const eqPort = (id, ws) => { const gid = eqOfIp(id); const g = gid && L().graphics.find(x => x.id === gid && (!ws || x.workspace === ws)); return g ? eqPorts(g).find(q => q.id === id) : null; };
 function ipPoint(id, ws) {
   if (!id) return null;
+  const ps = pspotOf(id); if (ps) { const e = L().elements.find(x => x.name === ps.name); return e ? pumpEndAt(e, ps.end, ps.code) : null; }
   const vt = vtopOf(id);           // a Quick Disconnect hose put in the top of a vessel (Rule 5.28)
   if (vt !== null) { const v = L().graphics.find(x => x.id === vt && hasTop(x) && (!ws || x.workspace === ws)); return v ? vtopPoint(v) : null; }
   if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
@@ -3844,6 +3882,7 @@ function rejoinEnds(only = null, one = null, end = null) {
       const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
       const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other && (!only || only.has(q.id))).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
         .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
+      if (!near.length && !only) { const sp = pumpSpotHit(p.workspace, e, REJOIN_PX); if (sp) near.push(sp); }     // near a pump: its nearest spot (Rule 5.27)
       for (const q of near) {
         const lined = p.straight && pts.length === 2 ? inLine(pts[j], e, q.c, OFF_PX) : null;
         if (!p.straight || pts.length !== 2 || onAngle(q.c, pts[j], 0.5)) pts[i] = [...q.c];
@@ -3853,7 +3892,7 @@ function rejoinEnds(only = null, one = null, end = null) {
           if (!g || isFitting(g) || g.attachTo || g.locked || pipesOn(g.id, p.workspace).length) continue;
           g.x = (g.x || 0) + e[0] - q.c[0]; g.y = (g.y || 0) + e[1] - q.c[1];
         }
-        p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++;
+        p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++; takePumpSpots();
         break;
       }
     }
@@ -4046,6 +4085,7 @@ function reducers(pipes, ws) {
 }
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
+  if (editing && draft) takePumpSpots();      // a pipe or hose put down on a pump's spot joins the pump there (Rule 5.27)
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
@@ -4707,6 +4747,7 @@ function drawSnap(ev) {
   if (!drawHose) for (const u of draft.graphics.filter(g => g.workspace === wsName && isTcFit(g) && TC_FIT_TPL[(g.fittings || [])[0]?.kind])) {     // the bend of a TC Pipe Fitting (Rule 5.25)
     const c = tcBend(u); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c: c.map(Math.round), id: 'bend:' + u.id }; }
   }
+  if (!best) best = pumpSpotHit(wsName, p, r, true);      // on or near a pump: the nearest of its 8 IPs (Rule 5.27)
   return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
 }
 // A pipe runs only Horizontal, Vertical or at 45 degrees from its start (Fritz, 2026-11-02, Rule 5.19). It ends on the IP picked
@@ -4832,13 +4873,14 @@ function dropPipe(d) {
     const mine = pipe[k] && ownCoupling(pipe[k], pipe);
     if (pipe[k] && !mine) continue;
     const near = allIps(pipe.workspace).filter(q => q.id !== pipe.from && q.id !== pipe.to).map(q => ({ id: q.id, c: ipPoint(q.id, pipe.workspace) }))
-      .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= 14).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0];
+      .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= 14).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0]
+      || pumpSpotHit(pipe.workspace, pts[i], 14);       // near a pump: the nearest of its 8 IPs (Rule 5.27)
     if (near) {
       const mx = near.c[0] - pts[i][0], my = near.c[1] - pts[i][1];
       pipe.points = pts.map(q => [q[0] + mx, q[1] + my]);
       for (const q of d.carry) if (q.g !== mine) { q.g.x += mx; q.g.y += my; }
       if (mine) draft.graphics = draft.graphics.filter(g => g !== mine);
-      pipe[k] = near.id;
+      pipe[k] = near.id; takePumpSpots();
       return dropPipe({ ...d, carry: d.carry.filter(q => q.g !== mine) });   // the other end may now sit on an IP too
     }
     if (!pipe[k]) pipe[k] = endCoupling(pipe.points, i, j);
@@ -6212,7 +6254,7 @@ function applyPumpProfile(o, p) {
   if (!p) return o;
   o.flipH = p.flip === 'left'; if (!o.flipH) delete o.flipH;
   if (p.cover) o.cover = p.cover;
-  for (const k of ['pumpIn', 'pumpOut', 'pumpLink', 'ipTypeIn', 'ipTypeOut']) if (p[k]) o[k] = p[k]; else delete o[k];
+  for (const k of ['pumpLink', 'ipTypeIn', 'ipTypeOut']) if (p[k]) o[k] = p[k]; else delete o[k];
   if (p.imageOverlay) o.imageOverlay = p.imageOverlay === 'none' ? '' : p.imageOverlay;      // every Pump Profile names its Overlay ('none' = None)
   return o;
 }
@@ -7862,20 +7904,20 @@ const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, 
   ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }], ...PUMP_SPOT_FIELDS(it, x)];
 // The Inlet and Outlet spots (Rule 5.27, OakBarn Brewery, 2026-11-11: every pump has 8 IPs) on one line, and on a Skynet pump drawing
 // the Hose or Pipe drawn from its ports to them. The first choice is where it starts (saved as none, so it follows the Orientation).
-const PUMP_SPOT_CHOICES = (it, i) => { const st = pumpSpotStart(it)[i]; return [['', `${PUMP_SPOT_NAMES[st]} (start)`], ...Object.keys(PUMP_SPOTS).filter(c => c !== st).map(c => [c, PUMP_SPOT_NAMES[c]])]; };
-const PUMP_SPOT_FIELDS = (it, x = {}) => [['pumpIn', 'Inlet IP', 'sel', PUMP_SPOT_CHOICES(it, 0), true, false, { tip: DEVICE_TIPS.pumpIn, with: ['pumpOut', 'Outlet IP', 'sel', PUMP_SPOT_CHOICES(it, 1), true, false, { tip: DEVICE_TIPS.pumpIn }], ...x }],
+// No Inlet IP / Outlet IP boxes (OakBarn Brewery, 2026-11-16: "Pipe and hose changes are always auto"): the pipe or hose joined to the
+// pump sets them (takePumpSpots). The spots ride along hidden in the Orientation (kind 'orient'), so a Left/Right switch keeps them.
+const PUMP_SPOT_FIELDS = (it, x = {}) => [
   ...(isStdPump(it) || !it.imageOff ? [['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink, ...x }]] : [])];
 // Switching a pump's Orientation (Right <-> Left) leaves its Inlet IP and Outlet IP where they are on the Tab, so the pipes and hoses
 // joined to them never have to move; only the Hose or Pipe drawn inside the pump is drawn again to reach them (OakBarn Brewery,
 // 2026-11-15: "flipping IPs would need lots of pipe or hose joins to move ... internal redraw is the way to go and get rid of rule").
 // A spot left at its start (start) would follow the Orientation, so it is set to the spot it was on; the lists get the new (start).
 function keepPumpSpots(root, obj, flipH, flipV) {
-  const ins = ['pumpIn', 'pumpOut'].map(k => root?.querySelector(`select[data-k="${k}"]`));
+  const ins = ['pumpIn', 'pumpOut'].map(k => root?.querySelector(`input[data-k="${k}"]`));
   if (!ins[0] || !ins[1]) return;
   const was = pumpSpots({ ...obj, flipH: !flipH, flipV, pumpIn: ins[0].value, pumpOut: ins[1].value });
   const now = { ...obj, flipH, flipV }, start = pumpSpotStart(now);
   ins.forEach((sel, i) => {
-    sel.replaceChildren(...PUMP_SPOT_CHOICES(now, i).map(([o, l]) => h('option', { value: o }, l)));
     sel.value = was[i] !== start[i] ? was[i] : '';
     sel.dispatchEvent(new Event('change', { bubbles: true }));
   });
@@ -8946,8 +8988,7 @@ function fieldTip(name, text) {
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
   // Inlet IP, Orientation and Hose or Pipe: Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14), his text and pictures word for word
-  pumpIn: '⟪img:help_pictures/Pump_8_IPs.png⟫Every pump has 8 IPs: the 4 corners of its box and the middle of each side, the same on every pump, so another pump can take its place and stay joined to its pipes. Pick which one is its Inlet (IN) and which its Outlet (OUT), as seen on the Tab.\n\nExample 1:⟪img:help_pictures/Pump_IP_Example_1.png⟫Example 2:⟪img:help_pictures/Pump_IP_Example_2.png⟫Pipes or Hose snap connect to an IP in the selected position if the end is within 10 px of that⟪img:help_pictures/IP_Marker.png⟫when drawn.',
-  pumpLink: 'What is drawn from the pump\'s own inlet and outlet to its Inlet IP and Outlet IP: a White Hose, or a stainless Pipe. It is drawn over the pump and its Cover under the On overlay.',
+  pumpLink: '⟪img:help_pictures/Pump_8_IPs.png⟫Every pump has 8 IPs: the 4 corners of its box and the middle of each side. The pipes and hoses set its Inlet (IN) and Outlet (OUT): draw or drop a pipe or hose end on or near the pump and it joins the nearest of the 8 IPs, and the pump\'s free end moves there. Nothing to pick.\n\nHose or Pipe is what is drawn inside the pump, from its own inlet and outlet to those IPs: a White Hose, or a stainless Pipe. A pipe or hose joined to it sets this too. It is drawn over the pump and its Cover under the On overlay.',
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
   // (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_TEMP@1W_HLT_BH)
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
@@ -9409,7 +9450,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       const was = fh.checked; fh.checked = sel.value.includes('h');
       if (was !== fh.checked) keepPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
     });
-    return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv)];
+    const spots = isPumpDev(obj) || obj.subtype === 'pump' ? ['pumpIn', 'pumpOut'].map(k => h('input', { type: 'hidden', 'data-k': k, 'data-kind': 'text', value: obj[k] || '' })) : [];
+    return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv, ...spots)];
   }
   else if (kind === 'vorient') {     // a valve's Orientation (Rule 18.23): its own dropdown, in the Enter sequence of a new Device
     const os = opts || [], cur = String(v ?? os[0]?.[0] ?? '');
@@ -14985,6 +15027,7 @@ function qdTarget(p, c, end = 'to') {
     const d = Math.hypot(at[0] - c[0], at[1] - c[1]);
     if (d <= r && (!best || d < best.d)) best = { d, id: q.id, c: at };
   }
+  if (!best) best = pumpSpotHit(ws, c, r, true);        // on or near a pump: the nearest of its 8 IPs (Rule 5.27)
   if (best) return { id: best.id, c: best.c };
   const v = [...L().graphics].reverse().find(v => hasTop(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
   return v ? { id: 'vtop:' + v.id, c: vtopPoint(v) } : null;
@@ -15666,7 +15709,6 @@ function profFields(kind) {
       ['notes', 'Notes', 'area']];
     if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']]], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])]],
-      ['pumpIn', 'Inlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]], ['pumpOut', 'Outlet IP', 'sel', [['', '(as the pump starts)'], ...Object.entries(PUMP_SPOT_NAMES)]],
       ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
       ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...IP_TYPES]], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...IP_TYPES]],
       ['notes', 'Notes', 'area']];

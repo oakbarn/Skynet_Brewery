@@ -1590,8 +1590,13 @@ display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standa
   between Middle / Bottom Top and Side / side Middle so we can easily substitute a Different Pump ... All Pumps get 8 IPs"; thread
   "Add pump hose stubs for inlet and outlet"): the **4 corners** of its box and the **middle of each side**: Top Left, Top Middle,
   Top Right, Right Middle, Bottom Right, Bottom Middle, Bottom Left, Left Middle. Its **Inlet IP** and **Outlet IP** are each on one
-  of them, picked in its Add box and Properties (as seen on the Tab), so it is always known which is In and which is Out, even with
-  both on one side; they are never on the same spot. A **Skynet pump** starts with its Inlet on the **Right Middle** and its Outlet on
+  of them (as seen on the Tab), so it is always known which is In and which is Out, even with both on one side; they are never on the
+  same spot.
+- **The pipe or hose sets them** (OakBarn Brewery, 2026-11-16: "Pipe and hose changes are always auto"; "nearest where the user places
+  it"): there is no Inlet IP or Outlet IP box (not in the Add box, Properties or the Pump Profile). A pipe or hose end drawn or dropped
+  on or near a pump (a Quick Disconnect hose end too) joins the nearest of its 8 IPs, and the pump's free end (its IN or OUT with
+  nothing joined yet) moves there; with both free, the one now nearer that spot moves; with both joined, nothing moves. A spot the
+  other end is on is never taken. A **Skynet pump** starts with its Inlet on the **Right Middle** and its Outlet on
   the **Top Right** (Orientation Left: Left Middle and Top Left), the spots nearest its ports; a **User pump** on the middle of its
   left and right sides, as before.
 - **A Hose or Pipe to the spot** (OakBarn Brewery, 2026-11-09: "something on a Pump that looks like a Hose or Pipe ... so it looks
@@ -4200,9 +4205,9 @@ Add box has its own order of focus (Rule 18.38).
 the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
 ✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
 (greyed out for good, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
-Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Inlet IP** with **Outlet IP** on the
-same line and **Hose or Pipe** below them (Rule 5.27; OakBarn Brewery, 2026-11-11: every pump has 8 IPs; Hose or Pipe on a Skynet
-pump drawing only); **Cover** with **Toggle** (On/Off, Push
+Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Hose or Pipe** below it (Rule 5.27;
+OakBarn Brewery, 2026-11-11: every pump has 8 IPs; Hose or Pipe on a Skynet pump drawing only; 2026-11-16: no Inlet IP / Outlet IP
+box, the pipe or hose joined sets them); **Cover** with **Toggle** (On/Off, Push
 button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
 2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
 the hexagon opens the Database and .API settings in a pop-up, in the Add box and the Properties (Fritz's screen 7); **X, Y, Width, Height**; the **Device
@@ -4843,6 +4848,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery, Add Interface markup 2): buttons frozen at the top and none at the bottom (the model); a new Connection keeps the suggested Interface ID; USB Port Simulator mode note; Network address Hover Help for Ethernet and WiFi (Help 76); Lost Comm "You are the Safety" bold red with the triangle; Diagnostic Logging caveat at the bottom.
 - 2026-11-16: Rule 18.40 added, Rules 2.42 and 18.32 changed (OakBarn Brewery, PDF "Blichmann_Riptide_Dialog_2_3"): there is always a Default Pump Profile (no (none) choice); the Default settings Pump Overlay only applies to new Pump Profiles; the Model's ⬢ Pump facts are to look at only with ◀ Back and hold Power and Use; Ports is on the dialog where Power was; the greyed Interface and Available Ports Hover Help say the combination is saved; Cover and Overlay Hover Help have pictures; Database and .API Hover Help.
 - 2026-11-15: Rule 18.39 added, Rules 3.2, 6.3, 6.27 and 18.28 changed (OakBarn Brewery, Add Interface markup: "Rule #1 Follow Blicmann RipTide Model"; "do this in the next PR"). The Add Interface pop-up: its own Hover Help on every name (the Interface ID's is on the Interface ID, not the Board, and is Dialog 1's with this Interface's ID and Name put in live); Interface IDs suggested 2, then 3, then 4 characters (Rule 3.2); Board list is boards only (no "other"); Connection choices follow the Board, no Simulator; the USB Port suggests a free port, takes the number alone on Windows and links to its technical side; On, Lost Comm (was Lost Link) and Diagnostic Logging have new Hover Help; Pause communications became 🔌 Test Communication (a step by step check, Rule 6.27; Pause stays in Board Talk); the Baud box is gone (every Skynet program talks at 115200; the BruControl Import no longer copies Baud); the Simulator note is gone; the Enter and Tab keys follow the Dialog 1 model. The Devices page's second "add" row of boxes is gone: ➕ Add Interface… is the one way in. Rule 18.28: a field's name may be clicked or double-clicked with a blank Label (OakBarn Brewery: a double-click on the Tab gave the blank Label warning). Checked against both programs: the BruControl Import's Build page uses the same pop-up; a BruControl board it cannot tell comes in as "(pick the board)". Help 3, 69, 76, 155, 177, 188 and their French pages. (thread "Polish the Blichmann RipTide pump dialog")

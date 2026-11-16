@@ -38,7 +38,7 @@ Chaque pompe Skynet a un **IP sur son entrée** (IN) et un **IP sur sa sortie** 
 avec n'importe quel Cover (Règle Skynet 5.24).
 
 Ils sont sur deux des **8 IP** de la pompe (les 4 coins et le milieu de chaque côté de sa case, les mêmes sur chaque pompe) : son
-**Inlet IP** et son **Outlet IP**, choisis dans ses Properties (aide 130). Une pompe Skynet commence avec son entrée au milieu à droite et sa
+**Inlet IP** et son **Outlet IP**, fixés par le tuyau ou le flexible qui y est joint (aide 130). Une pompe Skynet commence avec son entrée au milieu à droite et sa
 sortie en haut à droite, avec un flexible ou un tuyau tracé depuis ses vrais orifices jusqu'à eux. La pompe de puisard garde les siens : le milieu de la
 grille en bas (IN) et le haut de la colonne montante à droite (OUT).
 
