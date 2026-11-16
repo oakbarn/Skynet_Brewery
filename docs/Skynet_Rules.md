@@ -4676,6 +4676,13 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
 - **Lost Comm** Hover Help: after a blank line, "You are the Safety" in bold red with the red safety triangle. **Diagnostic Logging**:
   Skynet's caveat (no help with communication problems) at the bottom, after a blank line, in normal text.
 - More common boards are added once the Skynet firmware is set (Sandbox/Panel_Updates entry 11).
+- **A suggested Network address** (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address based on the
+  Brian's IP address"; "Ok we need to make at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power
+  it on (ESP 32)"): a new Ethernet or WiFi Interface starts with an address on the Brain's own home network (the Brain's first three
+  numbers and a last one no other Interface or the Brain uses, 60 first; 192.168.1.60 when the Brain's address is not known). Its
+  Hover Help says to plug in or power on the board first, that the address is only a suggestion, and to make it fixed in the board's
+  program or reserved in the router (Help 76). A **Search** button that finds boards on the network waits in Sandbox/Panel_Updates
+  entry 17: it needs the Skynet firmware to answer a search.
 
 18.40 **Blichmann RipTide Dialog 2 #3** (OakBarn Brewery, 2026-11-16, PDF "Blichmann_Riptide_Dialog_2_3", the model, Rule 18.34).
 The Pump Add box (Dialog 2) and Pump Device Properties:
@@ -4878,6 +4885,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
 - 2026-11-16: Added Rule 14.5, the Process Updates Sandbox (OakBarn Brewery: "New sand Box for Process and put things there till we build those Processes"): `Sandbox/Process_Updates/Process_Updates.md` holds Brew Day, sample Process and Process command ideas, not built until the Skynet Process setup starts. First entries, moved from the Panel Updates Sandbox: the PreBrew grain temperature and Strike Offset boxes, the "Boil Started" button in the sample Brew Day Process, and waiting on the boil temperature from the air pressure. Checked against both programs: notes only, nothing in either program changes.
