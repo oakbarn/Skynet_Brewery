@@ -35,4 +35,17 @@ assert.match(app, /const tplOk = onBuildTab\(item\) && item\.kind === 'vessel'/,
 assert.match(rules, /4\.1 \*\*Every new Device, Widget or copy of a Template starts on the 🔨 Build Tab, never on a regular Tab\*\*/, 'Rule 4.1');
 assert.match(help, /## Where it goes/, 'Help 55');
 assert.match(help, /### The Watermark/, 'Help 55 Watermark');
+// an open Build is never thrown away (OakBarn Brewery, 2026-11-16: "Need to keep adding to the open Build tab and never leave with out
+// a Warning that you will lose the work if not saved"): Edit layout opened again keeps its draft; every Add goes to the open Build Tab
+{
+  const src = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(src, /function setEditing\(on\) \{\n(  \/\/[^\n]*\n)+  if \(on && editing && draft\) \{ renderTabs\(\); renderWs\(\); return; \}/, 'Edit layout opened again keeps the open Build');
+  assert.equal((src.match(/draft = on \? clone\(S\.config\) : null;/g) || []).length, 1, 'only setEditing starts a draft');
+  assert.match(src, /function toBuild\(\) \{\n  if \(!editing\) return;\n  let b = buildWs\(\);/, 'the open Build Tab is used, a new one only when there is none');
+  for (const f of ['addTcFit', 'addThing', 'addIpFit', 'addEquipment', 'addText']) {
+    const i = src.indexOf(`function ${f}(`); assert.ok(i > 0, f);
+    assert.ok(/toBuild\(\)|keepOnBuild\(/.test(src.slice(i, i + 2500)), `${f} puts the new item on the open Build Tab`);
+  }
+  assert.match(src, /window\.addEventListener\('beforeunload', e => \{ if \(dirty \|\| \(editing && JSON\.stringify\(draft\) !== JSON\.stringify\(S\.config\)\)\)/, 'closing the page with an unsaved Build warns');
+}
 console.log('buildfirst ok');
