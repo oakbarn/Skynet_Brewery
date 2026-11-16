@@ -12,7 +12,7 @@ Le navigateur garde ce choix, donc l'aide s'ouvre dans la même langue la fois s
 ## Ce qui est en français {#what-is-in-french}
 
 - Chaque page d'aide, avec les mêmes pages, parties, images et liens que l'aide en anglais.
-- Les noms des boutons, cases et menus restent **en anglais, exactement comme à l'écran**, donc une page en français dit d'appuyer sur **Save Build**, les mêmes mots que vous voyez sur le bouton.
+- Les noms des boutons, cases et menus restent **en anglais, exactement comme à l'écran**, donc une page en français dit d'appuyer sur **Finish Build**, les mêmes mots que vous voyez sur le bouton.
 - Les noms des Devices, Widgets, Tabs et Processes, et le code Process, ne sont jamais traduits.
 
 ## Les bulles en français {#balloons-in-french}

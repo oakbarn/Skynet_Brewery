@@ -23,7 +23,7 @@ avec une différence : **une vanne n'a pas de Cover**. (Règle Skynet 18.23)
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé.
    **Entrée** vous fait passer par Label, Interface, Available Ports, Tab, Orientation, puis **➕ Add Device**. Si **➕ Add Device**
    a l'air pâle, appuyez quand même : il vous dit ce qui manque encore.
-4. Appuyez sur **➕ Add Device**. La vanne est faite sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **💾 Save Build ...** la déplace vers le Tab que vous avez choisi. L'**Interface** et le **Port** sont maintenant
+4. Appuyez sur **➕ Add Device**. La vanne est faite sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace vers le Tab que vous avez choisi. L'**Interface** et le **Port** sont maintenant
    grisés et fixés : c'est le câblage, ils restent donc tels quels. Pour la câbler à une autre carte ou une autre broche, supprimez-la et ajoutez-la à nouveau. Son Name peut toujours être changé avec **✏ Change name**.
 
 ## Properties, du haut vers le bas {#properties-from-the-top}

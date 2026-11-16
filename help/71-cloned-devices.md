@@ -16,7 +16,7 @@ The only way to make a Clone is the **⧉ Clone Device** button on the Edit layo
 2. The list holds the Devices already placed on a Tab (not the ones already on this Tab), grouped by type: Pumps, Valves, Heat, Temperature probes, Other outputs, Motors, Inputs and sensors.
 3. Pick one and press **Save**. The Clone appears on the Tab; drag it into place.
 
-A Clone made on the Build Tab goes to a Tab with **Save Build**, like everything else built there.
+A Clone made on the Build Tab goes to a Tab with **Finish Build**, like everything else built there.
 
 ## The Clone's name
 

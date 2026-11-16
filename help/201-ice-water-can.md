@@ -8,7 +8,7 @@ water and the ice, in the shape of its box.
 ## Add one
 
 In **Edit layout**, open **Add equipment ➕** and pick **Ice Water Can**. Like every new Widget it is made on the 🔨 Build Tab
-first (Rule 4.1); **💾 Save Build ... > Move to Tab** puts it on its Tab. Its Label starts **Ice Water**. Drag its corner to
+first (Rule 4.1); **✅ Finish Build ... > Move to Tab** puts it on its Tab. Its Label starts **Ice Water**. Drag its corner to
 make it taller or wider.
 
 ## The ice water loop

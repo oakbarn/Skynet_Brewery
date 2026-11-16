@@ -28,7 +28,7 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le même TEMP@1W est dans son Suggested Name).
    **Entrée** vous fait passer par Label, Interface, Port, Tab, Orientation, puis **➕ Add Device**. Si **➕ Add Device** paraît pâle,
    appuyez quand même : il vous dit ce qui manque encore.
-3. Appuyez sur **➕ Add Device**. La sonde est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **💾 Save Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port** sont maintenant
+3. Appuyez sur **➕ Add Device**. La sonde est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port** sont maintenant
    grisés et fixés : c'est le câblage. Pour la câbler à une autre carte ou broche, ou utiliser une autre sorte de sonde, supprimez-la et ajoutez-la
    de nouveau. Son Name peut encore être changé avec **✏ Change name**.
 
