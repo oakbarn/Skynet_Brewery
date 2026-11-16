@@ -45,7 +45,7 @@ for (const old of ['electric', 'gas', 'mashTun', 'coil', 'plateChiller']) assert
 assert.ok(!/v-electric|v-gas|v-coil|v-plateChiller/.test(read('public/style.css')), 'their drawings are gone');
 assert.match(app, /stoveTop: \{ title: 'Stove Top Vessel', [^\n]*ports: \{\} \}/, 'no outlets');
 assert.match(app, /stoveTopOut: \{ title: 'Stove Top Vessel Bottom Outlet'[^\n]*\n\s*ports: \{ outlet: pt\('Bottom Outlet', \[\['Center Bottom', 0\.5, 1\]\], \{ on: true \}\) \} \}/, 'one IP at the center of the bottom');
-assert.match(app, /\['ipTypeOut', 'Bottom Outlet IP Type', 'sel', IP_TYPES/, 'its IP Type, like a pipe end');
+assert.match(app, /\['ipTypeOut', 'Bottom Outlet IP Type', 'sel', ipChoices\(it\.ipTypeOut\)/, 'its IP Type, like a pipe end');
 assert.match(app, /if \(c === 'stoveTopOut'\) g\.ipTypeOut = defaultIpType\(/, 'it starts as the Default pipe IP Type');
 assert.match(app, /const hasTop = g => isKettle\(g\) \|\| isStove\(g\)/, 'both have a hose hang top');
 assert.match(app, /reverse\(\)\.find\(v => hasTop\(v\) && v\.workspace === ws/, 'a hose end dropped in the top third');
@@ -58,7 +58,7 @@ assert.match(app, /\|\| stoveOutIp\(g\)\); \};/, 'a pipe end on its outlet does 
 assert.match(app, /isSkyV\(v\) \|\| isStove\(v\) \|\| isIceCan\(v\)\) && v !== g\) return v;/, 'its IP is fixed: it moves with the pot');
 assert.match(app, /!isStove\(item\) && !isIceCan\(item\) && \(placed\.length \|\| before\.isNew\)\) vesselPopup/, 'no "check where the IPs went" pop-up');
 assert.match(app, /if \(isStove\(g\)\) \{        \/\/ a Stove Top Vessel's Bottom Outlet stays at the center of its bottom/, 'resized: its outlet stays at the center of the bottom');
-assert.match(app, /isStove\(g\) \? `\$\{eqClass\(g\)\.ports\[k\]\.name\} \(\$\{IP_TYPES/, 'its IP is labelled with its IP Type');
+assert.match(app, /isStove\(g\) \? `\$\{eqClass\(g\)\.ports\[k\]\.name\} \(\$\{stoveOutType\(g\)/, 'its IP is labelled with its IP Type');
 assert.match(app, /\.includes\(k\)\)\.map\(\(\[k, t\]\) => \[t, \(\) => addEquipment\(k\)\]\);/, 'Add equipment rows show their plain names and work');
 assert.match(app, /const base = C\.title\.replace\(\/\[\^A-Za-z0-9\]\+\/g, '_'\)/, 'a Name has no spaces');
 

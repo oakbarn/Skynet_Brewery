@@ -1,5 +1,6 @@
 // Connection ratings by board (public/links.js): node test/links.test.js
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { BOARDS, connChoices, boardOf, linkOf, isHeating, rating, heatingLinkWarning, lostLinkSec } from '../public/links.js';
 
 assert.equal(boardOf({ name: 'Main Brewery Mega USB' }), 'mega', 'an older Interface with no board: a Mega');
@@ -63,3 +64,17 @@ console.log('links tests passed');
   assert.match(body, /⟪b:Simulation mode⟫/);
 }
 console.log('Add Interface pop-up tests passed');
+
+// A suggested Network address (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the Brian's IP address"; Rule 18.39)
+{
+  const app2 = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), srv = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+  const src = app2.slice(app2.indexOf('function suggestHost('), app2.indexOf('// start: an Interface to change'));
+  const suggestHost = new Function(src + '; return suggestHost;')();
+  assert.equal(suggestHost(['192.168.1.20'], []), '192.168.1.60', 'the Brain\'s network, 60 first');
+  assert.equal(suggestHost(['10.0.0.5'], [{ host: '10.0.0.60' }, { host: '10.0.0.61' }]), '10.0.0.62', 'a number no other Interface uses');
+  assert.equal(suggestHost(['192.168.4.60'], []), '192.168.4.61', 'never the Brain itself');
+  assert.equal(suggestHost([], []), '192.168.1.60', 'no address known: the Mega program\'s');
+  assert.ok(srv.includes('brainIps: brainIps(),') && srv.includes('function brainIps()'), 'the Brain sends its home addresses');
+  assert.ok(app2.includes("o.host = suggestHost(S.brainIps, S.config.devices);") && app2.includes('NET_HELP_START + NET_HELP_BEFORE +'), 'a new Interface starts with it, and the Hover Help explains');
+  console.log('suggested Network address tests passed');
+}

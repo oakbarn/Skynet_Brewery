@@ -3,6 +3,8 @@
 When liquid moves through a Pipe or Hose, the moving flow is drawn in a color. Skynet picks that color for you, from the
 Tab, the pipe, the Vessel the flow came from, or a Tap Water Valve.
 
+When a pipe flows, and which way: Skynet does this in the Background and needs no user input.
+
 ## Making a Pipe or Hose
 
 A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose**
