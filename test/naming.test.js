@@ -251,7 +251,7 @@ console.log('naming tests passed');
   const s = new Store(cfg, path.join(d, 'data')); s.load();
   assert.ok(s.has('BM_22_DO@Pump_Pump_BH')); assert.deepEqual([...s.loadRenames], [['BM_22_Pump_Pump_BH', 'BM_22_DO@Pump_Pump_BH']]);
   const c = JSON.parse(fs.readFileSync(cfg, 'utf8'));
-  assert.equal(c.elements[1].follow, 'BM_22_DO@Pump_Pump_BH'); assert.equal(c.graphics[0].from, 'dev:BM_22_DO@Pump_Pump_BH:out'); assert.deepEqual(c.graphics[0].flowWhen, ['BM_22_DO@Pump_Pump_BH']);
+  assert.equal(c.elements[1].follow, 'BM_22_DO@Pump_Pump_BH'); assert.equal(c.graphics[0].from, 'dev:BM_22_DO@Pump_Pump_BH:out'); assert.ok(!('flowWhen' in c.graphics[0]), 'the old Only when list is dropped');
   assert.equal(c.typeAtNames, true);
   s.load(); assert.equal(s.loadRenames.size, 0, 'only once');
   assert.equal(compile('BM_22_DO@Pump_Pump_BH = true').errors?.length ?? 0, 0);

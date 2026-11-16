@@ -588,7 +588,7 @@ Integrated items, IPs, pipes and hoses, Equipment Profile vessels). (2026-10-27,
 2.19 **Skynet Standard: double-click a picker dropdown** to open the Properties of the one picked,
 when it has a Skynet dialog a user can reach. Example: in pic_Kettle_Element's Properties,
 double-clicking the Tab dropdown on **Brewhouse** opens the Brew House Tab settings. Works for Tab,
-Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Picture and sound pickers
+Device / Widget, vessel and IP dropdowns. Picture and sound pickers
 work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
 changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
 
@@ -1517,6 +1517,22 @@ still fills with its ring color. Both programs.
   middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
   be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
   the Name and Label greyed out too.)
+- **When a pipe flows, and which way: Skynet does this in the Background and needs no user input** (Rule 11.13). The pipe dialog has
+  no "Only when ALL of these are on" list and no "Reverse flow direction" switch (OakBarn Brewery, 2026-11-16: "Again TMI for anything
+  background"; "and reverse flow .  Only a check valve has prevent Reverse Slow and that is in its properties as to direction"); both
+  were taken out, and older Schemas drop them when they load. Starts at IP and Ends at IP are only where the pipe was drawn from and to.
+- **Gravity flow** (OakBarn Brewery, 2026-11-16: "Assume gravity flow"; "I prime my pumps with reverse flow"): with no pump moving
+  it, liquid runs out of a vessel's low opening (its Outlet, Second Outlet or Bottom Drain) along every open path, away from the
+  vessel. A closed valve stops it, a Check Valve lets it go only its own way, and a pump that is Off lets it through (both ways, so
+  priming a pump works). Skynet does not know real heights, so **gravity flow is drawn lighter and moving slower** than pumped flow
+  (OakBarn Brewery picked "Lighter and slower"); where a pump moves the liquid, the pumped flow shows instead. It uses the same Flow
+  Color as flow from that vessel. Once vessels have a Volume (Process Updates Sandbox), it will show only while the vessel holds liquid.
+- **A pipe or hose always shows** on its Tab, flowing or not (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot
+  disappear in the real world.  I cannot see a reason to hide them"). The old "Show when nothing flows" switch was taken out, and
+  older Schemas drop it when they load.
+- **No Tab box in the Pipe or Hose dialog** (OakBarn Brewery, 2026-11-16: "Pipes cannot be moved individually to a different tab.  It
+  is an all or nothing"): a pipe or hose stays on the Tab it was drawn on. Copying a whole Tab to a new Tab waits in the Panel Updates
+  Sandbox, entry 18 (Rule 14.4).
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 - **Pipes and hoses start at None and follow the Tab Flow Color** (Fritz, 2026-11-04). The orange (#ffb347) every pipe in the
   sample Schemas had becomes None once in each Schema; a color picked after that is kept.
@@ -4894,6 +4910,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 5.21 Gravity flow added (OakBarn Brewery: "Assume gravity flow"; on how it looks, picked "Lighter and slower"): with no pump moving it, liquid runs out of a vessel's low opening along every open path, drawn lighter and slower than pumped flow. Help 24 (and French). Checked against the BruControl Import program: it draws pipes the same way and needs nothing.
+- 2026-11-16: Rule 5.21 changed, Rule 2.19 trimmed (OakBarn Brewery, on the pipe's "Only when ALL of these are on" list: "The whole Only when these are on  is a background thing and of little use to a User and Confusing.  Why does it need to be displayed at all."; "Again TMI for anything background"): and on its Reverse flow direction switch: "and reverse flow .  Only a check valve has prevent Reverse Slow and that is in its properties as to direction"): the list and the switch are taken out of the pipe dialog and the code, and Starts at IP / Ends at IP lose "(flow comes from here)" / "(flow goes to here)"; when a pipe flows, and which way, Skynet does this in the Background and needs no user input (Rule 11.13). Only a Check Valve sets a direction, in its own Properties. Older Schemas drop both when they load (Old Ways policy). Also the "Show when nothing flows" switch is taken out (OakBarn Brewery: "Pipes are physically there and cannot disappear in the real world.  I cannot see a reason to hide them"): a pipe or hose always shows. Help 24 (and French). And the Tab box is taken out of the Pipe and Hose dialog (OakBarn Brewery: "Pipes cannot be moved individually to a different tab ... We will add that later  Put in sand box"); Copy a whole Tab to a new Tab is Panel Updates Sandbox entry 18. Help 73, 116 (and French), Widget Library. Checked against the BruControl Import program: it never filled the list, and its pipes use the same dialog.
 - 2026-11-16: Rule 11.8 item 2 changed (OakBarn Brewery: "Change the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short need-to-know note (safety or setup) may show on the dialog, rarely, with the full explanation still in the Hover Help and Help. First use: the priming note under a greyed Self Priming of No in the Pump facts (Rule 18.32). Checked against both programs: the BruControl Import shows the same Pump facts pop-up; nothing else changes there.
 - 2026-11-16: Rule 18.32 changed (OakBarn Brewery: "add the little caveat on that proprtues that Boiling Liquids are not recomened to be Pumps because of Cavitation"; "a Prperty of Self Priming   for a Riotide it is no"): Hottest Liquid Hover Help gets the cavitation caveat; new Pump fact Self Priming (RipTide No; bayite BYT-7A006 No, from its own note; the rest Not known until checked). The RipTide's Hottest Liquid stays Not known: no number found from Blichmann. Help 115, 163 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and show the same facts.
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
