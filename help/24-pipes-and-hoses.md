@@ -73,6 +73,6 @@ it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel).
 
 Grab a pipe in Edit layout and press **🔓 Unlock its ends**: its ends let go and get a coupling. Drag that coupling (or the handle on the end) along the pipe to make it shorter or longer. It stays on its own line.
 
-## Showing only the flow
+## Pipes always show
 
-If the tab's background picture already shows your piping, switch off **Show when nothing flows** on that pipe or hose. Then only the moving flow appears on top of the picture.
+A pipe or hose always shows on its Tab, flowing or not, because it is really there.

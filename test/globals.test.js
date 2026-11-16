@@ -18,7 +18,7 @@ const cfg = {
     { name: 'Pitch_Show', type: 'picture', follow: 'RP_v_Pitch_Temp', note: 'RP_v_Pitch_Temp is shown' },
     { name: 'Old_Show', type: 'picture', follow: 'xgblT_Old' },
   ],
-  graphics: [{ kind: 'pipe', id: 'p1', flowWhen: ['RP_dt_BrewDate'] }],
+  graphics: [{ kind: 'pipe', id: 'p1', heater: 'RP_dt_BrewDate' }],
   beerxml: { recipe: { og: 'RP_v_Pitch_Temp' }, hops: { oz: 'RP_v_Hop{n}_Oz' } },
 };
 const scripts = [
@@ -43,7 +43,7 @@ assert.equal(el('insp_Pix_Pump'), undefined);
 assert.equal(el('Odd_Name').type, 'gGlobal'); assert.equal(el('Odd_Name').api, 'getput'); assert.equal(el('Odd_Name').kind, 'bool');
 assert.equal(r.scripts[2].text, 'v = "gblV_Typo" value\n"gG_Mash_Temp_DE" value = 150\n"insp_Pix_Pump" background = 2\nprint "xglbV_Typo"');
 assert.equal(el('Pitch_Show').follow, 'gG_v_Pitch_Temp'); assert.equal(el('Pitch_Show').note, 'RP_v_Pitch_Temp is shown');
-assert.deepEqual(r.cfg.graphics[0].flowWhen, ['gG_dt_BrewDate']);
+assert.equal(r.cfg.graphics[0].heater, 'gG_dt_BrewDate');
 assert.deepEqual(r.cfg.beerxml, { recipe: { og: 'gG_v_Pitch_Temp' }, hops: { oz: 'gG_v_Hop{n}_Oz' } });
 assert.equal(r.scripts[0].text, '"gG_v_Pitch_Temp" value = 68\nprint "gG_v_Pitch_Temp"\n"xgblT_Old" value = 0\nsXRP_y = 1');
 assert.equal(r.scripts[1], scripts[1], 'unchanged scripts are kept as they are');

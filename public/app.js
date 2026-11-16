@@ -4105,13 +4105,11 @@ function renderPipes() {
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
-    if (p.baseVisible !== false || editing) {
-      const op = p.baseVisible === false ? 0.35 : 1;
-      for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
-      g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
-    }
+    // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
+    for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
+    g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
-    if (p.baseVisible !== false || editing) for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
+    for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
@@ -4123,7 +4121,7 @@ function renderPipes() {
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
     // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
-    if (!editing && !p.locked && p.baseVisible !== false && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
+    if (!editing && !p.locked && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
       if (!qdEndMoves(p, end)) continue;
       const q = end === 'to' ? p.points[p.points.length - 1] : p.points[0], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
       grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, 'data-end': end, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
@@ -4835,7 +4833,7 @@ function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
   if (hose) g.hose = true; else g.straight = true;
   if (qd) g.qd = true;
   stampIpType(g);
@@ -6855,7 +6853,7 @@ function vbDirOf(g, k) {
   return [0, 1];
 }
 function vbPipe(ws, from, to, a, b, size) {
-  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
+  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', size: String(size || defPipeIn()), straight: true, from, to };
   stampIpType(p); giveName(p, draft.graphics); draft.graphics.push(p); return p;
 }
 // a TC Pipe Fittings Widget with one end at `at`, its other end going on along D (an Elbow: turning to `turn`)
@@ -7597,8 +7595,7 @@ const F = {
     ['ipTypeFrom', 'IP Type at start', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
     ['ipTypeTo', 'IP Type at end', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
     ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
-    ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
-    ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
+    ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
 // Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
 for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
