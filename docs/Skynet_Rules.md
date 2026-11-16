@@ -2016,9 +2016,27 @@ Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
 5.40 **IP Type: the connector on each end of a pipe or hose** (OakBarn Brewery, 2026-11-14: "Need 2 additional Defaults with
 associated IPs Pipe Connector and Hose Connector"; "4 Choices Triclamp, NPT, BSP, or QuickDisconnet"; "Pipe and Hose
 Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
-- Every pipe and hose has an **IP Type at start** and an **IP Type at end**: **Tri-Clamp**, **NPT**, **BSP** or **Quick
-  Disconnect**. Both are in its Properties, under its size. The connector has no size of its own: it is the size of the pipe
-  or hose, so the two can never disagree.
+- Every pipe and hose has an **IP Type at start** and an **IP Type at end**. Both are in its Properties, under its size.
+- **Sized IP Types** (OakBarn Brewery, 2026-11-16: "IPs Types will need to be expanded to have size  TC1.5  TC3/4   TC2  ....   NPT
+  to MPT1  MPT1/2  MPT 2"; "FPT1.   A list of the sizes and type in Defualts with a TickBox to show in the List.  Have sizes from
+  1/8 to 6 " ( and if there are odd Metrics Those too."; "Do A with all Unclicked in the Default"): an IP Type is a type and a
+  size in one code, real sizes only (public/iptype.js): **Tri-Clamp** TC1/2, TC3/4, TC1.5, TC2, TC2.5, TC3, TC4, TC6 (sized by
+  the clamp); **FPT** (female) and **MPT** (male) pipe thread 1/8" to 6"; **BSP** 1/8" to 6"; metric **DN6** to **DN150**;
+  stainless **Quick Disconnect** **FMSSQD** (female) and **MSSQD** (male) 1/2" to 3" ("Hose FMSSQD1/2 wher they are on a Pipe
+  or Pump and a MSSQD1/2 on the other end").
+- **Default settings > IP Types** has a tick box for each. **None are ticked to start.** An IP Type list shows the ticked ones,
+  the ones already used in the Schema (Never Take Away), and its own. A sample Schema may name its own (`ipAllow`); the 3 Vessel
+  sample allows TC1.5, TC2, FMSSQD1/2 and MSSQD1/2, and its pipes and pump are TC1.5.
+- **Ends that fit by themselves** ("Pipe and hose changes are always auto"): a pipe end on a pump's In or Out, or on a Stove Top
+  Vessel's Bottom Outlet, takes the IP Type that mates with it (MPT1/2 on an FPT1/2 port), greyed out in the pipe's Properties.
+  A hose's Quick Disconnect end is FMSSQD where it is on a pipe or a pump and MSSQD on its other end. On a Tri-Clamp pipe or pump
+  the real adapter goes there (OakBarn Brewery: "Adapter is what I use"; "And that is the most common TC to QD": TC1.5 to
+  MSSQD1/2); until it is added, the fit warning shows (Rule 5.43).
+- **Fit warning:** in Edit layout an orange ring marks two pipe ends on the same IP whose types can't be joined without an
+  adapter (another type, or MPT to MPT, FPT to FPT). Different sizes of one type meet at a reducer, so they are not warned. It
+  only warns; nothing is blocked.
+- Older Schemas: once (ipSizesKept), each old plain type becomes its size (a pipe or hose end from its own size, threads male; a
+  pump from its Ports, female; a Stove Top outlet female), then the ends above are fitted.
 - A size the connector is not made in is not offered with it: Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only
   NPT, BSP and Quick Disconnect.
 - **Defaults (Rule 2.42):** ☰ Menu > Default settings has **Default pipe IP Type** (beside Default pipe size; Tri-Clamp unless
@@ -2097,6 +2115,12 @@ from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, ves
 - **3 Vessel sample:** the Brew Day places the Immersion chiller in the Boil kettle 15 minutes before the end of the boil and takes
   it off after chilling.
 - **BruControl Import:** BruControl has no chillers; the Importer does not run Processes.
+
+5.43 **Only real things on a Tab or in a Process** (OakBarn Brewery, 2026-11-16: "Any fittings are not samples as only real world
+thinks go on a tab or Process unless as Virtual."): everything on a Tab or named in a Process stands for a real thing in the
+brewery, unless it is marked Virtual (Rule 6.2). So there are no sample-only fittings: every fitting is a real Skynet library item
+a user can add (Rule 5.14), and a sample Schema uses those same items. Skynet never draws or assumes a part that is not there:
+where two IP Types can't be joined, the user adds the real adapter, or the fit warning stays (Rule 5.40).
 
 ## 6. Devices, connections and safety
 
@@ -4904,6 +4928,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 5.40 changed (OakBarn Brewery: "IPs Types will need to be expanded to have size  TC1.5  TC3/4   TC2  ....   NPT to MPT1  MPT1/2  MPT 2"; "FPT1.   A list of the sizes and type in Defualts with a TickBox to show in the List.  Have sizes from  1/8 to 6 " ( and if there are odd Metrics Those too."; "Do A with all Unclicked in the Default"; "Make all the IPs on the 3 Vessel  Pipes TC1.5  Allow TC2,  Hose FMSSQD1/2 wher they are on a Pipe or Pump and a MSSQD1/2 on the other end"; "Adapter is what I use"): sized IP Types (TC, FPT, MPT, BSP, DN, FMSSQD, MSSQD), Default settings > IP Types tick boxes (none ticked), ends on pumps and Stove Top outlets fit by themselves, hose QD ends female on a pipe or pump, fit warning ring, older Schemas convert once; 3 Vessel sample TC1.5. New Rule 5.43 ("Any fittings are not samples as only real world thinks go on a tab or Process unless as Virtual."): only real things on a Tab or in a Process, no sample-only fittings, Skynet never assumes a part. An IP Interview and Default IP Profiles wait in the Panel Updates Sandbox (entries 19, 20). Help 24, 130, 155 (and French). Checked against the BruControl Import program: imported pipes take the Defaults in their own size, its pumps are Skynet Pump Devices.
 - 2026-11-16: Rule 5.21 changed, Rule 2.19 trimmed (OakBarn Brewery, on the pipe's "Only when ALL of these are on" list: "The whole Only when these are on  is a background thing and of little use to a User and Confusing.  Why does it need to be displayed at all."; "Again TMI for anything background"): and on its Reverse flow direction switch: "and reverse flow .  Only a check valve has prevent Reverse Slow and that is in its properties as to direction"): the list and the switch are taken out of the pipe dialog and the code, and Starts at IP / Ends at IP lose "(flow comes from here)" / "(flow goes to here)"; when a pipe flows, and which way, Skynet does this in the Background and needs no user input (Rule 11.13). Only a Check Valve sets a direction, in its own Properties. Older Schemas drop both when they load (Old Ways policy). Also the "Show when nothing flows" switch is taken out (OakBarn Brewery: "Pipes are physically there and cannot disappear in the real world.  I cannot see a reason to hide them"): a pipe or hose always shows. Help 24 (and French). And the Tab box is taken out of the Pipe and Hose dialog (OakBarn Brewery: "Pipes cannot be moved individually to a different tab ... We will add that later  Put in sand box"); Copy a whole Tab to a new Tab is Panel Updates Sandbox entry 18. Help 73, 116 (and French), Widget Library. Checked against the BruControl Import program: it never filled the list, and its pipes use the same dialog.
 - 2026-11-16: Rule 11.8 item 2 changed (OakBarn Brewery: "Change the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short need-to-know note (safety or setup) may show on the dialog, rarely, with the full explanation still in the Hover Help and Help. First use: the priming note under a greyed Self Priming of No in the Pump facts (Rule 18.32). Checked against both programs: the BruControl Import shows the same Pump facts pop-up; nothing else changes there.
 - 2026-11-16: Rule 18.32 changed (OakBarn Brewery: "add the little caveat on that proprtues that Boiling Liquids are not recomened to be Pumps because of Cavitation"; "a Prperty of Self Priming   for a Riotide it is no"): Hottest Liquid Hover Help gets the cavitation caveat; new Pump fact Self Priming (RipTide No; bayite BYT-7A006 No, from its own note; the rest Not known until checked). The RipTide's Hottest Liquid stays Not known: no number found from Blichmann. Help 115, 163 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and show the same facts.

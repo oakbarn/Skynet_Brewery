@@ -44,6 +44,10 @@ Cette case est à deux endroits, ici et dans **New Tabs**. C'est un seul réglag
 
 Le côté technique : les tailles vont de 1/4" à 6", avec la taille en mm à côté de chacune ; Skynet commence à 1/2" pour les deux, Tri-Clamp pour les tuyaux et Quick Disconnect pour les flexibles ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). Un nouveau Device, Pipe Fitting ou élément avec des IP (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour la Default Pipe Size jusqu'à ce qu'un tuyau y soit. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). La case des pixels va de 2 à 100 (vide = 10).
 
+### IP Types
+
+Une case à cocher pour chaque IP Type et chaque taille : Tri-Clamp (TC1/2 à TC6), filetage de tuyau (FPT femelle et MPT mâle, de 1/8" à 6"), BSP, métrique (DN6 à DN150) et Quick Disconnect inox (FMSSQD femelle et MSSQD mâle). Seules les cochées apparaissent dans les listes IP Type des tuyaux, flexibles, pompes et Stove Top Vessels, avec celles déjà utilisées dans le Schema. Aucune n'est cochée au départ : cochez celles que vous utilisez ([Tuyaux, flexibles et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40).
+
 ### Comment les choses se dimensionnent selon leurs tuyaux {#how-things-size-to-their-pipes}
 
 Une fois des tuyaux joints, un élément prend la taille qu'ont **la plupart de ses tuyaux et flexibles** (en cas d'égalité, la plus grande ; Règle Skynet
