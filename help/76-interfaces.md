@@ -101,6 +101,14 @@ If you do not understand Networks and protocols, call a friend to help.
 
 **What it is.** The Network Address (IP Address) is the board's own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.
 
+**Before you add it.** Plug the board in, or power it on (an ESP32 too), before you add it, so it is on your network and
+🔌 Test Communication can reach it.
+
+**The suggested address.** Skynet suggests an address on the Brain's own network: the first three numbers are the Brain's, and the
+last is one no other Interface uses (60 to start, the address in Skynet's Mega program). It is only a suggestion: the board decides
+its own address. Make it a fixed address, so it never changes: write it in the board's Skynet program, or reserve it for the board
+in your router (How to find it, below).
+
 **Ethernet (a network cable).**
 - No WiFi name (SSID) or password is needed: the cable plugs the board into your router or network switch.
 - An Arduino Mega with an Ethernet Shield uses the address written in the Skynet program on the board: 192.168.1.60 to start. Type that same address. If the addresses on your network start with other numbers (for example 10.0.0.), the address in the program is changed to one of yours and the program is loaded on the board again.

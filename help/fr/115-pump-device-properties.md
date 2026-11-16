@@ -67,7 +67,7 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
    Juste en dessous, **Overlay** : ce qui est dessiné par-dessus quand la pompe est On. ![Every Overlay choice](help_pictures/Pump_Overlays.png)
    Sur la même ligne, **Database and .API ⬢** : l'hexagone ouvre ses réglages (aide 98).
    En dessous, **Model** (le modèle de pompe choisi parmi les pompes de brasserie courantes ; ses propriétés s'affichent avec le
-   ⬢, seulement à regarder, avec **◀ Back** : Power, Use, Flow, Lift et Hottest Liquid) et **Ports** (faites correspondre les raccords de VOTRE pompe). Aide 163.
+   ⬢, seulement à regarder, avec **◀ Back** : Power, Use, Flow, Lift, Hottest Liquid et Self Priming) et **Ports** (faites correspondre les raccords de VOTRE pompe). Aide 163.
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** et **Height**.
 10. Le **Device Type** grisé et rempli pour vous : **DO@Pump** pour une pompe On/Off comme la Blichmann RipTide (une pompe sur une sortie numérique, DO), **PWM@Pump** pour une pompe dont la vitesse est réglée sur un port PWM. Le même DO@Pump est la troisième partie du Suggested Name : `BM_22_DO@Pump_Pump_BH`.
 

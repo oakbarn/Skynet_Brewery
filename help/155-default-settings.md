@@ -48,6 +48,10 @@ Each of these two boxes is in two places, here and in **New Tabs**. Each is one 
 
 The technical side: the sizes are 1/4" to 6", with the mm size beside each; Skynet starts at 1/2" for both, Tri-Clamp for pipes and Quick Disconnect for hoses ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). A new Device, Pipe Fitting or item with IPs (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for the Default Pipe Size until a pipe is on it. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). The Pixels box is from 2 to 100 (empty = 10).
 
+### IP Types
+
+A tick box for every IP Type and size: Tri-Clamp (TC1/2 to TC6), pipe thread (FPT female and MPT male, 1/8" to 6"), BSP, metric (DN6 to DN150) and stainless Quick Disconnect (FMSSQD female and MSSQD male). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in the Schema. None are ticked to start: tick the ones you use ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40).
+
 ### How things size to their pipes
 
 Once pipes are joined to it, an item takes the size **most of its pipes and hoses** have (a tie takes the bigger; Skynet Rule
