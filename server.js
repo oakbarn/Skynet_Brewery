@@ -7,6 +7,16 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+// The Brain's own addresses on a home network (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address
+// based on the Brain's IP address"): IPv4, not the Brain talking to itself, home ranges first (192.168, 10, 172.16-31); a Tailscale
+// 100.x address is left out, as no board is on it. The Add Interface pop-up suggests a board address on the same network (Rule 18.39).
+function brainIps() {
+  const home = a => /^192\.168\./.test(a) ? 0 : /^10\./.test(a) ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(a) ? 2 : 9;
+  try {
+    return Object.values(os.networkInterfaces()).flat().filter(n => n && n.family === 'IPv4' && !n.internal && home(n.address) < 9)
+      .map(n => n.address).sort((a, b) => home(a) - home(b));
+  } catch { return []; }
+}
 import { fileURLToPath } from 'node:url';
 import { readStandby, writeStandby, clearStandby, onBrainComputer, otherScreens, startAgain } from './lib/brainstate.js';
 import { writeStopKey, removeStopKey, stopAllowed } from './lib/stoppanel.js';
@@ -667,7 +677,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }

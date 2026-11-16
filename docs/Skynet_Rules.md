@@ -4677,6 +4677,13 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
 - **Lost Comm** Hover Help: after a blank line, "You are the Safety" in bold red with the red safety triangle. **Diagnostic Logging**:
   Skynet's caveat (no help with communication problems) at the bottom, after a blank line, in normal text.
 - More common boards are added once the Skynet firmware is set (Sandbox/Panel_Updates entry 11).
+- **A suggested Network address** (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address based on the
+  Brian's IP address"; "Ok we need to make at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power
+  it on (ESP 32)"): a new Ethernet or WiFi Interface starts with an address on the Brain's own home network (the Brain's first three
+  numbers and a last one no other Interface or the Brain uses, 60 first; 192.168.1.60 when the Brain's address is not known). Its
+  Hover Help says to plug in or power on the board first, that the address is only a suggestion, and to make it fixed in the board's
+  program or reserved in the router (Help 76). A **Search** button that finds boards on the network waits in Sandbox/Panel_Updates
+  entry 17: it needs the Skynet firmware to answer a search.
 
 18.40 **Blichmann RipTide Dialog 2 #3** (OakBarn Brewery, 2026-11-16, PDF "Blichmann_Riptide_Dialog_2_3", the model, Rule 18.34).
 The Pump Add box (Dialog 2) and Pump Device Properties:
@@ -4879,6 +4886,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
 - 2026-11-16: Rule 2.42 changed (OakBarn Brewery: "Resizing to screen resolution 1920 x 1040 presents well so a New Size to Screen Resolution works very well at Zoom Full Screen", then picked Match the screen + sample Tabs): a new Tab's Width and Height start at the usable size of the screen it is made on (the screen less the taskbar; 1920 x 1040 on a 1920 x 1080 Windows screen; 1920 x 1040 if the screen cannot be read), not 1600 x 900. Default settings shows that size in the boxes and does not save it, so new Tabs keep matching their screen; a different number typed there is kept. Tab Settings keeps typed Width and Height and gets a **🖥 Fit Screen** button (label Screen size) that fills both with this screen's usable size (OakBarn Brewery: "Still allow manual change on the Tabs but make clear the Hover help and maybe a button on the tab properties to set to screen resolution"); Help 26 (and French). The 3 Vessel sample's Brew House, Recipe and Reporting Tabs are now 1920 x 1040 (were 1720 x 745 and 1800 x 785). Help 155 (and French). Checked against the BruControl Import program: an imported Tab keeps the size it brings; the Importer's Build page shares this code.
