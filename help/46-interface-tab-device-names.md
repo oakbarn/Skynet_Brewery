@@ -39,7 +39,7 @@ When you add a Device (anything wired to a port), the **New Device** box asks fo
 4. **Label**, the text the tab shows (its **Show label** switch hides it), for example *Fly Sparge*.
 5. **Suggested Name**, filled in for you from the boxes above (see below). You may type your own name instead; it must be unique.
 
-Press **Create**. The Device is always made on the **Build Tab** first, the same way as a new Widget or Template, and its **Properties** open right away so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. Then press **💾 Save Build ...** and pick the Tab: the Device moves there and the Tab ID is added to the end of its name.
+Press **Create**. The Device is always made on the **Build Tab** first, the same way as a new Widget or Template, and its **Properties** open right away so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. Then press **✅ Finish Build ...** and pick the Tab: the Device moves there and the Tab ID is added to the end of its name.
 
 The **Suggested Name** is filled in as you go:
 

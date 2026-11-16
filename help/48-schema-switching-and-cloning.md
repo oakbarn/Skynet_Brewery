@@ -63,4 +63,4 @@ A Bundled vessel and its IPs can be copied in one go:
 
 If the Tab has an Equipment Profile, the copy is in that profile's **Equipment list** as soon as you save the layout, like everything else on the Tab.
 
-To copy a vessel, copy it on the Tab in **Edit layout**, or make a Vessel Template from it (**💾 Save Build ... > 📁 Templates**).
+To copy a vessel, copy it on the Tab in **Edit layout**, or make a Vessel Template from it (**✅ Finish Build ... > 📁 Templates**).

@@ -21,7 +21,7 @@ Tracez un tuyau vers un IP et son bout s'accroche (accrochage des IP, 10 px). Le
 
 1. Ouvrez le **🔨 Build Tab** (les nouveaux Widgets y sont faits d'abord).
 2. ☰ Menu > **Equipment Templates**, choisissez **Copper_Counterflow_Chiller** et mettez-en une copie sur le Build Tab (ou **Add equipment ➕** dans la barre Edit layout).
-3. Raccordez-le, puis **Save Build** pour l'envoyer vers son Tab.
+3. Raccordez-le, puis **Finish Build** pour l'envoyer vers son Tab.
 
 C'est un Template Skynet : son image et la place de ses orifices sont fixées. Son Type est **Plate chiller, Counterflow** avec des orifices **MPT 1/2"**, comme les autres refroidisseurs à contre-courant.
 

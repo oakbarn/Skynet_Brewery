@@ -64,7 +64,7 @@ Le panneau **Vessel Builder** est à droite. Il a une ligne pour chaque chose qu
 Double-cliquez sur l'image d'une pièce sur la cuve pour ouvrir ses propres Properties (une image pâle ouvre son choix). Les Properties de la cuve
 montrent une section pour chaque résistance et pour le Thermowell / Probe (aide : Vessel Widget).
 
-Appuyez sur **✔ Done** pour fermer le panneau. Puis appuyez sur **💾 Save Build ... > Move to Tab** pour mettre la cuve sur son Tab.
+Appuyez sur **✔ Done** pour fermer le panneau. Puis appuyez sur **✅ Finish Build ... > Move to Tab** pour mettre la cuve sur son Tab.
 
 **Une fois sur un Tab et le layout enregistré, ses ouvertures et ses pièces intégrées sont verrouillées pour toujours.** Son Name, ses Labels, son Volume,
 son Tab et sa position peuvent encore changer.

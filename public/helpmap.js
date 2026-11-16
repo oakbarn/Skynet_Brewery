@@ -172,6 +172,7 @@ const MENU_TOPICS = {
   water: { _: ['recipe-tab', 'water-profile'] },
   tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
+  pump: { _: ['tab-and-valve-profiles', 'pump-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },
   brainmove: { '1. On the OLD Brain': ['move-brain', 'make-the-brain-move-file'], '2. On the NEW Brain': ['move-brain', 'bring-it-in-on-the-new-brain'], '3. On the NEW Brain': ['move-brain', 'usb-ports'], _: ['move-brain'] },
   buildtemplate: { _: ['build-template-tab'] },

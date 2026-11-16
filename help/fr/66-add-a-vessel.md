@@ -5,7 +5,7 @@ Une cuve (Vessel) est une bouilloire, un HLT, une cuve d'empâtage, un fermenteu
 - **Widget** : vous y ajoutez tout vous-même.
 - **Integrated** : toute prête.
 
-Ce que vous choisissez va d'abord sur le 🔨 [Build Tab](55-build-tab), et ses Properties s'ouvrent. Quand c'est fini, appuyez sur **💾 Save Build ...** et choisissez **Move to Tab** (ou **As a Template**).
+Ce que vous choisissez va d'abord sur le 🔨 [Build Tab](55-build-tab), et ses Properties s'ouvrent. Quand c'est fini, appuyez sur **✅ Finish Build ...** et choisissez **Move to Tab** (ou **As a Template**).
 
 ## Widget
 
@@ -48,7 +48,7 @@ Un Template de cuve groupé de l'utilisateur commence toujours à partir d'un Sk
 
 1. **Add equipment > Vessel > Widget**, et cliquez sur un Skynet Vessel Widget.
 2. Sur le Build Tab, ajoutez ce qu'il faut et groupez-le.
-3. Appuyez sur **💾 Save Build ...**, choisissez **As a Template**, donnez-lui un nom et enregistrez-le.
+3. Appuyez sur **✅ Finish Build ...**, choisissez **As a Template**, donnez-lui un nom et enregistrez-le.
 
 Dès lors il est dans le groupe **User Bundled Templates** sous **Integrated**. Un clone de celui-ci (ou d'un Skynet Vessel Widget) est construit sur le même Skynet Vessel Widget.
 
