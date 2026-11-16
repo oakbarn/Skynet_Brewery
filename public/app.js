@@ -246,6 +246,15 @@ function renderMvAsks(list) {
       tab && tab !== curWs()?.name ? h('button', { onclick: () => { wsName = tab; setView('workspace'); renderTabs(); renderWs(); renderValves(S.valves); } }, `Go to ${tab}`) : ''));
   }
 }
+// Rule 2.53 (OakBarn Brewery, 2026-11-16: "When something is saved but just stays on same screen Pop Up a Quick \"Saved\" Dialog up for 2
+// seconds and then goes out on its own"): a notice, not a question (Rule 2.44): nothing to click, it never blocks the screen
+const SAVED_MS = 2000;
+// the same notice as every other short note (OakBarn Brewery, 2026-11-16: reuse the small note, bigger, in the middle), in green
+function savedPop(what) {
+  const t = $('#toast');
+  t.replaceChildren(h('b', {}, '✔ Saved'), ...(what && what !== 'Saved' ? [h('span', {}, what)] : []));
+  t.className = 'show ok'; clearTimeout(t._t); t._t = setTimeout(() => t.className = '', SAVED_MS);
+}
 function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 // Rule 2.35 (Fritz, 2026-11-04): a phone or tablet is for running the brewery, not for editing or building. On one, an admin
@@ -11503,7 +11512,7 @@ const saveScript = guard(async () => {
   }
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter(); refreshFind(false);
   const note = (r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '') + (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
-  toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length);
+  if (problems.length || note) toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length); else savedPop('Saved');
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
   for (const x of added) knownPaths.add(x.path);
   if (added.length && S.config.warnOffBrainPaths !== false) offBrainDialog(added);
@@ -11930,7 +11939,7 @@ $('#csvSaveSet').onclick = guard(async () => {
   const name = (prompt('Name for this CSV set (like Mash Profile or Fermentor Profile):', $('#csvSet').value) || '').trim(); if (!name) return;
   const sets = (S.config.logSets || []).filter(s => s.name.toLowerCase() !== name.toLowerCase());
   await saveCsvSets([...sets, { name, names }].sort((a, b) => a.name.localeCompare(b.name)));
-  renderCsvBox(); $('#csvSet').value = name; renderCsvBox(); toast('Saved');
+  renderCsvBox(); $('#csvSet').value = name; renderCsvBox(); savedPop('Saved');
 });
 $('#csvDelSet').onclick = guard(async () => {
   const name = $('#csvSet').value; if (!name || !confirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`)) return;
@@ -12031,7 +12040,7 @@ function renderProbes() {
 }
 const saveProbes = guard(async change => {
   const list = clone(S.config.probes || []); change(list);
-  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); toast('Probe index saved');
+  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); savedPop('Probe index saved');
 });
 // put a ROM id on a slot (taking it off any other slot); clear = take this ROM off every slot
 const setSlotRom = (index, rom, clear) => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; if (!clear) { const s = l.find(x => x.index === index); if (s) s.rom = rom; } });
@@ -12457,7 +12466,7 @@ $('#prSave').onclick = guard(async () => {
   if (!(min >= limits.min && min <= limits.max)) throw new Error(`Min length must be ${limits.min} to ${limits.max}`);
   if (!(max >= min && max <= limits.max)) throw new Error(`Max length must be from the min length (${min}) up to ${limits.max}`);
   await api('PUT', '/ui/settings', { passwordRules: { allowed: $('#prAllowed').value, custom: $('#prCustom').value, min, max } });
-  await load(); toast('Password rules saved');
+  await load(); savedPop('Password rules saved');
 });
 async function renderUsers() {
   if (!can('admin')) return;
@@ -12579,7 +12588,7 @@ $('#ctUser').onchange = guard(() => renderContact($('#ctUser').value));
 $('#ctSave').onclick = guard(async () => {
   const who = can('admin') ? $('#ctUser').value : S.me.name;
   await api('PUT', '/auth/contact?user=' + encodeURIComponent(who), { email: $('#ctEmail').value, phone: $('#ctPhone').value, textVia: $('#ctVia').value });
-  toast('Saved');
+  savedPop('Saved');
 });
 async function renderMessaging() {
   if (!can('admin')) return;
@@ -12596,7 +12605,7 @@ const saveMessaging = () => api('PUT', '/auth/messaging', {
   smtpHost: $('#msHost').value, smtpPort: +$('#msPort').value || '', smtpSecurity: $('#msSec').value, smtpUser: $('#msUser').value, smtpPass: $('#msPass').value,
   smtpFrom: $('#msFrom').value, twilioSid: $('#msSid').value, twilioToken: $('#msToken').value, twilioFrom: $('#msTwFrom').value,
 });
-$('#msSave').onclick = guard(async () => { await saveMessaging(); await renderMessaging(); renderContact(); toast('Sending settings saved'); });
+$('#msSave').onclick = guard(async () => { await saveMessaging(); await renderMessaging(); renderContact(); savedPop('Sending settings saved'); });
 $('#msTest').onclick = guard(async () => {
   await saveMessaging();
   $('#msResult').textContent = 'Sending...';
@@ -12665,7 +12674,7 @@ $('#saveSettings').onclick = guard(async () => {
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
     restartLimit: Math.min(60, Math.max(1, Math.round(Number($('#setRestartLimit').value)) || 5)), restartAlarm: $('#setRestartAlarm').value,
   });
-  await load(); toast('Settings saved');
+  await load(); savedPop('Settings saved');
 });
 
 // ---------------------------------------------------------------- beer money pop-up
@@ -12708,7 +12717,7 @@ function renderDonate() {
 $('#donSave').onclick = guard(async () => {
   await api('PUT', '/ui/settings', { donation: { enabled: $('#donOn').checked, message: $('#donMsg').value,
     button: $('#donBtn').value, everyDays: $('#donEvery').value, donatedDays: $('#donDone').value } });
-  await load(); toast('Pop-up settings saved');
+  await load(); savedPop('Pop-up settings saved');
 });
 $('#donPreview').onclick = () => showDonate(true);
 
@@ -12744,7 +12753,7 @@ $('#saveMqtt').onclick = guard(async () => {
   if ($('#mqPass').value) body.password = $('#mqPass').value;
   if (body.enabled && !body.host) throw new Error('Enter the broker address (localhost when Mosquitto runs on this Pi)');
   await api('PUT', '/ui/mqtt', body);
-  await load(); toast('MQTT and voice saved');
+  await load(); savedPop('MQTT and voice saved');
 });
 
 // ---------------------------------------------------------------- simulation mode
@@ -12829,7 +12838,7 @@ $('#simMoreClose').onclick = () => simMoreOpen(false);
 $('#simSave').onclick = $('#simSave2').onclick = guard(async () => {
   for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
   S.sim = await api('PUT', '/ui/sim', { lead: +$('#simLead').value, watch: +$('#simWatch').value, reachWaits: $('#simReach').checked, reachAfter: +$('#simReachAfter').value, jumps: simDraft });
-  simDirty = false; await load(); toast('Simulator settings saved');
+  simDirty = false; await load(); savedPop('Simulator settings saved');
 });
 // Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
 // (Fritz, 2026-10-27) and the ☰ Menu. Returns false when the admin said no.
@@ -13243,7 +13252,7 @@ async function setMenuOrder(key, n) {
   await api('PUT', '/ui/settings', { menuOrder });
   S.config.menuOrder = menuOrder; renderMenu();
 }
-const paneDirty = () => menuTab === 'equipment' ? eqDirty : profDirty[menuTab];
+const paneDirty = () => menuTab === 'equipment' ? eqDirty : !!profDirty[menuTab];
 
 function renderMenu() {
   if (!S?.profiles) return;
@@ -13617,6 +13626,22 @@ function leaveMenuTab() {
   markOnTabs(); showMenuBar(false);
   renderMenu(); renderTabs(); fitZoom();
 }
+// Save, Undo and Close, all at the top (OakBarn Brewery, 2026-11-16, Rule 2.53): Save saves and stays open (✔ Saved); Undo goes
+// back to the last Save and stays open (it replaces Cancel); Close closes, asking first when there are changes that are not saved
+// (closeMenuTab). All the buttons sit together, frozen, in the upper right corner, always in the same order, so each is in the same
+// exact place on every screen (OakBarn Brewery, 2026-11-16: "I like to have some buttons on any Dialog in same exact place on
+// different Dialogs. A better Option would be to move all the Buttons to the Upper Right and Freeze", "Do it now", "Delete Button
+// also"): Delete · Save · Undo · Close · ✕. dlgBtns() makes the group; its closeSlot() is filled by renderMenuPane with the Menu
+// tab's own Close and boxed ✕, so they stay at the far right, where they always were.
+const UNDO_TIP = 'Goes back to the last Save. The changes made since then are let go, and this stays open.';
+const CLOSE_TIP = 'Closes this Menu tab and goes back to your Tabs. If there are changes that are not saved, Skynet asks first.';
+const closeSlot = () => h('span', { class: 'closeSlot' });
+// the purple + Add New button (OakBarn Brewery, 2026-11-16, Rule 2.54): only on a Profile screen, right of its Open list. It may not
+// be used anywhere else. Today only the Pump Profile has it; the other Profiles wait in the Panel Updates Sandbox.
+const ADD_NEW_PUMP_TIP = 'Makes a new Pump Profile, the same as Add new ... in the Open list.';
+const addNewBtn = (tip, onclick) => h('button', { type: 'button', class: 'addNewBtn', title: tip, onclick }, h('span', { class: 'plus', 'aria-hidden': 'true' }, '+'), ' Add New');
+const dlgBtns = (...items) => h('div', { class: 'dlgBtns' }, ...items.filter(Boolean), closeSlot());
+const undoBtn = (dirty, undo) => h('button', { type: 'button', title: UNDO_TIP, onclick: () => { if (dirty() && !confirm('Go back to the last Save? The changes made since then are let go.')) return; undo(); } }, '↶ Undo');
 function closeMenuTab(k) {
   if (k === menuTab && paneDirty() && !confirm('This Menu tab has changes that are not saved. Close it anyway?')) return;
   menuOpen.splice(menuOpen.indexOf(k), 1);
@@ -13634,13 +13659,16 @@ function renderMenuPane() {
   const box = $('#menuPane'); box.innerHTML = '';
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
   const k = menuTab;
-  box.append(paneClose(() => closeMenuTab(k)));
+  const pc = paneClose(() => closeMenuTab(k), CLOSE_TIP);
+  box.append(pc);
   m.render(box);
+  const slot = box.querySelector('.closeSlot');
+  if (slot) slot.replaceWith(pc);
   menuHelpIcons(box);
 }
 // Fritz, 2026-10-21: every Menu tab, File Move and Help has a Close button and a boxed ✕ in its top right corner; both close it
-function paneClose(close) {
-  return h('div', { class: 'paneClose' }, h('button', { onclick: close, title: 'Close' }, 'Close'), h('button', { class: 'boxX', onclick: close, title: 'Close', 'aria-label': 'Close' }, '✕'));
+function paneClose(close, tip = 'Close') {
+  return h('div', { class: 'paneClose' }, h('button', { onclick: close, title: tip }, 'Close'), h('button', { class: 'boxX', onclick: close, title: tip, 'aria-label': 'Close' }, '✕'));
 }
 // Help and File Move are pages of their own: closing them goes back to where you were (the Tabs, or the Menu tab you came from)
 const closePage = () => setView(view === 'help' && helpFrom && helpFrom !== 'help' ? helpFrom : 'workspace');
@@ -13879,14 +13907,17 @@ function renderDefaultTab(box) {
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
     await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(d.hoverDelay);
     await tap.save();      // Tap Water is saved with the rest (one Save for the whole tab)
-    renderWs(); renderMenuPane(); toast('Defaults saved'); });
-  const saveBtn = () => admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : '';
+    profDirty.default = false; renderWs(); renderMenuPane(); savedPop('Defaults saved'); });
+  const state = h('span', { class: 'muted' }, profDirty.default ? 'Not saved yet' : 'Saved');
+  const saveBtn = () => admin ? dlgBtns(h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty.default, () => { profDirty.default = false; renderMenuPane(); })) : dlgBtns();
   const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Skynet Default'), h('th', {}, 'Rule'))),
     h('tbody', {}, ...otherDefaults().map(([what, now, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, rule)))));
   // Freeze (Default Tab 3, Rule 2.51): the title and Save stay at the top while the rest scrolls; no Save further down
-  box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn())), h('div', { class: 'menuNarrow' }, f.box),
+  box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, saveBtn(), h('h3', {}, 'Default settings'), admin ? state : ''), h('div', { class: 'menuNarrow' }, f.box),
     ...tap.nodes,
     h('h3', {}, 'Skynet Defaults for New User Created Items'), h('p', { class: 'muted' }, 'These defaults are set and cannot be changed, but can be Changed in a New User Template.'), others));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
+  // any change below the frozen top is 'Not saved yet' until Save (so Close asks first, and Undo has something to go back from)
+  if (admin) { const tab = box.lastChild, mark = e => { if (e.target.closest('.defFreeze')) return; profDirty.default = true; state.textContent = 'Not saved yet'; }; tab.addEventListener('input', mark); tab.addEventListener('change', mark); }
 }
 
 // Settings > Panel settings, the part that was on the Default tab (OakBarn Brewery, 2026-11-14: "Move any field that affects existing
@@ -13947,7 +13978,7 @@ function renderPanelSettings() {
     if (cur.hoverDelay !== undefined && !(Number.isInteger(+cur.hoverDelay) && +cur.hoverDelay >= 0 && +cur.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty: at once)`);
     await api('PUT', '/ui/settings', { brewDefaults: cur }); S.config.brewDefaults = cur;
     showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
-    renderWs(); renderMenuPane(); toast('Panel settings saved'); });
+    renderWs(); renderMenuPane(); savedPop('Panel settings saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
@@ -14118,7 +14149,7 @@ function renderBuildTemplateTab(box) {
     const sameUser = m && JSON.stringify([...userFields].sort()) === JSON.stringify([...(m.userFields || [])].sort());
     const r = await api('PUT', '/ui/templates/device/' + encodeURIComponent(t.name), { title: work.title, master: work.master || undefined, notes: work.notes, type: t.type || m?.type || 'digitalOut',
       props: own, pics: Object.keys(pics).length && !(m && JSON.stringify(pics) === JSON.stringify(m.pics)) ? pics : undefined, userFields: sameUser ? undefined : userFields });
-    setTPL(r); renderMenuPane(); fillAddType(); toast(`Saved ${t.name}`);
+    setTPL(r); renderMenuPane(); fillAddType(); savedPop(`Saved ${t.name}`);
   });
   const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
   del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
@@ -14219,7 +14250,7 @@ function renderBrewProcessTab(box) {
   const names = BP.steps.filter(st => BP.setup.templates[st.key] !== '').map((st, i) => `Brew_${i + 1}_${st.key}`);
   const built = names.length > 0 && names.every(x => BP.processes.includes(x));
   box.append(saveBar(
-    admin ? h('button', { onclick: guard(async () => { await save(); toast('Brew Process saved'); }) }, '💾 Save') : '',
+    admin ? h('button', { onclick: guard(async () => { await save(); savedPop('Brew Process saved'); }) }, '💾 Save') : '',
     admin ? h('button', { class: 'primary', onclick: guard(async () => {
       if (built && !confirm(`Build the Brew Day again? ${names[0]} ... ${names[names.length - 1]} are made new from the Templates (the ones they replace are kept as .bak).`)) return;
       await save(); const r = await api('POST', '/ui/brewprocess/build'); await loadBrewProcess(); renderMenuPane(); toast('Built: ' + r.built.join(', ') + (r.removed?.length ? '. Moved to the bin: ' + r.removed.join(', ') : ''));
@@ -14714,7 +14745,7 @@ async function deleteProfile(id) {
 }
 async function saveProfile() {
   const r = await api('PUT', `/ui/equipment/${eqWork.id}`, eqWork);
-  eqWork = clone(r.saved); eqDirty = false; S.profiles = r.list; renderMenu(); toast('Equipment Profile saved');
+  eqWork = clone(r.saved); eqDirty = false; S.profiles = r.list; renderMenu(); savedPop('Equipment Profile saved');
 }
 
 function eqEditor() {
@@ -14722,9 +14753,9 @@ function eqEditor() {
   if (!eqWork) { box.append(h('p', { class: 'muted' }, 'Pick an Equipment Profile above to open it, or Add new to make one.')); return box; }
   const p = eqWork, admin = can('admin') && !p.locked;
   const changed = () => { eqDirty = true; calc(); $('#eqSaveState').textContent = 'Not saved yet'; };
-  const buttons = () => h('div', { class: 'bar' }, admin ? h('button', { class: 'danger', onclick: guard(() => deleteProfile(p.id)) }, 'Delete') : '', h('span', { class: 'spacer' }),
-    admin ? h('button', { onclick: () => { if (eqDirty && !confirm('Leave the changes that are not saved?')) return; eqWork = null; eqDirty = false; renderMenuPane(); } }, 'Cancel') : '',
-    admin ? h('button', { class: 'primary', onclick: guard(async () => { f.read(); await saveProfile(); }) }, 'Save') : '');
+  const buttons = () => dlgBtns(admin && h('button', { class: 'danger', onclick: guard(() => deleteProfile(p.id)) }, 'Delete'),
+    admin && h('button', { class: 'primary', onclick: guard(async () => { f.read(); await saveProfile(); renderMenuPane(); }) }, 'Save'),
+    admin && undoBtn(() => eqDirty, () => { eqDirty = false; renderMenuPane(); }));
   const fields = w => [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, w.units)})`, 'num']), ['notes', 'Notes', 'area'],
     ['_m', 'Batch size and top up water are set in the Recipe, boil time and boil off in the Boil Profile, and each vessel\'s size, dead space and trub loss in its Properties on the Tab (the Equipment Profile Interview asks them).', 'note']];
@@ -14749,10 +14780,11 @@ function eqEditor() {
       ...v.warnings.map(w => h('div', { class: 'eqWarn' }, '⚠ ' + w)));
   };
   calc();
-  box.append(h('h3', {}, `${p.locked ? '🔒 ' : ''}${p.name}`),
+  // the name, its state and Save, Undo and Close stay frozen at the top while the rest scrolls (Rule 2.51); no buttons further down
+  box.append(h('div', { class: 'profFreeze' }, buttons(), h('h3', {}, `${p.locked ? '🔒 ' : ''}${p.name}`),
     p.locked ? h('div', { class: 'eqWarn' }, `Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}. Unlock it to change it (the 🔒 Locked switch above when a Tab of this Schema uses it, or unlock_Equipment in a Process).`) : '',
     h('div', { class: 'muted' }, p.usedOn?.length ? `Used by: ${usedOnText(p)}` : 'Not used on any Tab yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
-    buttons(), h('div', { class: 'eqTop' }, f.box, out), eqPane(p), buttons());
+    ), h('div', { class: 'eqTop' }, f.box, out), eqPane(p));
   return box;
 }
 
@@ -15769,6 +15801,11 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
 const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile first. There is always one Default Pump Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Pump Profile, turn its Default On and Save: this one is then no longer the Default.';
+// the Pump Profile pane brought to the Blichmann model (OakBarn Brewery, 2026-11-16: "while messing with that Dialog bring up to
+// Blickman Model"): Hover Help on every box, a need-to-know note on top (Rule 11.8), title and buttons frozen at the top (Rule 2.51)
+const PUMP_PROF_NOTE = 'Every box here is what a new pump made from this Pump Profile starts with. Changing a Pump Profile never changes the pumps already on a Tab.';
+const PUMP_PROF_NAME_TIP = 'The name of this Pump Profile, as it shows in the Pump Profile list of the Pump Add box. For example Red Pump Right.';
+const PROF_NOTES_TIP = 'Your own notes about this profile. Only shown here.';
 const PUMP_PROF_OVERLAY_TIP = 'The On overlay a new pump made with this Pump Profile starts with: what shows over the pump while it runs. A new Pump Profile starts with the Default settings Pump Overlay (☰ Menu > Default settings).';
 const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
 const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
@@ -15785,11 +15822,11 @@ function profFields(kind) {
       ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
       ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
       ['notes', 'Notes', 'area']];
-    if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
-      ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']]], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])]],
-      ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
+    if (kind === 'pump') return [['_pn', PUMP_PROF_NOTE, 'note'], ['name', 'Name', 'text', null, false, false, { tip: PUMP_PROF_NAME_TIP }], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
+      ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']], false, false, { tip: DEVICE_TIPS.orient }], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])], false, false, { tip: DEVICE_TIPS.cover }],
+      ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink }], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
       ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeIn)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeOut)], false, false, { tip: IP_TYPE_PICK_TIP }],
-      ['notes', 'Notes', 'area']];
+      ['notes', 'Notes', 'area', null, false, false, { tip: PROF_NOTES_TIP }]];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
@@ -15829,7 +15866,14 @@ function renderBrewProfileTab(kind) {
       if (pick.value === '__add__') { pick.value = profWork[kind]?.id || ''; return newBrewProfile(kind); }
       profWork[kind] = stepsToFields(clone(list.find(x => x.id === pick.value))); profDirty[kind] = false; renderMenuPane();
     });
-    box.append(h('h3', {}, K.title), h('p', { class: 'muted' }, K.about), h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
+    // the title, the Open list and the buttons stay frozen at the top while the rest scrolls (Rule 2.51, the Blichmann model)
+    // the purple + Add New button right of the Open list (Rule 2.54, Profiles only): the same as Add new ... in the list, which stays
+    const addNew = kind === 'pump' && admin ? addNewBtn(ADD_NEW_PUMP_TIP, guard(async () => {
+      if (profDirty[kind] && !confirm(`The open ${K.title} has changes that are not saved. Leave them?`)) return;
+      return newBrewProfile(kind);
+    })) : '';
+    const top = h('div', { class: 'profFreeze' }, h('h3', {}, K.title), h('p', { class: 'muted' }, K.about), h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick, addNew));
+    box.append(top);
     const w = profWork[kind];
     if (!w) return box.append(h('p', { class: 'muted' }, admin ? 'Pick Add new ... to make one.' : 'None made yet.'));
     // a Skynet Template is read only: Add new ... starts a copy of it to change
@@ -15839,17 +15883,16 @@ function renderBrewProfileTab(kind) {
     const save = guard(async () => {
       f.read();
       const r = await api('PUT', `/ui/profiles/${kind}/${w.id}`, kind === 'mash' ? fieldsToSteps(w) : w);
-      S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.saved)); profDirty[kind] = false; renderMenuPane(); toast(`${K.title} saved`);
+      S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.saved)); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
     });
     const del = guard(async () => {
       if (!confirm(`Delete the ${K.title} "${w.name}"?`)) return;
       const r = await api('DELETE', `/ui/profiles/${kind}/${w.id}`);
       S[kind + 'Profiles'] = r.list; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); toast(`"${w.name}" deleted`);
     });
-    const buttons = () => edit ? saveBar(h('button', { class: 'danger', onclick: del }, 'Delete'), h('span', { class: 'spacer' }),
-      h('button', { onclick: () => { if (profDirty[kind] && !confirm('Leave the changes that are not saved?')) return; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); } }, 'Cancel'),
-      h('button', { class: 'primary', onclick: save }, 'Save')) : '';
-    box.append(h('div', {}, state), buttons(), f.box, buttons());
+    const undo = () => { const was = list.find(x => x.id === w.id); profWork[kind] = was ? stepsToFields(clone(was)) : null; profDirty[kind] = false; renderMenuPane(); };
+    const buttons = () => edit ? dlgBtns(h('button', { class: 'danger', onclick: del }, 'Delete'), h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty[kind], undo)) : dlgBtns();
+    top.prepend(buttons()); top.append(h('div', {}, state)); box.append(f.box);
     if (kind === 'tab') box.append(tabsUsing(w, admin));
   };
 }
@@ -15941,8 +15984,8 @@ function renderRecipeTab(box) {
   const op = can('operator'), rc = rcWork, u = rcUnits();
   const state = h('span', { class: 'muted rcState' }, profDirty.recipe ? 'Not saved yet' : rcView.has ? '' : 'No Recipe yet: IMPORT one or press NEW');
   const changed = () => { profDirty.recipe = true; state.textContent = 'Not saved yet'; };
-  const save = guard(async () => { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); renderMenuPane(); toast('Recipe saved'); });
-  const cancel = guard(async () => { if (profDirty.recipe && !confirm('Leave the changes that are not saved?')) return; await rcLoad(); renderMenuPane(); });
+  const save = guard(async () => { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); renderMenuPane(); savedPop('Recipe saved'); });
+  const undo = guard(async () => { await rcLoad(); renderMenuPane(); });
   // NEW asks which Recipe Level (1 Can Kit, 2 Extract, 3 Partial Grain, 4 All Grain): the user picks it (Rule 17.11)
   const fresh = guard(async () => {
     const w = { level: String(recipeLevel(rc)) };
@@ -15984,7 +16027,7 @@ function renderRecipeTab(box) {
     if (profDirty.recipe && !confirm('The Recipe has changes that are not saved. Open the saved one anyway?')) return;
     await api('POST', `/ui/recipes/${v}/open`); await rcLoad(); renderMenuPane(); toast('Recipe opened');
   });
-  const right = op ? h('div', { class: 'rcRight' }, state, lib, h('button', { onclick: cancel }, 'Cancel'), h('button', { class: 'primary', onclick: save }, 'Save')) : h('div', { class: 'rcRight' }, state);
+  const right = op ? h('div', { class: 'rcRight' }, state, lib, h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty.recipe, undo), closeSlot()) : h('div', { class: 'rcRight' }, state, closeSlot());
   // the Recipe Level (Rule 17.11), at the top beside NEW: the user picks it; the boxes and Daughter Tabs this Level does not use
   // are not shown (their values stay). It sits in the top line so the boxes keep OakBarn Brewery's layout.
   rc.level = recipeLevel(rc);
@@ -16505,7 +16548,7 @@ $('#cfgSave').onclick = guard(async () => {
   if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
   cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
   $('#cfgBackupNote').textContent = 'Saved. The old file was copied to config/backups/' + r.backup;
-  toast('Schema.json saved');
+  savedPop('Schema.json saved');
 });
 $('#cfgReload').onclick = () => { if (cfgDirty && !confirm('Throw away your unsaved changes?')) return; cfgDirty = false; openConfig(); };
 $('#cfgBackups').onclick = guard(async () => {
@@ -16547,7 +16590,7 @@ async function exportSchemaFile() {
   readFields(w);
   const r = await api('GET', `/ui/schemas/${encodeURIComponent(w.id)}/export`);
   download(r.file, JSON.stringify(r.schema, null, 2), 'application/json');
-  toast(`Saved ${r.file}`);
+  savedPop(`Saved ${r.file}`);
 }
 // Schema.json: Open a Schema file (Fritz, 2026-11-06). The BruControl Importer saves its Schema in the Brewing folder's Import
 // subfolder (C:\Brewing\Import); a file saved with "Save as .json file" works too. It becomes a new Schema (Rule 15.4).
