@@ -3,7 +3,16 @@
 // Heating Devices on a network link are allowed with a warning (Fritz, 2026-10-26); the board turns all outputs OFF
 // when it hears nothing from the Brain for the Interface's "lost link" delay (user set, 3 to 600 s, default 10).
 
-export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['other', 'Other Arduino-type board'], ['pi', 'Raspberry Pi (its own GPIO pins)']];
+// The boards Skynet has a program for (OakBarn Brewery, 2026-11-15, Add Interface markup: "List Boards Only"): no "other" board
+export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['pi', 'Raspberry Pi']];
+// The Connection choices of each board (the same markup: "Connection would be based on Board, like Ethernet (with W5100 Shield)").
+// No Simulator: the Simulator belongs to the panel, not to a board (Rule 10.10). A Raspberry Pi's program talks over the network only.
+const CONNECTIONS = {
+  mega: [['serial', 'USB'], ['ethernet', 'Ethernet (with W5100 or W5500 Shield)'], ['esp32', 'WiFi (through an ESP32 bridge)']],
+  esp32: [['serial', 'USB'], ['ethernet', 'Ethernet (an ESP32 with an Ethernet port)'], ['esp32', 'WiFi (built in)']],
+  pi: [['ethernet', 'Ethernet (or the Brain itself)'], ['esp32', 'WiFi (built in)']],
+};
+export const connChoices = board => CONNECTIONS[board] || CONNECTIONS.mega;
 export const LINK_NAMES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'WiFi', simulator: 'Simulator' };
 
 // level: best, good, ok, poor (best first)
@@ -19,7 +28,6 @@ const RANKS = {
     esp32: ['good', 'Good, as long as no heating Device is on it'],
   },
 };
-RANKS.other = RANKS.mega;
 // Raspberry Pi GPIO (firmware/Pi_GPIO, 2026-10-27): the Pi program is reached over the network only. On the Brain itself
 // (address 127.0.0.1 or localhost) nothing leaves the computer, so it is as safe as USB.
 RANKS.pi = {
@@ -29,8 +37,9 @@ RANKS.pi = {
 };
 const onThisComputer = d => /^(127\.\d+\.\d+\.\d+|localhost|::1)$/i.test(String(d?.host || '').trim());
 
-// An Interface saved before boards were asked: guess from its name (an "ESP..." name is an ESP32, anything else a Mega)
-export const boardOf = d => d?.board || (/esp/i.test(d?.name || '') ? 'esp32' : 'mega');
+// An Interface saved before boards were asked: guess from its name (an "ESP..." name is an ESP32, anything else a Mega). A board
+// the BruControl Import could not tell is '' (not picked yet): the Interface pop-up asks for it.
+export const boardOf = d => d?.board ?? (/esp/i.test(d?.name || '') ? 'esp32' : 'mega');
 // An Interface's Connection (USB, Ethernet, WiFi or Simulator) is kept as .connection, and the real one of a board in the simulator
 // as .realConnection (OakBarn Brewery, 2026-11-09: hidden names match what is shown).
 export const connOf = d => d?.connection ?? '';

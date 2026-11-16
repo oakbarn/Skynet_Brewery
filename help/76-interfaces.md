@@ -5,31 +5,35 @@ An **Interface** is a board (PLC) your Devices are wired to: an Arduino Mega 256
 ## Finding them
 
 - **☰ Menu > 🔌 Interfaces (boards)** opens the Devices page at the Interfaces list.
-- The **Devices** page lists every Interface: its ID, name, board, connection, rating, lost link delay and status.
+- The **Devices** page lists every Interface: its ID, name, board, connection, rating, Lost Comm and status.
 
 ## Adding an Interface
 
 There are three ways in, and all three open the same **Add Interface** pop-up:
 
 1. **☰ Menu > ➕ Add Interface…**
-2. **Devices page > Add Interface > ➕ Add Interface…** (the row of boxes under it still works too)
+2. **Devices page > Add Interface > ➕ Add Interface…**
 3. In the **New Device** box on any Tab: open **1. Interface** and pick **➕ Add new Interface…** at the bottom. When you click Add, you are taken back to the New Device box with the new Interface already picked. The New Device box for a RIMS tube or an electric kettle has the same choice.
 
-The pop-up asks:
+The pop-up asks (rest the mouse on each name for its Hover Help):
 
 - **Name**: something that means something to you, like *Hot Side*, *Fermentation* or your brewery's name. The Skynet Home Brewery, for example, has 3 Megas: **Main_Brewery_HotSide**, **Valves** and **Fermentor**.
 - **Interface ID**: see below.
-- **Board**: Arduino Mega, ESP32 or another Arduino-type board.
-- **Connection**: USB, Ethernet, WiFi, or **Simulator** (no board yet: everything on it is pretend). It shows the connection rating (Help: [Connection ratings](69-connection-ratings)).
-- **USB port** or **Network address**, for a USB or a network board.
-- **Lost Link (s)**: must be filled in, 3 to 600 seconds (10 to start). If the board hears nothing from the Brain for this long, it turns all its outputs OFF. Change it here any time.
+- **Board**: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each of them.
+- **Connection**: the choices follow the Board. An Arduino Mega: USB, Ethernet (with a W5100 or W5500 Shield) or WiFi (through an ESP32 bridge). An ESP32: USB, Ethernet or WiFi. A Raspberry Pi: Ethernet (or the Brain itself) or WiFi. Its Hover Help shows the connection rating (Help: [Connection ratings](69-connection-ratings)).
+- **USB Port** (a USB board) or **Network address** (Ethernet or WiFi). See [The USB Port, the technical side](#the-usb-port-the-technical-side).
+- **Board Settings**: **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** and **Diagnostic Logging** (and the **Network Port** for Ethernet or WiFi): see [Board Settings](#board-settings) below.
+
+The **Simulator** is not a Connection: it belongs to the panel, not to a board. It is switched on and off on the Simulator bar.
+
+**The keys.** The **Name** and the **USB Port** (or **Network address**) are the boxes the **Enter** key goes to: Enter on the Name goes to the USB Port, and Enter on a filled-in USB Port with a Name adds (or saves) the Interface. The **Tab** key goes round every box of the pop-up, the last back to the first. The **?** Help, **✖ Cancel** and **Add** are for the mouse. The same order as the [Blichmann RipTide Dialog 1](115-pump-device-properties) (Rule 18.39).
 
 ## The Interface ID
 
 - The Interface ID **becomes part of the Suggested Name of every Device on this Interface**. It is the start of the name: a pump on pin 25 of the Interface **HS** is suggested as `HS_25_DO@Pump_Wort_HS`.
 - Interface IDs follow **Rule 3.2**: see [The ID Rule](46-interface-tab-device-names). Once saved, it never changes, not even by an Admin.
 
-Left empty, the ID is the first letters of the Name (*Hot Side* = HS).
+Skynet suggests the ID from the Name as you type it: the first letters of its first two words (*Hot Side* = **HS**). When that ID is taken, 3 letters (**HSI**), and only when every 3 is taken, 4. Its Hover Help is the same as the Pump's Interface Hover Help, with this Interface's own ID (in red) and Name put in.
 
 ## Ports (IO Pins)
 
@@ -55,13 +59,13 @@ is on (through the SSR), and if Off the SSR no longer sends power. Similar to a 
 
 ## Changing an Interface
 
-**⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to move a board from **Simulator** to its real **USB** port or network address once it is wired, to pick another USB port, or to set the ID. The name of an Interface that has Devices on it stays as it is.
+**⚙ Change** in an Interface's row on the Devices page opens the same pop-up. Use it to give a pretend board its real **USB Port** or network address once it is wired, to pick another USB Port, to change its Board Settings or to **Test Communication**. The name of an Interface that has Devices on it stays as it is, and a saved ID never changes (Rule 3.2).
 
 ## A new empty Schema has no Interface
 
 A new Schema that is **not** a copy of another one (Schema dropdown > Add new Schema > *An empty Schema*) starts with **no Interface**. Add your boards with **Add Interface** on the Devices page, or with **➕ Add new Interface…** in the New Device box. Each Device you add carries its Interface.
 
-A Skynet Schema Template made with no real board still gets a pretend (Simulator) Mega for its Devices ([New Schema from a Skynet Template](157-schema-templates)).
+A Skynet Schema Template made with no real board still gets a pretend Mega for its Devices ([New Schema from a Skynet Template](157-schema-templates)). It stays pretend until its USB Port or Network address is filled in and saved.
 
 A copy of a Schema keeps the Interfaces it had.
 
@@ -74,6 +78,39 @@ The New Device box suggests a name from the Interface ID, the Port, the Device T
 
 Click OK to keep your own name, or Cancel to go back and change it.
 
-Each Interface also has **Board settings** (On, Pause communications, Answer wait, Diagnostic logging, Baud, Network port) and
-**💬 Board Talk** on the Devices page, which shows every line to and from the board in plain words: see
-[Board settings and Board Talk](177-board-talk).
+## Board Settings
+
+- **On**: the panel talks to this board. **Off**: the panel never opens it, and its Devices show as not connected. When a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.
+- **🔌 Test Communication**: a step by step check that the Brain and the board are talking. See [Test Communication](#test-communication).
+- **Answer Wait (seconds)**: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.
+- **Lost Comm (s)**: a safety. If the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. It must be filled in: 3 to 600 seconds (10 to start). **Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.**
+- **Diagnostic Logging**: normally **Off**. Turn it On only to find a problem: every line to and from this board is written, with plain words, to a file a day in the data folder (`logs/boards`). Use it when you know what the log means. Skynet gives no help with communication problems: the log is only a way for you, or someone helping you, to find the problem. Turn it Off after.
+- **Network Port** (Ethernet or WiFi): the network port the board listens on. Skynet's own programs use 4100.
+
+There is no Baud (USB speed) box: it comes from the board. Every Skynet board program talks at 115200.
+
+## Test Communication
+
+**🔌 Test Communication** in the Interface pop-up (⚙ Change on the Devices page) opens a step by step check. Nothing on the board is turned On or Off. An Interface that is being added is tested after it is added.
+
+1. **Is the board On and talking?** It shows what the Brain sees now: *Talking*, *no answer*, *Off* or *Not connected* with the reason.
+2. **👋 Say Hello.** Skynet sends `HELLO`. A board with the Skynet program answers with its name and program version within 5 seconds.
+3. **Sample answers:**
+
+| The board says | What it means |
+|---|---|
+| `HELLO MEGA1 0.5` | Good: the board MEGA1 answered, and it runs the Skynet program, version 0.5. |
+| `DI 22 0` | Good: the board reports its inputs after Hello (input 22 is Off). |
+| `ERR ADS1115 not found on I2C` | The board talks, but one of its parts is not found: check that part's wiring. |
+| (nothing) | No answer: see step 4. |
+| strange letters (ÿ?¿) | The board runs a program that is not Skynet's: load the Skynet program on it. |
+
+4. **What to check when there is no answer.** A USB board: the USB Port number is the one the board is plugged into; the USB cable carries data (some cables only charge); no other program has the board open (the Arduino program's Serial Monitor, another brewing program); the board has the Skynet program. A network board: it has power and its network light is on; the Network address is the board's own and the Brain is on the same network; the Network Port is the one in its program (4100); it has the Skynet program.
+
+**💬 Board Talk** on the Devices page shows every line to and from the board, in plain words: see [Board settings and Board Talk](177-board-talk).
+
+## The USB Port, the technical side
+
+A USB board shows up on the Brain as a **serial port**. On Windows it is called **COM** and a number (COM3, COM7 ...): type the number alone (7) and Skynet makes it COM7. Windows numbers them 1 to 256 and gives each board its own number the first time it is plugged in; the same board in the same USB socket keeps its number. On a Raspberry Pi or Linux the port is a name like `/dev/ttyACM0` (an Arduino Mega) or `/dev/ttyUSB0` (a board with a USB-to-serial chip); type it as it is.
+
+When the pop-up opens, Skynet looks for the boards plugged in now and suggests the first one no other Interface uses. To find which number is your board: unplug it, open the pop-up and look at the numbers found, plug it back in and open it again. The new number is your board. Only one program at a time can use a port: close the Arduino program's Serial Monitor and any other brewing program before Skynet connects.

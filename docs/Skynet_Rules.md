@@ -980,7 +980,10 @@ contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruContr
 Suggested Unique one on a New Build) 1 to 4 Char Unique Once saved, Never Changed even by an Admin. Used as first text with Name
 (may change to Label on some) Example BH: Brew House for a tab DDLB."; letters and numbers picked the same day). Every **Interface ID**,
 every **Tab ID**, and the ID of **any other item that has a user-set ID**:
-- **Skynet always suggests a unique one** on a new build. The user may type another before the first Save.
+- **Skynet always suggests a unique one** on a new build. The user may type another before the first Save. An **Interface ID**
+  is suggested from its Name as it is typed (OakBarn Brewery, 2026-11-15, Add Interface markup: "Suggest unique ID based on Name 2
+  char then 3 and 4 if needed to be unique"): the first letters of its first two words (Hot Side = HS); when that is taken, 3
+  characters (HSI, or the first letters of three words), then 4 only when every 3 is taken.
 - **1 to 4 characters**: letters and numbers (A to Z, 0 to 9), **starting with a letter** (BH, MB2, F1).
 - **Unique** among its kind (no two Interfaces, no two Tabs, the same ID).
 - **Once saved, never changed, not even by an Admin.** The box shows it read only; the Brain refuses a changed ID. To use another
@@ -2072,12 +2075,13 @@ one heater). The last one turned on wins and the others turn off."
 Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
 
 6.3 **Connection ranking per board** (2026-10-26, PR #108, still open):
-- Mega and other Arduino boards: USB best, Ethernet OK (a network failure is a safety risk), WiFi
-  poor.
+- Arduino Mega: USB best, Ethernet OK (a network failure is a safety risk), WiFi poor. There is no "other
+  Arduino-type board" (OakBarn Brewery, 2026-11-15: "List Boards Only"): the Board list is Arduino Mega, ESP32 and Raspberry Pi.
 - ESP32: USB best, Ethernet good, WiFi good **as long as no heating is on a pin**.
 - Heating on Ethernet or WiFi is allowed, with a warning. A lost link turns the board's outputs off
   after a set delay.
-- **Lost Link (s) is a must-fill box on the Interface dialog** (OakBarn Brewery, 2026-11-14: "Make it a Mandatory Field on a New
+- **Lost Comm (s) is a must-fill box on the Interface dialog** (named Lost Link until OakBarn Brewery, 2026-11-15: "Lost Link (s)
+  Change to Lost Comm") (OakBarn Brewery, 2026-11-14: "Make it a Mandatory Field on a New
   Interface, edited on the Interface Dialog. Set all Interfaces and existing Templates to the recommended setting"): 3 to 600
   seconds, 10 to start. Every Interface and Sample Schema has it set to 10. It is not on the Default tab.
 *Replaced:* Fritz first said "Mega by USB only" the same day, then changed it to this ranking.
@@ -2515,16 +2519,31 @@ the main value's pick and lists it in the notes. Help 174.
 
 6.27 **Board settings and Board Talk** (OakBarn Brewery, 2026-11-09: "You could add the Board things also as it is possible
 sometimes to use communications to the board to find or fix a problem. There was no real explaination on how to communicate or what
-to send and what is reply meant"). Each Interface has **Board settings** (its ⚙ Change dialog, both programs): **On** (Off = never
-opened; saved as `enabled`), **Pause communications** (only PING is sent, so the board keeps its outputs; what the board says is
-shown but not used; going on again sends every setting and output), **Answer wait** (seconds without a word from the board before
-the Devices page says "no answer"; 2 to 600, default 10; BruControl's Response Timeout), **Diagnostic logging** (every line, with
-plain words, to a file a day in the data folder's logs/boards), **Baud** (USB) and **Network port** (Ethernet / WiFi), which must
-match the program on the board (Skynet's: 115200 and 4100). **Board Talk** (💬 on the Devices page, admins) is a window with every
-line to (→) and from (←) the board, each with its time and its meaning in plain words, Hide PING, Pause, and a box to send a line
-(sent even while paused). Help 177 lists every line in plain words (public/boardtalk.js, the same words as the window; the details
-are in docs/DEVICE_PROTOCOL.md). BruControl Import: Enabled, Baud and Response Timeout (ms to seconds) are kept; Logging is listed in
-the notes, not turned on (it writes every line); Refresh Interval is not copied. Help 177.
+to send and what is reply meant"; changed 2026-11-15, Add Interface markup). Each Interface has **Board settings** (its ⚙ Change
+dialog, both programs), each with its own Hover Help:
+- **On** (Off = never opened; saved as `enabled`). When a board is Off none of its Devices work; a board must be On and in
+  communication with the Brain to do any action.
+- **🔌 Test Communication** (OakBarn Brewery, 2026-11-15: "Change Pause Communication To Test Communication. Have a Step by Step how
+  to test with a sample responses and maybe a way to send specific code for common Comm Errors. Plain not technical"): a step by step
+  pop-up: 1 is the board On and talking (what the Brain sees now), 2 👋 Say Hello (sends HELLO; a Skynet board answers with its name
+  and program version within 5 seconds), 3 sample answers in plain words, 4 what to check when there is no answer (USB or network).
+  Nothing on the board is turned On or Off. A new Interface is tested once it is added.
+- **Answer wait** (seconds without a word from the board before the Devices page says "no answer"; 2 to 600, default 10;
+  BruControl's Response Timeout).
+- **Lost Comm** (Rule 6.3): a safety, with the reminder that the user, watching the brewery, is the primary safety.
+- **Diagnostic logging**: normally Off; every line, with plain words, to a file a day in the data folder's logs/boards. Used only to
+  find a problem, by someone who knows what the log means: Skynet gives no communication help, the log is only the means for the
+  user or another person to find it.
+- **Network port** (Ethernet / WiFi), which must match the program on the board (Skynet's: 4100).
+- **No Baud** (OakBarn Brewery, 2026-11-15: "Baud would come from Board Type ... If not delete"): every Skynet board program talks at
+  115200, so the Brain always uses it.
+**Board Talk** (💬 on the Devices page, admins) is a window with every line to (→) and from (←) the board, each with its time and
+its meaning in plain words, Hide PING, ⏸ Pause communications (only PING is sent, so the board keeps its outputs; what the board says
+is shown but not used; Talk again sends every setting and output), and a box to send a line (sent even while paused). Help 177 lists
+every line in plain words (public/boardtalk.js, the same words as the window; the details are in docs/DEVICE_PROTOCOL.md). BruControl
+Import: Enabled and Response Timeout (ms to seconds) are kept; Baud is not copied (Skynet's programs use 115200); Logging is listed in
+the notes, not turned on (it writes every line); Refresh Interval is not copied. Help 76, 177.
+*Replaced:* Pause communications and Baud (USB speed) were boxes in the Interface dialog (2026-11-09 to 2026-11-15).
 
 6.28 **Last One Rules** (OakBarn Brewery, 2026-11-09, its own draft: "All for One, One For All"): **The last Device with the same
 Interface and Port controls the action.** How can there be more than one Device with the same Interface and Port (Rule 6.1)? There
@@ -4316,6 +4335,8 @@ States the Label Cannot be Blank. Dialog self distructs after 5 seconds"; OakBar
 - Only **Save / ➕ Add Device / ➕ Add Widget** and a box that gets no focus (greyed out or read only, like Device Type) wait for the
   Label: a click on them does nothing, a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label.
   The pop-up **goes away by itself after 5 seconds** (or when tapped).
+- A field's **name** (its Hover Help) may be clicked or double-clicked too: a double-click on the Tab's name opens its Tab settings
+  (OakBarn Brewery, 2026-11-15: a double-click on the Tab with a blank Label after Confirm gave the warning: fixed).
 - **Enter** on a blank Label stays on it. A blank Label left for nothing (a click on empty space, a title, a greyed out box) gets
   the focus back.
 - **The Cancel button is "hot"** (Fritz, 2026-11-05: "The Cancel Button is Hot is part of the Rule"): ✖ Cancel (and Esc) always
@@ -4578,6 +4599,28 @@ the mouse; **TMF** = the Tab key or the mouse only; **NF** = no focus:
 - The Pump first; the other Device dialogs follow once the Pump dialog, the model, is done. Both programs: the BruControl Import's
   Build page uses the same dialog.
 
+18.39 **The Add Interface pop-up follows the Blichmann RipTide model** (OakBarn Brewery, 2026-11-15, Add Interface markup: "Rule #1
+Follow Blicmann RipTide Model"; "I was able to get to this on the BHlickmann Dialog 1 so it must be fixed before Blickman Dialog 1 is
+finished"). Both programs (the BruControl Import's Build page uses the same pop-up). Help 76.
+- **Hover Help on every name, each its own**: Name, Interface ID, Board, Connection (with its rating, Rule 6.3), USB Port or Network
+  address, and each Board setting (Rule 6.27). The **Interface ID** Hover Help is the Pump's Interface Hover Help (Dialog 1) with this
+  Interface's own ID (in red in the example name) and Name put in as they are typed; with no Name and no ID it is Dialog 1's, word
+  for word. The ID is suggested as Rule 3.2 says.
+- **Board**: boards only (Arduino Mega, ESP32, Raspberry Pi). A board the BruControl Import could not tell shows "(pick the board)"
+  and must be picked before Save.
+- **Connection**: the choices follow the Board. Arduino Mega: USB, Ethernet (with W5100 or W5500 Shield), WiFi (through an ESP32
+  bridge). ESP32: USB, Ethernet, WiFi (built in). Raspberry Pi: Ethernet (or the Brain itself), WiFi (built in). **No Simulator**: it
+  belongs to the panel (Rule 10.10), not to a board. A pretend board (a Skynet Schema Template's Mega) stays pretend until its USB
+  Port or Network address is filled in.
+- **USB Port**: plain words in its Hover Help ("a number between 1 and 256, used to connect the Arduino to the Brain"), with a link to
+  the technical side (Help 76). Skynet suggests the first USB port it finds that no other Interface uses. On Windows the number alone
+  is typed (7 = COM7).
+- **The focus**: the Name and the USB Port (or Network address) are **All** (Enter, Tab key, mouse); the Interface ID, Board,
+  Connection and Board settings are Tab key or mouse only. Enter goes from the Name to the USB Port; Enter on a filled-in USB Port
+  with a Name adds (or saves) it. The Tab key cycles through the boxes only, last back to first; the ? Help, ✖ Cancel and Add are for
+  the mouse. Opened from the New Device box (➕ Add new Interface…), it comes back to that box with its own keys as they were.
+- No Simulator note at the bottom (OakBarn Brewery: "Remove").
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -4761,6 +4804,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-15: Rule 18.39 added, Rules 3.2, 6.3, 6.27 and 18.28 changed (OakBarn Brewery, Add Interface markup: "Rule #1 Follow Blicmann RipTide Model"; "do this in the next PR"). The Add Interface pop-up: its own Hover Help on every name (the Interface ID's is on the Interface ID, not the Board, and is Dialog 1's with this Interface's ID and Name put in live); Interface IDs suggested 2, then 3, then 4 characters (Rule 3.2); Board list is boards only (no "other"); Connection choices follow the Board, no Simulator; the USB Port suggests a free port, takes the number alone on Windows and links to its technical side; On, Lost Comm (was Lost Link) and Diagnostic Logging have new Hover Help; Pause communications became 🔌 Test Communication (a step by step check, Rule 6.27; Pause stays in Board Talk); the Baud box is gone (every Skynet program talks at 115200; the BruControl Import no longer copies Baud); the Simulator note is gone; the Enter and Tab keys follow the Dialog 1 model. The Devices page's second "add" row of boxes is gone: ➕ Add Interface… is the one way in. Rule 18.28: a field's name may be clicked or double-clicked with a blank Label (OakBarn Brewery: a double-click on the Tab gave the blank Label warning). Checked against both programs: the BruControl Import's Build page uses the same pop-up; a BruControl board it cannot tell comes in as "(pick the board)". Help 3, 69, 76, 155, 177, 188 and their French pages. (thread "Polish the Blichmann RipTide pump dialog")
 - 2026-11-15: Rule 4.7 added (OakBarn Brewery: "WE need to have the Builld tab keep in Build mode and be able to come back to it rather than a different tab"). A double-click in an Add box's Tab list closed the Add box as a Cancel and the new pump was gone; now the Add box steps aside and comes back with everything kept, on the same Tab. Properties of things already made open again after the other Properties close, and a Tab bar double-click from the Build Tab comes back to the Build Tab.
 - 2026-11-15: Rule 18.28 changed and Rule 18.38 added (OakBarn Brewery, "Blichmann Riptide Dialog 1 Final": "Best to be able to change Inter face and also the tab anytime"; "why prevent"; "Rule 18.28 please"). In every dialog a blank Label or Port lets the Tab key and the mouse reach every other field and icon; only Save / ➕ Add and a box with no focus wait for it, Enter stays on a blank Label, and a blank Port never keeps the focus. Rule 18.38: the Pump Add box's focus order (Label and Port take Enter; ⬆, ⬢, Label Visible, Interface and Tab take only the Tab key or the mouse; Device Type no focus; ? Help, Cancel and Add Device out of the Tab cycle). Help 140 and 115 (and French). Both programs: the Importer's Build page uses the same dialogs and public/labelguard.js.
 - 2026-11-15: Rule 18.37 item 2 changed (OakBarn Brewery: "internal redraw is the way to go and get rid of rule"): switching a pump's Orientation (Left/Right) leaves its Inlet IP and Outlet IP where they are, the joined pipes and hoses stay put, and the Hose or Pipe inside the pump is drawn again. Orientation Hover Help, Help 115 (and French). Both programs.

@@ -39,8 +39,11 @@ for (const [type, list] of Object.entries(TYPE_CODES)) for (const [c, l] of list
 
 // Interface IDs
 assert.equal(defaultInterfaceId('Main Brewery Mega USB', []), 'MB');
-assert.equal(defaultInterfaceId('Main Brewery Mega Ethernet', ['MB']), 'MB2', 'a second MB is MB2 (Rule 3.2: 1 to 4 characters)');
-assert.equal(defaultInterfaceId('Main Brewery Mega WiFi', ['MB', 'MB2']), 'MB3');
+assert.equal(defaultInterfaceId('Main Brewery Mega Ethernet', ['MB']), 'MBM', 'MB taken: 3 letters from the Name (Rule 3.2)');
+assert.equal(defaultInterfaceId('Main Brewery Mega WiFi', ['MB', 'MBM']), 'MBR', 'then the next letters of the Name');
+assert.equal(defaultInterfaceId('Hot Side', ['HS']), 'HSI');
+assert.equal(defaultInterfaceId('Brewery Mega', ['BM', 'BME', 'BMR', 'BMG', 'BMA']), 'BMEG', '4 letters only when every 3 is taken');
+assert.equal(defaultInterfaceId('', []), 'IF', 'no Name yet');
 assert.equal(defaultInterfaceId('MEGA1', []), 'ME', 'one word: its first two letters');
 assert.equal(cleanInterfaceId('mbub'), 'MBUB');
 assert.equal(cleanInterfaceId('MB_'), 'MB', 'the underscore after the ID is not part of it');
@@ -64,7 +67,7 @@ const c = { devices: [{ name: 'Main Brewery Mega USB' }, { name: 'Main Brewery M
 assert.equal(assignIds(c), true);
 assert.equal(c.elements[0].typeCode, 'Pump', 'an old type code is updated');
 assert.equal(c.elements[0].name, 'MB_25_PmP_Wort_BR', 'the Device keeps its name');
-assert.deepEqual(c.devices.map(d => d.id), ['MB', 'MB2', 'X']);
+assert.deepEqual(c.devices.map(d => d.id), ['MB', 'MBM', 'X']);
 assert.deepEqual(c.workspaces.map(w => w.id), ['BR', 'BH', 'BO'], 'a second BR gets a new ID');
 assert.equal(assignIds(c), false, 'nothing changes the second time');
 assert.throws(() => checkIds([{ name: 'A', id: 'MB' }, { name: 'B', id: 'mb' }], 'interface'), /used twice/);

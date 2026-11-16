@@ -1075,7 +1075,7 @@ async function route(req, res) {
       schemas.dropProfile(sc[1], q.graphics || []); profiles.remove(sc[1]); return ok(res, { list: profileView() });
     }
   }
-  if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
+  if (p === '/ui/ports' && m === 'GET') return ok(res, { ...(await hw.listPorts()), platform: process.platform });      // win32: a USB Port is COM and its number
   // Board Talk (Rule 6.27): the lines to and from a board, sending one, and Pause communications
   if (p === '/ui/boardtalk' && m === 'GET') { try { return ok(res, hw.talkSince(String(url.searchParams.get('name') ?? ''), Number(url.searchParams.get('after')) || 0)); } catch (e) { return fail(res, 400, e.message); } }
   if (p === '/ui/boardtalk' && m === 'POST') {

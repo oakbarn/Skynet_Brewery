@@ -58,11 +58,11 @@ Nothing else needs to be installed for the simulator, processes, API and databas
 ```
 npm install serialport
 ```
-Then add a device on the **Devices** page. **Scan ports** lists the ports it finds:
+Then add an Interface on the **Devices** page (**➕ Add Interface…**). Its **USB Port** box suggests a free port it finds:
 
 | System | Port names |
 |---|---|
-| Windows | COM3, COM4 … |
+| Windows | COM3, COM4 … (type the number alone: 3 is COM3) |
 | Mac | /dev/tty.usbmodem… |
 | Linux / Pi | /dev/ttyACM0 … |
 

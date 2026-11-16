@@ -46,7 +46,7 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 | **Valve Overlay** | La superposition On avec laquelle commence une nouvelle vanne motorisée. L'éclair fixe sauf si vous le changez. |
 | **Push Lockout (s)** | Combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties. |
 
-Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir **Skynet Defaults for New User Created Items** plus bas. Le **Lost Link** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
+Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir **Skynet Defaults for New User Created Items** plus bas. Le **Lost Comm** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
 
 ## Déplacé dans Settings {#moved-to-settings}
 

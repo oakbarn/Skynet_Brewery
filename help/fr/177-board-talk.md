@@ -10,15 +10,14 @@ Ouvrez la page **Devices** et cliquez sur **⚙ Change** sur l'Interface.
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| **On** | On : le panneau parle à cette carte. Off : le panneau ne l'ouvre jamais, et ses Devices apparaissent comme non connectés. |
-| **Pause communications** | Le panneau arrête d'envoyer à la carte (seulement le PING « tu es là ? », pour que la carte garde ses sorties telles quelles) et n'utilise pas ce que dit la carte. Board Talk montre quand même chaque ligne. Le désactiver renvoie chaque réglage et chaque sortie, pour que la carte corresponde à l'écran. |
-| **Answer wait (seconds)** | Si la carte ne dit rien pendant ce temps, la page Devices affiche **no answer**. 2 à 600 ; vide = 10. |
-| **Diagnostic logging** | Chaque ligne vers et depuis la carte est écrite, avec des mots simples, dans un fichier par jour dans le dossier des données (`logs/boards`). Cela écrit beaucoup : désactivez-le quand le problème est trouvé. |
-| **Baud (USB speed)** | Une carte USB seulement. Il doit être le même que le programme sur la carte ; les programmes de Skynet utilisent 115200. |
+| **On** | On : le panneau parle à cette carte. Off : le panneau ne l'ouvre jamais, et ses Devices apparaissent comme non connectés. Quand une carte est Off, aucun de ses Devices ne fonctionne. |
+| **🔌 Test Communication** | Une vérification pas à pas que le Brain et la carte se parlent, avec des exemples de réponses et quoi vérifier quand il n'y a pas de réponse ([Interfaces](76-interfaces)). |
+| **Answer wait (seconds)** | Si la carte ne dit rien pendant ce temps, la page Devices affiche **no answer**. 2 à 600 ; Skynet utilise 10. |
+| **Lost Comm (s)** | Une sécurité : si la carte n'entend rien du Brain pendant ce temps, elle met toutes ses sorties sur OFF. Vous restez la première sécurité. |
+| **Diagnostic logging** | Normalement Off. Chaque ligne vers et depuis la carte est écrite, avec des mots simples, dans un fichier par jour dans le dossier des données (`logs/boards`). Ne l'utilisez que pour trouver un problème, quand vous savez ce que le journal veut dire. Skynet ne donne pas d'aide pour les problèmes de communication : le journal est un moyen pour vous, ou pour quelqu'un qui vous aide, de trouver le problème. Désactivez-le après. |
 | **Network port** | Une carte en Ethernet ou WiFi seulement. Il doit être le même que le programme sur la carte ; les programmes de Skynet utilisent 4100. |
 
-Le **Lost link delay** (sur la page Devices) est le temps que la carte attend sans nouvelles du Brain avant d'arrêter toutes
-ses sorties.
+Il n'y a pas de case Baud (vitesse USB) : elle vient de la carte. Chaque programme de carte Skynet parle à 115200.
 
 ## Board Talk
 
@@ -26,7 +25,7 @@ Sur la page **Devices**, cliquez sur **💬 Board Talk** sur l'Interface. Une fe
 
 - **→** les lignes que le Brain envoie à la carte, **←** les lignes que la carte renvoie, chacune avec son heure et son sens en mots simples.
 - **Hide PING** (activé au départ) cache la ligne « tu es là ? » envoyée toutes les 2 secondes.
-- **⏸ Pause communications** / **▶ Talk again** fait la même chose que le réglage ci-dessus.
+- **⏸ Pause communications** / **▶ Talk again** : le panneau arrête d'envoyer à la carte (seulement le PING « tu es là ? », pour que la carte garde ses sorties telles quelles) et n'utilise pas ce que dit la carte. Talk again renvoie chaque réglage et chaque sortie, pour que la carte corresponde à l'écran.
 - Tapez une ligne dans la case et appuyez sur **Send** (ou Entrée) pour l'envoyer à la carte. Elle est envoyée même en pause. Par exemple `HELLO`
   demande à la carte qui elle est, et `DO 22 1` met la broche 22 sur ON. **Attention :** une ligne que vous envoyez met vraiment des choses en marche et à l'arrêt.
 
