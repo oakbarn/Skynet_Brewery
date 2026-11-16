@@ -489,7 +489,7 @@ top and no bottom row; Keep is blue like Save was and puts the settings back int
 Pop-ups of other dialogs keep Save and their bottom row for now. **Any dialog that is updated** (OakBarn Brewery, 2026-11-14:
 "Apply the Freeze to any dialog that is updated"; "Freeze top and get rid of bottom buttons"): from now on, each time a dialog or pop-up is changed, it gets the frozen top too
 (its title and Cancel and Save, or its buttons, stay at the top while the rest scrolls; the bottom row is not shown). Done so far: the
-Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37). Dialogs not changed keep their top and bottom rows: "Once I am
+Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37); the ☰ Menu > Default settings Tab (2026-11-16, Rule 2.42). Dialogs not changed keep their top and bottom rows: "Once I am
 satisfied with the Blickmann Model, we do a global update as limited by the instructions"; "I will likely do only the Pump
 ones first" (OakBarn Brewery, 2026-11-14). **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
@@ -877,7 +877,30 @@ Help 155).
   - The **Value** of a Device or Widget follows the Text Boxes colors only once they are changed from the fresh-install values, so a fresh install puts no
     black box behind the values on pictures.
 - **Rich Text Embedded Code** (2026-11-14): the Large text size box is now **\L Rich Text Code Size (px)**, under its own heading.
-- **One Save** (2026-11-14): the Default tab has one **Save**, at the top and the bottom, that also saves Tap Water.
+- **One Save** (2026-11-14): the Default tab has one **Save** that also saves Tap Water. **Frozen** (OakBarn Brewery, 2026-11-16, PDF
+  "Default Tab 3": "Freeze"): the title and Save stay at the top while the rest scrolls, and there is no Save further down (Rule 2.51).
+- **Default Tab 3** (OakBarn Brewery, 2026-11-16, PDF "Default Tab 3"; each Hover Help is his text word for word, only the spelling
+  fixed, Rules 2.37, 11.12; Panel Help 155 is the same text, with French):
+  - **Pipes, Hoses and Sizes:** Default Pipe Size, Default Hose Size and their **IP Type** have his Hover Help.
+  - **A new pipe joined to a pipe takes that pipe's size; hoses never auto size** (OakBarn Brewery, 2026-11-16: "No auto sizing of
+    Hoses is correct. If they do, they should not. The auto size of pipes is good ... if you are building a Manifold out of pipe in the
+    real world, the logical choice is the next pipe is the same size"): a pipe drawn from, or ending on, an IP that a pipe is on starts
+    at that pipe's size (not the Default Pipe Size), and its IP Types follow. A hose always starts at the Default Hose Size. Nothing
+    cascades along the line yet ("may need more work later", Sandbox Panel Updates #12). The size lists are one
+    line with no "(Skynet default)" ("Single Line and no Skynet Default").
+  - **How many Pixels are Pipes and Hoses to be drawn on a Tab?** (was "How thick a 1/2" pipe is drawn on a new Tab"; "This is a Tab
+    Default setting even though it relates to Drawing Pipes and Hoses, but can be reset on a Tabs Property. This affects only new Tabs.
+    There is an exact Duplicate of this in the Tabs Defaults and they are the same Default"): the same setting shows in Pipes, Hoses
+    and Sizes and in **New Tabs**; typing in one fills the other. **Width of a New Tab (px)** and **Height of a New Tab (px)** moved to
+    New Tabs ("Move to Tab Section").
+  - **New User Recipes** (was New Recipes; "Section Title changed to New User Recipes"): **Units** moved to Settings > Panel settings
+    ("This is not a default but a Skynet Setting that resides in the Brain"). **Batch Size (Gallons)** or **Batch Size (Liters)** from
+    Units, kept in liters ("Stored as Litres regardless"). A new Recipe starts with 5 gallons, Skynet Single Step, Batch Sparge (152 °F,
+    60 minutes) and Skynet 60 Minute Boil ("set all the defaults for a 5 gal Batch, 60 min Boil, 60 Minute Mash"), its Boil Time from
+    its Boil Profile. Taken off the tab: **Equipment Profile** ("Not needed as set on a Tab"), **Brewhouse Efficiency** (the Equipment
+    Profile's, 72 %, Rule 17.13), **Grain Temperature** ("Remove but use 72 for planning": 72 °F), **Strike Offset** ("Equipment
+    Profile, not recipe") and **Boil Time** (the Boil Profile's). Mash Profile, Boil Profile, Water Profile and Water to Grain Ratio
+    have Hover Help written from his notes.
 - **Defaults are for new things** (OakBarn Brewery, 2026-11-14: "Generally Defaults are used for New Things. Existing Templates might
   have their Properties already set. For an Example, the Blickmann Riptide Template might have it's label attributes set, and the
   defaults for a New Blickmann would follow the Template settings, not the Default Tab. A new Pump Template (User Created) would use
@@ -901,7 +924,7 @@ Help 155).
 - **Settings, not Defaults** (OakBarn Brewery, 2026-11-14: "Move any field that affects existing things like the Theme or Pulse button
   (and anything that affects existing Device, Tabs etc to only be in settings as the are more Settings than defaults. No need to even
   mention on Default Tab"). The Default tab is **only for new things**. What changes things already made, or how the whole panel works,
-  is in **Settings > Panel settings: screen, Tabs and alerts**: Tab Style, Menu Bar, Sound (and Sound on now), On startup, \L Rich Text
+  is in **Settings > Panel settings: screen, Tabs and alerts**: Units (2026-11-16), Tab Style, Menu Bar, Sound (and Sound on now), On startup, \L Rich Text
   Code Size, Hover Delay, Phones and tablets, the Grain weight and gravity points labels, Hop alerts and the Order of the Menu. The
   Look of the open Schema stays in Settings > Panel settings; Pulse is fixed at 100 ms. None of them is named on the Default tab. (They
   are still kept with the Default tab's values on the Brain, so nothing moved there.)
@@ -3617,6 +3640,13 @@ are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks wh
 both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
 Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
 
+14.5 **The Process Updates Sandbox** (OakBarn Brewery, 2026-11-16: "WE will do that later when we start the Skynet Process setup. New
+sand Box for Process and put things there till we build those Processes"). Ideas for Brew Day steps, the sample Processes and Process
+commands are written in `Sandbox/Process_Updates/Process_Updates.md`, with where each goes, and are **not built yet**. When the
+Skynet Process setup starts, OakBarn Brewery picks which to start; each is checked against the Rules and both programs before it is
+built, then moved to the file's Done table with its PR. General Panel ideas stay in the Panel Updates Sandbox (Rule 14.4). Like the
+rest of `Sandbox/`, it is never shipped.
+
 ## 15. Importing
 
 15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
@@ -3919,7 +3949,7 @@ public/recipecalc.js and Help 99.
 17.3 **Recipe import: BeerSmith .bsmx (BeerSmith 3 and 4) and BeerXML .xml**, every grain, hop, yeast, adjunct (Misc), water
 and mash step, with **no limit** on how many (the old BruControl import stopped at 8 hops). The .bsmx keeps BeerSmith's own
 US units inside (ounces, fluid ounces, °F; a Misc item in its own unit); Skynet keeps every Recipe in kg, L and °C and shows it
-in the units picked on the Default tab. A Process imports with `import_recipe "path"`. (Fritz, 2026-10-30, Help 99)
+in the Units picked in Settings > Panel settings (Rule 2.42). A Process imports with `import_recipe "path"`. (Fritz, 2026-10-30, Help 99)
 
 17.4 **Skynet orders the hops and makes the hop alerts** (the OakBarn Hop Warnings): Top of Mash, 1st Wort, Start of Boil,
 Bitter, Flavor, Aroma, Whirlpool, Dry Hop; hops at the same time are one Hop Group; each gets a warning (10 minutes, Default
@@ -4849,6 +4879,9 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ## Change log
 
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
+- 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
+- 2026-11-16: Added Rule 14.5, the Process Updates Sandbox (OakBarn Brewery: "New sand Box for Process and put things there till we build those Processes"): `Sandbox/Process_Updates/Process_Updates.md` holds Brew Day, sample Process and Process command ideas, not built until the Skynet Process setup starts. First entries, moved from the Panel Updates Sandbox: the PreBrew grain temperature and Strike Offset boxes, the "Boil Started" button in the sample Brew Day Process, and waiting on the boil temperature from the air pressure. Checked against both programs: notes only, nothing in either program changes.
+- 2026-11-16: Rules 2.42 and 2.51 changed (OakBarn Brewery, PDF "Default Tab 3"): the Default settings Tab is frozen (title and Save at the top, no Save further down); Default Pipe Size, Default Hose Size and both IP Types have his Hover Help word for word; the size lists are one line with no "(Skynet default)"; "How many Pixels are Pipes and Hoses to be drawn on a Tab?" replaces the 1/2" pipe thickness label and shows in Pipes, Hoses and Sizes and in New Tabs (one setting); Width and Height of a New Tab moved to New Tabs with his Hover Help; New Recipes is now **New User Recipes**: Units moved to Settings > Panel settings, Batch Size (Gallons/Liters) kept in liters, a new Recipe starts at 5 gallons, Skynet Single Step Batch Sparge and Skynet 60 Minute Boil (Boil Time from the Boil Profile); Equipment Profile, Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are off the tab; Hover Help written for Mash, Boil and Water Profile and Water to Grain Ratio. Help 155 (and French). Sentences about things not built yet, the Hop Stand change, the Brew Day grain temperature question and the scroll bar pictures wait in Sandbox/Panel_Updates/Panel_Updates.md (Rule 14.4). Checked against the BruControl Import program: it reads the Panel's Units from the same saved setting (unchanged) and has no Recipe screens.
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery, Add Interface markup 2): buttons frozen at the top and none at the bottom (the model); a new Connection keeps the suggested Interface ID; USB Port Simulator mode note; Network address Hover Help for Ethernet and WiFi (Help 76); Lost Comm "You are the Safety" bold red with the triangle; Diagnostic Logging caveat at the bottom.
 - 2026-11-16: Rule 18.40 added, Rules 2.42 and 18.32 changed (OakBarn Brewery, PDF "Blichmann_Riptide_Dialog_2_3"): there is always a Default Pump Profile (no (none) choice); the Default settings Pump Overlay only applies to new Pump Profiles; the Model's ⬢ Pump facts are to look at only with ◀ Back and hold Power and Use; Ports is on the dialog where Power was; the greyed Interface and Available Ports Hover Help say the combination is saved; Cover and Overlay Hover Help have pictures; Database and .API Hover Help.
 - 2026-11-15: Rule 18.39 added, Rules 3.2, 6.3, 6.27 and 18.28 changed (OakBarn Brewery, Add Interface markup: "Rule #1 Follow Blicmann RipTide Model"; "do this in the next PR"). The Add Interface pop-up: its own Hover Help on every name (the Interface ID's is on the Interface ID, not the Board, and is Dialog 1's with this Interface's ID and Name put in live); Interface IDs suggested 2, then 3, then 4 characters (Rule 3.2); Board list is boards only (no "other"); Connection choices follow the Board, no Simulator; the USB Port suggests a free port, takes the number alone on Windows and links to its technical side; On, Lost Comm (was Lost Link) and Diagnostic Logging have new Hover Help; Pause communications became 🔌 Test Communication (a step by step check, Rule 6.27; Pause stays in Board Talk); the Baud box is gone (every Skynet program talks at 115200; the BruControl Import no longer copies Baud); the Simulator note is gone; the Enter and Tab keys follow the Dialog 1 model. The Devices page's second "add" row of boxes is gone: ➕ Add Interface… is the one way in. Rule 18.28: a field's name may be clicked or double-clicked with a blank Label (OakBarn Brewery: a double-click on the Tab gave the blank Label warning). Checked against both programs: the BruControl Import's Build page uses the same pop-up; a BruControl board it cannot tell comes in as "(pick the board)". Help 3, 69, 76, 155, 177, 188 and their French pages. (thread "Polish the Blichmann RipTide pump dialog")

@@ -37,7 +37,7 @@ import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
-import { blankRecipe } from './public/recipecalc.js';
+import { newUserRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
@@ -1000,7 +1000,7 @@ async function route(req, res) {
   }
   // The Recipe (☰ Menu > Recipe): everyone sees it, brewers (operators) import, change and save it
   if (p === '/ui/recipe' && m === 'GET') {
-    const v = recipeView(currentRecipe() ?? blankRecipe(store.config.brewDefaults ?? {}), store.config.brewDefaults ?? {});
+    const v = recipeView(currentRecipe() ?? newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), store.config.brewDefaults ?? {});
     for (const a of v.schedule.alerts) { const f = store.resolveMedia(a.audio); a.audioFound = !!f && fs.existsSync(f); }
     return ok(res, { ...v, has: !!currentRecipe(), saved: recipes.list(), alerts: hopAlerts.status() });
   }
@@ -1011,7 +1011,7 @@ async function route(req, res) {
     try { const r = await mediaFiles.upload(req, 0, 'Audio/Hops', name, true); return ok(res, { ok: true, ...r }); } catch (e) { return fail(res, 400, e.message); }
   }
   if (p === '/ui/recipe' && m === 'PUT') { useRecipe(await jsonBody(req)); return ok(res, recipeView(currentRecipe(), store.config.brewDefaults ?? {})); }
-  if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(blankRecipe(store.config.brewDefaults ?? {})); return ok(res); }
+  if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list())); return ok(res); }
   if (p === '/ui/recipe/import' && m === 'POST') {
     const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
     useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name });
