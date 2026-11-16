@@ -36,11 +36,15 @@ Hoses have a flow simulation.
 
 The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.
 
-### How many Pixels are Pipes and Hoses to be drawn on a Tab?
+### How many Pixels are Pipes to be drawn on a Tab?
 
-This is simply how Pipes and Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes or Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
+This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
 
-This box is in two places, here and in **New Tabs**. It is one setting: typing in one changes the other. Each Tab can still change its own in **Tab Settings**.
+### How many Pixels are Hoses to be drawn on a Tab?
+
+This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
+
+Each of these two boxes is in two places, here and in **New Tabs**. Each is one setting: typing in one changes the other. Each Tab can still change its own **Pipe Size** and **Hose Size** in **Tab Settings**. A Tab made before there was a Hose Size draws its hoses at its Pipe Size, as before.
 
 The technical side: the sizes are 1/4" to 6", with the mm size beside each; Skynet starts at 1/2" for both, Tri-Clamp for pipes and Quick Disconnect for hoses ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). A new Device, Pipe Fitting or item with IPs (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for the Default Pipe Size until a pipe is on it. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). The Pixels box is from 2 to 100 (empty = 10).
 
@@ -130,7 +134,7 @@ This only affects new Tabs added to a Schema. This is how the Tab fits on the sc
 
 The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
-The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes and Hoses to be drawn on a Tab?** box is here too (see above).
+The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes to be drawn on a Tab?** and **How many Pixels are Hoses to be drawn on a Tab?** boxes are here too (see above).
 
 ## New User Templates and Schemas
 

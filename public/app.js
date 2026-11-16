@@ -1747,6 +1747,10 @@ const FIT_SVG = {
 // (1/2" when not set), drawn in proportion: a 1" pipe is twice as thick as a 1/2" one. Sizes are kept in inches; the metric
 // choices are the common mm sizes that match them (pipe: DN sizes, hose: inside diameter).
 const pipeSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.pipeSize) || 10;
+// Each tab also has a Hose size (OakBarn Brewery, 2026-11-16: "Add PX size for Hose Separate from Pipe. Hoses need to be smaller than a
+// pipe in most cases"): how thick a 1/2" hose is drawn. A Tab without one draws its hoses at its Pipe size, as before (Rule 2.42).
+const HOSE_PX = 6;
+const hoseSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.hoseSize) || pipeSize(wsn);
 const PIPE_SIZES = [['0.5', '1/2"  (most common)', '15 mm (DN15)'], ['1', '1"', '25 mm (DN25)'], ['0.75', '3/4"', '20 mm (DN20)'], ['0.25', '1/4"', '8 mm (DN8)'],
   ['2', '2"', '50 mm (DN50)'], ['3', '3"', '80 mm (DN80)'], ['4', '4"', '100 mm (DN100)'], ['5', '5"', '125 mm (DN125)'], ['6', '6"', '150 mm (DN150)']];
 const HOSE_SIZES = [['0.5', '1/2"  (most common)', '13 mm'], ['1', '1"', '25 mm'], ['0.75', '3/4"', '19 mm'], ['0.25', '1/4"', '6 mm'], ['2', '2"', '50 mm']];
@@ -1755,7 +1759,7 @@ function sizeInches(p) {
   if (p.size === 'custom') { const c = +p.sizeCustom; return c > 0 ? (p.sizeUnits === 'mm' ? c / 25.4 : c) : 0.5; }
   return +p.size > 0 ? +p.size : 0.5;
 }
-const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
+const pipeWidth = p => (p.hose ? hoseSize(p.workspace) : pipeSize(p.workspace)) * sizeInches(p) / 0.5;
 // The Default pipe size and hose size (☰ Menu > Default settings; Fritz, 2026-11-07: "setting a Default Pipe size and have all the
 // devices with Ips conform to that size", Rules 2.42 and 5.36): a new pipe or hose starts at it, and a Device, Pipe Fitting or other
 // item with IPs that has no pipe on it is drawn for the Default pipe size. 1/2" when not set.
@@ -1802,11 +1806,11 @@ const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, 
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
 const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
 const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
-// a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = the screen's usable size and 10)
+// a new Tab's size and pipe and hose thickness (☰ Menu > Default settings; empty = the screen's usable size, 10 and 6)
 // The screen's usable size (OakBarn Brewery, 2026-11-16): the size of the screen the Tab is made on, less the taskbar (1920 x 1040 on a
 // 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
 const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
-const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
+const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
@@ -10772,7 +10776,8 @@ const TAB_TIPS = {
   height: 'How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless ☰ Menu > Default settings gives a Height.',
   fitScreen: 'One click sets this Tab\'s Width and Height to the usable size of THIS screen (the screen less the taskbar), so the whole Tab fills the screen at Zoom Fit screen with no scroll bars. Press Save to keep it. You can still type your own Width and Height. Pick the screen of the computer you brew from: a Tab sized on a small laptop is drawn smaller on a big screen.',
   vSizer: 'The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout.',
-  pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it.',
+  pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe size, reducer and fitting is drawn to scale from it.',
+  hoseSize: 'How thick a 1/2" hose is drawn on this Tab, in pixels. Hoses are usually drawn thinner than pipes. A new Tab starts at 6 (☰ Menu > Default settings). Every other hose size is drawn to scale from it. Empty = the Pipe Size, as on Tabs made before there was a Hose Size.',
   flowColor: 'The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color.\n\nThe technical side: a Process sets it with tab.flow_Color = Mash, on the Tab the screen shows.',
 };
 // the small ⚠ box of Rule 18.28 (public/labelguard.js), for a box of this dialog that Save waits for; it goes away after 5 seconds
@@ -10807,6 +10812,7 @@ async function editWorkspace() {
     ['vSizer', 'Vessel Sizer', 'sel', [['', 'None'], ...draft.graphics.filter(g => isSized(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])], false, false, tip('vSizer')],
     ['_pipeHead', 'Pipes', 'head'],
     ['pipeSize', 'Pipe Size', 'num', null, false, false, tip('pipeSize', { def: 10 })],
+    ['hoseSize', 'Hose Size', 'num', null, false, false, tip('hoseSize', { def: +w.pipeSize || 10 })],
     ['flowColor', 'Flow Color', 'flowc', 'tab', false, false, tip('flowColor')]], work, draft.workspaces.length > 1, TAB_SPOT);
   // the boxes, as the dialog shows them now
   const dlgEl = $('#dlg'), body = $('#dlgBody'), nameBox = body.querySelector('[data-k="name"]'), idBox = idLocked ? null : body.querySelector('[data-k="id"]');
@@ -13702,7 +13708,8 @@ const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: 
 const DEF_TIPS = {
   pipe: 'Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.\n\nIPs snap together and are locked.\n\nIPs lock automatically and a Pipe\'s IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.\n\nPipes have a flow simulation.',
   hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nHoses have a flow simulation.',
-  px: 'This is simply how Pipes and Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes or Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
+  px: 'This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
+  hosePx: 'This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
   width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
   height: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
   batch: 'This only affects new User Recipes. This is your normal Batch size when Manually creating a Recipe in Skynet. Skynet does not pretend to be a Recipe Builder and can import a standard Beer.xml file from the popular Recipe builders with no coding on your part in Skynet. Simply create the recipe in your favorite Recipe Builder or get one from a forum or a friend and import it. As long as the import is in the beer.xml agreed standard, Skynet should import it. If you never plan to build a Recipe here you can ignore this entire Section as it has some defaults set to what is most common regardless.',
@@ -13790,9 +13797,10 @@ function renderDefaultTab(box) {
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
-    // the same box twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
-    // the same Default"): typing in one fills the other (newTabPipeTwin)
-    ['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    // the same boxes twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
+    // the same Default"): typing in one fills the other; Pipes and Hoses apart (OakBarn Brewery, 2026-11-16)
+    ['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
     // IP Type sizes (OakBarn Brewery, 2026-11-16: "A list of the sizes and type in Defualts with a TickBox to show in the List"; "all
     // Unclicked in the Default"): only the ticked ones, and the ones already used, show in the IP Type lists
     ['_ipt', 'IP Types', 'head'],
@@ -13825,7 +13833,8 @@ function renderDefaultTab(box) {
     ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
     ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['_tabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['_tabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['_tabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
     ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: screenTab().w, tip: DEF_TIPS.width }],
     ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: screenTab().h, tip: DEF_TIPS.height }],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
@@ -13856,12 +13865,14 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
-  d._tabPipe = d.newTabPipe;
+  d._tabPipe = d.newTabPipe; d._tabHose = d.newTabHose;
   hopStandsToForm(d, du.tempUnit);
   const f = paneForm(fields, d, () => { }, !admin);
-  // the Pixels box is in two sections and is one setting: typing in one fills the other
-  const twins = ['newTabPipe', '_tabPipe'].map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
-  if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
+  // each Pixels box is in two sections and is one setting: typing in one fills the other
+  for (const pair of [['newTabPipe', '_tabPipe'], ['newTabHose', '_tabHose']]) {
+    const twins = pair.map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
+    if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
+  }
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
@@ -13875,13 +13886,13 @@ function renderDefaultTab(box) {
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
     hopStandsFromForm(d, su.tempUnit);
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
-    delete d._w2g; delete d._batch; delete d._tabPipe; delete d._grainLabel; delete d.grainLabel;
+    delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
     for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     { const sc = screenTab(); if (+d.newTabWidth === sc.w) delete d.newTabWidth; if (+d.newTabHeight === sc.h) delete d.newTabHeight; }      // the screen's own size is not saved, so a new Tab keeps matching the screen it is made on
-    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
+    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab', 2, 100], ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
