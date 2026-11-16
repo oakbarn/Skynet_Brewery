@@ -98,3 +98,21 @@ assert.match(app, /&& \(!pumpFocus \|\| confirmed \|\| ev\.target\.dataset\?\.k 
 assert.match(app, /if \(!pumpFocus && tab && !tab\.value && tab\.offsetParent !== null\)/, 'the Tab is never jumped to');
 assert.match(app, /if \(pumpFocus\) dlgEl\.addEventListener\('keydown', pumpTabKey, true\);/, 'the Tab key cycle');
 console.log('RipTide Dialog 1 focus order ok');
+// Blichmann RipTide Dialog 2 #3 (OakBarn Brewery, 2026-11-16, Rule 18.40)
+assert.match(app, /pumpModel: 'The Pump Model you choose from Available Common Brewery Pumps\. Its Properties can be displayed with the ⬢\.'/, 'Model Hover Help in OakBarn Brewery\'s words');
+assert.match(app, /const PUMP_FACTS_POP = \{ title: 'Pump facts', view: pumpFactsView/, 'the Model ⬢ is to look at only');
+assert.match(app, /'◀ Back'\)\);\s*\n\s*if \(view\)/, 'its one button is Back');
+assert.match(app, /\['_power', 'Power', 'ro'/, 'Power is in the Pump facts');
+assert.doesNotMatch(app, /\['power', 'Power', 'sel', PUMP_POWER_CHOICES/, 'Power is no longer on the dialog');
+assert.match(app, /const PORTS_TIP = 'Match YOUR Pump fittings/, 'Ports Hover Help starts Match YOUR Pump fittings');
+assert.match(app, /\(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpPortField\(it, factsOf\(it\), PORTS_TIP\)\)/, 'Ports where Power was');
+assert.doesNotMatch(app, /it is not changed here/, 'Use: no "not changed here"');
+assert.match(app, /const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed\./);
+assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both balloons');
+assert.match(app, /⟪img:help_pictures\/Pump_Cover\.png⟫/); assert.match(app, /⟪img:help_pictures\/Pump_Overlays\.png⟫/);
+for (const f of ['Pump_Cover.png', 'Pump_Overlays.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
+assert.match(app, /const DB_TIPS = \{/); assert.match(app, /pairLbl dbPopLbl tipLbl', 'data-help': DB_TIPS\.line/, 'Database and .API has its own Hover Help');
+assert.match(app, /const profileChoices = kind => \[\.\.\.\(kind === 'pump' && \(S\.pumpProfiles \|\| \[\]\)\.length \? \[\] : \[\['', '\(none\)'\]\]\)/, 'no (none) Pump Profile');
+assert.match(app, /if \(\(ovl \|\| \(lit && isPumpDev\(e\)\)\) && img === pic\)/, 'a pump On with Overlay None shows its picture');
+assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.40 \*\*Blichmann RipTide Dialog 2 #3\*\*/m);
+console.log('Dialog 2 #3 tests passed');
