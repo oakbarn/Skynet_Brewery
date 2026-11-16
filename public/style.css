@@ -60,6 +60,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .pipes .flow { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 14; animation: flow 0.9s linear infinite; }
 .pipes .flow.rev { animation-direction: reverse; }
 .pipes .flow.off { display: none; }
+.pipes .flow.grav { opacity: 0.45; animation-duration: 2.4s; }     /* gravity flow (Rule 5.21): lighter and slower than pumped flow */
 .pipes .hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: none; }
 #ws.editing .pipes .hit { pointer-events: stroke; }
 .pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }

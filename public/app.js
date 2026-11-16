@@ -3731,7 +3731,9 @@ const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
 const ipFlowOf = id => { const g = L().graphics.find(x => x.id === id && x.kind === 'ip'); return g ? (!editing && g.name && S.flow?.ips?.[g.name]) || flowKey(g.flowColor) || '' : ''; };
 const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowKey(p.flowColor) || '';
 const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
-function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here)
+// a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
+const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
+function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -3804,6 +3806,25 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
     if (col) pumpSrc.set(devOfIp(k), { vessel: col });
   }
   for (const [k, n] of nodes) if (n.push) trace(k, true);
+  // Gravity flow (Rule 5.21, OakBarn Brewery, 2026-11-16: "Assume gravity flow"): with no pump moving it, liquid runs out of a
+  // vessel's low opening along every open path, away from the vessel. A closed valve stops it, a Check Valve only lets it go its
+  // own way, and an Off pump lets it through. Skynet does not know real heights, so it is drawn lighter and slower (Fritz's pick).
+  if (grav) for (const g of L().graphics.filter(x => x.kind === 'ip' && x.workspace === ws && GRAV_PORTS.has(x.port))) {
+    const v = L().graphics.find(x => x.id === g.attachTo);
+    if (!hasTop(v) || !nodes.has(g.id) || !nodes.get(g.id).end) continue;
+    const col = vesselFlowOf(g.id), prev = new Map([[g.id, null]]), queue = [g.id];
+    while (queue.length) {
+      const u = queue.shift(), n = nodes.get(u);
+      if (u !== g.id && !n.pass) {
+        if (n.end) for (let k = u; prev.get(k); k = prev.get(k).from) {
+          const st = prev.get(k); if (dir.has(st.p.id) || grav.has(st.p.id)) continue;
+          grav.set(st.p.id, st.d); if (col && !src.has(st.p.id)) src.set(st.p.id, { vessel: col });
+        }
+        continue;
+      }
+      for (const { v: w, p, d } of adj.get(u) || []) if (!prev.has(w)) { prev.set(w, { from: u, p, d }); queue.push(w); }
+    }
+  }
   return dir;
 }
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square (a hose just bends).
@@ -4095,20 +4116,20 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
+  const srcs = new Map(), grav = new Map(), flow = computeFlow(w.name, srcs, grav), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
   layers.forEach(n => n.replaceChildren());
   for (const p of pipes) {
-    const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
+    const byGrav = !flow.has(p.id) && grav.has(p.id), flowing = flow.has(p.id) || byGrav, backwards = (flow.get(p.id) ?? grav.get(p.id)) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
     for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe

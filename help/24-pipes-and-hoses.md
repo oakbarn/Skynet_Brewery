@@ -76,3 +76,7 @@ Grab a pipe in Edit layout and press **🔓 Unlock its ends**: its ends let go a
 ## Pipes always show
 
 A pipe or hose always shows on its Tab, flowing or not, because it is really there.
+
+## Gravity flow
+
+With no pump moving it, liquid runs out of a vessel's bottom outlet by gravity along every open path, away from the vessel. A closed valve stops it, a Check Valve lets it go only its own way, and a pump that is Off lets it through, so priming a pump by back flow shows too. Skynet does not know how high things really are, so gravity flow is drawn **lighter and moving slower** than pumped flow. When a pump moves the liquid, the pumped flow shows instead.
