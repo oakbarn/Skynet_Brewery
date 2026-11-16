@@ -4171,6 +4171,10 @@ function findItem(kind, id) { return kind === 'el' ? draft.elements.find(e => e.
 const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 function setEditing(on) {
+  // Edit layout already open: never start a new draft over it, so an unsaved Build (the 🔨 Build Tab and everything on it) is never
+  // lost (OakBarn Brewery, 2026-11-16: "Need to keep adding to the open Build tab and never leave with out a Warning that you will
+  // lose the work if not saved"). Leaving goes through leaveLayout, which asks to Save first.
+  if (on && editing && draft) { renderTabs(); renderWs(); return; }
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
