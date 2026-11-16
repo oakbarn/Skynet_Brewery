@@ -10,7 +10,7 @@ else can look.
 
 ### Default Pipe Size
 
-Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.
+Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.
 
 IPs snap together and are locked.
 
@@ -116,11 +116,15 @@ The technical side: a new Recipe starts with a 5 gallon (18.93 liter) batch, **S
 
 ### Width of a New Tab (px)
 
-How wide this Tab is, in pixels. A new Tab starts at 1600.
+This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.
+
+The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
 ### Height of a New Tab (px)
 
-How tall this Tab is, in pixels. A new Tab starts at 900.
+This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.
+
+The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
 The technical side: from 200 to 20000 pixels; empty = 1600 x 900. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes and Hoses to be drawn on a Tab?** box is here too (see above).
 

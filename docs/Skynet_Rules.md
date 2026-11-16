@@ -881,7 +881,12 @@ Help 155).
   "Default Tab 3": "Freeze"): the title and Save stay at the top while the rest scrolls, and there is no Save further down (Rule 2.51).
 - **Default Tab 3** (OakBarn Brewery, 2026-11-16, PDF "Default Tab 3"; each Hover Help is his text word for word, only the spelling
   fixed, Rules 2.37, 11.12; Panel Help 155 is the same text, with French):
-  - **Pipes, Hoses and Sizes:** Default Pipe Size, Default Hose Size and their **IP Type** have his Hover Help. The size lists are one
+  - **Pipes, Hoses and Sizes:** Default Pipe Size, Default Hose Size and their **IP Type** have his Hover Help.
+  - **A new pipe joined to a pipe takes that pipe's size; hoses never auto size** (OakBarn Brewery, 2026-11-16: "No auto sizing of
+    Hoses is correct. If they do, they should not. The auto size of pipes is good ... if you are building a Manifold out of pipe in the
+    real world, the logical choice is the next pipe is the same size"): a pipe drawn from, or ending on, an IP that a pipe is on starts
+    at that pipe's size (not the Default Pipe Size), and its IP Types follow. A hose always starts at the Default Hose Size. Nothing
+    cascades along the line yet ("may need more work later", Sandbox Panel Updates #12). The size lists are one
     line with no "(Skynet default)" ("Single Line and no Skynet Default").
   - **How many Pixels are Pipes and Hoses to be drawn on a Tab?** (was "How thick a 1/2" pipe is drawn on a new Tab"; "This is a Tab
     Default setting even though it relates to Drawing Pipes and Hoses, but can be reset on a Tabs Property. This affects only new Tabs.
@@ -4861,6 +4866,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
 - 2026-11-16: Rules 2.42 and 2.51 changed (OakBarn Brewery, PDF "Default Tab 3"): the Default settings Tab is frozen (title and Save at the top, no Save further down); Default Pipe Size, Default Hose Size and both IP Types have his Hover Help word for word; the size lists are one line with no "(Skynet default)"; "How many Pixels are Pipes and Hoses to be drawn on a Tab?" replaces the 1/2" pipe thickness label and shows in Pipes, Hoses and Sizes and in New Tabs (one setting); Width and Height of a New Tab moved to New Tabs with his Hover Help; New Recipes is now **New User Recipes**: Units moved to Settings > Panel settings, Batch Size (Gallons/Liters) kept in liters, a new Recipe starts at 5 gallons, Skynet Single Step Batch Sparge and Skynet 60 Minute Boil (Boil Time from the Boil Profile); Equipment Profile, Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are off the tab; Hover Help written for Mash, Boil and Water Profile and Water to Grain Ratio. Help 155 (and French). Sentences about things not built yet, the Hop Stand change, the Brew Day grain temperature question and the scroll bar pictures wait in Sandbox/Panel_Updates/Panel_Updates.md (Rule 14.4). Checked against the BruControl Import program: it reads the Panel's Units from the same saved setting (unchanged) and has no Recipe screens.
 - 2026-11-16: Rule 18.39 changed (OakBarn Brewery, Add Interface markup 2): buttons frozen at the top and none at the bottom (the model); a new Connection keeps the suggested Interface ID; USB Port Simulator mode note; Network address Hover Help for Ethernet and WiFi (Help 76); Lost Comm "You are the Safety" bold red with the triangle; Diagnostic Logging caveat at the bottom.
 - 2026-11-16: Rule 18.40 added, Rules 2.42 and 18.32 changed (OakBarn Brewery, PDF "Blichmann_Riptide_Dialog_2_3"): there is always a Default Pump Profile (no (none) choice); the Default settings Pump Overlay only applies to new Pump Profiles; the Model's ⬢ Pump facts are to look at only with ◀ Back and hold Power and Use; Ports is on the dialog where Power was; the greyed Interface and Available Ports Hover Help say the combination is saved; Cover and Overlay Hover Help have pictures; Database and .API Hover Help.
