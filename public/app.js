@@ -8075,13 +8075,17 @@ function pumpPortField(o, f, tip) {
 // The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
 // Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
 // was. A User Defined pump (Other) has no facts to show, so its facts are still typed here.
+// OakBarn Brewery, 2026-11-16: "We can always use what you found, Just add a Caveat that the Properties came from Internet searches
+// and not an Official Websites and they are Informational rather than facts" (the sources: docs/DC_Brewing_Pumps.md)
+const PUMP_FROM_PRIME = 'Self Priming: from OakBarn Brewery.';
+const pumpFromNote = f => `Where from: ${f.from}${f.official ? ' (the maker\'s own website).' : ', not the maker\'s official website: information, not facts.'}` + (typeof f.selfPrime === 'boolean' ? ' ' + PUMP_FROM_PRIME : '');
 const PRIME_NOTE = '⚠ Not self priming: put the pump lower than the liquid, and fill it (prime it) before you turn it On.';
 const PUMP_VIEW_ROWS = PUMP_FACT_ROWS.filter(r => r[1] !== 'ports');
 const pumpFactsView = o => !!factsOf(o) && o.pumpModel !== 'other';
 const PUMP_FACTS_POP = { title: 'Pump facts', view: pumpFactsView, redraw: 'pumpModel', fields: o => {
   const f = factsOf(o), T = DEVICE_TIPS;
   const power = ['_power', 'Power', 'ro', powerText(powerOf(o)) || 'Not set', false, false, { tip: T.pumpPower }], use = ['_use', 'Use', 'ro', pumpUseText(o), false, false, { tip: T.pumpUse }];
-  if (pumpFactsView(o)) return [['_pfn', `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}`, 'note', null, false, false, { keep: true }], power, use,
+  if (pumpFactsView(o)) return [['_pfn', `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}`, 'note', null, false, false, { keep: true }], ['_pfc', pumpFromNote(f), 'note', null, false, false, { keep: true }], power, use,
     ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', k === 'selfPrime' ? ({ true: 'Yes', false: 'No' })[selfPrimeOf(o)] || 'Not known' : String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }]),
     // the need-to-know priming note under a greyed Self Priming of No (OakBarn Brewery, 2026-11-16: "Maybe add that note about Primimg
     // under the Greyed Out SelfPrimimg for pimps that have ano self Priming"; Rule 11.8 item 2 exception)
