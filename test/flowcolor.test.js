@@ -71,6 +71,18 @@ assert.ok(await until(() => store.getProp('Done', 'value') === 3));
 assert.deepEqual(eng.flowView().ips, { IP_1: 'red' });
 eng.resetFlow(); assert.deepEqual(eng.flowView(), { tab: '', pipes: {}, ips: {} });
 assert.ok(compile('tab.flow_Color = Reddish_Brown\n').errors.length === 0);
+// Gravity flow (Rule 5.21, OakBarn Brewery 2026-11-16: "Assume gravity flow", picked "Lighter and slower")
+{
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(app, /GRAV_PORTS = new Set\(\['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet'\]\)/, 'gravity starts at a vessel low opening');
+  assert.match(app, /computeFlow\(w\.name, srcs, grav\)/, 'the pipes draw gravity flow');
+  assert.match(app, /if \(dir\.has\(st\.p\.id\) \|\| grav\.has\(st\.p\.id\)\) continue;/, 'pumped flow wins over gravity flow');
+  assert.match(app, /\(byGrav \? ' grav' : ''\)/, 'gravity flow has its own look');
+  assert.match(app, /computeFlow\(p\.workspace\)\.has\(p\.id\)/, 'the QD hose pump check still sees pumped flow only');
+  assert.match(css, /\.pipes \.flow\.grav \{ opacity: 0\.45; animation-duration: 2\.4s; \}/, 'lighter and slower');
+  console.log('gravity flow ok');
+}
 clearTimeout(store._persistTimer);
 console.log('flow color tests passed');
 process.exit(0);
+
