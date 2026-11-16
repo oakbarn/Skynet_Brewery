@@ -109,13 +109,11 @@ When a pump or powered valve on it is on, flow runs from the source, through the
 | Setting | Choices / notes |
 |---|---|
 | Flow Color (`.flow_Color`) | **None** (default: follows the Tab), Tap, Strike, Mash, Boil, Whirlpool, Ferment, Red, Yellow, Blue, Green, Brown, Orange, Purple, Reddish Brown, Golden, RGB. The only Process attribute of a pipe or hose (Help 116) |
-| Starts at IP | Flow comes from here |
-| Ends at IP | Flow goes to here |
+| Starts at IP | Where it was drawn from (flow direction is worked out by Skynet) |
+| Ends at IP | Where it was drawn to |
 | Size units | Inch (SAE) or Metric (mm) |
 | Pipe size / Hose size | List of standard sizes, or Custom |
 | Custom size | Shows when Size = custom |
-| Only when ALL of these are on | Optional extra conditions (pumps and valves on the pipe already count) |
-| Reverse flow direction | on / off |
 | Pipe color / Hose color | Default pipe #8a8f96, hose #c9ced3 |
 | Show when nothing flows | Off = only the moving flow shows (the Tab picture already shows the pipe) |
 | Tab, Lock position | |

@@ -56,7 +56,7 @@ assert.deepEqual([...cl], [['Pump_A_copy', 'Pump_Main_copy']]);
 assert.equal(items[1].name, 'Pump_Main_copy'); assert.equal(items[2].name, 'Other_copy', 'a clone without the old name is left alone');
 const taken = [{ name: 'B', _key: 'k1' }, { name: 'A_copy', _key: 'k2', _from: 'k1' }, { name: 'B_copy', _key: 'k3' }];
 assert.equal(followClones(taken, new Map([['A', 'B']])).size, 0, 'a taken name is not used');
-assert.deepEqual(renameGraphicRefs({ heater: 'H', flowWhen: ['H', 'X'], from: 'dev:H:in', to: 'ip_1' }, new Map([['H', 'H2']])), { heater: 'H2', flowWhen: ['H2', 'X'], from: 'dev:H2:in', to: 'ip_1' });
+assert.deepEqual(renameGraphicRefs({ heater: 'H', from: 'dev:H:in', to: 'ip_1' }, new Map([['H', 'H2']])), { heater: 'H2', from: 'dev:H2:in', to: 'ip_1' });
 
 // ---- the Config Editor: no keys shown; on Save each item gets its key back by its name
 const text = stripKeysText(fs.readFileSync(cfg, 'utf8'));
