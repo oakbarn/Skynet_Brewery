@@ -2903,12 +2903,51 @@ function fillEl(n, e0) {
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
+  fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? text : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
   n.classList.toggle('vfit', !!vf);
   if (vf) { const gm = elGeom(e); n.style.setProperty('--vfs', vf.size); n.style.setProperty('--vfp', `${Math.round(vf.mx * (gm.w || 120))}px ${Math.round(vf.my * (gm.h || 60))}px`); }
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
+}
+// A reading stays on one line (OakBarn Brewery, 2026-11-16: "127.3 °F" wrapped, °F dropped below the number; "4 digits"; Rule 2.56):
+// a number with its unit (up to 9999.9 °F) is never split. When it is wider than its box the value's font gets smaller
+// until it fits; when the reading is short again it goes back to its own size. Texts that are meant to wrap
+// (Text and Label Widgets, long strings, Alarm text, picture text) are left alone.
+const FIT_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'valueWidget', 'codeValueWidget', 'timeWidget', 'dateTimeWidget',
+  'gGlobal', 'hydrometer', 'flowMeter', 'scale', 'dutyCycle', 'pid', 'deadband', 'hysteresis', 'fermentor', 'stepper']);
+function fitsOneLine(e, n, drawn) {
+  if (drawn || n.classList.contains('longtext')) return false;
+  if (e.type === 'gGlobal') return !['list', 'graphic', 'longstring'].includes(vkKind(e));
+  return FIT_TYPES.has(e.type) || isHeatElem(e) || isPropValve(e) || (e.type === 'digitalIn' && e.mode === 'counter');
+}
+function fitOneLine(n, vl, text) {
+  const ours = vl._fitPx && vl.style.fontSize === vl._fitPx;
+  if (vl._fitPx && !ours) vl._fitKey = '';             // its own size was set again since (Properties, a Tab Style): measure afresh
+  const on = text !== null && text !== undefined && !String(text).includes('\n');
+  n.classList.toggle('fit1', on);
+  if (!on) { if (ours) vl.style.fontSize = vl._fitBase; vl._fitPx = vl._fitKey = ''; return; }
+  // the digits do not change the width (much): measure again only when the shape of the text or the box changes
+  const key = String(text).replace(/\d/g, '0') + '|' + vl.clientWidth + '|' + vl.clientHeight;
+  if (key === vl._fitKey && (ours || !vl._fitPx)) return;
+  if (ours) vl.style.fontSize = vl._fitBase;          // back to its own size first
+  vl._fitPx = vl._fitKey = '';
+  if (!vl.isConnected) {                                 // just made, not on the Tab yet: fit it once it is
+    if (!vl._fitWait) { vl._fitWait = true; requestAnimationFrame(() => { vl._fitWait = false; if (vl.isConnected) fitOneLine(n, vl, text); }); }
+    return;
+  }
+  if (!vl.clientWidth) return;                           // hidden: fitted the next time it is filled
+  const cs = getComputedStyle(vl), avail = vl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const zoom = vl.getBoundingClientRect().width / (vl.offsetWidth || 1) || 1;      // a Tab drawn smaller or larger
+  const r = document.createRange(); r.selectNodeContents(vl);
+  const base = vl.style.fontSize; let px = parseFloat(cs.fontSize), need = r.getBoundingClientRect().width / zoom;
+  for (let i = 0; i < 4 && need > avail && px > 8; i++) {      // its letter spacing does not shrink with it: a few small steps
+    px = Math.max(8, Math.floor(px * avail / need * 10) / 10 - 0.2);
+    vl.style.fontSize = px + 'px'; need = r.getBoundingClientRect().width / zoom;
+  }
+  if (vl.style.fontSize !== base) { vl._fitBase = base; vl._fitPx = vl.style.fontSize; }
+  vl._fitKey = key;
 }
 // The Chart Widget (Fritz, 2026-11-08, Rule 1.26): its lines come from the brew database (/ui/chart), fetched again every
 // Refresh interval seconds; in between the picture is drawn from the readings it already has.

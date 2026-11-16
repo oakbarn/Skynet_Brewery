@@ -23,7 +23,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    - **Probe type**, greyed out: the kind you picked. The **⬢** beside it has its settings (wires and reference resistor of an
      RTD, thermocouple type, thermistor values, board voltage, Simulator settings).
    - **Units** (°F or °C) and **Decimals** on one line.
-   - **Display**: how the reading shows on its Tab: a **Number**, **LCD digits**, **LED digits** or the **Skynet Dial**; the ⬢ beside it holds the Dial settings ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)).
+   - **Display**: how the reading shows on its Tab: a **Number**, **LCD digits**, **LED digits** or the **Skynet Dial**; the ⬢ beside it holds the Dial settings ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)). The reading and its unit always stay on one line (212.0 °F, even 9999.9 °F): when they are wider than the box the digits get smaller to fit, and go back to their own size when the reading is short again (Skynet Rule 2.56).
    - **Calibration offset** (added to every reading) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**: a DS18B20 probe, 1W, on a Temperature port, TEMP; the same TEMP@1W is in its Suggested Name).
    **Enter** takes you through Label, Interface, Port, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device** looks faded,
