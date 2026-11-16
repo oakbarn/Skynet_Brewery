@@ -65,7 +65,8 @@ Laissez Picture Left, Top, Width et Height tous vides pour étirer la Picture su
 
 | Case | Ce qu'elle fait |
 |---|---|
-| **Pipe Size** | L'épaisseur d'un tuyau de 1/2" dessiné sur ce Tab, en pixels. Un nouveau Tab commence à 10. Toutes les autres tailles de tuyau et de tuyau souple, les réductions et les raccords sont dessinés à l'échelle à partir de lui. |
+| **Pipe Size** | L'épaisseur d'un tuyau de 1/2" dessiné sur ce Tab, en pixels. Un nouveau Tab commence à 10. Toutes les autres tailles de tuyau, les réductions et les raccords sont dessinés à l'échelle à partir de lui. |
+| **Hose Size** | L'épaisseur d'un tuyau souple de 1/2" dessiné sur ce Tab, en pixels. Les tuyaux souples sont en général dessinés plus fins que les tuyaux. Un nouveau Tab commence à 6 (☰ Menu > Default settings). Toutes les autres tailles de tuyau souple sont dessinées à l'échelle à partir de lui. Vide = la Pipe Size, comme sur les Tabs faits avant qu'il y ait une Hose Size. |
 | **Flow Color** | La couleur du flux dans chaque tuyau et tuyau souple de ce Tab. None = chaque tuyau garde sa propre Flow Color. Mash, Boil, Whirlpool et Ferment : un tuyau qui a sa propre Flow Color la garde. Tap, Strike et les couleurs simples : chaque tuyau la prend. Le flux d'une Tap Water Valve est toujours bleu, et le flux qui part d'une Vessel avec une Out Flow Color prend cette couleur. RGB ouvre le Color Picker ([Pipe and hose flow colors](116-pipe-and-hose-flow-colors)). |
 
 ## Le côté technique {#the-technical-side}
