@@ -3642,6 +3642,8 @@ const qdEndMoves = (p, end) => p?.kind === 'pipe' && !!p.hose && (end === 'from'
 const vtopOf = id => typeof id === 'string' && id.startsWith('vtop:') ? id.slice(5) : null;
 const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.08)];      // the middle of the vessel's top
 let qdDrag = null;            // a QD hose end being moved outside Edit layout
+let qdLockFlash = null;       // { id, end, until }: the ring that just locked onto an IP flashes red and yellow for 2 seconds
+let qdDragEnded = 0;          // when a QD hose end drag last ended: the right button's let-go is not a right-click for Help
 const QD_PIC = 'Images/Skynet/Valves/Quick_Disconnect.svg';     // Fritz's drawing, 2026-11-05: a bold red star, easy to see on a Tab
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
 // An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
@@ -3725,6 +3727,9 @@ function ipNode(id, ws) {
   if (isQd(g)) return pipesOn(id, ws).length ? { key: id, pass: true } : { closed: true };
   // a coupling joining two or more pipes / hoses passes flow; a hose end with nothing else on it is an open end (flow pours out)
   if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
+  // a plain IP on its own (the open end of a pipe) with a hose or another pipe joined to it passes flow on into that pipe, the same
+  // as a coupling (OakBarn Brewery, 2026-11-16: "Connected to a Pipe and has flow to the Pipe but no flow into the Pipe")
+  if (g?.kind === 'ip' && !g.attachTo && !g.port && !isFitting(g) && pipesOn(id, ws).length >= 2) return { key: id, pass: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
 // Where the flow in a pipe began (Rule 5.21): a Vessel with an Out flow color, or a Tap Water Valve (always Blue)
@@ -3742,7 +3747,7 @@ const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowK
 const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
 // a vessel's low openings, where liquid runs out by gravity (OakBarn Brewery, 2026-11-16: "Assume gravity flow")
 const GRAV_PORTS = new Set(['outlet', 'outlet2', 'cOutlet', 'cBottomOutlet']);
-function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
+function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // spouts: filled with { p, d } for each open end that flow pours out of    // src: pipe id -> { vessel, tap } where its flow began (filled in here); grav: gravity flow (filled in when given)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -3751,11 +3756,25 @@ function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> {
     if (!oneWay) { add(adj, b, a, -1); add(radj, a, b, 1); }
   };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
+  // an open end, where flow pours out into the air: a pipe end let go in the air, an open-end coupling, or a plain IP with one pipe
+  // on it that is not on a vessel or any equipment (OakBarn Brewery, 2026-11-16: "a graphic of water spurting out the end")
+  const openEnd = key => { const n = nodes.get(key); if (n?.air) return true; const g = L().graphics.find(x => x.id === key && x.kind === 'ip' && x.workspace === ws);
+    return !!g && !g.attachTo && !g.port && (g.fitting === 'coupling' || !isFitting(g)) && pipesOn(key, ws).length === 1; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
     const a = node(p.from), b = node(p.to);
     if (a.closed || b.closed || a.key === b.key) continue;
     if (a.end && b.end) continue;
     link(a.key, b.key, p);
+  }
+  // a pipe or hose end left hanging in the air is open: what pushes into it (a Tap Water Valve that is On, a running pump) pours out
+  // of it, so it shows flow (OakBarn Brewery, 2026-11-16: "Any open pipe in the air can Flow!! Only endcaps, and valves stop flow").
+  // Nothing is pulled in through it: a pump pulls only air there.
+  for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && (g.points || []).length > 1 && !pipeJoined(g))) {
+    const loose = ['from', 'to'].filter(k => !p[k]), fixed = loose.length === 1 && (loose[0] === 'to' ? 'from' : 'to');
+    if (!fixed || !ipPoint(p[fixed], ws)) continue;
+    const a = node(p[fixed]); if (a.closed || !a.key) continue;
+    const key = `air:${p.id}`; nodes.set(key, { key, end: true, air: true });
+    if (fixed === 'from') link(a.key, key, p); else link(key, a.key, p);
   }
   // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
   for (const q of L().graphics.filter(g => isQd(g) && g.qdOn && g.workspace === ws)) {
@@ -3795,10 +3814,11 @@ function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> {
       const u = queue.shift();
       if (u !== start && !nodes.get(u).pass) {            // reached an end of the line: mark the route back to the start
         const n = nodes.get(u);
-        if (n.end || (outward ? n.pull : n.push)) {
+        if ((n.end && !(n.air && !outward)) || (outward ? n.pull : n.push)) {
           const o = outward ? originOf(start) : originOf(u);
           if (!outward && o) pumpSrc.set(devOfIp(start), better(pumpSrc.get(devOfIp(start)), o));
           for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); if (o) src.set(st.p.id, better(src.get(st.p.id), o)); }
+          if (outward && spouts && openEnd(u)) spouts.push({ p: prev.get(u).p, d: prev.get(u).d });
         }
         continue;
       }
@@ -3825,6 +3845,7 @@ function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> {
     while (queue.length) {
       const u = queue.shift(), n = nodes.get(u);
       if (u !== g.id && !n.pass) {
+        if (n.end && spouts && openEnd(u) && prev.get(u)?.p?.kind === 'pipe') spouts.push({ p: prev.get(u).p, d: prev.get(u).d, grav: true });
         if (n.end) for (let k = u; prev.get(k); k = prev.get(k).from) {
           const st = prev.get(k); if (dir.has(st.p.id) || grav.has(st.p.id)) continue;
           grav.set(st.p.id, st.d); if (col && !src.has(st.p.id)) src.set(st.p.id, { vessel: col });
@@ -3835,6 +3856,24 @@ function computeFlow(ws, src = new Map(), grav = null) {    // src: pipe id -> {
     }
   }
   return dir;
+}
+// Water spurting out of an open pipe or hose end (OakBarn Brewery, 2026-11-16: "a graphic of water spurting out the end"; "something
+// similar with blue and white details more details svg needed original art"): Skynet's own drawing, made here in code (no picture
+// file). A blue splash that fans out of the end in four fingers and bends down as it falls, white highlights inside, and drops that
+// fly off, in the color of the flow with white details. It is drawn 100 long pointing right, then turned the way the end points and sized to the pipe. q = the open end, a = its angle.
+const SPOUT_BODY = 'M0,-5 C18,-9 36,-26 56,-36 C64,-41 74,-44 80,-39 C84,-35 79,-30 72,-27 L60,-21 C74,-23 90,-21 100,-15 C106,-11 105,-4 98,-4 '
+  + 'L70,-3 C84,1 97,7 103,15 C107,21 101,25 95,21 L66,8 C73,17 80,28 83,38 C85,45 78,47 74,41 L52,17 C36,13 18,8 0,5 Z';
+const SPOUT_HI = ['M7,-2 C26,-7 42,-17 62,-29', 'M16,0 C40,-3 64,-7 90,-11', 'M22,3 C44,6 64,10 88,15', 'M30,7 C44,13 56,21 70,33'];
+const SPOUT_DROPS = [[108, -30, 6.5, -20], [114, 3, 5.5, 0], [108, 31, 6, 25], [90, 50, 4.5, 40], [68, 52, 5, 55], [122, -14, 4, -5]];
+function waterSpout(mk, q, a, len, col, grav) {
+  const sc = len / 100, sg = mk('g', { class: 'spout' + (grav ? ' grav' : ''), ...(col ? { style: `--spc:${col}` } : {}), transform: `translate(${q[0]},${q[1]}) rotate(${(a * 180 / Math.PI).toFixed(1)}) scale(${sc.toFixed(3)})` });
+  const inner = mk('g', { class: 'spoutBody' });
+  inner.append(mk('path', { class: 'spoutFill', d: SPOUT_BODY }));
+  for (const d of SPOUT_HI) inner.append(mk('path', { class: 'spoutHi', d }));
+  sg.append(inner);
+  SPOUT_DROPS.forEach(([x, y, r, tilt], i) => sg.append(mk('path', { class: 'spoutDrop d' + i,
+    d: `M${x - r * 1.9},${y} C${x - r},${y - r * 0.9} ${x + r},${y - r} ${x + r},${y} C${x + r},${y + r} ${x - r},${y + r * 0.9} ${x - r * 1.9},${y} Z`, transform: `rotate(${tilt} ${x} ${y})` })));
+  return sg;
 }
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square (a hose just bends).
 function snapEnd(pts, i, j, c) {
@@ -4126,7 +4165,7 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const srcs = new Map(), grav = new Map(), flow = computeFlow(w.name, srcs, grav), cones = reducers(pipes, w.name);
+  const srcs = new Map(), grav = new Map(), spouts = [], flow = computeFlow(w.name, srcs, grav, spouts), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
   $$('#ws > .qdEnd').forEach(n => n.remove());
   const layers = new Map($$('#ws > svg.pipeL').map(n => [n.dataset.pipe, n])), mine = [];
@@ -4141,6 +4180,14 @@ function renderPipes() {
     g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (byGrav ? ' grav' : '') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
+    // water spurting out of an open end that flow pours out of (OakBarn Brewery, 2026-11-16: "if a pipe or hose is open, maybe a
+    // graphic of water spurting out the end")
+    for (const sp of spouts.filter((x, i, a) => x.p === p && a.findIndex(y => y.p === p && y.d === x.d) === i)) {
+      const pts = p.points || [], atEnd = sp.d === 1, q = atEnd ? pts[pts.length - 1] : pts[0], nb = atEnd ? pts[pts.length - 2] : pts[1];
+      if (!q || !nb) continue;
+      const a = Math.atan2(q[1] - nb[1], q[0] - nb[0]), len = Math.max(44, width * 5);
+      g.append(waterSpout(mk, q, a, len, pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), sp.grav && !flow.has(p.id)));     // in the color of the flow (OakBarn Brewery: "maybe match the color of the flow")
+    }
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
@@ -4161,7 +4208,8 @@ function renderPipes() {
     if (!editing && !p.locked && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
       if (!qdEndMoves(p, end)) continue;
       const q = end === 'to' ? p.points[p.points.length - 1] : p.points[0], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
-      grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, 'data-end': end, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
+      const flash = qdLockFlash && qdLockFlash.id === p.id && qdLockFlash.end === end && qdLockFlash.until > Date.now();
+      grabs.push(h('div', { class: 'qdEnd' + (flash ? ' qdLocked' : ''), 'data-gid': p.id, 'data-end': end, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
         style: `left:${q[0] - r}px;top:${q[1] - r}px;width:${2 * r}px;height:${2 * r}px` }));
     }
     if (editing) {
@@ -4548,6 +4596,7 @@ let pointerKind = 'mouse';
 document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }, true);
 document.addEventListener('contextmenu', ev => {
   if (!editing && ev.target.closest?.('div.qdEnd')) { ev.preventDefault(); return; }     // the right button drags a QD hose end (Rule 5.28)
+  if (!editing && (qdDrag || Date.now() - qdDragEnded < 1500)) { ev.preventDefault(); return; }     // letting go of a dragged hose end (over a vessel, say) does not open Help
   if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
   const topic = rightClickTopic(ev.target);
   if (topic) { ev.preventDefault(); openHelp(topic); }
@@ -15245,7 +15294,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (!can('operator')) return toast('Only an operator or an admin can move a hose', true);
   const p = S.config.graphics.find(x => x.id === end.dataset.gid), which = end.dataset.end === 'from' ? 'from' : 'to';
   if (!qdEndMoves(p, which) || p.locked) return;
-  if (!qdCleared(p, which)) { qdSafety(p, which); return; }      // first the safety pop-up (Rule 5.40)
+  { const { pumps, flowing } = qdPumpsOn(p); if (pumps.length || flowing) { qdSafety(p, which); return; } }     // flow in the hose: a warning, no move (Rule 5.40); no flow: it moves at once
   // the end that stays is where the hose hangs from: the dragged end is always drawn last, then turned back for a 'from' end
   const fixed = which === 'to' ? p.points : [...p.points].reverse();
   qdDrag = { p, end: which, pts: clone(p.points), lead: hoseLead(fixed), was: p[which], target: null, moved: false, start: [ev.clientX, ev.clientY] };
@@ -15259,61 +15308,47 @@ window.addEventListener('pointermove', ev => {
   const pts = hoseSag(from, t ? t.c : c, d.lead); d.p.points = d.end === 'to' ? pts : pts.reverse();
   renderPipes();
 });
-// Before a hose end is unhooked (OakBarn Brewery, 2026-11-14: "a POP Off telling user to shut down the Pump and any Valves to keep the
-// hose from Spraying or draining from Gravity Feed. If Pump is off, ask about Gravity Draining Valve setting and Go if user says yes";
-// "Dialog Disappears if Pump is On"): with a pump on it running, or flow in the hose, the pop-up says to turn the pump Off and close
-// the valves, and the end does not move. With nothing running, it asks whether the valves are set so nothing drains out by gravity;
-// Yes lets that end be dragged for the next 2 minutes. The top is frozen (Rule 2.51).
-const qdOk = new Map();       // hose id + end -> until when it may be dragged
-const qdCleared = (p, end) => (qdOk.get(p.id + end) || 0) > Date.now();
+// Before a hose end is unhooked (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.
+// It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning, No flow,
+// no warning"): with no flow the end moves at once, no pop-up. With a pump on it running, or flow in the hose, a warning says to turn
+// the pump Off and the end does not move. The warning keeps checking and closes by itself once nothing flows; then hold the ring again.
+// The top is frozen (Rule 2.51).
 function qdPumpsOn(p) {
   const pumps = ['from', 'to'].map(k => devOfIp(p[k])).filter(n => n !== null).map(elNamed).filter(e => e?.subtype === 'pump' && isOn(e.name));
   const flowing = (() => { try { return computeFlow(p.workspace).has(p.id); } catch { return false; } })();
   return { pumps, flowing };
 }
-// Unhooking a QD hose end (Fritz, 2026-11-14): one pop-up that stays open. 1. A pump on the hose is On: it says to shut it off
-// and keeps checking until it is Off. 2. Then the valves: set so nothing drains by gravity? Yes = go. Exit always closes without moving it.
 function qdSafety(p, end) {
   const hn = p.label || p.name || 'this hose', Hn = hn[0].toUpperCase() + hn.slice(1);
-  const head = h('div', { class: 'bar' }), msg = h('p', {});
-  const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true }, h('div', { class: 'grabHead' }, head), msg);
-  const btn = (text, cls, fn) => h('button', { type: 'button', class: 'big ' + cls, onclick: () => { fn?.(); d.close(); } }, text);
-  const exit = () => btn('✖ Exit', '');
-  let was = null;
+  const msg = h('p', {});
+  const exit = h('button', { type: 'button', class: 'big', onclick: () => d.close() }, '✖ Exit');
+  const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true },
+    h('div', { class: 'grabHead' }, h('div', { class: 'bar' }, h('h3', {}, `⚠ ${Hn}: liquid is flowing`), h('span', { class: 'spacer' }), exit)), msg);
   const step = () => {
-    const { pumps, flowing } = qdPumpsOn(p), run = !!(pumps.length || flowing);
-    if (run === was) return; was = run;
-    if (run) {
-      head.replaceChildren(h('h3', {}, `⚠ ${Hn}: shut off the pump`), h('span', { class: 'spacer' }), exit());
-      msg.textContent = `${pumps.length ? pumps.map(e => e.label || e.name).join(', ') + (pumps.length > 1 ? ' are' : ' is') + ' On' : 'Liquid is flowing in ' + hn}. Turn the pump Off before you unhook ${hn}, so it does not spray. This pop-up goes on by itself once the pump is Off.`;
-    } else {
-      head.replaceChildren(h('h3', {}, `Unhook ${hn}?`), h('span', { class: 'spacer' }), exit(),
-        btn('Yes, unhook it', 'primary', () => { qdOk.set(p.id + end, Date.now() + 120000); toast(`Now drag the end of ${hn} (right mouse button, or a finger).`, false, 6000); }));
-      msg.textContent = `The pump is Off. Are the valves set so nothing drains out of ${hn} by gravity?`;
-    }
+    const { pumps, flowing } = qdPumpsOn(p);
+    if (!pumps.length && !flowing) { d.close(); toast(`Nothing flows in ${hn} now: hold its yellow ring with the right mouse button (or a finger) and drag.`, false, 6000); return; }
+    msg.textContent = pumps.length ? `${pumps.map(e => e.label || e.name).join(', ')}${pumps.length > 1 ? ' are' : ' is'} On. Turn the pump Off before you unhook ${hn}, so it does not spray. This warning closes by itself once nothing flows.`
+      : `Liquid is flowing in ${hn}. Turn Off what feeds it (a pump, or a Tap Water Valve) before you unhook it, so it does not spray. This warning closes by itself once nothing flows.`;
   };
-  step();
-  const tick = setInterval(step, 500);      // the pump's On status, checked while the pop-up is open
+  const tick = setInterval(step, 500);      // the pump's On status, checked while the warning is open
   d.addEventListener('close', () => { clearInterval(tick); d.remove(); });
-  document.body.append(d); d.showModal();
+  document.body.append(d); d.showModal(); step();
 }
 // iPhone Safari pans or zooms on a finger drag unless the touch is stopped here (touch-action is not honoured on SVG there)
 $('#ws').addEventListener('touchstart', ev => { if (!editing && ev.target.closest?.('div.qdEnd')) ev.preventDefault(); }, { passive: false });
 window.addEventListener('pointercancel', () => { if (!qdDrag) return; Object.assign(qdDrag.p, { points: qdDrag.pts, [qdDrag.end]: qdDrag.was }); qdDrag = null; renderPipes(); });
 window.addEventListener('pointerup', async () => {
   if (!qdDrag) return;
-  const d = qdDrag; qdDrag = null;
+  const d = qdDrag; qdDrag = null; qdDragEnded = Date.now();
   const back = () => { Object.assign(d.p, { points: d.pts, [d.end]: d.was }); renderPipes(); };
   if (!d.moved) return back();
   const at = d.target?.id ?? null; d.p[d.end] = at; renderPipes();
-  // a person moved the end by hand: they say the real hose is there too before it is kept (Fritz, 2026-11-06, Rule 5.34)
-  const hn = d.p.label || d.p.name || 'The hose', there = at ? qdWhere(at, d.p.workspace) : 'off (loose, no flow)';
-  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));      // the hose shows where it went before the question
-  if (!confirm(`Is the real ${hn} ${there} now?\n\nOK = Yes, it is connected: keep it there.\nCancel = No: put it back where it was.`)) return back();
+  // let go: the end is kept where it is, on the IP or vessel top, or hanging loose (OakBarn Brewery, 2026-11-16: no confirmation)
+  const hn = d.p.label || d.p.name || 'The hose';
   try {
     await api('POST', '/ui/hose', { id: d.p.id, to: at, points: d.p.points, end: d.end });
-    qdOk.delete(d.p.id + d.end);       // the next unhook asks again
-    toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose (no flow)'}`);
+    if (at) { qdLockFlash = { id: d.p.id, end: d.end, until: Date.now() + 2000 }; renderPipes(); setTimeout(() => { qdLockFlash = null; renderPipes(); }, 2000); }
+    toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose, in the air'}`);
   } catch (e) { back(); toast(e.message, true); }
 });
 // a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
