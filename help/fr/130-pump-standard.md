@@ -37,9 +37,9 @@ couleur et même épaisseur, donc les deux se rejoignent en une seule pièce. Sa
 Skynet la choisit pour vous : le Hose ou Pipe arrive du même sens que le tuyau ou le flexible joint à cette IP. Sans rien de
 joint, il arrive le long du côté, et il tourne pour suivre dès qu'un tuyau ou un flexible est joint. Il n'y a rien à choisir.
 
-**IP Type In** et **IP Type Out** sont le raccord sur l'entrée et la sortie de la pompe : Tri-Clamp, NPT, BSP ou Quick Disconnect
-(Règle Skynet 5.40). Une pompe commence avec celui que disent ses **Ports** (TC est Tri-Clamp, FPT ou MPT est NPT, BSP est BSP),
-sinon le **Default pipe IP Type**.
+**IP Type In** et **IP Type Out** sont le raccord sur l'entrée et la sortie de la pompe, avec sa taille (FPT1/2, TC1.5 ...)
+(Règle Skynet 5.40). Une pompe commence avec celui que disent ses **Ports**, sinon le **Default pipe IP Type**. Un bout de tuyau
+sur la pompe va avec elle de lui-même (un bout MPT1/2 sur un port FPT1/2).
 
 ## Tuyaux sur une pompe {#pipes-on-a-pump}
 

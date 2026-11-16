@@ -66,7 +66,7 @@ assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace, g
 assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace, g)); if (!pw) return;'), 'a TC fitting with no pipe: the Default pipe size, on a vessel it keeps its size');
 assert.ok(app.includes("size: String(hose ? defHoseIn() : defPipeIn()) };"), 'a new pipe or hose starts at the Default size');
 assert.ok(/\['defPipeSize', 'Default Pipe Size/.test(app) && /\['defHoseSize', 'Default Hose Size/.test(app), 'the Default settings tab has them');
-assert.ok(app.includes("x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName") && /if \(!hose\) \{\n    const nb = /.test(app), 'a new pipe joined to a pipe takes its size; a hose never does (Rule 2.42, 2026-11-16)');
+assert.ok(app.includes("x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName") && /if \(!hose\) \{\n    const id = [^\n]*\n    if \(id\) takeNeighbour\(g, /.test(app), 'a new pipe joined to a pipe takes its size; a hose never does (Rule 2.42, 2026-11-16)');
 assert.ok(app.includes("{ key: 'default', title: 'Default settings',"), 'the Menu tab is called Default settings');
 assert.ok(app.includes("h('h3', {}, 'Skynet Defaults for New User Created Items')"), 'the Skynet Defaults for New User Created Items are listed');
 assert.ok(app.includes('const k = elK(e), w = e.w || 120'), 'a Device is drawn for its pipes');

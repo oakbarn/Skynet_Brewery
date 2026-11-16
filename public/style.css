@@ -290,6 +290,7 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
 .pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
+.pipes .ipMis { fill: none; stroke: #f39c12; stroke-width: 3; stroke-dasharray: 4 3; pointer-events: all; }
 /* IP widget fittings: tee, elbows, cross, manual valve */
 #ws .gfx.ip.fit { border: none; background: none; border-radius: 0; box-shadow: none; }
 #ws .gfx.ip.fit svg { width: 100%; height: 100%; overflow: visible; }
@@ -1384,3 +1385,8 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 /* Default settings Tab: Freeze (OakBarn Brewery, 2026-11-16, Default Tab 3; Rule 2.51): the title and Save stay at the top while the rest scrolls */
 .defTab .defFreeze { position: sticky; top: -10px; z-index: 5; background: var(--panel); padding: 6px 0 4px; margin-top: -6px; border-bottom: 1px solid var(--line); }
 .defTab .defFreeze .bar { margin: 0; }
+/* Default settings > IP Types (Rule 5.40): a row of tick boxes for each type */
+.ipTicks { display: flex; flex-direction: column; gap: 6px; }
+.ipTickRow b { display: block; font-size: .9em; margin-bottom: 2px; }
+.ipTickBoxes { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.ipTick { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; font-size: .9em; }

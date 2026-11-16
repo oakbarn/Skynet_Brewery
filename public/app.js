@@ -1,7 +1,7 @@
 import { addEyes } from './eye.js';
 import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -15,8 +15,8 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
-import { IP_TYPES, ipTypePick, defaultIpType, pumpIpType } from './iptype.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText } from './pumps.js';
+import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, isIpCode, ownerIpType, fitOwnedEnds, usedIpTypes } from './iptype.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
@@ -1394,7 +1394,7 @@ function vPortXY(g, k, pos) {
   return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
 }
 // a port's Label: a Vessel Widget IP's own Label (it starts the same as its Name, Fritz 2026-11-05), else its Name and Standard
-const vPortLabel = (g, k, p) => p.label ? p.label : isStove(g) ? `${eqClass(g).ports[k].name} (${IP_TYPES.find(([t]) => t === stoveOutType(g))?.[1] || 'IP'})`      // its IP Type (Rule 19.7)
+const vPortLabel = (g, k, p) => p.label ? p.label : isStove(g) ? `${eqClass(g).ports[k].name} (${stoveOutType(g) || 'IP'})`      // its IP Type (Rule 19.7)
   : `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
 // the starting port settings of a new widget
 const eqDefaultPorts = c => Object.fromEntries(Object.entries(EQ[c].ports).filter(([, d]) => d.on).map(([k, d]) => [k, { installed: true, position: portDefPos(d), standard: EQ_STANDARDS[0] }]));
@@ -1550,7 +1550,7 @@ const isVW = g => g?.kind === 'vessel' && !!g.vwidget && !g.integrated && isSkyV
 const isStove = g => g?.kind === 'vessel' && (g.vesselType === 'stoveTop' || g.vesselType === 'stoveTopOut');
 const isIceCan = g => g?.kind === 'vessel' && g.vesselType === 'iceCan';        // the Ice Water Can (Rule 19.8)
 // the IP Type of a Stove Top Vessel's Bottom Outlet (Rule 5.40), '' when it has none; it starts as the Default pipe IP Type
-const stoveOutType = g => g?.vesselType === 'stoveTopOut' && g.ports?.outlet?.installed !== false ? g.ipTypeOut || defaultIpType(S.config.brewDefaults || {}) : '';
+const stoveOutType = g => g?.vesselType === 'stoveTopOut' && g.ports?.outlet?.installed !== false ? g.ipTypeOut || defaultIpType(S.config.brewDefaults || {}, { female: true }) : '';
 const isSized = g => isVW(g) || isStove(g);
 const vDia = g => (g.sizeMethod === 'diameter' || isStove(g)) && +g.diameter > 0 && +g.vheight > 0;       // drawn by its real size
 const vGal = g => { const v = +(g.volume ?? g.maxVolume) > 0 ? +(g.volume ?? g.maxVolume) : 10; return g.units === 'Metric' ? v / 3.78541 : v; };
@@ -1747,6 +1747,10 @@ const FIT_SVG = {
 // (1/2" when not set), drawn in proportion: a 1" pipe is twice as thick as a 1/2" one. Sizes are kept in inches; the metric
 // choices are the common mm sizes that match them (pipe: DN sizes, hose: inside diameter).
 const pipeSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.pipeSize) || 10;
+// Each tab also has a Hose size (OakBarn Brewery, 2026-11-16: "Add PX size for Hose Separate from Pipe. Hoses need to be smaller than a
+// pipe in most cases"): how thick a 1/2" hose is drawn. A Tab without one draws its hoses at its Pipe size, as before (Rule 2.42).
+const HOSE_PX = 6;
+const hoseSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.hoseSize) || pipeSize(wsn);
 const PIPE_SIZES = [['0.5', '1/2"  (most common)', '15 mm (DN15)'], ['1', '1"', '25 mm (DN25)'], ['0.75', '3/4"', '20 mm (DN20)'], ['0.25', '1/4"', '8 mm (DN8)'],
   ['2', '2"', '50 mm (DN50)'], ['3', '3"', '80 mm (DN80)'], ['4', '4"', '100 mm (DN100)'], ['5', '5"', '125 mm (DN125)'], ['6', '6"', '150 mm (DN150)']];
 const HOSE_SIZES = [['0.5', '1/2"  (most common)', '13 mm'], ['1', '1"', '25 mm'], ['0.75', '3/4"', '19 mm'], ['0.25', '1/4"', '6 mm'], ['2', '2"', '50 mm']];
@@ -1755,7 +1759,7 @@ function sizeInches(p) {
   if (p.size === 'custom') { const c = +p.sizeCustom; return c > 0 ? (p.sizeUnits === 'mm' ? c / 25.4 : c) : 0.5; }
   return +p.size > 0 ? +p.size : 0.5;
 }
-const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
+const pipeWidth = p => (p.hose ? hoseSize(p.workspace) : pipeSize(p.workspace)) * sizeInches(p) / 0.5;
 // The Default pipe size and hose size (☰ Menu > Default settings; Fritz, 2026-11-07: "setting a Default Pipe size and have all the
 // devices with Ips conform to that size", Rules 2.42 and 5.36): a new pipe or hose starts at it, and a Device, Pipe Fitting or other
 // item with IPs that has no pipe on it is drawn for the Default pipe size. 1/2" when not set.
@@ -1767,7 +1771,8 @@ const defHoseIn = () => +S.config.brewDefaults?.defHoseSize > 0 ? +S.config.brew
 // with its two arms. Its size follows the pipe. Not drawn where the end sits on a fitting, a Quick Disconnect or End Cap that is
 // drawn already, or on a Quick Disconnect hose's free end (its yellow ring shows there).
 const CONN_NS = 'http://www.w3.org/2000/svg';
-function connShape(t, w) {
+function connShape(code, w) {
+  const t = ipFamily(code) === 'dn' ? 'bsp' : ipFamily(code);        // a metric (DN) thread is drawn as a straight thread
   const g = document.createElementNS(CONN_NS, 'g'), mk = (tag, a) => { const e = document.createElementNS(CONN_NS, tag); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); g.append(e); return e; };
   const steel = '#d5d9de', edge = '#5b6168', r = w / 2;
   g.setAttribute('class', 'conn conn_' + t);
@@ -1801,11 +1806,11 @@ const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, 
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
 const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
 const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
-// a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = the screen's usable size and 10)
+// a new Tab's size and pipe and hose thickness (☰ Menu > Default settings; empty = the screen's usable size, 10 and 6)
 // The screen's usable size (OakBarn Brewery, 2026-11-16): the size of the screen the Tab is made on, less the taskbar (1920 x 1040 on a
 // 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
 const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
-const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
+const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
@@ -2350,12 +2355,7 @@ function applySplit(it, p, plan, who, rule) {
   });
   const idOf = k => k === 'A' || k === 'B' ? ends[k] : /^J\d$/.test(k) ? joints[+k[1]] : k;
   const made = [];
-  plan.pieces.forEach((pc, i) => {
-    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
-    if (i) { delete q.name; delete q.label; delete q.labelVisible; }
-    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
-    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
-  });
+  cutPieces(p, plan.pieces, idOf, newId).forEach((q, i) => { if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); } });      // every piece keeps the pipe's settings
   return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule ${rule}).`
     : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule ${rule}).` };
 }
@@ -3629,7 +3629,7 @@ const isQd = g => g?.kind === 'ip' && g.fitting === 'qd';
 const isQdHose = p => p?.kind === 'pipe' && p.hose && p.qd;
 // a hose end that moves outside Edit layout: a QD hose's free end, or a hose end whose IP Type is Quick Disconnect (Rule 5.40,
 // as lib/qdhose.js qdEndMoves). Hoses only, one end at a time.
-const qdEndMoves = (p, end) => p?.kind === 'pipe' && !!p.hose && (end === 'from' ? p.ipTypeFrom === 'qd' : !!p.qd || p.ipTypeTo === 'qd');
+const qdEndMoves = (p, end) => p?.kind === 'pipe' && !!p.hose && (end === 'from' ? ipFamily(p.ipTypeFrom) === 'qd' : !!p.qd || ipFamily(p.ipTypeTo) === 'qd');
 const vtopOf = id => typeof id === 'string' && id.startsWith('vtop:') ? id.slice(5) : null;
 const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.08)];      // the middle of the vessel's top
 let qdDrag = null;            // a QD hose end being moved outside Edit layout
@@ -3741,10 +3741,9 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
   };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
-    if (!(p.flowWhen || []).every(isOn)) continue;
     const a = node(p.from), b = node(p.to);
     if (a.closed || b.closed || a.key === b.key) continue;
-    if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
+    if (a.end && b.end) continue;
     link(a.key, b.key, p);
   }
   // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
@@ -4088,7 +4087,8 @@ function reducers(pipes, ws) {
 }
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
-  if (editing && draft && takePumpSpots()) { renderWs(); return; }      // a pipe or hose put down on a pump's spot joins the pump there (Rule 5.27); the pump is drawn again
+  if (editing && draft && takePumpSpots()) { renderWs(); return; }
+  if (editing && draft) fitOwnedEnds(draft);       // a pipe or hose end on a pump or a Stove Top outlet fits it by itself (Rule 5.40)      // a pipe or hose put down on a pump's spot joins the pump there (Rule 5.27); the pump is drawn again
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
@@ -4106,17 +4106,21 @@ function renderPipes() {
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
-    if (p.baseVisible !== false || editing) {
-      const op = p.baseVisible === false ? 0.35 : 1;
-      for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
-      g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
-    }
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
-    if (p.baseVisible !== false || editing) for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
+    // a pipe or hose always shows (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot disappear in the real world")
+    for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color }));
+    g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
+    for (const c of pipeConnectors(p, width)) g.append(c);     // its IP Type at each end (Rule 5.40)
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
       const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TDo(p).labelFore || '#e6e6e6', 'font-size': TDo(p).labelFontSize || 14 }); t.textContent = p.label; g.append(t);
+    }
+    if (editing && (p.points || []).length > 1) for (const [end, k] of [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']]) {     // an orange ⚠ ring: this end and another pipe's end on the same IP can't be joined without an adapter (Rule 5.40)
+      const other = p[end] && pipes.find(o => o !== p && [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']].some(([e2, k2]) => o[e2] === p[end] && !ipFits(p[k], o[k2], { sameSize: false })));
+      if (!other) continue;
+      const q = end === 'from' ? p.points[0] : p.points[p.points.length - 1], ok = other.from === p[end] ? other.ipTypeFrom : other.ipTypeTo;
+      const ring = mk('circle', { class: 'ipMis', cx: q[0], cy: q[1], r: 11 }), t = mk('title', {}); t.textContent = `⚠ IP Types do not fit: ${p[k]} and ${ok}. Add an adapter fitting, or change one of the IP Types.`; ring.append(t); g.append(ring);
     }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
@@ -4124,7 +4128,7 @@ function renderPipes() {
     }
     // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
     // and so can a hose end whose IP Type is Quick Disconnect, one end at a time (Rule 5.40)
-    if (!editing && !p.locked && p.baseVisible !== false && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
+    if (!editing && !p.locked && (p.points || []).length > 1 && can('operator')) for (const end of ['to', 'from']) {
       if (!qdEndMoves(p, end)) continue;
       const q = end === 'to' ? p.points[p.points.length - 1] : p.points[0], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
       grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, 'data-end': end, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
@@ -4725,14 +4729,8 @@ function tcFitOnPipe(u) {
   const ends = { A: p.from, B: p.to };
   if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
   const idOf = k => k === 'A' || k === 'B' ? ends[k] : k;
-  const pieces = [], made = [];
-  plan.pieces.forEach((pc, i) => {
-    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
-    if (i) { delete q.name; delete q.label; delete q.labelVisible; delete q._key; }
-    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
-    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
-    pieces.push(q);
-  });
+  const made = [], pieces = cutPieces(p, plan.pieces, idOf, newId);      // every piece keeps the pipe's settings
+  pieces.forEach((q, i) => { if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); } });
   if (autoSized(u)) autoSizeUnit(u);             // it takes the pipe's size, about its bend (its ends stay on the pipe's line)
   const armIds = new Set(A0.arms.map(q => q.id));
   for (const q of pieces) for (const [k, i] of [['from', 0], ['to', 1]]) {
@@ -4836,7 +4834,7 @@ function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
   if (hose) g.hose = true; else g.straight = true;
   if (qd) g.qd = true;
   stampIpType(g);
@@ -4849,13 +4847,10 @@ function finishPipe(to) {
   // a new pipe joined to a pipe takes that pipe's size (OakBarn Brewery, 2026-11-16: "if you are building a Manifold out of pipe in
   // the real world, the logical choice is the next pipe is the same size"); it starts end first. Hoses never auto size ("No auto
   // sizing of Hoses is correct"): a hose keeps the Default Hose Size.
+  // It also takes that pipe's IP Type at the joint and its color (takeNeighbour, public/pipefit.js).
   if (!hose) {
-    const nb = [g.from, g.to].map(id => typeof id === 'string' ? draft.graphics.find(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)) : null).find(Boolean);
-    if (nb?.size && nb.size !== g.size) {
-      g.size = nb.size;
-      if (nb.size === 'custom') { g.sizeCustom = nb.sizeCustom; g.sizeUnits = nb.sizeUnits; }
-      stampIpType(g);
-    }
+    const id = [g.from, g.to].find(id => typeof id === 'string' && draft.graphics.some(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)));
+    if (id) takeNeighbour(g, draft.graphics.find(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)), id);
   }
   giveName(g, draft.graphics);
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
@@ -6519,7 +6514,7 @@ function addVesselWidget(c) {
   const n = draft.graphics.filter(g => eqClass(g) && g.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: c, workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
     name: base + '_' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
-  if (c === 'stoveTopOut') g.ipTypeOut = defaultIpType(S.config.brewDefaults || {});         // its Bottom Outlet's connector (Rule 5.40)
+  if (c === 'stoveTopOut') g.ipTypeOut = defaultIpType(S.config.brewDefaults || {}, { female: true });         // its Bottom Outlet's connector (Rule 5.40)
   if (c === 'iceCan') { g.flowColor = ICECAN_FLOW; g.label = 'Ice Water'; }      // cold water: its Out flow starts Blue (Rule 19.8)
   if (EQ[c] && isStove({ kind: 'vessel', vesselType: c })) { Object.assign(g, { volume: STOVE_GALLONS, units: 'US' }); [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab)); }      // drawn at its Gallons (Rule 19.7)
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
@@ -6856,7 +6851,7 @@ function vbDirOf(g, k) {
   return [0, 1];
 }
 function vbPipe(ws, from, to, a, b, size) {
-  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', flowWhen: [], baseVisible: true, size: String(size || defPipeIn()), straight: true, from, to };
+  const p = { id: newId(), kind: 'pipe', workspace: ws, points: [a.map(Math.round), b.map(Math.round)], color: '#8a8f96', size: String(size || defPipeIn()), straight: true, from, to };
   stampIpType(p); giveName(p, draft.graphics); draft.graphics.push(p); return p;
 }
 // a TC Pipe Fittings Widget with one end at `at`, its other end going on along D (an Elbow: turning to `turn`)
@@ -7592,15 +7587,14 @@ const F = {
     ['label', 'Label (never blank: it starts as its Name in small letters, pipe_1, Rule 3.14)', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
     ['_flN', 'None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.', 'note'],
-    ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['from', 'Starts at IP', 'ip'], ['to', 'Ends at IP', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
-    ['ipTypeFrom', 'IP Type at start', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
-    ['ipTypeTo', 'IP Type at end', 'sel', ipTypePick(sizeInches(it)), false, false, { tip: IP_TYPE_TIP }],
-    ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
+    ...[['ipTypeFrom', 'IP Type at start', 'from'], ['ipTypeTo', 'IP Type at end', 'to']].map(([k, l, end]) => ownerIpType(draft || S.config, it[end])
+      ? [k, l, 'ro', null, false, false, { tip: IP_OWNED_TIP }]       // on a pump or a Stove Top outlet: it fits that one by itself
+      : [k, l, 'sel', ipChoices(it[k]), false, false, { tip: IP_TYPE_TIP }]),
     ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
-    ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
-    ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
+    ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
 // Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
 for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
@@ -7628,7 +7622,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
   ['image', isStove(it) || isIceCan(it) ? 'Graphic (picture path; empty = drawn by Skynet for its Height and Width)' : 'Graphic (picture path)', 'path'],
   ...(hasTop(it) && !isKettle(it) ? [['_top', `Hose hang top: its top third is one big IP. A Quick Disconnect hose dropped there hangs over the rim, and a Process line Hose_1.connect = ${it.name || 'its Name'} puts it there (Rules 5.28 and 5.34).`, 'note']] : []),
   // a Stove Top Vessel's one IP is fixed at the center of its bottom: only its IP Type is set (Rule 19.7)
-  ...(it.vesselType === 'stoveTopOut' ? [['ipTypeOut', 'Bottom Outlet IP Type', 'sel', IP_TYPES, true, false, { tip: STOVE_IP_TIP }]] : []),
+  ...(it.vesselType === 'stoveTopOut' ? [['ipTypeOut', 'Bottom Outlet IP Type', 'sel', ipChoices(it.ipTypeOut), true, false, { tip: STOVE_IP_TIP }]] : []),
   ...Object.entries(isStove(it) || isIceCan(it) ? {} : EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
@@ -7984,7 +7978,11 @@ const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump
   + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.';
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
-  ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.'],
+  // the cavitation caveat (OakBarn Brewery, 2026-11-16: "add the little caveat on that proprtues that Boiling Liquids are not recomened
+  // to be Pumps because of Cavitation")
+  ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.\n\n⚠ Boiling liquids are not recommended to be pumped because of cavitation (the hot liquid turns to steam bubbles inside the pump, so it loses its flow and can be damaged).'],
+  // Self Priming (OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for a Riotide it is no")
+  ['pumpSelfPrime', 'selfPrime', 'Self Priming', 'Can the pump start pumping on its own when it sits above the liquid? Most brewery pumps cannot (No): the pump has to sit lower than the liquid it pulls from, and be filled with liquid (primed) before it is turned On, or it runs dry and can be damaged. To prime it, let the liquid flow in and open its air vent until liquid comes out.'],
   ['pumpPorts', 'ports', 'Ports', PORTS_TIP]];
 // Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
 // make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
@@ -7997,16 +7995,20 @@ function pumpPortField(o, f, tip) {
 // The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
 // Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
 // was. A User Defined pump (Other) has no facts to show, so its facts are still typed here.
+const PRIME_NOTE = '⚠ Not self priming: put the pump lower than the liquid, and fill it (prime it) before you turn it On.';
 const PUMP_VIEW_ROWS = PUMP_FACT_ROWS.filter(r => r[1] !== 'ports');
 const pumpFactsView = o => !!factsOf(o) && o.pumpModel !== 'other';
 const PUMP_FACTS_POP = { title: 'Pump facts', view: pumpFactsView, redraw: 'pumpModel', fields: o => {
   const f = factsOf(o), T = DEVICE_TIPS;
   const power = ['_power', 'Power', 'ro', powerText(powerOf(o)) || 'Not set', false, false, { tip: T.pumpPower }], use = ['_use', 'Use', 'ro', pumpUseText(o), false, false, { tip: T.pumpUse }];
   if (pumpFactsView(o)) return [['_pfn', `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''}`, 'note', null, false, false, { keep: true }], power, use,
-    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }])];
+    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [`_${key}`, label, 'ro', k === 'selfPrime' ? ({ true: 'Yes', false: 'No' })[selfPrimeOf(o)] || 'Not known' : String(o[key] ?? '').trim() || f[k] || 'Not known', false, false, { tip }]),
+    // the need-to-know priming note under a greyed Self Priming of No (OakBarn Brewery, 2026-11-16: "Maybe add that note about Primimg
+    // under the Greyed Out SelfPrimimg for pimps that have ano self Priming"; Rule 11.8 item 2 exception)
+    ...(selfPrimeOf(o) === false ? [['_primeNote', PRIME_NOTE, 'note', null, false, false, { keep: true }]] : [])];
   return [['_pfn', 'User Defined pump: type what you know.', 'note', null, false, false, { keep: true }],
     ['power', 'Power', 'sel', PUMP_POWERS, false, false, { tip: T.pumpPower }], use,
-    ...PUMP_VIEW_ROWS.map(([key, , label, tip]) => [key, label, 'text', null, false, false, { tip }])];
+    ...PUMP_VIEW_ROWS.map(([key, k, label, tip]) => [key, label, k === 'selfPrime' ? 'bool' : 'text', null, false, false, { tip }])];      // Self Priming Yes/No is a switch (true/false = a switch)
 } };
 function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   const T = DEVICE_TIPS;
@@ -8020,13 +8022,13 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
     // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Ports, else the Default pipe IP Type
     ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}), it.ipTypeOut ||= it.ipTypeIn,
-      [['ipTypeIn', 'IP Type In', 'sel', IP_TYPES, false, false, { tip: PUMP_IP_TIP, with: ['ipTypeOut', 'IP Type Out', 'sel', IP_TYPES, false, false, { tip: PUMP_IP_TIP }], ...x }]])),
+      [['ipTypeIn', 'IP Type In', 'sel', ipChoices(it.ipTypeIn), false, false, { tip: PUMP_IP_TIP, with: ['ipTypeOut', 'IP Type Out', 'sel', ipChoices(it.ipTypeOut), false, false, { tip: PUMP_IP_TIP }], ...x }]])),
     ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
 const PUMP_XYWH = (x = {}) => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, pairCls: 'xywh',
   with: [['y', 'Y (Vertical)', 'num', null, false, false, { tip: DEVICE_TIPS.xy }], ['w', 'Width', 'num', null, false, false, { tip: DEVICE_TIPS.size }], ['h', 'Height', 'num', null, false, false, { tip: DEVICE_TIPS.size }]], ...x }]];
-const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpPorts'];
+const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpSelfPrime', 'pumpPorts'];
 // can this Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin)
 const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 // Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
@@ -9546,6 +9548,11 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
   else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
+  else if (kind === 'ticks') {      // IP Type sizes (Rule 5.40): a tick box for each size, a row for each type
+    const on = new Set(v || []);
+    input = h('div', { 'data-k': key, 'data-kind': kind, class: 'ipTicks' }, ...IP_SIZES.map(f => h('div', { class: 'ipTickRow' }, h('b', {}, f.name),
+      h('div', { class: 'ipTickBoxes' }, ...f.codes.map(c => h('label', { class: 'ipTick' }, h('input', { type: 'checkbox', class: 'tick', value: c, ...(on.has(c) ? { checked: true } : {}) }), c))))));
+  }
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
     input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8, title: 'Double-click a name to open its Properties' }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
@@ -9554,7 +9561,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'fldPair' }, h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', list: id, placeholder: 'type it, or pick one Skynet heard' }), h('datalist', { id }));
     api('GET', '/ui/hydrometers/heard').then(list => { const dl = input.querySelector('datalist'); for (const x of list || []) dl.append(h('option', { value: x.id }, `${x.id}${x.other ? ' (' + x.other + ')' : ''}: heard ${new Date(x.at).toLocaleTimeString()}${x.sg ? ', SG ' + Number(x.sg).toFixed(3) : ''}`)); }).catch(() => { });
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', ...(kind === 'num' ? { step: 'any' } : {}), value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
-  const full = kind === 'multi' || kind === 'area';
+  const full = kind === 'multi' || kind === 'area' || kind === 'ticks';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
 }
 
@@ -9634,6 +9641,7 @@ function readFields(obj, root = $('#dlgBody')) {
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
+    else if (kind === 'ticks') { v = [...inp.querySelectorAll('input.tick:checked')].map(c => c.value); if (!v.length) v = undefined; }
     else if (kind === 'dbgroups') { v = JSON.parse(inp.dataset.groups || '[]'); if (!v.length) v = undefined; }
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
@@ -10648,7 +10656,6 @@ async function editItem(kind, id) {
       if (isFermentor(work)) { const bad = fermProblems(work, n => draft.elements.some(e => e.name === n)); if (bad.length) throw new Error(bad.join(' ')); }      // Rule 6.30
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
-        if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
         if (g.heater === item.name) g.heater = work.name;
         for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
@@ -10748,7 +10755,8 @@ const TAB_TIPS = {
   height: 'How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless ☰ Menu > Default settings gives a Height.',
   fitScreen: 'One click sets this Tab\'s Width and Height to the usable size of THIS screen (the screen less the taskbar), so the whole Tab fills the screen at Zoom Fit screen with no scroll bars. Press Save to keep it. You can still type your own Width and Height. Pick the screen of the computer you brew from: a Tab sized on a small laptop is drawn smaller on a big screen.',
   vSizer: 'The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout.',
-  pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it.',
+  pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe size, reducer and fitting is drawn to scale from it.',
+  hoseSize: 'How thick a 1/2" hose is drawn on this Tab, in pixels. Hoses are usually drawn thinner than pipes. A new Tab starts at 6 (☰ Menu > Default settings). Every other hose size is drawn to scale from it. Empty = the Pipe Size, as on Tabs made before there was a Hose Size.',
   flowColor: 'The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color.\n\nThe technical side: a Process sets it with tab.flow_Color = Mash, on the Tab the screen shows.',
 };
 // the small ⚠ box of Rule 18.28 (public/labelguard.js), for a box of this dialog that Save waits for; it goes away after 5 seconds
@@ -10783,6 +10791,7 @@ async function editWorkspace() {
     ['vSizer', 'Vessel Sizer', 'sel', [['', 'None'], ...draft.graphics.filter(g => isSized(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])], false, false, tip('vSizer')],
     ['_pipeHead', 'Pipes', 'head'],
     ['pipeSize', 'Pipe Size', 'num', null, false, false, tip('pipeSize', { def: 10 })],
+    ['hoseSize', 'Hose Size', 'num', null, false, false, tip('hoseSize', { def: +w.pipeSize || 10 })],
     ['flowColor', 'Flow Color', 'flowc', 'tab', false, false, tip('flowColor')]], work, draft.workspaces.length > 1, TAB_SPOT);
   // the boxes, as the dialog shows them now
   const dlgEl = $('#dlg'), body = $('#dlgBody'), nameBox = body.querySelector('[data-k="name"]'), idBox = idLocked ? null : body.querySelector('[data-k="id"]');
@@ -12038,6 +12047,11 @@ const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device ===
 // Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
 const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help.\n\n'
   + '⟪b:What it is⟫The Network Address (IP Address) is the board\'s own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.\n\n';
+// Before you add it, and the suggested address (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address
+// based on the Brian's IP address"; "Ok we need to make at least the Hint and Discuss the Fixed address and to best to hook in the
+// Board or Power it on (ESP 32)")
+const NET_HELP_BEFORE = '⟪b:Before you add it⟫Plug the board in, or power it on (an ESP32 too), before you add it, so it is on your network and 🔌 Test Communication can reach it.\n\n'
+  + '⟪b:The suggested address⟫Skynet suggests an address on the Brain\'s own network: the first three numbers are the Brain\'s, and the last is one no other Interface uses (60 to start, the address in Skynet\'s Mega program). It is only a suggestion: the board decides its own address. Make it a fixed address, so it never changes: write it in the board\'s Skynet program, or reserve it for the board in your router (How to find it, below).\n\n';
 const NET_HELP_FIND = '\n⟪b:How to find it⟫Open your router\'s app or its web page and look at its list of connected devices: the board is there with its address. Then, in the router, reserve that address for the board (it may be called a DHCP reservation, a fixed or a static address), so it never changes. Without that, the board can get a new address after a power cut and the Brain can no longer find it.\n';
 const NET_HELP_SAME = '\n⟪b:Windows, Mac, Linux or a Raspberry Pi⟫It is the same on all of them: the address belongs to the board and your router, not to the Brain\'s computer, and nothing more is installed. The Brain only has to be on the same network (the same router) as the board. The Network port below must be the same as the program on the board (Skynet\'s own programs use 4100).';
 const IFACE_TIP = {
@@ -12049,13 +12063,13 @@ const IFACE_TIP = {
   // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
   // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
   // differ for the Pi, Linux, Windows and the Mac"): one for Ethernet, one for WiFi
-  hostEth: NET_HELP_START + '⟪b:Ethernet (a network cable)⟫'
+  hostEth: NET_HELP_START + NET_HELP_BEFORE + '⟪b:Ethernet (a network cable)⟫'
     + '• No WiFi name (SSID) or password is needed: the cable plugs the board into your router or network switch.\n'
     + '• An Arduino Mega with an Ethernet Shield uses the address written in the Skynet program on the board: 192.168.1.60 to start. Type that same address here. If the addresses on your network start with other numbers (for example 10.0.0.), the address in the program is changed to one of yours and the program is loaded on the board again.\n'
     + '• An ESP32 with an Ethernet jack gets its address from your router: see How to find it, below.\n'
     + '• A Raspberry Pi that is the Brain itself: 127.0.0.1 (the Brain talking to itself).\n'
     + NET_HELP_FIND + NET_HELP_SAME,
-  hostWifi: NET_HELP_START + '⟪b:WiFi⟫'
+  hostWifi: NET_HELP_START + NET_HELP_BEFORE + '⟪b:WiFi⟫'
     + '• Yes, the WiFi name (SSID) and its password are needed, but not here: they are typed into the Skynet program on the board (the ESP32) before the program is loaded on it, so the board can join your WiFi. Skynet never asks for them and never keeps them.\n'
     + '• A Raspberry Pi board joins your WiFi in its own WiFi settings, set on the Pi when it is set up.\n'
     + '• Your router then gives the board its address. When the board starts, it shows its address in the Arduino program\'s Serial Monitor (with the USB cable plugged in), and your router lists it too: see How to find it, below.\n'
@@ -12202,6 +12216,17 @@ function ifaceIdTip(name, id, board) {
     `Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above ${i}_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface ${i} (${nm} {${b}}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).`,
     `And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in ${i} in the List Box and your choices are limited only to those devices assigned a Port on the ${i}: ${nm} ${b} will be a choice (among all the other ${i}_ Devices) in the Predictive Text List Box.`].join('\n\n');
 }
+// The Network address Skynet suggests for a new Interface (OakBarn Brewery, 2026-11-16: "suggest a Network address based on the
+// Brian's IP address"): the Brain's first three numbers and a last one no other Interface (or the Brain) uses, 60 first (the address
+// in Skynet's Mega program, 192.168.1.60), then 61, 62 ... With no home address known for the Brain: 192.168.1.60.
+function suggestHost(ips = [], devices = []) {
+  const ip = (ips || []).find(a => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+  if (!ip) return '192.168.1.60';
+  const net = ip.split('.').slice(0, 3).join('.'), used = new Set([...(ips || []), ...(devices || []).map(d => String(d.host ?? '').trim())]);
+  for (let n = 60; n < 255; n++) if (!used.has(`${net}.${n}`)) return `${net}.${n}`;
+  for (let n = 2; n < 60; n++) if (!used.has(`${net}.${n}`)) return `${net}.${n}`;
+  return `${net}.60`;
+}
 // start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
 async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
@@ -12224,6 +12249,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   const fields = o => {
     const conns = connChoices(o.board);
     if (!conns.some(([c]) => c === o.connection)) o.connection = conns[0][0];      // the Connection follows the Board
+    if (!old && o.connection !== 'serial' && !String(o.host ?? '').trim()) o.host = suggestHost(S.brainIps, S.config.devices);      // on the Brain's network (Rule 18.39)
     const rt = rating({ board: o.board, connection: o.connection });
     return [
       ...(renamable ? [['name', 'Name', 'text', null, false, false, { tip: IFACE_TIP.name }]] : [['_nm', `Name: ${o.name} (Devices use it, so it stays)`, 'note']]),
@@ -13647,9 +13673,13 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // ---- Default settings tab (Fritz, 2026-11-07: "create that default settings tab (accessed by the Hamburger Menu Only) and let me look
 // at all the Defaults", Rule 2.42): the defaults set here, a list of the defaults set somewhere else, and the order of the Menu.
 // Only ☰ Menu opens it. It belongs to the panel (every Schema), not to one Schema.
-const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of its pipes. A new pump starts from its Ports, else the Default pipe IP Type.';
-const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP: Tri-Clamp, NPT, BSP or Quick Disconnect. It is drawn as its type, and it is the size of the pipe or hose on it. A new one starts with the Default pipe IP Type on the Default tab.';
-const IP_TYPE_TIP = 'The connector on this end: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the same size as the pipe or hose. A new one starts with the Default IP Type on the Default tab, on both ends.';
+// an IP Type dropdown (Rule 5.40): the sizes ticked in Default settings, the ones already used in the Schema, and its own
+const ipChoices = (...own) => ipTypeChoices(S.config.brewDefaults?.ipTicks, [...usedIpTypes(draft || S.config), ...((draft || S.config).ipAllow || [])], own);      // ipAllow: a sample Schema's own sizes
+const IP_TYPE_PICK_TIP = 'The list shows the sizes ticked in ☰ Menu > Default settings > IP Types, and any already used in this Schema. Tick more there to see them here.';
+const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT port). To change it, change the IP Type of the pump or the vessel.';
+const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs, with its size (FPT1/2, TC1.5 ...). A new pump starts from its Ports, else the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
+const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP, with its size (FPT1/2, TC1.5 ...). It is drawn as its type. A new one starts with the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
+const IP_TYPE_TIP = 'The connector on this end, with its size: Tri-Clamp (TC1.5), pipe thread (FPT female, MPT male), BSP, metric (DN) or stainless Quick Disconnect (FMSSQD female, MSSQD male). A new one starts with the Default IP Type in the pipe\'s size, on both ends. ' + IP_TYPE_PICK_TIP;
 // The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;
 // Rules 2.37, 11.12). The sentences about things Skynet does not do yet wait in Sandbox/Panel_Updates/Panel_Updates.md until they are built.
 const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5)',
@@ -13657,7 +13687,8 @@ const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: 
 const DEF_TIPS = {
   pipe: 'Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.\n\nIPs snap together and are locked.\n\nIPs lock automatically and a Pipe\'s IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.\n\nPipes have a flow simulation.',
   hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nHoses have a flow simulation.',
-  px: 'This is simply how Pipes and Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes or Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
+  px: 'This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
+  hosePx: 'This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
   width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
   height: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
   batch: 'This only affects new User Recipes. This is your normal Batch size when Manually creating a Recipe in Skynet. Skynet does not pretend to be a Recipe Builder and can import a standard Beer.xml file from the popular Recipe builders with no coding on your part in Skynet. Simply create the recipe in your favorite Recipe Builder or get one from a forum or a friend and import it. As long as the import is in the beer.xml agreed standard, Skynet should import it. If you never plan to build a Recipe here you can ignore this entire Section as it has some defaults set to what is most common regardless.',
@@ -13666,6 +13697,7 @@ const DEF_TIPS = {
   boil: 'The Boil Profile a new Recipe starts with. Mostly it is the Boil Time: how long the wort boils (Skynet 60 Minute Boil is 60 minutes). It can also have its own Boil Off, and every Skynet Boil Profile asks the kettle volume at the start and the end of the boil.',
   water: 'The water a new Recipe starts with. Tap Water unless you pick another.\n\nWhat is in your water changes the beer: Calcium and Magnesium (the hardness) help the mash and the yeast, Sulfate makes hops taste crisper and more bitter, Chloride makes malt taste fuller and rounder, and Bicarbonate (alkalinity) suits dark beers but can make pale ones dull. Chlorine gives a medicine taste.\n\nYour Water Department\'s water quality report gives the numbers, or use a Water Test Kit. You can also make your own "water" to match a famous brewing region: start with RO (reverse osmosis) or distilled water and add brewing salts.\n\nAnd if you have been Brewing with your tap water and making Good beer, why rock the apple cart?',
   w2g: 'How much water goes in the mash for each pound (or kilogram) of grain (the grist ratio). Used to help work out the Strike Temperature on Brew Day.\n\nA thick mash (less water, about 1.25 qt/lb or 2.6 L/kg) holds its heat well and is easy to stir. A thin mash (more water, 1.5 to 2 qt/lb or 3 to 4 L/kg) is easier for a pump to move and leaves more water for a batch sparge. Brew in a bag uses all the water at once. Anywhere in between makes good beer.' };
+DEF_TIPS.ipTicks = 'Tick the IP Types you use (Tri-Clamp, pipe thread FPT female and MPT male, BSP, metric DN, Quick Disconnect QD, 1/8" to 6"). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in this Schema. None are ticked to start.';
 const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}`]);      // one line, no "(Skynet default)" (Default Tab 3)
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
 function otherDefaults() {
@@ -13744,9 +13776,14 @@ function renderDefaultTab(box) {
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
-    // the same box twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
-    // the same Default"): typing in one fills the other (newTabPipeTwin)
-    ['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    // the same boxes twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
+    // the same Default"): typing in one fills the other; Pipes and Hoses apart (OakBarn Brewery, 2026-11-16)
+    ['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
+    // IP Type sizes (OakBarn Brewery, 2026-11-16: "A list of the sizes and type in Defualts with a TickBox to show in the List"; "all
+    // Unclicked in the Default"): only the ticked ones, and the ones already used, show in the IP Type lists
+    ['_ipt', 'IP Types', 'head'],
+    ['ipTicks', 'Sizes to show in the IP Type lists', 'ticks', null, false, false, { tip: DEF_TIPS.ipTicks }],
     ['_bd', 'New Devices and Widgets (the Build)', 'head'],
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
@@ -13775,7 +13812,8 @@ function renderDefaultTab(box) {
     ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
     ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['_tabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['_tabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['_tabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
     ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: screenTab().w, tip: DEF_TIPS.width }],
     ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: screenTab().h, tip: DEF_TIPS.height }],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
@@ -13806,12 +13844,14 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
-  d._tabPipe = d.newTabPipe;
+  d._tabPipe = d.newTabPipe; d._tabHose = d.newTabHose;
   hopStandsToForm(d, du.tempUnit);
   const f = paneForm(fields, d, () => { }, !admin);
-  // the Pixels box is in two sections and is one setting: typing in one fills the other
-  const twins = ['newTabPipe', '_tabPipe'].map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
-  if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
+  // each Pixels box is in two sections and is one setting: typing in one fills the other
+  for (const pair of [['newTabPipe', '_tabPipe'], ['newTabHose', '_tabHose']]) {
+    const twins = pair.map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
+    if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
+  }
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
@@ -13825,13 +13865,13 @@ function renderDefaultTab(box) {
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
     hopStandsFromForm(d, su.tempUnit);
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
-    delete d._w2g; delete d._batch; delete d._tabPipe; delete d._grainLabel; delete d.grainLabel;
+    delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
     for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     { const sc = screenTab(); if (+d.newTabWidth === sc.w) delete d.newTabWidth; if (+d.newTabHeight === sc.h) delete d.newTabHeight; }      // the screen's own size is not saved, so a new Tab keeps matching the screen it is made on
-    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
+    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab', 2, 100], ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
@@ -15748,7 +15788,7 @@ function profFields(kind) {
     if (kind === 'pump') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']]], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])]],
       ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']]], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
-      ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...IP_TYPES]], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...IP_TYPES]],
+      ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeIn)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeOut)], false, false, { tip: IP_TYPE_PICK_TIP }],
       ['notes', 'Notes', 'area']];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],

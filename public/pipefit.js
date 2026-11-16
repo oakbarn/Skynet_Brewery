@@ -229,3 +229,28 @@ export function inLine(a, e, c, off = 1.5) {
   const ux = (e[0] - a[0]) / L, uy = (e[1] - a[1]) / L, t = (c[0] - a[0]) * ux + (c[1] - a[1]) * uy, d = Math.abs((c[0] - a[0]) * uy - (c[1] - a[1]) * ux);
   return d <= off && t > 0 ? [Math.round(a[0] + ux * t), Math.round(a[1] + uy * t)] : null;
 }
+
+// A pipe cut in pieces (by a pump, valve, tee, cross, probe tee or Manual Valve, Rules 5.25, 5.26, 5.30): the first piece is the
+// pipe itself, every other piece is a copy of it with its own id and points, so each one keeps every setting the pipe had (size,
+// IP Types, color, Flow Color, lock ...). Only the Name, Label and permanent key are new for a new piece (never used twice, Rules
+// 3.14 and 3.2), and its Show label starts off. pieces: [{ from, to, pts }], idOf turns 'A', 'B', a joint or a port into an IP id.
+// (OakBarn Brewery, 2026-11-16: "the pipe is devided in two pipes and all the IPs and other properties are set and proties inheietrd")
+export const PIECE_OWN = ['id', '_key', 'name', 'label', 'labelVisible', 'points', 'from', 'to'];
+export function cutPieces(p, pieces, idOf, newId) {
+  return pieces.map((pc, i) => {
+    const q = i ? Object.assign(JSON.parse(JSON.stringify(p)), { id: newId() }) : p;
+    if (i) for (const k of ['name', 'label', 'labelVisible', '_key']) delete q[k];
+    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
+    return q;
+  });
+}
+// A new pipe drawn on to a pipe (OakBarn Brewery, 2026-11-16: "the logical choice is the next pipe is the same size") takes that
+// pipe's size, its IP Type at the joint (on both ends) and its color. nb: the pipe it joins, id: the IP they share.
+export function takeNeighbour(g, nb, id) {
+  if (!nb) return g;
+  if (nb.size) { g.size = nb.size; if (nb.size === 'custom') { g.sizeCustom = nb.sizeCustom; g.sizeUnits = nb.sizeUnits; } }
+  const t = nb.from === id ? nb.ipTypeFrom : nb.to === id ? nb.ipTypeTo : '';
+  if (t) { g.ipTypeFrom = t; g.ipTypeTo = t; }
+  if (nb.color) g.color = nb.color;
+  return g;
+}

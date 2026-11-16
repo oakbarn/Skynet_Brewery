@@ -101,6 +101,14 @@ Si vous ne comprenez pas les réseaux et les protocoles, demandez de l'aide à u
 
 **Ce que c'est.** La Network Address (adresse IP) est le numéro de la carte sur votre réseau à la maison : quatre nombres avec des points, par exemple 192.168.1.60. Le Brain trouve la carte grâce à elle, comme une lettre trouve une maison grâce à son adresse.
 
+**Avant de l'ajouter.** Branchez la carte, ou mettez-la sous tension (un ESP32 aussi), avant de l'ajouter, pour qu'elle soit sur
+votre réseau et que 🔌 Test Communication puisse l'atteindre.
+
+**L'adresse proposée.** Skynet propose une adresse sur le réseau du Brain : les trois premiers nombres sont ceux du Brain, et le
+dernier est un nombre qu'aucune autre Interface n'utilise (60 au départ, l'adresse du programme Mega de Skynet). Ce n'est qu'une
+proposition : c'est la carte qui décide de sa propre adresse. Rendez-la fixe, pour qu'elle ne change jamais : écrivez-la dans le
+programme Skynet de la carte, ou réservez-la pour la carte dans votre routeur (Comment la trouver, plus bas).
+
 **Ethernet (un câble réseau).**
 - Aucun nom de WiFi (SSID) ni mot de passe n'est nécessaire : le câble branche la carte sur votre routeur ou votre switch réseau.
 - Un Arduino Mega avec un Ethernet Shield utilise l'adresse écrite dans le programme Skynet sur la carte : 192.168.1.60 au départ. Tapez cette même adresse. Si les adresses de votre réseau commencent par d'autres nombres (par exemple 10.0.0.), l'adresse du programme est changée pour une des vôtres et le programme est rechargé sur la carte.
