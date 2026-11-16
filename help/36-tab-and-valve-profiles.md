@@ -20,9 +20,9 @@ Something with an ON / OFF state (a pump, valve, switch) can only be an LED or T
 ### Give a tab its profile
 
 - On the **Tab Background Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
-- Or in Edit layout, open **⚙ Tab settings** and pick **Tab Background Profile**.
+- Or in Edit layout, open **⚙ Tab Settings** and pick it under **Background > Profile**.
 
-A tab with its own **Background color** in Tab settings keeps that color. Set it to **Default** to use the profile's color.
+A tab with its own **Background > Color** in Tab Settings keeps that color. Set it to **Default** to use the profile's color.
 
 The **Default** Menu tab picks the Tab Background Profile a **new tab** gets.
 
