@@ -23,7 +23,7 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
    - **Probe type**, grisé : la sorte choisie. Le **⬢** à côté contient ses réglages (fils et résistance de référence d'une
      RTD, type de thermocouple, valeurs de la thermistance, tension de la carte, réglages du simulateur).
    - **Units** (°F ou °C) et **Decimals** sur une ligne.
-   - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits)).
+   - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits)). La lecture et son unité restent toujours sur une seule ligne (212.0 °F, et même 9999.9 °F) : quand elles sont plus larges que la case, les chiffres rapetissent pour tenir, puis reprennent leur taille quand la lecture redevient courte (Skynet Rule 2.56).
    - **Calibration offset** (ajouté à chaque lecture) et, sur la même ligne, **Database and .API ⬢** (aide 98).
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le même TEMP@1W est dans son Suggested Name).
    **Entrée** vous fait passer par Label, Interface, Port, Tab, Orientation, puis **➕ Add Device**. Si **➕ Add Device** paraît pâle,
