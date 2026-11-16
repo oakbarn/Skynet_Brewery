@@ -137,6 +137,9 @@ export const HOT_SPOTS = [
   ['Ports', ['interfaces', 'ports-io-pins']], ['Port', ['interfaces', 'ports-io-pins']], ['Trigger Signal', ['interfaces', 'the-trigger-signal']],
   ['Hardware Type', ['interface-tab-device-names', 'device-type-ids']], ['Direct Output', ['interface-tab-device-names', 'device-type-ids']],
   ['Predictive Text', ['predictive-text']], ['List Box', ['list-boxes']],
+  // the Add Interface pop-up (OakBarn Brewery, 2026-11-15, Add Interface markup: "USB Port Hover Help needs a link to the Technical Help")
+  ['USB Port, the technical side', ['interfaces', 'the-usb-port-the-technical-side']], ['Test Communication', ['interfaces', 'test-communication']],
+  ['Lost Comm', ['interfaces', 'board-settings']],
 ];
 
 export const ALL_TOPICS = () => [...HOT_SPOTS.map(x => x[1]), ...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,

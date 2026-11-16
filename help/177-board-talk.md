@@ -10,15 +10,14 @@ Open the **Devices** page and click **⚙ Change** on the Interface.
 
 | Setting | What it does |
 |---|---|
-| **On** | On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected. |
-| **Pause communications** | The panel stops sending to the board (only the "are you there?" PING, so the board keeps its outputs as they are) and does not use what the board says. Board Talk still shows every line. Off again sends every setting and output, so the board matches the screen. |
-| **Answer wait (seconds)** | If the board says nothing for this long, the Devices page shows **no answer**. 2 to 600; empty = 10. |
-| **Diagnostic logging** | Every line to and from the board is written, with plain words, to a file a day in the data folder (`logs/boards`). It writes a lot: turn it off when the problem is found. |
-| **Baud (USB speed)** | A USB board only. It must be the same as the program on the board; Skynet's own programs use 115200. |
+| **On** | On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected. When a board is Off, none of its Devices work. |
+| **🔌 Test Communication** | A step by step check that the Brain and the board are talking, with sample answers and what to check when there is no answer ([Interfaces](76-interfaces)). |
+| **Answer wait (seconds)** | If the board says nothing for this long, the Devices page shows **no answer**. 2 to 600; Skynet uses 10. |
+| **Lost Comm (s)** | A safety: if the board hears nothing from the Brain this long, it turns every output OFF. You are still the primary safety. |
+| **Diagnostic logging** | Normally Off. Every line to and from the board is written, with plain words, to a file a day in the data folder (`logs/boards`). Use it only to find a problem, when you know what the log means. Skynet gives no help with communication problems: the log is a way for you, or someone helping you, to find the problem. Turn it off after. |
 | **Network port** | A board on Ethernet or WiFi only. It must be the same as the program on the board; Skynet's own programs use 4100. |
 
-The **Lost link delay** (on the Devices page) is how long the board waits without hearing from the Brain before it turns every
-output OFF.
+There is no Baud (USB speed) box: it comes from the board. Every Skynet board program talks at 115200.
 
 ## Board Talk
 
@@ -26,7 +25,7 @@ On the **Devices** page click **💬 Board Talk** on the Interface. A window ope
 
 - **→** lines the Brain sends to the board, **←** lines the board sends back, each with its time and its meaning in plain words.
 - **Hide PING** (on to start) hides the "are you there?" line sent every 2 seconds.
-- **⏸ Pause communications** / **▶ Talk again** does the same as the setting above.
+- **⏸ Pause communications** / **▶ Talk again**: the panel stops sending to the board (only the "are you there?" PING, so the board keeps its outputs as they are) and does not use what the board says. Talk again sends every setting and output, so the board matches the screen.
 - Type a line in the box and press **Send** (or Enter) to send it to the board. It is sent even while paused. For example `HELLO`
   asks the board who it is, and `DO 22 1` turns pin 22 ON. **Careful:** a line you send really turns things on and off.
 
