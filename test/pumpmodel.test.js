@@ -116,3 +116,18 @@ assert.match(app, /const profileChoices = kind => \[\.\.\.\(kind === 'pump' && \
 assert.match(app, /if \(\(ovl \|\| \(lit && isPumpDev\(e\)\)\) && img === pic\)/, 'a pump On with Overlay None shows its picture');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.40 \*\*Blichmann RipTide Dialog 2 #3\*\*/m);
 console.log('Dialog 2 #3 tests passed');
+
+// Self Priming and the cavitation caveat (OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for a Riotide it is no"; "Boiling
+// Liquids are not recomened to be Pumps because of Cavitation"; the priming note on the dialog, Rule 11.8 item 2 exception)
+{
+  const { selfPrimeOf, factLines } = await import('../public/pumps.js');
+  assert.equal(selfPrimeOf({ pumpModel: 'riptide' }), false, 'the RipTide is not self priming');
+  assert.equal(selfPrimeOf({ pumpModel: 'march_809' }), null, 'not stated: not known');
+  assert.equal(selfPrimeOf({ pumpModel: 'other', pumpSelfPrime: true }), true, 'a User Defined pump: its own answer');
+  assert.ok(factLines({ pumpModel: 'riptide' }).includes('Self Priming: No'));
+  assert.ok(app.includes("['pumpSelfPrime', 'selfPrime', 'Self Priming',") && app.includes("'pumpHottest', 'pumpSelfPrime', 'pumpPorts'"), 'a Pump fact, saved');
+  assert.ok(app.includes('Boiling liquids are not recommended to be pumped because of cavitation'), 'the cavitation caveat');
+  assert.ok(app.includes("...(selfPrimeOf(o) === false ? [['_primeNote', PRIME_NOTE, 'note'"), 'the priming note under a greyed No');
+  assert.ok(!/riptide'[^\n]*hottest: '\d/.test(fs.readFileSync(new URL('../public/pumps.js', import.meta.url), 'utf8')), 'no RipTide Hottest number without Blichmann\'s own');
+  console.log('self priming tests passed');
+}

@@ -10,7 +10,6 @@ Exemple : ouvrez les Properties du Widget Picture **pic_Kettle_Element** dans l'
 | Un Device ou un Widget (Turns on with, Input, Heater, Timer, Hop Alarm ...) | les Properties de ce Device ou Widget |
 | **Port on vessel** | les Properties de la cuve |
 | **Starts at IP** / **Ends at IP** d'un tuyau | les Properties de l'IP (ou de la pompe, de la vanne ou de la cuve à laquelle il appartient) |
-| **Only when ALL of these are on** d'un tuyau (une liste) | les Properties du nom sur lequel vous double-cliquez |
 
 Comment ça marche :
 

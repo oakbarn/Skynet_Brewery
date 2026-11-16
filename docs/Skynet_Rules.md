@@ -588,7 +588,7 @@ Integrated items, IPs, pipes and hoses, Equipment Profile vessels). (2026-10-27,
 2.19 **Skynet Standard: double-click a picker dropdown** to open the Properties of the one picked,
 when it has a Skynet dialog a user can reach. Example: in pic_Kettle_Element's Properties,
 double-clicking the Tab dropdown on **Brewhouse** opens the Brew House Tab settings. Works for Tab,
-Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Picture and sound pickers
+Device / Widget, vessel and IP dropdowns. Picture and sound pickers
 work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
 changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
 
@@ -892,7 +892,10 @@ Help 155).
   - **How many Pixels are Pipes and Hoses to be drawn on a Tab?** (was "How thick a 1/2" pipe is drawn on a new Tab"; "This is a Tab
     Default setting even though it relates to Drawing Pipes and Hoses, but can be reset on a Tabs Property. This affects only new Tabs.
     There is an exact Duplicate of this in the Tabs Defaults and they are the same Default"): the same setting shows in Pipes, Hoses
-    and Sizes and in **New Tabs**; typing in one fills the other. **Width of a New Tab (px)** and **Height of a New Tab (px)** moved to
+    and Sizes and in **New Tabs**; typing in one fills the other. **Pipes and Hoses apart** (OakBarn Brewery, 2026-11-16: "Add PX size for
+    Hose Separate from Pipe. Hoses need to be smaller than a pipe in most cases"): **How many Pixels are Pipes to be drawn on a Tab?** (10)
+    and **How many Pixels are Hoses to be drawn on a Tab?** (6), each in both places; each Tab has a **Pipe Size** and a **Hose Size**
+    in Tab Settings; a Tab without a Hose Size draws its hoses at its Pipe Size (nothing already made changes). **Width of a New Tab (px)** and **Height of a New Tab (px)** moved to
     New Tabs ("Move to Tab Section").
   - **New User Recipes** (was New Recipes; "Section Title changed to New User Recipes"): **Units** moved to Settings > Panel settings
     ("This is not a default but a Skynet Setting that resides in the Brain"). **Batch Size (Gallons)** or **Batch Size (Liters)** from
@@ -1517,6 +1520,16 @@ still fills with its ring color. Both programs.
   middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
   be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
   the Name and Label greyed out too.)
+- **When a pipe flows, and which way: Skynet does this in the Background and needs no user input** (Rule 11.13). The pipe dialog has
+  no "Only when ALL of these are on" list and no "Reverse flow direction" switch (OakBarn Brewery, 2026-11-16: "Again TMI for anything
+  background"; "and reverse flow .  Only a check valve has prevent Reverse Slow and that is in its properties as to direction"); both
+  were taken out, and older Schemas drop them when they load. Starts at IP and Ends at IP are only where the pipe was drawn from and to.
+- **A pipe or hose always shows** on its Tab, flowing or not (OakBarn Brewery, 2026-11-16: "Pipes are physically there and cannot
+  disappear in the real world.  I cannot see a reason to hide them"). The old "Show when nothing flows" switch was taken out, and
+  older Schemas drop it when they load.
+- **No Tab box in the Pipe or Hose dialog** (OakBarn Brewery, 2026-11-16: "Pipes cannot be moved individually to a different tab.  It
+  is an all or nothing"): a pipe or hose stays on the Tab it was drawn on. Copying a whole Tab to a new Tab waits in the Panel Updates
+  Sandbox, entry 18 (Rule 14.4).
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 - **Pipes and hoses start at None and follow the Tab Flow Color** (Fritz, 2026-11-04). The orange (#ffb347) every pipe in the
   sample Schemas had becomes None once in each Schema; a color picked after that is kept.
@@ -2006,9 +2019,33 @@ Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
 5.40 **IP Type: the connector on each end of a pipe or hose** (OakBarn Brewery, 2026-11-14: "Need 2 additional Defaults with
 associated IPs Pipe Connector and Hose Connector"; "4 Choices Triclamp, NPT, BSP, or QuickDisconnet"; "Pipe and Hose
 Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
-- Every pipe and hose has an **IP Type at start** and an **IP Type at end**: **Tri-Clamp**, **NPT**, **BSP** or **Quick
-  Disconnect**. Both are in its Properties, under its size. The connector has no size of its own: it is the size of the pipe
-  or hose, so the two can never disagree.
+- Every pipe and hose has an **IP Type at start** and an **IP Type at end**. Both are in its Properties, under its size.
+- **Sized IP Types** (OakBarn Brewery, 2026-11-16: "IPs Types will need to be expanded to have size  TC1.5  TC3/4   TC2  ....   NPT
+  to MPT1  MPT1/2  MPT 2"; "FPT1.   A list of the sizes and type in Defualts with a TickBox to show in the List.  Have sizes from
+  1/8 to 6 " ( and if there are odd Metrics Those too."; "Do A with all Unclicked in the Default"): an IP Type is a type and a
+  size in one code, real sizes only (public/iptype.js): **Tri-Clamp** TC1/2, TC3/4, TC1.5, TC2, TC2.5, TC3, TC4, TC6 (sized by
+  the clamp); **FPT** (female) and **MPT** (male) pipe thread 1/8" to 6"; **BSP** 1/8" to 6"; metric **DN6** to **DN150**;
+  stainless **Quick Disconnect** **FMSSQD** (female) and **MSSQD** (male) 1/2" to 3" ("Hose FMSSQD1/2 wher they are on a Pipe
+  or Pump and a MSSQD1/2 on the other end").
+- **Default settings > IP Types** has a tick box for each. **None are ticked to start.** An IP Type list shows the ticked ones,
+  the ones already used in the Schema (Never Take Away), and its own. A sample Schema may name its own (`ipAllow`); the 3 Vessel
+  sample allows TC1.5, TC2, FMSSQD1/2 and MSSQD1/2, and its pipes and pump are TC1.5.
+- **Ends that fit by themselves** ("Pipe and hose changes are always auto"): a pipe end on a pump's In or Out, or on a Stove Top
+  Vessel's Bottom Outlet, takes the IP Type that mates with it (MPT1/2 on an FPT1/2 port), greyed out in the pipe's Properties.
+  A hose's Quick Disconnect end is FMSSQD where it is on a pipe or a pump and MSSQD on its other end. On a Tri-Clamp pipe or pump
+  the real adapter goes there (OakBarn Brewery: "Adapter is what I use"; "And that is the most common TC to QD": TC1.5 to
+  MSSQD1/2); until it is added, the fit warning shows (Rule 5.43).
+- **A pipe divided in two keeps everything** (OakBarn Brewery, 2026-11-16: "Maybe a comment in the Help about auto setting fittings
+  like elbows that the pipe is devided in two pipes and all the IPs and other properties are set and proties inheietrd"; "Good
+  check that auto always works"): a tee, cross, pump, valve, probe tee or Manual Valve on a pipe cuts it, and every piece keeps
+  every setting the pipe had (size, IP Types, color, Flow Color, lock); only its Name, Label and Show label are its own. A new pipe
+  drawn on to a pipe (a corner at an elbow) takes that pipe's size, its IP Type at the joint and its color. Skynet does this in the
+  Background and needs no user input (Rule 11.13). Checked by test/pipesplit.test.js for every kind of cut.
+- **Fit warning:** in Edit layout an orange ring marks two pipe ends on the same IP whose types can't be joined without an
+  adapter (another type, or MPT to MPT, FPT to FPT). Different sizes of one type meet at a reducer, so they are not warned. It
+  only warns; nothing is blocked.
+- Older Schemas: once (ipSizesKept), each old plain type becomes its size (a pipe or hose end from its own size, threads male; a
+  pump from its Ports, female; a Stove Top outlet female), then the ends above are fitted.
 - A size the connector is not made in is not offered with it: Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only
   NPT, BSP and Quick Disconnect.
 - **Defaults (Rule 2.42):** ☰ Menu > Default settings has **Default pipe IP Type** (beside Default pipe size; Tri-Clamp unless
@@ -2087,6 +2124,12 @@ from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, ves
 - **3 Vessel sample:** the Brew Day places the Immersion chiller in the Boil kettle 15 minutes before the end of the boil and takes
   it off after chilling.
 - **BruControl Import:** BruControl has no chillers; the Importer does not run Processes.
+
+5.43 **Only real things on a Tab or in a Process** (OakBarn Brewery, 2026-11-16: "Any fittings are not samples as only real world
+thinks go on a tab or Process unless as Virtual."): everything on a Tab or named in a Process stands for a real thing in the
+brewery, unless it is marked Virtual (Rule 6.2). So there are no sample-only fittings: every fitting is a real Skynet library item
+a user can add (Rule 5.14), and a sample Schema uses those same items. Skynet never draws or assumes a part that is not there:
+where two IP Types can't be joined, the user adds the real adapter, or the fit warning stays (Rule 5.40).
 
 ## 6. Devices, connections and safety
 
@@ -3467,7 +3510,11 @@ Bloviating, not on the Dialog. Plain English in Both Dialog, Dialog DDLB Choices
 then maybe but always follow by plain English in Help and Hover Help. Make the Help and Hover Help be the same for the same topic unless
 the Help can Expand More. Most technical Explanations in Help and Not Hover Help."). In both programs:
   1. **A field's label is 1 or 2 words**, the label of a dropdown too. Nothing else is written on the dialog to explain it (Rule 2.38).
-  2. **Explanations go in the Hover Help**, never on the dialog.
+  2. **Explanations go in the Hover Help**, not on the dialog. **Exception: a need-to-know note** (OakBarn Brewery, 2026-11-16: "Change
+     the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short,
+     plain English note that the brewer must see to be safe or to set up right may show on the dialog, so it is seen with no extra
+     click (Rule 2.44). Use it rarely: one or two sentences, only for safety or setup, and the full explanation stays in the Hover Help
+     and the Help. Example: under a greyed Self Priming of No, the priming note (Rule 18.32).
   3. **Plain English everywhere:** the dialog, its dropdown choices (short, Rule 2.38) and the Hover Help. A technical word may follow
      the plain words, in ( ) (Rule 2.37).
   4. **Plain English first, then the technical part.** Where a topic needs a more technical explanation, the plain English comes first,
@@ -4483,8 +4530,12 @@ have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 
 below the Overlay:
 - **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
   holding the **Pump facts**: **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V), **Use** (**Hot & Cool**, or Cold for a glycol pump),
-  Flow, Lift and Hottest liquid. For a model in the list the Pump facts are to look at only, with one **◀ Back** button; for Other
-  they are typed in (Rule 18.40).
+  Flow, Lift, Hottest liquid and **Self Priming** (Yes / No / Not known; OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for
+  a Riotide it is no"; a switch on a User Defined pump). For a model in the list the Pump facts are to look at only, with one **◀ Back**
+  button; for Other they are typed in (Rule 18.40). Hottest liquid's Hover Help ends with the caveat that boiling liquids are not
+  recommended to be pumped because of cavitation (OakBarn Brewery, 2026-11-16). A fact is filled in only from the maker's own words:
+  the RipTide's Hottest liquid stays Not known until Blichmann's own number is found (blichmannengineering.com now goes to MoreBeer,
+  whose RipTide pages give none).
 - **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
   is filled in and greyed out.
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
@@ -4677,6 +4728,13 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
 - **Lost Comm** Hover Help: after a blank line, "You are the Safety" in bold red with the red safety triangle. **Diagnostic Logging**:
   Skynet's caveat (no help with communication problems) at the bottom, after a blank line, in normal text.
 - More common boards are added once the Skynet firmware is set (Sandbox/Panel_Updates entry 11).
+- **A suggested Network address** (OakBarn Brewery, 2026-11-16: "it is possible for Skynet to suggest a Network address based on the
+  Brian's IP address"; "Ok we need to make at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power
+  it on (ESP 32)"): a new Ethernet or WiFi Interface starts with an address on the Brain's own home network (the Brain's first three
+  numbers and a last one no other Interface or the Brain uses, 60 first; 192.168.1.60 when the Brain's address is not known). Its
+  Hover Help says to plug in or power on the board first, that the address is only a suggestion, and to make it fixed in the board's
+  program or reserved in the router (Help 76). A **Search** button that finds boards on the network waits in Sandbox/Panel_Updates
+  entry 17: it needs the Skynet firmware to answer a search.
 
 18.40 **Blichmann RipTide Dialog 2 #3** (OakBarn Brewery, 2026-11-16, PDF "Blichmann_Riptide_Dialog_2_3", the model, Rule 18.34).
 The Pump Add box (Dialog 2) and Pump Device Properties:
@@ -4879,8 +4937,14 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-16: Rule 5.40 changed (OakBarn Brewery: "IPs Types will need to be expanded to have size  TC1.5  TC3/4   TC2  ....   NPT to MPT1  MPT1/2  MPT 2"; "FPT1.   A list of the sizes and type in Defualts with a TickBox to show in the List.  Have sizes from  1/8 to 6 " ( and if there are odd Metrics Those too."; "Do A with all Unclicked in the Default"; "Make all the IPs on the 3 Vessel  Pipes TC1.5  Allow TC2,  Hose FMSSQD1/2 wher they are on a Pipe or Pump and a MSSQD1/2 on the other end"; "Adapter is what I use"): sized IP Types (TC, FPT, MPT, BSP, DN, FMSSQD, MSSQD), Default settings > IP Types tick boxes (none ticked), ends on pumps and Stove Top outlets fit by themselves, hose QD ends female on a pipe or pump, fit warning ring, older Schemas convert once; 3 Vessel sample TC1.5. A divided pipe keeps every setting on both pieces, and a new pipe drawn on to a pipe takes its size, IP Type and color ("the pipe is devided in two pipes and all the IPs and other properties are set and proties inheietrd"; "Good check that auto always works"), tested. New Rule 5.43 ("Any fittings are not samples as only real world thinks go on a tab or Process unless as Virtual."): only real things on a Tab or in a Process, no sample-only fittings, Skynet never assumes a part. An IP Interview and Default IP Profiles wait in the Panel Updates Sandbox (entries 19, 20). Help 24, 130, 155 (and French). Checked against the BruControl Import program: imported pipes take the Defaults in their own size, its pumps are Skynet Pump Devices.
+- 2026-11-16: Rule 5.21 changed, Rule 2.19 trimmed (OakBarn Brewery, on the pipe's "Only when ALL of these are on" list: "The whole Only when these are on  is a background thing and of little use to a User and Confusing.  Why does it need to be displayed at all."; "Again TMI for anything background"): and on its Reverse flow direction switch: "and reverse flow .  Only a check valve has prevent Reverse Slow and that is in its properties as to direction"): the list and the switch are taken out of the pipe dialog and the code, and Starts at IP / Ends at IP lose "(flow comes from here)" / "(flow goes to here)"; when a pipe flows, and which way, Skynet does this in the Background and needs no user input (Rule 11.13). Only a Check Valve sets a direction, in its own Properties. Older Schemas drop both when they load (Old Ways policy). Also the "Show when nothing flows" switch is taken out (OakBarn Brewery: "Pipes are physically there and cannot disappear in the real world.  I cannot see a reason to hide them"): a pipe or hose always shows. Help 24 (and French). And the Tab box is taken out of the Pipe and Hose dialog (OakBarn Brewery: "Pipes cannot be moved individually to a different tab ... We will add that later  Put in sand box"); Copy a whole Tab to a new Tab is Panel Updates Sandbox entry 18. Help 73, 116 (and French), Widget Library. Checked against the BruControl Import program: it never filled the list, and its pipes use the same dialog.
+- 2026-11-16: Rule 11.8 item 2 changed (OakBarn Brewery: "Change the Rule but avoid mostly as Help is a Better Place but since this is sorta need to know, it follow my One clcik rule"): a short need-to-know note (safety or setup) may show on the dialog, rarely, with the full explanation still in the Hover Help and Help. First use: the priming note under a greyed Self Priming of No in the Pump facts (Rule 18.32). Checked against both programs: the BruControl Import shows the same Pump facts pop-up; nothing else changes there.
+- 2026-11-16: Rule 18.32 changed (OakBarn Brewery: "add the little caveat on that proprtues that Boiling Liquids are not recomened to be Pumps because of Cavitation"; "a Prperty of Self Priming   for a Riotide it is no"): Hottest Liquid Hover Help gets the cavitation caveat; new Pump fact Self Priming (RipTide No; bayite BYT-7A006 No, from its own note; the rest Not known until checked). The RipTide's Hottest Liquid stays Not known: no number found from Blichmann. Help 115, 163 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and show the same facts.
+- 2026-11-16: Rule 18.39 changed (OakBarn Brewery: "suggest a Network address based on the Brian's IP address"; "at least the Hint and Discuss the Fixed address and to best to hook in the Board or Power it on (ESP 32)"): a new Ethernet or WiFi Interface starts with a suggested address on the Brain's network; Hover Help on plugging in or powering on first and on fixed addresses (Help 76, and French). The Search button waits in Sandbox/Panel_Updates entry 17. Checked against the BruControl Import program: its Build page uses the same Add Interface pop-up and the same Brain, so it gets the same suggestion.
 - 2026-11-16: Rule 5.27 changed (OakBarn Brewery, Inlet/Outlet IP question, "A": "Pipe and hose changes are always auto"; "nearest where the user places it"): no Inlet IP / Outlet IP boxes in the Add box, Properties or Pump Profile; a pipe or hose end drawn or dropped on or near a pump joins the nearest of its 8 IPs and the pump's free end moves there. Rule 18.19 list updated. Help 115, 130, 123, 36 (and French). Checked against the BruControl Import program: its pumps are Skynet Pump Devices and get the same; it never set Inlet/Outlet spots. Both programs.
 - 2026-11-16: Rule 2.42: a new pipe joined to a pipe takes that pipe's size, hoses never auto size (OakBarn Brewery's answer on the Hose text); his Default Pipe Size sentence "any new pipe joined to that different size are auto sized to that pipe size" is back in the Hover Help. Help 155 (and French). Checked against the BruControl Import program: it draws no pipes.
+- 2026-11-16: Rule 2.42 changed (OakBarn Brewery: "Add PX size for Hose Separate from Pipe. Hoses need to be smaller than a pipe in most cases"): the Pixels box is split into **How many Pixels are Pipes to be drawn on a Tab?** (10) and **How many Pixels are Hoses to be drawn on a Tab?** (6), each shown in Pipes, Hoses and Sizes and in New Tabs; Tab Settings gets **Hose Size** next to Pipe Size. A new Tab gets both; a Tab without a Hose Size (every Tab made before) draws its hoses at its Pipe Size, so nothing already made changes. Help 26 and 155 (and French). Checked against the BruControl Import program: an imported Tab has no Hose Size, so its hoses draw as before; the Importer's Build page shares this code.
 - 2026-11-16: Rule 2.42 changed (OakBarn Brewery: "Resizing to screen resolution 1920 x 1040 presents well so a New Size to Screen Resolution works very well at Zoom Full Screen", then picked Match the screen + sample Tabs): a new Tab's Width and Height start at the usable size of the screen it is made on (the screen less the taskbar; 1920 x 1040 on a 1920 x 1080 Windows screen; 1920 x 1040 if the screen cannot be read), not 1600 x 900. Default settings shows that size in the boxes and does not save it, so new Tabs keep matching their screen; a different number typed there is kept. Tab Settings keeps typed Width and Height and gets a **🖥 Fit Screen** button (label Screen size) that fills both with this screen's usable size (OakBarn Brewery: "Still allow manual change on the Tabs but make clear the Hover help and maybe a button on the tab properties to set to screen resolution"); Help 26 (and French). The 3 Vessel sample's Brew House, Recipe and Reporting Tabs are now 1920 x 1040 (were 1720 x 745 and 1800 x 785). Help 155 (and French). Checked against the BruControl Import program: an imported Tab keeps the size it brings; the Importer's Build page shares this code.
 - 2026-11-16: Added Rule 14.5, the Process Updates Sandbox (OakBarn Brewery: "New sand Box for Process and put things there till we build those Processes"): `Sandbox/Process_Updates/Process_Updates.md` holds Brew Day, sample Process and Process command ideas, not built until the Skynet Process setup starts. First entries, moved from the Panel Updates Sandbox: the PreBrew grain temperature and Strike Offset boxes, the "Boil Started" button in the sample Brew Day Process, and waiting on the boil temperature from the air pressure. Checked against both programs: notes only, nothing in either program changes.
 - 2026-11-16: Rules 2.42 and 2.51 changed (OakBarn Brewery, PDF "Default Tab 3"): the Default settings Tab is frozen (title and Save at the top, no Save further down); Default Pipe Size, Default Hose Size and both IP Types have his Hover Help word for word; the size lists are one line with no "(Skynet default)"; "How many Pixels are Pipes and Hoses to be drawn on a Tab?" replaces the 1/2" pipe thickness label and shows in Pipes, Hoses and Sizes and in New Tabs (one setting); Width and Height of a New Tab moved to New Tabs with his Hover Help; New Recipes is now **New User Recipes**: Units moved to Settings > Panel settings, Batch Size (Gallons/Liters) kept in liters, a new Recipe starts at 5 gallons, Skynet Single Step Batch Sparge and Skynet 60 Minute Boil (Boil Time from the Boil Profile); Equipment Profile, Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are off the tab; Hover Help written for Mash, Boil and Water Profile and Water to Grain Ratio. Help 155 (and French). Sentences about things not built yet, the Hop Stand change, the Brew Day grain temperature question and the scroll bar pictures wait in Sandbox/Panel_Updates/Panel_Updates.md (Rule 14.4). Checked against the BruControl Import program: it reads the Panel's Units from the same saved setting (unchanged) and has no Recipe screens.

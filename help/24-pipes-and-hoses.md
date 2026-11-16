@@ -44,20 +44,25 @@ Sizes are drawn in proportion: a 1" pipe is twice as thick as a 1/2" one. **Tab�
 
 ## IP Type
 
-Every pipe and hose has an **IP Type at start** and an **IP Type at end**: the connector on each end (Skynet Rule 5.40). The choices are:
+Every pipe and hose has an **IP Type at start** and an **IP Type at end**: the connector on each end, with its size (Skynet Rule 5.40). The types are:
 
-- **Tri-Clamp**
-- **NPT**
-- **BSP**
-- **Quick Disconnect**
+- **Tri-Clamp**: TC1/2, TC3/4, TC1.5, TC2 ... up to TC6. A Tri-Clamp is sized by its clamp: 1/2", 3/4" and 1" tube often all use the common **TC1.5**.
+- **Pipe thread (NPT)**: **FPT** is female and **MPT** is male, 1/8" to 6" (FPT1/2, MPT1 ...). An MPT fits an FPT of the same size.
+- **BSP** (British pipe thread), 1/8" to 6". It does not fit NPT.
+- **Metric pipe (DN)**: DN6 to DN150.
+- **Quick Disconnect**, stainless: **FMSSQD** is female and **MSSQD** is male, 1/2" to 3".
 
-The connector is always the size of the pipe or hose, so it has no size box of its own. Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only the other three.
+**Only the sizes you tick show in the lists.** Tick them in ☰ Menu > Default settings > **IP Types**. None are ticked to start. A size already used in the Schema always shows too.
+
+**Ends that fit by themselves:** a pipe end on a pump, or on a Stove Top Vessel's outlet, fits it (an MPT1/2 end on an FPT1/2 port). Its IP Type is greyed out; change the pump's IP Type to change it. A hose's Quick Disconnect end is female (**FMSSQD**) where it is on a pipe or a pump, and male (**MSSQD**) on its other end. On a Tri-Clamp pipe or pump, add the real adapter there (the most common is TC1.5 to MSSQD1/2): until then the orange ring below shows.
+
+**When ends can't fit:** in Edit layout, an orange ring marks two pipe ends on the same IP that can't be joined without an adapter (Tri-Clamp to NPT, MPT to MPT). Rest the mouse on it to see why. It only warns.
 
 Each end is **drawn as its IP Type**, so you can see it on the Tab: a Tri-Clamp ferrule and clamp, an NPT thread, a BSP hex nut, or a Quick Disconnect cam lock with its two arms. It is not drawn where the end sits on a fitting, a Quick Disconnect or an End Cap, which are drawn already.
 
 A **hose** end that is **Quick Disconnect** can be unhooked and moved at any time, not only in Edit layout, the same way as a QD hose (see Help 127). Grab one end at a time; the other stays. Pipes do not move this way.
 
-A new pipe starts with the **Default pipe IP Type**, and a new hose with the **Default hose IP Type**, on both ends. Both are on ☰ Menu > Default settings, beside the sizes. A Quick Disconnect hose is always Quick Disconnect on both ends. Changing a Default never changes a pipe or hose already made.
+A new pipe starts with the **Default pipe IP Type**, and a new hose with the **Default hose IP Type**, in its own size, on both ends. Both are on ☰ Menu > Default settings, beside the sizes. A Quick Disconnect hose is always Quick Disconnect on both ends. Changing a Default never changes a pipe or hose already made.
 
 ## Reducers
 
@@ -69,10 +74,14 @@ Delete a pipe or hose from its Properties (🗑 Delete), or grab it in Edit layo
 (or **Delete Hose**) button. Its own IPs go with it: a coupling or IP point on one of its ends is deleted too when nothing else is on
 it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel). **↩ Put back** (Ctrl+Z) brings it back.
 
+## Fittings on a pipe
+
+When a tee, cross, pump or valve goes on a pipe, or a pipe turns at an elbow, the pipe is divided into two pipes. Their IPs are set and every setting of the old pipe is kept on both (size, IP Types, colors): Skynet does this in the Background and needs no user input. Each new pipe gets its own Name. A new pipe drawn on to a pipe takes its size, IP Type and color the same way.
+
 ## Shortening a pipe
 
 Grab a pipe in Edit layout and press **🔓 Unlock its ends**: its ends let go and get a coupling. Drag that coupling (or the handle on the end) along the pipe to make it shorter or longer. It stays on its own line.
 
-## Showing only the flow
+## Pipes always show
 
-If the tab's background picture already shows your piping, switch off **Show when nothing flows** on that pipe or hose. Then only the moving flow appears on top of the picture.
+A pipe or hose always shows on its Tab, flowing or not, because it is really there.

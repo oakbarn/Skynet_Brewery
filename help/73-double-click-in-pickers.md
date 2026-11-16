@@ -10,7 +10,6 @@ Example: open the Properties of the Picture Widget **pic_Kettle_Element** on the
 | A Device or Widget (Turns on with, Input, Heater, Timer, Hop Alarm ...) | that Device's or Widget's Properties |
 | **Port on vessel** | the vessel's Properties |
 | **Starts at IP** / **Ends at IP** of a pipe | the IP's Properties (or the pump, valve or vessel it belongs to) |
-| **Only when ALL of these are on** of a pipe (a list) | the Properties of the name you double-click |
 
 How it works:
 
