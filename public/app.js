@@ -11976,24 +11976,44 @@ $('#addSlot').onclick = () => newSlot('');
 // Simulator (it belongs to the panel, Rule 10.10), no Baud (it comes from the board), Test Communication in place of Pause, Lost Comm.
 const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
 // Board settings (OakBarn Brewery, 2026-11-09, Rule 6.27): BruControl's Interface settings, in plain words
+const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help.\n\n'
+  + '⟪b:What it is⟫The Network Address (IP Address) is the board\'s own number on your home network: four numbers with dots, for example 192.168.1.60. The Brain finds the board by it, the way a letter finds a house by its street address.\n\n';
+const NET_HELP_FIND = '\n⟪b:How to find it⟫Open your router\'s app or its web page and look at its list of connected devices: the board is there with its address. Then, in the router, reserve that address for the board (it may be called a DHCP reservation, a fixed or a static address), so it never changes. Without that, the board can get a new address after a power cut and the Brain can no longer find it.\n';
+const NET_HELP_SAME = '\n⟪b:Windows, Mac, Linux or a Raspberry Pi⟫It is the same on all of them: the address belongs to the board and your router, not to the Brain\'s computer, and nothing more is installed. The Brain only has to be on the same network (the same router) as the board. The Network port below must be the same as the program on the board (Skynet\'s own programs use 4100).';
 const IFACE_TIP = {
   name: 'An Interface is the board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 or a Raspberry Pi. Give it a Name that means something to you: Hot Side, Fermentation, your brewery name. Skynet suggests its Interface ID from the Name.',
   board: 'The kind of board this Interface is. Skynet has a program for each board in the list, and sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
-  usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\nMore: USB Port, the technical side.',
-  host: 'The board\'s network address, for example 192.168.1.60. A Raspberry Pi that is the Brain itself uses 127.0.0.1.',
+  usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
+  // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know
+  // nothing about TCIP and IP Address or how to figure out which one to use. Help here can be expansive but start with If you do not
+  // understand Networks and protocalls, call a friend to help. Do we need the SSID and Password to connect? And is this a Software and
+  // differ for the Pi, Linux, Windows and the Mac"): one for Ethernet, one for WiFi
+  hostEth: NET_HELP_START + '⟪b:Ethernet (a network cable)⟫'
+    + '• No WiFi name (SSID) or password is needed: the cable plugs the board into your router or network switch.\n'
+    + '• An Arduino Mega with an Ethernet Shield uses the address written in the Skynet program on the board: 192.168.1.60 to start. Type that same address here. If the addresses on your network start with other numbers (for example 10.0.0.), the address in the program is changed to one of yours and the program is loaded on the board again.\n'
+    + '• An ESP32 with an Ethernet jack gets its address from your router: see How to find it, below.\n'
+    + '• A Raspberry Pi that is the Brain itself: 127.0.0.1 (the Brain talking to itself).\n'
+    + NET_HELP_FIND + NET_HELP_SAME,
+  hostWifi: NET_HELP_START + '⟪b:WiFi⟫'
+    + '• Yes, the WiFi name (SSID) and its password are needed, but not here: they are typed into the Skynet program on the board (the ESP32) before the program is loaded on it, so the board can join your WiFi. Skynet never asks for them and never keeps them.\n'
+    + '• A Raspberry Pi board joins your WiFi in its own WiFi settings, set on the Pi when it is set up.\n'
+    + '• Your router then gives the board its address. When the board starts, it shows its address in the Arduino program\'s Serial Monitor (with the USB cable plugged in), and your router lists it too: see How to find it, below.\n'
+    + '• WiFi has to reach the board where it sits. A USB cable or a network cable is safer.\n'
+    + NET_HELP_FIND + NET_HELP_SAME,
   on: 'On: the panel talks to this board. Off: the panel never opens it, and its Devices show as not connected.\nWhen a board is Off, none of its Devices work. A board must be On and in communication with the Brain (the two talking to each other) to do any action.',
   test: 'Test Communication: a step by step check that the Brain and this board are talking to each other, with sample answers and what to do when they are not.',
   answer: 'Answer wait: if the board says nothing for this many seconds, the Devices page shows "no answer". 2 to 600.',
   lost: `Lost Comm (lost communication) is a safety: if the board hears nothing from the Brain for this many seconds, it turns all its outputs OFF, so a heater or a pump is not left on when the Brain, the cable or the network fails. Must be filled in: ${LOST_LINK.min} to ${LOST_LINK.max}; Skynet uses ${LOST_LINK.def}.`,
-  lostYou: 'Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.',
-  logging: 'Normally Off. Turn it On only to find a problem: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). Use it when you know what the log means. Skynet gives no help with communication problems: the log is only a way for you, or someone helping you, to find the problem. Turn it Off after.',
+  // "Make the Lost Comm and you are the Saftey with a blank line to seperate from Above and Bold and add a Red Safety Tringe before the Caveat"
+  lostYou: '⚠ You are the Safety. Lost Comm is a backup, not your safety: you are responsible for watching your brewery while it runs. You are the primary safety.',
+  logging: 'Normally Off. Turn it On only to find a problem: every line to and from this board is written, with plain words, to a file a day in the data folder (logs/boards). Use it when you know what the log means. Turn it Off after.\n\nSkynet gives no help with communication problems: the log is only a way for you, or someone helping you, to find the problem.',
   netPort: 'The network port the board listens on. It must be the same as the program on the board: Skynet\'s own programs use 4100.',
 };
 const boardFields = o => [['_bsh', 'Board settings', 'head'], ['enabled', 'On', 'bool', null, false, false, { tip: IFACE_TIP.on }],
   ['_test', '🔌 Test Communication', 'go', () => testComm(o._saved), false, false, { tip: IFACE_TIP.test }],
   ['answerSec', 'Answer wait (seconds)', 'num', null, false, false, { tip: IFACE_TIP.answer, def: BOARD_DEFAULTS.answerSec }],
-  ['lostLinkSec', 'Lost Comm (s)', 'num', null, false, false, { tip: IFACE_TIP.lost + '\n' + IFACE_TIP.lostYou }],      // must be filled in (OakBarn Brewery, 2026-11-14)
+  ['lostLinkSec', 'Lost Comm (s)', 'num', null, false, false, { tip: IFACE_TIP.lost + '\n\n' + IFACE_TIP.lostYou }],      // must be filled in (OakBarn Brewery, 2026-11-14)
   ['logging', 'Diagnostic logging', 'bool', null, false, false, { tip: IFACE_TIP.logging }],
   ...(['ethernet', 'esp32'].includes(o.connection) ? [['netPort', 'Network port', 'num', null, false, false, { tip: IFACE_TIP.netPort }]] : [])];
 function boardStart(w) {
@@ -12152,7 +12172,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
       ['board', 'Board', 'sel', [...(o.board ? [] : [['', '(pick the board)']]), ...BOARDS], true, false, { tip: IFACE_TIP.board }],
       ['connection', 'Connection', 'sel', conns, true, false, { tip: IFACE_TIP.connection + (rt.text ? '\nThis connection: ' + rt.text : '') }],
       ...(o.connection === 'serial' ? [['port', 'USB Port', 'text', null, false, false, { tip: IFACE_TIP.usb }]]
-        : [['host', 'Network address', 'text', null, false, false, { tip: IFACE_TIP.host }]]),
+        : [['host', 'Network address', 'text', null, false, false, { tip: o.connection === 'esp32' ? IFACE_TIP.hostWifi : IFACE_TIP.hostEth }]]),
       ...boardFields(o),      // Board settings (Rule 6.27)
     ];
   };
@@ -12178,7 +12198,7 @@ async function addInterfaceDialog(start = {}, { title, edit = false } = {}) {
   };
   const oks = $$('#dlg button[value="ok"]'), was = oks.map(b => b.textContent);
   for (const b of oks) b.textContent = old ? 'Save' : 'Add';
-  const live = ev => { if (['name', 'id', 'board'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0); };
+  const live = ev => { if (['name', 'id', 'board', 'connection'].includes(ev.target?.dataset?.k)) setTimeout(liveId, 0); };      // a new Connection redraws the box: the suggested ID stays (OakBarn Brewery, 2026-11-16: "Change of Connection Type removes suggested Interface ID")
   dlgEl.addEventListener('keydown', tabKey, true); body.addEventListener('input', live); body.addEventListener('change', live);
   try {
     for (;;) {

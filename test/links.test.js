@@ -46,5 +46,14 @@ console.log('links tests passed');
   assert.match(body, /IFACE_PUMP_PARTS\.slice\(4, 8\)/, 'Dialog 1, word for word, before a Name or ID');
   assert.match(body, /connChoices\(o\.board\)/, 'the Connection follows the Board');
   assert.match(app, /dlgEnterSeq = keepSeq/, 'the New Device box gets its Enter back');
+  // Add Interface markup 2 (OakBarn Brewery, 2026-11-16)
+  const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="lostLinkSec"\]\), dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: none; \}/, 'frozen at the top, none at the bottom');
+  assert.match(app, /\['name', 'id', 'board', 'connection'\]\.includes/, 'a new Connection keeps the suggested ID');
+  assert.match(app, /const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help\./);
+  assert.match(body, /hostWifi: NET_HELP_START/); assert.match(body, /hostEth: NET_HELP_START/);
+  assert.match(body, /lostYou: '⚠ You are the Safety\./); assert.match(body, /IFACE_TIP\.lost \+ '\\n\\n' \+ IFACE_TIP\.lostYou/);
+  assert.match(body, /Turn it Off after\.\\n\\nSkynet gives no help with communication problems/);
+  assert.match(body, /⟪b:Simulation mode⟫/);
 }
 console.log('Add Interface pop-up tests passed');
