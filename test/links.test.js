@@ -48,7 +48,13 @@ console.log('links tests passed');
   assert.match(app, /dlgEnterSeq = keepSeq/, 'the New Device box gets its Enter back');
   // Add Interface markup 2 (OakBarn Brewery, 2026-11-16)
   const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
-  assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="lostLinkSec"\]\), dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: none; \}/, 'frozen at the top, none at the bottom');
+  assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="lostLinkSec"\]\) \.dlgBottomBar, dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: none; \}/, 'frozen at the top, none at the bottom');
+  assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="lostLinkSec"\]\) \.dlgHead, dialog#dlg:has\(#dlgBody \.mSet\) \.dlgHead \{ position: sticky;/, 'its title and buttons frozen at the top');
+  // never hide or pin a whole dialog (OakBarn Brewery, 2026-11-16: the Add Interface box from the RipTide Add box left a greyed Build
+  // Tab with no way out: a selector missing its " .dlgBottomBar" hid the whole dialog)
+  for (const rule of css.match(/[^{}]+\{[^}]*(display: none|position: sticky)[^}]*\}/g) || [])
+    for (const sel of rule.slice(0, rule.indexOf('{')).split(',').map(x => x.trim()).filter(x => /^dialog#dlg:has\(/.test(x)))
+      assert.ok(/\)\s+\S+$/.test(sel), `a whole dialog is hidden or pinned: ${sel}`);
   assert.match(app, /\['name', 'id', 'board', 'connection'\]\.includes/, 'a new Connection keeps the suggested ID');
   assert.match(app, /const NET_HELP_START = 'If you do not understand Networks and protocols, call a friend to help\./);
   assert.match(body, /hostWifi: NET_HELP_START/); assert.match(body, /hostEth: NET_HELP_START/);
