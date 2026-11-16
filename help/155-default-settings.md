@@ -126,7 +126,7 @@ This only affects new Tabs added to a Schema. This is how the Tab fits on the sc
 
 The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
-The technical side: from 200 to 20000 pixels; empty = 1600 x 900. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes and Hoses to be drawn on a Tab?** box is here too (see above).
+The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes and Hoses to be drawn on a Tab?** box is here too (see above).
 
 ## New User Templates and Schemas
 
