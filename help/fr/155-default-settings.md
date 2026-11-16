@@ -65,7 +65,7 @@ avant. Un raccord posé sur une ouverture de cuve sans tuyau garde sa taille. Vo
 | Réglage | Ce qu'il fait |
 |---|---|
 | **Default Interface** | L'Interface sur laquelle commence la case d'ajout d'un nouveau Device. Vide : celle du dernier nouveau Device. |
-| **Default Tab** | Le Tab où va un nouveau Device ou Widget quand le Build est fini (💾 Save Build ... > Move to Tab). Vide : le Tab d'où venait le Build Tab. **➕ Add new Tab…** dans une case d'ajout le règle aussi. |
+| **Default Tab** | Le Tab où va un nouveau Device ou Widget quand le Build est fini (✅ Finish Build ... > Move to Tab). Vide : le Tab d'où venait le Build Tab. **➕ Add new Tab…** dans une case d'ajout le règle aussi. |
 
 Ce sont les deux mêmes listes déroulantes que sur la barre Edit layout du 🔨 Build Tab. Elles sont gardées par l'ID d'Interface et l'ID de Tab, donc un Schema
 sans cette Interface ou ce Tab commence à l'ancienne façon. (Règle Skynet 4.6)
