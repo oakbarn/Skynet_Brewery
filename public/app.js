@@ -37,7 +37,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -4802,6 +4802,17 @@ function finishPipe(to) {
     const t = typeof to === 'string' ? { id: to } : qdTarget(g, pts[pts.length - 1]);
     g.to = t?.id ?? null; if (t?.c) pts[pts.length - 1] = [...t.c];
   } else g.to = typeof to === 'string' ? to : endCoupling(pts, pts.length - 1, pts.length - 2);
+  // a new pipe joined to a pipe takes that pipe's size (OakBarn Brewery, 2026-11-16: "if you are building a Manifold out of pipe in
+  // the real world, the logical choice is the next pipe is the same size"); it starts end first. Hoses never auto size ("No auto
+  // sizing of Hoses is correct"): a hose keeps the Default Hose Size.
+  if (!hose) {
+    const nb = [g.from, g.to].map(id => typeof id === 'string' ? draft.graphics.find(x => x.kind === 'pipe' && !x.hose && x !== g && x.workspace === wsName && (x.from === id || x.to === id)) : null).find(Boolean);
+    if (nb?.size && nb.size !== g.size) {
+      g.size = nb.size;
+      if (nb.size === 'custom') { g.sizeCustom = nb.sizeCustom; g.sizeUnits = nb.sizeUnits; }
+      stampIpType(g);
+    }
+  }
   giveName(g, draft.graphics);
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -13590,9 +13601,23 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of its pipes. A new pump starts from its Ports, else the Default pipe IP Type.';
 const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP: Tri-Clamp, NPT, BSP or Quick Disconnect. It is drawn as its type, and it is the size of the pipe or hose on it. A new one starts with the Default pipe IP Type on the Default tab.';
 const IP_TYPE_TIP = 'The connector on this end: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the same size as the pipe or hose. A new one starts with the Default IP Type on the Default tab, on both ends.';
-const DEF_IP_TIPS = { pipe: 'The connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes already made keep theirs.',
-  hose: 'The connector a new hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses already made keep theirs.' };
-const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}${v === '0.5' ? '  (Skynet default)' : ''}`]);
+// The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;
+// Rules 2.37, 11.12). The sentences about things Skynet does not do yet wait in Sandbox/Panel_Updates/Panel_Updates.md until they are built.
+const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5)',
+  hose: 'The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.' };
+const DEF_TIPS = {
+  pipe: 'Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.\n\nIPs snap together and are locked.\n\nIPs lock automatically and a Pipe\'s IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.\n\nPipes have a flow simulation.',
+  hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nHoses have a flow simulation.',
+  px: 'This is simply how Pipes and Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes or Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
+  width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
+  height: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
+  batch: 'This only affects new User Recipes. This is your normal Batch size when Manually creating a Recipe in Skynet. Skynet does not pretend to be a Recipe Builder and can import a standard Beer.xml file from the popular Recipe builders with no coding on your part in Skynet. Simply create the recipe in your favorite Recipe Builder or get one from a forum or a friend and import it. As long as the import is in the beer.xml agreed standard, Skynet should import it. If you never plan to build a Recipe here you can ignore this entire Section as it has some defaults set to what is most common regardless.',
+  // written by Claude from OakBarn Brewery's notes (Default Tab 3: "Write a plain language ...")
+  mash: 'The Mash Profile a new Recipe starts with. Skynet Single Step, Batch Sparge: one rest at 152 °F (67 °C) for 60 minutes, the usual mash for most beers.\n\n⟪b:Strike Temperature⟫\nThe water is heated hotter than the mash temperature (the Strike Temperature), because the grain cools it down when it goes in. The mash tun soaks up some heat too: that is the Offset for Equipment. Cold grain cools the water more: if your grain is colder on Brew Day than the recipe planned for (72 °F), you will land under the mash temperature.\n\n⟪b:Adding the grain⟫\nAdd the grain slowly while stirring, so no dry clumps (dough balls) form, until you reach the mash temperature. Heat the water (the Pre Strike) a bit higher than the Strike Temperature and let it cool to Strike before the grain goes in: cooling is easy, heating a full mash tun back up is hard.\n\n⟪b:Mash length and temperature⟫\nA lower mash temperature (148 to 150 °F) makes a drier, lighter beer; a higher one (154 to 158 °F) a sweeter, fuller one. 60 minutes is enough for most malts today. Best practice: keep the mash at its temperature for the whole mash, with a lid on or the heat on.\n\n⟪b:Sparge⟫\nAfter the mash, the sugar is rinsed out of the grain (the sparge). Batch Sparge: drain, add hot water, stir, rest, drain again. Fly Sparge: hot water is sprinkled on top while the wort drains slowly from the bottom; slower, often a little more sugar. Brewzilla type (brew in a bag or a basket): lift the grain out and pour hot water over it. Each one changes how much sugar you get out of the grain (the efficiency).',
+  boil: 'The Boil Profile a new Recipe starts with. Mostly it is the Boil Time: how long the wort boils (Skynet 60 Minute Boil is 60 minutes). It can also have its own Boil Off, and every Skynet Boil Profile asks the kettle volume at the start and the end of the boil.',
+  water: 'The water a new Recipe starts with. Tap Water unless you pick another.\n\nWhat is in your water changes the beer: Calcium and Magnesium (the hardness) help the mash and the yeast, Sulfate makes hops taste crisper and more bitter, Chloride makes malt taste fuller and rounder, and Bicarbonate (alkalinity) suits dark beers but can make pale ones dull. Chlorine gives a medicine taste.\n\nYour Water Department\'s water quality report gives the numbers, or use a Water Test Kit. You can also make your own "water" to match a famous brewing region: start with RO (reverse osmosis) or distilled water and add brewing salts.\n\nAnd if you have been Brewing with your tap water and making Good beer, why rock the apple cart?',
+  w2g: 'How much water goes in the mash for each pound (or kilogram) of grain (the grist ratio). Used to help work out the Strike Temperature on Brew Day.\n\nA thick mash (less water, about 1.25 qt/lb or 2.6 L/kg) holds its heat well and is easy to stir. A thin mash (more water, 1.5 to 2 qt/lb or 3 to 4 L/kg) is easier for a pump to move and leaves more water for a batch sparge. Brew in a bag uses all the water at once. Anywhere in between makes good beer.' };
+const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}`]);      // one line, no "(Skynet default)" (Default Tab 3)
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
 function otherDefaults() {
   // Skynet Defaults for New User Created Items (OakBarn Brewery, 2026-11-14: "These defaults are set and cannot be changed, but can
@@ -13663,33 +13688,29 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...NS_DEFAULTS, ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
-    ['defPipeSize', 'Default pipe size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: 'A new pipe starts at it, and a new Device, Pipe Fitting or item with IPs (pumps too) is drawn for it until a pipe is on it. With pipes on it, it takes the size most of them have (Rule 5.36). Items already made keep theirs.', with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
-    ['defHoseSize', 'Default hose size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: 'A new hose starts at it. Hoses already made keep theirs.', with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
-    ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px). Each Tab can change it in Tab settings', 'num', null, false, false, { def: 10 }],
-    ['newTabWidth', 'Width of a new Tab (px)', 'num', null, false, false, { def: 1600 }],
-    ['newTabHeight', 'Height of a new Tab (px)', 'num', null, false, false, { def: 900 }],
+    ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
+    ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
+    // the same box twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
+    // the same Default"): typing in one fills the other (newTabPipeTwin)
+    ['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
     ['_bd', 'New Devices and Widgets (the Build)', 'head'],
     ['buildIface', 'Default Interface', 'sel', [['', '(the last one used)'], ...(S.config.devices || []).map(x => { const id = ifaceIdOf(x.name); return [id, `${id}: ${x.name}`]; })], false, false, { tip: 'The Interface a new Device starts on in its Add box. The same default as the Interface list on the 🔨 Build Tab. Kept by its Interface ID, so a Schema without that Interface starts on the last one used (Rule 4.6).' }],
     ['buildTab', 'Default Tab', 'sel', [['', '(the Tab it came from)'], ...(S.config.workspaces || []).filter(x => !x.build && !x.template && x.id).map(x => [x.id, `${x.id}: ${x.name}`])], false, false, { tip: 'The Tab a new Device or Widget goes to when the Build is done. The same default as the Tab list on the 🔨 Build Tab; ➕ Add new Tab… in an Add box sets it too. Kept by its Tab ID (Rule 4.6).' }],
-    ['_r', 'New Recipes', 'head'],
+    // New User Recipes (Default Tab 3, 2026-11-16): Units is a Skynet Panel Setting (Settings > Panel settings); Equipment Profile,
+    // Brewhouse Efficiency, Grain Temperature (72 °F for planning), Strike Offset and Boil Time are not Recipe defaults
+    ['_r', 'New User Recipes', 'head'],
     ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
-    ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
-    ['batchSize', `Batch size (${volUnit(w.units)}, into the fermenter)`, 'num'],
-    ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
-    ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD]],
-    ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD]],
-    ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: 'The water a new Recipe starts with. Tap Water unless you pick another (Rule 17.12).' }],
-    ['boilTime', 'Boil time (minutes)', 'num'],
+    ['_batch', `Batch Size (${w.units === 'Metric' ? 'Liters' : 'Gallons'})`, 'num', null, false, false, { tip: DEF_TIPS.batch }],
+    ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.mash }],
+    ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.boil }],
+    ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: DEF_TIPS.water }],
     ...hopStandFields(w.units),
-    ['efficiency', 'Brewhouse efficiency (%)', 'num'],
-    ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
-    ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
-    ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature)`, 'num', null, false, false, { def: 0 }],
+    ['_w2g', `Water to Grain Ratio (${displayUnits(w).ratioUnit})`, 'num', null, false, false, { tip: DEF_TIPS.w2g }],
     ['_ns', 'New Schema from a Skynet Template', 'head'],
     ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
     ['ns_template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
@@ -13705,6 +13726,9 @@ function renderDefaultTab(box) {
     ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
     ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
+    ['_tabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+    ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: 1600, tip: DEF_TIPS.width }],
+    ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: 900, tip: DEF_TIPS.height }],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
     // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
     ['_lbl', 'Labels', 'head'],
@@ -13730,13 +13754,15 @@ function renderDefaultTab(box) {
     ['newValveOverlay', 'Valve Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.valve }],
     ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { tip: NEW_TIPS.lockout }]];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
-  const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
+  const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
-  if (d.grainTempC !== undefined) d._grainT = Math.round(cTo(d.grainTempC, du.tempUnit) * 10) / 10;
+  d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
+  d._tabPipe = d.newTabPipe;
   hopStandsToForm(d, du.tempUnit);
-  d._grainLabel = grainWtLabel(d.units);
-  if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
+  // the Pixels box is in two sections and is one setting: typing in one fills the other
+  const twins = ['newTabPipe', '_tabPipe'].map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
+  if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
@@ -13747,16 +13773,15 @@ function renderDefaultTab(box) {
     if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');      // empty: what a fresh install has
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
-    for (const [k, from] of [['waterToGrain', () => toRatio(d._w2g, su.ratioUnit)], ['grainTempC', () => toC(d._grainT, su.tempUnit)], ['strikeOffsetC', () => su.tempUnit === 'F' ? d._strikeOff * 5 / 9 : d._strikeOff]]) {
-      const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
-      if (raw === undefined) delete d[k]; else d[k] = Math.round(from() * 1000) / 1000;
-    }
+    if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
     hopStandsFromForm(d, su.tempUnit);
-    delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._grainLabel; delete d.grainLabel;
+    if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
+    delete d._w2g; delete d._batch; delete d._tabPipe; delete d._grainLabel; delete d.grainLabel;
+    for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
-    for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
+    for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
-    for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
+    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
@@ -13768,8 +13793,9 @@ function renderDefaultTab(box) {
   const saveBtn = () => admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : '';
   const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Skynet Default'), h('th', {}, 'Rule'))),
     h('tbody', {}, ...otherDefaults().map(([what, now, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, rule)))));
-  box.append(h('div', { class: 'defTab' }, h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn(), f.box, saveBtn()),
-    ...tap.nodes, h('div', { class: 'menuNarrow' }, saveBtn()),
+  // Freeze (Default Tab 3, Rule 2.51): the title and Save stay at the top while the rest scrolls; no Save further down
+  box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, saveBtn())), h('div', { class: 'menuNarrow' }, f.box),
+    ...tap.nodes,
     h('h3', {}, 'Skynet Defaults for New User Created Items'), h('p', { class: 'muted' }, 'These defaults are set and cannot be changed, but can be Changed in a New User Template.'), others));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
 }
 
@@ -13778,6 +13804,10 @@ function renderDefaultTab(box) {
 // Settings than defaults. No need to even mention on Default Tab"). They change what is already made, so they are Settings (Rule 2.42).
 // Saved with the Default tab's values (brewDefaults), so nothing is moved on the Brain.
 const panelSetFields = w => [
+    // Units (OakBarn Brewery, 2026-11-16, Default Tab 3: "This is not a default but a Skynet Setting that resides in the Brain";
+    // "Units are set by the Skynet Panel Setting and not by Recipe Level Hover Help will be set in the Skynet Settings and not here")
+    ['_un', 'Units', 'head'],
+    ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { tip: 'US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount, temperature and Recipe shows in it, on every screen. Skynet keeps the numbers the same inside, so changing it only changes how they show.' }],
     ['_ts', 'Tabs', 'head'],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['_m', 'Menu Bar', 'head'],
@@ -13806,7 +13836,7 @@ const panelSetFields = w => [
     ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
-const PANEL_SET_KEYS = ['tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'touchEdit', 'touchMove',
+const PANEL_SET_KEYS = ['units', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'touchEdit', 'touchMove',
   'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
 function renderPanelSettings() {
   const box = $('#panelSet'); if (!box) return;
@@ -14610,7 +14640,7 @@ function eqEditor() {
     ['_m', 'Batch size and top up water are set in the Recipe, boil time and boil off in the Boil Profile, and each vessel\'s size, dead space and trub loss in its Properties on the Tab (the Equipment Profile Interview asks them).', 'note']];
   const f = paneForm(fields, p, () => { try { f.read(); } catch { } changed(); }, !admin);
   // a volume check: a batch size and a Boil Profile (the Recipe gives these from the next stage)
-  const chk = { batchSize: S.config.brewDefaults?.batchSize ?? (p.units === 'Metric' ? 20 : 5), boil: S.config.brewDefaults?.boilProfile || S.boilProfiles[0]?.id || '' };
+  const chk = { batchSize: Math.round(lTo(S.config.brewDefaults?.batchL ?? NEW_RECIPE.batchL, volUnit(p.units)) * 100) / 100, boil: S.config.brewDefaults?.boilProfile ?? NEW_RECIPE.boilProfile };
   const out = h('div', { class: 'eqCalc' });
   const calc = () => {
     const all = { equipment: [...eqItems(p), ...(p.equipment || [])] };

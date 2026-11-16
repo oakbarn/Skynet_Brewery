@@ -8,14 +8,41 @@ else can look.
 
 ## Pipes, hoses and sizes
 
-| Setting | What it does |
-|---|---|
-| **Default pipe size** | 1/2" unless you change it (1/4" to 6", with the mm size beside each). A **new pipe** starts at this size. A **new Device, Pipe Fitting or item with IPs** (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for this size until a pipe is on it, so a new pump already matches your pipes. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). |
-| **IP Type** (beside Default pipe size) | The connector a **new pipe** has on both ends: Tri-Clamp unless you change it (Tri-Clamp, NPT, BSP or Quick Disconnect). It is the size of the pipe ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). |
-| **Default hose size** | The size a **new hose** starts at. |
-| **IP Type** (beside Default hose size) | The connector a **new hose** has on both ends: Quick Disconnect unless you change it. It is the size of the hose. |
-| **How thick a 1/2" pipe is drawn on a new Tab** | In pixels; empty = 10. Each Tab can still change it in **Tab settings**. |
-| **Width** and **Height of a new Tab** | In pixels; empty = 1600 x 900. |
+### Default Pipe Size
+
+Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.
+
+IPs snap together and are locked.
+
+IPs lock automatically and a Pipe's IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.
+
+Pipes have a flow simulation.
+
+### IP Type (for Pipes)
+
+The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5)
+
+### Default Hose Size
+
+Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.
+
+IPs snap together and are locked.
+
+Hoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.
+
+Hoses have a flow simulation.
+
+### IP Type (for Hoses)
+
+The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.
+
+### How many Pixels are Pipes and Hoses to be drawn on a Tab?
+
+This is simply how Pipes and Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes or Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
+
+This box is in two places, here and in **New Tabs**. It is one setting: typing in one changes the other. Each Tab can still change its own in **Tab Settings**.
+
+The technical side: the sizes are 1/4" to 6", with the mm size beside each; Skynet starts at 1/2" for both, Tri-Clamp for pipes and Quick Disconnect for hoses ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). A new Device, Pipe Fitting or item with IPs (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for the Default Pipe Size until a pipe is on it. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). The Pixels box is from 2 to 100 (empty = 10).
 
 ### How things size to their pipes
 
@@ -35,6 +62,72 @@ before that. A fitting sitting on a vessel opening with no pipe keeps its size. 
 They are the same two dropdowns as on the 🔨 Build Tab's Edit layout bar. They are kept by the Interface ID and Tab ID, so a Schema
 without that Interface or Tab starts the old way. (Skynet Rule 4.6)
 
+## New User Recipes
+
+What a new Recipe starts with when you press **NEW** on the Recipe tab. You can change each one in the Recipe. **Units** (US or Metric) is not here: it is a Skynet Panel Setting, in **Settings > Panel settings** ([Settings](09-settings)).
+
+### Batch Size (Gallons) or Batch Size (Liters)
+
+This only affects new User Recipes. This is your normal Batch size when Manually creating a Recipe in Skynet. Skynet does not pretend to be a Recipe Builder and can import a standard Beer.xml file from the popular Recipe builders with no coding on your part in Skynet. Simply create the recipe in your favorite Recipe Builder or get one from a forum or a friend and import it. As long as the import is in the beer.xml agreed standard, Skynet should import it. If you never plan to build a Recipe here you can ignore this entire Section as it has some defaults set to what is most common regardless.
+
+### Mash Profile
+
+The Mash Profile a new Recipe starts with. Skynet Single Step, Batch Sparge: one rest at 152 °F (67 °C) for 60 minutes, the usual mash for most beers.
+
+**Strike Temperature**
+The water is heated hotter than the mash temperature (the Strike Temperature), because the grain cools it down when it goes in. The mash tun soaks up some heat too: that is the Offset for Equipment. Cold grain cools the water more: if your grain is colder on Brew Day than the recipe planned for (72 °F), you will land under the mash temperature.
+
+**Adding the grain**
+Add the grain slowly while stirring, so no dry clumps (dough balls) form, until you reach the mash temperature. Heat the water (the Pre Strike) a bit higher than the Strike Temperature and let it cool to Strike before the grain goes in: cooling is easy, heating a full mash tun back up is hard.
+
+**Mash length and temperature**
+A lower mash temperature (148 to 150 °F) makes a drier, lighter beer; a higher one (154 to 158 °F) a sweeter, fuller one. 60 minutes is enough for most malts today. Best practice: keep the mash at its temperature for the whole mash, with a lid on or the heat on.
+
+**Sparge**
+After the mash, the sugar is rinsed out of the grain (the sparge). Batch Sparge: drain, add hot water, stir, rest, drain again. Fly Sparge: hot water is sprinkled on top while the wort drains slowly from the bottom; slower, often a little more sugar. Brewzilla type (brew in a bag or a basket): lift the grain out and pour hot water over it. Each one changes how much sugar you get out of the grain (the efficiency).
+
+### Boil Profile
+
+The Boil Profile a new Recipe starts with. Mostly it is the Boil Time: how long the wort boils (Skynet 60 Minute Boil is 60 minutes). It can also have its own Boil Off, and every Skynet Boil Profile asks the kettle volume at the start and the end of the boil.
+
+### Water Profile
+
+The water a new Recipe starts with. Tap Water unless you pick another.
+
+What is in your water changes the beer: Calcium and Magnesium (the hardness) help the mash and the yeast, Sulfate makes hops taste crisper and more bitter, Chloride makes malt taste fuller and rounder, and Bicarbonate (alkalinity) suits dark beers but can make pale ones dull. Chlorine gives a medicine taste.
+
+Your Water Department's water quality report gives the numbers, or use a Water Test Kit. You can also make your own "water" to match a famous brewing region: start with RO (reverse osmosis) or distilled water and add brewing salts.
+
+And if you have been Brewing with your tap water and making Good beer, why rock the apple cart?
+
+### Hop Stands
+
+The temperature and time of the three Hop Stands (High, Middle, Low) a new Recipe starts with ([Mash, Boil and Water Profiles](35-mash-and-boil-profiles), Skynet Rule 17.14).
+
+### Water to Grain Ratio
+
+How much water goes in the mash for each pound (or kilogram) of grain (the grist ratio). Used to help work out the Strike Temperature on Brew Day.
+
+A thick mash (less water, about 1.25 qt/lb or 2.6 L/kg) holds its heat well and is easy to stir. A thin mash (more water, 1.5 to 2 qt/lb or 3 to 4 L/kg) is easier for a pump to move and leaves more water for a batch sparge. Brew in a bag uses all the water at once. Anywhere in between makes good beer.
+
+The technical side: a new Recipe starts with a 5 gallon (18.93 liter) batch, **Skynet Single Step, Batch Sparge** (152 °F for 60 minutes), **Skynet 60 Minute Boil** (its Boil Time comes from the Boil Profile) and Tap Water. The Batch Size is kept in liters and shown in Gallons or Liters as Units says. Brewhouse Efficiency (72 %) and the Strike Offset belong to the Equipment Profile, not the Recipe, and the Grain Temperature is 72 °F (22.2 °C) for planning. The label says Gallons for US and Liters for Metric.
+
+## New Tabs
+
+### Width of a New Tab (px)
+
+This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.
+
+The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
+
+### Height of a New Tab (px)
+
+This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Vertical Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Height only affects a Vertical Scroll Bar.
+
+The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
+
+The technical side: from 200 to 20000 pixels; empty = 1600 x 900. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes and Hoses to be drawn on a Tab?** box is here too (see above).
+
 ## New User Templates and Schemas
 
 These are used only by **new** things you make yourself. A Skynet Template keeps its own settings, and pumps and valves already made keep theirs.
@@ -52,6 +145,7 @@ Some things have no box because they are always the same: see **Skynet Defaults 
 
 These change things already made, or how the whole panel works, so they are Settings, not Defaults. They are in **Settings > Panel settings: screen, Tabs and alerts**:
 
+- **Units** (US or Metric): every amount, temperature and Recipe shows in it;
 - **Tab Style** (the look of every Tab that has no Tab Style of its own);
 - **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
 - **\L Rich Text Code Size**;
@@ -67,12 +161,11 @@ The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Look
 
 **Defaults are for new things only.** Labels, Text Boxes, the Default pipe size and the IP Types are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
 
-New Recipes (Units, Batch size, Profiles, Boil time, efficiency ...), New Schema from a Skynet Template, new Tabs (Tab
-Background Profile), Labels and Text Boxes. The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
+New Schema from a Skynet Template, new Tabs (Tab Background Profile), Labels and Text Boxes. The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
 
 ## Tap Water
 
-Your own tap water: the numbers that matter for brewing. Every Recipe starts with Tap Water on its Waters tab, on every Level, unless you pick another water. Fill them in, then press **Save** (the Default tab's one Save, at the top or the bottom).
+Your own tap water: the numbers that matter for brewing. Every Recipe starts with Tap Water on its Waters tab, on every Level, unless you pick another water. Fill them in, then press **Save** (the Default tab's one Save, at the top).
 
 **Where to find the numbers:**
 
@@ -108,4 +201,4 @@ These defaults are set and cannot be changed, but can be Changed in a New User T
 - **Skynet Dial**: Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red.
 - **Alarm Set Graphic (Layer 2)**: None.
 
-The section titles on this tab have a blue back, so each part is easy to find.
+The section titles on this tab have a blue back, so each part is easy to find. The title and **Save** stay at the top while the rest scrolls (Skynet Rule 2.51).
