@@ -8,7 +8,7 @@ bord, ses poignées, l'eau et la glace, à la forme de son cadre.
 ## En ajouter un {#add-one}
 
 En **Edit layout**, ouvrez **Add equipment ➕** et choisissez **Ice Water Can**. Comme chaque nouveau Widget, il est fait d'abord sur le
-🔨 Build Tab (Règle 4.1) ; **💾 Save Build ... > Move to Tab** le met sur son Tab. Son Label commence à **Ice Water**. Tirez son coin
+🔨 Build Tab (Règle 4.1) ; **✅ Finish Build ... > Move to Tab** le met sur son Tab. Son Label commence à **Ice Water**. Tirez son coin
 pour le rendre plus haut ou plus large.
 
 ## La boucle d'eau glacée {#the-ice-water-loop}

@@ -39,7 +39,7 @@ Quand vous ajoutez un Device (tout ce qui est câblé à un port), la fenêtre *
 4. **Label**, le texte affiché sur le Tab (son interrupteur **Show label** le cache), par exemple *Fly Sparge*.
 5. **Suggested Name** (nom proposé), rempli pour vous à partir des cases ci-dessus (voir plus bas). Vous pouvez taper votre propre nom à la place ; il doit être unique.
 
-Appuyez sur **Create**. Le Device est toujours créé d'abord sur le **Build Tab**, de la même façon qu'un nouveau Widget ou Template, et ses **Properties** s'ouvrent tout de suite pour que vous régliez tout le reste. Si vous en créez plusieurs à la suite, chaque nouveau se place un peu plus bas et à droite du précédent, pour qu'aucun ne cache les autres. Appuyez ensuite sur **💾 Save Build ...** et choisissez le Tab : le Device y va et le Tab ID est ajouté à la fin de son nom.
+Appuyez sur **Create**. Le Device est toujours créé d'abord sur le **Build Tab**, de la même façon qu'un nouveau Widget ou Template, et ses **Properties** s'ouvrent tout de suite pour que vous régliez tout le reste. Si vous en créez plusieurs à la suite, chaque nouveau se place un peu plus bas et à droite du précédent, pour qu'aucun ne cache les autres. Appuyez ensuite sur **✅ Finish Build ...** et choisissez le Tab : le Device y va et le Tab ID est ajouté à la fin de son nom.
 
 Le **Suggested Name** se remplit au fur et à mesure :
 
