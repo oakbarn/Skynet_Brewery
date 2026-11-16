@@ -21,10 +21,12 @@ La fenêtre demande (posez la souris sur chaque nom pour son Hover Help) :
 - **Interface ID** : voir plus bas.
 - **Board** : Arduino Mega, ESP32 ou Raspberry Pi. Skynet a un programme pour chacune.
 - **Connection** : les choix suivent la Board. Un Arduino Mega : USB, Ethernet (avec un Shield W5100 ou W5500) ou WiFi (par un pont ESP32). Un ESP32 : USB, Ethernet ou WiFi. Un Raspberry Pi : Ethernet (ou le Brain lui-même) ou WiFi. Son Hover Help montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
-- **USB Port** (une carte USB) ou **Network address** (adresse réseau, Ethernet ou WiFi). Voir [Le USB Port, le côté technique](#the-usb-port-the-technical-side).
+- **USB Port** (une carte USB) ou **Network address** (adresse réseau, Ethernet ou WiFi). Voir [Le USB Port, le côté technique](#the-usb-port-the-technical-side) et [La Network address](#the-network-address). Quand le panel est en mode 🧪 Simulator, le Brain ne parle à aucune carte, donc rien ne passe par le USB Port : pour tester la vraie connexion, passez sur 🔌 Real, ajoutez l'Interface, puis ⚙ changez-la sur la page Devices et appuyez sur 🔌 Test Communication.
 - **Board Settings** : **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** et **Diagnostic Logging** (et le **Network Port** en Ethernet ou WiFi) : voir [Board Settings](#board-settings) plus bas.
 
 Le **Simulator** n'est pas une Connection : il appartient au panel, pas à une carte. Il s'allume et s'éteint sur la barre du simulateur.
+
+**Les boutons** (✖ Cancel et Add) sont figés en haut, avec le titre, et il n'y a pas de rangée de boutons en bas : le modèle (Règle 2.51). Choisir une autre Connection garde l'Interface ID suggéré.
 
 **Les touches.** Le **Name** et le **USB Port** (ou la **Network address**) sont les cases où va la touche **Entrée** : Entrée sur le Name va au USB Port, et Entrée sur un USB Port rempli, avec un Name, ajoute (ou enregistre) l'Interface. La touche **Tab** fait le tour de chaque case de la fenêtre, de la dernière à la première. Le **?** Help, **✖ Cancel** et **Add** sont pour la souris. Le même ordre que le [Blichmann RipTide Dialog 1](115-pump-device-properties) (Rule 18.39).
 
@@ -83,11 +85,37 @@ Cliquez sur OK pour garder votre nom, ou sur Cancel pour revenir le changer.
 - **On** : le panel parle à cette carte. **Off** : le panel ne l'ouvre jamais, et ses Devices apparaissent comme non connectés. Quand une carte est Off, aucun de ses Devices ne fonctionne. Une carte doit être On et en communication avec le Brain (les deux se parlent) pour faire la moindre action.
 - **🔌 Test Communication** : une vérification pas à pas que le Brain et la carte se parlent. Voir [Test Communication](#test-communication).
 - **Answer Wait (seconds)** : si la carte ne dit rien pendant ce nombre de secondes, la page Devices affiche « no answer ». 2 à 600.
-- **Lost Comm (s)** : une sécurité. Si la carte n'entend rien du Brain pendant ce nombre de secondes, elle met toutes ses sorties sur OFF, pour qu'un chauffage ou une pompe ne reste pas allumé quand le Brain, le câble ou le réseau lâche. À remplir : 3 à 600 secondes (10 au départ). **Lost Comm est une sécurité de secours, pas votre sécurité : vous êtes responsable de surveiller votre brasserie pendant qu'elle tourne. Vous êtes la première sécurité.**
-- **Diagnostic Logging** : normalement **Off**. Ne l'activez que pour trouver un problème : chaque ligne vers et depuis cette carte est écrite, avec des mots simples, dans un fichier par jour dans le dossier des données (`logs/boards`). Utilisez-le quand vous savez ce que le journal veut dire. Skynet ne donne pas d'aide pour les problèmes de communication : le journal est seulement un moyen pour vous, ou pour quelqu'un qui vous aide, de trouver le problème. Désactivez-le après.
+- **Lost Comm (s)** : une sécurité. Si la carte n'entend rien du Brain pendant ce nombre de secondes, elle met toutes ses sorties sur OFF, pour qu'un chauffage ou une pompe ne reste pas allumé quand le Brain, le câble ou le réseau lâche. À remplir : 3 à 600 secondes (10 au départ).
+
+  ⚠ **C'est vous la sécurité. Lost Comm est une sécurité de secours, pas votre sécurité : vous êtes responsable de surveiller votre brasserie pendant qu'elle tourne. Vous êtes la première sécurité.**
+- **Diagnostic Logging** : normalement **Off**. Ne l'activez que pour trouver un problème : chaque ligne vers et depuis cette carte est écrite, avec des mots simples, dans un fichier par jour dans le dossier des données (`logs/boards`). Utilisez-le quand vous savez ce que le journal veut dire. Désactivez-le après.
+
+  Skynet ne donne pas d'aide pour les problèmes de communication : le journal est seulement un moyen pour vous, ou pour quelqu'un qui vous aide, de trouver le problème.
 - **Network Port** (Ethernet ou WiFi) : le port réseau sur lequel la carte écoute. Les programmes de Skynet utilisent 4100.
 
 Il n'y a pas de case Baud (vitesse USB) : elle vient de la carte. Chaque programme de carte Skynet parle à 115200.
+
+## La Network address {#the-network-address}
+
+Si vous ne comprenez pas les réseaux et les protocoles, demandez de l'aide à un ami.
+
+**Ce que c'est.** La Network Address (adresse IP) est le numéro de la carte sur votre réseau à la maison : quatre nombres avec des points, par exemple 192.168.1.60. Le Brain trouve la carte grâce à elle, comme une lettre trouve une maison grâce à son adresse.
+
+**Ethernet (un câble réseau).**
+- Aucun nom de WiFi (SSID) ni mot de passe n'est nécessaire : le câble branche la carte sur votre routeur ou votre switch réseau.
+- Un Arduino Mega avec un Ethernet Shield utilise l'adresse écrite dans le programme Skynet sur la carte : 192.168.1.60 au départ. Tapez cette même adresse. Si les adresses de votre réseau commencent par d'autres nombres (par exemple 10.0.0.), l'adresse du programme est changée pour une des vôtres et le programme est rechargé sur la carte.
+- Un ESP32 avec une prise Ethernet reçoit son adresse de votre routeur (Comment la trouver, plus bas).
+- Un Raspberry Pi qui est lui-même le Brain : 127.0.0.1 (le Brain qui se parle à lui-même).
+
+**WiFi.**
+- Oui, le nom du WiFi (SSID) et son mot de passe sont nécessaires, mais pas dans Skynet : ils sont tapés dans le programme Skynet de la carte (l'ESP32) avant que le programme y soit chargé, pour que la carte puisse rejoindre votre WiFi. Skynet ne les demande jamais et ne les garde jamais.
+- Une carte Raspberry Pi rejoint votre WiFi dans ses propres réglages WiFi, faits sur le Pi quand il est installé.
+- Votre routeur donne ensuite son adresse à la carte. Quand la carte démarre, elle montre son adresse dans le Serial Monitor du programme Arduino (avec le câble USB branché), et votre routeur la liste aussi.
+- Le WiFi doit atteindre la carte là où elle est. Un câble USB ou un câble réseau est plus sûr.
+
+**Comment la trouver.** Ouvrez l'application ou la page web de votre routeur et regardez sa liste d'appareils connectés : la carte y est avec son adresse. Puis, dans le routeur, réservez cette adresse pour la carte (cela peut s'appeler une réservation DHCP, une adresse fixe ou statique), pour qu'elle ne change jamais. Sans cela, la carte peut recevoir une nouvelle adresse après une coupure de courant et le Brain ne la trouve plus.
+
+**Windows, Mac, Linux ou un Raspberry Pi.** C'est pareil pour tous : l'adresse appartient à la carte et à votre routeur, pas à l'ordinateur du Brain, et rien de plus n'est installé. Le Brain doit seulement être sur le même réseau (le même routeur) que la carte. Le **Network Port** doit être le même que celui du programme de la carte (les programmes de Skynet utilisent 4100).
 
 ## Test Communication
 
