@@ -67,7 +67,7 @@ for (const sm of list) {
   for (const g of c.graphics) if (g.kind === 'ip' && g.fitting === 'manualValve') { ips.add(`eq:${g.id}:in`); ips.add(`eq:${g.id}:out`); }
   for (const p of c.graphics.filter(g => g.kind === 'pipe')) {
     assert.ok(ips.has(p.from) && ips.has(p.to), `${sm.id}: pipe ${p.id} ends ${p.from} -> ${p.to}`);
-    for (const n of p.flowWhen ?? []) assert.ok(store.has(n));
+    assert.ok(!('flowWhen' in p), `${sm.id}: pipe ${p.id} still has the old Only when list`);
   }
   const pics = [...c.elements.flatMap(e => [e.image, e.imageOn, e.imageOff, e.sound]), ...c.graphics.map(g => g.image)].filter(Boolean);
   for (const f of pics) assert.ok(fs.existsSync(path.join(ROOT, 'media', f)), `${sm.id}: missing media ${f}`);

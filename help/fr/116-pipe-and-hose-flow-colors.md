@@ -3,6 +3,8 @@
 Quand du liquide circule dans un tuyau ou un flexible, le passage est dessiné en couleur. Skynet choisit cette couleur pour vous, d'après le
 Tab, le tuyau, la cuve d'où vient le passage, ou une Tap Water Valve.
 
+Quand un tuyau a du passage, et dans quel sens : Skynet le fait en arrière-plan, sans rien vous demander.
+
 ## Faire un tuyau ou un flexible {#making-a-pipe-or-hose}
 
 Un tuyau ou un flexible est un Widget, mais il **n'est pas dans la liste des Widgets**. Le seul moyen d'en faire un est **Draw pipe** ou **Draw hose**
