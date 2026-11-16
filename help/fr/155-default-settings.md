@@ -42,7 +42,7 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 | Réglage | Ce qu'il fait |
 |---|---|
 | **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
-| **Pump Overlay** | La superposition On avec laquelle commence une nouvelle pompe : ce qui s'affiche dessus quand elle tourne. Anneau vert lumineux sauf si vous le changez ([On overlay](58-on-overlay)). |
+| **Pump Overlay** | Le Pump Overlay par défaut : la superposition On, ce qui s'affiche sur une pompe quand elle tourne. Anneau vert lumineux sauf si vous le changez ([On overlay](58-on-overlay)). Il ne s'applique qu'aux nouveaux Pump Profiles : un nouveau Pump Profile commence avec lui, et une nouvelle pompe prend l'Overlay de son Pump Profile ([Tab Background, Valve et Pump Profiles](36-tab-and-valve-profiles)). |
 | **Valve Overlay** | La superposition On avec laquelle commence une nouvelle vanne motorisée. L'éclair fixe sauf si vous le changez. |
 | **Push Lockout (s)** | Combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties. |
 

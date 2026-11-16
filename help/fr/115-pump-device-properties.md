@@ -16,7 +16,8 @@ L'idée : ce que vous réglez le plus est dans la fenêtre elle-même. Tout le r
    Une fois l'**Interface** et le **Port** choisis, la fenêtre **Review** (vérification) les montre grisés avec : *You MUST Confirm the
    Interface and Port Number. Once Confirmed, they cannot be changed. If a Change is needed now, Click the Back Button.* (Vous DEVEZ
    confirmer l'Interface et le numéro de Port. Une fois confirmés, ils ne peuvent plus être changés. S'il faut changer maintenant, cliquez sur Back.)
-   **✔ Confirm** grise la ligne **Interface** et **Available Ports** (c'est le câblage ; appuyez sur Cancel pour recommencer) ;
+   **✔ Confirm** grise la ligne **Interface** et **Available Ports** (c'est le câblage ; appuyez sur Cancel pour recommencer). Leur
+   Hover Help commence alors en disant que la combinaison Interface et Port est enregistrée et ne peut pas être changée ;
    **◀ Back** revient au Port pour que vous le changiez. Rien n'est fixé pour de bon tant que **➕ Add Device** n'a pas enregistré le Device.
    Une fois 1 à 4 faits et confirmés, le reste de la fenêtre s'ouvre : le **Label** et le **Tab** peuvent encore être changés et le
    Suggested Name les suit, et le curseur va sur **Orientation**. Le **Graphic** est l'image de ce Device telle qu'elle s'affichera sur le Tab, avec son Cover
@@ -46,7 +47,8 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
    Fore Color et Back Color montrent ce qu'a le Label maintenant (votre Tab Style, puis ☰ Menu > Default settings), et ils continuent
    à suivre ces valeurs par défaut tant que vous ne les changez pas. Ses **Cancel** et **Save** sont en haut seulement. Alignment est **Left**, **Centered** ou **Right** ; un Label commence Centered. Un Label n'est jamais
    vide : laissez-le vide et il devient le Name. **Label Visible** l'affiche ou non.
-3. **2. Interface** et **Available Ports** sur une ligne : grisés une fois ajoutés (la carte et la broche auxquelles il est câblé).
+3. **2. Interface** et **Available Ports** sur une ligne : grisés une fois ajoutés (la carte et la broche auxquelles il est câblé). Les
+   deux Hover Help commencent en disant que la combinaison Interface et Port est enregistrée et ne peut pas être changée.
 4. **3. Tab** : le Tab où il est.
 5. **4. Name** : commence comme le Suggested Name (à partir du Label, de l'Interface, du Port, du Device Type et du Tab) ; vous pouvez taper le vôtre. Il
    doit être unique. Un Process l'utilise : `Pump_Name.state = true`. Voir **Le Name** plus bas.
@@ -58,12 +60,14 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
    **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent. Changer l'Orientation
    laisse l'Inlet IP et l'Outlet IP où elles sont, donc les tuyaux et les flexibles qui y sont joints ne bougent pas ; le Hose ou
    Pipe dans la pompe est redessiné pour les rejoindre.
-8. **Cover** (aide 111, dessins de pompes Skynet seulement) et **Toggle** sur une ligne. Le Toggle est ce qui se passe quand on clique sur la pompe
+8. **Cover** (aide 111, dessins de pompes Skynet seulement) et **Toggle** sur une ligne. ![No Cover and Red Cover](help_pictures/Pump_Cover.png) Le Toggle est ce qui se passe quand on clique sur la pompe
    sur le Tab : **On/Off** (un clic l'allume ou l'éteint, le plus courant), **Push Button** (allumée seulement tant qu'on appuie), **Dual
    Action** (un clic l'allume ou l'éteint ; appuyée et tenue plus d'une demi-seconde, elle est allumée seulement tant qu'on appuie, pratique pour compléter
    une cuve à la main) ou **None** (l'image ne fait rien quand on clique). Règle 2.50.
-   Juste en dessous, **Overlay** : ce qui est dessiné par-dessus quand la pompe est On (l'éclair fixe, l'éclair clignotant,
-   l'anneau lumineux vert, ou None). Sur la même ligne, **Database and .API ⬢** : l'hexagone ouvre ses réglages (aide 98).
+   Juste en dessous, **Overlay** : ce qui est dessiné par-dessus quand la pompe est On. ![Every Overlay choice](help_pictures/Pump_Overlays.png)
+   Sur la même ligne, **Database and .API ⬢** : l'hexagone ouvre ses réglages (aide 98).
+   En dessous, **Model** (le modèle de pompe choisi parmi les pompes de brasserie courantes ; ses propriétés s'affichent avec le
+   ⬢, seulement à regarder, avec **◀ Back** : Power, Use, Flow, Lift et Hottest Liquid) et **Ports** (faites correspondre les raccords de VOTRE pompe). Aide 163.
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** et **Height**.
 10. Le **Device Type** grisé et rempli pour vous : **DO@Pump** pour une pompe On/Off comme la Blichmann RipTide (une pompe sur une sortie numérique, DO), **PWM@Pump** pour une pompe dont la vitesse est réglée sur un port PWM. Le même DO@Pump est la troisième partie du Suggested Name : `BM_22_DO@Pump_Pump_BH`.
 
