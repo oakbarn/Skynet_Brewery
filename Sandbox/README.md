@@ -25,3 +25,4 @@ add-only Skynet Sample Schemas Setup (Rule 9.13), one at a time. The panel itsel
 | `Importer/Interview_Questions.md` | The settled BruControl Importer Interview questions (OakBarn Brewery, 2026-11-15), on hold until the Importer work starts. |
 | `Importer/General_Import_Rules.md` | OakBarn Brewery's General Import Rules for the BruControl Import and the Change Patterns list (2026-11-15), on hold until the Importer work starts. |
 | `Panel_Updates/Panel_Updates.md` | The Panel Updates Sandbox (OakBarn Brewery, 2026-11-15, Rule 14.4): general Skynet Panel updates and ideas, parked and not built until the Blichmann RipTide pump dialogs and their Help are done. |
+| `Process_Updates/Process_Updates.md` | The Process Updates Sandbox (OakBarn Brewery, 2026-11-16, Rule 14.5): Brew Day step, sample Process and Process command ideas, parked and not built until the Skynet Process setup starts. |

@@ -26,7 +26,7 @@ export function displayUnits(d = {}) {
   return out;
 }
 // recipe defaults a new Recipe starts with (Fritz: "We will provide the first defaults but can be edited by a User on the Default tab")
-export const RECIPE_DEFAULTS = { boilTime: 60, waterToGrain: 2.6, grainTempC: 20, hopWarnMinutes: 10, alertMergeMinutes: 1, efficiency: 72, strikeOffsetC: 0 };
+export const RECIPE_DEFAULTS = { boilTime: 60, waterToGrain: 2.6, grainTempC: 22.222, hopWarnMinutes: 10, alertMergeMinutes: 1, efficiency: 72, strikeOffsetC: 0 };
 
 const W = { kg: 1, lb: 1 / KG_LB, oz: 1 / KG_OZ, g: 0.001 }, V = { L: 1, gal: 1 / L_GAL, qt: 1 / L_QT };
 export const kgTo = (kg, u) => kg === null || kg === undefined || kg === '' ? null : n(kg) / W[u];
@@ -123,11 +123,19 @@ export const levelShowsTab = (r, tab) => levelOf(r).tabs.includes(tab);
 export const levelFermTypes = r => levelOf(r).fermTypes;
 export const levelShowsBox = (r, field) => !levelOf(r).hide.includes(field);
 
+// A new User Recipe (NEW on the Recipe tab): the Default settings Tab's New User Recipes, else NEW_RECIPE; its Boil Time comes from
+// its Boil Profile (boil = the Boil Profiles, lib/profiles.js)
+export function newUserRecipe(d = {}, boil = []) {
+  const r = blankRecipe({ ...NEW_RECIPE, ...d });
+  const bp = boil.find(x => x.id === r.boilProfile);
+  if (bp && Number.isFinite(+bp.boilTime)) r.boilTime = +bp.boilTime;
+  return r;
+}
 export function blankRecipe(d = {}) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) };
   return {
     sourceFormat: 'manual', sourceVersion: null, sourceFile: null, name: '', level: 4, type: 'All Grain', style: '', brewer: '', assistantBrewer: '', notes: '',
-    volumes: { batchLiters: d.batchSize ? toL(d.batchSize, d.units === 'Metric' ? 'L' : 'gal') : null, boilLiters: null },
+    volumes: { batchLiters: +d.batchL > 0 ? +d.batchL : null, boilLiters: null },
     boilTime: D.boilTime, efficiency: D.efficiency, og: null, fg: null, ibu: null, color: null,
     waterToGrain: D.waterToGrain, grainTempC: D.grainTempC,
     // the boxes on the Recipe tab (Fritz's layout, 2026-10-31). Calculate fills grainKg, firstMashC, ibuCalc, strike and sparge.
@@ -138,9 +146,16 @@ export function blankRecipe(d = {}) {
     mash: { profileName: null, grainTempC: null, spargeTempC: null, steps: [] },
   };
 }
+// What a new User Recipe starts with (OakBarn Brewery, 2026-11-16, Default Tab 3: "set all the defaults for a 5 gal Batch, 60 min Boil,
+// 60 Minute Mash"): 5 gallons kept as liters, Skynet Single Step, Batch Sparge (152 °F for 60 minutes), Skynet 60 Minute Boil.
+// Grain at 72 °F for planning ("Remove but use 72 for planning"); efficiency 72 % ("Start at 72").
+export const NEW_RECIPE = { batchL: 18.927, mashProfile: 'skynet-single-batch', boilProfile: 'skynet-boil-60' };
+// not on the Default settings Tab any more (Default Tab 3): Brewhouse Efficiency and Strike Offset belong to the Equipment Profile,
+// the Grain Temperature is 72 °F for planning, and the Boil Time comes from the Boil Profile
+const NOT_A_DEFAULT = ['efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime'];
 function pickNums(d) {
   const out = {};
-  for (const k of Object.keys(RECIPE_DEFAULTS)) if (d[k] !== undefined && d[k] !== '' && Number.isFinite(+d[k])) out[k] = +d[k];
+  for (const k of Object.keys(RECIPE_DEFAULTS)) if (!NOT_A_DEFAULT.includes(k) && d[k] !== undefined && d[k] !== '' && Number.isFinite(+d[k])) out[k] = +d[k];
   return out;
 }
 
