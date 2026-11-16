@@ -12,7 +12,7 @@ The browser remembers the choice, so Help opens in the same language next time o
 ## What is in French
 
 - Every Help page, with the same pages, parts, pictures and links as the English Help.
-- The names of buttons, boxes and menus stay **in English, exactly as on the screen**, so a French page says to press **Save Build**, the same words you see on the button.
+- The names of buttons, boxes and menus stay **in English, exactly as on the screen**, so a French page says to press **Finish Build**, the same words you see on the button.
 - Names of Devices, Widgets, Tabs and Processes, and Process code, are never translated.
 
 ## Balloons in French

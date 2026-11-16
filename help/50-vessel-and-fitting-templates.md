@@ -32,8 +32,8 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 The buttons on a Template's pop-up:
 
 - **✕** and **Cancel**: close it without saving.
-- **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want). The copy, with every setting showing in the pop-up, is made on the **🔨 Build Tab** first. Change it there, look at it with **👁 Preview**, then press **💾 Save Build ...** and pick **As a Template**: it is saved under the new name (see [Build Tab](55-build-tab)).
-- **Add to Tab**: pick the Tab it goes on and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**. The copy is made on the **🔨 Build Tab** first. Change it there if you want, then press **💾 Save Build ...** and **Save to Tab**: the Tab you picked is offered first (see [Build Tab](55-build-tab)).
+- **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want). The copy, with every setting showing in the pop-up, is made on the **🔨 Build Tab** first. Change it there, look at it with **👁 Preview**, then press **✅ Finish Build ...** and pick **As a Template**: it is saved under the new name (see [Build Tab](55-build-tab)).
+- **Add to Tab**: pick the Tab it goes on and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**. The copy is made on the **🔨 Build Tab** first. Change it there if you want, then press **✅ Finish Build ...** and **Save to Tab**: the Tab you picked is offered first (see [Build Tab](55-build-tab)).
 - **Add to Vessel** (Bundled Fittings only): puts this fitting on a port of a Vessel Template (Outlet, Tangential Inlet, Steam Slayer or CIP Inlet). The name it suggests is bndl1_FittingName_VesselName.
 - **Save**: only on Templates you can change.
 - **Delete**: only on User Bundled Templates. A Bundled Fitting that a Vessel Template uses can't be deleted until it is taken off that vessel.

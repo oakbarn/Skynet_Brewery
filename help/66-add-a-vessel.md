@@ -5,7 +5,7 @@ A Vessel is a Kettle, an HLT, a Mash Tun, a Fermenter and so on. In **Edit layou
 - **Widget**: you add everything to it yourself.
 - **Integrated**: ready-made.
 
-Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Properties open. When it is done, press **💾 Save Build ...** and pick **Move to Tab** (or **As a Template**).
+Whatever you pick goes on the 🔨 [Build Tab](55-build-tab) first, and its Properties open. When it is done, press **✅ Finish Build ...** and pick **Move to Tab** (or **As a Template**).
 
 ## Widget
 
@@ -48,7 +48,7 @@ A User Bundled vessel Template always starts from a Skynet Vessel Widget. There 
 
 1. **Add equipment > Vessel > Widget**, and click a Skynet Vessel Widget.
 2. On the Build Tab, add what it needs and bundle it.
-3. Press **💾 Save Build ...**, pick **As a Template**, give it a name and save it.
+3. Press **✅ Finish Build ...**, pick **As a Template**, give it a name and save it.
 
 From then on it is in the **User Bundled Templates** group under **Integrated**. A clone of it (or of a Skynet Vessel Widget) is built on the same Skynet Vessel Widget.
 

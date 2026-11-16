@@ -23,7 +23,7 @@ de bouts de tuyau) et **pas de Toggle** (un appui ouvre la case où vous réglez
    - **X**, **Y**, **Width** et **Height**.
    **Entrée** vous fait passer par Label, Interface, Available Ports, Device Type, Tab, puis **➕ Add Device**. Si **➕ Add Device**
    paraît pâle, appuyez quand même : il vous dit ce qui manque encore.
-3. Appuyez sur **➕ Add Device**. La sortie est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **💾 Save Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port** sont maintenant
+3. Appuyez sur **➕ Add Device**. La sortie est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port** sont maintenant
    grisés et fixés : c'est le câblage. Pour la câbler à une autre carte ou broche, supprimez-la et ajoutez-la de nouveau. Son Name peut encore être
    changé avec **✏ Change name**.
 

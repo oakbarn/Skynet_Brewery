@@ -1,11 +1,11 @@
 # Barre Edit layout {#edit-layout-bar}
 
-La barre **Edit layout** (appuyez sur le bouton bleu Edit layout à côté de **☰ Menu**) a trois lignes. Chaque nouveau Device et Widget est d'abord fait sur le 🔨 [Build Tab](55-build-tab) (Règle 4.1), puis **💾 Save Build ...** le met sur le Tab choisi pour lui.
+La barre **Edit layout** (appuyez sur le bouton bleu Edit layout à côté de **☰ Menu**) a trois lignes. Chaque nouveau Device et Widget est d'abord fait sur le 🔨 [Build Tab](55-build-tab) (Règle 4.1), puis **✅ Finish Build ...** le met sur le Tab choisi pour lui.
 
 | Ligne | Ce qu'il y a dessus |
 |---|---|
 | **1** | Les Devices à gauche (avec **Vessel** juste avant ⧉ Clone Device), les Widgets à droite |
-| **2** | Draw pipe, Draw hose, Draw QD hose, Elbows, Tees …, **Add equipment ➕**, les boutons pour tourner, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 👻 Hidden Tab et son **?** orange, 🔨 Build Tab, 🔨 To Build Tab, 📝 Processes, 👁 Preview, 💾 Save Build ... |
+| **2** | Draw pipe, Draw hose, Draw QD hose, Elbows, Tees …, **Add equipment ➕**, les boutons pour tourner, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 👻 Hidden Tab et son **?** orange, 🔨 Build Tab, 🔨 To Build Tab, 📝 Processes, 👁 Preview, ✅ Finish Build ... |
 | **3** | Update Schema Version, Save layout, Exit |
 
 Le **?** orange à côté de 👻 Hidden Tab explique dans une fenêtre comment marche Edit layout (glisser, redimensionner, double-cliquer pour les propriétés, verrous, Hidden Tabs, Update Schema Version). **Close** est en haut et en bas.
@@ -44,7 +44,7 @@ Les Interfaces et les Tabs sont listés sous la forme **ID: Name**, par exemple 
 
 Avec le Name viennent **Width** et **Height** (150 x 150 au départ ; une pompe a aussi **Cover**, **X** et **Y**). Quand une sorte a plus d'un Device Type (par exemple une vanne basse ou haute température), une ligne **Device Type** vient après l'Interface.
 
-Rien d'autre ne s'affiche tant que le Label, l'Interface, le Port et le Tab ne sont pas remplis (le Label doit être tapé). **➕ Add Device** (en haut ; sur une pompe il reste visible quand la fenêtre défile) marche une fois qu'ils le sont. **✖ Cancel** n'ajoute rien. Après Add Device, le Device est sur le 🔨 Build Tab et le reste de ses Properties s'ouvre ; **💾 Save Build ...** le déplace vers le Tab que vous avez choisi. Si **☰ Menu > Default** fixe où vont les nouvelles choses (X et Y), il va là.
+Rien d'autre ne s'affiche tant que le Label, l'Interface, le Port et le Tab ne sont pas remplis (le Label doit être tapé). **➕ Add Device** (en haut ; sur une pompe il reste visible quand la fenêtre défile) marche une fois qu'ils le sont. **✖ Cancel** n'ajoute rien. Après Add Device, le Device est sur le 🔨 Build Tab et le reste de ses Properties s'ouvre ; **✅ Finish Build ...** le déplace vers le Tab que vous avez choisi. Si **☰ Menu > Default** fixe où vont les nouvelles choses (X et Y), il va là.
 
 ## Widgets
 

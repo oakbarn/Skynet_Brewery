@@ -16,10 +16,10 @@ Seul un operator ou un admin peut appuyer dessus. Chaque Process qui a avancé �
 
 ## En ajouter un {#adding-one}
 
-En Edit layout, appuyez sur **Override ➕** dans la barre Edit layout. Il est fait sur le 🔨 Build Tab, comme chaque nouveau Widget, et ses Properties s'ouvrent. **Save Build ...** l'envoie vers un Tab.
+En Edit layout, appuyez sur **Override ➕** dans la barre Edit layout. Il est fait sur le 🔨 Build Tab, comme chaque nouveau Widget, et ses Properties s'ouvrent. **Finish Build ...** l'envoie vers un Tab.
 
 - **Un seul bouton Override par Tab.** Le panel n'en mettra pas un second sur un Tab qui en a un.
-- **Il peut être sur plusieurs Tabs.** Appuyez sur **COPY** dans ses Properties, puis **Save Build ...** vers un autre Tab. Le bouton de chaque Tab a son **propre Label et son propre aspect**, et ils font tous la même chose.
+- **Il peut être sur plusieurs Tabs.** Appuyez sur **COPY** dans ses Properties, puis **Finish Build ...** vers un autre Tab. Le bouton de chaque Tab a son **propre Label et son propre aspect**, et ils font tous la même chose.
 
 ## Override Button Widget Properties
 

@@ -14,7 +14,7 @@ En **Edit layout**, ouvrez **Add equipment ➕** et choisissez :
 | **Stove Top Vessel** | Aucune sortie. Seulement son haut pour suspendre un tuyau. |
 | **Stove Top Vessel, Bottom Outlet** | Son haut pour suspendre un tuyau, et une IP **Bottom Outlet** (sortie du bas) au centre du fond. |
 
-Comme tout nouveau Widget, elle est faite d'abord sur l'onglet 🔨 Build (règle 4.1) ; **💾 Save Build ... > Move to Tab** la
+Comme tout nouveau Widget, elle est faite d'abord sur l'onglet 🔨 Build (règle 4.1) ; **✅ Finish Build ... > Move to Tab** la
 met sur son onglet.
 
 ## Le haut pour suspendre un tuyau {#the-hose-hang-top}

@@ -32,8 +32,8 @@ Les Templates Skynet viennent avec le panel, dans son dossier `templates`, et un
 Les boutons de la fenêtre d'un Template :
 
 - **✕** et **Cancel** : la ferment sans enregistrer.
-- **Clone** : demande un nouveau nom (il propose Copy1_ et le nom ; changez-le comme vous voulez). La copie, avec tous ses réglages visibles dans la fenêtre, est d'abord faite sur le **🔨 Build Tab**. Changez-la là, regardez-la avec **👁 Preview**, puis appuyez sur **💾 Save Build ...** et choisissez **As a Template** : elle est enregistrée sous le nouveau nom (voir [Build Tab](55-build-tab)).
-- **Add to Tab** : choisissez le Tab où elle va et un nom (il propose bndl1_TemplateName_TabID ; changez-le comme vous voulez), puis appuyez sur **Add**. La copie est d'abord faite sur le **🔨 Build Tab**. Changez-la là si vous voulez, puis appuyez sur **💾 Save Build ...** et **Save to Tab** : le Tab choisi est proposé en premier (voir [Build Tab](55-build-tab)).
+- **Clone** : demande un nouveau nom (il propose Copy1_ et le nom ; changez-le comme vous voulez). La copie, avec tous ses réglages visibles dans la fenêtre, est d'abord faite sur le **🔨 Build Tab**. Changez-la là, regardez-la avec **👁 Preview**, puis appuyez sur **✅ Finish Build ...** et choisissez **As a Template** : elle est enregistrée sous le nouveau nom (voir [Build Tab](55-build-tab)).
+- **Add to Tab** : choisissez le Tab où elle va et un nom (il propose bndl1_TemplateName_TabID ; changez-le comme vous voulez), puis appuyez sur **Add**. La copie est d'abord faite sur le **🔨 Build Tab**. Changez-la là si vous voulez, puis appuyez sur **✅ Finish Build ...** et **Save to Tab** : le Tab choisi est proposé en premier (voir [Build Tab](55-build-tab)).
 - **Add to Vessel** (raccords groupés seulement) : pose ce raccord sur un orifice d'un Vessel Template (Outlet, Tangential Inlet, Steam Slayer ou CIP Inlet). Le nom proposé est bndl1_FittingName_VesselName.
 - **Save** : seulement sur les Templates que vous pouvez changer.
 - **Delete** : seulement sur les Templates groupés de l'utilisateur. Un raccord groupé utilisé par un Vessel Template ne peut pas être supprimé tant qu'il n'est pas retiré de cette cuve.
