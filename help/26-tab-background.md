@@ -65,7 +65,8 @@ Leave Picture Left, Top, Width and Height all empty to stretch the Picture over 
 
 | Box | What it does |
 |---|---|
-| **Pipe Size** | How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it. |
+| **Pipe Size** | How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe size, reducer and fitting is drawn to scale from it. |
+| **Hose Size** | How thick a 1/2" hose is drawn on this Tab, in pixels. Hoses are usually drawn thinner than pipes. A new Tab starts at 6 (☰ Menu > Default settings). Every other hose size is drawn to scale from it. Empty = the Pipe Size, as on Tabs made before there was a Hose Size. |
 | **Flow Color** | The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color. RGB opens the Color Picker ([Pipe and hose flow colors](116-pipe-and-hose-flow-colors)). |
 
 ## The technical side
