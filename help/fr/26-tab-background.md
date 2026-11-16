@@ -56,8 +56,9 @@ Laissez Picture Left, Top, Width et Height tous vides pour étirer la Picture su
 
 | Case | Ce qu'elle fait |
 |---|---|
-| **Width** | La largeur de ce Tab, en pixels. Un nouveau Tab commence à 1600. |
-| **Height** | La hauteur de ce Tab, en pixels. Un nouveau Tab commence à 900. |
+| **Width** | La largeur de ce Tab, en pixels. Vous pouvez taper n'importe quelle taille (200 à 20000), ou appuyer sur 🖥 Fit Screen plus bas pour suivre cet écran. Un nouveau Tab commence aussi large que l'écran sur lequel il est créé (1920 sur la plupart des écrans), sauf si ☰ Menu > Default settings donne une Largeur. |
+| **Height** | La hauteur de ce Tab, en pixels. Vous pouvez taper n'importe quelle taille (200 à 20000), ou appuyer sur 🖥 Fit Screen plus bas pour suivre cet écran. Un nouveau Tab commence aussi haut que l'écran sur lequel il est créé, moins la barre des tâches (1040 sur la plupart des écrans), sauf si ☰ Menu > Default settings donne une Hauteur. |
+| **Screen size : 🖥 Fit Screen** | Un clic met la Largeur et la Hauteur de ce Tab à la taille utile de CET écran (l'écran moins la barre des tâches), pour que tout le Tab remplisse l'écran au Zoom Fit screen, sans barres de défilement. Appuyez sur Save pour le garder. Vous pouvez toujours taper votre propre Largeur et Hauteur. Faites-le sur l'écran de l'ordinateur d'où vous brassez : un Tab réglé sur un petit portable est dessiné plus petit sur un grand écran. |
 | **Vessel Sizer** | Le Master Vessel Sizer : choisissez une Vessel de ce Tab. Seule cette Vessel peut être redimensionnée, et toutes les autres Vessels du Tab la suivent à la même échelle. None = aucune Vessel ne peut être redimensionnée. Le Master montre 📏 dans Edit layout ([Vessel sizing](135-vessel-sizing)). |
 
 ## Pipes
