@@ -62,7 +62,7 @@ Vous ne choisissez le Valve Profile **qu'au moment de créer une nouvelle vanne*
 
 ## Pump Profile {#pump-profile}
 
-Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient de la pompe choisie (le modèle), donc le profil garde le reste :
+Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient de la pompe choisie (le modèle), donc le profil garde le reste. Changer un Pump Profile ne change jamais les pompes déjà sur un Tab. Chaque case a son Hover Help, et le titre et la liste **Open** restent en haut, et les boutons (**Delete**, **Save**, **Undo**, **Close**, **✕**) restent dans le coin en haut à droite pendant que le reste défile (le modèle Blichmann, Règle Skynet 2.51 ; les autres profils aussi). À droite de la liste **Open**, **+ Add New** (le + violet) crée un nouveau Pump Profile, comme **Add new ...** dans la liste (Règle Skynet 2.55). Le profil garde :
 
 - **Orientation** : Right ou Left.
 - **Cover** : None ou une couleur.
