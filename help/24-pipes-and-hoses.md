@@ -74,6 +74,10 @@ Delete a pipe or hose from its Properties (🗑 Delete), or grab it in Edit layo
 (or **Delete Hose**) button. Its own IPs go with it: a coupling or IP point on one of its ends is deleted too when nothing else is on
 it (no other pipe, Quick Disconnect or End Cap, and not an opening on a vessel). **↩ Put back** (Ctrl+Z) brings it back.
 
+## Fittings on a pipe
+
+When a tee, cross, pump or valve goes on a pipe, or a pipe turns at an elbow, the pipe is divided into two pipes. Their IPs are set and every setting of the old pipe is kept on both (size, IP Types, colors): Skynet does this in the Background and needs no user input. Each new pipe gets its own Name. A new pipe drawn on to a pipe takes its size, IP Type and color the same way.
+
 ## Shortening a pipe
 
 Grab a pipe in Edit layout and press **🔓 Unlock its ends**: its ends let go and get a coupling. Drag that coupling (or the handle on the end) along the pipe to make it shorter or longer. It stays on its own line.
