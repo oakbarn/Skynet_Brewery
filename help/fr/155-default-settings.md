@@ -36,11 +36,15 @@ Les tuyaux souples ont une simulation de débit.
 
 Le raccord par défaut qu'un nouveau tuyau souple a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau souple. Une fois placés, les tuyaux souples gardent leur type de raccord. Les IP de chaque bout d'un tuyau souple peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux souples comme la plupart de vos tuyaux souples sont montés.
 
-### How many Pixels are Pipes and Hoses to be drawn on a Tab? {#how-many-pixels-are-pipes-and-hoses-to-be-drawn-on-a-tab}
+### How many Pixels are Pipes to be drawn on a Tab? {#how-many-pixels-are-pipes-to-be-drawn-on-a-tab}
 
-C'est seulement la façon dont les tuyaux et tuyaux souples sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 10 est un bon départ. Cela vaut pour les nouveaux tuyaux et tuyaux souples placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
+C'est seulement la façon dont les tuyaux sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 10 est un bon départ. Cela vaut pour les nouveaux tuyaux placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
 
-Cette case est à deux endroits, ici et dans **New Tabs**. C'est un seul réglage : taper dans l'une change l'autre. Chaque Tab peut encore changer le sien dans **Tab Settings**.
+### How many Pixels are Hoses to be drawn on a Tab? {#how-many-pixels-are-hoses-to-be-drawn-on-a-tab}
+
+C'est seulement la façon dont les tuyaux souples sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 6 est un bon départ ; les tuyaux souples sont en général dessinés plus fins que les tuyaux. Cela vaut pour les nouveaux tuyaux souples placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
+
+Chacune de ces deux cases est à deux endroits, ici et dans **New Tabs**. Chacune est un seul réglage : taper dans l'une change l'autre. Chaque Tab peut encore changer sa **Pipe Size** et sa **Hose Size** dans **Tab Settings**. Un Tab fait avant qu'il y ait une Hose Size dessine ses tuyaux souples à sa Pipe Size, comme avant.
 
 Le côté technique : les tailles vont de 1/4" à 6", avec la taille en mm à côté de chacune ; Skynet commence à 1/2" pour les deux, Tri-Clamp pour les tuyaux et Quick Disconnect pour les flexibles ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). Un nouveau Device, Pipe Fitting ou élément avec des IP (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour la Default Pipe Size jusqu'à ce qu'un tuyau y soit. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). La case des pixels va de 2 à 100 (vide = 10).
 
@@ -126,7 +130,7 @@ Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le 
 
 La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
 
-Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). La case **How many Pixels are Pipes and Hoses to be drawn on a Tab?** est ici aussi (voir plus haut).
+Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). Les cases **How many Pixels are Pipes to be drawn on a Tab?** et **How many Pixels are Hoses to be drawn on a Tab?** sont ici aussi (voir plus haut).
 
 ## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
 
