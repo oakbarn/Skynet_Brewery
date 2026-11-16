@@ -20,9 +20,9 @@ Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être
 ### Donner son profil à un Tab {#give-a-tab-its-profile}
 
 - Sur l'onglet de menu **Tab Background Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
-- Ou dans Edit layout, ouvrez **⚙ Tab settings** et choisissez **Tab Background Profile**.
+- Ou dans Edit layout, ouvrez **⚙ Tab Settings** et choisissez-le sous **Background > Profile**.
 
-Un Tab qui a sa propre **Background color** dans Tab settings garde cette couleur. Mettez-la sur **Default** pour utiliser la couleur du profil.
+Un Tab qui a sa propre **Background > Color** dans Tab Settings garde cette couleur. Mettez-la sur **Default** pour utiliser la couleur du profil.
 
 L'onglet de menu **Default** choisit le Tab Background Profile que reçoit un **nouveau Tab**.
 

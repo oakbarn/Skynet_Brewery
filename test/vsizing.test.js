@@ -44,7 +44,7 @@ assert.deepEqual(f.vBox({ volume: 10 }, c), [212, 255]);
 assert.deepEqual(f.vBox({ volume: 1 }, c), [98, 118]);
 
 // the panel: only the Master has grab points; Tab settings pick it; Show All
-assert.ok(app.includes("['vSizer', 'Master Vessel Sizer"), 'Tab settings: Master Vessel Sizer');
+assert.ok(app.includes("['vSizer', 'Vessel Sizer'") && app.includes("vSizer: 'The Master Vessel Sizer:"), 'Tab Settings: the Vessel Sizer box picks the Master Vessel Sizer');
 assert.ok(app.includes("isSized(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id !== o.id) return;"), 'no grab points on a Vessel that is not the Master');
 assert.ok(app.includes("if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab("), 'resizing the Master resizes the Tab');
 assert.ok(app.includes("if (!m || m.id !== item.id) { work.w = item.w; work.h = item.h; }"), 'only the Master takes a new Width or Height');

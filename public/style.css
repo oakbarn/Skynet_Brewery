@@ -1336,10 +1336,12 @@ dialog.testComm { width: min(720px, 96vw); }
 /* A frozen top on the model dialog (Rule 2.51): only a Pump's Properties or Add box for now (OakBarn Brewery: "Wait ... until I am
    100% Finished with the model"). The ☰, title and buttons stay put while the rest scrolls; the bottom row is not shown. */
 #dlg .dlgHead::after { content: ''; display: block; clear: both; }
-/* Rule 2.51: the Pump dialogs, and each dialog updated since 2026-11-14 (the Pipe and Hose Properties) */
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]), dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]), dialog#dlg:has(#dlgBody .mSet) { padding-top: 0; }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgHead, dialog#dlg:has(#dlgBody .mSet) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
-dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgBottomBar, dialog#dlg:has(#dlgBody .mSet) .dlgBottomBar { display: none; }
+/* Rule 2.51: the Pump dialogs, and each dialog updated since 2026-11-14 (the Pipe and Hose Properties; Tab Settings, marked by its Vessel Sizer box) */
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]), dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]), dialog#dlg:has(#dlgBody [data-k="vSizer"]), dialog#dlg:has(#dlgBody .mSet) { padding-top: 0; }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgHead, dialog#dlg:has(#dlgBody [data-k="vSizer"]) .dlgHead, dialog#dlg:has(#dlgBody .mSet) .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg:has(#dlgBody [data-k="pumpModel"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="ipTypeFrom"]) .dlgBottomBar, dialog#dlg:has(#dlgBody [data-k="vSizer"]) .dlgBottomBar, dialog#dlg:has(#dlgBody .mSet) .dlgBottomBar { display: none; }
+/* Tab Settings: a box that gets the focus (the Name after a ⚠) scrolls into view below the frozen top, not under it */
+dialog#dlg:has(#dlgBody [data-k="vSizer"]) { scroll-padding-top: 8em; }
 /* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
 .gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
 .gpick .gpickFolder.hidden { display: none; }
