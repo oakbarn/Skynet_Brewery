@@ -115,8 +115,7 @@ When a pump or powered valve on it is on, flow runs from the source, through the
 | Pipe size / Hose size | List of standard sizes, or Custom |
 | Custom size | Shows when Size = custom |
 | Pipe color / Hose color | Default pipe #8a8f96, hose #c9ced3 |
-| Show when nothing flows | Off = only the moving flow shows (the Tab picture already shows the pipe) |
-| Tab, Lock position | |
+| Lock position | |
 | Label, Show label | As every Widget (Rule 1.21): the Label sits in the middle of the pipe |
 | Name | Given by Skynet (Pipe_1, Hose_1), shown greyed out |
 | X, Y, Width, Height | **Hidden** (Rule 5.21 exception): the place and size come from where it is drawn |

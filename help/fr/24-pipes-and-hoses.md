@@ -74,6 +74,6 @@ de cuve). **↩ Put back** (Ctrl+Z) le remet.
 
 Attrapez un tuyau dans Edit layout et appuyez sur **🔓 Unlock its ends** : ses bouts se détachent et reçoivent un raccord (coupling). Faites glisser ce raccord (ou la poignée au bout) le long du tuyau pour le raccourcir ou l'allonger. Il reste sur sa propre ligne.
 
-## Ne montrer que l'écoulement {#showing-only-the-flow}
+## Les tuyaux se voient toujours {#pipes-always-show}
 
-Si l'image de fond du Tab montre déjà votre tuyauterie, éteignez **Show when nothing flows** (afficher quand rien ne coule) sur ce tuyau. Seul l'écoulement en mouvement apparaît alors par-dessus l'image.
+Un tuyau ou un flexible se voit toujours sur son Tab, qu'il y ait du passage ou non, parce qu'il est vraiment là.
