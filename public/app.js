@@ -1801,8 +1801,11 @@ const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, 
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
 const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
 const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
-// a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = 1600 x 900 and 10)
-const newTabSize = () => { const d = S.config.brewDefaults || {}; return { width: +d.newTabWidth || 1600, height: +d.newTabHeight || 900, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
+// a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = the screen's usable size and 10)
+// The screen's usable size (OakBarn Brewery, 2026-11-16): the size of the screen the Tab is made on, less the taskbar (1920 x 1040 on a
+// 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
+const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
+const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
@@ -10741,8 +10744,9 @@ const TAB_TIPS = {
   bgW: 'How wide the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
   bgH: 'How tall the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
   style: 'The Tab Style: the colors, fonts and sizes of the Labels, Devices and Widgets on this Tab. Default = the Tab Style picked on ☰ Menu > Default settings. A Device or Widget with a color, font or size of its own keeps it; only the rest take the Tab Style. Skynet Styles 🔒 can never be changed. ➕ Add new User Style… makes your own, and ✏ Edit changes it.',
-  width: 'How wide this Tab is, in pixels. A new Tab starts at 1600.',
-  height: 'How tall this Tab is, in pixels. A new Tab starts at 900.',
+  width: 'How wide this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as wide as the screen it is made on (1920 on most screens), unless ☰ Menu > Default settings gives a Width.',
+  height: 'How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless ☰ Menu > Default settings gives a Height.',
+  fitScreen: 'One click sets this Tab\'s Width and Height to the usable size of THIS screen (the screen less the taskbar), so the whole Tab fills the screen at Zoom Fit screen with no scroll bars. Press Save to keep it. You can still type your own Width and Height. Pick the screen of the computer you brew from: a Tab sized on a small laptop is drawn smaller on a big screen.',
   vSizer: 'The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout.',
   pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe and hose size, reducer and fitting is drawn to scale from it.',
   flowColor: 'The color of the flow in every pipe and hose on this Tab. None = each pipe keeps its own Flow Color. Mash, Boil, Whirlpool and Ferment: a pipe with a Flow Color of its own keeps it. Tap, Strike and the plain colors: every pipe takes it. Flow from a Tap Water Valve is always Blue, and flow that starts at a Vessel with an Out Flow Color takes that color.\n\nThe technical side: a Process sets it with tab.flow_Color = Mash, on the Tab the screen shows.',
@@ -10782,6 +10786,9 @@ async function editWorkspace() {
     ['flowColor', 'Flow Color', 'flowc', 'tab', false, false, tip('flowColor')]], work, draft.workspaces.length > 1, TAB_SPOT);
   // the boxes, as the dialog shows them now
   const dlgEl = $('#dlg'), body = $('#dlgBody'), nameBox = body.querySelector('[data-k="name"]'), idBox = idLocked ? null : body.querySelector('[data-k="id"]');
+  // 🖥 Fit Screen (OakBarn Brewery, 2026-11-16): one click fills Width and Height with this screen's usable size; Save keeps it, Cancel does not
+  { const wB = body.querySelector('[data-k="width"]'), hB = body.querySelector('[data-k="height"]');
+    if (wB && hB) { const sc = screenTab(); hB.after(h('label', { title: T.fitScreen }, 'Screen size'), h('button', { type: 'button', class: 'fitScreenBtn', title: T.fitScreen, onclick: () => { const n = screenTab(); wB.value = n.w; hB.value = n.h; wB.dispatchEvent(new Event('input', { bubbles: true })); hB.dispatchEvent(new Event('input', { bubbles: true })); } }, `🖥 Fit Screen (${sc.w} x ${sc.h})`)); } }
   // what would stop the Save: the box to go back to and what to say, or null
   const problem = () => {
     const nm = String(nameBox?.value ?? '').trim();
@@ -12981,7 +12988,7 @@ async function newSchemaFromTemplate(name) {
   const ifName = draft.devices?.[0]?.name || plan.devices[0].name;
   for (const e of plan.elements) if (e.device !== undefined) e.device = ifName;
   const newTabs = [{ name: plan.tab, id: plan.tabId, width: plan.width, height: plan.height, ...tabLook() }];
-  if (plan.fTab && plan.fTab !== plan.tab) newTabs.push({ name: plan.fTab, id: plan.fTabId, width: 1600, height: 900, ...tabLook() });
+  if (plan.fTab && plan.fTab !== plan.tab) newTabs.push({ name: plan.fTab, id: plan.fTabId, ...newTabSize(), ...tabLook() });
   draft.workspaces = [...newTabs, ...draft.workspaces.filter(x => x.name !== 'Main' && !newTabs.some(n => n.name === x.name))];
   wsName = plan.tab;
   const taken = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
@@ -13786,8 +13793,8 @@ function renderDefaultTab(box) {
     ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
     ['_tabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
-    ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: 1600, tip: DEF_TIPS.width }],
-    ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: 900, tip: DEF_TIPS.height }],
+    ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: screenTab().w, tip: DEF_TIPS.width }],
+    ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: screenTab().h, tip: DEF_TIPS.height }],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
     // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
     ['_lbl', 'Labels', 'head'],
@@ -13840,6 +13847,7 @@ function renderDefaultTab(box) {
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
     for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    { const sc = screenTab(); if (+d.newTabWidth === sc.w) delete d.newTabWidth; if (+d.newTabHeight === sc.h) delete d.newTabHeight; }      // the screen's own size is not saved, so a new Tab keeps matching the screen it is made on
     for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes and Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
@@ -14612,7 +14620,7 @@ async function ivBuild(a) {
     const bad = elementNameError(tab, 'Tab'); if (bad) return toast(bad, true);
     if (S.config.workspaces.some(w => w.name.toLowerCase() === tab.toLowerCase())) return toast(`There is already a Tab "${tab}"`, true);
     const id = defaultTabId(tab, S.config.workspaces.map(w => w.id).filter(Boolean));
-    await api('PUT', '/ui/layout', { workspaces: [...clone(S.config.workspaces), { name: tab, id, width: 1600, height: 900, ...tabLook() }], elements: S.config.elements, graphics: S.config.graphics });
+    await api('PUT', '/ui/layout', { workspaces: [...clone(S.config.workspaces), { name: tab, id, ...newTabSize(), ...tabLook() }], elements: S.config.elements, graphics: S.config.graphics });
     await load();
   }
   const r = await api('POST', '/ui/equipment', { name: a.name, assign: true, tab, layout: 'use' });
