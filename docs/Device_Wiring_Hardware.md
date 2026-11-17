@@ -678,5 +678,6 @@ Prices: see the [Hardware shopping list](Skynet_Brewery_Shopping_List.md).
 ---
 
 ## Change log
+- 2026-11-17: OakBarn Brewery confirmed the additions ("Additions to Confirm Yes"): the Contactor for 240 V elements (2.2), the Mechanical Relay for compressors (4.2) and the E-Stop that cuts the power by its own wiring (8.1).
 - 2026-11-17: Pump Switching: Relay or SSR, both as options (OakBarn Brewery: "Describe both as Options in Text and why a Relay Works just as well as a SSR but the trigger voltage may favor an SSR").
 - 2026-11-17: First version, from OakBarn Brewery's Pump (On/Off) sheet, for every Device Skynet makes today.
