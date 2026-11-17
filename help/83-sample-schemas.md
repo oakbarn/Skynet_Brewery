@@ -5,8 +5,8 @@ The Schema dropdown (on the Menu Bar, the ☰ Menu > Schema tab and the About ta
 - **Three vessels, one pump** (also the Schema a new panel starts with)
 
 It is kept up to every new Rule, so it is the place to try new things. The other samples (Two vessels, one pump and the
-BrewZilla brew day) have been set aside for now. Each one comes back, one at a time, in its own download, the **Skynet Sample
-Schemas Setup**, once it is brought up to the current Rules (see [The Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup)).
+BrewZilla brew day) have been set aside for now. Each one comes back, one at a time, with the next **Update Setup**, once it is
+brought up to the current Rules (see [The Skynet Sample Schemas](184-skynet-sample-schemas-setup)).
 Samples from that Setup are listed here too, after the 3 Vessel sample. (Some may also come back as Schema Templates, see
 [New Schema from a Skynet Template](157-schema-templates).)
 

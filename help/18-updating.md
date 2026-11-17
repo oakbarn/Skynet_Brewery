@@ -2,9 +2,9 @@
 
 **One zip does both:** a first install and every update. The zip has **no** `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. Their samples are in a folder called `defaults`, and the panel copies them in only on its very first start, into a folder you don't have yet.
 
-**The Skynet pictures and sounds are a separate download**, the Skynet Media Setup (Windows) or Skynet Media zip. It only adds the ones you don't have yet and never changes or deletes any. See [The Skynet Media Setup](183-skynet-media-setup).
+**New Skynet pictures and sounds come with the update.** The Update Setup brings the ones added since the last one; the Brain adds the ones it does not have yet and never changes one you have. Nothing extra to run. See [The Skynet pictures and sounds](183-skynet-media-setup).
 
-**More Sample Schemas are a separate download too**, the Skynet Sample Schemas Setup (Windows) or zip. The panel comes with only the 3 Vessel sample. See [The Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup).
+**New and fixed Sample Schemas come with the update too.** A fixed one replaces its older copy; a Schema you already made from it is yours and is never touched. See [The Skynet Sample Schemas](184-skynet-sample-schemas-setup).
 
 | Folder | What is in it | On an update |
 |---|---|---|
@@ -14,10 +14,10 @@
 | `processes` | Your processes (earlier versions called this folder `scripts`: Skynet renames it in the Background and needs no user input) | **Kept.** Not in the zip. |
 | `help` | This manual | Replaced by the new manual. The installers copy the old pages to `help/backups/before_update_<date>` first. |
 | `defaults` | The sample layout and processes | Replaced. Only used for a folder you don't have. |
-| `sample_schemas` | The extra Sample Schemas from the Sample Schemas Setup, and any Schema from another brewer | **Kept.** Not in the zip. |
+| `sample_schemas` | The extra Skynet Sample Schemas, and any Schema from another brewer | **Kept.** New Skynet samples are added and fixed ones replaced; your own are never touched. |
 | Everything else (`lib`, `public`, `server.js`, `samples` …) | The program itself | Replaced. |
 
-**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, processes, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `processes` to `processes_old`). The panel copies the samples into a fresh `processes` the next time it starts. (Pictures and sounds are never replaced: rename `media` only if you want to start it over, then run the Skynet Media Setup again.)
+**Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, processes, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `processes` to `processes_old`). The panel copies the samples into a fresh `processes` the next time it starts. (Pictures and sounds are never replaced: they come back only with the Full Setup, which overwrites everything.)
 
 > **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you pick **Update the program and reset all users** or **Start Fresh** in the installer and confirm the warning. See [Login, users and passwords](10-login).
 
@@ -57,7 +57,7 @@ When the installer finds the panel already there, it asks what this update does.
    - every Schema, Tab, Device, Widget, setting, Profile and Recipe (`config`)
    - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
    - every Process (`processes`) and the `backups` folders
-   - every picture and sound (`media`), the Skynet ones too: run the **Media Setup** after it
+   - every picture and sound (`media`), the Skynet ones too: the **Full Setup** has them all
    - everything in the **Import** folder (`C:\Brewing\Import`)
    - **No** on the warning goes back. Nothing is deleted.
    - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).

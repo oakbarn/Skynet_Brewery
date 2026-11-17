@@ -20,7 +20,7 @@ Chaque version sur cette page est une **mise à jour officielle de Skynet** : un
 | Fichier de la version | À quoi il sert |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Programme d'installation Windows. Tout le panel est dedans. |
-| `Skynet_Brewer_Full_Setup_<date>.exe` | Le même programme d'installation Windows, avec en plus toutes les images et tous les sons Skynet. Le plus simple sur un nouvel ordinateur : pas besoin du Media Setup. Voir [Le Skynet Media Setup](183-skynet-media-setup). |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | Le même programme d'installation Windows, avec en plus toutes les images, tous les sons et tous les Sample Schemas Skynet. La façon de faire sur un nouvel ordinateur. Voir [Les images et sons Skynet](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | Le panel lui-même : une première installation ou une mise à jour à la main, et pour Mac, Linux et le Pi. Il n'a pas de dossiers `config`, `data`, `media` ni `processes`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. |
 | `Install Skynet Brewer.command` | Programme d'installation Mac |
 | `install-skynet-brewer.sh` | Programme d'installation Linux et Raspberry Pi |

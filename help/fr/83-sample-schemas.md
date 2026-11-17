@@ -5,8 +5,8 @@ La liste des Schemas (sur la Menu Bar, sur le Tab ☰ Menu > Schema et sur le Ta
 - **Three vessels, one pump** (trois cuves, une pompe ; c'est aussi le Schema avec lequel commence un nouveau panel)
 
 Il est tenu à jour de chaque nouvelle Règle, c'est donc l'endroit où essayer les nouveautés. Les autres exemples (Two vessels, one pump et le
-jour de brassage BrewZilla) ont été mis de côté pour l'instant. Chacun revient, un à la fois, dans son propre téléchargement, le **Skynet Sample
-Schemas Setup**, une fois mis à jour des Règles actuelles (voir [Le Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup)).
+jour de brassage BrewZilla) ont été mis de côté pour l'instant. Chacun revient, un à la fois, avec le prochain **Update Setup**, une fois
+mis à jour des Règles actuelles (voir [Les Sample Schemas Skynet](184-skynet-sample-schemas-setup)).
 Les exemples de ce Setup sont aussi listés ici, après l'exemple à 3 cuves. (Certains peuvent aussi revenir comme Schema Templates, voir
 [Nouveau Schema à partir d'un Skynet Template](157-schema-templates).)
 
