@@ -1081,6 +1081,27 @@ Build Tab, Rule 4.1). Units are not asked: they are a Panel setting, the same fo
 Import makes no Schemas with Add new Schema, so nothing changes there. (thread "Open a short interview after adding a Schema",
 Help 202)
 
+2.59 **Data is always metric; Units are for showing only** (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 9: "Remember
+that switching units only affects display, not the data which is always metric"; "make sure everything like the defaults are set to
+metric when stored. If we have any open defaults that are stored US Standard Now, convert them all"; "3 Vessel Schema ALL Metric
+Data. we can work on the Display after"). Skynet keeps every number in metric: **°C, liters, kilograms (grams for hops), cm**.
+Settings > Panel settings > **Units** (US or Metric) only changes what a box or a reading **shows** and what you **type**; switching it
+never changes a saved number, so switching back and forth can never drift a number. What you type in US units is saved in metric.
+- **Kept in metric now:** Mash, Boil and Water Profiles (Skynet's own too), Equipment Profiles and the Vessels in their drawings,
+  Vessels on a Tab, Vessel Templates (the shipped ones too), and the Default settings (Batch Size, Hop Stands, Boil Start and
+  Ferment temperatures). Recipes already were (Rule 17.16). A BeerXML map with `"units": "Metric"` imports liters and grams.
+- **Older saves:** a Profile, Equipment Profile, Vessel Template, Vessel or Default kept in US units (each says so with its own
+  US tag) is turned into metric **once** on the first start after the update; the old file is kept beside it (`.before_metric`).
+  Skynet does this in the Background and needs no user input.
+- **The 3 Vessel Sample** (and the Brain's starting Schema) is all metric: probes in °C, the HLT and Kettle elements' Setpoint and
+  Offset (150 °F and -1 °F kept as 65.5556 °C and -0.5556 °C, so the Help examples stay true in US), the Recipe Globals (°C,
+  liters, hop grams), the Vessels, the Simulator and the Brew Day Process. Names never change (Rule 3.2), so a Global named
+  _Gal or _Oz now holds liters or grams.
+- **Still to come:** showing every number in the Units (each Tab and Recipe turns its numbers into the Units when it opens, only
+  on screen), and the live side of a user's own Schemas (probes, Setpoints, PID, alarms, Processes).
+- **Both programs:** the BruControl Import still makes its Vessels and Profiles in the Units picked; the Panel keeps them in metric
+  when they are saved. Its probes stay in the units BruControl had until the live side is done. (Panel Updates Sandbox entry 9)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -3984,6 +4005,17 @@ plain that the Skynet way is better in the end"). By default every imported name
 Only after both are confirmed are the BruControl names kept. Even then, characters a name may not have (Rule 3.4) and spaces are
 changed as always, and every item still gets its hidden key (Rule 3.10). Everything else that comes in is still changed to the
 Skynet way. Either choice can be changed later item by item, since Skynet renames everywhere.
+**A BruControl item in conflict with any Skynet Rule** (OakBarn Brewery, 2026-11-17, as a General Rule: "BruControl items in
+Conflict with any Skynet Rule will be updated automatically if possible without user intervention or with the Help of the User. A
+good example of where the user will be very involved is approving changes to globals to widgets or gGlobal variable and API"): the
+Importer fixes it by itself whenever it can, and lists the change in the Import report; when it can't, it asks the user (an Interview
+question). The user approves each BruControl Global that becomes a Widget or a gGlobal variable, and its API. **IDs too** (OakBarn Brewery,
+2026-11-17: "IDs are another case where we will allow user input to our suggestion"): the Importer suggests each new ID and the user may
+change it before it is saved (after that it never changes, Rule 3.2). **Reserved words**
+(the short Skynet Constant names and `toF`, `toC`, Panel Updates Sandbox entry 28) are force changed on Import, in any capitals,
+even when the BruControl names are kept, like a character a name may not have (Rule 3.4). Rule 3.2 is kept: an item gets its Skynet
+ID only when it is saved into Skynet, so a name changed during the Import is not a renamed item. **Both programs:** this is the
+Importer's Rule; the Panel's own check for reserved words is a warning when naming (entry 28).
 
 15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
@@ -5287,6 +5319,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-17: Rule 15.1 (OakBarn Brewery's General Rule: "BruControl items in Conflict with any Skynet Rule will be updated automatically if possible without user intervention or with the Help of the User"): the Importer fixes a conflict by itself when it can, else asks; the user approves each Global that becomes a Widget or gGlobal variable and its API; IDs are suggested and the user may change them before saving; reserved words (Panel Updates Sandbox entry 28) are force changed on Import. The Importer details are in the Importer Sandbox (Skynet_Private). Checked against both programs: the Panel warns when naming, the Importer force changes.
+- 2026-11-17: Added Rule 2.59, data is always metric and Units are for showing only (OakBarn Brewery, Panel Updates Sandbox entry 9: "switching units only affects display, not the data which is always metric"; "If we have any open defaults that are stored US Standard Now, convert them all"; "3 Vessel Schema ALL Metric Data. we can work on the Display after"). Profiles, Equipment Profiles, Vessels, Vessel Templates and Defaults are kept in metric; older US saves are turned into metric once (old file kept as .before_metric); the 3 Vessel Sample and the starting Schema are all metric. The display part comes next. Checked against both programs: the BruControl Import's Vessels and Profiles are kept in metric when the Panel saves them.
 - 2026-11-17: Added Rule 2.58, the New Schema Interview (OakBarn Brewery: "Adding a New Schema Lands back on the Schema Page. Should land on a short interview Page about the New Schema"; "Similar to the Skynet Schema Import"): after Add new Schema, About (Name, What is it for?), Boards, Tabs, Equipment and Done, one page at a time with the steps across the top; Finish and Close land on the new Schema's first Tab. A Template or an Equipment Profile gets About and Done only. The Schema list shows What it is for. Rule 14.4 suspended (OakBarn Brewery: "Suspend Rule 14.4 for Now"); Rule 14.5 stands. Rule 10.9 (OakBarn Brewery's Schema page markup): Clone is now **Create New Copy of Schema**, the Sample Schema's Add is **Add This Schema Template**, and Share with other brewers names the kinds of files, lists the Schema's own pictures and sounds to save and send (Skynet sends none itself), warns that both brewers should be on the latest Skynet, and links the new Step by Step (Help 203). Help 44, 48, 188, 202 and 203 (and French). Checked against both programs: the BruControl Import adds no Schemas and has no Schema tab, so nothing changes there. (thread "Open a short interview after adding a Schema")
 - 2026-11-17: Rule 4.1 (OakBarn Brewery, 2026-11-17: "I see the Equipment Template so use a Normal Build Tab to create a Bundled Immersion Chiller and save to Equipment Templates"; markup "Method to change the Menu Bar when the Build is for a Vessel Template, And Equipment Profile, An Equiment Template", option A: "Change Valves to Valves/Equpment and just add the Equipment Templates and Build new to the DDLB LIst"; "I think A is best choice if possible"; built as a Rule 4.1 and Rule 14.4 exception): a **Chiller Bundle Equipment Template** (one immersion chiller with its hoses, Ice Water Cans, a Sump Pump and IPs, saved from a normal Build Tab with Finish Build ... > As a Template; a pump Device keeps no Port and gets the next free Port when placed, Rule 6.1); the **Valves** shortcut is now **Valves/Equipment** with the Equipment Templates and 🔨 Build new Equipment Template; while a Build is for a Template or an Equipment Profile the Edit layout bar greys out what can't go in one (the Widget buttons, Picture, Text, Tab settings, New tab, Hidden Tab, Processes, Update Schema Version) and Finish Build ... shows As a Template first. Placing a Bundle with place_Chiller waits in the Process Updates Sandbox (entry 8, Rule 14.5). Help 55, 82, 200 (and French). Checked against both programs: the BruControl Import's Build page is the Panel's, so it has the same bar and Templates; BruControl has no chillers. (thread "Move an Immersion Chiller between Vessels")
 - 2026-11-17: Rule 19.6 #1 and #2 changed (OakBarn Brewery: "Ok a switch  that is a real world thing is a Special widget like a Manual Valve.  So yes."; "Remove old"): a Switch that is a real world thing is in the Equipment Profile like a Manual Valve; the old Equipment Profile screen (its form, Equipment list, Paste onto a Tab dialog, Made before Templates with Put on Tab, the Settings button) is taken out, before the first Public Production (Old Ways policy). Opening a profile anywhere opens the Equipment Profile view, which now also has 🧮 Check the volumes, 📈 Efficiency and 🗂 New Schema from this profile. Help 28, 34, 48, 50, 68 (and French). Checked against both programs: the BruControl Import has no Equipment Profiles. (thread "Paste Equipment Profiles onto a Tab")

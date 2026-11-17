@@ -221,6 +221,12 @@ if (store.config.brewDefaults?.valveProfile !== undefined) {
 }
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
+// every number is kept in metric (Rule 2.59): an older Mash, Boil or Water Profile, Equipment Profile or Vessel Template kept in US
+// units is turned into metric once, the old file kept beside it (.before_metric). Skynet does this in the Background and needs no user input.
+try {
+  const n = Object.values(brewProfiles).reduce((a, ps) => a + ps.keepMetric(), 0) + profiles.keepMetric() + templates.keepMetric();
+  if (n) console.log(`Kept in metric (Rule 2.59): ${n} saved profile${n > 1 ? 's' : ''} and template${n > 1 ? 's' : ''} turned from US units`);
+} catch (e) { console.log('Metric numbers: ' + e.message); }
 engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vessel picks a Chiller Template (Rule 5.42)
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.

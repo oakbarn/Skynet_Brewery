@@ -51,7 +51,7 @@ assert.throws(() => schemas.remove(first), /loaded/);
 
 // Equipment Profiles: shared and unique
 const p = profiles.create('10 gallon');
-assert.equal(p.trubChillerLoss, 0.5);
+assert.equal(p.trubChillerLoss, 2); assert.equal(p.units, 'Metric', 'a new profile is kept in metric (Rule 2.59)');
 assert.equal(p.batchSize, undefined, 'batch size belongs to the Recipe now');
 schemas.setProfile('Main', p.id);
 assert.equal(store.config.workspaces.find(w => w.name === 'Main').equipmentProfile, p.id, 'the profile belongs to a Tab');

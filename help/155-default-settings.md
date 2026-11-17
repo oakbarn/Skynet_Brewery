@@ -154,7 +154,7 @@ Some things have no box because they are always the same (for example the Pump a
 
 These change things already made, or how the whole panel works, so they are Settings, not Defaults. They are in **Settings > Panel settings: screen, Tabs and alerts**:
 
-- **Units** (US or Metric): every amount, temperature and Recipe shows in it;
+- **Units** (US or Metric): every amount, temperature and Recipe shows in it. Skynet keeps every number in metric (°C, liters, kilograms, cm), so Units only changes what you see and type; switching it never changes a saved number (Skynet Rule 2.59);
 - **Tab Style** (the look of every Tab that has no Tab Style of its own);
 - **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
 - **\L Rich Text Code Size**;

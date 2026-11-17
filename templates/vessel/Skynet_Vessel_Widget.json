@@ -1,5 +1,5 @@
 {
-  "vesselType": "vessel",
+  "vesselType": "vessel", "units": "Metric",
   "vtype": "Brew Kettle",
   "vwidget": true,
   "probeStyle": "front",
@@ -8,7 +8,7 @@
     260,
     320
   ],
-  "volume": 10,
+  "volume": 37.8541,
   "sizeMethod": "proportional",
   "std": {
     "type": "TC",
