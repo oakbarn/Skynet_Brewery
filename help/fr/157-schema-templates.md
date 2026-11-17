@@ -29,7 +29,7 @@ Choisissez ensuite l'**Interface** (votre carte). Chaque Device prend le Port li
 - **Supply Manifold** : aucun, un Long Tee with a Valve, un Double ou un Triple, avec des vannes manuelles ou motorisées.
 - **Fermenteurs** : combien vont sur le Tab **Fermentor**. Chacun a sa sonde de température et une vanne de **glycol** qui s'ouvre au-dessus de la température de fermentation. Le Fermentor 1 fait les tâches de l'étape Ferment.
 
-Chaque question part de **☰ Menu > Default settings > New Schema from a Skynet Template**, donc réglez-y une fois vos réponses habituelles.
+Chaque question commence avec la réponse de Skynet (par exemple le 3 Vessel, un refroidisseur Immersion et des vannes à main). Changez-en n'importe laquelle ici, avant de faire le Schema.
 
 ## 3. Prêt à créer {#3-ready-to-make}
 

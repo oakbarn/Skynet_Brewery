@@ -42,6 +42,22 @@ Utilisez n'importe quel nom de couleur du panel : Red, Green, Blue, Yellow, Oran
 
 **`\dFC` ne change que la lettre, pas le nombre.** Il montre °F quand vos unités Default sont US et °C quand elles sont Metric (l'unité **Temperatures** de l'onglet ☰ Menu > Default, la même que celle de la touche Ctrl+Shift+D). Le nombre devant est celui que vous avez tapé, donc `152\dFC` montre 152°C sur un panel Metric. Utilisez-le pour des mots qui vont aux deux, comme `Temperature (\dFC)`, ou dans un Process où le nombre arrive déjà dans vos unités.
 
+## Nouvelles lignes et retour à la ligne {#new-lines-and-word-wrap}
+
+Le retour à la ligne (word wrap) est toujours actif dans chaque Text Box et chaque Label : un long texte passe sur plusieurs lignes tout seul. Le Rich Text s'occupe d'une nouvelle ligne là où vous en voulez une : `\n` commence une nouvelle ligne, et `\t` un retrait.
+
+## Les raccourcis clavier du Rich Text {#rich-text-shortcut-keys}
+
+Ces touches tapent les codes pour vous, dans chaque case de texte et de chaîne ([Raccourcis clavier](113-shortcut-keys)) :
+
+| Windows et Linux | Mac | Ce qu'elle tape |
+|---|---|---|
+| **Shift + Enter** | **Shift + Enter** | `\n`, une nouvelle ligne |
+| **Ctrl + B** | **⌘ + B** | `\b` avant et après les mots choisis (gras) ; sans rien de choisi, `\b\b` avec le curseur au milieu |
+| **Ctrl + Shift + D** | **⌘ + Shift + D** | **°F** ou **°C**, selon Units |
+
+Les téléphones et tablettes sans clavier n'ont pas ces touches : tapez les codes à la main.
+
 ## Bon à savoir {#good-to-know}
 
 - Les codes peuvent être utilisés ensemble : `\L\b\c{Red}BOIL\c\b\L 60 min`.

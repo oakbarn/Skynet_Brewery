@@ -68,12 +68,22 @@ const t2 = tabs.save(t1.id, { ...t1, bgColor: 'Black', nameColor: 'White', nameA
 assert.deepEqual([t2.bgColor, t2.nameAlign, t2.valueAlign, t2.digits, t2.precision, t2.ledMode], ['Black', 'TopCenter', undefined, 4, 1, undefined]);
 assert.equal(tabs.save(t1.id, { ...t2, valueType: 'led', ledMode: 'momentary' }).ledMode, 'momentary');
 assert.throws(() => tabs.save(t1.id, { ...t2, digits: 20 }), /1 to 12/);
+// a new Tab's pipe and hose pixels and size live in the Tab Profile (OakBarn Brewery, 2026-11-17: "Tab Profile")
+{ const t9 = tabs.create('Big Tabs'); const sv = tabs.save(t9.id, { ...t9, newTabPipe: 12, newTabHose: '8', newTabWidth: 1600, newTabHeight: '' });
+  assert.equal(sv.newTabPipe, 12); assert.equal(sv.newTabHose, 8); assert.equal(sv.newTabWidth, 1600); assert.equal(sv.newTabHeight, undefined, 'empty: the screen');
+  assert.throws(() => tabs.save(t9.id, { ...t9, newTabPipe: 1 }), /2 to 100/); assert.throws(() => tabs.save(t9.id, { ...t9, newTabWidth: 50 }), /200 to 20000/); tabs.remove(t9.id); }
 const v1 = valves.create('Ball H');
 assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Open picture: the On overlay shows open (2026-11-05)'); assert.match(v1.imageClosed, /Valve_Motor_Ball_Closed/);
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
+// the Valve Profile's Overlay (OakBarn Brewery, 2026-11-17: Valve Overlay "On Valve Profile", off Default settings)
+valves.seed = () => ({ imageOverlay: 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg' });
+valves.fillOverlay();
+assert.match(valves.get(v1.id).imageOverlay, /Overlay_Bolt_Flash/, 'a Valve Profile with no Overlay gets the old Default settings one');
+assert.equal(valves.save(v1.id, { ...valves.get(v1.id), imageOverlay: '' }).imageOverlay, 'none', 'no Overlay is None');
+assert.match(valves.create('Ball V').imageOverlay, /Overlay_Bolt_Flash/, 'a new Valve Profile starts with the seed Overlay');
 
-// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default, Right, no Cover, Hose, the Default settings Pump Overlay
+// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default, Right, no Cover, Hose, the Green Glow Ring Overlay
 const pumps = new ProfileStore(path.join(dir, 'pump'), 'pump');
 pumps.seed = () => ({ imageOverlay: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg' });
 const pd = pumps.ensureDefault();
@@ -84,7 +94,7 @@ assert.throws(() => pumps.save(pd.id, { ...pd, isDefault: false }), /stays the D
 assert.throws(() => pumps.remove(pd.id), /can not be deleted/);
 pumps.seed = () => ({ imageOverlay: 'tint:red' });
 const p2 = pumps.create('Left pump');
-assert.equal(p2.imageOverlay, 'tint:red', 'a new Pump Profile starts with the Default settings Pump Overlay'); assert.equal(p2.isDefault, undefined);
+assert.equal(p2.imageOverlay, 'tint:red', 'a new Pump Profile starts with the seed Overlay (the Default Pump Profile\'s)'); assert.equal(p2.isDefault, undefined);
 assert.equal(pumps.save(p2.id, { ...p2, imageOverlay: '' }).imageOverlay, 'none', 'no Overlay is None');
 pumps.save(p2.id, { ...p2, isDefault: true });
 assert.equal(pumps.marked().id, p2.id); pumps.remove(pd.id); assert.equal(pumps.own().length, 1, 'no longer the Default: it can go');

@@ -148,7 +148,7 @@ BK_Temp.valueColor = ""
 
 Every text box also has `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.x_hPosition` and `.y_vPosition`, for example `Pump_1.foreColor = "Red"` or `Text_1.x_hPosition = 400`. A Text added with **+ Text** has a name too (`Text_1`). See [Text boxes](49-text-boxes).
 
-The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Background Profile](36-tab-and-valve-profiles).
+The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Profile](36-tab-and-valve-profiles).
 
 ## Skynet Constants
 

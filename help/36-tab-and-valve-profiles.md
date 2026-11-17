@@ -1,10 +1,10 @@
-# Tab Background, Valve and Pump Profiles
+# Tab, Valve and Pump Profiles
 
-All three are Menu tabs (**☰ Menu**): Tab Background Profile, Valve Profile and Pump Profile. Each profile is kept on the Brain, in `config/profiles/tab`, `config/profiles/valve` and `config/profiles/pump`, so every Schema can use it. Only an Admin can make or change them.
+All three are Menu tabs (**☰ Menu**): Tab Profile, Valve Profile and Pump Profile. Each profile is kept on the Brain, in `config/profiles/tab`, `config/profiles/valve` and `config/profiles/pump`, so every Schema can use it. Only an Admin can make or change them.
 
-## Tab Background Profile
+## Tab Profile
 
-A Tab Background Profile gives a tab its **background color**, and the **look** a new device or widget on that tab starts with:
+A Tab Profile gives a tab its **background color**, and the **look** a new device or widget on that tab starts with:
 
 - **Name**: text color, background color and placement (TopLeft ... BottomRight).
 - **Value**: text color, background color and placement.
@@ -19,12 +19,16 @@ Something with an ON / OFF state (a pump, valve, switch) can only be an LED or T
 
 ### Give a tab its profile
 
-- On the **Tab Background Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
+- On the **Tab Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
 - Or in Edit layout, open **⚙ Tab Settings** and pick it under **Background > Profile**.
 
 A tab with its own **Background > Color** in Tab Settings keeps that color. Set it to **Default** to use the profile's color.
 
-The **Default** Menu tab picks the Tab Background Profile a **new tab** gets.
+### New Tabs
+
+A Tab Profile also holds what a **new Tab** made with it starts with: **How many Pixels are Pipes to be drawn on a Tab?** (10 if empty), **How many Pixels are Hoses to be drawn on a Tab?** (6 if empty), **Width of a New Tab (px)** and **Height of a New Tab (px)** (the size of the screen if empty). Each Tab still changes its own in **⚙ Tab Settings**.
+
+☰ Menu > Default settings > **Tab Profile for a new tab** picks the Tab Profile a **new tab** gets ([Default settings](155-default-settings)).
 
 ## Valve Profile
 
@@ -32,6 +36,7 @@ A Valve Profile is how a new valve starts:
 
 - **Graphic** (the valve as drawn) and, optional, **Graphic when open**. Skynet valves have no open pictures: the valve keeps its picture and the **On overlay** shows it is open ([Retired Skynet pictures](129-retired-skynet-pictures)).
 - **Orientation**: **Horizontal** (pipe ends left and right), **Vertical** (top and bottom), **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). For Horizontal and Vertical, pick graphics drawn that way. For the 45s, pick the **vertical** graphics: the panel turns them 45 degrees left or right for you. The 45s are for a valve sitting on a 45 degree elbow.
+- **Overlay**: what shows over the valve while it is open ([On overlay](58-on-overlay)). A new Valve Profile starts with the Overlay of the Valve Profile marked **Default** (the Lightning Bolt if none is marked). A new valve takes the Overlay of the Valve Profile picked in its Add box.
 
 Skynet's own valve pictures are SVG files in `Images/samples`, so they stay sharp at any size and can't be deleted (see [Media](07-media)):
 
@@ -72,6 +77,6 @@ A Pump Profile is how a new pump starts. Its picture comes from the pump you pic
 
 The **Pump Add box** has a **Pump Profile** dropdown. It starts on the Pump Profile marked **Default** and fills the boxes below with it; pick another and they change to it. You can still change any box before **➕ Add Device**. After that, the pump is changed in its own properties.
 
-**Default:** there is always one Default Pump Profile, so the Pump Profile list has no (none). Skynet makes the first one, **Default Pump Profile**: Right, no Cover, Hose, and the Default settings Pump Overlay. Change it as you like. Its **Default** switch can not be turned Off and it can not be deleted: to make another one the Default, open that one, turn its **Default** on and Save.
+**Default:** there is always one Default Pump Profile, so the Pump Profile list has no (none). Skynet makes the first one, **Default Pump Profile**: Right, no Cover, Hose, and the Green Glow Ring Overlay. Change it as you like. Its **Default** switch can not be turned Off and it can not be deleted: to make another one the Default, open that one, turn its **Default** on and Save.
 
-**Overlay of a new Pump Profile:** a new Pump Profile starts with the **Pump Overlay** of ☰ Menu > Default settings (the Green Glow Ring unless you change it). The Default settings Pump Overlay only applies to new Pump Profiles: Pump Profiles and pumps already made keep theirs. A new pump takes the Overlay of the Pump Profile picked in its Add box.
+**Overlay of a new Pump Profile:** a new Pump Profile starts with the **Overlay** of the Default Pump Profile. Pump Profiles and pumps already made keep theirs. A new pump takes the Overlay of the Pump Profile picked in its Add box. (The Pump Overlay is no longer on ☰ Menu > Default settings.)

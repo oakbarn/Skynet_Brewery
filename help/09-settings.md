@@ -42,6 +42,7 @@ These change things already made and how the whole panel works, for every Schema
 - **On startup**: the Zoom and Full screen the panel starts with ([Zoom and Full screen](41-zoom-and-full-screen)).
 - **Rich Text Embedded Code**: **\L Rich Text Code Size (px)**.
 - **Hover Help**: **Hover Delay (ms)** ([Hover help in dialogs](147-hover-help)).
+- **Pulse buttons**: **Push Lockout (s)**: how long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties.
 - **Phones and tablets**: can they edit, and move things ([Phones and tablets](45-phones-and-tablets)).
 - **Grain weight label** and the gravity points label ([Recipe tab](99-recipe-tab)).
 - **Hop alerts**: warning minutes, joining alerts, a sound, saying them out loud, and the browser voice.

@@ -42,6 +42,22 @@ Use any panel color name: Red, Green, Blue, Yellow, Orange, Purple, Copper, Brow
 
 **`\dFC` only changes the letter, not the number.** It shows °F when your Default units are US and °C when they are Metric (the **Temperatures** unit on the ☰ Menu > Default tab, the same one the Ctrl+Shift+D key uses). The number in front of it is whatever you typed, so `152\dFC` shows 152°C on a Metric panel. Use it for words that fit both, like `Temperature (\dFC)`, or in a Process where the number already comes in your units.
 
+## New lines and word wrap
+
+Word wrap is always on in every Text Box and Label: a long text goes onto more lines by itself. Rich Text takes care of a new line where you want one: `\n` starts a new line, and `\t` an indent.
+
+## Rich Text shortcut keys
+
+These keys type the codes for you, in every text and string box ([Shortcut keys](113-shortcut-keys)):
+
+| Windows and Linux | Mac | What it types |
+|---|---|---|
+| **Shift + Enter** | **Shift + Enter** | `\n`, a new line |
+| **Ctrl + B** | **⌘ + B** | `\b` before and after the words picked (bold); with nothing picked, `\b\b` with the cursor in between |
+| **Ctrl + Shift + D** | **⌘ + Shift + D** | **°F** or **°C**, as Units says |
+
+Phones and tablets with no keyboard do not have these keys: type the codes by hand.
+
 ## Good to know
 
 - Codes can be used together: `\L\b\c{Red}BOIL\c\b\L 60 min`.

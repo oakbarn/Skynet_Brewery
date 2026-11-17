@@ -29,7 +29,7 @@ Les téléphones n'ont pas de clic droit. **Gardez le doigt sur un élément pen
 
 Un cercle jaune avec un **?** noir ouvre l'aide à la partie qui parle de la chose à côté.
 
-- **Onglets du ☰ Menu** : à côté de chaque titre (Default, Equipment Profile, Vessel et ses parties Size, Heat, Temperature, Ports and Build, Default Layout, Mash, Boil, Tab Background et Valve Profiles).
+- **Onglets du ☰ Menu** : à côté de chaque titre (Default, Equipment Profile, Vessel et ses parties Size, Heat, Temperature, Ports and Build, Default Layout, Mash, Boil, Tab et Valve Profiles).
 - Fenêtres **Properties** : à côté du titre, pour chaque Device et Widget, les tuyaux, les IP, l'équipement et Tab settings. Si vous avez changé quelque chose dans la fenêtre, il demande d'abord, car ouvrir l'aide ferme la fenêtre sans enregistrer.
 - Il n'y a **pas** de ? sur un Tab lui-même, pour que vos écrans du jour de brassage restent propres. Le seul ? de la barre des Tabs est à côté de **☰ Menu**, pas sur le Tab.
 

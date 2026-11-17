@@ -17,14 +17,14 @@ really changes.
 | 1, 2 | Recommendations good | Default tab: **Look of a New Schema**. A new Tab keeps taking its colors from the Look. |
 | 3, 4 | "Rule is the default so no need for defaults; remove default choice everywhere" | Off the list. The Pump and Valve Standards (Rules) set the size. |
 | 5 | "Always Resize pipes (no user Option); remove default choice everywhere" | The **Autosize to pipe** switch is gone: every pipe fitting always sizes to its pipes (Rules 5.14, 5.36). |
-| 6a | Default Overlay for a New User Pump Template | Default tab: **Pump Overlay** (Green glow ring). |
-| 6b | Default Overlay for a New User Valve Template | Default tab: **Valve Overlay** (the steady bolt). |
+| 6a | Default Overlay for a New User Pump Template | Default tab: **Pump Overlay** (Green glow ring). Moved 2026-11-17 (OakBarn Brewery: "On Pump Profile"): the Overlay of each Pump Profile. |
+| 6b | Default Overlay for a New User Valve Template | Default tab: **Valve Overlay** (the steady bolt). Moved 2026-11-17 (OakBarn Brewery: "On Valve Profile"): the Overlay of each Valve Profile. |
 | 7 | "7 use the 6a only" | Folded into 6a. |
 | 8 | Delete; None on a new User Template; remove default choice everywhere | A new pump's cover color is None. Off the list. |
 | 9 | Set default to Blue, remove default choice everywhere | The flow color is Blue (it already was, #4fb3ff). Off the list. |
 | 10 | Defaults good; set as default, no user option | The Skynet Dial keeps its ranges and colors. Off the list. |
 | 11 | No need for Grey; add a Note that it is applied to every existing Pulse Button | Stays on the list with that note. |
-| 12 | Recommendation good | Default tab: **Push Lockout (s)** (3 s, for new buttons; Rule 6.7). |
+| 12 | Recommendation good | Default tab: **Push Lockout (s)** (3 s, for new buttons; Rule 6.7). Moved 2026-11-17 (OakBarn Brewery: "Skynet Panel Setting"): Settings > Panel settings. |
 | 13 | Mandatory field on a new Interface, edited on the Interface dialog; set all Interfaces and Templates to the recommended setting | **Lost Link (s)** is a must-fill box on the Interface dialog (3 to 600, 10 to start); the sample and config are set to 10 (Rule 6.3). |
 | 14, 15 | On the Simulator Bar, a user can change; remove the idea of defaults for the Bar. Then: "All Simulator Bar settings should be ONLY!!! on the Simulator Bar" | Settings > Simulation is gone; every Simulator setting is on the bar (⚙ Settings). Off the list (Rule 10.10). |
 | 16, 17 | Recommendations good | Already on the Default tab (16); Default Interface stays (17, Rule 4.6). |

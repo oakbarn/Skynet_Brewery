@@ -18,7 +18,7 @@ Chaque morceau de texte sur un Tab est une **zone de texte** (text box), et chaq
 | Width, Height | sa taille en pixels | `w_Text_1.width = 300` |
 | Position X et Y | sa place en pixels depuis la gauche et le haut du Tab : **x** est **h**orizontal (en travers), **y** est **v**ertical (de haut en bas). Les anciens noms `.xPosition` et `.yPosition` marchent toujours. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
-- **Word wrap as needed** (retour à la ligne si besoin) : un long texte passe sur plusieurs lignes. Sur un Device ou un Widget, il permet à un long Name de passer à la ligne (les Values passent toujours à la ligne). Un Text Widget passe toujours à la ligne.
+- **Le retour à la ligne (word wrap) est toujours actif** dans chaque Text Box et chaque Label : un long texte passe sur plusieurs lignes dans sa case. Il n'y a pas d'interrupteur pour ça. Pour commencer une nouvelle ligne là où vous voulez, utilisez le Rich Text : tapez `\n` ou appuyez sur **Shift + Enter** ([Rich Text Embedded Code](90-rich-text-embedded-code)). Une lecture avec son unité (127.3 °F) reste sur une ligne et devient plus petite pour tenir (Règle Skynet 2.56).
 - **Les codes dans le texte** marchent dans chaque zone de texte : `\b` gras, `\L` grand, `\n` nouvelle ligne, `\t` retrait, `\deg` signe degré et les autres dans [Rich Text Embedded Code](90-rich-text-embedded-code).
 - **Les raccourcis clavier** tapent les codes pour vous : Maj+Entrée `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Maj+D (⌘+Maj+D) °F ou °C. Voir [Raccourcis clavier](113-shortcut-keys).
 
@@ -31,7 +31,7 @@ Chaque attribut a un **Default** dans **☰ Menu > Default settings**, en deux p
 - **Labels** : le Name de chaque Device et Widget, et le Label sur une cuve. Visible, Fore Color, Back Color, Alignment, Bold,
   Font et Font Size (px).
 - **Text Boxes** : un Text, un Label Widget, et la Value d'un Device ou d'un Widget. Fore Color, Back Color, Alignment, Font, Font Size
-  (px), New Box Width, New Box Height et Word Wrap.
+  (px), New Box Width et New Box Height.
 
 Une nouvelle installation commence avec :
 
@@ -54,7 +54,7 @@ Une nouvelle installation commence avec :
   couleur à lui dans les propriétés de l'élément et cet élément la garde.
 - **La Value d'un Device ou d'un Widget** suit les couleurs des Text Boxes seulement une fois que vous les changez par rapport à
   une nouvelle installation, donc une nouvelle installation ne met pas de case noire derrière les valeurs sur vos images.
-- **Visible, Word Wrap, la taille et la place sont copiés quand un élément est créé.** Un nouveau Device, Widget ou Text commence
+- **Visible, la taille et la place sont copiés quand un élément est créé.** Un nouveau Device, Widget ou Text commence
   avec, puis vous le changez dans ses propriétés. Changer le Default plus tard ne cache, ne déplace ni ne redimensionne ce qui est
   déjà sur vos Tabs.
 - La couleur de texte par défaut laisse les chiffres d'une apparence **LED** ou **Gauge** dans leurs propres couleurs.

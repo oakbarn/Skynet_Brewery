@@ -12,6 +12,10 @@ const all = IP_SIZES.flatMap(f => f.codes);
 for (const c of ['TC1.5', 'TC3/4', 'TC2', 'FPT1', 'FPT1/8', 'MPT6', 'MPT1/2', 'BSP3/4', 'DN15', 'DN150', 'FMSSQD1/2', 'MSSQD1/2']) assert.ok(all.includes(c), c);
 assert.ok(!all.includes('TC1/8') && !all.includes('TC1'), 'no Tri-Clamp that is not made');
 assert.equal(new Set(all).size, all.length, 'no code twice');
+// Camlocks (OakBarn Brewery, 2026-11-17): tick boxes from 1/2" up, female coupler CAMF fits male adapter CAMM of the same size
+for (const c of ['CAMF1/2', 'CAMM1/2', 'CAMF6', 'CAMM2']) assert.ok(all.includes(c), c);
+assert.equal(ipFamily('CAMF1/2'), 'cam'); assert.equal(ipMate('CAMF1/2'), 'CAMM1/2'); assert.equal(ipMate('CAMM3/4'), 'CAMF3/4');
+assert.ok(ipFits('CAMF1/2', 'CAMM1/2') && !ipFits('CAMF1/2', 'CAMF1/2') && !ipFits('CAMF1/2', 'CAMM1') && !ipFits('CAMF1/2', 'FMSSQD1/2'));
 assert.deepEqual(['TC1.5', 'FPT1/2', 'MPT1', 'BSP1', 'DN15', 'FMSSQD1/2', 'tc', 'npt'].map(ipFamily), ['tc', 'npt', 'npt', 'bsp', 'dn', 'qd', 'tc', 'npt']);
 assert.equal(ipMate('FPT1/2'), 'MPT1/2'); assert.equal(ipMate('MSSQD1/2'), 'FMSSQD1/2'); assert.equal(ipMate('FMSSQD3/4'), 'MSSQD3/4'); assert.equal(ipMate('TC1.5'), 'TC1.5');
 assert.ok(ipFits('MPT1/2', 'FPT1/2') && !ipFits('MPT1/2', 'MPT1/2') && !ipFits('FPT1/2', 'FPT3/4') && !ipFits('TC1.5', 'MPT1/2') && !ipFits('MPT1/2', 'BSP1/2'));
