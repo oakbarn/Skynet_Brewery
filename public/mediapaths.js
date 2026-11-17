@@ -52,8 +52,6 @@ export const isPicNumber = v => typeof v === 'number' ? Number.isInteger(v) && v
 // The Process attributes that hold a picture or a sound (the ones with .path and .file), by the store's runtime name.
 // A Graphic gGlobal's value and a Sound Player's .path are paths too (lib/store.js).
 export const PICTURE_PROPS = ['image', 'backpath', 'backpath_2', 'backpath_3', 'imageon', 'imageoff', 'imageoverlay', 'setgraphic'];
-export const SOUND_PROPS = ['sound', 'path'];
-export const PATH_PARTS = ['path', 'file'];
 
 // What a picture list shows (Rule 7.22, 7.23): only the file name, and a Skynet picture's ID number in front: "17 · led_green.svg"
 export const pickLabel = (p, id) => { const f = fileOf(p) || String(p ?? ''); return id ? `${id} · ${f}` : f; };

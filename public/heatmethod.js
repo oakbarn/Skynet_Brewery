@@ -157,7 +157,6 @@ export const SWITCHED_BY = [
 // Picking a Hardware Controller sets its On offset and On delay (OakBarn Brewery, 2026-11-10: Optical SSR .5 and 0, Contactor 1 and 10,
 // Mechanical relay 1 and 10)
 export const switchedBy = el => SWITCHED_BY.some(s => s[0] === el?.switchedBy) ? el.switchedBy : 'ssr';
-export const switchedByWord = k => SWITCHED_BY.find(s => s[0] === k)?.[1] ?? SWITCHED_BY[0][1];
 export const switchedByChoices = () => SWITCHED_BY.map(s => [s[0], s[1]]);
 const isCelsius = u => /c/i.test(String(u ?? '')) && !/f/i.test(String(u ?? ''));
 // { min, max, delay, u } for this Heating Element; probe = its Temperature Probe (for °C), or null (°F)
