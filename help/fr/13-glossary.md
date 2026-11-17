@@ -2,7 +2,7 @@
 
 Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, ou tapez le mot dans la case **Search** de l'aide. Les mots restent en anglais, comme à l'écran ; le sens en français est entre parenthèses.
 
-[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w)
+[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [🔌 Mots du câblage](#wiring-and-hardware-words)
 
 ## A {#a}
 
@@ -237,3 +237,321 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 ## W {#w}
 
 **Widget** : un élément qui n'existe que dans l'application, relié à aucune carte (images, étiquettes, minuteries, IP, raccords).
+
+## Mots du câblage et du matériel {#wiring-and-hardware-words}
+
+Les pièces et les mots techniques des listes de câblage, en mots simples : ce que fait chacun, ce dont Skynet a besoin, et des pièces à comparer. Les pièces suggérées sont des exemples à comparer, pas des recommandations. Les liens **Où acheter** viendront plus tard ; d'ici là, chacun montre quoi chercher.
+
+> **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
+
+> **⚠ Le gaz peut exploser ou tuer. OakBarn Brewery et Skynet ne sont ni électriciens, ni plombiers, ni experts en chauffage et climatisation. Consultez un électricien, un plombier ou un professionnel du chauffage et de la climatisation agréé.** (Règle 6.20)
+
+### 0-10 V Signal {#0-10-v-signal}
+
+- **En mots simples :** un fil de commande dont la tension, de 0 V (arrêt ou 0 %) à 10 V (plein ou 100 %), règle la quantité. Utilisé par les régulateurs de puissance, les vannes proportionnelles et les commandes de vitesse.
+- **Ce dont Skynet a besoin :** fait à partir d'un True PWM Port par un DAC / module PWM vers 0-10 V.
+
+### 0-10V Controller {#0-10v-controller}
+
+*Aussi appelé 0-10 V Power Regulator (régulateur de puissance 0-10 V) ou régulateur de puissance à SCR.*
+
+- **Ce qu'il fait :** règle la puissance que reçoit un élément chauffant, de 0 à 100 %, par un signal 0-10 V (il rogne chaque onde alternative, ce qu'on appelle l'angle de phase).
+- **Ce dont Skynet a besoin :** **Commande :** 0-10 V (venant du DAC / module PWM vers 0-10 V). **AMPS :** au moins ceux de l'élément, avec de la marge (40 A ou plus pour 5500 W en 240 V). **Tension :** celle de l'élément (120 ou 240 V alternatif). Toujours sur un Heat Sink.
+- **Pièces suggérées :** régulateurs de puissance à SCR ou régulateurs de tension SSVR avec une entrée 0-10 V (Auber, Crydom)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "SCR power controller 0-10V".
+
+### 4-20 mA {#4-20-ma}
+
+- **En mots simples :** un capteur envoie un courant : 4 mA = le plus bas, 20 mA = le plus haut. Un fil coupé lit 0 mA, donc on le repère facilement. Bon sur de longs fils.
+- **Ce dont Skynet a besoin :** une résistance de 250 ohms le transforme en 1-5 V pour un port analogique.
+
+### ADS1115 {#ads1115}
+
+- **Ce qu'il fait :** une petite carte qui lit 4 signaux analogiques bien plus finement que l'Arduino.
+- **Ce dont Skynet a besoin :** I2C (SDA/SCL de la Mega, GPIO 2 et 3 du Pi), adresse 0x48, 3,3 ou 5 V. Pour le pH et la pression.
+- **Pièces suggérées :** carte Adafruit ADS1115 (ou un clone)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "ADS1115 module".
+
+### Contactor {#contactor}
+
+- **Ce qu'il fait :** un relais robuste qui coupe les deux fils de phase d'un circuit 240 V, pour que l'élément soit vraiment Off. C'est aussi ce que coupe un E-Stop.
+- **Ce dont Skynet a besoin :** **bipolaire** (les deux phases) pour le 240 V ; **30 ou 40 A** pour un élément de 5500 W. Tension de bobine adaptée à ce qui la commande (12 ou 24 V continu, ou 120 V alternatif), commandée par un canal de Relay Module.
+- **Pièces suggérées :** contacteurs bipolaires « definite purpose » (30 A ou 40 A) ; contacteurs modulaires bipolaires sur rail DIN
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "2 pole 40A contactor".
+
+### Counter Port {#counter-port}
+
+- **En mots simples :** une broche de carte qui compte des impulsions rapides, comme celles d'un Flow Meter.
+- **Ce dont Skynet a besoin :** Mega D2, D3, D18-D21 (jusqu'à 6 par Mega).
+
+### CS Port {#cs-port}
+
+*Chip Select (sélection de puce).*
+
+- **En mots simples :** le fil qui dit à une carte SPI « c'est à toi qu'on parle maintenant ». Chaque carte SPI a besoin du sien.
+- **Ce dont Skynet a besoin :** Mega : seulement D14-D17, D22-D39, D41-D43, D47-D49, D53 pour une RTD (Règle 6.9).
+
+### DAC {#dac}
+
+*Digital to Analog Converter (convertisseur numérique-analogique).*
+
+- **Ce qu'il fait :** transforme le signal tout ou rien (numérique) de la carte en une tension continue et lisse, par exemple de 0 à 10 V, pour régler un chauffage, une vanne ou une pompe à n'importe quel %, et pas seulement On ou Off.
+- **Ce dont Skynet a besoin :** Skynet envoie un % depuis un **True PWM Port**, donc le DAC qu'il lui faut est un **module PWM vers 0-10 V** (entrée PWM 0-5 V d'une Mega, ou 3,3 V d'un ESP32 ou d'un Pi ; sortie 0-10 V ou 0-5 V, réglée par un cavalier ou une vis). Une carte DAC séparée qui parle en I2C (MCP4725, GP8403) n'est **pas** encore lue par le programme de la carte Skynet. La Règle 6.24 permet d'accorder le % aux vrais volts avec un multimètre.
+- **Pièces suggérées :** module convertisseur PWM vers 0-10 V (type LC-LM358-PWM2V, 0-5 V ou 0-10 V au choix) ; un convertisseur de signal PWM vers 0-10 V sur rail DIN
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "PWM to 0-10V module".
+
+### DC Power Supply {#dc-power-supply}
+
+- **Ce qu'il fait :** transforme le courant alternatif du mur en 12 V ou 24 V continu stable pour les vannes, les relais, les pompes DC et les modules.
+- **Ce dont Skynet a besoin :** la tension des pièces ; des AMPS au moins égaux au total de tout ce qui y est branché, plus 25 %. Sur rail DIN ou en boîtier. Son (-) relié au GND de l'Arduino quand un MOSFET, un module 0-10 V ou un capteur 4-20 mA est utilisé.
+- **Pièces suggérées :** alimentations Mean Well sur rail DIN (séries HDR ou EDR) ; alimentations Mean Well LRS en boîtier
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "Mean Well 24V DIN rail power supply".
+
+### Diode {#diode}
+
+*Flyback Diode (diode de roue libre).*
+
+- **Ce qu'il fait :** une pièce à sens unique placée sur une bobine en courant continu (électrovanne ou relais) pour absorber le choc quand elle s'éteint, afin qu'il n'abîme pas l'interrupteur.
+- **Ce dont Skynet a besoin :** 1N4007 (ou 1N4001-1N4007), la bague vers le côté (+) de la bobine.
+- **Pièces suggérées :** lots de diodes 1N4007
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "1N4007 diode".
+
+### DO, DI and AI Ports {#do-di-and-ai-ports}
+
+- **En mots simples :** DO = Digital Out, sortie numérique (la carte l'allume ou l'éteint). DI = Digital In, entrée numérique (la carte lit un interrupteur, On ou Off). AI = Analog In, entrée analogique (la carte lit une tension, de 0 à 5 V sur une Mega).
+- **Ce dont Skynet a besoin :** ports AI de la Mega A0-A15 (= 54-69). Le Pi n'a pas de port AI (utilisez un ADS1115).
+
+### DS18B20 {#ds18b20}
+
+- **Ce qu'il fait :** une sonde de température numérique. Plusieurs partagent un seul fil, chacune avec son propre numéro.
+- **Ce dont Skynet a besoin :** bout inox étanche, 3 fils (5 V, GND, données). Une résistance de 4,7 k ohms pour tout le groupe. Port OneWire : Mega D40, Pi GPIO 4.
+- **Pièces suggérées :** sondes DS18B20 étanches (câble de 1 m à 3 m)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "DS18B20 waterproof probe".
+
+### E-Stop {#e-stop}
+
+*Emergency Stop (arrêt d'urgence).*
+
+- **Ce qu'il fait :** un gros bouton champignon rouge. Appuyé, il coupe tout le courant de la brasserie par son propre câblage.
+- **Ce dont Skynet a besoin :** un contact **normalement fermé** qui coupe la bobine du contacteur principal, et un second contact (normalement ouvert ou fermé) vers un port DI pour que Skynet le sache (Type ID `EStop`). On le tourne ou on le tire pour le réarmer.
+- **Pièces suggérées :** bouton d'arrêt d'urgence champignon rouge 22 mm avec blocs de contact 1 NC + 1 NO
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "22mm emergency stop button NC NO".
+
+### Float Switch {#float-switch}
+
+- **Ce qu'il fait :** un flotteur qui ferme un contact quand le liquide l'atteint (plein) ou s'en éloigne (bas).
+- **Ce dont Skynet a besoin :** inox, qualité alimentaire, 2 fils vers un port DI et le GND (la résistance de rappel de la carte est active).
+- **Pièces suggérées :** interrupteurs à flotteur inox, montage latéral ou vertical
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "stainless float switch".
+
+### Flow Meter {#flow-meter}
+
+- **Ce qu'il fait :** une petite roue dans le tuyau envoie une impulsion chaque fois qu'une quantité donnée de liquide passe.
+- **Ce dont Skynet a besoin :** un Counter Port (Mega D2, D3, D18-D21), alimentation 5 V ; inox et qualité alimentaire pour le moût chaud (le YF-S201 en plastique pour l'eau froide seulement) ; les impulsions par unité sur sa fiche technique.
+- **Pièces suggérées :** débitmètres à effet Hall en inox (1/2" NPT) ; YF-S201 pour l'eau froide
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "stainless hall flow sensor 1/2".
+
+### Gas Solenoid Valve {#gas-solenoid-valve}
+
+- **Ce qu'il fait :** une électrovanne faite pour le gaz, pour que le contrôleur de brassage allume et éteigne le brûleur.
+- **Ce dont Skynet a besoin :** **homologuée pour le gaz LP** (UL ou CSA), **normalement fermée**, prévue pour plus que la pression du détendeur, bobine 24 V continu (ou 24 V alternatif). Voir [Sécurité Flame Out](197-flame-out-safety). ⚠ Gaz : voir l'avertissement en haut de cette section.
+- **Pièces suggérées :** électrovannes gaz LP homologuées (série de coupure gaz ASCO et similaires)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "LP gas solenoid valve 24V listed".
+
+### GFCI {#gfci}
+
+*Ground Fault Circuit Interrupter (disjoncteur différentiel).*
+
+- **Ce qu'il fait :** coupe le courant en une fraction de seconde si l'électricité fuit vers la terre, par exemple par l'eau ou par une personne. Indispensable près des liquides.
+- **Ce dont Skynet a besoin :** chaque circuit alternatif de la brasserie sur un GFCI : un disjoncteur GFCI dans le tableau principal, un panneau GFCI de spa, ou une prise GFCI en premier sur la ligne. Calibré pour le circuit (20 A pour les éléments et pompes en 120 V, 30 ou 50 A pour les éléments en 240 V).
+- **Pièces suggérées :** disjoncteurs GFCI faits pour la marque de votre tableau principal ; panneaux GFCI de spa 50 A
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "GFCI spa panel 50A".
+
+### GND {#gnd}
+
+*Ground (masse).*
+
+- **En mots simples :** le fil de retour commun (0 V) que partagent toutes les pièces basse tension, pour que leurs signaux veuillent dire la même chose.
+- **Ce dont Skynet a besoin :** reliez le (-) d'une DC Power Supply au GND de l'Arduino quand elle alimente un MOSFET, un module 0-10 V ou un capteur 4-20 mA.
+
+### Heat Sink {#heat-sink}
+
+- **Ce qu'il fait :** un bloc de métal à ailettes sur lequel on boulonne un SSR ou un régulateur de puissance, pour qu'il évacue sa chaleur et ne grille pas.
+- **Ce dont Skynet a besoin :** un pour chaque SSR au-dessus d'environ 5 AMPS et chaque régulateur de puissance 0-10 V, calibré pour les AMPS (le fabricant du SSR en indique un). Une fine couche de pâte thermique ou un pad entre les deux.
+- **Pièces suggérées :** dissipateurs Auber ou Crydom faits pour leurs SSR ; dissipateurs de SSR sur rail DIN
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "SSR heat sink".
+
+### HX711 and Load Cells {#hx711-and-load-cells}
+
+- **Ce qu'il fait :** les capteurs de force (load cells) plient très légèrement sous le poids ; la carte HX711 le lit pour que Skynet puisse peser une cuve.
+- **Ce dont Skynet a besoin :** un HX711 par cuve (deux ports : DT et SCK), avec quatre capteurs demi-pont et une carte de jonction (Combinator Board), ou un capteur en S calibré pour la cuve pleine.
+- **Pièces suggérées :** cartes HX711 ; lots de 4 capteurs demi-pont 50 kg avec carte de jonction ; capteurs en S
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "HX711 load cell kit".
+
+### I2C {#i2c}
+
+*Se dit « I deux C » ; parfois lu à tort 12C.*
+
+- **En mots simples :** une façon à deux fils pour que de petites cartes parlent à l'Arduino ou au Pi (un fil de données SDA, un fil d'horloge SCL). Plusieurs cartes peuvent partager les deux mêmes fils, chacune avec sa propre adresse.
+- **Ce dont Skynet a besoin :** Mega SDA = D20, SCL = D21 ; Pi GPIO 2 et 3. Utilisé par la carte ADS1115 (adresse 0x48).
+
+### Igniter {#igniter}
+
+- **Ce qu'il fait :** fait une étincelle (ou une pointe chauffée au rouge) pour allumer le brûleur.
+- **Ce dont Skynet a besoin :** module d'étincelle 12 V continu ou allumeur à surface chaude 120 V alternatif, commandé par un canal de Relay Module. Éteint par un déclenchement Flame Out.
+- **Pièces suggérées :** modules d'allumage à étincelles 12 V ; allumeurs à surface chaude pour brûleurs à gaz
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "12V spark igniter module".
+
+### Level Transmitter {#level-transmitter}
+
+*4-20 mA.*
+
+- **Ce qu'il fait :** lit la profondeur du liquide et l'envoie sous forme de courant, de 4 mA (vide) à 20 mA (plein).
+- **Ce dont Skynet a besoin :** alimentation de boucle 24 V continu et une résistance de 250 ohms du port analogique au GND (20 mA = 5 V). Prévu pour la température du liquide.
+- **Pièces suggérées :** transmetteurs de niveau inox immergés ou hydrostatiques avec sortie 4-20 mA
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "4-20mA level transmitter stainless".
+
+### Mechanical Power Relay {#mechanical-power-relay}
+
+- **Ce qu'il fait :** un relais plus gros pour les charges lourdes comme un moteur de compresseur. Sa bobine est commandée par un canal de Relay Module.
+- **Ce dont Skynet a besoin :** des contacts prévus pour un moteur (une puissance en chevaux, par exemple 1 HP, ou 30 A). Bobine 12 V ou 24 V continu, ou 120 V alternatif, selon ce qui la commande.
+- **Pièces suggérées :** relais de puissance d'usage général avec une valeur en HP (relais enfichable 8 ou 11 broches sur support DIN, ou relais de puissance ouvert 30 A)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "30A power relay 12V coil".
+
+### MOSFET Module {#mosfet-module}
+
+- **Ce qu'il fait :** un interrupteur électronique pour les charges en courant continu qui peut aussi commuter très vite, pour régler la vitesse d'une pompe ou d'un ventilateur DC par PWM.
+- **Ce dont Skynet a besoin :** **niveau logique** (pleinement passant à 3,3 ou 5 V), tension de charge 12 ou 24 V continu, 10 A ou plus. Masse reliée au GND de l'Arduino.
+- **Pièces suggérées :** modules MOSFET à niveau logique (les modules IRF520 ne sont pas pleinement passants à 5 V ; prenez un module à niveau logique ou à double MOSFET)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "logic level MOSFET module PWM".
+
+### Motorized Ball Valve {#motorized-ball-valve}
+
+- **Ce qu'il fait :** une vanne à boisseau avec un petit moteur dessus qui l'ouvre et la ferme quand le courant est commuté.
+- **Ce dont Skynet a besoin :** 12 V ou 24 V continu ; corps inox pour le moût ; le câblage indiqué sur son étiquette : **un fil de commande** (un relais) ou **un fil Open et un fil Close** (deux relais, Dual Throw, Règle 6.22). Les codes de fils des vendeurs (CR02, CR03, CR05...) diffèrent, donc lisez l'étiquette.
+- **Pièces suggérées :** vannes à boisseau motorisées inox 3 fils (types US Solid, Tsai Fan), 1/2" NPT ou TC 1.5
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "motorized ball valve stainless 12V 3 wire".
+
+### NO and NC {#no-and-nc}
+
+*Normally Open, Normally Closed (normalement ouvert, normalement fermé).*
+
+- **En mots simples :** la position d'un contact quand rien ne l'appuie ni ne l'alimente. NO = ouvert (off) jusqu'à l'appui ; NC = fermé (on) jusqu'à l'appui.
+- **Ce dont Skynet a besoin :** un E-Stop utilise NC pour couper le contacteur principal. Une vanne normalement fermée est fermée sans courant.
+
+### NTC Thermistor {#ntc-thermistor}
+
+- **Ce qu'il fait :** la sonde de température la moins chère : sa résistance change avec la chaleur.
+- **Ce dont Skynet a besoin :** un port analogique et une résistance de la même valeur que la thermistance (10 k ohms pour une 10K). Sa valeur Beta (par exemple 3950 ou 3977) se met dans ses Properties.
+- **Pièces suggérées :** sondes NTC 10K Beta 3950 étanches ; sondes 10K de type BCS-462
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "10K NTC thermistor probe waterproof".
+
+### OneWire {#onewire}
+
+- **En mots simples :** une façon à un seul fil (plus l'alimentation et la masse) pour que plusieurs sondes DS18B20 partagent un seul port. Chaque sonde a son propre numéro.
+- **Ce dont Skynet a besoin :** Mega D40, Pi GPIO 4 ; une Pull-up Resistor de 4,7 k ohms pour le groupe.
+
+### Opto-isolated {#opto-isolated}
+
+- **En mots simples :** le signal de la carte allume une minuscule LED dans la pièce, et cette lumière commute la charge, si bien qu'aucun fil ne relie la carte au côté haute puissance.
+- **Ce dont Skynet a besoin :** le mieux pour chaque Relay Module et chaque SSR.
+
+### Pressure Transducer {#pressure-transducer}
+
+*0,5-4,5 V.*
+
+- **Ce qu'il fait :** lit une pression (ou la profondeur du liquide par la pression au fond) sous forme de tension.
+- **Ce dont Skynet a besoin :** alimentation 5 V de l'Arduino, signal 0,5-4,5 V vers un port analogique, inox, 1/4" NPT, prévu pour la température du liquide. Une carte ADS1115 donne des lectures plus fines.
+- **Pièces suggérées :** capteurs de pression inox 5 V, 0-5 psi ou 0-30 psi
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "pressure transducer 5V 0.5-4.5V stainless".
+
+### Pull-up Resistor {#pull-up-resistor}
+
+- **En mots simples :** une résistance (de rappel) entre un fil de signal et le 5 V (ou 3,3 V) qui tient le fil HAUT jusqu'à ce qu'un interrupteur ou un capteur le tire vers le BAS.
+- **Ce dont Skynet a besoin :** la résistance de rappel de la carte est active pour les interrupteurs et les débitmètres ; le OneWire en demande une externe de 4,7 k ohms.
+
+### PWM Port {#pwm-port}
+
+*PWM, un True PWM Port.*
+
+- **En mots simples :** Pulse Width Modulation (modulation de largeur d'impulsion) : une broche allumée et éteinte très vite. La part du temps où elle est On (de 0 à 100 %) règle une vitesse ou une puissance. Un True PWM Port est une broche que la carte peut faire pulser toute seule.
+- **Ce dont Skynet a besoin :** Mega D2-D13, D44-D46. Nécessaire pour la vitesse des pompes, des ventilateurs, et pour le DAC / module PWM vers 0-10 V.
+
+### Relay Module {#relay-module}
+
+- **Ce qu'il fait :** une petite carte avec un ou plusieurs relais (un interrupteur actionné par un aimant). La broche de la carte allume l'aimant et le contact se ferme avec un clic.
+- **Ce dont Skynet a besoin :** **Bobine :** cartes 5 V pour une Mega ; pour un ESP32 ou un Pi, prenez une carte vendue comme **3.3 V trigger** ou **High/Low trigger**. **Opto-isolée** est le mieux. **Contacts :** 10 A sous 250 V alternatif. Beaucoup sont **On quand la broche est BASSE** : mettez **Invert** sur On dans les attributs de broche ⬢.
+- **Pièces suggérées :** modules relais 5 V opto-isolés de 1, 2, 4 ou 8 canaux (relais de type SRD-05VDC) ; modules relais sur rail DIN
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "8 channel 5V relay module opto isolated".
+
+### RTD {#rtd}
+
+*PT100 ou PT1000, avec une carte MAX31865.*
+
+- **Ce qu'il fait :** le type de sonde de température le plus précis. La carte MAX31865 la lit pour l'Arduino.
+- **Ce dont Skynet a besoin :** une carte MAX31865 par sonde ; ses cavaliers réglés pour 2, 3 ou 4 fils (3 pour commencer). Ports SPI (Mega D50-D52) et un CS Port (Règle 6.9). Résistance de référence 430 ohms pour une PT100, 4300 ohms pour une PT1000.
+- **Pièces suggérées :** carte Adafruit MAX31865 (ou un clone) ; sondes PT100 3 fils avec raccord 1/2" NPT
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "MAX31865 PT100 board".
+
+### Solenoid Valve {#solenoid-valve}
+
+- **Ce qu'il fait :** une vanne ouverte par un aimant électrique. Elle s'ouvre ou se ferme d'un coup. La plupart ont besoin de pression d'eau pour fonctionner.
+- **Ce dont Skynet a besoin :** **normalement fermée**, 12 ou 24 V continu, qualité alimentaire (inox) pour le moût, laiton pour l'eau de refroidissement. Une Flyback Diode sur la bobine si elle n'en a pas.
+- **Pièces suggérées :** électrovannes 12 V normalement fermées inox ou laiton (1/2" NPT)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "12V normally closed solenoid valve stainless".
+
+### SPI {#spi}
+
+- **En mots simples :** une façon à quatre fils pour que des cartes parlent à l'Arduino, plus rapide que l'I2C. Les cartes partagent trois fils ; chacune a son propre quatrième fil, le CS Port.
+- **Ce dont Skynet a besoin :** Mega D50, D51, D52 (partagés par chaque carte RTD et thermocouple) ; Pi GPIO 7-11.
+
+### SSR {#ssr}
+
+*Solid State Relay, relais statique (Opto SSR).*
+
+- **Ce qu'il fait :** un interrupteur électronique sans pièce mobile. Un petit signal continu de la carte allume et éteint une charge plus grosse en alternatif (ou en continu), sans bruit.
+- **Ce dont Skynet a besoin :** **Entrée :** environ 3 à 32 V continu (marche avec toutes les Interfaces). **Sortie :** 24-380 V alternatif pour les charges alternatives (type « DA » : continu en entrée, alternatif en sortie), ou continu pour les charges continues (type « DD »). **AMPS :** 5 ou 10 A pour une pompe ou un tapis chauffant ; 25 ou 40 A sur un Heat Sink pour un élément. Type **Zero cross** pour les éléments.
+- **Pièces suggérées :** SSR Auber, Crydom ou Omron (type DA pour l'alternatif, DD pour le continu). Évitez les SSR imités sans nom de fabricant.
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "SSR 40A DA".
+
+### Stepper Driver {#stepper-driver}
+
+- **Ce qu'il fait :** alimente un moteur pas à pas par petits pas pour qu'il tourne jusqu'à une position exacte.
+- **Ce dont Skynet a besoin :** broches STEP et DIR (ENABLE en option), sa propre alimentation 12-24 V continu (jamais le 5 V de l'Arduino), réglé sur le courant du moteur.
+- **Pièces suggérées :** TMC2209, A4988, DRV8825 (petits moteurs) ; TB6600 ou DM542 (NEMA 23)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "TMC2209 stepper driver".
+
+### Thermocouple {#thermocouple}
+
+*Avec une carte MAX31855 ou MAX31856.*
+
+- **Ce qu'il fait :** une sonde pour les endroits très chauds (la flamme d'un brûleur, un conduit de fumée). La carte lit sa toute petite tension.
+- **Ce dont Skynet a besoin :** MAX31856 pour tous les types (K, J, T ...) ou MAX31855 pour le type K seulement ; une carte par sonde ; ports SPI et un CS Port. Du fil de thermocouple, le + et le - dans le bon sens.
+- **Pièces suggérées :** cartes Adafruit MAX31856 ou MAX31855 ; sondes type K céramique ou Inconel
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "MAX31856 thermocouple board".
+
+### Thermocouple Gas Safety Valve {#thermocouple-gas-safety-valve}
+
+- **Ce qu'il fait :** une vanne de gaz tenue ouverte par une veilleuse qui chauffe un thermocouple. Si la flamme s'éteint, elle coupe tout le gaz d'elle-même, sans courant.
+- **Ce dont Skynet a besoin :** **homologuée UL ou CSA**, pour le LP, la bonne pression (basse pression type VR8200, ou haute pression type BASO H19) et les bons BTU. Posée par un professionnel du gaz agréé. Recommandée (Règle 6.33).
+- **Pièces suggérées :** type Honeywell VR8200 (basse pression) ; série BASO H19 (haute pression)
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "BASO H19 safety pilot valve".
+
+### Thermowell {#thermowell}
+
+- **Ce qu'il fait :** un tube de métal fermé qui baigne dans le liquide. La sonde glisse dedans, pour qu'on puisse la sortir sans vider la cuve.
+- **Ce dont Skynet a besoin :** TC 1.5 (Tri-Clamp) ou 1/2" NPT, inox, assez long pour atteindre le liquide (Short, Medium ou Long), assez large dedans pour la sonde (la plupart prennent une sonde de 6 mm ou 1/4").
+- **Pièces suggérées :** doigts de gant inox TC 1.5 ; doigts de gant 1/2" NPT
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "tri clamp thermowell 1.5".
+
+### Waterproof In Use Outlet {#waterproof-in-use-outlet}
+
+- **Ce qu'il fait :** une prise extérieure avec un couvercle qui reste fermé sur la fiche branchée, pour que l'eau n'entre pas.
+- **Ce dont Skynet a besoin :** prévue pour les lieux humides (couvercle « in use » ou « extra duty »), sur un circuit GFCI, les AMPS de la prise adaptés au circuit.
+- **Pièces suggérées :** couvercles de prise étanches « in use » avec une prise GFCI
+- **Où acheter :** *(lien à venir)* Cherchez sur Amazon "in use weatherproof outlet cover".
+
+### Zero Cross {#zero-cross}
+
+- **En mots simples :** un SSR qui ne commute que quand l'onde alternative passe par zéro volt, ce qui ménage l'élément et ne fait pas de parasites électriques.
+- **Ce dont Skynet a besoin :** le SSR normal pour les éléments commandés par PID, Duty Cycle ou Hysteresis. Pas pour le PWM rapide.

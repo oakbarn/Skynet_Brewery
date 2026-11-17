@@ -2,7 +2,7 @@
 
 Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type the word in the Help **Search** box.
 
-[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w)
+[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [🔌 Wiring words](#wiring-and-hardware-words)
 
 ## A
 
@@ -237,3 +237,321 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 ## W
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
+
+## Wiring and hardware words
+
+The parts and technical words in the wiring lists, in plain words: what each one does, what Skynet needs, and parts to compare. The suggested parts are examples to compare, not endorsements. **Where to buy** links will come later; until then each one shows what to search for.
+
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
+> **⚠ Gas can explode or kill. OakBarn Brewery and Skynet are not Electricians, Plumbers or HVAC experts. Consult a Licensed Electrician, Plumber or HVAC professional.** (Rule 6.20)
+
+### 0-10 V Signal
+
+- **In plain words:** A control wire whose voltage, from 0 V (off or 0 %) to 10 V (full or 100 %), sets how much. Used by power regulators, proportional valves and speed controls.
+- **What Skynet needs:** Made from a True PWM Port by a DAC / PWM to 0-10 V Module.
+
+### 0-10V Controller
+
+*Also called a 0-10 V Power Regulator or SCR power controller.*
+
+- **What it does:** Sets how much power an element gets, from 0 to 100 %, by a 0-10 V signal (it trims each AC wave, called phase-angle).
+- **What Skynet needs:** **Control:** 0-10 V (from the DAC / PWM to 0-10 V Module). **AMPS:** at least the element's, with room to spare (40 A or more for 5500 W at 240 V). **Voltage:** the element's (120 or 240 V AC). Always on a Heat Sink.
+- **Suggested parts:** SCR power regulators or SSVR voltage regulators with a 0-10 V input (Auber, Crydom)
+- **Where to buy:** *(link coming)* Search Amazon for "SCR power controller 0-10V".
+
+### 4-20 mA
+
+- **In plain words:** A sensor sends a current: 4 mA = lowest, 20 mA = highest. A broken wire reads 0 mA, so it is easy to spot. Good over long wires.
+- **What Skynet needs:** A 250 ohm resistor turns it into 1-5 V for an Analog Port.
+
+### ADS1115
+
+- **What it does:** A small board that reads 4 analog signals much more finely than the Arduino can.
+- **What Skynet needs:** I2C (Mega SDA/SCL, Pi GPIO 2 and 3), address 0x48, 3.3 or 5 V. For pH and pressure.
+- **Suggested parts:** Adafruit ADS1115 board (or a clone)
+- **Where to buy:** *(link coming)* Search Amazon for "ADS1115 module".
+
+### Contactor
+
+- **What it does:** A heavy-duty relay that switches both hot wires of a 240 V circuit, so the element is truly Off. Also what an E-Stop drops.
+- **What Skynet needs:** **Two-pole** (both hot wires) for 240 V; **30 or 40 A** for a 5500 W element. Coil voltage to match its driver (12 or 24 V DC, or 120 V AC), switched by a Relay Module channel.
+- **Suggested parts:** Two-pole definite purpose contactors (30 A or 40 A); DIN-rail 2-pole modular contactors
+- **Where to buy:** *(link coming)* Search Amazon for "2 pole 40A contactor".
+
+### Counter Port
+
+- **In plain words:** A board pin that counts fast pulses, such as from a Flow Meter.
+- **What Skynet needs:** Mega D2, D3, D18-D21 (up to 6 per Mega).
+
+### CS Port
+
+*Chip Select.*
+
+- **In plain words:** The one wire that tells an SPI board "you are the one being talked to now". Each SPI board needs its own.
+- **What Skynet needs:** Mega: only D14-D17, D22-D39, D41-D43, D47-D49, D53 for an RTD (Rule 6.9).
+
+### DAC
+
+*Digital to Analog Converter.*
+
+- **What it does:** Turns the board's on/off (digital) signal into a smooth voltage, for example 0 to 10 V, so a heater, valve or pump can be set to any % instead of only On or Off.
+- **What Skynet needs:** Skynet sends a % from a **True PWM Port**, so the DAC it needs is a **PWM to 0-10 V Module** (input 0-5 V PWM from a Mega, or 3.3 V from an ESP32 or Pi; output 0-10 V or 0-5 V, set by a jumper or screw). A separate DAC chip board that talks over I2C (MCP4725, GP8403) is **not** read by the Skynet board program yet. Rule 6.24 lets you match the % to the real volts with a meter.
+- **Suggested parts:** PWM to 0-10 V converter module (LC-LM358-PWM2V type, 0-5 V or 0-10 V selectable); a DIN-rail PWM to 0-10 V signal converter
+- **Where to buy:** *(link coming)* Search Amazon for "PWM to 0-10V module".
+
+### DC Power Supply
+
+- **What it does:** Turns the wall's AC into steady 12 V or 24 V DC for valves, relays, DC pumps and modules.
+- **What Skynet needs:** Voltage to match the parts; AMPS at least the total of everything on it plus 25 %. DIN-rail or enclosed. Its (-) tied to the Arduino's GND when a MOSFET, 0-10 V Module or 4-20 mA sensor is used.
+- **Suggested parts:** Mean Well DIN-rail supplies (HDR or EDR series); Mean Well LRS enclosed supplies
+- **Where to buy:** *(link coming)* Search Amazon for "Mean Well 24V DIN rail power supply".
+
+### Diode
+
+*Flyback Diode.*
+
+- **What it does:** A one-way part put across a DC coil (solenoid or relay) to soak up the kick when it turns off, so it does not harm the switch.
+- **What Skynet needs:** 1N4007 (or 1N4001-1N4007), stripe toward the (+) side of the coil.
+- **Suggested parts:** 1N4007 diode packs
+- **Where to buy:** *(link coming)* Search Amazon for "1N4007 diode".
+
+### DO, DI and AI Ports
+
+- **In plain words:** DO = Digital Out (the board turns it On or Off). DI = Digital In (the board reads a switch, On or Off). AI = Analog In (the board reads a voltage, 0 to 5 V on a Mega).
+- **What Skynet needs:** Mega AI Ports A0-A15 (= 54-69). The Pi has no AI Ports (use an ADS1115).
+
+### DS18B20
+
+- **What it does:** A digital temperature probe. Many share one wire, each with its own number.
+- **What Skynet needs:** Waterproof stainless tip, 3 wires (5 V, GND, data). One 4.7k ohm resistor for the whole set. OneWire Port: Mega D40, Pi GPIO 4.
+- **Suggested parts:** Waterproof DS18B20 probes (1 m to 3 m lead)
+- **Where to buy:** *(link coming)* Search Amazon for "DS18B20 waterproof probe".
+
+### E-Stop
+
+*Emergency Stop.*
+
+- **What it does:** A big red mushroom button. Pressed, it cuts all the brewery's power by its own wiring.
+- **What Skynet needs:** A **normally closed** contact that drops the Main Contactor's coil, and a second contact (normally open or closed) to a DI Port so Skynet knows (Type ID `EStop`). Twist or pull to reset.
+- **Suggested parts:** 22 mm red mushroom E-stop button with 1 NC + 1 NO contact blocks
+- **Where to buy:** *(link coming)* Search Amazon for "22mm emergency stop button NC NO".
+
+### Float Switch
+
+- **What it does:** A float that closes a switch when the liquid reaches it (full) or drops away (low).
+- **What Skynet needs:** Stainless, food grade, 2 wires to a DI Port and GND (the board's pull-up is on).
+- **Suggested parts:** Stainless side-mount or vertical float switches
+- **Where to buy:** *(link coming)* Search Amazon for "stainless float switch".
+
+### Flow Meter
+
+- **What it does:** A little wheel in the pipe sends a pulse each time a set amount of liquid passes.
+- **What Skynet needs:** A Counter Port (Mega D2, D3, D18-D21), 5 V supply; stainless and food grade for hot wort (plastic YF-S201 for cold water only); Pulses per unit from its data sheet.
+- **Suggested parts:** Stainless hall-effect flow sensors (1/2" NPT); YF-S201 for cold water
+- **Where to buy:** *(link coming)* Search Amazon for "stainless hall flow sensor 1/2".
+
+### Gas Solenoid Valve
+
+- **What it does:** A solenoid valve made for gas, so the brew controller can turn the burner On and Off.
+- **What Skynet needs:** **Listed for LP gas** (UL or CSA), **normally closed**, rated above the regulator's pressure, 24 V DC (or 24 V AC) coil. See [Flame Out safety](197-flame-out-safety). ⚠ Gas: see the warning at the top of this section.
+- **Suggested parts:** Listed LP gas solenoid valves (ASCO gas shut-off series and similar)
+- **Where to buy:** *(link coming)* Search Amazon for "LP gas solenoid valve 24V listed".
+
+### GFCI
+
+*Ground Fault Circuit Interrupter.*
+
+- **What it does:** Cuts the power in a split second if electricity leaks to ground, for example through water or a person. A must near liquids.
+- **What Skynet needs:** Every AC circuit in the brewery on a GFCI: a GFCI breaker in the main panel, a GFCI spa panel, or a GFCI outlet first on the line. Sized for the circuit (20 A for 120 V elements and pumps, 30 or 50 A for 240 V elements).
+- **Suggested parts:** GFCI breakers made for your main panel's brand; 50 A GFCI spa panels
+- **Where to buy:** *(link coming)* Search Amazon for "GFCI spa panel 50A".
+
+### GND
+
+*Ground.*
+
+- **In plain words:** The common return wire (0 V) every low-voltage part shares, so their signals mean the same thing.
+- **What Skynet needs:** Tie the (-) of a DC Power Supply to the Arduino's GND when it feeds a MOSFET, a 0-10 V Module or a 4-20 mA sensor.
+
+### Heat Sink
+
+- **What it does:** A finned metal block an SSR or power regulator is bolted to, so it gets rid of its heat and does not burn out.
+- **What Skynet needs:** One for every SSR above about 5 AMPS and every 0-10 V Power Regulator, sized for the AMPS (the SSR maker lists one). A thin layer of heat sink paste or a pad between them.
+- **Suggested parts:** Auber or Crydom heat sinks made for their SSRs; DIN-rail SSR heat sinks
+- **Where to buy:** *(link coming)* Search Amazon for "SSR heat sink".
+
+### HX711 and Load Cells
+
+- **What it does:** Load cells bend a tiny bit under weight; the HX711 board reads that so Skynet can weigh a vessel.
+- **What Skynet needs:** One HX711 per vessel (two Ports: DT and SCK), with four half-bridge cells and a Combinator Board, or one S-type cell sized for the full vessel.
+- **Suggested parts:** HX711 boards; 50 kg half-bridge load cell sets of 4 with combinator; S-type load cells
+- **Where to buy:** *(link coming)* Search Amazon for "HX711 load cell kit".
+
+### I2C
+
+*Said "I squared C"; sometimes misread as 12C.*
+
+- **In plain words:** A two-wire way for small boards to talk to the Arduino or Pi (one data wire SDA, one clock wire SCL). Many boards can share the same two wires, each with its own address.
+- **What Skynet needs:** Mega SDA = D20, SCL = D21; Pi GPIO 2 and 3. Used by the ADS1115 board (address 0x48).
+
+### Igniter
+
+- **What it does:** Makes a spark (or a hot glowing tip) to light the burner.
+- **What Skynet needs:** 12 V DC spark module or 120 V AC hot surface igniter, switched by a Relay Module channel. Turned off by a Flame Out trip.
+- **Suggested parts:** 12 V pulse spark igniter modules; hot surface igniters for gas burners
+- **Where to buy:** *(link coming)* Search Amazon for "12V spark igniter module".
+
+### Level Transmitter
+
+*4-20 mA.*
+
+- **What it does:** Reads how deep the liquid is and sends it as a current from 4 mA (empty) to 20 mA (full).
+- **What Skynet needs:** 24 V DC loop power and a 250 ohm resistor from the Analog Port to GND (20 mA = 5 V). Rated for the liquid's temperature.
+- **Suggested parts:** Stainless submersible or hydrostatic level transmitters with a 4-20 mA output
+- **Where to buy:** *(link coming)* Search Amazon for "4-20mA level transmitter stainless".
+
+### Mechanical Power Relay
+
+- **What it does:** A bigger relay for heavy loads like a compressor motor. Its coil is switched by a Relay Module channel.
+- **What Skynet needs:** Contacts rated for a motor (a horsepower rating, for example 1 HP, or 30 A). Coil 12 V or 24 V DC, or 120 V AC, matching what drives it.
+- **Suggested parts:** General purpose power relays with an HP rating (8 or 11 pin plug-in relay with a DIN socket, or a 30 A open-frame power relay)
+- **Where to buy:** *(link coming)* Search Amazon for "30A power relay 12V coil".
+
+### MOSFET Module
+
+- **What it does:** An electronic switch for DC loads that can also switch very fast, so it can set a DC pump or fan's speed by PWM.
+- **What Skynet needs:** **Logic level** (turns fully on at 3.3 or 5 V), DC load voltage 12 or 24 V, 10 A or more. Ground tied to the Arduino's GND.
+- **Suggested parts:** Logic-level MOSFET driver modules (IRF520 modules are not fully on at 5 V; pick a logic-level or dual-MOSFET module)
+- **Where to buy:** *(link coming)* Search Amazon for "logic level MOSFET module PWM".
+
+### Motorized Ball Valve
+
+- **What it does:** A ball valve with a small motor on top that opens and closes it when power is switched.
+- **What Skynet needs:** 12 V or 24 V DC; stainless body for wort; the wiring on its label: **one control wire** (one relay) or **Open and Close wires** (two relays, Dual Throw, Rule 6.22). Sellers' wire codes (CR02, CR03, CR05...) differ, so read the label.
+- **Suggested parts:** Stainless 3-wire motorized ball valves (US Solid, Tsai Fan types), 1/2" NPT or TC 1.5
+- **Where to buy:** *(link coming)* Search Amazon for "motorized ball valve stainless 12V 3 wire".
+
+### NO and NC
+
+*Normally Open, Normally Closed.*
+
+- **In plain words:** How a switch sits when nothing presses it or powers it. NO = open (off) until pressed; NC = closed (on) until pressed.
+- **What Skynet needs:** An E-Stop uses NC to drop the Main Contactor. A normally closed valve is shut with no power.
+
+### NTC Thermistor
+
+- **What it does:** The cheapest temperature probe: its resistance changes with heat.
+- **What Skynet needs:** One Analog Port and one resistor the same size as the thermistor (10k ohm for a 10K). Its Beta value (for example 3950 or 3977) goes in its Properties.
+- **Suggested parts:** 10K NTC Beta 3950 waterproof probes; BCS-462 type 10K probes
+- **Where to buy:** *(link coming)* Search Amazon for "10K NTC thermistor probe waterproof".
+
+### OneWire
+
+- **In plain words:** A one-wire way (plus power and ground) for many DS18B20 probes to share a single Port. Each probe has its own number.
+- **What Skynet needs:** Mega D40, Pi GPIO 4; one 4.7k ohm Pull-up Resistor for the set.
+
+### Opto-isolated
+
+- **In plain words:** The board's signal lights a tiny LED inside the part, and the light switches the load, so no wire joins the board to the high-power side.
+- **What Skynet needs:** Best for every Relay Module and SSR.
+
+### Pressure Transducer
+
+*0.5-4.5 V.*
+
+- **What it does:** Reads pressure (or liquid depth by the pressure at the bottom) as a voltage.
+- **What Skynet needs:** 5 V supply from the Arduino, signal 0.5-4.5 V to an Analog Port, stainless, 1/4" NPT, rated for the liquid's temperature. An ADS1115 board gives finer readings.
+- **Suggested parts:** Stainless 5 V pressure transducers, 0-5 psi or 0-30 psi
+- **Where to buy:** *(link coming)* Search Amazon for "pressure transducer 5V 0.5-4.5V stainless".
+
+### Pull-up Resistor
+
+- **In plain words:** A resistor from a signal wire to 5 V (or 3.3 V) that holds the wire HIGH until a switch or sensor pulls it LOW.
+- **What Skynet needs:** The board's own pull-up is On for switches and flow meters; OneWire needs an outside 4.7k ohm one.
+
+### PWM Port
+
+*PWM, a True PWM Port.*
+
+- **In plain words:** Pulse Width Modulation: a pin turned On and Off very fast. The share of time it is On (0 to 100 %) sets a speed or power. A True PWM Port is a pin the board can pulse by itself.
+- **What Skynet needs:** Mega D2-D13, D44-D46. Needed for pump speed, fan speed, and the DAC / PWM to 0-10 V Module.
+
+### Relay Module
+
+- **What it does:** A small board with one or more relays (a switch moved by a magnet). The board's pin turns the magnet on and the switch clicks closed.
+- **What Skynet needs:** **Coil:** 5 V boards for a Mega; for an ESP32 or Pi pick a board sold as **3.3 V trigger** or **High/Low trigger**. **Opto-isolated** is best. **Contacts:** 10 A at 250 V AC. Many are **On when the pin is LOW**: set **Invert** On in the Pin attributes ⬢.
+- **Suggested parts:** 1, 2, 4 or 8 channel 5 V opto-isolated relay modules (SRD-05VDC type relays); DIN-rail relay modules
+- **Where to buy:** *(link coming)* Search Amazon for "8 channel 5V relay module opto isolated".
+
+### RTD
+
+*PT100 or PT1000, with a MAX31865 Board.*
+
+- **What it does:** The most accurate kind of temperature probe. The MAX31865 board reads it for the Arduino.
+- **What Skynet needs:** One MAX31865 board per probe; its jumpers set for 2, 3 or 4 wires (3 is the start). SPI Ports (Mega D50-D52) and one CS Port (Rule 6.9). PT100 reference resistor 430 ohm, PT1000 4300 ohm.
+- **Suggested parts:** Adafruit MAX31865 board (or a clone); 3-wire PT100 probes with a 1/2" NPT fitting
+- **Where to buy:** *(link coming)* Search Amazon for "MAX31865 PT100 board".
+
+### Solenoid Valve
+
+- **What it does:** A valve opened by an electric magnet. Snaps open or shut. Most need water pressure to work.
+- **What Skynet needs:** **Normally closed**, 12 or 24 V DC, food grade (stainless) for wort, brass for cooling water. A Flyback Diode across the coil if it has none.
+- **Suggested parts:** Stainless or brass normally closed 12 V solenoid valves (1/2" NPT)
+- **Where to buy:** *(link coming)* Search Amazon for "12V normally closed solenoid valve stainless".
+
+### SPI
+
+- **In plain words:** A four-wire way for boards to talk to the Arduino, faster than I2C. The boards share three wires; each gets its own fourth wire, the CS Port.
+- **What Skynet needs:** Mega D50, D51, D52 (shared by every RTD and Thermocouple board); Pi GPIO 7-11.
+
+### SSR
+
+*Solid State Relay (Opto SSR).*
+
+- **What it does:** An electronic switch with no moving parts. A small DC signal from the board turns a bigger AC (or DC) load On and Off, silently.
+- **What Skynet needs:** **Input:** about 3 to 32 V DC (works from every Interface). **Output:** AC 24-380 V for AC loads ("DA" type: DC in, AC out), or DC for DC loads ("DD" type). **AMPS:** 5 or 10 A for a pump or heat pad; 25 or 40 A on a Heat Sink for an element. **Zero cross** type for elements.
+- **Suggested parts:** Auber, Crydom or Omron SSRs (DA type for AC, DD type for DC). Avoid look-alike SSRs with no maker's name.
+- **Where to buy:** *(link coming)* Search Amazon for "SSR 40A DA".
+
+### Stepper Driver
+
+- **What it does:** Feeds a stepper motor in small steps so it turns to an exact position.
+- **What Skynet needs:** STEP and DIR pins (ENABLE optional), its own 12-24 V DC supply (never the Arduino's 5 V), set to the motor's current.
+- **Suggested parts:** TMC2209, A4988, DRV8825 (small motors); TB6600 or DM542 (NEMA 23)
+- **Where to buy:** *(link coming)* Search Amazon for "TMC2209 stepper driver".
+
+### Thermocouple
+
+*With a MAX31855 or MAX31856 Board.*
+
+- **What it does:** A probe for very hot places (a burner's flame, a flue). The board reads its tiny voltage.
+- **What Skynet needs:** MAX31856 for any type (K, J, T ...) or MAX31855 for Type K only; one board per probe; SPI Ports and one CS Port. Thermocouple wire, + and - the right way round.
+- **Suggested parts:** Adafruit MAX31856 or MAX31855 boards; ceramic or Inconel Type K probes
+- **Where to buy:** *(link coming)* Search Amazon for "MAX31856 thermocouple board".
+
+### Thermocouple Gas Safety Valve
+
+- **What it does:** A gas valve held open by a pilot flame heating a thermocouple. If the flame goes out, it shuts all gas by itself, with no power.
+- **What Skynet needs:** **UL or CSA listed**, for LP, the right pressure (low-pressure VR8200 type, or high-pressure BASO H19 type) and BTU. Fitted by a licensed gas professional. Recommended (Rule 6.33).
+- **Suggested parts:** Honeywell VR8200 type (low pressure); BASO H19 series (high pressure)
+- **Where to buy:** *(link coming)* Search Amazon for "BASO H19 safety pilot valve".
+
+### Thermowell
+
+- **What it does:** A closed metal tube that sits in the liquid. The probe slides inside, so the probe can be taken out without draining.
+- **What Skynet needs:** TC 1.5 (Tri-Clamp) or 1/2" NPT, stainless, long enough to reach the liquid (Short, Medium or Long), its inside wide enough for the probe (most take a 6 mm or 1/4" probe).
+- **Suggested parts:** Stainless TC 1.5 thermowells; 1/2" NPT thermowells
+- **Where to buy:** *(link coming)* Search Amazon for "tri clamp thermowell 1.5".
+
+### Waterproof In Use Outlet
+
+- **What it does:** An outdoor outlet with a cover that stays closed over a plug, so water can't get in.
+- **What Skynet needs:** Rated for wet places ("in use" or "extra duty" cover), on a GFCI circuit, the outlet's AMPS matching the circuit.
+- **Suggested parts:** Weatherproof in-use outlet covers with a GFCI outlet
+- **Where to buy:** *(link coming)* Search Amazon for "in use weatherproof outlet cover".
+
+### Zero Cross
+
+- **In plain words:** An SSR that switches only when the AC wave passes zero volts, which is gentle on the element and makes no electrical noise.
+- **What Skynet needs:** The normal SSR for elements switched by PID, Duty Cycle or Hysteresis. Not for fast PWM.

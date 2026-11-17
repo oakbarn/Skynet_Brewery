@@ -25,6 +25,24 @@ for (const [file, lang] of [['help/13-glossary.md', 'en'], ['help/fr/13-glossary
   for (const l of [...page.matchAll(/\]\((\d+-[\w-]+)\)/g)].map(m => m[1])) assert.ok(fs.existsSync(new URL(`../help/${l}.md`, import.meta.url)), `${lang}: link ${l}`);
   assert.doesNotMatch(page, /Fritz|BruControl/, 'Rules 11.3 and 11.5');
 }
+// the wiring and hardware words (OakBarn Brewery, 2026-11-17: "something Technical like 12C needs explanation (Link to Glossary)";
+// "0-10V Controller"): one ### heading each, so each has its own link; the same words and links in French
+const slugOf = h => h.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');      // as public/help.js slug and GitHub
+const wiring = (page, fr) => {
+  const part = page.split(fr ? '\n## Mots du câblage et du matériel {#wiring-and-hardware-words}' : '\n## Wiring and hardware words')[1];
+  assert.ok(part, (fr ? 'fr' : 'en') + ': a wiring words section');
+  assert.match(part, fr ? /L'électricité peut tuer/ : /⚠ Electricity can kill/, 'the electrical warning (Rule 6.20)');
+  return [...part.matchAll(/^### (.+?)(?: \{#([\w-]+)\})?$/gm)].map(m => ({ name: m[1], id: m[2] || slugOf(m[1]) }));
+};
+const wEn = wiring(read('help/13-glossary.md')), wFr = wiring(read('help/fr/13-glossary.md'), true);
+assert.ok(wEn.length >= 40, 'the wiring words are there');
+assert.deepEqual(wFr.map(w => w.id), wEn.map(w => w.id), 'French has the same words and links');
+assert.deepEqual(wEn.map(w => w.name), [...wEn.map(w => w.name)].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())), 'wiring words A to Z');
+for (const id of ['0-10v-controller', 'i2c', 'dac', 'ssr', 'gfci', 'pwm-port', 'contactor', '4-20-ma', 'thermowell'])
+  assert.ok(wEn.some(w => w.id === id), 'wiring word link #' + id);
+assert.match(read('help/13-glossary.md'), /\[🔌 Wiring words\]\(#wiring-and-hardware-words\)/, 'jump to the wiring words');
+assert.doesNotMatch(read('help/13-glossary.md').split('## Wiring and hardware words')[1], /https?:/, 'no store links yet (Rule 11.10)');
+
 const en = read('help/13-glossary.md');
 for (const w of ['Brain', 'Build Tab (🔨)', 'Hysteresis', 'Setpoint', 'Offset', 'Port', 'Hover Help', 'Clone', 'Edit layout'])
   assert.ok(en.includes(`**${w}**`), 'Glossary has ' + w);
