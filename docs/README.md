@@ -41,3 +41,4 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [LED Test Board: parts list](LED_Test_Board_Parts.md) | Parts, wiring and pins for a plug-in Mega test board with LEDs (220 ohm) standing in for Pumps, Valves and other Devices (2026-11-12). |
 | [Summary 1](Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
 | [Summary 2](Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |
+| [Summary 3](Summary_3.md) | Full copy of the project memory on 2026-11-17, before it was trimmed: every standing rule, merged PR and open question up to then. For what is true now, use the Skynet Rules. |
