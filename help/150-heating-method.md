@@ -141,6 +141,23 @@ Several Elements can be On at the same time (for example on different AC circuit
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
 click on PID to hold the strike temperature.
 
+## Double-click for a method's Settings
+
+On a running Tab (not Edit layout), **double-click a method button** to open that method's Settings for that Element, for example
+**HLT Heater: Duty Cycle Settings**. Double-click the **Element's picture** (on its own, on its Vessel Device, or a Picture Widget that
+follows it) to open the Settings of the method it is in now; double-click a **Method Clone** for its own method.
+
+- **Nothing turns On or Off, and the method does not change.**
+- **Ctrl + Click** does the same (**⌘ + Click** on a Mac, where Ctrl + Click is the right-click and opens Help).
+- So that a double-click can do this, **a single click on a Heating Element or its method buttons waits about a third of a second**
+  before it turns the Element On or Off or picks the method. Everything else on the Tab still acts at once.
+- It is the same dialog as the method's **⬢** in the Properties. **💾 Save** saves it at once. The Element stays On or Off in the
+  same method; a new Offset, Delay or Kp works at once, and a new Setpoint is sent at once too.
+- **Admins only.** Other accounts get a short note.
+
+Example: the HLT Heater is heating in **PID**. Double-click **Duty Cycle** under it: the **Duty Cycle Settings** open, and the HLT
+Heater keeps heating in PID.
+
 ## Method Clones: one tile per method
 
 To show one Element as separate tiles, one for each method side by side, add a **Method Clone** (Rule 4.4):
