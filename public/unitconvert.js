@@ -20,51 +20,74 @@ const convAbs = (v, to, d = SHOW.a) => !isNum(v) ? v : r(to === 'Metric' ? +v * 
 
 const unitsOf = p => p?.units === 'Metric' ? 'Metric' : 'US';
 const needs = (p, to) => !!p && unitsOf(p) !== to;
-
-// each one gives the same thing in the Units "to", or null when it already is
-function mash(p, to, P) {
-  if (!needs(p, to)) return null;
-  return { ...p, units: to, steps: (p.steps || []).map(s => ({ ...s, temp: convTemp(s.temp, to, P.t) })), mashOutTemp: convTemp(p.mashOutTemp, to, P.t), spargeTemp: convTemp(p.spargeTemp, to, P.t) };
+const CONV = { t: convTemp, v: convVol, l: convLen, a: convAbs };
+// one number into the Units "to". o: the kept metric number it was shown from (a box's _shown copy, see forShow): when the shown
+// number was not changed, the kept one comes back exactly, so showing and saving never moves a number (Rule 2.59)
+function one(kind, v, to, P, o) {
+  if (to === 'Metric' && o !== undefined && isNum(o) && isNum(v) && +v === CONV[kind](o, 'US', SHOW[kind])) return +o;
+  return CONV[kind](v, to, P[kind]);
 }
-function boil(p, to, P) {
+const at = (o, k) => o && typeof o === 'object' ? o[k] : undefined;
+
+// each one gives the same thing in the Units "to", or null when it already is. o: the kept copy it was shown from, if any.
+function mash(p, to, P, o) {
   if (!needs(p, to)) return null;
-  const out = { ...p, units: to, boilOffRate: convVol(p.boilOffRate, to, P.v) };
-  for (const [k] of HOP_STANDS) if (out[`hs${k}Temp`] !== undefined) out[`hs${k}Temp`] = convTemp(out[`hs${k}Temp`], to, P.t);
+  return { ...p, units: to, steps: (p.steps || []).map((s, i) => ({ ...s, temp: one('t', s.temp, to, P, at(at(at(o, 'steps'), i), 'temp')) })),
+    mashOutTemp: one('t', p.mashOutTemp, to, P, at(o, 'mashOutTemp')), spargeTemp: one('t', p.spargeTemp, to, P, at(o, 'spargeTemp')) };
+}
+function boil(p, to, P, o) {
+  if (!needs(p, to)) return null;
+  const out = { ...p, units: to, boilOffRate: one('v', p.boilOffRate, to, P, at(o, 'boilOffRate')) };
+  for (const [k] of HOP_STANDS) if (out[`hs${k}Temp`] !== undefined) out[`hs${k}Temp`] = one('t', out[`hs${k}Temp`], to, P, at(o, `hs${k}Temp`));
   return out;
 }
 // a Water Profile holds ppm and pH only: just its tag changes
 const water = (p, to) => needs(p, to) ? { ...p, units: to } : null;
 const VOLS = ['volume', 'maxVolume', 'minVolume', 'deadspace', 'safeVolume', 'extraTrub'], LENS = ['diameter', 'vheight'];
-function sizes(g, to, P) {
+function sizes(g, to, P, o) {
   const out = { ...g };
-  for (const k of VOLS) if (out[k] !== undefined) out[k] = convVol(out[k], to, P.v);
-  for (const k of LENS) if (out[k] !== undefined) out[k] = convLen(out[k], to, P.l);
+  for (const k of VOLS) if (out[k] !== undefined) out[k] = one('v', out[k], to, P, at(o, k));
+  for (const k of LENS) if (out[k] !== undefined) out[k] = one('l', out[k], to, P, at(o, k));
   return out;
 }
 // a Vessel (or a Fermenter, a Vessel Template): its size numbers. One with no units tag was made in US numbers.
-function vessel(g, to, P) {
+function vessel(g, to, P, o) {
   if (!needs(g, to) || !VOLS.concat(LENS).some(k => g[k] !== undefined)) return null;
-  return { ...sizes(g, to, P), units: to };
+  return { ...sizes(g, to, P, o), units: to };
 }
 // an Equipment Profile: its numbers, its Equipment list (in the profile's units) and the Vessels in its drawing (each with its own tag)
-function equipment(p, to, P) {
-  const out = needs(p, to) ? { ...p, units: to, trubChillerLoss: convVol(p.trubChillerLoss, to, P.v), grainAbsorption: convAbs(p.grainAbsorption, to, P.a) } : { ...p };
-  if (needs(p, to) && Array.isArray(p.equipment)) out.equipment = p.equipment.map(e => sizes(e, to, P));
-  let changed = needs(p, to);
-  for (const k of ['graphics']) if (Array.isArray(p[k])) out[k] = p[k].map(g => { const v = g?.kind === 'vessel' ? vessel(g, to, P) : null; if (v) changed = true; return v || g; });
+function equipment(p, to, P, o) {
+  const own = needs(p, to);
+  const out = own ? { ...p, units: to, trubChillerLoss: one('v', p.trubChillerLoss, to, P, at(o, 'trubChillerLoss')), grainAbsorption: one('a', p.grainAbsorption, to, P, at(o, 'grainAbsorption')) } : { ...p };
+  if (own && Array.isArray(p.equipment)) out.equipment = p.equipment.map((e, i) => sizes(e, to, P, at(at(o, 'equipment'), i)));
+  let changed = own;
+  if (Array.isArray(p.graphics)) out.graphics = p.graphics.map(g => {
+    if (g?.kind !== 'vessel') return g;
+    const v = P === KEEP ? toMetric.vessel(g) : (forShow.vessel(g, to) !== g ? forShow.vessel(g, to) : null);
+    if (v) changed = true; return v || g;
+  });
   return changed ? out : null;
+}
+const KINDS = { mash, boil, water, vessel, equipment };
+// a shown copy remembers what it was shown from (_shown: its Units and the kept copy); it never goes back to the Brain
+const SHOWN = '_shown';
+function keep(kind, p) {
+  if (!p || typeof p !== 'object') return null;
+  const sh = p[SHOWN], body = sh ? (({ [SHOWN]: _, ...rest }) => rest)(p) : p;
+  const o = sh && sh.units === unitsOf(body) ? sh.was : undefined;
+  return KINDS[kind](body, 'Metric', KEEP, o) || (sh ? body : null);
 }
 
 // the kept (metric) copy, or null when it already is metric
-export const toMetric = {
-  mash: p => mash(p, 'Metric', KEEP), boil: p => boil(p, 'Metric', KEEP), water: p => water(p, 'Metric'),
-  vessel: g => vessel(g, 'Metric', KEEP), equipment: p => equipment(p, 'Metric', KEEP),
-};
-// the copy a box shows, in the Units (US or Metric); always a copy
-export const forShow = {
-  mash: (p, to) => mash(p, to, SHOW) || p, boil: (p, to) => boil(p, to, SHOW) || p, water: (p, to) => water(p, to) || p,
-  vessel: (g, to) => vessel(g, to, SHOW) || g, equipment: (p, to) => equipment(p, to, SHOW) || p,
-};
+export const toMetric = Object.fromEntries(Object.keys(KINDS).map(k => [k, p => keep(k, p)]));
+// the copy a box shows, in the Units (US or Metric); always a copy, and it remembers the kept one it came from
+export const forShow = Object.fromEntries(Object.keys(KINDS).map(k => [k, (p, to) => {
+  if (!p || typeof p !== 'object') return p;
+  const s = KINDS[k](p, to, SHOW);
+  if (!s) return p;
+  const was = { ...p }; delete was.graphics;      // the Vessels of a drawing remember their own
+  return { ...s, [SHOWN]: { units: to, was } };
+}]));
 export const VESSEL_SIZE_KEYS = VOLS.concat(LENS);
 
 // The Default settings: Boil Start and Ferment temperatures of older saves were in the Units; now in °C (boilStartTempC, fermentTempC)
