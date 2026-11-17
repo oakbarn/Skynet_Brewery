@@ -56,6 +56,10 @@ assert.equal(both.graphics.find(g => g.id === 'p2').from, 'dev:Valve_1:out', 'th
 const ves = pastePieces(prof, 'vessels');
 assert.deepEqual(ves.graphics.map(g => g.id).sort(), ['ipo', 'v1']);
 assert.deepEqual(ves.elements.map(e => e.name), ['Probe_1', 'Heat_1']);
+// an immersion chiller sits in its vessel: it goes with Vessels Only and with its vessel, never alone
+{ const pc = { ...prof, graphics: [...prof.graphics, { id: 'chl1', kind: 'vessel', vesselType: 'ccoil', name: 'wgt_CHL_Coil_HT', chillerOn: 'v1', workspace: 'Hot' }] };
+  assert.ok(pastePieces(pc, 'vessels').graphics.some(g => g.id === 'chl1'), 'immersion chiller comes with its vessel');
+  assert.ok(!pastePieces(pc, 'manifold').graphics.some(g => g.id === 'chl1'), 'not with the manifold, without its vessel'); }
 // Manifold Only: pump, valve, tee and pipes; the pipe from the HLT's IP is left OPEN at that end ("Open so a Vessel could be attached")
 const man = pastePieces(prof, 'manifold');
 assert.deepEqual(man.elements.map(e => e.name), ['Valve_1', 'Pump_1']);
