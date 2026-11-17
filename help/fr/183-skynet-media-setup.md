@@ -23,8 +23,13 @@ Le Media Setup et le zip ne sont refaits que quand Skynet ajoute des images ou d
 Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.exe`** au lieu des deux Setups séparés. C'est le même Skynet Brewer Setup, avec toutes les images et tous les sons Skynet dedans : pas besoin du Media Setup.
 
 - Il ajoute les images et les sons comme le Media Setup : une image ou un son que vous avez déjà n'est jamais changé, et rien n'est supprimé.
-- Après un **Start Fresh**, il remet tout seul les images et sons Skynet.
-- Il est plus gros (environ 12 Mo au lieu d'environ 5 Mo). Pour une mise à jour rapide plus tard, le Skynet Brewer Setup simple suffit : vos images et sons restent en place.
+- Il n'a **aucun choix**. C'est toujours une installation complète, et il **écrase tout** : chaque Schema, réglage, utilisateur, Process, le journal de brassage, chaque image et son, et le dossier Import. Il remet ensuite tout seul les images et sons Skynet.
+- Si Skynet est déjà installé, il montre **un seul avertissement** : c'est l'installation Full et elle va TOUT ÉCRASER. Sur cette page :
+  - **Get the Update Setup** ouvre la page de téléchargement et ferme le Full Setup. Prenez l'Update Setup (`Skynet_Brewer_Setup_<date>.exe`) quand vous voulez seulement une mise à jour : il garde tout.
+  - **Close and Do Not Install** le ferme, et rien n'est changé.
+  - **Install** écrase tout.
+- Avant d'écraser, vos anciens dossiers (config, data, processes, media, backups et le dossier Import) sont **déplacés, pas supprimés**, dans `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.
+- Il est plus gros (environ 12 Mo au lieu d'environ 5 Mo). Pour une mise à jour rapide plus tard, prenez le Skynet Brewer Setup simple : vos images et sons restent en place.
 - La désinstallation est la même, quel que soit le Setup utilisé.
 
 ## Comment l'utiliser {#how-to-use-it}

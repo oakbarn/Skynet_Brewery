@@ -3342,6 +3342,8 @@ choice buttons; the Mac and Linux / Pi installers show the same four as a number
 4. **Update the program and keep everything** (the original No: recommended, already picked, and what a silent or
    unattended update does).
 With 3 or 4 the installer still offers to replace single folders ("Keep all of them as they are?").
+**Except the Full Setup** (Rule 9.20, 2026-11-17): it shows none of these four choices. It is always a full install that
+overwrites everything; see Rule 9.20.
 *Replaced:* "it first asks **Delete all users and Schemas and Start Fresh?** (No is the default)." (2026-11-02)
 **Start Fresh** (Fritz, 2026-11-02): choice 1 shows a second warning that **all existing data will be deleted**, listing what goes,
 with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `config` (Schemas, Tabs, Devices, settings),
@@ -3537,6 +3539,19 @@ Never Take Away; the Media Setup and zip are made new only when media changed, R
 VirusTotal takes files over 32 MB through its large-file upload. Ships only the media already in Media_Licenses.csv (no new
 media). Both programs (the Importer is in the same Setup; nothing changes there). (thread "Add a Full Setup with media included",
 Help 19 and 183)
+**No choices: the Full Setup always overwrites everything** (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 10, word for
+word: "Somewhere in a sandbox we had about a full install not having any options always a full install and will overwrite any
+installed folders or files. If the Install can see a previous install the one warning is allowed that explains this is the Full
+install and will OVERWRITE everything. If Only an Update, get that Update. and then a link to the Update and clicking it closes the
+install. also a Close and Do Not install Option that closes the installer."; "It is annoying to have to click the Fresh every
+time."). The Full Setup does not show the four update choices of Rule 9.8. On a new computer it just installs. When it finds Skynet
+already installed it shows **one warning page**: this is the Full install and it will OVERWRITE everything, with a link **Get the
+Update Setup** (opens the download page and closes the Full Setup), a **Close and Do Not Install** button (closes it, nothing
+changed) and **Install**. Install runs the same Start Fresh as Rule 9.8 choice 1 (`lib/freshstart.js fresh`), then adds the Skynet
+pictures and sounds. Before that, the old `config`, `data`, `processes`, `media`, `backups` and Import folders are **moved, never
+deleted**, to `<Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>` (outside the panel folder, so the overwrite cannot reach
+them). The plain Setup (the Update Setup) keeps its four choices. *Replaced:* "the same Skynet Brewer Setup (same pages, choices,
+Uninstall and Rules)": the Full Setup now has the warning page instead of the choices page.
 
 9.21 **The Media Setup and Media zip are made new only when Skynet pictures or sounds are added** (OakBarn Brewery, 2026-11-15:
 "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"). On every merge the release workflow
@@ -5213,6 +5228,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ---
 
+- 2026-11-17: Rule 9.20 changed, Rule 9.8 points to it (OakBarn Brewery, Panel Updates Sandbox entry 10: "always a full install and will overwrite any installed folders or files ... the one warning is allowed ... a link to the Update ... a Close and Do Not install Option"): the Full Setup has no choices; one warning page when Skynet is already installed (Get the Update Setup, Close and Do Not Install, Install); old folders moved to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date> first. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French). Both programs: the Importer is in the same Setup; it is overwritten with the rest, nothing else changes for it.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
