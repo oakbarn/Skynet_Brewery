@@ -74,6 +74,20 @@ Certains nombres sont sortis du profil (2026-10-20) :
 
 La case **Check the volumes** (vérifier les volumes) calcule le volume avant ébullition, ce qui s'évapore, le volume après ébullition, ce qui va dans le fermenteur et ce qui reste pour la mise en bouteille ou en fût. Tapez une **Batch size** et choisissez un **Boil Profile** pour les essayer (la Recipe les donnera le jour du brassage). Elle utilise la première **Brew Kettle** et le premier **Fermenter** de l'Equipment list du profil (le profil d'un Tab Fermentation n'a pas de cuve d'ébullition, donc il le dit). Une ligne ⚠ vous prévient quand le volume avant ébullition dépasse ce que contient la cuve, ou quand le brassin dépasse ce que contient le fermenteur.
 
+## Rendement sur ce Schema {#efficiency-on-this-schema}
+
+La mouture du grain, la conversion de l'empâtage et le rinçage changent tous le Rendement de la salle de brassage, et il est difficile de les suivre. Le résultat est facile à suivre, donc Skynet le garde pour vous. La case **Efficiency on this Schema** (rendement sur ce Schema) sous l'Equipment list montre chaque brassin enregistré avec ce profil dans le Schema chargé : la **Date**, la **Recipe**, le Tab **Brew on**, la **OG** (DO), le volume **Into the fermenter** (mis dans le fermenteur) et le vrai **Efficiency** (rendement).
+
+1. Après un brassin, chargez sa Recipe (☰ Menu > Recipe) et vérifiez son Tab **Brew on**.
+2. Ouvrez le Equipment Profile de ce Tab et appuyez sur **📝 Record a brew** (enregistrer un brassin).
+3. Tapez la **OG** (la densité dans le fermenteur, par exemple 1.052), le volume mis **Into the fermenter** et la **Date**, puis appuyez sur **OK**. Skynet calcule le vrai rendement à partir de la liste de grains de la Recipe et le montre, avec la moyenne.
+
+Les brassins sont gardés dans le **Schema**, donc chaque Schema a sa propre liste (un Schema fait comme copie d'un autre commence avec la liste de celui-ci). Skynet fait la moyenne des **10 derniers brassins** sur ce Schema avec ce profil. 🗑 retire un brassin de la liste quand il a été mal tapé.
+
+**Use the average (x %)** (utiliser la moyenne) met cette moyenne dans le **Brewhouse efficiency** de ce profil. Skynet montre d'abord le changement, et **↩ Undo** (annuler) remet l'ancien nombre. Un profil partagé est changé pour chaque Schema qui l'utilise ; appuyez d'abord sur **Make it unique to this Tab** pour le changer pour ce Schema seulement. Le bouton n'apparaît que quand la moyenne est différente du nombre du profil, pour un Admin, et quand le profil n'est pas verrouillé.
+
+Tout utilisateur peut enregistrer un brassin ; seul un Admin peut utiliser la moyenne.
+
 ## Donner à chaque Tab son Equipment Profile {#give-each-tab-its-equipment-profile}
 
 La case en haut de l'onglet **Equipment Profile** liste chaque Tab du Schema chargé, chacun avec son Equipment Profile.

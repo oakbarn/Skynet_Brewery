@@ -96,6 +96,26 @@ export function expectedGravity(r, eff) {
   if (!(n(eff) > 0) && fs.some(mashedFerm)) return null;
   return round(1 + fs.reduce((a, f) => a + (gravityPoints(f, r, eff) || 0), 0) / 1000, 3);
 }
+// The real Brewhouse Efficiency of one brew (OakBarn Brewery, 2026-11-17: "Things that affect Efficiency: Grain Grind, Mash Conversion,
+// Sparge and maybe others. Hard to keep track of all those variables, but easy to track the Efficiency We should do that."): the gravity
+// points measured in the fermenter (OG and the volume into it), less what the sugars and extracts gave (100 %), over the most the grains
+// and adjuncts could give. og: a specific gravity (1.052); liters: into the fermenter. A % with 1 decimal, or null.
+export function measuredEfficiency(r, og, liters) {
+  const gal = n(liters) * L_GAL, g = n(og);
+  if (!(gal > 0) || !(g > 1) || g > 1.2) return null;
+  const pts = f => n(f.yieldPct) / 100 * PPG_SUGAR * n(f.kg) * KG_LB;
+  const fs = (r?.ingredients?.fermentables || []).filter(f => n(f.kg) > 0 && n(f.yieldPct) > 0);
+  const most = fs.filter(mashedFerm).reduce((a, f) => a + pts(f), 0), sugar = fs.filter(f => !mashedFerm(f)).reduce((a, f) => a + pts(f), 0);
+  if (!(most > 0)) return null;
+  const eff = ((g - 1) * 1000 * gal - sugar) / most * 100;
+  return eff > 0 && eff < 150 ? Math.round(eff * 10) / 10 : null;
+}
+// the average Efficiency of the last brews (OakBarn Brewery, 2026-11-17: "Average over 10 brews with same schema"; "Track by schema")
+export const EFF_AVERAGE_OF = 10;
+export function averageEfficiency(log = [], profileId) {
+  const last = log.filter(x => x && (!profileId || x.profile === profileId) && n(x.eff) > 0).slice(-EFF_AVERAGE_OF);
+  return last.length ? { avg: Math.round(last.reduce((a, x) => a + n(x.eff), 0) / last.length * 10) / 10, count: last.length, last } : null;
+}
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
 
