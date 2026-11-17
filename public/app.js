@@ -3009,7 +3009,7 @@ function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
-      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, methodButtonWord(k, !!e.methodShort))));
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}. Double-click (or Ctrl + Click, ⌘ + Click on a Mac): the ${word} Settings of ${e.label || e.name}, nothing turned On or Off (admins)` }, methodButtonWord(k, !!e.methodShort))));
     const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
     if (part) { box.style.left = `${parseFloat(part.style.left) + parseFloat(part.style.width) / 2}px`; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
     else if (!e.integratedIn) { box.style.left = `${(e.x ?? 0) + (e.w ?? 60) / 2}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
@@ -3035,6 +3035,76 @@ $('#ws').addEventListener('click', ev => {
   // Off Buttton", Rule 6.19). Several Elements can be ON at once (on different AC circuits).
   setProp(name, 'method', heatMethodWord(k));
 }, true);
+
+// Ctrl + Left Click opens settings on a running Tab (OakBarn Brewery, 2026-11-16: "CTRL + Left Click could do something"; "I tried
+// double clicking on the Little Method Balloons for a Heating element to bring up the dialog for Duty cycle for that element"; "it
+// might be a standard to bring up properties so a slow double click does not turn on something"). Outside Edit layout a double-click is
+// two clicks (On, then Off), so a modifier click is used instead. On a Mac Ctrl + Click is the right-click (Help, Rule 2.11), so there
+// it is ⌘ + Click. It never switches a method and never turns anything On (Rule 6.19). Admins only: it saves to the Schema.
+// CTRL_CLICK lists what answers it, so other Devices can be added later (only Heating Elements for now, Rule 6.19).
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const ctrlClick = ev => !editing && !ev.shiftKey && !ev.altKey && (IS_MAC ? ev.metaKey : ev.ctrlKey);
+const CTRL_CLICK = [
+  // a Heating Element (on its own, built into a Vessel Device, or a Picture Widget that follows one): the Current Method's Settings;
+  // a Method Clone: the Settings of its own method
+  target => {
+    const vp = target.closest('.vpPart.vp-element[data-dev]');
+    const n = !vp && target.closest('.el');
+    const mc = n?.dataset?.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
+    if (mc) return () => methodSettingsNow(mc.of, heatMethodKey(mc.method));
+    let e = vp ? elByName(vp.dataset.dev) : n ? elByName(n.dataset.name) : null;
+    if (e?.type === 'picture' && e.follow) e = elByName(e.follow);
+    if (!isHeatElem(e)) return null;
+    return () => methodSettingsNow(e.name, heatMethodKey(S.values[e.name]?.method) ?? startMethod(e));
+  },
+];
+const ctrlClickAction = target => { for (const f of CTRL_CLICK) { const a = f(target); if (a) return a; } return null; };
+// Double-click too (OakBarn Brewery, 2026-11-16: "single click turn on, double click brings up property dialog (turns nothing on or
+// off"). A browser only knows a click was the first of a double-click when the second comes, so on these items (only what is in
+// CTRL_CLICK) a single click waits DBL_WAIT_MS: no second click, it acts as always (On / Off, the method picked); a second click,
+// nothing is turned On or Off and the Settings open. Everything else on a Tab still acts at once.
+// Caught on the document, before the Tab's own click actions (and a Push Button's press), so the Settings click never acts.
+const DBL_WAIT_MS = 350;
+let dblWait = null;
+const replayed = new WeakSet();
+const onTab = ev => !editing && ev.target?.closest?.('#ws') && ev.button === 0;
+document.addEventListener('pointerdown', ev => {
+  if (!onTab(ev) || !ctrlClick(ev)) return;
+  if (ev.target.closest('.hmBtn') || ctrlClickAction(ev.target)) { ev.stopPropagation(); ev.preventDefault(); }
+}, true);
+document.addEventListener('click', ev => {
+  if (replayed.has(ev) || !onTab(ev) || ev.shiftKey || ev.altKey) return;
+  const b = ev.target.closest('.hmBtn');
+  const act = b ? () => methodSettingsNow(b.closest('.hmSpots').dataset.dev, b.dataset.k) : ctrlClickAction(ev.target);
+  if (!act) return;
+  ev.stopPropagation(); ev.preventDefault();
+  if (ctrlClick(ev) || ev.detail >= 2) { if (dblWait) { clearTimeout(dblWait.t); dblWait = null; } return act(); }      // Ctrl + Click, or the second click
+  if (dblWait) clearTimeout(dblWait.t);
+  const target = ev.target;
+  dblWait = { t: setTimeout(() => {      // no second click came: the single click does what it always did
+    dblWait = null;
+    const again = new MouseEvent('click', { bubbles: true, cancelable: true, clientX: ev.clientX, clientY: ev.clientY, button: 0 });
+    replayed.add(again); target.isConnected && target.dispatchEvent(again);
+  }, DBL_WAIT_MS) };
+}, true);
+// One method's Settings, opened on a running Tab: the same dialog as its ⬢ in the Properties (methodSetFields), with its title,
+// ✖ Cancel and 💾 Save frozen at the top (Rule 2.51). Save saves it to the Schema at once (no Edit layout).
+async function methodSettingsNow(name, k) {
+  if (!can('admin')) return toast('Only an admin can change Method Settings', true);
+  const orig = S.config.elements.find(e => e.name === name);
+  if (!orig || !k) return;
+  const w = clone(orig); let body;
+  const r = await layerDialog(`${orig.label || orig.name}: ${heatMethodWord(k)} Settings`, b => { body = b; b.classList.add('attrBody'); bindForm(b, it => methodSetFields(k, it), w); }, false, { model: true, saveNow: true });
+  if (r !== 'ok') return;
+  try { readFields(w, body); } catch (e) { return toast(e.message, true); }
+  const now = S.config.elements.find(e => e.name === name);
+  if (!now) return toast(`${name} is gone: nothing saved`, true);
+  const out = clone(now);
+  for (const key of methodSetKeys(k)) { if (w[key] === undefined) delete out[key]; else out[key] = w[key]; }
+  // a Save keeps what is running (On / Off, the method, the Setpoint now): a new Setpoint typed here is also sent at once
+  const sp = 'target' in w && String(w.target ?? '') !== String(now.target ?? '') && Number.isFinite(Number(w.target)) && w.target !== '' ? Number(w.target) : null;
+  try { await saveElements(S.config.elements.map(x => x === now ? out : x)); if (sp !== null) await setProp(name, 'target', sp); savedPop(`${orig.label || orig.name}: ${heatMethodWord(k)} Settings`); } catch (e) { toast(e.message, true); }
+}
 
 function updateEl(name) {
   litSpots(name);
@@ -10240,12 +10310,12 @@ async function dbGroupDialog(g, me, cur) {
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
 const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"]');
-function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false } = {}) {
+function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false, saveNow = false } = {}) {
   return new Promise(res => {
     const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' + (model ? ' miniModel' : '') });
     const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
-      h('button', { type: 'button', class: 'primary', ...(model ? { title: 'Keep these settings and go back to the dialog. They are saved when you Save the dialog.' } : {}), onclick: () => done('ok') }, model ? '💾 Keep' : '💾 Save'));
+      h('button', { type: 'button', class: 'primary', ...(saveNow ? { title: 'Save these settings now' } : model ? { title: 'Keep these settings and go back to the dialog. They are saved when you Save the dialog.' } : {}), onclick: () => done('ok') }, model && !saveNow ? '💾 Keep' : '💾 Save'));      // saveNow: opened on its own (Ctrl + Click), so it saves
     // a pop-up to look at only (the Model's ⬢ Pump facts, Dialog 2 #3): one ◀ Back button, nothing to change
     const viewBar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Back to the dialog', onclick: () => done('cancel') }, '◀ Back'));
     if (view) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), viewBar()), body);
