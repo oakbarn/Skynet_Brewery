@@ -1,7 +1,7 @@
 {
  "00-tailscale-windows": "7718c563861cc0e1",
  "01-getting-started": "5c355762bc5f9815",
- "02-tabs": "4202d41ecae3b2a8",
+ "02-tabs": "33b2052c17709737",
  "03-devices": "c12cac967e2e5cd9",
  "04-variables": "285856e470f40ab8",
  "05-scripts": "9e1cfc6e4b57fa92",
@@ -144,7 +144,7 @@
  "147-hover-help": "f816c93a1e729355",
  "148-every-device-dialog": "334c52fc1bf74613",
  "149-shared-variables-became-gglobals": "c024c092ae445ef2",
- "150-heating-method": "621bfe86f97888bd",
+ "150-heating-method": "e12bd90b85f583a9",
  "151-panel-looks": "adb64ad7ef01c8b0",
  "152-skynet-dial-and-timer-digits": "72aac9abbaa83357",
  "153-move-alone-swap-put-back": "d0a6163462ef6f84",

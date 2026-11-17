@@ -143,21 +143,22 @@ Plusieurs résistances peuvent être en marche en même temps (par exemple sur d
 Exemple : la résistance HLT de Tartan sur le port 42 du Main Panel montre **Duty Cycle** et **PID** : un clic sur Duty Cycle pour l'ébullition, un
 clic sur PID pour tenir la température d'empâtage.
 
-## Double-clic pour les Settings d'une méthode {#double-click-for-a-method-s-settings}
+## Ctrl + clic pour les Settings d'une méthode {#ctrl-click-for-a-method-s-settings}
 
-Sur un Tab en marche (pas en Edit layout), **double-cliquez un bouton de méthode** pour ouvrir les Settings de cette méthode pour cette
-résistance, par exemple **HLT Heater: Duty Cycle Settings**. Double-cliquez l'**image de la résistance** (seule, sur son Vessel Device, ou un
-Picture Widget qui la suit) pour ouvrir les Settings de la méthode où elle est ; double-cliquez un **Method Clone** pour sa propre méthode.
+Sur un Tab en marche (pas en Edit layout), **Ctrl + cliquez un bouton de méthode** (**⌘ + clic** sur un Mac, où Ctrl + clic est le clic
+droit et ouvre l'aide) pour ouvrir les Settings de cette méthode pour cette résistance, par exemple **HLT Heater: Duty Cycle Settings**.
+Ctrl + cliquez l'**image de la résistance** (seule, sur son Vessel Device, ou un Picture Widget qui la suit) pour ouvrir les Settings de
+la méthode où elle est ; Ctrl + cliquez un **Method Clone** pour sa propre méthode.
 
-- **Rien ne s'allume ni ne s'éteint, et la méthode ne change pas.**
-- **Ctrl + clic** fait la même chose (**⌘ + clic** sur un Mac, où Ctrl + clic est le clic droit et ouvre l'aide).
-- Pour qu'un double-clic puisse faire cela, **un simple clic sur une résistance ou ses boutons de méthode attend environ un tiers de
-  seconde** avant de la mettre en marche ou à l'arrêt ou de choisir la méthode. Tout le reste du Tab agit toujours tout de suite.
+- **Rien ne s'allume ni ne s'éteint, et la méthode ne change pas.** Un simple clic agit toujours tout de suite.
 - C'est la même fenêtre que le **⬢** de la méthode dans les Properties. **💾 Save** l'enregistre tout de suite. La résistance reste en
   marche ou à l'arrêt dans la même méthode ; un nouvel Offset, Delay ou Kp agit tout de suite, et un nouveau Setpoint est envoyé tout de suite aussi.
 - **Admins seulement.** Les autres comptes reçoivent une courte note.
+- Les changements de tous les jours restent à un clic : la fenêtre **SetPoint** depuis la sonde de température, et la fenêtre de la
+  résistance (**Heating method…**) pour la méthode et son Duty cycle %. Toutes les autres Properties se changent en **Edit layout**, où
+  Ctrl + clic ouvre les Properties comme un double-clic.
 
-Exemple : la HLT Heater chauffe en **PID**. Double-cliquez **Duty Cycle** sous elle : les **Duty Cycle Settings** s'ouvrent, et la HLT
+Exemple : la HLT Heater chauffe en **PID**. Ctrl + cliquez **Duty Cycle** sous elle : les **Duty Cycle Settings** s'ouvrent, et la HLT
 Heater continue de chauffer en PID.
 
 ## Method Clones : une tuile par méthode {#method-clones-one-tile-per-method}

@@ -3048,7 +3048,7 @@ function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
-      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}. Double-click (or Ctrl + Click, ⌘ + Click on a Mac): the ${word} Settings of ${e.label || e.name}, nothing turned On or Off (admins)` }, methodButtonWord(k, !!e.methodShort))));
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}. Ctrl + Click (⌘ + Click on a Mac): the ${word} Settings of ${e.label || e.name}, nothing turned On or Off (admins)` }, methodButtonWord(k, !!e.methodShort))));
     const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
     if (part) { box.style.left = `${parseFloat(part.style.left) + parseFloat(part.style.width) / 2}px`; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
     else if (!e.integratedIn) { box.style.left = `${(e.x ?? 0) + (e.w ?? 60) / 2}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
@@ -3075,15 +3075,21 @@ $('#ws').addEventListener('click', ev => {
   setProp(name, 'method', heatMethodWord(k));
 }, true);
 
-// Ctrl + Left Click opens settings on a running Tab (OakBarn Brewery, 2026-11-16: "CTRL + Left Click could do something"; "I tried
-// double clicking on the Little Method Balloons for a Heating element to bring up the dialog for Duty cycle for that element"; "it
-// might be a standard to bring up properties so a slow double click does not turn on something"). Outside Edit layout a double-click is
-// two clicks (On, then Off), so a modifier click is used instead. On a Mac Ctrl + Click is the right-click (Help, Rule 2.11), so there
-// it is ⌘ + Click. It never switches a method and never turns anything On (Rule 6.19). Admins only: it saves to the Schema.
-// CTRL_CLICK lists what answers it, so other Devices can be added later (only Heating Elements for now, Rule 6.19).
+// Ctrl + Click opens settings (OakBarn Brewery, 2026-11-16: "CTRL + Left Click could do something"; then, 2026-11-17: "Maybe the
+// CTRL + Click is the way to Bring Up Properties Dialog"; "Other Properties only on Build"; picked A: "make sure that the double click
+// for hoses still works"). On a Mac Ctrl + Click is the right-click (Help, Rule 2.11), so there it is ⌘ + Click.
+// - On a running Tab (outside Edit layout): Ctrl + Click on a Heating Element, a method button under it or a Method Clone opens that
+//   method's Settings. It never switches a method and never turns anything On (Rule 6.19). Admins only: it saves to the Schema.
+//   A plain click acts at once, as always; a double-click there is two plain clicks (no wait, no Settings).
+// - In Edit layout (Build): Ctrl + Click opens Properties, the same as a double-click (Rule 2.9, kept, with the double-click that
+//   finishes drawing a hose).
+// CTRL_CLICK lists what answers it on a running Tab, so other Devices can be added later (only Heating Elements for now).
 const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
-const ctrlClick = ev => !editing && !ev.shiftKey && !ev.altKey && (IS_MAC ? ev.metaKey : ev.ctrlKey);
+const modClick = ev => !ev.shiftKey && !ev.altKey && (IS_MAC ? ev.metaKey : ev.ctrlKey);
+const ctrlClick = ev => !editing && modClick(ev);
 const CTRL_CLICK = [
+  // a method button under a Heating Element: that method's Settings
+  target => { const b = target.closest('.hmBtn'); return b ? () => methodSettingsNow(b.closest('.hmSpots').dataset.dev, b.dataset.k) : null; },
   // a Heating Element (on its own, built into a Vessel Device, or a Picture Widget that follows one): the Current Method's Settings;
   // a Method Clone: the Settings of its own method
   target => {
@@ -3098,33 +3104,23 @@ const CTRL_CLICK = [
   },
 ];
 const ctrlClickAction = target => { for (const f of CTRL_CLICK) { const a = f(target); if (a) return a; } return null; };
-// Double-click too (OakBarn Brewery, 2026-11-16: "single click turn on, double click brings up property dialog (turns nothing on or
-// off"). A browser only knows a click was the first of a double-click when the second comes, so on these items (only what is in
-// CTRL_CLICK) a single click waits DBL_WAIT_MS: no second click, it acts as always (On / Off, the method picked); a second click,
-// nothing is turned On or Off and the Settings open. Everything else on a Tab still acts at once.
-// Caught on the document, before the Tab's own click actions (and a Push Button's press), so the Settings click never acts.
-const DBL_WAIT_MS = 350;
-let dblWait = null;
-const replayed = new WeakSet();
-const onTab = ev => !editing && ev.target?.closest?.('#ws') && ev.button === 0;
+// Caught on the document, before the Tab's own click actions (and a Push Button's press), so a Ctrl + Click never acts.
+const onTab = ev => ev.target?.closest?.('#ws') && ev.button === 0;
 document.addEventListener('pointerdown', ev => {
-  if (!onTab(ev) || !ctrlClick(ev)) return;
-  if (ev.target.closest('.hmBtn') || ctrlClickAction(ev.target)) { ev.stopPropagation(); ev.preventDefault(); }
+  if (!onTab(ev) || !ctrlClick(ev) || !ctrlClickAction(ev.target)) return;
+  ev.stopPropagation(); ev.preventDefault();
 }, true);
 document.addEventListener('click', ev => {
-  if (replayed.has(ev) || !onTab(ev) || ev.shiftKey || ev.altKey) return;
-  const b = ev.target.closest('.hmBtn');
-  const act = b ? () => methodSettingsNow(b.closest('.hmSpots').dataset.dev, b.dataset.k) : ctrlClickAction(ev.target);
-  if (!act) return;
+  if (!onTab(ev) || !modClick(ev)) return;
+  if (editing) {      // Build: Ctrl + Click = double-click = Properties; never while a pipe or hose is being drawn (its clicks place points)
+    if (drawPts) return;
+    ev.stopPropagation(); ev.preventDefault();
+    ev.target.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true, clientX: ev.clientX, clientY: ev.clientY, button: 0 }));
+    return;
+  }
+  const act = ctrlClickAction(ev.target); if (!act) return;
   ev.stopPropagation(); ev.preventDefault();
-  if (ctrlClick(ev) || ev.detail >= 2) { if (dblWait) { clearTimeout(dblWait.t); dblWait = null; } return act(); }      // Ctrl + Click, or the second click
-  if (dblWait) clearTimeout(dblWait.t);
-  const target = ev.target;
-  dblWait = { t: setTimeout(() => {      // no second click came: the single click does what it always did
-    dblWait = null;
-    const again = new MouseEvent('click', { bubbles: true, cancelable: true, clientX: ev.clientX, clientY: ev.clientY, button: 0 });
-    replayed.add(again); target.isConnected && target.dispatchEvent(again);
-  }, DBL_WAIT_MS) };
+  act();
 }, true);
 // One method's Settings, opened on a running Tab: the same dialog as its ⬢ in the Properties (methodSetFields), with its title,
 // ✖ Cancel and 💾 Save frozen at the top (Rule 2.51). Save saves it to the Schema at once (no Edit layout).
@@ -4611,6 +4607,12 @@ const vpPartAt = ev => vpOf(ev.target.closest?.('.vpPart[data-dev], .vpPart[data
 const vpPartOpen = vp => () => { if (vp.dev) return editItem('el', vp.dev); const g = findItem('gfx', vp.gid); if (g) vbPickPart(g, vp.k); };
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
+  // a double-click while drawing a hose finishes it (Rule 2.9, OakBarn Brewery, 2026-11-17: "make sure that the double click for hoses
+  // still works"; "Double click to add hose is broken still brings up Brew House Tab Properties"): a hose's first click on the end IP
+  // already finished it, so the double-click's second half is not a new double-click on what lies under it (the Tab, a valve ...);
+  // a double-click on the start point only starts the hose
+  if (Date.now() - pipeDoneAt < 700) return;
+  if (drawPts && drawHose && new Set(drawPts.map(q => q.join())).size < 2) return;
   if (drawPts) { if (drawHose) finishPipe(); else drawStraight(ev); return; }
   const vpart = vpPartAt(ev);      // a part built into a Vessel Device: its own Properties (Fritz, 2026-11-07); a faint one: its picker
   if (vpart) return vpPartOpen(vpart)();
@@ -5024,7 +5026,9 @@ function deletePipe(p) {
   draft.graphics = draft.graphics.filter(g => !own.includes(g));
   return own.length;
 }
+let pipeDoneAt = 0;      // when the last pipe or hose was finished: the rest of that double-click is not a new one
 function finishPipe(to) {
+  pipeDoneAt = Date.now();
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;

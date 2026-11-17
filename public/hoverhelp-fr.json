@@ -66,7 +66,7 @@
  "Set the time (hh:mm:ss)": "Régler l'heure (hh:mm:ss)",
  "{0} Alarm Chain step{1} waiting their turn (Rule 7.18)": "{0} étape{1} de l'Alarm Chain en attente de leur tour (Règle 7.18)",
  "Show the hydrometer's gravity in SG, °Plato or °Brix (this screen only)": "Afficher la densité de l'hydromètre en SG, °Plato ou °Brix (cet écran seulement)",
- "One click: {0} heats by {1}. Double-click (or Ctrl + Click, ⌘ + Click on a Mac): the {2} Settings of {3}, nothing turned On or Off (admins)": "Un clic : {0} chauffe par {1}. Double-clic (ou Ctrl + clic, ⌘ + clic sur un Mac) : les Settings {2} de {3}, rien n'est allumé ni éteint (admins)",
+ "One click: {0} heats by {1}. Ctrl + Click (⌘ + Click on a Mac): the {2} Settings of {3}, nothing turned On or Off (admins)": "Un clic : {0} chauffe par {1}. Ctrl + clic (⌘ + clic sur un Mac) : les Settings {2} de {3}, rien n'est allumé ni éteint (admins)",
  "Save these settings now": "Enregistrer ces réglages maintenant",
  "Needs a Temperature Probe: pick one in its Properties": "Il faut une sonde de température (Temperature Probe) : choisissez-en une dans ses Properties",
  "Sets the Setpoint and turns it ON": "Règle le Setpoint et l'allume (ON)",
