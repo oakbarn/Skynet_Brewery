@@ -1,17 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-pump-standard="1">
   <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Cover for Pump_March_809_Poly_90_Inlet_Motor.svg, same box and spots. -->
-  <g transform="translate(221.5 150) rotate(0)">
   <!-- Skynet pump Cover Overlay: User cover: only the outline and shading; the panel fills the cover shape with the color the user sets. Same box as Pump_March_809_Poly_90_Inlet_Motor.svg, so it lies exactly over it; covers the motor body only (like the Blichmann RipTide); see-through around the cover. -->
-  <defs><clipPath id="in"><path d="M-138.2 -30 Q-138.2 -40 -128.2 -40 H-32.2 Q-28.2 -40 -28.2 -36 V36 Q-28.2 40 -32.2 40 H-128.2 Q-138.2 40 -138.2 30 Z"/></clipPath></defs>
+  <defs><clipPath id="in"><path d="M115.8 104.9 Q115.8 94.9 125.8 94.9 H215.8 Q219.8 94.9 219.8 98.9 V170.9 Q219.8 174.9 215.8 174.9 H125.8 Q115.8 174.9 115.8 164.9 Z"/></clipPath></defs>
   <g stroke-linejoin="round">
-    <rect x="-138.2" y="-40" width="110" height="10" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in)"/>
-    <rect x="-138.2" y="30" width="110" height="10" fill="#000000" fill-opacity="0.22" clip-path="url(#in)"/>
-    <rect x="-120.19999999999999" y="-12" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
-    <rect x="-120.19999999999999" y="-6" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
-    <rect x="-120.19999999999999" y="0" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
-    <rect x="-120.19999999999999" y="6" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
-    <path d="M-34.2 -38 V38" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
-    <path d="M-138.2 -30 Q-138.2 -40 -128.2 -40 H-32.2 Q-28.2 -40 -28.2 -36 V36 Q-28.2 40 -32.2 40 H-128.2 Q-138.2 40 -138.2 30 Z" fill="none" stroke="#111111" stroke-width="1.8"/>
-  </g>
+    <rect x="115.8" y="94.9" width="104" height="10" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in)"/>
+    <rect x="115.8" y="164.9" width="104" height="10" fill="#000000" fill-opacity="0.22" clip-path="url(#in)"/>
+    <rect x="133.8" y="122.9" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="133.8" y="128.9" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="133.8" y="134.9" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="133.8" y="140.9" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <path d="M213.8 96.9 V172.9" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+    <path d="M115.8 104.9 Q115.8 94.9 125.8 94.9 H215.8 Q219.8 94.9 219.8 98.9 V170.9 Q219.8 174.9 215.8 174.9 H125.8 Q115.8 174.9 115.8 164.9 Z" fill="none" stroke="#111111" stroke-width="1.8"/>
   </g>
 </svg>
