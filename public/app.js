@@ -2116,7 +2116,8 @@ const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_Marc
   'Pump_KegLand_MKII_SS_Center_Inlet',
   // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned 60°
   ...['March_809_Poly', 'March_809_SS', 'March_815_Poly', 'March_815_SS', 'Chugger_SS', 'Chugger_Poly'].map(k => `Pump_${k}_90_Inlet_Motor`)].map(k => [k, PUMP_STD]));
-// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On; taken out of Skynet 2026-11-17 for
+// copyright, kept here so a Brain that still has them and a Schema that uses them lay out right) follow the Pump Standard too, with
 // the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
 // pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
 // the bottom (60, 117), out the top of the riser on its right (110, 12).
@@ -5152,7 +5153,7 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOff: 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg', cover: 'Red', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 150, h: 150, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };

@@ -57,7 +57,7 @@ Chaque gGlobal garde sa .value quand un Process démarre et quand le Brain redé
 | Nom | Sorte | .value |
 |---|---|---|
 | gS_Brewer_Note | gS_Global_String | Add the yeast nutrient at 10 minutes |
-| gG_Brew_Day_Picture | gG_Global_Graphic | Images/Skynet/Miscellaneous/brewery_main.png |
+| gG_Brew_Day_Picture | gG_Global_Graphic | Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg |
 | gV_Strike_Temp | gV_Global_Value | 163 °F (32 à 212) |
 | gB_Grain_Added | gB_Global_Boolean | false |
 | gT_Mash_Rest | gT_Global_Time | 01:00:00 |

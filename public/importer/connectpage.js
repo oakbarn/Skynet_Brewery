@@ -262,7 +262,7 @@ function renderPicture() {
     style="left:${(p.at.x * 100).toFixed(2)}%;top:${(p.at.y * 100).toFixed(2)}%" title="${esc(p.label)}: drag it to its place; click it, then click another piece to join them"><img src="${esc(p.kind === 'vessel' && tplOf(S.parts.vessels.find(v => 'vessel:' + v.key === p.key))?.image || CHIP_PICS[p.kind])}" alt="" draggable="false"><span>${esc(p.label)}</span></div>`).join('');
   drawLines();
 }
-const CHIP_PICS = { vessel: '/media/Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg', pump: '/media/Images/Skynet/Pumps/Pump_Red_Rip_Off.svg',
+const CHIP_PICS = { vessel: '/media/Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg', pump: '/media/Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg',
   valve: '/media/Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', tee: '/media/Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg' };
 // a line for each connection between two pieces on the picture
 function drawLines() {

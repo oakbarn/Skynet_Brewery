@@ -20,18 +20,18 @@ Chaque élément d'un Tab (un Device ou un Widget) peut montrer une image de fon
 | **4 ou plus** | Pas de fond |
 | **vide** | Il est mis à **0** : pas de fond |
 
-Double-cliquez sur un élément dans **Edit layout** (ou gardez le doigt dessus) pour voir ces champs. Un chemin d'image est un fichier dans l'un de vos dossiers media, par exemple `Images/Skynet/Pumps/Pump_Red_Rip_On.svg` (voir [Media (images et sons)](07-media)). Les listes ne montrent que le nom du fichier ; le dossier est en dessous (voir [Chemins en deux parties (.path et .file)](194-two-part-paths)).
+Double-cliquez sur un élément dans **Edit layout** (ou gardez le doigt dessus) pour voir ces champs. Un chemin d'image est un fichier dans l'un de vos dossiers media, par exemple `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg` (voir [Media (images et sons)](07-media)). Les listes ne montrent que le nom du fichier ; le dossier est en dessous (voir [Chemins en deux parties (.path et .file)](194-two-part-paths)).
 
 ## Dans un Process {#in-a-process}
 
 ```
-my_Widget.backpath = "Pump_Red_Rip_On.svg"
-my_Widget.backpath_2 = "Pump_Blue_Rip_On.svg"
+my_Widget.backpath = "Pump_Riptide_SS_Center_Inlet.svg"
+my_Widget.backpath_2 = "Pump_March_809_SS_Center_Inlet.svg"
 my_Widget.backpath_3 = 114
 my_Widget.background = 2
 ```
 
-Le nom du fichier seul suffit : Skynet ajoute son dossier ([Chemins en deux parties (.path et .file)](194-two-part-paths)). Un nombre est un [numéro d'image Skynet](193-skynet-picture-numbers) (114 est Pump_Green_Rip_On.svg). Un chemin entier marche toujours, par exemple `my_Widget.backpath.path = "Images/Skynet/Pumps/Pump_Red_Rip_On.svg"`.
+Le nom du fichier seul suffit : Skynet ajoute son dossier ([Chemins en deux parties (.path et .file)](194-two-part-paths)). Un nombre est un [numéro d'image Skynet](193-skynet-picture-numbers) (119 est Pump_March_809_SS_Center_Inlet.svg). Un chemin entier marche toujours, par exemple `my_Widget.backpath.path = "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"`.
 
 Régler un chemin ne change pas **.background** ; la dernière ligne choisit l'image qui s'affiche.
 

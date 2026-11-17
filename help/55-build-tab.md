@@ -2,7 +2,7 @@
 
 Building something new on a busy Tab is hard: it lands on top of other things and is fiddly to grab. So **everything new is made first on a clean Build Tab**: every Device, Widget, IP, picture, text, piece of equipment and copy of a Template. You can look at it with **👁 Preview** at any time. When it is ready, **Finish Build ...** asks where it goes: onto one of your Tabs (one pick and one click), or into a Template.
 
-The Build Tab only shows while you are building. It has a dashed orange edge and a 🔨 in the Tab bar. It is never saved with the Schema.
+The Build Tab only shows while you are building. It has a dashed orange edge and a 🔨 in the Tab bar. It is never one of your Tabs. An unfinished Build is kept on the Brain, in the Schema, and comes back the next time you open Edit layout (see [Saving never ends the Build](#saving-never-ends-the-build) below).
 
 ## Start building
 

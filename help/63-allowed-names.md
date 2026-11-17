@@ -61,7 +61,7 @@ A period `.` is allowed **only before the file ending**:
 | Name | Allowed? |
 |---|---|
 | `Mash_Steps.txt` | yes |
-| `Burner No Flame.png` | yes |
+| `Burner No Flame.svg` | yes |
 | `Burner.No.Flame.png` | no, use `Burner_No_Flame.png` |
 | `Mash_v1.2` as a Process name | no, a Process name has no period: use `Mash_v1_2` |
 | `My.Pictures` as a folder | no, a folder has no period |
