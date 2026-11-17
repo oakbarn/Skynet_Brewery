@@ -149,7 +149,7 @@ Les profils faits avant les Templates peuvent encore avoir une liste de cuves. E
 
 ## La vue du Equipment Profile {#the-equipment-profile-view}
 
-**Open** à côté du profil d'un Tab (ou **🖼 View the Equipment Profile** sous la liste déroulante Open) montre le profil lui-même. Un Equipment Profile **n'est pas un Tab** : c'est un profil du matériel réel de la brasserie, et c'est tout ce qu'il contient : les cuves, IP, raccords, tuyaux, tuyaux souples, pompes, vannes, éléments chauffants, sondes et Widgets avec des IP, avec leurs Interfaces (cartes) et leurs Ports. Les Text Boxes, Switches, Processes, Timers et autres Widgets ne sont jamais dans un profil, ils ne font donc pas du tout partie de cette vue. Rien ne peut y être cliqué.
+**Open** à côté du profil d'un Tab (ou **🖼 View the Equipment Profile** sous la liste déroulante Open) montre le profil lui-même. Un Equipment Profile **n'est pas un Tab** : c'est un profil du matériel réel de la brasserie, et c'est tout ce qu'il contient : les cuves, IP, raccords, tuyaux, tuyaux souples, pompes, vannes, éléments chauffants, sondes, refroidisseurs (un refroidisseur à immersion va avec la cuve où il se trouve) et **tout Widget avec une IP** (un Widget avec une IP est une chose réelle), avec leurs Interfaces (cartes) et leurs Ports. Les Text Boxes, Switches, Processes, Timers et autres **ne peuvent pas être ajoutés** à un profil, ils ne font donc pas du tout partie de cette vue. Rien ne peut y être cliqué.
 
 La barre du haut reste en place :
 

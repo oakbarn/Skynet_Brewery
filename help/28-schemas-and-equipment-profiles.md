@@ -149,7 +149,7 @@ Profiles made before Templates may still have a list of vessels. They show under
 
 ## The Equipment Profile view
 
-**Open** beside a Tab's profile (or **🖼 View the Equipment Profile** under the Open dropdown) shows the profile itself. An Equipment Profile is **not a Tab**: it is a profile of the brewery's real world hardware, and that is all it holds: the vessels, IPs, fittings, pipes, hoses, pumps, valves, heaters, probes and Widgets with IPs, with their Interfaces (boards) and Ports. Text Boxes, Switches, Processes, Timers and other Widgets are never in a profile, so they are not part of this view at all. Nothing on it can be clicked.
+**Open** beside a Tab's profile (or **🖼 View the Equipment Profile** under the Open dropdown) shows the profile itself. An Equipment Profile is **not a Tab**: it is a profile of the brewery's real world hardware, and that is all it holds: the vessels, IPs, fittings, pipes, hoses, pumps, valves, heaters, probes, chillers (an immersion chiller goes with the vessel it sits in) and **any Widget with an IP** (a Widget with an IP is a real world thing), with their Interfaces (boards) and Ports. Text Boxes, Switches, Processes, Timers and the like **cannot be added** to a profile, so they are not part of this view at all. Nothing on it can be clicked.
 
 The bar on top stays put:
 
