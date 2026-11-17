@@ -3775,9 +3775,31 @@ new import rule Fritz gives goes there. The importer itself waits for his go. (2
 
 13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
 
-13.6 **Every document Fritz asks for must be easy for him to open.** Save it in the project folder
-AND copy it to docs/ in the GitHub repo (by PR), then reply with a direct link he can open in a
-browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
+13.6 **Every document Fritz asks for must be easy for him to open.** Save it on GitHub (by PR): a public document in docs/ of
+the Skynet_Brewery repo, a private one in the private repo (Rule 13.7). Then reply with a direct link he can open in a browser.
+The list of all public documents is docs/README.md in the Skynet_Brewery repo. GitHub is the main copy. (2026-10-27; changed
+2026-11-17)
+*Replaced in part:* "Save it in the project folder AND copy it to docs/ in the GitHub repo" (2026-10-27).
+
+13.7 **Keep things on GitHub, not in the project files or threads** (OakBarn Brewery, 2026-11-17, word for word: "New Rule, if
+something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space. We may
+have the compacted summaies of the project that could go to github"; "and that would include most sandboxes"; "Ok Private Repo").
+  - **GitHub is the main copy.** A thread saves it on GitHub by PR and replies with its link, not a long copy of the text.
+  - **Two repos.** The **Skynet_Brewery** repo is **PUBLIC** (Rule 12.1): the program, Help, the Rules and the public documents
+    (the Libraries, how-to pages). A **private repo** (to be made by OakBarn Brewery) holds the private notes: the Sandboxes
+    (Panel Updates, Process Updates, Importer; Rules 14.4, 14.5, 11.3), the history Summaries (Summary_N) and plans that are
+    not built yet. When unsure which, it goes in the private repo.
+  - **Never on GitHub at all, not even the private repo:** the Patron private key (Rule 12.4), passwords and anyone's email
+    address. **Never in the public repo:** the private test import files (BruControl Schemas), and any picture, sound or paper
+    that is copyrighted or has no license OK (Rule 9.12), for example the Sandbox_Audio music and BruControl's firmware sheets.
+    These stay in the project files unless OakBarn Brewery says to put them in the private repo.
+  - **Only what opens quickly.** Big sound files go on a GitHub Release (Rule 7.20). What cannot be opened quickly on GitHub
+    stays in the project files.
+  - **No second copy in the project files.** Once a file is on GitHub its project-files copy is not kept up to date, and it is
+    removed only after OakBarn Brewery says so (moved to a Delete folder, Rule 15.3).
+  - Summary_N files are still never opened or read without OakBarn Brewery's permission (Rule 0a); moving one is done by its
+    file name only.
+  **Both programs:** this is about where files are kept; nothing changes in the Skynet Panel or the BruControl Import program.
 
 ## 14. Things on hold until Fritz says go
 
@@ -5108,6 +5130,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in a private repo still to be made; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 will point at the private repo once it exists. Nothing changes in either program.
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
 - 2026-11-17: Rule 2.42 changed (OakBarn Brewery, markup of Default settings > New Tabs: "Tab Background Profile for a new tab" "Good Except Make Tab Profile"; the pipe and hose pixels, Width and Height of a New Tab "Tab Profile"; "labels good"): the **Tab Background Profile is now the Tab Profile** (☰ Menu > Tab Profile), and each Tab Profile holds How many Pixels are Pipes / Hoses to be drawn on a Tab?, Width and Height of a New Tab (px), with the same labels. Default settings keeps only **Tab Profile for a new tab**; the Pixels boxes left the Pipes, hoses and sizes section too (they were the same setting). A new Tab takes them from the Tab Profile picked there; (none): 10, 6 and the screen's size. Never Take Away: values set before go, once, into the picked Tab Profile (a new Default Tab Profile when none was picked, or a copy of a Skynet one). Help 13, 22, 26, 33, 36, 43, 58, 68, 155 (and French). Checked against the BruControl Import program: its Tabs keep BruControl's sizes; a Tab added on its Build page follows the same Tab Profile.
