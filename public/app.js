@@ -26,7 +26,7 @@ import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
-import { isImmersion, takesChiller, spotIn } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
+import { isImmersion, takesChiller, spotIn, unbundle } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -429,6 +429,7 @@ function renderTabs() {
   $('#previewBuild').classList.toggle('hidden', !buildWs());
   $('#buildMark')?.classList.toggle('hidden', !(editing && curWs()?.build));
   drawBuildDefs();
+  markBuildFor();          // greyed buttons while the Build is for a Template or a Profile
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -5529,6 +5530,9 @@ function fillAddType() {
   const adds = (sel, head, list, k) => fillPick(sel, head, k ? [['', list.find(x => x[0] === k)?.[2] || []]] : list.map(([, t, rows]) => [t, rows]));
   adds($('#devAdd'), 'Add Device', dev, $('#devKind').value); adds($('#wgtAdd'), 'Add Widget', wgt, $('#wgtKind').value);
   for (const s of $$('#editBar select[data-dev]')) fillPick(s, s.dataset.head, [['', dev.find(x => x[0] === s.dataset.dev)[2]]]);
+  // Valves/Equipment (OakBarn Brewery, 2026-11-17, markup option A: "Change Valves to Valves/Equpment and just add the Equipment Templates
+  // and Build new to the DDLB LIst"): the Valves, then the Equipment Templates, then 🔨 Build new Equipment Template
+  { const s = $('#editBar select[data-dev="valves"]'); if (s) fillPick(s, s.dataset.head, [['Valves', dev.find(x => x[0] === 'valves')[2]], ['Equipment Templates', equipTemplateRows()], ['Build new', [['🔨 Build new Equipment Template', buildNewEquipment]]]]); }
   fillPick($('#addBoolean'), 'Boolean ➕', [['', amGroup('Boolean Widgets').map(r => [r[0], () => addThing(r[1], r[2], r[3])])]]);     // Rule 4.5: the list first, like Probe
   fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
   fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
@@ -7474,7 +7478,8 @@ function buildTemplate(b) {
   const vessels = gs.filter(g => g.kind === 'vessel' && !isBfit(g)), fits = gs.filter(isBfit);
   const owned = g => g.kind === 'ip' && g.attachTo && gs.some(v => v.id === g.attachTo && v.kind === 'vessel');
   const rest = gs.filter(g => g.kind !== 'vessel' && !owned(g));
-  const one = 'A Template is one vessel (with the fittings on its ports) or one Bundled Fitting.';
+  const one = 'A Template is one vessel (with the fittings on its ports), one Bundled Fitting, or a Chiller Bundle.';
+  { const cb = !fits.length && chillerBundle(gs, els); if (cb?.why) return { why: cb.why }; if (cb) return { kind: 'vessel', g: cb.chiller, fits: [], bundle: cb }; }      // a Chiller Bundle (Rule 4.1 exception)
   if (els.length || rest.length) return { why: `${one} Devices, Widgets, IPs, pipes, pictures and text can't go in a Template: save to a Tab, or delete them from the Build Tab first.` };
   if (vessels.length === 1 && VESSEL_KINDS[vessels[0].vesselType] && fits.every(f => f.onVessel === vessels[0].id)) return { kind: 'vessel', g: vessels[0], fits };
   if (!vessels.length && fits.length === 1) return { kind: 'fitting', g: fits[0] };
@@ -7535,6 +7540,7 @@ async function saveBuildTemplate({ name, skynet }) {
       }
       Object.assign(q, { installed: true, fitting: ft.name, bundleName: f.name });
     }
+    if (w.bundle) t.bundle = bundleBody(w); else delete t.bundle;      // a Chiller Bundle keeps its pieces (Rule 4.1 exception)
     await makeTemplate('vessel', name, skynet, t); made.unshift(name);
   }
   dropBuild();
@@ -7592,7 +7598,7 @@ function saveBuildDialog(b) {
       h('p', { class: 'muted' }, `Everything on the Build Tab moves to the one Tab picked here, at the size it is now.${picked.length ? ` ${picked[0]} is offered first because it was picked in an Add box.` : ''} To the Tab picked in an Add box it keeps the spot it has on the Build Tab; to another Tab it goes to the middle. Then press Save layout.`),
       h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Move to Tab')));
     d.append(h('h3', {}, 'Finish Build: where should it go?'),
-      ...((b.cloneAs || buildItems(b).some(x => x.buildTo === TO_TPL)) && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
+      ...(buildFor(b) === 'template' && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // a Build for a Template (Build new Equipment Template too) shows As a Template first         // 📁 Templates picked in its Tab list (2026-11-12)         // a clone of a Template is saved as a Template first
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
         h('button', { title: 'Close this and see the Build Tab the way it looks on Brew Day', onclick: () => { close(null); setPreview(true); } }, '👁 Preview'),
         h('button', { onclick: () => close(null) }, 'Keep building')));
@@ -14977,6 +14983,7 @@ async function ivBuild(a) {
     ...draft.graphics.filter(g => g.workspace === tab && (placed.v.includes(g) || placed.e.includes(g) || g === mfG || plan.elements.includes(g) || [...placed.v, ...placed.e, mfG].some(v => v && (g.attachTo === v.id || g.onVessel === v.id || g.capOn === v.id || bundleParts(v).includes(g)))))];
   wsName = tab;
   for (const x of new Set(onTab)) keepOnBuild(x);
+  { const bw = buildWs(); if (bw) bw.forProfile = a.name; }      // the Build is for an Equipment Profile: the bar greys what can't go in one
   renderTabs(); renderWs();
   toast(`"${a.name}" is made and the Tab ${tab} uses it. Its ${placed.v.length} vessel${placed.v.length === 1 ? '' : 's'}, ${devs.length} pump${devs.length === 1 ? '' : 's'} and valve${devs.length === 1 ? '' : 's'} and the rest are on the 🔨 Build Tab: press ✅ Finish Build ... > Move to Tab, then Save layout.`, false, 12000);
   // 🔨 a new Vessel Device: the Vessel Device Builder opens for each one, its questions filled in from the interview
@@ -15247,7 +15254,7 @@ const refreshProfiles = async () => { S.profiles = await api('GET', '/ui/equipme
 // each port that has a Bundled Fitting) or a Tab_Fitting. The copy is fully editable; the Template does not change.
 let TPL = null;           // { locked, vessel: [...], fitting: [...], device: [...] } from the Brain
 const loadTemplates = async () => { const r = await api('GET', '/ui/templates'); setTPL(r); return TPL; };
-const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting, device: r.device || [] }; };
+const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting, device: r.device || [] }; if (editing) fillAddType(); };      // a new or changed Template shows in Valves/Equipment at once
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
@@ -15664,6 +15671,87 @@ window.addEventListener('pointerup', async () => {
     toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose, in the air'}`);
   } catch (e) { back(); toast(e.message, true); }
 });
+// ---- What a Build is for, and the Edit layout bar while building a Template or a Profile (OakBarn Brewery, 2026-11-17, markup:
+// "Method to change the Menu Bar when the Build is for a Vessel Template, And Equipment Profile, An Equiment Template"). While the
+// 🔨 Build Tab is for a Template (Build new Equipment Template, a Clone of a Template, or 📁 Templates picked in a Tab list) or for an
+// Equipment Profile (its Interview's 🔨 Build), what can't go in one is greyed out: Select Widget Type, Add Widget, Picture, Text,
+// Override, Boolean, Value, Code Value, Time, DateTime, Tab settings, New tab, the Hidden tab, Processes and Update Version. A
+// Template or Profile holds real world hardware only (Rule 19.6).
+const TPL_GREY = ['#wgtKind', '#wgtAdd', '#addImg', '#addText', '#addOverride', '#addBoolean', '#addValueW', '#addCodeValueW', '#addTimeW', '#addDateTimeW', '#wsProps', '#addWs', '#addHiddenWs', '#procTab', '#updateVersion'];
+function buildFor(b = buildWs()) {
+  if (!b) return '';
+  if (b.forProfile) return 'profile';
+  return b.forTpl || b.cloneAs || buildItems(b).some(x => x.buildTo === TO_TPL) ? 'template' : '';
+}
+function markBuildFor() {
+  const f = editing && curWs()?.build ? buildFor() : '';
+  const why = f === 'profile' ? 'An Equipment Profile holds real world hardware only, so this is greyed out while the Build is for one'
+    : 'A Template holds real world hardware only, so this is greyed out while the Build is for one';
+  for (const s of TPL_GREY) {
+    const n = $(s); if (!n) continue;
+    n.disabled = !!f;
+    const box = n.closest('label') || n; box.classList.toggle('tplGrey', !!f);
+    if (f) { if (box.dataset.tip === undefined) box.dataset.tip = box.title || ''; box.title = why; }
+    else if (box.dataset.tip !== undefined) { box.title = box.dataset.tip; delete box.dataset.tip; }
+  }
+  $('#editBar').classList.toggle('tplBuild', !!f);
+  if (editing && curWs()?.build) {      // the hint: "Add Widget" greyed too
+    const [a, z] = BUILD_HINT.split('Add Widget');
+    $('#editHint').replaceChildren(...(f && z !== undefined ? [a, h('span', { class: 'tplGrey' }, 'Add Widget'), z] : [BUILD_HINT]));
+  }
+}
+// 🔨 Build new Equipment Template (in Valves/Equipment): a clean start on the Build Tab, for a Template
+function buildNewEquipment() {
+  if (!editing) setEditing(true);
+  const b = toBuild(); if (!b) return;
+  b.forTpl = 'equip';
+  markBuildFor();
+  toast('🔨 Build Tab: build the Equipment Template here. For a Chiller Bundle: Add equipment ➕ > an Immersion chiller, then its hoses (Draw hose or Draw QD hose), and if you want an Ice Water Can and a Sump Pump. Then ✅ Finish Build ... > As a Template.', false, 12000);
+}
+// the Equipment Templates in Valves/Equipment: each one is put on the Build Tab (a Chiller Bundle with all of its pieces)
+const equipTemplateRows = () => (TPL?.vessel || []).filter(t => t.vesselType && t.vesselType !== 'vessel')
+  .map(t => [`${t.name}${t.bundle ? ' (Chiller Bundle)' : ''}`, () => vesselToBuild(tplOf('vessel', t.name))]);
+
+// ---- A Chiller Bundle Equipment Template (OakBarn Brewery, 2026-11-17: "use a Normal Build Tab to create a Bundled Immersion Chiller
+// and save to Equipment Templates"; "Immersion Chillers can be a bundled item with their own flow supply or connected with a QD Hose
+// an different existing one one a Tab. and the waste hose. The may have an Ice Bath and Manual Sump Pump (or plugged into a controlled
+// Wall Outlet)"; a Rule 4.1 exception). On the Build Tab: one immersion chiller (2 IPs) and the pieces that go with it: hoses (plain or
+// Quick Disconnect), Ice Water Cans, a Sump Pump (by hand, or a pump Device), and IPs. Nothing else (no Widget, picture or text).
+const BUNDLE_WHY = 'A Chiller Bundle is one immersion chiller (2 IPs) with its hoses, an Ice Water Can, a Sump Pump and IPs. Take anything else off the Build Tab first:';
+function chillerBundle(gs, els) {
+  const chillers = gs.filter(isImmersion);
+  if (chillers.length !== 1) return null;
+  const c = chillers[0], others = gs.filter(g => g !== c);
+  if (!others.length && !els.length) return null;           // the chiller alone: a plain Equipment Template
+  const pieceOk = g => isIceCan(g) || (g.kind === 'ip' && !g.port) || (g.kind === 'ip' && gs.some(v => v.id === g.attachTo)) || (g.kind === 'pipe' && g.hose);
+  const elOk = e => e.type === 'manualPump' || e.subtype === 'pump';
+  const bad = [...others.filter(g => !pieceOk(g)), ...els.filter(e => !elOk(e))];
+  if (bad.length) return { why: `${BUNDLE_WHY} ${bad.map(x => x.label || x.name || x.kind || x.type).join(', ')}.` };
+  return { chiller: c, graphics: others, elements: els };
+}
+// the pieces as the Template keeps them: spots from the chiller's top left corner
+function bundleBody(w) {
+  const c = w.g, dx = c.x || 0, dy = c.y || 0, mv = o => { const x = clone(o); if (x.x !== undefined) x.x -= dx; if (x.y !== undefined) x.y -= dy; if (Array.isArray(x.points)) x.points = x.points.map(([a, b]) => [a - dx, b - dy]); delete x.workspace; delete x.buildTo; return x; };
+  return { chiller: c.id, graphics: w.bundle.graphics.map(mv), elements: w.bundle.elements.map(mv) };
+}
+// put a Chiller Bundle's pieces next to its chiller c (just placed from the Template on tab): new ids and names, refs followed, and a
+// pump Device gets the next free Port of the Build's Interface (Rule 4.2; a Template keeps no Port, Rule 6.1)
+function placeBundle(c, b, tab) {
+  const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
+  const pc = unbundle(b, { chillerId: c.id, ownIps: draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === c.id), taken, newId, dx: c.x || 0, dy: c.y || 0 });
+  for (const g of pc.graphics) { g.workspace = tab; draft.graphics.push(g); }
+  const noPort = [];
+  for (const e of pc.elements) {
+    e.workspace = tab;
+    if (e.type !== 'manualPump') {        // a pump Device on a controlled wall outlet: the next free Port of the Build's Interface
+      const iface = defaultIface(S.config.devices || []);
+      const pin = iface && freePins({ ...e, device: iface, name: '\0new' }, draft.elements, S.config.devices, false)[0];
+      if (iface && pin !== undefined) { e.device = iface; e.channel = pin; } else noPort.push(e.name);
+    }
+    draft.elements.push(e);
+  }
+  if (noPort.length) toast(`${noPort.join(', ')}: no free Port was found. Give ${noPort.length > 1 ? 'them' : 'it'} an Interface and Port in Properties.`, true, 9000);
+}
 // ---- Moving an Immersion Chiller by hand on a live Tab (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
 // but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built now as a Rule 14.4 exception: "B Now"; Rule 5.42, Help 200).
 // The same as a Quick Disconnect hose end (Rule 5.40): a right-button hold (or a finger) on the chiller picks it up, with no pop-up.
@@ -16109,6 +16197,7 @@ function placeTabVessel(t, tab, name) {
     placeTabFitting({ ...ft, std: ft.std || t.std }, tab, q.bundleName && !taken().includes(q.bundleName) ? q.bundleName : bundleName(ft.name, t.name, taken()), { vessel: g, port: k });
   }
   placeUnitParts(g);
+  if (t.bundle) placeBundle(g, t.bundle, tab);      // a Chiller Bundle: its hoses, Ice Water Can, Sump Pump and IPs come too
   if (isAppliance(t.appliance)) applianceParts(g, tab);     // a DigiBoil or Brewzilla: its switches, screen and valves (Rule 5.39)
   return g;
 }
