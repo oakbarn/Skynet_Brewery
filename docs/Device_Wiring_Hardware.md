@@ -64,6 +64,30 @@ Device Type `DO@Pump`. An AC brewing pump (Blichmann RipTide, Chugger, March).
             WaterProof Outlet ◀────┘ ⚠️
 ```
 
+### Pump Switching: Relay or SSR (both are Options)
+
+The SSR in 1.1 can be swapped for a **Relay** (One (1) Relay Module channel ⚠️, contacts rated 10 AMPS at 250 V AC). The chain is
+the same: Arduino ───▶ Relay ───▶ Waterproof Outlet ───▶ Pump plug.
+
+**Why a Relay works just as well for a pump:** a pump is switched On or Off only a few times a brew day and draws only a few AMPS, so a
+Relay's contacts last for years. When a Relay is Off it is truly Off (no small leak of power), and it makes no heat, so it needs no
+Heat Sink. It clicks when it switches. It is often the cheaper choice (an 8 channel board also runs the valves).
+
+**Why the trigger voltage may favor an SSR:** a Relay needs enough voltage and current from the pin to pull its switch in. Most
+relay boards are made for **5 V** boards like the Arduino Mega. An ESP32 or the Raspberry Pi's own pins send only **3.3 V** and
+may not switch a 5 V relay board every time, or may not let it go. An Opto SSR switches on anything from about **3 to 32 V DC**
+with very little current, so it works from every Interface. It is silent and has no contacts to wear out.
+
+| | Relay | Opto SSR |
+|---|---|---|
+| Switches on from | 5 V boards (some 3.3 V boards with a "3.3 V" or "High/Low trigger" relay board) | About 3 to 32 V DC: every Interface |
+| Off is | Truly Off | A tiny leak (a meter can show voltage at the outlet: still unplug before touching) |
+| Heat | None | A little; a Heat Sink above about 5 AMPS (a pump does not need one) |
+| Noise and wear | Clicks; contacts wear slowly | Silent; no wear |
+| Watch for | Many boards are **On when the pin is LOW**: set **Invert** On in the Pin attributes ⬢ | Fake brand SSRs: buy a known brand |
+
+Either way the Pump Device in Skynet is the same (`DO@Pump`); only the part in the box changes.
+
 ### 1.2 DC Pump (On/Off)
 Device Type `DO@Pump`, Power dc12 or dc24 (a 12 V or 24 V pump, see [DC Brewing Pumps](DC_Brewing_Pumps.md)).
 
@@ -654,4 +678,5 @@ Prices: see the [Hardware shopping list](Skynet_Brewery_Shopping_List.md).
 ---
 
 ## Change log
+- 2026-11-17: Pump Switching: Relay or SSR, both as options (OakBarn Brewery: "Describe both as Options in Text and why a Relay Works just as well as a SSR but the trigger voltage may favor an SSR").
 - 2026-11-17: First version, from OakBarn Brewery's Pump (On/Off) sheet, for every Device Skynet makes today.
