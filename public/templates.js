@@ -154,6 +154,7 @@ export function cleanVessel(b = {}) {
     for (const x of Object.keys(p)) if (p[x] === undefined) delete p[x];
     t.ports[k] = p;
   }
+  if (b._shown) t._shown = b._shown;       // a box's shown copy remembers what it was shown from
   return toMetric.vessel(t) || t;       // kept in metric, whatever Units it came in (Rule 2.59)
 }
 
