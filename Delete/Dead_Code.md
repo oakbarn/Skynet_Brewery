@@ -58,7 +58,6 @@ never shipped (Rule 15.3).
 | 46 | public/style.css (line 722) | Phone-size look of the old eqGrid | No screen uses the eqGrid class. |
 | 47 | public/style.css (line 925) | Look of an old Interface ID note | No screen uses the ifaceIdNote class. |
 | 48 | public/style.css (line 1282) | Look of a 'later' line in the Vessel Device Builder | No screen uses the vbLater class. |
-| 49 | public/app.js (line 66) | A second copy of isLink (is this a web link?) | The same function already comes from mediapaths.js; app.js now uses that one under one name (isLink, was also called isWebLink). |
 
 ## The code
 
@@ -538,10 +537,4 @@ export const equipVolumes = brewVolumes;
 
 ```css
 .vbPanel .vbLater { opacity: .55; font-size: 13px; }
-```
-
-### 49. public/app.js, line 66
-
-```js
-const isLink = p => /^https?:\/\//i.test(String(p ?? '').trim());
 ```

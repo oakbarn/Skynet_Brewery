@@ -28,7 +28,7 @@ import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';    
 import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { isImmersion, takesChiller, spotIn } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
-import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink, DEFAULT_WORDS, userFolderError } from './mediapaths.js';
+import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -64,6 +64,7 @@ const h = (tag, attrs = {}, ...kids) => {
 };
 const media = p => p === '/File_Not_Found.svg' ? p : '/media?path=' + encodeURIComponent(p);      // the File Not Found picture is a program file (Rule 7.24)
 // a sound can be a web link to an MP3 (Rule 7.20): the browser plays it straight from the web; anything else is a file on the Brain
+const isLink = p => /^https?:\/\//i.test(String(p ?? '').trim());
 const soundUrl = p => isLink(p) ? String(p).trim() : media(p);
 const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -1385,8 +1386,8 @@ async function loadMediaPictures() {
 // What a picture or sound list shows for a path (Rule 7.22, 7.23): only the file name, a Skynet picture's number in front
 // ("24 · Overlay_Bolt.svg"), and the folder only when another file in the list has the same name; a web link shows 🌐 and its file
 const pathText = (p, all = []) => {
-  if (isLink(p)) return '🌐 ' + (fileOf(p) || p);
-  const f = fileOf(p).toLowerCase(), twin = all.some(q => q !== p && !isLink(q) && fileOf(q).toLowerCase() === f);
+  if (isWebLink(p)) return '🌐 ' + (fileOf(p) || p);
+  const f = fileOf(p).toLowerCase(), twin = all.some(q => q !== p && !isWebLink(q) && fileOf(q).toLowerCase() === f);
   return pickLabel(p, picIds[p]) + (twin ? ` (${folderOf(p) || 'media'})` : '');
 };
 // Picture groups (Help > Picture groups): every picture list can show one group (a folder in media/Images, or in media/sounds
@@ -9622,7 +9623,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     // Two-part paths (Rule 7.23, OakBarn Brewery 2026-11-13): the list shows only the file name (a Skynet picture with its number in
     // front, Rule 7.22) and the Folder box under it shows where it is. A Skynet picture or sound's folder can't be changed; your own
     // can be typed (normally the folder it is in, or the User Graphic / User Audio folder, is used).
-    const isPath = pic || list === 'sounds', fileVal = p => !!p && p !== CHAIN_KEEP && p !== '__add__' && !isTint(p) && !isLink(p) && /\.[a-z0-9]{2,5}$/i.test(p);
+    const isPath = pic || list === 'sounds', fileVal = p => !!p && p !== CHAIN_KEEP && p !== '__add__' && !isTint(p) && !isWebLink(p) && /\.[a-z0-9]{2,5}$/i.test(p);
     const fb = isPath ? h('input', { type: 'text', class: 'gpickFolderBox', spellcheck: 'false', 'aria-label': 'Folder' }) : null;
     const fl = isPath ? h('div', { class: 'gpickFolder' }, h('span', { class: 'muted' }, 'Folder'), fb) : null;
     function showFolder() {
