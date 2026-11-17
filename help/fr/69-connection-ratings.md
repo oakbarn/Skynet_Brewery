@@ -20,7 +20,7 @@ Chaque carte (Interface) sur la page **Devices** montre une **note de connexion*
 
 ## Devices de chauffe {#heating-devices}
 
-Un Device de chauffe est une résistance électrique, une vanne de gaz ou un allumeur de brûleur, un tapis chauffant, ou la sortie d'un PID, d'une Hysteresis ou d'un Duty Cycle. Vous **pouvez** en mettre un sur une carte Ethernet ou WiFi, mais le panel vous avertit quand vous l'enregistrez, et la **Connection** de cette carte montre ⚠ avec les Devices de chauffe nommés. En WiFi, la note d'un ESP32 tombe à **Poor**. L'USB est le plus sûr.
+Un Device de chauffe est une résistance électrique, une vanne de gaz ou un allumeur de brûleur, un tapis chauffant, ou la sortie d'un PID, d'une Hysteresis ou d'un Duty Cycle. Vous **pouvez** en mettre un sur une carte Ethernet ou WiFi, mais le panel vous avertit quand vous l'enregistrez, et le **Rating** de cette carte montre ⚠ avec les Devices de chauffe nommés. En WiFi, la note d'un ESP32 tombe à **Poor**. L'USB est le plus sûr.
 
 ## Lost Comm {#lost-comm}
 

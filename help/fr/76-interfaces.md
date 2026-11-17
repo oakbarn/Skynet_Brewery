@@ -5,7 +5,24 @@ Une **Interface** est une carte (PLC) à laquelle vos Devices sont câblés : un
 ## Les trouver {#finding-them}
 
 - **☰ Menu > 🔌 Interfaces (boards)** ouvre la page Devices à la liste des Interfaces.
-- La page **Devices** liste chaque Interface : son ID, son nom, sa carte, sa connexion, sa note, son Lost Comm et son état.
+- La page **Devices** a deux onglets : **🔌 Interfaces** (chaque Interface et **Add Interface**) et **🌡 OneWire Probes** (le OneWire probe index et les sondes vues, voir [Devices and boards](03-devices)).
+
+## La liste des Interfaces {#the-interfaces-list}
+
+Posez la souris sur le nom d'une colonne pour son Hover Help :
+
+| Colonne | Ce qu'elle montre |
+|---|---|
+| **ID** | L'Interface ID : il commence le nom suggéré de chaque Device sur cette Interface (MB_25_DO@Pump_Wort_BH). Les Interface ID suivent la Rule 3.2 : une fois enregistré, il ne change jamais. |
+| **Name** | Le nom de l'Interface, celui que vous lui avez donné en l'ajoutant : Hot Side, Fermentation, le nom de votre brasserie. |
+| **Board** | Le type de carte : Arduino Mega, ESP32 ou Raspberry Pi. Skynet a un programme pour chacune. |
+| **Mode** | Simulator : le panel fait semblant d'être cette carte, et rien ne va à une vraie carte. Real : le panel parle à la vraie carte. Le panel passe de l'un à l'autre sur la barre Simulator. |
+| **Connection** | Comment la carte est reliée au Brain : USB, Ethernet ou WiFi. Posez la souris dessus pour voir son USB Port ou son Network address. |
+| **Rating** | À quel point la Connection est sûre pour cette carte : Best, Good, OK ou Poor. L'USB est le plus sûr ; Ethernet et WiFi dépendent de votre réseau. |
+| **Lost Comm** | Lost Comm : si la carte n'entend rien du Brain pendant ce temps, elle met toutes ses sorties sur OFF |
+| **Status** | La carte parle-t-elle au Brain : connected, connecting, no answer ou disabled. Posez la souris dessus pour en savoir plus (le programme de la carte et sa version, ou ce qui ne va pas). |
+
+Quand quelque chose ne va pas (no answer, une erreur de la carte), la raison est aussi écrite sous le Status. La case ID est verrouillée : elle montre l'ID bien lisible mais on ne peut pas y taper (Rule 3.2).
 
 ## Ajouter une Interface {#adding-an-interface}
 
