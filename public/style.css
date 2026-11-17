@@ -1434,3 +1434,15 @@ body.eqViewing #ws { pointer-events: none; }
 /* The Edit layout bar while the Build is for a Template or an Equipment Profile: what can't go in one is greyed out */
 #editBar .tplGrey { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
 #editHint .tplGrey { opacity: .4; }
+
+/* The New Schema Interview (Rule 2.58): its steps across the top like the Skynet BruControl Importer, and its buttons frozen at the
+   top right (Rule 2.54) */
+.nsiDlg .nsiBar { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+.nsiSteps { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0 0 10px; padding: 6px 8px; background: var(--panel2); border-radius: 8px; counter-reset: s; }
+.nsiSteps li { counter-increment: s; padding: 3px 10px; border-radius: 14px; color: var(--muted); }
+.nsiSteps li::before { content: counter(s) ". "; }
+.nsiSteps li.now { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.nsiSteps li.done { color: var(--ok); }
+/* Share with other brewers (Rule 10.9): the kinds of files, and your own pictures and sounds to save and send */
+.shareInfo ul { margin: 4px 0 8px 20px; }
+.shareInfo .shareMedia ul { columns: 2 260px; }

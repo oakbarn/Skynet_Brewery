@@ -14,7 +14,7 @@ Choisir un autre Schema le charge. Seul un Admin peut charger ou changer un Sche
 
 Pour commencer un **nouveau** Schema, appuyez sur **☰ Menu > ➕ New Schema…**, ou sur **➕ New Schema** sur l'onglet **☰ Menu > Schema**. Voir [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema).
 
-L'onglet **☰ Menu > Schema** liste aussi chaque Schema du Brain : combien de Tabs il a, le Equipment Profile de chaque Tab et quand il a été enregistré pour la dernière fois, avec un bouton **Load** et un bouton **Clone** sur chacun.
+L'onglet **☰ Menu > Schema** liste aussi chaque Schema du Brain : à quoi il sert (venu de la [New Schema Interview](202-new-schema-interview)), combien de Tabs il a, le Equipment Profile de chaque Tab et quand il a été enregistré pour la dernière fois, avec un bouton **Load** et un bouton **Create New Copy of Schema** sur chacun.
 
 ## Quand des Processes tournent {#when-processes-are-running}
 
@@ -24,7 +24,7 @@ Charger un autre Schema arrête chaque Process en marche. Donc si un Process tou
 
 (Le Schema « Oak Barn » est actif : 2 Processes tournent ... Peut-on continuer ?) Appuyez sur **OK** pour continuer, ou sur **Cancel** pour rester où vous êtes. L'onglet Schema montre le même avertissement en jaune tant que des Processes tournent.
 
-Le même avertissement apparaît pour tout ce qui recharge un Schema : **Add new Schema**, **Clone** avec **Load the clone now**, et **Restore a backup or version**.
+Le même avertissement apparaît pour tout ce qui recharge un Schema : **Add new Schema**, **Create New Copy of Schema** avec **Load the clone now**, et **Restore a backup or version**.
 
 ## Tout est éteint {#everything-is-switched-off}
 
@@ -44,7 +44,7 @@ Les vannes manuelles se tournent à la main, donc le panel les laisse comme elle
 
 Un clone est une copie d'un Schema sous un nouveau nom. Utilisez-le pour essayer des changements sans toucher au Schema avec lequel vous brassez.
 
-1. Choisissez **Clone a Schema ...** dans la liste déroulante Schema, ou appuyez sur **Clone** à côté d'un Schema sur l'onglet **☰ Menu > Schema**.
+1. Choisissez **Clone a Schema ...** dans la liste déroulante Schema, ou appuyez sur **Create New Copy of Schema** à côté d'un Schema sur l'onglet **☰ Menu > Schema**.
 2. Choisissez le **Schema to clone** (le Schema à cloner). Ce n'est pas forcément celui qui est chargé.
 3. Tapez un **Name of the clone** (nom du clone). Laissez-le vide et il s'appellera « <name> copy ».
 4. Allumez **Load the clone now** si vous voulez y passer tout de suite. Laissez-le éteint et le Schema chargé reste chargé.

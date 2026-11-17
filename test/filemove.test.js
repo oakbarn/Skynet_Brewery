@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
-import { FileMove, kindOf, missingMedia } from '../lib/filemove.js';
+import { FileMove, kindOf, missingMedia, ownMedia, isSkynetFile } from '../lib/filemove.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filemove-'));
 const dirs = { root, media: path.join(root, 'media'), processes: path.join(root, 'processes'), help: path.join(root, 'help') };
@@ -47,6 +47,13 @@ const find = p => { const f = path.join(dirs.media, p); return fs.existsSync(f) 
 const miss = missingMedia({ workspaces: [{ name: 'B1', background: 'Images/System_Back_1.png' }],
   elements: [{ name: 'p', backpath: 'Images/Pumps/a.png', sounds: ['sounds/bell.wav', 'sounds/Hops.wav', ''], bru: { x: 'C:\\old.png' } }], graphics: [] }, find);
 assert.deepEqual(miss.map(m => [m.path, m.kind]), [['Images/System_Back_1.png', 'pictures'], ['sounds/Hops.wav', 'sounds']]);
+
+// Share with other brewers (Rule 10.9): only the brewer's own pictures and sounds that are on the Brain; Skynet's are never listed
+for (const f of ['Images/Skynet/Pumps/p.svg', 'sounds/alarm_beep.wav', 'sounds/mine.wav']) { fs.mkdirSync(path.dirname(path.join(dirs.media, f)), { recursive: true }); fs.writeFileSync(path.join(dirs.media, f), 'x'); }
+const own = ownMedia({ workspaces: [], elements: [{ name: 'a', image: 'Images/Skynet/Pumps/p.svg', sound: 'sounds/alarm_beep.wav', sounds: ['sounds/mine.wav', 'sounds/gone.wav'] }], graphics: [] }, find);
+assert.deepEqual(own.map(m => [m.path, m.kind]), [['sounds/mine.wav', 'sounds']]);
+assert.equal(isSkynetFile('a.svg', '/brain/samples/a.svg'), true);
+assert.equal(isSkynetFile('Images/Pumps/a.png', '/brain/media/Images/Pumps/a.png'), false);
 
 fs.rmSync(root, { recursive: true });
 console.log('filemove tests passed');
