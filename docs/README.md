@@ -1,7 +1,7 @@
 # Skynet documents
 
 Every document Fritz has asked for, in one place. Tap a name to open it.
-The master copies live in the project folder (docs/); these are kept in step with them.
+These GitHub copies are the main copies (Rule 13.7). This repo is public: private notes go in the private repo.
 
 | Document | What it holds |
 |---|---|
