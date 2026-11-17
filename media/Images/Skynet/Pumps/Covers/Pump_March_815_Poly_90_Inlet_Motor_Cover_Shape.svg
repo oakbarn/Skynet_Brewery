@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-pump-standard="1">
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Cover for Pump_March_815_Poly_90_Inlet_Motor.svg, same box and spots. -->
+  <!-- Skynet pump Cover Overlay: Cover shape (the panel fills it with the cover color). Same box as Pump_March_815_Poly_90_Inlet_Motor.svg, so it lies exactly over it; covers the motor body only (like the Blichmann RipTide); see-through around the cover. -->
+  <defs><clipPath id="in"><path d="M105.6 96.4 Q105.6 86.4 115.6 86.4 H213.6 Q217.6 86.4 217.6 90.4 V174.4 Q217.6 178.4 213.6 178.4 H115.6 Q105.6 178.4 105.6 168.4 Z"/></clipPath></defs>
+  <g stroke-linejoin="round">
+    <path d="M105.6 96.4 Q105.6 86.4 115.6 86.4 H213.6 Q217.6 86.4 217.6 90.4 V174.4 Q217.6 178.4 213.6 178.4 H115.6 Q105.6 178.4 105.6 168.4 Z" fill="#000000"/>
+    <rect x="105.6" y="86.4" width="112" height="10" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in)"/>
+    <rect x="105.6" y="168.4" width="112" height="10" fill="#000000" fill-opacity="0.22" clip-path="url(#in)"/>
+    <rect x="123.6" y="120.4" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="123.6" y="126.4" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="123.6" y="132.4" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <rect x="123.6" y="138.4" width="34" height="2" rx="0.8" fill="#000000" fill-opacity="0.45"/>
+    <path d="M211.6 88.4 V176.4" stroke="#000000" stroke-opacity="0.35" stroke-width="1.2"/>
+    <path d="M105.6 96.4 Q105.6 86.4 115.6 86.4 H213.6 Q217.6 86.4 217.6 90.4 V174.4 Q217.6 178.4 213.6 178.4 H115.6 Q105.6 178.4 105.6 168.4 Z" fill="none" stroke="#111111" stroke-width="1.8"/>
+  </g>
+</svg>

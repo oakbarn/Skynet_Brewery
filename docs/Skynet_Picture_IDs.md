@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-208 pictures.
+226 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -218,5 +218,23 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 206 | Skynet_Icon_Pump.svg | Miscellaneous |
 | 207 | Skynet_Icon_PWM.svg | Miscellaneous |
 | 208 | Skynet_Icon_Valve.svg | Miscellaneous |
+| 209 | Covers/Pump_Chugger_Poly_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 210 | Covers/Pump_Chugger_Poly_90_Inlet_Motor_Cover.svg | Pumps |
+| 211 | Covers/Pump_Chugger_SS_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 212 | Covers/Pump_Chugger_SS_90_Inlet_Motor_Cover.svg | Pumps |
+| 213 | Covers/Pump_March_809_Poly_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 214 | Covers/Pump_March_809_Poly_90_Inlet_Motor_Cover.svg | Pumps |
+| 215 | Covers/Pump_March_809_SS_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 216 | Covers/Pump_March_809_SS_90_Inlet_Motor_Cover.svg | Pumps |
+| 217 | Covers/Pump_March_815_Poly_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 218 | Covers/Pump_March_815_Poly_90_Inlet_Motor_Cover.svg | Pumps |
+| 219 | Covers/Pump_March_815_SS_90_Inlet_Motor_Cover_Shape.svg | Pumps |
+| 220 | Covers/Pump_March_815_SS_90_Inlet_Motor_Cover.svg | Pumps |
+| 221 | Pump_Chugger_Poly_90_Inlet_Motor.svg | Pumps |
+| 222 | Pump_Chugger_SS_90_Inlet_Motor.svg | Pumps |
+| 223 | Pump_March_809_Poly_90_Inlet_Motor.svg | Pumps |
+| 224 | Pump_March_809_SS_90_Inlet_Motor.svg | Pumps |
+| 225 | Pump_March_815_Poly_90_Inlet_Motor.svg | Pumps |
+| 226 | Pump_March_815_SS_90_Inlet_Motor.svg | Pumps |
 
 *This list is written by `node tools/skynet-picture-ids.js`.*
