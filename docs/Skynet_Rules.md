@@ -1047,6 +1047,23 @@ size. The box is never made bigger by itself (Design Rule #1: nothing the user s
 are meant to wrap are left alone: Text and Label Widgets, long strings, Alarm text and picture text. The Skynet Dial and Timer
 Digits draw their own digits to fit (Rule 2.40). Help 138. **Both programs:** the BruControl Import's Build page shares the Panel code.
 
+2.57 **Port means a board Port; a pipe end has an End Fitting** (OakBarn Brewery, 2026-11-17: "Ports could be confused with Arduino
+Ports so use Inlet Fitting"; "Use Ports only for Arduino Type Ports in the Help   For IPs End Fitting or something akin."; "There
+should be Inlet and Outlet fittings as they can be different on a Pump. Immersion Chiller, so every IP gets it own type End fitting.
+Information only generally except for QDs."; "Yes Skynet can connect a TC to NPT and VICE versus  but the graphic is so small
+noting need to be done except maybe a comment in the Property dialog of the IP that adapter is in the connection.   But Only for
+imformation").
+- In the dialogs, Hover Help and Help, **Port** is only a pin on an Interface (an Arduino, a Raspberry Pi ...). The connector where a
+  pipe or hose joins a pump, a chiller or a valve is its **End Fitting** (TC1.5, FPT1/2, FMSSQD1/2 ...).
+- Every IP has its own End Fitting (its IP Type, Rule 5.40). A pump has two: **Inlet IP Fitting** and **Outlet IP Fitting** (they can be
+  different), one row each in every Pump dialog and in the Pump Profile.
+- The End Fitting is **information only**, except a **Quick Disconnect**, where a hose end can be unhooked and moved (Rule 5.40).
+  Two End Fittings that don't fit (a TC to an NPT) can still be joined: nothing is blocked and no adapter is drawn (it would be too
+  small, and there is no warning ring); the IP's Properties say **Adapter: TC1.5 to FPT1/2** as a note.
+- *Not yet (next step):* the vessel ports, the plain IPs and the chillers get the same End Fitting rows and wording; until then the
+  vessel dialogs and their Help still say Ports, and the Panel's network and mail server port settings keep the word (they are not
+  pipes). **Both programs:** the BruControl Import's Build page shares the Panel's dialogs; BruControl has no fittings to import.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2125,9 +2142,11 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   every setting the pipe had (size, IP Types, color, Flow Color, lock); only its Name, Label and Show label are its own. A new pipe
   drawn on to a pipe (a corner at an elbow) takes that pipe's size, its IP Type at the joint and its color. Skynet does this in the
   Background and needs no user input (Rule 11.13). Checked by test/pipesplit.test.js for every kind of cut.
-- **Fit warning:** in Edit layout an orange ring marks two pipe ends on the same IP whose types can't be joined without an
-  adapter (another type, or MPT to MPT, FPT to FPT). Different sizes of one type meet at a reducer, so they are not warned. It
-  only warns; nothing is blocked.
+- **No mismatch:** two pipe ends on the same IP whose types can't be joined directly (another type, or MPT to MPT, FPT to FPT)
+  are joined with an adapter, as in the real brewery, so there is no mismatch and no warning ring (OakBarn Brewery, 2026-11-17:
+  "There can be no mismatch because an adapter would be used so no need for Orange Ring"). The IP's Properties say **Adapter: ...**
+  as a note, information only (Rule 2.57). Different sizes of one type meet at a reducer. Nothing is blocked.
+  *Replaced (2026-11-17):* an orange ring in Edit layout marked such ends.
 - Older Schemas: once (ipSizesKept), each old plain type becomes its size (a pipe or hose end from its own size, threads male; a
   pump from its Ports, female; a Stove Top outlet female), then the ends above are fitted.
 - A size the connector is not made in is not offered with it: Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only
@@ -2156,9 +2175,10 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   own art, made in code, in the flow color with white details). A hose end put on the open end of a pipe goes in the way that end
   faces, with a U when needed, as a real hose does (OakBarn Brewery, 2026-11-17).
   (Replaces the 2026-11-14 pop-up that asked about gravity draining and needed **Yes, unhook it**.)
-- **Pumps:** **IP Type In** and **IP Type Out** in the pump's Properties (OakBarn Brewery: "Add Connection Type for the In and
-  Out IPs as above on a Pump"). A pump starts with what its Ports say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
-  the Default pipe IP Type; pumps already made took it once.
+- **Pumps:** the **Inlet IP Fitting** and **Outlet IP Fitting** in every Pump dialog are the IP Types of its In and Out IPs (OakBarn
+  Brewery: "Add Connection Type for the In and Out IPs as above on a Pump"; 2026-11-17, Rule 2.57: one row each, named Inlet and
+  Outlet IP Fitting). A pump starts with what its older Ports pick says (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else the
+  Default pipe IP Type; pumps already made took it once. The Pump Profile has the same two rows.
 - **BruControl Import:** BruControl has no connector on its pipes, so imported pipes and hoses take the Defaults.
 
 ---
@@ -2203,6 +2223,20 @@ from a DDLB with the brew Kettle as the Default"; "place_Chiller = template, ves
   Tab (Rule 5.33; one with "chill" in its Label first) and Out to the Tab's drain IP ("Drain" or "outside" in its Label). Flow
   passes only while that tap is open (Rule 5.41). A chiller already placed on that vessel is taken off first.
 - `remove_Chiller = BK_Vessel` takes that chiller, its IPs and its hoses off; `remove_Chiller` alone takes off every one a Process placed.
+  A chiller a person built and moved in by hand is never taken off by a Process, and `place_Chiller` says that vessel already has one.
+- **Moving an Immersion Chiller by hand on a live Tab** (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
+  but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built as a Rule 14.4 exception: "B Now"): the same as a Quick
+  Disconnect hose end (Rule 5.40). A **right-button hold** (or a finger) on the chiller picks it up, with no pop-up; while water flows
+  through it a warning says so and it does not move (the warning closes by itself once nothing flows). Let go over a vessel (no other
+  chiller in it) and it **drops into that vessel**, in its lower middle, the same spot `place_Chiller` uses, and flashes red and yellow
+  for 2 seconds; let go anywhere else and it stays there, **free floating**. Its own hoses (a bundled supply and waste hose, or Quick
+  Disconnect hoses to a supply on the Tab; OakBarn Brewery: "Immersion Chillers can be a bundled item with their own flow supply or
+  connected with a QD Hose an different existing one one a Tab. and the waste hose") stay on its In and Out IPs and follow it; a
+  chiller is a pipe (Rule 5.41), so moving it changes no flow. Only an immersion chiller (2 IPs) moves; a plate or counterflow chiller
+  (a Chillzilla too) or a jacketed coil stays put, and so does a chiller joined by a rigid pipe, a locked one, or for a Viewer. A
+  right-click that does not move it opens its Help, as before. The Equipment Profile keeps a chiller in a vessel with that vessel
+  (Rule 19.6). A chiller Bundle Template (the chiller with its Ice Water Can, Sump Pump and hoses) waits in the Panel Updates Sandbox,
+  entry 26; a Process line that moves a chiller already on the Tab waits in the Process Updates Sandbox, entry 8.
 - **Only the drawing changes; the Process does not wait.** An `ask` line after it waits for the brewer.
 - The chiller's **Suggested Name and Label come from its Template** (`wgt_CHL_Immersion~chiller_BH`, Label Immersion chiller; Rule
   3.14); its hoses get the next free Hose_n with Label hose_n.
@@ -3573,7 +3607,7 @@ Help").
     the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
     importer version, then that goes to the Importer SandBox"). The Skynet Panel version is polished first (Help, Hover Help, the
     README); its model for the Importer version comes later. Until the Big Merge, anything said to be for the Importer version only
-    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md`, with
+    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md` in the private Skynet_Private repo (Rule 13.7), with
     where it goes, and is not put in the Importer yet. **But when OakBarn Brewery says to update both the Importer and Skynet** (OakBarn
     Brewery, 2026-11-12: "I may also tell you to update Both Importer and Skynet, an ten it does not go to the importer sandbox, but to
     the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
@@ -3776,9 +3810,33 @@ new import rule Fritz gives goes there. The importer itself waits for his go. (2
 
 13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
 
-13.6 **Every document Fritz asks for must be easy for him to open.** Save it in the project folder
-AND copy it to docs/ in the GitHub repo (by PR), then reply with a direct link he can open in a
-browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
+13.6 **Every document Fritz asks for must be easy for him to open.** Save it on GitHub (by PR): a public document in docs/ of
+the Skynet_Brewery repo, a private one in the private repo (Rule 13.7). Then reply with a direct link he can open in a browser.
+The list of all public documents is docs/README.md in the Skynet_Brewery repo. GitHub is the main copy. (2026-10-27; changed
+2026-11-17)
+*Replaced in part:* "Save it in the project folder AND copy it to docs/ in the GitHub repo" (2026-10-27).
+
+13.7 **Keep things on GitHub, not in the project files or threads** (OakBarn Brewery, 2026-11-17, word for word: "New Rule, if
+something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space. We may
+have the compacted summaies of the project that could go to github"; "and that would include most sandboxes"; "Ok Private Repo").
+  - **GitHub is the main copy.** A thread saves it on GitHub by PR and replies with its link, not a long copy of the text.
+  - **Two repos.** The **Skynet_Brewery** repo is **PUBLIC** (Rule 12.1): the program, Help, the Rules and the public documents
+    (the Libraries, how-to pages). The **private repo, [Skynet_Private](https://github.com/oakbarn/Skynet_Private)** (made 2026-11-17), holds the private notes: the Sandboxes
+    (Panel Updates, Process Updates, Importer; Rules 14.4, 14.5, 11.3), the history Summaries (Summary_N) and plans that are
+    not built yet. When unsure which, it goes in the private repo.
+  - **Never on GitHub at all, not even the private repo:** the Patron private key (Rule 12.4), passwords and anyone's email
+    address. **Never in the public repo:** the private test import files (BruControl Schemas), and any picture, sound or paper
+    that is copyrighted or has no license OK (Rule 9.12), for example the Sandbox_Audio music and BruControl's firmware sheets.
+    These stay in the project files unless OakBarn Brewery says to put them in the private repo.
+  - **Old copies are removed**, not kept in two places (OakBarn Brewery, 2026-11-17: "Remove anything Old"): once a file is in its
+    GitHub home, its old copy in the other repo or in the project files is removed. Removed public files are still in Git history.
+  - **Only what opens quickly.** Big sound files go on a GitHub Release (Rule 7.20). What cannot be opened quickly on GitHub
+    stays in the project files.
+  - **No second copy in the project files.** Once a file is on GitHub its project-files copy is not kept up to date, and it is
+    removed only after OakBarn Brewery says so (moved to a Delete folder, Rule 15.3).
+  - Summary_N files are still never opened or read without OakBarn Brewery's permission (Rule 0a); moving one is done by its
+    file name only.
+  **Both programs:** this is about where files are kept; nothing changes in the Skynet Panel or the BruControl Import program.
 
 ## 14. Things on hold until Fritz says go
 
@@ -3792,14 +3850,14 @@ finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits unti
 
 14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
-pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and
 are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
 both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
 Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
 
 14.5 **The Process Updates Sandbox** (OakBarn Brewery, 2026-11-16: "WE will do that later when we start the Skynet Process setup. New
 sand Box for Process and put things there till we build those Processes"). Ideas for Brew Day steps, the sample Processes and Process
-commands are written in `Sandbox/Process_Updates/Process_Updates.md`, with where each goes, and are **not built yet**. When the
+commands are written in `Sandbox/Process_Updates/Process_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and are **not built yet**. When the
 Skynet Process setup starts, OakBarn Brewery picks which to start; each is checked against the Rules and both programs before it is
 built, then moved to the file's Done table with its PR. General Panel ideas stay in the Panel Updates Sandbox (Rule 14.4). Like the
 rest of `Sandbox/`, it is never shipped.
@@ -4662,8 +4720,16 @@ below the Overlay:
   recommended to be pumped because of cavitation (OakBarn Brewery, 2026-11-16). A fact is filled in only from the maker's own words:
   the RipTide's Hottest liquid stays Not known until Blichmann's own number is found (blichmannengineering.com now goes to MoreBeer,
   whose RipTide pages give none).
-- **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
-  is filled in and greyed out.
+- **Inlet IP Fitting** and **Outlet IP Fitting** where Power was (Rule 18.40), each on its own line and each its own dropdown (OakBarn
+  Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet
+  Fitting"). They are the End Fittings of the pump's In and Out IPs (Rule 5.40, Rule 2.57): the **IP Type In / Out** row is changed
+  to **Inlet IP Fitting**, and **Outlet IP Fitting** is added (OakBarn Brewery, 2026-11-17: "Remove IP TYPe  In/Out rows not a Take
+  away but a Change.  Change IP TYPe  In/Out to Inlet Ip Fitting  and Add Outlet IP Fitting"; "Populate Both Changed ANd NEW WITH
+  THE OLD IP TYPe  In/Out VALUE"): a saved pump shows its old IP Type In in Inlet IP Fitting and its old IP Type Out in Outlet IP
+  Fitting. A dropdown, because a fitting can change an End Fitting; the list has every size of the old Ports list plus
+  the sizes ticked in Default settings and those used in the Schema. A pump saved with the one **Ports** pick starts from it; its
+  Ports pick is kept (Design Rule #1).
+  *Replaced (2026-11-17):* one **Ports** dropdown for both ends, and the **IP Type In / IP Type Out** row (changed to Inlet IP Fitting; Outlet IP Fitting added).
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
   or one already set to PWM; OakBarn Brewery's drawing, 2026-11-11). An AC pump is On/Off only. A PWM pump needs a true PWM Port (Rule
   4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
@@ -5109,6 +5175,9 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in the private Skynet_Private repo; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 now point at the Sandboxes in the private Skynet_Private repo (made 2026-11-17, OakBarn Brewery: "Done with GitHub"); the old `Sandbox/` folder and docs/Summary_N.md copies were removed from this public repo (OakBarn Brewery: "Remove anything Old"); the BruControl Help extract test now only checks the README. Nothing changes in either program.
+- 2026-11-17: Added Rule 2.57, Port means a board Port; a pipe end has an End Fitting (OakBarn Brewery, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet Fitting"; "Use Ports only for Arduino Type Ports in the Help"; "every IP gets it own type End fitting"; an adapter note in the IP's Properties, information only). Rules 18.32 and 5.40 changed: the one **Ports** dropdown and the **IP Type In / IP Type Out** row are now two rows, **Inlet IP Fitting** and **Outlet IP Fitting**, the End Fittings of the pump's In and Out IPs, in the Add box, the Properties and the Pump Profile ("not a Take away but a Change"; a saved pump shows its old IP Type In and Out values in them). Help 24, 36, 104, 109, 111, 115, 121, 123, 130, 163 and their French; Hover Help with French. Vessels, plain IPs and chillers are the next step. Checked against both programs: BruControl has no fittings to import; the Importer's Build page shares the Pump dialogs. No new Help number. The orange mismatch ring in Edit layout (Rule 5.40) is removed: an adapter is used, so there is no mismatch. (thread "Split pump Ports into Inlet and Outlet IP Fitting")
+- 2026-11-17: Rule 5.42 (OakBarn Brewery: "Immersion Chillers on a Tab Can be Free Floating but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; "Immersion Chillers can be a bundled item with their own flow supply or connected with a QD Hose an different existing one one a Tab. and the waste hose"; "B Now", a Rule 14.4 exception): an Immersion Chiller moves by hand on a live Tab with a right-button hold (or a finger), with no pop-up, a warning only while water flows through it; let go over a vessel it drops into it and flashes red and yellow for 2 seconds, anywhere else it stays free floating; its hoses follow it. `remove_Chiller` takes off only chillers a Process placed. The Bundle Template and the Process line wait in the sandboxes (Panel Updates 26, Process Updates 8). Help 200 (and French). Checked against both programs: the BruControl Import has no chillers and does not run Processes; its Build page is Edit layout, where nothing changes. (thread "Move an Immersion Chiller between Vessels")
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
 - 2026-11-17: Rule 2.42 changed (OakBarn Brewery, markup of Default settings > New Tabs: "Tab Background Profile for a new tab" "Good Except Make Tab Profile"; the pipe and hose pixels, Width and Height of a New Tab "Tab Profile"; "labels good"): the **Tab Background Profile is now the Tab Profile** (☰ Menu > Tab Profile), and each Tab Profile holds How many Pixels are Pipes / Hoses to be drawn on a Tab?, Width and Height of a New Tab (px), with the same labels. Default settings keeps only **Tab Profile for a new tab**; the Pixels boxes left the Pipes, hoses and sizes section too (they were the same setting). A new Tab takes them from the Tab Profile picked there; (none): 10, 6 and the screen's size. Never Take Away: values set before go, once, into the picked Tab Profile (a new Default Tab Profile when none was picked, or a copy of a Skynet one). Help 13, 22, 26, 33, 36, 43, 58, 68, 155 (and French). Checked against the BruControl Import program: its Tabs keep BruControl's sizes; a Tab added on its Build page follows the same Tab Profile.
