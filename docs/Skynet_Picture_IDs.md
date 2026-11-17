@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-226 pictures.
+199 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -29,21 +29,15 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 17 | led_green.svg | Lights LEDs |
 | 18 | led_off.svg | Lights LEDs |
 | 19 | led_red.svg | Lights LEDs |
-| 20 | brewery_main.png | Miscellaneous |
 | 21 | Overlay_Bolt_Center.svg | On Off |
 | 22 | Overlay_Bolt_Corner.svg | On Off |
 | 23 | Overlay_Bolt_Flash.svg | On Off |
 | 24 | Overlay_Bolt.svg | On Off |
 | 25 | Overlay_Glow_Ring.svg | On Off |
 | 26 | Overlay_Manual_Valve_Open.svg | On Off |
-| 27 | BigMacRElementOff.png | Other Equipment |
 | 28 | BigMacRElementOff.svg | Other Equipment |
-| 29 | BigMacRElementOn.png | Other Equipment |
 | 30 | BigMacRElementOn.svg | Other Equipment |
-| 31 | Burner No Flame.png | Other Equipment |
 | 32 | Burner No Flame.svg | Other Equipment |
-| 33 | BurnerFlame.png | Other Equipment |
-| 34 | BurnerFlame.svg | Other Equipment |
 | 35 | Ceramic_Heat_Emitter_Off.svg | Other Equipment |
 | 36 | Ceramic_Heat_Emitter_On.svg | Other Equipment |
 | 37 | Equipment_RIMS.svg | Other Equipment |
@@ -113,17 +107,8 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 101 | Covers/Pump_Riptide_SS_Center_Inlet_Cover.svg | Pumps |
 | 102 | Covers/Pump_Topsflo_TD5_Poly_Center_Inlet_Cover_Shape.svg | Pumps |
 | 103 | Covers/Pump_Topsflo_TD5_Poly_Center_Inlet_Cover.svg | Pumps |
-| 104 | Pump_Black_Rip_Off.svg | Pumps |
-| 105 | Pump_Blue_Rip_Off.png | Pumps |
-| 106 | Pump_Blue_Rip_Off.svg | Pumps |
-| 107 | Pump_Blue_Rip_On.png | Pumps |
-| 108 | Pump_Blue_Rip_On.svg | Pumps |
 | 109 | Pump_Chugger_SS_90_Inlet.svg | Pumps |
 | 110 | Pump_Chugger_SS_Center_Inlet.svg | Pumps |
-| 111 | Pump_Green_Rip_Off.png | Pumps |
-| 112 | Pump_Green_Rip_Off.svg | Pumps |
-| 113 | Pump_Green_Rip_On.png | Pumps |
-| 114 | Pump_Green_Rip_On.svg | Pumps |
 | 115 | Pump_KegLand_MKII_Poly_Center_Inlet.svg | Pumps |
 | 116 | Pump_KegLand_MKII_SS_Center_Inlet.svg | Pumps |
 | 117 | Pump_March_809_Poly_90_Inlet.svg | Pumps |
@@ -132,24 +117,10 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 120 | Pump_March_815_Poly_90_Inlet.svg | Pumps |
 | 121 | Pump_March_815_Poly_Center_Inlet.svg | Pumps |
 | 122 | Pump_March_815_SS_Center_Inlet.svg | Pumps |
-| 123 | Pump_NoCover_Rip_Off.svg | Pumps |
-| 124 | Pump_Purple_Rip_Off.svg | Pumps |
-| 125 | Pump_Red_Rip_Off.png | Pumps |
-| 126 | Pump_Red_Rip_Off.svg | Pumps |
-| 127 | Pump_Red_Rip_On.png | Pumps |
-| 128 | Pump_Red_Rip_On.svg | Pumps |
 | 129 | Pump_Riptide_SS_Center_Inlet.svg | Pumps |
 | 130 | Pump_Sump_Off.svg | Pumps |
 | 131 | Pump_Sump_On.svg | Pumps |
 | 132 | Pump_Topsflo_TD5_Poly_Center_Inlet.svg | Pumps |
-| 133 | Pump_White_Rip_Off.png | Pumps |
-| 134 | Pump_White_Rip_Off.svg | Pumps |
-| 135 | Pump_Whute_Rip_On.png | Pumps |
-| 136 | Pump_Whute_Rip_On.svg | Pumps |
-| 137 | Pump_Yellow_Rip_Off.png | Pumps |
-| 138 | Pump_Yellow_Rip_Off.svg | Pumps |
-| 139 | Pump_Yellow_Rip_On.png | Pumps |
-| 140 | Pump_Yellow_Rip_On.svg | Pumps |
 | 141 | Manual_Ball_Valve_Front_Closed.svg | Valves |
 | 142 | Manual_Ball_Valve_Front_Elbow_Closed.svg | Valves |
 | 143 | Manual_Ball_Valve_Side_Closed.svg | Valves |
@@ -236,5 +207,41 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 224 | Pump_March_809_SS_90_Inlet_Motor.svg | Pumps |
 | 225 | Pump_March_815_Poly_90_Inlet_Motor.svg | Pumps |
 | 226 | Pump_March_815_SS_90_Inlet_Motor.svg | Pumps |
+| 227 | Skynet_Brewery_Main.svg | Miscellaneous |
+| 228 | Burner_Jet_Flame.svg | Other Equipment |
+
+## Retired numbers (never used again)
+
+| ID | File name | Group |
+|---:|---|---|
+| 20 | brewery_main.png | Miscellaneous |
+| 27 | BigMacRElementOff.png | Other Equipment |
+| 29 | BigMacRElementOn.png | Other Equipment |
+| 31 | Burner No Flame.png | Other Equipment |
+| 33 | BurnerFlame.png | Other Equipment |
+| 34 | BurnerFlame.svg | Other Equipment |
+| 104 | Pump_Black_Rip_Off.svg | Pumps |
+| 105 | Pump_Blue_Rip_Off.png | Pumps |
+| 106 | Pump_Blue_Rip_Off.svg | Pumps |
+| 107 | Pump_Blue_Rip_On.png | Pumps |
+| 108 | Pump_Blue_Rip_On.svg | Pumps |
+| 111 | Pump_Green_Rip_Off.png | Pumps |
+| 112 | Pump_Green_Rip_Off.svg | Pumps |
+| 113 | Pump_Green_Rip_On.png | Pumps |
+| 114 | Pump_Green_Rip_On.svg | Pumps |
+| 123 | Pump_NoCover_Rip_Off.svg | Pumps |
+| 124 | Pump_Purple_Rip_Off.svg | Pumps |
+| 125 | Pump_Red_Rip_Off.png | Pumps |
+| 126 | Pump_Red_Rip_Off.svg | Pumps |
+| 127 | Pump_Red_Rip_On.png | Pumps |
+| 128 | Pump_Red_Rip_On.svg | Pumps |
+| 133 | Pump_White_Rip_Off.png | Pumps |
+| 134 | Pump_White_Rip_Off.svg | Pumps |
+| 135 | Pump_Whute_Rip_On.png | Pumps |
+| 136 | Pump_Whute_Rip_On.svg | Pumps |
+| 137 | Pump_Yellow_Rip_Off.png | Pumps |
+| 138 | Pump_Yellow_Rip_Off.svg | Pumps |
+| 139 | Pump_Yellow_Rip_On.png | Pumps |
+| 140 | Pump_Yellow_Rip_On.svg | Pumps |
 
 *This list is written by `node tools/skynet-picture-ids.js`.*

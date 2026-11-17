@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" font-family="Segoe UI, Arial, sans-serif">
+  <!-- Skynet drawing (OakBarn Brewery, 2026-11-17), Help 180: an Integrated Instance starts as a copy, then goes its own way.
+       It replaces Bobiverse_Bob.png (a screenshot of another web site, so possibly copyrighted). -->
+  <rect width="760" height="300" fill="#ffffff"/>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#333"/></marker></defs>
+  <g id="el">
+    <rect x="40" y="110" width="180" height="80" rx="10" fill="#808080" stroke="#000" stroke-width="3"/>
+    <path d="M60 150 H170 q14 0 14 -12 q0 -12 -14 -12 H75" fill="none" stroke="#d32f2f" stroke-width="7" stroke-linecap="round"/>
+    <rect x="186" y="122" width="22" height="56" rx="4" fill="#bdbdbd" stroke="#000" stroke-width="2"/>
+  </g>
+  <text x="130" y="220" text-anchor="middle" font-size="18" fill="#000">Heating Element</text>
+  <text x="130" y="96" text-anchor="middle" font-size="16" fill="#333">its own Port</text>
+  <path d="M230 135 C300 80 330 70 400 70" fill="none" stroke="#333" stroke-width="3" marker-end="url(#a)"/>
+  <path d="M230 165 C300 220 330 230 400 230" fill="none" stroke="#333" stroke-width="3" marker-end="url(#a)"/>
+  <text x="305" y="155" text-anchor="middle" font-size="16" fill="#333">a copy</text>
+  <g transform="translate(370 -80)">
+    <rect x="40" y="110" width="180" height="80" rx="10" fill="#808080" stroke="#000" stroke-width="3"/>
+    <path d="M60 150 H170 q14 0 14 -12 q0 -12 -14 -12 H75" fill="none" stroke="#f57c00" stroke-width="7" stroke-linecap="round"/>
+    <rect x="186" y="122" width="22" height="56" rx="4" fill="#bdbdbd" stroke="#000" stroke-width="2"/>
+  </g>
+  <text x="640" y="70" font-size="16" fill="#000">HLT: 168 °F</text>
+  <text x="640" y="92" font-size="14" fill="#555">its own Setpoint</text>
+  <g transform="translate(370 80)">
+    <rect x="40" y="110" width="180" height="80" rx="10" fill="#808080" stroke="#000" stroke-width="3"/>
+    <path d="M60 150 H170 q14 0 14 -12 q0 -12 -14 -12 H75" fill="none" stroke="#1e63c8" stroke-width="7" stroke-linecap="round"/>
+    <rect x="186" y="122" width="22" height="56" rx="4" fill="#bdbdbd" stroke="#000" stroke-width="2"/>
+  </g>
+  <text x="640" y="230" font-size="16" fill="#000">Boil: 212 °F</text>
+  <text x="640" y="252" font-size="14" fill="#555">its own method</text>
+  <text x="380" y="290" text-anchor="middle" font-size="16" fill="#333">Starts as a copy, then goes its own way. All share the one Port.</text>
+</svg>

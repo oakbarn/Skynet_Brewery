@@ -4,7 +4,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 
 - **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
-- The **Menu tabs**: Zoom (number 1 to start with), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile and Pump Profile.
+- The **Menu tabs**: Zoom (number 1 to start with), Default settings, Equipment Profile, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile and Pump Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
 - **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](48-schema-switching-and-cloning).

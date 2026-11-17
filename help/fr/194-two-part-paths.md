@@ -25,7 +25,7 @@ Le nom du fichier seul suffit :
 ```
 alm_Brew.backpath = "Bell.svg"
 alm_Brew.sound = "ding.mp3"
-gG_Brew_Day_Picture = "brewery_main.png"
+gG_Brew_Day_Picture = "Skynet_Brewery_Main.svg"
 ```
 
 Skynet cherche le fichier d'abord dans le dossier **User** (et les dossiers dedans), puis dans le dossier **Skynet** (et ses groupes). Un fichier qui n'est dans aucun des deux est montré par la vérification du Process, et le chemin est le dossier User avec ce nom.

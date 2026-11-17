@@ -83,7 +83,7 @@ import { useKeySecret, newKey, KEY, keyReplacer, dropKeys, claimKeys, keyRenames
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
-import { chillerTemplates, chillerVessels } from './lib/chiller.js';
+import { chillerTemplates, chillerVessels, moveChiller } from './lib/chiller.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -442,7 +442,7 @@ function setBuildDraft(v) {
   store.writeConfig();
 }
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/brain/notice' || p === '/ui/flameout/close' || p === '/ui/brain/resume' || p === '/ui/sound/finished' || p === '/ui/hose' || p === '/ui/chiller' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/reading' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
@@ -749,6 +749,13 @@ async function route(req, res) {
   // the free end of a Quick Disconnect hose, moved on a Tab outside Edit layout (Fritz, 2026-11-05, Rule 5.28): operators may
   if (p === '/ui/hose' && m === 'POST') {
     const r = moveHoseEnd(store.config, await jsonBody(req));
+    if (r.error) return fail(res, 400, r.error);
+    store.writeConfig(); broadcast('config', {});
+    return ok(res, r);
+  }
+  // an Immersion Chiller moved by hand on a Tab outside Edit layout (OakBarn Brewery, 2026-11-17, Rule 5.42): operators may
+  if (p === '/ui/chiller' && m === 'POST') {
+    const r = moveChiller(store.config, await jsonBody(req));
     if (r.error) return fail(res, 400, r.error);
     store.writeConfig(); broadcast('config', {});
     return ok(res, r);
