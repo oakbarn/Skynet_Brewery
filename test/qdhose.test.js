@@ -83,8 +83,6 @@ assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: null, points: [[0, 'x']] }).error, 
   assert.equal(moved, 1);
   clearTimeout(store._persistTimer);
 }
-console.log('qdhose tests passed');
-process.exit(0);
 
 // ---- One right-button hold moves the end; no confirmations; letting go never opens Help (OakBarn Brewery, 2026-11-16) ----
 {
@@ -96,4 +94,22 @@ process.exit(0);
   assert.ok(/if \(pumps\.length \|\| flowing\) \{ qdSafety\(p, which\); return; \}/.test(app), 'a warning only while liquid flows');
   assert.ok(/qdLocked/.test(app) && /qdLocked/.test(readFileSync(new URL('../public/style.css', import.meta.url), 'utf8')), 'the ring flashes when it locks onto an IP');
 }
-console.log('qdhose ok (no confirmations)');
+
+// ---- A hose goes into an open pipe end the way it faces, with a U (OakBarn Brewery, 2026-11-17) ----
+{
+  const { readFileSync } = await import('node:fs');
+  const app = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  const src = app.slice(app.indexOf('function hoseSag('), app.indexOf('// the way an opening faces'));
+  const hoseSag = new Function(src + '; return hoseSag;')();
+  const pts = hoseSag([100, 100], [100, 600], [0, 50], Object.assign([0, 40], { side: 1 }));     // straight below, end facing down
+  assert.deepEqual(pts.at(-1), [100, 600], 'ends on the opening');
+  assert.ok(Math.max(...pts.map(q => q[1])) > 620, 'droops below a down facing end (the U)');
+  assert.ok(Math.max(...pts.map(q => q[0])) > 130, 'bows out to the side, not a straight line');
+  assert.ok(pts.at(-2)[1] > 600 && pts.at(-2)[0] === 100, 'comes up into it the way it faces');
+  const plain = hoseSag([0, 0], [400, 100], null, null);
+  assert.ok(Math.max(...plain.map(q => q[1])) > 100, 'with no facing it still sags as before');
+  assert.match(app, /hoseSag\(from, t \? t\.c : c, d\.lead, t && ipFacing\(t\.id, d\.p\.workspace, d\.p\)\)/, 'a dragged end uses the facing of the IP under it');
+}
+
+console.log('qdhose tests passed');
+process.exit(0);
