@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 368" width="520" height="368">
+  <!-- Skynet drawing (OakBarn Brewery, 2026-11-17), Help 180 "All for One, One For All": three musketeers with plumed hats, their
+       swords crossed above them. It replaces the clip art Three_Musketeers.png (source unknown, so possibly copyrighted). -->
+  <rect width="520" height="368" fill="#ffffff"/>
+  <!-- crossed swords, from each raised hand to one point above -->
+  <g stroke="#555" stroke-width="5" stroke-linecap="round">
+    <line x1="183" y1="172" x2="292" y2="36"/><line x1="323" y1="172" x2="262" y2="30"/><line x1="463" y1="172" x2="236" y2="40"/>
+  </g>
+  <g fill="#c9a24a" stroke="#000" stroke-width="2"><circle cx="183" cy="172" r="7"/><circle cx="323" cy="172" r="7"/><circle cx="463" cy="172" r="7"/></g>
+  <defs><g id="m" stroke="#000" stroke-width="3" stroke-linejoin="round">
+    <!-- legs and boots -->
+    <rect x="-28" y="250" width="20" height="70" fill="#5a3a1a"/><rect x="8" y="250" width="20" height="70" fill="#5a3a1a"/>
+    <path d="M-34 320 h30 v24 h-36 z" fill="#111"/><path d="M4 320 h30 l6 24 h-36 z" fill="#111"/>
+    <!-- tunic and belt -->
+    <path d="M-42 170 h84 l8 90 h-100 z" fill="var(--c)"/>
+    <rect x="-46" y="226" width="92" height="12" fill="#3a2410"/><rect x="-8" y="224" width="16" height="16" fill="#c9a24a"/>
+    <!-- collar -->
+    <path d="M-30 168 l30 22 l30 -22 z" fill="#ffffff"/>
+    <!-- arm up holding the sword -->
+    <path d="M30 178 l30 -10 l6 12 l-30 14 z" fill="var(--c)"/>
+    <!-- head -->
+    <circle cx="0" cy="140" r="28" fill="#f1c9a0"/>
+    <path d="M-14 152 q14 8 28 0" fill="none"/>
+    <path d="M-16 146 q8 -6 14 0 q6 -6 14 0" fill="#3a2410" stroke-width="2"/>
+    <circle cx="-9" cy="134" r="3" fill="#000"/><circle cx="9" cy="134" r="3" fill="#000"/>
+    <!-- hat with plume -->
+    <ellipse cx="0" cy="114" rx="48" ry="10" fill="#222"/>
+    <path d="M-24 112 q24 -40 48 0 z" fill="#222"/>
+    <path d="M14 104 q40 -30 46 -4 q-18 -8 -42 10 z" fill="#ffffff"/>
+  </g></defs>
+  <use href="#m" transform="translate(120 0)" style="--c:#f57c00"/>
+  <use href="#m" transform="translate(260 0)" style="--c:#1e63c8"/>
+  <use href="#m" transform="translate(400 0)" style="--c:#d32f2f"/>
+</svg>
