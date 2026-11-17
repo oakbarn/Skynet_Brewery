@@ -4,7 +4,7 @@ Le bouton **☰ Menu** est en haut à droite de la page **Tabs**, là où était
 
 - **Show Menu Bar** / **Hide Menu Bar** : la ligne du haut du panel est cachée sur la page Tabs ; ceci la fait revenir. Voir [La barre de menus (Menu Bar)](40-menu-bar).
 - **Edit layout** (Admins) : change les Tabs. C'est le premier choix. Pendant que vous êtes dans Edit layout, il indique **Exit Edit layout**. Voir [Tabs (les écrans de votre brasserie)](02-tabs).
-- Les **onglets de menu** (Menu tabs) : Zoom (numéro 1 au départ), Default settings, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile et Pump Profile.
+- Les **onglets de menu** (Menu tabs) : Zoom (numéro 1 au départ), Default settings, Equipment Profile, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Profile, Valve Profile et Pump Profile.
 - **File Move Utility** (Admins) ouvre la page File Move. Voir [File Move (copier des fichiers de votre ordinateur vers le Brain)](32-file-move).
 - **Recipe** et **Fermentation** sont grisés. Ils arrivent dans les prochaines étapes.
 - **Schema** : la liste déroulante Schema (la même que sur la barre de menus), chaque Schema du Brain avec **Load** et **Clone**. Voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
