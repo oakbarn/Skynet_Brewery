@@ -201,8 +201,8 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #toast b { display: block; font-size: 1.3em; }
 #toast span { display: block; margin-top: 4px; font-size: 0.85em; }
 /* a kept Build came back (Rule 4.1): one click to Discard it, then ↩ Undo for a few seconds */
-#buildBack { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
-#buildBack .bbX { padding: 2px 8px; }
+#buildBack, #undoNote { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--accent, var(--line)); border-radius: 8px; padding: 8px 12px; max-width: 92vw; flex-wrap: wrap; }
+#buildBack .bbX, #undoNote .bbX { padding: 2px 8px; }
 /* Sound is off (OakBarn Brewery, 2026-11-13): a reminder on the Tab until sound is turned on */
 #soundNag { position: fixed; bottom: 16px; left: 16px; z-index: 49; background: var(--panel2); border: 2px solid var(--bad); padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; max-width: calc(100vw - 32px); }
 #soundNag.hidden { display: none; }
