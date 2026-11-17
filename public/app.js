@@ -48,6 +48,7 @@ import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
+import { forShow, toMetric } from './unitconvert.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -10742,7 +10743,7 @@ async function editItem(kind, id) {
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const fields = fields0 && item.integratedIn ? it => (typeof fields0 === 'function' ? fields0(it) : fields0).filter(f => f[0] !== 'hidden') : fields0;
-  const work = clone(item), before0 = item.fitting;
+  const work = clone(item.kind === 'vessel' ? shownIn('vessel', item) : item), before0 = item.fitting;      // a Vessel's size shown in your Units (Rule 2.59)
   const tplOk = onBuildTab(item) && item.kind === 'vessel' && !item.attachTo;      // a vessel, equipment or Tab_Fitting can go to Templates instead
   const goTo = buildToOf(item) || (tplOk && item.buildTo === TO_TPL ? TO_TPL : '') || (tplOk ? item.workspace : '');      // a new item on the 🔨 Build Tab: its Tab box shows where it goes (Rule 4.1); it stays on the Build Tab
   if (goTo) work.workspace = goTo;
@@ -11006,6 +11007,7 @@ async function editItem(kind, id) {
     const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
     if (work.type === 'alarm' && work.alarmClass) chainFromWork(work);      // the boxes back to .chain (Rule 7.16)
     const spotsWas = item.subtype === 'pump' ? String(pumpSpots(item)) : '';
+    if (work.kind === 'vessel') { const m = toMetric.vessel(work); if (m) { Object.keys(work).forEach(k => delete work[k]); Object.assign(work, m); } }      // kept in metric (Rule 2.59)
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     // a pump's Inlet or Outlet put on another of its 8 spots (Rule 5.27): it moves onto its pipes (Rule 5.23) and their ends slide to meet it
     if (spotsWas && String(pumpSpots(item)) !== spotsWas && item.workspace === oldTab) centerOnPipes(draft, item.workspace);
@@ -15353,7 +15355,7 @@ async function eqViewOpen(id) {
   const w = tabOfProfile(id), back = menuTab ? (curWs()?.name ?? wsName) : wsName;
   leaveMenuTab();
   const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
-  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(p), dirty: false, layout: eqLayout(p, full) };
+  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(shownIn('equipment', p)), dirty: false, layout: eqLayout(p, full) };
   wsName = eqv.layout.workspaces[0].name;
   document.body.classList.add('eqViewing'); sel = null;
   renderTabs(); renderWs(); eqViewBar();
@@ -15377,7 +15379,7 @@ function eqViewBar() {
   $('#eqViewBar')?.remove();
   if (!eqv) return;
   const p = S.profiles.find(x => x.id === eqv.id); if (!p) return eqViewClose(true);
-  if (!eqv.dirty) eqv.work = clone(p);
+  if (!eqv.dirty) eqv.work = clone(shownIn('equipment', p));      // shown in your Units (Rule 2.59)
   const w = eqv.work, admin = can('admin'), ro = !admin || p.locked, tab = tabOfProfile(p.id);
   const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
   const toSel = h('select', { title: EQV_TIPS.to }, ...tabs.map(x => h('option', { value: x.name, ...(x.name === eqv.to ? { selected: true } : {}) }, tabTitle(x))));
@@ -15396,11 +15398,11 @@ function eqViewBar() {
   const del = guard(async () => { await deleteProfile(p.id); if (!S.profiles.some(x => x.id === p.id)) eqViewClose(true); });
   const props = guard(async () => {
     const o = clone(w);
-    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num']), ['notes', 'Notes', 'area']];
+    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num']), ['notes', 'Notes', 'area']];
     if (await dialog(`⚙ Properties of "${w.name}"`, fields, o) !== 'ok') return;
     readFields(o);
     for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]];
-    eqv.work = o; eqv.dirty = JSON.stringify(o) !== JSON.stringify(p) || eqv.dirty; eqViewBar();
+    eqv.work = o; eqv.dirty = JSON.stringify(o) !== JSON.stringify(shownIn('equipment', p)) || eqv.dirty; eqViewBar();
   });
   const panel = k => () => { eqv.panel = eqv.panel === k ? null : k; eqViewBar(); };
   const fromIt = guard(async () => { if (eqv.dirty) return toast('💾 Save or ↶ Undo the changes to this profile first', true); const id = p.id; if (!eqViewClose()) return; await newSchemaFromProfile(id); });
@@ -16180,7 +16182,7 @@ function vesselTplFields(w) {
     ['vtype', 'Type', 'sel', types, true],
     ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
     ['image', 'Graphic (picture path)', 'path'],
-    ['_s', 'Size', 'head'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)],
+    ['_s', 'Size', 'head'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
     ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
       : [['volume', `Size: ${u === 'L' ? 'Liters' : 'Gallons'} (10 gallons to start; a Vessel Widget is drawn to this size)`, 'num'],
         ...(isV ? [['sizeMethod', 'Method (how its shape is worked out)', 'sel', V_METHODS, true], ...(w.sizeMethod === 'diameter' ? [['diameter', `Diameter (${u === 'L' ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${u === 'L' ? 'cm' : 'inches'})`, 'num']] : [])] : []),
@@ -16246,7 +16248,7 @@ function openTemplate(kind, name) {
     await loadMediaPictures();
     const t = tplOf(kind, name); if (!t) return done();
     const admin = can('admin'), ed = admin && t.editable;
-    const work = kind === 'vessel' ? vesselTplToFields(clone(t)) : fitToFields(clone(t));
+    const work = kind === 'vessel' ? vesselTplToFields(clone(shownIn('vessel', t))) : fitToFields(clone(t));      // its size shown in your Units (Rule 2.59)
     let dirty = false;
     const body = h('div', { class: 'menuForm' });
     const build = bindForm(body, kind === 'vessel' ? vesselTplFields : fittingTplFields, work, ev => { dirty = true; portFitPicked(ev); });
@@ -16475,7 +16477,7 @@ function vSizerWho(it) {
 // the Stove Top Vessel's size (Rule 19.7): Gallons, and its Height and Width (Width = across the pot). Both typed: drawn by its real size.
 function stoveSizeFields(it) {
   const metric = it.units === 'Metric', u = metric ? 'cm' : 'inches';
-  return [['_sz', 'Size', 'head'], ['units', 'Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true], ['volume', metric ? 'Liters' : 'Gallons', 'num'],
+  return [['_sz', 'Size', 'head'], ['units', 'Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ['volume', metric ? 'Liters' : 'Gallons', 'num'],
     ['vheight', `Height (${u}; empty = a stock pot shape)`, 'num'], ['diameter', `Width (${u}, across the pot; empty = a stock pot shape)`, 'num'],
     ['_calcVol', 'Calculated Volume (from its Width and Height; read only)', 'ro', vCalcVol(it)],
     ['_szn', `${vDia(it) ? 'Drawn by its real size (the Calculated Volume), the shape of its Height and Width.' : 'Drawn as a stock pot (as tall as it is wide) for its Gallons. Type its Height and Width to draw it by its real size.'} ${vSizerWho(it)}`, 'note']];
@@ -16632,13 +16634,13 @@ function profFields(kind) {
         ['_r', `The water you brew with: ${WATER_IONS.map(([k, l]) => `${l.replace(/ \(.*/, '')} ${b[k]}`).join(', ')}${b.so4cl !== null ? `. Sulfate to chloride ${b.so4cl}` : ''} (as last saved)`, 'note'],
         ['notes', 'Notes', 'area']];
     }
-    if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
+    if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
       ['boilTime', 'Total boil time (minutes)', 'num', null, false, false, { tip: '0 = No Boil.' }],
       ['boilOffRate', `Boil off (${u} per hour)`, 'num', null, false, false, { tip: 'Empty: the Equipment Profile\'s Boil Off. With a number here, picking this profile in a Recipe asks which one to use.' }],
       ['askVolumes', 'Ask the kettle volume at the start and end of the boil', 'yn', true],
       ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: 'Empty: Default settings.' }]),
       ['notes', 'Notes', 'area']];
-    return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
+    return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
       ...Array.from({ length: MASH_STEPS }, (_, i) => [['_s' + i, `Step ${i + 1}${i ? ' (leave empty if not used)' : ''}`, 'head'],
         ['s' + i + '_name', 'Name', 'text'], ['s' + i + '_temp', `Temperature (${t})`, 'num'], ['s' + i + '_time', 'Time (minutes)', 'num']]).flat(),
       ['_o', 'Mash out and sparge', 'head'], ['mashOutTemp', `Mash out temperature (${t})`, 'num', null, false, false, { tip: `Empty: none.` }],
@@ -16646,6 +16648,11 @@ function profFields(kind) {
       ...(w.sparge === 'batch' ? [['batchRest', 'Batch sparge rest time (minutes)', 'num']] : []), ['notes', 'Notes', 'area']];
   };
 }
+// Units are for showing only (Rule 2.59): a box shows the kept metric numbers in ☰ Menu > Settings > Units and saves them back in
+// metric. The shown copy remembers what it came from, so a number that was not changed is saved exactly as it was kept.
+const showUnits = () => S.config.brewDefaults?.units === 'Metric' ? 'Metric' : 'US';
+const shownIn = (kind, p) => p && forShow[kind] ? forShow[kind](p, showUnits()) : p;
+const UNITS_SHOWN_TIP = 'The numbers here are shown and typed in your Units (☰ Menu > Settings > Units). Skynet keeps them in metric (Rule 2.59).';
 // the steps as flat fields for the form (and back)
 const stepsToFields = p => { (p.steps || []).forEach((s, i) => { p['s' + i + '_name'] = s.name; p['s' + i + '_temp'] = s.temp; p['s' + i + '_time'] = s.time; }); return p; };
 const fieldsToSteps = p => { const out = { ...p, steps: [] }; for (let i = 0; i < MASH_STEPS; i++) { out.steps.push({ name: p['s' + i + '_name'], temp: p['s' + i + '_temp'], time: p['s' + i + '_time'] }); delete out['s' + i + '_name']; delete out['s' + i + '_temp']; delete out['s' + i + '_time']; } return out; };
@@ -16653,13 +16660,13 @@ function renderBrewProfileTab(kind) {
   return box => {
     const K = PK[kind], list = K.list(), admin = can('admin');
     if (profWork[kind] && !list.some(x => x.id === profWork[kind].id)) { profWork[kind] = null; profDirty[kind] = false; }
-    if (!profWork[kind] && list.length) { const d = S.config.brewDefaults?.[kind + 'Profile']; profWork[kind] = stepsToFields(clone(list.find(x => x.isDefault) || list.find(x => x.id === d) || list[0])); }
+    if (!profWork[kind] && list.length) { const d = S.config.brewDefaults?.[kind + 'Profile']; profWork[kind] = stepsToFields(clone(shownIn(kind, list.find(x => x.isDefault) || list.find(x => x.id === d) || list[0]))); }
     const pick = h('select', {}, ...(list.length ? [] : [h('option', { value: '' }, '(none yet)')]), ...list.map(x => h('option', { value: x.id, ...(x.id === profWork[kind]?.id ? { selected: true } : {}) }, x.name)),
       ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
     pick.onchange = guard(async () => {
       if (profDirty[kind] && !confirm(`The open ${K.title} has changes that are not saved. Leave them?`)) { pick.value = profWork[kind]?.id || ''; return; }
       if (pick.value === '__add__') { pick.value = profWork[kind]?.id || ''; return newBrewProfile(kind); }
-      profWork[kind] = stepsToFields(clone(list.find(x => x.id === pick.value))); profDirty[kind] = false; renderMenuPane();
+      profWork[kind] = stepsToFields(clone(shownIn(kind, list.find(x => x.id === pick.value)))); profDirty[kind] = false; renderMenuPane();
     });
     // the title, the Open list and the buttons stay frozen at the top while the rest scrolls (Rule 2.51, the Blichmann model)
     // the purple + Add New button right of the Open list (Rule 2.55, Profiles only): the same as Add new ... in the list, which stays
@@ -16680,14 +16687,14 @@ function renderBrewProfileTab(kind) {
       // a Tab Profile: the screen's own size (and 10 and 6) is not saved, so a new Tab keeps matching the screen it is made on
       if (kind === 'tab') { const sc = screenTab(); for (const [k, v] of [['newTabWidth', sc.w], ['newTabHeight', sc.h], ['newTabPipe', 10], ['newTabHose', HOSE_PX]]) if (+w[k] === v) w[k] = ''; }
       const r = await api('PUT', `/ui/profiles/${kind}/${w.id}`, kind === 'mash' ? fieldsToSteps(w) : w);
-      S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.saved)); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
+      S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(shownIn(kind, r.saved))); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
     });
     const del = guard(async () => {
       if (!confirm(`Delete the ${K.title} "${w.name}"?`)) return;
       const r = await api('DELETE', `/ui/profiles/${kind}/${w.id}`);
       S[kind + 'Profiles'] = r.list; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); toast(`"${w.name}" deleted`);
     });
-    const undo = () => { const was = list.find(x => x.id === w.id); profWork[kind] = was ? stepsToFields(clone(was)) : null; profDirty[kind] = false; renderMenuPane(); };
+    const undo = () => { const was = list.find(x => x.id === w.id); profWork[kind] = was ? stepsToFields(clone(shownIn(kind, was))) : null; profDirty[kind] = false; renderMenuPane(); };
     const buttons = () => edit ? dlgBtns(h('button', { class: 'danger', onclick: del }, 'Delete'), h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty[kind], undo)) : dlgBtns();
     top.prepend(buttons()); top.append(h('div', {}, state)); box.append(f.box);
     if (kind === 'tab') box.append(tabsUsing(w, admin));
@@ -16724,12 +16731,11 @@ function profAddWatch(box, map) {
   }, true);
 }
 async function newBrewProfile(kind, openTab = false) {
-  const K = PK[kind], list = K.list(), w = { name: '', from: '', units: S.config.brewDefaults?.units || 'US' };
-  if (await dialog(`New ${K.title}`, [['name', 'Name', 'text'], ['from', 'Start from', 'sel', [['', K.start], ...list.map(p => [p.id, `A copy of "${p.name}"`])]],
-    ...(K.noUnits ? [] : [['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)]])], w) !== 'ok') return;
+  const K = PK[kind], list = K.list(), w = { name: '', from: '' };      // it is kept in metric and shown in your Units (Rule 2.59)
+  if (await dialog(`New ${K.title}`, [['name', 'Name', 'text'], ['from', 'Start from', 'sel', [['', K.start], ...list.map(p => [p.id, `A copy of "${p.name}"`])]]], w) !== 'ok') return;
   readFields(w);
-  const r = await api('POST', `/ui/profiles/${kind}`, { name: w.name, from: w.from || undefined, units: w.units });
-  S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.list.find(x => x.id === r.made))); profDirty[kind] = false;
+  const r = await api('POST', `/ui/profiles/${kind}`, { name: w.name, from: w.from || undefined });
+  S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(shownIn(kind, r.list.find(x => x.id === r.made)))); profDirty[kind] = false;
   if (openTab && menuTab !== kind) openMenuTab(kind); else renderMenuPane();
   toast(`${K.title} "${w.name}" made`);
 }

@@ -43,6 +43,32 @@ for (const f of ['samples/configs/three-vessel-one-pump/processes/BrewDay_Flow.t
 for (const f of fs.readdirSync('templates/vessel')) assert.equal(toMetric.vessel(JSON.parse(fs.readFileSync('templates/vessel/' + f, 'utf8'))), null, f);
 console.log('unitconvert tests passed');
 
+// Part 2: shown in the Units, saved back in metric. A number not changed comes back exactly as kept; a changed one is converted.
+{
+  const kept = { units: 'Metric', steps: [{ name: 'Sacch', temp: 66.25, time: 60 }], spargeTemp: 76.6667 };
+  const s = forShow.mash(kept, 'US');
+  assert.deepEqual([s.units, s.steps[0].temp, s.spargeTemp], ['US', 151.3, 170]);
+  assert.equal(forShow.mash(kept, 'Metric'), kept, 'already in the Units: shown as it is');
+  const back = toMetric.mash(JSON.parse(JSON.stringify(s)));          // it went to the Brain and back as JSON
+  assert.equal(back.steps[0].temp, 66.25, 'unchanged: exactly as kept'); assert.equal(back._shown, undefined, 'the _shown note is never kept');
+  const ch = toMetric.mash({ ...s, steps: [{ ...s.steps[0], temp: 152 }] });
+  assert.deepEqual([ch.steps[0].temp, ch.spargeTemp], [66.6667, 76.6667], 'a changed number is converted, the others stay');
+  const vk = { kind: 'vessel', units: 'Metric', volume: 20, deadspace: 1.5 };
+  const vs = forShow.vessel(vk, 'US'); assert.equal(vs.volume, 5.28);
+  assert.deepEqual(toMetric.vessel(vs), vk, 'a Vessel shown in gallons comes back exactly');
+  const ek = { units: 'Metric', trubChillerLoss: 1.8927, graphics: [{ kind: 'vessel', units: 'Metric', volume: 37.8541 }] };
+  const es = forShow.equipment(ek, 'US');
+  assert.deepEqual([es.trubChillerLoss, es.graphics[0].volume], [0.5, 10]);
+  const eb = toMetric.equipment(es); assert.deepEqual([eb.trubChillerLoss, eb.graphics[0].volume, eb.graphics[0]._shown, eb._shown], [1.8927, 37.8541, undefined, undefined]);
+  // the Brain's own save path: a Mash Profile saved from a box shown in US
+  const { ProfileStore } = await import('../lib/profiles.js');
+  const os = await import('node:os'), path = await import('node:path');
+  const ps = new ProfileStore(fs.mkdtempSync(path.join(os.tmpdir(), 'uc-')), 'mash');
+  const saved = ps.clean({ ...JSON.parse(JSON.stringify(s)), name: 'Shown' });
+  assert.deepEqual([saved.units, saved.steps[0].temp, saved._shown], ['Metric', 66.25, undefined], 'the Brain keeps the unchanged number exactly');
+  console.log('Units shown, data kept ok');
+}
+
 // BeerXML into a metric Schema: liters and grams (a map with units Metric); gallons and ounces otherwise (BruControl Schemas)
 {
   const { importBeerXml } = await import('../lib/beerxml.js');
