@@ -8236,7 +8236,7 @@ function pumpPortField(o, f, tip) {
 // OakBarn Brewery, 2026-11-16: "We can always use what you found, Just add a Caveat that the Properties came from Internet searches
 // and not an Official Websites and they are Informational rather than facts" (the sources: docs/DC_Brewing_Pumps.md)
 const PUMP_FROM_PRIME = 'Self Priming: from OakBarn Brewery.';
-const pumpFromNote = f => `Where from: ${f.from}${f.official ? ' (the maker\'s own website).' : ', not the maker\'s official website: information, not facts.'}` + (typeof f.selfPrime === 'boolean' ? ' ' + PUMP_FROM_PRIME : '');
+const pumpFromNote = f => `Where from: ${f.from}${f.official ? ' (the maker\'s own website).' : ', not the maker\'s official website: information, not facts.'}` + (typeof f.selfPrime === 'boolean' ? ' ' + (f.primeFrom ? `Self Priming: from ${f.primeFrom}.` : PUMP_FROM_PRIME) : '');
 const PRIME_NOTE = '⚠ Not self priming: put the pump lower than the liquid, and fill it (prime it) before you turn it On.';
 const PUMP_VIEW_ROWS = PUMP_FACT_ROWS.filter(r => r[1] !== 'ports');
 const pumpFactsView = o => !!factsOf(o) && o.pumpModel !== 'other';
