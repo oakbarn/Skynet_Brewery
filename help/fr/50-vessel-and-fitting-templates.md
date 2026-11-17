@@ -46,7 +46,7 @@ Un **Template Name** n'a pas d'espaces (mettez _ à la place) et doit être uniq
 - **Graphic** : l'image dessinée sur le Tab. Un Template Skynet garde aussi la taille à laquelle son image est dessinée, donc une bouilloire haute reste haute et une large reste large.
 - **Size** : unités, taille, volume mort et perte de trub en plus (un fermenteur a le plus grand brassin, le plus petit brassin et la perte de trub).
 - **Heat Source** (source de chaleur). Le Device qui chauffe, et sa sonde, sont choisis plus tard sur le Tab_Vessel, car ils appartiennent à un Schema.
-- **Connection Standard** et sa **Size** : TC, FPT, MPT, BSP Female Rp, BSP Female Rc, BSP Male Rp, BSP Male Rc, MM Female, MM Male (un nombre, par exemple 1.5) ou DIN (du texte, par exemple DN25). C'est la valeur par défaut pour chaque orifice et chaque raccord groupé. Elle va sur la liste d'équipement et fixe la taille par défaut des images.
+- **Connection Standard** et sa **Size** : TC, FPT, MPT, BSP Female Rp, BSP Female Rc, BSP Male Rp, BSP Male Rc, MM Female, MM Male (un nombre, par exemple 1.5) ou DIN (du texte, par exemple DN25). C'est la valeur par défaut pour chaque orifice et chaque raccord groupé. Elle va dans le Equipment Profile et fixe la taille par défaut des images.
 - **Ports** : activez chaque orifice que la cuve possède et choisissez sa **position**. **Outlet**, **Second Outlet**, **Tangential Inlet**, **Steam Slayer** et **CIP Inlet** ont aussi une liste **Bundled Fitting** :
   - un raccord groupé Skynet ou de l'utilisateur,
   - **New ...** : donnez-lui un nom, et sa fenêtre s'ouvre pour que vous le construisiez. Fermez-la pour revenir à la cuve.
@@ -105,7 +105,7 @@ Skynet fournit des raccords simples prêts à mettre dans la tuyauterie, avec le
 
 Ajoutez-en un à un Tab (**Add to Tab** dans sa fenêtre), faites-le glisser à sa place et tracez des tuyaux vers ses IP. Sur le Tab c'est un **Skynet Fitting** : chaque ouverture a son IP intégré. Pour le tourner dans un autre sens, ouvrez-le en Edit layout et utilisez **Flip Horizontal**, **Flip Vertical** et **Rotate** (par pas de 45 degrés). L'image et ses IP tournent ensemble, donc un seul Elbow_90 couvre toutes les directions. Voir [Raccords Skynet](60-skynet-fittings).
 
-Là où deux tuyaux de tailles différentes se rejoignent sur un IP, le panel dessine tout seul un cône de réduction (voir [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)). Utilisez le raccord **Reducer** là où il doit figurer sur la liste d'équipement, ou sur un orifice de cuve qui n'a pas la taille de sa tuyauterie.
+Là où deux tuyaux de tailles différentes se rejoignent sur un IP, le panel dessine tout seul un cône de réduction (voir [Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses)). Utilisez le raccord **Reducer** là où il doit être dans la tuyauterie, ou sur un orifice de cuve qui n'a pas la taille de sa tuyauterie.
 
 ## Add to Tab {#add-to-tab}
 

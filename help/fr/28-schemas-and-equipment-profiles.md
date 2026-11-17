@@ -6,7 +6,7 @@ Un **Equipment Profile** décrit votre équipement de brassage : les pertes, le 
 
 **Un Equipment Profile appartient à un Tab, pas au Schema entier.** Un Schema peut avoir autant d'Equipment Profiles qu'il a de Tabs. En général, il y en a deux : un Tab pour le **Hot Side** (côté chaud : HLT, cuve d'empâtage, cuve d'ébullition, refroidisseur) et un pour la **Fermentation** (les fermenteurs). Un Schema n'utilise un profil que sur un seul Tab. Un Tab sans profil garde son équipement dans le Schema lui-même.
 
-Le profil n'est pas copié dans le Schema. C'est là que l'information est rangée. Les Tab_Vessels, Tab_Fittings, refroidisseurs, serpentins, filtres, IP, tuyaux rigides et souples d'un Tab sont enregistrés dans le Equipment Profile de ce Tab, et ils forment l'**Equipment list** (liste d'équipement) du profil. Chargez un autre Schema qui utilise le même profil sur l'un de ses Tabs, et le même équipement et les mêmes tuyaux sont sur ce Tab.
+Le profil n'est pas copié dans le Schema. C'est là que l'information est rangée. Les Tab_Vessels, Tab_Fittings, refroidisseurs, serpentins, filtres, IP, tuyaux rigides et souples d'un Tab sont enregistrés dans le Equipment Profile de ce Tab, et ils forment le matériel du profil. Chargez un autre Schema qui utilise le même profil sur l'un de ses Tabs, et le même équipement et les mêmes tuyaux sont sur ce Tab.
 
 Les panels faits avant ce changement avaient un seul profil pour tout le Schema. Au premier démarrage après la mise à jour, il passe tout seul au Tab qui contient son équipement (le Tab Equipment, ou le Tab qui a le plus d'équipement). L'équipement des autres Tabs reste où il est, gardé dans le Schema. Les Devices (pompes, vannes, sondes sur une carte), les images et les textes restent avec le Schema.
 
@@ -52,14 +52,14 @@ Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Vo
 3. Donnez-lui un nom, par exemple « Oak Barn Hot Side » ou « Fermentation room », et choisissez à partir de quoi il commence : **Answer a few questions (the Interview)** (le premier choix : il demande les cuves, les pompes et les vannes et les construit ; voir [L'Equipment Profile Interview](196-equipment-profile-interview)), les nombres habituels, ou une copie d'un autre profil.
 4. Choisissez les **Units** (unités) : US (gallons, livres, °F) ou Metric (litres, kilogrammes, °C).
 5. Dans **Use it on a Tab**, choisissez le Tab auquel il est destiné, ou **(not now)** (pas maintenant).
-6. Appuyez sur **OK**. Le profil s'ouvre.
+6. Appuyez sur **OK**. Le profil s'ouvre (voir **La vue du Equipment Profile** plus bas).
 
 ## Ce qu'il y a dans un Equipment Profile {#what-is-in-an-equipment-profile}
 
 - **System Loss (Trub, Chiller Manifold and Hoses)** : ce qui reste en route entre la cuve d'ébullition et le fermenteur (trub, collecteur du refroidisseur et tuyaux).
 - **Cooling shrinkage** (contraction au refroidissement), **Grain absorption** (absorption du grain), **Brewhouse efficiency** (rendement de la brasserie) et **Hop utilization** (utilisation du houblon). Le Brewhouse efficiency est le seul rendement de Skynet : un nouveau profil commence à 72 %, et chaque recette dont le Tab **Brew on** utilise ce profil calcule son Expected Gravity avec lui ([Le Tab Recipe](99-recipe-tab)).
 - **Notes**.
-- **Equipment list** : les Tab_Vessels et Tab_Fittings de son Tab, avec leur type, leur taille, le Template d'où ils viennent et la cuve à laquelle chaque raccord est relié. Vous les mettez sur le Tab depuis les [Modèles de cuves et de raccords](50-vessel-and-fitting-templates) (**Add to Tab**) et changez chacun dans ses propriétés sur le Tab.
+- **Son matériel** : les choses réelles de son Tab (voir **La vue du Equipment Profile** plus bas). Vous les mettez sur le Tab depuis les [Modèles de cuves et de raccords](50-vessel-and-fitting-templates) (**Add to Tab**), l'Interview ou Edit layout, et changez chacun dans ses propriétés sur le Tab.
 
 Certains nombres sont sortis du profil (2026-10-20) :
 
@@ -69,17 +69,17 @@ Certains nombres sont sortis du profil (2026-10-20) :
 
 ## Modifier ou supprimer un Equipment Profile {#edit-or-delete-an-equipment-profile}
 
-- **Modifier :** choisissez-le dans la liste déroulante **Open**. Changez les nombres, puis appuyez sur **Save** (en haut ou en bas). **Cancel** remet ce qui était enregistré.
-- **Supprimer :** ouvrez-le et appuyez sur **Delete**. Les Tabs qui l'utilisaient restent sans profil. Leur équipement et leurs tuyaux restent sur eux.
+- **Modifier :** choisissez-le dans la liste déroulante **Open** (il s'ouvre lui-même, voir **La vue du Equipment Profile** plus bas). Appuyez sur **⚙ Properties**, changez les nombres, puis appuyez sur **💾 Save**. **↶ Undo** remet ce qui était enregistré.
+- **Supprimer :** ouvrez-le et appuyez sur **🗑 Delete**. Les Tabs qui l'utilisaient restent sans profil. Leur équipement et leurs tuyaux restent sur eux.
 
-La case **Check the volumes** (vérifier les volumes) calcule le volume avant ébullition, ce qui s'évapore, le volume après ébullition, ce qui va dans le fermenteur et ce qui reste pour la mise en bouteille ou en fût. Tapez une **Batch size** et choisissez un **Boil Profile** pour les essayer (la Recipe les donnera le jour du brassage). Elle utilise la première **Brew Kettle** et le premier **Fermenter** de l'Equipment list du profil (le profil d'un Tab Fermentation n'a pas de cuve d'ébullition, donc il le dit). Une ligne ⚠ vous prévient quand le volume avant ébullition dépasse ce que contient la cuve, ou quand le brassin dépasse ce que contient le fermenteur.
+**🧮 Check the volumes** (vérifier les volumes), dans la vue du profil, calcule le volume avant ébullition, ce qui s'évapore, le volume après ébullition, ce qui va dans le fermenteur et ce qui reste pour la mise en bouteille ou en fût. Tapez une **Batch size** et choisissez un **Boil Profile** pour les essayer (la Recipe les donnera le jour du brassage). Elle utilise la première **Brew Kettle** et le premier **Fermenter** du profil (le profil d'un Tab Fermentation n'a pas de cuve d'ébullition, donc il le dit). Une ligne ⚠ vous prévient quand le volume avant ébullition dépasse ce que contient la cuve, ou quand le brassin dépasse ce que contient le fermenteur.
 
 ## Rendement sur ce Schema {#efficiency-on-this-schema}
 
-La mouture du grain, la conversion de l'empâtage et le rinçage changent tous le Rendement de la salle de brassage, et il est difficile de les suivre. Le résultat est facile à suivre, donc Skynet le garde pour vous. La case **Efficiency on this Schema** (rendement sur ce Schema) sous l'Equipment list montre chaque brassin enregistré avec ce profil dans le Schema chargé : la **Date**, la **Recipe**, le Tab **Brew on**, la **OG** (DO), le volume **Into the fermenter** (mis dans le fermenteur) et le vrai **Efficiency** (rendement).
+La mouture du grain, la conversion de l'empâtage et le rinçage changent tous le Rendement de la salle de brassage, et il est difficile de les suivre. Le résultat est facile à suivre, donc Skynet le garde pour vous. **📈 Efficiency** (rendement), dans la vue du profil, montre chaque brassin enregistré avec ce profil dans le Schema chargé : la **Date**, la **Recipe**, le Tab **Brew on**, la **OG** (DO), le volume **Into the fermenter** (mis dans le fermenteur) et le vrai **Efficiency** (rendement).
 
 1. Après un brassin, chargez sa Recipe (☰ Menu > Recipe) et vérifiez son Tab **Brew on**.
-2. Ouvrez le Equipment Profile de ce Tab et appuyez sur **📝 Record a brew** (enregistrer un brassin).
+2. Ouvrez le Equipment Profile de ce Tab, appuyez sur **📈 Efficiency**, puis sur **📝 Record a brew** (enregistrer un brassin).
 3. Tapez la **OG** (la densité dans le fermenteur, par exemple 1.052), le volume mis **Into the fermenter** et la **Date**, puis appuyez sur **OK**. Skynet calcule le vrai rendement à partir de la liste de grains de la Recipe et le montre, avec la moyenne.
 
 Les brassins sont gardés dans le **Schema**, donc chaque Schema a sa propre liste (un Schema fait comme copie d'un autre commence avec la liste de celui-ci). Skynet fait la moyenne des **10 derniers brassins** sur ce Schema avec ce profil. 🗑 retire un brassin de la liste quand il a été mal tapé.
@@ -98,7 +98,7 @@ La case en haut de l'onglet **Equipment Profile** liste chaque Tab du Schema cha
     - **Keep this Tab's layout as it is** (garder la disposition de ce Tab telle quelle) : le Tab n'est pas changé, et le Default Layout du profil est laissé tel quel. Voir **The Default Layout** plus bas.
   - S'il n'en a encore aucun de dessiné (un nouveau profil), il prend l'équipement et les tuyaux qui sont sur le Tab maintenant comme Default Layout.
   - Choisir **(none)** retire le profil du Tab. L'équipement et les tuyaux restent sur le Tab, gardés dans le Schema lui-même.
-- **Open** ouvre le profil de ce Tab plus bas.
+- **Open** ouvre le profil de ce Tab lui-même (voir **La vue du Equipment Profile** plus bas).
 - Sous chaque Tab, il est indiqué si le profil est **Unique** (seul ce Tab l'utilise) ou **Shared** (partagé, et avec quels Schemas et Tabs).
 - **Make it unique to this Tab** (le rendre unique à ce Tab) s'affiche quand le profil est partagé. Il fait une copie du profil rien que pour ce Tab, et les autres gardent l'original.
 
@@ -129,56 +129,56 @@ Quand le profil est juste, verrouillez-le pour que rien ne soit dérangé le jou
 
 Tant qu'il est verrouillé :
 
-- Ses nombres et sa liste d'équipement ne peuvent pas être changés, et il ne peut pas être supprimé.
+- Ses nombres et son matériel ne peuvent pas être changés, et il ne peut pas être supprimé.
 - Sur son Tab, **Edit layout** ne peut ni déplacer, ni ajouter, ni changer, ni supprimer d'équipement, d'IP, de tuyaux rigides ou souples. **Save layout** dit qu'il est verrouillé. Les Devices, les images et les textes peuvent toujours être changés, et les autres Tabs aussi.
 - Le Tab ne peut pas passer à un autre profil.
 
 Pour déverrouiller, éteignez **🔒 Locked** (le panel demande d'abord), ou lancez `unlock_Equipment`. Le Brew Day (bientôt) verrouillera le profil tout seul quand il commencera.
 
-## Construire l'Equipment list {#build-the-equipment-list}
+## Construire le matériel d'un profil {#build-the-hardware-of-a-profile}
 
-L'**Equipment list**, sous les nombres, montre ce qu'il y a sur le Tab du profil.
+Le profil garde les choses réelles du Tab qui l'utilise, chaque fois que ce Tab est enregistré.
 
-1. Allez dans **☰ Menu > Vessel Templates** (ou **Fitting Templates**). Les boutons sous la liste les ouvrent.
+1. Allez dans **☰ Menu > Vessel Templates** (ou **Fitting Templates**).
 2. Double-cliquez sur un Template et appuyez sur **Add to Tab**. Choisissez le Tab qui utilise le profil.
-3. Le nouveau Tab_Vessel ou Tab_Fitting apparaît dans l'Equipment list. Changez-le dans ses propriétés sur le Tab (double-cliquez dessus dans Edit layout).
-
-**Go to the Tab** vous montre le Tab lui-même.
-
-Les profils faits avant les Templates peuvent encore avoir une liste de cuves. Elles s'affichent sous **Made before Templates**, avec **Put on Tab** pour les dessiner sur le Tab du profil ([Réglages d'une cuve](34-vessel-tab)).
+3. Changez-le dans ses propriétés sur le Tab (double-cliquez dessus dans Edit layout), puis **Save layout**. Ouvrez le profil : la nouvelle pièce y est.
 
 ## La vue du Equipment Profile {#the-equipment-profile-view}
 
-**Open** à côté du profil d'un Tab (ou **🖼 View the Equipment Profile** sous la liste déroulante Open) montre le profil lui-même. Un Equipment Profile **n'est pas un Tab** : c'est un profil du matériel réel de la brasserie, et c'est tout ce qu'il contient : les cuves, IP, raccords, tuyaux, tuyaux souples, pompes, vannes, éléments chauffants, sondes, refroidisseurs (un refroidisseur à immersion va avec la cuve où il se trouve) et **tout Widget avec une IP** (un Widget avec une IP est une chose réelle), avec leurs Interfaces (cartes) et leurs Ports. Les Text Boxes, Switches, Processes, Timers et autres **ne peuvent pas être ajoutés** à un profil, ils ne font donc pas du tout partie de cette vue. Rien ne peut y être cliqué.
+**Open** à côté du profil d'un Tab, ou choisir un profil dans la liste déroulante **Open**, montre le profil lui-même. Un Equipment Profile **n'est pas un Tab** : c'est un profil du matériel réel de la brasserie, et c'est tout ce qu'il contient : les cuves, IP, raccords, tuyaux, tuyaux souples, pompes, vannes, éléments chauffants, sondes, refroidisseurs (un refroidisseur à immersion va avec la cuve où il se trouve) et **tout Widget avec une IP** (un Widget avec une IP est une chose réelle), avec leurs Interfaces (cartes) et leurs Ports. Un **Switch qui est une chose réelle** (câblé sur le Port d'une carte) est un Widget spécial comme une Manual Valve, donc il est aussi dans le profil. Les Text Boxes, Processes, Timers, Switches qui ne sont pas des choses réelles et autres **ne peuvent pas être ajoutés** à un profil, ils ne font donc pas du tout partie de cette vue. Rien ne peut y être cliqué.
 
 La barre du haut reste en place :
 
-- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** et **➡ Transfer Manifold to Tab** (tout, les cuves, le collecteur) mettent cette partie du matériel sur le **Tab** choisi à côté, en un clic chacun. Ils font la même chose que **📋 Paste onto a Tab** (plus bas) avec Both, Vessels Only ou Manifold Only : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
+- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** et **➡ Transfer Manifold to Tab** (tout, les cuves, le collecteur) mettent cette partie du matériel sur le **Tab** choisi à côté, en un clic chacun. Ils collent le profil (voir **Coller un profil** plus bas) : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** et **✕ Close**, dans cet ordre.
 
-En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** et Hop utilization. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. **📋 More ...** ouvre tout le reste sur ☰ Menu > Equipment Profile : la vérification des volumes, l'Equipment list, le Rendement sur ce Schema et le verrou.
+En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** et Hop utilization. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. À côté :
+
+- **🧮 Check the volumes** et **📈 Efficiency** ouvrent leur case sous la barre (appuyez encore pour la fermer). Voir **Modifier ou supprimer un Equipment Profile** et **Rendement sur ce Schema** plus haut.
+- **🗂 New Schema from this profile ...** (voir plus bas).
+
+L'interrupteur 🔒 Locked est à côté du profil du Tab sur ☰ Menu > Equipment Profile.
 
 **Les Properties vont avec chaque Transfer et chaque collage.** Quand le Tab a déjà son propre Equipment Profile, les nombres qui changent sont dans la liste Replace (« Brewhouse efficiency 74 % → 72 % »). Quand le Tab n'a pas encore de profil, il prend celui-ci, donc son Rendement vient aussi. Le Tab garde sa propre disposition, donc le collage ne change jamais le dessin du profil. Cela n'arrive pas quand un autre Tab du Schema utilise déjà le profil, parce qu'un Schema utilise un profil sur un seul Tab.
 
 ## Coller un profil, ou commencer un nouveau Schema à partir de lui {#paste-a-profile-or-start-a-new-schema-from-it}
 
-Un Equipment Profile garde **tout le matériel physique de la brasserie** : les cuves, IP, raccords, tuyaux, tuyaux souples, refroidisseurs, pompes et vannes, **et les Interfaces (cartes), leurs Ports et leur câblage**, chacun avec toutes ses Propriétés et son Nom. Skynet les garde dans le profil chaque fois que le Tab qui l'utilise est enregistré. Deux boutons sous l'Equipment list les utilisent (Admins seulement).
+Un Equipment Profile garde **tout le matériel physique de la brasserie** : les cuves, IP, raccords, tuyaux, tuyaux souples, refroidisseurs, pompes et vannes, **et les Interfaces (cartes), leurs Ports et leur câblage**, chacun avec toutes ses Propriétés et son Nom. Skynet les garde dans le profil chaque fois que le Tab qui l'utilise est enregistré. Deux choses de la vue du profil les utilisent (Admins seulement).
 
 **🗂 New Schema from this profile ...** (nouveau Schema à partir de ce profil ; aussi **Add new Schema ... > Start from > An Equipment Profile**) fait un nouveau Schema avec un Tab qui utilise le profil, donc ses nombres et son dessin viennent aussi, avec chaque carte et chaque Device déjà câblés : les mêmes Noms, Interfaces et Ports. Aucun Processus, Text Widget, Minuterie ou autre Widget ne vient : le nouveau Schema a les siens. Par exemple, construisez votre brasserie une fois comme Equipment Profile, puis faites-en un Schema **Keg Cleaning** (nettoyage des fûts) et écrivez ses Processus, Zones de texte et Minuteries. Le nouveau Schema est chargé tout de suite ; celui que vous aviez reste tel quel.
 
-**📋 Paste onto a Tab ...** (coller sur un Tab) met une copie du matériel du profil sur un Tab du Schema chargé :
+Les boutons **➡ Transfer** mettent une copie du matériel du profil sur un Tab du Schema chargé :
 
-1. Choisissez **What to paste** (quoi coller) :
-   - **Both** (les deux) : tout.
-   - **Vessels Only** (cuves seulement) : chaque cuve avec tout ce qui est dessus (ses IP, raccords, éléments chauffants et sondes).
-   - **Manifold Only** (collecteur seulement) : tout le collecteur (pompes, vannes, tuyaux, tuyaux souples, raccords, refroidisseurs), pas les cuves.
-2. Choisissez le Tab où il va (**Goes to the Tab**), et appuyez sur **💾 Save**.
-3. Quand ce Tab a déjà du matériel qui est le même que celui du profil (la même carte et le même Port, ou une cuve du même Nom), une liste montre ce qui sera remplacé, et les nombres du profil du Tab qui changent (comme « Brewhouse efficiency 74 % → 72 % »). Rien ne change avant que vous appuyiez sur **Replace** (remplacer). **Cancel** (annuler) laisse tout comme avant. Un Device remplacé continue de marcher dans vos Processus.
-4. Edit layout s'ouvre et les pièces sont sur le **🔨 Build Tab**. Appuyez sur **✅ Finish Build ... > Move to Tab** : elles vont sur le Tab aux mêmes endroits. Puis appuyez sur **Save layout**.
+1. Choisissez le **Tab** à côté, et appuyez sur l'un d'eux :
+   - **➡ Transfer All to Tab** : tout.
+   - **➡ Transfer Vessels to Tab** : chaque cuve avec tout ce qui est dessus (ses IP, raccords, éléments chauffants, sondes et un refroidisseur à immersion dedans).
+   - **➡ Transfer Manifold to Tab** : tout le collecteur (pompes, vannes, tuyaux, tuyaux souples, raccords, refroidisseurs à plaques), pas les cuves.
+2. Quand ce Tab a déjà du matériel qui est le même que celui du profil (la même carte et le même Port, ou une cuve du même Nom), une liste montre ce qui sera remplacé, et les nombres du profil du Tab qui changent (comme « Brewhouse efficiency 74 % → 72 % »). Rien ne change avant que vous appuyiez sur **Replace** (remplacer). **Cancel** (annuler) laisse tout comme avant. Un Device remplacé continue de marcher dans vos Processus.
+3. Edit layout s'ouvre et les pièces sont sur le **🔨 Build Tab**. Appuyez sur **✅ Finish Build ... > Move to Tab** : elles vont sur le Tab aux mêmes endroits. Puis appuyez sur **Save layout**.
 
 **↩ Undo** (annuler) s'affiche quelques secondes après un collage et remet tout.
 
-- **Un bout de tuyau dont la pièce n'est pas venue reste ouvert**, pour qu'une cuve puisse y être jointe (avec Manifold Only, les tuyaux qui allaient aux cuves).
+- **Un bout de tuyau dont la pièce n'est pas venue reste ouvert**, pour qu'une cuve puisse y être jointe (avec Transfer Manifold, les tuyaux qui allaient aux cuves).
 - **Une carte déjà utilisée sur un autre Tab de ce Schema arrête le collage.** Rien n'est collé, et une note dit quelle carte et quel Tab. Une carte n'est jamais partagée entre des Tabs, et son ID ne change jamais. Collez sur ce Tab, ou commencez un nouveau Schema à partir du profil. Un nouveau Schema prend toujours les cartes.
 - Une carte que le Schema n'a pas encore vient avec le collage, avec son ID et ses réglages.
 - Une pièce dont le Nom est déjà utilisé sur un autre Tab reçoit _2 à la fin.
