@@ -58,7 +58,7 @@ BM_30_DO@Valve_E_Tap~water_BH = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
 gblV_Brew_Status = 100
-vSMsg = "Brewing " + gblS_BeerName_R1 + ". Import the BeerSmith recipe (Import > BeerXML) or check the Recipe tab. Strike " + gblV_Desired_Strike + " °F, mash " + gblV_Mash_1_Temp + " °F."
+vSMsg = "Brewing " + gblS_BeerName_R1 + ". Import the BeerSmith recipe (Import > BeerXML) or check the Recipe tab. Strike " + gblV_Desired_Strike + " °C, mash " + gblV_Mash_1_Temp + " °C."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Recipe Ready?"
 gblS_Advance_Label.background = 4
@@ -80,7 +80,7 @@ wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Strike~volume_RP"
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = gblV_Desired_Strike
 HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH = on
-vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °F."
+vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °C."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
@@ -91,7 +91,7 @@ start "wgt_ALM_Step~alarm_BH"
 [SectionBrew104]
 step 1.00003 "SectionBrew104"
 gblV_Brew_Status = 104
-vSMsg = "HLT at " + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °F. The pump moves the strike water to the mash tun."
+vSMsg = "HLT at " + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °C. The pump moves the strike water to the mash tun."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Start Transfer?"
 gblS_Advance_Label.background = 4
@@ -134,56 +134,56 @@ HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.setpoint = gblV_Sparge_Temp
 vSHops = ""
 if gblV_Hop1_Group_R1 == -333
 	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop1_Added = true
 	endif
 endif
 if gblV_Hop2_Group_R1 == -333
 	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop2_Added = true
 	endif
 endif
 if gblV_Hop3_Group_R1 == -333
 	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop3_Added = true
 	endif
 endif
 if gblV_Hop4_Group_R1 == -333
 	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop4_Added = true
 	endif
 endif
 if gblV_Hop5_Group_R1 == -333
 	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop5_Added = true
 	endif
 endif
 if gblV_Hop6_Group_R1 == -333
 	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop6_Added = true
 	endif
 endif
 if gblV_Hop7_Group_R1 == -333
 	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop7_Added = true
 	endif
 endif
 if gblV_Hop8_Group_R1 == -333
 	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop8_Added = true
 	endif
@@ -232,7 +232,7 @@ vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 1: holding " + gblV_Mash_1_Temp + " °F. Recirculating."
+vSMsg = "Mash step 1: holding " + gblV_Mash_1_Temp + " °C. Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 1"
 gblS_Advance_Label.background = 5
@@ -256,7 +256,7 @@ sleep 1000
 [SectionBrew220]
 step 1.00009 "SectionBrew220"
 gblV_Brew_Status = 220
-vSMsg = "Mash step 2: raise the mash to " + gblV_Mash_2_Temp + " °F, then click."
+vSMsg = "Mash step 2: raise the mash to " + gblV_Mash_2_Temp + " °C, then click."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Step 2 Set?"
 gblS_Advance_Label.background = 4
@@ -281,7 +281,7 @@ vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 2: holding " + gblV_Mash_2_Temp + " °F. Recirculating."
+vSMsg = "Mash step 2: holding " + gblV_Mash_2_Temp + " °C. Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 2"
 gblS_Advance_Label.background = 5
@@ -305,7 +305,7 @@ sleep 1000
 [SectionBrew230]
 step 1.00011 "SectionBrew230"
 gblV_Brew_Status = 230
-vSMsg = "Mash step 3: raise the mash to " + gblV_Mash_3_Temp + " °F, then click."
+vSMsg = "Mash step 3: raise the mash to " + gblV_Mash_3_Temp + " °C, then click."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Step 3 Set?"
 gblS_Advance_Label.background = 4
@@ -330,7 +330,7 @@ vT_Step = vVStep
 wgt_TMR_Step~timer_BH.countdown = true
 wgt_TMR_Step~timer_BH = vT_Step
 start "wgt_TMR_Step~timer_BH"
-vSMsg = "Mash step 3: holding " + gblV_Mash_3_Temp + " °F. Recirculating."
+vSMsg = "Mash step 3: holding " + gblV_Mash_3_Temp + " °C. Recirculating."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Mashing: step 3"
 gblS_Advance_Label.background = 5
@@ -352,56 +352,56 @@ start "wgt_ALM_Step~alarm_BH"
 vSHops = ""
 if gblV_Hop1_Group_R1 == -444
 	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop1_Added = true
 	endif
 endif
 if gblV_Hop2_Group_R1 == -444
 	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop2_Added = true
 	endif
 endif
 if gblV_Hop3_Group_R1 == -444
 	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop3_Added = true
 	endif
 endif
 if gblV_Hop4_Group_R1 == -444
 	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop4_Added = true
 	endif
 endif
 if gblV_Hop5_Group_R1 == -444
 	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop5_Added = true
 	endif
 endif
 if gblV_Hop6_Group_R1 == -444
 	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop6_Added = true
 	endif
 endif
 if gblV_Hop7_Group_R1 == -444
 	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop7_Added = true
 	endif
 endif
 if gblV_Hop8_Group_R1 == -444
 	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop8_Added = true
 	endif
@@ -462,7 +462,7 @@ BM_22_DO@Pump_Pump_BH = true
 [SectionBrew304]
 step 1.00015 "SectionBrew304"
 gblV_Brew_Status = 304
-vSMsg = "Sparge water (" + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °F) into the mash tun. Click when the sparge volume is in, then stir."
+vSMsg = "Sparge water (" + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °C) into the mash tun. Click when the sparge volume is in, then stir."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Sparge Water In?"
 gblS_Advance_Label.background = 4
@@ -533,7 +533,7 @@ wait gblV_Brew_Status == 311
 wgt_SW_Advance_BH.visible = false
 send_db "wgt_VAL_Pre~boil~volume_RP"
 send_db "wgt_VAL_Pre~boil~gravity_RP"
-BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.setpoint = 215
+BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH.setpoint = 101.7
 BK_Vessel.BM_9_DO@H_Element_Kettle~element_BH = on
 vSMsg = "Heating the kettle to a boil."
 gblS_Step_Text = vSMsg
@@ -541,7 +541,7 @@ gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait BK_Vessel.BM_702_TEMP@1W_Kettle_BH >= 211
+wait BK_Vessel.BM_702_TEMP@1W_Kettle_BH >= 99.4
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew400]
 step 1.00019 "SectionBrew400"
@@ -628,7 +628,7 @@ vVLeft = wgt_TMR_Step~timer_BH
 if vVH1 == 0
 	if vVLeft <= vVT1 + vVWarn
 		if vVLeft > vVT1
-			vSMsg = "In 10 minutes: " + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1 + " at " + gblV_TimeHop1_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1 + " at " + gblV_TimeHop1_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH1 = 1
@@ -637,7 +637,7 @@ if vVH1 == 0
 endif
 if vVH1 < 2
 	if vVLeft <= vVT1
-		vSMsg = "ADD NOW: " + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
+		vSMsg = "ADD NOW: " + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -653,7 +653,7 @@ endif
 if vVH2 == 0
 	if vVLeft <= vVT2 + vVWarn
 		if vVLeft > vVT2
-			vSMsg = "In 10 minutes: " + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1 + " at " + gblV_TimeHop2_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1 + " at " + gblV_TimeHop2_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH2 = 1
@@ -662,7 +662,7 @@ if vVH2 == 0
 endif
 if vVH2 < 2
 	if vVLeft <= vVT2
-		vSMsg = "ADD NOW: " + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
+		vSMsg = "ADD NOW: " + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -678,7 +678,7 @@ endif
 if vVH3 == 0
 	if vVLeft <= vVT3 + vVWarn
 		if vVLeft > vVT3
-			vSMsg = "In 10 minutes: " + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1 + " at " + gblV_TimeHop3_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1 + " at " + gblV_TimeHop3_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH3 = 1
@@ -687,7 +687,7 @@ if vVH3 == 0
 endif
 if vVH3 < 2
 	if vVLeft <= vVT3
-		vSMsg = "ADD NOW: " + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
+		vSMsg = "ADD NOW: " + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -703,7 +703,7 @@ endif
 if vVH4 == 0
 	if vVLeft <= vVT4 + vVWarn
 		if vVLeft > vVT4
-			vSMsg = "In 10 minutes: " + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1 + " at " + gblV_TimeHop4_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1 + " at " + gblV_TimeHop4_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH4 = 1
@@ -712,7 +712,7 @@ if vVH4 == 0
 endif
 if vVH4 < 2
 	if vVLeft <= vVT4
-		vSMsg = "ADD NOW: " + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
+		vSMsg = "ADD NOW: " + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -728,7 +728,7 @@ endif
 if vVH5 == 0
 	if vVLeft <= vVT5 + vVWarn
 		if vVLeft > vVT5
-			vSMsg = "In 10 minutes: " + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1 + " at " + gblV_TimeHop5_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1 + " at " + gblV_TimeHop5_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH5 = 1
@@ -737,7 +737,7 @@ if vVH5 == 0
 endif
 if vVH5 < 2
 	if vVLeft <= vVT5
-		vSMsg = "ADD NOW: " + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
+		vSMsg = "ADD NOW: " + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -753,7 +753,7 @@ endif
 if vVH6 == 0
 	if vVLeft <= vVT6 + vVWarn
 		if vVLeft > vVT6
-			vSMsg = "In 10 minutes: " + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1 + " at " + gblV_TimeHop6_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1 + " at " + gblV_TimeHop6_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH6 = 1
@@ -762,7 +762,7 @@ if vVH6 == 0
 endif
 if vVH6 < 2
 	if vVLeft <= vVT6
-		vSMsg = "ADD NOW: " + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
+		vSMsg = "ADD NOW: " + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -778,7 +778,7 @@ endif
 if vVH7 == 0
 	if vVLeft <= vVT7 + vVWarn
 		if vVLeft > vVT7
-			vSMsg = "In 10 minutes: " + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1 + " at " + gblV_TimeHop7_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1 + " at " + gblV_TimeHop7_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH7 = 1
@@ -787,7 +787,7 @@ if vVH7 == 0
 endif
 if vVH7 < 2
 	if vVLeft <= vVT7
-		vSMsg = "ADD NOW: " + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
+		vSMsg = "ADD NOW: " + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -803,7 +803,7 @@ endif
 if vVH8 == 0
 	if vVLeft <= vVT8 + vVWarn
 		if vVLeft > vVT8
-			vSMsg = "In 10 minutes: " + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1 + " at " + gblV_TimeHop8_Min_R1 + " min"
+			vSMsg = "In 10 minutes: " + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1 + " at " + gblV_TimeHop8_Min_R1 + " min"
 			gblS_Hop_Warning = vSMsg
 			start "wgt_ALM_Warning_BH"
 			vVH8 = 1
@@ -812,7 +812,7 @@ if vVH8 == 0
 endif
 if vVH8 < 2
 	if vVLeft <= vVT8
-		vSMsg = "ADD NOW: " + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
+		vSMsg = "ADD NOW: " + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
 		gblS_Hop_Warning = vSMsg
 		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
 		gblS_Advance_Label.background = 4
@@ -859,56 +859,56 @@ wgt_ALM_Step~alarm_BH = false
 vSHops = ""
 if gblV_Hop1_Group_R1 == -999
 	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop1_Added = true
 	endif
 endif
 if gblV_Hop2_Group_R1 == -999
 	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop2_Added = true
 	endif
 endif
 if gblV_Hop3_Group_R1 == -999
 	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop3_Added = true
 	endif
 endif
 if gblV_Hop4_Group_R1 == -999
 	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop4_Added = true
 	endif
 endif
 if gblV_Hop5_Group_R1 == -999
 	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop5_Added = true
 	endif
 endif
 if gblV_Hop6_Group_R1 == -999
 	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop6_Added = true
 	endif
 endif
 if gblV_Hop7_Group_R1 == -999
 	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop7_Added = true
 	endif
 endif
 if gblV_Hop8_Group_R1 == -999
 	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
 		gblB_Hop8_Added = true
 	endif
@@ -948,7 +948,7 @@ gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
 wait wgt_TMR_Step~timer_BH <= 00:00:00
 stop "wgt_TMR_Step~timer_BH"
-vSMsg = "Open the Chiller water tap. Chilling to " + gblV_Pitch_Temp + " °F, still whirlpooling."
+vSMsg = "Open the Chiller water tap. Chilling to " + gblV_Pitch_Temp + " °C, still whirlpooling."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
@@ -967,7 +967,7 @@ start "wgt_ALM_Step~alarm_BH"
 [SectionBrew600]
 step 1.00024 "SectionBrew600"
 gblV_Brew_Status = 600
-vSMsg = "Chilled to " + BK_Vessel.BM_702_TEMP@1W_Kettle_BH + " °F. Enter the post-boil volume. Hoses and fermenter ready?"
+vSMsg = "Chilled to " + BK_Vessel.BM_702_TEMP@1W_Kettle_BH + " °C. Enter the post-boil volume. Hoses and fermenter ready?"
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Transfer WORT?"
 gblS_Advance_Label.background = 4
@@ -1046,56 +1046,56 @@ wgt_SW_Advance_BH.visible = false
 vSHops = ""
 if gblV_Hop1_Group_R1 == -111
 	if gblS_Hop1_R1 != ""
-		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1 + " (" + gblV_TimeHop1_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " g " + gblS_Hop1_R1 + " (" + gblV_TimeHop1_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop1_Added = true
 	endif
 endif
 if gblV_Hop2_Group_R1 == -111
 	if gblS_Hop2_R1 != ""
-		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1 + " (" + gblV_TimeHop2_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " g " + gblS_Hop2_R1 + " (" + gblV_TimeHop2_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop2_Added = true
 	endif
 endif
 if gblV_Hop3_Group_R1 == -111
 	if gblS_Hop3_R1 != ""
-		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1 + " (" + gblV_TimeHop3_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " g " + gblS_Hop3_R1 + " (" + gblV_TimeHop3_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop3_Added = true
 	endif
 endif
 if gblV_Hop4_Group_R1 == -111
 	if gblS_Hop4_R1 != ""
-		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1 + " (" + gblV_TimeHop4_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " g " + gblS_Hop4_R1 + " (" + gblV_TimeHop4_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop4_Added = true
 	endif
 endif
 if gblV_Hop5_Group_R1 == -111
 	if gblS_Hop5_R1 != ""
-		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1 + " (" + gblV_TimeHop5_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " g " + gblS_Hop5_R1 + " (" + gblV_TimeHop5_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop5_Added = true
 	endif
 endif
 if gblV_Hop6_Group_R1 == -111
 	if gblS_Hop6_R1 != ""
-		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1 + " (" + gblV_TimeHop6_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " g " + gblS_Hop6_R1 + " (" + gblV_TimeHop6_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop6_Added = true
 	endif
 endif
 if gblV_Hop7_Group_R1 == -111
 	if gblS_Hop7_R1 != ""
-		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1 + " (" + gblV_TimeHop7_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " g " + gblS_Hop7_R1 + " (" + gblV_TimeHop7_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop7_Added = true
 	endif
 endif
 if gblV_Hop8_Group_R1 == -111
 	if gblS_Hop8_R1 != ""
-		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1 + " (" + gblV_TimeHop8_Min_R1 + " days" + ")"
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " g " + gblS_Hop8_R1 + " (" + gblV_TimeHop8_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
 		gblB_Hop8_Added = true
 	endif

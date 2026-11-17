@@ -10,9 +10,9 @@ import { cleanProfile } from '../lib/equipment.js';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiles-'));
 const mash = new ProfileStore(path.join(dir, 'mash'), 'mash'), boil = new ProfileStore(path.join(dir, 'boil'), 'boil');
 
-// a new Mash Profile starts with one step; Metric starts in °C
+// a new Mash Profile starts with one step, kept in °C (Rule 2.59: every number is kept in metric, Units only for showing)
 const m1 = mash.create('Single infusion');
-assert.deepEqual(m1.steps, [{ name: 'Saccharification', temp: 152, time: 60 }]);
+assert.deepEqual(m1.steps, [{ name: 'Saccharification', temp: 67, time: 60 }]); assert.equal(m1.units, 'Metric');
 assert.equal(m1.sparge, 'batch'); assert.equal(m1.batchRest, 10);
 assert.equal(mash.create('Metric one', { units: 'Metric' }).steps[0].temp, 67);
 assert.ok(fs.existsSync(path.join(dir, 'mash', 'single-infusion.json')), 'own file');
@@ -28,6 +28,16 @@ assert.throws(() => mash.save(m1.id, { ...m1, steps: [] }), /at least one step/)
 assert.throws(() => mash.save(m1.id, { ...m1, steps: [{ name: 'x', temp: -5, time: 10 }] }), /0 or more/);
 assert.equal(mash.create('Copy', { from: m1.id }).steps.length, 4, 'a copy of another');
 
+// a profile sent in US units is kept in metric; an older US file is turned into metric once, the old file kept beside it (Rule 2.59)
+{ const us = mash.save(m1.id, { ...m1, units: 'US', steps: [{ name: 'Sacch', temp: 152, time: 60 }], spargeTemp: 168, mashOutTemp: 170 });
+  assert.equal(us.units, 'Metric'); assert.equal(us.steps[0].temp, 66.6667); assert.equal(us.spargeTemp, 75.5556);
+  const f = path.join(dir, 'mash', m1.id + '.json');
+  fs.writeFileSync(f, JSON.stringify({ ...JSON.parse(fs.readFileSync(f, 'utf8')), units: 'US', steps: [{ name: 'Sacch', temp: 212, time: 60 }] }));
+  assert.equal(mash.keepMetric(), 1); assert.equal(mash.get(m1.id).steps[0].temp, 100); assert.equal(mash.keepMetric(), 0, 'only once');
+  assert.ok(fs.existsSync(f + '.before_metric'), 'the old file is kept');
+  assert.ok(mash.list().filter(p => p.skynet).every(p => p.units === 'Metric'), 'Skynet Mash Profiles are kept in °C');
+  assert.equal(mash.get('skynet-single-batch').steps[0].temp, 66.6667); }
+
 // Boil Profile: total time, its own boil off (empty = the Equipment Profile's), the volume questions and the three Hop Stands
 const b1 = boil.create('60 minute');
 assert.equal(b1.boilTime, 60); assert.equal(b1.boilOffRate, undefined, 'no boil off of its own'); assert.equal(b1.askVolumes, true);
@@ -35,6 +45,7 @@ assert.throws(() => boil.save(b1.id, { ...b1, boilTime: '' }), /boil time/);
 const b2 = boil.save(b1.id, { ...b1, boilTime: 90, boilOffRate: 1.25, hsMiddleTemp: 150, hsMiddleMin: 25 });
 assert.equal(b2.boilTime, 90); assert.equal(b2.boilOffRate, 1.25); assert.equal(b2.hsMiddleTemp, 150); assert.equal(b2.hsMiddleMin, 25); assert.equal(b2.hsHighTemp, undefined);
 assert.equal(boil.save(b1.id, { ...b2, boilTime: 0 }).boilTime, 0, '0 = No Boil');
+assert.equal(boil.save(b1.id, { ...b2, units: 'US', boilOffRate: 1, hsMiddleTemp: 154 }).boilOffRate, 3.7854, 'US gallons kept as liters');
 boil.remove(b1.id);
 // the Skynet Boil Profiles (OakBarn Brewery, 2026-11-13): read only, every one asks the volumes, no boil off of their own
 assert.deepEqual(boil.list().map(p => [p.name, p.boilTime]), [['Skynet 60 Minute Boil', 60], ['Skynet 90 Minute Boil', 90], ['Skynet 30 Minute Boil', 30], ['Skynet No Boil', 0]]);

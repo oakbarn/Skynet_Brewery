@@ -1,11 +1,11 @@
 {
-  "vesselType": "vessel",
+  "vesselType": "vessel", "units": "Metric",
   "vtype": "All In One",
   "image": "Images/Skynet/Vessels/Vessel_Brewzilla.svg",
   "heatKind": "other",
   "otherHeat": "Its own heaters, pump and controller (set by hand)",
   "appliance": "brewzilla65",
-  "volume": 17.2,
+  "volume": 65.1091,
   "std": {
     "type": "BSPMRc",
     "size": 0.5
