@@ -4,7 +4,6 @@ import { traceFile, Pictures, DRAWING_SCORE } from '../lib/vectorize.js';
 import { createRequire } from 'node:module';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpv'));
-fs.copyFileSync(path.join(ROOT, 'media/Images/Skynet/Alarms/AlarmBitter.png'), path.join(d, 'Bell.png'));
 // photo-like and too-big test pictures are made here (the old burner photo and brewery_main.png left the repo, copyright, 2026-11-17)
 const { PNG } = createRequire(import.meta.url)('../lib/vendor/pngjs/png.js');
 function makePng(file, w, h, px) {
@@ -14,6 +13,8 @@ function makePng(file, w, h, px) {
 }
 let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
 makePng(path.join(d, 'Burner.png'), 400, 400, (x, y) => [x * 0.5 + rnd() * 90, y * 0.4 + rnd() * 90, (x + y) * 0.25 + rnd() * 90]);   // photo-like: soft shading and grain
+// a flat two-color drawing, made here (AlarmBitter.png left the repo, copyright, 2026-11-17): a light bell on green
+makePng(path.join(d, 'Bell.png'), 600, 600, (x, y) => ((x - 300) ** 2 + (y - 280) ** 2 < 150 ** 2 && y < 330) || (y >= 330 && y < 440 && Math.abs(x - 300) < 150 + (y - 330) * 0.5) || ((x - 300) ** 2 + (y - 470) ** 2 < 40 ** 2) ? [198, 239, 42] : [33, 176, 75]);
 const bigPng = path.join(os.tmpdir(), `bpv_big_${process.pid}.png`); makePng(bigPng, 1500, 1400, x => [x % 256, 128, 64]);
 fs.writeFileSync(path.join(d, 'Mine.png'), fs.readFileSync(path.join(d, 'Bell.png')));
 fs.writeFileSync(path.join(d, 'Mine.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"/>');   // hand-made
@@ -60,7 +61,7 @@ console.log('vectorize tests passed');
 // Rule 7.25: Help pictures are never swapped for a traced copy (it smears their words); a hand-made SVG still wins
 {
   const h = fs.mkdtempSync(path.join(os.tmpdir(), 'bpvh')), hp = path.join(h, 'help_pictures'); fs.mkdirSync(hp);
-  fs.copyFileSync(path.join(ROOT, 'media/Images/Skynet/Alarms/AlarmBitter.png'), path.join(hp, 'Shot.png'));
+  fs.copyFileSync(path.join(d, 'Bell.png'), path.join(hp, 'Shot.png'));
   fs.writeFileSync(path.join(hp, 'Shot.svg'), traceFile(path.join(hp, 'Shot.png')).svg);          // an old traced copy left on a Brain
   const hs = new Pictures({ config: {}, writeConfig() {} }, () => [h]);
   assert.equal(hs.pick(path.join(hp, 'Shot.png')), path.join(hp, 'Shot.png'), 'Help picture: the picture itself, not the traced copy');

@@ -23,6 +23,11 @@ La Basic Skynet Alarm est dessinée en couches, de bas en haut :
 
 L'image de la cloche elle-même est fixée par Skynet et ne peut pas être changée. Elle existe en trois versions : **Together** (Back et Fore),
 **Back only** et **Fore only**, toutes dans `Images/Skynet/Alarms/`. Les traits noirs de la cloche ne sont jamais colorés.
+
+**Bell** choisit quelle cloche Skynet : **Basic** (la cloche ci-dessus, avec ses traits noirs) ou **Hop** (`Alarm_Hop` : un dessin
+au trait d'une cloche avec des ondes sonores, dans les seules couleurs Back et Fore, sans traits noirs). La cloche Hop ne contient
+pas de houblon : posez le houblon vert dessus avec le Set Graphic **Hop Cone** (`Alarm_Set_Hop_Cone.svg`, Layer 2). Une seule
+cloche Hop sert aux alarmes de houblon Bitter, Flavor et Aroma, chacune avec ses propres couleurs Back et Fore.
 Les couleurs sont la liste de couleurs standard (Default et None d'abord, puis les couleurs nommées, puis Custom).
 
 Les listes Set Graphic et Active overlay ne contiennent que des images Skynet : les images `Alarm_Set_...` et `Alarm_Active_...` de
