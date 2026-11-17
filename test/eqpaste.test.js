@@ -40,6 +40,9 @@ assert.deepEqual(hw.elements.map(e => e.name), ['Probe_1', 'Heat_1', 'Valve_1', 
 assert.deepEqual(hw.boards.map(b => b.name), ['Mega'], 'only the boards its Devices use');
 assert.equal(JSON.stringify(hw).includes('_key'), false, 'no hidden key in the profile');
 assert.equal(hw.tabId, 'HT');
+// a Widget with IPs is real world hardware even with no board (a manual pump); a Switch or Text Box never is ("No Switches")
+{ const c2 = { ...c, elements: [...c.elements, { name: 'MPump_1', type: 'manualPump', workspace: 'Hot' }, { name: 'Sw_1', type: 'digitalOut', workspace: 'Hot' }, { name: 'wgt_TXT_A_HT', type: 'text', workspace: 'Hot' }] };
+  assert.deepEqual(hardwareOf(c2, tab).elements.map(e => e.name), ['Probe_1', 'Heat_1', 'Valve_1', 'Pump_1', 'MPump_1']); }
 // the profile's drawing points at slots for the pumps and valves (lib/schemas.js toSlots); the paste puts the Names back
 const graphics = c.graphics.filter(g => g.kind !== 'text').map(g => ({ ...g, from: g.from?.replace('dev:Valve_1', 'dev:@sV').replace('dev:Pump_1', 'dev:@sP'), to: g.to?.replace('dev:Valve_1', 'dev:@sV').replace('dev:Pump_1', 'dev:@sP') }))
   .map(g => Object.fromEntries(Object.entries(g).filter(([, v]) => v !== undefined)));
