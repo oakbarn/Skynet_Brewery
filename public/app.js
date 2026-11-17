@@ -403,7 +403,7 @@ function setView(v, here = false) {
 
 // ---------------------------------------------------------------- workspaces
 let previewing = false;
-const L = () => editing || previewing ? draft : S.config;          // layout being shown (a Build Tab Preview shows the draft too)
+const L = () => eqv?.layout || (editing || previewing ? draft : S.config);          // the Equipment Profile view draws the profile itself (Rule 19.6 #2); a Build Tab Preview shows the draft too
 // Hidden_ Special Tabs (Fritz, 2026-10-30): a Tab named Hidden_... holds things a Process uses but nobody needs on Brew Day
 // (a gV_ variable, a Widget only a Process sets). It shows only in Edit layout; the rest of the time it works in the background.
 const HIDDEN_TAB = 'Hidden_';
@@ -551,7 +551,6 @@ function drawWs() {
   if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
   drawMethodSpots(w);
   markFresh();         // a new item just moved here from the Build Tab glows until clicked (Rule 4.1)
-  if (eqv) eqvHide();  // the Equipment Profile view shows the hardware only
   renderPipes(); fitZoom(); updLockBtn(); renderVbPanel();
 }
 
@@ -15138,12 +15137,13 @@ async function pasteProfile(p, pick = null) {
   }), 15000);
 }
 // ---- The Equipment Profile view (OakBarn Brewery, 2026-11-17: "The one in Skynet now does not make sense for what the Equipment Profile
-// will be used for"; "Make it with your recommendations and I will test"). Opening a profile shows the brewery it is: the Tab that uses
-// it, as it looks on Brew Day (nothing on it can be clicked here), or a drawing of its pieces when no Tab of this Schema uses it. The
-// frozen bar on top has the three ➡ Transfer buttons ("1 for all 1 for just vessels and 1 for Just Manifold"), each one click (Rule
-// 2.44) to the Tab picked beside them, then 🗑 Delete · 💾 Save · ↶ Undo · ✕ Close (Rule 2.51). Under them, the profile's Properties
-// that go with it to a Tab ("Equipment Profile Properties are ones transferred like Effenicy"); ⚙ Properties changes them, and
-// 📋 More ... opens everything else (the volume check, the Equipment list, Efficiency on this Schema, the lock) on ☰ Menu.
+// will be used for"; "Make it with your recommendations and I will test"; "IT Is NOT a Tab but a PROFILE"). Opening a profile draws the
+// profile itself, from what the profile keeps (GET /ui/equipment/:id/hardware): only its real world hardware (the vessels, IPs, fittings,
+// pipes, hoses, Widgets with IPs and every Device on a board). A Text Box, a Switch, a Process or a Timer is never in a profile, so there
+// is nothing to hide. It is not a Tab: no Tab row shows and nothing on it can be clicked. The frozen bar on top has the three ➡ Transfer
+// buttons ("1 for all 1 for just vessels and 1 for Just Manifold"), each one click (Rule 2.44) to the Tab picked beside them, then
+// 🗑 Delete · 💾 Save · ↶ Undo · ✕ Close (Rule 2.51). Under them, the profile's Properties that go with it to a Tab ("Equipment Profile
+// Properties are ones transferred like Effenicy"); ⚙ Properties changes them, and 📋 More ... opens everything else on ☰ Menu.
 const EQV_TIPS = {
   all: 'Put all of this profile\'s hardware on the Tab picked on the right: vessels, pumps, valves, pipes, hoses, fittings, boards and Ports, and its Properties (Efficiency ...). It lands on the 🔨 Build Tab; hardware already on that Tab that is the same is replaced after a list.',
   vessels: 'Put only the vessels, each with everything on it (its IPs, fittings, heaters and probes), and the profile\'s Properties, on the Tab picked on the right. It lands on the 🔨 Build Tab.',
@@ -15152,30 +15152,38 @@ const EQV_TIPS = {
   props: 'Change this profile\'s Name, Units and the numbers that go with it to a Tab (Brewhouse efficiency, losses ...). 💾 Save keeps them.',
   more: 'Everything else about this profile on ☰ Menu > Equipment Profile: the volume check, the Equipment list, Efficiency on this Schema, the lock, New Schema from this profile.',
 };
-function eqViewOpen(id) {
+async function eqViewOpen(id) {
   const p = S.profiles.find(x => x.id === id); if (!p) return toast('That profile is gone', true);
   if (editing) return toast('Save or exit Edit layout first', true);
   if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
+  const full = await api('GET', `/ui/equipment/${id}/hardware`).catch(e => { toast(e.message, true); return null; });
+  if (!full) return;
   eqDirty = false;
   const w = tabOfProfile(id), back = menuTab ? (curWs()?.name ?? wsName) : wsName;
   leaveMenuTab();
   const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
-  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(p), dirty: false };
-  if (w) wsName = w.name;
+  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(p), dirty: false, layout: eqLayout(p, full) };
+  wsName = eqv.layout.workspaces[0].name;
   document.body.classList.add('eqViewing'); sel = null;
   renderTabs(); renderWs(); eqViewBar();
+}
+// the profile drawn as itself: its own hardware only, on a page of its own size (L() shows it while the view is open)
+function eqLayout(p, full) {
+  const pc = pastePieces(full || {}, 'both'), hw = full?.hardware || {}, name = p.name || 'Equipment Profile';
+  const page = { name, id: hw.tabId || '', width: hw.width || 1600, height: hw.height || 900 };
+  return { ...S.config, workspaces: [page], devices: pc.boards, elements: pc.elements.map(e => ({ ...e, workspace: name })), graphics: pc.graphics.map(g => ({ ...g, workspace: name })), profileView: p.id };
 }
 function eqViewClose(force = false) {
   if (!eqv) return true;
   if (!force && eqv.dirty && !confirm(`"${eqv.work.name}" has changes that are not saved. Close anyway?`)) return false;
   const back = eqv.back; eqv = null;
-  document.body.classList.remove('eqViewing'); $('#eqViewBar')?.remove(); $('#eqPreview')?.remove();
+  document.body.classList.remove('eqViewing'); $('#eqViewBar')?.remove();
   if (back && S.config.workspaces.some(w => w.name === back)) wsName = back;
   renderTabs(); renderWs();
   return true;
 }
 function eqViewBar() {
-  $('#eqViewBar')?.remove(); $('#eqPreview')?.remove();
+  $('#eqViewBar')?.remove();
   if (!eqv) return;
   const p = S.profiles.find(x => x.id === eqv.id); if (!p) return eqViewClose(true);
   if (!eqv.dirty) eqv.work = clone(p);
@@ -15219,36 +15227,9 @@ function eqViewBar() {
       !ro ? btn('↶ Undo', undo, UNDO_TIP) : '',
       btn('✕ Close', () => eqViewClose(), 'Close the Equipment Profile and go back')),
     h('div', { class: 'bar wrap eqvProps' }, !ro ? btn('⚙ Properties', props, EQV_TIPS.props) : h('span', {}, p.locked ? '🔒 Locked' : 'Properties'), ...nums,
-      h('span', { class: 'muted' }, tab ? `Shown: the Tab "${tab.name}" that uses it (look only: nothing here can be clicked).` : 'No Tab of this Schema uses it: a drawing of its pieces.'),
+      h('span', { class: 'muted' }, eqv.layout.elements.length || eqv.layout.graphics.length ? 'Shown: the hardware this profile holds (look only).' : `"${w.name}" holds no hardware yet: give it to a Tab (☰ Menu > Equipment Profile > Settings) and build on that Tab.`),
       btn('📋 More ...', more, EQV_TIPS.more)));
   $('#view-workspace > .bar').after(bar);
-  if (!tab) eqPreview(p);
-}
-// the Equipment Profile view shows only the physical hardware of the Tab (Rule 19.6 #2: "only Physical Hardware"): every Device on a
-// board, the vessels, fittings, IPs, pipes and hoses. Widgets, Timers, Texts and pictures are hidden while it is open.
-function eqvHide() {
-  const els = new Map(S.config.elements.map(e => [String(e.name), e])), gs = new Map(S.config.graphics.map(g => [String(g.id), g]));
-  for (const n of document.querySelectorAll('#ws .el, #ws .gfx')) {
-    const e = n.dataset.gid ? null : els.get(n.dataset.name), g = n.dataset.gid ? gs.get(n.dataset.gid) : null;
-    const hw = e ? e.device !== undefined && e.device !== '' : g ? ['vessel', 'ip', 'pipe'].includes(g.kind) : true;
-    n.classList.toggle('eqvHidden', !hw);
-  }
-}
-// a drawing of a profile no Tab of this Schema uses: its vessels, fittings and IPs as outlines with their Labels, and its pipes
-async function eqPreview(p) {
-  const full = await api('GET', `/ui/equipment/${p.id}/hardware`).catch(() => null);
-  if (!eqv || eqv.id !== p.id || $('#eqPreview')) return;
-  const gs = full?.graphics || [], els = full?.hardware?.elements || [];
-  const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); return n; };
-  const W = full?.hardware?.width || 1600, H = full?.hardware?.height || 900, svg = mk('svg', { class: 'buildMark eqPrevSvg', viewBox: `0 0 ${W} ${H}`, width: '100%' });
-  for (const g of gs.filter(g => g.kind === 'pipe' && g.points?.length > 1)) svg.append(mk('polyline', { points: g.points.map(c => c.join(',')).join(' '), class: 'bmPipe' }));
-  for (const o of [...gs.filter(g => g.kind !== 'pipe' && g.kind !== 'ip'), ...els.filter(e => !e.integratedIn)]) {
-    const x = +o.x || 0, y = +o.y || 0, w = +o.w || 120, hh = +o.h || 60;
-    svg.append(mk('rect', { x, y, width: w, height: hh, rx: 4, class: 'bmBox' }));
-    const t = mk('text', { x: x + w / 2, y: y + hh / 2, class: 'bmText' }); t.textContent = o.label || o.name || ''; svg.append(t);
-  }
-  const box = h('div', { id: 'eqPreview', class: 'eqPreview' }, gs.length || els.length ? svg : h('p', { class: 'muted' }, `"${p.name}" has no hardware kept yet: give it to a Tab (☰ Menu > Equipment Profile) and build on that Tab.`));
-  $('#eqViewBar').after(box);
 }
 // the Replace / Cancel list (Rule 19.6 #2: "Nothing happens until the user says so: a list shows what will be replaced")
 function replaceAsk(title, intro, lines) {

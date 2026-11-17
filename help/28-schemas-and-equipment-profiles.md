@@ -149,7 +149,7 @@ Profiles made before Templates may still have a list of vessels. They show under
 
 ## The Equipment Profile view
 
-**Open** beside a Tab's profile (or **🖼 View the Equipment Profile** under the Open dropdown) shows the profile as the brewery it is: the Tab that uses it, with only its hardware (the vessels, pumps, valves, heaters, probes, fittings, IPs, pipes and hoses), as it looks on Brew Day. Nothing on it can be clicked there. When no Tab of the loaded Schema uses the profile, a drawing of its pieces shows instead.
+**Open** beside a Tab's profile (or **🖼 View the Equipment Profile** under the Open dropdown) shows the profile itself. An Equipment Profile is **not a Tab**: it is a profile of the brewery's real world hardware, and that is all it holds: the vessels, IPs, fittings, pipes, hoses, pumps, valves, heaters, probes and Widgets with IPs, with their Interfaces (boards) and Ports. Text Boxes, Switches, Processes, Timers and other Widgets are never in a profile, so they are not part of this view at all. Nothing on it can be clicked.
 
 The bar on top stays put:
 
