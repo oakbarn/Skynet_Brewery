@@ -20,7 +20,7 @@ Each board (Interface) on the **Devices** page shows a **connection rating**: ho
 
 ## Heating Devices
 
-A heating Device is an electric element, a burner gas valve or igniter, a heat pad, or the output of a PID, Hysteresis or Duty Cycle. You **can** put one on an Ethernet or WiFi board, but the panel warns you when you save it, and that board's **Connection** shows ⚠ with the heating Devices named. On WiFi an ESP32's rating drops to **Poor**. USB is safest.
+A heating Device is an electric element, a burner gas valve or igniter, a heat pad, or the output of a PID, Hysteresis or Duty Cycle. You **can** put one on an Ethernet or WiFi board, but the panel warns you when you save it, and that board's **Rating** shows ⚠ with the heating Devices named. On WiFi an ESP32's rating drops to **Poor**. USB is safest.
 
 ## Lost Comm
 

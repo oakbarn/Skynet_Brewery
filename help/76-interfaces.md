@@ -5,7 +5,24 @@ An **Interface** is a board (PLC) your Devices are wired to: an Arduino Mega 256
 ## Finding them
 
 - **☰ Menu > 🔌 Interfaces (boards)** opens the Devices page at the Interfaces list.
-- The **Devices** page lists every Interface: its ID, name, board, connection, rating, Lost Comm and status.
+- The **Devices** page has two Tabs: **🔌 Interfaces** (every Interface and **Add Interface**) and **🌡 OneWire Probes** (the OneWire probe index and the probes seen, see [Devices and boards](03-devices)).
+
+## The Interfaces list
+
+Rest the mouse on a column name for its Hover Help:
+
+| Column | What it shows |
+|---|---|
+| **ID** | The Interface ID: it starts the suggested name of every Device on this Interface (MB_25_DO@Pump_Wort_BH). Interface IDs follow Rule 3.2: once saved, it never changes. |
+| **Name** | The Interface's Name, the one you gave it when you added it: Hot Side, Fermentation, your brewery name. |
+| **Board** | The kind of board: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each. |
+| **Mode** | Simulator: the panel pretends to be this board, and nothing goes to a real board. Real: the panel talks to the real board. The panel is switched between them on the Simulator bar. |
+| **Connection** | How the board is connected to the Brain: USB, Ethernet or WiFi. Rest the mouse on it to see its USB Port or Network address. |
+| **Rating** | How safe the Connection is for this board: Best, Good, OK or Poor. USB is the safest; Ethernet and WiFi depend on your network. |
+| **Lost Comm** | Lost Comm: if the board hears nothing from the Brain this long, it turns all outputs OFF |
+| **Status** | Is the board talking to the Brain: connected, connecting, no answer or disabled. Rest the mouse on it for more (the board's program and version, or what went wrong). |
+
+When something is wrong (no answer, an error from the board), the reason is also written under the Status. The ID box is locked: it shows the ID in plain view but cannot be typed in (Rule 3.2).
 
 ## Adding an Interface
 
