@@ -143,6 +143,7 @@ export function cleanVessel(b = {}) {
   }
   if (NAME_RE.test(text(b.base, 60))) t.base = text(b.base, 60);      // the Skynet Vessel Widget a User Bundled vessel Template is built on
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
+  { const bundle = vesselType === 'ccoil' && t.liquidPorts === 2 ? cleanBundle(b.bundle) : null; if (bundle) t.bundle = bundle; }      // a Chiller Bundle (Rule 4.1 exception)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
     const p = { installed: !!q?.installed, position: text(q?.position, 60) || undefined };
@@ -222,4 +223,25 @@ export function applyDeviceTemplate(el, t) {
   if (p) { if (p[0]) el.imageOn = p[0]; else delete el.imageOn; el.imageOff = p[1]; }
   if (el.subtype === 'valve') { if (el.tapwater) el.tapwaterOut = tapOutFrom(el.tapSource); else { delete el.tapwaterOut; delete el.tapSource; } }
   return el;
+}
+
+// A Chiller Bundle Equipment Template (OakBarn Brewery, 2026-11-17: "use a Normal Build Tab to create a Bundled Immersion Chiller and
+// save to Equipment Templates"; a Rule 4.1 exception): an immersion chiller Template that also keeps the pieces built with it on the
+// Build Tab, its hoses (Quick Disconnect or plain), an Ice Water Can, a Sump Pump (by hand, or a Device on a controlled wall outlet) and
+// the IPs they need. Their spots are kept from the chiller's top left corner. A Device never keeps its Interface or Port in a Template
+// (Rule 6.1: a Template that held a Port would hold it for good); it gets the next free Port when the Bundle is put on a Tab.
+const BUNDLE_MAX = { graphics: 80, elements: 12 };
+const NO_PORT = ['device', 'channel', 'pin', 'port2', 'channel2', 'pins'];
+function plainCopy(x) {
+  try { const s = JSON.stringify(x); return s && s.length < 100000 ? JSON.parse(s, (k, v) => k.startsWith('_') ? undefined : v) : null; } catch { return null; }
+}
+export function cleanBundle(b) {
+  if (!b || typeof b !== 'object' || typeof b.chiller !== 'string') return null;
+  const graphics = (Array.isArray(b.graphics) ? b.graphics : []).slice(0, BUNDLE_MAX.graphics).map(plainCopy)
+    .filter(g => g && typeof g.id === 'string' && ['ip', 'pipe', 'vessel'].includes(g.kind));
+  const elements = (Array.isArray(b.elements) ? b.elements : []).slice(0, BUNDLE_MAX.elements).map(plainCopy)
+    .filter(e => e && typeof e.name === 'string' && /^[\w~@]{1,80}$/.test(e.name));
+  for (const e of elements) for (const k of NO_PORT) delete e[k];
+  if (!graphics.some(g => g.kind !== 'ip') && !elements.length) return null;       // nothing but the chiller's own IPs: a plain Template
+  return { chiller: b.chiller, graphics, elements };
 }

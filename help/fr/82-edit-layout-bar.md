@@ -31,6 +31,10 @@ Un **Device** est lié à une broche d'une carte (une Interface).
 
 Ce sont des raccourcis. Cliquer sur **Pumps** montre seulement la liste des pompes : comme choisir **Pumps** dans Select Device Type puis ouvrir Add Device. Un clic pour ouvrir, un pour choisir.
 
+**Valves/Equipment** a d'abord les vannes, puis les **Equipment Templates** (en choisir un le met sur le 🔨 Build Tab) et **🔨 Build new Equipment Template**, qui ouvre le 🔨 Build Tab pour un nouvel Equipment Template, comme un Chiller Bundle ([Build Tab](55-build-tab)).
+
+Tant que le 🔨 Build Tab est pour un Template ou un Equipment Profile, les boutons des choses qui ne peuvent pas y aller sont grisés : Select Widget Type, Add Widget, Picture, Text, Override, Boolean, Value, Code Value, Time, DateTime, Tab settings, New tab, Hidden Tab, Processes et Update Schema Version.
+
 ## Add Device
 
 Choisir un Device ouvre la fenêtre **Add Device**. Remplissez-la depuis le haut :

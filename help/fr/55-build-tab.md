@@ -121,10 +121,28 @@ Si son Tab a été supprimé ou renommé entre-temps, la question est sautée et
 
 ## Ce qui peut être un Template {#what-can-be-a-template}
 
-Un Template est **une cuve** (avec les raccords groupés sur ses orifices) ou **un raccord groupé**. Tant qu'il y a autre chose sur le Build Tab (un Device, un Widget, un IP isolé, un tuyau, une image ou un texte), **As a Template** est grisé et dit pourquoi. Enregistrez plutôt vers un Tab, ou supprimez d'abord ces choses du Build Tab.
+Un Template est **une cuve** (avec les raccords groupés sur ses orifices), **un raccord groupé** ou **un Chiller Bundle** (plus bas). Tant qu'il y a autre chose sur le Build Tab (un Device, un Widget, un IP isolé, un tuyau, une image ou un texte), **As a Template** est grisé et dit pourquoi. Enregistrez plutôt vers un Tab, ou supprimez d'abord ces choses du Build Tab.
 
 - Une cuve, un refroidisseur, un serpentin, un filtre à trub ou un tube RIMS devient un **Vessel Template** (ou un **Equipment Template**). Il garde sa sorte, son type, son image, la taille à laquelle il est dessiné, ses tailles, sa source de chaleur, son Connection Standard, ses notes et quels orifices sont actifs et où.
 - Un raccord groupé sur un de ses orifices qui est encore identique à son Template est utilisé tel quel. Un raccord que vous avez changé sur le Build Tab est d'abord enregistré comme un nouveau **Bundled Fitting Template**, nommé d'après lui.
 - Un Tab_Fitting seul devient un **Bundled Fitting Template**.
+
+### Un Chiller Bundle {#a-chiller-bundle}
+
+Un refroidisseur à immersion avec tout ce qui va avec peut être **un seul Equipment Template** :
+
+1. Dans la barre Edit layout, choisissez **Valves/Equipment > 🔨 Build new Equipment Template**. Le 🔨 Build Tab s'ouvre pour un
+   Template, et les boutons des choses qui ne peuvent pas y aller (Widgets, Picture, Text, Tab settings, New tab, Hidden Tab,
+   Processes) sont grisés.
+2. Mettez-y **un refroidisseur à immersion** (Add equipment ➕ > Chilling coil, 2 IP) et ce qui va avec : ses **tuyaux souples** (Draw
+   hose ou Draw QD hose : le tuyau d'arrivée vers son In et le tuyau d'évacuation depuis son Out), un **Ice Water Can**, une **pompe
+   de puisard** (Pumps > Sump Pump by hand, ou un Device de pompe sur une prise murale commandée) et les **IP** nécessaires.
+3. Appuyez sur **✅ Finish Build ...** : **As a Template** est en premier. Donnez-lui un nom (par exemple Ice_Bath_Chiller) et
+   appuyez sur **Save as Template**.
+
+Il est dans ☰ Menu > Equipment Templates et dans **Valves/Equipment**. Le choisir met tout sur le 🔨 Build Tab ensemble, tuyaux
+toujours joints ; un nom déjà pris reçoit un numéro. Un Template ne garde jamais de Port, donc un Device de pompe de puisard reçoit le
+**prochain Port libre** de l'Interface du Build quand il est posé (ou Skynet dit de lui en donner un dans Properties). Toute autre
+chose sur le Build Tab (un Widget, une image, un texte, un deuxième refroidisseur) est nommée, et As a Template dit de l'enlever d'abord.
 
 Tant que Skynet construit encore ses Templates, il y a un bouton **Skynet Template** (désactivé = un Template groupé de l'utilisateur). Voir [Modèles de cuves et de raccords](50-vessel-and-fitting-templates).
