@@ -1431,3 +1431,11 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 #ws .gfx.vessel.chillTarget { outline: 3px dashed #f5c400; outline-offset: 2px; }
 #ws .gfx.vessel.chillLocked { animation: chillLock .25s steps(1) 8; }
 @keyframes chillLock { 0% { outline: 3px solid #e02020; outline-offset: 2px; } 50% { outline: 3px solid #f5c400; outline-offset: 2px; } }
+/* The Equipment Profile view (Rule 19.6 #2): the profile itself (its own hardware, not a Tab), look only, under a frozen bar with the ➡ Transfer buttons */
+body.eqViewing #wsTabs, body.eqViewing #menuTabs { visibility: hidden; }
+body.eqViewing #ws { pointer-events: none; }
+.eqViewBar { position: sticky; top: 0; z-index: 40; background: var(--panel2); border-bottom: 1px solid var(--line); padding: 6px 10px; }
+.eqViewBar .bar { gap: 8px; align-items: center; }
+.eqViewBar .eqvTitle { font-size: 1.05em; margin-right: 8px; }
+.eqViewBar .eqvProps { font-size: .92em; margin-top: 4px; }
+.eqViewBar .eqvNum b { margin-right: 6px; }
