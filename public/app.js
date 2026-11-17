@@ -1318,12 +1318,15 @@ const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
 // with; the flashing one is a choice
 const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
 // the names (OakBarn Brewery, 2026-11-10): each starts with its own first letter, so typing that letter in the list picks it (Rule 2.38)
-// the On overlay a new pump or a new powered valve starts with (OakBarn Brewery, 2026-11-14: "Default Overlay for a New User Pump
-// Template" and "... Valve Template"): ☰ Menu > Default settings; a Skynet Template keeps its own (Rule 2.42: Defaults are for new things)
-// the lockout a new Pulse button starts with (Rule 6.7): ☰ Menu > Default settings > Push Lockout (s), 3 unless changed
+// the On overlay a new pump or a new powered valve starts with: the Overlay of the Pump or Valve Profile marked Default (OakBarn Brewery,
+// 2026-11-17: Pump Overlay "On Pump Profile", Valve Overlay "On Valve Profile", off Default settings); the profile picked in the Add
+// box then sets its own. The old Default settings value only where no profile names one. A Skynet Template keeps its own.
+// the lockout a new Pulse button starts with (Rule 6.7): Settings > Panel settings > Push Lockout (s), 3 unless changed (OakBarn
+// Brewery, 2026-11-17: "Skynet Panel Setting", off Default settings)
 const newLockout = () => Math.round((+S.config.brewDefaults?.pushLockout > 0 ? +S.config.brewDefaults.pushLockout : 3) * 1000);
 const OVERLAY_DEFAULTS = { pump: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg', valve: BOLT };
-const newOverlay = kind => (v => v === undefined || v === null ? OVERLAY_DEFAULTS[kind] : v)(S.config.brewDefaults?.[kind === 'pump' ? 'newPumpOverlay' : 'newValveOverlay']);
+const newOverlay = kind => (v => v === undefined || v === null ? OVERLAY_DEFAULTS[kind] : v === 'none' ? '' : v)(S[kind === 'pump' ? 'pumpProfiles' : 'valveProfiles']?.find(p => p.isDefault)?.imageOverlay
+  ?? S.config.brewDefaults?.[kind === 'pump' ? 'newPumpOverlay' : 'newValveOverlay']);
 const OVERLAY_GRAPHICS = [['Lightning Bolt', BOLT], ['Flashing Lightning Bolt', BOLT_FLASH], ['Corner Badge Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['See Through Lightning Bolt', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green Glow Ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -5268,8 +5271,8 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
-  if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // Default settings (Rule 2.42)
-  if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout on Default settings
+  if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // the Default Pump or Valve Profile (Rule 2.42)
+  if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout in Settings > Panel settings
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
   if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'valueWidget' || type === 'codeValueWidget') e.precision = 2; if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
@@ -6473,6 +6476,7 @@ function useValveProfile(e, id) {
   e.orientation = p.orientation; delete e.ipIn; delete e.ipOut;
   if (p.orientation === 'h') [e.w, e.h] = [e.h, e.w];
   if (p.orientation === 'l45' || p.orientation === 'r45') e.w = e.h = Math.max(e.w, e.h);   // the vertical picture is turned 45 degrees in a square
+  if (p.imageOverlay) e.imageOverlay = p.imageOverlay === 'none' ? '' : p.imageOverlay;      // every Valve Profile names its Overlay (2026-11-17)
   return true;
 }
 // Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
@@ -13462,7 +13466,7 @@ const MENU = [
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
-  { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
+  { key: 'valve', title: 'Valve Profile', tip: 'The pictures, orientation and Overlay a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types', render: renderBrewProfileTab('pump') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
@@ -14022,9 +14026,6 @@ const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
 // the New User Templates and Schemas boxes' hover help (OakBarn Brewery, 2026-11-14: "These are for new User Created only")
 const NEW_TIPS = {
   look: 'The Look (theme) a new Schema starts with. The Schema that is open changes its own Look in Settings > Panel settings.',
-  // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): "What the Default Pump overlay is, and The default Pump Overlay only applies to new Pump Profiles"
-  pump: 'The Default Pump Overlay is the On overlay: what shows over a pump while it runs. Skynet starts with the Green Glow Ring.\nThe Default Pump Overlay only applies to new Pump Profiles: a new Pump Profile starts with it, and each new pump takes the Overlay of the Pump Profile picked in its Add box. Pump Profiles already made, and pumps already made, keep theirs.',
-  valve: 'The On overlay a new User Valve Template (a powered valve) starts with. A Skynet Template keeps its own, and valves already made keep theirs.',
   lockout: 'How long a new Pulse button waits before another press counts, in seconds. Each button can change its own in its Properties.' };
 // the Hover Delay box's own hover help (Rule 2.38)
 const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover Help shows, in milliseconds (1000 ms = 1 second). 0 or empty: it shows at once. Up to 5000. Phones and tablets have no mouse: a tap still opens the help at once.';
@@ -14034,7 +14035,7 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...NS_DEFAULTS, ...freshTextBoxes(),
-    newSchemaLook: 'officeBlack', newPumpOverlay: OVERLAY_DEFAULTS.pump, newValveOverlay: OVERLAY_DEFAULTS.valve, pushLockout: 3, ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
+    newSchemaLook: 'officeBlack', ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is here: what a NEW thing starts with, for every Schema. What changes things already made is in Settings > Panel settings: screen, Tabs and alerts (Rule 2.42).', 'note'],
@@ -14101,10 +14102,9 @@ function renderDefaultTab(box) {
     ['textHeight', 'New Box Height', 'num', null, false, false, { tip: TBX_TIPS.height }],
     ['textWrap', 'Word Wrap', 'bool', null, false, false, { tip: TBX_TIPS.wrap }],
     ['_nw', 'New User Templates and Schemas', 'head'],
-    ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }],
-    ['newPumpOverlay', 'Pump Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.pump }],
-    ['newValveOverlay', 'Valve Overlay', 'sel', OVERLAY_GRAPHICS.map(([n, v]) => [v, n]), false, false, { tip: NEW_TIPS.valve }],
-    ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { tip: NEW_TIPS.lockout }]];
+    // Pump Overlay, Valve Overlay and Push Lockout moved (OakBarn Brewery, 2026-11-17: "On Pump Profile", "On Valve Profile",
+    // "Skynet Panel Setting"): ☰ Menu > Pump Profile and Valve Profile (Overlay), Settings > Panel settings (Push Lockout)
+    ['newSchemaLook', 'Look of a New Schema', 'sel', THEMES.map(t => [t.key, t.name]), false, false, { tip: NEW_TIPS.look }]];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
@@ -14123,8 +14123,7 @@ function renderDefaultTab(box) {
     f.read();
     // what changes things already made is saved in Settings > Panel settings (Rule 2.42): keep what is saved there
     for (const k of PANEL_SET_KEYS) if (S.config.brewDefaults && k in S.config.brewDefaults) d[k] = S.config.brewDefaults[k]; else delete d[k];
-    for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight', 'pushLockout']) if (d[k] === '' || d[k] === null) delete d[k];
-    if (d.pushLockout !== undefined && !(+d.pushLockout >= 0.1 && +d.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');      // empty: what a fresh install has
+    for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
@@ -14180,6 +14179,9 @@ const panelSetFields = w => [
     ['textLarge', '\\L Rich Text Code Size (px)', 'num', null, false, false, { def: TEXT_LARGE, tip: RTC_SIZE_TIP }],
     ['_hh', 'Hover Help', 'head'],
     ['hoverDelay', 'Hover Delay (ms)', 'num', null, false, false, { def: HOVER_DELAY_MS, tip: HOVER_DELAY_TIP }],
+    // Push Lockout (OakBarn Brewery, 2026-11-17: "Skynet Panel Setting"; it was on ☰ Menu > Default settings, the value stays)
+    ['_pb', 'Pulse buttons', 'head'],
+    ['pushLockout', 'Push Lockout (s)', 'num', null, false, false, { def: 3, tip: NEW_TIPS.lockout }],
     ['_p', 'Phones and tablets', 'head'],
     ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
@@ -14194,7 +14196,7 @@ const panelSetFields = w => [
     ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
-const PANEL_SET_KEYS = ['units', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'touchEdit', 'touchMove',
+const PANEL_SET_KEYS = ['units', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
   'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
 function renderPanelSettings() {
   const box = $('#panelSet'); if (!box) return;
@@ -14213,6 +14215,7 @@ function renderPanelSettings() {
     for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (cur[k] !== undefined && !(+cur[k] >= 0 && +cur[k] <= 600)) throw new Error(`${t} must be from 0 to 600 minutes`);
     if (cur.textLarge !== undefined && !(+cur.textLarge > TEXT_NORMAL && +cur.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     if (cur.hoverDelay !== undefined && !(Number.isInteger(+cur.hoverDelay) && +cur.hoverDelay >= 0 && +cur.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty: at once)`);
+    if (cur.pushLockout !== undefined && !(+cur.pushLockout >= 0.1 && +cur.pushLockout <= 60)) throw new Error('Push Lockout must be 0.1 to 60 seconds (or empty: 3)');      // empty: what a fresh install has
     await api('PUT', '/ui/settings', { brewDefaults: cur }); S.config.brewDefaults = cur;
     showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); setHoverDelay(cur.hoverDelay);
     renderWs(); renderMenuPane(); savedPop('Panel settings saved'); });
@@ -16018,8 +16021,8 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
   tab: { title: 'Tab Background Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
     about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
-    about: 'The pictures and orientation a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
-  pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover, Hose, the Default settings Pump Overlay', noUnits: true,
+    about: 'The pictures, orientation and Overlay a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
+  pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover, Hose, the Overlay of the Default Pump Profile', noUnits: true,
     about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and IP Types. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
@@ -16029,7 +16032,9 @@ const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile firs
 const PUMP_PROF_NOTE = 'Every box here is what a new pump made from this Pump Profile starts with. Changing a Pump Profile never changes the pumps already on a Tab.';
 const PUMP_PROF_NAME_TIP = 'The name of this Pump Profile, as it shows in the Pump Profile list of the Pump Add box. For example Red Pump Right.';
 const PROF_NOTES_TIP = 'Your own notes about this profile. Only shown here.';
-const PUMP_PROF_OVERLAY_TIP = 'The On overlay a new pump made with this Pump Profile starts with: what shows over the pump while it runs. A new Pump Profile starts with the Default settings Pump Overlay (☰ Menu > Default settings).';
+const PUMP_PROF_OVERLAY_TIP = 'The On overlay a new pump made with this Pump Profile starts with: what shows over the pump while it runs. A new Pump Profile starts with the Overlay of the Default Pump Profile (Skynet starts with the Green Glow Ring).';
+// the Valve Profile's Overlay (OakBarn Brewery, 2026-11-17: Valve Overlay "On Valve Profile", off Default settings)
+const VALVE_PROF_OVERLAY_TIP = 'The On overlay a new powered valve made with this Valve Profile starts with: what shows over the valve while it is open. A new Valve Profile starts with the Overlay of the Valve Profile marked Default (Skynet starts with the Lightning Bolt).';
 const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
 const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
 const LED_MODES = { locking: 'Locking (press: ON, press again: OFF)', momentary: 'Momentary (ON only while held)' };
@@ -16051,6 +16056,7 @@ function profFields(kind) {
       ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeIn)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeOut)], false, false, { tip: IP_TYPE_PICK_TIP }],
       ['notes', 'Notes', 'area', null, false, false, { tip: PROF_NOTES_TIP }]];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
+      ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: VALVE_PROF_OVERLAY_TIP }],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'water') {
