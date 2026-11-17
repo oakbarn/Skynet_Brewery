@@ -1396,5 +1396,6 @@
  "The Tab {0} already uses \"{1}\".": "Le Tab {0} utilise déjà \"{1}\".",
  "The vessels, pumps and valves of a Tab.": "Les cuves, pompes et vannes d'un Tab.",
  "Every Tab already has an Equipment Profile.": "Chaque Tab a déjà un Equipment Profile.",
- "Help: Step by Step: Share a Schema with another brewer": "Aide : Pas à pas : partager un Schema avec un autre brasseur"
+ "Help: Step by Step: Share a Schema with another brewer": "Aide : Pas à pas : partager un Schema avec un autre brasseur",
+ "The numbers here are shown and typed in your Units (☰ Menu > Settings > Units). Skynet keeps them in metric (Rule 2.59).": "Les nombres ici sont affichés et tapés dans vos Units (☰ Menu > Settings > Units). Skynet les garde en métrique (Rule 2.59)."
 }
