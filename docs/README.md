@@ -39,6 +39,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Hysteresis code review](Hysteresis_Code_Review.md) | Every place in the code that deals with Hysteresis and its Offset, with plain notes, for review (2026-11-10). |
 | [High-pressure gas burner build](High_Pressure_Gas_Build.md) | **For Information Only.** A parts list and step-by-step build for flame safety on a high-pressure propane burner: the UL / CSA listed way (recommended) and a daisy chain some home brewers build, with leak and first-light tests (2026-11-14). |
 | [LED Test Board: parts list](LED_Test_Board_Parts.md) | Parts, wiring and pins for a plug-in Mega test board with LEDs (220 ohm) standing in for Pumps, Valves and other Devices (2026-11-12). |
+| [Daisy Chained Hardware for every Device](Device_Wiring_Hardware.md) | The parts each Device needs, from the board's pin out to the real pump, heater, valve, chiller, vessel part or probe, with a chain drawing for each, after OakBarn Brewery's Pump (On/Off) sheet (2026-11-17). |
 | [Summary 1](Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
 | [Summary 2](Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |
 | [Summary 3](Summary_3.md) | Full copy of the project memory on 2026-11-17, before it was trimmed: every standing rule, merged PR and open question up to then. For what is true now, use the Skynet Rules. |
