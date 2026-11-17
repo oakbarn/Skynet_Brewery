@@ -1,10 +1,10 @@
 {
-  "vesselType": "vessel",
+  "vesselType": "vessel", "units": "Metric",
   "vtype": "Brew Kettle",
   "image": "Images/Skynet/Vessels/boil_kettle.svg",
   "heatKind": "electric",
-  "volume": 15,
-  "deadspace": 0.5,
+  "volume": 56.7812,
+  "deadspace": 1.8927,
   "std": {
     "type": "TC",
     "size": 1.5

@@ -29,7 +29,7 @@ assert.equal(v.cls, 'skynet'); assert.ok(fs.existsSync(path.join(dir, 'own', 'sk
 assert.throws(() => b.create('vessel', 'hlt'), /already/, 'unique, any letter case');
 assert.equal(b.create('vessel', 'Mine', { skynet: false }).cls, 'user');
 b.save('vessel', 'HLT', { vtype: 'HLT', volume: '15', std: { type: 'TC', size: '1.5' }, ports: { outlet: { installed: true, position: 'Center Bottom', fitting: 'Valve_90' } } });
-assert.equal(b.get('vessel', 'HLT').volume, 15);
+assert.equal(b.get('vessel', 'HLT').volume, 56.7812, '15 gallons (no units: US) kept as liters (Rule 2.59)'); assert.equal(b.get('vessel', 'HLT').units, 'Metric');
 assert.deepEqual(b.get('vessel', 'HLT').std, { type: 'TC', size: 1.5 });
 // a shipped Skynet one is changed into its own copy, and can't be deleted
 b.save('fitting', 'Valve_90', { fittings: [{ kind: 'valve' }, { kind: 'elbow45' }] });
@@ -43,7 +43,7 @@ assert.equal(b.get('vessel', 'Mine').ports.outlet.fitting, 'Out_B');
 assert.throws(() => b.remove('fitting', 'Out_B'), /on Mine/, 'in use on a vessel');
 // a clone is a copy under the new name
 const c = b.create('vessel', 'Copy1_HLT', { from: 'HLT', skynet: false });
-assert.equal(c.volume, 15); assert.equal(c.clonedFrom, 'HLT'); assert.equal(c.cls, 'user');
+assert.equal(c.volume, 56.7812); assert.equal(c.clonedFrom, 'HLT'); assert.equal(c.cls, 'user');
 
 // once locked: Skynet Templates can't be changed or deleted, new ones and clones are User Templates
 const L = new Templates(shipped, path.join(dir, 'own'), { locked: true });
@@ -52,7 +52,7 @@ assert.throws(() => L.save('vessel', 'HLT', { volume: 20 }), /Skynet Template/);
 assert.throws(() => L.remove('vessel', 'HLT'), /can't be deleted/);
 assert.throws(() => L.remove('fitting', 'Valve_90'), /can't be deleted/);
 assert.equal(L.create('vessel', 'Copy2_HLT', { from: 'HLT' }).cls, 'user', 'a clone of a Skynet one is a User Template');
-L.save('vessel', 'Copy2_HLT', { volume: 20 }); assert.equal(L.get('vessel', 'Copy2_HLT').volume, 20);
+L.save('vessel', 'Copy2_HLT', { volume: 20, units: 'Metric' }); assert.equal(L.get('vessel', 'Copy2_HLT').volume, 20);
 L.remove('vessel', 'Copy2_HLT'); assert.equal(L.find('vessel', 'Copy2_HLT'), null);
 
 // a Bundled Fitting: four slots; a tee's thermowell stops flow, so only an open tee gets a branch IP

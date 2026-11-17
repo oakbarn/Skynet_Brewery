@@ -154,7 +154,7 @@ Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles (par e
 
 Ceux-ci changent les choses déjà faites, ou la façon dont tout le panneau marche, donc ce sont des réglages (Settings), pas des réglages par défaut. Ils sont dans **Settings > Panel settings: screen, Tabs and alerts** :
 
-- **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix ;
+- **Units** (US ou Métrique) : chaque quantité, température et Recette s'affiche dans ce choix. Skynet garde chaque nombre en métrique (°C, litres, kilogrammes, cm) : Units change seulement ce que vous voyez et tapez, et le changer ne change jamais un nombre enregistré (Skynet Rule 2.59) ;
 - **Tab Style** (l'aspect de chaque Tab qui n'a pas de Tab Style à lui) ;
 - **Menu Bar**, **Sound**, **On startup** (Zoom, plein écran) ;
 - **\L Rich Text Code Size** ;

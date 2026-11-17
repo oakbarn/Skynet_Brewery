@@ -7,6 +7,7 @@
 // Connection Standard (was "Outlet Standard"): the default for every port and Bundled Fitting of a Template; each one can set
 // its own. It goes on the Equipment list and sets the default size of the SVG. DIN sizes are text, the others numbers.
 import { isAppliance } from './appliance.js';
+import { toMetric } from './unitconvert.js';
 export const CONNECTION_STANDARDS = {
   TC: 'TC (Tri-Clamp)', FPT: 'FPT (NPT female)', MPT: 'MPT (NPT male)',
   BSPFRp: 'BSP Female Rp', BSPFRc: 'BSP Female Rc', BSPMRp: 'BSP Male Rp', BSPMRc: 'BSP Male Rc',
@@ -137,7 +138,7 @@ export function cleanVessel(b = {}) {
   // sized by gallons (Fritz, 2026-11-05, Rule 5.32): a vessel Template starts at 10 gallons; its shape comes from its picture
   // (Proportional) or from its Diameter and Height
   if (vesselType === 'vessel') {
-    if (t.volume === undefined) t.volume = t.units === 'Metric' ? 37.9 : 10;
+    if (t.volume === undefined) t.volume = t.units === 'Metric' ? 37.8541 : 10;      // 10 gallons (kept in liters below, Rule 2.59)
     if (b.sizeMethod === 'diameter') t.sizeMethod = 'diameter';
     for (const k of ['diameter', 'vheight']) { const n = +b[k]; if (Number.isFinite(n) && n > 0 && n <= 1000) t[k] = n; }
   }
@@ -153,7 +154,7 @@ export function cleanVessel(b = {}) {
     for (const x of Object.keys(p)) if (p[x] === undefined) delete p[x];
     t.ports[k] = p;
   }
-  return t;
+  return toMetric.vessel(t) || t;       // kept in metric, whatever Units it came in (Rule 2.59)
 }
 
 // Add a Vessel (Fritz, 2026-10-23). A Skynet Vessel Widget is a vessel picture with its IPs built in and nothing else: no Device
