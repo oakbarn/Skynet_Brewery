@@ -20,18 +20,18 @@ Every item on a tab (a Device or a Widget) can show a background picture. It has
 | **4 or more** | No background |
 | **blank** | It is set to **0**: no background |
 
-Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Skynet/Pumps/Pump_Red_Rip_On.svg` (see [Media](07-media)). The lists show only the file name; the folder is under it (see [Two-part paths](194-two-part-paths)).
+Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg` (see [Media](07-media)). The lists show only the file name; the folder is under it (see [Two-part paths](194-two-part-paths)).
 
 ## In a Process
 
 ```
-my_Widget.backpath = "Pump_Red_Rip_On.svg"
-my_Widget.backpath_2 = "Pump_Blue_Rip_On.svg"
+my_Widget.backpath = "Pump_Riptide_SS_Center_Inlet.svg"
+my_Widget.backpath_2 = "Pump_March_809_SS_Center_Inlet.svg"
 my_Widget.backpath_3 = 114
 my_Widget.background = 2
 ```
 
-A file name alone is enough: Skynet adds its folder ([Two-part paths](194-two-part-paths)). A number is a [Skynet Picture number](193-skynet-picture-numbers) (114 is Pump_Green_Rip_On.svg). A whole path still works, for example `my_Widget.backpath.path = "Images/Skynet/Pumps/Pump_Red_Rip_On.svg"`.
+A file name alone is enough: Skynet adds its folder ([Two-part paths](194-two-part-paths)). A number is a [Skynet Picture number](193-skynet-picture-numbers) (119 is Pump_March_809_SS_Center_Inlet.svg). A whole path still works, for example `my_Widget.backpath.path = "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"`.
 
 Setting a path does not change **.background**; the last line picks which picture shows.
 

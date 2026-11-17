@@ -1701,7 +1701,7 @@ comply with the rule if we drew everyone in the same Ratio Box. We could make it
 display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standardize pump size and IPs", Help 130).
 - **Why:** a pump put in the same place as the one it replaces must stay joined to the same pipes.
 - **Every Skynet pump picture is drawn in a 300 x 300 box:** the brew pump drawings (March, Chugger, Riptide, Topsflo, KegLand), their
-  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover).
+  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover). (Those Riptide-style pictures left Skynet on 2026-11-17 for copyright, Rule 9.12; the Blichmann Riptide drawing with a Cover replaces them.)
 - **Every pump has 8 IPs, the same on every pump** (OakBarn Brewery, 2026-11-11: "What should be is an IP at Every Corner and one in
   between Middle / Bottom Top and Side / side Middle so we can easily substitute a Different Pump ... All Pumps get 8 IPs"; thread
   "Add pump hose stubs for inlet and outlet"): the **4 corners** of its box and the **middle of each side**: Top Left, Top Middle,
@@ -3337,6 +3337,7 @@ name. The Setup's last page, the ReadMes and Help 183 say where to get it. **No 
 Skynet ships only its own pictures and sounds, or ones in the public domain or under CC0 or another Creative Commons license (credit
 kept as the license asks). Every picture or sound that is not Skynet's own, CC0 and CC included, has a row in
 [Media_Licenses.csv](Media_Licenses.csv) with its source, license and what the license asks for. A questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
+*2026-11-17 (OakBarn Brewery: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"):* the pictures that might be copyrighted (the Riptide-style Pump_<color>_Rip pictures, BurnerFlame, the Burner No Flame and BigMacRElement PNGs, brewery_main.png, the Help 180 Bob screenshot and Musketeers clip art, and the valve photos in Delete/) were taken out of the public repo and replaced by Skynet drawings; the list is in docs/Image_Library.md, Removed for copyright. They are still in the Git history. Every picture Skynet ships has a row in docs/Image_Library.md. AlarmBitter stays (OakBarn Brewery's own).
 Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
 **Exception** (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"): the three fallback sounds,
 sounds/alarm_beep.wav, sounds/Skynet/Alarm_Sound_Missing.mp3 and sounds/Skynet/Find_The_File_Connecting.mp3, also stay in the
