@@ -80,6 +80,7 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .el { position: absolute; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; overflow: hidden; user-select: none; background-size: contain; background-repeat: no-repeat; background-position: center; }
 .el .nm { font-size: 11px; color: var(--muted); padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .el .vl { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2px 6px; font-weight: 600; font-size: 18px; text-align: center; white-space: pre-wrap; overflow: hidden; }
+.el.fit1 .vl { white-space: pre; }      /* a reading with its unit stays on one line (Rule 2.56): app.js fitOneLine makes its font smaller to fit */
 .el.text .vl { font-size: 13px; font-weight: 400; justify-content: flex-start; align-items: flex-start; text-align: left; }
 .el.clickable { cursor: pointer; }
 .el.on { border-color: var(--ok); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 45%, transparent) inset; }
