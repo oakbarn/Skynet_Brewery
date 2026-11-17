@@ -27,7 +27,7 @@ Les Processes, les connexions, MQTT, les dossiers media et les listes derrière 
 
 En bas de la liste déroulante **Schema** :
 
-- **Add new Schema ...** (aussi **☰ Menu > ➕ New Schema…**) : donnez-lui un nom, puis choisissez à partir de quoi il commence. Chaque étape, avec des images : [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema). **A copy of** (une copie de) le Schema chargé copie tout, ce qui est bien pour essayer des changements. **An empty Schema** (un Schema vide) commence avec seulement un Tab Main et le Tab Equipment. Le nouveau Schema est chargé tout de suite.
+- **Add new Schema ...** (aussi **☰ Menu > ➕ New Schema…**) : donnez-lui un nom, puis choisissez à partir de quoi il commence. Chaque étape, avec des images : [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema). **A copy of** (une copie de) le Schema chargé copie tout, ce qui est bien pour essayer des changements. **An empty Schema** (un Schema vide) commence avec seulement un Tab Main et le Tab Equipment. **An Equipment Profile** (un profil d'équipement) commence avec le matériel de ce profil déjà câblé ([Coller un profil, ou commencer un nouveau Schema à partir de lui](#paste-a-profile-or-start-a-new-schema-from-it)). Le nouveau Schema est chargé tout de suite.
 - **Clone a Schema ...** : une copie de n'importe quel Schema sous un nouveau nom, chargée seulement si vous le dites. Voir [Changer de Schema et cloner des Schemas](48-schema-switching-and-cloning).
 - **Rename this Schema ...** : donne un nouveau nom au Schema chargé.
 - **Delete a Schema ...** : choisissez-en un qui n'est pas chargé. Il est déplacé dans `config/schemas/deleted`, donc on peut le récupérer.
@@ -146,6 +146,29 @@ L'**Equipment list**, sous les nombres, montre ce qu'il y a sur le Tab du profil
 **Go to the Tab** vous montre le Tab lui-même.
 
 Les profils faits avant les Templates peuvent encore avoir une liste de cuves. Elles s'affichent sous **Made before Templates**, avec **Put on Tab** pour les dessiner sur le Tab du profil ([Réglages d'une cuve](34-vessel-tab)).
+
+## Coller un profil, ou commencer un nouveau Schema à partir de lui {#paste-a-profile-or-start-a-new-schema-from-it}
+
+Un Equipment Profile garde **tout le matériel physique de la brasserie** : les cuves, IP, raccords, tuyaux, tuyaux souples, refroidisseurs, pompes et vannes, **et les Interfaces (cartes), leurs Ports et leur câblage**, chacun avec toutes ses Propriétés et son Nom. Skynet les garde dans le profil chaque fois que le Tab qui l'utilise est enregistré. Deux boutons sous l'Equipment list les utilisent (Admins seulement).
+
+**🗂 New Schema from this profile ...** (nouveau Schema à partir de ce profil ; aussi **Add new Schema ... > Start from > An Equipment Profile**) fait un nouveau Schema avec un Tab qui utilise le profil, donc ses nombres et son dessin viennent aussi, avec chaque carte et chaque Device déjà câblés : les mêmes Noms, Interfaces et Ports. Aucun Processus, Text Widget, Minuterie ou autre Widget ne vient : le nouveau Schema a les siens. Par exemple, construisez votre brasserie une fois comme Equipment Profile, puis faites-en un Schema **Keg Cleaning** (nettoyage des fûts) et écrivez ses Processus, Zones de texte et Minuteries. Le nouveau Schema est chargé tout de suite ; celui que vous aviez reste tel quel.
+
+**📋 Paste onto a Tab ...** (coller sur un Tab) met une copie du matériel du profil sur un Tab du Schema chargé :
+
+1. Choisissez **What to paste** (quoi coller) :
+   - **Both** (les deux) : tout.
+   - **Vessels Only** (cuves seulement) : chaque cuve avec tout ce qui est dessus (ses IP, raccords, éléments chauffants et sondes).
+   - **Manifold Only** (collecteur seulement) : tout le collecteur (pompes, vannes, tuyaux, tuyaux souples, raccords, refroidisseurs), pas les cuves.
+2. Choisissez le Tab où il va (**Goes to the Tab**), et appuyez sur **💾 Save**.
+3. Quand ce Tab a déjà du matériel qui est le même que celui du profil (la même carte et le même Port, ou une cuve du même Nom), une liste montre ce qui sera remplacé, et les nombres du profil du Tab qui changent (comme « Brewhouse efficiency 74 % → 72 % »). Rien ne change avant que vous appuyiez sur **Replace** (remplacer). **Cancel** (annuler) laisse tout comme avant. Un Device remplacé continue de marcher dans vos Processus.
+4. Edit layout s'ouvre et les pièces sont sur le **🔨 Build Tab**. Appuyez sur **✅ Finish Build ... > Move to Tab** : elles vont sur le Tab aux mêmes endroits. Puis appuyez sur **Save layout**.
+
+**↩ Undo** (annuler) s'affiche quelques secondes après un collage et remet tout.
+
+- **Un bout de tuyau dont la pièce n'est pas venue reste ouvert**, pour qu'une cuve puisse y être jointe (avec Manifold Only, les tuyaux qui allaient aux cuves).
+- **Une carte déjà utilisée sur un autre Tab de ce Schema arrête le collage.** Rien n'est collé, et une note dit quelle carte et quel Tab. Une carte n'est jamais partagée entre des Tabs, et son ID ne change jamais. Collez sur ce Tab, ou commencez un nouveau Schema à partir du profil. Un nouveau Schema prend toujours les cartes.
+- Une carte que le Schema n'a pas encore vient avec le collage, avec son ID et ses réglages.
+- Une pièce dont le Nom est déjà utilisé sur un autre Tab reçoit _2 à la fin.
 
 ## À venir {#coming-next}
 

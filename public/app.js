@@ -26,6 +26,7 @@ import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
+import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
@@ -13386,13 +13387,33 @@ async function addNewSchema() {
   if (editing) return toast('Save or exit Edit layout first', true);
   const act = S.schemas?.active, w = { name: '', start: 'copy' };
   if (await dialog('Add new Schema', [['name', 'Name of the new Schema', 'text'],
-    ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)'], ['template', 'A Skynet Schema Template (answer a few questions, and it is ready to brew)']]],
+    ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)'], ['template', 'A Skynet Schema Template (answer a few questions, and it is ready to brew)'],
+      ...((S.profiles || []).length ? [['profile', 'An Equipment Profile (its hardware, already wired)']] : [])]],
     ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
   readFields(w);
   if (!okToSwitch(w.name, 'Making and loading')) return;
   if (w.start === 'template') return newSchemaFromTemplate(w.name);
+  if (w.start === 'profile') return newSchemaFromProfile(null, w.name);
   const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
   await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
+}
+// New Schema from an Equipment Profile (Rule 19.6 #2, OakBarn Brewery, 2026-11-17: "The reason to \"import\" and equipment Profiles is to
+// create a new Schema with its own Text Widgets, and Processes."): its one Tab uses the profile and has all its hardware, boards, Ports and
+// wiring, with their Names and Properties. Nothing else comes: the new Schema gets its own Processes, Text Widgets and Timers.
+const FROM_PROFILE_TIP = 'A new Schema with all of this profile\'s hardware already wired: its Interfaces (boards), every Device with its Port, Name and Properties, the vessels, pipes, hoses and fittings, and the profile\'s numbers. Then add its own Processes, Text Boxes and Timers.';
+async function newSchemaFromProfile(pid, name = '') {
+  if (!can('admin')) return toast('Only an admin can add a Schema', true);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  const w = { name, prof: pid || S.profiles[0]?.id || '' };
+  if (!pid || !name) {
+    if (await dialog('New Schema from an Equipment Profile', [['name', 'Name of the new Schema', 'text'], ['prof', 'Equipment Profile', 'sel', S.profiles.map(p => [p.id, p.name])],
+      ['_n', FROM_PROFILE_TIP, 'note', null, null, null, { keep: true }], ['_m', 'The new Schema is loaded at once. The Schema you have now is kept just as it is.', 'note']], w) !== 'ok') return;
+    readFields(w);
+  }
+  if (!okToSwitch(w.name, 'Making and loading')) return;
+  const p = S.profiles.find(x => x.id === w.prof); if (!p) return toast('Pick an Equipment Profile', true);
+  await api('POST', '/ui/schemas', { name: w.name, fromProfile: p.id });
+  await afterSchemaSwitch(`Schema "${w.name}" made from "${p.name}" and loaded`);
 }
 // Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
@@ -15046,6 +15067,77 @@ function eqEffPane(p) {
       av ? h('span', {}, `Average of the last ${av.count}: `, h('b', {}, `${av.avg} %`)) : '',
       av && can('admin') && !p.locked && +av.avg !== +p.brewhouseEfficiency ? h('button', { type: 'button', class: 'primary', onclick: useAvg, title: EFF_USE_TIP }, `Use the average (${av.avg} %)`) : ''));
 }
+// 📋 Paste onto a Tab (Rule 19.6 #2, OakBarn Brewery, 2026-11-17: "like copy and Paste ... only Physical Hardware ... Vessels Only, Manifold
+// Only (Include Pipes and Valve and Widgets with Ips) or Both"). The pieces land on the 🔨 Build Tab ("2. Build Tab", Rule 4.1) and Finish
+// Build ... > Move to Tab puts them on the Tab picked here, in the same spots. Hardware on that Tab that is the same as the profile's is
+// replaced after a Replace / Cancel list, and so are the Tab's own profile numbers ("A Same Tab"); a board used on another Tab stops it.
+const PASTE_TIP = 'Put a copy of this profile\'s hardware on a Tab: its vessels, pumps, valves, pipes, hoses, fittings and the Widgets with IPs, every Device with its Interface, Port, Name and Properties. It lands on the 🔨 Build Tab; ✅ Finish Build ... > Move to Tab puts it on its Tab.';
+const PASTE_WHAT_TIP = 'Both: all of it. Vessels Only: each vessel with everything on it (its IPs, fittings, heaters and probes). Manifold Only: all of the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels. A pipe end whose piece does not come is left open, so a vessel can be joined to it.';
+async function pasteProfile(p) {
+  if (!can('admin')) return toast('Only an admin can paste an Equipment Profile', true);
+  if (eqDirty) return toast('Save or Undo the changes to this profile first', true);
+  p = { ...p, ...await api('GET', `/ui/equipment/${p.id}/hardware`) };
+  if (!p.hardware?.elements && !(p.graphics || []).length) return toast(`"${p.name}" has no hardware kept yet: give it to a Tab and press Save layout once, then paste it.`, true, 7000);
+  setEditing(true); if (!draft) throw new Error('Edit layout did not open: paste on a computer, not a phone');
+  const tabs = draft.workspaces.filter(w => !w.build && !w.template);
+  const mine = tabs.find(w => w.equipmentProfile === p.id), here = tabs.find(w => w.name === wsName);
+  const o = { what: 'both', tab: (mine || here || tabs[0])?.name || '' };
+  const fields = () => [['what', 'What to paste', 'sel', PASTE_WHAT, false, false, { tip: PASTE_WHAT_TIP }], ['tab', 'Goes to the Tab', 'sel', tabs.map(w => [w.name, tabTitle(w)])],
+    ['_n', `"${p.name}" lands on the 🔨 Build Tab. ✅ Finish Build ... > Move to Tab puts it on that Tab, in the same spots. Hardware already on that Tab that is the same (the same board and Port, or a vessel with the same Name) is replaced: you see the list first.`, 'note', null, null, null, { keep: true }]];
+  if (await dialog(`📋 Paste "${p.name}"`, fields, o) !== 'ok') return;
+  readFields(o);
+  const to = tabs.find(w => w.name === o.tab); if (!to) return toast('Pick the Tab it goes to', true);
+  const pieces = pastePieces(p, o.what);
+  if (!pieces.graphics.length && !pieces.elements.length) return toast(`"${p.name}" has nothing for ${PASTE_WHAT.find(x => x[0] === o.what)[1]}.`, true);
+  const b = buildWs(), plan = pastePlan(draft, to.name, pieces, b?.name || '');
+  if (plan.blocked) return toast(plan.blocked, true, 12000);
+  // the Tab's own profile numbers that the profile's replace (shown in the same list)
+  const tp = to.equipmentProfile && S.profiles.find(x => x.id === to.equipmentProfile), nums = numberChanges(EQUIP_FIELDS, tp, p);
+  const what = x => x.label || x.name || x.kind;
+  const lines = [...plan.gone.filter(x => x.kind !== 'pipe' && x.kind !== 'ip').map(what), ...(plan.gone.some(x => x.kind === 'pipe') ? [`${plan.gone.filter(x => x.kind === 'pipe').length} pipes and hoses joined to them`] : []),
+    ...(plan.opened.length ? [`${plan.opened.length} pipe ends joined to them are let go (left open)`] : []),
+    ...(tp && tp.locked ? [] : nums.map(n => `"${tp.name}": ${n[1]} ${n[2] ?? '?'} → ${n[3]}`))];
+  if (lines.length && !await replaceAsk(`Replace on the Tab "${to.name}"?`, `These ${lines.length} will be replaced by "${p.name}":`, lines)) return toast('Nothing was pasted');
+  const was = clone(draft), wasNums = tp && !tp.locked && nums.length ? Object.fromEntries(nums.map(n => [n[0], n[2]])) : null;
+  applyRenames(pieces, plan);
+  const drop = new Set(plan.gone);
+  draft.elements = draft.elements.filter(x => !drop.has(x)); draft.graphics = draft.graphics.filter(x => !drop.has(x));
+  for (const g of plan.opened) for (const k of ['from', 'to']) { const v = g[k] || ''; if (plan.gone.some(x => x.id === v || (x.name && v.startsWith(`dev:${x.name}:`)))) delete g[k]; }
+  for (const [n, old] of plan.stands) if (old._ref) n._ref = old._ref;      // a replaced Device keeps its hidden key (Rule 3.10)
+  const wasBoards = plan.newBoards.length ? clone(S.config.devices || []) : null;
+  if (wasBoards) {           // a board the Schema does not have yet: added now, as ➕ Add new Interface does (its ID and settings as the profile has them)
+    const devices = [...wasBoards, ...clone(plan.newBoards)];
+    await api('PUT', '/ui/layout', { devices }); S.config.devices = clone(devices); draft.devices = clone(devices);
+  }
+  for (const x of [...pieces.elements, ...pieces.graphics]) x.workspace = to.name;
+  draft.elements.push(...pieces.elements); draft.graphics.push(...pieces.graphics);
+  wsName = to.name;
+  for (const x of [...pieces.elements, ...pieces.graphics]) keepOnBuild(x);
+  if (wasNums) { await api('PUT', `/ui/equipment/${tp.id}`, { ...tp, ...Object.fromEntries(nums.map(n => [n[0], n[3]])) }); await refreshProfiles(); }
+  renderTabs(); renderWs();
+  const big = x => x.kind !== 'pipe' && x.kind !== 'ip', n = pieces.elements.length + pieces.graphics.filter(big).length, r = plan.gone.filter(big).length;
+  undoNote(`"${p.name}" (${PASTE_WHAT.find(x => x[0] === o.what)[1]}): ${n} pieces${pieces.open ? `, ${pieces.open} open pipe ends` : ''} on the 🔨 Build Tab for "${to.name}"${r ? `, ${r} replaced` : ''}. ✅ Finish Build ... > Move to Tab puts them there.`, guard(async () => {
+    draft = was; sel = null;
+    if (wasBoards) { await api('PUT', '/ui/layout', { devices: wasBoards }); S.config.devices = clone(wasBoards); draft.devices = clone(wasBoards); }
+    if (!draft.workspaces.some(w => w.name === wsName)) wsName = to.name;
+    if (wasNums) { await api('PUT', `/ui/equipment/${tp.id}`, { ...S.profiles.find(x => x.id === tp.id), ...wasNums }); await refreshProfiles(); }
+    renderTabs(); renderWs(); toast('↩ The paste is undone');
+  }), 15000);
+}
+// the Replace / Cancel list (Rule 19.6 #2: "Nothing happens until the user says so: a list shows what will be replaced")
+function replaceAsk(title, intro, lines) {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const close = v => { d.close(); res(v); };
+    d.append(h('div', { class: 'vdTitle' }, title), h('div', { class: 'vdText', style: 'margin:8px 0 4px' }, intro),
+      h('ul', { class: 'replaceList', style: 'max-height:50vh;overflow:auto;margin:0 0 8px;text-align:left' }, ...lines.map(l => h('li', {}, l))),
+      h('div', { class: 'vdText muted', style: 'margin-bottom:10px' }, 'Nothing changes until you press Replace. ↩ Undo shows after.'),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => close(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => close(true) }, 'Replace')));
+    d.oncancel = () => res(false);
+    d.showModal();
+  });
+}
+const refreshProfiles = async () => { S.profiles = await api('GET', '/ui/equipment'); };
 // the profile's Equipment list: the Tab_Vessels, Tab_Fittings and other equipment on its Tab (Fritz, 2026-10-21). On the Tab of
 // this Schema that uses it they come from the Tab itself, otherwise from the profile's Default Layout.
 function eqItems(p) {
@@ -15071,6 +15163,8 @@ function eqPane(p) {
     rows.length ? h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Kind', 'Size', 'Template', 'Joined'].map(t => h('th', {}, t)))), h('tbody', {}, ...rows))
       : h('p', {}, 'No equipment on the Tab yet.'),
     h('div', { class: 'bar wrap' }, w ? h('button', { onclick: goTab }, `Go to the Tab "${w.name}"`) : '',
+      can('admin') ? h('button', { title: PASTE_TIP, onclick: guard(() => pasteProfile(p)) }, '📋 Paste onto a Tab ...') : '',
+      can('admin') ? h('button', { title: FROM_PROFILE_TIP, onclick: guard(() => newSchemaFromProfile(p.id)) }, '🗂 New Schema from this profile ...') : '',
       admin ? h('button', { onclick: () => openMenuTab('vtemplates') }, 'Vessel Templates ...') : '',
       admin ? h('button', { onclick: () => openMenuTab('ftemplates') }, 'Fitting Templates ...') : ''));
   if (p.equipment?.length) out.append(oldEqList(p, w));
