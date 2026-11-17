@@ -9,8 +9,8 @@
 export const PASTE_WHAT = [['both', 'Both'], ['vessels', 'Vessels Only'], ['manifold', 'Manifold Only']];
 const SLOT_REF = /^dev:@([\w-]+):(\w+)$/;
 const DEV_REF = /^dev:(.+):(\w+)$/;
-const HOOKS = ['attachTo', 'onVessel', 'capOn', 'qdOn'];        // what a piece sits on
-const REFS = ['attachTo', 'from', 'to', 'onVessel', 'capOn', 'qdOn'];
+const HOOKS = ['attachTo', 'onVessel', 'capOn', 'qdOn', 'chillerOn'];        // what a piece sits on (an immersion chiller sits in its vessel)
+const REFS = ['attachTo', 'from', 'to', 'onVessel', 'capOn', 'qdOn', 'chillerOn'];
 const clone = x => JSON.parse(JSON.stringify(x ?? null));
 const low = s => String(s ?? '').toLowerCase();
 export const isVesselPiece = g => g?.kind === 'vessel' && (g.vesselType === 'vessel' || !g.vesselType);
