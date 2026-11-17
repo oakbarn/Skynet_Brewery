@@ -3,7 +3,7 @@
 ## Centrées sur le tuyau {#centered-on-the-pipe}
 
 Une vanne ou une pompe est posée **juste sur ses tuyaux** (Règle Skynet 5.23). Le tuyau la traverse tout droit : dans le propre tuyau de la vanne
-ou l'orifice de la pompe d'un côté et ressort de l'autre, pareil dans chaque Orientation.
+ou l'End Fitting de la pompe d'un côté et ressort de l'autre, pareil dans chaque Orientation.
 
 - **Les tuyaux restent où ils sont ; c'est la vanne ou la pompe qui bouge** sur la ligne du tuyau : à gauche ou à droite sur un tuyau vertical,
   en haut ou en bas sur un tuyau horizontal.

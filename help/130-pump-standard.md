@@ -26,9 +26,9 @@ The pipes and hoses set which one is its Inlet (IN) and which its Outlet (OUT), 
 ## Hose or Pipe
 
 What is drawn from the pump's own inlet and outlet to its Inlet IP and Outlet IP: a white **Hose**, or a stainless **Pipe**. It is
-drawn over the pump and its Cover, under the On overlay. It runs straight out of the port, round the inside edge of the pump's box,
+drawn over the pump and its Cover, under the On overlay. It runs straight out of the End Fitting, round the inside edge of the pump's box,
 and out to the spot, and it turns with the pump when it is shown Left. A pump with your own picture has no Hose or Pipe (Skynet does
-not know where its ports are), so its IPs are simply on the spots.
+not know where its End Fittings are), so its IPs are simply on the spots.
 
 **With a pipe or hose joined to the IP**, that end is drawn like the pipe or hose on it: the same kind, color and thickness, so the
 two meet as one piece. With nothing on the IP, the Hose or Pipe picked here is drawn.
@@ -37,9 +37,10 @@ two meet as one piece. With nothing on the IP, the Hose or Pipe picked here is d
 picks it for you: the Hose or Pipe comes in the same way as the pipe or hose joined to that IP. With nothing joined yet, it comes
 in along the side, and it turns to follow as soon as a pipe or hose is joined. There is nothing to pick.
 
-**IP Type In** and **IP Type Out** are the connector on the pump's inlet and outlet, with its size (FPT1/2, TC1.5 ...)
-(Skynet Rule 5.40). A pump starts with the ones its **Inlet Fitting** and **Outlet Fitting** say, or else the **Default pipe IP Type**. A pipe end on the pump
-fits it by itself (an MPT1/2 end on an FPT1/2 port).
+**Inlet Fitting** and **Outlet Fitting** are the End Fitting (the connector) on the pump's In and Out IPs, with its size (FPT1/2, TC1.5 ...)
+(Skynet Rule 5.40). A new pump starts with the **Default pipe IP Type** (a pump saved with the older Ports pick starts from it), and
+the two can be different. A pipe end on the pump fits it by itself (an MPT1/2 end on an FPT1/2 End Fitting). The End Fitting is
+information only, except a Quick Disconnect, where a hose end can be unhooked and moved.
 
 ## Pipes on a pump
 
@@ -53,10 +54,10 @@ box, or 10 on a 150 x 150 pump. A pump starts at **150 x 150** on a Tab. If you 
 two pumps of the **same size** always have their IPs in the same place. The Covers line up the same way. The older Riptide-style
 color pictures follow the Pump Standard too.
 
-| Where the pump's own port ends (Orientation Right) | In the 300 x 300 drawing | On a 150 x 150 pump |
+| Where the pump's own End Fitting ends (Orientation Right) | In the 300 x 300 drawing | On a 150 x 150 pump |
 |----|-----|-----|
-| Inlet port | 285 across, 150 down | 142.5 across, 75 down |
-| Outlet port | 243 across, 56 down | 121.5 across, 28 down |
+| Inlet Fitting | 285 across, 150 down | 142.5 across, 75 down |
+| Outlet Fitting | 243 across, 56 down | 121.5 across, 28 down |
 
 The Hose or Pipe starts there.
 
