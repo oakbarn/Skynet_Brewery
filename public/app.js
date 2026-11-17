@@ -26,6 +26,7 @@ import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
+import { isImmersion, takesChiller, spotIn } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -4726,6 +4727,7 @@ document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }
 document.addEventListener('contextmenu', ev => {
   if (!editing && ev.target.closest?.('div.qdEnd')) { ev.preventDefault(); return; }     // the right button drags a QD hose end (Rule 5.28)
   if (!editing && (qdDrag || Date.now() - qdDragEnded < 1500)) { ev.preventDefault(); return; }     // letting go of a dragged hose end (over a vessel, say) does not open Help
+  if (!editing && (chDrag || Date.now() - chDragEnded < 1500 || chillerAt(ev.target))) { ev.preventDefault(); return; }     // the right button moves an Immersion Chiller; a right-click that does not move it opens its Help on let go
   if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
   const topic = rightClickTopic(ev.target);
   if (topic) { ev.preventDefault(); openHelp(topic); }
@@ -15735,6 +15737,113 @@ window.addEventListener('pointerup', async () => {
     toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose, in the air'}`);
   } catch (e) { back(); toast(e.message, true); }
 });
+// ---- Moving an Immersion Chiller by hand on a live Tab (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
+// but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built now as a Rule 14.4 exception: "B Now"; Rule 5.42, Help 200).
+// The same as a Quick Disconnect hose end (Rule 5.40): a right-button hold (or a finger) on the chiller picks it up, with no pop-up.
+// While water flows through it a warning says so and it does not move. Let go over a vessel and it drops into that vessel (in its lower
+// middle, the same spot place_Chiller uses) and flashes red and yellow for 2 seconds; let go anywhere else and it stays there, free
+// floating. Its own hoses (a bundled supply and waste hose, or QD hoses to a supply on the Tab) stay on its In and Out IPs and follow it:
+// a chiller is a pipe (Rule 5.41), so moving it changes no flow. A right-click that does not move it opens its Help, as before.
+let chDrag = null, chDragEnded = 0;
+function chillerAt(target) {
+  const n = target?.closest?.('#ws .gfx.vessel'); if (!n) return null;
+  const g = L().graphics.find(x => x.id === n.dataset.gid);
+  return isImmersion(g) ? g : null;
+}
+const chJoins = c => { const ips = L().graphics.filter(g => g.kind === 'ip' && g.attachTo === c.id), ids = new Set(ips.map(g => g.id));
+  const on = L().graphics.filter(g => g.kind === 'pipe' && (ids.has(g.from) || ids.has(g.to))); return { ips, hoses: on.filter(g => g.hose), pipes: on.filter(g => !g.hose) }; };
+// the vessel the chiller's middle is over (on top first), with no other chiller in it
+function chTarget(c) {
+  const cx = (c.x || 0) + (c.w || 120) / 2, cy = (c.y || 0) + (c.h || 120) / 2, gs = L().graphics;
+  return [...gs].reverse().find(v => takesChiller(v) && v.workspace === c.workspace && !gs.some(o => o !== c && o.chillerOn === v.id) &&
+    cx >= (v.x || 0) && cx <= (v.x || 0) + (v.w || 90) && cy >= (v.y || 0) && cy <= (v.y || 0) + (v.h || 90)) || null;
+}
+// put the chiller (and its IPs) at x, y and let its hoses hang from their other ends to its IPs
+function chPut(d, x, y) {
+  const c = d.c, dx = x - (c.x || 0), dy = y - (c.y || 0);
+  c.x = x; c.y = y;
+  for (const g of d.j.ips) { g.x = (g.x || 0) + dx; g.y = (g.y || 0) + dy; }
+  for (const hz of d.j.hoses) {
+    const was = d.pts.get(hz.id), mineTo = d.j.ips.some(g => g.id === hz.to), other = mineTo ? was[0] : was[was.length - 1];
+    const ip = d.j.ips.find(g => g.id === (mineTo ? hz.to : hz.from)), fixed = mineTo ? was : [...was].reverse();
+    const pts = hoseSag(other, ipCenter(ip), hoseLead(fixed), null); hz.points = mineTo ? pts : pts.reverse();
+  }
+  const n = $(`#ws .gfx.vessel[data-gid="${CSS.escape(c.id)}"]`); if (n) place(n, c);
+  for (const g of d.j.ips) { const m = $(`#ws .gfx.ip[data-gid="${CSS.escape(g.id)}"]`); if (m) place(m, g); }
+  renderPipes();
+}
+function chMark(v) {
+  for (const n of $$('#ws .gfx.vessel.chillTarget')) n.classList.toggle('chillTarget', false);
+  if (v) $(`#ws .gfx.vessel[data-gid="${CSS.escape(v.id)}"]`)?.classList.add('chillTarget');
+}
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing) return;
+  const c = chillerAt(ev.target); if (!c) return;
+  if (ev.pointerType === 'mouse' && ev.button !== 2) return;
+  ev.preventDefault();
+  chDrag = { c, help: ev.pointerType === 'mouse', start: [ev.clientX, ev.clientY], moved: false, blocked: '' };
+  if (!can('operator')) chDrag.blocked = 'Only an operator or an admin can move a chiller';
+  else if (c.locked) chDrag.blocked = `${c.label || c.name} is locked`;
+  else {
+    const j = chJoins(c);
+    if (j.pipes.length) chDrag.blocked = `${c.label || c.name} is joined by a pipe, not a hose, so it cannot move`;
+    Object.assign(chDrag, { j, at: [c.x || 0, c.y || 0], pts: new Map(j.hoses.map(p => [p.id, clone(p.points)])), grab: canvasPt(ev), was: c.chillerOn ?? null, ips: j.ips.map(g => [g.x, g.y]) });
+  }
+});
+window.addEventListener('pointermove', ev => {
+  const d = chDrag; if (!d || d.stop) return;
+  if (!d.moved && Math.hypot(ev.clientX - d.start[0], ev.clientY - d.start[1]) < 4) return;
+  if (d.blocked) { d.stop = true; toast(d.blocked, true); return; }
+  if (!d.moved) {     // water flowing through it: a warning, no move (Rule 5.40); no flow: it moves at once, no pop-up
+    const f = (() => { try { return computeFlow(d.c.workspace); } catch { return new Map(); } })();
+    if (d.j.hoses.some(p => f.has(p.id))) { d.stop = true; chSafety(d.c); return; }
+    d.moved = true;
+  }
+  const p = canvasPt(ev);
+  chPut(d, Math.round(d.at[0] + p[0] - d.grab[0]), Math.round(d.at[1] + p[1] - d.grab[1]));
+  chMark(d.target = chTarget(d.c));
+});
+// back where it was (a cancel, or the Brain said no)
+function chBack(d) {
+  const c = d.c; c.x = d.at[0]; c.y = d.at[1];
+  d.j.ips.forEach((g, i) => { [g.x, g.y] = d.ips[i]; });
+  for (const p of d.j.hoses) p.points = d.pts.get(p.id);
+  if (d.was) c.chillerOn = d.was; else delete c.chillerOn;
+  renderWs();
+}
+window.addEventListener('pointercancel', () => { const d = chDrag; if (!d) return; chDrag = null; chMark(null); if (d.moved) chBack(d); });
+window.addEventListener('pointerup', async () => {
+  const d = chDrag; if (!d) return;
+  chDrag = null; chDragEnded = Date.now(); chMark(null);
+  if (!d.moved) { if (d.help && !d.stop) openHelp(graphicTopic(d.c)); return; }     // a right-click that did not move it: its Help, as before
+  const c = d.c, v = d.target || null;
+  if (v) chPut(d, ...spotIn(v, c));      // into the vessel: in its lower middle
+  try {
+    await api('POST', '/ui/chiller', { id: c.id, x: c.x, y: c.y, into: v?.id ?? null, hoses: d.j.hoses.map(p => ({ id: p.id, points: p.points })) });
+    if (v) c.chillerOn = v.id; else delete c.chillerOn;
+    if (v) {      // locked into the vessel: it flashes red and yellow for 2 seconds (the same as a QD hose end on an IP)
+      $(`#ws .gfx.vessel[data-gid="${CSS.escape(c.id)}"]`)?.classList.add('chillLocked');
+      setTimeout(() => { for (const n of $$('#ws .gfx.vessel.chillLocked')) n.classList.toggle('chillLocked', false); }, 2000);
+    }
+    toast(`${c.label || c.name}: ${v ? 'in ' + (v.label || v.name) : 'free floating on the Tab'}`);
+  } catch (e) { chBack(d); toast(e.message, true); }
+});
+$('#ws').addEventListener('touchstart', ev => { if (!editing && chillerAt(ev.target)) ev.preventDefault(); }, { passive: false });     // iPhone Safari: no pan or zoom on a finger drag
+// water flowing through the chiller: a warning (the same as a QD hose end, Rule 5.40); it closes by itself once nothing flows
+function chSafety(c) {
+  const cn = c.label || c.name || 'The chiller', msg = h('p', {});
+  const exit = h('button', { type: 'button', class: 'big', onclick: () => d.close() }, '✖ Exit');
+  const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true },
+    h('div', { class: 'grabHead' }, h('div', { class: 'bar' }, h('h3', {}, `⚠ ${cn}: water is flowing`), h('span', { class: 'spacer' }), exit)), msg);
+  const step = () => {
+    const f = (() => { try { return computeFlow(c.workspace); } catch { return new Map(); } })();
+    if (!chJoins(c).hoses.some(p => f.has(p.id))) { d.close(); toast(`Nothing flows through ${cn} now: hold it with the right mouse button (or a finger) and drag.`, false, 6000); return; }
+    msg.textContent = `Water is flowing through ${cn}. Turn Off what feeds it (a Tap Water Valve, or a sump pump) before you move it, so it does not spray. This warning closes by itself once nothing flows.`;
+  };
+  const tick = setInterval(step, 500);
+  d.addEventListener('close', () => { clearInterval(tick); d.remove(); });
+  document.body.append(d); d.showModal(); step();
+}
 // a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
 function valveShut(name) {
   const e = L().elements.find(x => x.name === name);
