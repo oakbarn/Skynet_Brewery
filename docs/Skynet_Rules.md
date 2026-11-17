@@ -3572,7 +3572,7 @@ Help").
     the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
     importer version, then that goes to the Importer SandBox"). The Skynet Panel version is polished first (Help, Hover Help, the
     README); its model for the Importer version comes later. Until the Big Merge, anything said to be for the Importer version only
-    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md`, with
+    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md` in the private Skynet_Private repo (Rule 13.7), with
     where it goes, and is not put in the Importer yet. **But when OakBarn Brewery says to update both the Importer and Skynet** (OakBarn
     Brewery, 2026-11-12: "I may also tell you to update Both Importer and Skynet, an ten it does not go to the importer sandbox, but to
     the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
@@ -3786,7 +3786,7 @@ something can be accessed quickly on github, save it there rather than here so w
 have the compacted summaies of the project that could go to github"; "and that would include most sandboxes"; "Ok Private Repo").
   - **GitHub is the main copy.** A thread saves it on GitHub by PR and replies with its link, not a long copy of the text.
   - **Two repos.** The **Skynet_Brewery** repo is **PUBLIC** (Rule 12.1): the program, Help, the Rules and the public documents
-    (the Libraries, how-to pages). A **private repo** (to be made by OakBarn Brewery) holds the private notes: the Sandboxes
+    (the Libraries, how-to pages). The **private repo, [Skynet_Private](https://github.com/oakbarn/Skynet_Private)** (made 2026-11-17), holds the private notes: the Sandboxes
     (Panel Updates, Process Updates, Importer; Rules 14.4, 14.5, 11.3), the history Summaries (Summary_N) and plans that are
     not built yet. When unsure which, it goes in the private repo.
   - **Never on GitHub at all, not even the private repo:** the Patron private key (Rule 12.4), passwords and anyone's email
@@ -3813,14 +3813,14 @@ finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits unti
 
 14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
-pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and
 are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
 both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
 Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
 
 14.5 **The Process Updates Sandbox** (OakBarn Brewery, 2026-11-16: "WE will do that later when we start the Skynet Process setup. New
 sand Box for Process and put things there till we build those Processes"). Ideas for Brew Day steps, the sample Processes and Process
-commands are written in `Sandbox/Process_Updates/Process_Updates.md`, with where each goes, and are **not built yet**. When the
+commands are written in `Sandbox/Process_Updates/Process_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and are **not built yet**. When the
 Skynet Process setup starts, OakBarn Brewery picks which to start; each is checked against the Rules and both programs before it is
 built, then moved to the file's Done table with its PR. General Panel ideas stay in the Panel Updates Sandbox (Rule 14.4). Like the
 rest of `Sandbox/`, it is never shipped.
@@ -5130,7 +5130,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
-- 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in a private repo still to be made; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 will point at the private repo once it exists. Nothing changes in either program.
+- 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in the private Skynet_Private repo; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 now point at the Sandboxes in the private Skynet_Private repo (made 2026-11-17, OakBarn Brewery: "Done with GitHub"); the old copies in this public repo's `Sandbox/` stay until OakBarn Brewery says to remove them. Nothing changes in either program.
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
 - 2026-11-17: Rule 2.42 changed (OakBarn Brewery, markup of Default settings > New Tabs: "Tab Background Profile for a new tab" "Good Except Make Tab Profile"; the pipe and hose pixels, Width and Height of a New Tab "Tab Profile"; "labels good"): the **Tab Background Profile is now the Tab Profile** (☰ Menu > Tab Profile), and each Tab Profile holds How many Pixels are Pipes / Hoses to be drawn on a Tab?, Width and Height of a New Tab (px), with the same labels. Default settings keeps only **Tab Profile for a new tab**; the Pixels boxes left the Pipes, hoses and sizes section too (they were the same setting). A new Tab takes them from the Tab Profile picked there; (none): 10, 6 and the screen's size. Never Take Away: values set before go, once, into the picked Tab Profile (a new Default Tab Profile when none was picked, or a copy of a Skynet one). Help 13, 22, 26, 33, 36, 43, 58, 68, 155 (and French). Checked against the BruControl Import program: its Tabs keep BruControl's sizes; a Tab added on its Build page follows the same Tab Profile.
