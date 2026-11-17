@@ -26,6 +26,7 @@ import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
+import { isImmersion, takesChiller, spotIn } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2114,7 +2115,8 @@ const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_Marc
   'Pump_KegLand_MKII_SS_Center_Inlet',
   // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned 60°
   ...['March_809_Poly', 'March_809_SS', 'March_815_Poly', 'March_815_SS', 'Chugger_SS', 'Chugger_Poly'].map(k => `Pump_${k}_90_Inlet_Motor`)].map(k => [k, PUMP_STD]));
-// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On; taken out of Skynet 2026-11-17 for
+// copyright, kept here so a Brain that still has them and a Schema that uses them lay out right) follow the Pump Standard too, with
 // the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
 // pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
 // the bottom (60, 117), out the top of the riser on its right (110, 12).
@@ -4319,12 +4321,8 @@ function renderPipes() {
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
       const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TDo(p).labelFore || '#e6e6e6', 'font-size': TDo(p).labelFontSize || 14 }); t.textContent = p.label; g.append(t);
     }
-    if (editing && (p.points || []).length > 1) for (const [end, k] of [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']]) {     // an orange ⚠ ring: this end and another pipe's end on the same IP can't be joined without an adapter (Rule 5.40)
-      const other = p[end] && pipes.find(o => o !== p && [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']].some(([e2, k2]) => o[e2] === p[end] && !ipFits(p[k], o[k2], { sameSize: false })));
-      if (!other) continue;
-      const q = end === 'from' ? p.points[0] : p.points[p.points.length - 1], ok = other.from === p[end] ? other.ipTypeFrom : other.ipTypeTo;
-      const ring = mk('circle', { class: 'ipMis', cx: q[0], cy: q[1], r: 11 }), t = mk('title', {}); t.textContent = `⚠ IP Types do not fit: ${p[k]} and ${ok}. Add an adapter fitting, or change one of the IP Types.`; ring.append(t); g.append(ring);
-    }
+    // no orange mismatch ring (OakBarn Brewery, 2026-11-17: "There can be no mismatch because an adapter would be used so no need for
+    // Orange Ring"): the IP's Properties say which adapter is in the connection (ipAdapterNote, Rule 2.57)
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
@@ -4730,6 +4728,7 @@ document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }
 document.addEventListener('contextmenu', ev => {
   if (!editing && ev.target.closest?.('div.qdEnd')) { ev.preventDefault(); return; }     // the right button drags a QD hose end (Rule 5.28)
   if (!editing && (qdDrag || Date.now() - qdDragEnded < 1500)) { ev.preventDefault(); return; }     // letting go of a dragged hose end (over a vessel, say) does not open Help
+  if (!editing && (chDrag || Date.now() - chDragEnded < 1500 || chillerAt(ev.target))) { ev.preventDefault(); return; }     // the right button moves an Immersion Chiller; a right-click that does not move it opens its Help on let go
   if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
   const topic = rightClickTopic(ev.target);
   if (topic) { ev.preventDefault(); openHelp(topic); }
@@ -5153,7 +5152,7 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOff: 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg', cover: 'Red', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 150, h: 150, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
@@ -6476,7 +6475,7 @@ const markedProfile = kind => (S[kind + 'Profiles'] || []).find(p => p.isDefault
 // a Pump Profile list has no (none): one is always the Default (OakBarn Brewery, 2026-11-16, Dialog 2 #3: "We need to create a Default
 // so None Choice goes away")
 const profileChoices = kind => [...(kind === 'pump' && (S.pumpProfiles || []).length ? [] : [['', '(none)']]), ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
-const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
+const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
   valve: 'The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).' };
 // a Pump Profile into a new pump (or its Add box): only what the profile says; the picture stays the pump picked
 function applyPumpProfile(o, p) {
@@ -7842,8 +7841,8 @@ const F = {
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its Label, its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ['label', 'Label (never blank: it starts as its Name in small letters, tee_1, Rule 3.14)', 'text'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
       ['label', 'Label (shown in the "by hand" message; never blank)', 'text'], ['labelVisible', 'Show label', 'yn'],
-      ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
-  ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
+      ['image', 'Picture (the Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : [...ipAdapterNote(it), ...F.ipPoint],
+  ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'On vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path', 'path', null, false, false, { tip: 'Empty: drawn shape.' }], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['noUnlock', 'No Unlock (🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it)', 'bool']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
@@ -7859,6 +7858,16 @@ const F = {
     ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
     ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
+// An adapter in the connection (OakBarn Brewery, 2026-11-17: "Skynet can connect a TC to NPT and VICE versus  but the graphic is so small
+// noting need to be done except maybe a comment in the Property dialog of the IP that adapter is in the connection.   But Only for
+// imformation", Rule 2.57): the End Fittings of the pipe and hose ends on this IP that do not fit each other. Nothing is blocked or drawn.
+function ipAdapterNote(it) {
+  const ends = (draft || S.config).graphics.filter(p => p?.kind === 'pipe' && (p.from === it.id || p.to === it.id))
+    .flatMap(p => [...(p.from === it.id ? [p.ipTypeFrom] : []), ...(p.to === it.id ? [p.ipTypeTo] : [])]).filter(Boolean);
+  const pairs = [];
+  for (let i = 0; i < ends.length; i++) for (let j = i + 1; j < ends.length; j++) if (!ipFits(ends[i], ends[j], { sameSize: false }) && !pairs.includes(`${ends[i]} to ${ends[j]}`)) pairs.push(`${ends[i]} to ${ends[j]}`);
+  return pairs.length ? [['_adapter', `Adapter: ${pairs.join(', ')}. Information only: Skynet joins them, and the adapter is too small to draw.`, 'note', null, false, false, { keep: true }]] : [];
+}
 // Data Display (Rule 6.26) at the end of each of these dialogs: which of its values it shows on the Tab
 for (const t of ['pid', 'deadband', 'hysteresis', 'dutyCycle', 'flowMeter', 'scale', 'pwmOut']) F[t]?.push(DISPLAY_FIELD(t));
 F.alarm.push(...EMAIL_FIELDS, ...ALARM_OUT_FIELDS);      // Alarm Email (Rule 7.17)
@@ -8232,13 +8241,24 @@ const pumpPwmShown = it => !!it.pwm || isDcPower(powerOf(it));
 // Useful"): a fact the model knows is filled in and greyed out; a fact it doesn't know, or every fact of a User Defined pump (Other,
 // or no model), is a box to type in. A fact typed before stays the brewer's own and can still be changed (Rule #1).
 // Ports (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Use Paragraphs or Bullets for different Configurations Start by Match YOUR Pump fittings.")
+// Port is a board Port only (OakBarn Brewery, 2026-11-17: "Use Ports only for Arduino Type Ports in the Help   For IPs End Fitting or
+// something akin"; "every IP gets it own type End fitting.  Information only generally except for QDs.", Rule 2.57)
 const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump has now, with any fitting you added on it.\n'
   + '• Tri-Clamp (TC): a flat flange held on by a clamp. TC1.5 is a 1.5 inch Tri-Clamp, the most common on a brewery pump.\n'
-  + '• Female Pipe Thread (FPT): the threads are inside the port. FPT1/2 is 1/2 inch.\n'
-  + '• Male Pipe Thread (MPT): the threads are on the outside of the port.\n'
+  + '• Female Pipe Thread (FPT): the threads are inside the End Fitting. FPT1/2 is 1/2 inch.\n'
+  + '• Male Pipe Thread (MPT): the threads are on the outside of the End Fitting.\n'
   + '• BSP: the British pipe thread, on many pumps made outside the USA.\n'
   + '• Metric (DN): a metric size, for example DN15.\n'
-  + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.';
+  + '• Quick Disconnect (FMSSQD female, MSSQD male) and Camlock (CAMF female, CAMM male): for hoses.\n'
+  + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 End Fittings, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.\n\n'
+  + 'The End Fitting is information only, except a Quick Disconnect: a hose end on a Quick Disconnect can be unhooked and moved.';
+// Inlet IP Fitting and Outlet IP Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet Fitting"; "Separate Outlet Fitting"; "There should be Inlet and Outlet fittings as they can be different on a Pump"): two
+// dropdowns where the one Ports dropdown was. They are the End Fittings of the pump's In and Out IPs (ipTypeIn, ipTypeOut, Rule 5.40),
+// so the IP Type In / Out row is changed to Inlet IP Fitting and Outlet IP Fitting is added ("not a Take away but a Change"); a saved
+// pump shows its old IP Type In and Out values in them.
+const INLET_FIT_TIP = 'Inlet IP Fitting: the fitting where the liquid goes into the pump (the suction side).\n' + PORTS_TIP;
+const OUTLET_FIT_TIP = 'Outlet IP Fitting: the fitting where the liquid comes out of the pump (the pressure side).\n' + PORTS_TIP;
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
   // the cavitation caveat (OakBarn Brewery, 2026-11-16: "add the little caveat on that proprtues that Boiling Liquids are not recomened
@@ -8246,14 +8266,15 @@ const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with not
   ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.\n\n⚠ Boiling liquids are not recommended to be pumped because of cavitation (the hot liquid turns to steam bubbles inside the pump, so it loses its flow and can be damaged).'],
   // Self Priming (OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for a Riotide it is no")
   ['pumpSelfPrime', 'selfPrime', 'Self Priming', 'Can the pump start pumping on its own when it sits above the liquid? Most brewery pumps cannot (No): the pump has to sit lower than the liquid it pulls from, and be filled with liquid (primed) before it is turned On, or it runs dry and can be damaged. To prime it, let the liquid flow in and open its air vent until liquid comes out.'],
-  ['pumpPorts', 'ports', 'Ports', PORTS_TIP]];
-// Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
-// make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
-function pumpPortField(o, f, tip) {
-  const own = String(o.pumpPorts ?? '').trim(), tc = !own && f?.port && isTcPort(f.port);
-  if (tc) return ['_pumpPorts', 'Ports', 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
+  ['pumpPorts', 'ports', 'Fittings', PORTS_TIP]];
+// Each Fitting is a dropdown (OakBarn Brewery, 2026-11-11, said of Ports): editable, because a fitting changes it ("A user can add a
+// TC Fitting and make it TC"); only a Tri-Clamp the model is known to have is filled in and greyed out. The model's own words stay in its
+// Hover Help. The list: every size of the old Ports list, the sizes ticked in Default settings, and those used in this Schema.
+function pumpFitField(o, f, side) {
+  const key = side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet IP Fitting' : 'Outlet IP Fitting', tip = side === 'in' ? INLET_FIT_TIP : OUTLET_FIT_TIP;
+  if (f?.port && isTcPort(f.port) && !o.pumpPorts) return [`_${key}`, label, 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
   const hint = f?.ports ? ` The model: ${f.ports}.` : '';
-  return ['pumpPorts', 'Ports', 'sel', [['', '(pick)'], ...PUMP_PORTS.map(p => [p, p]), ...(own && !PUMP_PORTS.includes(own) ? [[own, own]] : [])], false, false, { tip: tip + hint }];
+  return [key, label, 'sel', ipChoices(o[key], ...PUMP_PORTS), false, false, { tip: tip + hint }];
 }
 // The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
 // Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
@@ -8279,17 +8300,17 @@ const PUMP_FACTS_POP = { title: 'Pump facts', view: pumpFactsView, redraw: 'pump
 } };
 function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   const T = DEVICE_TIPS;
+  // the End Fittings a pump without them starts with: its old Ports pick, else the Default pipe IP Type (Rule 5.40), female
+  it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}); it.ipTypeOut ||= it.ipTypeIn;
   if (it.pwm === true) it.pwm = 'pwm';
   // known values are filled in and greyed out (OakBarn Brewery, 2026-11-11: "If the data is Known, fill it in and Grey Out for Know
   // values"): the Model a Skynet pump drawing picks, and the Power that model runs on. The ⬢ Pump facts stays open.
   const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it));
   return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
-    // Ports, where Power was (Dialog 2 #3, 2026-11-16); Power and Use are in the Model's ⬢ Pump facts
-    (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpPortField(it, factsOf(it), PORTS_TIP)),
+    // Inlet IP Fitting and Outlet IP Fitting, each its own row where Ports was (where Power was, Dialog 2 #3, 2026-11-16; OakBarn Brewery,
+    // 2026-11-17); Power and Use are in the Model's ⬢ Pump facts
+    ...['in', 'out'].map(side => (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpFitField(it, factsOf(it), side))),
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
-    // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Ports, else the Default pipe IP Type
-    ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}), it.ipTypeOut ||= it.ipTypeIn,
-      [['ipTypeIn', 'IP Type In', 'sel', ipChoices(it.ipTypeIn), false, false, { tip: PUMP_IP_TIP, with: ['ipTypeOut', 'IP Type Out', 'sel', ipChoices(it.ipTypeOut), false, false, { tip: PUMP_IP_TIP }], ...x }]])),
     ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
@@ -13504,7 +13525,7 @@ const MENU = [
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Profile', tip: 'A tab\'s background color, the look new devices and widgets on it start with, and a new Tab\'s pipe and hose pixels and size', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures, orientation and Overlay a new valve starts with', render: renderBrewProfileTab('valve') },
-  { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types', render: renderBrewProfileTab('pump') },
+  { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings', render: renderBrewProfileTab('pump') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
   { key: 'water', title: 'Water Profile', tip: 'Your water: its minerals, and how much distilled or RO water it is cut with', render: renderBrewProfileTab('water') },
@@ -13983,8 +14004,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // an IP Type dropdown (Rule 5.40): the sizes ticked in Default settings, the ones already used in the Schema, and its own
 const ipChoices = (...own) => ipTypeChoices(S.config.brewDefaults?.ipTicks, [...usedIpTypes(draft || S.config), ...((draft || S.config).ipAllow || [])], own);      // ipAllow: a sample Schema's own sizes
 const IP_TYPE_PICK_TIP = 'The list shows the sizes ticked in ☰ Menu > Default settings > IP Types, and any already used in this Schema. Tick more there to see them here.';
-const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT port). To change it, change the IP Type of the pump or the vessel.';
-const PUMP_IP_TIP = 'The connector on its inlet (In) and outlet (Out) IPs, with its size (FPT1/2, TC1.5 ...). A new pump starts from its Ports, else the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
+const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT End Fitting). To change it, change the pump\'s Inlet or Outlet IP Fitting, or the vessel\'s IP Type.';
 const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP, with its size (FPT1/2, TC1.5 ...). It is drawn as its type. A new one starts with the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
 const IP_TYPE_TIP = 'The connector on this end, with its size: Tri-Clamp (TC1.5), pipe thread (FPT female, MPT male), BSP, metric (DN) stainless Quick Disconnect (FMSSQD female, MSSQD male) or Camlock (CAMF female coupler, CAMM male adapter). A new one starts with the Default IP Type in the pipe\'s size, on both ends. ' + IP_TYPE_PICK_TIP;
 // The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;
@@ -15644,6 +15664,113 @@ window.addEventListener('pointerup', async () => {
     toast(`${hn}: ${at ? 'its end is ' + qdWhere(at, d.p.workspace) : 'its end is loose, in the air'}`);
   } catch (e) { back(); toast(e.message, true); }
 });
+// ---- Moving an Immersion Chiller by hand on a live Tab (OakBarn Brewery, 2026-11-17: "Immersion Chillers on a Tab Can be Free Floating
+// but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; built now as a Rule 14.4 exception: "B Now"; Rule 5.42, Help 200).
+// The same as a Quick Disconnect hose end (Rule 5.40): a right-button hold (or a finger) on the chiller picks it up, with no pop-up.
+// While water flows through it a warning says so and it does not move. Let go over a vessel and it drops into that vessel (in its lower
+// middle, the same spot place_Chiller uses) and flashes red and yellow for 2 seconds; let go anywhere else and it stays there, free
+// floating. Its own hoses (a bundled supply and waste hose, or QD hoses to a supply on the Tab) stay on its In and Out IPs and follow it:
+// a chiller is a pipe (Rule 5.41), so moving it changes no flow. A right-click that does not move it opens its Help, as before.
+let chDrag = null, chDragEnded = 0;
+function chillerAt(target) {
+  const n = target?.closest?.('#ws .gfx.vessel'); if (!n) return null;
+  const g = L().graphics.find(x => x.id === n.dataset.gid);
+  return isImmersion(g) ? g : null;
+}
+const chJoins = c => { const ips = L().graphics.filter(g => g.kind === 'ip' && g.attachTo === c.id), ids = new Set(ips.map(g => g.id));
+  const on = L().graphics.filter(g => g.kind === 'pipe' && (ids.has(g.from) || ids.has(g.to))); return { ips, hoses: on.filter(g => g.hose), pipes: on.filter(g => !g.hose) }; };
+// the vessel the chiller's middle is over (on top first), with no other chiller in it
+function chTarget(c) {
+  const cx = (c.x || 0) + (c.w || 120) / 2, cy = (c.y || 0) + (c.h || 120) / 2, gs = L().graphics;
+  return [...gs].reverse().find(v => takesChiller(v) && v.workspace === c.workspace && !gs.some(o => o !== c && o.chillerOn === v.id) &&
+    cx >= (v.x || 0) && cx <= (v.x || 0) + (v.w || 90) && cy >= (v.y || 0) && cy <= (v.y || 0) + (v.h || 90)) || null;
+}
+// put the chiller (and its IPs) at x, y and let its hoses hang from their other ends to its IPs
+function chPut(d, x, y) {
+  const c = d.c, dx = x - (c.x || 0), dy = y - (c.y || 0);
+  c.x = x; c.y = y;
+  for (const g of d.j.ips) { g.x = (g.x || 0) + dx; g.y = (g.y || 0) + dy; }
+  for (const hz of d.j.hoses) {
+    const was = d.pts.get(hz.id), mineTo = d.j.ips.some(g => g.id === hz.to), other = mineTo ? was[0] : was[was.length - 1];
+    const ip = d.j.ips.find(g => g.id === (mineTo ? hz.to : hz.from)), fixed = mineTo ? was : [...was].reverse();
+    const pts = hoseSag(other, ipCenter(ip), hoseLead(fixed), null); hz.points = mineTo ? pts : pts.reverse();
+  }
+  const n = $(`#ws .gfx.vessel[data-gid="${CSS.escape(c.id)}"]`); if (n) place(n, c);
+  for (const g of d.j.ips) { const m = $(`#ws .gfx.ip[data-gid="${CSS.escape(g.id)}"]`); if (m) place(m, g); }
+  renderPipes();
+}
+function chMark(v) {
+  for (const n of $$('#ws .gfx.vessel.chillTarget')) n.classList.toggle('chillTarget', false);
+  if (v) $(`#ws .gfx.vessel[data-gid="${CSS.escape(v.id)}"]`)?.classList.add('chillTarget');
+}
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing) return;
+  const c = chillerAt(ev.target); if (!c) return;
+  if (ev.pointerType === 'mouse' && ev.button !== 2) return;
+  ev.preventDefault();
+  chDrag = { c, help: ev.pointerType === 'mouse', start: [ev.clientX, ev.clientY], moved: false, blocked: '' };
+  if (!can('operator')) chDrag.blocked = 'Only an operator or an admin can move a chiller';
+  else if (c.locked) chDrag.blocked = `${c.label || c.name} is locked`;
+  else {
+    const j = chJoins(c);
+    if (j.pipes.length) chDrag.blocked = `${c.label || c.name} is joined by a pipe, not a hose, so it cannot move`;
+    Object.assign(chDrag, { j, at: [c.x || 0, c.y || 0], pts: new Map(j.hoses.map(p => [p.id, clone(p.points)])), grab: canvasPt(ev), was: c.chillerOn ?? null, ips: j.ips.map(g => [g.x, g.y]) });
+  }
+});
+window.addEventListener('pointermove', ev => {
+  const d = chDrag; if (!d || d.stop) return;
+  if (!d.moved && Math.hypot(ev.clientX - d.start[0], ev.clientY - d.start[1]) < 4) return;
+  if (d.blocked) { d.stop = true; toast(d.blocked, true); return; }
+  if (!d.moved) {     // water flowing through it: a warning, no move (Rule 5.40); no flow: it moves at once, no pop-up
+    const f = (() => { try { return computeFlow(d.c.workspace); } catch { return new Map(); } })();
+    if (d.j.hoses.some(p => f.has(p.id))) { d.stop = true; chSafety(d.c); return; }
+    d.moved = true;
+  }
+  const p = canvasPt(ev);
+  chPut(d, Math.round(d.at[0] + p[0] - d.grab[0]), Math.round(d.at[1] + p[1] - d.grab[1]));
+  chMark(d.target = chTarget(d.c));
+});
+// back where it was (a cancel, or the Brain said no)
+function chBack(d) {
+  const c = d.c; c.x = d.at[0]; c.y = d.at[1];
+  d.j.ips.forEach((g, i) => { [g.x, g.y] = d.ips[i]; });
+  for (const p of d.j.hoses) p.points = d.pts.get(p.id);
+  if (d.was) c.chillerOn = d.was; else delete c.chillerOn;
+  renderWs();
+}
+window.addEventListener('pointercancel', () => { const d = chDrag; if (!d) return; chDrag = null; chMark(null); if (d.moved) chBack(d); });
+window.addEventListener('pointerup', async () => {
+  const d = chDrag; if (!d) return;
+  chDrag = null; chDragEnded = Date.now(); chMark(null);
+  if (!d.moved) { if (d.help && !d.stop) openHelp(graphicTopic(d.c)); return; }     // a right-click that did not move it: its Help, as before
+  const c = d.c, v = d.target || null;
+  if (v) chPut(d, ...spotIn(v, c));      // into the vessel: in its lower middle
+  try {
+    await api('POST', '/ui/chiller', { id: c.id, x: c.x, y: c.y, into: v?.id ?? null, hoses: d.j.hoses.map(p => ({ id: p.id, points: p.points })) });
+    if (v) c.chillerOn = v.id; else delete c.chillerOn;
+    if (v) {      // locked into the vessel: it flashes red and yellow for 2 seconds (the same as a QD hose end on an IP)
+      $(`#ws .gfx.vessel[data-gid="${CSS.escape(c.id)}"]`)?.classList.add('chillLocked');
+      setTimeout(() => { for (const n of $$('#ws .gfx.vessel.chillLocked')) n.classList.toggle('chillLocked', false); }, 2000);
+    }
+    toast(`${c.label || c.name}: ${v ? 'in ' + (v.label || v.name) : 'free floating on the Tab'}`);
+  } catch (e) { chBack(d); toast(e.message, true); }
+});
+$('#ws').addEventListener('touchstart', ev => { if (!editing && chillerAt(ev.target)) ev.preventDefault(); }, { passive: false });     // iPhone Safari: no pan or zoom on a finger drag
+// water flowing through the chiller: a warning (the same as a QD hose end, Rule 5.40); it closes by itself once nothing flows
+function chSafety(c) {
+  const cn = c.label || c.name || 'The chiller', msg = h('p', {});
+  const exit = h('button', { type: 'button', class: 'big', onclick: () => d.close() }, '✖ Exit');
+  const d = h('dialog', { class: 'infoDlg grabDlg qdSafe', 'data-nomenu': true },
+    h('div', { class: 'grabHead' }, h('div', { class: 'bar' }, h('h3', {}, `⚠ ${cn}: water is flowing`), h('span', { class: 'spacer' }), exit)), msg);
+  const step = () => {
+    const f = (() => { try { return computeFlow(c.workspace); } catch { return new Map(); } })();
+    if (!chJoins(c).hoses.some(p => f.has(p.id))) { d.close(); toast(`Nothing flows through ${cn} now: hold it with the right mouse button (or a finger) and drag.`, false, 6000); return; }
+    msg.textContent = `Water is flowing through ${cn}. Turn Off what feeds it (a Tap Water Valve, or a sump pump) before you move it, so it does not spray. This warning closes by itself once nothing flows.`;
+  };
+  const tick = setInterval(step, 500);
+  d.addEventListener('close', () => { clearInterval(tick); d.remove(); });
+  document.body.append(d); d.showModal(); step();
+}
 // a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
 function valveShut(name) {
   const e = L().elements.find(x => x.name === name);
@@ -16171,7 +16298,7 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
     about: 'The pictures, orientation and Overlay a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
   pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover, Hose, the Overlay of the Default Pump Profile', noUnits: true,
-    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and IP Types. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
+    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
 const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile first. There is always one Default Pump Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Pump Profile, turn its Default On and Save: this one is then no longer the Default.';
@@ -16209,7 +16336,7 @@ function profFields(kind) {
     if (kind === 'pump') return [['_pn', PUMP_PROF_NOTE, 'note'], ['name', 'Name', 'text', null, false, false, { tip: PUMP_PROF_NAME_TIP }], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']], false, false, { tip: DEVICE_TIPS.orient }], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])], false, false, { tip: DEVICE_TIPS.cover }],
       ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink }], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
-      ['ipTypeIn', 'IP Type In', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeIn)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'IP Type Out', 'sel', [['', '(from its Ports)'], ...ipChoices(w.ipTypeOut)], false, false, { tip: IP_TYPE_PICK_TIP }],
+      ['ipTypeIn', 'Inlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeIn, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'Outlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeOut, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }],
       ['notes', 'Notes', 'area', null, false, false, { tip: PROF_NOTES_TIP }]];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: VALVE_PROF_OVERLAY_TIP }],

@@ -30,12 +30,35 @@ A chiller already placed on that vessel is taken off first, so the line can run 
 
 - `remove_Chiller = BK_Vessel` takes the chiller, its IPs and its two hoses off that vessel.
 - `remove_Chiller` alone takes off every chiller a Process placed.
+- A chiller you built yourself and moved into a vessel by hand is never taken off by a Process. `place_Chiller` says that vessel
+  already has one.
 - Nothing placed: nothing happens.
 
 ## Picking in the Process editor
 
 Start typing `place_C` and pick **place_Chiller**: the list shows the Chiller Templates. Pick one and the list shows the
 Vessels, with the **Brew Kettle first**. `remove_Chiller` shows the Vessels too.
+
+## Moving an immersion chiller by hand
+
+On a Tab (not in Edit layout) an immersion chiller can sit on its own, **free floating**, and be put into a vessel later, the same
+way you move a Quick Disconnect hose end ([Quick Disconnect hoses](127-quick-disconnects-and-qd-hoses)):
+
+1. Hold the **right mouse button** on the chiller (on a phone or tablet, hold it with a finger) and drag. No pop-up asks first.
+2. Let go **over a vessel**: the chiller drops into it, in its lower middle, and flashes red and yellow for 2 seconds. A yellow
+   dashed outline shows the vessel while you drag over it.
+3. Let go **anywhere else**: it stays there, free floating.
+
+Its hoses stay on its In and Out and follow it: a hose from its own supply (an Ice Water Can with a Sump Pump) or a Quick
+Disconnect hose from a supply on the Tab (a Tap Water Valve), and its waste hose. A chiller is the same as a pipe (Rule 5.41), so
+moving it does not change what flows.
+
+- **Water flowing through it:** a warning says so and it does not move. Turn Off what feeds it (the Tap Water Valve or the sump
+  pump); the warning closes by itself once nothing flows.
+- **Only an immersion chiller** (2 IPs, In and Out) moves this way. A plate or counterflow chiller (a Chillzilla too) is part of
+  the manifold and stays put, and so does a chiller joined by a rigid pipe or a locked one. A vessel takes one chiller.
+- A right-click that does not move the chiller opens this Help, as before.
+- Viewers can't move a chiller; Operators and Admins can.
 
 ## Good to know
 

@@ -23,13 +23,13 @@ Port (they are greyed out). Nothing else may use that Port.
 
 An Instance is more like **Bob** of the Bobiverse (*We Are Legion*) than a Clone: it starts as a copy and then goes its own way.
 
-![Bob of the Bobiverse](help_pictures/Bobiverse_Bob.png)
+![A copy that goes its own way](help_pictures/Instance_Own_Way.svg)
 
-*Picture: the [Bob page of the Bobiverse Wiki](https://bobiverse.fandom.com/wiki/Bob) (Fandom, CC BY-SA).*
+*More about Bob: the [Bob page of the Bobiverse Wiki](https://bobiverse.fandom.com/wiki/Bob).*
 
 **Last One Rules** (Rule 6.28, "All for One, One For All"): only one of them can be On at a time.
 
-![All for One, One For All](help_pictures/Three_Musketeers.png)
+![All for One, One For All](help_pictures/Musketeers_All_For_One.svg)
 
 - Turning one On takes the Port. The others on it go Off.
 - Turning one Off turns the Port Off. Every one on it is then Off.

@@ -25,7 +25,7 @@ Les deux endroits ont les mêmes onze groupes. Ils sont créés à chaque démar
 | Miscellaneous | `Miscellaneous` | Fonds et tout le reste |
 | On Off | `On_Off` | Superpositions On : des images transparentes dessinées par-dessus un élément quand il est On (voir On overlay) |
 
-Les noms de dossiers ont `_` à la place des espaces, donc un Process peut utiliser un chemin tel quel, par exemple `my_pump.image = "Images/Skynet/Pumps/Pump_Red_Rip_On.png"` ou `my_pump.image = "Images/Pumps/MyPump.png"`.
+Les noms de dossiers ont `_` à la place des espaces, donc un Process peut utiliser un chemin tel quel, par exemple `my_pump.image = "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"` ou `my_pump.image = "Images/Pumps/MyPump.png"`.
 
 ## Les images Skynet sont en lecture seule {#the-skynet-pictures-are-read-only}
 
@@ -70,4 +70,4 @@ En écrivant un Process, appuyez sur **Alt+P** (Option+P sur un Mac), ou sur le 
 
 - Choisissez **Pictures** ou **Sounds**, **Skynet / My pictures / Both**, un groupe (ou **All groups**), et tapez dans **Search** pour réduire la liste.
 - Les images s'affichent en **icônes**, comme dans l'Explorateur Windows. Cliquez sur une, ou déplacez-vous avec les flèches ; son chemin s'affiche en dessous (un son peut être joué).
-- **Double-cliquez** ou appuyez sur **Entrée** pour mettre le chemin là où est le curseur, entre guillemets : `"Images/Skynet/Pumps/Pump_Red_Rip_On.png"`. Si vous avez déjà tapé le `"` d'ouverture, seul le chemin (et le `"` de fermeture) est ajouté.
+- **Double-cliquez** ou appuyez sur **Entrée** pour mettre le chemin là où est le curseur, entre guillemets : `"Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"`. Si vous avez déjà tapé le `"` d'ouverture, seul le chemin (et le `"` de fermeture) est ajouté.
