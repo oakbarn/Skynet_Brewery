@@ -6,7 +6,7 @@ import path from 'node:path';
 import { Store } from '../lib/store.js';
 import { Schemas, versionName, versionFile } from '../lib/schemas.js';
 import { EquipmentProfiles } from '../lib/equipment.js';
-import { equipVolumes } from '../public/brewcalc.js';
+import { brewVolumes } from '../public/brewcalc.js';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'schemas-'));
 const cfgPath = path.join(dir, 'config', 'brewery.json');
@@ -259,7 +259,7 @@ delete hw.allOff;
 }
 
 // volumes as in BeerSmith
-const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
+const v = brewVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
 assert.equal(v.postBoil, 6.25); assert.equal(v.preBoil, 7.25);
 assert.match(v.warnings[0], /more than the kettle holds/);
 
