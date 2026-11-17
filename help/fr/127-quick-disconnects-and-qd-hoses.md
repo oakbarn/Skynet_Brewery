@@ -43,7 +43,8 @@ C'est tout : gardez l'anneau appuyé et faites glisser. Rien ne s'ouvre avant.
 
 Pendant que vous faites glisser, le tuyau **fléchit** : il quitte la pompe comme avant et pend en une courbe passant par plusieurs points de pliage, en pendant davantage plus vous tirez le bout loin. Un **anneau vert** montre où ira le bout. Lâchez sur :
 
-- **un IP ou un Quick Disconnect** : le flexible s'y joint. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous. Sur le bout
+- **un IP ou un Quick Disconnect** : le flexible s'y joint. Sur le bout ouvert d'un tuyau, le flexible entre dans le sens où ce
+  bout est tourné, comme un vrai flexible : sur un bout tourné vers le bas, il pend dessous et fait un **U** pour y remonter. Un Quick Disconnect l'emporte sur l'IP de vanne en dessous. Sur le bout
   ouvert d'un tuyau, le passage continue du flexible dans ce tuyau.
 - **n'importe où dans le tiers du haut d'une cuve** : tout le tiers du haut est un seul gros IP. C'est comme mettre le flexible dans le
   haut de la cuve, et le bout du flexible va au milieu du haut de la cuve.
