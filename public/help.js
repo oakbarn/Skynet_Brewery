@@ -36,6 +36,8 @@ const FR = {
 const bare = n => n.replace(/^\d+[-_]/, '');
 // a Step by Step guide: its title starts "Step by Step:" (Rule 11.9)
 export const isStep = p => /^step by step\s*:/i.test(p.title || '');
+// the Glossary page (help/13-glossary.md): pinned near the top of the page list
+export const isGlossary = p => bare(p.name || '') === 'glossary';
 const find = n => n ? pages.find(p => p.name === n) || pages.find(p => bare(p.name) === bare(n)) : undefined;
 
 // ---------------- Markdown to HTML (small and safe: every bit of text is escaped, links only go to http(s), mailto or other pages) ----------------
@@ -142,13 +144,22 @@ function renderList() {
   const nav = $('#hpList');
   // the Step by Step guides come first, in a section of their own (OakBarn Brewery, 2026-11-11: "a Section in Help that is a Step By Step
   // with Pictures on How to do something"); every other page follows in its usual order
-  const steps = pages.filter(isStep), rest = pages.filter(p => !isStep(p));
+  // the Glossary (every special word, A to Z) sits right under them, so it is always easy to find (OakBarn Brewery, 2026-11-17:
+  // "We also need a Glossary in the Help"); it is still in its usual place in Every page too
+  const steps = pages.filter(isStep), rest = pages.filter(p => !isStep(p)), gloss = pages.filter(isGlossary);
   const opt = p => el('option', { value: p.name, selected: p.name === cur }, p.title);
-  $('#hpPick').replaceChildren(...(steps.length ? [el('optgroup', { label: 'Step by Step' }, ...steps.map(opt)), el('optgroup', { label: 'Every page' }, ...rest.map(opt))] : pages.map(opt)));
+  const top = [...steps, ...gloss];
+  $('#hpPick').replaceChildren(...(top.length ? [
+    ...(steps.length ? [el('optgroup', { label: 'Step by Step' }, ...steps.map(opt))] : []),
+    ...(gloss.length ? [el('optgroup', { label: 'Glossary' }, ...gloss.map(p => el('option', { value: p.name }, p.title)))] : []),
+    el('optgroup', { label: 'Every page' }, ...rest.map(opt))] : pages.map(opt)));
   $('#hpSide').classList.toggle('searching', !!q);
   if (!q) {
     const link = p => el('a', { href: '#', class: p.name === cur ? 'here' : '', onclick: e => { e.preventDefault(); open(p.name); } }, p.title);
-    nav.replaceChildren(...(steps.length ? [el('div', { class: 'hpGroup' }, '👣 Step by Step'), ...steps.map(link), el('div', { class: 'hpGroup' }, 'Every page')] : []), ...rest.map(link));
+    nav.replaceChildren(
+      ...(steps.length ? [el('div', { class: 'hpGroup' }, '👣 Step by Step'), ...steps.map(link)] : []),
+      ...(gloss.length ? [el('div', { class: 'hpGroup' }, '📖 Glossary'), ...gloss.map(link)] : []),
+      ...(top.length ? [el('div', { class: 'hpGroup' }, 'Every page')] : []), ...rest.map(link));
     return;
   }
   const words = q.split(/\s+/);
