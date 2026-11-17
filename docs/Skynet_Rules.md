@@ -1047,6 +1047,23 @@ size. The box is never made bigger by itself (Design Rule #1: nothing the user s
 are meant to wrap are left alone: Text and Label Widgets, long strings, Alarm text and picture text. The Skynet Dial and Timer
 Digits draw their own digits to fit (Rule 2.40). Help 138. **Both programs:** the BruControl Import's Build page shares the Panel code.
 
+2.57 **Port means a board Port; a pipe end has an End Fitting** (OakBarn Brewery, 2026-11-17: "Ports could be confused with Arduino
+Ports so use Inlet Fitting"; "Use Ports only for Arduino Type Ports in the Help   For IPs End Fitting or something akin."; "There
+should be Inlet and Outlet fittings as they can be different on a Pump. Immersion Chiller, so every IP gets it own type End fitting.
+Information only generally except for QDs."; "Yes Skynet can connect a TC to NPT and VICE versus  but the graphic is so small
+noting need to be done except maybe a comment in the Property dialog of the IP that adapter is in the connection.   But Only for
+imformation").
+- In the dialogs, Hover Help and Help, **Port** is only a pin on an Interface (an Arduino, a Raspberry Pi ...). The connector where a
+  pipe or hose joins a pump, a chiller or a valve is its **End Fitting** (TC1.5, FPT1/2, FMSSQD1/2 ...).
+- Every IP has its own End Fitting (its IP Type, Rule 5.40). A pump has two: **Inlet IP Fitting** and **Outlet IP Fitting** (they can be
+  different), one row each in every Pump dialog and in the Pump Profile.
+- The End Fitting is **information only**, except a **Quick Disconnect**, where a hose end can be unhooked and moved (Rule 5.40).
+  Two End Fittings that don't fit (a TC to an NPT) can still be joined: nothing is blocked and no adapter is drawn (it would be too
+  small, and there is no warning ring); the IP's Properties say **Adapter: TC1.5 to FPT1/2** as a note.
+- *Not yet (next step):* the vessel ports, the plain IPs and the chillers get the same End Fitting rows and wording; until then the
+  vessel dialogs and their Help still say Ports, and the Panel's network and mail server port settings keep the word (they are not
+  pipes). **Both programs:** the BruControl Import's Build page shares the Panel's dialogs; BruControl has no fittings to import.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2140,9 +2157,11 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   every setting the pipe had (size, IP Types, color, Flow Color, lock); only its Name, Label and Show label are its own. A new pipe
   drawn on to a pipe (a corner at an elbow) takes that pipe's size, its IP Type at the joint and its color. Skynet does this in the
   Background and needs no user input (Rule 11.13). Checked by test/pipesplit.test.js for every kind of cut.
-- **Fit warning:** in Edit layout an orange ring marks two pipe ends on the same IP whose types can't be joined without an
-  adapter (another type, or MPT to MPT, FPT to FPT). Different sizes of one type meet at a reducer, so they are not warned. It
-  only warns; nothing is blocked.
+- **No mismatch:** two pipe ends on the same IP whose types can't be joined directly (another type, or MPT to MPT, FPT to FPT)
+  are joined with an adapter, as in the real brewery, so there is no mismatch and no warning ring (OakBarn Brewery, 2026-11-17:
+  "There can be no mismatch because an adapter would be used so no need for Orange Ring"). The IP's Properties say **Adapter: ...**
+  as a note, information only (Rule 2.57). Different sizes of one type meet at a reducer. Nothing is blocked.
+  *Replaced (2026-11-17):* an orange ring in Edit layout marked such ends.
 - Older Schemas: once (ipSizesKept), each old plain type becomes its size (a pipe or hose end from its own size, threads male; a
   pump from its Ports, female; a Stove Top outlet female), then the ends above are fitted.
 - A size the connector is not made in is not offered with it: Tri-Clamp is not made under 1/2", so a 1/4" pipe offers only
@@ -2171,9 +2190,10 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   own art, made in code, in the flow color with white details). A hose end put on the open end of a pipe goes in the way that end
   faces, with a U when needed, as a real hose does (OakBarn Brewery, 2026-11-17).
   (Replaces the 2026-11-14 pop-up that asked about gravity draining and needed **Yes, unhook it**.)
-- **Pumps:** **IP Type In** and **IP Type Out** in the pump's Properties (OakBarn Brewery: "Add Connection Type for the In and
-  Out IPs as above on a Pump"). A pump starts with what its Ports say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
-  the Default pipe IP Type; pumps already made took it once.
+- **Pumps:** the **Inlet IP Fitting** and **Outlet IP Fitting** in every Pump dialog are the IP Types of its In and Out IPs (OakBarn
+  Brewery: "Add Connection Type for the In and Out IPs as above on a Pump"; 2026-11-17, Rule 2.57: one row each, named Inlet and
+  Outlet IP Fitting). A pump starts with what its older Ports pick says (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else the
+  Default pipe IP Type; pumps already made took it once. The Pump Profile has the same two rows.
 - **BruControl Import:** BruControl has no connector on its pipes, so imported pipes and hoses take the Defaults.
 
 ---
@@ -4691,8 +4711,16 @@ below the Overlay:
   recommended to be pumped because of cavitation (OakBarn Brewery, 2026-11-16). A fact is filled in only from the maker's own words:
   the RipTide's Hottest liquid stays Not known until Blichmann's own number is found (blichmannengineering.com now goes to MoreBeer,
   whose RipTide pages give none).
-- **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
-  is filled in and greyed out.
+- **Inlet IP Fitting** and **Outlet IP Fitting** where Power was (Rule 18.40), each on its own line and each its own dropdown (OakBarn
+  Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet
+  Fitting"). They are the End Fittings of the pump's In and Out IPs (Rule 5.40, Rule 2.57): the **IP Type In / Out** row is changed
+  to **Inlet IP Fitting**, and **Outlet IP Fitting** is added (OakBarn Brewery, 2026-11-17: "Remove IP TYPe  In/Out rows not a Take
+  away but a Change.  Change IP TYPe  In/Out to Inlet Ip Fitting  and Add Outlet IP Fitting"; "Populate Both Changed ANd NEW WITH
+  THE OLD IP TYPe  In/Out VALUE"): a saved pump shows its old IP Type In in Inlet IP Fitting and its old IP Type Out in Outlet IP
+  Fitting. A dropdown, because a fitting can change an End Fitting; the list has every size of the old Ports list plus
+  the sizes ticked in Default settings and those used in the Schema. A pump saved with the one **Ports** pick starts from it; its
+  Ports pick is kept (Design Rule #1).
+  *Replaced (2026-11-17):* one **Ports** dropdown for both ends, and the **IP Type In / IP Type Out** row (changed to Inlet IP Fitting; Outlet IP Fitting added).
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
   or one already set to PWM; OakBarn Brewery's drawing, 2026-11-11). An AC pump is On/Off only. A PWM pump needs a true PWM Port (Rule
   4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
@@ -5139,6 +5167,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ## Change log
 
 - 2026-11-17: Rule 4.1 (OakBarn Brewery, 2026-11-17: "I see the Equipment Template so use a Normal Build Tab to create a Bundled Immersion Chiller and save to Equipment Templates"; markup "Method to change the Menu Bar when the Build is for a Vessel Template, And Equipment Profile, An Equiment Template", option A: "Change Valves to Valves/Equpment and just add the Equipment Templates and Build new to the DDLB LIst"; "I think A is best choice if possible"; built as a Rule 4.1 and Rule 14.4 exception): a **Chiller Bundle Equipment Template** (one immersion chiller with its hoses, Ice Water Cans, a Sump Pump and IPs, saved from a normal Build Tab with Finish Build ... > As a Template; a pump Device keeps no Port and gets the next free Port when placed, Rule 6.1); the **Valves** shortcut is now **Valves/Equipment** with the Equipment Templates and 🔨 Build new Equipment Template; while a Build is for a Template or an Equipment Profile the Edit layout bar greys out what can't go in one (the Widget buttons, Picture, Text, Tab settings, New tab, Hidden Tab, Processes, Update Schema Version) and Finish Build ... shows As a Template first. Placing a Bundle with place_Chiller waits in the Process Updates Sandbox (entry 8, Rule 14.5). Help 55, 82, 200 (and French). Checked against both programs: the BruControl Import's Build page is the Panel's, so it has the same bar and Templates; BruControl has no chillers. (thread "Move an Immersion Chiller between Vessels")
+- 2026-11-17: Added Rule 2.57, Port means a board Port; a pipe end has an End Fitting (OakBarn Brewery, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet Fitting"; "Use Ports only for Arduino Type Ports in the Help"; "every IP gets it own type End fitting"; an adapter note in the IP's Properties, information only). Rules 18.32 and 5.40 changed: the one **Ports** dropdown and the **IP Type In / IP Type Out** row are now two rows, **Inlet IP Fitting** and **Outlet IP Fitting**, the End Fittings of the pump's In and Out IPs, in the Add box, the Properties and the Pump Profile ("not a Take away but a Change"; a saved pump shows its old IP Type In and Out values in them). Help 24, 36, 104, 109, 111, 115, 121, 123, 130, 163 and their French; Hover Help with French. Vessels, plain IPs and chillers are the next step. Checked against both programs: BruControl has no fittings to import; the Importer's Build page shares the Pump dialogs. No new Help number. The orange mismatch ring in Edit layout (Rule 5.40) is removed: an adapter is used, so there is no mismatch. (thread "Split pump Ports into Inlet and Outlet IP Fitting")
 - 2026-11-17: Rule 5.42 (OakBarn Brewery: "Immersion Chillers on a Tab Can be Free Floating but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; "Immersion Chillers can be a bundled item with their own flow supply or connected with a QD Hose an different existing one one a Tab. and the waste hose"; "B Now", a Rule 14.4 exception): an Immersion Chiller moves by hand on a live Tab with a right-button hold (or a finger), with no pop-up, a warning only while water flows through it; let go over a vessel it drops into it and flashes red and yellow for 2 seconds, anywhere else it stays free floating; its hoses follow it. `remove_Chiller` takes off only chillers a Process placed. The Bundle Template and the Process line wait in the sandboxes (Panel Updates 26, Process Updates 8). Help 200 (and French). Checked against both programs: the BruControl Import has no chillers and does not run Processes; its Build page is Edit layout, where nothing changes. (thread "Move an Immersion Chiller between Vessels")
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
