@@ -13,9 +13,9 @@
 ; deleted, to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
-;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
-; and, only for the Full Setup (Rule 9.20), -DMEDIA_SRC=<the media folder of the Skynet Media Setup>: the same Setup, with every
-; Skynet picture and sound inside it, added the Media Setup's add-only way (a file already there is never changed or deleted).
+;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures, sounds and Sample Schemas added since the last Update Setup are in it too, Rule 9.22)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+; and, only for the Full Setup (Rule 9.20), -DMEDIA_SRC=<every Skynet picture and sound> and -DSAMPLES_SRC=<every Skynet Sample
+; Schema>: the same Setup with all of them inside, added the add-only way (a file already there is never changed or deleted).
 ; and, only when signing is set up (docs/Code_Signing_Setup.md), -DSIGN_SCRIPT=<tools/sign-exe.sh>: the Setup .exe and the
 ; Uninstall .exe inside it are then signed with Azure Artifact Signing as they are made (needs NSIS 3.08 or newer).
 
@@ -99,7 +99,7 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 ; The opening screen shows the version, so the brewer can see which one this Setup installs (OakBarn Brewery, 2026-11-07)
 !ifdef MEDIA_SRC
   !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer (Full)"
-  !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer, with every Skynet picture and sound, and adds a Skynet Brewer shortcut to your Desktop. You do not need the Skynet Media Setup.$\r$\n$\r$\nPictures and sounds are only added: one you already have is never changed or deleted."
+  !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer, with every Skynet picture, sound and Sample Schema, and adds a Skynet Brewer shortcut to your Desktop."
 !else
   !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
   !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop."
@@ -115,7 +115,7 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !ifdef MEDIA_SRC
   !define FRESH_MEDIA "this Full Setup puts them back"
 !else
-  !define FRESH_MEDIA "run the Media Setup after"
+  !define FRESH_MEDIA "the Full Setup has them all"
 !endif
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Start the Skynet Brain and open the Skynet Panel now"
@@ -123,13 +123,12 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\install\ReadMe.txt"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show the install notes"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-; The pictures and sounds (Rule 9.12) and the extra Sample Schemas (Rule 9.13) are their own Setups: the Finish page links to them
-!ifdef MEDIA_SRC
-  !define MUI_FINISHPAGE_LINK "Get more Sample Schemas"
-!else
-  !define MUI_FINISHPAGE_LINK "Get the Skynet pictures and sounds, and more Sample Schemas"
+; No Media or Sample Schemas Setup to fetch any more (Rule 9.22): the Update Setup brings what is new, the Full Setup has everything.
+; Only the Update Setup on a panel with no Skynet pictures yet needs the Full Setup, so its Finish page links to the downloads.
+!ifndef MEDIA_SRC
+  !define MUI_FINISHPAGE_LINK "Skynet downloads (the Full Setup has every picture, sound and Sample Schema)"
+  !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 !endif
-!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
@@ -548,7 +547,7 @@ Section "Skynet Brew Panel" SecMain
   ; The panel ships only the 3 Vessel sample (Rule 9.13). The three sample folders older versions put in samples\configs (now set
   ; aside in the Sandbox) are MOVED, never deleted, to backups\old_samples_<date>, so they stop showing under Add a Sample Schema.
   ; Nothing else is touched: your own Schemas are in config\schemas (never here), any other folder in samples\configs stays, and
-  ; sample_schemas\ (the Skynet Sample Schemas Setup's folder) is never touched by this Setup.
+  ; sample_schemas\ (the Skynet Sample Schemas) only gets new or changed Skynet samples (Rule 9.22).
   !macro MoveOldSample ID
     ${If} ${FileExists} "$INSTDIR\samples\configs\${ID}\*.*"
       CreateDirectory "$INSTDIR\backups\old_samples_$Stamp"
@@ -566,7 +565,15 @@ Section "Skynet Brew Panel" SecMain
     Call CoreWritable
   ${EndIf}
   SetOutPath "$INSTDIR"
-  File /r "${SRC}\*.*"
+  File /r /x sample_schemas "${SRC}\*.*"
+  ; Skynet Sample Schemas added or changed since the last Update Setup (Rule 9.22): a changed one replaces the older copy of that
+  ; Skynet sample. It is only used to make a New Schema, so a Schema already made from it (the user's own copy) is never touched.
+!if /FileExists "${SRC}\sample_schemas\*.*"
+  SetOutPath "$INSTDIR\sample_schemas"
+  File /r "${SRC}\sample_schemas\*.*"
+  SetOutPath "$INSTDIR"
+  DetailPrint "Added the new and changed Skynet Sample Schemas. Your own Schemas were not touched."
+!endif
   ${If} $Fresh == 1
     Call StartFresh
   ${EndIf}
@@ -586,18 +593,23 @@ Section "Skynet Brew Panel" SecMain
   ${EndIf}
 
 !ifdef MEDIA_SRC
-  ; The Full Setup (Rule 9.20): every Skynet picture and sound, added the Media Setup's way (Rule 9.12, Rule #1). A file already
-  ; there by that name is never changed, and nothing is deleted. It comes after a Start Fresh, so a Fresh Start gets them back too.
+  ; The Full Setup (Rule 9.20): every Skynet picture and sound, added only (Rule 9.12, Rule #1), and every Skynet Sample Schema
+  ; (the newest copy, Rule 9.22). It comes after the overwrite (Start Fresh), so everything Skynet's is back.
   SetOverwrite off
   SetOutPath "$INSTDIR\media"
   File /r "${MEDIA_SRC}\*.*"
   SetOverwrite on
-  DetailPrint "Added the Skynet pictures and sounds this panel did not have yet. Nothing you had was changed."
+!ifdef SAMPLES_SRC
+  SetOutPath "$INSTDIR\sample_schemas"
+  File /r "${SAMPLES_SRC}\*.*"
+!endif
+  SetOutPath "$INSTDIR"
+  DetailPrint "Added every Skynet picture, sound and Sample Schema."
 !else
-  ; The pictures and sounds come with the Skynet Media Setup (Rule 9.12): say so when this panel has none yet
+  ; A panel with no Skynet pictures yet (a new computer that used this Update Setup): the Full Setup has them all (Rule 9.22)
   ${IfNot} ${FileExists} "$INSTDIR\media\Images\Skynet\*.*"
-    DetailPrint "No Skynet pictures and sounds yet: get the Skynet Media Setup (the link on the last page, or the Releases page:"
-    DetailPrint "https://github.com/oakbarn/Skynet_Brewery/releases/latest) and run it after this, or use the Skynet Brewer Full Setup next time."
+    DetailPrint "No Skynet pictures and sounds yet. On a new computer use the Skynet Brewer Full Setup: it has every picture, sound and"
+    DetailPrint "Sample Schema (https://github.com/oakbarn/Skynet_Brewery/releases/latest). Each Update Setup then brings what is new."
   ${EndIf}
 !endif
 

@@ -4,6 +4,9 @@ Un **Hidden Tab** (Tab caché) est un Tab spécial pour les choses qu'un Process
 
 - **Il ne s'affiche qu'en Edit layout.** Le jour du brassage, il n'est ni dans la barre des Tabs ni dans la liste des écrans du ☰ Menu, mais tout ce qui est dessus marche toujours : les Processes lisent et règlent ses Devices, Widgets et variables comme d'habitude.
 - **En faire un :** Edit layout > **👻 Hidden Tab**. Le premier est **Hidden_1**, puis **Hidden_2** et ainsi de suite. Vous pouvez en faire autant que vous voulez ; chacun suit les mêmes règles.
+- **Fait par erreur ?** Cliquez sur **↩ Undo** dans la note qui s'affiche. Il retire le nouveau Hidden Tab tant que rien n'est dessus.
+- **Revenir à un :** Edit layout > **👻 Hidden Tabs ▾** liste chaque Hidden Tab de ce Schema (un vide le dit). Cliquez-en un pour y aller.
+- **Save layout** demande pour chaque Hidden Tab **vide** : **Keep** (garder) ou **Delete** (supprimer). Cancel arrête la sauvegarde.
 - **Son nom commence toujours par `Hidden_`.** Changez la partie après dans **Tab settings** (par exemple `Hidden_Mash_Helpers`). Si vous retirez `Hidden_`, il est remis. Un Tab que vous renommez pour qu'il commence par `Hidden_` devient aussi un Hidden Tab.
 - En Edit layout, le bouton d'un Hidden Tab a un 👻 et un bord en pointillés.
 - Quitter Edit layout pendant qu'un Hidden Tab est ouvert va au premier Tab que vous pouvez voir.

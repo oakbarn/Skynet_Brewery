@@ -1,10 +1,15 @@
-# Le Skynet Media Setup {#the-skynet-media-setup}
+# Les images et sons Skynet {#the-skynet-pictures-and-sounds}
 
-Les images et sons Skynet (pompes, vannes, cuves, sons d'alarme ...) ne sont **pas** dans l'installateur ou le zip du panneau. Ils viennent dans leur propre téléchargement, pour que le panneau reste petit, et que de nouvelles images puissent être ajoutées sans nouvelle version du panneau.
+Les images et sons Skynet (pompes, vannes, cuves, sons d'alarme ...) viennent avec les Setups Skynet. **Il n'y a rien de plus à télécharger ni à lancer** (OakBarn Brewery : « No extra steps for a User »).
 
-Trois sons viennent aussi avec le panneau lui-même, pour qu'une alarme ou un Sound Player puisse toujours sonner : le bip d'alarme, la voix « Alarm sound missing » et la chanson « Find The File ».
+- **Nouveau sur cet ordinateur Windows :** le **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) a toutes les images et tous les sons Skynet, et tous les Sample Schemas.
+- **À chaque mise à jour :** l'**Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) et le zip du panel portent chaque image et son Skynet ajoutés depuis le dernier Update Setup. Le Brain ajoute ceux qu'il n'a pas encore à son prochain démarrage.
 
-**Il ne fait qu'ajouter.** Une image ou un son que vous avez déjà, sous ce nom, n'est jamais changé. Rien n'est jamais supprimé. Vos propres images et sons ne sont jamais touchés.
+Trois sons viennent toujours avec le panneau lui-même, pour qu'une alarme ou un Sound Player puisse toujours sonner : le bip d'alarme, la voix « Alarm sound missing » et la chanson « Find The File ».
+
+**Il ne fait qu'ajouter.** Une image ou un son que vous avez déjà, sous ce nom, n'est jamais changé. Vos propres images et sons ne sont jamais touchés.
+
+> Le **Skynet Media Setup** .exe à part n'existe plus : l'Update Setup et le Full Setup font son travail.
 
 ## Où l'obtenir {#where-to-get-it}
 
@@ -12,17 +17,16 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 
 | Fichier | Pour |
 |---|---|
-| `Skynet_Media_Setup_<date>.exe` | Windows |
-| `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou Windows à la main |
-| `Skynet_Brewer_Full_Setup_<date>.exe` | Windows : le panneau **et** les images et sons dans un seul fichier |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | Windows, nouvel ordinateur : le panneau **et** toutes les images, sons et Sample Schemas dans un seul fichier |
+| `Skynet_Brewer_Setup_<date>.exe` | Windows, mises à jour : apporte les nouvelles images, sons et Sample Schemas |
+| `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou à la main : toutes les images et tous les sons Skynet |
 
-Le Media Setup et le zip ne sont refaits que quand Skynet ajoute des images ou des sons. En attendant, chaque nouvelle Release porte les mêmes, donc la date dans leur nom peut être plus ancienne que celle du panneau. C'est normal : ce sont toujours les images et les sons les plus récents.
+Le zip Media n'est refait que quand Skynet ajoute des images ou des sons. En attendant, chaque nouvelle Release porte le même, donc la date dans son nom peut être plus ancienne que celle du panneau. C'est normal.
 
 ## Le Full Setup : tout dans un seul fichier (Windows) {#the-full-setup-everything-in-one-file-windows}
 
-Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.exe`** au lieu des deux Setups séparés. C'est le même Skynet Brewer Setup, avec toutes les images et tous les sons Skynet dedans : pas besoin du Media Setup.
+Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.exe`**. C'est le même Skynet Brewer Setup, avec toutes les images, tous les sons et tous les Sample Schemas Skynet dedans.
 
-- Il ajoute les images et les sons comme le Media Setup : une image ou un son que vous avez déjà n'est jamais changé, et rien n'est supprimé.
 - Il n'a **aucun choix**. C'est toujours une installation complète, et il **écrase tout** : chaque Schema, réglage, utilisateur, Process, le journal de brassage, chaque image et son, et le dossier Import. Il remet ensuite tout seul les images et sons Skynet.
 - Si Skynet est déjà installé, il montre **un seul avertissement** : c'est l'installation Full et elle va TOUT ÉCRASER. Sur cette page :
   - **Get the Update Setup** ouvre la page de téléchargement et ferme le Full Setup. Prenez l'Update Setup (`Skynet_Brewer_Setup_<date>.exe`) quand vous voulez seulement une mise à jour : il garde tout.
@@ -32,13 +36,10 @@ Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.ex
 - Il est plus gros (environ 12 Mo au lieu d'environ 5 Mo). Pour une mise à jour rapide plus tard, prenez le Skynet Brewer Setup simple : vos images et sons restent en place.
 - La désinstallation est la même, quel que soit le Setup utilisé.
 
-## Comment l'utiliser {#how-to-use-it}
+## Mac, Linux, Raspberry Pi ou à la main {#mac-linux-raspberry-pi-or-by-hand}
 
-- **Windows :** installez d'abord le panneau (Skynet Brewer Setup), puis double-cliquez sur `Skynet_Media_Setup_<date>.exe`. Gardez le dossier qu'il montre (`C:\Brewing\BrewPanel`, où est le panneau) et cliquez sur Install. Si le panneau tourne, appuyez sur F5 dans sa fenêtre pour voir les nouvelles images.
-- **Mac, Linux, Raspberry Pi avec l'installateur :** mettez `Skynet_Media_<date>.zip` à côté de l'installateur avant de le lancer. L'installateur ajoute les images et sons que vous n'avez pas encore.
-- **À la main :** décompressez `Skynet_Media_<date>.zip` dans le dossier qui contient `BrewPanel` (sur Mac, Linux et Pi utilisez `unzip -n`, qui ne remplace jamais un fichier). Il ajoute `BrewPanel/defaults/media`. Au prochain démarrage, le panneau copie seulement les images et sons que vous n'avez pas encore.
-
-Relancez-le chaque fois que de nouvelles images Skynet sortent. On peut le lancer aussi souvent qu'on veut sans risque.
+- **Avec l'installateur :** mettez `Skynet_Media_<date>.zip` à côté de l'installateur avant de le lancer. L'installateur ajoute les images et sons que vous n'avez pas encore.
+- **À la main :** décompressez `Skynet_Media_<date>.zip` dans le dossier qui contient `BrewPanel` (utilisez `unzip -n`, qui ne remplace jamais un fichier). Il ajoute `BrewPanel/defaults/media`. Au prochain démarrage, le panneau copie seulement les images et sons que vous n'avez pas encore.
 
 ## Bon à savoir {#good-to-know}
 

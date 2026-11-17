@@ -1,27 +1,16 @@
-# The Skynet Sample Schemas Setup
+# The Skynet Sample Schemas
 
-The panel comes with **one** Sample Schema: the **3 Vessel 1 Pump** brewery (HLT, mash tun, boil kettle and one pump). It is kept up to every new Skynet Rule, and it is the Schema a new panel starts with. It **always stays in the panel**: it is never moved to the Sample Schemas Setup.
+The panel comes with the **3 Vessel 1 Pump** brewery (HLT, mash tun, boil kettle and one pump). It is kept up to every new Skynet Rule, and it is the Schema a new panel starts with. It **always stays in the panel**.
 
-The Sample Schemas Setup is only for **additional** samples. Every **other** Sample Schema (a ready-made brewery) comes as its own download, the **Skynet Sample Schemas Setup**, and they are added to it **one at a time**.
+Every **other** Sample Schema (a ready-made brewery) is added **one at a time**, and comes with the Skynet Setups. **There is nothing extra to download or run** (OakBarn Brewery: "No extra steps for a User"):
 
-> **There are none in it yet.** The older samples (Two vessels, one pump, and the BrewZilla brew day) are set aside while each one is brought up to the current Skynet Rules. When one is ready, it is added to the Sample Schemas Setup.
+- **New on this Windows computer:** the **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) has every Sample Schema.
+- **Each update:** the **Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) brings the Sample Schemas added or changed since the last Update Setup.
+- **Mac, Linux, Raspberry Pi or by hand:** unzip `Skynet_Sample_Schemas_<date>.zip` into the folder that holds `BrewPanel` (use `unzip -n`, which never replaces a file), or put it next to the installer before you run it. It adds `BrewPanel/sample_schemas`.
 
-**It only ever adds.** A sample you already have, by that name, is never changed. Nothing is ever deleted. Your own Schemas are never touched. When a sample is redone, it comes with a new name, so the old one stays as it was.
+> **There are none yet.** The older samples (Two vessels, one pump, and the BrewZilla brew day) are set aside while each one is brought up to the current Skynet Rules. The separate **Skynet Sample Schemas Setup** .exe is gone: the Update and Full Setups do its job.
 
-## Where to get it
-
-On the same download page as the panel: **https://github.com/oakbarn/Skynet_Brewery/releases/latest**
-
-| File | For |
-|---|---|
-| `Skynet_Sample_Schemas_Setup_<date>.exe` | Windows |
-| `Skynet_Sample_Schemas_<date>.zip` | Mac, Linux, Raspberry Pi, or Windows by hand |
-
-## How to use it
-
-- **Windows:** install the panel first (Skynet Brewer Setup), then double-click `Skynet_Sample_Schemas_Setup_<date>.exe`. Keep the folder it shows (`C:\Brewing\BrewPanel`, where the panel is) and click Install.
-- **Mac, Linux, Raspberry Pi with the installer:** put `Skynet_Sample_Schemas_<date>.zip` next to the installer before you run it.
-- **By hand:** unzip `Skynet_Sample_Schemas_<date>.zip` into the folder that holds `BrewPanel` (on Mac, Linux and Pi use `unzip -n`, which never replaces a file). It adds `BrewPanel/sample_schemas`.
+**Your own Schemas are never touched.** A Sample Schema is only used to make a new Schema: picking it adds a copy that is yours. So when Skynet fixes a sample, the update replaces the older copy of that sample, and a Schema you already made from it stays exactly as it is. The same goes for the Skynet Templates: each update brings the newest ones, and your own Templates are never touched.
 
 Then press **F5** in the panel. The new samples are in the Schema dropdown under **Add a Sample Schema**, after the 3 Vessel sample (see [Add a Sample Schema](83-sample-schemas)). Picking one adds a **copy** as a new Schema of your own, on the simulator, so nothing real is switched.
 
@@ -43,6 +32,6 @@ Most of the time another brewer will send you a single `.json` file instead (mad
 
 ## Good to know
 
-- Updating the panel never touches `sample_schemas`. Your own Schemas are never touched either.
+- Updating the panel adds new Skynet samples to `sample_schemas` and replaces a Skynet sample that was fixed. Your own Schemas are never touched.
 - The samples older versions of the panel had (Two vessels, one pump; BrewZilla brew day; OakBarn Brewery) are moved, not deleted, to `backups/old_samples_<date>` the first time you update, so only the 3 Vessel sample is listed. A Schema you already made from one of them is yours and stays.
-- Uninstalling the panel deletes `sample_schemas` with everything else (Rule 9.19). Run the Sample Schemas Setup again after a new install.
+- Uninstalling the panel deletes `sample_schemas` with everything else (Rule 9.19). The Full Setup puts every Skynet sample back on a new install.

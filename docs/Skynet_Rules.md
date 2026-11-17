@@ -672,6 +672,10 @@ window goes down to the task bar once the panel is up. (Fritz, 2026-10-30)
 2.30 **Hidden Special Tabs** (Fritz, 2026-10-30): a Tab named **Hidden_...** shows only in Edit layout; the rest of the time
 it works in the background (Processes still use what is on it). Edit layout > 👻 Hidden Tab makes Hidden_1, Hidden_2 ...; the
 part after Hidden_ is editable, Hidden_ always stays. (Help 103)
+OakBarn Brewery, 2026-11-17 (Panel Updates Sandbox entry 6: "I quickly create 3 Hidden Tabs. Too easy and how would I get back to
+any one of them"; "Yes"): one click still makes one, with **↩ Undo** on its note (takes it away while nothing is on it, Rule 2.53);
+**👻 Hidden Tabs ▾** lists every Hidden Tab and goes to the one picked; **Save layout** asks **Keep** or **Delete** for each empty
+Hidden Tab (Cancel stops the Save).
 
 2.31 **Process Version** (Fritz, 2026-10-30): every Process can have a Version, **YYMMDD_HH_MM_n** (Brain's clock; n counts up
 only within the same minute), shown on the Process editor bar with an **Update Version** button (Admins). (Help 102)
@@ -1401,7 +1405,8 @@ deletes its Clones." A Clone is not a new Device, so Rule 6.1 (one Device per po
 4.5 **The Edit layout bar has three rows** (Fritz's layout, 2026-10-28, Help 82):
 - **Row 1, Devices:** **Select Device Type** (the major kinds: On/Off, Pumps, Valves, Heating Element,
   PWM / Analog out, Inputs, Probe, Sensors, Motors, Weight) and **Add Device** (only that kind's Devices;
-  a Pump, Valve or on/off heating element is in On/Off too). Then the shortcuts **Pumps**, **Valves**,
+  a Pump, Valve or on/off heating element is in On/Off too; Heating Element: PWM and the Proportional Valves are in PWM / Analog out
+  too, OakBarn Brewery 2026-11-17, Panel Updates Sandbox entry 1). Then the shortcuts **Pumps**, **Valves**,
   **Probe**, **Heating Element** and **PWM**: one click shows only that kind's list, the same as picking
   the kind and then Add Device. Then **Vessel** and **⧉ Clone Device** (a list of the Devices on other Tabs) (Fritz,
   2026-11-05: "place vessel before clone").
@@ -3427,6 +3432,8 @@ sounds/alarm_beep.wav, sounds/Skynet/Alarm_Sound_Missing.mp3 and sounds/Skynet/F
 panel zip and the Skynet Brewer Setup (in defaults/media, copied in only when missing), so an Alarm or Sound Player can always
 sound. Every other sound and picture is only in the Media Setup.
 (thread "Shrink the Setup .exe and remove dead code", Help 183)
+*2026-11-17 (Rule 9.22):* the Skynet Media Setup .exe is retired: the Update Setup brings the pictures and sounds added since the last
+one, the Full Setup has them all. The Media zip stays (Mac, Linux, Pi, by hand). Still add-only.
 
 9.13 **The extra Sample Schemas are their own add-only Setup** (OakBarn Brewery, 2026-11-10: "separate the Sample Schemas in a
 separate exe and only leave the 3 vessel as the only Sample Schema as Skynet Panel ships"; "leave the new exe empty of schema
@@ -3453,6 +3460,10 @@ change is need add a new Sample with the same Name but at #2"): the Sample Schem
 brewer picks which samples are imported, and has **no All tick box**. A sample that is available is **never deleted**: when a change
 is needed, a new sample is added with the **same Name and #2** at the end (then #3 ...), and the old one stays. The tick boxes are
 built with the first sample put in the Setup (it holds none yet). (thread "Move Sample Schemas to own Setup", Help 184)
+*2026-11-17 (Rule 9.22):* the Skynet Sample Schemas Setup .exe is retired: the Update Setup brings the Sample Schemas added since the
+last one, the Full Setup has them all. The Sample Schemas zip stays (Mac, Linux, Pi, by hand). *Replaced:* "a redone sample gets a
+new name" and "An update of the panel never touches `sample_schemas`": a changed Skynet sample now replaces its older copy (a Schema
+made from it is the user's own and is never touched).
 
 9.14 **Official Skynet: the program on a Brain is checked on every start, and a change is reported** (OakBarn Brewery, 2026-11-12:
 "can we set something so that the skynet code on ones sent from Skynet Official updates cannot be modified once on a Brain?", "WE
@@ -3565,6 +3576,7 @@ pictures and sounds. Before that, the old `config`, `data`, `processes`, `media`
 deleted**, to `<Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>` (outside the panel folder, so the overwrite cannot reach
 them). The plain Setup (the Update Setup) keeps its four choices. *Replaced:* "the same Skynet Brewer Setup (same pages, choices,
 Uninstall and Rules)": the Full Setup now has the warning page instead of the choices page.
+*2026-11-17 (Rule 9.22):* the Full Setup also has every Skynet Sample Schema, added the same add-only way.
 
 9.21 **The Media Setup and Media zip are made new only when Skynet pictures or sounds are added** (OakBarn Brewery, 2026-11-15:
 "Unless we add additional Skynet Media files, the Media exe and Zip do not need updating"). On every merge the release workflow
@@ -3578,6 +3590,21 @@ carries every picture and sound (Rule 9.20). OakBarn Brewery can force a new Med
 workflow > rebuild media** (for example once signing is set up, Rule 9.10, so the Media Setup gets signed). If the last one cannot be
 found or downloaded, it is made new, so a Release is never missing it. Both programs (the Importer is in the same Setup; nothing
 changes there). (thread "Rebuild Media Setup only when media changes", Help 183)
+*2026-11-17 (Rule 9.22):* there is no Media Setup .exe any more; this Rule now decides only whether the Media zip is made new.
+
+9.22 **The Update Setup brings the new Skynet pictures, sounds and Sample Schemas; no separate Media or Sample Schemas Setup**
+(OakBarn Brewery, 2026-11-17: "If there are new skynet Media files since the last Update exe, can they be included in the update and
+added to the media on the brain"; "Add New Skynet Schema same as media. WE could get rid of both the Schema Uodate and the Media
+updates"; **why:** "THat is the correct way to handle it.. No extra steps for a User."). The plain Skynet Brewer Setup (the Update
+Setup) and the panel zip carry, besides the three fallback sounds of Rule 9.12, every file **added** to `media/`, and every
+file **added or changed** in `sample_schemas/`, since the last published Release that has an Update Setup. Pictures and sounds go in `defaults/media`, and the
+panel copies in only the ones the Brain does not have yet on its next start (lib/seed.js). Sample Schemas go in `sample_schemas/`,
+where a **changed Skynet sample replaces the Brain's older copy of it** (OakBarn Brewery, 2026-11-17, about Skynet Templates: "Since they are only used on a New Schema, they would not affect any User Schema"; the same holds for a sample). A Schema the user already made from a sample is their own copy and is never touched. Skynet Templates (`templates/`) are program files, so every update already replaces them; User Templates (`config/templates`) are never touched. Pictures and sounds stay add-only: a file already there is never changed (Rule 9.12). Only Skynet's own
+media already in docs/Media_Licenses.csv is ever in `media/`, so nothing copyrighted ships. The **Full Setup** (Rule 9.20) has every
+Skynet picture, sound and Sample Schema. So the **Skynet Media Setup .exe and the Skynet Sample Schemas Setup .exe are retired**
+(allowed before the first Public Production, Rule Old Ways; their scripts are in Delete/install_windows/). The **Media zip**
+and **Sample Schemas zip** stay on every Release for Mac, Linux, Raspberry Pi and by hand; the Media zip is still made new only when
+media changed (Rule 9.21). Both programs (the Importer is in the same Setup; nothing changes there). (Help 183, 184)
 
 ## 10. Testing
 
@@ -5253,6 +5280,9 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ---
 
+- 2026-11-17: Added Rule 9.22 (OakBarn Brewery: "If there are new skynet Media files since the last Update exe, can they be included in the update and added to the media on the brain"; "Add New Skynet Schema same as media. WE could get rid of both the Schema Uodate and the Media updates"; "No extra steps for a User"): the Update Setup and panel zip carry the Skynet pictures, sounds and Sample Schemas added since the last Update Setup; the Full Setup has them all; the Media Setup and Sample Schemas Setup .exe are retired (zips stay). Notes on Rules 9.12, 9.13, 9.20, 9.21. tools/build-release.sh, the release workflow, SkynetBrewer.nsi, Help 19, 183, 184 (and French), README, install/ReadMe.txt. Both programs.
+- 2026-11-17: Rule 2.30 (Panel Updates Sandbox entry 6): ↩ Undo on a new Hidden Tab, the 👻 Hidden Tabs ▾ list, Save layout asks Keep or Delete for an empty Hidden Tab. Help 103 (and French). Both programs: the Importer has no Edit layout; nothing changes there.
+- 2026-11-17: Rule 4.5 (OakBarn Brewery, Panel Updates Sandbox entry 1: "A Heater or Valve could also be PWM so add those that can be on this ddlb"; "Yes"): the PWM / Analog out list also has Heating Element: PWM and the Proportional Valves (Skynet ones and User Defined), the same rows as in the Heating Element and Valves lists. Help 82 and 136 (and French). Both programs: the Importer has no Edit layout bar; nothing changes there.
 - 2026-11-17: Rule 9.20 changed, Rule 9.8 points to it (OakBarn Brewery, Panel Updates Sandbox entry 10: "always a full install and will overwrite any installed folders or files ... the one warning is allowed ... a link to the Update ... a Close and Do Not install Option"): the Full Setup has no choices; one warning page when Skynet is already installed (Get the Update Setup, Close and Do Not Install, Install); old folders moved to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date> first. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French). Both programs: the Importer is in the same Setup; it is overwritten with the rest, nothing else changes for it.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log

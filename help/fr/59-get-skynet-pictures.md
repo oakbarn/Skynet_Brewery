@@ -20,5 +20,5 @@ Appuyez sur **Check GitHub** pour redemander. Si tout est déjà là, il dit **N
 - Chaque image est vérifiée avec l'empreinte de GitHub avant d'être enregistrée, donc un téléchargement raté ne remplace jamais une bonne image. Si l'une échoue, elle est listée avec la raison ; appuyez sur **Check GitHub** et obtenez-la à nouveau.
 - Skynet ne change jamais une image qu'il a déjà envoyée. Quand un dessin est refait, il vient comme une nouvelle image avec un nouveau nom, donc chaque Schema qui utilise l'ancienne a le même aspect qu'avant.
 - Si GitHub dit **too many requests** (trop de demandes), attendez une heure : GitHub laisse chaque adresse Internet demander environ 60 fois par heure sans compte.
-- Toutes les images et tous les sons Skynet d'un coup, sans Internet sur le Brain, viennent avec le **Skynet Media Setup** (voir [Le Skynet Media Setup](183-skynet-media-setup)).
+- Toutes les images et tous les sons Skynet d'un coup, sans Internet sur le Brain, viennent avec le **Full Setup**, et chaque **Update Setup** apporte les nouveaux (voir [Les images et sons Skynet](183-skynet-media-setup)).
 - Une toute nouvelle version du panel (les fichiers du programme, pas seulement les images) vient toujours par **Updating** (voir [Passer à une nouvelle version](18-updating)).
