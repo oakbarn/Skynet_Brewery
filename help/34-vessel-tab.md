@@ -26,4 +26,4 @@ The vessel's openings are its **IPs**, set by its Vessel Template or by the [Ves
 
 ## Made before Templates
 
-Equipment Profiles made before Vessel Templates may still have a list of vessels. It shows on **☰ Menu > Equipment Profile** under **Made before Templates**, with **Put on Tab** to draw each one on the profile's Tab. After that, change it in its Properties on the Tab.
+Equipment Profiles made before Vessel Templates had a list of vessels. That old list and its **Put on Tab** are gone. Put the vessel on the Tab from a Vessel Template (**Add to Tab**), and the profile keeps it when the Tab is saved.

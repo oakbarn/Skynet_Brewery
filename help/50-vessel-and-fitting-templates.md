@@ -46,7 +46,7 @@ A **Template Name** has no spaces (use _ instead) and must be unique.
 - **Graphic**: the picture drawn on the Tab. A Skynet Template also keeps the size its picture is drawn at, so a tall kettle stays tall and a wide one stays wide.
 - **Size**: Units, Size, Dead space and Extra trub loss (a Fermenter has Largest batch, Smallest batch and Trub loss).
 - **Heat Source**. The Device that heats it, and its probe, are picked later on the Tab_Vessel, because they belong to a Schema.
-- **Connection Standard** and its **Size**: TC, FPT, MPT, BSP Female Rp, BSP Female Rc, BSP Male Rp, BSP Male Rc, MM Female, MM Male (a number, for example 1.5) or DIN (text, for example DN25). It is the default for every port and Bundled Fitting. It goes on the Equipment list and sets the default size of the pictures.
+- **Connection Standard** and its **Size**: TC, FPT, MPT, BSP Female Rp, BSP Female Rc, BSP Male Rp, BSP Male Rc, MM Female, MM Male (a number, for example 1.5) or DIN (text, for example DN25). It is the default for every port and Bundled Fitting. It goes into the Equipment Profile and sets the default size of the pictures.
 - **Ports**: switch on each port it has and pick its **position**. The **Outlet**, **Second Outlet**, **Tangential Inlet**, **Steam Slayer** and **CIP Inlet** also have a **Bundled Fitting** dropdown:
   - a Skynet or User Bundled Fitting,
   - **New ...**: name it, and its pop-up opens so you can build it. Close it to come back to the vessel.
@@ -105,7 +105,7 @@ Skynet comes with single fittings ready to put in the piping, with their IPs whe
 
 Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. On the Tab it is a **Skynet Fitting**: every opening has its IP built in. To point it another way, open it in Edit layout and use **Flip Horizontal**, **Flip Vertical** and **Rotate** (45 degree steps). The picture and its IPs turn together, so one Elbow_90 covers every direction. See [Skynet Fittings](60-skynet-fittings).
 
-Where two pipes of different sizes meet on one IP, the panel draws a reducer cone by itself (see [Pipes, hoses and reducers](24-pipes-and-hoses)). Use the **Reducer** fitting where it should be on the Equipment list, or on a vessel port that is not the size of its piping.
+Where two pipes of different sizes meet on one IP, the panel draws a reducer cone by itself (see [Pipes, hoses and reducers](24-pipes-and-hoses)). Use the **Reducer** fitting where it should be in the piping, or on a vessel port that is not the size of its piping.
 
 ## Add to Tab
 

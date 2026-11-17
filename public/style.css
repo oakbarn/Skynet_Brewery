@@ -1438,3 +1438,5 @@ body.eqViewing #ws { pointer-events: none; }
 .eqViewBar .eqvTitle { font-size: 1.05em; margin-right: 8px; }
 .eqViewBar .eqvProps { font-size: .92em; margin-top: 4px; }
 .eqViewBar .eqvNum b { margin-right: 6px; }
+.eqViewBar .eqvPanel { max-height: 50vh; overflow: auto; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
+.eqViewBar button.on { outline: 2px solid var(--accent, #4a90e2); }
