@@ -25,7 +25,7 @@ Both places have the same eleven groups. They are made on every start.
 | Miscellaneous | `Miscellaneous` | Backgrounds and anything else |
 | On Off | `On_Off` | On overlays: see-through pictures drawn on top of an item while it is on (see On overlay) |
 
-The folder names have `_` in place of spaces, so a Process can use a path as it is, for example `my_pump.image = "Images/Skynet/Pumps/Pump_Red_Rip_On.png"` or `my_pump.image = "Images/Pumps/MyPump.png"`.
+The folder names have `_` in place of spaces, so a Process can use a path as it is, for example `my_pump.image = "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"` or `my_pump.image = "Images/Pumps/MyPump.png"`.
 
 ## The Skynet pictures are read only
 
@@ -70,4 +70,4 @@ While writing a Process, press **Alt+P** (Option+P on a Mac), or the **Picture**
 
 - Choose **Pictures** or **Sounds**, **Skynet / My pictures / Both**, a group (or **All groups**), and type in **Search** to narrow it down.
 - The pictures show as **icons**, like in Windows Explorer. Click one, or move with the arrow keys; its path shows below (a sound can be played).
-- **Double-click** or press **Enter** to put the path where the cursor is, in quotes: `"Images/Skynet/Pumps/Pump_Red_Rip_On.png"`. If you already typed the opening `"`, only the path (and the closing `"`) is added.
+- **Double-click** or press **Enter** to put the path where the cursor is, in quotes: `"Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"`. If you already typed the opening `"`, only the path (and the closing `"`) is added.

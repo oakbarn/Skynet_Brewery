@@ -2,7 +2,7 @@
 
 Construire quelque chose de nouveau sur un Tab chargé est difficile : ça tombe sur d'autres choses et c'est délicat à attraper. Alors **tout ce qui est nouveau est d'abord fait sur un Build Tab propre** (l'onglet de construction) : chaque Device, Widget, IP, image, texte, équipement et copie de Template. Vous pouvez le regarder avec **👁 Preview** à tout moment. Quand c'est prêt, **Finish Build ...** demande où ça va : sur un de vos Tabs (un choix et un clic), ou dans un Template.
 
-Le Build Tab ne s'affiche que pendant que vous construisez. Il a un bord orange en pointillés et un 🔨 dans la barre des Tabs. Il n'est jamais enregistré avec le Schema.
+Le Build Tab ne s'affiche que pendant que vous construisez. Il a un bord orange en pointillés et un 🔨 dans la barre des Tabs. Il ne fait jamais partie de vos Tabs. Un Build pas fini est gardé sur le Brain, dans le Schema, et revient la prochaine fois que vous ouvrez Edit layout (voir [Enregistrer ne termine jamais le Build](#saving-never-ends-the-build) plus bas).
 
 ## Commencer à construire {#start-building}
 

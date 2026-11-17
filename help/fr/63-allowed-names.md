@@ -61,7 +61,7 @@ Un point `.` est permis **seulement avant l'extension du fichier** :
 | Nom | Permis ? |
 |---|---|
 | `Mash_Steps.txt` | oui |
-| `Burner No Flame.png` | oui |
+| `Burner No Flame.svg` | oui |
 | `Burner.No.Flame.png` | non, utilisez `Burner_No_Flame.png` |
 | `Mash_v1.2` comme nom de Process | non, un nom de Process n'a pas de point : utilisez `Mash_v1_2` |
 | `My.Pictures` comme dossier | non, un dossier n'a pas de point |

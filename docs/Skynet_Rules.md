@@ -1733,7 +1733,7 @@ comply with the rule if we drew everyone in the same Ratio Box. We could make it
 display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standardize pump size and IPs", Help 130).
 - **Why:** a pump put in the same place as the one it replaces must stay joined to the same pipes.
 - **Every Skynet pump picture is drawn in a 300 x 300 box:** the brew pump drawings (March, Chugger, Riptide, Topsflo, KegLand), their
-  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover).
+  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover). (Those Riptide-style pictures left Skynet on 2026-11-17 for copyright, Rule 9.12; the Blichmann Riptide drawing with a Cover replaces them.)
 - **Every pump has 8 IPs, the same on every pump** (OakBarn Brewery, 2026-11-11: "What should be is an IP at Every Corner and one in
   between Middle / Bottom Top and Side / side Middle so we can easily substitute a Different Pump ... All Pumps get 8 IPs"; thread
   "Add pump hose stubs for inlet and outlet"): the **4 corners** of its box and the **middle of each side**: Top Left, Top Middle,
@@ -3387,6 +3387,7 @@ name. The Setup's last page, the ReadMes and Help 183 say where to get it. **No 
 Skynet ships only its own pictures and sounds, or ones in the public domain or under CC0 or another Creative Commons license (credit
 kept as the license asks). Every picture or sound that is not Skynet's own, CC0 and CC included, has a row in
 [Media_Licenses.csv](Media_Licenses.csv) with its source, license and what the license asks for. A questionable file is replaced by one OakBarn Brewery makes, or by a free one OakBarn Brewery approves.
+*2026-11-17 (OakBarn Brewery: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"):* the pictures that might be copyrighted (the Riptide-style Pump_<color>_Rip pictures, BurnerFlame, the Burner No Flame and BigMacRElement PNGs, brewery_main.png, the Help 180 Bob screenshot and Musketeers clip art, and the valve photos in Delete/) were taken out of the public repo and replaced by Skynet drawings; the list is in docs/Image_Library.md, Removed for copyright. They are still in the Git history. Every picture Skynet ships has a row in docs/Image_Library.md. AlarmBitter stays (OakBarn Brewery's own).
 Both programs (the Importer ships in the same Setup; it already copies imported pictures and sounds into User folders).
 **Exception** (OakBarn Brewery, 2026-11-10, "Keep the Beep", "Song and clip also with the brain"): the three fallback sounds,
 sounds/alarm_beep.wav, sounds/Skynet/Alarm_Sound_Missing.mp3 and sounds/Skynet/Find_The_File_Connecting.mp3, also stay in the
@@ -3622,7 +3623,7 @@ Help").
     the Importer in a Sand Box. We will do a Big Merge to move things over to the Importer."; "I might say add this note only in the
     importer version, then that goes to the Importer SandBox"). The Skynet Panel version is polished first (Help, Hover Help, the
     README); its model for the Importer version comes later. Until the Big Merge, anything said to be for the Importer version only
-    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md`, with
+    (a note, a BruControl comparison, a difference) is written in the **Importer Sandbox**, `Sandbox/Importer/Importer_Notes.md` in the private Skynet_Private repo (Rule 13.7), with
     where it goes, and is not put in the Importer yet. **But when OakBarn Brewery says to update both the Importer and Skynet** (OakBarn
     Brewery, 2026-11-12: "I may also tell you to update Both Importer and Skynet, an ten it does not go to the importer sandbox, but to
     the Importer itself"), the change goes straight into the Importer itself as well as Skynet, not into the Sandbox. BruControl text taken out of Skynet text goes to
@@ -3825,9 +3826,33 @@ new import rule Fritz gives goes there. The importer itself waits for his go. (2
 
 13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
 
-13.6 **Every document Fritz asks for must be easy for him to open.** Save it in the project folder
-AND copy it to docs/ in the GitHub repo (by PR), then reply with a direct link he can open in a
-browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
+13.6 **Every document Fritz asks for must be easy for him to open.** Save it on GitHub (by PR): a public document in docs/ of
+the Skynet_Brewery repo, a private one in the private repo (Rule 13.7). Then reply with a direct link he can open in a browser.
+The list of all public documents is docs/README.md in the Skynet_Brewery repo. GitHub is the main copy. (2026-10-27; changed
+2026-11-17)
+*Replaced in part:* "Save it in the project folder AND copy it to docs/ in the GitHub repo" (2026-10-27).
+
+13.7 **Keep things on GitHub, not in the project files or threads** (OakBarn Brewery, 2026-11-17, word for word: "New Rule, if
+something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space. We may
+have the compacted summaies of the project that could go to github"; "and that would include most sandboxes"; "Ok Private Repo").
+  - **GitHub is the main copy.** A thread saves it on GitHub by PR and replies with its link, not a long copy of the text.
+  - **Two repos.** The **Skynet_Brewery** repo is **PUBLIC** (Rule 12.1): the program, Help, the Rules and the public documents
+    (the Libraries, how-to pages). The **private repo, [Skynet_Private](https://github.com/oakbarn/Skynet_Private)** (made 2026-11-17), holds the private notes: the Sandboxes
+    (Panel Updates, Process Updates, Importer; Rules 14.4, 14.5, 11.3), the history Summaries (Summary_N) and plans that are
+    not built yet. When unsure which, it goes in the private repo.
+  - **Never on GitHub at all, not even the private repo:** the Patron private key (Rule 12.4), passwords and anyone's email
+    address. **Never in the public repo:** the private test import files (BruControl Schemas), and any picture, sound or paper
+    that is copyrighted or has no license OK (Rule 9.12), for example the Sandbox_Audio music and BruControl's firmware sheets.
+    These stay in the project files unless OakBarn Brewery says to put them in the private repo.
+  - **Old copies are removed**, not kept in two places (OakBarn Brewery, 2026-11-17: "Remove anything Old"): once a file is in its
+    GitHub home, its old copy in the other repo or in the project files is removed. Removed public files are still in Git history.
+  - **Only what opens quickly.** Big sound files go on a GitHub Release (Rule 7.20). What cannot be opened quickly on GitHub
+    stays in the project files.
+  - **No second copy in the project files.** Once a file is on GitHub its project-files copy is not kept up to date, and it is
+    removed only after OakBarn Brewery says so (moved to a Delete folder, Rule 15.3).
+  - Summary_N files are still never opened or read without OakBarn Brewery's permission (Rule 0a); moving one is done by its
+    file name only.
+  **Both programs:** this is about where files are kept; nothing changes in the Skynet Panel or the BruControl Import program.
 
 ## 14. Things on hold until Fritz says go
 
@@ -3841,14 +3866,14 @@ finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits unti
 
 14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
-pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md`, with where each goes, and
+pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and
 are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
 both programs before it is built, then moved to the file's Done table with its PR. Importer-only notes still go to the Importer
 Sandbox (Rule 11.3). Like the rest of `Sandbox/`, it is never shipped.
 
 14.5 **The Process Updates Sandbox** (OakBarn Brewery, 2026-11-16: "WE will do that later when we start the Skynet Process setup. New
 sand Box for Process and put things there till we build those Processes"). Ideas for Brew Day steps, the sample Processes and Process
-commands are written in `Sandbox/Process_Updates/Process_Updates.md`, with where each goes, and are **not built yet**. When the
+commands are written in `Sandbox/Process_Updates/Process_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and are **not built yet**. When the
 Skynet Process setup starts, OakBarn Brewery picks which to start; each is checked against the Rules and both programs before it is
 built, then moved to the file's Done table with its PR. General Panel ideas stay in the Panel Updates Sandbox (Rule 14.4). Like the
 rest of `Sandbox/`, it is never shipped.
@@ -5167,6 +5192,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ## Change log
 
 - 2026-11-17: Rule 4.1 (OakBarn Brewery, 2026-11-17: "I see the Equipment Template so use a Normal Build Tab to create a Bundled Immersion Chiller and save to Equipment Templates"; markup "Method to change the Menu Bar when the Build is for a Vessel Template, And Equipment Profile, An Equiment Template", option A: "Change Valves to Valves/Equpment and just add the Equipment Templates and Build new to the DDLB LIst"; "I think A is best choice if possible"; built as a Rule 4.1 and Rule 14.4 exception): a **Chiller Bundle Equipment Template** (one immersion chiller with its hoses, Ice Water Cans, a Sump Pump and IPs, saved from a normal Build Tab with Finish Build ... > As a Template; a pump Device keeps no Port and gets the next free Port when placed, Rule 6.1); the **Valves** shortcut is now **Valves/Equipment** with the Equipment Templates and 🔨 Build new Equipment Template; while a Build is for a Template or an Equipment Profile the Edit layout bar greys out what can't go in one (the Widget buttons, Picture, Text, Tab settings, New tab, Hidden Tab, Processes, Update Schema Version) and Finish Build ... shows As a Template first. Placing a Bundle with place_Chiller waits in the Process Updates Sandbox (entry 8, Rule 14.5). Help 55, 82, 200 (and French). Checked against both programs: the BruControl Import's Build page is the Panel's, so it has the same bar and Templates; BruControl has no chillers. (thread "Move an Immersion Chiller between Vessels")
+- 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in the private Skynet_Private repo; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 now point at the Sandboxes in the private Skynet_Private repo (made 2026-11-17, OakBarn Brewery: "Done with GitHub"); the old `Sandbox/` folder and docs/Summary_N.md copies were removed from this public repo (OakBarn Brewery: "Remove anything Old"); the BruControl Help extract test now only checks the README. Nothing changes in either program.
 - 2026-11-17: Added Rule 2.57, Port means a board Port; a pipe end has an End Fitting (OakBarn Brewery, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet Fitting"; "Use Ports only for Arduino Type Ports in the Help"; "every IP gets it own type End fitting"; an adapter note in the IP's Properties, information only). Rules 18.32 and 5.40 changed: the one **Ports** dropdown and the **IP Type In / IP Type Out** row are now two rows, **Inlet IP Fitting** and **Outlet IP Fitting**, the End Fittings of the pump's In and Out IPs, in the Add box, the Properties and the Pump Profile ("not a Take away but a Change"; a saved pump shows its old IP Type In and Out values in them). Help 24, 36, 104, 109, 111, 115, 121, 123, 130, 163 and their French; Hover Help with French. Vessels, plain IPs and chillers are the next step. Checked against both programs: BruControl has no fittings to import; the Importer's Build page shares the Pump dialogs. No new Help number. The orange mismatch ring in Edit layout (Rule 5.40) is removed: an adapter is used, so there is no mismatch. (thread "Split pump Ports into Inlet and Outlet IP Fitting")
 - 2026-11-17: Rule 5.42 (OakBarn Brewery: "Immersion Chillers on a Tab Can be Free Floating but later moved to a Vessel similar to hand a QD Hose on a Live Tab"; "Immersion Chillers can be a bundled item with their own flow supply or connected with a QD Hose an different existing one one a Tab. and the waste hose"; "B Now", a Rule 14.4 exception): an Immersion Chiller moves by hand on a live Tab with a right-button hold (or a finger), with no pop-up, a warning only while water flows through it; let go over a vessel it drops into it and flashes red and yellow for 2 seconds, anywhere else it stays free floating; its hoses follow it. `remove_Chiller` takes off only chillers a Process placed. The Bundle Template and the Process line wait in the sandboxes (Panel Updates 26, Process Updates 8). Help 200 (and French). Checked against both programs: the BruControl Import has no chillers and does not run Processes; its Build page is Edit layout, where nothing changes. (thread "Move an Immersion Chiller between Vessels")
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.

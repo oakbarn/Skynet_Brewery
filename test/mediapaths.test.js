@@ -46,7 +46,7 @@ assert.equal(skynetPicByName('overlay_bolt.svg'), 'Images/Skynet/On_Off/Overlay_
 }
 
 // ---- Rule 7.23: the two fields ----
-assert.deepEqual(splitPath('Images/Skynet/Pumps/Pump_Red_Rip_Off.svg'), { path: 'Images/Skynet/Pumps', file: 'Pump_Red_Rip_Off.svg' });
+assert.deepEqual(splitPath('Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'), { path: 'Images/Skynet/Pumps', file: 'Pump_Riptide_SS_Center_Inlet.svg' });
 assert.deepEqual(splitPath('Bell.svg'), { path: '', file: 'Bell.svg' });
 assert.deepEqual(splitPath('C:\\Brewing\\media\\sounds\\x.mp3'), { path: 'C:/Brewing/media/sounds', file: 'x.mp3' });
 assert.equal(fileOf('https://github.com/oakbarn/x/releases/download/Skynet-Sounds/Song_A.mp3?x=1'), 'Song_A.mp3');

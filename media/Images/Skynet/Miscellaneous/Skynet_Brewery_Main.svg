@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1000" width="1536" height="1000">
+  <!-- Skynet drawing (OakBarn Brewery, 2026-11-17): a three vessel brewery (HLT, Mash Tun, Boil Kettle) with a pump, a counterflow
+       chiller and a fermentor, joined by grey pipes, on a light blue wall. No text: Labels show on the Tab. It replaces
+       brewery_main.png (origin unknown, so possibly copyrighted) as the starting picture of gG_Brew_Day_Picture. Skynet style
+       (Rule 7.4): flat grey #808080, black outline. -->
+  <defs>
+    <linearGradient id="ss" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6f6f6f"/><stop offset=".35" stop-color="#bdbdbd"/><stop offset=".6" stop-color="#9a9a9a"/><stop offset="1" stop-color="#5f5f5f"/>
+    </linearGradient>
+    <linearGradient id="cu" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8a4a22"/><stop offset=".5" stop-color="#d9874d"/><stop offset="1" stop-color="#7a3f1c"/>
+    </linearGradient>
+    <g id="kettle">
+      <rect x="0" y="40" width="220" height="300" rx="10" fill="url(#ss)" stroke="#000" stroke-width="4"/>
+      <ellipse cx="110" cy="40" rx="110" ry="22" fill="#a8a8a8" stroke="#000" stroke-width="4"/>
+      <rect x="-22" y="90" width="26" height="14" rx="4" fill="#808080" stroke="#000" stroke-width="3"/>
+      <rect x="216" y="90" width="26" height="14" rx="4" fill="#808080" stroke="#000" stroke-width="3"/>
+      <rect x="60" y="350" width="10" height="70" fill="#404040" stroke="#000" stroke-width="2"/>
+      <rect x="150" y="350" width="10" height="70" fill="#404040" stroke="#000" stroke-width="2"/>
+      <rect x="20" y="335" width="180" height="16" rx="4" fill="#505050" stroke="#000" stroke-width="3"/>
+      <circle cx="110" cy="150" r="18" fill="#fafafa" stroke="#000" stroke-width="3"/>
+      <line x1="110" y1="150" x2="120" y2="138" stroke="#d32f2f" stroke-width="3"/>
+    </g>
+  </defs>
+  <rect width="1536" height="1000" fill="#9fd8ea"/>
+  <rect y="860" width="1536" height="140" fill="#b9c4c9"/>
+  <line x1="0" y1="860" x2="1536" y2="860" stroke="#7d8a90" stroke-width="4"/>
+  <!-- stand -->
+  <rect x="120" y="760" width="900" height="24" fill="#505050" stroke="#000" stroke-width="3"/>
+  <rect x="140" y="784" width="18" height="76" fill="#404040"/><rect x="560" y="784" width="18" height="76" fill="#404040"/><rect x="980" y="784" width="18" height="76" fill="#404040"/>
+  <!-- three kettles -->
+  <use href="#kettle" x="170" y="330"/>
+  <use href="#kettle" x="460" y="330"/>
+  <use href="#kettle" x="750" y="330"/>
+  <!-- burners/elements hint: element flange on the HLT, a flame under the kettle -->
+  <rect x="160" y="560" width="24" height="40" rx="4" fill="#808080" stroke="#000" stroke-width="3"/>
+  <g fill="#3fa0ff" stroke="#1e3cff" stroke-width="2">
+    <path d="M820 742 q8 -26 16 0 z"/><path d="M850 742 q8 -30 16 0 z"/><path d="M880 742 q8 -26 16 0 z"/><path d="M910 742 q8 -30 16 0 z"/>
+  </g>
+  <!-- pipes (grey, black outline) -->
+  <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M280 670 V700 H330 V820 H1080 V700" stroke="#000" stroke-width="22"/>
+    <path d="M280 670 V700 H330 V820 H1080 V700" stroke="#808080" stroke-width="14"/>
+    <path d="M570 670 V720 H600" stroke="#000" stroke-width="22"/><path d="M570 670 V720 H600" stroke="#808080" stroke-width="14"/>
+    <path d="M1100 560 V280 H670 V380" stroke="#000" stroke-width="22"/><path d="M1100 560 V280 H670 V380" stroke="#808080" stroke-width="14"/>
+    <path d="M860 670 V720 H1000" stroke="#000" stroke-width="22"/><path d="M860 670 V720 H1000" stroke="#808080" stroke-width="14"/>
+    <path d="M1180 640 H1290 V520" stroke="#000" stroke-width="22"/><path d="M1180 640 H1290 V520" stroke="#808080" stroke-width="14"/>
+  </g>
+  <!-- valves (closed = handle across) -->
+  <g stroke="#000" stroke-width="3">
+    <rect x="315" y="805" width="30" height="30" rx="4" fill="#d32f2f"/>
+    <rect x="585" y="705" width="30" height="30" rx="4" fill="#d32f2f"/>
+    <rect x="985" y="705" width="30" height="30" rx="4" fill="#d32f2f"/>
+  </g>
+  <!-- pump -->
+  <g transform="translate(1030 590)">
+    <rect x="0" y="20" width="110" height="70" rx="14" fill="#808080" stroke="#000" stroke-width="4"/>
+    <rect x="110" y="10" width="40" height="90" rx="8" fill="#bdbdbd" stroke="#000" stroke-width="4"/>
+    <rect x="10" y="90" width="120" height="16" fill="#404040" stroke="#000" stroke-width="3"/>
+    <circle cx="130" cy="55" r="12" fill="#d32f2f" stroke="#000" stroke-width="3"/>
+  </g>
+  <!-- counterflow chiller (copper coil) -->
+  <g fill="none" stroke-linecap="round">
+    <ellipse cx="1290" cy="470" rx="70" ry="18" stroke="#000" stroke-width="20"/><ellipse cx="1290" cy="470" rx="70" ry="18" stroke="url(#cu)" stroke-width="13"/>
+    <ellipse cx="1290" cy="440" rx="70" ry="18" stroke="#000" stroke-width="20"/><ellipse cx="1290" cy="440" rx="70" ry="18" stroke="url(#cu)" stroke-width="13"/>
+    <ellipse cx="1290" cy="410" rx="70" ry="18" stroke="#000" stroke-width="20"/><ellipse cx="1290" cy="410" rx="70" ry="18" stroke="url(#cu)" stroke-width="13"/>
+  </g>
+  <path d="M1360 410 H1420 V560" fill="none" stroke="#000" stroke-width="22" stroke-linejoin="round"/>
+  <path d="M1360 410 H1420 V560" fill="none" stroke="#808080" stroke-width="14" stroke-linejoin="round"/>
+  <!-- fermentor (conical) -->
+  <g transform="translate(1360 560)">
+    <path d="M0 0 H120 V150 L72 230 H48 L0 150 Z" fill="url(#ss)" stroke="#000" stroke-width="4"/>
+    <ellipse cx="60" cy="0" rx="60" ry="12" fill="#a8a8a8" stroke="#000" stroke-width="4"/>
+    <rect x="52" y="230" width="16" height="40" fill="#808080" stroke="#000" stroke-width="3"/>
+    <line x1="10" y1="160" x2="-10" y2="300" stroke="#404040" stroke-width="8"/><line x1="110" y1="160" x2="130" y2="300" stroke="#404040" stroke-width="8"/>
+  </g>
+</svg>

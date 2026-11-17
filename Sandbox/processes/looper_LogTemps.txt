@@ -1,9 +1,0 @@
-//looper_LogTemps
-//MIT License Granted for all Scripts and Configurations
-//Copyright © OakBarn Brewery 2026
-//Copies the kettle probe into a gGlobal so the database can log it.
-//gGV_Kettle_Temp sends to the database every 10 seconds (its Properties, Database and .API box).
-[Loop]
-gGV_Kettle_Temp = BK_Temp
-sleep 5000
-goto "Loop"

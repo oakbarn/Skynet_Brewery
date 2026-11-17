@@ -1,10 +1,20 @@
 // PNG/JPG -> SVG pictures:  node test/vectorize.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
 import { traceFile, Pictures, DRAWING_SCORE } from '../lib/vectorize.js';
+import { createRequire } from 'node:module';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpv'));
 fs.copyFileSync(path.join(ROOT, 'media/Images/Skynet/Alarms/AlarmBitter.png'), path.join(d, 'Bell.png'));
-fs.copyFileSync(path.join(ROOT, 'media/Images/Skynet/Other_Equipment/Burner No Flame.png'), path.join(d, 'Burner.png'));
+// photo-like and too-big test pictures are made here (the old burner photo and brewery_main.png left the repo, copyright, 2026-11-17)
+const { PNG } = createRequire(import.meta.url)('../lib/vendor/pngjs/png.js');
+function makePng(file, w, h, px) {
+  const p = new PNG({ width: w, height: h });
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, [r, g, b] = px(x, y); p.data[i] = r; p.data[i + 1] = g; p.data[i + 2] = b; p.data[i + 3] = 255; }
+  fs.writeFileSync(file, PNG.sync.write(p));
+}
+let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+makePng(path.join(d, 'Burner.png'), 400, 400, (x, y) => [x * 0.5 + rnd() * 90, y * 0.4 + rnd() * 90, (x + y) * 0.25 + rnd() * 90]);   // photo-like: soft shading and grain
+const bigPng = path.join(os.tmpdir(), `bpv_big_${process.pid}.png`); makePng(bigPng, 1500, 1400, x => [x % 256, 128, 64]);
 fs.writeFileSync(path.join(d, 'Mine.png'), fs.readFileSync(path.join(d, 'Bell.png')));
 fs.writeFileSync(path.join(d, 'Mine.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"/>');   // hand-made
 
@@ -12,7 +22,7 @@ const bell = traceFile(path.join(d, 'Bell.png'));
 assert.ok(bell.score >= DRAWING_SCORE, 'bell is a drawing');
 assert.match(bell.svg, /^<svg [^>]*width="600" height="600" viewBox="0 0 600 600" preserveAspectRatio="none"/);
 assert.ok(traceFile(path.join(d, 'Burner.png')).score < DRAWING_SCORE, 'burner is photo-like');
-assert.match(traceFile(path.join(ROOT, 'media/Images/Skynet/Miscellaneous/brewery_main.png')).skipped, /too big/);
+assert.match(traceFile(bigPng).skipped, /too big/); fs.rmSync(bigPng, { force: true });
 
 const store = { config: {}, writeConfig() {} };
 const pics = new Pictures(store, () => [d]);
