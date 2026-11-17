@@ -281,11 +281,16 @@
 
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
+    <!-- two tabs on the Devices page (OakBarn Brewery, 2026-11-17: "One wire gets own Tab") -->
+    <div class="pageTabs" role="tablist"><button class="pageTab on" data-pane="paneIfaces" role="tab">🔌 Interfaces</button><button class="pageTab" data-pane="paneOneWire" role="tab">🌡 OneWire Probes</button></div>
+    <div id="paneIfaces" class="pagePane">
     <h3 id="sec-interfaces">Interfaces (boards)</h3>
     <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID starts the suggested name of every Device on it, for example MB_25_DO@Pump_Wort_BH. Interface IDs follow Rule 3.2.</p>
-    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Board</th><th>Type</th><th>Connection</th><th title="Lost Comm: if the board hears nothing from the Brain this long, it turns all outputs OFF">Lost Comm</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <table class="grid" data-hover-titles><thead><tr><th data-help="The Interface ID: it starts the suggested name of every Device on this Interface (MB_25_DO@Pump_Wort_BH). Interface IDs follow Rule 3.2: once saved, it never changes.">ID</th><th data-help="The Interface's Name, the one you gave it when you added it: Hot Side, Fermentation, your brewery name.">Name</th><th data-help="The kind of board: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each.">Board</th><th data-help="Simulator: the panel pretends to be this board, and nothing goes to a real board. Real: the panel talks to the real board. The panel is switched between them on the Simulator bar.">Mode</th><th data-help="How the board is connected to the Brain: USB, Ethernet or WiFi. Rest the mouse on it to see its USB Port or Network address.">Connection</th><th data-help="How safe the Connection is for this board: Best, Good, OK or Poor. USB is the safest; Ethernet and WiFi depend on your network.">Rating</th><th data-help="Lost Comm: if the board hears nothing from the Brain this long, it turns all outputs OFF">Lost Comm</th><th data-help="Is the board talking to the Brain: connected, connecting, no answer or disabled. Rest the mouse on it for more (the board's program and version, or what went wrong).">Status</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
     <h3 id="sec-addInterface" class="admin-only">Add Interface</h3>
     <div class="bar admin-only"><button id="addIfaceBtn" class="primary">➕ Add Interface…</button><span class="muted">opens the Add Interface pop-up (the same one as "➕ Add new Interface…" in the New Device box).</span></div>
+    </div>
+    <div id="paneOneWire" class="pagePane hidden">
     <h3 id="sec-probeIndex">OneWire probe index</h3>
     <p class="muted">Each DS18B20 probe gets a number here, and temperature Devices use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every Device that uses that number follows it, nothing else changes.</p>
     <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
@@ -293,6 +298,7 @@
     <h3 id="sec-probesSeen">OneWire probes seen</h3>
     <p class="muted">Every probe the boards report, by its ROM id (not its position on the bus). Give a new probe a number here.</p>
     <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Probe number</th></tr></thead><tbody id="probeBody"></tbody></table>
+    </div>
   </section>
 
   <!-- ===== Import ===== -->
