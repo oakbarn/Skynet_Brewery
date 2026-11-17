@@ -17,7 +17,7 @@
   "workspaces": [
     {
       "name": "Brewery",
-      "background": "Images/Skynet/Miscellaneous/brewery_main.png",
+      "background": "Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg",
       "color": "#9ad8e8",
       "width": 2520,
       "height": 1302,
@@ -950,7 +950,8 @@
       "w": 140,
       "h": 95,
       "follow": "MB_35_do_YellowPump_B1",
-      "imageOff": "Images/Skynet/Pumps/Pump_Yellow_Rip_Off.svg",
+      "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
+      "cover": "Yellow",
       "hideName": true,
       "_key": "ke7ba4e14bf50285d",
       "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
@@ -980,7 +981,8 @@
       "w": 140,
       "h": 95,
       "follow": "MB_36_do_RedPump_B1",
-      "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.svg",
+      "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
+      "cover": "Red",
       "hideName": true,
       "_key": "ke126b54323991278",
       "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
@@ -1010,7 +1012,8 @@
       "w": 140,
       "h": 95,
       "follow": "MB_37_do_BluePump_B1",
-      "imageOff": "Images/Skynet/Pumps/Pump_Blue_Rip_Off.svg",
+      "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
+      "cover": "Blue",
       "hideName": true,
       "_key": "kbf29ded59e524e35",
       "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
@@ -1040,7 +1043,8 @@
       "w": 140,
       "h": 95,
       "follow": "MB_38_do_GreenPump_B1",
-      "imageOff": "Images/Skynet/Pumps/Pump_Green_Rip_Off.svg",
+      "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
+      "cover": "Green",
       "hideName": true,
       "_key": "ke6e5c87988ddd595",
       "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
@@ -1070,7 +1074,8 @@
       "w": 140,
       "h": 95,
       "follow": "MB_39_do_WhitePump_B1",
-      "imageOff": "Images/Skynet/Pumps/Pump_White_Rip_Off.svg",
+      "imageOff": "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg",
+      "cover": "White",
       "hideName": true,
       "_key": "k171429b6060cf336",
       "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
@@ -1331,7 +1336,7 @@
       "w": 140,
       "h": 160,
       "hideName": true,
-      "initial": "Images/Skynet/Other_Equipment/Burner No Flame.png",
+      "initial": "Images/Skynet/Other_Equipment/Burner No Flame.svg",
       "workspace": "Variables Demo",
       "_key": "k2d9bf79d88f13d0b",
       "dataType": "string"

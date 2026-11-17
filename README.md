@@ -95,7 +95,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | Area | What it does |
 |---|---|
 | **Tabs** | Placed Devices (Pumps, Valves, Heating Elements ...), Widgets (Graphics, Text, Values) and Pipes and/or Hoses become your Control Centers on your Star Ship.<br><br>Screens that fill a Browser Pane. Your Computer's Screen resolution is up to you, but Skynet was built on a Windows Computer whose resolution was set to 1920 x 1080. At that resolution there is room for whatever is available on the Build menu. The layout and the number and type of items are up to you.<br><br>Use **Edit layout** to drag, resize, double-click for properties, add Devices and Widgets, and draw pipes. Any Device, Widget, graphic, text or pipe can be **locked** in place: select it and press **🔒 Lock** (or switch on **Lock position** in its properties). A locked item shows a padlock and cannot be dragged or resized until you unlock it; you can still open its properties and tap it as normal. |
-| **Picture Widgets** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** a Device (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a process (`"insp_Pix_Red_Pump_B1" image = "Images/Skynet/Pumps/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off.<br><br>Some Picture paths can be changed and even updated in a process, while some are fixed and cannot be changed. |
+| **Picture Widgets** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** a Device (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a process (`"insp_Pix_Red_Pump_B1" image = "Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg"`). Tapping a picture that follows an output turns that output on/off.<br><br>Some Picture paths can be changed and even updated in a process, while some are fixed and cannot be changed. |
 | **Touch screens** | Tap an output to turn it on/off, tap a variable to get a large dialog with − / + buttons and a number pad. Every Device and Widget has **When tapped** (default, none, toggle, dialog, process, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
 | **Looks** | `led` (red digits), `lcd` (blue digits), `dark` (white on black) and `button`. |
 | **Pipes** | In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical, turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side. Click points to draw a pipe along a manifold path (or start and end it on an **IP**, below). You can even add Manual Valves that require a Confirmation that they were set during the Brew Day before proceeding. Design manifolds with Pipes, Hoses, Valves, Pumps, Fittings and so on. A flow is created based on a source and the Open or Closed Valves or End Caps. A Pump can back flow if off (OakBarn Brewery has drained Vessels with gravity it did not want to!). When all of them are on and the Valves and such are set correctly, the Pipes and Hoses show animated flow.<br><br>Background Pictures with Vessels and Manifolds are not needed in Skynet. You have Dynamic Vessel Devices and a working display of a Manifold with Valves and Pumps. A Back Color is generally a better choice than a Background Image, but you could have a Graphic of something you might want to display like a watermark for the background. |
@@ -146,7 +146,7 @@ Each gGlobal is one of six Kinds, the subclasses of a gGlobal. The Kind is picke
 | Kind | Prefix | Notes |
 |---|---|---|
 | String | `gS_` | Text. |
-| Graphic | `gG_` | A picture: Image Path 1, 2 and 3, Background # and Back Colour. A process can swap it: `gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"` |
+| Graphic | `gG_` | A picture: Image Path 1, 2 and 3, Background # and Back Colour. A process can swap it: `gG_Burner_Pic = "Images/Skynet/Other_Equipment/Burner_Jet_Flame.svg"` |
 | Value | `gV_` | A number. |
 | Boolean | `gB_` | true / false. |
 | Time | `gT_` | `00:00:00` |
@@ -274,7 +274,7 @@ config/schemas/      one file per Schema (picked in the Schema dropdown), its sa
 config/equipment/    Equipment Profiles (☰ Menu > Equipment Profile), used by any Schema
 config/profiles/     Mash, Boil, Tab Background and Valve Profiles (☰ Menu)
 processes/*.txt      Processes
-media/Images/        every picture (backgrounds too, e.g. media/Images/brewery_main.png); the
+media/Images/        every picture (backgrounds too, e.g. media/Images/Skynet/Miscellaneous/Skynet_Brewery_Main.svg); the
                      File Move page copies a whole folder from your computer
 media/sounds/        alarm and timer sounds
 media/notes/         text files read by Long String gGlobals

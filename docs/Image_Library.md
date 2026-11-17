@@ -1,8 +1,8 @@
 # Skynet Image Library
 
-Every picture Skynet ships, copied from the repo so we can look them up when we talk about images. Source: oakbarn/Skynet_Brewery, default branch `claude/project-thread-vzxi0a`, folder `media/Images/Skynet/<group>/`, as of version PR107_Skynet-v.20261026_23_23 (2026-10-26).
+Every picture Skynet ships, so we can look them up when we talk about images. **This GitHub copy is the main copy (Rule 13.7).** Source: oakbarn/Skynet_Brewery, default branch `claude/project-thread-vzxi0a`, folder `media/Images/Skynet/<group>/`, as of version PR107_Skynet-v.20261026_23_23 (2026-10-26).
 
-Copies live in `/mnt/project-files/Image_Library/<group>/` with the same group folders. A contact sheet of every picture is `Image_Library/_Contact_Sheet.png`.
+The older copy in the project folder (`/mnt/project-files/Image_Library/`, last updated 2026-10-31) is out of date: its 19 extra rows are pictures retired on 2026-11-05. Use this one.
 
 **In the GitHub repo**, the pictures themselves are in [media/Images/Skynet](../media/Images/Skynet/) (one folder per group). Tap a group folder, then a file, to see the picture.
 
@@ -10,22 +10,24 @@ Copies live in `/mnt/project-files/Image_Library/<group>/` with the same group f
 
 **2026-11-05 (Fritz):** the old pipe_ fittings, Skynet_TC15_InstrumentTee, the Valve_Ball PNGs and every Open valve picture were retired to the repo's Delete/ folder and taken off this list (see Delete/README.md and Help 129); Valve_Ball_ClosedH_1 / ClosedV-1x1 are renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical. The project-folder copies in Image_Library/ are not changed.
 
-**Totals (2026-10-26, before that cleanup):** 133 files (113 SVG, 20 PNG) in 10 groups. The Motors group is empty.
+**2026-11-17 (OakBarn Brewery, "any Copywrite images need to be removed from the Public github regardless"):** every Skynet picture in the repo now has a row here (116 were missing). Pictures that might be copyrighted were taken out of the repo and replaced by Skynet drawings; see [Removed for copyright](#removed-for-copyright-2026-11-17) at the end.
+
+**Totals (2026-11-17):** 199 Skynet pictures in 10 groups (the Motors group is empty), plus the Help pictures and program icons listed at the end.
 
 Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size on screen). PNG sizes are pixels. Where a PNG and an SVG share a name, the PNG is the original and the SVG is either a hand redraw ("Skynet drawing") or a panel auto-trace. "Pump_Whute_Rip_On" is the original file name, typo included.
 
 ## Groups
 
-- [Alarms](#alarms) (2)
-- [Chillers](#chillers) (4)
+- [Alarms](#alarms) (11)
+- [Chillers](#chillers) (5)
 - [Hop_Infusion](#hop_infusion) (1)
 - [Lights_LEDs](#lights_leds) (5)
-- [Miscellaneous](#miscellaneous) (1)
-- [On_Off](#on_off) (3)
-- [Other_Equipment](#other_equipment) (32)
-- [Pumps](#pumps) (25)
-- [Valves](#valves) (33)
-- [Vessels](#vessels) (27)
+- [Miscellaneous](#miscellaneous) (12)
+- [On_Off](#on_off) (6)
+- [Other_Equipment](#other_equipment) (49)
+- [Pumps](#pumps) (56)
+- [Valves](#valves) (26)
+- [Vessels](#vessels) (28)
 
 ## Alarms
 
@@ -33,6 +35,15 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 |---|---|---|---|
 | `AlarmBitter.png` | Alarm bell picture (original PNG). | 600x600 px | sample Schema (config/brewery.json) |
 | `AlarmBitter.svg` | Alarm bell, SVG traced from AlarmBitter.png (the trace is clean). | viewBox 0 0 600 600 (600x600) | not used yet |
+| `Alarm_Active_Red.svg` | Skynet Alarm Active overlay (Layer 1): red sound waves and bell outline while the alarm sounds. 600 x 600, see-through. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
+| `Alarm_Basic.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Together: Back (Layer 4) and Fore (Layer 3) with the black lines. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
+| `Alarm_Basic_Back.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Back only (Layer 4): the panel colors it with .back. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
+| `Alarm_Basic_Fore.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Fore only (Layer 3): the panel colors it with .fore. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
+| `Alarm_Basic_Lines.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. The black lines over Layer 3 (never colored). | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
+| `Alarm_PreHop_Mark_1.svg` | Skynet Pre-Hop Alarm watermark 1 (Rule 7.21): a pale hop cone. Placeholder drawing, see-through. | viewBox 0 0 600 300 (600x300) | Panel code (store.js) |
+| `Alarm_PreHop_Mark_2.svg` | Skynet Pre-Hop Alarm watermark 2 (Rule 7.21): a pale clock, the time before the hop drop. Placeholder drawing, see-through. | viewBox 0 0 600 300 (600x300) | Panel code (store.js) |
+| `Alarm_PreHop_Mark_3.svg` | Skynet Pre-Hop Alarm watermark 3 (Rule 7.21): a pale bell. Placeholder drawing, see-through. | viewBox 0 0 600 300 (600x300) | Panel code (store.js) |
+| `Alarm_Set_Hop.svg` | Skynet Alarm Set Graphic (Layer 2): a hop cone inside the Basic Alarm bell. 600 x 600, see-through. | viewBox 0 0 600 600 (600x600) | Panel code (app.js); Help 172, 195 |
 
 ## Chillers
 
@@ -42,6 +53,7 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Chiller_Counterflow_Small.svg` | Skynet small counterflow chiller (redrawn from Fritz's CounterFlow_2 photo): a shorter copper coil with Wort In at the Top Left, Water Out at the Top Right, ... | viewBox 0 0 240 200 (240x200) | Vessel/Equipment Template Counterflow_Chiller_Small |
 | `chill_coil.svg` | Coiled immersion chiller. | viewBox 0 0 180 180 (180x180) | Vessel/Equipment Template Chillzilla; Vessel/Equipment Template Immersion_Chiller; Equipment Widget "Chilling coil" |
 | `plate_chiller.svg` | Brazed plate chiller, four ports at the corners. | viewBox 0 0 110 200 (110x200) | Vessel/Equipment Template Plate_Chiller; Equipment Widget "Plate chiller" |
+| `Chiller_Copper_Counterflow.svg` | Skynet Copper Counterflow Chiller (redrawn as plain SVG from Fritz's Copper_CounterFlow.svg, 2026-11-02): a copper coil of 8 turns. The 4 ports all face left... | viewBox 0 0 225 245 (225x245) | Template vessel Copper_Counterflow_Chiller; Panel code (app.js); Help 109 |
 
 ## Hop_Infusion
 
@@ -63,7 +75,18 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `brewery_main.png` | Sample Tab background photo of a brewery (3540x2304, too big to trace). | 3540x2304 px | sample Schema (config/brewery.json) |
+| `Skynet_Brewery_Main.svg` | Skynet drawing (OakBarn Brewery, 2026-11-17): a three vessel brewery (HLT, Mash Tun, Boil Kettle) with a pump, a counterflow chiller and a fermentor, joined... | viewBox 0 0 1536 1000 (1536x1000) | Panel code (gkinds.js); Help 07, 108, 194 |
+| `Skynet_Icon_Clock.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Fan.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Gauge.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Kettle.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Liquid_Level.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Liquid_Temp.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_On_Off.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_PID.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Pump.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_PWM.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
+| `Skynet_Icon_Valve.svg` | MIT License Granted. Copyright (c) OakBarn Brewery 2026. Drawn new for Skynet. | viewBox 0 0 160 128 (160x128) | not used by anything yet (in the picture list only) |
 
 ## On_Off
 
@@ -72,19 +95,17 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Overlay_Bolt_Center.svg` | On overlay: a big half see-through lightning bolt over the middle of the picture | viewBox 0 0 100 100 (100x100) | On overlay "Lightning bolt (big, see-through)" |
 | `Overlay_Bolt_Corner.svg` | On overlay: a lightning bolt badge in the top right corner, the rest is see-through | viewBox 0 0 100 100 (100x100) | On overlay "Lightning bolt (corner badge)" |
 | `Overlay_Glow_Ring.svg` | On overlay: a green glow around the picture | viewBox 0 0 100 100 (100x100) | On overlay "Green glow ring" |
+| `Overlay_Bolt.svg` | On overlay (Fritz, 2026-11-04): a red lightning bolt with a yellow edge over the middle of a valve or pump while it is on (steady, not flashing) | viewBox 0 0 100 100 (100x100) | Template device Skynet_Motorized_Butterfly_Valve_H; Template device Skynet_KLD20T_Proportional_Valve_H; Template device Skynet_Motorized_Ball_Valve_H; default Schema; sample three-vessel-one-pump; Panel code (app.js, eqinterview.js, profiles.js, schemabuild.js, store.js); Help 121, 193 |
+| `Overlay_Bolt_Flash.svg` | On overlay (Fritz, 2026-11-04): a lightning bolt over the middle of a valve or pump that flashes red and yellow while it is on | viewBox 0 0 100 100 (100x100) | Panel code (app.js, store.js); Help 121 |
+| `Overlay_Manual_Valve_Open.svg` | Skynet On overlay for a Manual Valve Widget while it is open (Fritz, 2026-10-28): a green ring and a green open mark | viewBox 0 0 100 100 (100x100) | Panel code (app.js); Help 87 |
 
 ## Other_Equipment
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `BigMacRElementOff.png` | BigMac heating element, off (original PNG). | 51x24 px | sample Schema (config/brewery.json) |
 | `BigMacRElementOff.svg` | BigMac heating element, off (grey), mounting flange on the right. Same size as BigMacRElementOff.png. | viewBox 0 0 51 24 (51x24) | not used yet |
-| `BigMacRElementOn.png` | BigMac heating element, on (original PNG). | 51x24 px | sample Schema (config/brewery.json) |
 | `BigMacRElementOn.svg` | BigMac heating element, on (red), mounting flange on the right. A copy of BigMacRElementOff.svg with the element red. Same size as BigMacRElementOn.png. | viewBox 0 0 51 24 (51x24) | not used yet |
-| `Burner No Flame.png` | Jet burner with no flame (original photo-like PNG). | 400x400 px | sample Schema (config/brewery.json) |
 | `Burner No Flame.svg` | cast-iron jet burner with brass jets, no flame. Same size as Burner No Flame.png. | viewBox 0 0 400 400 (400x400) | not used yet |
-| `BurnerFlame.png` | Burner flame (original PNG). | 251x191 px | sample Schema (config/brewery.json) |
-| `BurnerFlame.svg` | Auto-traced SVG of BurnerFlame (made by the panel; quality only fair). | viewBox 0 0 251 191 (251x191) | not used yet |
 | `Equipment_RIMS.svg` | Skynet RIMS tube: liquid in at the top left, out at the bottom right; probe (purple) in the left end, element (red) in the right end | viewBox 0 0 200 100 (200x100) | Equipment Widget "RIMS tube" |
 | `Fitting_Elbow45.svg` | Skynet 45 degree elbow: openings at the middle of the Left edge and near the top right corner | viewBox 0 0 100 100 (100x100) | Skynet Bundled Fitting picture choice |
 | `Fitting_Elbow90.svg` | Skynet 90 degree elbow: openings at the middle of the Bottom and Right edges | viewBox 0 0 100 100 (100x100) | Skynet Bundled Fitting picture choice |
@@ -104,36 +125,94 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Skynet_TC1_2_Rims_Device.svg` | Skynet RIMS tube, an Integrated Device (Fritz's drawing, 2026-10-23): wort in at the top left and out at the bottom (TC fittings with their IPs built in), th... | viewBox 0 0 413 58 (413x58) | Integrated Device Template RIMS_Tube |
 | `herms_coil.svg` | HERMS coil. | viewBox 0 0 180 180 (180x180) | Vessel/Equipment Template HERMS_Coil; Equipment Widget "HERMS coil" |
 | `trub_filter.svg` | Trub / hop filter canister. | viewBox 0 0 100 170 (100x170) | Vessel/Equipment Template Trub_Filter; Equipment Widget "Trub filter" |
+| `Burner_Jet_Flame.svg` | Skynet drawing (OakBarn Brewery, 2026-11-17): cast-iron jet burner with brass jets, lit: a blue flame on every jet. The lit partner of Burner No Flame.svg, s... | viewBox 0 0 400 400 (400x400) | not used by anything yet (in the picture list only) |
+| `Ceramic_Heat_Emitter_Off.svg` | Skynet drawing: ceramic heat emitter (a heat bulb with no light) in a screw base, off. See-through background. | viewBox 0 0 40 56 (40x56) | Panel code (app.js) |
+| `Ceramic_Heat_Emitter_On.svg` | Skynet drawing: ceramic heat emitter (a heat bulb with no light) in a screw base, on: glowing hot. See-through background. | viewBox 0 0 40 56 (40x56) | Panel code (app.js) |
+| `Heat_Mat_Off.svg` | Skynet drawing: heat mat (pad) for a fermentor, off. See-through background. | viewBox 0 0 64 40 (64x40) | Panel code (app.js) |
+| `Heat_Mat_On.svg` | Skynet drawing: heat mat (pad) for a fermentor, on: its heating wire glows. See-through background. | viewBox 0 0 64 40 (64x40) | Panel code (app.js) |
+| `Heat_Wrap_Off.svg` | Skynet drawing: heat wrap (Fermwrap style band) around a fermentor, off. See-through background. | viewBox 0 0 64 40 (64x40) | Panel code (app.js) |
+| `Heat_Wrap_On.svg` | Skynet drawing: heat wrap (Fermwrap style band) around a fermentor, on: its heating wire glows. See-through background. | viewBox 0 0 64 40 (64x40) | Panel code (app.js) |
+| `Skynet_TC15_Cross.svg` | Skynet TC 1.5 cross (2026-11-04, in the style of Fritz's new Tee): IPs at the center of each ferrule face, left (0, 0.5), right (1, 0.5), top (0.5, 0) and bo... | viewBox 0 0 134 134 (134x134) | Template fitting Cross; Panel code (app.js); Help 129 |
+| `Skynet_TC15_Elbow_45.svg` | Skynet TC 1.5 45 degree elbow (2026-11-04, in the style of Fritz's new 90 elbow): IPs at the center of each ferrule face, bottom left (0.194,0.756) and right... | viewBox 0 0 107.15 85.15 (107.15x85.15) | Template fitting Elbow_45; Panel code (app.js); Help 129 |
+| `Skynet_TC15_Elbow_90.svg` | Skynet TC 1.5 90 degree elbow (Fritz's drawing, 2026-11-04): IPs at the center of each ferrule face, bottom (0.29, 1) and right (1, 0.29) | viewBox 0 0 100 100 (100x100) | Template fitting Valve_Tee_Thermowell_90; Template fitting Elbow_90; Template fitting Valve_90; default Schema; sample three-vessel-one-pump; Panel code (app.js); Help 129 |
+| `Skynet_TC15_Elbow_Front.svg` | Skynet TC 1.5 90 degree elbow seen from the front: one end faces you, one goes down (Fritz's drawing, 2026-11-02). IPs at the center of the front opening (0.... | viewBox 0 0 80 110 (80x110) | Template fitting Elbow_Front; Panel code (app.js) |
+| `Skynet_TC15_Instrument_Tee.svg` | Skynet TC 1.5 instrument tee (2026-11-04, in the style of Fritz's new Tee): a short branch. IPs at the center of each ferrule face, left (0, 0.318), right (1... | viewBox 0 0 210 91.2 (210x91.2) | Template fitting Instrument_Tee; Panel code (app.js); Help 129 |
+| `Skynet_TC15_Instrument_Tee_Probe_Branch.svg` | Skynet Instrument Tee with a Temperature Probe (purple) in the branch (2026-11-04): a Temperature Device. The probe fills the branch, so the IPs are left (0,... | viewBox 0 0 210 91.2 (210x91.2) | Panel code (app.js) |
+| `Skynet_TC15_Instrument_Tee_Probe_Run.svg` | Skynet Instrument Tee with a Temperature Probe (purple) in from the left (2026-11-04): a Temperature Device. The probe fills the left end, so the IPs are rig... | viewBox 0 0 210 91.2 (210x91.2) | Panel code (app.js) |
+| `Skynet_TC15_Long_Tee.svg` | Skynet TC 1.5 tee (Fritz's drawing, 2026-11-04): IPs at the center of each ferrule face, left (0, 0.216), right (1, 0.216), branch (0.5, 1) | viewBox 0 0 210 134 (210x134) | Template fitting Tee; default Schema; sample three-vessel-one-pump; Panel code (app.js); Help 129 |
+| `Skynet_TC15_Long_Tee_Probe_Branch.svg` | Skynet Long Tee with a Temperature Probe (purple) in the branch (Fritz's drawing, 2026-11-04): a Temperature Device. The probe fills the branch, so the IPs a... | viewBox 0 0 210 134 (210x134) | Panel code (app.js) |
+| `Skynet_TC15_Long_Tee_Probe_Run.svg` | Skynet Long Tee with a Temperature Probe (purple) in from the left (2026-11-04): a Temperature Device. The probe fills the left end, so the IPs are right (1,... | viewBox 0 0 210 134 (210x134) | Panel code (app.js) |
+| `Skynet_TC15_Priming_Tee.svg` | Skynet TC 1.5 Priming Tee (OakBarn Brewery, 2026-11-09: "Basically an Instrument Tee with a Manual Valve on the Short side always pointing up (on the Top sid... | viewBox 0 0 210 160 (210x160) | Template fitting Priming_Tee |
+| `Skynet_TC15_Sight_Glass.svg` | Skynet TC 1.5 sight glass, 6 in (Rule 5.32). On a Tab the picture is drawn for its Length: only the glass stretch. IPs at the center of each ferrule face, le... | viewBox 0 0 169.2 58 (169.2x58) | Template fitting Sight_Glass |
+| `Skynet_TC15_Sight_Glass_Caged.svg` | Skynet TC 1.5 caged sight glass, 6 in (Rule 5.32). On a Tab the picture is drawn for its Length: only the glass and cage stretch. IPs at the center of each f... | viewBox 0 0 169.2 58 (169.2x58) | Template fitting Sight_Glass_Caged |
+| `Skynet_TC15_Supply_Manifold_2.svg` | Skynet TC 1.5 Supply Manifold, 2 Long Tees joined end to end (Fritz, 2026-11-06, Rule 5.35). Each tee is Fritz's Long Tee (210 x 134). The valve on each bran... | viewBox 0 0 420 344 (420x344) | Template fitting Supply_Manifold_2; Help 146 |
+| `Skynet_TC15_Supply_Manifold_3.svg` | Skynet TC 1.5 Supply Manifold, 3 Long Tees joined end to end (Fritz, 2026-11-06, Rule 5.35). Each tee is Fritz's Long Tee (210 x 134). The valve on each bran... | viewBox 0 0 630 344 (630x344) | Template fitting Supply_Manifold_3 |
+| `Skynet_TC15_Thermowell_Front.svg` | Skynet TC 1.5 thermowell seen from the front (2026-11-05, Rule 5.30): on a front facing IP. The TC cap face-on (flange, gasket groove, as the face-on ports o... | viewBox 0 0 40 40 (40x40) | Panel code (app.js) |
+| `Skynet_TC15_Valve_Tee.svg` | Skynet TC 1.5 Long Tee with a Valve (Fritz, 2026-11-06, Rule 5.35). Each tee is Fritz's Long Tee (210 x 134). The valve on each branch is drawn by the panel... | viewBox 0 0 210 344 (210x344) | Template fitting Valve_Tee |
+| `Skynet_TC2_1_Reducer_Concentric.svg` | Skynet TC 2 to 1 concentric reducer (Fritz's drawing 2_1__Reducer, 2026-11-02): IPs at the center of each ferrule face, big end (0, 0.5), small end (1, 0.5) | viewBox 0 0 120 84 (120x84) | Template fitting Reducer; Template fitting Reducer_2_1_Concentric; Panel code (app.js) |
+| `Skynet_TC2_1_Reducer_Eccentric.svg` | Skynet TC 2 to 1 eccentric reducer, flat along the bottom (Fritz's drawing 2_1_Concentric, 2026-11-02): IPs at the center of each ferrule face, big end (0, 0... | viewBox 0 0 120 84 (120x84) | Template fitting Reducer_2_1_Eccentric; Panel code (app.js) |
+| `Skynet_TC2_1_Reducer_Front.svg` | Skynet TC 2 to 1 reducer seen from the front, looking down the pipe (Fritz's drawing, 2026-11-02): both IPs at the center of the opening (0.5, 0.5) | viewBox 0 0 100 100 (100x100) | Template fitting Reducer_2_1_Front; Panel code (app.js) |
 
 ## Pumps
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `Pump_Black_Rip_Off.svg` | Riptide-style pump, off, black cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used by anything yet (in the picture list only) |
-| `Pump_Blue_Rip_Off.png` | Original PNG (Pump Blue Rip Off). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Blue_Rip_Off.svg` | Riptide-style pump, off, blue cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Blue_Rip_On.png` | Original PNG (Pump Blue Rip On). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Blue_Rip_On.svg` | Auto-traced SVG of Pump_Blue_Rip_On (made by the panel; quality only fair). | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Green_Rip_Off.png` | Original PNG (Pump Green Rip Off). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Green_Rip_Off.svg` | Riptide-style pump, off, green cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Green_Rip_On.png` | Original PNG (Pump Green Rip On). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Green_Rip_On.svg` | Auto-traced SVG of Pump_Green_Rip_On (made by the panel; quality only fair). | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_NoCover_Rip_Off.svg` | Riptide-style pump, off, no cover. Same size and pipe spots as the other Riptide pumps. | viewBox 0 0 434 292 (434x292) | not used by anything yet (in the picture list only) |
-| `Pump_Purple_Rip_Off.svg` | Riptide-style pump, off, purple cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used by anything yet (in the picture list only) |
-| `Pump_Red_Rip_Off.png` | Original PNG (Pump Red Rip Off). | 434x292 px | Pump Device preset; sample Schema (config/brewery.json) |
-| `Pump_Red_Rip_Off.svg` | Riptide-style pump, off, red cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Red_Rip_On.png` | Original PNG (Pump Red Rip On). | 434x292 px | Pump Device preset; sample Schema (config/brewery.json) |
-| `Pump_Red_Rip_On.svg` | Auto-traced SVG of Pump_Red_Rip_On (made by the panel; quality only fair). | viewBox 0 0 434 292 (434x292) | not used yet |
 | `Pump_Sump_Off.svg` | Skynet submersible sump pump, off (a generic drawing): it sits in the water and draws in through the screen at the Bottom; the outlet is at the top right. Gr... | viewBox 0 0 120 140 (120x140) | On/Off picture list "Submersible sump pump off" |
 | `Pump_Sump_On.svg` | Skynet submersible sump pump, on (a generic drawing): it sits in the water and draws in through the screen at the Bottom; the outlet is at the top right. Gre... | viewBox 0 0 120 140 (120x140) | On/Off picture list "Submersible sump pump on" |
-| `Pump_White_Rip_Off.png` | Original PNG (Pump White Rip Off). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_White_Rip_Off.svg` | Riptide-style pump, off, white cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Whute_Rip_On.png` | Original PNG (Pump Whute Rip On). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Whute_Rip_On.svg` | Auto-traced SVG of Pump_Whute_Rip_On (made by the panel; quality only fair). | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Yellow_Rip_Off.png` | Original PNG (Pump Yellow Rip Off). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Yellow_Rip_Off.svg` | Riptide-style pump, off, yellow cover. Same size and pipe spots as the Riptide pump PNGs. | viewBox 0 0 434 292 (434x292) | not used yet |
-| `Pump_Yellow_Rip_On.png` | Original PNG (Pump Yellow Rip On). | 434x292 px | sample Schema (config/brewery.json) |
-| `Pump_Yellow_Rip_On.svg` | Auto-traced SVG of Pump_Yellow_Rip_On (made by the panel; quality only fair). | viewBox 0 0 434 292 (434x292) | not used yet |
+| `Pump_Chugger_Poly_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_Poly_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_90_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_90_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_SS_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_KegLand_MKII_Poly_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_KegLand_MKII_Poly_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_KegLand_MKII_SS_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_KegLand_MKII_SS_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_90_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_90_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_Poly_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_SS_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_SS_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_SS_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_809_SS_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_90_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_90_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_Poly_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_SS_90_Inlet_Motor_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_SS_90_Inlet_Motor_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_SS_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_March_815_SS_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Riptide_SS_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Riptide_SS_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Topsflo_TD5_Poly_Center_Inlet_Cover.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Topsflo_TD5_Poly_Center_Inlet_Cover_Shape.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... (in Pumps/Covers/) | viewBox 0 0 300 300 (300x300) | pump Cover: drawn when its pump has a Cover (Covers/<pump>_Cover.svg, filled through _Cover_Shape.svg) |
+| `Pump_Chugger_Poly_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_Chugger_SS_90_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_Chugger_SS_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_Chugger_SS_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_KegLand_MKII_Poly_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_KegLand_MKII_SS_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_809_Poly_90_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_809_Poly_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_809_Poly_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_809_SS_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_809_SS_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js); Help 25 |
+| `Pump_March_815_Poly_90_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_815_Poly_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_815_Poly_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_815_SS_90_Inlet_Motor.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_March_815_SS_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
+| `Pump_Riptide_SS_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | default Schema; sample three-vessel-one-pump; Panel code (app.js, bruimport.js, connectpage.js, eqinterview.js, pumps.js, schemabuild.js); Help 07, 12, 25, 57, 93 |
+| `Pump_Topsflo_TD5_Poly_Center_Inlet.svg` | Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243,... | viewBox 0 0 300 300 (300x300) | Panel code (app.js, pumps.js) |
 
 ## Valves
 
@@ -154,6 +233,17 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Valve_Motor_Ball_ClosedH.svg` | Skynet motorized ball valve, closed, horizontal: pipe ends at the middle of the Left and Right edges; the ring means closed | viewBox 0 0 140 120 (140x120) | On/Off picture list "Motorized ball valve closed (horizontal)"; Proportional valve preset |
 | `Valve_Motor_Ball_ClosedV_LC.svg` | Skynet motorized ball valve, closed, vertical, motor on the left: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve closed (vertical, motor left)" |
 | `Valve_Motor_Ball_ClosedV_RC.svg` | Skynet motorized ball valve, closed, vertical, motor on the right: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve closed (vertical, motor right)"; Valve Profile default |
+| `Manual_Ball_Valve_Front_Closed.svg` | Skynet Manual Ball Valve seen from the front, looking down the pipe, closed (Fritz's drawing, 2026-11-02): a Manual Valve Widget picture, its IP in the middl... | viewBox 0 0 100 100 (100x100) | Panel code (app.js) |
+| `Manual_Ball_Valve_Front_Elbow_Closed.svg` | Skynet Manual Ball Valve on a front elbow, closed (Fritz's drawing, 2026-11-02): a Manual Valve Widget picture, its IP in the middle. The handle across the p... | viewBox 0 0 100 100 (100x100) | Panel code (app.js) |
+| `Manual_Ball_Valve_Side_Closed.svg` | Skynet Manual Ball Valve, side view, closed (Fritz's drawing, 2026-11-02): a Manual Valve Widget picture. The pipe runs through the middle (its one IP); the... | viewBox 0 0 100 100 (100x100) | Panel code (app.js) |
+| `Quick_Disconnect.svg` | Quick Disconnect (Fritz's drawing, 2026-11-05): a bold red four-point star with a grey centre, easy to see on a Tab. It sits on a valve end (an IP); the cent... | viewBox 0 0 100 100 (100x100) | Panel code (app.js) |
+| `Tap_Water_Valve_Hose_Bib.svg` | Skynet Tap Water Valve: a household brass hose bib (sill cock) with a green cross handle, like one from a home store (Fritz, 2026-11-06). A Manual Valve Widg... | viewBox 0 0 300 300 (300x300) | sample three-vessel-one-pump; Panel code (app.js, chiller.js, helpmap.js); Help 141 |
+| `Valve_Motor_Ball_ClosedFront.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | Template device Skynet_Motorized_Ball_Valve_Front; Panel code (app.js) |
+| `Valve_Motor_Butterfly_ClosedFront.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | Template device Skynet_Motorized_Butterfly_Valve_Front |
+| `Valve_Motor_Butterfly_ClosedFront_Elbow.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | Template device Skynet_Motorized_Butterfly_Valve_Front_Elbow |
+| `Valve_Motor_Butterfly_ClosedH.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | Template device Skynet_Motorized_Butterfly_Valve_H |
+| `Valve_Motor_Butterfly_ClosedV_L.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | Template device Skynet_Motorized_Butterfly_Valve_H |
+| `Valve_Motor_Butterfly_ClosedV_R.svg` | The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs are always on the same spot... | viewBox 0 0 300 300 (300x300) | not used by anything yet (in the picture list only) |
 
 ## Vessels
 
@@ -186,9 +276,95 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `kettle.svg` | Older generic kettle drawing; also the fallback icon for a Template with no picture. | viewBox 0 0 260 320 (260x320) | Vessel/Equipment Template Brew_Kettle; Vessel/Equipment Template Fermenter; fallback Template icon |
 | `mash_tun.svg` | Older generic mash tun drawing. | viewBox 0 0 260 320 (260x320) | Vessel/Equipment Template Mash_Tun |
 | `vessel_gray.svg` | A plain gray tank (Fritz, 2026-10-21): no text on it. The vessel's Label is its only text. | viewBox 0 0 260 320 (260x320) | Equipment Widget "Vessel" |
+| `Skynet_Vessel_Widget.svg` | Skynet Vessel Widget (Fritz, 2026-11-05, Rule 5.31): the tank of the Three Vessel sample (260 x 320), drawn the Skynet way (Rule 7.4: flat grey #808080, blac... | viewBox 0 0 260 320 (260x320) | Template vessel Skynet_Vessel_Widget; default Schema; sample three-vessel-one-pump; Panel code (app.js, schemabuild.js, vesselbuilder.js); Help 133 |
+
+## Help pictures
+
+Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/help_pictures/). OakBarn Brewery's own screenshots and drawings, or Skynet drawings.
+
+| Name | Used by |
+|---|---|
+| `Clone_Hive_Cube.svg` | Help 180 |
+| `IP_Marker.png` | Help 115 |
+| `IP_Marker.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Instance_Own_Way.svg` | Help 180 |
+| `Label_Visible_Switch.png` | Help 115 |
+| `Label_Visible_Switch.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Musketeers_All_For_One.svg` | Help 180 |
+| `Pump_8_IPs.png` | Help 115 |
+| `Pump_8_IPs.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Pump_Cover.png` | Help 115 |
+| `Pump_Daisy_Chain.png` | Help 115 |
+| `Pump_Daisy_Chain.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Pump_IP_Example_1.png` | Help 115 |
+| `Pump_IP_Example_1.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Pump_IP_Example_2.png` | Help 115 |
+| `Pump_IP_Example_2.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Pump_Overlays.png` | Help 115 |
+| `Pump_Right_Left.png` | Help 115 |
+| `Pump_Right_Left.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Red_Pump_Label.png` | Help 115 |
+| `Red_Pump_Label.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Step_Add_Schema_01_Menu.png` | Help 188 |
+| `Step_Add_Schema_02_Schema_Tab.png` | Help 188 |
+| `Step_Add_Schema_03_Add_New_Schema.png` | Help 188 |
+| `Step_Add_Schema_04_Start_From.png` | Help 188 |
+| `Step_Add_Schema_05_Template.png` | Help 188 |
+| `Step_Add_Schema_06_Questions.png` | Help 188 |
+| `Step_Add_Schema_07_Ready.png` | Help 188 |
+| `Step_Add_Schema_08_Done.png` | Help 188 |
+| `Step_Add_Schema_09_Simulator.png` | not on a Help page yet |
+| `Step_Add_Schema_10_Interface.png` | Help 188 |
+| `Step_Add_Schema_11_Edit_Layout.png` | Help 188 |
+
+## Program icons
+
+| File | What it is |
+|---|---|
+| `public/favicon.svg`, `public/favicon.ico`, `install/windows/skynet.ico`, `install/icon.png` | The Skynet Panel icon (Skynet's own drawing) |
+| `public/importer/importer-icon.svg`, `.ico`, `install/windows/importer.ico` | The BruControl Import icon: Google Noto Emoji, Apache License 2.0 (credit in docs/Media_Licenses.csv) |
+| `public/File_Not_Found.svg` | The picture shown when a picture's file is missing (Skynet's own drawing) |
+
+## Removed for copyright (2026-11-17)
+
+Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"). Their Skynet Picture numbers are kept, marked retired (Rule 7.22). Copies are kept privately in the project folder (`private/Removed_Copyright_Images_2026-11-17/`), not on GitHub. **They are still in the repo's Git history** until OakBarn Brewery decides whether to rewrite it.
+
+| File | Was in | Why, and what replaces it |
+|---|---|---|
+| `brewery_main.png` | Miscellaneous | may hold pictures from the internet (OakBarn Brewery); replaced by Skynet_Brewery_Main.svg |
+| `BigMacRElementOff.png` | Other_Equipment | made from a web picture; replaced by the Skynet drawing BigMacRElementOff.svg (already used) |
+| `BigMacRElementOn.png` | Other_Equipment | made from a web picture; replaced by BigMacRElementOn.svg (already used) |
+| `Burner No Flame.png` | Other_Equipment | a web picture modified; replaced by the Skynet drawing Burner No Flame.svg |
+| `BurnerFlame.png` | Other_Equipment | a web picture modified; replaced by Burner_Jet_Flame.svg |
+| `BurnerFlame.svg` | Other_Equipment | traced from BurnerFlame.png; replaced by Burner_Jet_Flame.svg |
+| `Pump_Black_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Blue_Rip_Off.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Blue_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Blue_Rip_On.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Blue_Rip_On.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Green_Rip_Off.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Green_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Green_Rip_On.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Green_Rip_On.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_NoCover_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Purple_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Red_Rip_Off.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Red_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Red_Rip_On.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Red_Rip_On.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_White_Rip_Off.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_White_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Whute_Rip_On.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Whute_Rip_On.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Yellow_Rip_Off.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Yellow_Rip_Off.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Yellow_Rip_On.png` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Pump_Yellow_Rip_On.svg` | Pumps | a photo of a Blichmann Riptide pump with a painted cover (a BruControl picture); replaced by Pump_Riptide_SS_Center_Inlet.svg with a Cover of the same color |
+| `Bobiverse_Bob.png` | help_pictures | a screenshot of the Fandom wiki page; replaced by Instance_Own_Way.svg |
+| `Three_Musketeers.png` | help_pictures | clip art, source unknown; replaced by Musketeers_All_For_One.svg |
+| `Valve_Ball_*.png` (4), `Valve_Ball_OpenH_1.svg`, `Valve_Ball_OpenV-1x1.svg`, `Pump_Red_Rip_Off_Valve_IPs_Test.svg`, help `Bobiverse_Bob.svg`, `Three_Musketeers.svg` | Delete/ folder | product photos of a motorized ball valve and traced copies of removed pictures; the Delete/ folder is public too |
 
 ## Not in the library
 
-- `install/icon.png` (the app icon) is not a Skynet picture group image, so it is left out.
 - Unmerged previews in `reviews/screenshots/` (for example `vessel_widgets`) are left out until Fritz says otherwise.
 - Empty user folders `media/Images/<group>/` hold the user's own pictures, not Skynet ones.

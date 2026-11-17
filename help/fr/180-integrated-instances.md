@@ -23,13 +23,13 @@ Port (ils sont grisés). Rien d'autre ne peut utiliser ce Port.
 
 Une Instance ressemble plus à **Bob** du Bobiverse (*We Are Legion*) qu'à un Clone : elle commence comme une copie puis suit son propre chemin.
 
-![Bob du Bobiverse](help_pictures/Bobiverse_Bob.png)
+![Une copie qui suit son propre chemin](help_pictures/Instance_Own_Way.svg)
 
-*Image : la [page Bob du Wiki Bobiverse](https://bobiverse.fandom.com/wiki/Bob) (Fandom, CC BY-SA).*
+*Plus sur Bob : la [page Bob du Wiki Bobiverse](https://bobiverse.fandom.com/wiki/Bob).*
 
 **La dernière commande** (Règle 6.28, « Un pour tous, tous pour un ») : une seule d'entre elles peut être en marche à la fois.
 
-![Un pour tous, tous pour un](help_pictures/Three_Musketeers.png)
+![Un pour tous, tous pour un](help_pictures/Musketeers_All_For_One.svg)
 
 - En mettre une en marche prend le Port. Les autres sur ce Port s'arrêtent.
 - En arrêter une arrête le Port. Toutes celles qui y sont sont alors arrêtées.

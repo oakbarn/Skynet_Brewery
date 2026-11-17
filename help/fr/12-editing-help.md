@@ -21,7 +21,7 @@ Les pages sont écrites en **Markdown**, du texte simple avec quelques signes :
 | `> Note` | Une note mise en valeur |
 | `[Tailscale](https://tailscale.com)` | Un lien vers un site web |
 | `[Scripts](05-scripts)` | Un lien vers une autre page d'aide |
-| `![Red pump](Images/Skynet/Pumps/Pump_Red_Rip_On.png)` | Une image d'un dossier media |
+| `![Pompe](Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg)` | Une image d'un dossier media |
 | `---` | Une ligne en travers de la page |
 
 Les tableaux sont des lignes de `|` avec une ligne `|---|---|` sous la première ligne, comme celui ci-dessus. Pour une image, ajoutez-la d'abord sur l'écran [Media (images et sons)](07-media), puis utilisez **Copy path**.
