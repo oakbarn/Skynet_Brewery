@@ -28,7 +28,8 @@ export const MANIFOLD_KINDS = { manual: 'Manual valves', motorized: 'Motorized v
 // the Brew Process steps a Fermentor-only Schema skips (it only ferments)
 const HOT_STEPS = ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Clean'];         // no real Interface yet: a pretend Mega on the Simulator
 
-// The defaults of the questions (☰ Menu > Default settings > New Schema from a Skynet Template). brewDefaults keeps them as ns_...
+// The answers the questions start with: Skynet's own (OakBarn Brewery, 2026-11-17: "New Schema from Skynet section not needed" on
+// ☰ Menu > Default settings; a future interview will help pick the nearest Schema, parked in the Panel Updates Sandbox)
 export const NS_DEFAULTS = { ns_template: 'Skynet_3_Vessel', ns_fermentors: '1', ns_recirc: 'none', ns_chiller: 'immersion', ns_whirlpool: false,
   ns_valves: 'hand', ns_manifold: 'none', ns_manifoldKind: 'manual', ns_heat_HLT: 'electric', 'ns_heat_Mash Tun': 'none', 'ns_heat_Brew Kettle': 'electric',
   'ns_heat_All In One': 'electric', ns_tab: 'Brew House' };
