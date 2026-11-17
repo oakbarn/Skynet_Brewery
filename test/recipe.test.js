@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe } from '../public/recipecalc.js';
+import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from '../lib/recipe.js';
+import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe, RECIPE_DEFAULTS } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
 import { recipeValues } from '../lib/brewprocess.js';
 
@@ -80,10 +80,34 @@ assert.equal(gf.rcp_Grain_Count, 2); assert.equal(gf.rcp_Fermentable_Count, 2);
 assert.equal(gf.rcp_Grain_1_Amount, 10); assert.equal(gf.rcp_Grain_1_Potential, 80); assert.equal(gf.rcp_Grain_2_Name, 'Munich');
 assert.equal(gf.rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.rcp_Fermentable_1_After_Boil, true); assert.equal(gf.rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
 // gravity points (PPG>SG) and the Expected Gravity: 10 lb at 80% Potential, 72% efficiency, 5 gal = 53.2 points; 1 lb of honey (75%, not mashed) = 6.9
-const gr = { efficiency: 72, volumes: { batchLiters: 5 / 0.264172052 }, ingredients: { fermentables: [{ type: 'grain', kg: 4.5359237, yieldPct: 80 }, { type: 'sugar', kg: 0.45359237, yieldPct: 75 }] } };
-assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[0], gr) * 10) / 10, 53.2); assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr) * 10) / 10, 6.9);
-assert.equal(expectedGravity(gr), 1.06); assert.equal(calculateRecipe(gr).expectedSG, 1.06); assert.equal(recipeFieldValues({ ...gr, expectedSG: 1.06 }).rcp_Expected_Gravity, 1.06);
-assert.equal(recipeFieldValues(gr).rcp_Grain_1_PPG_SG, 53.24); assert.equal(expectedGravity({ ingredients: { fermentables: [{ kg: 1, yieldPct: 80 }] } }), null, 'no Brew Length, no gravity');
+// The efficiency is only the Brew on Tab's Equipment Profile's (Rule 17.13): it is passed in, never kept on the Recipe or a default
+const gr = { volumes: { batchLiters: 5 / 0.264172052 }, ingredients: { fermentables: [{ type: 'grain', kg: 4.5359237, yieldPct: 80 }, { type: 'sugar', kg: 0.45359237, yieldPct: 75 }] } };
+assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[0], gr, 72) * 10) / 10, 53.2); assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr, 72) * 10) / 10, 6.9);
+assert.equal(expectedGravity(gr, 72), 1.06); assert.equal(calculateRecipe(gr, {}, null, 1.0, 72).expectedSG, 1.06); assert.equal(recipeFieldValues({ ...gr, expectedSG: 1.06 }).rcp_Expected_Gravity, 1.06);
+assert.equal(recipeFieldValues(gr, { eff: 72 }).rcp_Grain_1_PPG_SG, 53.24); assert.equal(expectedGravity({ ingredients: { fermentables: [{ kg: 1, yieldPct: 80 }] } }, 72), null, 'no Brew Length, no gravity');
+assert.equal(gravityPoints(gr.ingredients.fermentables[0], gr), null, 'no Efficiency: a grain has no gravity points (no hidden 72 %)');
+assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr) * 10) / 10, 6.9, 'a sugar needs no Efficiency');
+assert.equal(expectedGravity(gr), null, 'no Efficiency, no Expected Gravity'); assert.equal(calculateRecipe(gr).expectedSG, null);
+assert.equal(expectedGravity({ volumes: gr.volumes, ingredients: { fermentables: [gr.ingredients.fermentables[1]] } }), 1.007, 'sugars only: no Efficiency needed');
+assert.equal(RECIPE_DEFAULTS.efficiency, undefined, 'no overall Efficiency default'); assert.equal('efficiency' in blankRecipe(), false);
+// the Brew on Tab: kept by the Tab's hidden key; the default is the Tab whose profile has a Mash Tun or All In One
+{
+  const prof = { hot: { brewhouseEfficiency: 75, equipment: [{ vtype: 'HLT' }, { vtype: 'Mash Tun' }] }, cold: { brewhouseEfficiency: 60, equipment: [{ vtype: 'Fermenter' }] } };
+  const P = { has: id => id in prof, get: id => prof[id] };
+  const cfg = { workspaces: [{ name: 'Cellar', _key: 'k00000000000000a1', equipmentProfile: 'cold' }, { name: 'Brew House', _key: 'k00000000000000b2', equipmentProfile: 'hot' }, { name: 'Notes', _key: 'k00000000000000c3' }] };
+  const on = defaultBrewOn(cfg, P);
+  assert.equal(on._key, 'k00000000000000b2', 'the Tab with a Mash Tun');
+  assert.equal(brewOnEfficiency(cfg, P, { brewOn: on }), 75);
+  assert.equal(brewOnEfficiency(cfg, P, { brewOn: { _key: 'k00000000000000a1' } }), 60);
+  assert.equal(brewOnEfficiency(cfg, P, { brewOn: null }), null);
+  const out = recipeForBrowser({ name: 'X', brewOn: on }, cfg, P);
+  assert.equal('brewOn' in out, false, 'the key never goes to the browser'); assert.ok(out.brewOnRef && !out.brewOnRef.startsWith('k0')); assert.equal(out.brewOnEff, 75);
+  assert.deepEqual(brewOnFromBrowser(out.brewOnRef, cfg), on, 'the stand-in comes back as the key');
+  assert.equal(brewOnFromBrowser('nope', cfg), null);
+  assert.deepEqual(cleanRecipe({ brewOn: { _key: 'k00000000000000b2' } }).brewOn, { _key: 'k00000000000000b2' });
+  assert.equal(cleanRecipe({ brewOn: { _key: 'name' } }).brewOn, null);
+  assert.equal(defaultBrewOn({ workspaces: [cfg.workspaces[2]] }, P), null, 'no Tab with a profile');
+}
 assert.equal(recipeField('rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
 assert.equal(readRecipeFile('<RECIPES><RECIPE><NAME>A</NAME><FERMENTABLES><FERMENTABLE><NAME>DME</NAME><TYPE>Dry Extract</TYPE><AMOUNT>1</AMOUNT><ADD_AFTER_BOIL>TRUE</ADD_AFTER_BOIL></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>', 'a.xml').recipe.ingredients.fermentables[0].addAfterBoil, true);
 assert.equal(fx.ingredients.fermentables[0].notes, 'Adds body to porters and stouts, must be mashed'); assert.equal(fx.grainKg, 4.91);

@@ -57,7 +57,7 @@ Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Vo
 ## Ce qu'il y a dans un Equipment Profile {#what-is-in-an-equipment-profile}
 
 - **System Loss (Trub, Chiller Manifold and Hoses)** : ce qui reste en route entre la cuve d'ébullition et le fermenteur (trub, collecteur du refroidisseur et tuyaux).
-- **Cooling shrinkage** (contraction au refroidissement), **Grain absorption** (absorption du grain), **Brewhouse efficiency** (rendement de la brasserie) et **Hop utilization** (utilisation du houblon).
+- **Cooling shrinkage** (contraction au refroidissement), **Grain absorption** (absorption du grain), **Brewhouse efficiency** (rendement de la brasserie) et **Hop utilization** (utilisation du houblon). Le Brewhouse efficiency est le seul rendement de Skynet : un nouveau profil commence à 72 %, et chaque recette dont le Tab **Brew on** utilise ce profil calcule son Expected Gravity avec lui ([Le Tab Recipe](99-recipe-tab)).
 - **Notes**.
 - **Equipment list** : les Tab_Vessels et Tab_Fittings de son Tab, avec leur type, leur taille, le Template d'où ils viennent et la cuve à laquelle chaque raccord est relié. Vous les mettez sur le Tab depuis les [Modèles de cuves et de raccords](50-vessel-and-fitting-templates) (**Add to Tab**) et changez chacun dans ses propriétés sur le Tab.
 
