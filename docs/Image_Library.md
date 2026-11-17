@@ -294,8 +294,7 @@ Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/
 | `Pump_8_IPs.png` | Help 115 |
 | `Pump_8_IPs.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Pump_Cover.png` | Help 115 |
-| `Pump_Daisy_Chain.png` | Help 115 |
-| `Pump_Daisy_Chain.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Pump_Daisy_Chain.png` | Help 115 (2026-11-17: the pump is now the Skynet pump with its Red Cover; the old photo pump is gone) |
 | `Pump_IP_Example_1.png` | Help 115 |
 | `Pump_IP_Example_1.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
 | `Pump_IP_Example_2.png` | Help 115 |
@@ -303,8 +302,8 @@ Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/
 | `Pump_Overlays.png` | Help 115 |
 | `Pump_Right_Left.png` | Help 115 |
 | `Pump_Right_Left.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
-| `Red_Pump_Label.png` | Help 115 |
-| `Red_Pump_Label.svg` | not on a Help page yet (the sharp copy of the PNG, Rule 7.25) |
+| `Red_Pump_Label.png` | Help 115 (2026-11-17: made from Red_Pump_Label.svg) |
+| `Red_Pump_Label.svg` | Help 115 (hand-made, used in place of the PNG, Rule 7.25; 2026-11-17: redrawn with the Skynet pump and its Red Cover) |
 | `Step_Add_Schema_01_Menu.png` | Help 188 |
 | `Step_Add_Schema_02_Schema_Tab.png` | Help 188 |
 | `Step_Add_Schema_03_Add_New_Schema.png` | Help 188 |
@@ -312,7 +311,7 @@ Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/
 | `Step_Add_Schema_05_Template.png` | Help 188 |
 | `Step_Add_Schema_06_Questions.png` | Help 188 |
 | `Step_Add_Schema_07_Ready.png` | Help 188 |
-| `Step_Add_Schema_08_Done.png` | Help 188 |
+| `Step_Add_Schema_08_Done.png` | Help 188 (2026-11-17: taken again; the pumps are the Skynet pumps) |
 | `Step_Add_Schema_09_Simulator.png` | not on a Help page yet |
 | `Step_Add_Schema_10_Interface.png` | Help 188 |
 | `Step_Add_Schema_11_Edit_Layout.png` | Help 188 |
@@ -363,6 +362,12 @@ Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a p
 | `Bobiverse_Bob.png` | help_pictures | a screenshot of the Fandom wiki page; replaced by Instance_Own_Way.svg |
 | `Three_Musketeers.png` | help_pictures | clip art, source unknown; replaced by Musketeers_All_For_One.svg |
 | `Valve_Ball_*.png` (4), `Valve_Ball_OpenH_1.svg`, `Valve_Ball_OpenV-1x1.svg`, `Pump_Red_Rip_Off_Valve_IPs_Test.svg`, help `Bobiverse_Bob.svg`, `Three_Musketeers.svg` | Delete/ folder | product photos of a motorized ball valve and traced copies of removed pictures; the Delete/ folder is public too |
+| `help_pictures/Pump_Daisy_Chain.png` (old version) | Help pictures | showed the Blichmann Riptide photo pump; same file name, the pump is now the Skynet pump with its Red Cover |
+| `help_pictures/Pump_Daisy_Chain.svg` | Help pictures | a traced copy of the old Pump_Daisy_Chain.png (photo pump inside); not replaced: Help shows the PNG (Rule 7.25) |
+| `help_pictures/Red_Pump_Label.png` (old version) | Help pictures | a screenshot with the photo pump; same file name, now made from the Skynet drawing Red_Pump_Label.svg |
+| `help_pictures/Red_Pump_Label.svg` (old version) | Help pictures | its pump was drawn to look like the photo pump; redrawn with the Skynet pump and Red Cover |
+| `help_pictures/Step_Add_Schema_08_Done.png` (old version) | Help pictures | a screenshot with the photo pumps; same file name, taken again with the Skynet pumps |
+| `docs/reviews/2026-11-04_Elbow_Tee_Three_Vessel_before_after.png`, `..._closeup.png` | docs/reviews | old review screenshots with the photo pump; not needed, not replaced |
 
 ## Not in the library
 
