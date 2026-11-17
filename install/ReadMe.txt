@@ -12,8 +12,8 @@ The installers get it for you, or tell you how.
 The files in this release:
 
   Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
-  Skynet_Brewer_Full_Setup_<date>.exe  The same Windows installer WITH the Skynet pictures and sounds
-                                    inside: the easy way on a new computer (no Media Setup needed).
+  Skynet_Brewer_Full_Setup_<date>.exe  The same Windows installer WITH every Skynet picture, sound and
+                                    Sample Schema inside: the way on a new computer.
                                     No choices: it always OVERWRITES everything (old folders are moved
                                     to C:\Brewing\Skynet_Backups first). To update, use the plain Setup.
   Skynet_BrewPanel_<date>.zip       The panel itself: install or update by hand, or for Mac/Linux/Pi
@@ -54,7 +54,7 @@ replaced by the new manual; the old ones go to help\backups.
 UPDATE CHOICES: before that, the installers ask what the update does:
   1. Start Fresh: delete everything, nothing saved. A warning says ALL EXISTING DATA
      WILL BE DELETED (config, data, processes, backups, every picture and sound, and
-     the Import folder, with no backup). Run the Media Setup after it.
+     the Import folder, with no backup). The Full Setup has every Skynet picture and sound.
   2. Modified Fresh Start: deletes Schemas, Processes, users and the brew log after a
      warning. Kept: Default settings, your own Profiles, Equipment Profiles, Recipes,
      pictures and sounds, the backups and the Import folder.
@@ -70,32 +70,27 @@ confirm the warning) removes them. In the panel, Help > "Updating to a new versi
 the details.
 
 
-THE SKYNET PICTURES AND SOUNDS (SEPARATE DOWNLOAD)
+THE SKYNET PICTURES AND SOUNDS
 --------------------------------------------------
-The pictures and sounds are not inside the panel zip or the installer. They are their
-own download, on the same page: https://github.com/oakbarn/Skynet_Brewery/releases/latest
-  Windows:   run Skynet_Media_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe,
-             OR use Skynet_Brewer_Full_Setup_<date>.exe, which has them inside (one file, same order).
+Windows: nothing extra to run (Rule 9.22). The Full Setup has every Skynet picture and
+  sound; each Update Setup (Skynet_Brewer_Setup_<date>.exe) brings the ones added since
+  the last one, and the panel copies in only the ones you do not have yet.
   Mac/Linux/Pi: put Skynet_Media_<date>.zip next to the installer before you run it,
              or unzip it into the folder that holds BrewPanel (it adds BrewPanel\defaults\media)
              and start the panel: it copies in the pictures and sounds you do not have yet.
-ORDER, on a First Install and after a Start Fresh or Modified Fresh Start: the panel
-  installer FIRST, then the Media Setup (it needs the panel folder, and a Fresh Start
-  clears folders before anything goes in), then the Sample Schemas Setup if you want it.
-  The Media Setup only adds what is missing, so running it again is always safe.
-They ONLY ADD: a picture or sound you already have, by that name, is never changed, and
-nothing is ever deleted. Your own pictures and sounds are never touched. Run them again
-whenever new pictures come out.
+They ONLY ADD: a picture or sound you already have, by that name, is never changed.
+Your own pictures and sounds are never touched.
 
 
-MORE SAMPLE SCHEMAS (SEPARATE DOWNLOAD)
+MORE SAMPLE SCHEMAS
 --------------------------------------
 The panel comes with one Sample Schema, the 3 Vessel 1 Pump brewery. Every other sample
-comes in the Skynet Sample Schemas Setup (Windows) or zip, on the same download page,
-added one at a time. There are none in it yet: each older sample is brought up to the
-current Skynet Rules first. It installs into BrewPanel\sample_schemas, which is also
-where a Schema from another brewer goes (see the ReadMe.txt in that folder).
-  Windows:   run Skynet_Sample_Schemas_Setup_<date>.exe after Skynet_Brewer_Setup_<date>.exe.
+is added one at a time. On Windows it comes with the Skynet Setups (Rule 9.22): the Full
+Setup has them all, and each Update Setup brings the new and fixed ones. A fixed sample
+replaces its older copy; a Schema you already made from it is yours and is never touched.
+There are none yet: each older sample is brought up to the current Skynet Rules first.
+They go in BrewPanel\sample_schemas, which is also where a Schema from another brewer
+goes (see the ReadMe.txt in that folder).
   Mac/Linux/Pi: put Skynet_Sample_Schemas_<date>.zip next to the installer before you
              run it, or unzip it (unzip -n) into the folder that holds BrewPanel.
 It ONLY ADDS: a sample you already have is never changed, and nothing is deleted.

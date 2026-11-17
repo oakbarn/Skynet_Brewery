@@ -60,6 +60,27 @@ SSTAGE="$OUT/stage/samples/BrewPanel"
 mkdir -p "$SSTAGE"
 [ -d "$STAGE/sample_schemas" ] && mv "$STAGE/sample_schemas" "$SSTAGE/sample_schemas"
 
+# The Update Setup (and the panel zip) also brings the Skynet pictures, sounds and Sample Schemas added since the last Update Setup
+# (OakBarn Brewery, 2026-11-17: "If there are new skynet Media files since the last Update exe, can they be included in the update
+# and added to the media on the brain"; "Add New Skynet Schema same as media"; Rule 9.22). SKYNET_UPDATE_SINCE is that Release's tag
+# (the release workflow sets it). Pictures and sounds: only files ADDED to media/ since then (Skynet's own, already in
+# docs/Media_Licenses.csv, Rule 9.12); they go in defaults/media like the three sounds above (the panel copies in only what is
+# missing, lib/seed.js). Sample Schemas: files ADDED or CHANGED in sample_schemas/ since then (OakBarn Brewery, 2026-11-17: a
+# Skynet sample or Template "only used on a New Schema" never affects a user's Schema); they go in sample_schemas/, where the
+# Windows Setup replaces the older copy of that Skynet sample. A Schema made from it is the user's own copy and is never touched.
+if [ -n "${SKYNET_UPDATE_SINCE:-}" ] && git rev-parse -q --verify "refs/tags/$SKYNET_UPDATE_SINCE^{commit}" >/dev/null; then
+  nm=0; ns=0
+  while IFS= read -r f; do
+    case "$f" in
+      media/*) g="${f#media/}"; [ -f "$MSTAGE/media/$g" ] || continue
+        mkdir -p "$STAGE/defaults/media/$(dirname "$g")"; cp -p "$MSTAGE/media/$g" "$STAGE/defaults/media/$g"; nm=$((nm+1)) ;;
+      sample_schemas/*) g="${f#sample_schemas/}"; [ -f "$SSTAGE/sample_schemas/$g" ] || continue
+        mkdir -p "$STAGE/sample_schemas/$(dirname "$g")"; cp -p "$SSTAGE/sample_schemas/$g" "$STAGE/sample_schemas/$g"; ns=$((ns+1)) ;;
+    esac
+  done < <(git diff --name-only --diff-filter=A "$SKYNET_UPDATE_SINCE" HEAD -- media; git diff --name-only --diff-filter=AM "$SKYNET_UPDATE_SINCE" HEAD -- sample_schemas)
+  echo "Added since $SKYNET_UPDATE_SINCE, in the Update Setup and panel zip: $nm pictures and sounds, $ns new or changed Sample Schema files"
+fi
+
 ZIP="Skynet_BrewPanel_$VERSION.zip"
 rm -f "$OUT"/Skynet_BrewPanel_*.zip
 ( cd "$OUT/stage" && zip -qr -X "../$ZIP" BrewPanel )
@@ -110,16 +131,11 @@ if command -v makensis >/dev/null; then
   # The Full Setup (OakBarn Brewery, 2026-11-14, Rule 9.20): the same Setup with every Skynet picture and sound inside, so a new
   # install needs no separate Media Setup. The plain Setup and the Media Setup stay as they are (Rule #1, Never Take Away).
   FEXE="Skynet_Brewer_Full_Setup_$VERSION.exe"
-  makensis -V2 -DSRC="$(pwd)/$STAGE" -DMEDIA_SRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$FEXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
+  makensis -V2 -DSRC="$(pwd)/$STAGE" -DMEDIA_SRC="$(pwd)/$MSTAGE/media" -DSAMPLES_SRC="$(pwd)/$SSTAGE/sample_schemas" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$FEXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$FEXE"
-  if [ "$MEDIA_BUILD" != no ]; then
-    MEXE="Skynet_Media_Setup_$VERSION.exe"
-    makensis -V2 -DSRC="$(pwd)/$MSTAGE/media" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$MEXE" "${SIGN[@]}" install/windows/SkynetMedia.nsi
-    echo "Built $OUT/$MEXE"
-  fi
-  SEXE="Skynet_Sample_Schemas_Setup_$VERSION.exe"
-  makensis -V2 -DSRC="$(pwd)/$SSTAGE/sample_schemas" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$SEXE" "${SIGN[@]}" install/windows/SkynetSampleSchemas.nsi
-  echo "Built $OUT/$SEXE"
+  # The Skynet Media Setup and Sample Schemas Setup .exe are retired (OakBarn Brewery, 2026-11-17: "WE could get rid of both the
+  # Schema Uodate and the Media updates"; Rule 9.22): the Update Setup brings what is new, the Full Setup has everything. Their
+  # scripts (install/windows/SkynetMedia.nsi, SkynetSampleSchemas.nsi) are kept in Delete/. The zips stay for Mac, Linux and Pi.
   [ -f "$OUT/signing.log" ] && cat "$OUT/signing.log"
 else
   echo "NSIS (makensis) is not installed, so no Windows installer was built. On Linux: sudo apt install nsis"

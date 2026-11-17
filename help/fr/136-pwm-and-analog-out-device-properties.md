@@ -8,6 +8,7 @@ de bouts de tuyau) et **pas de Toggle** (un appui ouvre la case où vous réglez
 
 1. En Edit layout, cliquez sur **PWM** (ou **Select Device Type > PWM / Analog out**) et choisissez **PWM output**, **Analog output 0-10 V**
    ou **Analog output 4-20 mA**. Les lignes **Pump speed** de la liste Pumps ouvrent la même case.
+   La même liste a aussi **Heating Element: PWM** et les **vannes proportionnelles**, les mêmes lignes que dans les listes Heating Element et Valves.
 2. La case d'ajout s'ouvre avec le titre **Add PWM Output** ou **Add Analog Output**. Son **Label** est déjà rempli : **PWM_1** pour une sortie PWM, **4_20_1** pour une sortie analogique 4-20 mA, **0_10_1** pour une 0-10 V
    (le numéro suivant à chaque fois), donc le curseur commence sur le champ vide suivant. Vous pouvez le changer, mais il ne peut pas être vide. Remplissez dans l'ordre : 1 le **Label** (le ⬢ à côté règle
    sa police et ses couleurs) et **Label Visible**, 2 l'**Interface** (la carte) et un **Available Port** sur la même ligne (seules les

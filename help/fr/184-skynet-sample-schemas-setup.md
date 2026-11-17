@@ -1,29 +1,18 @@
-# Le Skynet Sample Schemas Setup {#the-skynet-sample-schemas-setup}
+# Les Sample Schemas Skynet {#the-skynet-sample-schemas}
 
-Le panneau vient avec **un** Sample Schema : la brasserie **3 Vessel 1 Pump** (HLT, cuve d'empâtage, cuve d'ébullition et une pompe). Il est tenu à jour de chaque nouvelle Règle Skynet, et c'est le Schema avec lequel démarre un nouveau panneau. Il **reste toujours dans le panneau** : il n'est jamais déplacé dans le Sample Schemas Setup.
+Le panneau vient avec la brasserie **3 Vessel 1 Pump** (HLT, cuve d'empâtage, cuve d'ébullition et une pompe). Il est tenu à jour de chaque nouvelle Règle Skynet, et c'est le Schema avec lequel démarre un nouveau panneau. Il **reste toujours dans le panneau**.
 
-Le Sample Schemas Setup ne sert qu'aux exemples **supplémentaires**. Chaque **autre** Sample Schema (une brasserie toute faite) vient dans son propre téléchargement, le **Skynet Sample Schemas Setup**, et ils y sont ajoutés **un à la fois**.
+Chaque **autre** Sample Schema (une brasserie toute faite) est ajouté **un à la fois**, et vient avec les Setups Skynet. **Il n'y a rien de plus à télécharger ni à lancer** (OakBarn Brewery : « No extra steps for a User ») :
 
-> **Il n'y en a encore aucun.** Les anciens exemples (deux cuves une pompe, et le jour de brassage BrewZilla) sont mis de côté le temps que chacun soit mis aux Règles Skynet actuelles. Quand l'un est prêt, il est ajouté au Sample Schemas Setup.
+- **Nouveau sur cet ordinateur Windows :** le **Full Setup** (`Skynet_Brewer_Full_Setup_<date>.exe`) a tous les Sample Schemas.
+- **À chaque mise à jour :** l'**Update Setup** (`Skynet_Brewer_Setup_<date>.exe`) apporte les Sample Schemas ajoutés ou changés depuis le dernier Update Setup.
+- **Mac, Linux, Raspberry Pi ou à la main :** décompressez `Skynet_Sample_Schemas_<date>.zip` dans le dossier qui contient `BrewPanel` (utilisez `unzip -n`, qui ne remplace jamais un fichier), ou mettez-le à côté de l'installateur avant de le lancer. Il ajoute `BrewPanel/sample_schemas`.
 
-**Il ne fait qu'ajouter.** Un exemple que vous avez déjà, sous ce nom, n'est jamais changé. Rien n'est jamais supprimé. Vos propres Schemas ne sont jamais touchés. Quand un exemple est refait, il arrive avec un nouveau nom, donc l'ancien reste tel qu'il était.
+> **Il n'y en a encore aucun.** Les anciens exemples (deux cuves une pompe, et le jour de brassage BrewZilla) sont mis de côté le temps que chacun soit mis aux Règles Skynet actuelles. Le **Skynet Sample Schemas Setup** .exe à part n'existe plus : l'Update Setup et le Full Setup font son travail.
 
-## Où l'obtenir {#where-to-get-it}
+**Vos propres Schemas ne sont jamais touchés.** Un Sample Schema ne sert qu'à faire un nouveau Schema : le choisir ajoute une copie qui est à vous. Donc quand Skynet corrige un exemple, la mise à jour remplace l'ancienne copie de cet exemple, et un Schema que vous en avez déjà fait reste exactement tel qu'il est. Il en va de même pour les Templates Skynet : chaque mise à jour apporte les plus récents, et vos propres Templates ne sont jamais touchés.
 
-Sur la même page de téléchargement que le panneau : **https://github.com/oakbarn/Skynet_Brewery/releases/latest**
-
-| Fichier | Pour |
-|---|---|
-| `Skynet_Sample_Schemas_Setup_<date>.exe` | Windows |
-| `Skynet_Sample_Schemas_<date>.zip` | Mac, Linux, Raspberry Pi, ou Windows à la main |
-
-## Comment l'utiliser {#how-to-use-it}
-
-- **Windows :** installez d'abord le panneau (Skynet Brewer Setup), puis double-cliquez sur `Skynet_Sample_Schemas_Setup_<date>.exe`. Gardez le dossier qu'il montre (`C:\Brewing\BrewPanel`, où est le panneau) et cliquez sur Install.
-- **Mac, Linux, Raspberry Pi avec l'installateur :** mettez `Skynet_Sample_Schemas_<date>.zip` à côté de l'installateur avant de le lancer.
-- **À la main :** décompressez `Skynet_Sample_Schemas_<date>.zip` dans le dossier qui contient `BrewPanel` (sur Mac, Linux et Pi utilisez `unzip -n`, qui ne remplace jamais un fichier). Il ajoute `BrewPanel/sample_schemas`.
-
-Appuyez ensuite sur **F5** dans le panneau. Les nouveaux exemples sont dans la liste déroulante Schema sous **Add a Sample Schema**, après l'exemple 3 Vessel (voir [Ajouter un Schema exemple](83-sample-schemas)). En choisir un ajoute une **copie** comme nouveau Schema à vous, sur le simulateur, donc rien de réel n'est commandé.
+Puis appuyez sur **F5** dans le panneau. Les nouveaux exemples sont dans la liste des Schemas sous **Add a Sample Schema**, après l'exemple 3 Vessel (voir [Ajouter un Sample Schema](83-sample-schemas)). En choisir un ajoute une **copie** comme nouveau Schema à vous, sur le simulateur, donc rien de réel n'est commuté.
 
 ## Un Schema d'un autre brasseur {#a-schema-from-another-brewer}
 
@@ -43,6 +32,6 @@ La plupart du temps, un autre brasseur vous enverra plutôt un seul fichier `.js
 
 ## Bon à savoir {#good-to-know}
 
-- Mettre à jour le panneau ne touche jamais `sample_schemas`. Vos propres Schemas ne sont jamais touchés non plus.
+- Mettre à jour le panneau ajoute les nouveaux exemples Skynet dans `sample_schemas` et remplace un exemple Skynet qui a été corrigé. Vos propres Schemas ne sont jamais touchés.
 - Les exemples des anciennes versions du panneau (deux cuves une pompe ; jour de brassage BrewZilla ; OakBarn Brewery) sont déplacés, pas supprimés, dans `backups/old_samples_<date>` à la première mise à jour, donc seul l'exemple 3 Vessel est listé. Un Schema que vous avez déjà fait à partir de l'un d'eux est à vous et reste.
-- Désinstaller le panneau supprime `sample_schemas` avec tout le reste. Relancez le Sample Schemas Setup après une nouvelle installation.
+- Désinstaller le panneau supprime `sample_schemas` avec tout le reste. Le Full Setup remet tous les exemples Skynet lors d'une nouvelle installation.
