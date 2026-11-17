@@ -12,13 +12,13 @@ The older copy in the project folder (`/mnt/project-files/Image_Library/`, last 
 
 **2026-11-17 (OakBarn Brewery, "any Copywrite images need to be removed from the Public github regardless"):** every Skynet picture in the repo now has a row here (116 were missing). Pictures that might be copyrighted were taken out of the repo and replaced by Skynet drawings; see [Removed for copyright](#removed-for-copyright-2026-11-17) at the end.
 
-**Totals (2026-11-17):** 199 Skynet pictures in 10 groups (the Motors group is empty), plus the Help pictures and program icons listed at the end.
+**Totals (2026-11-17):** 197 Skynet pictures in 10 groups (the Motors group is empty), plus the Help pictures and program icons listed at the end.
 
 Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size on screen). PNG sizes are pixels. Where a PNG and an SVG share a name, the PNG is the original and the SVG is either a hand redraw ("Skynet drawing") or a panel auto-trace. "Pump_Whute_Rip_On" is the original file name, typo included.
 
 ## Groups
 
-- [Alarms](#alarms) (11)
+- [Alarms](#alarms) (9)
 - [Chillers](#chillers) (5)
 - [Hop_Infusion](#hop_infusion) (1)
 - [Lights_LEDs](#lights_leds) (5)
@@ -33,8 +33,6 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `AlarmBitter.png` | Alarm bell picture (original PNG). | 600x600 px | sample Schema (config/brewery.json) |
-| `AlarmBitter.svg` | Alarm bell, SVG traced from AlarmBitter.png (the trace is clean). | viewBox 0 0 600 600 (600x600) | not used yet |
 | `Alarm_Active_Red.svg` | Skynet Alarm Active overlay (Layer 1): red sound waves and bell outline while the alarm sounds. 600 x 600, see-through. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
 | `Alarm_Basic.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Together: Back (Layer 4) and Fore (Layer 3) with the black lines. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
 | `Alarm_Basic_Back.svg` | Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Back only (Layer 4): the panel colors it with .back. | viewBox 0 0 600 600 (600x600) | Panel code (app.js) |
@@ -368,6 +366,7 @@ Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a p
 | `help_pictures/Red_Pump_Label.svg` (old version) | Help pictures | its pump was drawn to look like the photo pump; redrawn with the Skynet pump and Red Cover |
 | `help_pictures/Step_Add_Schema_08_Done.png` (old version) | Help pictures | a screenshot with the photo pumps; same file name, taken again with the Skynet pumps |
 | `docs/reviews/2026-11-04_Elbow_Tee_Three_Vessel_before_after.png`, `..._closeup.png` | docs/reviews | old review screenshots with the photo pump; not needed, not replaced |
+| `AlarmBitter.png`, `AlarmBitter.svg` (trace) | Alarms | looks like a DevExpress bell (a BruControl-era picture); replaced by the original Skynet line drawing Alarm Hop (Alarm_Hop*.svg, Bell = Hop) with its separate hop overlay Alarm_Set_Hop_Cone.svg (OakBarn Brewery 2026-11-17). The new pictures are added to this library when OakBarn Brewery says so. |
 
 ## Not in the library
 

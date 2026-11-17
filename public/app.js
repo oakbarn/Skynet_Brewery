@@ -2593,6 +2593,12 @@ function buildEl(e) {
 // a Back color behind it. An Alarm made before the subclasses has no alarmClass and works as before.
 const ALM_DIR = 'Images/Skynet/Alarms/';
 const ALM_PICS = { back: ALM_DIR + 'Alarm_Basic_Back.svg', fore: ALM_DIR + 'Alarm_Basic_Fore.svg', lines: ALM_DIR + 'Alarm_Basic_Lines.svg', together: ALM_DIR + 'Alarm_Basic.svg' };
+// The Bell of a Basic Skynet Alarm (OakBarn Brewery, 2026-11-17: "rename a Alarm Hop because we will use different fore and back for
+// Flavor and Aroma Hops"): Basic (above, with its black lines) or Hop, an original line drawing in the Back and Fore colors only, no
+// black lines. Its hop is not in the bell: it is the separate Set Graphic Alarm_Set_Hop_Cone.svg (Layer 2). Empty = Basic.
+const ALM_BELLS = { '': ALM_PICS, hop: { back: ALM_DIR + 'Alarm_Hop_Back.svg', fore: ALM_DIR + 'Alarm_Hop_Fore.svg', lines: '', together: ALM_DIR + 'Alarm_Hop.svg' } };
+const ALM_BELL_LIST = [['', 'Basic'], ['hop', 'Hop']];
+const almBell = e => ALM_BELLS[e?.bell] || ALM_PICS;
 const ALM_COLORS = { back: '#6ca538', fore: '#8bcf18' };      // Fritz's greens (his Alarm.svg)
 // the Pre-Hop Alarm (Rule 7.21): a Combination Alarm and String Box Widget on one of three Skynet watermarks (.background 1, 2 or 3)
 const PREHOP_MARKS = [1, 2, 3].map(n => ALM_DIR + `Alarm_PreHop_Mark_${n}.svg`);
@@ -2609,10 +2615,14 @@ function almLayers(n, e, v) {
   if (!e.alarmClass) { L?.remove(); n.classList.remove('almBasic'); return; }
   if (!L) {
     L = h('div', { class: 'almLayers' }, h('div', { class: 'almBack' }), h('div', { class: 'almFore' }), h('div', { class: 'almLines' }), h('div', { class: 'almSet' }));
-    L.children[0].style.webkitMaskImage = L.children[0].style.maskImage = cssUrl(ALM_PICS.back);
-    L.children[1].style.webkitMaskImage = L.children[1].style.maskImage = cssUrl(ALM_PICS.fore);
-    L.children[2].style.backgroundImage = cssUrl(ALM_PICS.lines);
     n.prepend(L);
+  }
+  const bell = almBell(e);
+  if (L._bell !== bell) {      // the Bell (Basic or Hop) sets the Back and Fore masks and the black lines (Hop has none)
+    L._bell = bell;
+    L.children[0].style.webkitMaskImage = L.children[0].style.maskImage = cssUrl(bell.back);
+    L.children[1].style.webkitMaskImage = L.children[1].style.maskImage = cssUrl(bell.fore);
+    L.children[2].style.backgroundImage = bell.lines ? cssUrl(bell.lines) : '';
   }
   const basic = isAlmBasic(e);
   n.classList.toggle('almBasic', basic);
@@ -8085,7 +8095,8 @@ function alarmWidgetFields(it) {
     ...(pre ? [['_bg', 'Background: one of three Skynet watermarks. They are set and can\'t be changed; a Process picks one: .background = 1, 2 or 3.', 'note'],
       ['foreColor', 'Fore color (the text; a Process: .fore)', 'color', null, false, 'b'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color', null, false, 'b'],
       ['setGraphic', 'Set Graphic (Layer 2, on the watermark; a Process: .skynet_Layer_2)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE)]]
-      : basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+      : basic ? [['_bg', 'Background: a Skynet bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+      ['bell', 'Bell (Basic, or Hop: a line drawing in the Back and Fore colors only)', 'sel', ALM_BELL_LIST, false, 'b'],
       ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
       ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
       : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
