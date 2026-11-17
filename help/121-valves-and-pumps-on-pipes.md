@@ -3,7 +3,7 @@
 ## Centered on the pipe
 
 A valve or pump sits **right on its pipes** (Skynet Rule 5.23). The pipe runs straight on through it: into the valve's own pipe
-or the pump's port on one side and out the other, the same in every Orientation.
+or the pump's End Fitting on one side and out the other, the same in every Orientation.
 
 - **The pipes stay where they are; the valve or pump moves** across onto the pipe's line: left or right on an up-and-down pipe,
   up or down on a level one.

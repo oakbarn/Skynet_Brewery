@@ -63,8 +63,13 @@ export function factLines(el) {
   const pw = powerText(powerOf(el)); if (pw) out.push('Power: ' + pw);
   out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool'));
   if (isPwmPump(el)) out.push(`Speed control: PWM, Speed ${pumpSpeed(el.speed)} %`);
-  const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest, ports: el?.pumpPorts };
-  for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest'], ['ports', 'Ports']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
+  const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest };
+  for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
+  // its Inlet IP Fitting and Outlet IP Fitting, the End Fittings of its In and Out IPs (OakBarn Brewery, 2026-11-17: Port is a board Port
+  // only, Rule 2.57); else the model's
+  if (el?.ipTypeIn) out.push('Inlet IP Fitting: ' + el.ipTypeIn);
+  if (el?.ipTypeOut || el?.ipTypeIn) out.push('Outlet IP Fitting: ' + (el.ipTypeOut || el.ipTypeIn));
+  if (!el?.ipTypeIn && (el?.pumpPorts || f?.ports)) out.push('Fittings: ' + (el?.pumpPorts || f.ports));
   const sp = selfPrimeOf(el); if (sp !== null) out.push('Self Priming: ' + (sp ? 'Yes' : 'No'));
   if (f?.body) out.push('Body: ' + f.body);
   if (f?.note) out.push(f.note);
