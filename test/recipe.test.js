@@ -5,9 +5,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe, RECIPE_DEFAULTS } from '../public/recipecalc.js';
+import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity, RECIPE_LEVELS, recipeLevel, levelShowsTab, levelShowsBox, levelFermTypes, blankRecipe, RECIPE_DEFAULTS, measuredEfficiency, averageEfficiency, EFF_AVERAGE_OF } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
 import { recipeValues } from '../lib/brewprocess.js';
+import { SCHEMA_KEYS } from '../lib/schemas.js';
 
 // a small .bsmx as BeerSmith writes it: ounces, fluid ounces, °F; a folder of two recipes
 const hop = (n, oz, use, t, alpha = 10) => `<Hops><F_H_NAME>${n}</F_H_NAME><F_H_ALPHA>${alpha}</F_H_ALPHA><F_H_AMOUNT>${oz}</F_H_AMOUNT><F_H_BOIL_TIME>${t}</F_H_BOIL_TIME><F_H_DRY_HOP_TIME>4</F_H_DRY_HOP_TIME><F_H_USE>${use}</F_H_USE><F_H_FORM>0</F_H_FORM><F_H_IN_RECIPE>1</F_H_IN_RECIPE></Hops>`;
@@ -88,6 +89,16 @@ assert.equal(recipeFieldValues(gr, { eff: 72 }).rcp_Grain_1_PPG_SG, 53.24); asse
 assert.equal(gravityPoints(gr.ingredients.fermentables[0], gr), null, 'no Efficiency: a grain has no gravity points (no hidden 72 %)');
 assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr) * 10) / 10, 6.9, 'a sugar needs no Efficiency');
 assert.equal(expectedGravity(gr), null, 'no Efficiency, no Expected Gravity'); assert.equal(calculateRecipe(gr).expectedSG, null);
+// the real Efficiency of a brew, back from its OG and the volume into the fermenter (Rule 17.13): 1.060 in 5 gal = 71.8 % (the honey is not mashed; 72 % gives 1.0598, shown as 1.060)
+assert.equal(measuredEfficiency(gr, 1.06, 5 / 0.264172052), 71.8); assert.equal(measuredEfficiency(gr, 1.06, 0), null, 'no volume');
+assert.equal(measuredEfficiency(gr, 0.99, 19), null, 'not a gravity'); assert.equal(measuredEfficiency({ ingredients: { fermentables: [{ type: 'sugar', kg: 1, yieldPct: 75 }] } }, 1.05, 19), null, 'nothing mashed');
+// the average of the last 10 brews with this profile, kept in the Schema (effLog is a Schema key, so each Schema has its own list)
+{
+  const log = Array.from({ length: 12 }, (_, k) => ({ profile: 'p1', eff: k < 2 ? 50 : 75 })).concat([{ profile: 'p2', eff: 60 }]);
+  assert.equal(EFF_AVERAGE_OF, 10); assert.deepEqual({ ...averageEfficiency(log, 'p1'), last: undefined }, { avg: 75, count: 10, last: undefined }, 'only the last 10');
+  assert.equal(averageEfficiency(log, 'p2').avg, 60); assert.equal(averageEfficiency(log, 'p3'), null); assert.equal(averageEfficiency([], 'p1'), null);
+  assert.ok(SCHEMA_KEYS.includes('effLog'));
+}
 assert.equal(expectedGravity({ volumes: gr.volumes, ingredients: { fermentables: [gr.ingredients.fermentables[1]] } }), 1.007, 'sugars only: no Efficiency needed');
 assert.equal(RECIPE_DEFAULTS.efficiency, undefined, 'no overall Efficiency default'); assert.equal('efficiency' in blankRecipe(), false);
 // the Brew on Tab: kept by the Tab's hidden key; the default is the Tab whose profile has a Mash Tun or All In One

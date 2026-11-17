@@ -47,7 +47,7 @@ import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY, DEFAULT_VALVE_OVERLAY, NEW_TAB_KEYS } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView, brewOnTab, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from './lib/recipe.js';
-import { newUserRecipe, expectedGravity } from './public/recipecalc.js';
+import { newUserRecipe, expectedGravity, measuredEfficiency, averageEfficiency } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
@@ -79,7 +79,7 @@ import { kindChangeError } from './public/gkinds.js';
 import { Patron } from './lib/patron.js';
 import { lockDataFolder } from './lib/lockdata.js';
 import { Devices, DEVICE_COOKIE, isBrainItself } from './lib/devices.js';
-import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
+import { useKeySecret, newKey, KEY, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
 import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
@@ -1078,6 +1078,27 @@ async function route(req, res) {
     if (b.mode === 'new') { const nm = recipes.freeName(rc.name); useRecipe({ ...rc, name: nm }); const s = recipes.save(currentRecipe()); return ok(res, { id: s.id, name: nm, saved: recipes.list() }); }
     if (b.mode === 'overwrite') { const same = recipes.byName(rc.name); if (same) recipes.backup(same.id); const s = recipes.save(rc, same?.id); return ok(res, { id: s.id, name: s.name, saved: recipes.list() }); }
     const s = recipes.save(rc, b.id || undefined); return ok(res, { id: s.id, saved: recipes.list() });
+  }
+  // Track the real Efficiency of each brew, by Schema (Rule 17.13; OakBarn Brewery, 2026-11-17: "Average over 10 brews with same schema";
+  // "Track by schema"): the Recipe now loaded, its Brew on Tab and that Tab's Equipment Profile, the OG and the volume into the fermenter.
+  // The Brew Day and PreBrew steps that would ask these wait in the Process Updates Sandbox (Rule 14.5); until then they are typed in.
+  if (p === '/ui/recipe/efficiency' && m === 'POST') {
+    const b = await jsonBody(req), rc = currentRecipe(), w = rc && brewOnTab(store.config, rc);
+    if (!rc) return fail(res, 400, 'Load or make a Recipe first: the Efficiency is worked out from its grain bill.');
+    if (!w?.equipmentProfile || !profiles.has(w.equipmentProfile)) return fail(res, 400, 'Pick the Recipe\'s Brew on Tab first (a Tab with an Equipment Profile).');
+    const eff = measuredEfficiency(rc, b.og, b.liters);
+    if (eff === null) return fail(res, 400, 'Skynet could not work out an Efficiency: check the OG (like 1.052), the volume into the fermenter, and that the Recipe has grains with their Potential.');
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(b.date ?? '') ? b.date : new Date().toISOString().slice(0, 10);
+    const rec = { id: newKey(), date, recipe: String(rc.name || '').slice(0, 120), og: +b.og, liters: Math.round(+b.liters * 1000) / 1000, eff, tab: { [KEY]: w[KEY] }, profile: w.equipmentProfile, by: me?.name ?? '' };
+    store.config.effLog = [...(Array.isArray(store.config.effLog) ? store.config.effLog : []), rec];
+    store.writeConfig(); broadcast('config', {});
+    return ok(res, { ok: true, eff, average: averageEfficiency(store.config.effLog, w.equipmentProfile) });
+  }
+  const effDel = /^\/ui\/recipe\/efficiency\/(k[0-9a-f]{16})$/.exec(p);
+  if (effDel && m === 'DELETE') {      // a brew typed in wrong: taken out of the list (asked first in the panel)
+    const log = Array.isArray(store.config.effLog) ? store.config.effLog : [];
+    if (!log.some(x => x.id === effDel[1])) return fail(res, 404, 'That brew is not in the list');
+    store.config.effLog = log.filter(x => x.id !== effDel[1]); store.writeConfig(); broadcast('config', {}); return ok(res, { ok: true });
   }
   if (p === '/ui/recipe/alerts' && m === 'POST') {
     const b = await jsonBody(req);
