@@ -34,7 +34,7 @@ A new Device first asks for its **Interface**, **Port** (only free pins that fit
 
 ## OneWire probes (DS18B20)
 
-Each probe gets a **number** in the **OneWire probe index**, and temperature Devices use that number. Probes are recognised by their ROM id, not by where they sit on the wire.
+The probes have their own Tab: **Devices > 🌡 OneWire Probes**. Each probe gets a **number** in the **OneWire probe index**, and temperature Devices use that number. Probes are recognised by their ROM id, not by where they sit on the wire.
 
 **To replace a probe:** plug in the new one, find it under **OneWire probes seen**, and pick its ROM id in the old probe's row. Every Device using that number follows it; nothing else changes.
 

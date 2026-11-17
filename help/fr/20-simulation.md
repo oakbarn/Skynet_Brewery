@@ -7,7 +7,7 @@ Un Admin l'active avec le bouton **🔌 Real / 🧪 Simulator** à côté du ☰
 ## Ce qui se passe quand vous l'activez {#what-happens-when-you-turn-it-on}
 
 - Chaque Process s'arrête et chaque sortie s'éteint, pour que rien de ce qui tournait ne continue sur les vraies cartes.
-- Les vraies cartes sont lâchées. Chacune est remplacée par le simulateur, donc la page **Devices** les montre comme *Simulator (simulation mode)*.
+- Les vraies cartes sont lâchées. Chacune est remplacée par le simulateur, donc la page **Devices** montre leur **Mode** comme *🧪 Simulator*.
 - Une barre jaune rayée **SIMULATION** s'affiche sous le menu sur chaque téléphone et ordinateur, pour que personne ne la prenne pour un vrai brassage.
 - Les entrées des cartes (températures, débit, pH, etc.) viennent du simulateur. Vous pouvez aussi taper une valeur dans une entrée en la touchant, par exemple une lecture de pH.
 - Les valeurs écrites dans le Log pendant qu'il est actif sont marquées **sim** dans la colonne Trigger, pour les distinguer facilement des vrais brassages.
