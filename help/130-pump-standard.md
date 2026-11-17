@@ -38,7 +38,7 @@ picks it for you: the Hose or Pipe comes in the same way as the pipe or hose joi
 in along the side, and it turns to follow as soon as a pipe or hose is joined. There is nothing to pick.
 
 **IP Type In** and **IP Type Out** are the connector on the pump's inlet and outlet, with its size (FPT1/2, TC1.5 ...)
-(Skynet Rule 5.40). A pump starts with the one its **Ports** say, or else the **Default pipe IP Type**. A pipe end on the pump
+(Skynet Rule 5.40). A pump starts with the ones its **Inlet Fitting** and **Outlet Fitting** say, or else the **Default pipe IP Type**. A pipe end on the pump
 fits it by itself (an MPT1/2 end on an FPT1/2 port).
 
 ## Pipes on a pump

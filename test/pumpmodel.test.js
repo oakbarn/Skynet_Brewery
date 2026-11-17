@@ -105,7 +105,7 @@ assert.match(app, /'◀ Back'\)\);\s*\n\s*if \(view\)/, 'its one button is Back'
 assert.match(app, /\['_power', 'Power', 'ro'/, 'Power is in the Pump facts');
 assert.doesNotMatch(app, /\['power', 'Power', 'sel', PUMP_POWER_CHOICES/, 'Power is no longer on the dialog');
 assert.match(app, /const PORTS_TIP = 'Match YOUR Pump fittings/, 'Ports Hover Help starts Match YOUR Pump fittings');
-assert.match(app, /\(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpPortField\(it, factsOf\(it\), PORTS_TIP\)\)/, 'Ports where Power was');
+assert.match(app, /\.\.\.\['in', 'out'\]\.map\(side => \(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpFitField\(it, factsOf\(it\), side\)\)\)/, 'Inlet Fitting and Outlet Fitting where Power was (they replaced Ports, 2026-11-17)');
 assert.doesNotMatch(app, /it is not changed here/, 'Use: no "not changed here"');
 assert.match(app, /const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed\./);
 assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both balloons');
@@ -132,4 +132,24 @@ console.log('Dialog 2 #3 tests passed');
   assert.ok(app.includes("...(selfPrimeOf(o) === false ? [['_primeNote', PRIME_NOTE, 'note'"), 'the priming note under a greyed No');
   assert.ok(!/riptide'[^\n]*hottest: '\d/.test(fs.readFileSync(new URL('../public/pumps.js', import.meta.url), 'utf8')), 'no RipTide Hottest number without Blichmann\'s own');
   console.log('self priming tests passed');
+}
+
+// Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet Fitting"; "Separate Outlet Fitting"): two rows, each its own dropdown, where the one Ports row was
+{
+  const { factLines } = await import('../public/pumps.js');
+  const fn = app.slice(app.indexOf('function PUMP_TYPE_FIELDS'), app.indexOf('const PUMP_XYWH'));
+  assert.ok(fn.includes("['in', 'out'].map(side =>") && fn.includes('pumpFitField('), 'both rows in every Pump dialog (Add box and Properties)');
+  assert.ok(!fn.includes('pumpPortField'), 'no single Ports row');
+  assert.ok(app.includes("side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting'"), 'his labels, word for word');
+  assert.ok(!/\['pumpPorts', 'Ports', 'sel'/.test(app), 'no Ports dropdown');
+  assert.ok(app.includes("'pumpPorts', 'pumpInlet', 'pumpOutlet']"), 'both saved, the old Ports pick kept');
+  const store = fs.readFileSync(new URL('../lib/store.js', import.meta.url), 'utf8');
+  assert.match(store, /for \(const k of \['pumpInlet', 'pumpOutlet'\]\) if \(e\[k\] === undefined\) \{ e\[k\] = String\(e\.pumpPorts\)\.trim\(\)/, 'a pump saved with Ports gets it in both');
+  const el = { type: 'digitalOut', subtype: 'pump', pumpModel: 'march_815' };
+  assert.ok(factLines(el).some(l => l.startsWith('Fittings: 3/4" NPT in')), 'the model\'s fittings on the hover');
+  const own = factLines({ ...el, pumpInlet: 'TC1.5', pumpOutlet: 'FPT1/2' });
+  assert.ok(own.includes('Inlet Fitting: TC1.5') && own.includes('Outlet Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own fittings, never "Ports"');
+  assert.ok(factLines({ ...el, pumpPorts: 'TC2' }).includes('Outlet Fitting: TC2'), 'an older Ports pick shows in both');
+  console.log('inlet and outlet fitting tests passed');
 }

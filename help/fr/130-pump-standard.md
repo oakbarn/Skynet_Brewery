@@ -38,7 +38,7 @@ Skynet la choisit pour vous : le Hose ou Pipe arrive du même sens que le tuyau 
 joint, il arrive le long du côté, et il tourne pour suivre dès qu'un tuyau ou un flexible est joint. Il n'y a rien à choisir.
 
 **IP Type In** et **IP Type Out** sont le raccord sur l'entrée et la sortie de la pompe, avec sa taille (FPT1/2, TC1.5 ...)
-(Règle Skynet 5.40). Une pompe commence avec celui que disent ses **Ports**, sinon le **Default pipe IP Type**. Un bout de tuyau
+(Règle Skynet 5.40). Une pompe commence avec ceux que disent son **Inlet Fitting** et son **Outlet Fitting**, sinon le **Default pipe IP Type**. Un bout de tuyau
 sur la pompe va avec elle de lui-même (un bout MPT1/2 sur un port FPT1/2).
 
 ## Tuyaux sur une pompe {#pipes-on-a-pump}
