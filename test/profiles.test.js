@@ -72,8 +72,14 @@ const v1 = valves.create('Ball H');
 assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Open picture: the On overlay shows open (2026-11-05)'); assert.match(v1.imageClosed, /Valve_Motor_Ball_Closed/);
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
+// the Valve Profile's Overlay (OakBarn Brewery, 2026-11-17: Valve Overlay "On Valve Profile", off Default settings)
+valves.seed = () => ({ imageOverlay: 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg' });
+valves.fillOverlay();
+assert.match(valves.get(v1.id).imageOverlay, /Overlay_Bolt_Flash/, 'a Valve Profile with no Overlay gets the old Default settings one');
+assert.equal(valves.save(v1.id, { ...valves.get(v1.id), imageOverlay: '' }).imageOverlay, 'none', 'no Overlay is None');
+assert.match(valves.create('Ball V').imageOverlay, /Overlay_Bolt_Flash/, 'a new Valve Profile starts with the seed Overlay');
 
-// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default, Right, no Cover, Hose, the Default settings Pump Overlay
+// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default, Right, no Cover, Hose, the Green Glow Ring Overlay
 const pumps = new ProfileStore(path.join(dir, 'pump'), 'pump');
 pumps.seed = () => ({ imageOverlay: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg' });
 const pd = pumps.ensureDefault();
@@ -84,7 +90,7 @@ assert.throws(() => pumps.save(pd.id, { ...pd, isDefault: false }), /stays the D
 assert.throws(() => pumps.remove(pd.id), /can not be deleted/);
 pumps.seed = () => ({ imageOverlay: 'tint:red' });
 const p2 = pumps.create('Left pump');
-assert.equal(p2.imageOverlay, 'tint:red', 'a new Pump Profile starts with the Default settings Pump Overlay'); assert.equal(p2.isDefault, undefined);
+assert.equal(p2.imageOverlay, 'tint:red', 'a new Pump Profile starts with the seed Overlay (the Default Pump Profile\'s)'); assert.equal(p2.isDefault, undefined);
 assert.equal(pumps.save(p2.id, { ...p2, imageOverlay: '' }).imageOverlay, 'none', 'no Overlay is None');
 pumps.save(p2.id, { ...p2, isDefault: true });
 assert.equal(pumps.marked().id, p2.id); pumps.remove(pd.id); assert.equal(pumps.own().length, 1, 'no longer the Default: it can go');

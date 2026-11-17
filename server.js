@@ -45,7 +45,7 @@ import { Schemas } from './lib/schemas.js';
 import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js';
 import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
-import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY } from './lib/profiles.js';
+import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY, DEFAULT_VALVE_OVERLAY } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
 import { newUserRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
@@ -192,9 +192,13 @@ const schemas = new Schemas(store, { engine, hw, profiles });
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
 // Tap Water (Rule 17.12): every Brain has one; a Recipe or the Default tab with no Water Profile picked uses it
 try { brewProfiles.water.ensureTap(store.config.brewDefaults?.units); } catch (e) { console.log('Tap Water profile: ' + e.message); }
-// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default; a new Pump Profile starts with the Default settings Pump Overlay
-brewProfiles.pump.seed = () => ({ imageOverlay: store.config.brewDefaults?.newPumpOverlay || DEFAULT_PUMP_OVERLAY });
+// the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default. A new Pump or Valve Profile starts with the Overlay of
+// the one marked Default (OakBarn Brewery, 2026-11-17: the Overlays moved off Default settings onto the profiles); the old Default
+// settings value is used only where no profile names one yet, so nothing changes for a Brain that set it
+brewProfiles.pump.seed = () => ({ imageOverlay: brewProfiles.pump.marked()?.imageOverlay || store.config.brewDefaults?.newPumpOverlay || DEFAULT_PUMP_OVERLAY });
+brewProfiles.valve.seed = () => ({ imageOverlay: brewProfiles.valve.marked()?.imageOverlay || store.config.brewDefaults?.newValveOverlay || DEFAULT_VALVE_OVERLAY });
 try { brewProfiles.pump.ensureDefault(); } catch (e) { console.log('Default Pump Profile: ' + e.message); }
+try { brewProfiles.valve.fillOverlay(); } catch (e) { console.log('Valve Profile Overlay: ' + e.message); }
 // the Default tab's Valve Profile box is gone (OakBarn Brewery, 2026-11-14: "So remove them from the Tab"): the one it named becomes the
 // Valve Profile marked Default, once, and the box's value goes
 if (store.config.brewDefaults?.valveProfile !== undefined) {

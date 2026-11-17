@@ -42,6 +42,7 @@ Ceux-ci changent les choses déjà faites et la façon dont tout le panel marche
 - **On startup** : le Zoom et le plein écran avec lesquels le panel démarre ([Zoom et plein écran](41-zoom-and-full-screen)).
 - **Rich Text Embedded Code** : **\L Rich Text Code Size (px)**.
 - **Hover Help** : **Hover Delay (ms)** ([L'aide au survol dans les boîtes de dialogue](147-hover-help)).
+- **Pulse buttons** : **Push Lockout (s)** : combien de temps un nouveau bouton poussoir Pulse attend avant qu'un autre appui compte, en secondes (0,1 à 60, 3 sauf si vous le changez). Chaque bouton change le sien dans ses Properties.
 - **Phones and tablets** : peuvent-ils modifier, et déplacer les choses ([Téléphones et tablettes](45-phones-and-tablets)).
 - **Grain weight label** et le label des points de densité ([L'onglet Recipe](99-recipe-tab)).
 - **Hop alerts** : minutes d'avertissement, alertes réunies, un son, les dire à voix haute, et la voix du navigateur.
