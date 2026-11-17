@@ -1,15 +1,15 @@
 # Skynet documents
 
 Every document Fritz has asked for, in one place. Tap a name to open it.
-The master copies live in the project folder (docs/); these are kept in step with them.
+These GitHub copies are the main copies (Rule 13.7). This repo is public: private notes (the Sandboxes, Summaries and unbuilt plans) go in the private [Skynet_Private](https://github.com/oakbarn/Skynet_Private) repo. The links to them below open that private repo (sign in to GitHub).
 
 | Document | What it holds |
 |---|---|
 | [Skynet Rules](Skynet_Rules.md) | Every Skynet Rule. Read before building anything. |
-| [Panel Updates Sandbox](../Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked until the Blichmann RipTide dialogs and Help are done (Rule 14.4). |
-| [Process Updates Sandbox](../Sandbox/Process_Updates/Process_Updates.md) | Brew Day step, sample Process and Process command ideas, parked until the Skynet Process setup starts (Rule 14.5). |
+| [Panel Updates Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked until the Blichmann RipTide dialogs and Help are done (Rule 14.4). |
+| [Process Updates Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Process_Updates/Process_Updates.md) | Brew Day step, sample Process and Process command ideas, parked until the Skynet Process setup starts (Rule 14.5). |
 | [Dialog Model Learning: Tab Settings](Dialog_Model_Learning/Tab_Settings.md) | The Tab Settings dialog before and after its update to the Blichmann RipTide Dialog 1 model, the reason for each change, and room for OakBarn Brewery's corrections. |
-| [Importer Sandbox](../Sandbox/Importer/Importer_Notes.md) | Notes for the BruControl Importer version only, kept for the Big Merge (Rule 11.3). |
+| [Importer Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Importer/Importer_Notes.md) | Notes for the BruControl Importer version only, kept for the Big Merge (Rule 11.3). |
 | [General Properties Dialog Format](General_Properties_Dialog_Format.png) | Fritz's drawing for the General Dialog Rules (Rule 18). |
 | [Universal Properties](Universal_Properties.md) | The Properties and Process attributes every Device, Widget and Semi-Device has (Rule 1.21). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
@@ -40,6 +40,6 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [High-pressure gas burner build](High_Pressure_Gas_Build.md) | **For Information Only.** A parts list and step-by-step build for flame safety on a high-pressure propane burner: the UL / CSA listed way (recommended) and a daisy chain some home brewers build, with leak and first-light tests (2026-11-14). |
 | [LED Test Board: parts list](LED_Test_Board_Parts.md) | Parts, wiring and pins for a plug-in Mega test board with LEDs (220 ohm) standing in for Pumps, Valves and other Devices (2026-11-12). |
 | [Daisy Chained Hardware for every Device](Device_Wiring_Hardware.md) | The parts each Device needs, from the board's pin out to the real pump, heater, valve, chiller, vessel part or probe, with a chain drawing for each, after OakBarn Brewery's Pump (On/Off) sheet (2026-11-17). |
-| [Summary 1](Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
-| [Summary 2](Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |
-| [Summary 3](Summary_3.md) | Full copy of the project memory on 2026-11-17, before it was trimmed: every standing rule, merged PR and open question up to then. For what is true now, use the Skynet Rules. |
+| [Summary 1](https://github.com/oakbarn/Skynet_Private/blob/main/Summaries/Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
+| [Summary 2](https://github.com/oakbarn/Skynet_Private/blob/main/Summaries/Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |
+| [Summary 3](https://github.com/oakbarn/Skynet_Private/blob/main/Summaries/Summary_3.md) | Full copy of the project memory on 2026-11-17, before it was trimmed: every standing rule, merged PR and open question up to then. For what is true now, use the Skynet Rules. |
