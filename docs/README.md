@@ -1,7 +1,7 @@
 # Skynet documents
 
 Every document Fritz has asked for, in one place. Tap a name to open it.
-These GitHub copies are the main copies (Rule 13.7). This repo is public: private notes go in the private repo.
+These GitHub copies are the main copies (Rule 13.7). This repo is public: private notes (the Sandboxes, Summaries and unbuilt plans) go in the private [Skynet_Private](https://github.com/oakbarn/Skynet_Private) repo; the Sandbox and Summary copies below stay until OakBarn Brewery says to remove them.
 
 | Document | What it holds |
 |---|---|
