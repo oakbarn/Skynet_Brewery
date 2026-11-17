@@ -142,7 +142,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   const pumps = [];
   for (let i = 1; i <= Math.max(0, Math.min(8, +a.pumps || 0)); i++)
     pumps.push(add({ place: { at: 'pumps', i: i - 1 }, type: 'digitalOut', subtype: 'pump', label: a.pumpLabels?.[i - 1] || (a.pumps > 1 ? ['Mash pump', 'Kettle pump'][i - 1] ?? `Pump ${i}` : 'Pump'), device: '', x: 60 + (i - 1) * 180, y: 600, w: 150, h: 150, ipIn: 'left', ipOut: 'right',
-      imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.svg', hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF', imageOverlay: 'Images/Skynet/On_Off/Overlay_Bolt.svg' }));
+      imageOff: 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg', cover: 'Red', hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF', imageOverlay: 'Images/Skynet/On_Off/Overlay_Bolt.svg' }));
   if (pumps.length) {
     const p1 = pumps[0].name, p2 = (pumps[1] ?? pumps[0]).name;
     if (roles.includes('Mash Tun') || roles.includes('All In One') || a.recirc !== 'none') fields.Mash_Pump = p1;

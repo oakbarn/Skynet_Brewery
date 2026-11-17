@@ -7,7 +7,7 @@ import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:z
 const dir = path.join(import.meta.dirname, '..', 'media', 'Images', 'Skynet');
 const files = [...fs.readdirSync(path.join(dir, 'Pumps')).filter(f => /_Rip_(On|Off)\.(svg|png)$/.test(f)).map(f => path.join(dir, 'Pumps', f)),
   ...fs.readdirSync(path.join(dir, 'Valves')).filter(f => /^Motorized_TC15_Ball_Valve_/.test(f)).map(f => path.join(dir, 'Valves', f))];
-assert.ok(files.length >= 20, 'found the pictures');
+assert.ok(files.length >= 2, 'found the pictures');      // the Riptide-style Pump_<color>_Rip pictures left the repo (copyright, 2026-11-17)
 const cyan = (r, g, b) => Math.abs(r - 153) + Math.abs(g - 217) + Math.abs(b - 234) < 30;
 
 // the top-left pixel's alpha of an 8-bit RGBA PNG (filter byte + first pixel of the first row)
