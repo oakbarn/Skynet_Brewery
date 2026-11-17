@@ -16,7 +16,7 @@ Choisissez une page pour aller en haut de celle-ci. Choisissez une partie **↳*
 - **Processes** : Find in all Processes, Recycle Bin (Processes supprimés), Color key.
 - **Variables** : chaque gGlobal.
 - **Log** : Download CSV, Show readings.
-- **Devices** : **Interfaces (boards)** (les cartes (PLC) et leurs Interface ID), Add Interface, OneWire probe index, OneWire probes seen.
+- **Devices** : **Interfaces (boards)** (les cartes (PLC) et leurs Interface ID), Add Interface (l'onglet 🔌 Interfaces), OneWire probe index, OneWire probes seen (l'onglet 🌡 OneWire Probes).
 - **Import** : BeerSmith recipe, BruControl Schema.
 - **Settings** : Start from a sample Schema, My account (mot de passe), Sign-in codes by email or text, Users, Password rules, Recovery code, Sending codes, Simulation, Panel settings, Beer money pop-up, Pictures (PNG / JPG to SVG), MQTT and voice.
 - **Schema.json** : Backups.

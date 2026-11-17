@@ -12269,7 +12269,8 @@ function renderDevices() {
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
     // a saved Interface's ID never changes, not even by an Admin (OakBarn Brewery, 2026-11-15, Rule 3.2)
-    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 4, disabled: true, title: 'Interface ID (Rule 3.2): it starts the suggested name of each Device on this Interface (MB_25_...). Once saved it never changes, not even by an Admin. To use another ID, make a new Interface.' });
+    // a Schema saved before IDs were kept shows the ID its Devices are named with (ifaceIdOf), not an empty box (OakBarn Brewery, 2026-11-17)
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id || ifaceIdOf(d.name), size: 6, maxlength: 4, readonly: true, title: 'Interface ID (Rule 3.2): it starts the suggested name of each Device on this Interface (MB_25_...). Once saved it never changes, not even by an Admin. To use another ID, make a new Interface.' });
     // board and connection rating (public/links.js): USB best; a heating Device on a WiFi link is flagged
     const boardSel = h('select', { disabled: !can('admin'), title: 'The board, for the connection rating', onchange: guard(async ev => {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, board: ev.target.value } : x) }); await load();
@@ -12287,13 +12288,30 @@ function renderDevices() {
         if (!(n >= LOST_LINK.min && n <= LOST_LINK.max)) { ev.target.value = lostLinkSec(cfg); throw new Error(`Lost Comm is ${LOST_LINK.min} to ${LOST_LINK.max} seconds`); }
         await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, lostLinkSec: n } : x) }); await load(); toast(`${d.name}: all outputs OFF after ${n} s without the Brain`);
       }) });
-    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.connection] || d.connection) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realConnection]})` : d.connection === 'simulator' && d.realConnection ? ` (for ${TYPES[d.realConnection]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
-      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
+    // Mode, Connection and Status (OakBarn Brewery, 2026-11-17, Devices page markup: "It seems type is a Mode than a connection";
+    // "Port / Host: What good even for a geek?"; "Info: Seems redundant"). Mode is Simulator or Real; Connection is the real link
+    // (USB, Ethernet, WiFi) with its USB Port or Network address in its Hover Help; the board's Info is in the Status Hover Help,
+    // and shown under the Status only when something is wrong.
+    const sim = d.simMode || d.connection === 'simulator', link = linkOf(cfg || d) || (sim ? d.realConnection : d.connection);
+    const where = d.host ? `Network address: ${d.host}:${d.port ?? 4100}` : d.port ? `USB Port: ${d.port}` : '';
+    const ok = d.status === 'connected', infoShown = d.info && d.info !== 'simulator' && !/^simulation mode/.test(d.info) && (!ok || /^ERR/.test(d.info));
+    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel),
+      h('td', { title: sim ? 'Simulator: the panel pretends to be this board; nothing goes to the real board' : 'Real: the panel talks to the real board' }, sim ? '🧪 Simulator' : '🔌 Real'),
+      h('td', { title: where || 'No USB Port or Network address yet: ⚙ Change to fill it in' }, TYPES[link] || link || ''), rateCell, h('td', {}, lostBox, ' s'),
+      h('td', { title: d.info || '' }, h('span', { style: `color:${ok ? 'var(--ok)' : 'var(--bad)'}` }, d.status), infoShown ? h('div', { class: 'muted' }, d.info) : '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
       h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its board, connection (USB, Ethernet or WiFi), USB Port or address and Board settings, and Test Communication', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
     tb.lastChild?.lastChild?.append(' ', h('button', { class: 'admin-only', title: 'Board Talk: every line to and from this board in plain words, and a box to send one (Rule 6.27)', onclick: () => boardTalk(d.name) }, '💬 Board Talk'));
   }
   renderProbes();
 }
+
+// ---- the Tabs on a page (OakBarn Brewery, 2026-11-17: "One wire gets own Tab"): Devices > 🔌 Interfaces and 🌡 OneWire Probes
+function showPane(id) {
+  const pane = document.getElementById(id); if (!pane) return;
+  for (const p of pane.parentElement.querySelectorAll(':scope > .pagePane')) p.classList.toggle('hidden', p !== pane);
+  for (const b of pane.parentElement.querySelectorAll(':scope > .pageTabs .pageTab')) { b.classList.toggle('on', b.dataset.pane === id); b.setAttribute('aria-selected', String(b.dataset.pane === id)); }
+}
+for (const b of document.querySelectorAll('.pageTab')) b.onclick = () => showPane(b.dataset.pane);
 
 // ---- OneWire probe index: numbered slots; elements use the number, the slot holds the probe's ROM id
 const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t }); return m; };
@@ -13949,6 +13967,7 @@ function pageParts(v) {
   });
 }
 function showPart(el) {
+  const pane = el.closest?.('.pagePane'); if (pane) showPane(pane.id);      // a part on a page Tab (Devices > OneWire Probes) opens its Tab first
   requestAnimationFrame(() => {
     el.scrollIntoView({ block: 'start', behavior: 'smooth' });
     el.classList.remove('menuFlash'); void el.offsetWidth; el.classList.add('menuFlash');

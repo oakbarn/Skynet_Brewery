@@ -7,7 +7,7 @@ An admin turns it on with the **🔌 Real / 🧪 Simulator** button beside ☰ M
 ## What happens when you turn it on
 
 - Every Process stops and every output turns off, so nothing that was running keeps running on the real boards.
-- The real boards are let go. Each one is replaced by the simulator, so the **Devices** page shows them as *Simulator (simulation mode)*.
+- The real boards are let go. Each one is replaced by the simulator, so the **Devices** page shows their **Mode** as *🧪 Simulator*.
 - A yellow striped **SIMULATION** bar shows under the menu on every phone and computer, so nobody mistakes it for a real brew.
 - Inputs from the boards (temperatures, flow, pH and so on) come from the simulator. You can also type a value into an input by tapping it, for example a pH reading.
 - Values written to the Log while it is on are marked **sim** in the Trigger column, so they are easy to tell apart from real brews.
