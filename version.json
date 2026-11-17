@@ -1,8 +1,8 @@
 {
-  "version": "PR443_Skynet-v.20261116_22_56",
-  "merged": "2026-11-16T22:56:54Z",
+  "version": "PR444_Skynet-v.20261117_00_20",
+  "merged": "2026-11-17T00:20:07Z",
   "owner": "oakbarn",
-  "commit": "fe9bb25e038a7e8d8103fc6e6a312f2485937697",
+  "commit": "18666f8d49b36fa9586e777e525f3746480b3fcf",
   "repo": "oakbarn/Skynet_Brewery",
   "branch": "claude/project-thread-vzxi0a"
 }
