@@ -1299,6 +1299,12 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['March 815-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_Center_Inlet.svg'],
   ['Chugger CPSS-IN (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet.svg'],
   ['Chugger CPSS-CI (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_Center_Inlet.svg'],
+  ['March 809-PL with motor (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet_Motor.svg'],
+  ['March 809-SS with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_SS_90_Inlet_Motor.svg'],
+  ['March 815-PL with motor (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_90_Inlet_Motor.svg'],
+  ['March 815-SS with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_90_Inlet_Motor.svg'],
+  ['Chugger CPSS-IN with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet_Motor.svg'],
+  ['Chugger CPPS-IN with motor (plastic in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_Poly_90_Inlet_Motor.svg'],
   ['Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet)', 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'],
   ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
   ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
@@ -2100,7 +2106,9 @@ function pumpLinkSvg(e) {
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
   'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
   'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
-  'Pump_KegLand_MKII_SS_Center_Inlet'].map(k => [k, PUMP_STD]));
+  'Pump_KegLand_MKII_SS_Center_Inlet',
+  // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned 60°
+  ...['March_809_Poly', 'March_809_SS', 'March_815_Poly', 'March_815_SS', 'Chugger_SS', 'Chugger_Poly'].map(k => `Pump_${k}_90_Inlet_Motor`)].map(k => [k, PUMP_STD]));
 // The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
 // the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
 // pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
@@ -2130,14 +2138,18 @@ function coverOf(e, v) {
 }
 // Add Pump step 2 (Fritz's drawing, 2026-11-04): pick the pump. Each row has its picture; the pick is the Pump's Picture
 // (one of the Skynet brew pump drawings above, Help 104) and the Add box's title.
-const PUMP_MODELS = [['March 809: poly 90° inlet', 'Pump_March_809_Poly_90_Inlet'], ['March 809: poly center inlet', 'Pump_March_809_Poly_Center_Inlet'],
-  ['March 809: stainless center inlet', 'Pump_March_809_SS_Center_Inlet'], ['March 815: poly 90° inlet', 'Pump_March_815_Poly_90_Inlet'],
+// The 90° inlet rows use the drawings with the motor body (OakBarn Brewery, 2026-11-17); the older head-only drawings stay in the
+// picture lists so pumps already built keep their picture (media is add-only, Rule 9.12).
+const PUMP_MODELS = [['March 809: poly 90° inlet', 'Pump_March_809_Poly_90_Inlet_Motor'], ['March 809: stainless 90° inlet', 'Pump_March_809_SS_90_Inlet_Motor'],
+  ['March 809: poly center inlet', 'Pump_March_809_Poly_Center_Inlet'], ['March 809: stainless center inlet', 'Pump_March_809_SS_Center_Inlet'],
+  ['March 815: poly 90° inlet', 'Pump_March_815_Poly_90_Inlet_Motor'], ['March 815: stainless 90° inlet', 'Pump_March_815_SS_90_Inlet_Motor'],
   ['March 815: poly center inlet', 'Pump_March_815_Poly_Center_Inlet'], ['March 815: stainless center inlet', 'Pump_March_815_SS_Center_Inlet'],
-  ['Chugger: 90° inlet (CPSS-IN)', 'Pump_Chugger_SS_90_Inlet'], ['Chugger: center inlet (CPSS-CI)', 'Pump_Chugger_SS_Center_Inlet'],
+  ['Chugger: 90° inlet (CPSS-IN)', 'Pump_Chugger_SS_90_Inlet_Motor'], ['Chugger: plastic 90° inlet (CPPS-IN)', 'Pump_Chugger_Poly_90_Inlet_Motor'],
+  ['Chugger: center inlet (CPSS-CI)', 'Pump_Chugger_SS_Center_Inlet'],
   ['Blichmann Riptide', 'Pump_Riptide_SS_Center_Inlet'], ['Topsflo TD5', 'Pump_Topsflo_TD5_Poly_Center_Inlet'],
   ['KegLand MKII: poly head', 'Pump_KegLand_MKII_Poly_Center_Inlet'], ['KegLand MKII: stainless head', 'Pump_KegLand_MKII_SS_Center_Inlet']];
 const pumpPic = k => `Images/Skynet/Pumps/${k}.svg`;
-const pumpModelOf = e => PUMP_MODELS.find(([, k]) => k === coverPump(e?.imageOff))?.[0] || null;
+const pumpModelOf = e => { const c = coverPump(e?.imageOff); return PUMP_MODELS.find(([, k]) => k === c || k === c + '_Motor')?.[0] || null; };      // a head-only 90° drawing names the same pump
 function pickPump() { return pickModel('2. Pick the pump', PUMP_MODELS.map(([t, k]) => [t, k, pumpPic(k)])); }
 // Add Motorized Ball Valve step 2 (Fritz, 2026-11-05: "Create a Motorized Ball Valve Add Dialog using the Pump Drill Down Format.
 // Valves do not have covers but every thing else the same."): pick the valve, each row with its picture, as for a pump.
@@ -3994,7 +4006,7 @@ function syncPipeEnds(p) {
   if (p.straight && pts.length === 2) return syncStraight(p);
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
   // a Process connected this Quick Disconnect hose (Hose_1.connect = QD_1, Rule 5.34): it hangs the same as one dragged there by hand
-  if (isQdHose(p) && p.qdAuto) { p.points = hoseSag(a || pts[0], b || pts[n - 1]); return; }
+  if (isQdHose(p) && p.qdAuto) { p.points = hoseSag(a || pts[0], b || pts[n - 1], null, ipFacing(p.to, p.workspace, p)); return; }
   if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
   if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
 }
@@ -15385,18 +15397,50 @@ function qdTarget(p, c, end = 'to') {
 // a moved hose hangs from its fixed end to its free end. It leaves its fixed end the way it did before (lead), then hangs in a curve
 // through several bend points, so it flexes as the end is dragged (OakBarn Brewery, 2026-11-14: "When moving a QD Hose, add some bend
 // points to make the Hose Movement dynamic"): the farther the end, the more it sags; pulled up close, it loops lower under its ends.
-function hoseSag(a, b, lead) {
+// It also goes into the IP it lands on the way that opening faces (OakBarn Brewery, 2026-11-17: "when connecting now it like a
+// straight line with no bends. A real hose has a U at the end to revese"): it hangs to a spot just out in front of the opening, then
+// turns into it, so on a pipe end that faces down it droops below it and makes a U up into it. into = the way the opening faces.
+// A hose that would hang almost straight up and down bows out to the side, as a real hose does.
+function hoseSag(a, b, lead, into) {
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]), r = v => Math.round(v);
   const ll = lead && Math.hypot(lead[0], lead[1]), out = Math.min(60, Math.max(14, len * 0.18));
   const s = ll ? [a[0] + lead[0] / ll * out, a[1] + lead[1] / ll * out] : [...a];
-  const sag = Math.min(110, 18 + len * 0.22), n = 6, pts = [[r(a[0]), r(a[1])]];
+  const il = into && Math.hypot(into[0], into[1]), tail = Math.min(70, Math.max(24, len * 0.16));
+  const e = il ? [b[0] + into[0] / il * tail, b[1] + into[1] / il * tail] : [...b];
+  const dx = e[0] - s[0], dy = e[1] - s[1], span = Math.hypot(dx, dy) || 1;
+  const sag = Math.min(110, 18 + len * 0.22), n = 8, pts = [[r(a[0]), r(a[1])]];
+  // up and down: hanging straight down gives no curve, so it bows out sideways instead (to the side the hose leaves from, or right)
+  const steep = Math.abs(dx) / span < 0.35, side = (into && into.side) || Math.sign((lead && lead[0]) || (into && -into[0]) || 1) || 1;
+  const bow = steep ? Math.min(90, 16 + span * 0.14) * side : 0;
   if (ll) pts.push([r(s[0]), r(s[1])]);
   for (let i = 1; i < n; i++) {
-    const t = i / n, x = s[0] + (b[0] - s[0]) * t, y = s[1] + (b[1] - s[1]) * t + sag * 4 * t * (1 - t);
+    const t = i / n, w = 4 * t * (1 - t), x = s[0] + dx * t + bow * w, y = s[1] + dy * t + (steep ? 0 : sag * w);
     pts.push([r(x), r(y)]);
   }
+  if (il) {      // a rounded U: it swings round from the side it bows to, below (in front of) the opening, then up (in) to it
+    const vert = Math.abs(into[1]) >= Math.abs(into[0]), pre = vert ? [e[0] + side * tail * 0.55, e[1] - into[1] / il * tail * 0.1] : [e[0] - into[0] / il * tail * 0.1, e[1] + tail * 0.55];
+    pts.push([r(pre[0]), r(pre[1])]);
+    pts.push([r(e[0]), r(e[1])]); pts.push([r(b[0] + (e[0] - b[0]) * 0.45), r(b[1] + (e[1] - b[1]) * 0.45)]); }   // the U: out in front of the opening, then straight in
   pts.push([r(b[0]), r(b[1])]);
   return pts.filter((q, i) => !i || q[0] !== pts[i - 1][0] || q[1] !== pts[i - 1][1]);
+}
+// the way an opening faces, for a hose going into it: the open end of a pipe faces out along that pipe; a vessel top faces up.
+// Other IPs (a valve, a pump, a Quick Disconnect) give none, and the hose hangs straight to them as before.
+function ipFacing(id, ws, hose) {
+  if (!id) return null;
+  if (vtopOf(id) !== null) return [0, -1];
+  const g = L().graphics.find(x => x.id === id && x.kind === 'ip' && x.workspace === ws);
+  if (!g || g.attachTo || g.port || isQd(g)) return null;
+  const pipe = pipesOn(id, ws).find(o => o !== hose && o.id !== hose?.id && !o.hose && (o.points || []).length > 1);
+  if (!pipe) return null;
+  const pts = pipe.points, atTo = pipe.to === id, q = atTo ? pts[pts.length - 1] : pts[0], nb = atTo ? pts[pts.length - 2] : pts[1];
+  const v = [q[0] - nb[0], q[1] - nb[1]]; if (!Math.hypot(v[0], v[1])) return null;
+  // the hose bows away from the side the pipe comes from (through one fitting, as an elbow, if this piece runs straight up and down)
+  let far = atTo ? pts[0] : pts[pts.length - 1], away = Math.sign(q[0] - far[0]);
+  if (!away) { const fid = atTo ? pipe.from : pipe.to, next = fid && pipesOn(fid, ws).find(o => o !== pipe && o !== hose && (o.points || []).length > 1);
+    if (next) { far = next.from === fid ? next.points[next.points.length - 1] : next.points[0]; away = Math.sign(q[0] - far[0]); } }
+  if (away) v.side = away;
+  return v;
 }
 const hoseLead = pts => pts?.length > 1 ? [pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]] : null;
 const qdWhere = (id, ws) => { const vt = vtopOf(id); if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return `in the top of ${v?.name || v?.label || 'the vessel'}`; }
@@ -15421,7 +15465,7 @@ window.addEventListener('pointermove', ev => {
   qdDrag.moved = true;
   const c = canvasPt(ev), d = qdDrag, t = qdTarget(d.p, c, d.end), from = d.end === 'to' ? d.pts[0] : d.pts[d.pts.length - 1];
   d.target = t; d.p[d.end] = null;
-  const pts = hoseSag(from, t ? t.c : c, d.lead); d.p.points = d.end === 'to' ? pts : pts.reverse();
+  const pts = hoseSag(from, t ? t.c : c, d.lead, t && ipFacing(t.id, d.p.workspace, d.p)); d.p.points = d.end === 'to' ? pts : pts.reverse();
   renderPipes();
 });
 // Before a hose end is unhooked (OakBarn Brewery, 2026-11-16: "Right Click and hold the Yellow circle is all it should take to move it.

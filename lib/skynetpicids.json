@@ -208,6 +208,24 @@
   { "id": 205, "file": "Miscellaneous/Skynet_Icon_PID.svg" },
   { "id": 206, "file": "Miscellaneous/Skynet_Icon_Pump.svg" },
   { "id": 207, "file": "Miscellaneous/Skynet_Icon_PWM.svg" },
-  { "id": 208, "file": "Miscellaneous/Skynet_Icon_Valve.svg" }
+  { "id": 208, "file": "Miscellaneous/Skynet_Icon_Valve.svg" },
+  { "id": 209, "file": "Pumps/Covers/Pump_Chugger_Poly_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 210, "file": "Pumps/Covers/Pump_Chugger_Poly_90_Inlet_Motor_Cover.svg" },
+  { "id": 211, "file": "Pumps/Covers/Pump_Chugger_SS_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 212, "file": "Pumps/Covers/Pump_Chugger_SS_90_Inlet_Motor_Cover.svg" },
+  { "id": 213, "file": "Pumps/Covers/Pump_March_809_Poly_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 214, "file": "Pumps/Covers/Pump_March_809_Poly_90_Inlet_Motor_Cover.svg" },
+  { "id": 215, "file": "Pumps/Covers/Pump_March_809_SS_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 216, "file": "Pumps/Covers/Pump_March_809_SS_90_Inlet_Motor_Cover.svg" },
+  { "id": 217, "file": "Pumps/Covers/Pump_March_815_Poly_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 218, "file": "Pumps/Covers/Pump_March_815_Poly_90_Inlet_Motor_Cover.svg" },
+  { "id": 219, "file": "Pumps/Covers/Pump_March_815_SS_90_Inlet_Motor_Cover_Shape.svg" },
+  { "id": 220, "file": "Pumps/Covers/Pump_March_815_SS_90_Inlet_Motor_Cover.svg" },
+  { "id": 221, "file": "Pumps/Pump_Chugger_Poly_90_Inlet_Motor.svg" },
+  { "id": 222, "file": "Pumps/Pump_Chugger_SS_90_Inlet_Motor.svg" },
+  { "id": 223, "file": "Pumps/Pump_March_809_Poly_90_Inlet_Motor.svg" },
+  { "id": 224, "file": "Pumps/Pump_March_809_SS_90_Inlet_Motor.svg" },
+  { "id": 225, "file": "Pumps/Pump_March_815_Poly_90_Inlet_Motor.svg" },
+  { "id": 226, "file": "Pumps/Pump_March_815_SS_90_Inlet_Motor.svg" }
  ]
 }
