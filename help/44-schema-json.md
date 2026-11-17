@@ -44,6 +44,8 @@ The Schema list has the same two things, so you don't need the Schema.json page 
 
 Pictures and sounds are not inside the file, only their names. If the other brewer used pictures you don't have, those show as missing until you add them.
 
+**Share with other brewers** on the 🗂 Schema tab says which kinds of files to send: the Schema file (.json), your own pictures and sounds, and the Processes (.txt). It lists the pictures and sounds of your own that the loaded Schema uses (not Skynet's, which come with every Skynet): click one to save it on this computer, then send it with the file. **Skynet never sends a file for you**, as it may hold copyrighted material. Both brewers should be on the latest version of Skynet. Every step: [Step by Step: Share a Schema with another brewer](203-step-by-step-share-a-schema-with-another-brewer).
+
 ## What is in the file
 
 - The Schema's Tabs, Devices, Widgets, pictures, text, pipes and hoses, probes and the Processes it starts by itself (autostart list).

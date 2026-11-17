@@ -44,6 +44,8 @@ La liste Schema a les deux mêmes choses, donc vous n'avez pas besoin de la page
 
 Les images et les sons ne sont pas dans le fichier, seulement leurs noms. Si l'autre brasseur a utilisé des images que vous n'avez pas, elles s'affichent comme manquantes jusqu'à ce que vous les ajoutiez.
 
+**Share with other brewers** sur l'onglet 🗂 Schema dit quels genres de fichiers envoyer : le fichier du Schema (.json), vos propres images et sons, et les Processes (.txt). Il liste les images et sons à vous que le Schema chargé utilise (pas ceux de Skynet, qui viennent avec chaque Skynet) : cliquez sur l'un pour l'enregistrer sur cet ordinateur, puis envoyez-le avec le fichier. **Skynet n'envoie jamais un fichier pour vous**, car il peut contenir des éléments protégés par le droit d'auteur. Les deux brasseurs devraient avoir la dernière version de Skynet. Chaque étape : [Pas à pas : partager un Schema avec un autre brasseur](203-step-by-step-share-a-schema-with-another-brewer).
+
 ## Ce qu'il y a dans le fichier {#what-is-in-the-file}
 
 - Les Tabs, Devices, Widgets, images, textes, tuyaux rigides et souples, sondes du Schema et les Processes qu'il lance tout seul (liste autostart).
