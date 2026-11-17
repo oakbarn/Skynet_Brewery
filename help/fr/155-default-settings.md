@@ -148,7 +148,7 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 
 Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est maintenant dans **Settings > Panel settings** (voir plus bas). Ce qui était réglé ici est gardé.
 
-Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir **Skynet Defaults for New User Created Items** plus bas. Le **Lost Comm** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
+Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles (par exemple les Pump et Valve Standards, et les raccords qui prennent la taille de leurs tuyaux). Le **Lost Comm** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
 
 ## Déplacé dans Settings {#moved-to-settings}
 
@@ -198,17 +198,5 @@ Les cases :
 Posez la souris sur une case (ou appuyez sur son nom) pour voir ce qu'elle fait pour la bière.
 
 Le côté technique : Tap Water est un Water Profile (☰ Menu > Water Profile le liste) créé quand le Brain démarre pour la première fois et jamais supprimé. Une recette ou les Default settings sans Water Profile choisi l'utilisent. Bicarbonate = Alcalinité (en CaCO3) x 1,22. Dureté (en CaCO3) = 2,497 x Calcium + 4,118 x Magnésium. Un Process le lit avec les Skynet_Fields `rcp_Water_...` (aide 99).
-
-## Skynet Defaults for New User Created Items {#skynet-defaults-for-new-user-created-items}
-
-Ces réglages par défaut sont fixés et ne peuvent pas être changés, mais peuvent être changés dans un nouveau Template de l'utilisateur.
-
-- **Pump size** (taille de pompe) : le Pump Standard, 150 x 150 pour un tuyau de 1/2", puis la taille de ses tuyaux.
-- **Valve size** (taille de vanne) : le Valve Standard, 150 x 150 pour un tuyau de 1/2", puis la taille de ses tuyaux.
-- **Pipe fittings** (raccords) : prennent toujours la taille de leurs tuyaux.
-- **Pump cover color** (couleur du couvercle de pompe) : None.
-- **Flow color** (In et Out) : Blue.
-- **Skynet Dial** : plage Cooler et Hotter 2 ; Cold, OK, Hot = Blue, Green, Red.
-- **Alarm Set Graphic (Layer 2)** : None.
 
 Les titres des parties de ce Tab ont un fond bleu, pour trouver chaque partie facilement. Le titre et **Save** restent en haut pendant que le reste défile (Règle Skynet 2.51).

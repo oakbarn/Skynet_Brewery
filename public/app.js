@@ -2657,8 +2657,9 @@ function styleEl(n, e) {
   let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else nm.style.textAlign = (nal || 'Center').toLowerCase();      // Centered when nothing is set (Label Attributes)
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
   else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
-  // Word wrap on: a long name goes onto more lines (off: one line, cut off with ...). Values always wrap.
-  if (e.wrap) nm.style.whiteSpace = 'normal';
+  // Word wrap is always on (OakBarn Brewery, 2026-11-17: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap";
+  // "Rich Text takes care of new line"): a long name goes onto more lines. Readings keep Rule 2.56 (one line, smaller to fit).
+  nm.style.whiteSpace = 'normal';
   if (e.border === 'hidden') n.classList.add('no-border');
   if (e.border === 'visible') n.classList.add('show-border');
 }
@@ -5287,7 +5288,6 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (['pump', 'valve', 'propValve'].includes(pick)) e.imageOverlay = newOverlay(pick === 'pump' ? 'pump' : 'valve');      // the Default Pump or Valve Profile (Rule 2.42)
   if (e.type === 'digitalIn' && e.mode === 'momentary') e.lockout = newLockout();      // a new Pulse button: Push Lockout in Settings > Panel settings
   if (!D.visible) e.visibility = 'hidden';
-  if (D.wrap) e.wrap = true;
   if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'valueWidget' || type === 'codeValueWidget') e.precision = 2; if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -7755,7 +7755,6 @@ const F = {
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab)', 'text', null, false, false, { tip: 'Empty: itself.' }], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
-    ['wrap', 'Word wrap as needed (a long name goes onto more lines; off = one line, cut off with ...)', 'bool'],
     ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }],
     ['nameColor', 'Name color (over Fore color)', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color (over Fore color)', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font, more (JSON, e.g. {"bold":true,"italic":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
@@ -8147,7 +8146,7 @@ const LOOKS = ['normal', 'led', 'lcd', 'dark', 'button', 'indicator', ['dial', '
 const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
   ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
   ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
-  ['wrap', 'Word wrap as needed', 'bool'], ['look', 'Look', 'sel', LOOKS, false, false, { tip: DIAL_TIP.look }], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
+  ['look', 'Look', 'sel', LOOKS, false, false, { tip: DIAL_TIP.look }], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
 const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab)', 'text', null, false, false, { tip: 'Empty: itself.' }], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
@@ -8962,7 +8961,7 @@ const builtInHost = e => { const g = (draft || S.config).graphics.find(x => x.id
 // what the Pump's drill-down shows elsewhere or drops (it is in the ⬢ pop-ups): not part of a Device's own set
 const GEN_SHOWN = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', 'w', 'h', 'locked', 'visibility', 'hidden', 'device', 'channel', 'probeIndex',
   'imageOff', 'imageOn', 'imageOverlay', 'typeCode', 'background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3', 'look', 'digits', 'fontSize', 'tap',
-  'tapTarget', 'confirm', 'foreColor', 'backColor', 'align', 'wrap', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'nameFont', 'nameAlign', 'nameBold',
+  'tapTarget', 'confirm', 'foreColor', 'backColor', 'align', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'nameFont', 'nameAlign', 'nameBold',
   'valueColor', 'valueBg', 'valueFont', 'valueAlign', 'border', 'hideValue', '_tb', '_ovn', '_hint', '_sug']);
 const GEN_TEXT_POP = { title: 'Text attributes (its Value or On / Off text)', fields: [...DEV_TEXT_POP.fields, ...DIAL_FIELDS] };
 function genDeviceFields(it, item, f) {
@@ -13470,7 +13469,7 @@ const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
-  { key: 'default', title: 'Default settings', tip: 'What a new thing starts with: the Default pipe size, new Tabs, new Recipes, Labels and Text Boxes, new User Templates and Schemas, and the Skynet Defaults for New User Created Items', render: renderDefaultTab },
+  { key: 'default', title: 'Default settings', tip: 'What a new thing starts with: the Default pipe size, new Tabs, new Recipes, Labels and Text Boxes, and the Look of a New Schema', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
   { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils, trub filters and RIMS tubes (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
@@ -13982,20 +13981,8 @@ const DEF_TIPS = {
 DEF_TIPS.ipTicks = 'Tick the IP Types you use (Tri-Clamp, pipe thread FPT female and MPT male, BSP, metric DN, Quick Disconnect QD, Camlock CAM, 1/8" to 6"). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in this Schema. None are ticked to start.';
 const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}`]);      // one line, no "(Skynet default)" (Default Tab 3)
 // the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
-function otherDefaults() {
-  // Skynet Defaults for New User Created Items (OakBarn Brewery, 2026-11-14: "These defaults are set and cannot be changed, but can
-  // be Changed in a New User Template"). What changes things already made (the Look, Pulse, Setup's users) is not listed here at
-  // all: it is a Setting ("No need to even mention on Default Tab"). Choices in docs/Default_Settings_Other_Places.md.
-  return [
-    ['Pump size', 'Pump Standard: 150 x 150 for a 1/2" pipe, then the size of its pipes', 'Rule 5.27'],
-    ['Valve size', 'Valve Standard: 150 x 150 for a 1/2" pipe, then the size of its pipes', 'Rule 5.29'],
-    ['Pipe fittings', 'Always size to their pipes', 'Rules 5.14, 5.36'],
-    ['Pump cover color', 'None', 'Rule 7.13'],
-    ['Flow color (In and Out)', 'Blue', 'Rule 5.21'],
-    ['Skynet Dial', 'Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red', 'Rule 2.40'],
-    ['Alarm Set Graphic (Layer 2)', 'None', 'Rule 7.12'],
-  ];
-}
+// Skynet Defaults for New User Created Items: the list is gone from Default settings (OakBarn Brewery, 2026-11-17: "Get rid of Skynet
+// Defaults for New items TMI"); those values still come from their Rules (5.14, 5.21, 5.27, 5.29, 5.36, 7.12, 7.13, 2.40)
 // The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
 // defaulted to True / Fill with US or Metric after answer from user in New Setup"; "not user editable ... Locked True")
 const grainWtLabel = units => units === 'Metric' ? 'Kg' : 'Pounds';
@@ -14031,8 +14018,7 @@ const TBX_TIPS = {
   font: 'The font of Text Boxes. Tab\'s font: each Tab uses its Tab Style\'s font, and the panel\'s normal font when its Tab Style has none.',
   size: 'The size of the letters of a new Text, in pixels.',
   width: 'How wide a new Text or Label Widget is, in pixels.',
-  height: 'How tall a new Text or Label Widget is, in pixels.',
-  wrap: 'On: long words go on to the next line inside the box.' };
+  height: 'How tall a new Text or Label Widget is, in pixels.' };
 const RTC_SIZE_TIP = `The size, in pixels, of large text: the \\L code in Process text. Bigger than normal text (${TEXT_NORMAL} px). See Help: Text boxes.`;
 // the Font list of Labels and Text Boxes: empty = the Tab's font (OakBarn Brewery, 2026-11-14: "Should this be Tab's Default Font?" Yes)
 const TAB_FONT_PICK = FONTS.map(([v, t]) => [v, v ? t : 'Tab\'s font']);
@@ -14045,7 +14031,7 @@ const HOVER_DELAY_TIP = 'How long the mouse must rest on a name before its Hover
 // what a fresh install starts with, as the Default tab's boxes (public/textbox.js)
 const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align,
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
-  textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
+  textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height });
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
     newSchemaLook: 'officeBlack', ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
@@ -14096,7 +14082,6 @@ function renderDefaultTab(box) {
     ['textFontSize', 'Font Size (px)', 'num', null, false, false, { tip: TBX_TIPS.size }],
     ['textWidth', 'New Box Width', 'num', null, false, false, { tip: TBX_TIPS.width }],
     ['textHeight', 'New Box Height', 'num', null, false, false, { tip: TBX_TIPS.height }],
-    ['textWrap', 'Word Wrap', 'bool', null, false, false, { tip: TBX_TIPS.wrap }],
     ['_nw', 'New User Templates and Schemas', 'head'],
     // Pump Overlay, Valve Overlay and Push Lockout moved (OakBarn Brewery, 2026-11-17: "On Pump Profile", "On Valve Profile",
     // "Skynet Panel Setting"): ☰ Menu > Pump Profile and Valve Profile (Overlay), Settings > Panel settings (Push Lockout)
@@ -14114,7 +14099,8 @@ function renderDefaultTab(box) {
     // what changes things already made is saved in Settings > Panel settings (Rule 2.42): keep what is saved there
     for (const k of PANEL_SET_KEYS) if (S.config.brewDefaults && k in S.config.brewDefaults) d[k] = S.config.brewDefaults[k]; else delete d[k];
     for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];
-    for (const k of Object.keys(d)) if (k.startsWith('ns_')) delete d[k];      // the New Schema answers left Default settings (2026-11-17)
+    for (const k of Object.keys(d)) if (k.startsWith('ns_')) delete d[k];
+    delete d.textWrap;      // Word wrap is always on (2026-11-17)      // the New Schema answers left Default settings (2026-11-17)
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
@@ -14135,12 +14121,9 @@ function renderDefaultTab(box) {
     profDirty.default = false; renderWs(); renderMenuPane(); savedPop('Defaults saved'); });
   const state = h('span', { class: 'muted' }, profDirty.default ? 'Not saved yet' : 'Saved');
   const saveBtn = () => admin ? dlgBtns(h('button', { class: 'primary', onclick: save }, 'Save'), undoBtn(() => profDirty.default, () => { profDirty.default = false; renderMenuPane(); })) : dlgBtns();
-  const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Skynet Default'), h('th', {}, 'Rule'))),
-    h('tbody', {}, ...otherDefaults().map(([what, now, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, rule)))));
   // Freeze (Default Tab 3, Rule 2.51): the title and Save stay at the top while the rest scrolls; no Save further down
   box.append(h('div', { class: 'defTab' }, h('div', { class: 'defFreeze' }, saveBtn(), h('h3', {}, 'Default settings'), admin ? state : ''), h('div', { class: 'menuNarrow' }, f.box),
-    ...tap.nodes,
-    h('h3', {}, 'Skynet Defaults for New User Created Items'), h('p', { class: 'muted' }, 'These defaults are set and cannot be changed, but can be Changed in a New User Template.'), others));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
+    ...tap.nodes));      // .defTab: section titles highlighted (OakBarn Brewery, 2026-11-14)
   // any change below the frozen top is 'Not saved yet' until Save (so Close asks first, and Undo has something to go back from)
   if (admin) { const tab = box.lastChild, mark = e => { if (e.target.closest('.defFreeze')) return; profDirty.default = true; state.textContent = 'Not saved yet'; }; tab.addEventListener('input', mark); tab.addEventListener('change', mark); }
 }
@@ -16140,6 +16123,8 @@ function renderBrewProfileTab(kind) {
     const f = paneForm(profFields(kind), w, () => { profDirty[kind] = true; state.textContent = 'Not saved yet'; }, !edit);
     const save = guard(async () => {
       f.read();
+      // a Tab Profile: the screen's own size (and 10 and 6) is not saved, so a new Tab keeps matching the screen it is made on
+      if (kind === 'tab') { const sc = screenTab(); for (const [k, v] of [['newTabWidth', sc.w], ['newTabHeight', sc.h], ['newTabPipe', 10], ['newTabHose', HOSE_PX]]) if (+w[k] === v) w[k] = ''; }
       const r = await api('PUT', `/ui/profiles/${kind}/${w.id}`, kind === 'mash' ? fieldsToSteps(w) : w);
       S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.saved)); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
     });

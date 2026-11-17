@@ -626,7 +626,7 @@ title "... Widget Properties" with the yellow Help ?; Delete, **COPY**, Cancel, 
 bottom too); Name with its default name and an explanation ending in an **orange ?**; the settings in framed boxes (a Label
 box, a Properties box). The **orange ?** is not Help: it opens a pop-up with that kind's **Properties** and **Attributes**,
 with Close at the top and the bottom. **COPY** saves, then makes a copy with the next default name on the Build Tab (Rule
-4.1). A Text Widget's word wrap is always on. (thread "Redesign the Text Widget dialog", Help 91)
+4.1). A Text Widget's word wrap is always on; since 2026-11-17 every Text Box and Label wraps too, with no switch (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"). A reading keeps Rule 2.56. (thread "Redesign the Text Widget dialog", Help 91)
 
 2.23 **Image block** (Fritz, 2026-10-29): every dialog with background pictures shows **Background #** (1, 2 or 3 picks Image
 Path 1-3, which a Process calls .backpath, .backpath_2, .backpath_3; 0, blank or any other number = no picture, Rule 7.10), **Back Colour** (a color behind the picture), and **Image Path 1, 2, 3**, each with
@@ -871,10 +871,9 @@ Help 155).
   a new Tab (empty = 10; each Tab still changes it in Tab settings, Rule 5.11).
 - Then the defaults it already had: new Recipes, how amounts show, hop alerts, new Tabs and valves, Menu Bar, Sound, On startup,
   Text, Phones and tablets.
-- **Defaults set somewhere else (to look at)**: a list of the defaults that are changed in another place (the Look, a new Tab's
-  colors, the Pump and Valve Standards, the On overlay, flow colors, the Skynet Dial, button times, the Simulator, Setup, the BruControl
-  Import ...), each with its value now, where it is changed and its Rule. Nothing is changed in this list. **Whenever a new default
-  is added anywhere, it is added here too**, as a setting or to this list.
+- *Replaced 2026-11-17 (OakBarn Brewery: "Get rid of Skynet Defaults for New items TMI"):* the list of defaults set somewhere else
+  (Skynet Defaults for New User Created Items) is gone from the tab; those values come from their own Rules. A new default that can be
+  changed is still added here as a setting.
 - Then the **Order of the Menu**, as before.
 - **Taken off (2026-11-17, OakBarn Brewery: "New Schema from Skynet section not needed"):** New Schema from a Skynet Template (Rule 16.6).
 - **Moved off (2026-11-17, OakBarn Brewery):** the **Pump Overlay** is on each Pump Profile, the **Valve Overlay** on each Valve Profile
@@ -5046,6 +5045,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
 - 2026-11-17: Rule 2.42 changed (OakBarn Brewery, markup of Default settings > New Tabs: "Tab Background Profile for a new tab" "Good Except Make Tab Profile"; the pipe and hose pixels, Width and Height of a New Tab "Tab Profile"; "labels good"): the **Tab Background Profile is now the Tab Profile** (☰ Menu > Tab Profile), and each Tab Profile holds How many Pixels are Pipes / Hoses to be drawn on a Tab?, Width and Height of a New Tab (px), with the same labels. Default settings keeps only **Tab Profile for a new tab**; the Pixels boxes left the Pipes, hoses and sizes section too (they were the same setting). A new Tab takes them from the Tab Profile picked there; (none): 10, 6 and the screen's size. Never Take Away: values set before go, once, into the picked Tab Profile (a new Default Tab Profile when none was picked, or a copy of a Skynet one). Help 13, 22, 26, 33, 36, 43, 58, 68, 155 (and French). Checked against the BruControl Import program: its Tabs keep BruControl's sizes; a Tab added on its Build page follows the same Tab Profile.
 - 2026-11-17: Rules 2.42 and 16.6 changed (OakBarn Brewery: "New Schema from Skynet section not needed. There are going to be quite a few Skynet Schema and a User can select one for a New Schema. Likely an interview process to help pick nearest schema. Also copy and create from a User Schema"): the **New Schema from a Skynet Template** section is off ☰ Menu > Default settings; each Add new Schema question starts with Skynet's own answer (public/schemabuild.js) and is changed in the box. The interview and copying from a User Schema are parked in the Panel Updates Sandbox, entry 23 (Rule 14.4). Help 155, 157 (and French). Checked against the BruControl Import program: it has no New Schema from a Skynet Template, so nothing changes there.
 - 2026-11-17: Rule 5.40 changed (OakBarn Brewery: "add camlocks and 1/2 to the Ends"; "Add them to the list with Tck Boxes and no need for image"): a **Camlock** row in ☰ Menu > Default settings > IP Types, 1/2" to 6": **CAMF** female coupler and **CAMM** male adapter; a CAMF fits a CAMM of the same size (an IP Types do not fit warning otherwise). No drawing of their own. Help 24, 155 (and French). Checked against the BruControl Import program: BruControl has no IP Types, so nothing changes there.

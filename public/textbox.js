@@ -59,7 +59,7 @@ export function textDefaults(d = {}) {
     // Text Boxes
     foreColor: set(d.textForeColor, FRESH_TEXT.fore), backColor: set(d.textBackColor, FRESH_TEXT.back),
     align: tbAlign(set(d.textAlign, FRESH_TEXT.align)) || '', font: set(d.textFont, FRESH_TEXT.font), fontSize: px(set(d.textFontSize, FRESH_TEXT.size), 0),
-    width: px(d.textWidth, FRESH_TEXT.width), height: px(d.textHeight, FRESH_TEXT.height), wrap: set(d.textWrap, FRESH_TEXT.wrap) !== false,
+    width: px(d.textWidth, FRESH_TEXT.width), height: px(d.textHeight, FRESH_TEXT.height), wrap: true,      // always on (OakBarn Brewery, 2026-11-17)
     // the Value of a Device or Widget follows the Text Box colors only once they are changed from the fresh install's (its Black
     // would put a box behind every value on its picture)
     valueFore: own(d.textForeColor, FRESH_TEXT.fore), valueBack: own(d.textBackColor, FRESH_TEXT.back),
@@ -72,7 +72,7 @@ export function textDefaults(d = {}) {
 // with no newLook shows the fresh install's look, so changing the Default tab never changes what is already made.
 const FRESH_LOOK = { labelForeColor: FRESH_LABEL.fore, labelBackColor: FRESH_LABEL.back, labelAlign: FRESH_LABEL.align, labelBold: FRESH_LABEL.bold,
   labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back, textAlign: FRESH_TEXT.align,
-  textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWrap: FRESH_TEXT.wrap, defPipeSize: 0.5 };
+  textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, defPipeSize: 0.5 };
 export const LOOK_KEYS = Object.keys(FRESH_LOOK);
 export function lookSnap(d = {}) {
   const o = {};
