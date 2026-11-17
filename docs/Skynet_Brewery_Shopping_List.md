@@ -71,6 +71,7 @@ USB or Ethernet is better than WiFi for anything that heats or pumps. On every l
 | ➕ | Element on/off safety | **2-pole contactor**, 30-40 A, coil switched by a relay | $20-40 |
 | ➕ | Valves | **Motorized ball valves**, 12 V, stainless, CR02 or CR05 wiring (BruControl "VGC" outputs are valves). Or 12 V **solenoid valves** for water lines. | $25-45 each |
 | ➕ | Pumps | **Riptide** or **Chugger** magnetic-drive brewing pump | $150-220 each |
+| ➕ | Pump switch (either one) | A **relay** channel on the relay board above, **or** an **AC opto SSR, 5-10 A** (switches on from 3-32 V DC, so it suits an ESP32 or the Pi's own 3.3 V pins). See [Daisy Chained Hardware](Device_Wiring_Hardware.md), Pump Switching. | $0 (relay) or $10-15 (SSR) |
 | ➕ | Pump speed / proportional valve | **PWM to 0-10 V** (or 4-20 mA) converter module, for a VFD or proportional valve | $5-15 |
 | ✅ | Power for valves and relays | **12 V (or 24 V) DIN-rail power supply**, 5 A, sized for your valves | $20-35 |
 | ⭐ | Panel parts | Enclosure, DIN rail, terminal blocks, fuses, wire, cable glands | $50-150 |
