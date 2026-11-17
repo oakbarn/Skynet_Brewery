@@ -12,11 +12,8 @@ Un double-clic sur une case, une liste ou un bouton à l'intérieur d'une ligne 
 | --- | --- | --- |
 | gGlobals | Page Variables | les Properties de la variable |
 | Devices et Widgets pour la voix et Home Assistant | Settings, MQTT | les Properties du Device ou du Widget |
-| Liste d'équipement | ☰ Menu > Equipment Profile | les Properties du Tab_Vessel ou du Tab_Fitting sur son Tab |
 | Tabs du Schema | ☰ Menu > Tab Profile | les réglages de ce Tab |
 | Templates | ☰ Menu > Vessel, Fitting and Equipment Templates | les réglages du Template |
-
-La liste d'équipement n'ouvre les Properties que quand le Tab suit la Default Layout de son profil. Quand le Tab garde sa propre disposition, la liste montre la Default Layout du profil, qui n'est sur aucun Tab, il n'y a donc rien à ouvrir.
 
 ## Les listes qui marchent autrement {#lists-that-work-differently}
 
