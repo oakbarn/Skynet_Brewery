@@ -84,7 +84,7 @@
 
 **Boil Profile**: the total boil time and the boil off per hour.
 
-**Tab Background Profile**: a tab's background color and the look (colors, placement, LED / Text / Gauge) new devices and widgets on it start with. See [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
+**Tab Profile**: a tab's background color and the look (colors, placement, LED / Text / Gauge) new devices and widgets on it start with. See [Tab and Valve Profiles](36-tab-and-valve-profiles).
 
 **Valve Profile**: the graphics and orientation (Horizontal, Vertical, 45 degrees Left or Right) a new valve starts with, picked only when the valve is made.
 

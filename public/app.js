@@ -515,7 +515,7 @@ function drawWs() {
   if (!w) return;
   ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => n.remove());
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
-  ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Background Profile's
+  ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
   const placed = w.bgW && w.bgH;
   const bgSize = placed ? `${w.bgW}px ${w.bgH}px` : '100% 100%', bgPos = placed ? `${w.bgX || 0}px ${w.bgY || 0}px` : '0 0';
@@ -1824,11 +1824,12 @@ const stampIpType = p => { const t = defaultIpType(S.config.brewDefaults || {}, 
 // Default tab for an item made in this Edit layout, else 1/2" (Defaults are for new things only, Rule 2.42)
 const defPipeOf = o => +o?.newLook?.defPipeSize > 0 ? +o.newLook.defPipeSize : isNewItem(o) ? defPipeIn() : 0.5;
 const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
-// a new Tab's size and pipe and hose thickness (☰ Menu > Default settings; empty = the screen's usable size, 10 and 6)
+// a new Tab's size and pipe and hose thickness: from its Tab Profile (OakBarn Brewery, 2026-11-17: they moved off ☰ Menu > Default
+// settings into the Tab Profile; empty = the screen's usable size, 10 and 6)
 // The screen's usable size (OakBarn Brewery, 2026-11-16): the size of the screen the Tab is made on, less the taskbar (1920 x 1040 on a
 // 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
 const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
-const newTabSize = () => { const d = S.config.brewDefaults || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
+const newTabSize = (tp = S.config.brewDefaults?.tabProfile) => { const d = tabProfileOf({ tabProfile: tp }) || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
@@ -6491,7 +6492,7 @@ function useValveProfile(e, id) {
   if (p.imageOverlay) e.imageOverlay = p.imageOverlay === 'none' ? '' : p.imageOverlay;      // every Valve Profile names its Overlay (2026-11-17)
   return true;
 }
-// Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
+// Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Profile (only when it is made).
 // Something with an ON / OFF state can be an LED or Text; something with a value also a Gauge; with neither, only the colors.
 const hasStateEl = e => isBoolEl(e) || (['gGlobal'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
 const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual', 'chart'].includes(e.type) && !(e.type === 'gGlobal' && ['graphic', 'list', 'longstring'].includes(e.kind));
@@ -7236,7 +7237,7 @@ function makeTab() {
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // a unique suggestion (Rule 3.2); it can be changed in Tab settings until the first Save
   const w = { name: n, id, ...newTabSize(), ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
-  if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Background Profile's color wins
+  if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Profile's color wins
   draft.workspaces.push(w); return w;
 }
 $('#addWs').onclick = () => {
@@ -11005,7 +11006,7 @@ const TAB_TIPS = {
   name: 'The name of this Tab, shown on its button at the top of the panel, for example Brew House. Each Tab needs a name of its own, and it cannot be blank. A Hidden Tab\'s name always starts with Hidden_.\n\nRenaming a Tab is safe: everything on it goes with it, and the Suggested Names of its Devices use the Tab ID, not the name.',
   id: 'A short code for this Tab, for example BH for Brew House. It comes first in every list of Tabs (BH: Brew House) and last in the Suggested Name of every Device on this Tab (..._BH). Skynet suggests a unique one, and it follows the Name until you type your own. The Tab ID follows Rule 3.2. Check it before you Save.',
   idSaved: 'A short code for this Tab, for example BH for Brew House. It comes first in every list of Tabs (BH: Brew House) and last in the Suggested Name of every Device on this Tab (..._BH). The Tab ID follows Rule 3.2. It is saved, so it is greyed out.',
-  tabProfile: 'The Tab Background Profile of this Tab. It gives the Tab its background color, and the look (colors and value style) that a new Device or Widget on this Tab starts with. None = no Profile. Profiles are made on ☰ Menu > Tab Background Profile.\n\nThe look is copied only when a Device or Widget is made: changing the Profile later does not change what is already on the Tab.',
+  tabProfile: 'The Tab Profile of this Tab. It gives the Tab its background color, and the look (colors and value style) that a new Device or Widget on this Tab starts with. None = no Profile. Profiles are made on ☰ Menu > Tab Profile.\n\nThe look is copied only when a Device or Widget is made: changing the Profile later does not change what is already on the Tab.',
   color: 'The color behind everything on this Tab. It shows wherever the Picture does not cover. Default = the color of this Tab\'s Profile (with no Profile, the panel\'s normal color). None = no color. Custom opens the Color Picker for a color of your own.',
   background: 'A picture behind everything on this Tab. Pick Skynet pictures or your own, a group, then the picture. None = no picture. Add new ... takes the name of another picture in media/Images; the File Move page copies a picture from your computer there. The Color shows wherever the picture does not cover.',
   bgX: 'Where the left edge of the Picture goes, in pixels from the left of the Tab. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
@@ -11013,8 +11014,8 @@ const TAB_TIPS = {
   bgW: 'How wide the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
   bgH: 'How tall the Picture is drawn, in pixels. Leave Picture Left, Top, Width and Height all empty to stretch the Picture over the whole Tab; fill them in to put it at one spot and size.',
   style: 'The Tab Style: the colors, fonts and sizes of the Labels, Devices and Widgets on this Tab. Default = the Tab Style picked on ☰ Menu > Default settings. A Device or Widget with a color, font or size of its own keeps it; only the rest take the Tab Style. Skynet Styles 🔒 can never be changed. ➕ Add new User Style… makes your own, and ✏ Edit changes it.',
-  width: 'How wide this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as wide as the screen it is made on (1920 on most screens), unless ☰ Menu > Default settings gives a Width.',
-  height: 'How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless ☰ Menu > Default settings gives a Height.',
+  width: 'How wide this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as wide as the screen it is made on (1920 on most screens), unless its Tab Profile gives a Width.',
+  height: 'How tall this Tab is, in pixels. You can type any size (200 to 20000), or press 🖥 Fit Screen below to match this screen. A new Tab starts as tall as the screen it is made on, less the taskbar (1040 on most screens), unless its Tab Profile gives a Height.',
   fitScreen: 'One click sets this Tab\'s Width and Height to the usable size of THIS screen (the screen less the taskbar), so the whole Tab fills the screen at Zoom Fit screen with no scroll bars. Press Save to keep it. You can still type your own Width and Height. Pick the screen of the computer you brew from: a Tab sized on a small laptop is drawn smaller on a big screen.',
   vSizer: 'The Master Vessel Sizer: pick one Vessel on this Tab. Only that Vessel can be resized, and every other Vessel on the Tab follows it at the same scale. None = no Vessel can be resized. The Master shows 📏 in Edit layout.',
   pipeSize: 'How thick a 1/2" pipe is drawn on this Tab, in pixels. A new Tab starts at 10. Every other pipe size, reducer and fitting is drawn to scale from it.',
@@ -13477,7 +13478,7 @@ const MENU = [
   { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Tab gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
-  { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
+  { key: 'tab', title: 'Tab Profile', tip: 'A tab\'s background color, the look new devices and widgets on it start with, and a new Tab\'s pipe and hose pixels and size', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures, orientation and Overlay a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and IP Types', render: renderBrewProfileTab('pump') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
@@ -14054,10 +14055,7 @@ function renderDefaultTab(box) {
     ['_ps', 'Pipes, hoses and sizes', 'head'],
     ['defPipeSize', 'Default Pipe Size', 'sel', sizePick(PIPE_SIZES), true, false, { tip: DEF_TIPS.pipe, with: ['defPipeIp', 'IP Type', 'sel', ipTypePick(+d.defPipeSize || 0.5), false, false, { tip: DEF_IP_TIPS.pipe }] }],
     ['defHoseSize', 'Default Hose Size', 'sel', sizePick(HOSE_SIZES), true, false, { tip: DEF_TIPS.hose, with: ['defHoseIp', 'IP Type', 'sel', ipTypePick(+d.defHoseSize || 0.5), false, false, { tip: DEF_IP_TIPS.hose }] }],
-    // the same boxes twice, here and in New Tabs (Default Tab 3: "There is an exact Duplicate of this in the Tabs Defaults and they are
-    // the same Default"): typing in one fills the other; Pipes and Hoses apart (OakBarn Brewery, 2026-11-16)
-    ['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
-    ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
+    // the Pipe and Hose pixels moved into the Tab Profile with the New Tabs boxes (OakBarn Brewery, 2026-11-17: "Tab Profile")
     // IP Type sizes (OakBarn Brewery, 2026-11-16: "A list of the sizes and type in Defualts with a TickBox to show in the List"; "all
     // Unclicked in the Default"): only the ticked ones, and the ones already used, show in the IP Type lists
     ['_ipt', 'IP Types', 'head'],
@@ -14078,11 +14076,8 @@ function renderDefaultTab(box) {
     // New Schema from a Skynet Template: not on Default settings any more (OakBarn Brewery, 2026-11-17: "New Schema from Skynet section
     // not needed"): its questions start with Skynet's own answers (public/schemabuild.js NS_DEFAULTS)
     ['_t', 'New Tabs', 'head'],
-    ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['_tabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
-    ['_tabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
-    ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: screenTab().w, tip: DEF_TIPS.width }],
-    ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: screenTab().h, tip: DEF_TIPS.height }],
+    // New Tabs (OakBarn Brewery, 2026-11-17: "Good Except Make Tab Profile"): the pipe and hose pixels, Width and Height are in the Tab Profile
+    ['tabProfile', 'Tab Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)'), false, false, { tip: NEW_TAB_PROF_TIP }],
     // Labels and Text Boxes (OakBarn Brewery, 2026-11-14, Default tab markup: "The Default Text section needs to be separated into 2.
     // One for Labels and one for Text Boxes"); a box never set shows what a fresh install starts with (public/textbox.js)
     ['_lbl', 'Labels', 'head'],
@@ -14110,14 +14105,8 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
-  d._tabPipe = d.newTabPipe; d._tabHose = d.newTabHose;
   hopStandsToForm(d, du.tempUnit);
   const f = paneForm(fields, d, () => { }, !admin);
-  // each Pixels box is in two sections and is one setting: typing in one fills the other
-  for (const pair of [['newTabPipe', '_tabPipe'], ['newTabHose', '_tabHose']]) {
-    const twins = pair.map(k => f.box.querySelector(`[data-k="${k}"] input, input[data-k="${k}"]`));
-    if (twins.every(Boolean)) twins.forEach((x, i) => x.addEventListener('input', () => { twins[1 - i].value = x.value; }));
-  }
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
   const save = guard(async () => {
@@ -14136,9 +14125,7 @@ function renderDefaultTab(box) {
     for (const k of DISPLAY_UNITS.map(x => x[0])) delete d[k];      // amounts follow Units (US or Metric)
     for (const [k, t] of [['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`\\L Rich Text Code Size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
-    { const sc = screenTab(); if (+d.newTabWidth === sc.w) delete d.newTabWidth; if (+d.newTabHeight === sc.h) delete d.newTabHeight; }      // the screen's own size is not saved, so a new Tab keeps matching the screen it is made on
-    for (const [k, t, min, max] of [['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab', 2, 100], ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab', 2, 100], ['newTabWidth', 'Width of a New Tab', 200, 20000], ['newTabHeight', 'Height of a New Tab', 200, 20000]])
-      if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
+    for (const k of ['newTabPipe', 'newTabHose', 'newTabWidth', 'newTabHeight']) delete d[k];      // in the Tab Profile now (2026-11-17)
     if (d.hoverDelay === '' || d.hoverDelay === null) delete d.hoverDelay;
     if (d.hoverDelay !== undefined && !(Number.isInteger(+d.hoverDelay) && +d.hoverDelay >= 0 && +d.hoverDelay <= HOVER_DELAY_MAX)) throw new Error(`Hover Delay must be a whole number from 0 to ${HOVER_DELAY_MAX} ms (or empty)`);
     for (const [k, t, min] of [['labelFontSize', 'Labels Font Size', 6], ['textFontSize', 'Text Boxes Font Size', 6], ['textWidth', 'New Box Width', 10], ['textHeight', 'New Box Height', 10]])
@@ -16052,7 +16039,7 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
     about: 'The total boil time and how much boils off each hour. A Recipe picks its Boil Profile from a dropdown, and the volume check on the Equipment Profile tab uses it.' },
   water: { title: 'Water Profile', list: () => S.waterProfiles, start: 'Distilled water (nothing in it)',
     about: 'Your water as the water report gives it (ppm), and how much of it is cut with distilled or RO water. Skynet works out the water you brew with. A Recipe picks its Water Profile from a dropdown.' },
-  tab: { title: 'Tab Background Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
+  tab: { title: 'Tab Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
     about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
     about: 'The pictures, orientation and Overlay a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
@@ -16066,6 +16053,8 @@ const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile firs
 const PUMP_PROF_NOTE = 'Every box here is what a new pump made from this Pump Profile starts with. Changing a Pump Profile never changes the pumps already on a Tab.';
 const PUMP_PROF_NAME_TIP = 'The name of this Pump Profile, as it shows in the Pump Profile list of the Pump Add box. For example Red Pump Right.';
 const PROF_NOTES_TIP = 'Your own notes about this profile. Only shown here.';
+// the Tab Profile picked for a new Tab (OakBarn Brewery, 2026-11-17: "Good Except Make Tab Profile")
+const NEW_TAB_PROF_TIP = 'The Tab Profile a new Tab starts with: its background color, the look a new Device or Widget on it starts with, how many pixels its Pipes and Hoses are drawn, and its Width and Height. (none): Skynet\'s own (10, 6 and the size of the screen).';
 const PUMP_PROF_OVERLAY_TIP = 'The On overlay a new pump made with this Pump Profile starts with: what shows over the pump while it runs. A new Pump Profile starts with the Overlay of the Default Pump Profile (Skynet starts with the Green Glow Ring).';
 // the Valve Profile's Overlay (OakBarn Brewery, 2026-11-17: Valve Overlay "On Valve Profile", off Default settings)
 const VALVE_PROF_OVERLAY_TIP = 'The On overlay a new powered valve made with this Valve Profile starts with: what shows over the valve while it is open. A new Valve Profile starts with the Overlay of the Valve Profile marked Default (Skynet starts with the Lightning Bolt).';
@@ -16083,6 +16072,12 @@ function profFields(kind) {
       ...(w.valueType === 'led' ? [['ledMode', 'LED push button', 'sel', Object.entries(LED_MODES)]] : []),
       ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
       ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
+      // New Tabs (OakBarn Brewery, 2026-11-17: these moved here from ☰ Menu > Default settings, "Tab Profile"; "labels good")
+      ['_nt', 'New Tabs', 'head'],
+      ['newTabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
+      ['newTabHose', 'How many Pixels are Hoses to be drawn on a Tab?', 'num', null, false, false, { def: HOSE_PX, tip: DEF_TIPS.hosePx }],
+      ['newTabWidth', 'Width of a New Tab (px)', 'num', null, false, false, { def: screenTab().w, tip: DEF_TIPS.width }],
+      ['newTabHeight', 'Height of a New Tab (px)', 'num', null, false, false, { def: screenTab().h, tip: DEF_TIPS.height }],
       ['notes', 'Notes', 'area']];
     if (kind === 'pump') return [['_pn', PUMP_PROF_NOTE, 'note'], ['name', 'Name', 'text', null, false, false, { tip: PUMP_PROF_NAME_TIP }], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']], false, false, { tip: DEVICE_TIPS.orient }], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])], false, false, { tip: DEVICE_TIPS.cover }],
@@ -16159,7 +16154,7 @@ function renderBrewProfileTab(kind) {
     if (kind === 'tab') box.append(tabsUsing(w, admin));
   };
 }
-// which of this Schema's tabs use a Tab Background Profile
+// which of this Schema's tabs use a Tab Profile
 function tabsUsing(p, admin) {
   const rows = S.config.workspaces.map(ws => {
     const s = h('select', admin ? {} : { disabled: true }, h('option', { value: '' }, '(none)'),
@@ -16168,13 +16163,13 @@ function tabsUsing(p, admin) {
       const workspaces = clone(S.config.workspaces), t = workspaces.find(x => x.name === ws.name);
       if (s.value) t.tabProfile = s.value; else delete t.tabProfile;
       await api('PUT', '/ui/layout', { workspaces }); S.config.workspaces = workspaces;
-      toast(s.value ? `The ${ws.name} tab uses "${S.tabProfiles.find(x => x.id === s.value).name}"` : `The ${ws.name} tab has no Tab Background Profile now`);
+      toast(s.value ? `The ${ws.name} tab uses "${S.tabProfiles.find(x => x.id === s.value).name}"` : `The ${ws.name} tab has no Tab Profile now`);
     });
     return h('tr', { title: 'Double-click for its Tab settings', ondblclick: rowDbl(() => openTabProps(ws.name)) }, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
   });
   return h('div', { class: 'eqPane' }, h('h3', {}, `Tabs of the Schema "${S.schemas.active?.name}"`),
-    h('p', { class: 'muted' }, 'Pick the Tab Background Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
-    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Tab'), h('th', {}, 'Tab Background Profile'), h('th', {}, ''))), h('tbody', {}, ...rows)));
+    h('p', { class: 'muted' }, 'Pick the Tab Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Tab'), h('th', {}, 'Tab Profile'), h('th', {}, ''))), h('tbody', {}, ...rows)));
 }
 // Rule 18.14 (OakBarn Brewery, 2026-11-13: "Like all the choices but explain good in the help what it means and have a User Add";
 // "Same with Water Profiles"): every Mash, Boil and Water Profile list ends with Add new ...; picking it makes a new profile

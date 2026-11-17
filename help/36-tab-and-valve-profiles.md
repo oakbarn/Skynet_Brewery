@@ -1,10 +1,10 @@
-# Tab Background, Valve and Pump Profiles
+# Tab, Valve and Pump Profiles
 
-All three are Menu tabs (**☰ Menu**): Tab Background Profile, Valve Profile and Pump Profile. Each profile is kept on the Brain, in `config/profiles/tab`, `config/profiles/valve` and `config/profiles/pump`, so every Schema can use it. Only an Admin can make or change them.
+All three are Menu tabs (**☰ Menu**): Tab Profile, Valve Profile and Pump Profile. Each profile is kept on the Brain, in `config/profiles/tab`, `config/profiles/valve` and `config/profiles/pump`, so every Schema can use it. Only an Admin can make or change them.
 
-## Tab Background Profile
+## Tab Profile
 
-A Tab Background Profile gives a tab its **background color**, and the **look** a new device or widget on that tab starts with:
+A Tab Profile gives a tab its **background color**, and the **look** a new device or widget on that tab starts with:
 
 - **Name**: text color, background color and placement (TopLeft ... BottomRight).
 - **Value**: text color, background color and placement.
@@ -19,12 +19,16 @@ Something with an ON / OFF state (a pump, valve, switch) can only be an LED or T
 
 ### Give a tab its profile
 
-- On the **Tab Background Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
+- On the **Tab Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
 - Or in Edit layout, open **⚙ Tab Settings** and pick it under **Background > Profile**.
 
 A tab with its own **Background > Color** in Tab Settings keeps that color. Set it to **Default** to use the profile's color.
 
-The **Default** Menu tab picks the Tab Background Profile a **new tab** gets.
+### New Tabs
+
+A Tab Profile also holds what a **new Tab** made with it starts with: **How many Pixels are Pipes to be drawn on a Tab?** (10 if empty), **How many Pixels are Hoses to be drawn on a Tab?** (6 if empty), **Width of a New Tab (px)** and **Height of a New Tab (px)** (the size of the screen if empty). Each Tab still changes its own in **⚙ Tab Settings**.
+
+☰ Menu > Default settings > **Tab Profile for a new tab** picks the Tab Profile a **new tab** gets ([Default settings](155-default-settings)).
 
 ## Valve Profile
 

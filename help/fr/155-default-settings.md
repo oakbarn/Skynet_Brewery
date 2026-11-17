@@ -36,15 +36,7 @@ Les tuyaux souples ont une simulation de débit.
 
 Le raccord par défaut qu'un nouveau tuyau souple a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau souple. Une fois placés, les tuyaux souples gardent leur type de raccord. Les IP de chaque bout d'un tuyau souple peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux souples comme la plupart de vos tuyaux souples sont montés.
 
-### How many Pixels are Pipes to be drawn on a Tab? {#how-many-pixels-are-pipes-to-be-drawn-on-a-tab}
-
-C'est seulement la façon dont les tuyaux sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 10 est un bon départ. Cela vaut pour les nouveaux tuyaux placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
-
-### How many Pixels are Hoses to be drawn on a Tab? {#how-many-pixels-are-hoses-to-be-drawn-on-a-tab}
-
-C'est seulement la façon dont les tuyaux souples sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 6 est un bon départ ; les tuyaux souples sont en général dessinés plus fins que les tuyaux. Cela vaut pour les nouveaux tuyaux souples placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
-
-Chacune de ces deux cases est à deux endroits, ici et dans **New Tabs**. Chacune est un seul réglage : taper dans l'une change l'autre. Chaque Tab peut encore changer sa **Pipe Size** et sa **Hose Size** dans **Tab Settings**. Un Tab fait avant qu'il y ait une Hose Size dessine ses tuyaux souples à sa Pipe Size, comme avant.
+Chaque Tab peut encore changer sa **Pipe Size** et sa **Hose Size** dans **Tab Settings**. Un Tab fait avant qu'il y ait une Hose Size dessine ses tuyaux souples à sa Pipe Size, comme avant. Les cases Pixels sont dans chaque **Tab Profile** (voir **New Tabs** plus bas).
 
 Le côté technique : les tailles vont de 1/4" à 6", avec la taille en mm à côté de chacune ; Skynet commence à 1/2" pour les deux, Tri-Clamp pour les tuyaux et Quick Disconnect pour les flexibles ([Tuyaux, tuyaux souples et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40). Un nouveau Device, Pipe Fitting ou élément avec des IP (pompes, vannes, débitmètres, coudes, tés, Valve Tees, tés à sonde ...) est dessiné pour la Default Pipe Size jusqu'à ce qu'un tuyau y soit. Les éléments déjà faits gardent la taille qu'ils avaient : la changer ici n'atteint que les nouvelles choses (Règle Skynet 2.42). La case des pixels va de 2 à 100 (vide = 10).
 
@@ -122,6 +114,16 @@ Le côté technique : une nouvelle Recette commence avec un brassin de 5 gallons
 
 ## New Tabs {#new-tabs}
 
+**Tab Profile for a new tab** est la seule case ici : le Tab Profile avec lequel commence un nouveau Tab. Les quatre cases ci-dessous sont dans chaque **Tab Profile** (☰ Menu > Tab Profile), avec sa couleur de fond et l'aspect de départ d'un nouveau Device ou Widget ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). Avec **(none)** choisi, un nouveau Tab prend ceux de Skynet : 10, 6 et la taille de l'écran. Ce qui était réglé ici avant est gardé dans le Tab Profile.
+
+### How many Pixels are Pipes to be drawn on a Tab? {#how-many-pixels-are-pipes-to-be-drawn-on-a-tab}
+
+C'est seulement la façon dont les tuyaux sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 10 est un bon départ. Cela vaut pour les nouveaux tuyaux placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
+
+### How many Pixels are Hoses to be drawn on a Tab? {#how-many-pixels-are-hoses-to-be-drawn-on-a-tab}
+
+C'est seulement la façon dont les tuyaux souples sont dessinés à l'écran : cela ne change rien d'autre que « l'Aspect ». Pour les résolutions d'écran d'ordinateur normales (réglées par vous sur votre ordinateur, mais le système en a mis une par défaut), 6 est un bon départ ; les tuyaux souples sont en général dessinés plus fins que les tuyaux. Cela vaut pour les nouveaux tuyaux souples placés, pas pour ceux déjà placés : c'est donc une bonne idée de le régler et de ne plus y toucher, sinon votre écran pourrait sembler dessiné par un enfant de 3 ans.
+
 ### Width of a New Tab (px) {#width-of-a-new-tab-px}
 
 Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le Tab tient à l'écran, et s'il lui faut des barres de défilement horizontales parce qu'une partie du Tab sort de l'écran quand la valeur est trop grande. Le mieux est de n'avoir aucune barre de défilement sur un Tab. Changer la résolution de l'écran ou utiliser un ordinateur à distance peut aussi changer l'affichage, avec ou sans barres de défilement. Les téléphones et tablettes s'ajustent à leur taille, et vous n'avez presque pas de contrôle si vous en utilisez un à distance. Réglez-les pour l'ordinateur de votre brasserie qui suit le Skynet Panel. Pour une résolution d'écran de 1920 x 1040, 1600 x 900 est un bon départ, mais il faudra peut-être l'ajuster un peu pour VOTRE ordinateur. La Largeur ne touche que la barre de défilement horizontale.
@@ -134,7 +136,7 @@ Ne touche que les nouveaux Tabs ajoutés à un Schéma. C'est la façon dont le 
 
 La taille d'affichage (le Zoom de Skynet : Fit screen, Fit width, 50 % à 150 %) change si les barres de défilement se voient ou non. Skynet commence à Fit screen, qui dessine tout le Tab plus petit pour tenir à l'écran : aucune barre de défilement ne se voit. Votre ordinateur décide aussi de l'aspect des barres : Windows les montre ; un Mac les cache souvent jusqu'à ce que vous fassiez défiler (Réglages Système > Apparence) ; sous Linux, cela dépend du bureau et du navigateur.
 
-Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). Les cases **How many Pixels are Pipes to be drawn on a Tab?** et **How many Pixels are Hoses to be drawn on a Tab?** sont ici aussi (voir plus haut).
+Le côté technique : de 200 à 20000 pixels. Les cases sont remplies au départ avec la taille utile de votre écran (l'écran moins la barre des tâches : 1920 x 1040 sur un écran Windows de 1920 x 1080). Laissé ainsi, un nouveau Tab prend la taille de l'écran sur lequel il est créé, et remplit donc l'écran au Zoom Fit screen ; un autre nombre est gardé pour chaque nouveau Tab. Chaque Tab change le sien dans **Tab Settings**. Le **Zoom** de départ d'un écran est dans Settings > Panel settings (On startup). Les quatre cases sont dans chaque Tab Profile.
 
 ## Nouveaux Templates de l'utilisateur et Schemas {#new-user-templates-and-schemas}
 
@@ -144,7 +146,7 @@ Ils ne servent qu'aux **nouvelles** choses que vous faites vous-même. Un Skynet
 |---|---|
 | **Look of a New Schema** | Le Look (thème) avec lequel commence un nouveau Schema vide. Le Look du Schema ouvert se change dans Settings > Panel settings ([Les Looks du panneau (thèmes)](151-panel-looks)). |
 
-Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab Background, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est maintenant dans **Settings > Panel settings** (voir plus bas). Ce qui était réglé ici est gardé.
+Le **Pump Overlay** est maintenant sur chaque **Pump Profile** et le **Valve Overlay** sur chaque **Valve Profile** ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** est maintenant dans **Settings > Panel settings** (voir plus bas). Ce qui était réglé ici est gardé.
 
 Certaines choses n'ont pas de case parce qu'elles sont toujours pareilles : voir **Skynet Defaults for New User Created Items** plus bas. Le **Lost Comm** se règle sur chaque Interface ([Interfaces](76-interfaces)). Les réglages du **Simulator** sont seulement sur la barre du simulateur ([La barre du simulateur](85-simulator-bar)).
 
@@ -169,7 +171,7 @@ Le Look (thème) du Schema ouvert est dans Settings > Panel settings ([Les Looks
 
 **Les réglages par défaut sont seulement pour les nouvelles choses.** Labels, Text Boxes, la Default pipe size et les IP Types sont gardés sur chaque élément quand il est créé, donc les changer ici ne change jamais ce qui est déjà sur vos Tabs.
 
-Nouveaux Tabs (Tab Background Profile), Labels et Text Boxes. (Les réponses de New Schema from a Skynet Template ne sont plus ici : chaque question commence avec la réponse de Skynet, et vous la changez dans la case Add new Schema.) Le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué **Default** dans sa propre liste ([Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles)). Voir [Le Menu](33-menu).
+Nouveaux Tabs (Tab Profile), Labels et Text Boxes. (Les réponses de New Schema from a Skynet Template ne sont plus ici : chaque question commence avec la réponse de Skynet, et vous la changez dans la case Add new Schema.) Le Valve Profile et le Pump Profile d'un nouvel élément est celui marqué **Default** dans sa propre liste ([Tab Profiles et Valve Profiles](36-tab-and-valve-profiles)). Voir [Le Menu](33-menu).
 
 ## Tap Water
 

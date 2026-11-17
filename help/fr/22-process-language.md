@@ -150,7 +150,7 @@ BK_Temp.valueColor = ""
 
 Chaque zone de texte a aussi `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.x_hPosition` et `.y_vPosition`, par exemple `Pump_1.foreColor = "Red"` ou `Text_1.x_hPosition = 400`. Un Text ajouté avec **+ Text** a aussi un nom (`Text_1`). Voir [Les zones de texte](49-text-boxes).
 
-Le changement dure jusqu'au redémarrage du panel. Pour garder une apparence, réglez-la dans les propriétés de l'élément, ou faites commencer les nouveaux éléments avec un [Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles).
+Le changement dure jusqu'au redémarrage du panel. Pour garder une apparence, réglez-la dans les propriétés de l'élément, ou faites commencer les nouveaux éléments avec un [Tab Profiles et Valve Profiles](36-tab-and-valve-profiles).
 
 ## Skynet Constants (constantes Skynet) {#skynet-constants}
 
