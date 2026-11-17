@@ -105,7 +105,7 @@ assert.match(app, /'◀ Back'\)\);\s*\n\s*if \(view\)/, 'its one button is Back'
 assert.match(app, /\['_power', 'Power', 'ro'/, 'Power is in the Pump facts');
 assert.doesNotMatch(app, /\['power', 'Power', 'sel', PUMP_POWER_CHOICES/, 'Power is no longer on the dialog');
 assert.match(app, /const PORTS_TIP = 'Match YOUR Pump fittings/, 'Ports Hover Help starts Match YOUR Pump fittings');
-assert.match(app, /\(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpPortField\(it, factsOf\(it\), PORTS_TIP\)\)/, 'Ports where Power was');
+assert.match(app, /\.\.\.\['in', 'out'\]\.map\(side => \(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpFitField\(it, factsOf\(it\), side\)\)\)/, 'Inlet IP Fitting and Outlet IP Fitting where Power was (they replaced Ports, 2026-11-17)');
 assert.doesNotMatch(app, /it is not changed here/, 'Use: no "not changed here"');
 assert.match(app, /const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed\./);
 assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both balloons');
@@ -132,4 +132,31 @@ console.log('Dialog 2 #3 tests passed');
   assert.ok(app.includes("...(selfPrimeOf(o) === false ? [['_primeNote', PRIME_NOTE, 'note'"), 'the priming note under a greyed No');
   assert.ok(!/riptide'[^\n]*hottest: '\d/.test(fs.readFileSync(new URL('../public/pumps.js', import.meta.url), 'utf8')), 'no RipTide Hottest number without Blichmann\'s own');
   console.log('self priming tests passed');
+}
+
+// Inlet IP Fitting and Outlet IP Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet Fitting"; "Separate Outlet Fitting"; "every IP gets it own type End fitting"): two rows, the End Fittings of the In and Out IPs
+{
+  const { factLines } = await import('../public/pumps.js');
+  const fn = app.slice(app.indexOf('function PUMP_TYPE_FIELDS'), app.indexOf('const PUMP_XYWH'));
+  assert.ok(fn.includes("['in', 'out'].map(side =>") && fn.includes('pumpFitField('), 'both rows in every Pump dialog (Add box and Properties)');
+  assert.ok(!fn.includes("'IP Type In'") && !fn.includes('pumpPortField'), 'one pair of rows, not two: no Ports row, no IP Type In / Out row');
+  assert.ok(fn.includes("it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}); it.ipTypeOut ||= it.ipTypeIn;"), 'a pump saved with Ports starts from it, in the Add box too');
+  const fit = app.slice(app.indexOf('function pumpFitField'), app.indexOf("// The Model's ⬢ Pump facts"));
+  assert.ok(fit.includes("side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet IP Fitting' : 'Outlet IP Fitting'"), 'his labels, word for word, on the IP End Fittings');
+  assert.ok(fit.includes('ipChoices(o[key], ...PUMP_PORTS)'), 'every size of the old Ports list still offered');
+  assert.ok(!/\['pumpPorts', 'Ports', 'sel'/.test(app), 'no Ports dropdown');
+  assert.ok(app.includes("['ipTypeIn', 'Inlet IP Fitting', 'sel', [['', '(from the pump)']") && app.includes("['ipTypeOut', 'Outlet IP Fitting', 'sel'"), 'the Pump Profile says the same');
+  assert.ok(!/inside the port|outside of the port|FPT1 ports/.test(app), 'Port is a board Port only (Rule 2.57)');
+  const el = { type: 'digitalOut', subtype: 'pump', pumpModel: 'march_815' };
+  assert.ok(factLines(el).some(l => l.startsWith('Fittings: 3/4" NPT in')), 'the model\'s fittings on the hover');
+  const own = factLines({ ...el, ipTypeIn: 'TC1.5', ipTypeOut: 'FPT1/2' });
+  assert.ok(own.includes('Inlet IP Fitting: TC1.5') && own.includes('Outlet IP Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own End Fittings, never "Ports"');
+  // an adapter in the connection: a note in the IP's Properties, information only (OakBarn Brewery, 2026-11-17, Rule 2.57)
+  const ad = app.slice(app.indexOf('function ipAdapterNote'), app.indexOf('function ipAdapterNote') + 1200);
+  const ipFits = (await import('../public/iptype.js')).ipFits;
+  assert.ok(ad.includes('!ipFits(ends[i], ends[j], { sameSize: false })') && ad.includes('Adapter: ${pairs.join') && ad.includes('keep: true'), 'the adapter note');
+  assert.ok(!ipFits('TC1.5', 'MPT1/2', { sameSize: false }) && ipFits('TC1.5', 'TC2', { sameSize: false }), 'TC to NPT needs an adapter; two sizes of one type meet at a reducer');
+  assert.ok(app.includes(': [...ipAdapterNote(it), ...F.ipPoint]'), 'in the IP\'s Properties');
+  console.log('inlet and outlet fitting tests passed');
 }
