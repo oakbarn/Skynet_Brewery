@@ -43,7 +43,8 @@ That is all it takes: hold the ring and drag. Nothing pops up first.
 
 While you drag, the hose **flexes**: it leaves the pump the way it did before and hangs in a curve through several bend points, sagging more the farther you pull the end. A **green ring** shows where the end will go. Let go on:
 
-- **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it. On the open end of a pipe,
+- **an IP or a Quick Disconnect**: the hose joins it. On the open end of a pipe, the hose goes in the way that end faces, as a
+  real hose does: on an end that faces down, it droops below it and makes a **U** up into it. A Quick Disconnect wins over the valve IP under it. On the open end of a pipe,
   flow goes on from the hose into that pipe.
 - **anywhere in the top third of a vessel**: the whole top third is one big IP. It is the same as putting the hose in the
   top of the vessel, and the hose end goes to the middle of the vessel's top.
