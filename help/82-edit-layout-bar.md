@@ -19,7 +19,7 @@ A **Device** is tied to a pin on a board (an Interface).
    - **Pumps**: on / off, speed by PWM, speed by 0-10 V (a VFD), sump pump
    - **Valves**: the Skynet valves, the User Defined Motorized Ball Valve, the Skynet KLD20T Proportional Valve, the User Defined Proportional Valve, the Manual Valve
    - **Heating Element**: on / off, power by PWM, PID, Hysteresis, Duty cycle, RIMS tube, electric kettle
-   - **PWM / Analog out**: PWM, 0-10 V, 4-20 mA
+   - **PWM / Analog out**: PWM, 0-10 V, 4-20 mA, Heating Element: PWM and the Proportional Valves
    - **Inputs**: switches, push, toggle and pulse buttons, latching inputs, counters, float, flow switch, interlock
    - **Probe**: DS18B20, PT100, PT1000, thermocouples, NTC, LM35, TMP36, and the Thermowells (Short, Medium, Long)
    - **Sensors**: analog inputs, pressure, level, pH, flow meter

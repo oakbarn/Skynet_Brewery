@@ -16,6 +16,8 @@ Sur la même page de téléchargement que le panneau : **https://github.com/oakb
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, ou Windows à la main |
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Windows : le panneau **et** les images et sons dans un seul fichier |
 
+**Les nouvelles images et les nouveaux sons viennent aussi avec chaque mise à jour.** L'Update Setup (`Skynet_Brewer_Setup_<date>.exe`) et le zip du panel portent chaque image et son Skynet ajoutés depuis le dernier Update Setup. Le Brain ajoute ceux qu'il n'a pas encore à son prochain démarrage ; un fichier que vous avez déjà n'est jamais changé.
+
 Le Media Setup et le zip ne sont refaits que quand Skynet ajoute des images ou des sons. En attendant, chaque nouvelle Release porte les mêmes, donc la date dans leur nom peut être plus ancienne que celle du panneau. C'est normal : ce sont toujours les images et les sons les plus récents.
 
 ## Le Full Setup : tout dans un seul fichier (Windows) {#the-full-setup-everything-in-one-file-windows}

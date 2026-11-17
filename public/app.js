@@ -5486,7 +5486,10 @@ const DEV_TYPES = () => [
   // plain Port ("question 4 2 rows"). Deadband stays a Method ("Yes to all recomendations").
   ['heat', 'Heating Element', [...HEAT_ROWS(), ['RIMs Tube: (Skynet Device with Heating Element and Temperature Probe Embedded)', ...am('RIMS tube').slice(1)],
     ['Vessel Device Template (Heating Element and Temperature Probe Embedded)', ...VESSEL_ELEMENT.slice(1)]]],
-  ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
+  // A Heating Element or a Proportional Valve can be PWM too (OakBarn Brewery, Panel Updates Sandbox entry 1: "A Heater or Valve could
+  // also be PWM so add those that can be on this ddlb"; "Yes", 2026-11-17): the same rows as in the Heating Element and Valves lists
+  ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA'), HEAT_ROWS().find(r => r[3].heatMethod === 'pwm'),
+    ...SKY_DEV_ROWS('analogOut'), am('User Defined Proportional Valve')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
   ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
@@ -7275,8 +7278,26 @@ $('#addHiddenWs').onclick = () => {
   if (!editing) return;
   let i = 1; while (draft.workspaces.some(w => w.name === HIDDEN_TAB + i)) i++;
   const n = HIDDEN_TAB + i, id = defaultTabId(n, draft.workspaces.map(w => w.id));
-  draft.workspaces.push({ name: n, id, ...newTabSize() }); wsName = n; renderTabs(); renderWs();
-  toast(`Hidden Tab ${n} added. It shows only in Edit layout; the things on it still work in the background.`);
+  const from = wsName, w = { name: n, id, ...newTabSize() };
+  draft.workspaces.push(w); wsName = n; renderTabs(); renderWs();
+  // one click still makes it (Rule 2.44); ↩ Undo takes it away again while nothing is on it (OakBarn Brewery, 2026-11-17, Panel Updates
+  // Sandbox entry 6: "I quickly create 3 Hidden Tabs. Too easy and how would I get back to any one of them"; "Yes")
+  undoNote(`Hidden Tab ${n} added. It shows only in Edit layout; the things on it still work in the background. 👻 Hidden Tabs ▾ lists them all.`, () => {
+    if (!editing || !draft.workspaces.includes(w)) return;
+    if (tabItems(draft, w.name).length) return toast(`${n} has something on it now, so it was kept. Delete it in its ⚙ Tab settings.`, true);
+    draft.workspaces = draft.workspaces.filter(x => x !== w);
+    if (wsName === n) wsName = draft.workspaces.some(x => x.name === from) ? from : curWs()?.name;
+    renderTabs(); renderWs(); toast(`↩ ${n} taken away`);
+  });
+};
+// 👻 Hidden Tabs ▾ (entry 6, "how would I get back to any one of them"): every Hidden Tab of this Schema, one click goes to it
+$('#hiddenWsList').onclick = async () => {
+  if (!editing) return;
+  const hid = draft.workspaces.filter(isHiddenTab);
+  if (!hid.length) return toast('This Schema has no Hidden Tab yet. 👻 Hidden Tab makes one.');
+  const go = await choose('Hidden Tabs: pick one to go to it', hid.map(w => [`👻 ${tabTitle(w)}${tabItems(draft, w.name).length ? '' : ' (empty)'}`, w.name]), wsName);
+  if (go === undefined || !draft.workspaces.some(w => w.name === go)) return;
+  wsName = go; sel = null; renderTabs(); renderWs();
 };
 
 // ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
@@ -7626,6 +7647,12 @@ function renameNote(r) {
 // the regular Tabs and never ends the Build. An unfinished Build is kept on the Brain (config.buildDraft, never run) and stays open:
 // you stay in Edit layout on the 🔨 Build Tab. leave: Edit layout closes after the save (the Build is still kept for next time).
 const saveLayout = guard(async ({ leave = false } = {}) => {
+  // an empty Hidden Tab: Keep or Delete it (entry 6, "Yes"); Cancel stops the Save
+  for (const w of draft.workspaces.filter(x => isHiddenTab(x) && !tabItems(draft, x.name).length)) {
+    const r = await choose(`👻 ${w.name} is an empty Hidden Tab. Keep it or delete it?`, [['Keep', 'keep'], ['Delete', 'delete']]);
+    if (r === undefined) return toast('Not saved yet', true);
+    if (r === 'delete') { draft.workspaces = draft.workspaces.filter(x => x !== w); if (wsName === w.name) wsName = curWs()?.name; }
+  }
   const snap = buildSnap(), onB = new Set(buildItems(buildWs()));
   for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)

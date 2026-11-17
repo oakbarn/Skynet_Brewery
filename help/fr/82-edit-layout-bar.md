@@ -19,7 +19,7 @@ Un **Device** est lié à une broche d'une carte (une Interface).
    - **Pumps** : on / off, vitesse par PWM, vitesse par 0-10 V (un variateur VFD), pompe de puisard
    - **Valves** : les vannes Skynet, la User Defined Motorized Ball Valve, la Skynet KLD20T Proportional Valve, la User Defined Proportional Valve, la Manual Valve
    - **Heating Element** : on / off, puissance par PWM, PID, Hysteresis, Duty cycle, tube RIMS, bouilloire électrique
-   - **PWM / Analog out** : PWM, 0-10 V, 4-20 mA
+   - **PWM / Analog out** : PWM, 0-10 V, 4-20 mA, Heating Element: PWM et les vannes proportionnelles
    - **Inputs** : interrupteurs, boutons poussoir, bascule et impulsion, entrées à verrouillage, compteurs, flotteur, détecteur de débit, verrouillage de sécurité
    - **Probe** : DS18B20, PT100, PT1000, thermocouples, NTC, LM35, TMP36, et les doigts de gant (Short, Medium, Long)
    - **Sensors** : entrées analogiques, pression, niveau, pH, débitmètre
