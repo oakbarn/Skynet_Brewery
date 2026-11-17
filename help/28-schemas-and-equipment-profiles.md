@@ -57,7 +57,7 @@ Equipment Profiles are made on the **Equipment Profile** Menu tab. See [The ☰ 
 ## What is in an Equipment Profile
 
 - **System Loss (Trub, Chiller Manifold and Hoses)**: what is left behind between the kettle and the fermenter.
-- **Cooling shrinkage**, **Grain absorption**, **Brewhouse efficiency** and **Hop utilization**.
+- **Cooling shrinkage**, **Grain absorption**, **Brewhouse efficiency** and **Hop utilization**. The Brewhouse efficiency is the only Efficiency in Skynet: a new profile starts at 72 %, and every Recipe whose **Brew on** Tab uses this profile works out its Expected Gravity with it ([The Recipe tab](99-recipe-tab)).
 - **Notes**.
 - **Equipment list**: the Tab_Vessels and Tab_Fittings on its Tab, with their kind, size, the Template they came from and the vessel each fitting is joined to. You put them on the Tab from the [Vessel and Fitting Templates](50-vessel-and-fitting-templates) (**Add to Tab**) and change each one in its properties on the Tab.
 

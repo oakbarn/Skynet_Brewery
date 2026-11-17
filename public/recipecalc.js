@@ -26,7 +26,7 @@ export function displayUnits(d = {}) {
   return out;
 }
 // recipe defaults a new Recipe starts with (Fritz: "We will provide the first defaults but can be edited by a User on the Default tab")
-export const RECIPE_DEFAULTS = { boilTime: 60, waterToGrain: 2.6, grainTempC: 22.222, hopWarnMinutes: 10, alertMergeMinutes: 1, efficiency: 72, strikeOffsetC: 0 };
+export const RECIPE_DEFAULTS = { boilTime: 60, waterToGrain: 2.6, grainTempC: 22.222, hopWarnMinutes: 10, alertMergeMinutes: 1, strikeOffsetC: 0 };
 
 const W = { kg: 1, lb: 1 / KG_LB, oz: 1 / KG_OZ, g: 0.001 }, V = { L: 1, gal: 1 / L_GAL, qt: 1 / L_QT };
 export const kgTo = (kg, u) => kg === null || kg === undefined || kg === '' ? null : n(kg) / W[u];
@@ -81,15 +81,20 @@ export const FERM_MEASURES = { lb: 'Pounds (lb)', oz: 'Ounces (oz)', kg: 'Kilogr
 // Gravity points (the PPG>SG box, Fritz's Grain tab 2026-10-31): Potential (yield %) x 46.214 (the points of 1 lb of pure
 // sugar in 1 gallon) = PPG; points = PPG x pounds x efficiency / gallons in the batch. Grains and adjuncts are mashed, so the
 // brewhouse efficiency counts; extracts, sugars, fruit and juice give all their sugar (100%). Expected Gravity = 1 + all points / 1000.
+// The efficiency (eff, a %) is only ever the Brewhouse Efficiency of the Equipment Profile of the Recipe's Brew on Tab (Rule 17.13,
+// OakBarn Brewery, 2026-11-17: "Never an Overall Effincy defauly only on an Equipment profile"). There is no other number: without
+// it, a grain or adjunct has no gravity points (null) and the Expected Gravity is not worked out.
 export const PPG_SUGAR = 46.214;
-export function gravityPoints(f, r) {
+export const mashedFerm = f => isGrain(f) || f?.type === 'adjunct';
+export function gravityPoints(f, r, eff) {
   const gal = n(r?.volumes?.batchLiters) * L_GAL; if (!gal || f?.yieldPct === null || f?.yieldPct === undefined || f?.yieldPct === '') return null;
-  const mashed = isGrain(f) || f.type === 'adjunct', eff = mashed ? (n(r?.efficiency) || RECIPE_DEFAULTS.efficiency) / 100 : 1;
-  return n(f.yieldPct) / 100 * PPG_SUGAR * n(f.kg) * KG_LB * eff / gal;
+  if (mashedFerm(f) && !(n(eff) > 0)) return null;
+  return n(f.yieldPct) / 100 * PPG_SUGAR * n(f.kg) * KG_LB * (mashedFerm(f) ? n(eff) / 100 : 1) / gal;
 }
-export function expectedGravity(r) {
+export function expectedGravity(r, eff) {
   const fs = r?.ingredients?.fermentables || []; if (!(n(r?.volumes?.batchLiters) > 0) || !fs.length) return null;
-  return round(1 + fs.reduce((a, f) => a + (gravityPoints(f, r) || 0), 0) / 1000, 3);
+  if (!(n(eff) > 0) && fs.some(mashedFerm)) return null;
+  return round(1 + fs.reduce((a, f) => a + (gravityPoints(f, r, eff) || 0), 0) / 1000, 3);
 }
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
@@ -136,7 +141,7 @@ export function blankRecipe(d = {}) {
   return {
     sourceFormat: 'manual', sourceVersion: null, sourceFile: null, name: '', level: 4, type: 'All Grain', style: '', brewer: '', assistantBrewer: '', notes: '',
     volumes: { batchLiters: +d.batchL > 0 ? +d.batchL : null, boilLiters: null },
-    boilTime: D.boilTime, efficiency: D.efficiency, og: null, fg: null, ibu: null, color: null,
+    boilTime: D.boilTime, fileEfficiency: null, brewOn: null, og: null, fg: null, ibu: null, color: null,
     waterToGrain: D.waterToGrain, grainTempC: D.grainTempC,
     // the boxes on the Recipe tab (Fritz's layout, 2026-10-31). Calculate fills grainKg, firstMashC, ibuCalc, strike and sparge.
     grainKg: null, firstMashC: null, ibuCalc: null, expectedSG: null, strikeLiters: null, strikeTempC: null,
@@ -148,11 +153,12 @@ export function blankRecipe(d = {}) {
 }
 // What a new User Recipe starts with (OakBarn Brewery, 2026-11-16, Default Tab 3: "set all the defaults for a 5 gal Batch, 60 min Boil,
 // 60 Minute Mash"): 5 gallons kept as liters, Skynet Single Step, Batch Sparge (152 °F for 60 minutes), Skynet 60 Minute Boil.
-// Grain at 72 °F for planning ("Remove but use 72 for planning"); efficiency 72 % ("Start at 72").
+// Grain at 72 °F for planning ("Remove but use 72 for planning"). The Brewhouse Efficiency is not here: it is only on an Equipment
+// Profile (Rule 17.13; a new Equipment Profile starts at 72 %).
 export const NEW_RECIPE = { batchL: 18.927, mashProfile: 'skynet-single-batch', boilProfile: 'skynet-boil-60' };
 // not on the Default settings Tab any more (Default Tab 3): Brewhouse Efficiency and Strike Offset belong to the Equipment Profile,
 // the Grain Temperature is 72 °F for planning, and the Boil Time comes from the Boil Profile
-const NOT_A_DEFAULT = ['efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime'];
+const NOT_A_DEFAULT = ['grainTempC', 'strikeOffsetC', 'boilTime'];
 function pickNums(d) {
   const out = {};
   for (const k of Object.keys(RECIPE_DEFAULTS)) if (!NOT_A_DEFAULT.includes(k) && d[k] !== undefined && d[k] !== '' && Number.isFinite(+d[k])) out[k] = +d[k];
@@ -183,12 +189,12 @@ export function hopIbu(r, h, liters = n(r?.volumes?.batchLiters), boil = n(r?.bo
 }
 // The Calculate button: Total Grain Weight, 1st Mash temperature, IBU, Strike Volume and Temperature and the Sparge Volume.
 // Grain absorption 1.0 L/kg (0.12 gal/lb) unless the Equipment Profile gives one (absorbLkg).
-export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0) {
+export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0, eff = null) {
   const tt = recipeTotals(r, d, mp), first = firstMashStep(r, mp);
   const pre = n(r?.volumes?.boilLiters);
   const spargeL = pre && tt.strikeL ? Math.max(0, pre - (tt.strikeL - tt.grainKg * absorbLkg)) : null;
   const spargeC = r?.spargeTempC ?? (mp?.spargeTemp !== undefined ? (mp.units === 'Metric' ? n(mp.spargeTemp) : fToC(n(mp.spargeTemp))) : r?.mash?.spargeTempC ?? null);
-  return { expectedSG: expectedGravity(r), grainKg: tt.grainKg, firstMashC: first ? round(n(first.tempC), 1) : null, ibuCalc: tinsethIbu(r), strikeLiters: tt.strikeL || null, strikeTempC: tt.strikeC,
+  return { expectedSG: expectedGravity(r, eff), grainKg: tt.grainKg, firstMashC: first ? round(n(first.tempC), 1) : null, ibuCalc: tinsethIbu(r), strikeLiters: tt.strikeL || null, strikeTempC: tt.strikeC,
     spargeLiters: spargeL === null ? null : round(spargeL, 2), spargeTempC: spargeC === null ? null : round(spargeC, 1), spargeType: r?.spargeType || mp?.sparge || 'batch',
     spargeMinutes: r?.spargeMinutes ?? (mp?.batchRest ?? null) };
 }
@@ -358,7 +364,7 @@ export const GRAIN_FIELDS = [
   ['Amount', 'Grain N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
   ['Potential', 'Grain N: Potential (yield %)', f => f.yieldPct],
   ['SRM', 'Grain N: color in SRM', f => f.color],
-  ['PPG_SG', 'Grain N: PPG>SG, its gravity points', (f, u, r) => gravityPoints(f, r)],
+  ['PPG_SG', 'Grain N: PPG>SG, its gravity points', (f, u, r, eff) => gravityPoints(f, r, eff)],
 ];
 export const FERMENTABLE_FIELDS = [
   ['Name', 'Fermentable N: the fermentable', f => f.name ?? ''],
@@ -367,7 +373,7 @@ export const FERMENTABLE_FIELDS = [
   ['Measurement', 'Fermentable N: lb, oz, kg or g', (f, u) => FERM_MEASURES[f.unit] ? f.unit : u.grainUnit],
   ['Potential', 'Fermentable N: Potential (yield %)', f => f.yieldPct],
   ['SRM', 'Fermentable N: color in SRM', f => f.color],
-  ['PPG_SG', 'Fermentable N: PPG>SG, its gravity points', (f, u, r) => gravityPoints(f, r)],
+  ['PPG_SG', 'Fermentable N: PPG>SG, its gravity points', (f, u, r, eff) => gravityPoints(f, r, eff)],
   ['After_Boil', 'Fermentable N: added after the boil (true or false)', f => AFTER_BOIL_TYPES.includes(f.type) && !!f.addAfterBoil],
 ];
 export const ADJUNCT_FIELDS = [
@@ -414,8 +420,8 @@ export function recipeFieldValues(r, d = {}) {
   hops.forEach((h, i) => { for (const [end, , get] of HOP_FIELDS) put(hopFieldName(i + 1, end), get(r, h, u, sch, i) ?? (end === 'Name' || end === 'Date' ? '' : 0)); });
   const ferms = r?.ingredients?.fermentables || [];
   put(GRAIN_COUNT[0], r ? GRAIN_COUNT[2](r) : 0); put(FERM_COUNT[0], r ? FERM_COUNT[2](r) : 0);
-  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u, r) ?? (end === 'Name' ? '' : 0)); });
-  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u, r) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u, r, d.eff) ?? (end === 'Name' ? '' : 0)); });
   put(ADJ_COUNT[0], r ? ADJ_COUNT[2](r) : 0);
   (r?.ingredients?.miscs || []).forEach((m, i) => { for (const [end, , get] of ADJUNCT_FIELDS) put(`rcp_Adjunct_${i + 1}_${end}`, get(m) ?? 0); });
   return out;

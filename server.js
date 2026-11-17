@@ -46,8 +46,8 @@ import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js
 import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS, DEFAULT_PUMP_OVERLAY, DEFAULT_VALVE_OVERLAY, NEW_TAB_KEYS } from './lib/profiles.js';
-import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
-import { newUserRecipe } from './public/recipecalc.js';
+import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView, brewOnTab, defaultBrewOn, brewOnEfficiency, recipeForBrowser, brewOnFromBrowser } from './lib/recipe.js';
+import { newUserRecipe, expectedGravity } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
@@ -225,13 +225,21 @@ engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vess
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
-engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list() });
+engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list(), eff: brewOnEfficiency(store.config, profiles) });
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 // The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
 const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));
 const currentRecipe = () => store.config.recipe ?? null;
 const hopAlerts = new HopAlerts({ store, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe });
-function useRecipe(rc) { store.config.recipe = cleanRecipe(rc); store.writeConfig(); broadcast('recipe', {}); return store.config.recipe; }
+// a Recipe always has its Brew on Tab when this Schema has a Tab with an Equipment Profile (Rule 17.13); its Expected Gravity uses
+// that Tab's profile's Efficiency and nothing else
+function useRecipe(rc) {
+  const r = cleanRecipe(rc);
+  if (!brewOnTab(store.config, r)) r.brewOn = defaultBrewOn(store.config, profiles);
+  r.expectedSG = expectedGravity(r, brewOnEfficiency(store.config, profiles, r));
+  store.config.recipe = r; store.writeConfig(); broadcast('recipe', {}); return store.config.recipe;
+}
+const recipeOut = v => ({ ...v, recipe: recipeForBrowser(v.recipe, store.config, profiles) });
 // a recipe file on the Brain: a path inside the Brain's folder (or a media folder), .bsmx or .xml only
 function recipeFile(p) {
   const rel = String(p ?? '').trim().replace(/\\/g, '/');
@@ -861,7 +869,7 @@ async function route(req, res) {
   }
   // ---- The Brew Process (☰ Menu > Brew Process): everyone sees it, admins change it, operators start the Brew Day
   if (p === '/ui/brewprocess' && m === 'GET') {
-    const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list() });
+    const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list(), eff: brewOnEfficiency(store.config, profiles) });
     return ok(res, { steps: MAJOR_STEPS, fields: FIELDS, setup: brewSetup(store.config), templates: processTemplates.list(), recipeFields: RECIPE_FIELDS,
       recipe: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)])), processes: brewNames(brewSetup(store.config)).filter(n => engine.exists(n)) });
   }
@@ -1043,7 +1051,7 @@ async function route(req, res) {
   }
   // The Recipe (☰ Menu > Recipe): everyone sees it, brewers (operators) import, change and save it
   if (p === '/ui/recipe' && m === 'GET') {
-    const v = recipeView(currentRecipe() ?? newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), store.config.brewDefaults ?? {});
+    const v = recipeOut(recipeView(currentRecipe() ?? { ...newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list()), brewOn: defaultBrewOn(store.config, profiles) }, store.config.brewDefaults ?? {}));
     for (const a of v.schedule.alerts) { const f = store.resolveMedia(a.audio); a.audioFound = !!f && fs.existsSync(f); }
     return ok(res, { ...v, has: !!currentRecipe(), saved: recipes.list(), alerts: hopAlerts.status() });
   }
@@ -1053,11 +1061,15 @@ async function route(req, res) {
     if (!/^[\w.-]+\.(mp3|wav|ogg|m4a)$/i.test(name)) return fail(res, 400, 'A voice file must be .mp3, .wav, .ogg or .m4a');
     try { const r = await mediaFiles.upload(req, 0, 'Audio/Hops', name, true); return ok(res, { ok: true, ...r }); } catch (e) { return fail(res, 400, e.message); }
   }
-  if (p === '/ui/recipe' && m === 'PUT') { useRecipe(await jsonBody(req)); return ok(res, recipeView(currentRecipe(), store.config.brewDefaults ?? {})); }
+  if (p === '/ui/recipe' && m === 'PUT') {
+    const b = await jsonBody(req), was = currentRecipe();
+    b.brewOn = 'brewOnRef' in b ? brewOnFromBrowser(b.brewOnRef, store.config) : was?.brewOn ?? null;
+    useRecipe(b); return ok(res, recipeOut(recipeView(currentRecipe(), store.config.brewDefaults ?? {})));
+  }
   if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(newUserRecipe(store.config.brewDefaults ?? {}, brewProfiles.boil.list())); return ok(res); }
   if (p === '/ui/recipe/import' && m === 'POST') {
     const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
-    useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name });
+    useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name, fileEfficiency: got.recipe.fileEfficiency ?? null });
   }
   if (p === '/ui/recipe/save' && m === 'POST') {
     // mode overwrite: the saved Recipe with this name is replaced (its old copy goes to config/backups/recipes); mode new: saved

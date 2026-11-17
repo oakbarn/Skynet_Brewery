@@ -9,6 +9,14 @@ En haut :
 - **Library ...** ouvre une recette enregistrée, enregistre celle-ci (💾), ou supprime une recette enregistrée. Les recettes enregistrées sont sur le Brain dans `config/recipes`.
 - **Cancel** et **Save**.
 
+## Brew on : le Tab du brassin {#brew-on-the-tab-for-the-brew}
+
+**Brew on** (à côté de Brew Length) choisit le Tab sur lequel cette recette est brassée. Il liste les Tabs qui ont un Equipment Profile, avec le nom du profil et son rendement de brasserie (Brewhouse Efficiency). Le Tab choisi devient le Tab du brassin.
+
+Une recette nouvelle ou importée commence sur le Tab dont l'Equipment Profile a une cuve d'empâtage (Mash Tun) ou un All In One, sinon sur le premier Tab qui a un Equipment Profile. Un Tab renommé reste choisi.
+
+L'**Expected Gravity** et les points de densité utilisent le **rendement de brasserie de l'Equipment Profile de ce Tab**. C'est le seul rendement de Skynet : il n'y a pas de valeur par défaut générale, et une recette n'en garde jamais un à elle. Un nouvel Equipment Profile commence à 72 %, et vous le changez sur le profil ([Equipment Profiles](28-schemas-and-equipment-profiles)). Sans Tab choisi, les grains et les adjuvants n'ont pas de points de densité, et l'Expected Gravity reste vide.
+
 ## Le niveau {#the-level}
 
 Choisissez le **Level** (niveau) de la recette en haut du Tab Recipe, à côté de NEW. **NEW** le demande aussi.
@@ -138,7 +146,7 @@ Les fermentescibles d'une recette sont répartis sur deux onglets. **Grain** con
 
 - **Name**, le poids, **Potential** (le rendement, %), **SRM** (la couleur) et **PPG>SG**, ses points de densité (calculés).
 - Le poids s'affiche dans le **standard de poids du grain** choisi dans ☰ Menu > Default (Pounds ou Kg). Un fichier BeerSmith ou BeerXML importé y est aussi montré. Son étiquette, et l'étiquette PPG>SG, ne peuvent être changées que dans Settings > Panel settings: screen, Tabs and alerts.
-- **Points de densité** = Potential × 46.214 × livres × rendement ÷ gallons du brassin. Les grains et les adjuvants utilisent le rendement de la brasserie ; les extraits, sucres, fruits et jus donnent tout leur sucre. Les points de chaque ligne s'additionnent dans la case **Expected Gravity** (densité attendue) du Tab Recipe (1 + points ÷ 1000), calculée chaque fois qu'une quantité change, et par Calculate. Il faut la Brew Length.
+- **Points de densité** = Potential × 46.214 × livres × rendement ÷ gallons du brassin. Les grains et les adjuvants utilisent le rendement de brasserie de l'Equipment Profile du Tab **Brew on** ; les extraits, sucres, fruits et jus donnent tout leur sucre. Les points de chaque ligne s'additionnent dans la case **Expected Gravity** (densité attendue) du Tab Recipe (1 + points ÷ 1000), calculée chaque fois qu'une quantité change, et par Calculate. Il faut la Brew Length.
 - **After Boil** (onglet Fermentable seulement) : un interrupteur, montré seulement pour les types qu'un brasseur ajoute pendant ou après l'ébullition (Extract, Dry Extract, Sugar, Fruit, Juice). Activé veut dire qu'il est ajouté après l'ébullition. Le grain n'est jamais ajouté après l'ébullition, donc l'onglet Grain n'en a pas.
 
 Chaque onglet montre son poids total. Un import fait venir chaque champ de grain (notes, protéines, humidité et le reste aussi), prêt pour plus tard.
@@ -179,6 +187,11 @@ Deux sortes de fichiers arrivent, et les deux apportent chaque grain, houblon, l
 - **BeerXML .xml** : dans BeerSmith, utilisez **File > Export > BeerXML**. La plupart des autres logiciels de recettes peuvent aussi l'exporter.
 
 Note : dans un fichier .bsmx, BeerSmith garde ses propres unités américaines : les poids en **onces**, les volumes en **onces liquides**, les températures en **°F**. Un élément Misc garde l'unité que vous lui avez donnée dans BeerSmith (tsp, g, oz ...). Skynet les convertit toutes dans ses propres unités en lisant le fichier. (Les fichiers BeerXML utilisent les kilogrammes et les litres.)
+
+**Le rendement du fichier.** Un fichier BeerSmith ou BeerXML dit à quel rendement de brasserie son auteur a brassé. Ce nombre peut ne rien vouloir dire (beaucoup de brasseurs ne le règlent jamais), donc après l'import Skynet demande :
+
+- **Ignore it** (l'ignorer, choisi au départ) : le rendement de votre Equipment Profile reste tel quel.
+- **Put on** le Tab Brew on : le nombre du fichier va dans l'Equipment Profile de ce Tab. Skynet montre d'abord le changement (« 72 % → 75 % »), et **↩ Undo** remet l'ancien nombre pendant quelques secondes après. Cela change chaque recette brassée sur ce Tab.
 
 Vous pouvez aussi importer depuis la page **Import**, depuis Node-RED (envoyez le fichier par POST à `/api/import/recipe?file=MyBeer.bsmx`), ou depuis un Process (plus bas).
 
@@ -225,7 +238,7 @@ Skynet ne va pas chercher la voix tout seul sur le site web : les sites de voix 
 
 Dans **☰ Menu > Default** :
 
-- **Water Profile**, **Boil time**, **Brewhouse efficiency**, **Water to grain ratio**, **Grain temperature** et **Strike offset** : ce avec quoi commence une nouvelle recette. Chacun peut être changé dans la recette.
+- **Water Profile**, **Boil time**, **Water to grain ratio**, **Grain temperature** et **Strike offset** : ce avec quoi commence une nouvelle recette. Chacun peut être changé dans la recette.
 - **How amounts show** (comment s'affichent les quantités) : grains (lb, kg, oz, g), houblons (oz, g), volumes (gal, L, qt), températures (°F, °C), eau/grain (qt/lb, L/kg) et éléments divers (comme la recette les donne, métrique, ou US).
 
 Dans **Settings > Panel settings: screen, Tabs and alerts** :

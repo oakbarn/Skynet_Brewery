@@ -37,7 +37,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -271,7 +271,11 @@ const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(
 const TEXT_NORMAL = 18, TEXT_LARGE = 28;
 const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
-  S = await api('GET', '/ui/state');
+  // the state and every profile list come in together, so nothing on screen ever sees the new state without its profiles
+  const [st, ...lists] = await Promise.all([api('GET', '/ui/state'), api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
+    ...['mash', 'boil', 'water', 'tab', 'valve', 'pump'].map(k => api('GET', '/ui/profiles/' + k))]);
+  S = st;
+  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles, S.pumpProfiles] = lists;
   showStandby(S.standby);      // the Brain is in Standby (Rule 6.32): only its Standby page shows
   renderBrainNotices(S.brainNotices);
   renderFlameOut(S.flameOut);
@@ -303,8 +307,6 @@ async function load() {
     pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } else vbFromHash(); });
   }
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
-  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles, S.pumpProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
-    ...['mash', 'boil', 'water', 'tab', 'valve', 'pump'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
@@ -16221,6 +16223,38 @@ const rcRound = (v, d = 2) => v === null || v === undefined || v === '' || !Numb
 const TU = u => u === 'F' ? '°F' : '°C';
 const rcFrom = rc => rc.sourceFormat === 'bsmx' ? `BeerSmith ${rc.sourceVersion ? rc.sourceVersion + ' ' : ''}.bsmx` : rc.sourceFormat === 'beerxml' ? 'BeerXML' : 'made here';
 const rcMashProfile = rc => S.mashProfiles.find(x => x.id === rc.mashProfile) || null;
+// The Recipe's Brew on Tab (Rule 17.13, OakBarn Brewery, 2026-11-17: "Yes and That becomes the Tab for the Brew"): one of the Tabs with an
+// Equipment Profile. Its profile's Brewhouse Efficiency is the only efficiency the Recipe uses (never an overall default).
+// (S.profiles is empty for a moment while the panel reloads after a change)
+const rcProfiles = () => S.profiles || [];
+const rcBrewTabs = () => (S.config.workspaces || []).filter(w => !w.build && w._ref && w.equipmentProfile && rcProfiles().some(p => p.id === w.equipmentProfile));
+const rcBrewTab = rc => rcBrewTabs().find(w => w._ref === rc.brewOnRef) || null;
+const rcBrewProfile = rc => { const w = rcBrewTab(rc); return w ? rcProfiles().find(p => p.id === w.equipmentProfile) || null : null; };
+const rcEff = rc => { const v = +rcBrewProfile(rc)?.brewhouseEfficiency; return Number.isFinite(v) && v > 0 ? v : null; };
+const tabTitle = w => w.id ? `${w.id}: ${w.name}` : w.name;
+// a short note with ↩ Undo for a few seconds (Rule 2.53)
+function undoNote(text, onUndo, ms = 8000) {
+  $('#undoNote')?.remove();
+  const bar = h('div', { id: 'undoNote', role: 'status' }), close = () => { clearTimeout(bar._t); bar.remove(); };
+  bar.append(h('span', {}, text), h('button', { type: 'button', onclick: guard(async () => { close(); await onUndo(); }) }, '↩ Undo'),
+    h('button', { type: 'button', class: 'bbX', title: 'Close this note', onclick: close }, '✕'));
+  bar._t = setTimeout(close, ms); document.body.append(bar);
+}
+// A BeerXML or BeerSmith file brings the Efficiency of whoever wrote the recipe. OakBarn Brewery, 2026-11-17: "That figure could be
+// meaningless as I never set it in Beer Smith. For some user it might be good. So User Choice when importing"; "Ignore or Put On
+// Recipe choice Tab". Put on puts it into the Brew on Tab's Equipment Profile, after showing the change; ↩ Undo puts the old one back.
+async function rcFileEfficiency(v) {
+  const p = rcBrewProfile(rcWork), w = rcBrewTab(rcWork); if (!(+v > 0)) return;
+  if (!p) return toast(`The file says its Efficiency is ${v} %. It was ignored: this Schema has no Tab with an Equipment Profile.`, false, 8000);
+  const was = p.brewhouseEfficiency, o = { pick: 'ignore' };
+  if (+was === +v) return;
+  if (await dialog('The file\'s Efficiency', [['_n', `This file says the recipe was written for a Brewhouse Efficiency of ${v} %. Skynet uses the Efficiency of the Equipment Profile of the Brew on Tab (${tabTitle(w)}): "${p.name}", ${was ?? '?'} %.`, 'note'],
+    ['pick', 'Use', 'sel', [['ignore', `Ignore it: keep ${was ?? '?'} %`], ['put', `Put on ${tabTitle(w)}: "${p.name}" ${was ?? '?'} % → ${v} %`]]]], o) !== 'ok') return;
+  readFields(o); if (o.pick !== 'put') return;
+  const put = async eff => { const r = await api('PUT', `/ui/equipment/${p.id}`, { ...p, brewhouseEfficiency: eff }); S.profiles = r.list; await rcLoad(); renderMenuPane(); };
+  await put(+v);
+  undoNote(`"${p.name}": Brewhouse efficiency ${was ?? '?'} % → ${v} %.`, () => put(was));
+}
 async function rcLoad() { rcView = await api('GET', '/ui/recipe'); rcWork = clone(rcView.recipe); profDirty.recipe = false; }
 function renderRecipeTab(box) {
   if (!rcView) { box.append(h('h3', {}, 'Recipe'), h('p', { class: 'muted' }, 'Loading ...')); rcLoad().then(renderMenuPane).catch(e => toast(e.message, true)); return; }
@@ -16253,6 +16287,7 @@ function renderRecipeTab(box) {
         ['pick', 'Recipe', 'sel', r.names.map((n, i) => [String(i), n])]], w) === 'ok') { readFields(w); if (w.pick !== '0') r = await api('POST', q + '&pick=' + w.pick, buf, true); }
     }
     await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast(`Recipe "${r.name}" imported`);
+    if (op && r.fileEfficiency) await rcFileEfficiency(r.fileEfficiency);
     if (op) await askSaveImported(r.name);
   });
   // the Recipe library: saved Recipes in config/recipes on the Brain
@@ -16308,6 +16343,17 @@ function rcInput(obj, key, { kind = 'num', to = v => v, from = v => v, list, d =
 // The Recipe's Boil Profile (OakBarn Brewery, 2026-11-13). Picking one fills in the Boil Minutes. A profile with its own Boil Off
 // asks which to use, each time ("I think 3"): the Equipment Profile's, or the profile's own. The Recipe keeps the answer
 // (rc.boilOffRate in liters per hour; empty = the Equipment Profile's).
+const BREW_ON_TIP = 'The Tab this Recipe is brewed on: one of the Tabs with an Equipment Profile. It becomes the Tab for the Brew. The Expected Gravity uses the Brewhouse Efficiency of that Tab\'s Equipment Profile, the only place Skynet keeps an Efficiency.';
+function rcBrewOnPick(rc, changed) {
+  const tabs = rcBrewTabs();
+  if (!tabs.length) return h('span', { class: 'muted' }, 'No Tab has an Equipment Profile');
+  const sel = h('select', { title: BREW_ON_TIP }, ...(rcBrewTab(rc) ? [] : [h('option', { value: '' }, '')]), ...tabs.map(w => {
+    const p = rcProfiles().find(x => x.id === w.equipmentProfile);
+    return h('option', { value: w._ref, selected: w._ref === rc.brewOnRef }, `${tabTitle(w)} (${p.name}, ${p.brewhouseEfficiency ?? '?'} %)`);
+  }));
+  sel.onchange = () => { rc.brewOnRef = sel.value; rc.expectedSG = expectedGravity(rc, rcEff(rc)); changed(); renderMenuPane(); };
+  return sel;
+}
 function rcBoilPick(rc, changed) {
   const was = rc.boilProfile ?? '';
   const pick = rcInput({ boilProfile: was }, 'boilProfile', { kind: 'sel', list: [['', '(none)'], ...S.boilProfiles.map(x => [x.id, x.name]), ...(can('operator') ? [PROF_ADD] : [])], ro: !can('operator') });
@@ -16358,10 +16404,11 @@ function rcMain(pane, rc, u, changed) {
       rcBox('k', 'Beer Name', rcInput(rc, 'name', { kind: 'text', ...c }), { wide: true, field: 'rcp_Name' }),
       rcBox('k', 'Style', style, { wide: true, field: 'rcp_Style' }),
       rcBox('k', 'Brew Length', rcInput(rc.volumes, 'batchLiters', vol), { ...V, tip: 'The batch size, into the fermenter', field: 'rcp_Batch_Volume' }),
+      rcBox('k', 'Brew on', rcBrewOnPick(rc, changed), { wide: true, tip: BREW_ON_TIP }),
       calcBox('Grain Wt.', 'grainKg', v => rcRound(kgTo(v, u.grainUnit), 2), u.grainUnit, 'The weight of all the grains (Grain tab). Calculate works it out', 'rcp_Total_Grain_Weight'),
       calcBox('1st Mash', 'firstMashC', v => rcRound(cTo(v, u.tempUnit), 1), TU(u.tempUnit), 'The first mash step (MASH tab). Calculate works it out', 'rcp_First_Mash_Temp'),
       calcBox('IBU', 'ibuCalc', v => rcRound(v, 0), '', 'Bitterness from the Hops tab (Tinseth), with the Actual AAU of each hop. Calculate works it out', 'rcp_IBU'),
-      calcBox('Expected Gravity', 'expectedSG', v => rcRound(v, 3), '', 'The sum of the gravity points (PPG>SG) of every grain and fermentable. Worked out when an amount changes, and by Calculate', 'rcp_Expected_Gravity'),
+      calcBox('Expected Gravity', 'expectedSG', v => rcRound(v, 3), '', 'The sum of the gravity points (PPG>SG) of every grain and fermentable, with the Brewhouse Efficiency of the Brew on Tab\'s Equipment Profile. Worked out when an amount changes, and by Calculate', 'rcp_Expected_Gravity'),
       rcBox('b', 'Strike Volume', rcInput(rc, 'strikeLiters', vol), { ...V, field: 'rcp_Strike_Volume' }),
       rcBox('r', 'Strike Temperature', rcInput(rc, 'strikeTempC', tmp), { ...T, field: 'rcp_Strike_Temp' }),
       rcBox('r', 'Grain Temperature', rcInput(rc, 'grainTempC', tmp), { ...T, field: 'rcp_Grain_Temp' })),
@@ -16403,7 +16450,7 @@ function rcCalculate(rc, changed) {
   }
   rcAAWarn = false;
   sortHops(rc);
-  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc))); changed(); renderMenuPane();
+  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc))); changed(); renderMenuPane();
   toast('Calculated. Press Save to keep it');
 }
 // a warning that has one button, READ, to close it
@@ -16540,9 +16587,10 @@ function rcFerms(pane, rc, u, changed, grainTab) {
   // a changed amount or Potential: the gravity points of each line, the total, and the Expected Gravity on the Recipe tab
   const sum = () => {
     total.textContent = `${rcRound(kgTo(mine.reduce((a, f) => a + (+f.kg || 0), 0), W), 2)} ${W}`;
-    for (const [f, el] of pts) el.value = rcRound(gravityPoints(f, rc), 1);
-    rc.expectedSG = expectedGravity(rc);
-    eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : '(needs the Brew Length on the Recipe tab)';
+    const eff = rcEff(rc);
+    for (const [f, el] of pts) el.value = rcRound(gravityPoints(f, rc, eff), 1);
+    rc.expectedSG = expectedGravity(rc, eff);
+    eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : !eff && rc.ingredients?.fermentables?.some(mashedFerm) ? '(needs a Brew on Tab with an Equipment Profile, on the Recipe tab)' : '(needs the Brew Length on the Recipe tab)';
   };
   const live = { onChange: () => { changed(); sum(); } };
   const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : levelFermTypes(rc).includes('adjunct') ? 'adjunct' : levelFermTypes(rc)[0], kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
