@@ -96,3 +96,16 @@ Why Skynet asks: "Skynet counts the meter's pulses. To turn pulses into gallons 
 The Importer's flow meter list is shortened to this one (Rule 2.38: the old list had Turbine and Thermal mass).
 
 ### 7. (dropped: the Boards and Tabs page already leaves empty boards unticked)
+
+### 8. Name of a joined Heating Element
+OakBarn Brewery, 2026-11-16, word for word: "In the BruControl import this could all be handled by that attribute so that an Element that had the same Interface Port Combinations, get the One Port Pin, with the attribute. On the interview if we find one, the User will have to decide the Name of the Element as it was more than one in BruControl (different Elements)".
+
+**What is there now (lib/bruimport.js):** BruControl heat controls on the same Interface and Port (for example *HLT PID* and *HLT Hyst*) are already joined into **one** Heating Element with a Method for each (Rule 6.19). With BruControl names kept, the Element takes the **first** one's name, and the others are kept as other names a Process can still use (.heatControls). Nobody is asked.
+
+**The question** (only when two or more were joined):
+"*HLT PID* and *HLT Hyst* both switch the same pin (*Mega1* Port *8*). In Skynet that is **one** Heating Element, and its Method picks PID or Hysteresis. What should this Heating Element be called?"
+- one choice for each BruControl name (the first picked to start)
+- **Type a new name** (a box, Rule 3.1 letters)
+
+Processes from BruControl that used the other names keep working (they switch the Method). Not built: the Importer is on hold.
+
