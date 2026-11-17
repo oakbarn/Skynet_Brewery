@@ -50,7 +50,7 @@ Le côté technique : les tailles vont de 1/4" à 6", avec la taille en mm à c�
 
 ### IP Types
 
-Une case à cocher pour chaque IP Type et chaque taille : Tri-Clamp (TC1/2 à TC6), filetage de tuyau (FPT femelle et MPT mâle, de 1/8" à 6"), BSP, métrique (DN6 à DN150) et Quick Disconnect inox (FMSSQD femelle et MSSQD mâle). Seules les cochées apparaissent dans les listes IP Type des tuyaux, flexibles, pompes et Stove Top Vessels, avec celles déjà utilisées dans le Schema. Aucune n'est cochée au départ : cochez celles que vous utilisez ([Tuyaux, flexibles et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40).
+Une case à cocher pour chaque IP Type et chaque taille : Tri-Clamp (TC1/2 à TC6), filetage de tuyau (FPT femelle et MPT mâle, de 1/8" à 6"), BSP, métrique (DN6 à DN150), Quick Disconnect inox (FMSSQD femelle et MSSQD mâle) et Camlock (CAMF coupleur femelle et CAMM adaptateur mâle, de 1/2" à 6"). Seules les cochées apparaissent dans les listes IP Type des tuyaux, flexibles, pompes et Stove Top Vessels, avec celles déjà utilisées dans le Schema. Aucune n'est cochée au départ : cochez celles que vous utilisez ([Tuyaux, flexibles et réducteurs](24-pipes-and-hoses), Règle Skynet 5.40).
 
 ### Comment les choses se dimensionnent selon leurs tuyaux {#how-things-size-to-their-pipes}
 

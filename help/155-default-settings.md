@@ -50,7 +50,7 @@ The technical side: the sizes are 1/4" to 6", with the mm size beside each; Skyn
 
 ### IP Types
 
-A tick box for every IP Type and size: Tri-Clamp (TC1/2 to TC6), pipe thread (FPT female and MPT male, 1/8" to 6"), BSP, metric (DN6 to DN150) and stainless Quick Disconnect (FMSSQD female and MSSQD male). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in the Schema. None are ticked to start: tick the ones you use ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40).
+A tick box for every IP Type and size: Tri-Clamp (TC1/2 to TC6), pipe thread (FPT female and MPT male, 1/8" to 6"), BSP, metric (DN6 to DN150), stainless Quick Disconnect (FMSSQD female and MSSQD male) and Camlock (CAMF female coupler and CAMM male adapter, 1/2" to 6"). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in the Schema. None are ticked to start: tick the ones you use ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40).
 
 ### How things size to their pipes
 

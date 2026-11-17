@@ -51,6 +51,7 @@ Chaque tuyau et flexible a un **IP Type at start** et un **IP Type at end** : le
 - **BSP** (filetage britannique), de 1/8" à 6". Il ne va pas sur du NPT.
 - **Tuyau métrique (DN)** : DN6 à DN150.
 - **Quick Disconnect**, inox : **FMSSQD** est femelle et **MSSQD** est mâle, de 1/2" à 3".
+- **Camlock** : **CAMF** est le coupleur femelle et **CAMM** l'adaptateur mâle, de 1/2" à 6". Un CAMF va avec un CAMM de la même taille. Les Camlocks n'ont pas de dessin à eux.
 
 **Seules les tailles que vous cochez apparaissent dans les listes.** Cochez-les dans ☰ Menu > Default settings > **IP Types**. Aucune n'est cochée au départ. Une taille déjà utilisée dans le Schema apparaît toujours aussi.
 

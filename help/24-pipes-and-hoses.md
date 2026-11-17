@@ -51,6 +51,7 @@ Every pipe and hose has an **IP Type at start** and an **IP Type at end**: the c
 - **BSP** (British pipe thread), 1/8" to 6". It does not fit NPT.
 - **Metric pipe (DN)**: DN6 to DN150.
 - **Quick Disconnect**, stainless: **FMSSQD** is female and **MSSQD** is male, 1/2" to 3".
+- **Camlock**: **CAMF** is the female coupler and **CAMM** the male adapter, 1/2" to 6". A CAMF fits a CAMM of the same size. Camlocks have no drawing of their own.
 
 **Only the sizes you tick show in the lists.** Tick them in ☰ Menu > Default settings > **IP Types**. None are ticked to start. A size already used in the Schema always shows too.
 
