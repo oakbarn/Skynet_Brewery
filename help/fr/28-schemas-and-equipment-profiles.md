@@ -147,6 +147,19 @@ L'**Equipment list**, sous les nombres, montre ce qu'il y a sur le Tab du profil
 
 Les profils faits avant les Templates peuvent encore avoir une liste de cuves. Elles s'affichent sous **Made before Templates**, avec **Put on Tab** pour les dessiner sur le Tab du profil ([Réglages d'une cuve](34-vessel-tab)).
 
+## La vue du Equipment Profile {#the-equipment-profile-view}
+
+**Open** à côté du profil d'un Tab (ou **🖼 View the Equipment Profile** sous la liste déroulante Open) montre le profil comme la brasserie qu'il est : le Tab qui l'utilise, avec seulement son matériel (les cuves, pompes, vannes, éléments chauffants, sondes, raccords, IP, tuyaux et tuyaux souples), comme il est le jour du brassage. Rien ne peut y être cliqué. Quand aucun Tab du Schema chargé n'utilise le profil, un dessin de ses pièces s'affiche à la place.
+
+La barre du haut reste en place :
+
+- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** et **➡ Transfer Manifold to Tab** (tout, les cuves, le collecteur) mettent cette partie du matériel sur le **Tab** choisi à côté, en un clic chacun. Ils font la même chose que **📋 Paste onto a Tab** (plus bas) avec Both, Vessels Only ou Manifold Only : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
+- **🗑 Delete**, **💾 Save**, **↶ Undo** et **✕ Close**, dans cet ordre.
+
+En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** et Hop utilization. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. **📋 More ...** ouvre tout le reste sur ☰ Menu > Equipment Profile : la vérification des volumes, l'Equipment list, le Rendement sur ce Schema et le verrou.
+
+**Les Properties vont avec chaque Transfer et chaque collage.** Quand le Tab a déjà son propre Equipment Profile, les nombres qui changent sont dans la liste Replace (« Brewhouse efficiency 74 % → 72 % »). Quand le Tab n'a pas encore de profil, il prend celui-ci, donc son Rendement vient aussi. Le Tab garde sa propre disposition, donc le collage ne change jamais le dessin du profil. Cela n'arrive pas quand un autre Tab du Schema utilise déjà le profil, parce qu'un Schema utilise un profil sur un seul Tab.
+
 ## Coller un profil, ou commencer un nouveau Schema à partir de lui {#paste-a-profile-or-start-a-new-schema-from-it}
 
 Un Equipment Profile garde **tout le matériel physique de la brasserie** : les cuves, IP, raccords, tuyaux, tuyaux souples, refroidisseurs, pompes et vannes, **et les Interfaces (cartes), leurs Ports et leur câblage**, chacun avec toutes ses Propriétés et son Nom. Skynet les garde dans le profil chaque fois que le Tab qui l'utilise est enregistré. Deux boutons sous l'Equipment list les utilisent (Admins seulement).

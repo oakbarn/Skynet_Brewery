@@ -91,6 +91,7 @@ if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
 let knownPaths = new Set();   // file paths in the open process that were already warned about (not on the Brain)
 let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
+let eqv = null;            // the open Equipment Profile view: { id, back, to, work, dirty } (Rule 19.6 #2)
 let soundOn = false;
 const audios = new Map();
 
@@ -550,6 +551,7 @@ function drawWs() {
   if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
   drawMethodSpots(w);
   markFresh();         // a new item just moved here from the Build Tab glows until clicked (Rule 4.1)
+  if (eqv) eqvHide();  // the Equipment Profile view shows the hardware only
   renderPipes(); fitZoom(); updLockBtn(); renderVbPanel();
 }
 
@@ -4382,6 +4384,7 @@ function setEditing(on) {
   // lost (OakBarn Brewery, 2026-11-16: "Need to keep adding to the open Build tab and never leave with out a Warning that you will
   // lose the work if not saved"). Leaving goes through leaveLayout, which asks to Save first.
   if (on && editing && draft) { renderTabs(); renderWs(); return; }
+  if (on && eqv) eqViewClose(true);          // Edit layout leaves the Equipment Profile view
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
@@ -13884,6 +13887,7 @@ async function menuEditLayout() {
   setView('workspace'); setEditing(true);
 }
 function openMenuTab(k) {
+  if (eqv && !eqViewClose()) return;      // the Equipment Profile view closes first (it asks when its changes are not saved)
   if (editing) return toast('Save or exit Edit layout first', true);
   if (menuTab && menuTab !== k && paneDirty() && !confirm('This Menu tab has changes that are not saved. Leave them?')) return;
   if (menuTab && menuTab !== k) dropDirty(menuTab);
@@ -14674,7 +14678,8 @@ function renderEquipTab(box) {
     if (pick.value === '__add__') { pick.value = eqWork?.id || ''; return newProfile(); }
     if (pick.value) openProfile(pick.value);
   });
-  box.append(h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
+  box.append(h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick,
+    eqWork ? h('button', { type: 'button', class: 'primary', title: 'See this Equipment Profile as the brewery it is, with its Properties and the ➡ Transfer buttons', onclick: () => eqViewOpen(eqWork.id) }, '🖼 View the Equipment Profile') : ''));
   box.append(eqEditor());
 }
 // each Tab of the loaded Schema and its profile: pick one (and say what happens to the Tab's drawing), lock it, shared or unique
@@ -14719,7 +14724,8 @@ function tabProfileRow(w) {
   const share = !p ? '' : others.length ? `Shared: also used by ${others.map(u => `${u.schema} (Tab ${u.tab ?? '?'})`).join(', ')}. A change to it changes every one of them.` : 'Unique: only this Tab uses it.';
   const own = p && w.layoutFromProfile === false ? ' This Tab keeps its own layout (see the Default Layout tab).' : p ? ` The Tab shows its Default Layout (${p.drawn} equipment, ${plural(p.fittings || 0, 'fitting')}, ${plural(p.pipes, 'pipe')}).` : '';
   return h('div', { class: 'tabProfile' }, h('div', { class: 'bar wrap' }, h('span', {}, 'Tab ', h('b', {}, w.name), ' uses'), pick, lock,
-    p ? h('button', { onclick: () => { eqTabName = w.name; openProfile(p.id); } }, 'Open') : '',
+    p ? h('button', { title: 'Open the Equipment Profile: the brewery it is, its Properties and the ➡ Transfer buttons', onclick: () => { eqTabName = w.name; eqViewOpen(p.id); } }, 'Open') : '',
+    p ? h('button', { title: 'Its numbers, volume check, Equipment list and Efficiency here on ☰ Menu', onclick: () => { eqTabName = w.name; openProfile(p.id); } }, 'Settings') : '',
     p && admin && slotsToPort(w, p).length ? h('button', { class: 'primary', title: 'This profile has pumps or motorized valves this Schema has not got yet. Give each one its Interface and Port; its look and place come from the profile (Rule 19.6).', onclick: guard(() => slotPorts(w.name)) }, `🔌 Give ${pvCount(slotsToPort(w, p).length)} their Ports`) : '',
     p && others.length && admin ? h('button', { class: 'admin-only', title: 'Copy the profile and use the copy on this Tab only', onclick: guard(() => makeUnique(w.name)) }, 'Make it unique to this Tab') : ''),
     h('div', { class: 'muted' }, share, own),
@@ -15073,7 +15079,7 @@ function eqEffPane(p) {
 // replaced after a Replace / Cancel list, and so are the Tab's own profile numbers ("A Same Tab"); a board used on another Tab stops it.
 const PASTE_TIP = 'Put a copy of this profile\'s hardware on a Tab: its vessels, pumps, valves, pipes, hoses, fittings and the Widgets with IPs, every Device with its Interface, Port, Name and Properties. It lands on the 🔨 Build Tab; ✅ Finish Build ... > Move to Tab puts it on its Tab.';
 const PASTE_WHAT_TIP = 'Both: all of it. Vessels Only: each vessel with everything on it (its IPs, fittings, heaters and probes). Manifold Only: all of the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels. A pipe end whose piece does not come is left open, so a vessel can be joined to it.';
-async function pasteProfile(p) {
+async function pasteProfile(p, pick = null) {
   if (!can('admin')) return toast('Only an admin can paste an Equipment Profile', true);
   if (eqDirty) return toast('Save or Undo the changes to this profile first', true);
   p = { ...p, ...await api('GET', `/ui/equipment/${p.id}/hardware`) };
@@ -15084,8 +15090,8 @@ async function pasteProfile(p) {
   const o = { what: 'both', tab: (mine || here || tabs[0])?.name || '' };
   const fields = () => [['what', 'What to paste', 'sel', PASTE_WHAT, false, false, { tip: PASTE_WHAT_TIP }], ['tab', 'Goes to the Tab', 'sel', tabs.map(w => [w.name, tabTitle(w)])],
     ['_n', `"${p.name}" lands on the 🔨 Build Tab. ✅ Finish Build ... > Move to Tab puts it on that Tab, in the same spots. Hardware already on that Tab that is the same (the same board and Port, or a vessel with the same Name) is replaced: you see the list first.`, 'note', null, null, null, { keep: true }]];
-  if (await dialog(`📋 Paste "${p.name}"`, fields, o) !== 'ok') return;
-  readFields(o);
+  if (pick) Object.assign(o, pick);          // a ➡ Transfer button of the Equipment Profile view: one click, no dialog (Rule 2.44)
+  else { if (await dialog(`📋 Paste "${p.name}"`, fields, o) !== 'ok') return; readFields(o); }
   const to = tabs.find(w => w.name === o.tab); if (!to) return toast('Pick the Tab it goes to', true);
   const pieces = pastePieces(p, o.what);
   if (!pieces.graphics.length && !pieces.elements.length) return toast(`"${p.name}" has nothing for ${PASTE_WHAT.find(x => x[0] === o.what)[1]}.`, true);
@@ -15093,10 +15099,15 @@ async function pasteProfile(p) {
   if (plan.blocked) return toast(plan.blocked, true, 12000);
   // the Tab's own profile numbers that the profile's replace (shown in the same list)
   const tp = to.equipmentProfile && S.profiles.find(x => x.id === to.equipmentProfile), nums = numberChanges(EQUIP_FIELDS, tp, p);
+  // a Tab with no Equipment Profile takes this one, so its Properties (Efficiency ...) come too (OakBarn Brewery, 2026-11-17: "Equipment
+  // Profile Properties are ones transferred like Effenicy"); it keeps its own layout, so the paste never changes the profile's drawing.
+  // Not when another Tab of this Schema uses it (a Schema uses a profile on one Tab only).
+  const takes = !to.equipmentProfile && !S.config.workspaces.some(w => w.equipmentProfile === p.id);
   const what = x => x.label || x.name || x.kind;
   const lines = [...plan.gone.filter(x => x.kind !== 'pipe' && x.kind !== 'ip').map(what), ...(plan.gone.some(x => x.kind === 'pipe') ? [`${plan.gone.filter(x => x.kind === 'pipe').length} pipes and hoses joined to them`] : []),
     ...(plan.opened.length ? [`${plan.opened.length} pipe ends joined to them are let go (left open)`] : []),
     ...(tp && tp.locked ? [] : nums.map(n => `"${tp.name}": ${n[1]} ${n[2] ?? '?'} → ${n[3]}`))];
+  if (takes && lines.length) lines.push(`The Tab "${to.name}" uses "${p.name}" (Brewhouse efficiency ${p.brewhouseEfficiency ?? '?'} % ...)`);
   if (lines.length && !await replaceAsk(`Replace on the Tab "${to.name}"?`, `These ${lines.length} will be replaced by "${p.name}":`, lines)) return toast('Nothing was pasted');
   const was = clone(draft), wasNums = tp && !tp.locked && nums.length ? Object.fromEntries(nums.map(n => [n[0], n[2]])) : null;
   applyRenames(pieces, plan);
@@ -15114,6 +15125,7 @@ async function pasteProfile(p) {
   wsName = to.name;
   for (const x of [...pieces.elements, ...pieces.graphics]) keepOnBuild(x);
   if (wasNums) { await api('PUT', `/ui/equipment/${tp.id}`, { ...tp, ...Object.fromEntries(nums.map(n => [n[0], n[3]])) }); await refreshProfiles(); }
+  if (takes) { await api('PUT', '/ui/schema/profile', { tab: to.name, id: p.id, layout: 'keep' }); to.equipmentProfile = p.id; to.layoutFromProfile = false; await refreshProfiles(); }
   renderTabs(); renderWs();
   const big = x => x.kind !== 'pipe' && x.kind !== 'ip', n = pieces.elements.length + pieces.graphics.filter(big).length, r = plan.gone.filter(big).length;
   undoNote(`"${p.name}" (${PASTE_WHAT.find(x => x[0] === o.what)[1]}): ${n} pieces${pieces.open ? `, ${pieces.open} open pipe ends` : ''} on the 🔨 Build Tab for "${to.name}"${r ? `, ${r} replaced` : ''}. ✅ Finish Build ... > Move to Tab puts them there.`, guard(async () => {
@@ -15121,8 +15133,122 @@ async function pasteProfile(p) {
     if (wasBoards) { await api('PUT', '/ui/layout', { devices: wasBoards }); S.config.devices = clone(wasBoards); draft.devices = clone(wasBoards); }
     if (!draft.workspaces.some(w => w.name === wsName)) wsName = to.name;
     if (wasNums) { await api('PUT', `/ui/equipment/${tp.id}`, { ...S.profiles.find(x => x.id === tp.id), ...wasNums }); await refreshProfiles(); }
+    if (takes) { await api('PUT', '/ui/schema/profile', { tab: to.name, id: null }); await refreshProfiles(); }
     renderTabs(); renderWs(); toast('↩ The paste is undone');
   }), 15000);
+}
+// ---- The Equipment Profile view (OakBarn Brewery, 2026-11-17: "The one in Skynet now does not make sense for what the Equipment Profile
+// will be used for"; "Make it with your recommendations and I will test"). Opening a profile shows the brewery it is: the Tab that uses
+// it, as it looks on Brew Day (nothing on it can be clicked here), or a drawing of its pieces when no Tab of this Schema uses it. The
+// frozen bar on top has the three ➡ Transfer buttons ("1 for all 1 for just vessels and 1 for Just Manifold"), each one click (Rule
+// 2.44) to the Tab picked beside them, then 🗑 Delete · 💾 Save · ↶ Undo · ✕ Close (Rule 2.51). Under them, the profile's Properties
+// that go with it to a Tab ("Equipment Profile Properties are ones transferred like Effenicy"); ⚙ Properties changes them, and
+// 📋 More ... opens everything else (the volume check, the Equipment list, Efficiency on this Schema, the lock) on ☰ Menu.
+const EQV_TIPS = {
+  all: 'Put all of this profile\'s hardware on the Tab picked on the right: vessels, pumps, valves, pipes, hoses, fittings, boards and Ports, and its Properties (Efficiency ...). It lands on the 🔨 Build Tab; hardware already on that Tab that is the same is replaced after a list.',
+  vessels: 'Put only the vessels, each with everything on it (its IPs, fittings, heaters and probes), and the profile\'s Properties, on the Tab picked on the right. It lands on the 🔨 Build Tab.',
+  manifold: 'Put only the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels, and the profile\'s Properties, on the Tab picked on the right. A pipe end that went to a vessel is left open. It lands on the 🔨 Build Tab.',
+  to: 'The Tab the ➡ Transfer buttons put the hardware on.',
+  props: 'Change this profile\'s Name, Units and the numbers that go with it to a Tab (Brewhouse efficiency, losses ...). 💾 Save keeps them.',
+  more: 'Everything else about this profile on ☰ Menu > Equipment Profile: the volume check, the Equipment list, Efficiency on this Schema, the lock, New Schema from this profile.',
+};
+function eqViewOpen(id) {
+  const p = S.profiles.find(x => x.id === id); if (!p) return toast('That profile is gone', true);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
+  eqDirty = false;
+  const w = tabOfProfile(id), back = menuTab ? (curWs()?.name ?? wsName) : wsName;
+  leaveMenuTab();
+  const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
+  eqv = { id, back, to: (back && back !== w?.name && tabs.some(x => x.name === back) ? back : tabs.find(x => x !== w)?.name || w?.name || tabs[0]?.name), work: clone(p), dirty: false };
+  if (w) wsName = w.name;
+  document.body.classList.add('eqViewing'); sel = null;
+  renderTabs(); renderWs(); eqViewBar();
+}
+function eqViewClose(force = false) {
+  if (!eqv) return true;
+  if (!force && eqv.dirty && !confirm(`"${eqv.work.name}" has changes that are not saved. Close anyway?`)) return false;
+  const back = eqv.back; eqv = null;
+  document.body.classList.remove('eqViewing'); $('#eqViewBar')?.remove(); $('#eqPreview')?.remove();
+  if (back && S.config.workspaces.some(w => w.name === back)) wsName = back;
+  renderTabs(); renderWs();
+  return true;
+}
+function eqViewBar() {
+  $('#eqViewBar')?.remove(); $('#eqPreview')?.remove();
+  if (!eqv) return;
+  const p = S.profiles.find(x => x.id === eqv.id); if (!p) return eqViewClose(true);
+  if (!eqv.dirty) eqv.work = clone(p);
+  const w = eqv.work, admin = can('admin'), ro = !admin || p.locked, tab = tabOfProfile(p.id);
+  const tabs = S.config.workspaces.filter(x => !x.template && !x.build && !isHiddenTab(x));
+  const toSel = h('select', { title: EQV_TIPS.to }, ...tabs.map(x => h('option', { value: x.name, ...(x.name === eqv.to ? { selected: true } : {}) }, tabTitle(x))));
+  toSel.onchange = () => { eqv.to = toSel.value; };
+  const transfer = what => guard(async () => {
+    if (eqv.dirty) return toast('💾 Save or ↶ Undo the changes to this profile first', true);
+    const to = eqv.to, pp = S.profiles.find(x => x.id === eqv.id);
+    eqViewClose(true);
+    await pasteProfile(pp, { what, tab: to });
+  });
+  const save = guard(async () => {
+    const r = await api('PUT', `/ui/equipment/${p.id}`, eqv.work);
+    S.profiles = r.list; eqv.dirty = false; eqViewBar(); savedPop('Equipment Profile saved');
+  });
+  const undo = () => { if (eqv.dirty && !confirm('Go back to the last Save? The changes made since then are let go.')) return; eqv.dirty = false; eqViewBar(); };
+  const del = guard(async () => { await deleteProfile(p.id); if (!S.profiles.some(x => x.id === p.id)) eqViewClose(true); });
+  const props = guard(async () => {
+    const o = clone(w);
+    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num']), ['notes', 'Notes', 'area']];
+    if (await dialog(`⚙ Properties of "${w.name}"`, fields, o) !== 'ok') return;
+    readFields(o);
+    for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]];
+    eqv.work = o; eqv.dirty = JSON.stringify(o) !== JSON.stringify(p) || eqv.dirty; eqViewBar();
+  });
+  const more = () => { const id = p.id; if (!eqViewClose()) return; eqTabName = tab?.name ?? eqTabName; openProfile(id); };
+  const btn = (label, onclick, title, cls = '') => h('button', { type: 'button', class: cls, title, onclick }, label);
+  const nums = EQUIP_FIELDS.map(f => h('span', { class: 'eqvNum' }, `${f[1]} `, h('b', {}, `${w[f[0]] ?? '?'} ${unitOf(f, w.units)}`)));
+  const bar = h('div', { id: 'eqViewBar', class: 'eqViewBar' },
+    h('div', { class: 'bar wrap' },
+      h('b', { class: 'eqvTitle' }, `Equipment Profile: ${w.name}`), eqv.dirty ? h('span', { class: 'eqWarn' }, 'Not saved yet') : '',
+      admin ? btn('➡ Transfer All to Tab', transfer('both'), EQV_TIPS.all, 'primary') : '',
+      admin ? btn('➡ Transfer Vessels to Tab', transfer('vessels'), EQV_TIPS.vessels) : '',
+      admin ? btn('➡ Transfer Manifold to Tab', transfer('manifold'), EQV_TIPS.manifold) : '',
+      admin ? h('label', { class: 'eqvTo' }, 'Tab ', toSel) : '',
+      h('span', { class: 'spacer' }),
+      admin && !p.locked ? btn('🗑 Delete', del, 'Delete this Equipment Profile (asks first). The Tabs that used it keep their equipment and pipes.', 'danger') : '',
+      !ro ? btn('💾 Save', save, 'Save the changes to this profile', 'primary') : '',
+      !ro ? btn('↶ Undo', undo, UNDO_TIP) : '',
+      btn('✕ Close', () => eqViewClose(), 'Close the Equipment Profile and go back')),
+    h('div', { class: 'bar wrap eqvProps' }, !ro ? btn('⚙ Properties', props, EQV_TIPS.props) : h('span', {}, p.locked ? '🔒 Locked' : 'Properties'), ...nums,
+      h('span', { class: 'muted' }, tab ? `Shown: the Tab "${tab.name}" that uses it (look only: nothing here can be clicked).` : 'No Tab of this Schema uses it: a drawing of its pieces.'),
+      btn('📋 More ...', more, EQV_TIPS.more)));
+  $('#view-workspace > .bar').after(bar);
+  if (!tab) eqPreview(p);
+}
+// the Equipment Profile view shows only the physical hardware of the Tab (Rule 19.6 #2: "only Physical Hardware"): every Device on a
+// board, the vessels, fittings, IPs, pipes and hoses. Widgets, Timers, Texts and pictures are hidden while it is open.
+function eqvHide() {
+  const els = new Map(S.config.elements.map(e => [String(e.name), e])), gs = new Map(S.config.graphics.map(g => [String(g.id), g]));
+  for (const n of document.querySelectorAll('#ws .el, #ws .gfx')) {
+    const e = n.dataset.gid ? null : els.get(n.dataset.name), g = n.dataset.gid ? gs.get(n.dataset.gid) : null;
+    const hw = e ? e.device !== undefined && e.device !== '' : g ? ['vessel', 'ip', 'pipe'].includes(g.kind) : true;
+    n.classList.toggle('eqvHidden', !hw);
+  }
+}
+// a drawing of a profile no Tab of this Schema uses: its vessels, fittings and IPs as outlines with their Labels, and its pipes
+async function eqPreview(p) {
+  const full = await api('GET', `/ui/equipment/${p.id}/hardware`).catch(() => null);
+  if (!eqv || eqv.id !== p.id || $('#eqPreview')) return;
+  const gs = full?.graphics || [], els = full?.hardware?.elements || [];
+  const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); return n; };
+  const W = full?.hardware?.width || 1600, H = full?.hardware?.height || 900, svg = mk('svg', { class: 'buildMark eqPrevSvg', viewBox: `0 0 ${W} ${H}`, width: '100%' });
+  for (const g of gs.filter(g => g.kind === 'pipe' && g.points?.length > 1)) svg.append(mk('polyline', { points: g.points.map(c => c.join(',')).join(' '), class: 'bmPipe' }));
+  for (const o of [...gs.filter(g => g.kind !== 'pipe' && g.kind !== 'ip'), ...els.filter(e => !e.integratedIn)]) {
+    const x = +o.x || 0, y = +o.y || 0, w = +o.w || 120, hh = +o.h || 60;
+    svg.append(mk('rect', { x, y, width: w, height: hh, rx: 4, class: 'bmBox' }));
+    const t = mk('text', { x: x + w / 2, y: y + hh / 2, class: 'bmText' }); t.textContent = o.label || o.name || ''; svg.append(t);
+  }
+  const box = h('div', { id: 'eqPreview', class: 'eqPreview' }, gs.length || els.length ? svg : h('p', { class: 'muted' }, `"${p.name}" has no hardware kept yet: give it to a Tab (☰ Menu > Equipment Profile) and build on that Tab.`));
+  $('#eqViewBar').after(box);
 }
 // the Replace / Cancel list (Rule 19.6 #2: "Nothing happens until the user says so: a list shows what will be replaced")
 function replaceAsk(title, intro, lines) {
