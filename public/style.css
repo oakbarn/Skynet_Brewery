@@ -1427,3 +1427,17 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 @keyframes spoutDrop { 0% { opacity: 0; translate: -6px -2px; } 25% { opacity: 1; } 100% { opacity: 0; translate: 6px 6px; } }
 .pipes .spout.grav { opacity: .55; }
 .pipes .spout.grav .spoutBody, .pipes .spout.grav .spoutHi, .pipes .spout.grav .spoutDrop { animation-duration: 1.6s; }
+/* The Equipment Profile view (Rule 19.6 #2): the Tab it is, look only, under a frozen bar with the ➡ Transfer buttons */
+body.eqViewing #wsTabs, body.eqViewing #menuTabs { visibility: hidden; }
+body.eqViewing #ws { pointer-events: none; }
+.eqViewBar { position: sticky; top: 0; z-index: 40; background: var(--panel2); border-bottom: 1px solid var(--line); padding: 6px 10px; }
+.eqViewBar .bar { gap: 8px; align-items: center; }
+.eqViewBar .eqvTitle { font-size: 1.05em; margin-right: 8px; }
+.eqViewBar .eqvProps { font-size: .92em; margin-top: 4px; }
+.eqViewBar .eqvNum b { margin-right: 6px; }
+.eqPreview { padding: 10px; }
+.eqPreview .eqPrevSvg { max-width: 100%; height: auto; position: static; opacity: 1; }
+.eqPrevSvg .bmBox { fill: var(--panel2); stroke: var(--text); stroke-width: 2; }
+.eqPrevSvg .bmPipe { fill: none; stroke: #8a8f96; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.eqPrevSvg .bmText { fill: var(--text); font-size: 16px; text-anchor: middle; dominant-baseline: middle; }
+.eqvHidden { display: none !important; }
