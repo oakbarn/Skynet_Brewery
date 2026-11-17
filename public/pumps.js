@@ -63,8 +63,11 @@ export function factLines(el) {
   const pw = powerText(powerOf(el)); if (pw) out.push('Power: ' + pw);
   out.push('Use: ' + (useOf(el) === 'cold' ? 'Cold (glycol, ice water)' : 'Hot & Cool'));
   if (isPwmPump(el)) out.push(`Speed control: PWM, Speed ${pumpSpeed(el.speed)} %`);
-  const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest, ports: el?.pumpPorts };
-  for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest'], ['ports', 'Ports']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
+  const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest };
+  for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
+  // Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17: Ports could be confused with Arduino Ports); else the model's Fittings
+  const fin = el?.pumpInlet || el?.pumpPorts, fout = el?.pumpOutlet || el?.pumpPorts;
+  if (fin || fout) { if (fin) out.push('Inlet Fitting: ' + fin); if (fout) out.push('Outlet Fitting: ' + fout); } else if (f?.ports) out.push('Fittings: ' + f.ports);
   const sp = selfPrimeOf(el); if (sp !== null) out.push('Self Priming: ' + (sp ? 'Yes' : 'No'));
   if (f?.body) out.push('Body: ' + f.body);
   if (f?.note) out.push(f.note);

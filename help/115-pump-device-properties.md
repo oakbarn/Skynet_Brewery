@@ -69,7 +69,7 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    Just below them, **Overlay**: what is drawn on top while the pump is On. ![Every Overlay choice](help_pictures/Pump_Overlays.png)
    On the same line, **Database and .API ⬢**: the hexagon opens its settings (Help 98).
    Below them, **Model** (the Pump Model you choose from Available Common Brewery Pumps; its Properties can be displayed with the
-   ⬢, to look at only, with **◀ Back**: Power, Use, Flow, Lift, Hottest Liquid and Self Priming) and **Ports** (match YOUR pump fittings). Help 163.
+   ⬢, to look at only, with **◀ Back**: Power, Use, Flow, Lift, Hottest Liquid and Self Priming) and **Inlet Fitting** and **Outlet Fitting**, each on its own line (match YOUR pump fittings). Help 163.
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
 10. The **Device Type** greyed out and filled in for you: **DO@Pump** for an On/Off pump like the Blichmann RipTide (a Pump on a Digital Out, DO), **PWM@Pump** for a pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: `BM_22_DO@Pump_Pump_BH`.
 

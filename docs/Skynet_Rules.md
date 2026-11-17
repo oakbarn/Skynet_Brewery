@@ -2157,7 +2157,7 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   faces, with a U when needed, as a real hose does (OakBarn Brewery, 2026-11-17).
   (Replaces the 2026-11-14 pop-up that asked about gravity draining and needed **Yes, unhook it**.)
 - **Pumps:** **IP Type In** and **IP Type Out** in the pump's Properties (OakBarn Brewery: "Add Connection Type for the In and
-  Out IPs as above on a Pump"). A pump starts with what its Ports say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
+  Out IPs as above on a Pump"). A pump starts with what its Inlet Fitting and Outlet Fitting say (TC is Tri-Clamp, FPT or MPT is NPT, BSP is BSP), or else
   the Default pipe IP Type; pumps already made took it once.
 - **BruControl Import:** BruControl has no connector on its pipes, so imported pipes and hoses take the Defaults.
 
@@ -4661,8 +4661,11 @@ below the Overlay:
   recommended to be pumped because of cavitation (OakBarn Brewery, 2026-11-16). A fact is filled in only from the maker's own words:
   the RipTide's Hottest liquid stays Not known until Blichmann's own number is found (blichmannengineering.com now goes to MoreBeer,
   whose RipTide pages give none).
-- **Ports** where Power was (Rule 18.40): a dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have
-  is filled in and greyed out.
+- **Inlet Fitting** and **Outlet Fitting** where Power was (Rule 18.40), each on its own line and each its own dropdown (OakBarn
+  Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet
+  Fitting"). A dropdown, because a fitting can change a port; a Tri-Clamp port the model is known to have is filled in and greyed
+  out. A pump saved with the one **Ports** pick gets that pick in both, once; its Ports pick is kept (Design Rule #1).
+  *Replaced (2026-11-17):* one **Ports** dropdown for both ends.
 - **Speed Control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line, for **PWM pumps only** (a DC pump,
   or one already set to PWM; OakBarn Brewery's drawing, 2026-11-11). An AC pump is On/Off only. A PWM pump needs a true PWM Port (Rule
   4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
@@ -5091,6 +5094,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 ---
 
 ## Change log
+
+- 2026-11-17: Rule 18.32's Ports line changed (OakBarn Brewery, all Pump dialogs: "Ports could be confused with Arduino Ports so use Inlet Fitting"; "Separate Outlet Fitting"): the one **Ports** dropdown is now two rows, **Inlet Fitting** and **Outlet Fitting**, in the Add box and the Properties; IP Type In starts from the Inlet Fitting and IP Type Out from the Outlet Fitting (Rule 5.40); a pump saved with Ports gets that pick in both. Help 115, 130, 163 and their French; Hover Help with French. Checked against both programs: the BruControl Import has no pump fittings (BruControl has none), and its Build page shares the Pump dialogs, so it gets the two rows too. No new Help number. (thread "Split pump Ports into Inlet and Outlet Fitting")
 
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.

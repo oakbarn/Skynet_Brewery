@@ -8237,6 +8237,10 @@ const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump
   + '• BSP: the British pipe thread, on many pumps made outside the USA.\n'
   + '• Metric (DN): a metric size, for example DN15.\n'
   + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 ports, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.';
+// Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet Fitting"; "Separate Outlet Fitting"): two dropdowns where the one Ports dropdown was. His Ports Hover Help is kept, word for word.
+const INLET_FIT_TIP = 'Inlet Fitting: the fitting where the liquid goes into the pump (the suction side).\n' + PORTS_TIP;
+const OUTLET_FIT_TIP = 'Outlet Fitting: the fitting where the liquid comes out of the pump (the pressure side).\n' + PORTS_TIP;
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
   // the cavitation caveat (OakBarn Brewery, 2026-11-16: "add the little caveat on that proprtues that Boiling Liquids are not recomened
@@ -8244,14 +8248,17 @@ const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with not
   ['pumpHottest', 'hottest', 'Hottest Liquid', 'The hottest liquid it is made for.\n\n⚠ Boiling liquids are not recommended to be pumped because of cavitation (the hot liquid turns to steam bubbles inside the pump, so it loses its flow and can be damaged).'],
   // Self Priming (OakBarn Brewery, 2026-11-16: "a Prperty of Self Priming   for a Riotide it is no")
   ['pumpSelfPrime', 'selfPrime', 'Self Priming', 'Can the pump start pumping on its own when it sits above the liquid? Most brewery pumps cannot (No): the pump has to sit lower than the liquid it pulls from, and be filled with liquid (primed) before it is turned On, or it runs dry and can be damaged. To prime it, let the liquid flow in and open its air vent until liquid comes out.'],
-  ['pumpPorts', 'ports', 'Ports', PORTS_TIP]];
-// Ports is a dropdown (OakBarn Brewery, 2026-11-11): editable, because a fitting can change a port ("A user can add a TC Fitting and
-// make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay in its Hover Help.
-function pumpPortField(o, f, tip) {
-  const own = String(o.pumpPorts ?? '').trim(), tc = !own && f?.port && isTcPort(f.port);
-  if (tc) return ['_pumpPorts', 'Ports', 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
+  ['pumpPorts', 'ports', 'Fittings', PORTS_TIP]];
+// Each Fitting is a dropdown (OakBarn Brewery, 2026-11-11, said of Ports): editable, because a fitting can change a port ("A user can add a
+// TC Fitting and make it TC"); only a Tri-Clamp port the model is known to have is filled in and greyed out. The model's own words stay
+// in its Hover Help. A pump saved with the one Ports dropdown shows that pick in both (lib/store.js fills them once).
+function pumpFitField(o, f, side) {
+  const key = side === 'in' ? 'pumpInlet' : 'pumpOutlet', label = side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting', tip = side === 'in' ? INLET_FIT_TIP : OUTLET_FIT_TIP;
+  if (o[key] === undefined && String(o.pumpPorts ?? '').trim()) o[key] = String(o.pumpPorts).trim();
+  const own = String(o[key] ?? '').trim(), tc = !own && f?.port && isTcPort(f.port);
+  if (tc) return [`_${key}`, label, 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
   const hint = f?.ports ? ` The model: ${f.ports}.` : '';
-  return ['pumpPorts', 'Ports', 'sel', [['', '(pick)'], ...PUMP_PORTS.map(p => [p, p]), ...(own && !PUMP_PORTS.includes(own) ? [[own, own]] : [])], false, false, { tip: tip + hint }];
+  return [key, label, 'sel', [['', '(pick)'], ...PUMP_PORTS.map(p => [p, p]), ...(own && !PUMP_PORTS.includes(own) ? [[own, own]] : [])], false, false, { tip: tip + hint }];
 }
 // The Model's ⬢ Pump facts (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Change Keep to Back and no Edits Just View and Ports move";
 // Power and Use "Move to Facts"): the facts of the model picked, to look at, with one ◀ Back button. Ports is on the dialog, where Power
@@ -8282,18 +8289,19 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   // values"): the Model a Skynet pump drawing picks, and the Power that model runs on. The ⬢ Pump facts stays open.
   const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it));
   return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
-    // Ports, where Power was (Dialog 2 #3, 2026-11-16); Power and Use are in the Model's ⬢ Pump facts
-    (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpPortField(it, factsOf(it), PORTS_TIP)),
+    // Inlet Fitting and Outlet Fitting, each its own row where Ports was (where Power was, Dialog 2 #3, 2026-11-16; OakBarn Brewery,
+    // 2026-11-17); Power and Use are in the Model's ⬢ Pump facts
+    ...['in', 'out'].map(side => (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpFitField(it, factsOf(it), side))),
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
-    // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Ports, else the Default pipe IP Type
-    ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}), it.ipTypeOut ||= it.ipTypeIn,
+    // the connector at its In and Out IPs (Rule 5.40); a pump without one yet starts from its Inlet and Outlet Fittings, else the Default pipe IP Type
+    ...(add ? [] : (it.ipTypeIn ||= pumpIpType(it.pumpInlet, S.config.brewDefaults || {}), it.ipTypeOut ||= it.pumpOutlet ? pumpIpType(it.pumpOutlet, S.config.brewDefaults || {}) : it.ipTypeIn,
       [['ipTypeIn', 'IP Type In', 'sel', ipChoices(it.ipTypeIn), false, false, { tip: PUMP_IP_TIP, with: ['ipTypeOut', 'IP Type Out', 'sel', ipChoices(it.ipTypeOut), false, false, { tip: PUMP_IP_TIP }], ...x }]])),
     ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])];
 }
 // X, Y, Width and Height on one line in small boxes (OakBarn Brewery's drawing, 2026-11-11)
 const PUMP_XYWH = (x = {}) => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, pairCls: 'xywh',
   with: [['y', 'Y (Vertical)', 'num', null, false, false, { tip: DEVICE_TIPS.xy }], ['w', 'Width', 'num', null, false, false, { tip: DEVICE_TIPS.size }], ['h', 'Height', 'num', null, false, false, { tip: DEVICE_TIPS.size }]], ...x }]];
-const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpSelfPrime', 'pumpPorts'];
+const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpSelfPrime', 'pumpPorts', 'pumpInlet', 'pumpOutlet'];
 // can this Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin)
 const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 // Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
