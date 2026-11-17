@@ -2,17 +2,31 @@
 
 > **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
 
+> **What decides how close it holds:** the **probe** (a DS18B20 reads to about ±0.9 °F), **where it sits**, how well the liquid is
+> **mixed** and its **calibration** matter far more than how the element is switched. Get those right first.
+
 A heating element is **one Device**, however you control it. How it heats is its **heating method**, and you can change that
 while brewing, with a click or from a Process (Skynet Rule 6.19).
 
 | Heating method | What it does | Needs a Temperature Probe |
 |---|---|---|
 | **Direct** | Full on or off. | No |
+| **PWM** | A % you or a Process set (for example 60 %), sent out on a PWM Port. | No |
 | **Duty Cycle** | On for a % of each cycle (for example 60 % for a rolling boil). | No |
 | **Hysteresis** | On below the Setpoint, off when it gets there. | Yes |
 | **PID** | Holds a Setpoint temperature by working out its own %. | Yes |
 | **Deadband** | Steps its % up or down toward the Setpoint. | Yes |
 | **Precise** | A calm PID that holds a Setpoint to 0.1 degree, for a still's column or a water bath (see Precise heating). | Yes, a fine one |
+
+## Adding one: pick its method
+
+**Select Device Type > Heating Element** (or the Heating Element list on the Edit layout bar) has one row for each method:
+**Heating Element: DO On/Off**, **PWM**, **DutyC**, **HYS**, **PID**, **Precise** and **Deadband**, then **RIMs Tube** and **Vessel Device
+Template**. Every row makes the same **one** Heating Element; the row only picks the method it starts with. After the Add box, its
+Properties open with that method's **Settings** on top, so you set it up first. It can still use the other methods later.
+
+**The Port you pick decides how a % gets to the element** (a PWM Port or a plain Port, see [Which method and which wiring?](#which-method-and-which-wiring)).
+The **PWM** row offers PWM Ports first. Each method's Settings show a note saying which kind of Port it is on.
 
 ## Click it while brewing
 
@@ -74,15 +88,49 @@ stops at 150 °F.
 
 ⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.
 
-## Which methods suit your wiring
+## Which method and which wiring?
 
-How the element is wired decides which methods make sense (the hover help on the Heating method field says this too):
+### How Skynet sends the power
 
-| Wired to | What it does | Good methods |
-|---|---|---|
-| **SSR** (solid state relay) | Switches the element fully on or off, as fast as needed | All of them |
-| **Contactor** (a switch that clicks) | Switches it on or off, but wears out if switched quickly | Direct, Hysteresis (or a long cycle time) |
-| **DAC** (0-10 V signal to a power controller) | Sets the power anywhere from 0 to 100 % | PID, Deadband, Precise |
+- **Direct** and **Hysteresis** are only full On or Off. Any Port does them the same way.
+- **Duty Cycle** is On for its % of each cycle, a cycle seconds long, so a plain Port does it.
+- **PWM**, **PID**, **Deadband** and **Precise** work with a %: PWM uses the % you or a Process set, the others work it out from the
+  probe. **The Port you pick decides how that % goes out:**
+  - **A PWM Port** sends it as PWM. Wire it to a **PWM-to-0-10 V module and a 0-10 V power controller**, not straight to a zero-cross
+    SSR: the board switches hundreds of times a second and a zero-cross SSR can follow only 120 a second (60 Hz), so the power comes
+    out uneven.
+  - **A plain Port** turns the element fully On for its % of each **Output window** (a "Pseudo PID"). With an SSR this is the right
+    match. It switches On and Off many times a minute, so it **quickly wears out any mechanical switching device**: a mechanical
+    relay, a relay module with mechanical relays (the common Arduino relay boards), a contactor, a motorized or mechanical timer
+    switch. Use a **Solid State Relay (SSR)**.
+
+### Which wiring
+
+| Wired to | Port | Good methods | Note |
+|---|---|---|---|
+| **Zero-cross SSR** (solid state relay) | Plain | All of them | The usual choice. Not on a fast PWM Port. |
+| **Contactor** or mechanical relay (they click) | Plain | Direct, Hysteresis (or a long cycle time) | Wears out if switched often. |
+| **0-10 V power controller** (through a PWM-to-0-10 V module) | PWM | PWM, PID, Deadband, Precise | Smooth power from 0 to 100 %. Costs more, runs hotter, makes electrical noise. |
+
+### Where it makes a difference
+
+- **A kettle or HLT:** water takes minutes to change a degree, so a zero-cross SSR on a plain Port holds it as well as smooth power.
+- **A RIMS tube:** little water moves fast past the element, so smooth power (0-10 V) means less pulsing and less scorching.
+- **A still's column or a water bath held to 0.1 degree:** use **Precise**, a fine probe (a PT100) and smooth power.
+
+### PID or Precise
+
+**The method matters more than the wiring.** Hysteresis overshoots: it heats at full power up to the Setpoint and the element keeps
+heating a little after. PID and Precise ease off as they get close.
+
+**Precise is a PID with extras.** It uses the same Kp, Ki and Kd, so it still needs tuning: bad numbers make Precise bad too. With
+the same numbers it usually does better than PID: less overshoot after a warm-up (its I part does not pile up), a calmer output when
+the probe reading jumps around (it smooths the reading), and exact power on a plain Port (time left over carries to the next window).
+See Precise heating.
+
+**Auto-tune (planned, not in the Panel yet):** one button for PID and Precise. With water over the element, Skynet will turn it fully
+On and Off around the Setpoint for a few swings, measure how long and how big each swing is, and work out Kp, Ki and Kd; you then
+see the new numbers next to the old ones and pick Use or Keep old.
 
 ## Its main method and the other methods allowed
 
@@ -93,7 +141,7 @@ When you build it (and later in its Properties), the **Heating method** part has
   the line opens the **Current Method's own Settings** (for example Hysteresis Settings).
 - **On / Off**: on the same line, a small picture of the Element. One click turns it On or Off at once, like one click on it on
   the Tab. On / Off is the Element itself; **Direct** is a method (simply On or Off), so a Direct Element that is On heats at 100 %.
-- **Method Settings**: a **⬢** button for each method (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), with **✔ Used** or
+- **Method Settings**: a **⬢** button for each method (Direct, PWM, Duty Cycle, Hysteresis, PID, Deadband, Precise), with **✔ Used** or
   **Not used** under it. **Each method has its own settings dialog**: click its ⬢ to open it. See [Each method's settings](#each-method-s-settings).
 - **Control Method**: a balloon for each method in use, the Current Method **red**, the others **yellow**. These are the same
   balloons as under the Element on its Tab, and they work together: **click Duty Cycle here or on the Tab** and Duty Cycle becomes the
@@ -116,13 +164,15 @@ the settings in the Properties; they are saved when you Save the Properties.
   Tab, by a Method Clone and by a Process. **Off**: it can't be picked, and **all its other settings are hidden** (they are kept for
   later). **Direct** and the **Current Method** are always On (greyed). When you pick a new Current Method, the one before stays in use.
 - **Direct**: nothing to set; it is simply full On or Off.
+- **PWM**: **Power %** and **Output window (s)** (used only on a plain Port).
 - **Duty Cycle**: **Duty cycle %** and **Cycle time (ms)**.
 - **Hysteresis**: the **Temperature Probe** and its **Setpoint** on one line. **Direction** is Heating, with the **Offset (-)** beside
   it (-1 turns it on 1 degree below the Setpoint), picked from a list (every half degree its Hardware Controller allows).
   **Predictive** has the **Delay** beside it. A small drawing beside each shows the temperature (red) going between the Setpoint (blue)
   and the Offset (yellow).
 - **PID**, **Deadband** and **Precise**: the **Temperature Probe** and its **Setpoint**, then their own numbers (Kp, Ki, Kd, Max
-  output ...), **Reversed** (cooling) and **PWM pin**. Precise also says whether its probe can see 0.1 degree.
+  output ...) and **Reversed** (cooling). Precise also says whether its probe can see 0.1 degree. A note says whether its Port is a PWM
+  Port or a plain Port (see [Adding one: pick its method](#adding-one-pick-its-method)).
 
 The **Temperature Probe** and the **Setpoint** are shared: set them in one method's dialog and the others use the same ones.
 
@@ -188,7 +238,7 @@ MB_25_DO@H_Element_HLT_BH.HYS
 MB_25_DO@H_Element_HLT_BH.DutyC
 ```
 
-The codes are **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) and **PREC** (Precise). The Process editor offers them after the name.
+The codes are **DO** (Direct), **PWM**, **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) and **PREC** (Precise). The Process editor offers them after the name.
 
 **Only methods in use:** a Process may only switch to a method whose **Use Method** is On (Direct and the Current Method always are).
 The Process editor offers only those, and its check shows a plain error before you brew, for example: *hE_HLT_1 may only use Direct,
@@ -199,21 +249,21 @@ Duty Cycle, Hysteresis: the Use Method of PID is Off*. If such a line still runs
 A Heating Element's Device Type is **DO@H_Element**, so its name reads like `MB_25_DO@H_Element_HLT_BH` (Interface, Port, DO@H_Element, Label, Tab), whatever method it is using.
 It is wired straight to its port, going to an SSR or contactor, or to a DAC. Elements named before keep DO in their names.
 
-- `.method` is **Direct**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
+- `.method` is **Direct**, **PWM**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise** (the short codes DO, PWM, DutyC, HYS, PID, DeadB and PREC
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` turns it **On** in its method; `hE_HLT_1 = off` turns it **Off**. Every method works this way, Hysteresis and PID too.
 - **Picking a method never turns it On**: a method spot, the pop-up's method buttons or a Process only change the method. Turning
   it On or Off is its picture, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **Direct**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
-- Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset` (with its minus: `-1`), `.ondelay` (Hysteresis);
+- Every method keeps its own settings: `.power` (PWM, for example `hE_HLT_1.power = 60`); `.dutycycle`, `.interval` (Duty Cycle); `.setpoint`, `.onoffset` (with its minus: `-1`), `.ondelay` (Hysteresis);
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID); `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband); the PID's own plus `.holdoutput`, `.smoothing` (Precise).
   The same names the old separate Duty Cycle, Hysteresis, PID and Deadband Devices had.
 - **`.setpoint` is the Setpoint** (the temperature it holds). The older name **`.target`** still works and is exactly the same
   thing, read or set, so older Processes keep working. New Processes, Templates and Help use `.setpoint`.
   Dialogs call it **Setpoint** (Skynet Rule 6.19).
-- `.value` is the output % a PID, Deadband or Precise works out (`.pv` is the smoothed reading Precise holds). `.output` is its pin right now (read only).
+- `.value` is the output % a PID, Deadband or Precise works out (in PWM it is the Power %) (`.pv` is the smoothed reading Precise holds). `.output` is its pin right now (read only).
 - **`.method` is the word for every Device with more than one method of control** (today the Heating Element). In the Process
   editor, type `hE_HLT_1.method =` and the list shows its methods to pick from, in quotes. A Device with only one way of control
   has no `.method`.
@@ -222,7 +272,7 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 
 Under **Heating method**: the method it **starts with** and **Method Settings**, one ⬢ dialog for each method with its
 **Use Method** switch, the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise) and that method's settings
-([Each method's settings](#each-method-s-settings)). A PID, Deadband or Precise can also be **Reversed** (cooling) and use a **PWM pin**. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
+([Each method's settings](#each-method-s-settings)). A PID, Deadband or Precise can also be **Reversed** (cooling). The Port picked decides PWM or a plain Port. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
 same settings.
 
 ## One Interface Port, one Device
@@ -235,3 +285,6 @@ Older Skynet Schemas that already have two Devices on one port keep working as b
 two can still be saved; you just can't make new ones.
 
 See also: [Heat Hysteresis: what switches the element](181-heat-hysteresis-switched-by) (Rule 6.29).
+
+> **What decides how close it holds:** the **probe** (a DS18B20 reads to about ±0.9 °F), **where it sits**, how well the liquid is
+> **mixed** and its **calibration** matter far more than how the element is switched. Get those right first.

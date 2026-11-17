@@ -39,8 +39,8 @@ assert.match(css, /dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: 
   const hm = await import('../public/heatmethod.js');
   const src = fields.replace(/^function methodSetFields/, 'return function methodSetFields');
   const T = { useMethod: 'u', eHeatProbe: 'p', eDirection: 'd' };
-  const make = new Function('DEVICE_TIPS', 'startMethod', 'NEEDS_PROBE', 'HEAT_SETTINGS', 'PERCENT_METHODS', 'draft', 'S', 'elemTip', 'offsetChoices', 'PREDICTIVE_FIELD', 'probeStep', 'ELEM_PREDICTIVE_TIP', 'heatDefault', src);
-  const f = make(T, hm.startMethod, hm.NEEDS_PROBE, hm.HEAT_SETTINGS, hm.PERCENT_METHODS, null, { config: { elements: [{ name: 'Temp', type: 'temperature' }] } }, () => null, () => [], x => ['predictive', 'Predictive', 'bool', true, false, false, x], () => null, 'tip', hm.heatDefault);
+  const make = new Function('DEVICE_TIPS', 'startMethod', 'NEEDS_PROBE', 'HEAT_SETTINGS', 'PERCENT_METHODS', 'AUTO_PERCENT_METHODS', 'portNote', 'draft', 'S', 'elemTip', 'offsetChoices', 'PREDICTIVE_FIELD', 'probeStep', 'ELEM_PREDICTIVE_TIP', 'heatDefault', src);
+  const f = make(T, hm.startMethod, hm.NEEDS_PROBE, hm.HEAT_SETTINGS, hm.PERCENT_METHODS, hm.AUTO_PERCENT_METHODS, () => ['_portNote', 'n', 'note'], null, { config: { elements: [{ name: 'Temp', type: 'temperature' }] } }, () => null, () => [], x => ['predictive', 'Predictive', 'bool', true, false, false, x], () => null, 'tip', hm.heatDefault);
   const withs = w => !w ? [] : Array.isArray(w[0]) ? w : [w];
   const keys = (k, it) => f(k, it).flatMap(x => [x[0], ...withs(x[6]?.with).map(y => y[0])]);
   const el = { type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', methodSpot_dutyCycle: true, input: 'Temp' };
@@ -48,7 +48,8 @@ assert.match(css, /dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: 
   assert.deepEqual(keys('dutyCycle', el), ['methodSpot_dutyCycle', 'dutyCycle', 'interval']);
   assert.deepEqual(keys('hysteresis', el), ['_useLock', 'input', 'target', '_dir', 'onOffset', '_waveO', 'predictive', 'onDelay', '_waveD'], 'the Current Method');
   assert.deepEqual(keys('onoff', el), ['_useLock', '_doNote'], 'Direct: always used, nothing to set');
-  assert.deepEqual(keys('pid', { ...el, methodSpot_pid: true }), ['methodSpot_pid', 'input', 'target', 'kp', 'ki', 'kd', 'maxOutput', 'maxIntegral', 'calcTime', 'outTime', 'reversed', 'pwm']);
+  assert.deepEqual(keys('pid', { ...el, methodSpot_pid: true }), ['methodSpot_pid', 'input', 'target', 'kp', 'ki', 'kd', 'maxOutput', 'maxIntegral', 'calcTime', 'outTime', 'reversed', '_portNote'], 'the Port decides PWM: a note, no PWM switch (entry 4)');
+  assert.deepEqual(keys('pwm', { ...el, methodSpot_pwm: true }), ['methodSpot_pwm', 'pwmPower', 'outTime', '_portNote'], 'PWM: its Power % (entry 3)');
   assert.deepEqual(f('pid', { ...el, methodSpot_pid: true }).filter(x => x[6]?.def !== undefined).map(x => [x[0], x[6].def]), [['kp', 10], ['ki', 0.1], ['kd', 0], ['maxOutput', 100], ['maxIntegral', 100], ['calcTime', 1], ['outTime', 1]], 'each box shows its Skynet start (Rule 18.36)');
 }
 

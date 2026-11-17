@@ -3,7 +3,9 @@
 A **Deadband** Device holds a temperature (or any other reading) close to a **Setpoint** (Skynet Rule 6.17). It is gentler and slower than a PID: every **Calc Time** it nudges its output % up or
 down by a set step, and when the reading is close to the Setpoint it leaves the output alone.
 
-Add one with **➕ Add > Devices: control outputs > Deadband**, then double-click it for its Properties.
+For a heater, add a **Heating Element** on the Deadband Method: **Select Device Type > Heating Element > Heating Element: Deadband**
+(Help 150). A separate Deadband Device is no longer added (one Port, one Device); one already in a Schema keeps working. Double-click
+it for its Properties.
 
 ## The three zones
 

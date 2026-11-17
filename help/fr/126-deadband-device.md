@@ -3,7 +3,9 @@
 Un Device **Deadband** (zone morte) tient une température (ou toute autre mesure) près d'un **Setpoint** (consigne, Règle Skynet 6.17). Il est plus doux et plus lent qu'un PID : à chaque **Calc Time**, il pousse son % de sortie vers le haut ou
 vers le bas d'un pas fixé, et quand la mesure est proche du Setpoint, il laisse la sortie tranquille.
 
-Ajoutez-en un avec **➕ Add > Devices: control outputs > Deadband**, puis double-cliquez dessus pour ses Properties.
+Pour un chauffage, ajoutez une **résistance chauffante** sur la méthode Deadband : **Select Device Type > Heating Element > Heating Element: Deadband**
+(Help 150). Un Device Deadband séparé ne s'ajoute plus (un port, un Device) ; celui qui est déjà dans un Schema continue de marcher.
+Double-cliquez dessus pour ses Properties.
 
 ## Les trois zones {#the-three-zones}
 

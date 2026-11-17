@@ -286,24 +286,24 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - IPs on the picture's pipe ends (Rule 5.20), following the Orientation and Flips. Help 117.
 
 ### 4.7 Duty Cycle (control output)
-- **Add menu:** Devices: control outputs > Duty cycle.
+- **Add menu:** no longer added (2026-11-17, Panel Updates Sandbox entry 3: one Port, one Device). A heater is a Heating Element on this Method (Rule 6.19); ones already in a Schema keep working. Was: Devices: control outputs > Duty cycle.
 - **Type ID:** DutyCy. Counts as heating (PR #108).
 - **Settings:** Interface, Pin, Active low, Enabled at start, Duty cycle %, Cycle time (ms).
 - Turns its pin on for a % of each cycle by itself.
 
 ### 4.8 Hysteresis (control output)
-- **Add menu:** Devices: control outputs > Hysteresis.
+- **Add menu:** no longer added (2026-11-17, Panel Updates Sandbox entry 3: one Port, one Device). A heater is a Heating Element on this Method (Rule 6.19); ones already in a Schema keep working. Was: Devices: control outputs > Hysteresis.
 - **Type ID:** Hys. Counts as heating (PR #108).
 - **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Setpoint, ON offset (positive = heat: on below target minus offset; negative = cool), ON delay (seconds). **Predictive** (on by default, Rule 6.23, Help 168): turns off early by the coast it has learned, so it does not overshoot; never more starts.
 
 ### 4.9 PID (control output)
-- **Add menu:** Devices: control outputs > PID (holds a target temperature).
+- **Add menu:** no longer added (2026-11-17, Panel Updates Sandbox entry 3: one Port, one Device). A heater is a Heating Element on this Method (Rule 6.19); ones already in a Schema keep working. Was: Devices: control outputs > PID (holds a target temperature).
 - **Type ID:** PID. Counts as heating (PR #108).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
 - **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Setpoint, Kp, Ki, Kd, Max output %, Max integral %, Calculation time (s), Output window (s), Reversed (cooling), PWM output (off = time-proportioned on/off).
 
 ### 4.9.1 Deadband (control output)
-- **Add menu:** Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 126).
+- **Add menu:** no longer added (2026-11-17, Panel Updates Sandbox entry 3: one Port, one Device). A heater is a Heating Element on this Method (Rule 6.19); ones already in a Schema keep working. Was: Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 126).
 - **Type ID:** DBand (General Type DBAND, proposed). Counts as heating and is On while Enabled (Rule 7.9); can share a heater's port (Rule 6.1).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
 - **How it works:** every Calc Time its output % steps toward the Setpoint: left alone within ± Deadband Offset, by the Inner Band Drive within ± Inner Band Offset, by the Outer Band Drive further out. Below the Setpoint it goes up, above it goes down (Reversed for cooling). Starts at the Initial Output when Enabled.
