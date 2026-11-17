@@ -22,7 +22,7 @@ assert.deepEqual([d0.foreColor, d0.backColor, d0.align, d0.font, d0.fontSize, d0
 assert.deepEqual([d0.valueFore, d0.valueBack], ['', ''], 'Values follow the Text Box colors only once they are changed');
 assert.deepEqual((t => [t.valueFore, t.valueBack])(textDefaults({ textForeColor: '#FAFAFA', textBackColor: '#000000' })), ['', ''], 'saved fresh values: still none');
 const d1 = textDefaults({ labelVisible: false, textWrap: false, textWidth: 300, textAlign: 'Right', labelFontSize: 14, labelBold: true, labelBackColor: '', textForeColor: 'Red' });
-assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.labelFontSize, d1.labelBold, d1.labelBack, d1.valueFore], [false, false, 40, 300, 'Right', 14, true, '', 'Red']);
+assert.deepEqual([d1.visible, d1.wrap, d1.x, d1.width, d1.align, d1.labelFontSize, d1.labelBold, d1.labelBack, d1.valueFore], [false, true, 40, 300, 'Right', 14, true, '', 'Red']);
 assert.equal(firstSet('', undefined, 'Red', 'Blue'), 'Red');
 assert.equal(firstSet('', null), '');
 const g = { x: 1, y: 2, w: 3, h: 4 };

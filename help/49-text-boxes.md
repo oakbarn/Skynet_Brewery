@@ -18,7 +18,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 | Width, Height | its size in pixels | `w_Text_1.width = 300` |
 | X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
-- **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). A Text Widget always wraps.
+- **Word wrap is always on** in every Text Box and Label: a long text goes onto more lines inside its box. There is no switch for it. To start a new line where you want it, use Rich Text: type `\n` or press **Shift + Enter** ([Rich Text Embedded Code](90-rich-text-embedded-code)). A reading with its unit (127.3 °F) stays on one line and gets smaller to fit (Skynet Rule 2.56).
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\t` an indent, `\deg` a degree sign and the others in [Rich Text Embedded Code](90-rich-text-embedded-code).
 - **Shortcut keys** type the codes for you: Shift+Enter `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Shift+D (⌘+Shift+D) °F or °C. See [Shortcut keys](113-shortcut-keys).
 
@@ -31,7 +31,7 @@ Every attribute has a **Default** on **☰ Menu > Default settings**, in two par
 - **Labels**: the Name of every Device and Widget, and the Label on a vessel. Visible, Fore Color, Back Color, Alignment, Bold,
   Font and Font Size (px).
 - **Text Boxes**: a Text, a Label Widget, and the Value of a Device or Widget. Fore Color, Back Color, Alignment, Font, Font Size
-  (px), New Box Width, New Box Height and Word Wrap.
+  (px), New Box Width and New Box Height.
 
 A new install starts with:
 
@@ -53,7 +53,7 @@ A new install starts with:
   **items already made keep how they look**. Pick a color of its own in the item's properties and that item keeps it.
 - **The Value of a Device or Widget** follows the Text Boxes colors only once you change them from what a new install has, so a new install
   puts no black box behind the values on your pictures.
-- **Visible, Word Wrap, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them,
+- **Visible, the size and the place are copied when an item is made.** A new Device, Widget or Text starts with them,
   then you change it in its properties. Changing the Default later does not hide, move or resize what is already on your Tabs.
 - The Default fore color leaves the digits of an **LED** or **Gauge** look in their own colors.
 - The size of large text (the `\L` code) is **\L Rich Text Code Size (px)**, under **Rich Text Embedded Code** in **Settings > Panel settings: screen, Tabs and alerts**.

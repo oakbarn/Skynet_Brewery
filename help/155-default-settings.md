@@ -36,21 +36,13 @@ Hoses have a flow simulation.
 
 The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.
 
-### How many Pixels are Pipes to be drawn on a Tab?
-
-This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
-
-### How many Pixels are Hoses to be drawn on a Tab?
-
-This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
-
-Each of these two boxes is in two places, here and in **New Tabs**. Each is one setting: typing in one changes the other. Each Tab can still change its own **Pipe Size** and **Hose Size** in **Tab Settings**. A Tab made before there was a Hose Size draws its hoses at its Pipe Size, as before.
+Each Tab can still change its own **Pipe Size** and **Hose Size** in **Tab Settings**. A Tab made before there was a Hose Size draws its hoses at its Pipe Size, as before. The Pixels boxes are in each **Tab Profile** (see **New Tabs** below).
 
 The technical side: the sizes are 1/4" to 6", with the mm size beside each; Skynet starts at 1/2" for both, Tri-Clamp for pipes and Quick Disconnect for hoses ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40). A new Device, Pipe Fitting or item with IPs (pumps, valves, flow meters, elbows, tees, Valve Tees, probe tees ...) is drawn for the Default Pipe Size until a pipe is on it. Items already made keep the size they had: changing it here only reaches new things (Skynet Rule 2.42). The Pixels box is from 2 to 100 (empty = 10).
 
 ### IP Types
 
-A tick box for every IP Type and size: Tri-Clamp (TC1/2 to TC6), pipe thread (FPT female and MPT male, 1/8" to 6"), BSP, metric (DN6 to DN150) and stainless Quick Disconnect (FMSSQD female and MSSQD male). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in the Schema. None are ticked to start: tick the ones you use ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40).
+A tick box for every IP Type and size: Tri-Clamp (TC1/2 to TC6), pipe thread (FPT female and MPT male, 1/8" to 6"), BSP, metric (DN6 to DN150), stainless Quick Disconnect (FMSSQD female and MSSQD male) and Camlock (CAMF female coupler and CAMM male adapter, 1/2" to 6"). Only the ticked ones show in the IP Type lists of pipes, hoses, pumps and Stove Top Vessels, with any already used in the Schema. None are ticked to start: tick the ones you use ([Pipes, hoses and reducers](24-pipes-and-hoses), Skynet Rule 5.40).
 
 ### How things size to their pipes
 
@@ -122,6 +114,16 @@ The technical side: a new Recipe starts with a 5 gallon (18.93 liter) batch, **S
 
 ## New Tabs
 
+**Tab Profile for a new tab** is the only box here: the Tab Profile a new Tab starts with. The four boxes below are in each **Tab Profile** (☰ Menu > Tab Profile), with its background color and the look a new Device or Widget starts with ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). With **(none)** picked, a new Tab gets Skynet's own: 10, 6 and the size of the screen. What was set here before is kept in the Tab Profile.
+
+### How many Pixels are Pipes to be drawn on a Tab?
+
+This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
+
+### How many Pixels are Hoses to be drawn on a Tab?
+
+This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.
+
 ### Width of a New Tab (px)
 
 This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.
@@ -134,7 +136,7 @@ This only affects new Tabs added to a Schema. This is how the Tab fits on the sc
 
 The screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.
 
-The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The **How many Pixels are Pipes to be drawn on a Tab?** and **How many Pixels are Hoses to be drawn on a Tab?** boxes are here too (see above).
+The technical side: from 200 to 20000 pixels. The boxes start filled in with the usable size of your screen (the screen less the taskbar: 1920 x 1040 on a 1920 x 1080 Windows screen). Left at that, a new Tab takes the size of the screen it is made on, so it fills the screen at Zoom Fit screen; a different number is kept for every new Tab. Each Tab changes its own in **Tab Settings**. The **Zoom** a screen starts with is in Settings > Panel settings (On startup). The four boxes are in each Tab Profile.
 
 ## New User Templates and Schemas
 
@@ -143,11 +145,10 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 | Setting | What it does |
 |---|---|
 | **Look of a New Schema** | The Look (theme) a new empty Schema starts with. The open Schema's own Look is changed in Settings > Panel settings ([Panel Looks](151-panel-looks)). |
-| **Pump Overlay** | The Default Pump Overlay: the On overlay, what shows over a pump while it runs. Green glow ring unless you change it ([On overlay](58-on-overlay)). It only applies to new Pump Profiles: a new Pump Profile starts with it, and a new pump takes the Overlay of its Pump Profile ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). |
-| **Valve Overlay** | The On overlay a new powered valve starts with. The steady lightning bolt unless you change it. |
-| **Push Lockout (s)** | How long a new Pulse push button waits before another press counts, in seconds (0.1 to 60, 3 unless you change it). Each button changes its own in its Properties. |
 
-Some things have no box because they are always the same: see **Skynet Defaults for New User Created Items** below. **Lost Comm** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
+The **Pump Overlay** is now on each **Pump Profile** and the **Valve Overlay** on each **Valve Profile** ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** is now in **Settings > Panel settings** (see below). What was set here is kept.
+
+Some things have no box because they are always the same (for example the Pump and Valve Standards, and pipe fittings that size to their pipes). **Lost Comm** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
 
 ## Moved to Settings
 
@@ -158,6 +159,7 @@ These change things already made, or how the whole panel works, so they are Sett
 - **Menu Bar**, **Sound**, **On startup** (Zoom, Full screen);
 - **\L Rich Text Code Size**;
 - **Hover Delay** ([Hover help in dialogs](147-hover-help));
+- **Push Lockout (s)**: how long a new Pulse push button waits before another press counts;
 - **Phones and tablets**;
 - the **Grain weight label** and the gravity points label;
 - **Hop alerts**;
@@ -169,7 +171,7 @@ The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Look
 
 **Defaults are for new things only.** Labels, Text Boxes, the Default pipe size and the IP Types are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
 
-New Schema from a Skynet Template, new Tabs (Tab Background Profile), Labels and Text Boxes. The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
+New Tabs (Tab Profile), Labels and Text Boxes. (The New Schema from a Skynet Template answers are no longer here: each question starts with Skynet's own answer, and you change it in the Add new Schema box.) The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
 
 ## Tap Water
 
@@ -196,17 +198,5 @@ The boxes:
 Rest the mouse on a box (or tap its name) to see what it does for the beer.
 
 The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `rcp_Water_...` Skynet_Fields (Help 99).
-
-## Skynet Defaults for New User Created Items
-
-These defaults are set and cannot be changed, but can be Changed in a New User Template.
-
-- **Pump size**: the Pump Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
-- **Valve size**: the Valve Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
-- **Pipe fittings**: always size to their pipes.
-- **Pump cover color**: None.
-- **Flow color** (In and Out): Blue.
-- **Skynet Dial**: Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red.
-- **Alarm Set Graphic (Layer 2)**: None.
 
 The section titles on this tab have a blue back, so each part is easy to find. The title and **Save** stay at the top while the rest scrolls (Skynet Rule 2.51).

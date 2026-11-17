@@ -29,7 +29,7 @@ Then pick the **Interface** (your board). Each Device takes the next free Port o
 - **Supply Manifold**: none, a Long Tee with a Valve, a Double or a Triple, with manual or motorized valves.
 - **Fermentors**: how many go on the **Fermentor** Tab. Each has its temperature probe and a **glycol** valve that turns on above the fermentation temperature. Fermentor 1 does the Ferment step's jobs.
 
-Every question starts from **☰ Menu > Default settings > New Schema from a Skynet Template**, so set your usual answers there once.
+Every question starts with Skynet's own answer (for example the 3 Vessel, an Immersion chiller and hand valves). Change any of them here, before you make the Schema.
 
 ## 3. Ready to make
 

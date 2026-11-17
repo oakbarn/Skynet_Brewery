@@ -84,7 +84,7 @@
 
 **Boil Profile** (profil d'ébullition) : la durée totale d'ébullition et l'évaporation par heure.
 
-**Tab Background Profile** : la couleur de fond d'un Tab et l'apparence (couleurs, placement, LED / Text / Gauge) avec laquelle commencent les nouveaux Devices et Widgets qu'on y met. Voir [Tab Background Profiles et Valve Profiles](36-tab-and-valve-profiles).
+**Tab Profile** : la couleur de fond d'un Tab et l'apparence (couleurs, placement, LED / Text / Gauge) avec laquelle commencent les nouveaux Devices et Widgets qu'on y met. Voir [Tab Profiles et Valve Profiles](36-tab-and-valve-profiles).
 
 **Valve Profile** (profil de vanne) : les images et l'orientation (Horizontal, Vertical, 45 degrés à gauche ou à droite) avec lesquelles commence une nouvelle vanne, choisies seulement quand la vanne est créée.
 

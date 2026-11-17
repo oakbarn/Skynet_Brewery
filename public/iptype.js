@@ -10,10 +10,13 @@
 
 // the families: what the connector is drawn as, and what fits what
 export const IP_TYPES = [['tc', 'Tri-Clamp'], ['npt', 'NPT'], ['bsp', 'BSP'], ['qd', 'Quick Disconnect']];
-const FAMILY_NAME = { tc: 'Tri-Clamp', fpt: 'FPT (female pipe thread, NPT)', mpt: 'MPT (male pipe thread, NPT)', bsp: 'BSP (British pipe thread)', dn: 'Metric pipe (DN)', qd: 'Quick Disconnect, stainless (FMSSQD female, MSSQD male)' };
+const FAMILY_NAME = { tc: 'Tri-Clamp', fpt: 'FPT (female pipe thread, NPT)', mpt: 'MPT (male pipe thread, NPT)', bsp: 'BSP (British pipe thread)', dn: 'Metric pipe (DN)', cam: 'Camlock (CAMF female coupler, CAMM male adapter)', qd: 'Quick Disconnect, stainless (FMSSQD female, MSSQD male)' };
 // Quick Disconnects (OakBarn Brewery, 2026-11-16: "Hose FMSSQD1/2 wher they are on a Pipe or Pump and a MSSQD1/2 on the other end"):
 // FMSSQD = female stainless steel quick disconnect, MSSQD = male
 const QD = ['1/2', '3/4', '1', '1.5', '2', '3'];
+// Camlocks (OakBarn Brewery, 2026-11-17: "add camlocks and 1/2 to the Ends"; "Add them to the list with Tck Boxes and no need for
+// image"): a row of tick boxes from 1/2" up, CAMF = female coupler, CAMM = male adapter; no drawing of their own
+const CAM = ['1/2', '3/4', '1', '1.25', '1.5', '2', '2.5', '3', '4', '6'];
 const THREAD = ['1/8', '1/4', '3/8', '1/2', '3/4', '1', '1.25', '1.5', '2', '2.5', '3', '4', '5', '6'];
 // every size of every type, in this order (a Tri-Clamp is sized by its clamp: 1/2" to 1.5" tube often all use the TC1.5 clamp)
 export const IP_SIZES = [
@@ -23,6 +26,7 @@ export const IP_SIZES = [
   ['bsp', THREAD.map(s => 'BSP' + s)],
   ['dn', ['6', '8', '10', '15', '20', '25', '32', '40', '50', '65', '80', '100', '125', '150'].map(s => 'DN' + s)],
   ['qd', [...QD.map(s => 'FMSSQD' + s), ...QD.map(s => 'MSSQD' + s)]],
+  ['cam', [...CAM.map(s => 'CAMF' + s), ...CAM.map(s => 'CAMM' + s)]],
 ].map(([f, codes]) => ({ family: f, name: FAMILY_NAME[f], codes }));
 const ALL = IP_SIZES.flatMap(x => x.codes);
 export const isIpCode = t => ALL.includes(t);
@@ -35,12 +39,13 @@ export function ipFamily(t) {
   if (/^BSP/.test(s)) return 'bsp';
   if (/^DN/.test(s)) return 'dn';
   if (/^(FM|M)SSQD/.test(s)) return 'qd';
+  if (/^CAM[FM]/.test(s)) return 'cam';
   return '';
 }
-const sizeOf = t => String(t || '').replace(/^(TC|FPT|MPT|BSP|DN|FMSSQD|MSSQD)/, '');
-const gender = t => /^(FPT|FMSSQD)/.test(t) ? 'f' : /^(MPT|MSSQD)/.test(t) ? 'm' : '';
+const sizeOf = t => String(t || '').replace(/^(TC|FPT|MPT|BSP|DN|FMSSQD|MSSQD|CAMF|CAMM)/, '');
+const gender = t => /^(FPT|FMSSQD|CAMF)/.test(t) ? 'f' : /^(MPT|MSSQD|CAMM)/.test(t) ? 'm' : '';
 // the IP Type that fits this one: FPT and MPT of the same size fit each other; every other type fits its own kind and size
-export const ipMate = t => /^FPT/.test(t) ? 'M' + t.slice(1) : /^MPT/.test(t) ? 'F' + t.slice(1) : /^FMSSQD/.test(t) ? t.slice(1) : /^MSSQD/.test(t) ? 'F' + t : t;
+export const ipMate = t => /^CAMF/.test(t) ? 'CAMM' + t.slice(4) : /^CAMM/.test(t) ? 'CAMF' + t.slice(4) : /^FPT/.test(t) ? 'M' + t.slice(1) : /^MPT/.test(t) ? 'F' + t.slice(1) : /^FMSSQD/.test(t) ? t.slice(1) : /^MSSQD/.test(t) ? 'F' + t : t;
 // can two IP Types be joined without an adapter? sameSize false: only the type is checked (two pipes of different sizes meet at a
 // reducer, which Skynet draws)
 export function ipFits(a, b, { sameSize = true } = {}) {

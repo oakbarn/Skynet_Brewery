@@ -29,7 +29,7 @@ Phones have no right-click. **Hold a finger on an item for about a second** whil
 
 A yellow circle with a black **?** opens Help at the part about the thing next to it.
 
-- **☰ Menu tabs**: beside each heading (Default, Equipment Profile, Vessel and its Size, Heat, Temperature, Ports and Build parts, Default Layout, Mash, Boil, Tab Background and Valve Profiles).
+- **☰ Menu tabs**: beside each heading (Default, Equipment Profile, Vessel and its Size, Heat, Temperature, Ports and Build parts, Default Layout, Mash, Boil, Tab and Valve Profiles).
 - **Properties** pop-ups: beside the title, for every device and widget, pipes, IPs, equipment, and Tab settings. If you changed something in the pop-up, it asks first, because opening Help closes the pop-up without saving.
 - There is **no** ? on a tab itself, so your brew day screens stay clean. The one ? on the Tabs bar sits beside **☰ Menu**, not on the tab.
 

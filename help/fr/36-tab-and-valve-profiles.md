@@ -1,10 +1,10 @@
-# Tab Background Profiles et Valve Profiles {#tab-background-valve-and-pump-profiles}
+# Tab Profiles et Valve Profiles {#tab-valve-and-pump-profiles}
 
-Les trois sont des onglets de menu (**☰ Menu**) : Tab Background Profile, Valve Profile et Pump Profile. Chaque profil est gardé sur le Brain, dans `config/profiles/tab`, `config/profiles/valve` et `config/profiles/pump`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
+Les trois sont des onglets de menu (**☰ Menu**) : Tab Profile, Valve Profile et Pump Profile. Chaque profil est gardé sur le Brain, dans `config/profiles/tab`, `config/profiles/valve` et `config/profiles/pump`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
 
-## Tab Background Profile
+## Tab Profile
 
-Un Tab Background Profile donne à un Tab sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
+Un Tab Profile donne à un Tab sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
 
 - **Name** (nom) : couleur du texte, couleur de fond et placement (TopLeft ... BottomRight).
 - **Value** (valeur) : couleur du texte, couleur de fond et placement.
@@ -19,12 +19,16 @@ Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être
 
 ### Donner son profil à un Tab {#give-a-tab-its-profile}
 
-- Sur l'onglet de menu **Tab Background Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
+- Sur l'onglet de menu **Tab Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
 - Ou dans Edit layout, ouvrez **⚙ Tab Settings** et choisissez-le sous **Background > Profile**.
 
 Un Tab qui a sa propre **Background > Color** dans Tab Settings garde cette couleur. Mettez-la sur **Default** pour utiliser la couleur du profil.
 
-L'onglet de menu **Default** choisit le Tab Background Profile que reçoit un **nouveau Tab**.
+### New Tabs
+
+Un Tab Profile garde aussi ce avec quoi commence un **nouveau Tab** fait avec lui : **How many Pixels are Pipes to be drawn on a Tab?** (10 si vide), **How many Pixels are Hoses to be drawn on a Tab?** (6 si vide), **Width of a New Tab (px)** et **Height of a New Tab (px)** (la taille de l'écran si vide). Chaque Tab change encore les siens dans **⚙ Tab Settings**.
+
+☰ Menu > Default settings > **Tab Profile for a new tab** choisit le Tab Profile que reçoit un **nouveau Tab** ([Réglages par défaut](155-default-settings)).
 
 ## Valve Profile
 
@@ -32,6 +36,7 @@ Un Valve Profile est la façon dont commence une nouvelle vanne :
 
 - **Graphic** (la vanne telle qu'elle est dessinée) et, facultatif, **Graphic when open** (image quand elle est ouverte). Les vannes Skynet n'ont pas d'images ouvertes : la vanne garde son image et l'**On overlay** (la superposition « allumé ») montre qu'elle est ouverte ([Images Skynet retirées et renommées](129-retired-skynet-pictures)).
 - **Orientation** : **Horizontal** (bouts du tuyau à gauche et à droite), **Vertical** (en haut et en bas), **45 degrees Left** (coins en haut à gauche et en bas à droite) ou **45 degrees Right** (en haut à droite et en bas à gauche). Pour Horizontal et Vertical, choisissez des images dessinées dans ce sens. Pour les 45, choisissez les images **verticales** : le panel les tourne de 45 degrés à gauche ou à droite pour vous. Les 45 sont pour une vanne posée sur un coude à 45 degrés.
+- **Overlay** : ce qui s'affiche sur la vanne quand elle est ouverte ([On overlay](58-on-overlay)). Un nouveau Valve Profile commence avec l'Overlay du Valve Profile marqué **Default** (l'éclair si aucun n'est marqué). Une nouvelle vanne prend l'Overlay du Valve Profile choisi dans sa case d'ajout.
 
 Les images de vanne de Skynet sont des fichiers SVG dans `Images/samples`, donc elles restent nettes à toutes les tailles et ne peuvent pas être supprimées (voir [Media (images et sons)](07-media)) :
 
@@ -72,6 +77,6 @@ Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient 
 
 La **case d'ajout de pompe** a une liste **Pump Profile**. Elle commence sur le Pump Profile marqué **Default** et remplit les cases en dessous avec lui ; choisissez-en un autre et elles changent. Vous pouvez encore changer chaque case avant **➕ Add Device**. Ensuite, la pompe se change dans ses propres propriétés.
 
-**Default :** il y a toujours un Pump Profile par défaut, donc la liste Pump Profile n'a pas de (none). Skynet fait le premier, **Default Pump Profile** : Right, pas de Cover, Hose (tuyau souple), et le Pump Overlay des Default settings. Changez-le comme vous voulez. Son interrupteur **Default** ne peut pas être mis sur Off et il ne peut pas être supprimé : pour qu'un autre devienne le Default, ouvrez-le, mettez son **Default** sur On et faites Save.
+**Default :** il y a toujours un Pump Profile par défaut, donc la liste Pump Profile n'a pas de (none). Skynet fait le premier, **Default Pump Profile** : Right, pas de Cover, Hose (tuyau souple), et l'Overlay anneau vert lumineux (Green Glow Ring). Changez-le comme vous voulez. Son interrupteur **Default** ne peut pas être mis sur Off et il ne peut pas être supprimé : pour qu'un autre devienne le Default, ouvrez-le, mettez son **Default** sur On et faites Save.
 
-**Overlay d'un nouveau Pump Profile :** un nouveau Pump Profile commence avec le **Pump Overlay** de ☰ Menu > Default settings (l'anneau lumineux vert sauf si vous le changez). Le Pump Overlay des Default settings ne s'applique qu'aux nouveaux Pump Profiles : les Pump Profiles et les pompes déjà faits gardent le leur. Une nouvelle pompe prend l'Overlay du Pump Profile choisi dans sa case d'ajout.
+**Overlay d'un nouveau Pump Profile :** un nouveau Pump Profile commence avec l'**Overlay** du Default Pump Profile. Les Pump Profiles et les pompes déjà faits gardent le leur. Une nouvelle pompe prend l'Overlay du Pump Profile choisi dans sa case d'ajout. (Le Pump Overlay n'est plus dans ☰ Menu > Default settings.)
