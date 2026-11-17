@@ -211,6 +211,31 @@ Device Type `AO@H_Element`: the element's power is set from 0 to 100 %.
   (PWM Port)       Module
 ```
 
+### 2.4a Heater on a PWM Port
+Device Type `PWM@H_Element` (OakBarn Brewery, 2026-11-17: "Those would be the True PWM Ports and a DAC and 0-10v Controller").
+The element's power is set from 0 to 100 %. The same power controller as 2.4; only the Port and the converter differ.
+
+- One (1) Free Arduino **True PWM Port** (Mega D2-D13, D44-D46)
+- One (1) DAC or PWM to 0-10 V Module: an Arduino Mega has **no real DAC**, so on a Mega a PWM to 0-10 V Module takes its place. An
+  ESP32 has a real DAC (GPIO 25 and 26), but it gives only 0-3.3 V, so it still needs a module that raises it to 0-10 V.
+- One (1) 12 or 24 V DC Power Supply (for the module)
+- GFCI AC Circuit ⚠️ (sized for the element)
+- One (1) 0-10 V Controlled Power Regulator ⚠️ (SCR, phase-angle type), its AMPS matched to the element (40 AMPS or more for a 5500 W
+  element on 240 V)
+- One (1) Heat Sink ⚠️ for the regulator (it makes heat like an SSR)
+- One (1) Heating Element ⚠️
+
+```
+               AC GFCI PWR ⚠️
+                    │
+                    ▼
+  Arduino  ───▶  DAC or PWM to 0-10 V  ───▶  0-10 V Power Regulator ⚠️  ───▶  Heating Element ⚠️
+  (True PWM Port)      Module                   (on Heat Sink)
+```
+
+Do not drive a plain zero-cross SSR straight from a fast PWM Port: it can't follow the fast pulses, so the heat is not what the %
+says. For an SSR, use a time-proportioned method (PID, Duty Cycle) on 2.1 or 2.2 instead.
+
 ### 2.5 Heat Pad or Heat Wrap (Fermenter)
 Type ID `HtPad`. The same chain as the Pump (On/Off).
 
@@ -678,6 +703,7 @@ Prices: see the [Hardware shopping list](Skynet_Brewery_Shopping_List.md).
 ---
 
 ## Change log
+- 2026-11-17: Added 2.4a Heater on a PWM Port (True PWM Port, DAC or PWM to 0-10 V Module, 0-10 V Power Regulator).
 - 2026-11-17: OakBarn Brewery confirmed the additions ("Additions to Confirm Yes"): the Contactor for 240 V elements (2.2), the Mechanical Relay for compressors (4.2) and the E-Stop that cuts the power by its own wiring (8.1).
 - 2026-11-17: Pump Switching: Relay or SSR, both as options (OakBarn Brewery: "Describe both as Options in Text and why a Relay Works just as well as a SSR but the trigger voltage may favor an SSR").
 - 2026-11-17: First version, from OakBarn Brewery's Pump (On/Off) sheet, for every Device Skynet makes today.
