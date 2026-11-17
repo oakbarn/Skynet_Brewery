@@ -2,17 +2,32 @@
 
 > **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
 
+> **Ce qui décide de la précision :** la **sonde** (une DS18B20 lit à environ ±0,9 °F près), **sa place**, le **mélange** du liquide
+> et son **étalonnage** comptent bien plus que la façon de commuter la résistance. Réglez-les d'abord.
+
 Une résistance chauffante est **un seul Device**, quelle que soit la façon de la commander. Sa façon de chauffer est sa **méthode de chauffe**, et vous pouvez la changer
 pendant le brassage, d'un clic ou depuis un Process (Règle Skynet 6.19).
 
 | Méthode de chauffe | Ce qu'elle fait | Demande une sonde de température |
 |---|---|---|
 | **Direct** | Tout ou rien. | Non |
+| **PWM** | Un % que vous ou un Process réglez (par exemple 60 %), envoyé sur un port PWM. | Non |
 | **Duty Cycle** | En marche pendant un % de chaque cycle (par exemple 60 % pour une ébullition vive). | Non |
 | **Hysteresis** | En marche sous le Setpoint, arrêtée quand elle y arrive. | Oui |
 | **PID** | Tient une température de Setpoint en calculant son propre %. | Oui |
 | **Deadband** | Monte ou baisse son % par paliers vers le Setpoint. | Oui |
 | **Precise** | Un PID calme qui tient un Setpoint à 0,1 degré près, pour la colonne d'un alambic ou un bain-marie (voir Precise heating). | Oui, une sonde fine |
+
+## En ajouter une : choisir sa méthode {#adding-one-pick-its-method}
+
+**Select Device Type > Heating Element** (ou la liste Heating Element de la barre Edit layout) a une ligne pour chaque méthode :
+**Heating Element: DO On/Off**, **PWM**, **DutyC**, **HYS**, **PID**, **Precise** et **Deadband**, puis **RIMs Tube** et **Vessel Device
+Template**. Chaque ligne crée la même résistance chauffante **unique** ; la ligne choisit seulement la méthode avec laquelle elle démarre.
+Après la fenêtre Add, ses Properties s'ouvrent avec les **Settings** de cette méthode par-dessus, pour la régler d'abord. Elle peut
+toujours utiliser les autres méthodes plus tard.
+
+**Le port choisi décide comment un % arrive à la résistance** (un port PWM ou un port simple, voir [Quelle méthode et quel câblage ?](#which-method-and-which-wiring)).
+La ligne **PWM** propose d'abord les ports PWM. Les Settings de chaque méthode montrent une note qui dit sur quel genre de port elle est.
 
 ## Cliquez dessus pendant le brassage {#click-it-while-brewing}
 
@@ -74,15 +89,51 @@ s'arrête à 150 °F.
 
 ⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.
 
-## Quelles méthodes conviennent à votre câblage {#which-methods-suit-your-wiring}
+## Quelle méthode et quel câblage ? {#which-method-and-which-wiring}
 
-La façon dont la résistance est câblée décide quelles méthodes ont du sens (le hover help du champ Heating method le dit aussi) :
+### Comment Skynet envoie la puissance {#how-skynet-sends-the-power}
 
-| Câblée à | Ce que ça fait | Bonnes méthodes |
-|---|---|---|
-| **SSR** (relais statique) | Met la résistance tout en marche ou tout à l'arrêt, aussi vite que nécessaire | Toutes |
-| **Contacteur** (un interrupteur qui claque) | La met en marche ou à l'arrêt, mais s'use si on bascule vite | Direct, Hysteresis (ou un long temps de cycle) |
-| **DAC** (signal 0-10 V vers un variateur de puissance) | Règle la puissance n'importe où de 0 à 100 % | PID, Deadband, Precise |
+- **Direct** et **Hysteresis** ne font que tout On ou tout Off. N'importe quel port les fait de la même façon.
+- **Duty Cycle** est en marche pendant son % de chaque cycle, un cycle de quelques secondes, donc un port simple le fait.
+- **PWM**, **PID**, **Deadband** et **Precise** travaillent avec un % : PWM utilise le % que vous ou un Process réglez, les autres le
+  calculent d'après la sonde. **Le port choisi décide comment ce % sort :**
+  - **Un port PWM** l'envoie en PWM. Branchez-le à un **module PWM vers 0-10 V et un variateur de puissance 0-10 V**, pas directement à
+    un SSR à passage par zéro : la carte commute des centaines de fois par seconde et un SSR à passage par zéro ne peut suivre que
+    120 fois par seconde (60 Hz), donc la puissance sort irrégulière.
+  - **Un port simple** met la résistance tout en marche pendant son % de chaque **Output window** (un « Pseudo PID »). Avec un SSR,
+    c'est le bon choix. Elle s'allume et s'éteint plusieurs fois par minute, ce qui **use vite tout organe de commutation mécanique** :
+    un relais mécanique, un module de relais mécaniques (les cartes relais Arduino courantes), un contacteur, une minuterie motorisée
+    ou mécanique. Utilisez un **relais statique (SSR)**.
+
+### Quel câblage {#which-wiring}
+
+| Branché à | Port | Bonnes méthodes | Remarque |
+|---|---|---|---|
+| **SSR à passage par zéro** (relais statique) | Simple | Toutes | Le choix habituel. Pas sur un port PWM rapide. |
+| **Contacteur** ou relais mécanique (ils claquent) | Simple | Direct, Hysteresis (ou un long temps de cycle) | S'use s'il commute souvent. |
+| **Variateur de puissance 0-10 V** (par un module PWM vers 0-10 V) | PWM | PWM, PID, Deadband, Precise | Puissance douce de 0 à 100 %. Coûte plus, chauffe plus, fait du bruit électrique. |
+
+### Où cela fait une différence {#where-it-makes-a-difference}
+
+- **Une cuve ou un HLT :** l'eau met des minutes à changer d'un degré, donc un SSR à passage par zéro sur un port simple la tient aussi
+  bien qu'une puissance douce.
+- **Un RIMS tube :** peu d'eau passe vite devant la résistance, donc une puissance douce (0-10 V) veut dire moins de pulsations et
+  moins de brûlé.
+- **La colonne d'un alambic ou un bain-marie tenu à 0,1 degré :** utilisez **Precise**, une sonde fine (une PT100) et une puissance douce.
+
+### PID ou Precise {#pid-or-precise}
+
+**La méthode compte plus que le câblage.** L'hystérésis dépasse : elle chauffe à pleine puissance jusqu'au Setpoint et la résistance
+chauffe encore un peu après. PID et Precise ralentissent en approchant.
+
+**Precise est un PID avec des extras.** Il utilise les mêmes Kp, Ki et Kd, donc il faut toujours le régler : de mauvais nombres rendent
+Precise mauvais aussi. Avec les mêmes nombres, il fait en général mieux que PID : moins de dépassement après une chauffe (sa partie I ne
+s'accumule pas), une sortie plus calme quand la lecture de la sonde saute (il lisse la lecture), et une puissance exacte sur un port
+simple (le temps restant passe à la fenêtre suivante). Voir Precise heating.
+
+**Auto-tune (prévu, pas encore dans le Panel) :** un bouton pour PID et Precise. Avec de l'eau au-dessus de la résistance, Skynet la
+mettra tout On et tout Off autour du Setpoint pendant quelques oscillations, mesurera la durée et la taille de chacune, et calculera
+Kp, Ki et Kd ; vous verrez alors les nouveaux nombres à côté des anciens et choisirez Use ou Keep old.
 
 ## Sa méthode principale et les autres méthodes permises {#its-main-method-and-the-other-methods-allowed}
 
@@ -93,7 +144,7 @@ Quand vous la construisez (et plus tard dans ses Properties), la partie **Heatin
   rouge au bout de la ligne ouvre les **Settings de la Current Method** (par exemple Hysteresis Settings).
 - **On / Off** : sur la même ligne, une petite image de la résistance. Un clic la met en marche ou à l'arrêt tout de suite, comme un clic dessus sur
   le Tab. On / Off est la résistance elle-même ; **Direct** est une méthode (simplement marche ou arrêt), donc une résistance en Direct en marche chauffe à 100 %.
-- **Method Settings** : un bouton **⬢** pour chaque méthode (Direct, Duty Cycle, Hysteresis, PID, Deadband, Precise), avec **✔ Used** ou
+- **Method Settings** : un bouton **⬢** pour chaque méthode (Direct, PWM, Duty Cycle, Hysteresis, PID, Deadband, Precise), avec **✔ Used** ou
   **Not used** dessous. **Chaque méthode a sa propre fenêtre de réglages** : cliquez sur son ⬢ pour l'ouvrir. Voir [Les réglages de chaque méthode](#each-method-s-settings).
 - **Control Method** : une bulle pour chaque méthode utilisée, la Current Method en **rouge**, les autres en **jaune**. Ce sont les mêmes
   bulles que sous la résistance sur son Tab, et elles marchent ensemble : **cliquez sur Duty Cycle ici ou sur le Tab** et Duty Cycle devient la
@@ -118,13 +169,15 @@ réglages dans les Properties ; ils sont enregistrés quand vous faites Save dan
   cachés** (ils sont gardés pour plus tard). **Direct** et la **Current Method** sont toujours sur On (grisés). Quand vous choisissez une
   nouvelle Current Method, la précédente reste utilisée.
 - **Direct** : rien à régler ; elle est simplement tout On ou tout Off.
+- **PWM** : **Power %** et **Output window (s)** (utilisé seulement sur un port simple).
 - **Duty Cycle** : **Duty cycle %** et **Cycle time (ms)**.
 - **Hysteresis** : la **Temperature Probe** et son **Setpoint** sur une ligne. **Direction** est Heating, avec l'**Offset (-)** à
   côté (-1 la met en marche 1 degré sous le Setpoint), choisi dans une liste (chaque demi-degré que permet son Hardware Controller).
   **Predictive** a le **Delay** à côté. Un petit dessin à côté de chacun montre la température (rouge) allant entre le Setpoint (bleu)
   et l'Offset (jaune).
 - **PID**, **Deadband** et **Precise** : la **Temperature Probe** et son **Setpoint**, puis leurs propres nombres (Kp, Ki, Kd, Max
-  output ...), **Reversed** (refroidissement) et **PWM pin**. Precise dit aussi si sa sonde peut voir 0,1 degré.
+  output ...) et **Reversed** (refroidissement). Precise dit aussi si sa sonde peut voir 0,1 degré. Une note dit si son port est un
+  port PWM ou un port simple (voir [En ajouter une : choisir sa méthode](#adding-one-pick-its-method)).
 
 La **Temperature Probe** et le **Setpoint** sont partagés : réglez-les dans la fenêtre d'une méthode et les autres utilisent les mêmes.
 
@@ -192,7 +245,7 @@ MB_25_DO@H_Element_HLT_BH.HYS
 MB_25_DO@H_Element_HLT_BH.DutyC
 ```
 
-Les codes sont **DO** (Direct), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) et **PREC** (Precise). L'éditeur de Process les propose après le nom.
+Les codes sont **DO** (Direct), **PWM**, **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID**, **DeadB** (Deadband) et **PREC** (Precise). L'éditeur de Process les propose après le nom.
 
 **Seulement les méthodes utilisées :** un Process ne peut passer qu'à une méthode dont le **Use Method** est sur On (Direct et la
 Current Method le sont toujours). L'éditeur de Process ne propose que celles-là, et sa vérification montre une erreur simple avant de
@@ -204,21 +257,21 @@ quand même, le Brain la refuse avec le même genre de message.
 Le Device Type d'une résistance chauffante est **DO@H_Element**, donc son nom se lit comme `MB_25_DO@H_Element_HLT_BH` (Interface, Port, DO@H_Element, Label, Tab), quelle que soit la méthode utilisée.
 Elle est câblée directement à son port, vers un SSR ou un contacteur, ou vers un DAC. Les résistances nommées avant gardent DO dans leur nom.
 
-- `.method` vaut **Direct**, **Duty Cycle**, **Hysteresis**, **PID** ou **Deadband** (les codes courts DO, DutyC, HYS, PID et DeadB
+- `.method` vaut **Direct**, **PWM**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** ou **Precise** (les codes courts DO, PWM, DutyC, HYS, PID, DeadB et PREC
   marchent aussi). Le lire donne le mot, par exemple `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` la met **en marche** dans sa méthode ; `hE_HLT_1 = off` l'**arrête**. Toutes les méthodes marchent ainsi, Hysteresis et PID aussi.
 - **Choisir une méthode ne la met jamais en marche** : un bouton de méthode, les boutons de méthode de la fenêtre ou un Process ne changent que la méthode. La mettre
   en marche ou l'arrêter, c'est son image, un Clone, ou un Duty cycle % (Règle Skynet 6.19).
 - Changer la méthode **pendant qu'elle est en marche** continue tout de suite dans la nouvelle méthode, **sauf** vers **Direct** : cela l'arrête d'abord, pour qu'
   une résistance ne saute jamais d'elle-même de 40 % à pleine puissance. Remettez-la en marche pour la pleine puissance.
-- Chaque méthode garde ses propres réglages : `.dutycycle`, `.interval` (Duty Cycle) ; `.setpoint`, `.onoffset` (avec son moins : `-1`), `.ondelay` (Hysteresis) ;
+- Chaque méthode garde ses propres réglages : `.power` (PWM, par exemple `hE_HLT_1.power = 60`) ; `.dutycycle`, `.interval` (Duty Cycle) ; `.setpoint`, `.onoffset` (avec son moins : `-1`), `.ondelay` (Hysteresis) ;
   `.setpoint`, `.kp`, `.ki`, `.kd`, `.maxoutput`, `.maxintegral`, `.calctime`, `.outtime` (PID) ; `.setpoint`, `.deadbandoffset`,
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband) ; ceux du PID plus `.holdoutput`, `.smoothing` (Precise).
   Les mêmes noms qu'avaient les anciens Devices séparés Duty Cycle, Hysteresis, PID et Deadband.
 - **`.setpoint` est le Setpoint** (la température qu'elle tient). L'ancien nom **`.target`** marche toujours et est exactement la même
   chose, en lecture ou en réglage, donc les anciens Processes continuent de marcher. Les nouveaux Processes, Templates et l'aide utilisent `.setpoint`.
   Les fenêtres l'appellent **Setpoint** (Règle Skynet 6.19).
-- `.value` est le % de sortie que calcule un PID, un Deadband ou un Precise (`.pv` est la lecture lissée que tient Precise). `.output` est sa broche en ce moment (lecture seule).
+- `.value` est le % de sortie que calcule un PID, un Deadband ou un Precise (en PWM c'est le Power %) (`.pv` est la lecture lissée que tient Precise). `.output` est sa broche en ce moment (lecture seule).
 - **`.method` est le mot pour tout Device qui a plus d'une méthode de régulation** (aujourd'hui la résistance chauffante). Dans l'éditeur de Process,
   tapez `hE_HLT_1.method =` et la liste montre ses méthodes à choisir, entre guillemets. Un Device avec une seule façon de régulation
   n'a pas de `.method`.
@@ -228,7 +281,7 @@ Elle est câblée directement à son port, vers un SSR ou un contacteur, ou vers
 Sous **Heating method** : la méthode avec laquelle elle **démarre** et **Method Settings**, une fenêtre ⬢ pour chaque méthode avec
 son interrupteur **Use Method**, la **Temperature Probe** qu'elle lit (Hysteresis, PID, Deadband et Precise) et les réglages de cette
 méthode ([Les réglages de chaque méthode](#each-method-s-settings)). Un PID, un Deadband ou un Precise peut aussi être **Reversed**
-(refroidissement) et utiliser une **broche PWM**. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
+(refroidissement). Le port choisi décide PWM ou port simple. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
 mêmes réglages.
 
 ## Un port d'Interface, un Device {#one-interface-port-one-device}
@@ -241,3 +294,6 @@ Les anciens Schemas Skynet qui ont déjà deux Devices sur un port continuent de
 deux peuvent encore être enregistrés ; vous ne pouvez simplement pas en créer de nouveaux.
 
 Voir aussi : [Hysteresis de chauffe : ce qui commande la résistance](181-heat-hysteresis-switched-by) (Règle 6.29).
+
+> **Ce qui décide de la précision :** la **sonde** (une DS18B20 lit à environ ±0,9 °F près), **sa place**, le **mélange** du liquide
+> et son **étalonnage** comptent bien plus que la façon de commuter la résistance. Réglez-les d'abord.
