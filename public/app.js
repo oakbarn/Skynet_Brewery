@@ -2104,7 +2104,7 @@ const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_Marc
   'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
   'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
   'Pump_KegLand_MKII_SS_Center_Inlet',
-  // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned to face it
+  // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned 60°
   ...['March_809_Poly', 'March_809_SS', 'March_815_Poly', 'March_815_SS', 'Chugger_SS', 'Chugger_Poly'].map(k => `Pump_${k}_90_Inlet_Motor`)].map(k => [k, PUMP_STD]));
 // The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
 // the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
