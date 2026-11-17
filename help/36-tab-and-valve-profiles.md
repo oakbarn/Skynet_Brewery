@@ -71,9 +71,9 @@ A Pump Profile is how a new pump starts. Its picture comes from the pump you pic
 
 - **Orientation**: Right or Left.
 - **Cover**: None or a color.
-- **Hose or Pipe**: what is drawn from the pump's ports to its IPs.
+- **Hose or Pipe**: what is drawn from the pump's End Fittings to its IPs.
 - **Overlay**: what shows over it while it runs.
-- **IP Type In** and **IP Type Out**: Tri-Clamp, NPT, BSP or Quick Disconnect. Empty: from its Ports.
+- **Inlet IP Fitting** and **Outlet IP Fitting**: the End Fitting on its In and Out IPs (TC1.5, FPT1/2 ...). Empty: from the pump.
 
 The **Pump Add box** has a **Pump Profile** dropdown. It starts on the Pump Profile marked **Default** and fills the boxes below with it; pick another and they change to it. You can still change any box before **➕ Add Device**. After that, the pump is changed in its own properties.
 
