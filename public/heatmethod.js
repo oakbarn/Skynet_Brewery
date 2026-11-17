@@ -11,6 +11,9 @@
 // Direct is the old On/Off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct"): "On/Off" is still read as Direct (heatMethodKey).
 export const HEAT_METHODS = [
   ['onoff', 'Direct', 'DO', 'full on or off, by a click or a Process'],
+  // PWM (OakBarn Brewery, 2026-11-16: "It is Both. I actually wrote a script to control a Heating element using PWM values"): PWM is how
+  // the element is wired (a PWM Port) and a Method too: a % set by hand or by a Process (hE_1.power = 60), sent out on the PWM Port.
+  ['pwm', 'PWM', 'PWM', 'a % you or a Process set, sent out on a PWM Port'],
   ['dutyCycle', 'Duty Cycle', 'DutyC', 'on for a % of each cycle'],
   ['hysteresis', 'Hysteresis', 'HYS', 'on below the setpoint, off at it'],
   ['pid', 'PID', 'PID', 'holds a setpoint temperature'],
@@ -21,7 +24,9 @@ export const HEAT_KEYS = HEAT_METHODS.map(m => m[0]);
 // Hysteresis, PID, Deadband and Precise read a temperature probe (the Element's Probe, .input)
 export const NEEDS_PROBE = ['hysteresis', 'pid', 'deadband', 'precise'];
 // the methods that work out an output % (shown as "45 % ▸ 152")
-export const PERCENT_METHODS = ['pid', 'deadband', 'precise'];
+export const PERCENT_METHODS = ['pwm', 'pid', 'deadband', 'precise'];
+// the methods that work the % out from the probe (they may cool with Reversed)
+export const AUTO_PERCENT_METHODS = ['pid', 'deadband', 'precise'];
 
 export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'element';
 // Valves and Heating Elements always have a Toggle (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle cannot have None, Default to
@@ -92,6 +97,7 @@ export const controlMethods = el => { const l = allowedMethods(el); return l.len
 // separate Duty Cycle, Hysteresis, PID and Deadband Devices have, so a Process line reads the same (hE_1.setpoint = 152; the older hE_1.target is the same).
 export const HEAT_SETTINGS = {
   onoff: [],
+  pwm: [['power', 'pwmPower', 'Power %', 0], ['outtime', 'outTime', 'Output window (s)', 1]],
   dutyCycle: [['dutycycle', 'dutyCycle', 'Duty cycle %', 0], ['interval', 'interval', 'Cycle time (ms)', 1000]],
   hysteresis: [['target', 'target', 'Setpoint', 0], ['onoffset', 'onOffset', 'Offset', -1], ['ondelay', 'onDelay', 'On delay (s)', 0]],
   pid: [['target', 'target', 'Setpoint', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
@@ -114,7 +120,7 @@ export const ALL_HEAT_SETTINGS = (() => {
   return [...m.values()];
 })();
 // The main setting of each method, shown on the click pop-up with + and -
-export const HEAT_MAIN = { dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Setpoint'], pid: ['target', 'Setpoint'], deadband: ['target', 'Setpoint'], precise: ['target', 'Setpoint'] };
+export const HEAT_MAIN = { pwm: ['power', 'Power %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Setpoint'], pid: ['target', 'Setpoint'], deadband: ['target', 'Setpoint'], precise: ['target', 'Setpoint'] };
 
 // How fine a probe can see (Fritz, 2026-11-07: a precise method "to get to .1 F or .1 C"). Precise can only hold as close as its
 // probe sees, so its Properties warn when the probe is too coarse. Returns { step (in the probe's own units), ok, text }.
