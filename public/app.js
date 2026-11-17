@@ -1299,6 +1299,12 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['March 815-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_Center_Inlet.svg'],
   ['Chugger CPSS-IN (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet.svg'],
   ['Chugger CPSS-CI (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_Center_Inlet.svg'],
+  ['March 809-PL with motor (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet_Motor.svg'],
+  ['March 809-SS with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_SS_90_Inlet_Motor.svg'],
+  ['March 815-PL with motor (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_90_Inlet_Motor.svg'],
+  ['March 815-SS with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_90_Inlet_Motor.svg'],
+  ['Chugger CPSS-IN with motor (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet_Motor.svg'],
+  ['Chugger CPPS-IN with motor (plastic in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_Poly_90_Inlet_Motor.svg'],
   ['Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet)', 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'],
   ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
   ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
@@ -2097,7 +2103,9 @@ function pumpLinkSvg(e) {
 const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
   'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
   'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
-  'Pump_KegLand_MKII_SS_Center_Inlet'].map(k => [k, PUMP_STD]));
+  'Pump_KegLand_MKII_SS_Center_Inlet',
+  // the 90° inlet pumps with their motor body (OakBarn Brewery, 2026-11-17): same box and spots, the motor level like the Blichmann, the head turned to face it
+  ...['March_809_Poly', 'March_809_SS', 'March_815_Poly', 'March_815_SS', 'Chugger_SS', 'Chugger_Poly'].map(k => `Pump_${k}_90_Inlet_Motor`)].map(k => [k, PUMP_STD]));
 // The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
 // the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
 // pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
@@ -2127,14 +2135,18 @@ function coverOf(e, v) {
 }
 // Add Pump step 2 (Fritz's drawing, 2026-11-04): pick the pump. Each row has its picture; the pick is the Pump's Picture
 // (one of the Skynet brew pump drawings above, Help 104) and the Add box's title.
-const PUMP_MODELS = [['March 809: poly 90° inlet', 'Pump_March_809_Poly_90_Inlet'], ['March 809: poly center inlet', 'Pump_March_809_Poly_Center_Inlet'],
-  ['March 809: stainless center inlet', 'Pump_March_809_SS_Center_Inlet'], ['March 815: poly 90° inlet', 'Pump_March_815_Poly_90_Inlet'],
+// The 90° inlet rows use the drawings with the motor body (OakBarn Brewery, 2026-11-17); the older head-only drawings stay in the
+// picture lists so pumps already built keep their picture (media is add-only, Rule 9.12).
+const PUMP_MODELS = [['March 809: poly 90° inlet', 'Pump_March_809_Poly_90_Inlet_Motor'], ['March 809: stainless 90° inlet', 'Pump_March_809_SS_90_Inlet_Motor'],
+  ['March 809: poly center inlet', 'Pump_March_809_Poly_Center_Inlet'], ['March 809: stainless center inlet', 'Pump_March_809_SS_Center_Inlet'],
+  ['March 815: poly 90° inlet', 'Pump_March_815_Poly_90_Inlet_Motor'], ['March 815: stainless 90° inlet', 'Pump_March_815_SS_90_Inlet_Motor'],
   ['March 815: poly center inlet', 'Pump_March_815_Poly_Center_Inlet'], ['March 815: stainless center inlet', 'Pump_March_815_SS_Center_Inlet'],
-  ['Chugger: 90° inlet (CPSS-IN)', 'Pump_Chugger_SS_90_Inlet'], ['Chugger: center inlet (CPSS-CI)', 'Pump_Chugger_SS_Center_Inlet'],
+  ['Chugger: 90° inlet (CPSS-IN)', 'Pump_Chugger_SS_90_Inlet_Motor'], ['Chugger: plastic 90° inlet (CPPS-IN)', 'Pump_Chugger_Poly_90_Inlet_Motor'],
+  ['Chugger: center inlet (CPSS-CI)', 'Pump_Chugger_SS_Center_Inlet'],
   ['Blichmann Riptide', 'Pump_Riptide_SS_Center_Inlet'], ['Topsflo TD5', 'Pump_Topsflo_TD5_Poly_Center_Inlet'],
   ['KegLand MKII: poly head', 'Pump_KegLand_MKII_Poly_Center_Inlet'], ['KegLand MKII: stainless head', 'Pump_KegLand_MKII_SS_Center_Inlet']];
 const pumpPic = k => `Images/Skynet/Pumps/${k}.svg`;
-const pumpModelOf = e => PUMP_MODELS.find(([, k]) => k === coverPump(e?.imageOff))?.[0] || null;
+const pumpModelOf = e => { const c = coverPump(e?.imageOff); return PUMP_MODELS.find(([, k]) => k === c || k === c + '_Motor')?.[0] || null; };      // a head-only 90° drawing names the same pump
 function pickPump() { return pickModel('2. Pick the pump', PUMP_MODELS.map(([t, k]) => [t, k, pumpPic(k)])); }
 // Add Motorized Ball Valve step 2 (Fritz, 2026-11-05: "Create a Motorized Ball Valve Add Dialog using the Pump Drill Down Format.
 // Valves do not have covers but every thing else the same."): pick the valve, each row with its picture, as for a pump.
