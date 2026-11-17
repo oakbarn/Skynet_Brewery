@@ -1,10 +1,10 @@
-# Tab Background Profiles et Valve Profiles {#tab-background-valve-and-pump-profiles}
+# Tab Profiles et Valve Profiles {#tab-valve-and-pump-profiles}
 
-Les trois sont des onglets de menu (**☰ Menu**) : Tab Background Profile, Valve Profile et Pump Profile. Chaque profil est gardé sur le Brain, dans `config/profiles/tab`, `config/profiles/valve` et `config/profiles/pump`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
+Les trois sont des onglets de menu (**☰ Menu**) : Tab Profile, Valve Profile et Pump Profile. Chaque profil est gardé sur le Brain, dans `config/profiles/tab`, `config/profiles/valve` et `config/profiles/pump`, donc chaque Schema peut l'utiliser. Seul un Admin peut les créer ou les changer.
 
-## Tab Background Profile
+## Tab Profile
 
-Un Tab Background Profile donne à un Tab sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
+Un Tab Profile donne à un Tab sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
 
 - **Name** (nom) : couleur du texte, couleur de fond et placement (TopLeft ... BottomRight).
 - **Value** (valeur) : couleur du texte, couleur de fond et placement.
@@ -19,12 +19,16 @@ Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être
 
 ### Donner son profil à un Tab {#give-a-tab-its-profile}
 
-- Sur l'onglet de menu **Tab Background Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
+- Sur l'onglet de menu **Tab Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
 - Ou dans Edit layout, ouvrez **⚙ Tab Settings** et choisissez-le sous **Background > Profile**.
 
 Un Tab qui a sa propre **Background > Color** dans Tab Settings garde cette couleur. Mettez-la sur **Default** pour utiliser la couleur du profil.
 
-L'onglet de menu **Default** choisit le Tab Background Profile que reçoit un **nouveau Tab**.
+### New Tabs
+
+Un Tab Profile garde aussi ce avec quoi commence un **nouveau Tab** fait avec lui : **How many Pixels are Pipes to be drawn on a Tab?** (10 si vide), **How many Pixels are Hoses to be drawn on a Tab?** (6 si vide), **Width of a New Tab (px)** et **Height of a New Tab (px)** (la taille de l'écran si vide). Chaque Tab change encore les siens dans **⚙ Tab Settings**.
+
+☰ Menu > Default settings > **Tab Profile for a new tab** choisit le Tab Profile que reçoit un **nouveau Tab** ([Réglages par défaut](155-default-settings)).
 
 ## Valve Profile
 

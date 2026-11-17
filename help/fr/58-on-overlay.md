@@ -39,7 +39,7 @@ Les couleurs suivent ce que fait l'élément :
 
 Chaque nom commence par sa propre lettre, donc liste ouverte, vous pouvez taper cette lettre pour le choisir.
 
-Choisissez **None** pour éteindre la superposition. Une Heating Element commence avec **Red Glow** : elle brille en rouge quand elle est On. Une nouvelle pompe commence avec l'**Overlay** de son **Pump Profile** (anneau vert lumineux sauf si vous le changez), et une nouvelle vanne motorisée avec l'**Overlay** de son **Valve Profile** (l'éclair fixe sauf si vous le changez) ([Tab Background, Valve et Pump Profiles](36-tab-and-valve-profiles)). Les pompes et vannes déjà faites gardent les leurs. Les images de superposition intégrées sont dans `media/Images/Skynet/On_Off` (lecture seule).
+Choisissez **None** pour éteindre la superposition. Une Heating Element commence avec **Red Glow** : elle brille en rouge quand elle est On. Une nouvelle pompe commence avec l'**Overlay** de son **Pump Profile** (anneau vert lumineux sauf si vous le changez), et une nouvelle vanne motorisée avec l'**Overlay** de son **Valve Profile** (l'éclair fixe sauf si vous le changez) ([Tab, Valve et Pump Profiles](36-tab-and-valve-profiles)). Les pompes et vannes déjà faites gardent les leurs. Les images de superposition intégrées sont dans `media/Images/Skynet/On_Off` (lecture seule).
 
 ## Votre propre image de superposition {#your-own-overlay-picture}
 
