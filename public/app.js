@@ -15,8 +15,8 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
-import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, isIpCode, ownerIpType, fitOwnedEnds, usedIpTypes } from './iptype.js';
-import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, pumpSpeed, powerText, selfPrimeOf } from './pumps.js';
+import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, usedIpTypes } from './iptype.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
@@ -28,18 +28,18 @@ import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';    
 import { elementNameError, fileNameError, typedNameError } from './names.js';
 import { isImmersion, takesChiller, spotIn, unbundle } from './chillmove.js';      // move an Immersion Chiller by hand (Rule 5.42)
 import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from './eqpaste.js';      // Paste a profile onto a Tab (Rule 19.6 #2)
-import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, MEDIA_DEFAULTS, userFolderError } from './mediapaths.js';
+import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
-import { STOVE_SIDE, STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
+import { STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
 import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the Ice Water Can (Rule 19.8)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -48,7 +48,7 @@ import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
-import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
+import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -949,7 +949,6 @@ function vpParts(g, at, s, W) {
 const MF_TPLS = { Valve_Tee: { what: 'Long Tee with a Valve', prefix: 'ValveTee', label: 'valve_tee' },
   Supply_Manifold_2: { what: 'Double Supply Manifold', prefix: 'Manifold2', label: 'manifold_2' },
   Supply_Manifold_3: { what: 'Triple Supply Manifold', prefix: 'Manifold3', label: 'manifold_3' } };
-const MF_KINDS = [['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)'], ['motorized', 'Motorized (switched by its Port)']];
 // Fritz, 2026-11-06: "The valve ends need to match the Tee ends in the graphic". Each valve is drawn here in the 210 x 210 box
 // under its tee, on the tee's own grid: the same 38.4 wide pipe as the tee's branch, a TC ferrule (56 x 16.5) at the top, clamped to
 // the tee's branch ferrule, and the same ferrule at the bottom, where its IP is (the face of that ferrule). Closed: the Manual handle
@@ -1836,8 +1835,6 @@ const defaultWidth = (wsn, o) => pipeSize(wsn) * defPipeOf(o) / 0.5;
 // 1920 x 1080 Windows screen), so a new Tab fills the screen at Zoom Fit screen. 1920 x 1040 if the screen size cannot be read.
 const screenTab = () => { const w = Math.round(+window.screen?.availWidth || 0), h = Math.round(+window.screen?.availHeight || 0); return w >= 200 && h >= 200 ? { w: Math.min(w, 20000), h: Math.min(h, 20000) } : { w: 1920, h: 1040 }; };
 const newTabSize = (tp = S.config.brewDefaults?.tabProfile) => { const d = tabProfileOf({ tabProfile: tp }) || {}, sc = screenTab(); return { width: +d.newTabWidth || sc.w, height: +d.newTabHeight || sc.h, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}), hoseSize: +d.newTabHose > 0 ? +d.newTabHose : HOSE_PX }; };
-const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
-  : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
 // The pipe thickness a fitting takes (Fritz, 2026-11-07: "should size to the majority of the pipes or hoses", Rule 5.36): the size
 // most of the pipes and hoses joined to it have. On a tie (one 1" and one 1/2", as on a Reducer) it takes the bigger. 0 = none joined.
@@ -1988,7 +1985,6 @@ const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56
 // picture; the On image is layer 1). It starts with its Inlet on the Right Middle and its Outlet on the Top Right (mirrored when Left),
 // the spots nearest its ports. A User pump starts on the middle of its sides (its IN IP side and OUT IP side, Left and Right).
 const PUMP_SPOTS = { TL: [0, 0], TM: [0.5, 0], TR: [1, 0], RM: [1, 0.5], BR: [1, 1], BM: [0.5, 1], BL: [0, 1], LM: [0, 0.5] };
-const PUMP_SPOT_NAMES = { TL: 'Top Left', TM: 'Top Middle', TR: 'Top Right', RM: 'Right Middle', BR: 'Bottom Right', BM: 'Bottom Middle', BL: 'Bottom Left', LM: 'Left Middle' };
 const SPOT_FLIP_H = { TL: 'TR', TM: 'TM', TR: 'TL', RM: 'LM', BR: 'BL', BM: 'BM', BL: 'BR', LM: 'RM' };
 const SPOT_FLIP_V = { TL: 'BL', TM: 'BM', TR: 'BR', RM: 'RM', BR: 'TR', BM: 'TM', BL: 'TL', LM: 'LM' };
 const flipSpot = (c, fh, fv) => { if (fh) c = SPOT_FLIP_H[c]; if (fv) c = SPOT_FLIP_V[c]; return c; };
@@ -8123,17 +8119,12 @@ function chainNewSteps(work) {
 // used fields are on the opening dialog; each red hexagon ⬢ opens a pop-up with the rest, each red up arrow ⬆ a String Entry
 // Dialog. "Pump Properties ⬢" holds Visible, Hidden Locked, the lock, Tab, X, Y, Width, Height and Delete.
 const isPumpDev = e => e?.type === 'digitalOut' && e.subtype === 'pump' && !skyDev(e) && !e.kind;
-const DEV_PROPS_POP = what => ({ title: `${what} Properties`, canDelete: true, fields: [['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
-  ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']] });
 // Dual Throw (OakBarn Brewery, 2026-11-09, Rule 6.22, as BruControl's Dual Throw output): a second Port on the same Interface that is
 // always the opposite of this one, e.g. the Close wire of a valve whose Port is its Open wire
 const DUAL_THROW_TIP = 'Dual Throw (Rule 6.22): a second Port on the same Interface that is always the opposite of this one. ON = this Port on and the second Port off; OFF = this Port off and the second Port on. For a valve with an Open wire and a Close wire, or a motor that turns forward and backward. None = no second Port.';
 const DUAL_DELAY_TIP = 'How long both Ports stay off before the other one turns on, in milliseconds (1000 = 1 second), so the two are never on together.';
 const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'],
   ['dualThrowChannel', 'Dual Throw: second Port (optional)', 'pinsel', 'digital', false, false, { tip: DUAL_THROW_TIP }], ['dualThrowDelay', 'Dual Throw delay (ms)', 'num', null, false, false, { tip: DUAL_DELAY_TIP, def: 0 }]] };
-const DEV_PIC_POP = { title: 'Picture attributes', fields: [['imageOverlay', 'On overlay (on top while it is on)', 'gpick', 'overlays'], ['imageOn', 'Picture when on (a second picture, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
-const DEV_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
-  ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 // the Skynet Dial's settings (Fritz, 2026-11-07, Rule 2.40), in the ⬢ pop-up beside Display (or Look)
 const DIAL_TIP = {
   look: 'How the reading shows on the Tab: a Number, LCD or LED digits, or the Skynet Dial (an arc with a needle and the reading in digits under it). The ⬢ beside it holds the Dial settings.',
@@ -8167,7 +8158,6 @@ const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue',
   ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
   ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
   ['look', 'Look', 'sel', LOOKS, false, false, { tip: DIAL_TIP.look }], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
-const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab)', 'text', null, false, false, { tip: 'Empty: itself.' }], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
@@ -8964,7 +8954,7 @@ function vpSections(it, edit = false) {
       const ro = (key, label, x) => [k + key, label, 'ro', v(x), false, false, e ? {} : { tip: `None: this vessel has no ${word} built in.` }];
       const port = !e ? '' : e.probeIndex !== undefined && e.probeIndex !== null && e.probeIndex !== '' ? `Probe # ${e.probeIndex}` : pinLabel(e.channel, boardOfDevice(e, S.config.devices));
       if (edit && e) {      // integrated: its Heating Element or Probe can still be changed, or swapped for another (OakBarn Brewery, 2026-11-09)
-        const x = `vpx_${spot}_`, ow = e.type === 'temperature' && isOneWire(e), what = kind === 'element' ? 'Heating Element' : 'Temperature Probe';
+        const x = `vpx_${spot}_`, ow = e.type === 'temperature' && isOneWire(e);
         const pre = { label: e.label ?? '', device: e.device ?? '', [ow ? 'pidx' : 'channel']: ow ? e.probeIndex ?? '' : e.channel ?? '',
           ...(kind === 'element' ? { heatMethod: startMethod(e), input: e.input ?? '', target: e.target ?? '' } : { units: e.units || '°F', offset: e.offset ?? '' }) };
         for (const [a, b] of Object.entries(pre)) if (it[x + a] === undefined) it[x + a] = b;
@@ -11898,18 +11888,6 @@ const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
 // Fritz, 2026-11-06: plain English first (Read Only, Read & Control); the computer words Get / Get & Put follow in the ( )
 const API_LABEL = { off: 'Off', get: 'Read Only (Get: outside programs like Node-Red can read it.)', getput: 'Read & Control (Get & Put: outside programs like Node-Red can also control it.)' };
-function logSummary(lg) {
-  lg = lg || { frequency: 'none' };
-  const f = lg.frequency || 'none';
-  if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
-  if (f === 'datetime') return `At ${lg.at || '?'}`;
-  if (f === 'clock') return `Every day at ${lg.at || '?'}`;
-  const gs = (lg.groups || []).map(id => (S.config.dbGroups || []).find(x => x.id === id)?.name).filter(Boolean);
-  const inG = s => gs.length && f !== 'none' ? `${s}, while Group ${gs.join(' or ')} is started` : s;
-  if (!TIME_MODES.includes(f)) return inG(LOG_LABEL[f] || f);
-  const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
-  return inG(every);
-}
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
 const hasDbValue = e => !['picture', 'label', 'manual', 'gGlobal'].includes(e?.type);      // a gGlobal: only send_db / DBSend in a Process (Rule 1.33)
@@ -12117,8 +12095,6 @@ async function globalDialog(work, orig) {
     inp.addEventListener('input', () => { work[k] = conv(inp.type === 'number' ? (inp.value === '' ? undefined : +inp.value) : inp.value); });
     return inp;
   };
-  const sw = (k, label) => { const c = h('input', { type: 'checkbox' }); c.checked = !!work[k]; c.onchange = () => { work[k] = c.checked; };
-    return h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' ' + label); };
   function render() {
     title.replaceChildren(work.kind ? `${VAR_KINDS[work.kind]} Properties` : 'New gGlobal', ' ', helpIcon(G_HELP, () => { if (snap() !== snap0 && !confirm('Leave without saving your changes, and open Help?')) return false; close(); }));
     body.replaceChildren();
@@ -17054,7 +17030,6 @@ function rcHopDialog(hop, i, u, changed) {
     rcHopOpen.set(hop, work);
     const set = (use, on) => { work.use = on ? use : null; if (on && use === 'whirlpool' && work.time == null) work.time = 0; draw(); };
     const sw = ([use, label]) => h('div', { class: 'hopSw' }, h('b', {}, label), rcSwitch(work.use === use, on => set(use, on)));
-    const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) };
     const one = ['secondary', 'dry hop', 'whirlpool'].includes(work.use);
     if (!one) box.append(...RC_HOP_SW.map(sw));
     else box.append(sw(RC_HOP_SW.find(x => x[0] === work.use)));

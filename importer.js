@@ -72,7 +72,7 @@ function buildButtons() {
     const at = x[2], title = attr(at, 'title'); if (!title) continue;
     const id = attr(at, 'id'), head = attr(at, 'data-head');
     const label = BAR_NAMES[id] || head || x[3].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    if (label) out.push({ label, help: title.replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&lt;/g, '<') });
+    if (label) out.push({ label, help: title.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&') });
   }
   return out;
 }

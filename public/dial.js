@@ -6,7 +6,7 @@
 // No imports, so node can load it too (test/dial.test.js).
 
 export const DIAL_DEFAULTS = { cool: 2, hot: 2, coldColor: '#1e6fd9', okColor: '#1f9d55', hotColor: '#d93a26' };
-const START = -120, END = 120;               // the arc's ends, in degrees from straight up (the Standard shape)
+const END = 120;               // the arc's ends, in degrees from straight up (the Standard shape)
 // Gauge settings (Rule 2.40 point 4, OakBarn Brewery 2026-11-09): the kinds of settings every gauge program has, drawn by Skynet.
 // Shape of the Dial: Standard (two thirds round, as before), Full round (most of a circle), Half round (the top half)
 export const DIAL_SHAPES = [['', 'Standard (two thirds round)'], ['full', 'Full round'], ['half', 'Half round']];
@@ -107,7 +107,7 @@ export function barSvg(e = {}, value, sp = null, text = null) {
   const at = t => side ? [20 + L * t, 52] : [44, 190 - L * t];
   const out = [];
   if (gs) out.push(`<rect x="0" y="0" width="${W}" height="${H}" rx="12" fill="${gs.face}"/>`);
-  const [x0, y0] = at(0), [x1, y1] = at(1), T = 16;
+  const [x0, y0] = at(0), [, y1] = at(1), T = 16;
   out.push(side ? `<rect x="${x0}" y="${y0 - T / 2}" width="${L}" height="${T}" rx="4" fill="currentColor" fill-opacity=".15"/>` : `<rect x="${x0 - T / 2}" y="${y1}" width="${T}" height="${L}" rx="4" fill="currentColor" fill-opacity=".15"/>`);
   if (v !== null) {
     const t = frac(v), fill = zone ? col[zone] : ['#1e6fd9', '#16a3c4', '#1f9d55', '#e8b81c', '#ef7d1a', '#d93a26'][Math.min(5, Math.floor(t * 6))];

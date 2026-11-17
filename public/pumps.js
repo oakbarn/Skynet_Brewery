@@ -5,7 +5,6 @@
 
 // Power: what the pump runs on. Only a DC pump can have its speed set with PWM (a switch module, MOSFET, on a PWM pin).
 export const PUMP_POWERS = [['', 'Not set'], ['ac120', 'AC 120 V (house power)'], ['ac240', 'AC 240 V (house power)'], ['dc12', 'DC 12 V'], ['dc24', 'DC 24 V']];
-export const PUMP_USES = [['', 'Hot (wort, water)'], ['cold', 'Cold (glycol, ice water)']];
 export const PUMP_SPEEDS = [['', 'On/Off only'], ['pwm', 'PWM speed (Speed %)']];
 // Pump Ports (OakBarn Brewery, 2026-11-11: "This should be DDLB TC1.5 TC2 TC3/4 TC1/2 FPT1/2 FPT 3/4 FPT1 MPT1/2 MPT3/4 MPT1 Differnt BSP
 // up to 1 Metrc"): Tri-Clamp, Female and Male Pipe Thread (NPT), British pipe thread (BSP) up to 1", and metric pipe (DN, the

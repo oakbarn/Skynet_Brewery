@@ -53,10 +53,10 @@ import { seedDefaults, renameOldProcessesFolder } from './lib/seed.js';
 import { applyKeptSettings } from './lib/freshstart.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { SkynetPictures } from './lib/skynetpics.js';
-import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
+import { listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
-import { FileMove, KINDS as MOVE_KINDS, missingMedia, ownMedia } from './lib/filemove.js';
+import { FileMove, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain } from './lib/values.js';
 import { Help } from './lib/help.js';
@@ -78,7 +78,7 @@ import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
 import { Patron } from './lib/patron.js';
 import { lockDataFolder } from './lib/lockdata.js';
-import { Devices, DEVICE_COOKIE, isBrainItself } from './lib/devices.js';
+import { Devices, isBrainItself } from './lib/devices.js';
 import { useKeySecret, newKey, KEY, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { checkOfficial, repair as repairOfficial, canLock, setReadOnly, coreFiles } from './lib/official.js';
@@ -1411,7 +1411,6 @@ async function route(req, res) {
   // File Move page (admin only, see needRole): copy files and folders from your computer to the Brain
   if (p.startsWith('/ui/filemove/')) {
     const q = Object.fromEntries(url.searchParams);
-    if (p === '/ui/filemove/kinds' && m === 'GET') return ok(res, { kinds: Object.fromEntries(Object.entries(MOVE_KINDS).map(([k, v]) => [k, v.label])), brain: ROOT });
     if (p === '/ui/filemove/missing' && m === 'GET') return ok(res, { missing: missingMedia(store.config, findMedia) });
     if (p === '/ui/filemove/check' && m === 'POST') return ok(res, { items: fileMove.check((await jsonBody(req)).items) });
     if (p === '/ui/filemove/upload' && m === 'PUT') {
