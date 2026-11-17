@@ -74,6 +74,20 @@ Some numbers moved out of the profile (2026-10-20):
 
 The **Check the volumes** box works out the pre-boil volume, how much boils off, the post-boil volume, what goes into the fermenter and what is left to bottle or keg. Type a **Batch size** and pick a **Boil Profile** to try them (the Recipe will give these on brew day). It uses the first **Brew Kettle** and the first **Fermenter** in the profile's Equipment list (a Fermentation Tab's profile has no kettle, so it says so). A ⚠ line warns you when the pre-boil volume is more than the kettle holds, or the batch is more than the fermenter holds.
 
+## Efficiency on this Schema
+
+Grain grind, mash conversion and sparge all change the Brewhouse Efficiency, and they are hard to keep track of. The result is easy to track, so Skynet keeps it for you. The **Efficiency on this Schema** box under the Equipment list shows each brew recorded with this profile in the loaded Schema: the **Date**, the **Recipe**, the **Brew on** Tab, the **OG**, the volume **Into the fermenter** and the real **Efficiency**.
+
+1. After a brew, load its Recipe (☰ Menu > Recipe) and check its **Brew on** Tab.
+2. Open the Equipment Profile of that Tab and press **📝 Record a brew**.
+3. Type the **OG** (the gravity in the fermenter, like 1.052), the volume that went **Into the fermenter** and the **Date**, then press **OK**. Skynet works out the real Efficiency from the Recipe's grain bill and shows it, with the average.
+
+The brews are kept in the **Schema**, so each Schema has its own list (a Schema made as a copy of another starts with that one's list). Skynet averages the **last 10 brews** on this Schema with this profile. 🗑 takes a brew out of the list when it was typed in wrong.
+
+**Use the average (x %)** puts that average into this profile's **Brewhouse efficiency**. Skynet shows the change first, and **↩ Undo** puts the old number back. A shared profile is changed for every Schema that uses it; press **Make it unique to this Tab** first to change it for this Schema only. The button shows only when the average is different from the profile's number, for an Admin, and when the profile is not locked.
+
+Any user can record a brew; only an Admin can use the average.
+
 ## Give each Tab its Equipment Profile
 
 The box at the top of the **Equipment Profile** tab lists every Tab of the loaded Schema, each with its Equipment Profile.

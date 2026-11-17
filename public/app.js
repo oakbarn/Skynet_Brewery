@@ -37,7 +37,7 @@ import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TI
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
@@ -14998,10 +14998,54 @@ function eqEditor() {
   box.append(h('div', { class: 'profFreeze' }, buttons(), h('h3', {}, `${p.locked ? '🔒 ' : ''}${p.name}`),
     p.locked ? h('div', { class: 'eqWarn' }, `Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}. Unlock it to change it (the 🔒 Locked switch above when a Tab of this Schema uses it, or unlock_Equipment in a Process).`) : '',
     h('div', { class: 'muted' }, p.usedOn?.length ? `Used by: ${usedOnText(p)}` : 'Not used on any Tab yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
-    ), h('div', { class: 'eqTop' }, f.box, out), eqPane(p));
+    ), h('div', { class: 'eqTop' }, f.box, out), eqPane(p), eqEffPane(p));
   return box;
 }
 
+// Tracking the real Efficiency, by Schema (Rule 17.13; OakBarn Brewery, 2026-11-17: "Things that affect Efficiency: Grain Grind, Mash
+// Conversion, Sparge and maybe others. Hard to keep track of all those variables, but easy to track the Efficiency We should do that.";
+// "Average over 10 brews with same schema"; "Track by schema"). Each brew is kept in the Schema with its Recipe, Tab and profile. The
+// average of the last 10 brews of this Schema with this profile can be put into the profile; Skynet never changes it by itself.
+// The PreBrew and Brew Day steps that would ask the OG and volume wait in the Process Updates Sandbox (Rule 14.5); here they are typed in.
+const EFF_RECORD_TIP = 'Type in the OG and the volume that went into the fermenter for the Recipe now loaded. Skynet works out the real Brewhouse Efficiency from its grain bill and keeps it in this Schema.';
+const EFF_USE_TIP = 'Put the average of the last brews into this Equipment Profile\'s Brewhouse efficiency. Skynet shows the change first, and ↩ Undo puts the old number back.';
+function eqEffPane(p) {
+  const log = (S.config.effLog || []).filter(x => x.profile === p.id), av = averageEfficiency(S.config.effLog || [], p.id);
+  const tabOf = x => { const w = (S.config.workspaces || []).find(t => t._ref && t._ref === x.tab?._ref); return w ? tabTitle(w) : '(a Tab not here now)'; };
+  const u = rcUnits().volumeUnit;
+  const rows = log.slice().reverse().map(x => h('tr', {}, h('td', {}, x.date), h('td', {}, x.recipe), h('td', {}, tabOf(x)), h('td', {}, (+x.og).toFixed(3)),
+    h('td', {}, `${rcRound(lTo(x.liters, u), 2)} ${u}`), h('td', {}, h('b', {}, `${x.eff} %`)),
+    h('td', {}, can('operator') ? h('button', { type: 'button', class: 'danger', title: 'Take this brew out of the list (typed in wrong)', onclick: guard(async () => {
+      if (!confirm(`Take the brew of ${x.date} ("${x.recipe}", ${x.eff} %) out of the list?`)) return;
+      await api('DELETE', `/ui/recipe/efficiency/${x.id}`); await load(); renderMenuPane();
+    }) }, '🗑') : '')));
+  const record = guard(async () => {
+    if (!rcView) await rcLoad();
+    const rc = rcView.recipe, bp = rcBrewProfile(rc), w = rcBrewTab(rc);
+    if (!bp) return toast('Pick the Recipe\'s Brew on Tab first (☰ Menu > Recipe): a Tab with an Equipment Profile.', true, 6000);
+    const o = { og: '', vol: '', date: new Date().toLocaleDateString('en-CA') };
+    if (await dialog('📝 Record a brew', [['_n', `The Recipe "${rc.name || '(no name)'}", brewed on ${tabTitle(w)} with "${bp.name}"${bp.id === p.id ? '' : ' (not this profile: it is kept with that one)'}.`, 'note', null, null, null, { keep: true }],
+      ['og', 'OG (the gravity in the fermenter, like 1.052)', 'num'], ['vol', `Into the fermenter (${u})`, 'num'], ['date', 'Date (year-month-day)', 'text']], o) !== 'ok') return;
+    readFields(o);
+    const r = await api('POST', '/ui/recipe/efficiency', { og: +o.og, liters: toL(+o.vol, u), date: o.date });
+    await load(); renderMenuPane();
+    toast(`This brew: ${r.eff} %. Average of the last ${r.average.count}: ${r.average.avg} %`, false, 8000);
+  });
+  const useAvg = guard(async () => {
+    if (eqDirty) return toast('Save or Undo the changes to this profile first', true);
+    const was = p.brewhouseEfficiency;
+    if (await dialog('Use the average', [['_n', `"${p.name}": Brewhouse efficiency ${was ?? '?'} % → ${av.avg} % (the average of the last ${av.count} brews on this Schema).`, 'note']], {}) !== 'ok') return;
+    const put = async eff => { const r = await api('PUT', `/ui/equipment/${p.id}`, { ...p, brewhouseEfficiency: eff }); S.profiles = r.list; eqWork = clone(r.saved); eqDirty = false; renderMenuPane(); };
+    await put(av.avg);
+    undoNote(`"${p.name}": Brewhouse efficiency ${was ?? '?'} % → ${av.avg} %.`, () => put(was));
+  });
+  return h('div', { class: 'eqPane' }, h('h3', {}, 'Efficiency on this Schema'),
+    h('p', { class: 'muted' }, `The real Brewhouse Efficiency of each brew of this Schema with this profile. Skynet averages the last ${EFF_AVERAGE_OF}. This profile now: ${p.brewhouseEfficiency ?? '?'} %.`),
+    rows.length ? h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Date', 'Recipe', 'Brew on', 'OG', 'Into the fermenter', 'Efficiency', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)) : h('p', { class: 'muted' }, 'No brew recorded yet.'),
+    h('div', { class: 'bar' }, can('operator') ? h('button', { type: 'button', onclick: record, title: EFF_RECORD_TIP }, '📝 Record a brew') : '',
+      av ? h('span', {}, `Average of the last ${av.count}: `, h('b', {}, `${av.avg} %`)) : '',
+      av && can('admin') && !p.locked && +av.avg !== +p.brewhouseEfficiency ? h('button', { type: 'button', class: 'primary', onclick: useAvg, title: EFF_USE_TIP }, `Use the average (${av.avg} %)`) : ''));
+}
 // the profile's Equipment list: the Tab_Vessels, Tab_Fittings and other equipment on its Tab (Fritz, 2026-10-21). On the Tab of
 // this Schema that uses it they come from the Tab itself, otherwise from the profile's Default Layout.
 function eqItems(p) {
