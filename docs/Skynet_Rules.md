@@ -1064,6 +1064,19 @@ imformation").
   vessel dialogs and their Help still say Ports, and the Panel's network and mail server port settings keep the word (they are not
   pipes). **Both programs:** the BruControl Import's Build page shares the Panel's dialogs; BruControl has no fittings to import.
 
+2.58 **The New Schema Interview** (OakBarn Brewery, 2026-11-17: "Adding a New Schema Lands back on the Schema Page. Should land on
+a short interview Page about the New Schema"; "Similar to the Skynet Schema Import"). As soon as Add new Schema has made and loaded
+the new Schema, a short interview opens: its steps across the top like the Skynet BruControl Importer, one page at a time, ◀ Back and
+Next ▶, with Close and ✕ frozen in the upper right (Rule 2.54). The pages: **About** (the Name, and a one-line **What is it for?**
+that shows in the Schema list), **Boards** (tick the real boards from the other Schemas that this one uses too), **Tabs** (rename
+each Tab, and **Add a Fermentation Tab**), **Equipment** (an Equipment Profile for a Tab: Later, the Equipment Profile Interview
+now, or one you already have) and **Done** (a summary). A Skynet Schema Template or an Equipment Profile already asked about the
+boards, Tabs and equipment, so they get About and Done only. **Nothing is changed until ✔ Finish.** Finish, and Close, land on the
+new Schema's first Tab, never back on the Schema page (the Equipment Profile Interview, when picked, then opens and ends on the 🔨
+Build Tab, Rule 4.1). Units are not asked: they are a Panel setting, the same for every Schema. **Both programs:** the BruControl
+Import makes no Schemas with Add new Schema, so nothing changes there. (thread "Open a short interview after adding a Schema",
+Help 202)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -3590,7 +3603,16 @@ another brewer is the Import folder** (`C:\Brewing\Import`), or any .json file p
 Schema (no Schema is written over). Every one of these dialogs, and the 🗂 Schema tab's **Share with other brewers** part, shows
 the notice: *"Skynet does not check what is in a Schema file, going out or coming in. The pictures, sounds, names and anything
 else in it, and any copyright on them, are between the brewers."* **Skynet does no checking** of a shared Schema. A shared Schema
-can also be added as a folder in `sample_schemas` (Rule 9.13). Both programs: the BruControl Import saves its Schemas in the same
+can also be added as a folder in `sample_schemas` (Rule 9.13).
+**The kinds of files** (OakBarn Brewery, 2026-11-17: "More info about type of files and that media files (if not all are Skynet)
+need to be shared as well. Skynet cannot set up to send those files as they may contain copywrite material and then a Link to a Step
+by Step on how to tansfer files and maybe even a methos where a user can click a User File to send. Also a caveat about being on the
+latest Version of Skynet as items may have been aded."): **Share with other brewers** says what a shared Schema is made of (the
+Schema file (.json); the brewer's own pictures and sounds, which the file only names; the Processes (.txt), which are not in the file)
+and lists the loaded Schema's own pictures and sounds (not Skynet's, which come with every Skynet), each one a click to save it on
+this computer. **Skynet never sends a file itself**, as they may hold copyrighted material: the brewer sends them. A ⚠ caveat says both
+brewers should be on the latest version of Skynet, and **❓ Step by step: how to send the files** opens Help 203. The 🗂 Schema
+tab's buttons are **Create New Copy of Schema** (was Clone) and, under Add a Sample Schema, **Add This Schema Template** (was Add). Both programs: the BruControl Import saves its Schemas in the same
 Import folder; nothing changes there. (thread "Move Sample Schemas to own Setup", Help 44)
 
 10.10 **Every Simulator setting is ONLY on the Simulator bar** (OakBarn Brewery, 2026-11-14: "All Simulator Bar settings should be
@@ -3864,7 +3886,10 @@ only when Fritz says the program is set. (2026-10-26)
 14.3 **The Importer Help and a BruControl Read Me** (OakBarn Brewery, 2026-11-10): the Importer Help waits until the Skynet Panel Help is
 finished, and a single BruControl Read Me in the Skynet Panel (maybe) waits until the Import is done (Rule 11.3).
 
-14.4 **The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
+14.4 **SUSPENDED for now** (OakBarn Brewery, 2026-11-17: "Suspend Rule 14.4 for Now. The sand box items should all have been dealt
+with"): general Panel updates are built when asked, with no exception needed; the Panel Updates Sandbox stays for anything OakBarn
+Brewery says to park. Rule 14.5 (the Process Updates Sandbox) still stands. The Rule as it was:
+**The Panel Updates Sandbox** (OakBarn Brewery, 2026-11-15: "Create a sandbox for General SkyNet that will be used AFTER
 Blickmann Dialogs and Help are done. Call Panel Updates"). General Skynet Panel updates and ideas given while the Blichmann RipTide
 pump dialogs and their Help are being finished are written in `Sandbox/Panel_Updates/Panel_Updates.md` in the private Skynet_Private repo (Rule 13.7), with where each goes, and
 are **not built yet**. When the Blichmann work is done, OakBarn Brewery picks which to start; each is checked against the Rules and
@@ -5197,6 +5222,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Added Rule 2.58, the New Schema Interview (OakBarn Brewery: "Adding a New Schema Lands back on the Schema Page. Should land on a short interview Page about the New Schema"; "Similar to the Skynet Schema Import"): after Add new Schema, About (Name, What is it for?), Boards, Tabs, Equipment and Done, one page at a time with the steps across the top; Finish and Close land on the new Schema's first Tab. A Template or an Equipment Profile gets About and Done only. The Schema list shows What it is for. Rule 14.4 suspended (OakBarn Brewery: "Suspend Rule 14.4 for Now"); Rule 14.5 stands. Rule 10.9 (OakBarn Brewery's Schema page markup): Clone is now **Create New Copy of Schema**, the Sample Schema's Add is **Add This Schema Template**, and Share with other brewers names the kinds of files, lists the Schema's own pictures and sounds to save and send (Skynet sends none itself), warns that both brewers should be on the latest Skynet, and links the new Step by Step (Help 203). Help 44, 48, 188, 202 and 203 (and French). Checked against both programs: the BruControl Import adds no Schemas and has no Schema tab, so nothing changes there. (thread "Open a short interview after adding a Schema")
 - 2026-11-17: Rule 4.1 (OakBarn Brewery, 2026-11-17: "I see the Equipment Template so use a Normal Build Tab to create a Bundled Immersion Chiller and save to Equipment Templates"; markup "Method to change the Menu Bar when the Build is for a Vessel Template, And Equipment Profile, An Equiment Template", option A: "Change Valves to Valves/Equpment and just add the Equipment Templates and Build new to the DDLB LIst"; "I think A is best choice if possible"; built as a Rule 4.1 and Rule 14.4 exception): a **Chiller Bundle Equipment Template** (one immersion chiller with its hoses, Ice Water Cans, a Sump Pump and IPs, saved from a normal Build Tab with Finish Build ... > As a Template; a pump Device keeps no Port and gets the next free Port when placed, Rule 6.1); the **Valves** shortcut is now **Valves/Equipment** with the Equipment Templates and 🔨 Build new Equipment Template; while a Build is for a Template or an Equipment Profile the Edit layout bar greys out what can't go in one (the Widget buttons, Picture, Text, Tab settings, New tab, Hidden Tab, Processes, Update Schema Version) and Finish Build ... shows As a Template first. Placing a Bundle with place_Chiller waits in the Process Updates Sandbox (entry 8, Rule 14.5). Help 55, 82, 200 (and French). Checked against both programs: the BruControl Import's Build page is the Panel's, so it has the same bar and Templates; BruControl has no chillers. (thread "Move an Immersion Chiller between Vessels")
 - 2026-11-17: Rule 19.6 #1 and #2 changed (OakBarn Brewery: "Ok a switch  that is a real world thing is a Special widget like a Manual Valve.  So yes."; "Remove old"): a Switch that is a real world thing is in the Equipment Profile like a Manual Valve; the old Equipment Profile screen (its form, Equipment list, Paste onto a Tab dialog, Made before Templates with Put on Tab, the Settings button) is taken out, before the first Public Production (Old Ways policy). Opening a profile anywhere opens the Equipment Profile view, which now also has 🧮 Check the volumes, 📈 Efficiency and 🗂 New Schema from this profile. Help 28, 34, 48, 50, 68 (and French). Checked against both programs: the BruControl Import has no Equipment Profiles. (thread "Paste Equipment Profiles onto a Tab")
 - 2026-11-17: Added Rule 13.7 (OakBarn Brewery: "New Rule, if something can be accessed quickly on github, save it there rather than here so we do not take up thread or project Space"; "and that would include most sandboxes"; "Ok Private Repo"): GitHub is the main copy; public documents in the Skynet_Brewery repo, private notes (Sandboxes, Summaries, unbuilt plans) in the private Skynet_Private repo; the Patron key, passwords and emails never on GitHub; copyrighted media and the private test imports never in the public repo. Rule 13.6 changed to match (no second copy in the project folder). Rules 11.3, 14.4 and 14.5 now point at the Sandboxes in the private Skynet_Private repo (made 2026-11-17, OakBarn Brewery: "Done with GitHub"); the old `Sandbox/` folder and docs/Summary_N.md copies were removed from this public repo (OakBarn Brewery: "Remove anything Old"); the BruControl Help extract test now only checks the README. Nothing changes in either program.

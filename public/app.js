@@ -13305,6 +13305,7 @@ async function newSchemaFromTemplate(name) {
   const built = await api('POST', '/ui/brewprocess/build'); BP = null;
   toast(`Schema "${name}" is ready: ${plan.elements.length} Devices and Widgets, Brew Day built (${built.built.length} Processes). Pipe the equipment, check each job in ☰ Menu > Brew Process (🎯 click it on the Tab), then ▶ Start Brew Day.`, false, 12000);
   if (r.simulator && !r.real) await newSchemaInterface(r.iface, r.wasSim);
+  return schemaInterview({ short: true });      // About and Done (Rule 2.58): the Template's questions made the boards, Tabs and equipment
 }
 // the new Schema's Tab: the vessels side by side (each its own size), each one's probe, heater and valve under it, the chiller
 // and RIMS tube to their right with their parts under them, then a row of pumps (and the Supply Manifold), then the timers
@@ -13401,6 +13402,7 @@ async function addNewSchema() {
   if (w.start === 'profile') return newSchemaFromProfile(null, w.name);
   await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
   await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
+  return schemaInterview();          // then the New Schema Interview, never back on the Schema page (Rule 2.58)
 }
 // New Schema from an Equipment Profile (Rule 19.6 #2, OakBarn Brewery, 2026-11-17: "The reason to \"import\" and equipment Profiles is to
 // create a new Schema with its own Text Widgets, and Processes."): its one Tab uses the profile and has all its hardware, boards, Ports and
@@ -13419,6 +13421,131 @@ async function newSchemaFromProfile(pid, name = '') {
   const p = S.profiles.find(x => x.id === w.prof); if (!p) return toast('Pick an Equipment Profile', true);
   await api('POST', '/ui/schemas', { name: w.name, fromProfile: p.id });
   await afterSchemaSwitch(`Schema "${w.name}" made from "${p.name}" and loaded`);
+  return schemaInterview({ short: true });      // About and Done (Rule 2.58): the profile brought the boards, Tab and equipment
+}
+// ---- The New Schema Interview (OakBarn Brewery, 2026-11-17: "Adding a New Schema Lands back on the Schema Page. Should land on a
+// short interview Page about the New Schema", "Similar to the Skynet Schema Import"; Rule 2.58, Help 202). It opens as soon as Add new
+// Schema has made and loaded the new Schema: the steps across the top like the Skynet BruControl Importer, one short page at a time,
+// ◀ Back and Next ▶. Nothing is changed until ✔ Finish. Finish (and Close) land on the new Schema's first Tab, never back on the
+// Schema page. A Skynet Schema Template or an Equipment Profile already asked about the boards, Tabs and equipment, so they get About
+// and Done only. Units are not asked: they are a Panel setting (Settings > Panel settings), the same for every Schema.
+const NSI_KEEP = { keep: true };       // the interview's notes stay on the page (Rule 11.8: need to know)
+const NSI_STEPS = ['About', 'Boards', 'Tabs', 'Equipment', 'Done'];
+const NSI_TIP = {
+  name: 'The name you pick it by in the Schema list. Spaces are fine.',
+  about: 'One line on what this Schema is for, for example "Keg Cleaning" or "Hot Side, 10 gallon". It shows in the Schema list. You may leave it blank.',
+};
+function nsiPage(steps, at, fields, obj, { first = false, last = false } = {}) {
+  return new Promise(res => {
+    const body = h('div', { class: 'miniBody ivBody' }), d = h('dialog', { class: 'miniDlg ivDlg nsiDlg' });
+    const strip = h('ol', { class: 'nsiSteps' }, ...steps.map((s, i) => h('li', { class: i === at ? 'now' : i < at ? 'done' : '' }, s)));
+    // Back and Next (Finish) for the pages, then Close and ✕ together in the upper right (Rule 2.54)
+    const bar = h('div', { class: 'bar nsiBar' }, h('span', { class: 'spacer' }),
+      first ? '' : h('button', { type: 'button', onclick: () => done('back') }, '◀ Back'),
+      h('button', { type: 'button', class: 'primary', onclick: () => done('next') }, last ? '✔ Finish' : 'Next ▶'),
+      h('button', { type: 'button', title: 'Stop the interview. The new Schema is kept as it is now; change these later.', onclick: () => close() }, 'Close'),
+      h('button', { type: 'button', title: 'Close', onclick: () => close() }, '✕'));
+    d.append(bar, h('h3', {}, 'New Schema Interview: ' + steps[at]), strip, body);
+    document.body.append(d); bindForm(body, fields, obj);
+    const done = r => { try { readFields(obj, body); } catch (e) { if (r === 'next') return toast(e.message, true); } d.close(); d.remove(); res(r); };
+    const close = () => { if (!confirm('Stop the New Schema Interview? The new Schema is kept. Nothing from these pages is changed.')) return; d.close(); d.remove(); res('close'); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    d.showModal();
+  });
+}
+// a Tab's new name: the same checks as Tab settings (Rule 3.11)
+const nsiTabError = (n, others) => !n ? 'A Tab name cannot be blank.' : elementNameError(n, 'Tab') || (others.some(o => o.toLowerCase() === n.toLowerCase()) ? `There is already a Tab called ${n}.` : '');
+async function schemaInterview({ short = false } = {}) {
+  const act = S.schemas?.active; if (!act || !can('admin')) return;
+  const steps = short ? ['About', 'Done'] : NSI_STEPS;
+  const have = S.config.devices || [];
+  let found = [];        // the real boards in your other Schemas (the same list a Skynet Schema Template offers)
+  if (!short) try { found = (await api('GET', '/ui/schematemplates')).interfaces || []; } catch { found = []; }
+  const idUsed = d => d.id && have.some(x => String(x.id || '').toUpperCase() === String(d.id).toUpperCase());
+  const boards = found.filter(d => !have.some(x => x.name.toLowerCase() === d.name.toLowerCase()) && !idUsed(d));
+  const tabs = S.config.workspaces.filter(w => !w.build && !isHiddenTab(w));
+  const a = { name: act.name, about: act.about || '', ferment: false, eqHow: 'later', eqTab: '' };
+  boards.forEach((d, i) => { a['b' + i] = false; });
+  tabs.forEach((w, i) => { a['t' + i] = w.name; });
+  const tabNames = () => [...tabs.map((w, i) => String(a['t' + i] ?? w.name).trim()), ...(a.ferment ? ['Fermentation'] : [])];
+  const freeTabs = () => tabNames().filter((n, i) => !(tabs[i]?.equipmentProfile));
+  const picked = () => boards.filter((d, i) => a['b' + i]);
+  const eqText = () => a.eqHow === 'later' ? 'later (☰ Menu > Equipment Profile)' : a.eqHow === '@interview' ? `the Equipment Profile Interview for the Tab ${a.eqTab}, right after Finish`
+    : `"${profileName(a.eqHow)}" on the Tab ${a.eqTab}`;
+  const pages = {
+    About: () => [['name', 'Name', 'text', null, false, 'b', { tip: NSI_TIP.name }], ['about', 'What is it for?', 'text', null, false, false, { tip: NSI_TIP.about }],
+      ['_n', short ? 'Its boards, Tabs and equipment came from what you picked. Next ▶ shows what is left to do.' : 'A few short questions about the new Schema. Next ▶ keeps an answer as it is; nothing is changed until ✔ Finish.', 'note', null, null, null, NSI_KEEP]],
+    Boards: () => [['_h', have.length ? `It has ${plural(have.length, 'board')} now: ${have.map(d => (d.id ? d.id + ': ' : '') + d.name).join(', ')}.` : 'It has no board (Interface) yet.', 'note', null, null, null, NSI_KEEP],
+      ...(boards.length ? [['_b', 'Tick the boards from your other Schemas that this Schema uses too:', 'note', null, null, null, NSI_KEEP],
+        ...boards.map((d, i) => ['b' + i, `${d.id ? d.id + ': ' : ''}${d.name}${d.schema ? '  (in ' + d.schema + ')' : ''}`, 'bool'])]
+        : [['_b', 'There are no other boards in your other Schemas to bring in. Add one later on the Devices page (Add Interface), or try things first in the Simulator (🧪 beside ☰ Menu).', 'note', null, null, null, NSI_KEEP]])],
+    Tabs: () => [...tabs.map((w, i) => ['t' + i, `Tab ${i + 1}${w.equipmentProfile ? ' (uses the Equipment Profile "' + profileName(w.equipmentProfile) + '")' : ''}`, 'text']),
+      ...(tabs.some(w => /ferment/i.test(w.name)) ? [] : [['ferment', 'Add a Fermentation Tab', 'bool']]),
+      ['_n', 'More Tabs can be added at any time in Edit layout (➕ New tab).', 'note', null, null, null, NSI_KEEP]],
+    Equipment: () => {
+      const free = freeTabs(), used = tabs.filter(w => w.equipmentProfile);
+      if (!a.eqTab || !free.includes(a.eqTab)) a.eqTab = free[0] || '';
+      return [...(used.length ? [['_u', used.map(w => `The Tab ${a['t' + tabs.indexOf(w)]} already uses "${profileName(w.equipmentProfile)}".`).join('\n'), 'note', null, null, null, NSI_KEEP]] : []),
+        ...(free.length ? [['eqHow', 'Equipment Profile (the vessels, pumps and valves of a Tab)', 'sel', [['later', 'Later (☰ Menu > Equipment Profile)'], ['@interview', 'Answer the Equipment Profile Interview now'],
+          ...(S.profiles || []).filter(p => !(tabs.some(w => w.equipmentProfile === p.id))).map(p => [p.id, `Use "${p.name}"`])]], ['eqTab', 'For the Tab', 'sel', free.map(n => [n, n])]]
+          : [['_f', 'Every Tab already has an Equipment Profile.', 'note', null, null, null, NSI_KEEP]])];
+    },
+    Done: () => [['_d', [`Schema "${a.name}"${a.about ? ': ' + a.about : ''}.`,
+      ...(short ? [] : [
+        picked().length ? `Boards brought in: ${picked().map(d => d.name).join(', ')}.` : `Boards: ${have.length ? have.map(d => d.name).join(', ') : 'none yet'}.`,
+        `Tabs: ${tabNames().join(', ')}.`, `Equipment Profile: ${eqText()}.`]),
+      '✔ Finish keeps these answers and takes you to the new Schema\'s first Tab.'].join('\n'), 'note', null, null, null, NSI_KEEP]],
+  };
+  const check = step => {      // what stops Next ▶ on a page
+    if (step === 'About') { const n = String(a.name ?? '').trim(); if (!n) return 'Give the Schema a name';
+      if (S.schemas.list.some(x => x.id !== act.id && x.name.toLowerCase() === n.toLowerCase())) return `There is already a Schema called "${n}"`; }
+    if (step === 'Tabs') { const ns = tabNames(); for (let i = 0; i < ns.length; i++) { const bad = nsiTabError(ns[i], ns.filter((x, k) => k !== i)); if (bad) return bad; } }
+    return '';
+  };
+  for (let i = 0; i < steps.length;) {
+    const r = await nsiPage(steps, i, pages[steps[i]](), a, { first: i === 0, last: i === steps.length - 1 });
+    if (r === 'close') return nsiLand();
+    if (r === 'back') { i--; continue; }
+    const bad = check(steps[i]); if (bad) { toast(bad, true); continue; }
+    if (i === steps.length - 1) break;
+    i++;
+  }
+  // ✔ Finish: only now is anything changed
+  const name = String(a.name).trim(), about = String(a.about ?? '').trim();
+  if (name !== act.name || about !== (act.about || '')) await api('PUT', `/ui/schemas/${act.id}`, { name, about });
+  if (!short) {
+    const add = picked().map(({ schema, ...d }) => structuredClone(d));
+    if (add.length) await api('PUT', '/ui/layout', { devices: [...have, ...add] });
+    const renamed = tabs.map((w, i) => [w.name, String(a['t' + i]).trim()]).filter(([o, n]) => o !== n);
+    if (renamed.length || a.ferment) {
+      await load(); setEditing(true);
+      if (!draft) toast('Edit layout did not open: change the Tabs in Edit layout (Tab settings)', true);
+      else {
+        for (const [o, n] of renamed) {
+          const w = draft.workspaces.find(x => x.name === o); if (!w) continue;
+          w.name = n; for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === o) x.workspace = n;
+        }
+        if (a.ferment) draft.workspaces.push({ name: 'Fermentation', id: defaultTabId('Fermentation', draft.workspaces.map(w => w.id)), ...newTabSize(), ...tabLook() });
+        await saveLayout({ leave: true });
+      }
+    }
+    await load();
+    if (a.eqHow !== 'later' && a.eqHow !== '@interview' && a.eqTab) {
+      const drawn = S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === a.eqTab);
+      await api('PUT', '/ui/schema/profile', { tab: a.eqTab, id: a.eqHow, layout: drawn ? 'keep' : 'use' });
+      await load();
+    }
+  }
+  await nsiLand();
+  if (!short) toast(`Schema "${name}" is ready`);      // a Template keeps its own longer note (what is left to do)
+  if (!short && a.eqHow === '@interview' && a.eqTab) return eqInterview({ tab: a.eqTab });     // it ends on the 🔨 Build Tab (Rule 4.1)
+}
+// the new Schema's first Tab, never the Schema page (OakBarn Brewery, 2026-11-17)
+async function nsiLand() {
+  if (S.schemas?.active) S.schemas = await api('GET', '/ui/schemas').catch(() => S.schemas);
+  if (menuTab) leaveMenuTab();
+  wsName = (S.config.workspaces.find(w => !w.build && !isHiddenTab(w)) || S.config.workspaces[0])?.name ?? null;
+  setView('workspace'); renderSchemaPick();
 }
 // Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
@@ -14291,18 +14418,42 @@ function renderZoomTab(box) {
 function schemaSelect() { const s = h('select', { class: 'schemaSel' }); fillSchemaSelect(s); return s; }
 
 // ---- Schema tab (Fritz, 2026-10-21): the Schema dropdown, and every Schema with Load and Clone
+// Share with other brewers (Rule 10.9; OakBarn Brewery, 2026-11-17: "More info about type of files and that media files (if not all are
+// Skynet) need to be shared as well. Skynet cannot set up to send those files as they may contain copywrite material and then a Link
+// to a Step by Step on how to tansfer files and maybe even a methos where a user can click a User File to send. Also a caveat about being
+// on the latest Version of Skynet as items may have been aded."). Help 203.
+function shareInfo() {
+  const list = h('div', { class: 'shareMedia' }, h('span', { class: 'muted' }, 'Looking for your own pictures and sounds ...'));
+  api('GET', '/ui/schemas/sharemedia').then(r => {
+    const f = r.files || [];
+    list.replaceChildren(...(f.length ? [h('p', {}, `The loaded Schema uses ${plural(f.length, 'picture or sound')} of your own. Click one to save it on this computer, then send it with the Schema file:`),
+      h('ul', {}, ...f.map(x => h('li', {}, h('a', { href: media(x.path) + '&as=original', download: x.name, title: x.path }, (x.kind === 'sounds' ? '🔊 ' : '🖼 ') + x.name))))]
+      : [h('p', { class: 'muted' }, 'The loaded Schema uses only Skynet\'s own pictures and sounds: there are none of yours to send.')]));
+  }).catch(e => list.replaceChildren(h('p', { class: 'muted' }, 'Your own pictures and sounds could not be listed: ' + e.message)));
+  return h('div', { class: 'shareInfo' },
+    h('p', {}, 'A shared Schema can be more than one file:'),
+    h('ul', {},
+      h('li', {}, h('b', {}, 'The Schema file (.json)'), ': 📤 Export to share makes it. It holds the Tabs, boards, Devices, Widgets, pipes and Equipment Profile drawings. It holds no logins, passwords or panel settings.'),
+      h('li', {}, h('b', {}, 'Your own pictures and sounds'), ' (.png, .jpg, .svg, .wav, .mp3 ...): the file only names them. Skynet\'s own come with every Skynet, so they are never sent. ',
+        h('b', {}, 'Skynet cannot send yours for you'), ', as they may hold copyrighted material: you send them, if you may.'),
+      h('li', {}, h('b', {}, 'Processes (.txt)'), ': they are kept in the processes folder, not in the Schema file. Send the ones the other brewer needs.')),
+    list,
+    h('p', { class: 'eqWarn' }, '⚠ Both brewers should be on the latest version of Skynet. Things are added to Skynet all the time, and an older Skynet may not know something in a newer Schema file.'),
+    h('div', { class: 'bar' }, h('button', { title: 'Help: Step by Step: Share a Schema with another brewer', onclick: () => openHelp(['step-by-step-share-a-schema-with-another-brewer']) }, '❓ Step by step: how to send the files')));
+}
 function renderSchemaTab(box) {
   const admin = can('admin'), list = S.schemas?.list || [], act = S.schemas?.active, run = runningProcs();
   const when = x => x.updated ? new Date(x.updated).toLocaleString() : '';
   const rows = list.map(x => h('tr', { class: x.active ? 'active' : '' },
     h('td', {}, x.active ? h('b', {}, x.name) : x.name, x.active ? h('span', { class: 'muted' }, '  (loaded)') : ''),
+    h('td', { class: 'muted' }, x.about || ''),
     h('td', {}, String(x.tabs)), h('td', {}, (x.tabProfiles || []).map(t => (t.tab ? t.tab + ': ' : '') + profileName(t.id)).join(', ') || h('span', { class: 'muted' }, 'none')), h('td', {}, when(x)),
     h('td', {}, admin && !x.active ? h('button', { onclick: guard(async () => {
       if (editing) return toast('Save or exit Edit layout first', true);
       if (!okToSwitch(x.name)) return;
       await api('POST', `/ui/schemas/${x.id}/load`); await afterSchemaSwitch(`Schema "${x.name}" loaded`);
     }) }, 'Load') : '',
-      admin ? h('button', { title: 'Make a copy of this Schema under a new name', onclick: guard(() => cloneSchema(x.id)) }, 'Clone') : '')));
+      admin ? h('button', { title: 'Make a copy of this Schema under a new name', onclick: guard(() => cloneSchema(x.id)) }, 'Create New Copy of Schema') : '')));
   box.append(h('h3', {}, 'Schema'), h('div', { class: 'schemaPane' },
     h('div', { class: 'bar menuPick' }, h('span', {}, 'Loaded Schema'), schemaSelect(),
       act?.version ? h('span', { class: 'muted' }, 'Version ' + act.version) : ''),
@@ -14312,12 +14463,12 @@ function renderSchemaTab(box) {
     run.length ? h('div', { class: 'eqWarn' }, `⚠ ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running (${run.map(x => x.name).join(', ')}). Loading another Schema stops ${run.length > 1 ? 'them' : 'it'}; you are asked first.`) : '',
     h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profiles take the place of the loaded one. The one you leave is kept as it is.'),
     h('h3', {}, 'Schemas on this Brain'),
-    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Tabs', 'Equipment Profiles (Tab: profile)', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'What it is for', 'Tabs', 'Equipment Profiles (Tab: profile)', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
     admin && samples?.length ? [h('h3', {}, 'Add a Sample Schema'),
       h('p', { class: 'muted' }, 'A copy of a ready-made sample brewery comes in as a new Schema and is loaded. Your own Schemas are never written over. Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.'),
       h('table', { class: 'grid' }, h('tbody', {}, ...samples.map(x => h('tr', {}, h('td', {}, h('b', {}, x.name)), h('td', { class: 'muted' }, x.description || ''),
-        h('td', {}, h('button', { onclick: guard(() => editing ? toast('Save or exit Edit layout first', true) : addSampleSchema(x.id)) }, '➕ Add')))))) ] : '',
-    admin ? [h('h3', {}, 'Share with other brewers'),
+        h('td', {}, h('button', { onclick: guard(() => editing ? toast('Save or exit Edit layout first', true) : addSampleSchema(x.id)) }, '➕ Add This Schema Template')))))) ] : '',
+    admin ? [h('h3', {}, 'Share with other brewers'), shareInfo(),
       h('p', { class: 'muted' }, SHARE_NOTICE),
       h('div', { class: 'bar' },
         h('button', { title: 'Save a Schema as a .json file to give to another brewer', onclick: guard(exportSchemaFile) }, '📤 Export to share'),
