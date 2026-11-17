@@ -55,9 +55,9 @@ Every pipe and hose has an **IP Type at start** and an **IP Type at end**: the c
 
 **Only the sizes you tick show in the lists.** Tick them in ☰ Menu > Default settings > **IP Types**. None are ticked to start. A size already used in the Schema always shows too.
 
-**Ends that fit by themselves:** a pipe end on a pump, or on a Stove Top Vessel's outlet, fits it (an MPT1/2 end on an FPT1/2 End Fitting). Its IP Type is greyed out; change the pump's Inlet or Outlet Fitting to change it. A hose's Quick Disconnect end is female (**FMSSQD**) where it is on a pipe or a pump, and male (**MSSQD**) on its other end. On a Tri-Clamp pipe or pump, add the real adapter there (the most common is TC1.5 to MSSQD1/2): until then the orange ring below shows.
+**Ends that fit by themselves:** a pipe end on a pump, or on a Stove Top Vessel's outlet, fits it (an MPT1/2 end on an FPT1/2 End Fitting). Its IP Type is greyed out; change the pump's Inlet or Outlet IP Fitting to change it. A hose's Quick Disconnect end is female (**FMSSQD**) where it is on a pipe or a pump, and male (**MSSQD**) on its other end. On a Tri-Clamp pipe or pump, add the real adapter there (the most common is TC1.5 to MSSQD1/2): until then the orange ring below shows.
 
-**When ends can't fit:** in Edit layout, an orange ring marks two pipe ends on the same IP that can't be joined without an adapter (Tri-Clamp to NPT, MPT to MPT). Rest the mouse on it to see why. It only warns.
+**When ends are different:** two pipe ends on the same IP that can't be joined directly (Tri-Clamp to NPT, MPT to MPT) are joined with an adapter, as in your brewery, so there is no mismatch and no warning. The IP's Properties say which adapter is there (for example **Adapter: TC1.5 to MPT1/2**), as information only.
 
 Each end is **drawn as its IP Type**, so you can see it on the Tab: a Tri-Clamp ferrule and clamp, an NPT thread, a BSP hex nut, or a Quick Disconnect cam lock with its two arms. It is not drawn where the end sits on a fitting, a Quick Disconnect or an End Cap, which are drawn already.
 

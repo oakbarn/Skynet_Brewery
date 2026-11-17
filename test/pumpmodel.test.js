@@ -105,7 +105,7 @@ assert.match(app, /'◀ Back'\)\);\s*\n\s*if \(view\)/, 'its one button is Back'
 assert.match(app, /\['_power', 'Power', 'ro'/, 'Power is in the Pump facts');
 assert.doesNotMatch(app, /\['power', 'Power', 'sel', PUMP_POWER_CHOICES/, 'Power is no longer on the dialog');
 assert.match(app, /const PORTS_TIP = 'Match YOUR Pump fittings/, 'Ports Hover Help starts Match YOUR Pump fittings');
-assert.match(app, /\.\.\.\['in', 'out'\]\.map\(side => \(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpFitField\(it, factsOf\(it\), side\)\)\)/, 'Inlet Fitting and Outlet Fitting where Power was (they replaced Ports, 2026-11-17)');
+assert.match(app, /\.\.\.\['in', 'out'\]\.map\(side => \(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpFitField\(it, factsOf\(it\), side\)\)\)/, 'Inlet IP Fitting and Outlet IP Fitting where Power was (they replaced Ports, 2026-11-17)');
 assert.doesNotMatch(app, /it is not changed here/, 'Use: no "not changed here"');
 assert.match(app, /const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed\./);
 assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both balloons');
@@ -134,7 +134,7 @@ console.log('Dialog 2 #3 tests passed');
   console.log('self priming tests passed');
 }
 
-// Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet IP Fitting and Outlet IP Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
 // Inlet Fitting"; "Separate Outlet Fitting"; "every IP gets it own type End fitting"): two rows, the End Fittings of the In and Out IPs
 {
   const { factLines } = await import('../public/pumps.js');
@@ -143,15 +143,15 @@ console.log('Dialog 2 #3 tests passed');
   assert.ok(!fn.includes("'IP Type In'") && !fn.includes('pumpPortField'), 'one pair of rows, not two: no Ports row, no IP Type In / Out row');
   assert.ok(fn.includes("it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}); it.ipTypeOut ||= it.ipTypeIn;"), 'a pump saved with Ports starts from it, in the Add box too');
   const fit = app.slice(app.indexOf('function pumpFitField'), app.indexOf("// The Model's ⬢ Pump facts"));
-  assert.ok(fit.includes("side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting'"), 'his labels, word for word, on the IP End Fittings');
+  assert.ok(fit.includes("side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet IP Fitting' : 'Outlet IP Fitting'"), 'his labels, word for word, on the IP End Fittings');
   assert.ok(fit.includes('ipChoices(o[key], ...PUMP_PORTS)'), 'every size of the old Ports list still offered');
   assert.ok(!/\['pumpPorts', 'Ports', 'sel'/.test(app), 'no Ports dropdown');
-  assert.ok(app.includes("['ipTypeIn', 'Inlet Fitting', 'sel', [['', '(from the pump)']") && app.includes("['ipTypeOut', 'Outlet Fitting', 'sel'"), 'the Pump Profile says the same');
+  assert.ok(app.includes("['ipTypeIn', 'Inlet IP Fitting', 'sel', [['', '(from the pump)']") && app.includes("['ipTypeOut', 'Outlet IP Fitting', 'sel'"), 'the Pump Profile says the same');
   assert.ok(!/inside the port|outside of the port|FPT1 ports/.test(app), 'Port is a board Port only (Rule 2.57)');
   const el = { type: 'digitalOut', subtype: 'pump', pumpModel: 'march_815' };
   assert.ok(factLines(el).some(l => l.startsWith('Fittings: 3/4" NPT in')), 'the model\'s fittings on the hover');
   const own = factLines({ ...el, ipTypeIn: 'TC1.5', ipTypeOut: 'FPT1/2' });
-  assert.ok(own.includes('Inlet Fitting: TC1.5') && own.includes('Outlet Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own End Fittings, never "Ports"');
+  assert.ok(own.includes('Inlet IP Fitting: TC1.5') && own.includes('Outlet IP Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own End Fittings, never "Ports"');
   // an adapter in the connection: a note in the IP's Properties, information only (OakBarn Brewery, 2026-11-17, Rule 2.57)
   const ad = app.slice(app.indexOf('function ipAdapterNote'), app.indexOf('function ipAdapterNote') + 1200);
   const ipFits = (await import('../public/iptype.js')).ipFits;

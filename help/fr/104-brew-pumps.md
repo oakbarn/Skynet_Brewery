@@ -11,7 +11,7 @@ Skynet a des dessins des pompes de brassage amateur courantes, dessinées d'apr�
 | Topsflo TD5 | (pas vendue) | TD5 | (pas vendue) | (pas vendue) |
 | KegLand MKII | (pas vendue) | MKII | (pas vendue) | MKII tête inox |
 
-- **Un flexible ou un tuyau depuis les vrais End Fittings.** Les IP **IN** et **OUT** de la pompe sont sur deux de ses 8 places d'IP (aide 130), et un flexible ou un tuyau est dessiné depuis le bout de ses vrais Inlet et Outlet Fittings jusqu'à eux. L'orientation Left fait un miroir de l'image, du flexible ou du tuyau et des places de départ.
+- **Un flexible ou un tuyau depuis les vrais End Fittings.** Les IP **IN** et **OUT** de la pompe sont sur deux de ses 8 places d'IP (aide 130), et un flexible ou un tuyau est dessiné depuis le bout de ses vrais Inlet et Outlet IP Fittings jusqu'à eux. L'orientation Left fait un miroir de l'image, du flexible ou du tuyau et des places de départ.
 - **Tout dans la même case (le Pump Standard, aide 130) :** chaque image de pompe est dessinée à l'échelle dans la même case de 300 x 300 et chaque pompe a ses 8 IP aux mêmes places, donc une pompe peut en remplacer une autre au même endroit et rester raccordée. Certains tubes d'orifice sont dessinés un peu plus longs pour s'aligner.
 - Les pompes à **entrée au centre** sont dessinées de côté : moteur à gauche, entrée pointant à droite au milieu de la tête, sortie pointant vers le haut.
 - Les pompes à **entrée à 90°** (tête en ligne) sont dessinées en regardant la tête : l'entrée sort sur le côté, à 90° de la sortie, qui pointe vers le haut.

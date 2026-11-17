@@ -37,7 +37,7 @@ two meet as one piece. With nothing on the IP, the Hose or Pipe picked here is d
 picks it for you: the Hose or Pipe comes in the same way as the pipe or hose joined to that IP. With nothing joined yet, it comes
 in along the side, and it turns to follow as soon as a pipe or hose is joined. There is nothing to pick.
 
-**Inlet Fitting** and **Outlet Fitting** are the End Fitting (the connector) on the pump's In and Out IPs, with its size (FPT1/2, TC1.5 ...)
+**Inlet IP Fitting** and **Outlet IP Fitting** are the End Fitting (the connector) on the pump's In and Out IPs, with its size (FPT1/2, TC1.5 ...)
 (Skynet Rule 5.40). A new pump starts with the **Default pipe IP Type** (a pump saved with the older Ports pick starts from it), and
 the two can be different. A pipe end on the pump fits it by itself (an MPT1/2 end on an FPT1/2 End Fitting). The End Fitting is
 information only, except a Quick Disconnect, where a hose end can be unhooked and moved.
@@ -56,8 +56,8 @@ color pictures follow the Pump Standard too.
 
 | Where the pump's own End Fitting ends (Orientation Right) | In the 300 x 300 drawing | On a 150 x 150 pump |
 |----|-----|-----|
-| Inlet Fitting | 285 across, 150 down | 142.5 across, 75 down |
-| Outlet Fitting | 243 across, 56 down | 121.5 across, 28 down |
+| Inlet IP Fitting | 285 across, 150 down | 142.5 across, 75 down |
+| Outlet IP Fitting | 243 across, 56 down | 121.5 across, 28 down |
 
 The Hose or Pipe starts there.
 

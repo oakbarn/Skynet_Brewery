@@ -48,7 +48,7 @@ const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'
 for (const k of ['ipTypeFrom', 'ipTypeTo', 'ipTypeIn', 'ipTypeOut', 'defPipeIp', 'defHoseIp']) assert.ok(app.includes(`'${k}'`), k + ' is a box');
 assert.ok(app.includes('stampIpType(g)') && app.includes('stampIpType(p)'), 'a new pipe or hose takes the Default');
 assert.ok(app.includes("'ipTicks', 'Sizes to show in the IP Type lists', 'ticks'"), 'the tick boxes in Default settings');
-assert.ok(app.includes("if (editing && draft) fitOwnedEnds(draft);") && app.includes("class: 'ipMis'"), 'ends fit by themselves; the warning ring');
+assert.ok(app.includes("if (editing && draft) fitOwnedEnds(draft);") && !app.includes("class: 'ipMis'") && app.includes('function ipAdapterNote'), 'ends fit by themselves; the warning ring');
 console.log('iptype ok');
 
 // a hose end with a Quick Disconnect moves outside Edit layout, one end at a time; pipes never (Rules 5.28, 5.40)
