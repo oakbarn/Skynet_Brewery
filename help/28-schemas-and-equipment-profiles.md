@@ -27,7 +27,7 @@ Processes, logins, MQTT, media folders and the lists behind the dropdowns belong
 
 At the bottom of the **Schema** dropdown:
 
-- **Add new Schema ...** (also **☰ Menu > ➕ New Schema…**): give it a name, then pick what it starts from. Every step, with pictures: [Step by Step: Add a Schema](188-step-by-step-add-a-schema). **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. The new Schema is loaded straight away.
+- **Add new Schema ...** (also **☰ Menu > ➕ New Schema…**): give it a name, then pick what it starts from. Every step, with pictures: [Step by Step: Add a Schema](188-step-by-step-add-a-schema). **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. **An Equipment Profile** starts with that profile's hardware already wired ([Paste a profile, or start a new Schema from it](#paste-a-profile-or-start-a-new-schema-from-it)). The new Schema is loaded straight away.
 - **Clone a Schema ...**: a copy of any Schema under a new name, loaded only if you say so. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **Rename this Schema ...**: gives the loaded Schema a new name.
 - **Delete a Schema ...**: pick one that is not loaded. It is moved to `config/schemas/deleted`, so it can be got back.
@@ -146,6 +146,29 @@ The **Equipment list**, under the numbers, shows what is on the profile's Tab.
 **Go to the Tab** shows you the Tab itself.
 
 Profiles made before Templates may still have a list of vessels. They show under **Made before Templates**, with **Put on Tab** to draw them on the profile's Tab ([Vessel settings](34-vessel-tab)).
+
+## Paste a profile, or start a new Schema from it
+
+An Equipment Profile holds **all of the brewery's physical hardware**: the vessels, IPs, fittings, pipes, hoses, chillers, pumps and valves, **and the Interfaces (boards), their Ports and wiring**, each with all of its Properties and its Name. Skynet keeps them in the profile every time the Tab that uses it is saved. Two buttons under the Equipment list use them (Admins only).
+
+**🗂 New Schema from this profile ...** (also **Add new Schema ... > Start from > An Equipment Profile**) makes a new Schema with one Tab that uses the profile, so its numbers and drawing come too, with every board and every Device already wired: the same Names, Interfaces and Ports. No Processes, Text Widgets, Timers or other Widgets come: the new Schema gets its own. For example, build your brewery once as an Equipment Profile, then make a **Keg Cleaning** Schema from it and write its Processes, Text Boxes and Timers. The new Schema is loaded at once; the one you had stays just as it is.
+
+**📋 Paste onto a Tab ...** puts a copy of the profile's hardware on a Tab of the loaded Schema:
+
+1. Pick **What to paste**:
+   - **Both**: all of it.
+   - **Vessels Only**: each vessel with everything on it (its IPs, fittings, heaters and probes).
+   - **Manifold Only**: all of the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels.
+2. Pick the Tab it **Goes to**, and press **💾 Save**.
+3. When that Tab already has hardware that is the same as the profile's (the same board and Port, or a vessel with the same Name), a list shows what will be replaced, and the Tab's own profile numbers that change (like "Brewhouse efficiency 74 % → 72 %"). Nothing changes until you press **Replace**. **Cancel** leaves everything as it was. A replaced Device keeps working in your Processes.
+4. Edit layout opens and the pieces are on the **🔨 Build Tab**. Press **✅ Finish Build ... > Move to Tab**: they go on the Tab in the same spots. Then press **Save layout**.
+
+**↩ Undo** shows for a few seconds after a paste and puts everything back.
+
+- **A pipe end whose piece did not come stays open**, so a vessel can be joined to it (with Manifold Only, the pipes that went to the vessels).
+- **A board already used on another Tab of this Schema stops the paste.** Nothing is pasted, and a note says which board and which Tab. One board is never split between Tabs, and its ID never changes. Paste onto that Tab, or start a new Schema from the profile. A new Schema always takes the boards.
+- A board the Schema does not have yet comes with the paste, with its ID and settings.
+- A piece whose Name is already used on another Tab gets _2 at the end.
 
 ## Coming next
 
