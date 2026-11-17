@@ -16,6 +16,8 @@ On the same download page as the panel: **https://github.com/oakbarn/Skynet_Brew
 | `Skynet_Media_<date>.zip` | Mac, Linux, Raspberry Pi, or Windows by hand |
 | `Skynet_Brewer_Full_Setup_<date>.exe` | Windows: the panel **and** the pictures and sounds in one file |
 
+**New pictures and sounds come with each update too.** The Update Setup (`Skynet_Brewer_Setup_<date>.exe`) and the panel zip carry every Skynet picture and sound added since the last Update Setup. The Brain adds the ones it does not have yet on its next start; one you already have is never changed.
+
 The Media Setup and zip are only made new when Skynet adds pictures or sounds. Until then every new Release carries the same ones, so the date in their name can be older than the panel's. That is normal: they are still the newest pictures and sounds.
 
 ## The Full Setup: everything in one file (Windows)

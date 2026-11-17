@@ -54,6 +54,21 @@ for f in sounds/alarm_beep.wav sounds/Skynet/Alarm_Sound_Missing.mp3 sounds/Skyn
   mkdir -p "$STAGE/defaults/media/$(dirname "$f")"
   cp -p "$MSTAGE/media/$f" "$STAGE/defaults/media/$f"
 done
+# The Update Setup also brings the Skynet pictures and sounds added since the last Update Setup (OakBarn Brewery, 2026-11-17: "If
+# there are new skynet Media files since the last Update exe, can they be included in the update and added to the media on the
+# brain"; Rule 9.22). SKYNET_MEDIA_SINCE is that Release's tag (the release workflow sets it). Only files added to media/ since then,
+# so only Skynet's own media already in docs/Media_Licenses.csv (Rule 9.12). They go in defaults/media like the three sounds above:
+# the panel copies in only what is missing (lib/seed.js), so one you already have is never changed.
+if [ -n "${SKYNET_MEDIA_SINCE:-}" ] && git rev-parse -q --verify "refs/tags/$SKYNET_MEDIA_SINCE^{commit}" >/dev/null; then
+  n=0
+  while IFS= read -r f; do
+    f="${f#media/}"
+    [ -f "$MSTAGE/media/$f" ] || continue
+    mkdir -p "$STAGE/defaults/media/$(dirname "$f")"
+    cp -p "$MSTAGE/media/$f" "$STAGE/defaults/media/$f"; n=$((n+1))
+  done < <(git diff --name-only --diff-filter=A "$SKYNET_MEDIA_SINCE" HEAD -- media)
+  echo "New Skynet pictures and sounds since $SKYNET_MEDIA_SINCE in the Update Setup and panel zip: $n"
+fi
 
 # The extra Sample Schemas (sample_schemas/) are not in the panel zip or Setup either: they are the Sample Schemas zip and Setup (Rule 9.13)
 SSTAGE="$OUT/stage/samples/BrewPanel"

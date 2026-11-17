@@ -186,9 +186,15 @@ jobs:
         env:
           VERSION: ${{ steps.v.outputs.version }}
           SKYNET_MEDIA_BUILD: ${{ steps.media.outputs.build }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq nsis zip
+          # the Update Setup also carries the Skynet pictures and sounds added since the last Update Setup (OakBarn Brewery,
+          # 2026-11-17, Rule 9.22): the tag of the newest published Release that has a Skynet_Brewer_Setup .exe
+          export SKYNET_MEDIA_SINCE=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '[.[] | select(.draft | not) | select([.assets[].name | select(test("^Skynet_Brewer_Setup_.+\\.exe$"))] | length > 0) | .tag_name] | first // empty' 2>/dev/null || true)
+          echo "New pictures and sounds since: ${SKYNET_MEDIA_SINCE:-(no earlier Update Setup)}"
           bash tools/build-release.sh "$VERSION"
           # one zip for the first-install folders, so the Release page stays short
           ( cd release && zip -qr "First_Install_ReadMes_$VERSION.zip" First_Install_* )
