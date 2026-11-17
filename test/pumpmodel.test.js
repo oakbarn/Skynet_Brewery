@@ -122,7 +122,8 @@ console.log('Dialog 2 #3 tests passed');
 {
   const { selfPrimeOf, factLines } = await import('../public/pumps.js');
   assert.equal(selfPrimeOf({ pumpModel: 'riptide' }), false, 'the RipTide is not self priming');
-  assert.equal(selfPrimeOf({ pumpModel: 'chugger' }), null, 'not stated: not known');
+  assert.equal(selfPrimeOf({ pumpModel: 'topsflo_td5' }), null, 'not stated: not known');
+  for (const m of ['chugger', 'kegland_mkii']) assert.equal(selfPrimeOf({ pumpModel: m }), false, m + ': not self priming (the maker says so)');
   for (const m of ['march_809', 'march_809_dc', 'march_815']) assert.equal(selfPrimeOf({ pumpModel: m }), false, m + ': no March pump is self priming');
   assert.equal(selfPrimeOf({ pumpModel: 'other', pumpSelfPrime: true }), true, 'a User Defined pump: its own answer');
   assert.ok(factLines({ pumpModel: 'riptide' }).includes('Self Priming: No'));
