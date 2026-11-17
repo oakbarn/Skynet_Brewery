@@ -31,6 +31,10 @@ A **Device** is tied to a pin on a board (an Interface).
 
 These are short cuts. Clicking **Pumps** shows only the pump list: the same as picking **Pumps** in Select Device Type and then opening Add Device. One click to open, one to pick.
 
+**Valves/Equipment** has the Valves first, then the **Equipment Templates** (picking one puts it on the 🔨 Build Tab) and **🔨 Build new Equipment Template**, which opens the 🔨 Build Tab for a new Equipment Template, such as a Chiller Bundle ([Build Tab](55-build-tab)).
+
+While the 🔨 Build Tab is for a Template or an Equipment Profile, the buttons for things that can't go in one are greyed out: Select Widget Type, Add Widget, Picture, Text, Override, Boolean, Value, Code Value, Time, DateTime, Tab settings, New tab, Hidden Tab, Processes and Update Schema Version.
+
 ## Add Device
 
 Picking a Device opens the **Add Device** box. Fill it from the top:

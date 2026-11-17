@@ -121,10 +121,26 @@ If its Tab was deleted or renamed in the meantime, the question is skipped and i
 
 ## What can be a Template
 
-A Template is **one vessel** (with the Bundled Fittings on its ports) or **one Bundled Fitting**. While anything else is on the Build Tab (a Device, a Widget, a loose IP, a pipe, a picture or text), **As a Template** is greyed out and says why. Save to a Tab instead, or delete those from the Build Tab first.
+A Template is **one vessel** (with the Bundled Fittings on its ports), **one Bundled Fitting**, or **a Chiller Bundle** (below). While anything else is on the Build Tab (a Device, a Widget, a loose IP, a pipe, a picture or text), **As a Template** is greyed out and says why. Save to a Tab instead, or delete those from the Build Tab first.
 
 - A vessel, chiller, coil, trub filter or RIMS tube becomes a **Vessel Template** (or an **Equipment Template**). It keeps its kind, type, picture, the size it is drawn at, sizes, heat source, Connection Standard, notes and which ports are on and where.
 - A Bundled Fitting on one of its ports that is still the same as its Template is used as it is. One you changed on the Build Tab is saved as a new **Bundled Fitting Template** first, named after it.
 - A Tab_Fitting by itself becomes a **Bundled Fitting Template**.
+
+### A Chiller Bundle
+
+An immersion chiller with everything that goes with it can be **one Equipment Template**:
+
+1. On the Edit layout bar pick **Valves/Equipment > 🔨 Build new Equipment Template**. The 🔨 Build Tab opens for a Template, and the
+   buttons for things that can't go in one (Widgets, Picture, Text, Tab settings, New tab, Hidden Tab, Processes) are greyed out.
+2. Put on it **one immersion chiller** (Add equipment ➕ > Chilling coil, 2 IPs), and what goes with it: its **hoses** (Draw hose or
+   Draw QD hose: the supply hose to its In and the waste hose from its Out), an **Ice Water Can**, a **Sump Pump** (Pumps > Sump Pump
+   by hand, or a sump pump Device on a controlled wall outlet) and any **IPs** they need.
+3. Press **✅ Finish Build ...**: **As a Template** is first. Give it a name (for example Ice_Bath_Chiller) and press **Save as Template**.
+
+It is in ☰ Menu > Equipment Templates and in **Valves/Equipment**. Picking it puts all of it on the 🔨 Build Tab together, hoses
+still joined; a name already used gets a number. A Template never keeps a Port, so a sump pump Device gets the **next free Port** of
+the Build's Interface when it is put down (or Skynet says to give it one in Properties). Anything else on the Build Tab (a Widget,
+a picture, text, a second chiller) is named, and As a Template says to take it off first.
 
 While Skynet is still building its Templates there is a **Skynet Template** switch (off = a User Bundled Template). See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).

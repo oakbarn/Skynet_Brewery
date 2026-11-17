@@ -1440,3 +1440,6 @@ body.eqViewing #ws { pointer-events: none; }
 .eqViewBar .eqvNum b { margin-right: 6px; }
 .eqViewBar .eqvPanel { max-height: 50vh; overflow: auto; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
 .eqViewBar button.on { outline: 2px solid var(--accent, #4a90e2); }
+/* The Edit layout bar while the Build is for a Template or an Equipment Profile: what can't go in one is greyed out */
+#editBar .tplGrey { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
+#editHint .tplGrey { opacity: .4; }

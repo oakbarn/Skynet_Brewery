@@ -51,6 +51,8 @@ de la même façon que vous déplacez un bout de tuyau à raccord rapide ([Tuyau
    contour jaune en pointillés montre la cuve pendant que vous glissez dessus.
 3. Lâchez-le **ailleurs** : il reste là, libre.
 
+Un refroidisseur à immersion avec sa propre arrivée peut être enregistré comme un seul Equipment Template **Chiller Bundle**
+([Build Tab](55-build-tab)).
 Ses tuyaux souples restent sur son In et son Out et le suivent : un tuyau depuis sa propre arrivée (un Ice Water Can avec une
 pompe de puisard) ou un tuyau à raccord rapide depuis une arrivée sur le Tab (une Tap Water Valve), et son tuyau d'évacuation. Un
 refroidisseur est comme un tuyau (règle 5.41), donc le déplacer ne change pas ce qui coule.
