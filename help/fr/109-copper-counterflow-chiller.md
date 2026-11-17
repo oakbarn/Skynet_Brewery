@@ -4,9 +4,9 @@ Le **Skynet Copper Counterflow Chiller** est un Widget de refroidisseur fait à 
 
 ## Ses 4 IP {#its-4-ips}
 
-Le refroidisseur vient avec **4 IP intégrés**, un au bout de chaque vrai orifice de l'image. Chaque orifice est tourné vers la gauche, donc un tuyau se joint à chacun **à l'horizontale** (les tuyaux vont seulement à l'horizontale, à la verticale ou à 45°).
+Le refroidisseur vient avec **4 IP intégrés**, un au bout de chaque vrai End Fitting de l'image. Chaque End Fitting est tourné vers la gauche, donc un tuyau se joint à chacun **à l'horizontale** (les tuyaux vont seulement à l'horizontale, à la verticale ou à 45°).
 
-| Orifice | Où il est sur l'image | Côté |
+| End Fitting | Où il est sur l'image | Côté |
 |---|---|---|
 | **Wort In** | En haut, le bout qui passe tout droit dans le té du haut | Moût |
 | **Water Out** | En haut, la courte branche du té du haut | Eau |
@@ -15,7 +15,7 @@ Le refroidisseur vient avec **4 IP intégrés**, un au bout de chaque vrai orifi
 
 Le moût chaud entre en haut et sort froid en bas ; l'eau du robinet entre en bas et repart tiède en haut. Le passage ne va que de Wort In à Wort Out et de Water In à Water Out.
 
-Tracez un tuyau vers un IP et son bout s'accroche (accrochage des IP, 10 px). Les IP restent sur les bouts des orifices quand vous déplacez, redimensionnez, retournez ou tournez le refroidisseur.
+Tracez un tuyau vers un IP et son bout s'accroche (accrochage des IP, 10 px). Les IP restent sur les bouts des End Fittings quand vous déplacez, redimensionnez, retournez ou tournez le refroidisseur.
 
 ## En ajouter un {#adding-one}
 
@@ -23,6 +23,6 @@ Tracez un tuyau vers un IP et son bout s'accroche (accrochage des IP, 10 px). Le
 2. ☰ Menu > **Equipment Templates**, choisissez **Copper_Counterflow_Chiller** et mettez-en une copie sur le Build Tab (ou **Add equipment ➕** dans la barre Edit layout).
 3. Raccordez-le, puis **Finish Build** pour l'envoyer vers son Tab.
 
-C'est un Template Skynet : son image et la place de ses orifices sont fixées. Son Type est **Plate chiller, Counterflow** avec des orifices **MPT 1/2"**, comme les autres refroidisseurs à contre-courant.
+C'est un Template Skynet : son image et la place de ses End Fittings sont fixées. Son Type est **Plate chiller, Counterflow** avec des End Fittings **MPT 1/2"**, comme les autres refroidisseurs à contre-courant.
 
 L'image est `Images/Skynet/Chillers/Chiller_Copper_Counterflow.svg`, redessinée en SVG simple (les images Skynet sont seulement en SVG).
