@@ -27,12 +27,6 @@ export const THEMES = [
 ];
 export const DEFAULT_THEME = 'officeBlack';
 export const THEME_KEYS = THEMES.map(t => t.key);
-// the plain words for each color pick, in the order shown
-export const THEME_PARTS = [
-  ['back', 'Back color (behind everything)'], ['panel', 'Tabs and boxes'], ['box', 'Buttons and typing boxes'], ['line', 'Lines around them'],
-  ['text', 'Text'], ['labels', 'Labels and hints'], ['accent', 'Picked button, Tab and headings'], ['accentText', 'Text on a picked button'],
-];
-
 const squash = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 // a key, a name ("Dark Gray", "dark gray") or nothing -> a Look (the default when it is none of them)
 export function themeOf(v) {

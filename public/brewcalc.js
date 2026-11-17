@@ -55,8 +55,6 @@ export function brewVolumes(b = {}) {
   if (intoFermenter <= 0) warnings.push('The batch size must be more than the fermenter top up water.');
   return { ...out, warnings };
 }
-// the old name, used before the Boil Profile and Recipe took their numbers
-export const equipVolumes = brewVolumes;
 // the kettle and fermenter of an Equipment Profile (their sizes go into the sums above)
 export const firstOfType = (p, ...types) => (p?.equipment || []).find(e => types.includes(e.vtype));
 
