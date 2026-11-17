@@ -4319,12 +4319,8 @@ function renderPipes() {
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
       const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TDo(p).labelFore || '#e6e6e6', 'font-size': TDo(p).labelFontSize || 14 }); t.textContent = p.label; g.append(t);
     }
-    if (editing && (p.points || []).length > 1) for (const [end, k] of [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']]) {     // an orange ⚠ ring: this end and another pipe's end on the same IP can't be joined without an adapter (Rule 5.40)
-      const other = p[end] && pipes.find(o => o !== p && [['from', 'ipTypeFrom'], ['to', 'ipTypeTo']].some(([e2, k2]) => o[e2] === p[end] && !ipFits(p[k], o[k2], { sameSize: false })));
-      if (!other) continue;
-      const q = end === 'from' ? p.points[0] : p.points[p.points.length - 1], ok = other.from === p[end] ? other.ipTypeFrom : other.ipTypeTo;
-      const ring = mk('circle', { class: 'ipMis', cx: q[0], cy: q[1], r: 11 }), t = mk('title', {}); t.textContent = `⚠ IP Types do not fit: ${p[k]} and ${ok}. Add an adapter fitting, or change one of the IP Types.`; ring.append(t); g.append(ring);
-    }
+    // no orange mismatch ring (OakBarn Brewery, 2026-11-17: "There can be no mismatch because an adapter would be used so no need for
+    // Orange Ring"): the IP's Properties say which adapter is in the connection (ipAdapterNote, Rule 2.57)
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
@@ -6476,7 +6472,7 @@ const markedProfile = kind => (S[kind + 'Profiles'] || []).find(p => p.isDefault
 // a Pump Profile list has no (none): one is always the Default (OakBarn Brewery, 2026-11-16, Dialog 2 #3: "We need to create a Default
 // so None Choice goes away")
 const profileChoices = kind => [...(kind === 'pump' && (S.pumpProfiles || []).length ? [] : [['', '(none)']]), ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
-const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet Fittings. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
+const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
   valve: 'The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).' };
 // a Pump Profile into a new pump (or its Add box): only what the profile says; the picture stays the pump picked
 function applyPumpProfile(o, p) {
@@ -8253,12 +8249,13 @@ const PORTS_TIP = 'Match YOUR Pump fittings: pick the inlet and outlet your pump
   + '• Quick Disconnect (FMSSQD female, MSSQD male) and Camlock (CAMF female, CAMM male): for hoses.\n'
   + 'A fitting changes it: OakBarn Brewery\'s pumps came with FPT1/2 or FPT1 End Fittings, and each was made TC1.5 by adding a Tri-Clamp fitting, so pick TC1.5.\n\n'
   + 'The End Fitting is information only, except a Quick Disconnect: a hose end on a Quick Disconnect can be unhooked and moved.';
-// Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
+// Inlet IP Fitting and Outlet IP Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
 // Inlet Fitting"; "Separate Outlet Fitting"; "There should be Inlet and Outlet fittings as they can be different on a Pump"): two
 // dropdowns where the one Ports dropdown was. They are the End Fittings of the pump's In and Out IPs (ipTypeIn, ipTypeOut, Rule 5.40),
-// so the IP Type In / IP Type Out row is gone: one pair, not two.
-const INLET_FIT_TIP = 'Inlet Fitting: the fitting where the liquid goes into the pump (the suction side).\n' + PORTS_TIP;
-const OUTLET_FIT_TIP = 'Outlet Fitting: the fitting where the liquid comes out of the pump (the pressure side).\n' + PORTS_TIP;
+// so the IP Type In / Out row is changed to Inlet IP Fitting and Outlet IP Fitting is added ("not a Take away but a Change"); a saved
+// pump shows its old IP Type In and Out values in them.
+const INLET_FIT_TIP = 'Inlet IP Fitting: the fitting where the liquid goes into the pump (the suction side).\n' + PORTS_TIP;
+const OUTLET_FIT_TIP = 'Outlet IP Fitting: the fitting where the liquid comes out of the pump (the pressure side).\n' + PORTS_TIP;
 const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with nothing in the way (GPM or L/min).'],
   ['pumpLift', 'lift', 'Lift', 'How high it pushes liquid straight up before the flow stops (the head, ft or m).'],
   // the cavitation caveat (OakBarn Brewery, 2026-11-16: "add the little caveat on that proprtues that Boiling Liquids are not recomened
@@ -8271,7 +8268,7 @@ const PUMP_FACT_ROWS = [['pumpFlow', 'flow', 'Flow', 'How much it moves with not
 // TC Fitting and make it TC"); only a Tri-Clamp the model is known to have is filled in and greyed out. The model's own words stay in its
 // Hover Help. The list: every size of the old Ports list, the sizes ticked in Default settings, and those used in this Schema.
 function pumpFitField(o, f, side) {
-  const key = side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting', tip = side === 'in' ? INLET_FIT_TIP : OUTLET_FIT_TIP;
+  const key = side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet IP Fitting' : 'Outlet IP Fitting', tip = side === 'in' ? INLET_FIT_TIP : OUTLET_FIT_TIP;
   if (f?.port && isTcPort(f.port) && !o.pumpPorts) return [`_${key}`, label, 'ro', f.port, false, false, { tip: tip + ' Known from the model (Tri-Clamp), so it is greyed out.' }];
   const hint = f?.ports ? ` The model: ${f.ports}.` : '';
   return [key, label, 'sel', ipChoices(o[key], ...PUMP_PORTS), false, false, { tip: tip + hint }];
@@ -8307,7 +8304,7 @@ function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
   // values"): the Model a Skynet pump drawing picks, and the Power that model runs on. The ⬢ Pump facts stays open.
   const known = !!(pumpModelOf(it) && !it.pumpModel && factsOf(it));
   return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...(known ? { disabled: true, known: true } : {}), ...x }],
-    // Inlet Fitting and Outlet Fitting, each its own row where Ports was (where Power was, Dialog 2 #3, 2026-11-16; OakBarn Brewery,
+    // Inlet IP Fitting and Outlet IP Fitting, each its own row where Ports was (where Power was, Dialog 2 #3, 2026-11-16; OakBarn Brewery,
     // 2026-11-17); Power and Use are in the Model's ⬢ Pump facts
     ...['in', 'out'].map(side => (pf => [...pf.slice(0, 6), { ...pf[6], ...x }])(pumpFitField(it, factsOf(it), side))),
     ['pwm', 'Speed Control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed, def: 100 }], showIf: pumpPwmShown, ...x }],
@@ -13525,7 +13522,7 @@ const MENU = [
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Profile', tip: 'A tab\'s background color, the look new devices and widgets on it start with, and a new Tab\'s pipe and hose pixels and size', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures, orientation and Overlay a new valve starts with', render: renderBrewProfileTab('valve') },
-  { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet Fittings', render: renderBrewProfileTab('pump') },
+  { key: 'pump', title: 'Pump Profile', tip: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings', render: renderBrewProfileTab('pump') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
   { key: 'water', title: 'Water Profile', tip: 'Your water: its minerals, and how much distilled or RO water it is cut with', render: renderBrewProfileTab('water') },
@@ -14004,7 +14001,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // an IP Type dropdown (Rule 5.40): the sizes ticked in Default settings, the ones already used in the Schema, and its own
 const ipChoices = (...own) => ipTypeChoices(S.config.brewDefaults?.ipTicks, [...usedIpTypes(draft || S.config), ...((draft || S.config).ipAllow || [])], own);      // ipAllow: a sample Schema's own sizes
 const IP_TYPE_PICK_TIP = 'The list shows the sizes ticked in ☰ Menu > Default settings > IP Types, and any already used in this Schema. Tick more there to see them here.';
-const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT End Fitting). To change it, change the pump\'s Inlet or Outlet Fitting, or the vessel\'s IP Type.';
+const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT End Fitting). To change it, change the pump\'s Inlet or Outlet IP Fitting, or the vessel\'s IP Type.';
 const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP, with its size (FPT1/2, TC1.5 ...). It is drawn as its type. A new one starts with the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
 const IP_TYPE_TIP = 'The connector on this end, with its size: Tri-Clamp (TC1.5), pipe thread (FPT female, MPT male), BSP, metric (DN) stainless Quick Disconnect (FMSSQD female, MSSQD male) or Camlock (CAMF female coupler, CAMM male adapter). A new one starts with the Default IP Type in the pipe\'s size, on both ends. ' + IP_TYPE_PICK_TIP;
 // The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;
@@ -16294,7 +16291,7 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
     about: 'The pictures, orientation and Overlay a new valve starts with. The new valve\'s Add box picks the one marked Default first, and you can pick another there; after that, change the valve in its properties.' },
   pump: { title: 'Pump Profile', list: () => S.pumpProfiles, start: 'Shown Right, no Cover, Hose, the Overlay of the Default Pump Profile', noUnits: true,
-    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and Inlet and Outlet Fittings. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
+    about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
 const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile first. There is always one Default Pump Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Pump Profile, turn its Default On and Save: this one is then no longer the Default.';
@@ -16332,7 +16329,7 @@ function profFields(kind) {
     if (kind === 'pump') return [['_pn', PUMP_PROF_NOTE, 'note'], ['name', 'Name', 'text', null, false, false, { tip: PUMP_PROF_NAME_TIP }], ['isDefault', 'Default', 'bool', null, false, false, { tip: PUMP_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.pumpProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }],
       ['flip', 'Orientation', 'sel', [['right', 'Right'], ['left', 'Left']], false, false, { tip: DEVICE_TIPS.orient }], ['cover', 'Cover', 'sel', [['None', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])], false, false, { tip: DEVICE_TIPS.cover }],
       ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink }], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
-      ['ipTypeIn', 'Inlet Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeIn, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'Outlet Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeOut, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }],
+      ['ipTypeIn', 'Inlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeIn, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'Outlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeOut, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }],
       ['notes', 'Notes', 'area', null, false, false, { tip: PROF_NOTES_TIP }]];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: VALVE_PROF_OVERLAY_TIP }],

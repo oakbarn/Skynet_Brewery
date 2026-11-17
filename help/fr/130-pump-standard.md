@@ -37,7 +37,7 @@ couleur et même épaisseur, donc les deux se rejoignent en une seule pièce. Sa
 Skynet la choisit pour vous : le Hose ou Pipe arrive du même sens que le tuyau ou le flexible joint à cette IP. Sans rien de
 joint, il arrive le long du côté, et il tourne pour suivre dès qu'un tuyau ou un flexible est joint. Il n'y a rien à choisir.
 
-**Inlet Fitting** et **Outlet Fitting** sont l'End Fitting (le raccord) sur les IP In et Out de la pompe, avec sa taille (FPT1/2, TC1.5 ...)
+**Inlet IP Fitting** et **Outlet IP Fitting** sont l'End Fitting (le raccord) sur les IP In et Out de la pompe, avec sa taille (FPT1/2, TC1.5 ...)
 (Règle Skynet 5.40). Une nouvelle pompe commence avec le **Default pipe IP Type** (une pompe enregistrée avec l'ancien choix Ports commence avec lui), et
 les deux peuvent être différents. Un bout de tuyau sur la pompe va avec elle de lui-même (un bout MPT1/2 sur un End Fitting FPT1/2). L'End Fitting est
 une information seulement, sauf un Quick Disconnect, où un bout de flexible peut être décroché et déplacé.
@@ -56,8 +56,8 @@ style Riptide suivent aussi le standard des pompes.
 
 | Où finit l'End Fitting propre de la pompe (Orientation Right) | Dans le dessin de 300 x 300 | Sur une pompe de 150 x 150 |
 |----|-----|-----|
-| Inlet Fitting | 285 en largeur, 150 en hauteur | 142.5 en largeur, 75 en hauteur |
-| Outlet Fitting | 243 en largeur, 56 en hauteur | 121.5 en largeur, 28 en hauteur |
+| Inlet IP Fitting | 285 en largeur, 150 en hauteur | 142.5 en largeur, 75 en hauteur |
+| Outlet IP Fitting | 243 en largeur, 56 en hauteur | 121.5 en largeur, 28 en hauteur |
 
 Le Hose ou le Pipe commence là.
 

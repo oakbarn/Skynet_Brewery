@@ -6,7 +6,7 @@ Un dessin de pompe Skynet sans capot (voir Brew Pump Pictures) peut porter un **
 2. la **Cover overlay** (superposition du capot),
 3. l'**On overlay** (seulement tant que la pompe est en marche).
 
-Le capot a un fond transparent, donc la tête de pompe, les Inlet et Outlet Fittings et le socle se voient toujours. Il est là en marche comme à l'arrêt.
+Le capot a un fond transparent, donc la tête de pompe, les Inlet et Outlet IP Fittings et le socle se voient toujours. Il est là en marche comme à l'arrêt.
 
 ## Choisir un capot {#picking-a-cover}
 

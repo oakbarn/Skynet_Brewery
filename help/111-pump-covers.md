@@ -6,7 +6,7 @@ A Skynet no-cover pump drawing (see Brew Pump Pictures) can wear a **cover**. Th
 2. the **Cover overlay**,
 3. the **On overlay** (only while the pump is on).
 
-The cover has a see-through background, so the pump head, Inlet and Outlet Fittings and base still show. It is there on and off.
+The cover has a see-through background, so the pump head, Inlet and Outlet IP Fittings and base still show. It is there on and off.
 
 ## Picking a cover
 

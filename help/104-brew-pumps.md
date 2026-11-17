@@ -11,7 +11,7 @@ Skynet has drawings of the common homebrew pumps, drawn from the real pumps with
 | Topsflo TD5 | (not sold) | TD5 | (not sold) | (not sold) |
 | KegLand MKII | (not sold) | MKII | (not sold) | MKII stainless head |
 
-- **A Hose or Pipe from the real End Fittings.** The pump's **IN** and **OUT** IPs are on two of its 8 IP spots (Help 130), and a Hose or Pipe is drawn from the tip of its real Inlet and Outlet Fittings to them. Orientation Left mirrors the picture, the Hose or Pipe and the start spots.
+- **A Hose or Pipe from the real End Fittings.** The pump's **IN** and **OUT** IPs are on two of its 8 IP spots (Help 130), and a Hose or Pipe is drawn from the tip of its real Inlet and Outlet IP Fittings to them. Orientation Left mirrors the picture, the Hose or Pipe and the start spots.
 - **All in the same box (the Pump Standard, Help 130):** every pump picture is drawn to scale in the same 300 x 300 box and every pump has its 8 IPs in the same spots, so one pump can replace another in the same place and stay joined. Some inlet and outlet tubes are drawn a little longer to line up.
 - **Center inlet** pumps are drawn from the side: motor on the left, inlet pointing right out of the middle of the head, outlet pointing up.
 - **90° inlet** (in-line head) pumps are drawn looking at the head: the inlet comes out the side, at 90° to the outlet, which points up.
