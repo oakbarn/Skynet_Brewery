@@ -32,8 +32,5 @@ export function displayKey(el, v) {
   if (!hit) throw new Error(`"${el?.name}": display must be one of ${c.map(([, w]) => w.replace(/\s*\(.*\)$/, '')).join(', ') || '(nothing: it has one value)'}`);
   return hit[0];
 }
-// BruControl's Primary Value (a Process's "Flow" value): the value the Data Display shows, for a flow meter its rate or its total
-export const primaryFlow = (el, r, display) => (display || el.display) === 'total' ? r.total : r.rate;
-
 // the words for a pick (for the Properties and the notes)
 export const displayWord = (el, k) => (displayChoices(el) ?? DISPLAY_CHOICES[kindOf(el)] ?? []).find(([key]) => key === k)?.[1] ?? '';

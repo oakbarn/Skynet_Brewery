@@ -319,8 +319,6 @@ function vesselsHtml() {
   const vs = state.connect?.parts?.vessels ?? [];
   const add = '<div class="buttons"><button type="button" id="vAdd" title="Add a vessel the Importer missed">➕ Add a vessel</button></div>';
   if (!vs.length) return `<div class="card"><p>No vessels were found in your names or Scripts. Add each one of yours.</p>${add}</div>`;
-  const yn = (v, k) => `<select class="vd" data-v="${esc(v.key)}" data-k="${k}" title="${v.details?.found?.[k] ? 'Found in your names or Scripts (a guess): change it if it is wrong' : 'Not found in your names or Scripts: change it if your vessel has one'}">
-    <option value="no"${v.details?.[k] !== 'yes' ? ' selected' : ''}>No</option><option value="yes"${v.details?.[k] === 'yes' ? ' selected' : ''}>Yes${v.details?.found?.[k] ? ' (found)' : ''}</option></select>`;
   return `<div class="card"><p>These are the vessels the Importer found in your BruControl names and Scripts, with what it could tell about each one.
       Type each vessel's <b>Volume</b>, and measure its <b>Height</b> and <b>Diameter</b> (in ${state.units === 'Metric' ? 'Liters and centimeters' : 'Gallons and inches'}).
       Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in

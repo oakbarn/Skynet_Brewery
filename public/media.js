@@ -141,7 +141,6 @@ async function moveMany(fromRoot, paths, toRoot, toDir) {
   if (errors.length) say(`Moved ${done}. ${errors[0]}${errors.length > 1 ? ` (and ${errors.length - 1} more)` : ''}`, true);
   else say(done === 1 ? `Moved ${paths[0].split('/').pop()}.` : `Moved ${done} items.`);
 }
-const move = (fromRoot, from, toRoot, toDir) => moveMany(fromRoot, [from], toRoot, toDir);
 function moveTo(p) {   // phones cannot drag: pick the folder from a list (p: one path, or a list of the picked ones)
   const list = Array.isArray(p) ? p : [p]; p = list[0];
   const all = [''], walk = (base, fs) => { for (const f of fs) { all.push(join(base, f.name)); walk(join(base, f.name), f.folders); } };
