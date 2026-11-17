@@ -71,9 +71,9 @@ Un Pump Profile est la façon dont une nouvelle pompe commence. Son image vient 
 
 - **Orientation** : Right ou Left.
 - **Cover** : None ou une couleur.
-- **Hose or Pipe** : ce qui est dessiné des orifices de la pompe à ses IP.
+- **Hose or Pipe** : ce qui est dessiné des End Fittings de la pompe à ses IP.
 - **Overlay** : ce qui s'affiche dessus quand elle tourne.
-- **IP Type In** et **IP Type Out** : Tri-Clamp, NPT, BSP ou Quick Disconnect. Vide : d'après ses Ports.
+- **Inlet Fitting** et **Outlet Fitting** : l'End Fitting sur ses IP In et Out (TC1.5, FPT1/2 ...). Vide : d'après la pompe.
 
 La **case d'ajout de pompe** a une liste **Pump Profile**. Elle commence sur le Pump Profile marqué **Default** et remplit les cases en dessous avec lui ; choisissez-en un autre et elles changent. Vous pouvez encore changer chaque case avant **➕ Add Device**. Ensuite, la pompe se change dans ses propres propriétés.
 

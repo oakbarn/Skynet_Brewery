@@ -55,7 +55,7 @@ Chaque tuyau et flexible a un **IP Type at start** et un **IP Type at end** : le
 
 **Seules les tailles que vous cochez apparaissent dans les listes.** Cochez-les dans ☰ Menu > Default settings > **IP Types**. Aucune n'est cochée au départ. Une taille déjà utilisée dans le Schema apparaît toujours aussi.
 
-**Les bouts qui s'ajustent d'eux-mêmes :** un bout de tuyau sur une pompe, ou sur la sortie d'une Stove Top Vessel, va avec elle (un bout MPT1/2 sur un port FPT1/2). Son IP Type est grisé ; changez l'IP Type de la pompe pour le changer. Le bout Quick Disconnect d'un flexible est femelle (**FMSSQD**) là où il est sur un tuyau ou une pompe, et mâle (**MSSQD**) à son autre bout. Sur un tuyau ou une pompe Tri-Clamp, ajoutez le vrai adaptateur à cet endroit (le plus courant est TC1.5 vers MSSQD1/2) : en attendant, l'anneau orange ci-dessous s'affiche.
+**Les bouts qui s'ajustent d'eux-mêmes :** un bout de tuyau sur une pompe, ou sur la sortie d'une Stove Top Vessel, va avec elle (un bout MPT1/2 sur un End Fitting FPT1/2). Son IP Type est grisé ; changez l'Inlet ou l'Outlet Fitting de la pompe pour le changer. Le bout Quick Disconnect d'un flexible est femelle (**FMSSQD**) là où il est sur un tuyau ou une pompe, et mâle (**MSSQD**) à son autre bout. Sur un tuyau ou une pompe Tri-Clamp, ajoutez le vrai adaptateur à cet endroit (le plus courant est TC1.5 vers MSSQD1/2) : en attendant, l'anneau orange ci-dessous s'affiche.
 
 **Quand des bouts ne vont pas ensemble :** dans Edit layout, un anneau orange marque deux bouts de tuyau sur le même IP qui ne peuvent pas se joindre sans adaptateur (Tri-Clamp vers NPT, MPT vers MPT). Posez la souris dessus pour voir pourquoi. C'est seulement un avertissement.
 

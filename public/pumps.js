@@ -65,9 +65,11 @@ export function factLines(el) {
   if (isPwmPump(el)) out.push(`Speed control: PWM, Speed ${pumpSpeed(el.speed)} %`);
   const own = { flow: el?.pumpFlow, lift: el?.pumpLift, hottest: el?.pumpHottest };
   for (const [k, t] of [['flow', 'Flow'], ['lift', 'Lift'], ['hottest', 'Hottest']]) { const v = own[k] || f?.[k]; if (v) out.push(`${t}: ${v}`); }
-  // Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17: Ports could be confused with Arduino Ports); else the model's Fittings
-  const fin = el?.pumpInlet || el?.pumpPorts, fout = el?.pumpOutlet || el?.pumpPorts;
-  if (fin || fout) { if (fin) out.push('Inlet Fitting: ' + fin); if (fout) out.push('Outlet Fitting: ' + fout); } else if (f?.ports) out.push('Fittings: ' + f.ports);
+  // its Inlet Fitting and Outlet Fitting, the End Fittings of its In and Out IPs (OakBarn Brewery, 2026-11-17: Port is a board Port
+  // only, Rule 2.57); else the model's
+  if (el?.ipTypeIn) out.push('Inlet Fitting: ' + el.ipTypeIn);
+  if (el?.ipTypeOut || el?.ipTypeIn) out.push('Outlet Fitting: ' + (el.ipTypeOut || el.ipTypeIn));
+  if (!el?.ipTypeIn && (el?.pumpPorts || f?.ports)) out.push('Fittings: ' + (el?.pumpPorts || f.ports));
   const sp = selfPrimeOf(el); if (sp !== null) out.push('Self Priming: ' + (sp ? 'Yes' : 'No'));
   if (f?.body) out.push('Body: ' + f.body);
   if (f?.note) out.push(f.note);

@@ -135,21 +135,28 @@ console.log('Dialog 2 #3 tests passed');
 }
 
 // Inlet Fitting and Outlet Fitting (OakBarn Brewery, 2026-11-17, all Pump dialogs: "Ports could be confused with Arduino Ports so use
-// Inlet Fitting"; "Separate Outlet Fitting"): two rows, each its own dropdown, where the one Ports row was
+// Inlet Fitting"; "Separate Outlet Fitting"; "every IP gets it own type End fitting"): two rows, the End Fittings of the In and Out IPs
 {
   const { factLines } = await import('../public/pumps.js');
   const fn = app.slice(app.indexOf('function PUMP_TYPE_FIELDS'), app.indexOf('const PUMP_XYWH'));
   assert.ok(fn.includes("['in', 'out'].map(side =>") && fn.includes('pumpFitField('), 'both rows in every Pump dialog (Add box and Properties)');
-  assert.ok(!fn.includes('pumpPortField'), 'no single Ports row');
-  assert.ok(app.includes("side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting'"), 'his labels, word for word');
+  assert.ok(!fn.includes("'IP Type In'") && !fn.includes('pumpPortField'), 'one pair of rows, not two: no Ports row, no IP Type In / Out row');
+  assert.ok(fn.includes("it.ipTypeIn ||= pumpIpType(it.pumpPorts, S.config.brewDefaults || {}); it.ipTypeOut ||= it.ipTypeIn;"), 'a pump saved with Ports starts from it, in the Add box too');
+  const fit = app.slice(app.indexOf('function pumpFitField'), app.indexOf("// The Model's ⬢ Pump facts"));
+  assert.ok(fit.includes("side === 'in' ? 'ipTypeIn' : 'ipTypeOut', label = side === 'in' ? 'Inlet Fitting' : 'Outlet Fitting'"), 'his labels, word for word, on the IP End Fittings');
+  assert.ok(fit.includes('ipChoices(o[key], ...PUMP_PORTS)'), 'every size of the old Ports list still offered');
   assert.ok(!/\['pumpPorts', 'Ports', 'sel'/.test(app), 'no Ports dropdown');
-  assert.ok(app.includes("'pumpPorts', 'pumpInlet', 'pumpOutlet']"), 'both saved, the old Ports pick kept');
-  const store = fs.readFileSync(new URL('../lib/store.js', import.meta.url), 'utf8');
-  assert.match(store, /for \(const k of \['pumpInlet', 'pumpOutlet'\]\) if \(e\[k\] === undefined\) \{ e\[k\] = String\(e\.pumpPorts\)\.trim\(\)/, 'a pump saved with Ports gets it in both');
+  assert.ok(app.includes("['ipTypeIn', 'Inlet Fitting', 'sel', [['', '(from the pump)']") && app.includes("['ipTypeOut', 'Outlet Fitting', 'sel'"), 'the Pump Profile says the same');
+  assert.ok(!/inside the port|outside of the port|FPT1 ports/.test(app), 'Port is a board Port only (Rule 2.57)');
   const el = { type: 'digitalOut', subtype: 'pump', pumpModel: 'march_815' };
   assert.ok(factLines(el).some(l => l.startsWith('Fittings: 3/4" NPT in')), 'the model\'s fittings on the hover');
-  const own = factLines({ ...el, pumpInlet: 'TC1.5', pumpOutlet: 'FPT1/2' });
-  assert.ok(own.includes('Inlet Fitting: TC1.5') && own.includes('Outlet Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own fittings, never "Ports"');
-  assert.ok(factLines({ ...el, pumpPorts: 'TC2' }).includes('Outlet Fitting: TC2'), 'an older Ports pick shows in both');
+  const own = factLines({ ...el, ipTypeIn: 'TC1.5', ipTypeOut: 'FPT1/2' });
+  assert.ok(own.includes('Inlet Fitting: TC1.5') && own.includes('Outlet Fitting: FPT1/2') && !own.some(l => /^Ports:/.test(l)), 'its own End Fittings, never "Ports"');
+  // an adapter in the connection: a note in the IP's Properties, information only (OakBarn Brewery, 2026-11-17, Rule 2.57)
+  const ad = app.slice(app.indexOf('function ipAdapterNote'), app.indexOf('function ipAdapterNote') + 1200);
+  const ipFits = (await import('../public/iptype.js')).ipFits;
+  assert.ok(ad.includes('!ipFits(ends[i], ends[j], { sameSize: false })') && ad.includes('Adapter: ${pairs.join') && ad.includes('keep: true'), 'the adapter note');
+  assert.ok(!ipFits('TC1.5', 'MPT1/2', { sameSize: false }) && ipFits('TC1.5', 'TC2', { sameSize: false }), 'TC to NPT needs an adapter; two sizes of one type meet at a reducer');
+  assert.ok(app.includes(': [...ipAdapterNote(it), ...F.ipPoint]'), 'in the IP\'s Properties');
   console.log('inlet and outlet fitting tests passed');
 }
