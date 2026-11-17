@@ -36,6 +36,7 @@ Type a name that means something to you, for example **My Brewery** or **Hot Sid
 | **A Skynet Schema Template** | You are new, or your brewery is a common 1, 2 or 3 vessel setup. Answer a few questions and Skynet builds the Tabs, Devices and the whole Brew Day for you. **The easiest way to begin.** Go to Step 4. |
 | **An empty Schema** | You want to build every part yourself. You get a blank Main Tab, the Equipment Tab and one pretend board. Go to Step 5. |
 | **A copy of** the loaded Schema | You want to try changes without touching the Schema you brew with. Press **Save**, and you are done. |
+| **An Equipment Profile** (shows once you have one) | Your brewery is already built as an Equipment Profile and you want another Schema for it, like Keg Cleaning, with the same boards and Ports already wired. Pick the profile and press **Save**. See [Paste a profile, or start a new Schema from it](28-schemas-and-equipment-profiles#paste-a-profile-or-start-a-new-schema-from-it). |
 
 Press **💾 Save**. Skynet asks if it is OK to load the new Schema: every output is switched off first, and the Schema you had stays just as it is. Press **OK**.
 

@@ -990,6 +990,7 @@ async function route(req, res) {
     const b = await jsonBody(req);
     const real = b.iface ? schemas.realInterfaces().find(d => d.name === b.iface) : null;
     if (b.iface && !real) return fail(res, 400, `There is no Interface called "${b.iface}"`);
+    if (b.fromProfile) { schemas.fromProfile(b.name, String(b.fromProfile)); return ok(res, { ...schemaView(), fromProfile: true }); }   // Rule 19.6 #2
     schemas.create(b.name, { empty: !!b.empty });
     if (real) schemas.useInterface(real);
     // a new empty Schema has no Interface (OakBarn Brewery, 2026-11-14). A Skynet Schema Template with no real Interface to use
@@ -1137,6 +1138,14 @@ async function route(req, res) {
     const b = await jsonBody(req), made = profiles.create(b.name, b.from);
     if (b.assign) schemas.setProfile(b.tab, made.id, { layout: b.layout });   // "Make it unique" or "Use it on this Tab": the new one goes on that Tab
     return ok(res, { made: made.id, list: profileView() });
+  }
+  // the profile's whole drawing and hardware, for 📋 Paste onto a Tab (Rule 19.6 #2); no hidden key goes with it (a paste gets its own)
+  sc = /^\/ui\/equipment\/([a-z0-9-]+)\/hardware$/.exec(p);
+  if (sc && m === 'GET') {
+    if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
+    if (schemas.tabUsing(sc[1])) schemas.mirror();          // the Tab that uses it, as it is now
+    const q = profiles.get(sc[1]);
+    return ok(res, dropKeys({ graphics: q.graphics || [], hardware: q.hardware || null }));
   }
   sc = /^\/ui\/equipment\/([a-z0-9-]+)(\/lock)?$/.exec(p);
   if (sc) {
