@@ -1371,5 +1371,19 @@
  "Change this profile's Name, Units and the numbers that go with it to a Tab (Brewhouse efficiency, losses ...). 💾 Save keeps them.": "Change le Nom, les Unités et les nombres de ce profil qui vont avec lui sur un Tab (Rendement de la salle de brassage, pertes ...). 💾 Save les garde.",
  "Check the volumes of a batch with this profile: pre-boil, boiled off, post-boil, into the fermenter and left to bottle or keg.": "Vérifier les volumes d'un brassin avec ce profil : avant ébullition, évaporé, après ébullition, dans le fermenteur et restant pour la mise en bouteille ou en fût.",
  "Efficiency on this Schema: record the real Brewhouse Efficiency of each brew, see the average of the last brews, and put it into this profile.": "Efficacité sur ce Schema : noter la vraie Brewhouse Efficiency de chaque brassin, voir la moyenne des derniers brassins et la mettre dans ce profil.",
- "Valves/Equipment: the Valves (a shortcut, the same as Select Device Type > Valves, then Add Device), the Equipment Templates (one goes on the 🔨 Build Tab) and 🔨 Build new Equipment Template": "Valves/Equipment (vannes et équipement) : les vannes (un raccourci, comme Select Device Type > Valves, puis Add Device), les Equipment Templates (un modèle va sur le 🔨 Build Tab) et 🔨 Build new Equipment Template (construire un nouveau modèle d'équipement)"
+ "Valves/Equipment: the Valves (a shortcut, the same as Select Device Type > Valves, then Add Device), the Equipment Templates (one goes on the 🔨 Build Tab) and 🔨 Build new Equipment Template": "Valves/Equipment (vannes et équipement) : les vannes (un raccourci, comme Select Device Type > Valves, puis Add Device), les Equipment Templates (un modèle va sur le 🔨 Build Tab) et 🔨 Build new Equipment Template (construire un nouveau modèle d'équipement)",
+ "The name you pick it by in the Schema list. Spaces are fine.": "Le nom sous lequel vous le choisissez dans la liste des Schemas. Les espaces sont permis.",
+ "One line on what this Schema is for, for example \"Keg Cleaning\" or \"Hot Side, 10 gallon\". It shows in the Schema list. You may leave it blank.": "Une ligne sur ce à quoi sert ce Schema, par exemple \"Keg Cleaning\" ou \"Hot Side, 10 gallon\". Elle s'affiche dans la liste des Schemas. Vous pouvez la laisser vide.",
+ "Stop the interview. The new Schema is kept as it is now; change these later.": "Arrêter l'interview. Le nouveau Schema est gardé tel qu'il est ; changez cela plus tard.",
+ "Its boards, Tabs and equipment came from what you picked. Next ▶ shows what is left to do.": "Ses cartes, Tabs et équipement viennent de ce que vous avez choisi. Next ▶ montre ce qui reste à faire.",
+ "A few short questions about the new Schema. Next ▶ keeps an answer as it is; nothing is changed until ✔ Finish.": "Quelques courtes questions sur le nouveau Schema. Next ▶ garde une réponse telle quelle ; rien n'est changé avant ✔ Finish.",
+ "It has {0} now: {1}.": "Il a maintenant {0} : {1}.",
+ "It has no board (Interface) yet.": "Il n'a pas encore de carte (Interface).",
+ "Tick the boards from your other Schemas that this Schema uses too:": "Cochez les cartes de vos autres Schemas que ce Schema utilise aussi :",
+ "There are no other boards in your other Schemas to bring in. Add one later on the Devices page (Add Interface), or try things first in the Simulator (🧪 beside ☰ Menu).": "Vos autres Schemas n'ont pas d'autre carte à apporter. Ajoutez-en une plus tard sur la page Devices (Add Interface), ou essayez d'abord dans le Simulator (🧪 à côté de ☰ Menu).",
+ "More Tabs can be added at any time in Edit layout (➕ New tab).": "D'autres Tabs peuvent être ajoutés à tout moment en Edit layout (➕ New tab).",
+ "The Tab {0} already uses \"{1}\".": "Le Tab {0} utilise déjà \"{1}\".",
+ "The vessels, pumps and valves of a Tab.": "Les cuves, pompes et vannes d'un Tab.",
+ "Every Tab already has an Equipment Profile.": "Chaque Tab a déjà un Equipment Profile.",
+ "Help: Step by Step: Share a Schema with another brewer": "Aide : Pas à pas : partager un Schema avec un autre brasseur"
 }

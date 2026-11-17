@@ -14,7 +14,7 @@ Picking another Schema loads it. Only an Admin can load or change a Schema.
 
 To start a **new** Schema, press **☰ Menu > ➕ New Schema…**, or **➕ New Schema** on the **☰ Menu > Schema** tab. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
 
-The **☰ Menu > Schema** tab also lists every Schema on the Brain: how many tabs it has, the Equipment Profile of each Tab and when it was last saved, with a **Load** and a **Clone** button on each one.
+The **☰ Menu > Schema** tab also lists every Schema on the Brain: what it is for (from the [New Schema Interview](202-new-schema-interview)), how many tabs it has, the Equipment Profile of each Tab and when it was last saved, with a **Load** and a **Create New Copy of Schema** button on each one.
 
 ## When Processes are running
 
@@ -24,7 +24,7 @@ Loading another Schema stops every running Process. So if any Process is running
 
 Press **OK** to go ahead, or **Cancel** to stay where you are. The Schema tab shows the same warning in yellow while Processes are running.
 
-The same warning comes up for anything else that loads a Schema again: **Add new Schema**, **Clone** with **Load the clone now**, and **Restore a backup or version**.
+The same warning comes up for anything else that loads a Schema again: **Add new Schema**, **Create New Copy of Schema** with **Load the clone now**, and **Restore a backup or version**.
 
 ## Everything is switched off
 
@@ -44,7 +44,7 @@ Manual valves are turned by hand, so the panel leaves them as they are.
 
 A clone is a copy of a Schema under a new name. Use it to try changes without touching the Schema you brew with.
 
-1. Pick **Clone a Schema ...** in the Schema dropdown, or press **Clone** beside a Schema on the **☰ Menu > Schema** tab.
+1. Pick **Clone a Schema ...** in the Schema dropdown, or press **Create New Copy of Schema** beside a Schema on the **☰ Menu > Schema** tab.
 2. Pick the **Schema to clone**. It does not have to be the loaded one.
 3. Type a **Name of the clone**. Leave it empty and it is called "<name> copy".
 4. Turn on **Load the clone now** if you want to switch to it at once. Leave it off and the loaded Schema stays loaded.

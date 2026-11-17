@@ -56,7 +56,7 @@ import { SkynetPictures } from './lib/skynetpics.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
-import { FileMove, KINDS as MOVE_KINDS, missingMedia } from './lib/filemove.js';
+import { FileMove, KINDS as MOVE_KINDS, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain } from './lib/values.js';
 import { Help } from './lib/help.js';
@@ -1014,6 +1014,8 @@ async function route(req, res) {
   // written over (OakBarn Brewery, 2026-11-13, Rule 9.17): one with the same name but other text comes in as Name_1 (_2 ...), and the
   // imported Schema's Process lines and Process Widgets point to it.
   if (p === '/ui/schemas/importfolder' && m === 'GET') return ok(res, listSchemaFiles(importFolder(ROOT)));
+  // Share with other brewers (Rule 10.9): the loaded Schema's own pictures and sounds, to save and send with its file
+  if (p === '/ui/schemas/sharemedia' && m === 'GET') return ok(res, { files: ownMedia(store.config, findMedia) });
   if (p === '/ui/schemas/import' && m === 'POST') {
     const pick = url.searchParams.get('file');
     let raw;
@@ -1054,7 +1056,7 @@ async function route(req, res) {
     if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }
     if (sc[2] === 'clone' && m === 'POST') { const b = await jsonBody(req); const made = schemas.clone(sc[1], b.name, { load: !!b.load }); return ok(res, { ...schemaView(), made }); }
     if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
-    if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
+    if (!sc[2] && m === 'PUT') { const b = await jsonBody(req); schemas.rename(sc[1], b.name, b.about); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
   }
   // The Recipe (☰ Menu > Recipe): everyone sees it, brewers (operators) import, change and save it

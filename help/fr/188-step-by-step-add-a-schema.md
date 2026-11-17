@@ -35,10 +35,12 @@ Tapez un nom qui a du sens pour vous, par exemple **My Brewery** ou **Hot Side**
 |---|---|
 | **A Skynet Schema Template** | Vous débutez, ou votre brasserie est une installation courante à 1, 2 ou 3 cuves. Répondez à quelques questions et Skynet construit pour vous les Tabs, les Devices et tout le Brew Day. **La façon la plus facile de commencer.** Allez à l'étape 4. |
 | **An empty Schema** | Vous voulez construire chaque partie vous-même. Vous recevez un Main Tab vide, le Tab Equipment et une carte simulée. Allez à l'étape 5. |
-| **A copy of** du Schema chargé | Vous voulez essayer des changements sans toucher au Schema avec lequel vous brassez. Appuyez sur **Save**, et c'est fini. |
+| **A copy of** du Schema chargé | Vous voulez essayer des changements sans toucher au Schema avec lequel vous brassez. Appuyez sur **Save**, puis répondez à la New Schema Interview (Étape 6). |
 | **An Equipment Profile** (s'affiche dès que vous en avez un) | Votre brasserie est déjà construite comme Equipment Profile et vous voulez un autre Schema pour elle, comme Keg Cleaning, avec les mêmes cartes et Ports déjà câblés. Choisissez le profil et appuyez sur **Save**. Voir [Coller un profil, ou commencer un nouveau Schema à partir de lui](28-schemas-and-equipment-profiles#paste-a-profile-or-start-a-new-schema-from-it). |
 
 Appuyez sur **💾 Save**. Skynet demande s'il peut charger le nouveau Schema : chaque sortie est d'abord arrêtée, et le Schema que vous aviez reste tel quel. Appuyez sur **OK**.
+
+Puis la **New Schema Interview** s'ouvre (Étape 6).
 
 ## Étape 4. Un Skynet Schema Template {#step-4-a-skynet-schema-template}
 
@@ -79,6 +81,10 @@ Plus sur les cartes : [Interfaces](76-interfaces) et [Simulateur ou vraies carte
 ![La barre Edit layout](help_pictures/Step_Add_Schema_11_Edit_Layout.png)
 
 Plus : [Barre Edit layout](82-edit-layout-bar), [Ajouter une cuve](66-add-a-vessel) et [Chaque fenêtre de Device ressemble à celle de la pompe](148-every-device-dialog).
+
+## Étape 6. La New Schema Interview {#step-6-the-new-schema-interview}
+
+Juste après que le nouveau Schema est fait et chargé, une courte interview sur lui s'ouvre, une page à la fois : **About** (son nom et **What is it for?**, à quoi il sert), **Boards**, **Tabs**, **Equipment** et **Done**. Un Skynet Schema Template ou un Equipment Profile n'a que About et Done. **Next ▶** garde une réponse telle quelle, et rien n'est changé avant **✔ Finish**. Finish (ou **Close**) vous emmène au premier Tab du nouveau Schema. Plus : [La New Schema Interview](202-new-schema-interview).
 
 ## Revenir à votre ancien Schema {#going-back-to-your-old-schema}
 
