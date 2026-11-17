@@ -46,8 +46,8 @@ name reads like `MB_25_DO@H_Element_HLT_BH`.
 
 | Kind | Label |
 |---|---|
-| Heating Element (on / off output: Direct, Duty Cycle, Hysteresis, PID, Deadband or Precise) | hE_1 |
-| PWM (Heating element power 0-100 %) | hE_PWM_1 |
+| Heating Element (Direct, PWM, Duty Cycle, Hysteresis, PID, Deadband or Precise) | hE_1 |
+| The older PWM output (Heating element power 0-100 %), no longer added | hE_PWM_1 |
 | The older control Devices: PID, Hysteresis, Duty Cycle, Deadband | hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_DeadB_1 |
 
 ## Properties, from the top

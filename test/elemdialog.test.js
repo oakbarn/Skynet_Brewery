@@ -5,7 +5,9 @@ import fs from 'node:fs';
 import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-assert.match(app, /\['heat', 'Heating Element', \[ELEMENT,[\s\S]{0,200}am\('RIMS tube'\), VESSEL_ELEMENT\]\]/, 'Vessel Device Template in place of the Electric kettle, basic');
+assert.match(app, /\['heat', 'Heating Element', \[\.\.\.HEAT_ROWS\(\), \['RIMs Tube: \(Skynet Device with Heating Element and Temperature Probe Embedded\)', \.\.\.am\('RIMS tube'\)\.slice\(1\)\],\s*\['Vessel Device Template \(Heating Element and Temperature Probe Embedded\)', \.\.\.VESSEL_ELEMENT\.slice\(1\)\]\]\]/, 'one row per Method, then RIMs Tube and the Vessel Device Template (entry 3)');
+assert.match(app, /'Heating Element: ' \+ w, 'element', 'H_Element', \{ heatMethod: k \}/, 'each row is one Heating Element on its Method');
+assert.ok(!/\['heat', 'Heating Element',[^\n]*control outputs/.test(app), 'no separate control Devices for heaters (One Port, One Device)');
 assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'H_Element'\]/);
 assert.match(app, /const ELEM_MODELS = \[\['Skynet Heating Element', 'sky'[^\]]*\], \['User Defined Heating Element/, 'step 2 picks the element');
 assert.match(app, /if \(pick === 'vesselElement'\) \{[\s\S]{0,200}pickElemVessel\(\)/, 'choose the Vessel first');
@@ -38,6 +40,6 @@ console.log('elemdialog tests passed');
   assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), ''); assert.equal(heatMode({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), '', 'no method in the Label: hE_1 (its method can change)'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
   assert.equal(heatMode({ type: 'digitalOut', subtype: 'pump' }), null); assert.equal(heatMode({ type: 'pid', integratedIn: 'x' }), null);
   assert.match(app, /work\.label = autoLabel\(hm \? 'hE_' \+ hm : 'hE'\)/);
-  assert.match(app, /'pwmOut', 'PWM', \{ units: '%', subtype: 'element' \}/, 'the Heating Element list PWM row is a heating PWM');
+  assert.ok(app.includes("['PWM (0 to 100%)', 'pwm']"), 'the Heating Element list PWM row is a Heating Element on the PWM Method (entry 3)');
   console.log('heating labels tests passed');
 }

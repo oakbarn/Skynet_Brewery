@@ -13,7 +13,9 @@ The files in this release:
 
   Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
   Skynet_Brewer_Full_Setup_<date>.exe  The same Windows installer WITH the Skynet pictures and sounds
-                                    inside: the easy way on a new computer (no Media Setup needed)
+                                    inside: the easy way on a new computer (no Media Setup needed).
+                                    No choices: it always OVERWRITES everything (old folders are moved
+                                    to C:\Brewing\Skynet_Backups first). To update, use the plain Setup.
   Skynet_BrewPanel_<date>.zip       The panel itself: install or update by hand, or for Mac/Linux/Pi
   Skynet_Media_Setup_<date>.exe     The Skynet pictures and sounds, for Windows (run it after the installer)
   Skynet_Media_<date>.zip           The Skynet pictures and sounds, for Mac/Linux/Pi or by hand

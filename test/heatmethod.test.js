@@ -69,7 +69,7 @@ sent.length = 0;
 store.setProp('hE_PID_1', 'state', true);
 assert.deepEqual(sent, ['DO 42 1'], 'On/Off: the pin is .state');
 store.setProp('hE_PID_1', 'state', false);
-assert.throws(() => store.setProp('hE_PID_1', 'method', 'Steam'), /Direct, Duty Cycle, Hysteresis, PID, Deadband/);
+assert.throws(() => store.setProp('hE_PID_1', 'method', 'Steam'), /Direct, PWM, Duty Cycle, Hysteresis, PID, Deadband/);
 assert.throws(() => store.setProp('hE_PID_1', 'method', 'Deadband'), /may only use Direct, Duty Cycle, Hysteresis, PID \(switch its Use Method On to allow it: Properties, Method Settings, ⬢ Deadband\)/, 'Deadband Use Method is Off');
 
 // the old names merged into it (Rule 6.19): HLT_PID = true switches it to PID and turns it ON
