@@ -36,7 +36,7 @@ assert.ok(he, 'the sample has the HLT element');
 const vessel = cfg.graphics.find(g => g.id === he.integratedIn);
 assert.equal(vessel?.name, 'HLT_Vessel', 'built into HLT_Vessel');
 assert.deepEqual([he.label, he.device, he.channel, he.workspace, he.heatMethod, he.target, he.onOffset, he.input],
-  ['HLT element', 'Brewery Mega', 8, 'Brew House', 'hysteresis', 150, -1, 'BM_700_TEMP@1W_HLT_BH'], 'the HLT element the hover help describes');
+  ['HLT element', 'Brewery Mega', 8, 'Brew House', 'hysteresis', 65.5556, -0.5556, 'BM_700_TEMP@1W_HLT_BH'], 'the HLT element the hover help describes (150 °F and -1 °F, kept in °C: Rule 2.59)');
 assert.ok(he.methodSpot_pid && he.methodSpot_dutyCycle, 'Duty Cycle and PID enabled too (four balloons)');
 assert.equal(cfg.elements.find(e => e.name === he.input)?.integratedIn, he.integratedIn, 'its probe is built into the same vessel');
 

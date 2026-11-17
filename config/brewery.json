@@ -11,7 +11,7 @@
    "connection": "simulator",
    "realConnection": "serial",
    "port": "/dev/ttyACM0",
-   "ambient": 64,
+   "ambient": 17.8,
    "lostLinkSec": 10
   }
  ],
@@ -247,7 +247,7 @@
    "w": 170,
    "h": 52,
    "label": "Strike volume",
-   "units": "gal",
+   "units": "L",
    "precision": 2,
    "initial": 0,
    "api": "getput",
@@ -291,7 +291,7 @@
    "w": 170,
    "h": 52,
    "label": "Pre-boil volume",
-   "units": "gal",
+   "units": "L",
    "precision": 2,
    "initial": 0,
    "api": "getput",
@@ -335,7 +335,7 @@
    "w": 170,
    "h": 52,
    "label": "Post-boil volume",
-   "units": "gal",
+   "units": "L",
    "precision": 2,
    "initial": 0,
    "api": "getput",
@@ -379,7 +379,7 @@
    "w": 170,
    "h": 52,
    "label": "Into fermenter",
-   "units": "gal",
+   "units": "L",
    "precision": 2,
    "initial": 0,
    "api": "getput",
@@ -484,9 +484,9 @@
    "w": 130,
    "h": 64,
    "label": "Batch",
-   "initial": 5.5,
+   "initial": 20.82,
    "precision": 2,
-   "units": "gal",
+   "units": "L",
    "kind": "value"
   },
   {
@@ -498,9 +498,9 @@
    "w": 130,
    "h": 64,
    "label": "Pre-boil",
-   "initial": 6.75,
+   "initial": 25.55,
    "precision": 2,
-   "units": "gal",
+   "units": "L",
    "kind": "value"
   },
   {
@@ -512,9 +512,9 @@
    "w": 150,
    "h": 64,
    "label": "Strike water",
-   "initial": 163.6,
+   "initial": 73.1,
    "precision": 1,
-   "units": "°F",
+   "units": "°C",
    "step": 0.5,
    "kind": "value"
   },
@@ -527,9 +527,9 @@
    "w": 150,
    "h": 64,
    "label": "Sparge water",
-   "initial": 168,
-   "precision": 0,
-   "units": "°F",
+   "initial": 75.6,
+   "precision": 1,
+   "units": "°C",
    "kind": "value"
   },
   {
@@ -541,9 +541,9 @@
    "w": 150,
    "h": 64,
    "label": "Pitch at",
-   "initial": 66,
-   "precision": 0,
-   "units": "°F",
+   "initial": 18.9,
+   "precision": 1,
+   "units": "°C",
    "kind": "value"
   },
   {
@@ -581,9 +581,9 @@
    "w": 150,
    "h": 62,
    "label": "Temp",
-   "initial": 152,
+   "initial": 66.7,
    "precision": 1,
-   "units": "°F",
+   "units": "°C",
    "step": 0.5,
    "kind": "value"
   },
@@ -622,7 +622,7 @@
    "label": "Temp",
    "initial": 0,
    "precision": 1,
-   "units": "°F",
+   "units": "°C",
    "step": 0.5,
    "kind": "value"
   },
@@ -661,7 +661,7 @@
    "label": "Temp",
    "initial": 0,
    "precision": 1,
-   "units": "°F",
+   "units": "°C",
    "step": 0.5,
    "kind": "value"
   },
@@ -686,9 +686,9 @@
    "w": 150,
    "h": 62,
    "label": "Mash out",
-   "initial": 168,
+   "initial": 75.6,
    "precision": 1,
-   "units": "°F",
+   "units": "°C",
    "kind": "value"
   },
   {
@@ -737,9 +737,9 @@
    "y": 250,
    "w": 100,
    "h": 56,
-   "label": "oz",
-   "initial": 1,
-   "precision": 2,
+   "label": "g",
+   "initial": 28.3,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -815,9 +815,9 @@
    "y": 312,
    "w": 100,
    "h": 56,
-   "label": "oz",
-   "initial": 1,
-   "precision": 2,
+   "label": "g",
+   "initial": 28.3,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -893,9 +893,9 @@
    "y": 374,
    "w": 100,
    "h": 56,
-   "label": "oz",
-   "initial": 1,
-   "precision": 2,
+   "label": "g",
+   "initial": 28.3,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -971,9 +971,9 @@
    "y": 436,
    "w": 100,
    "h": 56,
-   "label": "oz",
-   "initial": 2,
-   "precision": 2,
+   "label": "g",
+   "initial": 56.7,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -1049,9 +1049,9 @@
    "y": 498,
    "w": 100,
    "h": 56,
-   "label": "oz",
-   "initial": 2,
-   "precision": 2,
+   "label": "g",
+   "initial": 56.7,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -1127,9 +1127,9 @@
    "y": 560,
    "w": 100,
    "h": 56,
-   "label": "oz",
+   "label": "g",
    "initial": 0,
-   "precision": 2,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -1205,9 +1205,9 @@
    "y": 622,
    "w": 100,
    "h": 56,
-   "label": "oz",
+   "label": "g",
    "initial": 0,
-   "precision": 2,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -1283,9 +1283,9 @@
    "y": 684,
    "w": 100,
    "h": 56,
-   "label": "oz",
+   "label": "g",
    "initial": 0,
-   "precision": 2,
+   "precision": 1,
    "kind": "value"
   },
   {
@@ -1353,14 +1353,15 @@
    "y": 80,
    "w": 170,
    "h": 74,
-   "units": "°F",
+   "units": "°C",
    "precision": 1,
    "look": "lcd",
    "sim": {
-    "start": 62,
+    "start": 16.7,
     "heater": "BM_8_DO@H_Element_HLT~element_BH",
-    "heatRate": 1.2,
-    "maxTemp": 212
+    "heatRate": 0.67,
+    "maxTemp": 100,
+    "ambient": 17.8
    },
    "integratedIn": "v_HLT",
    "integratedAs": "ip:lElement",
@@ -1378,19 +1379,20 @@
    "y": 80,
    "w": 170,
    "h": 74,
-   "units": "°F",
+   "units": "°C",
    "precision": 1,
    "look": "lcd",
    "sim": {
-    "start": 62,
+    "start": 16.7,
     "follow": "BM_700_TEMP@1W_HLT_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
      "BM_24_DO@Valve_E_HLT~out_BH",
      "BM_27_DO@Valve_E_To~mash~tun_BH"
     ],
-    "followLoss": 11,
-    "loss": 0.0002
+    "followLoss": 6.11,
+    "loss": 0.0002,
+    "ambient": 17.8
    },
    "integratedIn": "v_MLT",
    "integratedAs": "ip:lElement",
@@ -1408,24 +1410,25 @@
    "y": 80,
    "w": 170,
    "h": 74,
-   "units": "°F",
+   "units": "°C",
    "precision": 1,
    "look": "lcd",
    "sim": {
-    "start": 62,
+    "start": 16.7,
     "heater": "BM_9_DO@H_Element_Kettle~element_BH",
-    "heatRate": 1.2,
-    "maxTemp": 212,
+    "heatRate": 0.67,
+    "maxTemp": 100,
     "follow": "BM_701_TEMP@1W_Mash_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
      "BM_25_DO@Valve_E_Mash~tun~out_BH",
      "BM_28_DO@Valve_E_To~kettle_BH"
     ],
-    "followLoss": 1,
+    "followLoss": 0.56,
     "cooler": "BM_30_DO@Chill_Chiller~water_BH",
     "coolRate": 6,
-    "coolTo": 58
+    "coolTo": 14.4,
+    "ambient": 17.8
    },
    "integratedIn": "v_BK",
    "integratedAs": "ip:lElement",
@@ -1443,8 +1446,8 @@
    "channel": 8,
    "input": "BM_700_TEMP@1W_HLT_BH",
    "label": "HLT element",
-   "target": 150,
-   "onOffset": -1,
+   "target": 65.5556,
+   "onOffset": -0.5556,
    "x": 625,
    "y": 165,
    "w": 170,
@@ -1467,8 +1470,8 @@
    "channel": 9,
    "input": "BM_702_TEMP@1W_Kettle_BH",
    "label": "Kettle element",
-   "target": 150,
-   "onOffset": -1,
+   "target": 65.5556,
+   "onOffset": -0.5556,
    "x": 1345,
    "y": 165,
    "w": 170,
@@ -1843,7 +1846,8 @@
     }
    },
    "vdevice": true,
-   "volume": 10
+   "volume": 37.85,
+   "units": "Metric"
   },
   {
    "id": "ip_hlt_lElement",
@@ -2022,7 +2026,8 @@
     }
    },
    "vdevice": true,
-   "volume": 10
+   "volume": 37.85,
+   "units": "Metric"
   },
   {
    "id": "ip_mlt_lElement",
@@ -2201,7 +2206,8 @@
     }
    },
    "vdevice": true,
-   "volume": 10
+   "volume": 37.85,
+   "units": "Metric"
   },
   {
    "id": "ip_bk_lElement",
@@ -4174,8 +4180,9 @@
    "outTemp": "gblV_MashOut_Temp",
    "outTime": "gblT_MashOut_Time",
    "strike": "gblV_Desired_Strike",
-   "units": "F"
-  }
+   "units": "C"
+  },
+  "units": "Metric"
  },
  "chooseSample": true,
  "sample": "three-vessel-one-pump",
@@ -4186,6 +4193,6 @@
  "schema": {
   "id": "three-vessel-brewery",
   "name": "Three Vessel Brewery",
-  "version": "Three_Vessel_Brewery_20261113T1550"
+  "version": "Three_Vessel_Brewery_20261117T2100"
  }
 }

@@ -13,12 +13,13 @@ const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const app = read('public/app.js');
 
 // Templates: 10 gallons to start, Skynet and User alike; Method and Diameter kept
-assert.equal(cleanVessel(JSON.parse(read('templates/vessel/Skynet_Vessel_Widget.json'))).volume, 10, 'the Skynet Vessel Widget is 10 gallons');
-assert.equal(cleanVessel({ vesselType: 'vessel' }).volume, 10, 'a new vessel Template starts at 10 gallons');
-assert.equal(cleanVessel({ vesselType: 'vessel', volume: 15 }).volume, 15, 'an editable field');
+// kept in metric (Rule 2.59): 10 gallons = 37.8541 liters
+assert.equal(cleanVessel(JSON.parse(read('templates/vessel/Skynet_Vessel_Widget.json'))).volume, 37.8541, 'the Skynet Vessel Widget is 10 gallons');
+assert.equal(cleanVessel({ vesselType: 'vessel' }).volume, 37.8541, 'a new vessel Template starts at 10 gallons');
+assert.equal(cleanVessel({ vesselType: 'vessel', volume: 15, units: 'Metric' }).volume, 15, 'an editable field');
 assert.equal(cleanVessel({ vesselType: 'pchiller' }).volume, undefined, 'only vessels');
 const d = cleanVessel({ vesselType: 'vessel', sizeMethod: 'diameter', diameter: 16, vheight: 17 });
-assert.deepEqual([d.sizeMethod, d.diameter, d.vheight], ['diameter', 16, 17]);
+assert.deepEqual([d.sizeMethod, d.diameter, d.vheight, d.units], ['diameter', 40.64, 43.18, 'Metric'], 'inches kept as cm');
 assert.equal(cleanVessel({ vesselType: 'vessel', sizeMethod: 'x', diameter: -1 }).sizeMethod, undefined);
 
 // the size maths, taken from the panel: 1 gallon is 197 x 237, size follows volume
