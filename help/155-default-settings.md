@@ -169,7 +169,7 @@ The Look (theme) of the open Schema is in Settings > Panel settings ([Panel Look
 
 **Defaults are for new things only.** Labels, Text Boxes, the Default pipe size and the IP Types are kept on each item when it is made, so changing them here never changes what is already on your Tabs.
 
-New Schema from a Skynet Template, new Tabs (Tab Background Profile), Labels and Text Boxes. The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
+New Tabs (Tab Background Profile), Labels and Text Boxes. (The New Schema from a Skynet Template answers are no longer here: each question starts with Skynet's own answer, and you change it in the Add new Schema box.) The Valve and Pump Profile a new one starts with is the one marked **Default** in its own list ([Tab Background, Valve and Pump Profiles](36-tab-and-valve-profiles)). See [The Menu](33-menu).
 
 ## Tap Water
 

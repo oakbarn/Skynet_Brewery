@@ -41,7 +41,7 @@ import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lT
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
-import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
+import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords } from './appliance.js';
 import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GRAVITY_UNITS, GRAPH_GRAVITY, gravitySeries, hydroModel, hydroConnection, hydroGrey, hydroMissing, hydroClash, readSg } from './hydrometer.js';
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
@@ -13204,7 +13204,7 @@ async function newSchemaInterface(iface, wasSim) {
 async function newSchemaFromTemplate(name) {
   const [ST] = await Promise.all([api('GET', '/ui/schematemplates'), TPL ? TPL : loadTemplates()]);
   if (!ST.templates.length) throw new Error('No Skynet Schema Templates found (templates/schema)');
-  const b = S.config.brewDefaults || {};
+  const b = {};      // Skynet's own answers to start (OakBarn Brewery, 2026-11-17: the New Schema section left Default settings)
   const stOf = n => ST.templates.find(t => t.name === n) || ST.templates[ST.templates.length - 1];
   // 1: how many vessels (the Schema Template), the Interface, the Tab
   const w1 = { template: stOf(nsDefault(b, 'ns_template')).name, iface: ST.interfaces[0]?.name ?? '', tab: nsDefault(b, 'ns_tab') };
@@ -14046,7 +14046,7 @@ const freshTextBoxes = () => ({ labelVisible: FRESH_LABEL.visible, labelForeColo
   labelBold: FRESH_LABEL.bold, labelFont: FRESH_LABEL.font, labelFontSize: FRESH_LABEL.size, textForeColor: FRESH_TEXT.fore, textBackColor: FRESH_TEXT.back,
   textAlign: FRESH_TEXT.align, textFont: FRESH_TEXT.font, textFontSize: FRESH_TEXT.size, textWidth: FRESH_TEXT.width, textHeight: FRESH_TEXT.height, textWrap: FRESH_TEXT.wrap });
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...NS_DEFAULTS, ...freshTextBoxes(),
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, defPipeSize: '0.5', defHoseSize: '0.5', defPipeIp: 'tc', defHoseIp: 'qd', ...freshTextBoxes(),
     newSchemaLook: 'officeBlack', ...NEW_RECIPE, ...(S.config.brewDefaults || {}) };
   if (!d.waterProfile || !S.waterProfiles.some(x => x.id === d.waterProfile)) d.waterProfile = S.waterProfiles.find(x => x.tap)?.id ?? '';
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
@@ -14075,19 +14075,8 @@ function renderDefaultTab(box) {
     ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: DEF_TIPS.water }],
     ...hopStandFields(w.units),
     ['_w2g', `Water to Grain Ratio (${displayUnits(w).ratioUnit})`, 'num', null, false, false, { tip: DEF_TIPS.w2g }],
-    ['_ns', 'New Schema from a Skynet Template', 'head'],
-    ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
-    ['ns_template', 'Brew House Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
-      ['Skynet_2_Vessel_2_Pumps', '2 Vessel + 2 Pumps'], ['Skynet_3_Vessel', '3 Vessel'], ['Skynet_Fermentor', 'Fermentor (on its own)']]],
-    ['ns_fermentors', 'Fermentors on their own Fermentor Tab', 'sel', [['0', 'None'], ...[1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)])]],
-    ['ns_tab', 'Name of the Tab it goes on', 'text'],
-    ...GENERAL_TYPES.map(t => ['ns_heat_' + t, `Heat of a ${t}`, 'sel', Object.entries(HEATS)]),
-    ['ns_recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)],
-    ['ns_chiller', 'Chiller', 'sel', Object.entries(CHILLERS)],
-    ['ns_whirlpool', 'Whirlpool while chilling', 'bool'],
-    ['ns_valves', 'Valves', 'sel', Object.entries(VALVES)],
-    ['ns_manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)],
-    ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
+    // New Schema from a Skynet Template: not on Default settings any more (OakBarn Brewery, 2026-11-17: "New Schema from Skynet section
+    // not needed"): its questions start with Skynet's own answers (public/schemabuild.js NS_DEFAULTS)
     ['_t', 'New Tabs', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
     ['_tabPipe', 'How many Pixels are Pipes to be drawn on a Tab?', 'num', null, false, false, { def: 10, tip: DEF_TIPS.px }],
@@ -14136,6 +14125,7 @@ function renderDefaultTab(box) {
     // what changes things already made is saved in Settings > Panel settings (Rule 2.42): keep what is saved there
     for (const k of PANEL_SET_KEYS) if (S.config.brewDefaults && k in S.config.brewDefaults) d[k] = S.config.brewDefaults[k]; else delete d[k];
     for (const k of ['labelFontSize', 'textFontSize', 'textWidth', 'textHeight']) if (d[k] === '' || d[k] === null) delete d[k];
+    for (const k of Object.keys(d)) if (k.startsWith('ns_')) delete d[k];      // the New Schema answers left Default settings (2026-11-17)
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
