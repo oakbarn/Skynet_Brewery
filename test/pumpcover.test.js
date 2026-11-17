@@ -37,14 +37,14 @@ eng.stopAll?.();
 // fills the shape with the color. No per-color files.
 const pumps = new URL('../media/Images/Skynet/Pumps/', import.meta.url), covers = new URL('Covers/', pumps);
 const vb = f => /viewBox="([^"]+)"/.exec(fs.readFileSync(f, 'utf8'))[1];
-const drawn = fs.readdirSync(pumps).filter(f => /^Pump_.+_Inlet\.svg$/.test(f));
-assert.equal(drawn.length, 12);
+const drawn = fs.readdirSync(pumps).filter(f => /^Pump_.+_Inlet(_Motor)?\.svg$/.test(f));
+assert.equal(drawn.length, 18, '12 pumps + the 6 90° inlet pumps with their motor body (2026-11-17)');
 for (const f of drawn) for (const end of ['_Cover.svg', '_Cover_Shape.svg']) {
   const cf = new URL(f.replace('.svg', end), covers);
   assert.ok(fs.existsSync(cf), `${f} has its ${end}`);
   assert.equal(vb(cf), vb(new URL(f, pumps)), `${f} ${end} lies exactly over the pump`);
 }
-assert.equal(fs.readdirSync(covers).length, 24, 'two files per pump, none per color');
+assert.equal(fs.readdirSync(covers).length, 36, 'two files per pump, none per color');
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 for (const c of PUMP_COVER_CHOICES.filter(c => !['None', 'User'].includes(c))) assert.match(app, new RegExp(`${c}: '#[0-9a-f]{6}'`), `${c} has its color`);
 assert.match(app, /White: '#fafafa'/, 'White is RGB 250 250 250');
