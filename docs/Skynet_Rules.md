@@ -399,9 +399,9 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
   or a short note says why.
 - **The same thing does the same in every place:** a Device on its own on a Tab, the same Device built into a Vessel Device, its
   Clone and a Picture Widget that follows it all answer one click the same way.
-- **A double-click outside Edit layout** is two single clicks to a browser, so on most items its first click acts. On a **Heating
-  Element** and its method buttons a single click waits about a third of a second so a double-click (or Ctrl + Click) can open its
-  method's Settings instead, turning nothing On or Off (OakBarn Brewery, 2026-11-16, Rule 6.19).
+- **A double-click outside Edit layout** is two single clicks to a browser, so its first click acts. To open a **Heating Element's**
+  method Settings on a running Tab, use **Ctrl + Click** (⌘ + Click on a Mac); a plain click still acts at once (OakBarn Brewery,
+  2026-11-17, Rule 6.19).
 - What stays the same: **double-click opens Properties** (Rule 2.9), the right mouse button drags in Edit layout and gives Help
   outside it (Rule 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
   or Ask before changing) still wins, because the user chose it for that one item.
@@ -543,9 +543,10 @@ PR #15)
 
 2.9 **Double-click opens Properties** (hold a finger on phones). **Right mouse button drags.**
 (2026-10-21)
-*Outside Edit layout* Properties do not open (a running Tab is never changed by a stray click). A Heating Element's double-click
-(or Ctrl + Click, ⌘ + Click on a Mac) opens its method's Settings instead (OakBarn Brewery, 2026-11-16, Rule 6.19); whether every
-Device gets this waits for OakBarn Brewery's test.
+**Ctrl + Click** (⌘ + Click on a Mac) opens Properties too, in Edit layout (OakBarn Brewery, 2026-11-17: "Maybe the CTRL + Click is
+the way to Bring Up Properties Dialog"; "make sure that the double click for hoses still works"): double-click still opens Properties and
+still finishes drawing a hose; a Ctrl + Click while a pipe or hose is being drawn does nothing. *Outside Edit layout* Properties do not
+open (a running Tab is never changed by a stray click); a Heating Element's Ctrl + Click opens its method's Settings (Rule 6.19).
 *Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
 was closed. Do not offer it again.
 
@@ -2454,26 +2455,27 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   only those and its check shows a plain error before brewing; the Brain refuses it if it runs anyway. Switching Use Method On never turns
   the Element On. The Heating Element Properties have the frozen top too, with no bottom row. **Both programs:** the BruControl Import
   uses the same dialogs and switches Use Method On for each joined BruControl control. Help 150.
-- **Double-click or Ctrl + Click on a running Tab opens a method's Settings** (OakBarn Brewery, 2026-11-16: "I tried double clicking on
-  the Little Method Balloons for a Heating element to bring up the dialog for Duty cycle for that element"; "CTRL + Left Click could do
-  something"; "single click turn on, double click brings up property dialog (turns nothing on or off"). Outside Edit layout:
-  - a **double-click**, or **Ctrl + Click** (**⌘ + Click on a Mac**, where Ctrl + Click is the right-click and gives Help, Rule 2.11),
-    on a **method button** under a Heating Element opens that method's Settings for that Element (for example "HLT Heater: Duty Cycle
-    Settings"); on the **Heating Element picture** (on its own, built into a Vessel Device, or a Picture Widget that follows one) it opens
-    the Settings of the method it is in now; on a **Method Clone**, the Settings of the Clone's method.
-  - **It turns nothing On or Off and never switches the method.** So that a double-click can do this, a single click on these items
-    waits about a third of a second (to see whether a second click comes), then acts as always: one click turns the Element On or Off,
-    or picks the method. Everything else on a Tab still acts at once.
+- **Ctrl + Click opens a method's Settings on a running Tab** (OakBarn Brewery, 2026-11-16: "I tried double clicking on the Little
+  Method Balloons for a Heating element to bring up the dialog for Duty cycle for that element"; "CTRL + Left Click could do something";
+  *changed 2026-11-17* after trying the double-click: "Maybe the CTRL + Click is the way to Bring Up Properties Dialog"; "Other
+  Properties only on Build"; picked "A"). Outside Edit layout:
+  - **Ctrl + Click** (**⌘ + Click on a Mac**, where Ctrl + Click is the right-click and gives Help, Rule 2.11) on a **method button**
+    under a Heating Element opens that method's Settings for that Element (for example "HLT Heater: Duty Cycle Settings"); on the
+    **Heating Element picture** (on its own, built into a Vessel Device, or a Picture Widget that follows one) it opens the Settings of
+    the method it is in now; on a **Method Clone**, the Settings of the Clone's method.
+  - **It turns nothing On or Off and never switches the method.** A plain click acts at once, as always (no waiting). A double-click on a
+    running Tab is two plain clicks (*replaced 2026-11-17:* the double-click that opened the Settings, and the short wait it needed).
   - It is the same dialog as the method's ⬢ in the Properties, with its title, ✖ Cancel and 💾 **Save** frozen at the top (Rule 2.51).
     Save saves it to the Schema at once (no Edit layout); a new Offset, Delay, Kp ... works at once, the Element stays On or Off in the
     same method, and a new Setpoint is sent at once too. **Admins only** (it changes the Schema); others get a short note.
-  - **Phones and tablets:** nothing new (no Ctrl key; holding a finger gives Help, Rule 2.11; a double tap opens the Settings for an admin
-    where the phone allows editing, Rule 2.35).
-  - **Only Heating Elements for now:** OakBarn Brewery tries it first and then decides whether it becomes the standard for every Device
-    (a double-click that "does not turn on something"). The code keeps one list of what answers it (CTRL_CLICK in public/app.js), so
-    other Devices can be added later.
-  - **Both programs:** the BruControl Import has no running Tabs, so nothing changes there; the Heating Elements it makes get this in the
-    Panel. Help 150.
+  - The everyday quick changes stay one click (Rule 2.44): a Temperature Probe's SetPoint pop-up (Rule 2.43), a PWM or analog out's
+    number pop-up, and the Heating Element pop-up (Heating method…). **Every other Property is changed only in Edit layout.**
+  - **Phones and tablets:** nothing new (no Ctrl key; holding a finger gives Help, Rule 2.11).
+  - **Only Heating Elements for now.** The code keeps one list of what answers it (CTRL_CLICK in public/app.js), so other Devices can
+    be added later, one at a time, when OakBarn Brewery says so.
+  - **In Edit layout** Ctrl + Click opens Properties, the same as a double-click (Rule 2.9).
+  - **Both programs:** the BruControl Import has no running Tabs; its Build page is the same Edit layout, so Ctrl + Click opens
+    Properties there too. Help 150.
 - **The Hysteresis rows** (OakBarn Brewery, 2026-11-10, Integrate_4; in the Hysteresis Settings dialog since 2026-11-15): **Temperature Probe** and **Setpoint** on one line; **Direction**
   (Heating, greyed) with **Offset** beside it, picked from a list of every half degree its Hardware Controller allows (Rule 6.29);
   **Predictive** with **Delay** beside it. Each of the two lines has a small wave drawing: the temperature (red) going between the
@@ -5033,6 +5035,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Rules 6.19, 2.9 and 2.44 changed (OakBarn Brewery, after trying PR #445: "cannot draw a hose on build so double click could be issue to bring Up Properties   Maybe the CTRL + Click is the way to Bring Up Properties Dialog ... Other Properties only on Build"; picked "A But make sure that the double click for hoses still works"): on a running Tab the double-click no longer opens a Heating Element's method Settings and a plain click no longer waits; Ctrl + Click (⌘ + Click on a Mac) is the way. In Edit layout Ctrl + Click opens Properties, the same as a double-click; double-click still opens Properties and finishes drawing a hose. Help 150 (and French). Checked against the BruControl Import program: its Build page is the same Edit layout, so Ctrl + Click opens Properties there too. (thread "Open Method settings from the Method buttons")
 - 2026-11-16: Added Rule 2.56 (OakBarn Brewery: "127.3 °F" wrapped on the 3 Vessel sample's Boil kettle; "4 digits"): a reading with its unit stays on one line up to 9999.9; the value's font gets smaller to fit its box and goes back when the reading is short. Help 138 (and French). Checked against the BruControl Import program: its Build page shares the Panel code, so it gets the same fix.
 - 2026-11-16: Rules 5.34 and 5.40 changed (OakBarn Brewery: "Right Click and hold the Yellow circle is all it should take to move it.  It unhooks without comfirmation and is locked or hanging open when Right Moude buuton release"; "If there is flow a warning,  No flow, no warning"): a Quick Disconnect hose end moves with one right-button hold (or finger) on its yellow ring. No pop-up when nothing flows; a warning that blocks the move only while a pump on the hose is On or liquid flows in it (closes by itself once nothing flows). Letting go keeps the end where it is (on an IP, a Quick Disconnect, a vessel top, or loose) with no "Is the real hose there now?" question ("Maybe something like the Yellow flashes red and yelloe when locked to an IP for 2 seconds"; "No Ip stays yellow"): locked onto an IP, Quick Disconnect or vessel top, the ring flashes red and yellow for 2 seconds; left in the air it stays yellow; a Process .connect line still waits for Done. Fixed: letting go of the right button over a vessel opened its Help page, and the hose went back. Flow (Rule 5.21; "No Flow when in the air and Hose bib on"; "Connected to a Pipe and has flow to the Pipe but no flow into the Pipe"): a hose end left in the air is open, so what pushes into the hose (a Tap Water Valve that is On, a running pump) pours out and the hose shows flow; nothing is pulled in through it. A plain IP at the open end of a pipe, with a hose or another pipe joined to it, passes flow on into that pipe, like a coupling. Tried in a browser. Any open pipe or hose end can flow ("Any open pipe in the air can Flow!! Only endcaps, and valves stop flow"); where flow pours out of an open end, Skynet's own water splash is drawn ("a graphic of water spurting out the end"; "blue and white details ... original art"; "maybe match the color of the flow"): drawn in code, in the flow color with white details, lighter and slower for gravity flow. The timed Fire Hose (open a valve for 20 s, 1 min, 2 min or a set time) is parked in the Process Updates Sandbox, entry 6 (Rule 14.5). Help 127, 142 (and French). Checked against the BruControl Import program: it has no QD hose dragging outside its Build page and needs nothing.
 - 2026-11-16: Rule 4.1 changed, Rule 4.7 and new Rule 2.53 (OakBarn Brewery: "IT is a bug because I was Not finished Building. I want to add things to an existing Build and leave in Build Mode so needs to be fixed. Saving to the Tab (and I might have wanted to change the tab when saving) could be a nightmare for a User"; picked "A: Kept on the Brain"; "even if the Build was still in the Build mode after restarting, one click to discard"; "Always good to have a Restore ... fits 2 click rule"): Save layout saves the regular Tabs and never ends the Build; an unfinished Build is kept on the Brain in the Schema (buildDraft), never run, comes back the next time Edit layout opens, and its Devices keep their Ports; one click 🗑 Discard Build with ↩ Undo; 💾 Save Build ... is now ✅ Finish Build ..., and Move to Tab sends the whole Build to one Tab (the Add box Tab only offered first). Rule 2.53: a rare action may take a second click, and what it throws away can be put back (checked against Rule 1.28: not a Confirmation Widget). Help 55 and every Help page that named Save Build (and French). Checked against the BruControl Import program: its Build page is the same Edit layout; imported items are placed by the Importer, not built, so nothing changes there.
