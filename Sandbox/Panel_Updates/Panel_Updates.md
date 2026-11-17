@@ -45,7 +45,7 @@ The panel does not use this folder, and it is left out of the release zip and th
 | 26 (the Chiller Bundle Equipment Template, Valves/Equipment, the greyed bar for a Template or Profile Build) | PR #467 | 2026-11-17 |
 | 3 and 4 (a Heating Element row for each Method, the new PWM Method, the Port decides PWM or a plain Port, Help 150 condensed) | PR #471 | 2026-11-17 |
 | 10 (the Full Setup has no choices: one OVERWRITE warning, Get the Update Setup link, Close and Do Not Install; old folders moved to Skynet_Backups) | PR #471 (OakBarn Brewery: "Move that to the next open PR") | 2026-11-17 |
-| 1 (Heating Element: PWM and the Proportional Valves in the PWM / Analog out list; the Device Type pick already gives Low or High Temperature. The Port cannot decide PWM or AO, since every analog output is a PWM pin and a module: asked again 2026-11-17) | this PR (after #471) | 2026-11-17 |
+| 1 (Heating Element: PWM and the Proportional Valves in the PWM / Analog out list; the Device Type pick already gives Low or High Temperature. The Port cannot decide PWM or AO, since every analog output is a PWM pin and a module: asked again 2026-11-17. **Decided (OakBarn Brewery, 2026-11-17, "Your Recomendation"):** a proportional valve is always AO@ (0-10 V through a module), as built; no Signal box) | this PR (after #471) | 2026-11-17 |
 | 6 (↩ Undo on a new Hidden Tab, 👻 Hidden Tabs ▾ list, Save layout asks Keep or Delete for an empty Hidden Tab) | this PR (after #471) | 2026-11-17 |
 | 9 (the data is always metric: Profiles, Vessels, Vessel Templates, Default settings, the 3 Vessel Sample) | PR #474 | 2026-11-17 |
 | 9 (shown in the Units: Mash, Boil and Equipment Profiles, Vessel Properties, Vessel Templates) | this PR (after #474) | 2026-11-17 |
