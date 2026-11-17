@@ -2,9 +2,9 @@
 
 **Un seul zip fait les deux :** une première installation et chaque mise à jour. Le zip n'a **pas** de dossiers `config`, `data`, `media` ni `processes`, donc le décompresser par-dessus votre panel ne peut pas remplacer les vôtres. Leurs exemples sont dans un dossier appelé `defaults`, et le panel ne les copie qu'à son tout premier démarrage, dans un dossier que vous n'avez pas encore.
 
-**Les images et les sons Skynet sont un téléchargement à part**, le Skynet Media Setup (Windows) ou le zip Skynet Media. Il n'ajoute que ceux que vous n'avez pas encore et n'en change ni n'en supprime jamais aucun. Voir [Le Skynet Media Setup](183-skynet-media-setup).
+**Les nouvelles images et les nouveaux sons Skynet viennent avec la mise à jour.** L'Update Setup apporte ceux ajoutés depuis le dernier ; le Brain ajoute ceux qu'il n'a pas encore et ne change jamais un fichier que vous avez. Rien de plus à lancer. Voir [Les images et sons Skynet](183-skynet-media-setup).
 
-**D'autres Sample Schemas (Schemas d'exemple) sont aussi un téléchargement à part**, le Skynet Sample Schemas Setup (Windows) ou son zip. Le panel n'est livré qu'avec l'exemple 3 Vessel. Voir [Le Skynet Sample Schemas Setup](184-skynet-sample-schemas-setup).
+**Les Sample Schemas (Schemas d'exemple) nouveaux et corrigés viennent aussi avec la mise à jour.** Un exemple corrigé remplace son ancienne copie ; un Schema que vous en avez déjà fait est à vous et n'est jamais touché. Voir [Les Sample Schemas Skynet](184-skynet-sample-schemas-setup).
 
 | Dossier | Ce qu'il contient | Lors d'une mise à jour |
 |---|---|---|
@@ -14,10 +14,10 @@
 | `processes` | Vos Processes (les versions précédentes appelaient ce dossier `scripts` : Skynet le renomme en arrière-plan, sans aucune action de votre part) | **Gardé.** Pas dans le zip. |
 | `help` | Ce manuel | Remplacé par le nouveau manuel. Les programmes d'installation copient d'abord les anciennes pages dans `help/backups/before_update_<date>`. |
 | `defaults` | La disposition et les Processes d'exemple | Remplacé. Utilisé seulement pour un dossier que vous n'avez pas. |
-| `sample_schemas` | Les Sample Schemas en plus du Sample Schemas Setup, et tout Schema d'un autre brasseur | **Gardé.** Pas dans le zip. |
+| `sample_schemas` | Les Sample Schemas Skynet en plus, et tout Schema d'un autre brasseur | **Gardé.** Les nouveaux exemples Skynet sont ajoutés et ceux corrigés remplacés ; les vôtres ne sont jamais touchés. |
 | Tout le reste (`lib`, `public`, `server.js`, `samples` …) | Le programme lui-même | Remplacé. |
 
-**Vous voulez retrouver les exemples dans un dossier ?** Relancez le programme d'installation et répondez **No** à « Keep all of them as they are? » (tout garder tel quel ?). Il pose alors la question pour chaque dossier (config, processes, data) et déplace ceux que vous choisissez vers `backups/<folder>_<date>`. Ou faites-le vous-même : arrêtez le panel et renommez le dossier (par exemple `processes` en `processes_old`). Le panel copie les exemples dans un nouveau `processes` au démarrage suivant. (Les images et les sons ne sont jamais remplacés : renommez `media` seulement si vous voulez le recommencer, puis relancez le Skynet Media Setup.)
+**Vous voulez retrouver les exemples dans un dossier ?** Relancez le programme d'installation et répondez **No** à « Keep all of them as they are? » (tout garder tel quel ?). Il pose alors la question pour chaque dossier (config, processes, data) et déplace ceux que vous choisissez vers `backups/<folder>_<date>`. Ou faites-le vous-même : arrêtez le panel et renommez le dossier (par exemple `processes` en `processes_old`). Le panel copie les exemples dans un nouveau `processes` au démarrage suivant. (Les images et les sons ne sont jamais remplacés : ils ne reviennent qu'avec le Full Setup, qui écrase tout.)
 
 > **Les connexions sont gardées.** Une nouvelle version garde chaque utilisateur, mot de passe et le **code de secours**. La seule fois où une mise à jour les supprime, c'est quand vous choisissez **Update the program and reset all users** ou **Start Fresh** dans le programme d'installation et confirmez l'avertissement. Voir [Connexion, utilisateurs et mots de passe](10-login).
 
@@ -57,7 +57,7 @@ Quand le programme d'installation trouve le panel déjà là, il demande ce que 
    - chaque Schema, Tab, Device, Widget, réglage, Profile et Recipe (`config`)
    - chaque utilisateur, mot de passe, connexion et le code de secours, le journal de brassage et les valeurs enregistrées (`data`)
    - chaque Process (`processes`) et les dossiers `backups`
-   - toutes les images et tous les sons (`media`), ceux de Skynet aussi : lancez le **Media Setup** après
+   - toutes les images et tous les sons (`media`), ceux de Skynet aussi : le **Full Setup** les a tous
    - tout ce qui est dans le dossier **Import** (`C:\Brewing\Import`)
    - **No** sur l'avertissement revient en arrière. Rien n'est supprimé.
    - **Yes** les supprime. Le panel démarre alors comme une nouvelle installation à partir des exemples, et vous recréez le compte admin (notez le nouveau **code de secours**).

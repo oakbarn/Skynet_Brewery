@@ -164,22 +164,23 @@ jobs:
           mkdir -p release
           build() { echo "$1"; echo "build=yes" >> "$GITHUB_OUTPUT"; echo "version=$VERSION" >> "$GITHUB_OUTPUT"; exit 0; }
           [ "$FORCE" = "true" ] && build "Asked to make the Media Setup new (Run workflow > rebuild media)."
-          # the newest published Release that carries a Media Setup: "<release tag> <Media Setup file name>"
+          # the newest published Release that carries a Media zip: "<release tag> <Media zip file name>" (the Media Setup .exe is retired,
+          # OakBarn Brewery 2026-11-17: "WE could get rid of both the Schema Uodate and the Media updates"; Rule 9.22)
           LAST=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-            --jq '[.[] | select(.draft | not) | {t: .tag_name, a: ([.assets[].name | select(test("^Skynet_Media_Setup_.+\\.exe$"))] | first)} | select(.a != null)] | first // empty | "\(.t) \(.a)"' 2>/dev/null || true)
+            --jq '[.[] | select(.draft | not) | {t: .tag_name, a: ([.assets[].name | select(test("^Skynet_Media_[0-9A-Za-z].*\\.zip$"))] | first)} | select(.a != null)] | first // empty | "\(.t) \(.a)"' 2>/dev/null || true)
           [ -n "$LAST" ] || build "No earlier Media Setup found, so it is made new."
-          FROM="${LAST%% *}"; MEXE="${LAST#* }"
-          MV="${MEXE#Skynet_Media_Setup_}"; MV="${MV%.exe}"
-          # MV is the version the Media Setup was made at; its tag marks the code it was made from
-          git rev-parse -q --verify "refs/tags/$MV^{commit}" >/dev/null || build "No tag $MV to compare with, so the Media Setup is made new."
-          if ! git diff --quiet "$MV" HEAD -- media install/windows/SkynetMedia.nsi; then
-            git diff --stat "$MV" HEAD -- media install/windows/SkynetMedia.nsi | tail -20
-            build "Pictures or sounds changed since $MV, so the Media Setup and Media zip are made new."
+          FROM="${LAST%% *}"; MZIP="${LAST#* }"
+          MV="${MZIP#Skynet_Media_}"; MV="${MV%.zip}"
+          # MV is the version the Media zip was made at; its tag marks the code it was made from
+          git rev-parse -q --verify "refs/tags/$MV^{commit}" >/dev/null || build "No tag $MV to compare with, so the Media zip is made new."
+          if ! git diff --quiet "$MV" HEAD -- media; then
+            git diff --stat "$MV" HEAD -- media | tail -20
+            build "Pictures or sounds changed since $MV, so the Media zip is made new."
           fi
-          gh release download "$FROM" --pattern "$MEXE" --pattern "Skynet_Media_$MV.zip" --dir release \
-            || build "Could not get the last Media Setup from $FROM, so it is made new."
-          [ -f "release/$MEXE" ] && [ -f "release/Skynet_Media_$MV.zip" ] || build "The last Media Setup or zip is missing from $FROM, so both are made new."
-          echo "No picture or sound changed since $MV: this Release carries that Media Setup and zip, unchanged."
+          gh release download "$FROM" --pattern "$MZIP" --dir release \
+            || build "Could not get the last Media zip from $FROM, so it is made new."
+          [ -f "release/$MZIP" ] || build "The last Media zip is missing from $FROM, so it is made new."
+          echo "No picture or sound changed since $MV: this Release carries that Media zip, unchanged."
           { echo "build=no"; echo "version=$MV"; } >> "$GITHUB_OUTPUT"
 
       - name: Build the installer and zip
@@ -192,9 +193,9 @@ jobs:
           sudo apt-get install -y -qq nsis zip
           # the Update Setup also carries the Skynet pictures and sounds added since the last Update Setup (OakBarn Brewery,
           # 2026-11-17, Rule 9.22): the tag of the newest published Release that has a Skynet_Brewer_Setup .exe
-          export SKYNET_MEDIA_SINCE=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+          export SKYNET_UPDATE_SINCE=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
             --jq '[.[] | select(.draft | not) | select([.assets[].name | select(test("^Skynet_Brewer_Setup_.+\\.exe$"))] | length > 0) | .tag_name] | first // empty' 2>/dev/null || true)
-          echo "New pictures and sounds since: ${SKYNET_MEDIA_SINCE:-(no earlier Update Setup)}"
+          echo "New pictures, sounds and Sample Schemas since: ${SKYNET_UPDATE_SINCE:-(no earlier Update Setup)}"
           bash tools/build-release.sh "$VERSION"
           # one zip for the first-install folders, so the Release page stays short
           ( cd release && zip -qr "First_Install_ReadMes_$VERSION.zip" First_Install_* )
@@ -216,18 +217,18 @@ jobs:
           cat > notes.md <<NOTES
           **To install on Windows:** download \`Skynet_Brewer_Setup_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. $WARN
 
-          **New on this Windows computer? The easy way:** download \`Skynet_Brewer_Full_Setup_$VERSION.exe\` instead. It is the same Setup with every Skynet picture and sound inside, so you do not need the Media Setup. Pictures and sounds you already have are never changed or deleted.
+          **New on this Windows computer?** download \`Skynet_Brewer_Full_Setup_$VERSION.exe\` instead. It has every Skynet picture, sound and Sample Schema inside. It is always a full install: on a computer that already has Skynet it OVERWRITES everything (it warns first). To update, use the Setup above: it brings the Skynet pictures, sounds and Sample Schemas added since the last one.
 
           **Mac, Linux, Raspberry Pi or by hand:** download \`Skynet_BrewPanel_$VERSION.zip\` and \`ReadMe.txt\`.
 
-          **Pictures and sounds:** \`Skynet_Media_Setup_$MV.exe\` (Windows, run it after the Setup) or \`Skynet_Media_$MV.zip\`. They only add the ones you do not have: nothing you have is changed or deleted.$MSAME
+          **Pictures and sounds (Mac, Linux, Raspberry Pi or by hand):** \`Skynet_Media_$MV.zip\`. It only adds the ones you do not have: nothing you have is changed or deleted.$MSAME
 
-          **More Sample Schemas:** \`Skynet_Sample_Schemas_Setup_$VERSION.exe\` (Windows) or \`Skynet_Sample_Schemas_$VERSION.zip\`. The panel comes with the 3 Vessel sample; more samples are added here one at a time. Add-only, like the pictures and sounds.
+          **Sample Schemas (Mac, Linux, Raspberry Pi or by hand):** \`Skynet_Sample_Schemas_$VERSION.zip\`. Add-only, like the pictures and sounds.
 
           NOTES
           gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest \
-            release/Skynet_Brewer_Setup_*.exe release/Skynet_Brewer_Full_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_Setup_*.exe release/Skynet_Media_*.zip \
-            release/Skynet_Sample_Schemas_Setup_*.exe release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
+            release/Skynet_Brewer_Setup_*.exe release/Skynet_Brewer_Full_Setup_*.exe release/Skynet_BrewPanel_*.zip release/Skynet_Media_*.zip \
+            release/Skynet_Sample_Schemas_*.zip release/ReadMe.txt \
             "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
             release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt
 

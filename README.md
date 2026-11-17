@@ -27,17 +27,13 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). **Updates:** a release zip has no `config/`, `data/`, `media/` or `processes/` (their samples are in `defaults/`, copied in by `lib/seed.js` only into a folder that doesn't exist yet), so unzipping it over a panel or running an installer again never replaces them. On an update the installers ask whether to keep those folders (default: keep all). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
 
-**First Install and Fresh Start: the order** (OakBarn Brewery, 2026-11-13). Run the Setups in this order:
+**Which Setup?** (OakBarn Brewery, 2026-11-17, Rule 9.22: "No extra steps for a User")
 
-1. **Skynet Brewer Setup** (the panel) first. The Media Setup needs the panel's folder to be there, and a **Start Fresh** or **Modified Fresh Start** clears folders before anything else goes in.
-2. **Skynet Media Setup** (the Skynet pictures and sounds) second. It only adds what is missing and never changes or deletes a file, so it is safe to run again after any update or Fresh Start.
-3. **Skynet Sample Schemas Setup** last, only if you want the extra samples (the 3 Vessel sample is always in the panel).
+- **New on this Windows computer:** `Skynet_Brewer_Full_Setup_<version>.exe`. It has every Skynet picture, sound and Sample Schema inside. It has no choices: it is always a full install that **overwrites everything**. If Skynet is already installed it shows one warning, with a link to the Update Setup and Close and Do Not Install, and moves your old folders to `C:\Brewing\Skynet_Backups` first.
+- **Updating:** `Skynet_Brewer_Setup_<version>.exe`. It brings the Skynet pictures, sounds and Sample Schemas added (or, for samples, fixed) since the last one, and keeps everything of yours. There is no separate Media Setup or Sample Schemas Setup any more.
+- **Mac, Linux, Raspberry Pi:** the panel zip, with the Media zip and Sample Schemas zip next to the installer.
 
-**Or one file on Windows: the Full Setup** (OakBarn Brewery, 2026-11-14, Rule 9.20). `Skynet_Brewer_Full_Setup_<version>.exe` is the same Skynet Brewer Setup with every Skynet picture and sound inside, so a new install needs no separate Media Setup (steps 1 and 2 in one). It has no choices: it is always a full install that **overwrites everything** (2026-11-17). If Skynet is already installed it shows one warning, with a link to the Update Setup and Close and Do Not Install, and moves your old folders to `C:\Brewing\Skynet_Backups` first. To update, use the plain Setup. The plain Setup and the Media Setup stay on every Release too.
-
-**Why two .exe files?** The panel Setup is small (the program only), so future updates download in seconds. During Beta testing updates may come more than once a day; after the first Public Production they should rarely be needed. The pictures and sounds are big and seldom change: a changed picture gets a new file name, so the Media Setup only ever adds files. Keeping them apart means you download the big one once, not with every future update, and an update can never touch your pictures and sounds.
-
-A **Start Fresh** deletes everything, every picture and sound (the Skynet ones too) and the Import folder included; only the program stays. A **Modified Fresh Start** keeps your Default settings, own Profiles, Equipment Profiles, Recipes, pictures and sounds, the backups and the Import folder. Run the Media Setup after either one.
+A **Start Fresh** deletes everything, every picture and sound (the Skynet ones too) and the Import folder included; only the program stays. A **Modified Fresh Start** keeps your Default settings, own Profiles, Equipment Profiles, Recipes, pictures and sounds, the backups and the Import folder. After a Start Fresh, the Full Setup puts every Skynet picture and sound back.
 
 **By hand:**
 
@@ -77,14 +73,14 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 A Schema is a whole brewery setup: Tabs, Devices, Widgets, pipes and settings. The **3 Vessel 1 Pump** sample is native to the Skynet Panel: it comes with every panel, is kept up to every new Skynet Rule, and is the Schema a new panel starts with. You can load it again later from **Settings > Start from a sample Schema**. A sample loaded later comes in as a new Schema, so the Schema you have is kept. Processes with the same name are backed up before they are replaced.
 
-**More samples:** the **Skynet Sample Schemas Setup** (`Skynet_Sample_Schemas_Setup_<date>.exe`, on the same Releases page) can add additional ones. It has a **tick box for each sample**, so you pick which samples will be imported; there is **no All tick box**. A sample that is available is **never deleted**: if a change is needed, a new sample is added with the same Name but **#2** at the end, and the old one stays as it was.
+**More samples** come with the Skynet Setups, one at a time (Rule 9.22): the Full Setup has them all, and each Update Setup brings the new and fixed ones. A Schema you already made from a sample is yours and is never touched.
 
-The samples available to download in the Sample Schemas Setup:
+The Skynet samples:
 
 | Sample | What you get |
 |---|---|
 | **Three vessel, one pump** (in the panel) | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
-| *(Sample Schemas Setup)* | None yet. Each sample is added one at a time, once it is brought up to the current Skynet Rules. |
+| *(more)* | None yet. Each sample is added one at a time, once it is brought up to the current Skynet Rules. |
 
 Every sample has a **Recipe** tab (filled by a BeerXML import, including mash steps) and a **Brew Day** panel: `gblV_Brew_Status` holds the step, the red/blue advance switch moves to the next step, timers count down, and the hop alarm sounds for each hop addition. Readings such as pH, gravity and volumes are gGlobals with Database and .API set, so they are logged and sent through the API. Run `BrewDay_Flow` to start; tick **Testing** to run it fast.
 

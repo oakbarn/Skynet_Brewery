@@ -20,5 +20,5 @@ Press **Check GitHub** to ask again. If everything is already here, it says **No
 - Each picture is checked against GitHub's own fingerprint before it is saved, so a broken download never replaces a good picture. If one fails, it is listed with the reason; press **Check GitHub** and get it again.
 - Skynet never changes a picture it has already sent out. When a drawing is redone, it comes as a new picture with a new name, so every Schema that uses the old one looks the same as before.
 - If GitHub says **too many requests**, wait an hour: GitHub lets each internet address ask about 60 times an hour without an account.
-- All the Skynet pictures and sounds at once, without the internet on the Brain, come with the **Skynet Media Setup** (see [The Skynet Media Setup](183-skynet-media-setup)).
+- All the Skynet pictures and sounds at once, without the internet on the Brain, come with the **Full Setup**, and each **Update Setup** brings the new ones (see [The Skynet pictures and sounds](183-skynet-media-setup)).
 - A whole new panel version (program files, not just pictures) still comes through **Updating** (see [Updating](18-updating)).

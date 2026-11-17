@@ -20,7 +20,7 @@ Every version on that page is an **Official Skynet update**: once installed, Sky
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
-| `Skynet_Brewer_Full_Setup_<date>.exe` | The same Windows installer with every Skynet picture and sound inside too. The easy way on a new computer: no Media Setup needed. See [The Skynet Media Setup](183-skynet-media-setup). |
+| `Skynet_Brewer_Full_Setup_<date>.exe` | The same Windows installer with every Skynet picture, sound and Sample Schema inside too. The way on a new computer. See [The Skynet pictures and sounds](183-skynet-media-setup). |
 | `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `processes` folders, so unzipping it over your panel can't replace yours. |
 | `Install Skynet Brewer.command` | Mac installer |
 | `install-skynet-brewer.sh` | Linux and Raspberry Pi installer |
