@@ -61,6 +61,6 @@ Une cuve regroupée et ses IP peuvent être copiés d'un seul coup :
 3. La copie est placée juste à droite de la première, toujours regroupée, nommée « <name> copy ». Les tuyaux ne sont pas copiés : dessinez-en de nouveaux vers elle.
 4. Appuyez sur **Save layout** pour la garder.
 
-Si le Tab a un Equipment Profile, la copie est dans l'**Equipment list** de ce profil dès que vous enregistrez la disposition, comme tout le reste du Tab.
+Si le Tab a un Equipment Profile, la copie est dans ce profil dès que vous enregistrez la disposition, comme tout le reste du Tab.
 
 Pour copier une cuve, copiez-la sur le Tab dans **Edit layout**, ou faites-en un Vessel Template (**✅ Finish Build ... > 📁 Templates**).
