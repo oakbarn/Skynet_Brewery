@@ -61,6 +61,6 @@ A Bundled vessel and its IPs can be copied in one go:
 3. The copy is placed just to the right of the first one, still bundled, named "<name> copy". Pipes are not copied: draw new ones to it.
 4. Press **Save layout** to keep it.
 
-If the Tab has an Equipment Profile, the copy is in that profile's **Equipment list** as soon as you save the layout, like everything else on the Tab.
+If the Tab has an Equipment Profile, the copy is in that profile as soon as you save the layout, like everything else on the Tab.
 
 To copy a vessel, copy it on the Tab in **Edit layout**, or make a Vessel Template from it (**✅ Finish Build ... > 📁 Templates**).

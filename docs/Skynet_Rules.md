@@ -4974,7 +4974,7 @@ Valves, **And so on** (recirculation, chiller, Supply Manifold), the profile's n
 the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to the Tab and puts everything on the 🔨 Build Tab
 (Rule 4.1); each pump and motorized valve is a real Device on the next free Port (Rule 4.2), named by Rule 3.1.
 1. **It replaces the Vessel tab** (OakBarn Brewery, 2026-11-13: "Yes"). A vessel's size, dead space, heater and probe are in its
-   Properties on the Tab. A profile made before Templates keeps its list, with **Put on Tab** only (Help 34).
+   Properties on the Tab. The list of a profile made before Templates and its **Put on Tab** are gone (OakBarn Brewery, 2026-11-17: "Remove old"; Help 34).
 2. **The profile is all of the brewery's physical hardware** (OakBarn Brewery, 2026-11-17: "A Brewery has a set of equipment.
    Generally all of the Schema could be made of the same Equipment Profile."; "The reason to \"import\" and equipment Profiles is to
    create a new Schema with its own Text Widgets, and Processes."; "An equipment profile would be all the Brewery Hardware, including
@@ -4998,9 +4998,9 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
      it stops, nothing is added, and a plain note names the board and the Tab and says why (one board is never split by a paste, and
      its ID never changes, Rule 3.2).
    A Port is never given to two Devices (Rule 6.1). A slot another Schema has not given a Port stays in the profile (Design Rule 1); a Device deleted where it was given a Port takes its slot out.
-   **Built (2026-11-17):** the profile keeps its Tab's hardware every time that Tab is saved (no hidden key goes into it). Under the
-   profile's Equipment list, **📋 Paste onto a Tab ...** asks **Both**, **Vessels Only** (each vessel with everything on it) or
-   **Manifold Only** (OakBarn Brewery: "Yes All of the manifold. Just Not the Vessesls") and the Tab it goes to; the pieces land on the
+   **Built (2026-11-17):** the profile keeps its Tab's hardware every time that Tab is saved (no hidden key goes into it). The
+   ➡ Transfer buttons of the Equipment Profile view (below) paste **All**, **Vessels** (each vessel with everything on it) or
+   **Manifold** (OakBarn Brewery: "Yes All of the manifold. Just Not the Vessesls") onto the Tab picked beside them; the pieces land on the
    🔨 Build Tab (OakBarn Brewery: "2. Build Tab") and Finish Build > Move to Tab puts them there in the same spots. A pipe end whose
    piece did not come stays **open** (OakBarn Brewery: "Open so a Vessel could be attached"). A board the Schema does not have comes
    with the paste; a piece whose Name is used elsewhere gets _2. ↩ Undo puts it all back. **🗂 New Schema from this profile ...** (also
@@ -5015,15 +5015,21 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
    Text Boxes or such.  No Switches."; "Yes and immersion Chillers   any widget with an IP Can be added.    Text Widgets and Like CANNOT
    be added"; "That is because if a Widget has an IP, it is a real world thing.   Plate chillers  on so on."): **the test is the IP: a
    Widget with an IP is a real world thing, so it can be in a profile** (plate chillers and so on; an immersion chiller goes with the
-   vessel it sits in), and so is every Device on a board with its Port, and Text Widgets,
-   Switches, Processes, Timers and the like **cannot be added**: Skynet never puts them in a profile, so nothing is hidden in the view;
+   vessel it sits in), and so is every Device on a board with its Port. **A Switch that is a real world thing is a Special Widget like
+   a Manual Valve, so it is in the profile** (OakBarn Brewery, 2026-11-17: "Ok a switch  that is a real world thing is a Special widget
+   like a Manual Valve.  So yes."). Text Widgets, Switches that are not real world things, Processes, Timers and the like
+   **cannot be added**: Skynet never puts them in a profile, so nothing is hidden in the view;
    they are not there. A frozen bar (Rule 2.51) holds
    **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** with the Tab beside them ("Add Transfer
    to Tab. Since there is room 1 for all 1 for just vessels and 1 for Just Manifold"; one click each, Rule 2.44), then Delete · Save ·
    Undo · Close. Under it the profile's Properties, which go with every Transfer and Paste (OakBarn Brewery: "Equipment Profile
    Properties are ones transferred like Effenicy"): a Tab with its own profile shows the numbers that change in the Replace list; a Tab
    with no profile takes this one (keeping its own layout, so the profile's drawing never changes), unless another Tab of the Schema
-   uses it. The ☰ Menu > Equipment Profile pane stays (Settings, 📋 More ...), Design Rule 1.
+   uses it. Beside the Properties: **🧮 Check the volumes**, **📈 Efficiency** (Efficiency on this Schema, Rule 17.13) and **🗂 New Schema
+   from this profile ...**. **The old Equipment Profile screen is gone** (OakBarn Brewery, 2026-11-17: "Remove old"; before the first
+   Public Production, the Old Ways policy): its form, Equipment list, Paste onto a Tab dialog, Made before Templates list and the
+   Settings button. ☰ Menu > Equipment Profile keeps each Tab's row (its profile, 🔒 Locked, Open, Ports, Make it unique) and the
+   Open list, which opens the profile view.
    *Replaced (2026-11-17):* "Each pump and motorized valve on the profile's Tab is a slot of the profile ...: its look and place,
    never its Interface, Port or Name. ... A Schema that picks the profile and has no Device for a slot is asked for the Interface;
    each slot gets the next free Port (Tab row: 🔌 Give ... their Ports)" (2026-11-13: "I may have a 3 Vessel 3 Pump Layout that I want
@@ -5108,6 +5114,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ## Change log
 
+- 2026-11-17: Rule 19.6 #1 and #2 changed (OakBarn Brewery: "Ok a switch  that is a real world thing is a Special widget like a Manual Valve.  So yes."; "Remove old"): a Switch that is a real world thing is in the Equipment Profile like a Manual Valve; the old Equipment Profile screen (its form, Equipment list, Paste onto a Tab dialog, Made before Templates with Put on Tab, the Settings button) is taken out, before the first Public Production (Old Ways policy). Opening a profile anywhere opens the Equipment Profile view, which now also has 🧮 Check the volumes, 📈 Efficiency and 🗂 New Schema from this profile. Help 28, 34, 48, 50, 68 (and French). Checked against both programs: the BruControl Import has no Equipment Profiles. (thread "Paste Equipment Profiles onto a Tab")
 - 2026-11-17: Rules 2.55 and 16.6 changed (OakBarn Brewery: "Entry 5,7,22,23,,2 are dead", then "Yes to all recomendations"): the lines saying the + Add New button on the other Profiles (Panel Updates Sandbox entry 22) and the New Schema interview / copy from a User Schema (entry 23) wait in the sandbox are taken out; both ideas were dropped. Nothing in either program changes. Checked against the BruControl Import program: it has neither, so nothing changes there.
 - 2026-11-17: Rules 2.42 and the Text Box Rule changed (OakBarn Brewery: "Get rid of slider Word Wrap is on 100%"; "All text boxes, labels word wrap"; "Rich Text takes care of new line"; "Make sure there is a section in help about Rich Text and Rich Text Short Cuts"; "Get rid of Skynet Defaults for New items TMI"): the Word Wrap switch is gone from Default settings (Text Boxes) and from item Properties (Word wrap as needed); every Text Box and Label always wraps, and a new line comes from Rich Text (\\n, Shift + Enter). Readings keep Rule 2.56 (one line, smaller to fit). Old Schemas: the switch's value is dropped once on load (before the first Public Production, Old Ways policy). The Skynet Defaults for New User Created Items list is off Default settings (its values still come from their Rules). Help 49, 90 (new sections: New lines and word wrap, Rich Text shortcut keys), 155 (and French). Checked against the BruControl Import program: imported items follow the same always-on wrap.
 - 2026-11-17: Rule 2.42 changed (OakBarn Brewery, markup of Default settings > New Tabs: "Tab Background Profile for a new tab" "Good Except Make Tab Profile"; the pipe and hose pixels, Width and Height of a New Tab "Tab Profile"; "labels good"): the **Tab Background Profile is now the Tab Profile** (☰ Menu > Tab Profile), and each Tab Profile holds How many Pixels are Pipes / Hoses to be drawn on a Tab?, Width and Height of a New Tab (px), with the same labels. Default settings keeps only **Tab Profile for a new tab**; the Pixels boxes left the Pipes, hoses and sizes section too (they were the same setting). A new Tab takes them from the Tab Profile picked there; (none): 10, 6 and the screen's size. Never Take Away: values set before go, once, into the picked Tab Profile (a new Default Tab Profile when none was picked, or a copy of a Skynet one). Help 13, 22, 26, 33, 36, 43, 58, 68, 155 (and French). Checked against the BruControl Import program: its Tabs keep BruControl's sizes; a Tab added on its Build page follows the same Tab Profile.

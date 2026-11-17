@@ -12,11 +12,8 @@ A double-click on a box, dropdown or button inside a row does that box's own job
 | --- | --- | --- |
 | gGlobals | Variables page | the variable's Properties |
 | Devices and Widgets for voice and Home Assistant | Settings, MQTT | the Device's or Widget's Properties |
-| Equipment list | ☰ Menu > Equipment Profile | the Tab_Vessel's or Tab_Fitting's Properties on its Tab |
 | Tabs of the Schema | ☰ Menu > Tab Profile | that Tab's Tab settings |
 | Templates | ☰ Menu > Vessel, Fitting and Equipment Templates | the Template's settings |
-
-The Equipment list only opens Properties when the Tab follows its profile's Default Layout. When the Tab keeps its own layout, the list shows the profile's Default Layout, which is not on a Tab, so there is nothing to open.
 
 ## Lists that work differently
 

@@ -6,7 +6,7 @@ An **Equipment Profile** describes your brewing equipment: the losses, the effic
 
 **An Equipment Profile belongs to a Tab, not to the whole Schema.** A Schema can have as many Equipment Profiles as it has Tabs. Usually there are two: one Tab for the **Hot Side** (HLT, Mash Tun, Brew Kettle, chiller) and one for **Fermentation** (the fermenters). A Schema uses a profile on one Tab only. A Tab without a profile keeps its equipment in the Schema itself.
 
-The profile is not copied into the Schema. It is where the information is stored. The Tab_Vessels, Tab_Fittings, chillers, coils, filters, IPs, pipes and hoses on a Tab are saved in that Tab's Equipment Profile, and they are the profile's **Equipment list**. Load another Schema that uses the same profile on one of its Tabs, and the same equipment and pipes are on that Tab.
+The profile is not copied into the Schema. It is where the information is stored. The Tab_Vessels, Tab_Fittings, chillers, coils, filters, IPs, pipes and hoses on a Tab are saved in that Tab's Equipment Profile, and they are the profile's hardware. Load another Schema that uses the same profile on one of its Tabs, and the same equipment and pipes are on that Tab.
 
 Panels made before this change had one profile for the whole Schema. On the first start after the update it moves by itself to the Tab that holds its equipment (the Equipment Tab, or the Tab with the most equipment). Equipment on the other Tabs stays where it is, kept in the Schema. Devices (pumps, valves, probes on a board), pictures and text stay with the Schema.
 
@@ -52,14 +52,14 @@ Equipment Profiles are made on the **Equipment Profile** Menu tab. See [The ☰ 
 3. Give it a name, for example "Oak Barn Hot Side" or "Fermentation room", and pick what it starts from: **Answer a few questions (the Interview)** (the first choice: it asks for the vessels, pumps and valves and builds them; see [The Equipment Profile Interview](196-equipment-profile-interview)), the usual numbers, or a copy of another profile.
 4. Pick the **Units**: US (gallons, pounds, °F) or Metric (liters, kilograms, °C).
 5. In **Use it on a Tab**, pick the Tab it is for, or **(not now)**.
-6. Press **OK**. The profile opens.
+6. Press **OK**. The profile opens (see **The Equipment Profile view** below).
 
 ## What is in an Equipment Profile
 
 - **System Loss (Trub, Chiller Manifold and Hoses)**: what is left behind between the kettle and the fermenter.
 - **Cooling shrinkage**, **Grain absorption**, **Brewhouse efficiency** and **Hop utilization**. The Brewhouse efficiency is the only Efficiency in Skynet: a new profile starts at 72 %, and every Recipe whose **Brew on** Tab uses this profile works out its Expected Gravity with it ([The Recipe tab](99-recipe-tab)).
 - **Notes**.
-- **Equipment list**: the Tab_Vessels and Tab_Fittings on its Tab, with their kind, size, the Template they came from and the vessel each fitting is joined to. You put them on the Tab from the [Vessel and Fitting Templates](50-vessel-and-fitting-templates) (**Add to Tab**) and change each one in its properties on the Tab.
+- **Its hardware**: the real world things on its Tab (see **The Equipment Profile view** below). You put them on the Tab from the [Vessel and Fitting Templates](50-vessel-and-fitting-templates) (**Add to Tab**), the Interview or Edit layout, and change each one in its properties on the Tab.
 
 Some numbers moved out of the profile (2026-10-20):
 
@@ -69,17 +69,17 @@ Some numbers moved out of the profile (2026-10-20):
 
 ## Edit or delete an Equipment Profile
 
-- **Edit:** pick it in the **Open** dropdown. Change the numbers, then press **Save** (at the top or the bottom). **Cancel** puts back what was saved.
-- **Delete:** open it and press **Delete**. The Tabs that used it are left with no profile. Their equipment and pipes stay on them.
+- **Edit:** pick it in the **Open** dropdown (it opens as itself, see **The Equipment Profile view** below). Press **⚙ Properties**, change the numbers, then press **💾 Save**. **↶ Undo** puts back what was saved.
+- **Delete:** open it and press **🗑 Delete**. The Tabs that used it are left with no profile. Their equipment and pipes stay on them.
 
-The **Check the volumes** box works out the pre-boil volume, how much boils off, the post-boil volume, what goes into the fermenter and what is left to bottle or keg. Type a **Batch size** and pick a **Boil Profile** to try them (the Recipe will give these on brew day). It uses the first **Brew Kettle** and the first **Fermenter** in the profile's Equipment list (a Fermentation Tab's profile has no kettle, so it says so). A ⚠ line warns you when the pre-boil volume is more than the kettle holds, or the batch is more than the fermenter holds.
+**🧮 Check the volumes** in the profile view works out the pre-boil volume, how much boils off, the post-boil volume, what goes into the fermenter and what is left to bottle or keg. Type a **Batch size** and pick a **Boil Profile** to try them (the Recipe will give these on brew day). It uses the first **Brew Kettle** and the first **Fermenter** in the profile (a Fermentation Tab's profile has no kettle, so it says so). A ⚠ line warns you when the pre-boil volume is more than the kettle holds, or the batch is more than the fermenter holds.
 
 ## Efficiency on this Schema
 
-Grain grind, mash conversion and sparge all change the Brewhouse Efficiency, and they are hard to keep track of. The result is easy to track, so Skynet keeps it for you. The **Efficiency on this Schema** box under the Equipment list shows each brew recorded with this profile in the loaded Schema: the **Date**, the **Recipe**, the **Brew on** Tab, the **OG**, the volume **Into the fermenter** and the real **Efficiency**.
+Grain grind, mash conversion and sparge all change the Brewhouse Efficiency, and they are hard to keep track of. The result is easy to track, so Skynet keeps it for you. **📈 Efficiency** in the profile view shows each brew recorded with this profile in the loaded Schema: the **Date**, the **Recipe**, the **Brew on** Tab, the **OG**, the volume **Into the fermenter** and the real **Efficiency**.
 
 1. After a brew, load its Recipe (☰ Menu > Recipe) and check its **Brew on** Tab.
-2. Open the Equipment Profile of that Tab and press **📝 Record a brew**.
+2. Open the Equipment Profile of that Tab, press **📈 Efficiency**, then **📝 Record a brew**.
 3. Type the **OG** (the gravity in the fermenter, like 1.052), the volume that went **Into the fermenter** and the **Date**, then press **OK**. Skynet works out the real Efficiency from the Recipe's grain bill and shows it, with the average.
 
 The brews are kept in the **Schema**, so each Schema has its own list (a Schema made as a copy of another starts with that one's list). Skynet averages the **last 10 brews** on this Schema with this profile. 🗑 takes a brew out of the list when it was typed in wrong.
@@ -98,7 +98,7 @@ The box at the top of the **Equipment Profile** tab lists every Tab of the loade
     - **Keep this Tab's layout as it is**: the Tab is not changed, and the profile's Default Layout is left alone. See **The Default Layout** below.
   - If it has none drawn yet (a new profile), it takes the equipment and pipes that are on the Tab now as its Default Layout.
   - Picking **(none)** takes the profile off the Tab. The equipment and pipes stay on the Tab, kept in the Schema itself.
-- **Open** opens that Tab's profile below.
+- **Open** opens that Tab's profile as itself (see **The Equipment Profile view** below).
 - Under each Tab it says whether the profile is **Unique** (only this Tab uses it) or **Shared** (and with which Schemas and Tabs).
 - **Make it unique to this Tab** shows when the profile is shared. It makes a copy of the profile just for this Tab, and the others keep the original.
 
@@ -129,56 +129,56 @@ When the profile is right, lock it so nothing gets bumped on brew day.
 
 While it is locked:
 
-- Its numbers and its equipment list can't be changed, and it can't be deleted.
+- Its numbers and its hardware can't be changed, and it can't be deleted.
 - On its Tab, **Edit layout** can't move, add, change or delete equipment, IPs, pipes or hoses. **Save layout** says it is locked. Devices, pictures and text can still be changed, and so can the other Tabs.
 - The Tab can't switch to another profile.
 
 To unlock, switch **🔒 Locked** off (the panel asks first), or run `unlock_Equipment`. The Brew Day (coming soon) will lock the profile by itself when it starts.
 
-## Build the Equipment list
+## Build the hardware of a profile
 
-The **Equipment list**, under the numbers, shows what is on the profile's Tab.
+The profile keeps the real world things on the Tab that uses it, every time that Tab is saved.
 
-1. Go to **☰ Menu > Vessel Templates** (or **Fitting Templates**). The buttons under the list open them.
+1. Go to **☰ Menu > Vessel Templates** (or **Fitting Templates**).
 2. Double-click a Template and press **Add to Tab**. Pick the Tab that uses the profile.
-3. The new Tab_Vessel or Tab_Fitting shows in the Equipment list. Change it in its properties on the Tab (double-click it in Edit layout).
-
-**Go to the Tab** shows you the Tab itself.
-
-Profiles made before Templates may still have a list of vessels. They show under **Made before Templates**, with **Put on Tab** to draw them on the profile's Tab ([Vessel settings](34-vessel-tab)).
+3. Change it in its properties on the Tab (double-click it in Edit layout), then **Save layout**. Open the profile: the new piece is in it.
 
 ## The Equipment Profile view
 
-**Open** beside a Tab's profile (or **🖼 View the Equipment Profile** under the Open dropdown) shows the profile itself. An Equipment Profile is **not a Tab**: it is a profile of the brewery's real world hardware, and that is all it holds: the vessels, IPs, fittings, pipes, hoses, pumps, valves, heaters, probes, chillers (an immersion chiller goes with the vessel it sits in) and **any Widget with an IP** (a Widget with an IP is a real world thing), with their Interfaces (boards) and Ports. Text Boxes, Switches, Processes, Timers and the like **cannot be added** to a profile, so they are not part of this view at all. Nothing on it can be clicked.
+**Open** beside a Tab's profile, or picking a profile in the **Open** dropdown, shows the profile itself. An Equipment Profile is **not a Tab**: it is a profile of the brewery's real world hardware, and that is all it holds: the vessels, IPs, fittings, pipes, hoses, pumps, valves, heaters, probes, chillers (an immersion chiller goes with the vessel it sits in) and **any Widget with an IP** (a Widget with an IP is a real world thing), with their Interfaces (boards) and Ports. A **Switch that is a real world thing** (wired to a board's Port) is a Special Widget like a Manual Valve, so it is in the profile too. Text Boxes, Processes, Timers, Switches that are not real world things and the like **cannot be added** to a profile, so they are not part of this view at all. Nothing on it can be clicked.
 
 The bar on top stays put:
 
-- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** put that part of the hardware on the **Tab** picked beside them, with one click each. They do the same as **📋 Paste onto a Tab** (below) with Both, Vessels Only or Manifold Only: the pieces land on the 🔨 Build Tab, hardware that is the same is replaced after the Replace list, and **↩ Undo** shows after.
+- **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** put that part of the hardware on the **Tab** picked beside them, with one click each. They paste the profile (see **Paste a profile** below): the pieces land on the 🔨 Build Tab, hardware that is the same is replaced after the Replace list, and **↩ Undo** shows after.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** and **✕ Close**, in that order.
 
-Under them are the profile's **Properties**, the numbers that go with it to a Tab: System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** and Hop utilization. **⚙ Properties** changes them (and the Name, Units and Notes); **💾 Save** keeps them. **📋 More ...** opens everything else on ☰ Menu > Equipment Profile: the volume check, the Equipment list, Efficiency on this Schema and the lock.
+Under them are the profile's **Properties**, the numbers that go with it to a Tab: System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** and Hop utilization. **⚙ Properties** changes them (and the Name, Units and Notes); **💾 Save** keeps them. Beside them:
+
+- **🧮 Check the volumes** and **📈 Efficiency** open their box under the bar (press again to close it). See **Edit or delete an Equipment Profile** and **Efficiency on this Schema** above.
+- **🗂 New Schema from this profile ...** (see below).
+
+The 🔒 Locked switch is beside the Tab's profile on ☰ Menu > Equipment Profile.
 
 **The Properties go with every Transfer and Paste.** When the Tab already has its own Equipment Profile, the numbers that change are in the Replace list ("Brewhouse efficiency 74 % → 72 %"). When the Tab has no profile yet, it takes this one, so its Efficiency comes too. The Tab keeps its own layout, so the paste never changes the profile's drawing. This does not happen when another Tab of the Schema already uses the profile, because a Schema uses a profile on one Tab only.
 
 ## Paste a profile, or start a new Schema from it
 
-An Equipment Profile holds **all of the brewery's physical hardware**: the vessels, IPs, fittings, pipes, hoses, chillers, pumps and valves, **and the Interfaces (boards), their Ports and wiring**, each with all of its Properties and its Name. Skynet keeps them in the profile every time the Tab that uses it is saved. Two buttons under the Equipment list use them (Admins only).
+An Equipment Profile holds **all of the brewery's physical hardware**: the vessels, IPs, fittings, pipes, hoses, chillers, pumps and valves, **and the Interfaces (boards), their Ports and wiring**, each with all of its Properties and its Name. Skynet keeps them in the profile every time the Tab that uses it is saved. Two things in the profile view use them (Admins only).
 
 **🗂 New Schema from this profile ...** (also **Add new Schema ... > Start from > An Equipment Profile**) makes a new Schema with one Tab that uses the profile, so its numbers and drawing come too, with every board and every Device already wired: the same Names, Interfaces and Ports. No Processes, Text Widgets, Timers or other Widgets come: the new Schema gets its own. For example, build your brewery once as an Equipment Profile, then make a **Keg Cleaning** Schema from it and write its Processes, Text Boxes and Timers. The new Schema is loaded at once; the one you had stays just as it is.
 
-**📋 Paste onto a Tab ...** puts a copy of the profile's hardware on a Tab of the loaded Schema:
+The **➡ Transfer** buttons put a copy of the profile's hardware on a Tab of the loaded Schema:
 
-1. Pick **What to paste**:
-   - **Both**: all of it.
-   - **Vessels Only**: each vessel with everything on it (its IPs, fittings, heaters and probes).
-   - **Manifold Only**: all of the manifold (pumps, valves, pipes, hoses, fittings, chillers), not the vessels.
-2. Pick the Tab it **Goes to**, and press **💾 Save**.
-3. When that Tab already has hardware that is the same as the profile's (the same board and Port, or a vessel with the same Name), a list shows what will be replaced, and the Tab's own profile numbers that change (like "Brewhouse efficiency 74 % → 72 %"). Nothing changes until you press **Replace**. **Cancel** leaves everything as it was. A replaced Device keeps working in your Processes.
-4. Edit layout opens and the pieces are on the **🔨 Build Tab**. Press **✅ Finish Build ... > Move to Tab**: they go on the Tab in the same spots. Then press **Save layout**.
+1. Pick the **Tab** beside them, and press one:
+   - **➡ Transfer All to Tab**: all of it.
+   - **➡ Transfer Vessels to Tab**: each vessel with everything on it (its IPs, fittings, heaters, probes and an immersion chiller in it).
+   - **➡ Transfer Manifold to Tab**: all of the manifold (pumps, valves, pipes, hoses, fittings, plate chillers), not the vessels.
+2. When that Tab already has hardware that is the same as the profile's (the same board and Port, or a vessel with the same Name), a list shows what will be replaced, and the Tab's own profile numbers that change (like "Brewhouse efficiency 74 % → 72 %"). Nothing changes until you press **Replace**. **Cancel** leaves everything as it was. A replaced Device keeps working in your Processes.
+3. Edit layout opens and the pieces are on the **🔨 Build Tab**. Press **✅ Finish Build ... > Move to Tab**: they go on the Tab in the same spots. Then press **Save layout**.
 
 **↩ Undo** shows for a few seconds after a paste and puts everything back.
 
-- **A pipe end whose piece did not come stays open**, so a vessel can be joined to it (with Manifold Only, the pipes that went to the vessels).
+- **A pipe end whose piece did not come stays open**, so a vessel can be joined to it (with Transfer Manifold, the pipes that went to the vessels).
 - **A board already used on another Tab of this Schema stops the paste.** Nothing is pasted, and a note says which board and which Tab. One board is never split between Tabs, and its ID never changes. Paste onto that Tab, or start a new Schema from the profile. A new Schema always takes the boards.
 - A board the Schema does not have yet comes with the paste, with its ID and settings.
 - A piece whose Name is already used on another Tab gets _2 at the end.

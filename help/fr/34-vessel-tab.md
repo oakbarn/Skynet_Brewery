@@ -26,4 +26,4 @@ Les ouvertures de la cuve sont ses **IP**, réglées par son Vessel Template ou 
 
 ## Faits avant les Templates {#made-before-templates}
 
-Les Equipment Profiles faits avant les Vessel Templates peuvent encore avoir une liste de cuves. Elle s'affiche dans **☰ Menu > Equipment Profile** sous **Made before Templates**, avec **Put on Tab** pour dessiner chacune sur le Tab du profil. Ensuite, changez-la dans ses Propriétés sur le Tab.
+Les Equipment Profiles faits avant les Vessel Templates avaient une liste de cuves. Cette ancienne liste et son **Put on Tab** ont disparu. Mettez la cuve sur le Tab depuis un Vessel Template (**Add to Tab**), et le profil la garde quand le Tab est enregistré.
