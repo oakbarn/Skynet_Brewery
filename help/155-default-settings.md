@@ -148,7 +148,7 @@ These are used only by **new** things you make yourself. A Skynet Template keeps
 
 The **Pump Overlay** is now on each **Pump Profile** and the **Valve Overlay** on each **Valve Profile** ([Tab, Valve and Pump Profiles](36-tab-and-valve-profiles)). **Push Lockout (s)** is now in **Settings > Panel settings** (see below). What was set here is kept.
 
-Some things have no box because they are always the same: see **Skynet Defaults for New User Created Items** below. **Lost Comm** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
+Some things have no box because they are always the same (for example the Pump and Valve Standards, and pipe fittings that size to their pipes). **Lost Comm** is set on each Interface ([Interfaces](76-interfaces)). The **Simulator** settings are only on the Simulator bar ([The Simulator bar](85-simulator-bar)).
 
 ## Moved to Settings
 
@@ -198,17 +198,5 @@ The boxes:
 Rest the mouse on a box (or tap its name) to see what it does for the beer.
 
 The technical side: Tap Water is a Water Profile (☰ Menu > Water Profile lists it) that is made when the Brain first starts and is never deleted. A Recipe or the Default settings with no Water Profile picked uses it. Bicarbonate = Alkalinity (as CaCO3) x 1.22. Hardness (as CaCO3) = 2.497 x Calcium + 4.118 x Magnesium. A Process reads it with the `rcp_Water_...` Skynet_Fields (Help 99).
-
-## Skynet Defaults for New User Created Items
-
-These defaults are set and cannot be changed, but can be Changed in a New User Template.
-
-- **Pump size**: the Pump Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
-- **Valve size**: the Valve Standard, 150 x 150 for a 1/2" pipe, then the size of its pipes.
-- **Pipe fittings**: always size to their pipes.
-- **Pump cover color**: None.
-- **Flow color** (In and Out): Blue.
-- **Skynet Dial**: Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red.
-- **Alarm Set Graphic (Layer 2)**: None.
 
 The section titles on this tab have a blue back, so each part is easy to find. The title and **Save** stay at the top while the rest scrolls (Skynet Rule 2.51).
