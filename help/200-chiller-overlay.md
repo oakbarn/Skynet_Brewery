@@ -49,6 +49,7 @@ way you move a Quick Disconnect hose end ([Quick Disconnect hoses](127-quick-dis
    dashed outline shows the vessel while you drag over it.
 3. Let go **anywhere else**: it stays there, free floating.
 
+An immersion chiller with its own supply can be saved as one **Chiller Bundle** Equipment Template ([Build Tab](55-build-tab)).
 Its hoses stay on its In and Out and follow it: a hose from its own supply (an Ice Water Can with a Sump Pump) or a Quick
 Disconnect hose from a supply on the Tab (a Tap Water Valve), and its waste hose. A chiller is the same as a pipe (Rule 5.41), so
 moving it does not change what flows.

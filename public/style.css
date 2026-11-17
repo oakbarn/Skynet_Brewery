@@ -1439,3 +1439,6 @@ body.eqViewing #ws { pointer-events: none; }
 .eqViewBar .eqvTitle { font-size: 1.05em; margin-right: 8px; }
 .eqViewBar .eqvProps { font-size: .92em; margin-top: 4px; }
 .eqViewBar .eqvNum b { margin-right: 6px; }
+/* The Edit layout bar while the Build is for a Template or an Equipment Profile: what can't go in one is greyed out */
+#editBar .tplGrey { opacity: .35; filter: grayscale(1); cursor: not-allowed; }
+#editHint .tplGrey { opacity: .4; }
