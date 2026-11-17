@@ -45,4 +45,9 @@ assert.match(rules, /\*\*Ctrl \+ Click\*\* \(⌘ \+ Click on a Mac\) opens Prope
 assert.match(help, /## Ctrl \+ Click for a method's Settings/);
 assert.ok(!/waits about a third of a second/.test(help));
 assert.match(helpFr, /\{#ctrl-click-for-a-method-s-settings\}/);
+// the hose double-click (OakBarn Brewery, 2026-11-17: "Double click to add hose is broken still brings up Brew House Tab Properties"):
+// the second half of a double-click that finished a hose opens nothing more; a double-click on its start point only starts it
+assert.match(app, /if \(Date\.now\(\) - pipeDoneAt < 700\) return;/);
+assert.match(app, /if \(drawPts && drawHose && new Set\(drawPts\.map\(q => q\.join\(\)\)\)\.size < 2\) return;/);
+assert.match(app, /function finishPipe\(to\) \{\n  pipeDoneAt = Date\.now\(\);/);
 console.log('dblsettings ok');

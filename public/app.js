@@ -4607,6 +4607,12 @@ const vpPartAt = ev => vpOf(ev.target.closest?.('.vpPart[data-dev], .vpPart[data
 const vpPartOpen = vp => () => { if (vp.dev) return editItem('el', vp.dev); const g = findItem('gfx', vp.gid); if (g) vbPickPart(g, vp.k); };
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
+  // a double-click while drawing a hose finishes it (Rule 2.9, OakBarn Brewery, 2026-11-17: "make sure that the double click for hoses
+  // still works"; "Double click to add hose is broken still brings up Brew House Tab Properties"): a hose's first click on the end IP
+  // already finished it, so the double-click's second half is not a new double-click on what lies under it (the Tab, a valve ...);
+  // a double-click on the start point only starts the hose
+  if (Date.now() - pipeDoneAt < 700) return;
+  if (drawPts && drawHose && new Set(drawPts.map(q => q.join())).size < 2) return;
   if (drawPts) { if (drawHose) finishPipe(); else drawStraight(ev); return; }
   const vpart = vpPartAt(ev);      // a part built into a Vessel Device: its own Properties (Fritz, 2026-11-07); a faint one: its picker
   if (vpart) return vpPartOpen(vpart)();
@@ -5020,7 +5026,9 @@ function deletePipe(p) {
   draft.graphics = draft.graphics.filter(g => !own.includes(g));
   return own.length;
 }
+let pipeDoneAt = 0;      // when the last pipe or hose was finished: the rest of that double-click is not a new one
 function finishPipe(to) {
+  pipeDoneAt = Date.now();
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
