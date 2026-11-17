@@ -19,7 +19,7 @@ import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTy
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
@@ -5327,6 +5327,8 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     if (pick === 'valve') e._pickedValve = true;       // its Add box has the Valve Profile dropdown
     const ok = await newDeviceDialog(e, prefix, what); delete e._title; delete e._pickedValve;
     if (!ok) return;
+    if (isHeatElem(e)) e.pwm = pwmPinOk(e);      // the Port picked decides how its % goes out (Rule 6.19)
+    if (isHeatElem(e) && startMethod(e) !== 'onoff') e._openMethod = true;      // its Method's settings show first (entry 3 markup)
   }
   if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
   if (pick === 'valve' && e._valveProfile) useValveProfile(e, e._valveProfile);      // the Add box's Profile dropdown
@@ -5467,6 +5469,9 @@ const SUMP_BY_HAND_ROW = ['Sump Pump by hand (Manual Pump Widget, no Port: you p
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'H_Element'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
 const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'H_Element'];
+const HEAT_ROWS = () => [['DO On/Off (relay, SSR, contactor)', 'onoff'], ['PWM (0 to 100%)', 'pwm'], ['DutyC (Duty % per Cycle)', 'dutyCycle'],
+  ['HYS (Target and Offset)', 'hysteresis'], ['PID (Holds a Set Temperature)', 'pid'], ['Precise (Holds to 0.1 Degree)', 'precise'], ['Deadband (Steps its %)', 'deadband']]
+  .map(([w, k]) => ['Heating Element: ' + w, 'element', 'H_Element', { heatMethod: k }]);
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -5475,8 +5480,12 @@ const DEV_TYPES = () => [
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
     ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')],
     ...MF_ROWS()]],      // Valve Tees and Supply Manifolds (Rule 5.35): also in Elbows, Tees … on the Edit layout bar
-  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%', subtype: 'element' }], ...amGroup('Devices: control outputs'),
-    am('RIMS tube'), VESSEL_ELEMENT]],
+  // OakBarn Brewery's markup ("Update Panel", 2026-11-15, Panel Updates Sandbox entries 3 and 4): each row makes ONE Heating Element that
+  // starts on that Method and shows that Method's settings first (Rule 6.19, One Port One Device); the separate Duty Cycle, Hysteresis,
+  // PID and Deadband Devices are not offered for heaters any more. PID and Precise have one row each: the Port picked decides PWM or a
+  // plain Port ("question 4 2 rows"). Deadband stays a Method ("Yes to all recomendations").
+  ['heat', 'Heating Element', [...HEAT_ROWS(), ['RIMs Tube: (Skynet Device with Heating Element and Temperature Probe Embedded)', ...am('RIMS tube').slice(1)],
+    ['Vessel Device Template (Heating Element and Temperature Probe Embedded)', ...VESSEL_ELEMENT.slice(1)]]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
   ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
@@ -8408,9 +8417,16 @@ function heatFields(it, x = {}) {
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', { ...x, tip: ELEM_DISPLAY_TIP })] : []),
   ];
 }
+// The Port picked decides how a % reaches the element (OakBarn Brewery, 2026-11-16: "question 4 2 rows"; Rule 6.19): a PWM Port sends it as
+// PWM, a plain Port turns the element fully On for its % of each Output window (a "Pseudo PID"). Each says what to wire to it ("Yes to all
+// recomendations": the PWM wiring note; the Help requirement of 2026-11-15 for a plain Port).
+const PORT_PWM_NOTE = 'PWM Port: Skynet sends the % as PWM. Wire it to a PWM-to-0-10 V module and a 0-10 V power controller, not straight to a zero-cross SSR: the board switches hundreds of times a second and a zero-cross SSR can follow only 120 a second (60 Hz), so the power comes out uneven. Smooth power helps most in a RIMS tube or a still column.';
+const PORT_PLAIN_NOTE = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nPlain Port (a Pseudo PID): Skynet turns the element fully On for its % of each Output window, so it switches On and Off many times a minute. That quickly wears out any mechanical switching device: a mechanical relay, a relay module with mechanical relays (the common Arduino relay boards), a contactor, a motorized or mechanical timer switch. Use a Solid State Relay (SSR).';
+const portNote = it => ['_portNote', !it.device || it.channel === undefined || it.channel === '' ? 'Pick its Port: a PWM Port sends the % as PWM, a plain Port turns it On for its % of each Output window.'
+  : pwmPinOk(it) ? PORT_PWM_NOTE : PORT_PLAIN_NOTE, 'note'];
 // The keys a method's ⬢ dialog sets: its Use Method switch, the Probe the methods share, and its own settings
 const methodSetKeys = k => ['methodSpot_' + k, ...(NEEDS_PROBE.includes(k) ? ['input'] : []), ...HEAT_SETTINGS[k].map(s => s[1]),
-  ...(k === 'hysteresis' ? ['predictive'] : []), ...(PERCENT_METHODS.includes(k) ? ['reversed', 'pwm'] : [])];
+  ...(k === 'hysteresis' ? ['predictive'] : []), ...(AUTO_PERCENT_METHODS.includes(k) ? ['reversed'] : [])];
 // One method's own dialog (Rule 6.19, OakBarn Brewery, 2026-11-15): Use Method on top; set to No, every other setting is hidden (they are
 // kept). Direct and the Current Method are always in use (greyed). Hysteresis keeps its Integrate_4 rows (Probe and Setpoint on one line,
 // Direction with its Offset, Predictive with its Delay, each with its wave).
@@ -8430,7 +8446,8 @@ function methodSetFields(k, it) {
   return [head, ...probe, ...rest,
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...(k === 'precise' && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note']] : []),
-    ...(PERCENT_METHODS.includes(k) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, {}], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, {}]] : [])];
+    ...(AUTO_PERCENT_METHODS.includes(k) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, {}]] : []),
+    ...(PERCENT_METHODS.includes(k) ? [portNote(it)] : [])];
 }
 // The ⬢ of one method (OakBarn Brewery, 2026-11-15): its dialog on top of the Properties, frozen top with ✖ Cancel and 💾 Keep, no bottom
 // row (Rule 2.51, the model). It works on a copy; Keep puts its settings in the Properties (saved when the Properties are Saved).
@@ -9227,7 +9244,7 @@ function field(f, obj) {
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.tip || x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
     // the Current Method's own Settings (OakBarn Brewery, 2026-11-15: "a Icon that pops current properties methods"): the red ⬢ beside
     // Current Method opens the Settings dialog of the method picked there (Rule 6.19)
-    if (x.methodPop) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: `${heatMethodWord(startMethod(obj))} Settings: the settings of the Current Method`, onclick: ev => { ev.preventDefault(); methodEntry(startMethod(obj), obj); } }, '⬢'));
+    if (x.methodPop) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr methodPopBtn', title: `${heatMethodWord(startMethod(obj))} Settings: the settings of the Current Method`, onclick: ev => { ev.preventDefault(); methodEntry(startMethod(obj), obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
   if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
@@ -10729,6 +10746,9 @@ async function editItem(kind, id) {
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
   dlgBack = () => { if (findItem(kind, id)) { sel = { kind, id }; renderWs(); editItem(kind, id); } };      // Rule 4.7: come back to these Properties
+  // a Heating Element just added from a Method row (OakBarn Brewery's markup: "choosing Duty Cycle one creates a Heating Element Device that
+  // first presents the Duty Cycle Attributes"): its Current Method's ⬢ Settings open on top of its Properties
+  if (kind === 'el' && item._openMethod) { delete item._openMethod; setTimeout(() => $('#dlgBody .methodPopBtn')?.click(), 50); }
   let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
@@ -10780,6 +10800,7 @@ async function editItem(kind, id) {
     // locks the IP or fitting, and 🔓 Unlock All passes it by
     if (work.noUnlock) work.locked = true; else delete work.noUnlock;
     if (kind === 'el') dbFromWork(work, item);
+    if (kind === 'el' && isHeatElem({ ...item, ...work })) work.pwm = pwmPinOk({ ...item, ...work });      // the Port picked decides (Rule 6.19)
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
       if (item.onVessel && !work.joined && !isUnit(item)) { delete work.onVessel; delete work.onPort; }

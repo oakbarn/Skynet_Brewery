@@ -7,6 +7,10 @@
 ; Profiles, Equipment Profiles, Recipes, own pictures and sounds, backups and Import kept), 3 update and reset all users, or
 ; 4 update and keep everything (the default, the original No). 1, 2 and 3 have a second warning. Both Fresh Starts run
 ; lib\freshstart.js, the same file every installer runs. With 3 or 4 you can still replace one of your folders.
+; The Full Setup (Rule 9.20) has no choices (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 10): it is always a full
+; install that OVERWRITES everything. When it finds a Skynet already installed it shows one warning page, with a link to the Update
+; Setup (opens it and closes this one) and Close and Do Not Install. Before it overwrites, your old folders are moved, never
+; deleted, to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures and sounds are the Skynet Media Setup, SkynetMedia.nsi)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -100,7 +104,12 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
   !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
   !define WELCOME_WHAT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop."
 !endif
-!define MUI_WELCOMEPAGE_TEXT "Version: ${VERSION}$\r$\n$\r$\n${WELCOME_WHAT}$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
+!ifdef MEDIA_SRC
+  !define WELCOME_UPDATE "This is a Full install: it overwrites everything. To update a Skynet that is already installed, use the Update Setup (Skynet_Brewer_Setup) instead."
+!else
+  !define WELCOME_UPDATE "Updating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
+!endif
+!define MUI_WELCOMEPAGE_TEXT "Version: ${VERSION}$\r$\n$\r$\n${WELCOME_WHAT}$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\n${WELCOME_UPDATE}"
 !define MUI_DIRECTORYPAGE_TEXT_TOP "The panel goes in this folder. C:\Brewing\BrewPanel is recommended."
 ; What the Start Fresh warning says about the Skynet pictures and sounds
 !ifdef MEDIA_SRC
@@ -124,7 +133,11 @@ VIAddVersionKey "Comments" "Installs the Skynet Brew Panel (open source, https:/
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
-Page custom UpdateChoicePage UpdateChoiceLeave
+!ifdef MEDIA_SRC
+  Page custom FullFoundPage FullFoundLeave
+!else
+  Page custom UpdateChoicePage UpdateChoiceLeave
+!endif
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page: "Start the BruControl Importer now" beside "Start Skynet Brewer now", only when the Importer was added.
 ; Only one of the two can be ticked; Start Skynet Brewer is ticked to begin with (OakBarn Brewery, 2026-11-08)
@@ -138,16 +151,21 @@ Page custom UpdateChoicePage UpdateChoiceLeave
 Var Upgrade
 Var Fresh
 Var Choice
-Var RadioKeep
-Var RadioUsers
-Var RadioFresh
-Var RadioModified
+!ifndef MEDIA_SRC
+  Var RadioKeep
+  Var RadioUsers
+  Var RadioFresh
+  Var RadioModified
+!endif
 Var OldPanel
 Var Stamp
 Var BrewDir
 Var ImporterAdded
 Var OpenImporter
 Var StopScript
+!ifdef MEDIA_SRC
+  Var FullBackup
+!endif
 
 ; ---------------------------------------------------------------- Node.js
 ; Puts 1 in $R9 when a new enough Node.js is on this computer.
@@ -273,6 +291,7 @@ FunctionEnd
 ;   4 keep      Update the program and keep everything (the original No: the default, and what a silent /S update does)
 ; 1, 2 and 3 each have a warning with No as the default; No goes back to this page and nothing is deleted.
 ; The page only records the choice in $Choice. Nothing is deleted until the panel is stopped (Section SecMain).
+!ifndef MEDIA_SRC   ; the plain Setup only: the Full Setup has no choices (FullFoundPage)
 Function UpdateChoicePage
   StrCpy $Choice "keep"
   ${IfNot} ${FileExists} "$INSTDIR\server.js"
@@ -311,6 +330,77 @@ Function UpdateChoicePage
   ${NSD_Check} $RadioKeep
   nsDialogs::Show
 FunctionEnd
+!endif
+
+!ifdef MEDIA_SRC
+; The Full Setup's one warning (OakBarn Brewery, 2026-11-17: "If the Install can see a previous install the one warning is allowed
+; that explains this is the Full install and will OVERWRITE everything. If Only an Update, get that Update. and then a link to the
+; Update and clicking it closes the install. also a Close and Do Not install Option that closes the installer."). No choices:
+; Install always overwrites ($Choice fresh, the same lib\freshstart.js as Start Fresh), after the old folders are moved to backups.
+Function FullFoundPage
+  StrCpy $Choice "keep"
+  ${IfNot} ${FileExists} "$INSTDIR\server.js"
+    Abort   ; a new install: no warning
+  ${EndIf}
+  Call FindBrewDir
+  !insertmacro MUI_HEADER_TEXT "Skynet Brewer is already installed" "This is the Full install. It will OVERWRITE everything."
+  nsDialogs::Create 1018
+  Pop $0
+  ${If} $0 == error
+    Abort
+  ${EndIf}
+  ${NSD_CreateLabel} 0 0 100% 58u "Found in $INSTDIR.$\r$\n$\r$\nThis is the Full install and it will OVERWRITE everything: every Schema, setting, user and password, Process, the brew log, every picture and sound, and the Import folder ($BrewDir\Import). You make the admin account again.$\r$\n$\r$\nYour old folders are first moved to $BrewDir\Skynet_Backups, so nothing is lost by mistake."
+  Pop $0
+  ${NSD_CreateLabel} 0 62u 100% 10u "Only want an update? Get the Update Setup instead (it keeps everything):"
+  Pop $0
+  ${NSD_CreateLink} 0 74u 100% 10u "Get the Update Setup (closes this one)"
+  Pop $0
+  ${NSD_OnClick} $0 FullGetUpdate
+  ${NSD_CreateButton} 0 92u 50% 14u "Close and Do Not Install"
+  Pop $0
+  ${NSD_OnClick} $0 FullCloseNow
+  ${NSD_CreateLabel} 0 112u 100% 20u "Install: OVERWRITE everything with this Full install."
+  Pop $0
+  nsDialogs::Show
+FunctionEnd
+
+Function FullGetUpdate
+  Pop $0
+  ExecShell "open" "https://github.com/oakbarn/Skynet_Brewery/releases/latest"
+  Call FullCloseNow
+FunctionEnd
+
+; Closes the installer at once, nothing installed (the same as its Cancel button; there is no "are you sure" question)
+Function FullCloseNow
+  SendMessage $HWNDPARENT ${WM_COMMAND} 2 0
+FunctionEnd
+
+Function FullFoundLeave
+  StrCpy $Choice "fresh"
+FunctionEnd
+
+; Moves (never deletes) your old folders to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>, so the overwrite loses nothing
+!macro FullBackupOne SRCDIR NAME
+  ${If} ${FileExists} "${SRCDIR}\*.*"
+    Rename "${SRCDIR}" "$FullBackup\${NAME}"
+    ${If} ${FileExists} "${SRCDIR}\*.*"
+      DetailPrint "Could not move ${SRCDIR} to the backup (a program still has it open). It is overwritten."
+    ${Else}
+      DetailPrint "Your ${NAME} folder was moved to $FullBackup\${NAME}"
+    ${EndIf}
+  ${EndIf}
+!macroend
+Function FullBackupOld
+  StrCpy $FullBackup "$BrewDir\Skynet_Backups\Before_Full_Setup_$Stamp"
+  CreateDirectory "$FullBackup"
+  !insertmacro FullBackupOne "$INSTDIR\config" "config"
+  !insertmacro FullBackupOne "$INSTDIR\data" "data"
+  !insertmacro FullBackupOne "$INSTDIR\processes" "processes"
+  !insertmacro FullBackupOne "$INSTDIR\media" "media"
+  !insertmacro FullBackupOne "$INSTDIR\backups" "backups"
+  !insertmacro FullBackupOne "$BrewDir\Import" "Import"
+FunctionEnd
+!endif
 
 ; The Brewing folder (C:\Brewing when the panel is in C:\Brewing\BrewPanel): its Import subfolder is the Importer's
 !macro FindBrewDir UN
@@ -326,6 +416,7 @@ FunctionEnd
 !insertmacro FindBrewDir ""
 !insertmacro FindBrewDir "un."
 
+!ifndef MEDIA_SRC
 Function UpdateChoiceLeave
   ${NSD_GetState} $RadioUsers $0
   ${If} $0 == ${BST_CHECKED}
@@ -350,6 +441,7 @@ Function UpdateChoiceLeave
   ${EndIf}
   StrCpy $Choice "keep"
 FunctionEnd
+!endif
 
 ; Skynet's own clean window (Rule 2.36) keeps a small browser profile of its own. Its saved user name and password
 ; would be filled in on the new admin setup, so it goes on a reset or a Start Fresh. It is made again, empty, the next time
@@ -410,6 +502,9 @@ Section "Skynet Brew Panel" SecMain
     ${If} $Choice == "fresh"
     ${OrIf} $Choice == "modified"
       StrCpy $Fresh 1   ; lib\freshstart.js runs once the new program files are in (below)
+!ifdef MEDIA_SRC
+      Call FullBackupOld   ; the Full Setup: old folders moved to Skynet_Backups first
+!endif
     ${ElseIf} $Choice == "users"
       Call ResetUsers
       DetailPrint "Updating. Kept as they are: layout and settings (config), brew data and log (data), pictures and sounds (media), processes (processes)."

@@ -46,8 +46,8 @@ nom se lit comme `MB_25_DO@H_Element_HLT_BH`.
 
 | Sorte | Label |
 |---|---|
-| Heating Element (sortie on / off : Direct, Duty Cycle, Hysteresis, PID, Deadband ou Precise) | hE_1 |
-| PWM (puissance de la résistance 0-100 %) | hE_PWM_1 |
+| Heating Element (Direct, PWM, Duty Cycle, Hysteresis, PID, Deadband ou Precise) | hE_1 |
+| L'ancienne sortie PWM (puissance de la résistance 0-100 %), qui ne s'ajoute plus | hE_PWM_1 |
 | Les anciens Devices de régulation : PID, Hysteresis, Duty Cycle, Deadband | hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_DeadB_1 |
 
 ## Properties, de haut en bas {#properties-from-the-top}
