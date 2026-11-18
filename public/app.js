@@ -15,7 +15,7 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName } from './hoverhelp.js';
-import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, usedIpTypes } from './iptype.js';
+import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
@@ -1729,6 +1729,9 @@ const autoSized = g => isPipeFit(g) || (isMv(g) && !isTapMv(g)) || isMf(g);
 const isMv = g => g?.kind === 'ip' && g.fitting === 'manualValve';
 const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v === undefined ? !!g?.open : !!v; };
 const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
+// a Hose Bib's open Overlay may be picked, as on the Pump (Panel Update Final 3 #4, Rule 18.49): the Manual Valve open ring unless another
+// is picked (a tint is not offered: it colors a pump's own drawing)
+const mvOverPic = g => g?.mvOverlay && !String(g.mvOverlay).startsWith('tint:') ? g.mvOverlay : MV_OVERLAY;
 // Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. While open the Tab shows the open overlay on
 // top of it (Fritz, 2026-11-05: the _Open pictures are retired to Delete/, an Overlay shows open)
 const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
@@ -1774,8 +1777,9 @@ function hbToPic(g, [X, Y]) {
   const L = mvLook(g);
   return L.flip ? [1 - X, Y] : L.rot === 90 ? [Y, 1 - X] : L.rot === -90 ? [1 - Y, X] : [X, Y];
 }
-// the wall side of the picture (its right edge, above the bottom) has no IP: the house water comes from there
-const hbSpotOk = (g, k) => { const [x, y] = hbToPic(g, HB_SPOTS[k]); return !(x === 1 && y < 1); };
+// all 8 spots, the wall side too (OakBarn Brewery, 2026-11-18, Panel Update Final 3 #4: "Change Rule for a Tap Water can have the 8 IPs";
+// Rule 18.49): before, the wall side (the picture's right edge above the bottom) had none
+const hbSpotOk = (g, k) => !!HB_SPOTS[k];
 const hbSpots = g => HB_SPOT_WORDS.filter(([k]) => hbSpotOk(g, k));
 const hbSpot = g => HB_SPOTS[g?.tapSpot] && hbSpotOk(g, g.tapSpot) ? g.tapSpot : hbSpots(g)[0][0];
 const hbHose = g => g?.tapLink !== 'pipe';
@@ -1786,6 +1790,7 @@ const hbSpotAt = g => hbToPic(g, HB_SPOTS[hbSpot(g)]);
 function hbLinkSvg(g) {
   const [sx, sy] = HB_SPOUT, [qx, qy] = hbSpotAt(g), pts = [[sx, sy]];
   if (qy === 1) { if (qx !== sx) pts.push([sx, 0.95], [qx, 0.95]); }
+  else if (qx === 1) { pts.push([sx, 0.95], [0.95, 0.95], [0.95, qy]); }      // the wall side (Rule 18.49): along the bottom, then up the wall
   else { pts.push([sx, 0.88], [0.1, 0.88]); if (qy === 0) { pts.push([0.1, 0.08]); if (qx !== 0.1) pts.push([qx, 0.08]); } else pts.push([0.1, qy]); }
   pts.push([qx, qy]);
   const d = 'M' + pts.map(([x, y]) => `${Math.round(x * 300)} ${Math.round(y * 300)}`).join(' L');
@@ -1948,7 +1953,7 @@ function buildIp(g) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:${isMv(g) ? mvTransform(g) || 'none' : `rotate(${+g.rotate || 0}deg)`}"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
   if (isTapMv(g)) { n.classList.add('hoseBib'); n.insertAdjacentHTML('beforeend', hbLinkSvg(g)); }      // its picture top right, its inside Hose or Pipe to its IP (Rule 18.45)
-  if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(MV_OVERLAY)}")` })); }
+  if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(mvOverPic(g))}")` })); }
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (g.labelVisible && g.label && !plain) n.append(widgetLabel(g, 'below'));       // a pipe fitting has no label
@@ -2080,7 +2085,7 @@ function pumpSpotHit(ws, p, r, inside = false) {
 }
 // A Hose Bib's one IP is set the same way (Panel Update Final 2 #5 and #8, OakBarn Brewery, 2026-11-18: "One Skynet Picture That has IPs
 // like a Blickman Pump"; the IP "Should be in the background and not by user"; Rule 18.48): a pipe or hose end put on or near a Hose Bib
-// whose IP has nothing joined goes on the nearest of its spots (the 8 spots of its box, never on the wall side, Rule 18.45), and its IP
+// whose IP has nothing joined goes on the nearest of the 8 spots of its box (the wall side too since Rule 18.49), and its IP
 // moves there. While it is being drawn the end is a "hbspot:<id>:<spot>" IP; takePumpSpots makes it the Hose Bib's own IP.
 const hbspotOf = id => { if (typeof id !== 'string' || !id.startsWith('hbspot:')) return null; const i = id.lastIndexOf(':'); return { gid: id.slice(7, i), code: id.slice(i + 1) }; };
 const hbEndAt = (g, code) => mvEnds({ ...g, tapSpot: code })[0]?.c || null;
@@ -8331,7 +8336,8 @@ const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue',
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
-const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
+const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];
+const PUMP_SIDE_TIP = 'Right: the pump as drawn (the pump head on the right). Left: mirrored. A pump is always Horizontal, so its Orientation is greyed out.\n\nIts Inlet and Outlet IPs stay where they are on the Tab, so the pipes and hoses joined to it stay put; only the Hose or Pipe inside the pump is drawn again.';      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
 // Dual Action (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2, Rule 2.50): a click turns it On or Off, and pressed and held it
 // is a Push Button (On only while held), for topping off a vessel by hand
 const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push Button'], ['dual', 'Dual Action'], ['none', 'None'], ...(v && !['toggle', 'hold', 'dual', 'none'].includes(v) ? [[v, v]] : [])];
@@ -9057,10 +9063,14 @@ const MV_TIPS = {
   orient: '⟪img:help_pictures/Manual_Valve_Orientation.png⟫Horizontal: for a level pipe. Vertical: for an up and down pipe.\n\nA front view (looking down the pipe) has no Orientation. A Hose Bib may be Horizontal or Vertical.',
   side: 'Horizontal: Right is the picture as drawn, Left is it mirrored (a Hose Bib: the wall on the right or on the left). Vertical: the handle points to the Left or to the Right (a Hose Bib: turned, the wall above or below).\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
 };
+const HB_OVERLAYS = v => [['', 'Manual Valve open (green ring and tick)'], ...OVERLAY_GRAPHICS.filter(([, p]) => !p.startsWith('tint:')).map(([t, p]) => [p, t]),
+  ...(v && !v.startsWith('tint:') && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const MV_ORIENTS = [['h', 'Horizontal'], ['v', 'Vertical']], MV_SIDES = [['r', 'Right'], ['l', 'Left']];
 const HB_TIPS = {
-  graphic: '⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right and its own short Hose or Pipe from the hose thread to its one IP. While it is open it shows the open overlay. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, but never on the wall side. Like a Pump, you do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot. Once a pipe or hose is joined, the IP stays put.',
+  graphic: '⟪img:help_pictures/Hose_Bib_8_IPs.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right, Overlay and its own short Hose or Pipe from the hose thread to its one IP. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, like a Pump. You do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot, and the Graphic shows it there. Once a pipe or hose is joined, the IP stays put.',
   link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
+  overlay: 'What is drawn on top of the Hose Bib while it is open. Empty: the Manual Valve open sign (a green ring and a tick). The others are the Pump\'s Overlays.',
+  fitting: 'Outlet IP Fitting: the fitting on the end of its one IP, where the water comes out. A household hose bib has a male garden hose thread, MGH3/4 (the start). FGH3/4 is a female garden hose thread.\n\nA hose or pipe joined to it fits it by itself (an FGH3/4 hose end on an MGH3/4 Hose Bib). The End Fitting is information only.',
   size: 'Its size on the Tab in pixels. A Hose Bib is sized by hand, like a Pump; its inside Hose or Pipe is drawn again to reach its IP.',
 };
 // The Manual Valve and Hose Bib dialogs in the Blichmann Model's look and order (OakBarn Brewery, 2026-11-18: "the Look of the fields and
@@ -9090,10 +9100,14 @@ const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: HB_TIPS.graphic }],
   ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: ['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: MV_TIPS.side }] }],
   ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }],
+  // Panel Update Final 3 #4 (OakBarn Brewery, 2026-11-18: "Missing so add all those Fields to the Hose Bib"; "the Type of End. Add FGH
+  // and MGH"; Rule 18.49): the Overlay and the End Fitting of its one IP, in the Pump's order
+  ['mvOverlay', 'Overlay', 'sel', HB_OVERLAYS(it.mvOverlay), false, false, { tip: HB_TIPS.overlay }],
+  ['ipTypeOut', 'Outlet IP Fitting', 'sel', ipChoices(it.ipTypeOut, HOSE_BIB_END, 'FGH3/4'), false, false, { tip: HB_TIPS.fitting }],
   MV_CONFIRM, ...MV_XYWH(it, HB_TIPS.size), wgtType('Hose Bib (Tap Water Valve)', MV_KINDS_TIP)];
 const mvWidgetFields = it => {
   it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
-  if (isTapMv(it)) { it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
+  if (isTapMv(it)) { it.ipTypeOut ||= HOSE_BIB_END; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
   const front = mvFront(it);
   // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
   const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);
@@ -9995,7 +10009,15 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       const was = fh.checked; fh.checked = sel.value.includes('h');
       if (was !== fh.checked) keepPumpSpots(sel.closest('#dlgBody, .dlgBody, dialog'), obj, fh.checked, fv.checked);
     });
-    const spots = isPumpDev(obj) || obj.subtype === 'pump' ? ['pumpIn', 'pumpOut'].map(k => h('input', { type: 'hidden', 'data-k': k, 'data-kind': 'text', value: obj[k] || '' })) : [];
+    const pump = isPumpDev(obj) || obj.subtype === 'pump';
+    const spots = pump ? ['pumpIn', 'pumpOut'].map(k => h('input', { type: 'hidden', 'data-k': k, 'data-kind': 'text', value: obj[k] || '' })) : [];
+    // the Pump in the Hose Bib's look (OakBarn Brewery, 2026-11-18, Panel Update Final 3 #2: "Have the Hose Bib Look on the Blickmann with
+    // the Orientation Greyed out"; Rule 18.49): Orientation Horizontal greyed out (⛔ on hover, Rule 18.46), Left / Right beside it
+    if (pump) {
+      const hz = h('select', { class: 'orientSel', disabled: true, tabindex: '-1' }, h('option', { value: 'h', selected: true }, 'Horizontal'));
+      const lr = h('span', { class: 'pairLbl tipLbl', 'data-help': PUMP_SIDE_TIP }, 'Left / Right'); lr.addEventListener('click', () => fieldTip('Left / Right', PUMP_SIDE_TIP));
+      return [h('label', {}, label), h('div', { class: 'fldPair orientPair orientBox' }, hz, lr, sel, fh, fv, ...spots)];
+    }
     return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv, ...spots)];
   }
   else if (kind === 'vorient') {     // a valve's Orientation (Rule 18.23): its own dropdown, in the Enter sequence of a new Device
@@ -10511,13 +10533,13 @@ function mvGraphic(label, obj) {
   const draw = () => {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const w = { ...obj };
-    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink']) if (q(k)) w[k] = q(k).value;
+    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink', 'mvOverlay']) if (q(k)) w[k] = q(k).value;
     const src = mvPic(w), hb = isTapMv(w);
     pic.style.backgroundImage = src ? `url("${media(src)}")` : '';
     pic.classList.toggle('hoseBib', hb);      // a Hose Bib: its picture top right and its inside Hose or Pipe to its IP
     pic.innerHTML = hb ? hbLinkSvg(w) : src ? '' : `<svg viewBox="0 0 30 30"><g class="edge">${FIT_SVG.manualValve}</g><g class="core">${FIT_SVG.manualValve}</g></svg>`;
     pic.append(ovl);
-    ovl.style.backgroundImage = `url("${media(MV_OVERLAY)}")`;
+    ovl.style.backgroundImage = `url("${media(mvOverPic(w))}")`;
     ovl.classList.toggle('hidden', !mvOpen(S.config.graphics.find(g => g.id === obj.id) || obj));
     pic.style.transform = mvTransform(w) || '';
   };
@@ -14666,7 +14688,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 // an IP Type dropdown (Rule 5.40): the sizes ticked in Default settings, the ones already used in the Schema, and its own
 const ipChoices = (...own) => ipTypeChoices(S.config.brewDefaults?.ipTicks, [...usedIpTypes(draft || S.config), ...((draft || S.config).ipAllow || [])], own);      // ipAllow: a sample Schema's own sizes
 const IP_TYPE_PICK_TIP = 'The list shows the sizes ticked in ☰ Menu > Default settings > IP Types, and any already used in this Schema. Tick more there to see them here.';
-const IP_OWNED_TIP = 'This end is on a pump or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT End Fitting). To change it, change the pump\'s Inlet or Outlet IP Fitting, or the vessel\'s IP Type.';
+const IP_OWNED_TIP = 'This end is on a pump, a Hose Bib or a Stove Top outlet, so it fits that one by itself (an MPT end on an FPT End Fitting, an FGH hose end on an MGH Hose Bib). To change it, change the pump\'s Inlet or Outlet IP Fitting, the Hose Bib\'s Outlet IP Fitting, or the vessel\'s IP Type.';
 const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP, with its size (FPT1/2, TC1.5 ...). It is drawn as its type. A new one starts with the Default pipe IP Type. A pipe or hose end on it fits it by itself. ' + IP_TYPE_PICK_TIP;
 const IP_TYPE_TIP = 'The connector on this end, with its size: Tri-Clamp (TC1.5), pipe thread (FPT female, MPT male), BSP, metric (DN) stainless Quick Disconnect (FMSSQD female, MSSQD male) or Camlock (CAMF female coupler, CAMM male adapter). A new one starts with the Default IP Type in the pipe\'s size, on both ends. ' + IP_TYPE_PICK_TIP;
 // The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;

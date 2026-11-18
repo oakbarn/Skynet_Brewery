@@ -29,8 +29,8 @@ assert.match(app, /const hs = hbspotOf\(id\); if \(hs\)/, 'drawn: the spot has a
 assert.match(hb, /pairCls: 'orientPair'/);
 assert.match(css, /\.fldPair\.orientPair > select \{ flex: none; width: auto;/);
 // Hover Help in French
-for (const t of ['MV_TAB_TIP = ', "graphic: '⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫"]) assert.ok(app.includes(t), t);
-assert.ok(Object.keys(fr).some(k => k.startsWith('⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫The Skynet picture of the Hose Bib')), 'Graphic tip in French');
+for (const t of ['MV_TAB_TIP = ', "graphic: '⟪img:help_pictures/Hose_Bib_8_IPs.png⟫"]) assert.ok(app.includes(t), t);
+assert.ok(Object.keys(fr).some(k => k.startsWith('⟪img:help_pictures/Hose_Bib_8_IPs.png⟫The Skynet picture of the Hose Bib')), 'Graphic tip in French');
 assert.ok(fr['The Tab this Widget is on. Pick another Tab to move it there; the pipes and hoses joined to it stay on the old Tab, so draw new ones on the new Tab.'], 'Tab tip in French');
 // the Rule and the Help
 assert.match(rules, /^18\.48 \*\*Panel Update Final 2/m);
