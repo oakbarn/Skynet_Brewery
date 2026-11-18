@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-202 pictures.
+196 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -134,17 +134,11 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 153 | Valve_Manual_Butterfly_ClosedV_L.svg | Valves |
 | 154 | Valve_Manual_Butterfly_ClosedV_R.svg | Valves |
 | 155 | Valve_Manual_ClosedH.svg | Valves |
-| 156 | Valve_Manual_ClosedV_L.svg | Valves |
-| 157 | Valve_Manual_ClosedV_R.svg | Valves |
 | 158 | Valve_Motor_Ball_ClosedFront.svg | Valves |
-| 159 | Valve_Motor_Ball_ClosedH.svg | Valves |
-| 160 | Valve_Motor_Ball_ClosedV_LC.svg | Valves |
-| 161 | Valve_Motor_Ball_ClosedV_RC.svg | Valves |
 | 162 | Valve_Motor_Butterfly_ClosedFront_Elbow.svg | Valves |
 | 163 | Valve_Motor_Butterfly_ClosedFront.svg | Valves |
 | 164 | Valve_Motor_Butterfly_ClosedH.svg | Valves |
 | 165 | Valve_Motor_Butterfly_ClosedV_L.svg | Valves |
-| 166 | Valve_Motor_Butterfly_ClosedV_R.svg | Valves |
 | 167 | boil_kettle.svg | Vessels |
 | 168 | brewzilla.svg | Vessels |
 | 169 | digiboil.svg | Vessels |
@@ -248,5 +242,11 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 138 | Pump_Yellow_Rip_Off.svg | Pumps |
 | 139 | Pump_Yellow_Rip_On.png | Pumps |
 | 140 | Pump_Yellow_Rip_On.svg | Pumps |
+| 156 | Valve_Manual_ClosedV_L.svg | Valves |
+| 157 | Valve_Manual_ClosedV_R.svg | Valves |
+| 159 | Valve_Motor_Ball_ClosedH.svg | Valves |
+| 160 | Valve_Motor_Ball_ClosedV_LC.svg | Valves |
+| 161 | Valve_Motor_Ball_ClosedV_RC.svg | Valves |
+| 166 | Valve_Motor_Butterfly_ClosedV_R.svg | Valves |
 
 *This list is written by `node tools/skynet-picture-ids.js`.*

@@ -5,7 +5,7 @@ import fs from 'node:fs'; import path from 'node:path';
 
 const ROOT = path.join(import.meta.dirname, '..'), dir = path.join(ROOT, 'media', 'Images', 'Skynet', 'Valves');
 const valves = fs.readdirSync(dir).filter(f => /^(Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_|Motorized_TC15_Ball_Valve_).*\.svg$/.test(f));
-assert.ok(valves.length >= 20, 'found the valve pictures');
+assert.ok(valves.length >= 15, 'found the valve pictures');      // 6 unused ones retired to Delete/ (2026-11-18, Rule 18.43)
 for (const f of valves) {
   const root = fs.readFileSync(path.join(dir, f), 'utf8').match(/<svg[^>]*>/)[0];
   assert.ok(root.includes('viewBox="0 0 300 300"') && root.includes('data-valve-standard="1"'), `${f} is in the 300 x 300 Valve Standard box`);

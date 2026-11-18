@@ -22,6 +22,11 @@ Your own pictures can still come in an On and Off pair if you want that (Rule 7.
 
 | Retired | Use instead |
 | --- | --- |
+| Valve_Motor_Ball_ClosedH.svg (2026-11-18: not used) | Motorized_TC15_Ball_Valve_Horizontal.svg (the 3 Vessel valve) |
+| Valve_Motor_Ball_ClosedV_LC.svg (2026-11-18: not used) | Motorized_TC15_Ball_Valve_Vertical_Left.svg |
+| Valve_Motor_Ball_ClosedV_RC.svg (2026-11-18: not used) | Motorized_TC15_Ball_Valve_Vertical.svg |
+| Valve_Motor_Butterfly_ClosedV_R.svg (2026-11-18: not used) | Valve_Motor_Butterfly_ClosedV_L.svg, flipped (Vertical Right) |
+| Valve_Manual_ClosedV_L.svg, Valve_Manual_ClosedV_R.svg (2026-11-18: not used) | A Manual Valve Widget picture (it turns Vertical, Left or Right) |
 | pipe_cross.svg | Skynet_TC15_Cross.svg |
 | pipe_elbow45.svg | Skynet_TC15_Elbow_45.svg |
 | pipe_elbow90.svg | Skynet_TC15_Elbow_90.svg |
