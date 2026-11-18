@@ -28,7 +28,7 @@ to the edge of the box, where the IP is.
 For a **User Defined Motorized Ball Valve**, a **User Defined Proportional Valve**, or any valve with a picture of your own:
 
 - Your picture is **resized to fill the square box**, and the IPs go on the same spots as a Skynet valve's for its Orientation.
-- If you set its **In and Out spots** (the ⬢ beside Path (closed), or the % boxes), Skynet **moves and sizes your picture** so those
+- If you set its **In and Out spots** (the ⬢ beside Path, or the % boxes), Skynet **moves and sizes your picture** so those
   two spots sit right on the IPs. Part of the picture may be cut off at the edge, or it may look a little off center. That is the price
   of every valve lining up the same way.
 

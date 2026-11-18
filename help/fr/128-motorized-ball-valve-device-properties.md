@@ -89,8 +89,8 @@ Le Suggested Name suit le format de nommage (Règle 3.1) : Interface ID, Port, `
 
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
-| Path | grisé : fixé par son Template Skynet, suit l'Orientation | **Path (closed)** et **Path (open)** : vos images. Le ⬢ à côté de Path (closed) règle où sont les IP In et Out |
-| Orientation | Horizontal, Vertical Left, Vertical Right, Front, 45 degrees | Horizontal, Vertical, 45 degrees Left, 45 degrees Right |
+| Path | grisé : fixé par son Template Skynet, suit l'Orientation | **Path** : votre image, une seule image (l'Overlay la montre ouverte). Le ⬢ à côté de Path règle où sont les IP In et Out. **Path (open)** ne s'affiche que sur une vanne qui a déjà une image ouverte |
+| Orientation | Horizontal, Vertical Left, Vertical Right (Front et 45 degrees ne s'affichent que sur une vanne déjà posée ainsi) | Horizontal ou Vertical (les 45 ne s'affichent que sur une vanne déjà posée ainsi) |
 | Toggle et Overlay | à vous de choisir (ils commencent à On/Off et à l'éclair fixe) | à vous de choisir |
 | Width et Height | la taille de son Template pour chaque Orientation | 150 x 150 au départ |
 
