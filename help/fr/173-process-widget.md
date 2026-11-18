@@ -10,8 +10,8 @@ Il montre trois choses :
 - un bouton **▶ Start** tant que le Process est arrêté, ou un bouton **■ Stop** tant qu'il tourne.
 
 Ajoutez-en un dans **Edit layout > Add Widget > Widgets (app only, no board pin) > Process Widget**. Comme tout Widget, il est d'abord créé sur le
-🔨 Build Tab et n'existe que dans l'application (pas d'Interface ni de Port). Son Name suit `wgt_PRC_` + le Label + l'ID du Tab, par
-exemple `wgt_PRC_Mash~Steps_BH` (Règle 3.14).
+🔨 Build Tab et n'existe que dans l'application (pas d'Interface ni de Port). Son Name suit `wgt_PSW_` + le Label + l'ID du Tab, par
+exemple `wgt_PSW_Mash~Steps_BH` (Règle 3.14).
 
 ## Un clic le démarre ou l'arrête {#one-click-starts-or-stops-it}
 

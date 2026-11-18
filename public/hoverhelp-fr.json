@@ -686,7 +686,7 @@
  "🔒 Standard folder: can't be deleted, renamed or moved. ": "🔒 Dossier standard : ne peut pas être supprimé, renommé ou déplacé. ",
  "{0}Open {1}": "{0}Ouvrir {1}",
  "What it is called on the Tab, for example Mash Steps. The ⬢ beside it sets its font, size and colors.": "Comment il s'appelle sur le Tab, par exemple Mash Steps. Le ⬢ à côté règle sa police, sa taille et ses couleurs.",
- "Made by Skynet from the Label and the Tab (wgt_PRC_Label_TabID, Rule 3.14). It must be unique.": "Fait par Skynet à partir du Label et du Tab (wgt_PRC_Label_TabID, Règle 3.14). Il doit être unique.",
+ "Made by Skynet from the Label and the Tab (wgt_PSW_Label_TabID, Rule 3.14). It must be unique.": "Fait par Skynet à partir du Label et du Tab (wgt_PSW_Label_TabID, Règle 3.14). Il doit être unique.",
  "The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.": "Le Process qu'il montre et lance. Un clic sur le Widget le lance quand il est arrêté et l'arrête quand il tourne. Si le Process reçoit un nouveau nom (✏ Change name), le Widget le suit.",
  "Level 1: Extract Can Kit": "Level 1: Extract Can Kit",
  "Level 2: Extract": "Level 2: Extract",

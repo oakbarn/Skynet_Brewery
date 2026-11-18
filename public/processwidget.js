@@ -9,7 +9,7 @@
 
 export const PROCESS_WIDGET_TYPE = 'processWidget';
 export const PROCESS_WIDGET_WORD = 'Process Widget';
-export const PROCESS_WIDGET_CODE = 'PRC';         // its Type letters in a Widget name: wgt_PRC_Mash~Steps_BR (Rule 3.14)
+export const PROCESS_WIDGET_CODE = 'PSW';         // its Type letters in a Widget name: wgt_PSW_Mash~Steps_BR (Rule 3.14)
 export const isProcessWidget = el => el?.type === PROCESS_WIDGET_TYPE;
 // the size a new one starts at on the Build Tab
 export const PROCESS_WIDGET_SIZE = { w: 200, h: 80 };
@@ -29,7 +29,7 @@ export const processButton = st => (st.running ? '■ Stop' : '▶ Start');
 // The hover help of its Properties (Rule 2.38)
 export const PROCESS_TIPS = {
   label: 'What it is called on the Tab, for example Mash Steps. The ⬢ beside it sets its font, size and colors.',
-  name: 'Made by Skynet from the Label and the Tab (wgt_PRC_Label_TabID, Rule 3.14). It must be unique.',
+  name: 'Made by Skynet from the Label and the Tab (wgt_PSW_Label_TabID, Rule 3.14). It must be unique.',
   process: 'The Process it shows and starts. One click on the Widget starts it when it is stopped and stops it when it runs. If the Process gets a new name (✏ Change name), the Widget follows it.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
 };

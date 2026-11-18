@@ -327,13 +327,14 @@ Process picked** when it has none) and a **▶ Start** / **■ Stop** button.
   stop it; an item set to When tapped: none does nothing. Double-click opens its Properties (Rule 2.9).
 - **Properties** in the Pump's drill-down look (Rule 18.30): 1 Label (never blank; Script_1 to start), Label Visible, 2 Tab, 3 Name,
   **4 Process** (a dropdown of every Process), Ask before starting or stopping, X, Y, Width, Height (200 x 80 to start), Widget Type.
-- **Name** `wgt_PRC_Label_TabID` (Rule 3.14), for example `wgt_PRC_Mash~Steps_BR`.
+- **Name** `wgt_PSW_Label_TabID` (Rule 3.14), for example `wgt_PSW_Mash~Steps_BR`.
 - When its Process gets a new name with ✏ Change name (Rule 3.11), the Widget follows it. If its Process is deleted, the Widget says
   No such Process until another is picked.
 - It has no value of its own, so it has no Database or .API settings. A Process starts or stops the Process itself (`start Mash`,
   `stop Mash`) and every Process Widget showing it changes at once.
-- **Its name:** in Skynet a script is a Process (Rule 1.4), so it is the Process Widget (OakBarn Brewery, 2026-11-09: "Process Widget"),
-  type letters **PRC**.
+- **Its name:** in Skynet a script is a Process (Rule 1.4), so it is the Process Widget (OakBarn Brewery, 2026-11-09: "Process Widget").
+  It is a **Switch Widget that is a Process subclass** (OakBarn Brewery, 2026-11-18: "A Switch Widget that is a Process subclass"), so
+  its type letters are **PSW** (P Process + SW Switch).
 - **BruControl Import:** checked against both programs. The Importer and the older import in the Panel make each BruControl **Script
   element** a Process Widget that shows the BruControl Script of the same name (it is that Process once the Processes come in); the
   Script element's variable is kept with what BruControl had (`.bru`), and one BruControl marked as not user controlled gets When
@@ -1243,7 +1244,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PRC** Process Widget (Rule 1.31),
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch, **PSW** Process Switch (the Process Widget, a Switch Widget that is a Process subclass, Rule 1.31),
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **GPH** Graph (was CHT Chart, Rule 1.26), **SLD** Slider, **CHK** Checkbox, **LTB** Lighted Button (Rule 1.20) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Finish Build ...
@@ -5463,6 +5464,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Rule 3.14 and Rule 1.31 changed (OakBarn Brewery: "wgt_P_SW_Label_TabID is a Process switch"; "A Switch Widget that is a Process subclass"): the Process Widget's type letters are **PSW** instead of PRC, so its name is `wgt_PSW_Label_TabID` (one underscore between the parts, as Rule 3.14 says). No old way is kept: the PRC letters are gone everywhere (before the first Public Production). Help 173 and its French page changed. Checked against both programs: the Panel names a new one wgt_PSW_; the Importer makes each BruControl Script element a Process Widget named wgt_PSW_ (it reuses the Panel's code). (thread "Name Process switches wgt_PSW_")
 - 2026-11-18: Rule 2.9 note (an IP and a hose end are part of their parent): a double-click on a hose end's yellow ring opens the hose's Properties and on an IP the Properties of its Device or Widget; a left click on the ring pops up "Move with Held Right Click" (Rule 5.40). Rule 18.45 changed: State on every On / Off Device's Properties; Change Name and 🏷 Update to Suggested Name on every saved Device and Widget (not on a new Build's Add box); the Hose Bib and Manual Valve dialogs in the Blichmann Model's order. Help 127, 141. Checked against the BruControl Import program: its Build page shares these dialogs; it has no running Tabs, so the double-click on a running Tab is the Panel's only.
 - 2026-11-18: Rule 18.45 #6: a Hose Bib may be Vertical (Left or Right) too, and its IP may be on any of the 8 spots of its box that is not on the wall side. Help 141.
 - 2026-11-18: Added Rule 18.45 (OakBarn Brewery, PDF "Panel Update Final 1"): State slider, 🏷 Update to Suggested Name, the Change Name box and ✏ Change Name (mouse only), the Manual Valve's Graphic, Orientation and Left / Right, two kinds of Manual Valve (Straight and Hose Bib, the Hose Bib sized like a Pump with its own Hose or Pipe to its IP), and the ⛔ only on hover. Rules 5.33, 5.36 and 18.44 updated. Checked against both programs: the BruControl Import's Build page shares these dialogs. Help 87, 141, 148.
