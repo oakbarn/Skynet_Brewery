@@ -1381,6 +1381,11 @@ dialog :is(input, select, textarea):disabled:not([type="checkbox"], [type="radio
   background-repeat: no-repeat; background-size: 16px 16px; background-position: right 6px center; padding-right: 28px;
 }
 dialog select:disabled:not(fieldset:disabled *), #menuPane select:disabled:not(fieldset:disabled *) { background-position: right 24px center; padding-right: 44px; }
+/* the ⛔ stays bright red: a greyed box shows its words dim, not the whole box faded (the sign would fade with it) */
+#dlgBody label.greyed + :is(input, select):disabled, #dlgBody label.greyed + .fldPair { opacity: 1; }
+#dlgBody :is(input, select, textarea):disabled:not([type="checkbox"]) { color: var(--muted); }
+#dlgBody label.greyed + .fldPair > .pairLbl { opacity: .45; }
+#dlgBody label.greyed + .fldIcons > :first-child:disabled { opacity: 1; }
 /* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
 .gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
 .gpick .gpickFolder.hidden { display: none; }

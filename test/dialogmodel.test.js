@@ -41,3 +41,14 @@ const help = fs.readFileSync(new URL('../help/148-every-device-dialog.md', impor
 assert.match(help, /## Every dialog, the same way/);
 assert.match(help, /⛔ = can not be changed here/);
 console.log('dialogmodel tests passed');
+// every box has Hover Help (Rules 18.42, 18.43): the boxes that had none get FIELD_TIPS, greyed parts go by their name
+assert.match(app, /const FIELD_TIPS = \{/);
+for (const k of ['name', 'workspace', 'locked', 'backpath', 'foreColor', 'kind', 'sound', 'precision', 'onText', 'volume', 'deadspace', 'flowColor', 'size', 'imageOverlay'])
+  assert.match(app, new RegExp(`\\n  ${k}: '`), 'Hover Help for ' + k);
+assert.match(cf, /const t = \(f\[2\] === 'ro' \|\| f\[2\] === 'info' \? labelTipOf\(f\[1\]\) : ''\) \|\| fieldTipOf\(f\[0\]\)/, 'only a box with no Hover Help of its own gets one');
+assert.match(app, /'data-help': RGB_ROW_TIP/, 'the Color (RGB) row');
+assert.ok(app.includes('⟪img:help_pictures/Label_Visible_Switch.png⟫On: its Label shows on the Tab.'), 'with pictures');
+const fr = JSON.parse(fs.readFileSync(new URL('../public/hoverhelp-fr.json', import.meta.url), 'utf8'));
+assert.ok(fr['The color of all its text.'], 'and in French');
+assert.ok(fs.existsSync(new URL('../media/help_pictures/Greyed_Do_Not_Enter.png', import.meta.url)), 'the ⛔ picture in Help 148');
+console.log('dialog hover help tests passed');

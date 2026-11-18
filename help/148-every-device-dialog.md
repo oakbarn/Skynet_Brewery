@@ -24,6 +24,7 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
   scroll to the bottom to Save. There is no second row of buttons at the bottom.
 - **⛔ = can not be changed here.** A greyed out box has the red Do Not Enter sign at its right end. The box shows what it is,
   but you can not type in it or pick from it here (for example the Interface and Port once a Device is added, or the Device Type).
+  ![A greyed out box with the Do Not Enter sign](help_pictures/Greyed_Do_Not_Enter.png)
 - **Every ⬢ and ⬆ pop-up** has its title, ✖ Cancel and 💾 **Keep** frozen at the top. Keep puts what you set back into the dialog;
   the dialog's own 💾 Save saves it.
 - **Short names.** A field shows a short name; what it is for is in its Hover Help (rest the mouse on the name).

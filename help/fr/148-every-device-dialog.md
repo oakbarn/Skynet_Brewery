@@ -24,6 +24,7 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
   jamais à descendre tout en bas pour enregistrer (Save). Il n'y a pas de deuxième rangée de boutons en bas.
 - **⛔ = ne peut pas être changé ici.** Une case grisée porte le panneau rouge Sens interdit à son bout droit. La case montre ce
   qu'elle est, mais vous ne pouvez pas y taper ni y choisir ici (par exemple l'Interface et le Port une fois le Device ajouté, ou le Device Type).
+  ![Une case grisée avec le panneau Sens interdit](help_pictures/Greyed_Do_Not_Enter.png)
 - **Chaque fenêtre ⬢ et ⬆** a son titre, ✖ Cancel et 💾 **Keep** figés en haut. Keep remet ce que vous avez réglé dans la fenêtre ;
   le 💾 Save de la fenêtre l'enregistre.
 - **Des noms courts.** Un champ montre un nom court ; à quoi il sert est dans son Hover Help (posez la souris sur le nom).
