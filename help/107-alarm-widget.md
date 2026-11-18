@@ -23,6 +23,11 @@ The Basic Skynet Alarm is drawn in layers, from the bottom up:
 
 The bell picture itself is set by Skynet and can't be changed. It comes in three versions: **Together** (Back and Fore),
 **Back only** and **Fore only**, all in `Images/Skynet/Alarms/`. The black lines of the bell are never colored.
+
+**Bell** picks which Skynet bell: **Basic** (the bell above, with black lines) or **Hop** (`Alarm_Hop`: a line drawing of a bell
+with sound waves in the Back and Fore colors only, no black lines). The Hop bell has no hop in it: put the green hop on it with
+the Set Graphic **Hop Cone** (`Alarm_Set_Hop_Cone.svg`, Layer 2). One Hop bell serves Bitter, Flavor and Aroma hop alarms, each
+with its own Back and Fore colors.
 The colors are the standard color list (Default and None first, then the named colors, then Custom).
 
 The Set Graphic and Active overlay lists hold only Skynet pictures: the `Alarm_Set_...` and `Alarm_Active_...` pictures in

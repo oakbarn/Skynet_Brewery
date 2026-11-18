@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="363" height="180" viewBox="0 0 363 180">
+<!-- Skynet's own drawing, made by hand so it stays sharp at any size (Help picture). It is used in place of the PNG with the same name. 2026-11-17: the pump is now the Skynet pump (Pump_Riptide_SS_Center_Inlet.svg, Red Cover), so no part of the old photo pump is left. -->
+<title>Red Pump: the Label above the pump</title>
+<rect width="363" height="180" fill="#fff"/><rect x="8" y="18" width="197" height="162" fill="#262626"/><svg x="16" y="40" width="150" height="150" viewBox="0 0 300 300" overflow="visible"><!-- The Skynet pump today (Pump_Riptide_SS_Center_Inlet.svg with its Red Cover), as the panel draws it -->
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Drawn to scale, 20 units = 1 inch here (10 at 150 x 150); its port tube made 0.2" (inlet) and 0" (outlet) longer to reach the spots. -->
+  <g transform="translate(81.88 56) scale(2)">
+    <rect x="99" y="42.8" width="2.56" height="8.4" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+
+  <!-- Skynet drawing: Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.994, 0.63), outlet IP at the tip of the top port (0.804, 0.0). -->
+  <g stroke-linejoin="round">
+    <rect x="8.0" y="66.0" width="49.6" height="8.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <path d="M1.6 57.0 q -0.5 6 3 9" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="0.6" y="27.0" width="62.0" height="40.0" rx="7.2" fill="#808080" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="2.6" y="28.5" width="58.0" height="6.4" rx="1" fill="#9a9a9a"/>
+    <path d="M15.2 29.0 L15.2 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M20.5 29.0 L20.5 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M25.8 29.0 L25.8 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M31.2 29.0 L31.2 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M36.5 29.0 L36.5 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M41.8 29.0 L41.8 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <rect x="0.6" y="30.2" width="2.4" height="33.6" rx="1.0" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="62.1" y="32.6" width="9.5" height="28.8" rx="0.8" fill="#8f9296" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="71.6" y="26.0" width="18.0" height="42.0" rx="2.2" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="72.4" y="27.0" width="6.3" height="40.0" rx="1" fill="#d6d8db"/>
+    <rect x="71.0" y="25.6" width="2.2" height="42.8" rx="0.8" fill="#8f9296" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="89.6" y="42.8" width="10.0" height="8.4" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M91.2 42.8 L91.8 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M92.8 42.8 L93.4 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M94.4 42.8 L95.0 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M96.0 42.8 L96.6 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M97.6 42.8 L98.2 51.2" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="76.4" y="0.0" width="8.4" height="26.0" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M76.4 1.6 L84.8 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 3.2 L84.8 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 4.8 L84.8 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 6.4 L84.8 5.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 8.0 L84.8 7.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 9.6 L84.8 9.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 11.2 L84.8 10.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 12.8 L84.8 12.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 14.4 L84.8 13.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 16.0 L84.8 15.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 17.6 L84.8 17.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 19.2 L84.8 18.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 20.8 L84.8 20.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 22.4 L84.8 21.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 24.0 L84.8 23.4" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="72.6" y="14.2" width="16.0" height="6.0" rx="1.2" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="88.4" y="16.0" width="9.0" height="2.4" rx="1.0" fill="#c62828" stroke="#2b2b2b" stroke-width="0.8"/>
+  </g>
+  </g>
+<defs><mask id="rplCoverMask" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Cover for Pump_Riptide_SS_Center_Inlet.svg, same box and spots. -->
+  <g transform="translate(81.88 56) scale(2)">
+
+  <!-- Skynet pump Cover Overlay: Cover shape (the panel fills it with the cover color). Same box as Pump_Riptide_SS_Center_Inlet.svg, so it lies exactly over it; see-through around the cover. -->
+  <defs><clipPath id="in_rs"><path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z"/></clipPath></defs>
+  <g stroke-linejoin="round">
+    <path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z" fill="#000000"/>
+    <rect x="0.3" y="25.0" width="64.3" height="8.2" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in_rs)"/>
+    <rect x="0.3" y="58.6" width="64.3" height="7.4" fill="#000000" fill-opacity="0.22" clip-path="url(#in_rs)"/>
+    <rect x="6.7" y="38.9" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="43.0" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="47.1" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="51.2" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <path d="M61.6 27.0 V65.0" stroke="#000000" stroke-opacity="0.35" stroke-width="0.8"/>
+    <path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z" fill="none" stroke="#2b2b2b" stroke-width="1.2"/>
+  </g>
+  </g>
+</mask></defs><rect width="300" height="300" fill="#d32f2f" mask="url(#rplCoverMask)"/>
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Cover for Pump_Riptide_SS_Center_Inlet.svg, same box and spots. -->
+  <g transform="translate(81.88 56) scale(2)">
+
+  <!-- Skynet pump Cover Overlay: User cover: only the outline and shading; the panel fills the cover shape (from the Red cover) with the color the user sets. Same box as Pump_Riptide_SS_Center_Inlet.svg, so it lies exactly over it; see-through around the cover. -->
+  <defs><clipPath id="in_rc"><path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z"/></clipPath></defs>
+  <g stroke-linejoin="round">
+    
+    <rect x="0.3" y="25.0" width="64.3" height="8.2" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in_rc)"/>
+    <rect x="0.3" y="58.6" width="64.3" height="7.4" fill="#000000" fill-opacity="0.22" clip-path="url(#in_rc)"/>
+    <rect x="6.7" y="38.9" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="43.0" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="47.1" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="51.2" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <path d="M61.6 27.0 V65.0" stroke="#000000" stroke-opacity="0.35" stroke-width="0.8"/>
+    <path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z" fill="none" stroke="#2b2b2b" stroke-width="1.2"/>
+  </g>
+  </g>
+</svg><rect x="27" y="32" width="163" height="30" fill="#000"/><text x="108" y="47" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="15" text-anchor="middle" dominant-baseline="central" fill="#fafafa">Red Pump</text><polygon points="210,47 232,34 232,42 290,42 290,52 232,52 232,60" fill="none" stroke="#ed1c24" stroke-width="3" stroke-linejoin="miter"/><text x="305" y="52" font-family="'Times New Roman', Times, serif" font-size="16" fill="#000">Label</text></svg>
