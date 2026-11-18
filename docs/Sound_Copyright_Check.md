@@ -28,8 +28,8 @@ written one." This page is that list for **sounds** (pictures are checked in the
 | Sound | What it is | Made by | Risk | Note |
 |---|---|---|---|---|
 | alarm_beep.wav | Two-tone alarm beep | Computer-made tones | None | |
-| Alarm_Sound_Missing.mp3 | Voice: the Alarm sound is missing | OakBarn Brewery, text to speech | Low | Name the voice service in Media_Licenses.csv |
-| Skynet_Manifold_Rhyme_Voice.mp3 | Voice: the "connected to the valve" rhyme | OakBarn Brewery, text to speech | Low | Name the voice service. The rhyme copies the pattern of the old song "Dem Bones" (1928, now public domain in the US) with new words, so no problem |
+| Alarm_Sound_Missing.mp3 | Voice: the Alarm sound is missing | OakBarn Brewery, made at Text2Speech.org | None | The site allows its speech files "for any purpose, including commercial uses", no credit asked (checked 2026-11-18) |
+| Skynet_Manifold_Rhyme_Voice.mp3 | Voice: the "connected to the valve" rhyme | OakBarn Brewery, made at Text2Speech.org | None | Same Text2Speech.org terms. The rhyme copies the pattern of the old song "Dem Bones" (1928, now public domain in the US) with new words, so no problem |
 | Find_The_File_Connecting.mp3 | Song, 76 s | OakBarn Brewery on Treblo | Low | Treblo's terms could not be read online today; OakBarn Brewery says Treblo says free to use |
 | Skynet_Outlet_to_Valve.mp3 | Song, 3 min 47 s | OakBarn Brewery on Treblo | Low | Its Media_Licenses.csv row wrongly said "voice clip"; fixed |
 | Skynet_Tower_Chime.mp3 | **New.** Tower clock chime, 22 s | Computer-made (tune from 1793, public domain) | None | Replaces chime_big_ben.wav |
@@ -81,22 +81,19 @@ Raise_the_Song_by_the_Brew_Kettle; Ein Prosit -> Prost_auf_Freundschaft; Stimmun
 Unser_Brautag_Marsch; Kaiser Wilhelm's Hitparade No. 1 -> Unser_Brautag_Marsch_2; Gassenhauer-Spätausgabe No. 1 ->
 Brautag_im_Takt; Urgrossmutter's Hitparade No. 1 -> Beer Music #4.
 
-**Still to be assigned (13):** The Swallow Tail Jig; Greencastle Hornpipe; Kaiser Wilhelm's Hitparade No. 3 and No. 4;
-Fröhlichkeit In Allen Rillen; Urgrossmutter's Hitparade No. 2; Eins Zwei G'Suffa; Green, Green Grass of Home; Yodelling;
-Gemütlichkeit in Allen Rillen; Gassenhauer-Spätausgabe No. 2; Stimmung Ist (Auch) Die Zweite Bürgerpflicht; Dizzy.
-
-A tip: The Swallow Tail Jig, the Greencastle Hornpipe and Ein Prosit (1898) are old tunes in the public domain. Only the
-recordings are copyrighted, so a Skynet computer-made version of those tunes would also be safe.
+**Dropped, no replacement (13)** (OakBarn Brewery, 2026-11-18: "copywrite get rid of it"): The Swallow Tail Jig; Greencastle
+Hornpipe; Kaiser Wilhelm's Hitparade No. 3 and No. 4; Fröhlichkeit In Allen Rillen; Urgrossmutter's Hitparade No. 2; Eins Zwei
+G'Suffa; Green, Green Grass of Home; Yodelling; Gemütlichkeit in Allen Rillen; Gassenhauer-Spätausgabe No. 2; Stimmung Ist (Auch)
+Die Zweite Bürgerpflicht; Dizzy. They never ship, no Skynet sound takes their place, and the Importer does not offer one for them.
 
 ### Not needed (OakBarn Brewery marked "OK To Delete")
 
 Taps.mp3, batmobile_x.wav, jet_flyby2.wav, just_what.wav, Put Another Nickel In Music Music Music, the second copy of Kaiser
 Wilhelm's Hitparade No. 2. No replacement.
 
-### Still to find out
+### Dropped sound effect
 
-- **enthusiasm.wav**: source unknown and it is not clear what it sounds like (a voice? a cheer?). OakBarn Brewery to say, then
-  Claude makes or writes its replacement.
+- **enthusiasm.wav**: copyrighted (OakBarn Brewery, 2026-11-18: "copywrite get rid of it"). Dropped, no replacement.
 
 ## 3. The BruControl Import
 
