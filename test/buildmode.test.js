@@ -23,6 +23,6 @@ const look = app.slice(app.indexOf('const labelDefaultLook = '), app.indexOf('co
 assert.match(look, /firstSet\(T\.labelFont, D\.labelFont\)/, 'the Font the Tab draws with');
 assert.match(look, /firstSet\(o\.foreColor, T\.labelFore, D\.labelFore\)/, 'the Fore Color the Tab draws with');
 assert.match(look, /firstSet\(o\.backColor, T\.labelBack, D\.labelBack\)/, 'the Back Color the Tab draws with');
-assert.match(app, /d\.append\(h\('h3', \{\}, title\), bar\(\), body, \.\.\.\(bottom \? \[bar\(\)\] : \[\]\)\)/, 'a layer dialog can leave out its bottom row');
+assert.match(app, /else d\.append\(h\('div', \{ class: 'miniHead' \}, h\('h3', \{\}, title\), bar\(\)\), body\);/, 'no layer dialog has a bottom row (every dialog, Rule 18.44)');
 assert.match(rules, /^2\.52 \*\*Build mode: only what works while building\*\*/m, 'Rule 2.52');
 console.log('buildmode ok');

@@ -43,7 +43,7 @@ assert.match(app, /pumpPower: '⚠ Electricity can kill\./);
 assert.doesNotMatch(app, /\['_pwarn'/, 'no warning line in the dialog');
 assert.match(app, /live\.value = 'None'; live\.dispatchEvent/);
 assert.match(app, /The Skynet Picture is set by Skynet and cannot be changed\./);
-assert.match(app, /i\.disabled = true; i\.title = 'Confirmed: the board and pin it is wired to\. Cancel to change it\.'/, 'the Interface line greyed out once Confirmed');
+assert.match(app, /for \(const i of \[dv, ps\]\) if \(i && !i\.disabled\) \{ i\.disabled = true; i\.removeAttribute\('title'\); \}/, 'the Interface line greyed out once Confirmed (the ⛔ says it, Rule 18.44)');
 // the Review step and the Interface / Port Hover Help (OakBarn Brewery, 2026-11-12, Rule 18.35)
 assert.match(app, /const REVIEW_IFACE_PORT = 'You MUST Confirm the Interface and Port Number\. Once Confirmed, they cannot be changed\.\\nIf a Change is needed now, Click the Back Button\.'/);
 assert.match(app, /function reviewWire\(iface, port, portName = 'Available Ports'\)/);

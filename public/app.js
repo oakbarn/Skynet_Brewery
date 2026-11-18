@@ -5990,7 +5990,7 @@ async function newDeviceDialog(e, hint, what) {
     // set for good until ➕ Add Device saves it.
     if (dd && conf && wireKey(w)) {
       const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
-      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.title = 'Confirmed: the board and pin it is wired to. Cancel to change it.'; }
+      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it (Rule 18.44)
       dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
       setWireTips(dv, CONFIRMED_WIRE_TIP);
     }
@@ -9048,6 +9048,8 @@ function vpxApply(g, x) {
     else { if (!none(x[p + 'units'])) e.units = x[p + 'units']; if (none(x[p + 'offset'])) delete e.offset; else e.offset = +x[p + 'offset']; }
   }
 }
+// the Vessel Device's built in part sections (put back 2026-11-18: the list had gone missing, so a Vessel Device's Properties would not open)
+const VP_SECS = [['element', 'Heating Element', e => e.vpKind === 'element'], ['probe', 'Thermowell / Probe', e => e.vpKind === 'probe' || e.vpKind === 'thermowell']];
 function vpSections(it, edit = false) {
   const els = (draft || S.config).elements.filter(e => e.integratedIn === it.id && isVPart(e)), out = [];
   const open = e => () => {
@@ -9302,6 +9304,8 @@ function field(f, obj) {
       parts.push(lbl, o2[1]);
     }
     out[1] = h('div', { class: 'fldPair' + (x.pairCls ? ' ' + x.pairCls : '') }, ...parts);
+    // X, Y, Width and Height on one line (Rule 18.44): Autosize to pipe still greys the Width and Height
+    if (x.pairCls === 'xywh' && autoSized(obj)) for (const i of out[1].querySelectorAll('[data-k="w"], [data-k="h"]')) i.disabled = true;
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
@@ -9323,7 +9327,7 @@ function field(f, obj) {
   if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
     // wiring and almost never change, so there is no ✏ Change; the Device keeps its hidden key and only its Name changes (✏ Change name)
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
-    for (const i of ins()) { i.disabled = true; i.title = 'Set when it was added: the board and pin it is wired to'; }
+    for (const i of ins()) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it, no hover read (OakBarn Brewery, 2026-11-18, Rule 18.44)
     out[0].classList.add('greyed');
     for (const l of [out[0], ...(box.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {      // both balloons say it first (Dialog 2 #3)
       l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = SET_WIRE_TIP + ((l.dataset.help || (l === out[0] ? x.tip : '')) ? '\n\n' + (l.dataset.help || x.tip) : '');
@@ -9516,9 +9520,11 @@ function rgbRow(cur, val, { onSet = () => {}, onCancel = () => {} } = {}) {
     if (c) keep(c); else { if (txt.value.trim()) toast('Type the color as three numbers from 0 to 255, for example 250,250,250', true); paint(hex); }
   });
   txt.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); txt.dispatchEvent(new Event('change')); } });
-  const lab = h('label', { class: 'rgbLbl' }, 'Color (RGB)'), box = h('div', { class: 'rgbBox' }, sw, txt);
+  const lab = h('label', { class: 'rgbLbl tipLbl', 'data-help': RGB_ROW_TIP }, 'Color (RGB)'), box = h('div', { class: 'rgbBox' }, sw, txt);
   return { els: [lab, box], pick, hex: () => hex, show: on => { for (const e of [lab, box]) e.classList.toggle('rgbOff', !on); } };
 }
+// the Color (RGB) row's Hover Help (Rule 18.44: every box has one)
+const RGB_ROW_TIP = 'The color as three numbers from 0 to 255 (Red, Green, Blue), for example 250,250,250. Click the square to pick it with the Color Picker.';
 // Rule 18.36: a box with a Skynet default shows that number in the box (never 'empty = 10' in its label)
 function fillDef(f, el) { if (f[6]?.def === undefined || !el) return; const i = el.matches?.('input') ? el : el.querySelector?.('input'); if (i && i.value === '') i.value = f[6].def; }
 function fieldOne([key, label, kind, opts, rerender], obj) {
@@ -9687,7 +9693,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
-    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
+    return [h('label', { class: 'greyed' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
     const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
@@ -10095,6 +10101,81 @@ const titled = f => {
   if (w) g[6] = { ...g[6], with: Array.isArray(w[0]) ? w.map(titled) : titled(w) };
   return g;
 };
+// Hover Help for every box that had none (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model";
+// "Hover Help with Graphics"; Rule 18.42: adapted from the Blichmann RipTide's, in plain words). A box with no Hover Help of its own
+// gets the one here for its key (cleanFields); a built in part's box (vpx_rElement_label) uses the part after its last _ .
+const FIELD_TIPS = {
+  name: 'The Name is how Skynet and every Process refer to this item. It is unique. Press ✏ Change name to change it; every Process that uses it follows the new name.',
+  hideName: '⟪img:help_pictures/Label_Visible_Switch.png⟫On: its Label (or Name) shows on the Tab. Off: no Label shows.',
+  labelVisible: '⟪img:help_pictures/Label_Visible_Switch.png⟫On: its Label shows on the Tab. Off: no Label shows.',
+  initial: 'The value it starts with when the Brain starts, before a Process or a person changes it.',
+  units: 'The units shown after its value, for example °F, Gallons or %. Units only change what you see; the data is always kept metric (Rule 2.59).',
+  readOnly: 'On: it can be seen on the Tab but not changed there. A Process can still change it.',
+  workspace: 'The Tab this item shows on. Its Tab ID is the last part of the Suggested Name (..._BH for BH: Brew House).',
+  locked: 'On: it can not be dragged or resized on the Tab by mistake. Its Properties can still be changed.',
+  bgColor: 'The color behind it on the Tab.',
+  backpath: 'A picture drawn behind it (Image Path 1). Pick one from the list, or leave it empty for none.',
+  backpath_2: 'A second picture, drawn over Image Path 1. Leave it empty for none.',
+  backpath_3: 'A third picture, drawn over Image Path 2. Leave it empty for none.',
+  hideValue: 'On: its value or text is not shown on the Tab, only its picture.',
+  look: 'How it is drawn on the Tab. Pick a look from the list.',
+  fontSize: 'The size of its value in pixels. Empty: the size of the Tab Style.',
+  tap: 'What one click (or tap) on it does on the Tab.',
+  confirm: 'On: a click asks first, with ON and OFF buttons, before it is changed.',
+  foreColor: 'The color of all its text.',
+  backColor: 'The color behind all its text.',
+  align: 'Where all its text sits: Left, Centered or Right.',
+  nameFontFamily: 'The font of its name.',
+  nameColor: 'The color of its name. It is used in place of the Fore Color.',
+  nameBg: 'The color behind its name.',
+  valueColor: 'The color of its value. It is used in place of the Fore Color.',
+  valueBg: 'The color behind its value.',
+  valueFont: 'The font of its value, for those who know fonts. Leave it empty to use the Tab Style.',
+  nameAlign: 'Where its name sits: Left, Centered or Right.',
+  valueAlign: 'Where its value sits: Left, Centered or Right.',
+  border: 'The line around it on the Tab.',
+  kind: 'What kind of Alarm this is. The kind sets how it looks and sounds.',
+  soundMode: 'Which sound it plays when it goes off.',
+  sound: 'The sound file it plays (a .wav or .mp3 in your media folders).',
+  fileIndex: 'The number of the sound file in the list, for a Process that picks the sound by number.',
+  loop: 'On: the sound plays again and again until the Alarm is stopped. Off: it plays once.',
+  setGraphic: 'The picture drawn on top of the bell (Layer 2) while the Alarm sounds.',
+  activeText: 'The text shown on it while the Alarm is sounding.',
+  imageOverlay: 'A picture drawn on top while it is On, for example the Lightning Bolt. None: no overlay.⟪img:help_pictures/Pump_Overlays.png⟫',
+  precision: 'How many numbers after the decimal point the reading shows, for example 1 shows 152.3 °F.',
+  onText: 'The text shown on it while it is On, for example OPEN or RUN.',
+  offText: 'The text shown on it while it is Off, for example CLOSED or STOP.',
+  volume: 'How much this vessel holds, in Gallons (or Liters, as the Units are set).',
+  sizeMethod: 'How Skynet works out the size of the vessel picture from its volume.',
+  safeVolume: 'The least liquid that covers its Heating Element.',
+  deadspace: 'The liquid left in the bottom that can not be pumped or drained out (dead space).',
+  heatMethod: 'How its Heating Element is controlled when the Brain starts, for example Hysteresis: on below the Setpoint, off at it.',
+  input: 'The Temperature Probe this Heating Element follows.',
+  target: 'The temperature it heats to.',
+  offset: 'A small number added to every reading to make the probe agree with a good thermometer.',
+  labelAlign: 'Where its Label sits on the vessel.',
+  labelColor: 'The color of its Label.',
+  labelBg: 'The color behind its Label.',
+  flowColor: 'The color of the liquid shown flowing in the pipe, for example Mash or Water.',
+  to: 'The IP this pipe ends at.',
+  sizeUnits: 'Inches or millimeters, for the Pipe Size.',
+  size: 'How big around the pipe is.',
+  color: 'The color of the pipe itself.',
+  label: 'The name shown on the Tab, for example HLT Element. It is the start of the Suggested Name.',
+  x: 'Where it sits on the Tab, in pixels from the left (X) and from the top (Y).',
+  w: 'Its size on the Tab, in pixels.'
+};
+FIELD_TIPS.y = FIELD_TIPS.x; FIELD_TIPS.h = FIELD_TIPS.w;
+// greyed boxes of a built in part (Vessel Device) have no key of their own: their Hover Help goes by their name
+const LABEL_TIPS = {
+  'Interface': 'The board this part is wired to. It is set in the part\'s own Properties (✏ Open its own Properties).',
+  'Port': 'The Port (pin) on the board this part is wired to. It is set in the part\'s own Properties.',
+  'Name': 'How Skynet and every Process refer to this part. It is changed in the part\'s own Properties.',
+  'Probe Type': 'The kind of temperature probe, for example DS18B20. It is set in the part\'s own Properties.',
+  'Type': 'The kind of vessel, for example HLT, Mash Tun or Boil Kettle. It is set when the vessel is made.',
+  'Reading Now': 'What the probe reads right now, with its Calibration Offset added.' };
+const labelTipOf = l => typeof l !== 'string' ? '' : LABEL_TIPS[l.replace(/^\d+\.\s*/, '').replace(/\s*\(.*\)$/, '').replace(/\b\w/g, c => c.toUpperCase())] || '';
+const fieldTipOf = k => typeof k !== 'string' ? '' : FIELD_TIPS[k] || (/^vpx_/.test(k) ? FIELD_TIPS[k.replace(/^vpx_[^_]+_/, '')] || '' : '');
 function cleanFields(list, sink) {
   const fs = list.map(f => {        // a long ( ) explanation after a name becomes its tip
     if (!INPUT_KINDS(f) || typeof f[1] !== 'string' || f[6]?.tip) return f;
@@ -10103,6 +10184,37 @@ function cleanFields(list, sink) {
     const g = withTip(f, m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.')); g[1] = m[1]; return g;
   });
   if (!fs.some(INPUT_KINDS)) return fs;      // only a message: its words are what it says
+  // every box has Hover Help (Rules 2.38, 18.42, 18.44): one with none gets FIELD_TIPS's, the with-boxes on its line too
+  const tipped = f => {
+    if (!INPUT_KINDS(f) || f[6]?.tip) return f;
+    const t = (f[2] === 'ro' || f[2] === 'info' ? labelTipOf(f[1]) : '') || fieldTipOf(f[0]); return t ? withTip(f, t) : f;
+  };
+  for (let i = 0; i < fs.length; i++) {
+    let f = tipped(fs[i]);
+    const w = f?.[6]?.with;
+    if (w) { const more = Array.isArray(w[0]) ? w.map(tipped) : tipped(w); f = [...f]; f[6] = { ...f[6], with: more }; }
+    fs[i] = f;
+  }
+  // Keep Dialogs Clean (OakBarn Brewery, 2026-11-18, Rule 18.44; KISS, Rule 11.8): a name that still carries an explanation in ( )
+  // beside its own Hover Help shows the short name only; the explanation goes first in that Hover Help. A short ( ) such as
+  // (Horizontal), (pixels) or (ms) stays.
+  for (let i = 0; i < fs.length; i++) {
+    const f = fs[i];
+    if (!INPUT_KINDS(f) || typeof f[1] !== 'string' || !f[6]?.tip || typeof f[6].tip !== 'string') continue;
+    const m = /^(.+?)\s*\(([^()]{14,})\)\s*$/.exec(f[1]);
+    if (!m) continue;
+    const g = [...f], why = m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.');
+    g[1] = m[1]; g[6] = { ...f[6], tip: why + '\n\n' + f[6].tip }; fs[i] = g;
+  }
+  // X, Y, Width and Height on one line in every dialog, as on the Pump (Rules 18.41, 18.44)
+  for (let i = 0; i + 3 < fs.length; i++) {
+    const four = fs.slice(i, i + 4);
+    if (four.map(f => f?.[0]).join() !== 'x,y,w,h' || !four.every(f => f[2] === 'num' && !f[6]?.with && !f[6]?.showIf)) continue;
+    const short = (f, l) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); g[1] = l; return g; };
+    const x = short(four[0], 'X (Horizontal)');
+    x[6] = { ...(x[6] || {}), pairCls: 'xywh', with: [short(four[1], 'Y (Vertical)'), short(four[2], 'Width'), short(four[3], 'Height')] };
+    fs.splice(i, 4, x);
+  }
   for (let i = 0; i < fs.length; i++) fs[i] = titled(fs[i]);
   const out = [], top = [];
   for (let i = 0; i < fs.length; i++) {
@@ -10502,7 +10614,9 @@ async function dbGroupDialog(g, me, cur) {
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
 // the Motorized Ball Valve too (OakBarn Brewery, 2026-11-18: "fix all dialogs Now (exception) to the Blickmann Model Standard", Rule 18.41)
-const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"], dialog#dlg[open] #dlgBody .mbvModel');
+// EVERY dialog now (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model", Rule 18.44): a pop-up
+// opened from any Properties or Add box says Keep (its settings go back into that box, whose own Save saves them)
+const onModelDialog = () => !!document.querySelector('dialog#dlg[open]');
 function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false, saveNow = false } = {}) {
   return new Promise(res => {
     const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
@@ -10512,8 +10626,9 @@ function layerDialog(title, build, canDelete = false, { bottom = true, model: as
     // a pop-up to look at only (the Model's ⬢ Pump facts, Dialog 2 #3): one ◀ Back button, nothing to change
     const viewBar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Back to the dialog', onclick: () => done('cancel') }, '◀ Back'));
     if (view) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), viewBar()), body);
-    else if (model) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
-    else d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
+    // every pop-up: title and buttons frozen at the top, no bottom row (Rule 2.51; all dialogs, Rule 18.44). bottom is kept as an
+    // option for its callers but no longer adds a second row.
+    else d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
     const done = r => { d.close(); d.remove(); res(r); };
@@ -14131,8 +14246,23 @@ function addDialogMenu(d) {
 // the model): "This is on the model ... Wait for that until I am 100% Finished with the model". The ☰, the title and the buttons of the
 // Properties / Add box are kept together in .dlgHead; the CSS freezes it, and hides the bottom row, only when the box holds a Pump
 // (dialog#dlg:has([data-k="pumpModel"])). Every other dialog looks as before.
+// EVERY dialog now (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model", Rule 18.44): the
+// Properties and Add boxes (#dlg) always freeze (the CSS no longer waits for a Pump); any other dialog that has the same row of buttons
+// at its top and at its bottom gets its top frozen too, and the bottom row is not shown (freezeDupBars).
+function freezeDupBars(d) {
+  if (d.id === 'dlg' || d.classList.contains('frozenDlg') || d.querySelector(':scope > .miniHead')) return;
+  const host = d.querySelector(':scope > form') || d;
+  const kids = [...host.children], bars = kids.filter(k => k.classList.contains('bar'));
+  if (bars.length < 2) return;
+  const top = bars[0], last = bars[bars.length - 1], words = b => b.textContent.replace(/\s+/g, ' ').trim();
+  if (words(top) !== words(last) || kids.indexOf(last) <= kids.indexOf(top) + 1) return;      // only a true copy of the top row, below the body
+  const head = h('div', { class: 'frozenHead' });
+  host.insertBefore(head, kids[0]);
+  for (const k of kids.slice(0, kids.indexOf(top) + 1)) head.append(k);
+  last.classList.add('dupBottom'); d.classList.add('frozenDlg');
+}
 function freezeDialogTop(d) {
-  if (d.id !== 'dlg') return;
+  if (d.id !== 'dlg') return freezeDupBars(d);
   const host = d.querySelector(':scope > form') || d;
   if (host.querySelector(':scope > .dlgHead')) return;
   const kids = [...host.children], top = kids.find(k => k.classList.contains('bar'));
@@ -15125,7 +15255,7 @@ async function eqInterview(pre = {}) {
     () => ['4. Pick or build each Vessel', a.vessels.flatMap((v, i) => [['_h' + i, `Vessel ${i + 1}: ${v.type}`, 'head'],
       ['p' + i, 'Vessel Device or Widget', 'sel', vesselChoices(v.type, vt)], ['l' + i, 'Label', 'text'],
       ...(v.type === 'Fermentor' || v.type === 'Bright Tank' ? [['mx' + i, `Largest batch (${u})`, 'num'], ['mn' + i, `Smallest batch (${u})`, 'num']]
-        : [['vo' + i, `Size (${u})`, 'num'], ['ds' + i, `Dead space, left in the bottom (${u})`, 'num']])]),
+        : [['vo' + i, `Size (${u})`, 'num'], ['ds' + i, `Dead Space (${u})`, 'num', null, false, false, { tip: FIELD_TIPS.deadspace }]])]),
       Object.fromEntries(a.vessels.flatMap((v, i) => [['p' + i, v.pick || firstPick(v.type, vt)], ['l' + i, v.label || vesselLabel(a.vessels.map(x => x.type), i)],
         ['vo' + i, v.volume], ['ds' + i, v.deadspace], ['mx' + i, v.maxVolume], ['mn' + i, v.minVolume]]))],
     () => ['5. How many Pumps?', [['nP', 'How many pumps', 'sel', Array.from({ length: IV_MAX.pumps + 1 }, (_, i) => [String(i), i ? String(i) : 'None'])]], { nP: String(a.pumps.length) }],
@@ -16253,7 +16383,7 @@ function vesselTplFields(w) {
     ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
       : [['volume', `Size: ${u === 'L' ? 'Liters' : 'Gallons'} (10 gallons to start; a Vessel Widget is drawn to this size)`, 'num'],
         ...(isV ? [['sizeMethod', 'Method (how its shape is worked out)', 'sel', V_METHODS, true], ...(w.sizeMethod === 'diameter' ? [['diameter', `Diameter (${u === 'L' ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${u === 'L' ? 'cm' : 'inches'})`, 'num']] : [])] : []),
-        ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
+        ['deadspace', `Dead Space (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
     ...(heat.length ? [['_h', 'Heat', 'head'], ['heatKind', 'Heat Source', 'sel', heat.map(k => [k, HEAT_KINDS[k]]), true],
       ...(w.heatKind === 'other' ? [['otherHeat', 'Other heat source (what it is)', 'text']] : []),
       ['_hd', 'The Device that heats it, and its probe, are picked on the Tab_Vessel.', 'note']] : []),
@@ -16555,8 +16685,8 @@ function vSizeFields(it) {
     ...(it.sizeMethod === 'diameter' ? [['diameter', `Diameter (${metric ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${metric ? 'cm' : 'inches'})`, 'num'],
       ['_calcVol', 'Calculated Volume (from its Diameter and Height; read only)', 'ro', vCalcVol(it)]] : []),
     // Dead space and Safe Element Volume (OakBarn Brewery, 2026-11-09: "Also missing is Deadspace and Safe Element Volume")
-    ['deadspace', `Dead space, left in the bottom (${metric ? 'Liters' : 'Gallons'})`, 'num'],
-    ['safeVolume', `Safe Element Volume: the least liquid that covers its Heating Element (${metric ? 'Liters' : 'Gallons'})`, 'num'],
+    ['deadspace', `Dead Space (${metric ? 'Liters' : 'Gallons'})`, 'num'],
+    ['safeVolume', `Safe Element Volume (${metric ? 'Liters' : 'Gallons'})`, 'num'],      // short name, the rest in its Hover Help (Rule 18.44)
     ['_szn', `${it.sizeMethod === 'diameter' ? 'Drawn by its real size (the Calculated Volume). Advertised gallons can be wrong, so the drawing never uses them.' : 'Size follows volume: twice the gallons is about 1.26 times as wide and as tall.'} ${who}`, 'note']];
 }
 // the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
