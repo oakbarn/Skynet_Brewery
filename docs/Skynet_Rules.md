@@ -5376,6 +5376,33 @@ Import's Build page shares the Panel's dialogs, pipe drawing and End Fittings).
 5. **.confirmation, X, Y, Width, Height and the Widget Type** ("Good"): no change.
 Help 115, 141, 148.
 
+18.50 **Panel Update Final 4: how every Widget dialog follows the Model** (OakBarn Brewery, 2026-11-18, PDF "Panel Update Final 4",
+the Hose Bib Widget dialog beside the Blichmann RipTide's: "1. Good 2. Good"; "Final 4 will just be some guidance Rules"). A guidance
+Rule: it says how a Widget dialog is matched to the Model in the "Recheck dialogs" pass (Rule 18.47); it changes no dialog now. Both
+programs (the BruControl Import's Build page shares the Panel's dialogs).
+1. **The Model** ("The Blickmann and the Hose Bib are now the Model. Follow the way you updated from the Blickman to the Hose Bid and
+   Reference the Hose Bib for Widgets."): a Device dialog follows the Blichmann RipTide; a **Widget dialog follows the Hose Bib**, made
+   from the Blichmann the same way the Hose Bib was (Rules 18.48, 18.49): no Interface or Available Ports, no Model, **2. Tab** with
+   Layer Order under it, 3. Name with Change Name and the Suggested Name, the Graphic block (below), .confirmation where it has one,
+   X Y Width Height on one line, and the **Widget Type** last where a Device has its Device Type.
+2. **A Widget with no Graphic** ("If a Widget has no Graphic, Graphics are gone as attributes but Background and Fore and Back colors
+   are added to a Widget That does not have a Graphic."): it has no Graphic box and no picture attributes; it gets its **Background**
+   and **Fore color** and **Back color** instead.
+3. **Which Widgets have the Graphic properties** ("Generally Switch Widgets. Pump Widgets, and anything like them and the Graphic
+   Widget have the Graphic Properties. Other Widgets do not unless they have IPs or have Confirmation."): the Switch Widgets, the Pump
+   Widgets (the Manual Pump) and Widgets like them, and the **Graphic Widget** (the Picture Widget). Any other Widget has them only when
+   it has IPs (the Hose Bib, the Manual Valve) or .confirmation.
+4. **Backgrounds** ("The Graphic Widget can have the 3 Backgrounds with the .path_n attributes, All Other widgets get 1 from Skynet
+   unless it is a User Widget, but it only gets one path only. Skynet ones have no path except the Graphic Widget."):
+   - **The Graphic Widget**: up to 3 Backgrounds, .path, .path_2 and .path_3 (.backpath, .backpath_2, .backpath_3, Rules 7.10, 7.23),
+     with .background picking which one shows.
+   - **Every other Widget**: one Background from Skynet. It is set, so a Skynet Widget has **no path** box.
+   - **A User Widget** (the user's own picture): **one path only**, as a User pump (Rule 7.10's exception).
+5. **No pipe parts** ("No IPs, No Hose/Pipe No Ips Fittings No Cover No Overlay except for Switches which have an Overlay."): a Widget
+   without IPs has no IPs, no Hose or Pipe, no IP Fittings, no Cover and no Overlay. **A Switch has an Overlay.** A Widget with IPs (the
+   Hose Bib, the Manual Pump) keeps its own, as the Model does.
+Help 148 is not changed: nothing a user sees changes until a dialog is rechecked.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -5617,6 +5644,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 18.50 (OakBarn Brewery, PDF "Panel Update Final 4", "Final 4 will just be some guidance Rules"): a guidance Rule for the "Recheck dialogs" pass: a Widget dialog follows the Hose Bib (the Widget half of the Model) the way the Hose Bib was made from the Blichmann; a Widget with no Graphic has no picture attributes and gets a Background, Fore color and Back color; Switch, Pump and like Widgets and the Graphic (Picture) Widget have the Graphic properties, others only with IPs or .confirmation; the Graphic Widget has 3 Backgrounds (.path, .path_2, .path_3), other Widgets one from Skynet with no path, a User Widget one path; no IPs, Hose or Pipe, IP Fittings, Cover or Overlay on a Widget without IPs, except a Switch has an Overlay. No dialog changes now. Checked against both programs: the BruControl Import's Build page shares the dialogs.
 - 2026-11-18: Rule 6.18 changed (OakBarn Brewery: "in the next PR add Voice Command must be Unique"): API_Name is Unique across every Device and Widget, Hose Bibs too; a Voice Command falls back to the Label only when no other shared item has it, else to the Name; a Hose Bib with .API on is shared with MQTT and voice. Help 144 (and French). Checked against both programs: the BruControl Import has no MQTT or voice; its Build page uses the same API_Name check.
 - 2026-11-18: Added Rule 18.49 (OakBarn Brewery, PDF "Panel Update Final 3"): the Hose Bib's IP may be on any of its 8 spots (the wall side too) and its Graphic follows the joined pipe or hose; the Pump's Orientation shows Horizontal greyed out with Left / Right beside it (the Hose Bib's look); the Hose Bib gets the Pump's Overlay and an Outlet IP Fitting (MGH3/4 to start); new End Fitting family Garden Hose thread, FGH3/4 and MGH3/4. Then (OakBarn Brewery's pick, "B and Model is only left out"): the Hose Bib's Cover with Toggle (On/Off or Push Button), Database and .API (asked for from outside it is asked by hand, as by a Process line, Rule 5.15) and Inlet IP Fitting (information only); no Model. Rules 5.33, 18.45 and 18.48 marked. Help 115, 141, 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs and the End Fittings (lib/store.js uses the same iptype.js); BruControl has no fittings to import.
 - 2026-11-18: Rule 9.20 changed (OakBarn Brewery: "On a Full Install, add question about Back up if previous installtion installed and ask Abort and get Just Update or Install with Backup Yes or Install No Backup"): the Full Setup's warning page on an existing install has two round buttons, 1 Install with no backup (already picked: "I do not generally want a backup for a Full install") and 2 Install and back up my old folders first (the old move to Skynet_Backups); Get the Update Setup and Close and Do Not Install stay. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French), README, install/ReadMe.txt. Both programs: the Importer is in the same Setup; nothing else changes for it.
