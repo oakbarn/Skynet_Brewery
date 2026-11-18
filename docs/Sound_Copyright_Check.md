@@ -46,6 +46,7 @@ written one." This page is that list for **sounds** (pictures are checked in the
 | Skynet_Voice_Off_To_Brew.mp3 | **New.** Voice: "Off to the brew house we go" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces heigh-ho |
 | Skynet_Voice_Brew_Day_Done.mp3 | **New.** Voice: "That is the end of brew day" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces porkypigthatAll.wav |
 | Skynet_Voice_Interrupt.mp3 | **New.** Voice: "We interrupt this brew day" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces the voice half of we_interrupt.wav |
+| Skynet_Voice_<Line>_Alba.mp3 (6) | **New.** The same 6 voice lines in a second voice, Alba (a Scottish woman) | Piper voice en_GB-alba-medium; Skynet's own words | None (CC BY 4.0 credit in the README) | A second choice next to George |
 
 The 8 new sound effects are made by `tools/make-skynet-sounds.py` (running it again makes the very same files) and the 6 voice lines by `tools/make-voice-lines.py`. Media stays add-only
 (Rule 9.12): a better version later gets a new name.
@@ -67,7 +68,8 @@ The 8 new sound effects are made by `tools/make-skynet-sounds.py` (running it ag
 ### Film, TV and cartoon quotes (new words; Skynet voice made)
 
 A quote from a film or cartoon belongs to the studio. Each replacement below has **new words**, spoken by the free Kokoro
-text to speech voice **bm_george** (a British man; OakBarn Brewery picked it, 2026-11-18). Kokoro is under the Apache 2.0
+text to speech voice **bm_george** (a British man; OakBarn Brewery picked it, 2026-11-18). The same lines also come in a second voice, **Alba** (a Scottish woman, Piper; OakBarn Brewery: "add Alba"), named
+`Skynet_Voice_<Line>_Alba.mp3`; its CC BY 4.0 credit is in the README. Kokoro is under the Apache 2.0
 license, which puts no limit on the audio it makes. They are in `media/sounds/Skynet`, made by `tools/make-voice-lines.py`.
 
 | BruControl sound | Why it is a risk | Skynet replacement (name) | Words to speak |
