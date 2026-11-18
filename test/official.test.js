@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { checkOfficial, repair, makeList, coreFiles, fingerprint, setReadOnly, canLock, LIST_FILE, OFFICIAL_REPO } from '../lib/official.js';
+import { checkOfficial, repair, makeList, coreFiles, fingerprint, setReadOnly, canLock, LIST_FILE, OFFICIAL_REPO, RETIRED, moveRetired } from '../lib/official.js';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bp-official-'));
 // a test writing over a core file plays the brewer editing it: after Repair the file is Read-only, so it is made writable first
@@ -104,6 +104,22 @@ assert.equal((await checkOfficial(root, { fetcher: gh })).state, 'unofficial');
 // no list anywhere
 stamp(); fs.rmSync(path.join(root, LIST_FILE));
 assert.equal((await checkOfficial(root, { fetcher: offline })).state, 'unknown');
+
+// retired program files left by an older Setup (OakBarn Brewery, 2026-11-18: "2 added program files"): moved aside on the check,
+// never deleted, and no longer counted as added; a file of the same name that this version still lists is never moved
+stamp(); fs.writeFileSync(path.join(root, LIST_FILE), JSON.stringify({ files: list })); ghList = list;
+put('install/windows/SkynetMedia.nsi', '; old Media Setup\n');
+put('install/windows/SkynetSampleSchemas.nsi', '; old Sample Schemas Setup\n');
+r = await checkOfficial(root, { fetcher: gh });
+assert.deepEqual(r.added, [], 'the retired files are no longer counted as added');
+assert.match(r.text, /Moved 2 retired program files to backups\/retired_files_/);
+assert.ok(!fs.existsSync(path.join(root, 'install/windows/SkynetMedia.nsi')));
+const kept = fs.readdirSync(path.join(root, 'backups')).find(d => d.startsWith('retired_files_'));
+assert.equal(fs.readFileSync(path.join(root, 'backups', kept, 'install/windows/SkynetMedia.nsi'), 'utf8'), '; old Media Setup\n');
+assert.deepEqual(moveRetired(root, list).moved, [], 'nothing left to move');
+put('lib/gstandard.js', 'still used\n');
+assert.deepEqual(moveRetired(root, { ...list, 'lib/gstandard.js': 'x' }).moved, [], 'a file this version lists stays');
+assert.ok(RETIRED.every(f => !fs.existsSync(path.join(process.cwd(), f))), 'every retired file is really gone from the repo');
 
 fs.rmSync(root, { recursive: true, force: true });
 console.log('official tests passed');

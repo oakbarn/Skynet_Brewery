@@ -3519,6 +3519,11 @@ non official updates", "Explain the Offical Updates in the Help"). Skynet stays 
    Setup .exe for free at virustotal.com (named, not linked: Rule 11.10). Both programs: the BruControl Import's files are core
    files of the same Setup, so the same check covers them; the Panel shows it. The Importer's Build page shows no badge and runs
    no check of its own.
+8. **Retired program files** (OakBarn Brewery, 2026-11-18, after an update: About said "2 added program files"): a core file that
+   Skynet no longer uses is moved to `Delete/` in the repo (Rule 15.3) and its path is added to `RETIRED` in lib/official.js. An
+   update only adds and replaces files, so an older copy can stay on a Brain. On every check, each retired file still there (and
+   not in this version's list) is **moved** to `backups/retired_files_<date>`, never deleted (Rule #1), so it is not counted as
+   Added. Skynet does this in the Background and needs no user input.
 
 9.15 **The installers work from and into a folder with any name** (OakBarn Brewery, 2026-11-12, after a brewer on Ubuntu
 24.04 ran the Linux installer from `Brassage bière/.../Skynet Brew Panel`): spaces, accented letters (é, è, ü), apostrophes,
@@ -5317,6 +5322,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 
 ---
 
+- 2026-11-18: Rule 9.14 item 8 (OakBarn Brewery, after an update: About said "2 added program files", the retired SkynetMedia.nsi and SkynetSampleSchemas.nsi): retired core files left by an older Setup are moved to backups/retired_files_<date> on every check, never deleted; list RETIRED in lib/official.js. Help 191 (and French). Both programs: the Importer's files are core files of the same Setup; the same check covers them. Copyright cleanup: docs/Image_Library.md says the removed pictures are gone from the Git history too.
 - 2026-11-17: Added Rule 9.22 (OakBarn Brewery: "If there are new skynet Media files since the last Update exe, can they be included in the update and added to the media on the brain"; "Add New Skynet Schema same as media. WE could get rid of both the Schema Uodate and the Media updates"; "No extra steps for a User"): the Update Setup and panel zip carry the Skynet pictures, sounds and Sample Schemas added since the last Update Setup; the Full Setup has them all; the Media Setup and Sample Schemas Setup .exe are retired (zips stay). Notes on Rules 9.12, 9.13, 9.20, 9.21. tools/build-release.sh, the release workflow, SkynetBrewer.nsi, Help 19, 183, 184 (and French), README, install/ReadMe.txt. Both programs.
 - 2026-11-17: Rule 2.30 (Panel Updates Sandbox entry 6): ↩ Undo on a new Hidden Tab, the 👻 Hidden Tabs ▾ list, Save layout asks Keep or Delete for an empty Hidden Tab. Help 103 (and French). Both programs: the Importer has no Edit layout; nothing changes there.
 - 2026-11-17: Rule 4.5 (OakBarn Brewery, Panel Updates Sandbox entry 1: "A Heater or Valve could also be PWM so add those that can be on this ddlb"; "Yes"): the PWM / Analog out list also has Heating Element: PWM and the Proportional Valves (Skynet ones and User Defined), the same rows as in the Heating Element and Valves lists. Help 82 and 136 (and French). Both programs: the Importer has no Edit layout bar; nothing changes there.
