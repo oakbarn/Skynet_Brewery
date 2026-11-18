@@ -1286,7 +1286,8 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
   // the 3 Vessel valve pictures first (OakBarn Brewery, 2026-11-18: "the ones used in 3 vessel look much better so make those the first choice")
   ['Motorized TC 1.5" ball valve (horizontal)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg'],
-  ['Motorized TC 1.5" ball valve (vertical)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg'],
+  ['Motorized TC 1.5" ball valve (vertical, motor right)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg'],
+  ['Motorized TC 1.5" ball valve (vertical, motor left)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg'],
   ['Motorized ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
   ['Motorized ball valve closed (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg'],
   ['Motorized ball valve closed (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg'],
@@ -2206,7 +2207,7 @@ function picFlow(path) {
   // (Fritz, 2026-11-04: every Skynet pump has IPs on its inlet and outlet, Rule 5.24)
   if (/(?:^|\/)Pump_[A-Za-z]+_Rip_(?:Off|On)\.(?:svg|png)$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Rip };
   if (/(?:^|\/)Pump_Sump_(?:Off|On)\.svg$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Sump };
-  const om = String(path || '').match(/(?:^|\/)Motorized_TC15_Ball_Valve_(Horizontal|Vertical)\.svg$/i);
+  const om = String(path || '').match(/(?:^|\/)Motorized_TC15_Ball_Valve_(Horizontal|Vertical(?:_Left)?)\.svg$/i);      // _Left: mirrored, motor left (Rule 18.43)
   if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
@@ -15524,7 +15525,7 @@ const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Cross.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
   'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
   'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg',
-  'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg'];
+  'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
   return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg' : 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';

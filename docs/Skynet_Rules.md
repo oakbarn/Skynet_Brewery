@@ -5138,6 +5138,9 @@ of the Motorized Ball Valve Pictures for the one used on the 3 vessel."). Both p
   offered on a new valve or profile. A valve or profile that already has an open picture keeps it and still shows the box (Never Take Away).
 - **Orientation**: Horizontal, Vertical Left or Vertical Right (a User Defined valve: Horizontal or Vertical). Front, Front Elbow and
   45 degrees are not offered to a new valve; a valve already set that way keeps it and still shows that choice (Never Take Away).
+- **Vertical Left and Vertical Right switch the picture** (OakBarn Brewery, 2026-11-18: "That is the way the picture should be switched so it
+  is needed"; "Add it"): Vertical Left shows Motorized_TC15_Ball_Valve_Vertical_Left.svg (the 3 Vessel valve mirrored, motor left),
+  Vertical Right shows it flipped (motor right), the same on the Skynet Motorized Ball Valve and the KLD20T.
 - No picture is deleted until OakBarn Brewery picks which go. Help 36, 88, 117, 128, 131.
 
 ## 19. Vessel Rules
