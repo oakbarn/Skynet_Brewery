@@ -31,8 +31,8 @@ Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.ex
 - Si Skynet est déjà installé, il montre **un seul avertissement** : c'est l'installation Full et elle va TOUT ÉCRASER. Sur cette page :
   - **Get the Update Setup** ouvre la page de téléchargement et ferme le Full Setup. Prenez l'Update Setup (`Skynet_Brewer_Setup_<date>.exe`) quand vous voulez seulement une mise à jour : il garde tout.
   - **Close and Do Not Install** le ferme, et rien n'est changé.
-  - **1. Install and back up my old folders first (recommended)** (installer et sauvegarder d'abord mes anciens dossiers) est déjà choisi. Avant d'écraser, vos anciens dossiers (config, data, processes, media, backups et le dossier Import) sont **déplacés, pas supprimés**, dans `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.
-  - **2. Install with no backup** (installer sans sauvegarde) écrase tout et vos anciens dossiers sont **supprimés pour de bon**. Impossible de les récupérer.
+  - **1. Install with no backup** (installer sans sauvegarde) est déjà choisi. Il écrase tout et vos anciens dossiers sont **supprimés pour de bon**. Impossible de les récupérer.
+  - **2. Install and back up my old folders first** (installer et sauvegarder d'abord mes anciens dossiers) : avant d'écraser, vos anciens dossiers (config, data, processes, media, backups et le dossier Import) sont **déplacés, pas supprimés**, dans `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.
   - Cliquez ensuite sur **Install**.
 - Il est plus gros (environ 12 Mo au lieu d'environ 5 Mo). Pour une mise à jour rapide plus tard, prenez le Skynet Brewer Setup simple : vos images et sons restent en place.
 - La désinstallation est la même, quel que soit le Setup utilisé.

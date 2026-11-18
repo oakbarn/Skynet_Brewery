@@ -29,7 +29,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **Which Setup?** (OakBarn Brewery, 2026-11-17, Rule 9.22: "No extra steps for a User")
 
-- **New on this Windows computer:** `Skynet_Brewer_Full_Setup_<version>.exe`. It has every Skynet picture, sound and Sample Schema inside. It is always a full install that **overwrites everything**. If Skynet is already installed it shows one warning, with a link to the Update Setup, Close and Do Not Install, and one choice: Install and back up my old folders first (already picked: moved to `C:\Brewing\Skynet_Backups`) or Install with no backup.
+- **New on this Windows computer:** `Skynet_Brewer_Full_Setup_<version>.exe`. It has every Skynet picture, sound and Sample Schema inside. It is always a full install that **overwrites everything**. If Skynet is already installed it shows one warning, with a link to the Update Setup, Close and Do Not Install, and one choice: Install with no backup (already picked: old folders deleted for good) or Install and back up my old folders first (moved to `C:\Brewing\Skynet_Backups`).
 - **Updating:** `Skynet_Brewer_Setup_<version>.exe`. It brings the Skynet pictures, sounds and Sample Schemas added (or, for samples, fixed) since the last one, and keeps everything of yours. There is no separate Media Setup or Sample Schemas Setup any more.
 - **Mac, Linux, Raspberry Pi:** the panel zip, with the Media zip and Sample Schemas zip next to the installer.
 

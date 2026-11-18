@@ -31,8 +31,8 @@ New on this computer? Download **`Skynet_Brewer_Full_Setup_<date>.exe`**. It is 
 - If Skynet is already installed, it shows **one warning** that this is the Full install and will OVERWRITE everything. On that page:
   - **Get the Update Setup** opens the download page and closes the Full Setup. Use the Update Setup (`Skynet_Brewer_Setup_<date>.exe`) when you only want an update: it keeps everything.
   - **Close and Do Not Install** closes it, and nothing is changed.
-  - **1. Install and back up my old folders first (recommended)** is already picked. Before it overwrites, your old folders (config, data, processes, media, backups and the Import folder) are **moved, not deleted**, to `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.
-  - **2. Install with no backup** overwrites everything and your old folders are **deleted for good**. They cannot be brought back.
+  - **1. Install with no backup** is already picked. It overwrites everything and your old folders are **deleted for good**. They cannot be brought back.
+  - **2. Install and back up my old folders first**: before it overwrites, your old folders (config, data, processes, media, backups and the Import folder) are **moved, not deleted**, to `C:\Brewing\Skynet_Backups\Before_Full_Setup_<date>`.
   - Then click **Install**.
 - It is bigger (about 12 MB instead of about 5 MB). For a quick update later, use the plain Skynet Brewer Setup: your pictures and sounds stay where they are.
 - The Uninstall is the same one, whichever Setup you used.

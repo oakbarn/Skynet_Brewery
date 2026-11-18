@@ -10,8 +10,8 @@
 ; The Full Setup (Rule 9.20) has no choices (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 10): it is always a full
 ; install that OVERWRITES everything. When it finds a Skynet already installed it shows one warning page, with a link to the Update
 ; Setup (opens it and closes this one), Close and Do Not Install, and two ways to install (OakBarn Brewery, 2026-11-18): 1 Install
-; and back up my old folders first (the default: moved, never deleted, to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>)
-; or 2 Install with no backup (old folders deleted for good).
+; with no backup (the default: old folders deleted for good) or 2 Install and back up my old folders first (moved, never deleted,
+; to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>).
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures, sounds and Sample Schemas added since the last Update Setup are in it too, Rule 9.22)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -340,11 +340,11 @@ FunctionEnd
 ; that explains this is the Full install and will OVERWRITE everything. If Only an Update, get that Update. and then a link to the
 ; Update and clicking it closes the install. also a Close and Do Not install Option that closes the installer."; 2026-11-18: "Install
 ; with Backup Yes or Install No Backup"). The only choice is backup or no backup:
-; Install always overwrites ($Choice fresh, the same lib\freshstart.js as Start Fresh). Choice 1 (the default) first moves the old folders
-; to Skynet_Backups; choice 2 (no backup) does not, so they are deleted for good.
+; Install always overwrites ($Choice fresh, the same lib\freshstart.js as Start Fresh). Choice 1 (no backup, the default: "I do not
+; generally want a backup for a Full install") deletes the old folders for good; choice 2 first moves them to Skynet_Backups.
 Function FullFoundPage
   StrCpy $Choice "keep"
-  StrCpy $FullNoBackup 0
+  StrCpy $FullNoBackup 1
   ${IfNot} ${FileExists} "$INSTDIR\server.js"
     Abort   ; a new install: no warning
   ${EndIf}
@@ -358,16 +358,17 @@ Function FullFoundPage
   ${NSD_CreateLabel} 0 0 100% 34u "Found in $INSTDIR.$\r$\nThis is the Full install and it will OVERWRITE everything: every Schema, setting, user and password, Process, the brew log, every picture and sound, and the Import folder ($BrewDir\Import). You make the admin account again."
   Pop $0
 
-  ; Back up or not (OakBarn Brewery, 2026-11-18: "Install with Backup Yes or Install No Backup"). Backup is already picked.
-  ${NSD_CreateRadioButton} 0 36u 100% 10u "&1. Install and back up my old folders first (recommended)"
-  Pop $RadioBackup
-  ${NSD_CreateLabel} 12u 46u 96% 17u "Your old folders are moved to $BrewDir\Skynet_Backups\Before_Full_Setup_<date> first, so nothing is lost by mistake."
-  Pop $0
-  ${NSD_CreateRadioButton} 0 64u 100% 10u "&2. Install with no backup"
+  ; Back up or not (OakBarn Brewery, 2026-11-18: "Install with Backup Yes or Install No Backup"; "I do not generally want a backup
+  ; for a Full install"). No backup is already picked.
+  ${NSD_CreateRadioButton} 0 36u 100% 10u "&1. Install with no backup"
   Pop $RadioNoBackup
-  ${NSD_CreateLabel} 12u 74u 96% 10u "Your old folders are deleted for good. They cannot be brought back."
+  ${NSD_CreateLabel} 12u 46u 96% 10u "Your old folders are deleted for good. They cannot be brought back."
   Pop $0
-  ${NSD_Check} $RadioBackup
+  ${NSD_CreateRadioButton} 0 58u 100% 10u "&2. Install and back up my old folders first"
+  Pop $RadioBackup
+  ${NSD_CreateLabel} 12u 68u 96% 17u "Your old folders are moved to $BrewDir\Skynet_Backups\Before_Full_Setup_<date> first, so nothing is lost by mistake."
+  Pop $0
+  ${NSD_Check} $RadioNoBackup
 
   ${NSD_CreateLabel} 0 88u 100% 10u "Only want an update? Get the Update Setup instead (it keeps everything):"
   Pop $0
@@ -527,7 +528,7 @@ Section "Skynet Brew Panel" SecMain
       ${If} $FullNoBackup == 1
         DetailPrint "Install with no backup: your old folders are deleted for good."
       ${Else}
-        Call FullBackupOld   ; the Full Setup: old folders moved to Skynet_Backups first (choice 1, the default)
+        Call FullBackupOld   ; the Full Setup: old folders moved to Skynet_Backups first (choice 2)
       ${EndIf}
 !endif
     ${ElseIf} $Choice == "users"
