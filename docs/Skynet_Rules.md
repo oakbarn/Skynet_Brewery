@@ -4262,7 +4262,7 @@ the backup. Help 100 and 157.
   once brought up to the current Rules, Rule 9.13). `Sandbox/README.md` lists what came from where.
   The panel does not use `Sandbox/`, and it is left out of the release zip and the installer (so is `Delete/`, Rule 15.3).
 - **The OakBarn Brewery Scripts:** all 175 BruControl Scripts of the OakBarn Brewery configuration are kept in
-  [docs/OakBarn_Scripts](OakBarn_Scripts/README.md). **They are read only when OakBarn Brewery says so, or after asking
+  the private repository oakbarn/Skynet_Private (folder OakBarn_Scripts), not in this public repository. **They are read only when OakBarn Brewery says so, or after asking
   permission.** The one standing exception: a Process Template that is not finished yet is built on them.
 (thread "Keep templates and test bed to new Rules")
 
