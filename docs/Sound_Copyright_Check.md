@@ -40,8 +40,14 @@ written one." This page is that list for **sounds** (pictures are checked in the
 | Skynet_Siren.mp3 | **New.** Siren and two horn blasts, 7 s | Computer-made | None | Replaces the Pixabay fire trucks |
 | Skynet_Alien_Warning.mp3 | **New.** Space-alien warning tone, 4 s | Computer-made | None | Replaces warning_alien.wav |
 | Skynet_News_Bulletin.mp3 | **New.** News-flash beeps, 2 s | Computer-made | None | The tone half of we_interrupt.wav |
+| Skynet_Voice_Self_Destruct.mp3 | **New.** Voice: self destruct (just kidding) | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces autdestruct.wav |
+| Skynet_Voice_Onward.mp3 | **New.** Voice: "Brewers, onward!" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces boldly_go.wav |
+| Skynet_Voice_Not_Safe.mp3 | **New.** Voice: "Skynet says no" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces sorry_dave.wav |
+| Skynet_Voice_Off_To_Brew.mp3 | **New.** Voice: "Off to the brew house we go" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces heigh-ho |
+| Skynet_Voice_Brew_Day_Done.mp3 | **New.** Voice: "That is the end of brew day" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces porkypigthatAll.wav |
+| Skynet_Voice_Interrupt.mp3 | **New.** Voice: "We interrupt this brew day" | Kokoro voice bm_george (Apache 2.0), Skynet's own words | None | Replaces the voice half of we_interrupt.wav |
 
-The 8 new sounds are made by `tools/make-skynet-sounds.py`; running it again makes the very same files. Media stays add-only
+The 8 new sound effects are made by `tools/make-skynet-sounds.py` (running it again makes the very same files) and the 6 voice lines by `tools/make-voice-lines.py`. Media stays add-only
 (Rule 9.12): a better version later gets a new name.
 
 ## 2. OakBarn BruControl sounds that must never ship, and their Skynet replacement
@@ -58,11 +64,11 @@ The 8 new sounds are made by `tools/make-skynet-sounds.py`; running it again mak
 | two-fire-trucks-70776 (3).wav | Pixabay | Skynet_Siren.mp3 | None |
 | warning_alien.wav | Source unknown | Skynet_Alien_Warning.mp3 | None |
 
-### Film, TV and cartoon quotes (new words written; OakBarn Brewery makes the voice)
+### Film, TV and cartoon quotes (new words; Skynet voice made)
 
-A quote from a film or cartoon belongs to the studio. Each replacement below has **new words**, so it can be made with
-OakBarn Brewery's text to speech voice service, the same way as Alarm_Sound_Missing.mp3. Send the clip and Claude adds it to
-`media/sounds/Skynet` with its Media_Licenses.csv row. Change the words as you like; they only must not copy the quote.
+A quote from a film or cartoon belongs to the studio. Each replacement below has **new words**, spoken by the free Kokoro
+text to speech voice **bm_george** (a British man; OakBarn Brewery picked it, 2026-11-18). Kokoro is under the Apache 2.0
+license, which puts no limit on the audio it makes. They are in `media/sounds/Skynet`, made by `tools/make-voice-lines.py`.
 
 | BruControl sound | Why it is a risk | Skynet replacement (name) | Words to speak |
 |---|---|---|---|
@@ -71,7 +77,7 @@ OakBarn Brewery's text to speech voice service, the same way as Alarm_Sound_Miss
 | sorry_dave.wav | Film quote | Skynet_Voice_Not_Safe.mp3 | "Skynet says no. That step is not safe right now. Please check the brewery." |
 | heigh-ho ... off to work we go.wav | Film song | Skynet_Voice_Off_To_Brew.mp3 | "Time to brew! Off to the brew house we go." |
 | porkypigthatAll.wav | Cartoon voice and catch phrase (copyright and trademark) | Skynet_Voice_Brew_Day_Done.mp3 | "And that is the end of brew day. Cheers!" |
-| we_interrupt.wav | Source unknown | Skynet_News_Bulletin.mp3 (made), then Skynet_Voice_Interrupt.mp3 | "We interrupt this brew day for an important message from your brewery." |
+| we_interrupt.wav | Source unknown | Skynet_News_Bulletin.mp3, then Skynet_Voice_Interrupt.mp3 | "We interrupt this brew day for an important message from your brewery." |
 
 ### Songs (OakBarn Brewery's own Treblo songs)
 

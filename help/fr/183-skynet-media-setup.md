@@ -45,4 +45,4 @@ Nouveau sur cet ordinateur ? Téléchargez **`Skynet_Brewer_Full_Setup_<date>.ex
 
 - Quand un dessin Skynet est refait, il arrive comme une **nouvelle image avec un nouveau nom**. L'ancienne reste, donc chaque Schema qui l'utilise a le même aspect qu'avant.
 - Un Brain sur internet peut aussi obtenir les nouvelles images une à une avec **☰ Menu > Get Skynet pictures** (voir [Obtenir les images Skynet](59-get-skynet-pictures)).
-- Skynet ne livre que des images et des sons qu'il est libre de partager : ses propres dessins, ou ceux du domaine public ou sous une licence libre comme CC0, avec le crédit gardé là où la licence le demande.
+- Skynet ne livre que des images et des sons qu'il est libre de partager : les siens (sous la licence MIT), ceux du domaine public (CC0 compris), ou ceux sous la licence CC BY ou CC BY-SA, avec leur crédit dans les Media credits du README. Rien sous une licence non commerciale (NC) ou sans modification (ND).
