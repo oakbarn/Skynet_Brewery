@@ -289,3 +289,13 @@ docs/                DEVICE_PROTOCOL.md, MQTT_AND_VOICE.md, brewpanel.service, R
 - **Hardware testing:** the hardware layer is tested with the simulator and a simulated ESP32. It is not yet tested with a real Mega. The firmware sketches have not been compiled yet.
 - **Not built yet:** graphs on the Log page and PWM/analog outputs.
 - **Hardware safety still comes first.** Keep hard-wired safety devices: burner flame safety, float switches and emergency stop.
+
+## Media credits
+
+Skynet's pictures and sounds are its own (MIT License), public domain (CC0 included), or under CC BY or CC BY-SA with their
+credit here (Rule 9.12). The full list with sources is [docs/Media_Licenses.csv](docs/Media_Licenses.csv).
+
+- **Import program icon** (clinking beer mugs, `public/importer/importer-icon.svg`, `install/windows/importer.ico`): from
+  Google Noto Emoji, Apache License 2.0, https://github.com/googlefonts/noto-emoji.
+- **Skynet voice lines** (`media/sounds/Skynet/Skynet_Voice_*.mp3`): Skynet's own words, spoken by the Kokoro text to speech
+  model (Apache License 2.0, https://huggingface.co/hexgrad/Kokoro-82M), voice bm_george.
