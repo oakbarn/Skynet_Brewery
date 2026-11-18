@@ -5,7 +5,9 @@
 # It runs ONLY when someone presses Actions > Delete old Releases > Run workflow. It never runs on a merge.
 # It keeps the Release named in "keep_from" and every Release made after it. It deletes only Releases whose tag starts with
 # "PR<number>_" or "Skynet-v." (the Releases the Panel version workflow makes); any other Release is never touched.
-# The tags stay (they now point at the cleaned history); only the Release pages and their downloads go.
+# The tags stay; only the Release pages and their downloads go. First, every tag is moved to its commit in the cleaned history
+# (the list is .github/tag-map.txt, "tag new-commit", made by the history rewrite on 2026-11-18), because the rewrite could not
+# move the tags itself. A tag whose new commit is not on GitHub is left as it is and named in the log.
 # "dry_run" lists what would be deleted and deletes nothing.
 name: Delete old Releases
 
@@ -28,6 +30,24 @@ jobs:
   delete:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move every tag to the cleaned history
+        env:
+          DRY: ${{ github.event.inputs.dry_run }}
+        run: |
+          set -uo pipefail
+          moved=0; same=0; missing=0
+          while read -r tag sha; do
+            [ -n "$tag" ] || continue
+            if ! git cat-file -e "$sha^{commit}" 2>/dev/null; then echo "not on GitHub, left as it is: $tag"; missing=$((missing+1)); continue; fi
+            now=$(git rev-parse -q --verify "refs/tags/$tag^{commit}" || true)
+            if [ "$now" = "$sha" ]; then same=$((same+1)); continue; fi
+            if [ "$DRY" = "true" ]; then echo "would move $tag"; else git push -q --force origin "$sha:refs/tags/$tag" && echo "moved $tag"; fi
+            moved=$((moved+1))
+          done < .github/tag-map.txt
+          echo "Tags: $moved to move, $same already right, $missing not found."
       - name: Delete the Releases older than the one to keep
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
