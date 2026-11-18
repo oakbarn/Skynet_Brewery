@@ -44,6 +44,7 @@ Les images de vanne de Skynet sont des fichiers SVG dans `Images/samples`, donc 
 |---|---|
 | Vanne à boisseau motorisée TC 1.5", horizontale (la vanne du 3 Vessel, le premier choix) | Motorized_TC15_Ball_Valve_Horizontal.svg |
 | Vanne à boisseau motorisée TC 1.5", verticale, moteur à droite (la vanne du 3 Vessel, le premier choix) | Motorized_TC15_Ball_Valve_Vertical.svg |
+| Vanne à boisseau motorisée TC 1.5", verticale, moteur à gauche (la vanne du 3 Vessel, en miroir) | Motorized_TC15_Ball_Valve_Vertical_Left.svg |
 | Vanne à boisseau motorisée, horizontale | Valve_Motor_Ball_ClosedH.svg |
 | Vanne à boisseau motorisée, verticale, moteur à droite | Valve_Motor_Ball_ClosedV_RC.svg |
 | Vanne à boisseau motorisée, verticale, moteur à gauche | Valve_Motor_Ball_ClosedV_LC.svg |

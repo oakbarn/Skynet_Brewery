@@ -232,6 +232,7 @@
   { "id": 229, "file": "Alarms/Alarm_Hop_Back.svg" },
   { "id": 230, "file": "Alarms/Alarm_Hop_Fore.svg" },
   { "id": 231, "file": "Alarms/Alarm_Hop.svg" },
-  { "id": 232, "file": "Alarms/Alarm_Set_Hop_Cone.svg" }
+  { "id": 232, "file": "Alarms/Alarm_Set_Hop_Cone.svg" },
+  { "id": 233, "file": "Valves/Motorized_TC15_Ball_Valve_Vertical_Left.svg" }
  ]
 }

@@ -44,6 +44,7 @@ Skynet's own valve pictures are SVG files in `Images/samples`, so they stay shar
 |---|---|
 | Motorized TC 1.5" ball valve, horizontal (the 3 Vessel valve, the first choice) | Motorized_TC15_Ball_Valve_Horizontal.svg |
 | Motorized TC 1.5" ball valve, vertical, motor on the right (the 3 Vessel valve, the first choice) | Motorized_TC15_Ball_Valve_Vertical.svg |
+| Motorized TC 1.5" ball valve, vertical, motor on the left (the 3 Vessel valve, mirrored) | Motorized_TC15_Ball_Valve_Vertical_Left.svg |
 | Motorized ball valve, horizontal | Valve_Motor_Ball_ClosedH.svg |
 | Motorized ball valve, vertical, motor on the right | Valve_Motor_Ball_ClosedV_RC.svg |
 | Motorized ball valve, vertical, motor on the left | Valve_Motor_Ball_ClosedV_LC.svg |
