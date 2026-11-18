@@ -42,13 +42,18 @@ or smaller, the inside Hose or Pipe is drawn again to reach the IP.
 
 ## Its own dialog
 
-Its Properties are the **Hose Bib Widget** dialog: **State** (a slider, Open or Closed now), **1. Label** and **Label Visible**
-(🏷 Update to Suggested Name pops up once the Label is changed), **2. Name** with the **Change Name** box and **✏ Change Name**,
-**.confirmation**, the **Graphic** (its picture with its inside Hose or Pipe, kept up to date), **Picture**, **Orientation**
-(always Horizontal) with **Left / Right** (the wall on the right as drawn, or on the left), **IP** with **Hose or Pipe**, and
-**X**, **Y**, **Width**, **Height**.
+Its Properties are the **Hose Bib Widget** dialog, in the same look and order as the Pump's: the lock and **No Unlock** in the
+title line, **State** (a slider, Open or Closed now), **1. Label** and **Label Visible** (🏷 Update to Suggested Name pops up once
+the Label is changed), **Layer Order**, **2. Name** with the **Change Name** box and **✏ Change Name**, the Suggested Name, the
+**Graphic** (its picture with its inside Hose or Pipe, kept up to date), **Picture**, **Orientation** (Horizontal or Vertical) with
+**Left / Right**, **Hose or Pipe**, **IP**, **.confirmation**, **X**, **Y**, **Width** and **Height** on one line, and the Widget Type.
 
-**IP** is where its one IP is: Bottom Middle (the start), Bottom Left, Bottom Right or Left Middle. The spot is named as you see it,
-so on a Left Hose Bib, Bottom Left is still on the left.
+**Orientation** and **Left / Right**: Horizontal Right is the picture as drawn (the wall on the right), Horizontal Left is it
+mirrored (the wall on the left). Vertical turns it for a hose bib on an up and down pipe: Vertical Left points the handle to the
+left (the wall above), Vertical Right points it to the right (the wall below).
+
+**IP** is where its one IP is: one of the 8 spots on the edge of its box (Bottom Middle, Bottom Left, Bottom Right, Left Middle,
+Right Middle, Top Left, Top Middle, Top Right). The spot is named as you see it, whatever the Orientation and Left / Right, and the
+spots on the wall side are not offered (the house water comes from there).
 
 ![Hose Bib IP spots](help_pictures/Hose_Bib_IP_Spots.png)
