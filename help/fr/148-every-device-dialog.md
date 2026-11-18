@@ -43,7 +43,8 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
   disposés comme sur la pompe, et son IP fixé par le flexible ou le tuyau qui y est joint, jamais choisi dans une case). Ensemble,
   ils sont le Modèle auquel les autres fenêtres sont comparées. Depuis la Règle Skynet 18.49, l'**Orientation** de la pompe a
   l'aspect du Hose Bib : **Horizontal** grisé (une pompe est toujours à plat) avec **Left / Right** à côté ; et le Hose Bib a
-  l'**Overlay** de la pompe, un **Outlet IP Fitting**, et n'importe lequel de ses 8 endroits d'IP.
+  le **Cover** et le **Toggle**, l'**Overlay** et **Database and .API** de la pompe, un **Inlet** et un
+  **Outlet IP Fitting** (pas de Model), et n'importe lequel de ses 8 endroits d'IP.
 - **State, Name et Change Name** (Skynet Rule 18.45) : **State** (sur chaque Device On / Off, et une Manual Valve) est un curseur qui met
   l'élément On ou Off (une vanne : Open ou Closed) tout de suite, comme un clic sur lui dans son Tab ; ce n'est pas un réglage, donc
   Save et Close ne le changent pas. Le **Name** est grisé ; la case **Change Name** dessous commence avec le Name actuel, et **✏

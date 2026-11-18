@@ -50,7 +50,8 @@ Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le 
 **No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
 to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
 Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
-**Orientation** avec **Left / Right**, **Hose or Pipe**, **Overlay**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
+**Orientation** avec **Left / Right**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
+**Inlet IP Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
 le Widget Type (Règle Skynet 18.48). Il n'y a pas de case Picture (un Hose Bib a une seule image Skynet) ni de case IP (le flexible
 ou le tuyau que vous joignez la fixe, voir plus haut).
 
@@ -69,6 +70,18 @@ pas.
 
 **Overlay** : ce qui est dessiné par-dessus tant qu'il est ouvert. Vide est le signe ouvert de la Manual Valve (un anneau vert et une
 coche) ; les autres sont les Overlays de la Pump (Lightning Bolt ...).
+
+**Cover** et **Toggle** (Règle Skynet 18.49) : le Cover est un cache de couleur sur le robinet (les couleurs de la Pump), par
+exemple un cache en mousse. Le Toggle est ce que fait un clic dessus sur son Tab : **On/Off** (un clic l'ouvre, le suivant le ferme)
+ou **Push Button** (ouvert seulement tant que vous le tenez appuyé, pour compléter une cuve à la main).
+
+**Database and .API** (le ⬢ sur la ligne Overlay, comme sur la Pump) : son .state peut aller dans la base de données de brassage, et
+un programme extérieur ou une commande vocale peut le lire, ou, avec .API Read & Control, le demander. Demandé de l'extérieur, il
+est demandé **à la main**, comme par une ligne de Process : le Tab affiche « Open it by hand », quelqu'un tourne le vrai robinet et
+clique dessus, et son .state le confirme alors.
+
+**Inlet IP Fitting** : le raccord du côté du mur, là où arrive le tuyau de la maison (MPT1/2 au départ). Il n'a pas d'IP sur le Tab,
+c'est donc une information seulement.
 
 **Outlet IP Fitting** : l'End Fitting de son seul IP (Règles Skynet 2.57 et 18.49). Un robinet de jardin a un filetage mâle de tuyau
 d'arrosage, **MGH3/4**, et c'est ce qu'il a au départ. **FGH3/4** est le filetage femelle de tuyau d'arrosage. Un flexible ou un

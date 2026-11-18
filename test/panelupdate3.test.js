@@ -1,6 +1,10 @@
 // Panel Update Final 3 (OakBarn Brewery, 2026-11-18, the Pump and the Hose Bib match each other; Rule 18.49, Help 115, 141, 148)
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os'; import path from 'node:path';
+import { Store } from '../lib/store.js';
+import { Engine } from '../lib/engine.js';
+import { apiPut, apiList } from '../lib/itemapi.js';
 import { ipFamily, ipMate, ipFits, isIpCode, sizedIp, ownerIpType, fitOwnedEnds, HOSE_BIB_PIC, HOSE_BIB_END } from '../public/iptype.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
@@ -30,5 +34,22 @@ const cfg = { graphics: [{ id: 'b', kind: 'ip', fitting: 'manualValve', image: H
 assert.equal(ownerIpType(cfg, 'eq:b:out'), HOSE_BIB_END);
 fitOwnedEnds(cfg); assert.equal(cfg.graphics[1].ipTypeFrom, 'FGH3/4');
 cfg.graphics[0].ipTypeOut = 'FGH3/4'; fitOwnedEnds(cfg); assert.equal(cfg.graphics[1].ipTypeFrom, 'MGH3/4');
+// the rest of #4 (OakBarn Brewery: "B and Model is only left out"): Cover and Toggle, Database and .API, Inlet IP Fitting
+for (const k of ["['mvCover', 'Cover'", "['mvTap', 'Toggle'", "dbPop: true", "['ipTypeIn', 'Inlet IP Fitting'"]) assert.ok(hb.includes(k), k);
+assert.ok(!hb.includes("'Model'"), 'no Model');
+assert.match(app, /if \(kind === 'el' \|\| isTapMv\(item\)\) dbFromWork\(work, item\);/);
+assert.match(app, /const mvHoldGfx = id =>/, 'Push Button: open only while held');
+{ // an outside program or a Voice Command asks for it by hand, the same as a Process line
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'pu3')), cfgF = path.join(d, 'c.json');
+  fs.writeFileSync(cfgF, JSON.stringify({ elements: [], graphics: [{ id: 'g1', kind: 'ip', fitting: 'manualValve', image: HOSE_BIB_PIC, name: 'wgt_TWV_Chiller~water_BH', label: 'Chiller water', workspace: 'BH', api: 'getput', apiName: 'chiller water' }] }));
+  const store = new Store(cfgF, path.join(d, 'data')); store.load();
+  const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
+  assert.ok(apiList(store).some(x => x.name === 'wgt_TWV_Chiller~water_BH'), 'listed for outside programs');
+  const r = apiPut(store, 'Chiller Water', null, true);
+  assert.equal(r.value, false, 'not turned from outside');
+  assert.deepEqual(eng.valveList().map(a => [a.name, a.open, a.process]), [['wgt_TWV_Chiller~water_BH', true, 'API']], 'asked for by hand');
+  store.setProp('wgt_TWV_Chiller~water_BH', 'state', true, 'ui');
+  assert.equal(eng.valveList().length, 0, 'clicked open: the ask goes away');
+}
 assert.match(rules, /^18\.49 \*\*Panel Update Final 3/m);
 console.log('panel update 3 tests passed');

@@ -1731,6 +1731,9 @@ const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v 
 const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
 // a Hose Bib's open Overlay may be picked, as on the Pump (Panel Update Final 3 #4, Rule 18.49): the Manual Valve open ring unless another
 // is picked (a tint is not offered: it colors a pump's own drawing)
+// a Hose Bib's Cover (Panel Update Final 3 #4, Rule 18.49): a rounded colored cover over the body of the hose bib, as a Pump's Cover goes
+// over its motor; under the open Overlay
+const hbCoverDiv = c => h('div', { class: 'hbCover', style: `background:${PUMP_COVER_COLORS[c]}` });
 const mvOverPic = g => g?.mvOverlay && !String(g.mvOverlay).startsWith('tint:') ? g.mvOverlay : MV_OVERLAY;
 // Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. While open the Tab shows the open overlay on
 // top of it (Fritz, 2026-11-05: the _Open pictures are retired to Delete/, an Overlay shows open)
@@ -1953,7 +1956,7 @@ function buildIp(g) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:${isMv(g) ? mvTransform(g) || 'none' : `rotate(${+g.rotate || 0}deg)`}"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
   if (isTapMv(g)) { n.classList.add('hoseBib'); n.insertAdjacentHTML('beforeend', hbLinkSvg(g)); }      // its picture top right, its inside Hose or Pipe to its IP (Rule 18.45)
-  if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(mvOverPic(g))}")` })); }
+  if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (isTapMv(g) && PUMP_COVER_COLORS[g.mvCover]) n.append(hbCoverDiv(g.mvCover)); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(mvOverPic(g))}")` })); }
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (g.labelVisible && g.label && !plain) n.append(widgetLabel(g, 'below'));       // a pipe fitting has no label
@@ -3402,11 +3405,24 @@ for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(
 document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
 $('#ws').addEventListener('contextmenu', ev => { if (!editing && ev.target.closest('.el.k-pushbutton')) ev.preventDefault(); });
 
+// A Hose Bib set to Push Button (Panel Update Final 3 #4, OakBarn Brewery, 2026-11-18: "You could have manual valve that uses both the
+// Toggle and Push Button"; Rule 18.49): open only while it is held down on its Tab, closed again when it is let go
+let mvHeld = null;
+const mvHoldGfx = id => { const g = S.config.graphics.find(x => x.id === id); return g && isTapMv(g) && g.mvTap === 'hold' ? g : null; };
+const mvHoldSet = (g, open) => api('POST', '/ui/set', { name: g.name, prop: 'state', value: open }).then(() => setMvOpen(g.name, open)).catch(x => toast(x.message, true));
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing || ev.button !== 0) return;
+  const n = ev.target.closest('.gfx.ip[data-fit="manualValve"]'), g = n && mvHoldGfx(n.dataset.gid); if (!g) return;
+  if (!can('operator')) return toast('Only an operator or an admin can open or close a valve', true);
+  if (!g.name) return toast('Save the layout once (Edit layout > Save layout) so this Manual Valve gets its name', true);
+  ev.preventDefault(); mvHeld = g; mvHoldSet(g, true);
+});
+for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, () => { if (mvHeld) { const g = mvHeld; mvHeld = null; mvHoldSet(g, false); } });
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
   if (dualSkipClick) { dualSkipClick = false; return; }       // a Dual Action held as a Push Button: its let go is not a click
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
-  if (mv) return toggleManualValve(mv.dataset.gid);
+  if (mv) return mvHoldGfx(mv.dataset.gid) ? undefined : toggleManualValve(mv.dataset.gid);      // a Push Button works on press and let go
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
 
@@ -9063,6 +9079,7 @@ const MV_TIPS = {
   orient: '⟪img:help_pictures/Manual_Valve_Orientation.png⟫Horizontal: for a level pipe. Vertical: for an up and down pipe.\n\nA front view (looking down the pipe) has no Orientation. A Hose Bib may be Horizontal or Vertical.',
   side: 'Horizontal: Right is the picture as drawn, Left is it mirrored (a Hose Bib: the wall on the right or on the left). Vertical: the handle points to the Left or to the Right (a Hose Bib: turned, the wall above or below).\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
 };
+const HOSE_BIB_IN = 'MPT1/2';      // the house pipe end a hose bib screws onto: 1/2" male pipe thread to start (Rule 18.49)
 const HB_OVERLAYS = v => [['', 'Manual Valve open (green ring and tick)'], ...OVERLAY_GRAPHICS.filter(([, p]) => !p.startsWith('tint:')).map(([t, p]) => [p, t]),
   ...(v && !v.startsWith('tint:') && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const MV_ORIENTS = [['h', 'Horizontal'], ['v', 'Vertical']], MV_SIDES = [['r', 'Right'], ['l', 'Left']];
@@ -9070,6 +9087,9 @@ const HB_TIPS = {
   graphic: '⟪img:help_pictures/Hose_Bib_8_IPs.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right, Overlay and its own short Hose or Pipe from the hose thread to its one IP. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, like a Pump. You do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot, and the Graphic shows it there. Once a pipe or hose is joined, the IP stays put.',
   link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
   overlay: 'What is drawn on top of the Hose Bib while it is open. Empty: the Manual Valve open sign (a green ring and a tick). The others are the Pump\'s Overlays.',
+  cover: 'A colored cover over the Hose Bib, as a Pump\'s Cover: for example a foam faucet cover that keeps it from freezing, or a color that tells hose bibs apart. None: the plain brass hose bib.',
+  toggle: 'What a click on it on its Tab does. On/Off: one click opens it, the next closes it. Push Button: it is open only while it is held down, for topping off a vessel by hand (no Done to press: holding it is the confirmation). With .confirmation on, On/Off asks Done first.',
+  inlet: 'Inlet IP Fitting: the fitting on the wall side, where the house water pipe comes in (MPT1/2 to start). It has no IP on the Tab (the house plumbing is not drawn), so it is information only, for the parts list.',
   fitting: 'Outlet IP Fitting: the fitting on the end of its one IP, where the water comes out. A household hose bib has a male garden hose thread, MGH3/4 (the start). FGH3/4 is a female garden hose thread.\n\nA hose or pipe joined to it fits it by itself (an FGH3/4 hose end on an MGH3/4 Hose Bib). The End Fitting is information only.',
   size: 'Its size on the Tab in pixels. A Hose Bib is sized by hand, like a Pump; its inside Hose or Pipe is drawn again to reach its IP.',
 };
@@ -9102,12 +9122,15 @@ const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }],
   // Panel Update Final 3 #4 (OakBarn Brewery, 2026-11-18: "Missing so add all those Fields to the Hose Bib"; "the Type of End. Add FGH
   // and MGH"; Rule 18.49): the Overlay and the End Fitting of its one IP, in the Pump's order
-  ['mvOverlay', 'Overlay', 'sel', HB_OVERLAYS(it.mvOverlay), false, false, { tip: HB_TIPS.overlay }],
+  ['mvCover', 'Cover', 'sel', [['', 'None'], ...Object.keys(PUMP_COVER_COLORS).map(k => [k, k])], false, false, { tip: HB_TIPS.cover,
+    with: ['mvTap', 'Toggle', 'sel', [['', 'On/Off'], ['hold', 'Push Button']], false, false, { tip: HB_TIPS.toggle }] }],
+  ['mvOverlay', 'Overlay', 'sel', HB_OVERLAYS(it.mvOverlay), false, false, { tip: HB_TIPS.overlay, dbPop: true }],
+  ['ipTypeIn', 'Inlet IP Fitting', 'sel', ipChoices(it.ipTypeIn, HOSE_BIB_IN, 'FPT1/2'), false, false, { tip: HB_TIPS.inlet }],
   ['ipTypeOut', 'Outlet IP Fitting', 'sel', ipChoices(it.ipTypeOut, HOSE_BIB_END, 'FGH3/4'), false, false, { tip: HB_TIPS.fitting }],
   MV_CONFIRM, ...MV_XYWH(it, HB_TIPS.size), wgtType('Hose Bib (Tap Water Valve)', MV_KINDS_TIP)];
 const mvWidgetFields = it => {
   it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
-  if (isTapMv(it)) { it.ipTypeOut ||= HOSE_BIB_END; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
+  if (isTapMv(it)) { it.ipTypeOut ||= HOSE_BIB_END; it.ipTypeIn ||= HOSE_BIB_IN; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
   const front = mvFront(it);
   // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
   const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);
@@ -10533,11 +10556,12 @@ function mvGraphic(label, obj) {
   const draw = () => {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const w = { ...obj };
-    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink', 'mvOverlay']) if (q(k)) w[k] = q(k).value;
+    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink', 'mvOverlay', 'mvCover']) if (q(k)) w[k] = q(k).value;
     const src = mvPic(w), hb = isTapMv(w);
     pic.style.backgroundImage = src ? `url("${media(src)}")` : '';
     pic.classList.toggle('hoseBib', hb);      // a Hose Bib: its picture top right and its inside Hose or Pipe to its IP
     pic.innerHTML = hb ? hbLinkSvg(w) : src ? '' : `<svg viewBox="0 0 30 30"><g class="edge">${FIT_SVG.manualValve}</g><g class="core">${FIT_SVG.manualValve}</g></svg>`;
+    if (hb && PUMP_COVER_COLORS[w.mvCover]) pic.append(hbCoverDiv(w.mvCover));      // its Cover (Rule 18.49)
     pic.append(ovl);
     ovl.style.backgroundImage = `url("${media(mvOverPic(w))}")`;
     ovl.classList.toggle('hidden', !mvOpen(S.config.graphics.find(g => g.id === obj.id) || obj));
@@ -11206,7 +11230,7 @@ async function editItem(kind, id) {
   if (kind === 'el' && item.type === 'alarm' && item.alarmClass) chainToWork(work);      // the Alarm Chain's steps as boxes (Rule 7.16)
   if (inLayers(item)) work.layer = layerNow(draft, item) || 1;          // Layer Order: its place on its Tab now (a new item is 1, on top; Rule 1.29)
   const layer0 = work.layer;
-  if (kind === 'el') dbToWork(work);
+  if (kind === 'el' || isTapMv(item)) dbToWork(work);      // a Hose Bib has Database and .API too (Rule 18.49)
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
@@ -11282,7 +11306,7 @@ async function editItem(kind, id) {
     // No Unlock (OakBarn Brewery, 2026-11-15, Rule 2.12: "An attribute on IPs that says No Unlock individually"): switched on, it
     // locks the IP or fitting, and 🔓 Unlock All passes it by
     if (work.noUnlock) work.locked = true; else delete work.noUnlock;
-    if (kind === 'el') dbFromWork(work, item);
+    if (kind === 'el' || isTapMv(item)) dbFromWork(work, item);
     if (kind === 'el' && isHeatElem({ ...item, ...work })) work.pwm = pwmPinOk({ ...item, ...work });      // the Port picked decides (Rule 6.19)
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);

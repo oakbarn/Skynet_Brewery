@@ -22,7 +22,8 @@ assert.equal(store.manualValves().length, 1);
 
 // only a click (source ui) changes it, and it is kept in the layout
 assert.throws(() => store.setProp('ManualValve_1', 'state', true, 'script'), /only a click/);
-assert.throws(() => store.setProp('ManualValve_1', 'state', true, 'api'), /only a click/);
+{ let asked = null; store.once('mvask', (n, v) => { asked = [n, v]; });      // from outside: asked for by hand, never turned (Rule 18.49)
+  assert.equal(store.setProp('ManualValve_1', 'state', true, 'api'), false); assert.deepEqual(asked, ['ManualValve_1', true]); assert.equal(store.getProp('ManualValve_1', 'state'), false); }
 store.setProp('ManualValve_1', 'state', true, 'ui');
 assert.equal(store.getProp('ManualValve_1', 'state'), true);
 assert.equal(JSON.parse(fs.readFileSync(cfg, 'utf8')).graphics[0].open, true, 'saved in the layout');

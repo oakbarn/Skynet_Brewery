@@ -1403,6 +1403,7 @@ dialog .fldPair .pairLbl:hover + :is(input, select, textarea):disabled { --dne: 
 /* a Hose Bib on its Tab: the picture in the top right three quarters of its box, its own Hose or Pipe below it (Rule 18.45) */
 #ws .gfx.ip.has-img.hoseBib { background-size: 75% 75%; background-position: right top; overflow: visible; }
 #ws .gfx.ip.hoseBib .mvOver { inset: -10% -10% 15% 15%; }
+.hbCover { position: absolute; left: 46%; top: 24%; width: 44%; height: 33%; border-radius: 40% 40% 30% 30%; opacity: .88; pointer-events: none; box-shadow: inset 0 -4px 6px rgba(0,0,0,.25); }      /* a Hose Bib's Cover over its body (Rule 18.49) */
 dialog select:disabled:not(fieldset:disabled *), #menuPane select:disabled:not(fieldset:disabled *) { background-position: right 24px center; padding-right: 44px; }
 /* the ⛔ stays bright red: a greyed box shows its words dim, not the whole box faded (the sign would fade with it) */
 #dlgBody label.greyed + :is(input, select):disabled, #dlgBody label.greyed + .fldPair { opacity: 1; }
