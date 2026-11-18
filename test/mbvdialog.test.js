@@ -67,7 +67,7 @@ console.log('mbvdialog tests passed');
   assert.match(app, /\['_pv', 'Graphic', 'devpic', null, false, false, \{ tip: T\.vGraphic, cls: 'mbvModel'/, 'the valve\'s Graphic marks the Model dialog');
   for (const part of ['', ' .dlgHead', ' .dlgBottomBar']) assert.ok(css.includes(`dialog#dlg:has(#dlgBody .mbvModel)${part}`), 'frozen top, no bottom row: ' + (part || 'dialog'));
   assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\), dialog#dlg:has\(#dlgBody \.mbvModel\) \{ width: min\(680px, 94vw\); \}/, 'as wide as the pump dialog');
-  assert.match(app, /const onModelDialog = \(\) => !!document\.querySelector\('dialog#dlg\[open\] #dlgBody \[data-k="pumpModel"\], dialog#dlg\[open\] #dlgBody \.mbvModel'\)/, 'its ⬢ and ⬆ pop-ups: frozen top with Keep');
+  assert.match(app, /const onModelDialog = \(\) => !!document\.querySelector\('dialog#dlg\[open\]'\)/, 'its ⬢ and ⬆ pop-ups: frozen top with Keep (every dialog now, Rule 18.43)');
   assert.match(app, /const pumpFocus = dd && \(isPumpDev\(e\) \|\| mbv\)/, 'the Rule 18.38 focus order');
   assert.match(app, /if \(pumpFocus && mbv && filled && ps && !ps\.disabled && ps\.offsetParent !== null\) ps\.focus\(\)/, 'its Label starts filled in, so the focus starts on the Port');
   assert.match(app, /\.\.\.\(isPumpDev\(e\) \|\| mbv \? PUMP_XYWH\(after\)/, 'Add box: X, Y, Width, Height on one line');

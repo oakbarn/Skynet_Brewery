@@ -1361,6 +1361,26 @@ dialog#dlg:has(#dlgBody .mbvModel) .dlgHead { position: sticky; top: 0; z-index:
 dialog#dlg:has(#dlgBody .mbvModel) .dlgBottomBar { display: none; }
 /* Tab Settings: a box that gets the focus (the Name after a ⚠) scrolls into view below the frozen top, not under it */
 dialog#dlg:has(#dlgBody [data-k="vSizer"]) { scroll-padding-top: 8em; }
+/* EVERY dialog follows the Blichmann Model (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann
+   Model"; "Keep Dialogs Clean"; Rule 18.43): every Properties and Add box is as wide as the Pump's, its ☰, title and buttons stay
+   frozen at the top while the rest scrolls, and the bottom row of buttons is not shown (Rule 2.51, the global update). */
+dialog#dlg { width: min(680px, 94vw); padding-top: 0; scroll-padding-top: 8em; }
+dialog#dlg .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+dialog#dlg .dlgBottomBar { display: none; }
+/* every other dialog with its buttons at the top AND the bottom: the top frozen, the same row at the bottom gone (freezeDialogTop) */
+dialog .dupBottom { display: none; }
+/* every ⬢ and ⬆ pop-up: title and buttons frozen at the top, no bottom row (layerDialog always builds .miniHead now) */
+.miniDlg:has(> .miniHead) { padding-top: 0; }
+.miniDlg .miniHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
+/* A greyed out box shows the Do Not Enter sign ⛔ (OakBarn Brewery, 2026-11-18: "I prefer the do not enter icon to the Hover Read on
+   greyed fields"): a box that can not be changed here has the red sign at its right end, in every dialog, pop-up and ☰ Menu tab. A
+   whole form shown to look at only (a locked fieldset) gets none, to keep it clean. */
+dialog :is(input, select, textarea):disabled:not([type="checkbox"], [type="radio"], [type="hidden"], [type="color"], [type="range"]):not(fieldset:disabled *),
+#menuPane :is(input, select, textarea):disabled:not([type="checkbox"], [type="radio"], [type="hidden"], [type="color"], [type="range"]):not(fieldset:disabled *) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-size: 16px 16px; background-position: right 6px center; padding-right: 28px;
+}
+dialog select:disabled:not(fieldset:disabled *), #menuPane select:disabled:not(fieldset:disabled *) { background-position: right 24px center; padding-right: 44px; }
 /* Two-part paths (Rule 7.23): the Folder line under a picture or sound list */
 .gpick .gpickFolder { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 6px; font-size: .9em; }
 .gpick .gpickFolder.hidden { display: none; }

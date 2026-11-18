@@ -5983,7 +5983,7 @@ async function newDeviceDialog(e, hint, what) {
     // set for good until ➕ Add Device saves it.
     if (dd && conf && wireKey(w)) {
       const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
-      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.title = 'Confirmed: the board and pin it is wired to. Cancel to change it.'; }
+      for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it (Rule 18.43)
       dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
       setWireTips(dv, CONFIRMED_WIRE_TIP);
     }
@@ -9036,6 +9036,8 @@ function vpxApply(g, x) {
     else { if (!none(x[p + 'units'])) e.units = x[p + 'units']; if (none(x[p + 'offset'])) delete e.offset; else e.offset = +x[p + 'offset']; }
   }
 }
+// the Vessel Device's built in part sections (put back 2026-11-18: the list had gone missing, so a Vessel Device's Properties would not open)
+const VP_SECS = [['element', 'Heating Element', e => e.vpKind === 'element'], ['probe', 'Thermowell / Probe', e => e.vpKind === 'probe' || e.vpKind === 'thermowell']];
 function vpSections(it, edit = false) {
   const els = (draft || S.config).elements.filter(e => e.integratedIn === it.id && isVPart(e)), out = [];
   const open = e => () => {
@@ -9290,6 +9292,8 @@ function field(f, obj) {
       parts.push(lbl, o2[1]);
     }
     out[1] = h('div', { class: 'fldPair' + (x.pairCls ? ' ' + x.pairCls : '') }, ...parts);
+    // X, Y, Width and Height on one line (Rule 18.43): Autosize to pipe still greys the Width and Height
+    if (x.pairCls === 'xywh' && autoSized(obj)) for (const i of out[1].querySelectorAll('[data-k="w"], [data-k="h"]')) i.disabled = true;
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
@@ -9311,7 +9315,7 @@ function field(f, obj) {
   if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
     // wiring and almost never change, so there is no ✏ Change; the Device keeps its hidden key and only its Name changes (✏ Change name)
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
-    for (const i of ins()) { i.disabled = true; i.title = 'Set when it was added: the board and pin it is wired to'; }
+    for (const i of ins()) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it, no hover read (OakBarn Brewery, 2026-11-18, Rule 18.43)
     out[0].classList.add('greyed');
     for (const l of [out[0], ...(box.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {      // both balloons say it first (Dialog 2 #3)
       l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = SET_WIRE_TIP + ((l.dataset.help || (l === out[0] ? x.tip : '')) ? '\n\n' + (l.dataset.help || x.tip) : '');
@@ -9675,7 +9679,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', {}, label), h('div', { class: 'cpick' }, sw, s, val), ...row.els];
   }
   else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
-    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField', title: 'Read only' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
+    return [h('label', { class: 'greyed' }, label), h('input', { type: 'text', value: typeof opts === 'string' ? opts : v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed roField' })];      // a text in opts is what is shown (e.g. DO@Pump, Rule 18.18)
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, then Custom: the Color Picker and the Color (RGB) box (Rule 2.48)
     const cols = [...(CHAIN_RE.test(key) ? [['No Change', CHAIN_KEEP]] : []), ...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [customColorName(c), c])];      // an Alarm Chain step starts on No Change (Rule 7.16)
@@ -10091,6 +10095,26 @@ function cleanFields(list, sink) {
     const g = withTip(f, m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.')); g[1] = m[1]; return g;
   });
   if (!fs.some(INPUT_KINDS)) return fs;      // only a message: its words are what it says
+  // Keep Dialogs Clean (OakBarn Brewery, 2026-11-18, Rule 18.43; KISS, Rule 11.8): a name that still carries an explanation in ( )
+  // beside its own Hover Help shows the short name only; the explanation goes first in that Hover Help. A short ( ) such as
+  // (Horizontal), (pixels) or (ms) stays.
+  for (let i = 0; i < fs.length; i++) {
+    const f = fs[i];
+    if (!INPUT_KINDS(f) || typeof f[1] !== 'string' || !f[6]?.tip || typeof f[6].tip !== 'string') continue;
+    const m = /^(.+?)\s*\(([^()]{14,})\)\s*$/.exec(f[1]);
+    if (!m) continue;
+    const g = [...f], why = m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.');
+    g[1] = m[1]; g[6] = { ...f[6], tip: why + '\n\n' + f[6].tip }; fs[i] = g;
+  }
+  // X, Y, Width and Height on one line in every dialog, as on the Pump (Rules 18.41, 18.43)
+  for (let i = 0; i + 3 < fs.length; i++) {
+    const four = fs.slice(i, i + 4);
+    if (four.map(f => f?.[0]).join() !== 'x,y,w,h' || !four.every(f => f[2] === 'num' && !f[6]?.with && !f[6]?.showIf)) continue;
+    const short = (f, l) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); g[1] = l; return g; };
+    const x = short(four[0], 'X (Horizontal)');
+    x[6] = { ...(x[6] || {}), pairCls: 'xywh', with: [short(four[1], 'Y (Vertical)'), short(four[2], 'Width'), short(four[3], 'Height')] };
+    fs.splice(i, 4, x);
+  }
   for (let i = 0; i < fs.length; i++) fs[i] = titled(fs[i]);
   const out = [], top = [];
   for (let i = 0; i < fs.length; i++) {
@@ -10490,7 +10514,9 @@ async function dbGroupDialog(g, me, cur) {
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
 // the Motorized Ball Valve too (OakBarn Brewery, 2026-11-18: "fix all dialogs Now (exception) to the Blickmann Model Standard", Rule 18.41)
-const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"], dialog#dlg[open] #dlgBody .mbvModel');
+// EVERY dialog now (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model", Rule 18.43): a pop-up
+// opened from any Properties or Add box says Keep (its settings go back into that box, whose own Save saves them)
+const onModelDialog = () => !!document.querySelector('dialog#dlg[open]');
 function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false, saveNow = false } = {}) {
   return new Promise(res => {
     const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
@@ -10500,8 +10526,9 @@ function layerDialog(title, build, canDelete = false, { bottom = true, model: as
     // a pop-up to look at only (the Model's ⬢ Pump facts, Dialog 2 #3): one ◀ Back button, nothing to change
     const viewBar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', title: 'Back to the dialog', onclick: () => done('cancel') }, '◀ Back'));
     if (view) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), viewBar()), body);
-    else if (model) d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
-    else d.append(h('h3', {}, title), bar(), body, ...(bottom ? [bar()] : []));      // Label Attributes: no bottom row (Rule 2.52)
+    // every pop-up: title and buttons frozen at the top, no bottom row (Rule 2.51; all dialogs, Rule 18.43). bottom is kept as an
+    // option for its callers but no longer adds a second row.
+    else d.append(h('div', { class: 'miniHead' }, h('h3', {}, title), bar()), body);
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
     const done = r => { d.close(); d.remove(); res(r); };
@@ -14119,8 +14146,23 @@ function addDialogMenu(d) {
 // the model): "This is on the model ... Wait for that until I am 100% Finished with the model". The ☰, the title and the buttons of the
 // Properties / Add box are kept together in .dlgHead; the CSS freezes it, and hides the bottom row, only when the box holds a Pump
 // (dialog#dlg:has([data-k="pumpModel"])). Every other dialog looks as before.
+// EVERY dialog now (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model", Rule 18.43): the
+// Properties and Add boxes (#dlg) always freeze (the CSS no longer waits for a Pump); any other dialog that has the same row of buttons
+// at its top and at its bottom gets its top frozen too, and the bottom row is not shown (freezeDupBars).
+function freezeDupBars(d) {
+  if (d.id === 'dlg' || d.classList.contains('frozenDlg') || d.querySelector(':scope > .miniHead')) return;
+  const host = d.querySelector(':scope > form') || d;
+  const kids = [...host.children], bars = kids.filter(k => k.classList.contains('bar'));
+  if (bars.length < 2) return;
+  const top = bars[0], last = bars[bars.length - 1], words = b => b.textContent.replace(/\s+/g, ' ').trim();
+  if (words(top) !== words(last) || kids.indexOf(last) <= kids.indexOf(top) + 1) return;      // only a true copy of the top row, below the body
+  const head = h('div', { class: 'frozenHead' });
+  host.insertBefore(head, kids[0]);
+  for (const k of kids.slice(0, kids.indexOf(top) + 1)) head.append(k);
+  last.classList.add('dupBottom'); d.classList.add('frozenDlg');
+}
 function freezeDialogTop(d) {
-  if (d.id !== 'dlg') return;
+  if (d.id !== 'dlg') return freezeDupBars(d);
   const host = d.querySelector(':scope > form') || d;
   if (host.querySelector(':scope > .dlgHead')) return;
   const kids = [...host.children], top = kids.find(k => k.classList.contains('bar'));

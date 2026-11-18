@@ -492,7 +492,7 @@ top and no bottom row; Keep is blue like Save was and puts the settings back int
 Pop-ups of other dialogs keep Save and their bottom row for now. **Any dialog that is updated** (OakBarn Brewery, 2026-11-14:
 "Apply the Freeze to any dialog that is updated"; "Freeze top and get rid of bottom buttons"): from now on, each time a dialog or pop-up is changed, it gets the frozen top too
 (its title and Cancel and Save, or its buttons, stay at the top while the rest scrolls; the bottom row is not shown). Done so far: the
-Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37); the ☰ Menu > Default settings Tab (2026-11-16, Rule 2.42); the ☰ Menu > Pump Profile tab and the other profile tabs that share its screen (Valve, Tab Background, Mash, Boil, Water Profile; 2026-11-16, OakBarn Brewery: "bring up to Blickman Model"); the Motorized Ball Valve Add box, Properties and pop-ups, 2026-11-18, Rule 18.41). Dialogs not changed keep their top and bottom rows: "Once I am
+Pipe and Hose Properties and the Move pop-up of a pipe or hose (Rule 5.37); the ☰ Menu > Default settings Tab (2026-11-16, Rule 2.42); the ☰ Menu > Pump Profile tab and the other profile tabs that share its screen (Valve, Tab Background, Mash, Boil, Water Profile; 2026-11-16, OakBarn Brewery: "bring up to Blickman Model"); the Motorized Ball Valve Add box, Properties and pop-ups, 2026-11-18, Rule 18.41); and since 2026-11-18 **every dialog** (Rule 18.43, the global update). Before then, dialogs not changed kept their top and bottom rows: "Once I am
 satisfied with the Blickmann Model, we do a global update as limited by the instructions"; "I will likely do only the Pump
 ones first" (OakBarn Brewery, 2026-11-14). **Both programs:** the BruControl Import's Build page uses the same Pump dialogs.
 
@@ -5127,6 +5127,27 @@ rule. Adapt from Blickmann for any Hover Help not found, Do in same style with g
   Valve_Daisy_Chain.png), Available Ports, Tab, Name and Device Type. Help 128.
 - When OakBarn Brewery later writes its own text for a box, that text replaces the adapted one.
 
+18.43 **Every dialog follows the Blichmann Model** (OakBarn Brewery, 2026-11-18: "Generally a good job following the Blickmann Dialog
+Model so I will let you run. Exception to Rule. Start checking ALL Dialogs to conform to the Blickmann Model. I prefer the do not enter
+icon to the Hover Read on greyed fields. Keep Dialogs Clean. Hover Help with Graphics interactive"; a Rule 14.4 exception). This is the
+global update Rule 2.51 waited for. In both programs (the BruControl Import's Build page shares the Panel's dialogs):
+- **Every Properties and Add box** is as wide as the Pump's, and its ☰, title and buttons (🗑 Delete, ✖ Cancel, 💾 Save or ➕ Add
+  Device) are frozen at the top; the row of buttons at the bottom is not shown (Rule 2.51).
+- **Every ⬢ and ⬆ pop-up** has its title and buttons frozen at the top and no bottom row. Opened from a Properties or Add box, its
+  Save says **💾 Keep** (its settings go back into that box, whose own Save saves them). Opened on its own (Ctrl + Click), it still
+  says 💾 Save.
+- **Every other dialog** with the same row of buttons at its top and its bottom keeps the top one, frozen, and the bottom one is not
+  shown.
+- **⛔ Do Not Enter on a greyed out box**: a box that can not be changed here shows the red Do Not Enter sign at its right end, in
+  every dialog, pop-up and ☰ Menu tab. The short hover reads that only said "Read only", "Not editable" or "Set when it was added" are
+  gone; the ⛔ says it. A form shown only to look at (all of it locked) has no signs, to keep it clean. Hover Help written by OakBarn
+  Brewery for a greyed box (Rule 18.40) is kept word for word.
+- **Short names** (Rules 2.38, 11.8): a field name that still carries an explanation in ( ) beside its own Hover Help shows the
+  short name only, and the explanation goes first in its Hover Help. A short ( ) such as (Horizontal), (pixels) or (ms) stays.
+- **X, Y, Width and Height on one line** in every dialog, as on the Pump (Rule 18.41).
+- **Hover Help** not written yet is adapted from the Blichmann RipTide's (Rule 18.42), with pictures, plain words and the French.
+Help 148.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -5368,6 +5389,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 18.43 (OakBarn Brewery: "Start checking ALL Dialogs to conform to the Blickmann Model"; "I prefer the do not enter icon to the Hover Read on greyed fields"; "Keep Dialogs Clean"; a Rule 14.4 exception): every dialog frozen at the top with no bottom row, every pop-up frozen (Keep when opened from a dialog), ⛔ on greyed boxes, short names, X Y Width Height on one line. Rule 2.51 updated: the global update is done.
 - 2026-11-18: Rule 14.4 reinstated (OakBarn Brewery: "All this goes into Update Panel.  Reinstate Rule"): general Panel updates go to the Panel Updates Sandbox in Skynet_Private and are not built until OakBarn Brewery picks them. The 2026-11-17 suspension is ended. The Blichmann wording is kept as an exception ("Blickmann Model is good but leave exception just in case"): a fix to the Blichmann model dialogs may still be built straight away when he asks.
 - 2026-11-17: Rule 15.1 (OakBarn Brewery's General Rule: "BruControl items in Conflict with any Skynet Rule will be updated automatically if possible without user intervention or with the Help of the User"): the Importer fixes a conflict by itself when it can, else asks; the user approves each Global that becomes a Widget or gGlobal variable and its API; IDs are suggested and the user may change them before saving; reserved words (Panel Updates Sandbox entry 28) are force changed on Import. The Importer details are in the Importer Sandbox (Skynet_Private). Checked against both programs: the Panel warns when naming, the Importer force changes.
 - 2026-11-17: Added Rule 2.59, data is always metric and Units are for showing only (OakBarn Brewery, Panel Updates Sandbox entry 9: "switching units only affects display, not the data which is always metric"; "If we have any open defaults that are stored US Standard Now, convert them all"; "3 Vessel Schema ALL Metric Data. we can work on the Display after"). Profiles, Equipment Profiles, Vessels, Vessel Templates and Defaults are kept in metric; older US saves are turned into metric once (old file kept as .before_metric); the 3 Vessel Sample and the starting Schema are all metric. The display part comes next. Checked against both programs: the BruControl Import's Vessels and Profiles are kept in metric when the Panel saves them.
