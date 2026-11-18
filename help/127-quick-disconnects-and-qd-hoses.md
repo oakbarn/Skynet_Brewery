@@ -34,6 +34,8 @@ always on top of everything on the Tab.
 
 - **Computer:** hold the **right mouse button** on the ring and drag (Rule 2.9: the right button drags).
 - **Phone or tablet:** hold a **finger** on the ring and drag.
+- **Left click:** it does not move the end. After a moment a small pop-up with the red ⛔ says **Move with Held Right Click**. It goes by itself after 3 seconds, or at your next click.
+- **Double-click** the ring: the hose's **Properties** open (admins only; Edit layout opens with them). A double-click on an **IP** opens the Properties of the Device or Widget it belongs to.
 
 Any hose end whose **IP Type** is **Quick Disconnect** moves the same way (Help 24), one end at a time.
 

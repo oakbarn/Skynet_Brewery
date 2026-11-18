@@ -42,13 +42,19 @@ bord de la boîte. Agrandi ou réduit, le Hose ou Pipe intérieur est redessiné
 
 ## Sa propre fenêtre {#its-own-dialog}
 
-Ses Properties sont la fenêtre **Hose Bib Widget** : **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label
-Visible** (🏷 Update to Suggested Name apparaît dès que le Label change), **2. Name** avec la case **Change Name** et **✏ Change
-Name**, **.confirmation**, le **Graphic** (son image avec son Hose ou Pipe intérieur, tenue à jour), **Picture**, **Orientation**
-(toujours Horizontal) avec **Left / Right** (le mur à droite comme dessiné, ou à gauche), **IP** avec **Hose or Pipe**, et **X**,
-**Y**, **Width**, **Height**.
+Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le même ordre que celle de la Pump : le cadenas et
+**No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
+to Suggested Name apparaît dès que le Label change), **Layer Order**, **2. Name** avec la case **Change Name** et **✏ Change Name**,
+le Suggested Name, le **Graphic** (son image avec son Hose ou Pipe intérieur, tenue à jour), **Picture**, **Orientation** (Horizontal
+ou Vertical) avec **Left / Right**, **Hose or Pipe**, **IP**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne,
+et le Widget Type.
 
-**IP** est l'endroit de son seul IP : Bottom Middle (au départ), Bottom Left, Bottom Right ou Left Middle. L'endroit est nommé tel
-que vous le voyez, donc sur un Hose Bib Left, Bottom Left est toujours à gauche.
+**Orientation** et **Left / Right** : Horizontal Right est l'image telle qu'elle est dessinée (le mur à droite), Horizontal Left
+est son miroir (le mur à gauche). Vertical la tourne pour un robinet sur un tuyau qui monte et descend : Vertical Left tourne la
+poignée vers la gauche (le mur au-dessus), Vertical Right vers la droite (le mur en dessous).
+
+**IP** est l'endroit de son seul IP : un des 8 endroits sur le bord de sa boîte (Bottom Middle, Bottom Left, Bottom Right, Left
+Middle, Right Middle, Top Left, Top Middle, Top Right). L'endroit est nommé tel que vous le voyez, quelles que soient l'Orientation
+et Left / Right, et les endroits du côté du mur ne sont pas proposés (l'eau de la maison arrive de là).
 
 ![Hose Bib IP spots](help_pictures/Hose_Bib_IP_Spots.png)

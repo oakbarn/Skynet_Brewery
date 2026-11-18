@@ -551,6 +551,12 @@ the Pump Properties"; "Draw Pipe works with double click"): a double-click on a 
 it (it was cancelled, so the next double-click opened the Pump or Tab Properties), and a double-click on its end IP finishes it and
 opens only the new hose's Properties (the rest of the double-click opened the Tab or the valve under it). *Outside Edit layout* Properties do not
 open (a running Tab is never changed by a stray click); a Heating Element's Ctrl + Click opens its method's Settings (Rule 6.19).
+*Exception (OakBarn Brewery, 2026-11-18: "double Clicking on an IP of a Device or Widget should also bring Up the Property dialog for the
+Parent. Double Click on a Yellow Circle of a Hose QD End, bring up the Hose Property dialog"):* outside Edit layout a double-click on the
+**yellow ring of a hose end** opens that hose's Properties, and a double-click on an **IP** opens the Properties of the Device or Widget
+it belongs to (a Vessel's IP: the Vessel; a Pipe Fitting or a free IP: its own), as it already does in Edit layout. Edit layout opens
+with them (admins only). A Device or a Manual Valve itself keeps its own clicks. A left click on the yellow ring does not move it: after
+a moment a small pop-up with the ⛔ says **Move with Held Right Click** (Rule 5.40).
 *Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
 was closed. Do not offer it again.
 
@@ -5194,14 +5200,25 @@ BruControl Import's Build page shares the Panel's dialogs).
    - **Straight** (Widget Type Straight Manual Valve, wgt_MV_): in a pipe line, sized to its pipes (Rule 5.36), Width and Height ⛔.
    - **Hose Bib** (the Tap Water Valve, wgt_TWV_): its own **Hose Bib Widget** dialog; **sized by hand like a Pump** (Width, Height and
      the grab points); its picture in the top right three quarters of its box; its **own short Hose or Pipe** inside the box from the
-     hose thread to its one IP, on a spot on the edge of the box: **IP** Bottom Middle (the start), Bottom Left, Bottom Right or Left
-     Middle, named as seen (on a Left one too), with **Hose or Pipe**. Orientation is always Horizontal; Left / Right puts the wall on
-     the right (as drawn) or the left. Help picture Hose_Bib_IP_Spots.png.
+     hose thread to its one IP, on a spot on the edge of the box: **IP** one of the 8 spots (as a Pump's), named as seen whatever its
+     Orientation, never on the wall side, with **Hose or Pipe**. **Orientation** Horizontal or Vertical with Left / Right (OakBarn
+     Brewery, 2026-11-18: "the Orientaion is locked. I have a Hose bib that would need the Vertical Plane and I would say most hose bibs
+     are 50% vertical in a Brewery"): Horizontal Right as drawn, Horizontal Left mirrored, Vertical Left and Right turned (the handle
+     to the left or right). Help picture Hose_Bib_IP_Spots.png.
    *Replaces* for the Hose Bib: Rule 5.33's "Autosize to pipe as every Manual Valve" and its IP on the hose thread itself.
 7. **⛔ only on hover** ("Only show of Hover of Field"): in every dialog, pop-up and ☰ Menu tab, the Do Not Enter sign of a greyed
    box shows while the mouse is on that box or its name (Rule 18.44).
 The Pump (the Blichmann Model) gets 1, 2, 3 and 7; it already had 4 and its own Orientation (Right / Left, Rule 18.19). Other Device
 dialogs follow when OakBarn Brewery says (Rule 18.10). Help 87, 141, 148.
+*Changed 2026-11-18* (OakBarn Brewery, after testing PR #487: "You did not add the Name Change and update from Changed label Buttons or
+the State to the Blickmann Model"; "Double Click on existing has the name change but not the Update if Label Changed and Change Name
+Field"; "on a new Build there is no need for the change Name as it is already Dynamic till saved ... The could appear on a Build after a
+save"): 1 is on the Properties of every On / Off Device (a Digital Output: Pump, valve, Heating Element ...), and 2 and 3 on the
+Properties of every saved Device and Widget that has a Suggested Name, whichever dialog it opens in. The Add box of a new Build keeps its
+Name that follows the Suggested Name until it is added (no Change Name there). "Also the Look of the fields and Order should be the same
+on the Hose Bib dialog as the Blickmann Model": the Hose Bib and Straight Manual Valve dialogs have the lock and No Unlock in the title
+line, then State, 1. Label, Label Visible, Layer Order, 2. Name with Change Name, the Suggested Name, Graphic, Picture, Orientation with
+Left / Right, Hose or Pipe, IP (a Hose Bib), .confirmation, X, Y, Width and Height on one line, and the Widget Type last.
 
 ## 19. Vessel Rules
 
@@ -5444,6 +5461,8 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Rule 2.9 exception: outside Edit layout a double-click on a hose end's yellow ring opens the hose's Properties and on an IP the Properties of its Device or Widget; a left click on the ring pops up "Move with Held Right Click" (Rule 5.40). Rule 18.45 changed: State on every On / Off Device's Properties; Change Name and 🏷 Update to Suggested Name on every saved Device and Widget (not on a new Build's Add box); the Hose Bib and Manual Valve dialogs in the Blichmann Model's order. Help 127, 141. Checked against the BruControl Import program: its Build page shares these dialogs; it has no running Tabs, so the double-click exception is the Panel's only.
+- 2026-11-18: Rule 18.45 #6: a Hose Bib may be Vertical (Left or Right) too, and its IP may be on any of the 8 spots of its box that is not on the wall side. Help 141.
 - 2026-11-18: Added Rule 18.45 (OakBarn Brewery, PDF "Panel Update Final 1"): State slider, 🏷 Update to Suggested Name, the Change Name box and ✏ Change Name (mouse only), the Manual Valve's Graphic, Orientation and Left / Right, two kinds of Manual Valve (Straight and Hose Bib, the Hose Bib sized like a Pump with its own Hose or Pipe to its IP), and the ⛔ only on hover. Rules 5.33, 5.36 and 18.44 updated. Checked against both programs: the BruControl Import's Build page shares these dialogs. Help 87, 141, 148.
 - 2026-11-18: Added Rule 18.44 (OakBarn Brewery: "Start checking ALL Dialogs to conform to the Blickmann Model"; "I prefer the do not enter icon to the Hover Read on greyed fields"; "Keep Dialogs Clean"; a Rule 14.4 exception): every dialog frozen at the top with no bottom row, every pop-up frozen (Keep when opened from a dialog), ⛔ on greyed boxes, short names, X Y Width Height on one line. Rule 2.51 updated: the global update is done.
 - 2026-11-18: Rule 14.4 reinstated (OakBarn Brewery: "All this goes into Update Panel.  Reinstate Rule"): general Panel updates go to the Panel Updates Sandbox in Skynet_Private and are not built until OakBarn Brewery picks them. The 2026-11-17 suspension is ended. The Blichmann wording is kept as an exception ("Blickmann Model is good but leave exception just in case"): a fix to the Blichmann model dialogs may still be built straight away when he asks.
