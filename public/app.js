@@ -10455,7 +10455,7 @@ function stateRow(label, obj) {
     ev.stopPropagation();
     const want = cb.checked;
     if (mv) { await toggleManualValve(obj.id); cb.checked = now(); }
-    else try { await api('POST', '/ui/set', { name: obj.name, prop: 'state', value: want }); (S.values[obj.name] ??= {}).state = want; } catch (e) { toast(e.message, true); cb.checked = !want; }
+    else try { await api('POST', '/ui/set', { name: obj.name, prop: 'state', value: want }); } catch (e) { toast(e.message, true); cb.checked = !want; }      // the Brain's live update sets S.values
     show();
   });
   const tip = (mv ? STATE_TIPS.mv : STATE_TIPS.dev) + (ok ? '' : '\n\n' + STATE_TIPS.unsaved);
