@@ -16,8 +16,8 @@ You can also turn any Manual Valve into one: open its Properties and pick **Tap 
 
 ## Its one IP: the hose outlet
 
-The water comes in from the wall (the house plumbing), so the valve has **only one IP**, on the **center of the hose thread at the
-bottom of the spout**. Draw a hose (or a pipe) from there to where the water goes, such as your HLT or a chiller.
+The water comes in from the wall (the house plumbing), so the valve has **only one IP**, at the end of its own short Hose or Pipe
+that runs from the **hose thread at the bottom of the spout** (see Size below). Draw a hose (or a pipe) from there to where the water goes, such as your HLT or a chiller.
 
 - **Closed**: nothing comes out; any hose on it is blocked.
 - **Open**: it is a **tap water source**. Flow pushes out of the hose outlet with no pump, and the flow is **tap water Blue**
@@ -33,6 +33,22 @@ Exactly like every Manual Valve Widget (Skynet Rule 5.15, see the Pipe fittings 
 - A Process line such as `ManualValve_1.state = true` does **not** turn it. The Tab shows "Open it by hand", the valve blinks, and
   the Process waits until someone clicks it open. That is your reminder to go out and turn on the water.
 
-## Size
+## Size: a Hose Bib, sized like a Pump
 
-**Autosize to pipe** is always on: the valve takes the size of the hose on it, so its hose thread is as wide as the hose.
+A Manual Valve comes in two kinds (Skynet Rule 18.45): **Straight** (in a pipe line) and **Hose Bib**. The Tap Water Valve is the
+Hose Bib. It is **sized by hand, like a Pump**: drag its corner, or type its Width and Height. Its picture sits in the top right of
+its box, and its **own short Hose or Pipe** runs inside the box from the hose thread to its one IP on the edge of the box. Made bigger
+or smaller, the inside Hose or Pipe is drawn again to reach the IP.
+
+## Its own dialog
+
+Its Properties are the **Hose Bib Widget** dialog: **State** (a slider, Open or Closed now), **1. Label** and **Label Visible**
+(🏷 Update to Suggested Name pops up once the Label is changed), **2. Name** with the **Change Name** box and **✏ Change Name**,
+**.confirmation**, the **Graphic** (its picture with its inside Hose or Pipe, kept up to date), **Picture**, **Orientation**
+(always Horizontal) with **Left / Right** (the wall on the right as drawn, or on the left), **IP** with **Hose or Pipe**, and
+**X**, **Y**, **Width**, **Height**.
+
+**IP** is where its one IP is: Bottom Middle (the start), Bottom Left, Bottom Right or Left Middle. The spot is named as you see it,
+so on a Left Hose Bib, Bottom Left is still on the left.
+
+![Hose Bib IP spots](help_pictures/Hose_Bib_IP_Spots.png)

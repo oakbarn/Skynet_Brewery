@@ -47,7 +47,7 @@ assert.ok(app.includes('if (editing && draft) sizeToPipes(w.name);'), 'a Tab dra
 const stp = app.slice(app.indexOf('function sizeToPipes('), app.indexOf('const CAP_BOX'));
 assert.ok(stp.includes('autoSizeUnit(g)') && stp.includes('sizeProbeTee(e, pw)') && stp.includes('sizeCap(c)'), 'fittings, probe tees and End Caps');
 // Autosize to pipe is always on, with no switch (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option)")
-assert.ok(app.includes('const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);') && !/const autoSized[^\n]*isCap/.test(app), 'an End Cap has Autosize to pipe, always');
+assert.ok(app.includes('const autoSized = g => isPipeFit(g) || (isMv(g) && !isTapMv(g)) || isMf(g);') && !/const autoSized[^\n]*isCap/.test(app), 'an End Cap has Autosize to pipe, always');
 assert.ok(!app.includes('AUTOSIZE_FIELD'), 'no Autosize switch in any pipe fitting\'s Properties');
 assert.ok(/isMf\(o\) \|\| \/Reducer\//.test(app), 'a cap on a Reducer or Valve Tee keeps its size');
 // the majority of the pipes or hoses wins, a tie takes the bigger (Fritz, 2026-11-07, Rule 5.36)
@@ -59,7 +59,7 @@ assert.equal(majorityWidth([]), 0, 'no pipe: keeps its size');
 const one = { w: 10 }; assert.equal(majorityWidth([one, one, { w: 20 }]), 20, 'one pipe on two IPs counts once');
 // Valve Tees, Supply Manifolds, valves, inline Devices and (since 2026-11-07) pumps size to their pipes too, and with no pipe on
 // them to the Default pipe size (☰ Menu > Default settings, Rules 2.42 and 5.36)
-assert.ok(app.includes('const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);'), 'Valve Tees and Manifolds');
+assert.ok(app.includes('const autoSized = g => isPipeFit(g) || (isMv(g) && !isTapMv(g)) || isMf(g);'), 'Valve Tees and Manifolds');
 assert.ok(app.includes("const followsPipe = e => hasIps(e) && !isProbeTee(e) && !isThermowell(e);"), 'valves and pumps follow');
 assert.ok(app.includes('return (w || defaultWidth(e.workspace, e)) / 10;'), 'a Device with no pipe: the Default pipe size');
 assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace, g)'), 'an IP fitting with no pipe: the Default pipe size');

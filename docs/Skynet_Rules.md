@@ -2002,6 +2002,7 @@ hose outlet; thread "Add hose bib Manual Valve Widget", Help 141).
 - Added from Select Device Type > Valves and Select Widget Type > Semi_Widgets_Devices (**Tap Water Valve**), or by picking its
   Picture on any Manual Valve. Name ManualValve_n; its **Label** starts filled in as **tap_water_n** (Rule 18.15).
 - Autosize to pipe as every Manual Valve (Rule 5.29 does not cover Manual Valves).
+  *Changed (Rule 18.45, 2026-11-18):* it is a **Hose Bib**, sized by hand like a Pump, with its own short Hose or Pipe to its one IP.
 
 5.34 **A Process connects a Quick Disconnect hose, and a person confirms it is there** (Fritz, 2026-11-06: "A process command to put a
 QD Hose in a Vessel with a automatic need for confirmation that the hose is placed (similar to a Manual Valve) or a QD IP. Maybe
@@ -2081,7 +2082,7 @@ pipe on Save", Help 87).
   1" and one 1/2", as on a Reducer, or two of each on a cross) it takes the **bigger** size. With no pipe or hose on it, it keeps its size.
 - On **Save layout** every Tab is checked, and each time a Tab is drawn in Edit layout (so after 💾 Save in any Properties) that Tab
   is. Sized this way, about their bend (Rule 5.25):
-  - every pipe fitting (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP fittings, Manual Valves):
+  - every pipe fitting (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP fittings, Straight Manual Valves; a Hose Bib is sized by hand, Rule 18.45):
     **always**, there is no switch (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option)");
   - **Valve Tees and Supply Manifolds** (Rule 5.35; they have no Autosize switch, so they always follow);
   - **tees with a Temperature Probe** (Rule 5.30; no switch either, a Device dialog, Rule 18.10);
@@ -5163,6 +5164,44 @@ global update Rule 2.51 waited for. In both programs (the BruControl Import's Bu
 - **X, Y, Width and Height on one line** in every dialog, as on the Pump (Rule 18.41).
 - **Hover Help** not written yet is adapted from the Blichmann RipTide's (Rule 18.42), with pictures, plain words and the French.
 Help 148.
+*Changed (Rule 18.45, 2026-11-18):* the ⛔ shows only while the mouse is on the greyed box or its name ("Only show of Hover of Field").
+
+18.45 **Panel Update Final 1: the Manual Valve Widget and the Blichmann Model** (OakBarn Brewery, 2026-11-18, PDF "Panel Update Final 1":
+"Fix these on this Dialog and also on the Blickmann Model"; "Add any Pictures needed for Orientation/ Left Right"). Both programs (the
+BruControl Import's Build page shares the Panel's dialogs).
+1. **State** ("State is label and a Slider"; "Focus only on Mouse No Tab or Enter"; "Active, User can Change Here as well as the
+   screen"): the Manual Valve's and the Pump's Properties start with **State** and a slider with its word (Open / Closed, On / Off).
+   Sliding it works the item at once, the same as a click on it on its Tab (a Manual Valve with .confirmation asks Done first, Rule
+   5.15). It is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it. Greyed out until the item is saved.
+2. **🏷 Update to Suggested Name** ("If Label is Changed Pop Up Button with Update Suggested Name and populates Change Name Field"):
+   once the Label is changed, the button pops up on the Label Visible line; it puts the Suggested Name of the new Label in the Change
+   Name box.
+3. **Change Name** ("Change Name Field that a User can Edit. Fill with Current name on Open Add change name Button"): the **Name** is
+   greyed out (⛔); below it the **Change Name** box starts with the Name now and can be typed in; **✏ Change Name** checks it (Rules
+   3.3, 3.4) and puts it in the Name, kept with 💾 Save, and every Process follows (Rule 3.11). Once built, a Manual Valve's Name is
+   changed this way too (it had no way before). OakBarn Brewery, 2026-11-18: "New buttons associated with Name Change and the Name
+   Change Field only get focus with Mouse, No Tab or Enter": the Change Name box and both buttons are mouse only.
+4. **Graphic** ("Show the Graphic Like the Blickmann Model"): the Manual Valve's dialog shows it as it will be on the Tab, kept up to
+   date, with the open overlay while open.
+5. **Orientation (Horizontal, Vertical) and Left / Right** on its line, both reached by Enter, the Tab key and the mouse ("Orientaion
+   and Left Right all 3 focus"). Horizontal Right is the picture as drawn, Horizontal Left mirrored; Vertical Left and Vertical Right
+   point the handle left or right. The Manual Butterfly Valve uses its own H, V_L and V_R drawings; every other picture is turned or
+   mirrored, and its ends (IPs) go with it. A front view has no Orientation. Help picture Manual_Valve_Orientation.png.
+6. **Two kinds of Manual Valve** (OakBarn Brewery, 2026-11-18: "Straight manual Valves need to adjust to the IPs on the end so the
+   Pipes stay put"; "We need to treat sizing of a hose bib type valve like a Pump and have integral Hose or Pipe to IP"; "separate
+   subclasses of Manual Valves: Staight, Hose Bib"; "Hose Bibs get their own Dialog and the Interal Pipes or Hose and have the Graphic
+   similar to the Blickmann Model"; "The Hose Bib Graphic is good"):
+   - **Straight** (Widget Type Straight Manual Valve, wgt_MV_): in a pipe line, sized to its pipes (Rule 5.36), Width and Height ⛔.
+   - **Hose Bib** (the Tap Water Valve, wgt_TWV_): its own **Hose Bib Widget** dialog; **sized by hand like a Pump** (Width, Height and
+     the grab points); its picture in the top right three quarters of its box; its **own short Hose or Pipe** inside the box from the
+     hose thread to its one IP, on a spot on the edge of the box: **IP** Bottom Middle (the start), Bottom Left, Bottom Right or Left
+     Middle, named as seen (on a Left one too), with **Hose or Pipe**. Orientation is always Horizontal; Left / Right puts the wall on
+     the right (as drawn) or the left. Help picture Hose_Bib_IP_Spots.png.
+   *Replaces* for the Hose Bib: Rule 5.33's "Autosize to pipe as every Manual Valve" and its IP on the hose thread itself.
+7. **⛔ only on hover** ("Only show of Hover of Field"): in every dialog, pop-up and ☰ Menu tab, the Do Not Enter sign of a greyed
+   box shows while the mouse is on that box or its name (Rule 18.44).
+The Pump (the Blichmann Model) gets 1, 2, 3 and 7; it already had 4 and its own Orientation (Right / Left, Rule 18.19). Other Device
+dialogs follow when OakBarn Brewery says (Rule 18.10). Help 87, 141, 148.
 
 ## 19. Vessel Rules
 
@@ -5405,6 +5444,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 18.45 (OakBarn Brewery, PDF "Panel Update Final 1"): State slider, 🏷 Update to Suggested Name, the Change Name box and ✏ Change Name (mouse only), the Manual Valve's Graphic, Orientation and Left / Right, two kinds of Manual Valve (Straight and Hose Bib, the Hose Bib sized like a Pump with its own Hose or Pipe to its IP), and the ⛔ only on hover. Rules 5.33, 5.36 and 18.44 updated. Checked against both programs: the BruControl Import's Build page shares these dialogs. Help 87, 141, 148.
 - 2026-11-18: Added Rule 18.44 (OakBarn Brewery: "Start checking ALL Dialogs to conform to the Blickmann Model"; "I prefer the do not enter icon to the Hover Read on greyed fields"; "Keep Dialogs Clean"; a Rule 14.4 exception): every dialog frozen at the top with no bottom row, every pop-up frozen (Keep when opened from a dialog), ⛔ on greyed boxes, short names, X Y Width Height on one line. Rule 2.51 updated: the global update is done.
 - 2026-11-18: Rule 14.4 reinstated (OakBarn Brewery: "All this goes into Update Panel.  Reinstate Rule"): general Panel updates go to the Panel Updates Sandbox in Skynet_Private and are not built until OakBarn Brewery picks them. The 2026-11-17 suspension is ended. The Blichmann wording is kept as an exception ("Blickmann Model is good but leave exception just in case"): a fix to the Blichmann model dialogs may still be built straight away when he asks.
 - 2026-11-17: Rule 15.1 (OakBarn Brewery's General Rule: "BruControl items in Conflict with any Skynet Rule will be updated automatically if possible without user intervention or with the Help of the User"): the Importer fixes a conflict by itself when it can, else asks; the user approves each Global that becomes a Widget or gGlobal variable and its API; IDs are suggested and the user may change them before saving; reserved words (Panel Updates Sandbox entry 28) are force changed on Import. The Importer details are in the Importer Sandbox (Skynet_Private). Checked against both programs: the Panel warns when naming, the Importer force changes.

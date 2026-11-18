@@ -22,13 +22,20 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
 
 - **The buttons are frozen at the top.** The title and its buttons stay where they are while you scroll, so you never have to
   scroll to the bottom to Save. There is no second row of buttons at the bottom.
-- **⛔ = can not be changed here.** A greyed out box has the red Do Not Enter sign at its right end. The box shows what it is,
-  but you can not type in it or pick from it here (for example the Interface and Port once a Device is added, or the Device Type).
+- **⛔ = can not be changed here.** A greyed out box shows the red Do Not Enter sign at its right end while the mouse is on the box
+  or its name (Skynet Rule 18.45: the dialog stays clean). The box shows what it is, but you can not type in it or pick from it here
+  (for example the Interface and Port once a Device is added, or the Device Type).
   ![A greyed out box with the Do Not Enter sign](help_pictures/Greyed_Do_Not_Enter.png)
 - **Every ⬢ and ⬆ pop-up** has its title, ✖ Cancel and 💾 **Keep** frozen at the top. Keep puts what you set back into the dialog;
   the dialog's own 💾 Save saves it.
 - **Short names.** A field shows a short name; what it is for is in its Hover Help (rest the mouse on the name).
 - **X, Y, Width and Height** sit on one line.
+- **State, Name and Change Name** (Skynet Rule 18.45, the Pump and the Manual Valve first): **State** is a slider that turns the
+  item On or Off (a valve: Open or Closed) at once, the same as a click on it on its Tab; it is not a setting, so Save and Cancel
+  do not change it. The **Name** is greyed out; the **Change Name** box below it starts with the Name now, and **✏ Change Name**
+  puts what is typed there in the Name (kept with 💾 Save; every Process follows it). Once the Label is changed, **🏷 Update to
+  Suggested Name** pops up beside Label Visible and fills the Change Name box. The State slider, the Change Name box and its two
+  buttons are for the mouse only: the Tab key and Enter pass them by.
 
 ## A Device built into something
 

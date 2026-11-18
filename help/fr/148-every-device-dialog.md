@@ -22,13 +22,20 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
 
 - **Les boutons sont figés en haut.** Le titre et ses boutons restent en place pendant que vous faites défiler, donc vous n'avez
   jamais à descendre tout en bas pour enregistrer (Save). Il n'y a pas de deuxième rangée de boutons en bas.
-- **⛔ = ne peut pas être changé ici.** Une case grisée porte le panneau rouge Sens interdit à son bout droit. La case montre ce
+- **⛔ = ne peut pas être changé ici.** Une case grisée montre le panneau rouge Sens interdit à son bout droit pendant que la souris
+  est sur la case ou sur son nom (Skynet Rule 18.45 : la fenêtre reste propre). La case montre ce
   qu'elle est, mais vous ne pouvez pas y taper ni y choisir ici (par exemple l'Interface et le Port une fois le Device ajouté, ou le Device Type).
   ![Une case grisée avec le panneau Sens interdit](help_pictures/Greyed_Do_Not_Enter.png)
 - **Chaque fenêtre ⬢ et ⬆** a son titre, ✖ Cancel et 💾 **Keep** figés en haut. Keep remet ce que vous avez réglé dans la fenêtre ;
   le 💾 Save de la fenêtre l'enregistre.
 - **Des noms courts.** Un champ montre un nom court ; à quoi il sert est dans son Hover Help (posez la souris sur le nom).
 - **X, Y, Width et Height** sont sur une ligne.
+- **State, Name et Change Name** (Skynet Rule 18.45, la Pump et la Manual Valve d'abord) : **State** est un curseur qui met
+  l'élément On ou Off (une vanne : Open ou Closed) tout de suite, comme un clic sur lui dans son Tab ; ce n'est pas un réglage, donc
+  Save et Cancel ne le changent pas. Le **Name** est grisé ; la case **Change Name** dessous commence avec le Name actuel, et **✏
+  Change Name** met ce qui y est tapé dans le Name (gardé avec 💾 Save ; chaque Process le suit). Dès que le Label change, **🏷
+  Update to Suggested Name** apparaît à côté de Label Visible et remplit la case Change Name. Le curseur State, la case Change Name
+  et ses deux boutons sont pour la souris seulement : la touche Tab et Entrée les passent.
 
 ## Un Device intégré à quelque chose {#a-device-built-into-something}
 
