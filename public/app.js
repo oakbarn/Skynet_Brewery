@@ -2075,6 +2075,27 @@ function pumpSpotHit(ws, p, r, inside = false) {
       if (c && (!best || d < best.d)) best = { d, id: `pspot:${e.name}:${end}:${code}`, c: c.map(Math.round) };
     }
   }
+  const hb = hbSpotHit(ws, p, r, inside);
+  return hb && (!best || hb.d < best.d) ? hb : best;
+}
+// A Hose Bib's one IP is set the same way (Panel Update Final 2 #5 and #8, OakBarn Brewery, 2026-11-18: "One Skynet Picture That has IPs
+// like a Blickman Pump"; the IP "Should be in the background and not by user"; Rule 18.48): a pipe or hose end put on or near a Hose Bib
+// whose IP has nothing joined goes on the nearest of its spots (the 8 spots of its box, never on the wall side, Rule 18.45), and its IP
+// moves there. While it is being drawn the end is a "hbspot:<id>:<spot>" IP; takePumpSpots makes it the Hose Bib's own IP.
+const hbspotOf = id => { if (typeof id !== 'string' || !id.startsWith('hbspot:')) return null; const i = id.lastIndexOf(':'); return { gid: id.slice(7, i), code: id.slice(i + 1) }; };
+const hbEndAt = (g, code) => mvEnds({ ...g, tapSpot: code })[0]?.c || null;
+function hbSpotHit(ws, p, r, inside = false) {
+  let best = null;
+  for (const g of (L().graphics || []).filter(g => isTapMv(g) && g.workspace === ws && !g.cloneOf)) {
+    if (pipesOn(`eq:${g.id}:out`, ws).length) continue;      // joined: its IP stays where it is
+    const x = +g.x || 0, y = +g.y || 0, w = +g.w || 30, hh = +g.h || 30, cur = hbSpot(g);
+    const inBox = inside && p[0] >= x && p[0] <= x + w && p[1] >= y && p[1] <= y + hh;
+    for (const [code] of hbSpots(g).filter(([k]) => k !== cur)) {
+      const c = hbEndAt(g, code); if (!c) continue;
+      const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d > r && !inBox) continue;
+      if (!best || d < best.d) best = { d, id: `hbspot:${g.id}:${code}`, c: c.map(Math.round) };
+    }
+  }
   return best;
 }
 // a pipe or hose put down on a pump's spot: the pump's IN or OUT moves there and the end joins it
@@ -2088,6 +2109,12 @@ function takePumpSpots(lay = draft) {
     const key = ps.end === 'in' ? 'pumpIn' : 'pumpOut', st = pumpSpotStart(e)[ps.end === 'in' ? 0 : 1];
     if (ps.code === st) delete e[key]; else e[key] = ps.code;
     p[k] = `dev:${e.name}:${ps.end}`; n++;
+  }
+  for (const p of lay.graphics.filter(g => g.kind === 'pipe')) for (const k of ['from', 'to']) {      // a Hose Bib's IP (Rule 18.48)
+    const hs = hbspotOf(p[k]); if (!hs) continue;
+    const g = lay.graphics.find(x => x.id === hs.gid);
+    if (!isTapMv(g) || !HB_SPOTS[hs.code]) { delete p[k]; continue; }
+    g.tapSpot = hs.code; p[k] = `eq:${g.id}:out`; n++;
   }
   return n;
 }
@@ -3843,6 +3870,7 @@ const eqPort = (id, ws) => { const gid = eqOfIp(id); const g = gid && L().graphi
 function ipPoint(id, ws) {
   if (!id) return null;
   const ps = pspotOf(id); if (ps) { const e = L().elements.find(x => x.name === ps.name); return e ? pumpEndAt(e, ps.end, ps.code) : null; }
+  const hs = hbspotOf(id); if (hs) { const g = L().graphics.find(x => x.id === hs.gid); return isTapMv(g) ? hbEndAt(g, hs.code) : null; }      // a Hose Bib's spot (Rule 18.48)
   const vt = vtopOf(id);           // a Quick Disconnect hose put in the top of a vessel (Rule 5.28)
   if (vt !== null) { const v = L().graphics.find(x => x.id === vt && hasTop(x) && (!ws || x.workspace === ws)); return v ? vtopPoint(v) : null; }
   if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
@@ -9031,39 +9059,41 @@ const MV_TIPS = {
 };
 const MV_ORIENTS = [['h', 'Horizontal'], ['v', 'Vertical']], MV_SIDES = [['r', 'Right'], ['l', 'Left']];
 const HB_TIPS = {
-  graphic: 'The Hose Bib as it will be on the Tab: its picture, its Left / Right, and its own short Hose or Pipe from the hose thread to its IP. While it is open it shows the open overlay.\n\nThe Picture itself cannot be changed here.',
-  spot: '⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫Where its one IP is on the edge of its box, named as you see it (never on the wall side). Its own short Hose or Pipe runs inside the box from the hose thread to it, so the IP stays where it is when the Hose Bib is made bigger or smaller, and the hose or pipe joined to it stays put.\n\nPipes or Hose snap connect to an IP within 10 px.',
+  graphic: '⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right and its own short Hose or Pipe from the hose thread to its one IP. While it is open it shows the open overlay. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, but never on the wall side. Like a Pump, you do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot. Once a pipe or hose is joined, the IP stays put.',
   link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
   size: 'Its size on the Tab in pixels. A Hose Bib is sized by hand, like a Pump; its inside Hose or Pipe is drawn again to reach its IP.',
 };
 // The Manual Valve and Hose Bib dialogs in the Blichmann Model's look and order (OakBarn Brewery, 2026-11-18: "the Look of the fields and
 // Order should be the same on the Hose Bib dialog as the Blickmann Model"): the lock and No Unlock in the title line; State; 1. Label;
-// Label Visible; Layer Order; 2. Name with Change Name; the Suggested Name; Graphic; Picture; Orientation with Left / Right; Hose or Pipe;
-// its own boxes; X, Y, Width and Height on one line; the Widget Type last.
+// Label Visible; 2. Tab; Layer Order; 3. Name with Change Name; the Suggested Name; Graphic; Picture (a Straight one); Orientation with
+// Left / Right; Hose or Pipe; its own boxes; X, Y, Width and Height on one line; the Widget Type last (Panel Update Final 2, Rule 18.48).
 const MV_HEAD = [['locked', '', 'lock', null, false, false, { inTitle: true }],
   ['noUnlock', 'No Unlock', 'bool', null, false, false, { inTitle: true, tip: 'On: 🔓 Unlock All passes it by; only its own 🔓 Unlock unlocks it (Rule 2.12).' }]];
 const mvSugNote = it => { let n = ''; try { n = graphicWidgetName(it, origOf(it)) || ''; } catch { } return ['_sug', `Suggested Name: ${n || '(type a Label)'}`, 'note']; };
 const MV_XYWH = (it, sizeTip) => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: WGT_TIPS.xy, pairCls: 'xywh',
   with: [['y', 'Y (Vertical)', 'num', null, false, false, { tip: WGT_TIPS.xy }], ['w', 'Width', 'num', null, false, false, { tip: sizeTip }], ['h', 'Height', 'num', null, false, false, { tip: sizeTip }]] }]];
+const MV_TAB_TIP = 'The Tab this Widget is on. Pick another Tab to move it there; the pipes and hoses joined to it stay on the old Tab, so draw new ones on the new Tab.';
 const MV_TOP = (it, word) => [...MV_HEAD, ['_state', 'State', 'state', null, false, false, {}],
   ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
   ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
+  ['workspace', '2. Tab', 'ws', null, false, false, { tip: MV_TAB_TIP }],      // Panel Update Final 2 #3: "Missing: Add to Widget Dialog" (Rule 18.48)
   ['layer', 'Layer Order', 'num', null, false, false, { tip: LAYER_TIP }],
-  ['name', '2. Name', 'namechg', null, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || word}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).\n\nIt is changed with the Change Name box below it and ✏ Change Name.` }],
+  ['name', '3. Name', 'namechg', null, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || word}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).\n\nIt is changed with the Change Name box below it and ✏ Change Name.` }],
   mvSugNote(it)];
 const MV_CONFIRM = ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }];
 const MV_KINDS_TIP = 'A Manual Valve comes in two kinds: Straight (in a pipe line, it sizes itself to its pipes) and Hose Bib (sized by hand like a Pump, with its own Hose or Pipe to its one IP).';
-// a Hose Bib's own dialog (Rule 18.45): the Manual Valve's, with its IP spot and Hose or Pipe, and Width and Height of its own
-const hbWidgetFields = (it, pics) => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
+// a Hose Bib's own dialog (Rule 18.45), fixed by Panel Update Final 2 (OakBarn Brewery, 2026-11-18, Rule 18.48): #5 no Picture box ("One
+// Skynet Picture that has IPs like a Blickman Pump"); #6 Orientation with Left / Right and Hose or Pipe in the Pump's layout ("Copy the
+// fields and buttons in the same layout"); #8 no IP box ("Should be in the background and not by user"): its IP spot is set by the pipe
+// or hose joined to it, the same as a Pump's (hbSpotHit, takePumpSpots). The spot it is on rides along hidden, so a save keeps it.
+const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: HB_TIPS.graphic }],
-  ['image', 'Picture', 'sel', pics, true, false, { tip: 'The Tap Water Valve hose bib: its one IP is at the end of its own short Hose or Pipe and, open, it is a tap water source. Picking a Straight Manual Valve picture makes it a Straight Manual Valve.' }],
-  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, with: ['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: MV_TIPS.side }] }],
+  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: ['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: MV_TIPS.side }] }],
   ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }],
-  ['tapSpot', 'IP', 'sel', hbSpots(it), false, false, { tip: HB_TIPS.spot }],
   MV_CONFIRM, ...MV_XYWH(it, HB_TIPS.size), wgtType('Hose Bib (Tap Water Valve)', MV_KINDS_TIP)];
 const mvWidgetFields = it => {
   it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
-  if (isTapMv(it)) { it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it, MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr)); }
+  if (isTapMv(it)) { it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
   const front = mvFront(it);
   // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
   const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);

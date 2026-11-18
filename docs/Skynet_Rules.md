@@ -5244,6 +5244,8 @@ Name that follows the Suggested Name until it is added (no Change Name there). "
 on the Hose Bib dialog as the Blickmann Model": the Hose Bib and Straight Manual Valve dialogs have the lock and No Unlock in the title
 line, then State, 1. Label, Label Visible, Layer Order, 2. Name with Change Name, the Suggested Name, Graphic, Picture, Orientation with
 Left / Right, Hose or Pipe, IP (a Hose Bib), .confirmation, X, Y, Width and Height on one line, and the Widget Type last.
+*Changed (Rule 18.48, 2026-11-18):* both dialogs have 2. Tab after Label Visible (Layer Order under it, 3. Name); the Hose Bib has no
+Picture box and no IP box: its IP spot is set by the pipe or hose joined to it, as on a Pump.
 
 18.46 **A greyed out box shows only the ⛔, and only on hover** (OakBarn Brewery, 2026-11-18, Dialog Sandbox items 2 and 3: "Only when a
 User Hovers. The do not enter icon on hover of any Greyed out field. Rule. With text dialog if requested but only when I say make it a
@@ -5276,6 +5278,37 @@ focus and how."). Both programs.
   are not changed yet: they wait for the "Recheck dialogs" pass (OakBarn Brewery: "We will do another Recheck dialogs to follow
   Blickmann Model later").
 Help 148.
+*Changed (Rule 18.48, 2026-11-18):* the Manual Valve and the Hose Bib now have **2. Tab**, so their Layer Order is under the Tab too.
+
+18.48 **Panel Update Final 2: the Hose Bib Widget dialog, the Widget half of the Model** (OakBarn Brewery, 2026-11-18, PDF "Panel Update
+Final 2", the Hose Bib Widget dialog marked against the Blichmann RipTide's: "Fix these on this Dialog. This dialog after fixed and the
+Blickmann will now be a more comprehensive Model for future matching of Dialogs to the Model."; "Do this now"). Both programs (the
+BruControl Import's Build page shares the Panel's dialogs).
+1. **Title line, State, 1. Label, Label Visible** ("Good"): no change.
+2. **Interface and Available Ports** ("Not needed On a widget so Good"): a Widget has none (Rule 1.2).
+3. **Tab** ("Missing : Add to Widget Dialog"): the Hose Bib and the Straight Manual Valve dialogs get **2. Tab** after Label Visible,
+   with **Layer Order** under it (Rule 18.47) and the Name now **3. Name**, as on every other Widget (Rule 18.30). Picking another Tab
+   moves it there; the pipes joined to it stay on the old Tab.
+4. **Layer Order, Name, Change Name, Suggested Name, Graphic** ("Good but see 5 below"): no change, except the Graphic's Hover Help
+   now says the Skynet picture is set and how its IP is placed (with Hose_Bib_IP_Spots.png).
+5. **No Picture box** ("Not needed. One Skynet Picture That has IPs like a Blickman Pump. IF there are IPs On a Manual Widget, make them
+   with the 8 IPs and The Orientation and Left Right follow the same pattern as the Blickman Pump. For Widgets without IPs, The Skynet
+   images are flipped or Rotated in the Back Ground."): a Hose Bib has one Skynet picture, so its dialog has no Picture box. A Manual
+   Widget with IPs has the 8 IP spots of its box, as a Pump has (Rule 5.27), and its Orientation and Left / Right work as the Pump's:
+   the picture and its inside Hose or Pipe are mirrored or turned, and the IP stays where it is seen on the Tab, so the joined pipe or
+   hose stays put. A Widget without IPs is flipped or turned by Skynet in the background. A Hose Bib keeps its spots off the wall side
+   (Rule 18.45 #6).
+6. **Orientation and Hose or Pipe** ("Copy the fields and buttons in the same layout"): Orientation is a short dropdown as on the
+   Pump, with Left / Right short beside it on the same line, and Hose or Pipe on its own full line under it, as on the Pump.
+7. **Model** ("Not Needed for a Hose Bib, but may be needed on other Dialogs if significant but not likely for a Widget"): none.
+8. **No IP box** ("See 5 above. Should be in the background and not by user."): the IP spot is set the Pump's way (Rule 5.27): a pipe
+   or hose end put on or near a Hose Bib whose IP has nothing joined goes on the nearest of its spots, and its IP moves there. Once
+   joined, it stays. A Hose Bib already saved keeps the spot it has.
+9. **.confirmation** ("Needed for some Manual widgets so good"): kept.
+10. **X, Y, Width, Height and the Widget Type** ("Good"): no change.
+**The Model is now two dialogs**: the Blichmann RipTide (a Device) and the Hose Bib Widget (a Widget). A dialog matched to the Model
+(Rules 18.44, 18.47) follows the one of its kind. *Replaces* for the Hose Bib: Rule 18.45 #6's **IP** box and the Picture in its
+dialog (the Straight Manual Valve keeps its Picture list, which can still make it a Hose Bib). Help 87, 141, 148.
 
 ## 19. Vessel Rules
 
@@ -5518,6 +5551,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 18.48 (OakBarn Brewery, PDF "Panel Update Final 2": "Fix these on this Dialog"; "Do this now"): the Hose Bib Widget and Straight Manual Valve dialogs get 2. Tab (Layer Order under it, 3. Name); the Hose Bib has no Picture box and no IP box, its IP spot is set by the pipe or hose joined to it (the nearest of its spots, the Pump's way, Rule 5.27); Orientation with Left / Right short as on the Pump, Hose or Pipe under it. The Blichmann RipTide and the Hose Bib Widget dialogs together are the Model. Rules 18.45 and 18.47 marked. Help 87, 141, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs and pipe drawing; it imports no Hose Bib spot, so nothing else changes there.
 - 2026-11-18: Dialog Sandbox (PR #485) cleaned up (thread "Apply the Dialog Sandbox decisions"). Rule 2.54 changed: every dialog, the Blichmann Model too, has Delete · Save · Undo · Close · ✕ together at the right of its frozen top row; Cancel is called Close; a boxed ✕ on every dialog. Added Rule 18.46: a greyed out box shows only the ⛔ on hover, with no Hover Help or hover text (the Rule 18.40 Interface line and the "how to unlock" texts are gone) unless OakBarn Brewery names it as a text dialog. Added Rule 18.47: a dialog brought to the Blichmann Model keeps its layout and order (added boxes where suggested, the rest in Model order, the Model decides focus); Layer Order moves under the Tab on every dialog in the Model's numbered order. Rules 18.40 and 18.44 marked. Help 87, 115, 128, 148 (and French). Checked against both programs: the BruControl Import's Build page shares the Panel's dialogs, buttons and Hover Help code, so it changes the same way; its own pages are not dialogs with Cancel and keep their look.
 - 2026-11-18: Rule 9.12 made exact (OakBarn Brewery: "No Copywrite stuff in any Skynet Media"; "My own will be under the MIT Liencence and Public"; "CC BY and CC By SA are fine. we will put the credit in a Read me"): Skynet media is its own (MIT), public domain (CC0 included), or CC BY / CC BY-SA with credit in the README's Media credits; a changed BY-SA copy stays BY-SA; NC, ND and other licenses are out. Every shipped picture and sound was checked: all fit except the Importer's clinking mugs icon (Google Noto Emoji, Apache 2.0), which OakBarn Brewery keeps as an exception ("Yes"), credited in the README. Help 183 (and French). Checked against both programs: the Importer ships in the same Setup; its icon is the one exception. (thread "Replace copyrighted sounds with Skynet ones")
 - 2026-11-18: Rule 3.14 and Rule 1.31 changed (OakBarn Brewery: "wgt_P_SW_Label_TabID is a Process switch"; "A Switch Widget that is a Process subclass"): the Process Widget's type letters are **PSW** instead of PRC, so its name is `wgt_PSW_Label_TabID` (one underscore between the parts, as Rule 3.14 says). No old way is kept: the PRC letters are gone everywhere (before the first Public Production). Help 173 and its French page changed. Checked against both programs: the Panel names a new one wgt_PSW_; the Importer makes each BruControl Script element a Process Widget named wgt_PSW_ (it reuses the Panel's code). (thread "Name Process switches wgt_PSW_")

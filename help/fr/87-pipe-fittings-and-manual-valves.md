@@ -41,7 +41,9 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
     n'est pas un réglage : 💾 Save et Close ne le changent pas. Seule la souris l'atteint, pas la touche Tab ni Entrée.
   - **1. Label** (utilisé dans le message « à la main ») et **Label Visible**. Dès que le Label change, **🏷 Update to Suggested
     Name** apparaît à côté de Label Visible : il met le Suggested Name fait avec le nouveau Label dans la case Change Name.
-  - **2. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou utilisez
+  - **2. Tab** : le Tab où elle se trouve. Choisissez un autre Tab pour l'y déplacer (les tuyaux qui y sont joints restent sur
+    l'ancien Tab). **Layer Order** est dessous, comme sur la Pump (Skynet Rule 18.48).
+  - **3. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou utilisez
     🏷 Update to Suggested Name) et appuyez sur **✏ Change Name** : le nouveau Name va dans le Name et est gardé quand vous appuyez
     sur 💾 Save, et chaque Process qui utilise l'ancien Name le suit. La case Change Name et ses boutons sont pour la souris seulement.
   - **.confirmation**.
@@ -51,7 +53,7 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
     droite. Une vue de face (dans l'axe du tuyau) n'a pas d'Orientation. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux
     après avoir choisi.
     ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
-  - **X**, **Y**, **Width**, **Height** (réglés par ses tuyaux, ⛔), **Layer Order**, 🔒 Lock et No Unlock, et le **Widget Type**.
+  - **X**, **Y**, **Width**, **Height** (réglés par ses tuyaux, ⛔), 🔒 Lock et No Unlock, et le **Widget Type**.
 
 ### Une vanne manuelle dans un Process {#a-manual-valve-in-a-process}
 

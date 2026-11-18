@@ -41,7 +41,9 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
     change it. Only the mouse reaches it, not the Tab key or Enter.
   - **1. Label** (used in the "by hand" message) and **Label Visible**. Once the Label is changed, **🏷 Update to Suggested Name**
     pops up beside Label Visible: it puts the Suggested Name made from the new Label in the Change Name box.
-  - **2. Name**, greyed out, and below it the **Change Name** box, which starts with the Name now. Type a new Name (or use 🏷 Update
+  - **2. Tab**: the Tab it is on. Pick another Tab to move it there (the pipes joined to it stay on the old Tab). **Layer Order**
+    is under it, as on the Pump (Skynet Rule 18.48).
+  - **3. Name**, greyed out, and below it the **Change Name** box, which starts with the Name now. Type a new Name (or use 🏷 Update
     to Suggested Name) and press **✏ Change Name**: the new Name goes into the Name and is kept when you press 💾 Save, and every
     Process that uses the old Name follows it. The Change Name box and its buttons are for the mouse only.
   - **.confirmation**.
@@ -50,7 +52,7 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
     drawn, Horizontal Left is it mirrored; Vertical Left and Vertical Right point the handle to the left or the right. A front view
     (looking down the pipe) has no Orientation. Its ends (IPs) turn with it, so join the pipes after you pick.
     ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
-  - **X**, **Y**, **Width**, **Height** (set by its pipes, ⛔), **Layer Order**, 🔒 Lock and No Unlock, and the **Widget Type**.
+  - **X**, **Y**, **Width**, **Height** (set by its pipes, ⛔), 🔒 Lock and No Unlock, and the **Widget Type**.
 
 ### A Manual Valve in a Process
 
