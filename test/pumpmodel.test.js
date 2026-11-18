@@ -107,8 +107,8 @@ assert.doesNotMatch(app, /\['power', 'Power', 'sel', PUMP_POWER_CHOICES/, 'Power
 assert.match(app, /const PORTS_TIP = 'Match YOUR Pump fittings/, 'Ports Hover Help starts Match YOUR Pump fittings');
 assert.match(app, /\.\.\.\['in', 'out'\]\.map\(side => \(pf => \[\.\.\.pf\.slice\(0, 6\), \{ \.\.\.pf\[6\], \.\.\.x \}\]\)\(pumpFitField\(it, factsOf\(it\), side\)\)\)/, 'Inlet IP Fitting and Outlet IP Fitting where Power was (they replaced Ports, 2026-11-17)');
 assert.doesNotMatch(app, /it is not changed here/, 'Use: no "not changed here"');
-assert.match(app, /const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed\./);
-assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both balloons');
+// Rule 18.46 (2026-11-18): the greyed Interface and Port have no Hover Help any more, only the ⛔
+assert.ok(!app.includes('SET_WIRE_TIP') && !app.includes('CONFIRMED_WIRE_TIP') && !app.includes('setWireTips'), 'no greyed Interface balloon');
 assert.match(app, /⟪img:help_pictures\/Pump_Cover\.png⟫/); assert.match(app, /⟪img:help_pictures\/Pump_Overlays\.png⟫/);
 for (const f of ['Pump_Cover.png', 'Pump_Overlays.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
 assert.match(app, /const DB_TIPS = \{/); assert.match(app, /pairLbl dbPopLbl tipLbl', 'data-help': DB_TIPS\.line/, 'Database and .API has its own Hover Help');

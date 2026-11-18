@@ -14,7 +14,7 @@ import { gaugeStyle, DIAL_SHAPES, GAUGE_STYLES, BAR_ORIENTS } from './dial.js';
 import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
-import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX } from './hoverhelp.js';
+import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName } from './hoverhelp.js';
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, usedIpTypes } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
@@ -1041,8 +1041,8 @@ async function addMf(tname, kind) {
     mfIface: defaultIface(devs), workspace: tab, rot: '0', w: t.size?.[0] || 160, h: t.size?.[1] || 262, x: 60, y: 60 };
   for (const k of keys) work[k + '_mfk'] = kind;
   { const b = draft.workspaces.find(w => w.name === tab); work.x = Math.max(0, Math.round(((+b?.width || 1600) - work.w) / 2)); work.y = Math.max(0, Math.round(((+b?.height || 900) - work.h) / 2)); }
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
-  const setBtns = () => { for (const b of oks) b.textContent = '➕ Add Device'; for (const b of cancels) b.textContent = '✖ Cancel'; };
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg .dlgClose'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  const setBtns = () => { for (const b of oks) b.textContent = '➕ Add Device'; for (const b of cancels) b.textContent = 'Close'; };
   const gate = () => {
     const w = { ...work }; try { readFields(w, body); } catch { }
     const motor = keys.filter(k => w[k + '_mfk'] === 'motorized'), noPin = motor.find(k => (w[k + '_mfpin'] ?? '') === '');
@@ -5719,17 +5719,9 @@ const IFACE_PUMP_PARTS = ['The Arduino board this Pump Device is connected to. A
   'If you need to add a new Interface, select ➕ Add new Interface in the List Box (Bottom Choice). Create the Interface and Save it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.'];
 const IFACE_PUMP_TIP = IFACE_PUMP_PARTS.join('\n\n');
 const ifaceTip = e => isPumpDev(e) ? IFACE_PUMP_TIP : isMbvDev(e) ? IFACE_VALVE_TIP : DEVICE_TIPS.iface;      // the valve: Rule 18.42
-// the greyed out Interface and Available Ports (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Hover Help after Updated and Greyed out need
-// to basically explain that the Interface and Port combination are saved, they cannot be changed for both Hover Help"): this line
-// first in both balloons, then the box's own balloon
-const SET_WIRE_TIP = 'The Interface and Port combination is saved: they cannot be changed. They are the board and the pin (Port) this Device is wired to.';
-const CONFIRMED_WIRE_TIP = 'Confirmed: the Interface and Port combination is saved for this Device, and they cannot be changed. To use another Interface or Port, ✖ Cancel this Add box and start again.';
-function setWireTips(pair, lead) {      // pair: the Interface box (its line holds the Available Ports too)
-  const line = pair?.closest('.fldPair') || pair, lbl = line?.previousElementSibling;
-  for (const l of [lbl, ...(line?.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {
-    l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = lead + (l.dataset.help ? '\n\n' + l.dataset.help : '');
-  }
-}
+// the greyed out Interface and Available Ports: no Hover Help once they are greyed out, only the ⛔ while the mouse is on them
+// (OakBarn Brewery, 2026-11-18: "The do not enter icon on hover of any Greyed out field. Rule."; Rule 18.46). The Rule 18.40 line
+// "The Interface and Port combination is saved ..." is gone.
 // the standard part after a Suggested Name Format line, the same as the Interface balloon's (OakBarn Brewery, 2026-11-12, Dialog 1 #2:
 // "add the standard like the interface id text here")
 const NAME_STANDARD = 'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).\n\n'
@@ -6018,9 +6010,9 @@ async function newDeviceDialog(e, hint, what) {
   if (pwm) { delete work.tap; Object.assign(work, { initial: e.initial, precision: e.precision, signal: e.signal, units: e.units, rangeLow: e.rangeLow, rangeHigh: e.rangeHigh }); }
   if (elem) work.imageOn = e.imageOn;
   if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg .dlgClose'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
-  for (const b of cancels) b.textContent = '✖ Cancel';
+  for (const b of cancels) b.textContent = 'Close';
   let wired = false;      // the Interface and Available Ports are set once the rest of the box is open
   // The Review step (OakBarn Brewery, 2026-11-12, Rule 18.35): the Interface and Port this Device was Confirmed on. A Device with the
   // drill-down asks for it once both are picked; picking another Interface or Port asks again.
@@ -6048,8 +6040,7 @@ async function newDeviceDialog(e, hint, what) {
     if (dd && conf && wireKey(w)) {
       const dv = body.querySelector('[data-k="device"]'), ps = body.querySelector(`[data-k="${port[0]}"]`);
       for (const i of [dv, ps]) if (i && !i.disabled) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it (Rule 18.44)
-      dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');
-      setWireTips(dv, CONFIRMED_WIRE_TIP);
+      dv?.closest('.fldPair')?.previousElementSibling?.classList.add('greyed');      // no Hover Help on it now, only the ⛔ (Rule 18.46)
     }
     // the rest of the Add box is open (OakBarn Brewery, 2026-11-11, the second Blichmann Pump Build Dialog): the Label and Tab can
     // still change (the Suggested Name follows), and the focus goes to the first box that was not on the first part: the Orientation
@@ -6178,7 +6169,7 @@ async function newDeviceDialog(e, hint, what) {
         work.workspace = (await addTabForDevice()) || was;
         { const nt = draft.workspaces.find(x => x.name === work.workspace); if (work.workspace !== was && nt?.id) try { await saveBuildDefs({ buildTab: nt.id }); } catch { } }     // and it is the Default Tab now (Rule 4.6)
         for (const b of oks) b.textContent = '➕ Add Device';
-        for (const b of cancels) b.textContent = '✖ Cancel';
+        for (const b of cancels) b.textContent = 'Close';
         continue;
       }
       if (r === 'detour') {        // Rule 4.7: a double-click opened other Properties; keep what is typed, then back here on this Tab
@@ -6190,7 +6181,7 @@ async function newDeviceDialog(e, hint, what) {
         dlgEnterSeq = null;
         await detourAndBack($('#dlg')._detourGo);
         for (const b of oks) b.textContent = '➕ Add Device';
-        for (const b of cancels) b.textContent = '✖ Cancel';
+        for (const b of cancels) b.textContent = 'Close';
         continue;
       }
       if (r === 'reprofile') {      // another Pump Profile picked: the box opens again with its look, keeping what is typed
@@ -6254,9 +6245,9 @@ async function newPictureDialog(e) {
   // a new Picture Widget starts as a still picture with no picture yet (the green / red LEDs are for on / off Devices)
   if (work.imageOff === 'Images/Skynet/Lights_LEDs/led_red.svg') { delete work.imageOff; delete work.imageOn; }
   const KEEP = ['label', 'hideName', 'imageOff', 'imageOn', 'imageOverlay', 'bgColor', 'follow', 'tap', 'text', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'];
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg .dlgClose'), was = [oks[0]?.textContent, cancels[0]?.textContent];
   for (const b of oks) b.textContent = '➕ Add Widget';
-  for (const b of cancels) b.textContent = '✖ Cancel';
+  for (const b of cancels) b.textContent = 'Close';
   const gate = () => {
     const w = { ...work }; try { readFields(w, body); } catch { }
     const why = !String(w.label || '').trim() ? 'Type a Label first (1. Label)' : !w.imageOff || w.imageOff === '__add__' ? 'Pick the Picture first (2. Picture)' : '';
@@ -6291,7 +6282,7 @@ async function newPictureDialog(e) {
         body.oninput = body.onchange = null;
         for (const b of oks) b.textContent = was[0]; for (const b of cancels) b.textContent = was[1];
         await detourAndBack($('#dlg')._detourGo);
-        for (const b of oks) b.textContent = '➕ Add Widget'; for (const b of cancels) b.textContent = '✖ Cancel';
+        for (const b of oks) b.textContent = '➕ Add Widget'; for (const b of cancels) b.textContent = 'Close';
         continue;
       }
       if (r !== 'ok') return false;
@@ -9249,7 +9240,10 @@ function withLayer(fields, item) {
   if (!Array.isArray(fields)) return fields;
   const isF = (f, k) => Array.isArray(f) && f[0] === k && typeof f[2] === 'string';
   if (fields.some(f => isF(f, 'layer'))) return fields;
-  const at = ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
+  // a dialog in the Blichmann Model's numbered order (1. Label ... 3. Tab): Layer Order right under the Tab, where the Pump has it
+  // (OakBarn Brewery, 2026-11-18: "Place in Order of the Blickmann"; Rule 18.47). The older dialogs keep it after their Size.
+  const numTab = fields.findIndex(f => Array.isArray(f) && ['workspace', '_tab'].includes(f[0]) && /^\d+\. Tab$/.test(String(f[1])));
+  const at = numTab >= 0 ? numTab : ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
   const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
   const f = ['layer', inV ? 'Inside Vessel Device Layer' : 'Layer Order', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP, ...same }];
@@ -9426,17 +9420,14 @@ function field(f, obj) {
   if (f[0] === 'label' && x?.tip && out[0] && hasSuggestion(obj)) { x.tip = labelTip(obj, x); out[0].dataset.labelTip = `${x.attr ? 'a' : ''}${x.up || ''}`; }      // made for where it is
   if (x?.tip && out[0]) {        // Rules 18.16, 2.38: the name stays short; rest the mouse on it (hover help, public/hoverhelp.js) or tap it
     out[0].classList.add('tipLbl'); out[0].dataset.help = x.tip;
-    out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, out[0].dataset.help || x.tip); } });
+    out[0].addEventListener('click', ev => { if (ev.target === out[0] && !greyedName(out[0])) { ev.preventDefault(); fieldTip(out[0].textContent, out[0].dataset.help || x.tip); } });
   }
   if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
   if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
     // wiring and almost never change, so there is no ✏ Change; the Device keeps its hidden key and only its Name changes (✏ Change name)
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
     for (const i of ins()) { i.disabled = true; i.removeAttribute('title'); }      // the ⛔ says it, no hover read (OakBarn Brewery, 2026-11-18, Rule 18.44)
-    out[0].classList.add('greyed');
-    for (const l of [out[0], ...(box.querySelectorAll?.('.pairLbl') ?? [])]) if (l && !l.dataset.wireTip) {      // both balloons say it first (Dialog 2 #3)
-      l.classList.add('tipLbl'); l.dataset.wireTip = '1'; l.dataset.help = SET_WIRE_TIP + ((l.dataset.help || (l === out[0] ? x.tip : '')) ? '\n\n' + (l.dataset.help || x.tip) : '');
-    }
+    out[0].classList.add('greyed');      // no Hover Help on a greyed box, only the ⛔ (Rule 18.46)
   }
   if (x && out[1]) {
     const icons = []; let wrap;
@@ -9452,7 +9443,7 @@ function field(f, obj) {
   if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
-    out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
+    out[0].classList.add('greyed');      // no "how to unlock it" hover text, only the ⛔ (Rule 18.46)
     if (out[1].matches?.('select, input')) out[1].disabled = true;
   }
   if (x?.guard && out[1]) {       // a box that can't be left blank once the user is on it (Rule 18.28's pop-up)
@@ -9460,11 +9451,11 @@ function field(f, obj) {
     if (i) Object.assign(i.dataset, { guard: x.guard, ...(x.guardAllow ? { guardAllow: x.guardAllow } : {}), ...(x.guardMsg ? { guardMsg: x.guardMsg } : {}), ...(x.guardNow ? { guardNow: '1' } : {}) });
   }
   if (x?.grey && out[1]) {        // a setting this kind does not use: shown greyed out, never changed (a Hydrometer's Template, Rule 6.25)
-    out[0]?.classList.add('greyed'); if (out[0]) out[0].title = x.grey;
-    for (const i of [out[1], ...(out[1].querySelectorAll?.('select, button, input') ?? [])]) if ('disabled' in i) { i.disabled = true; i.title = x.grey; }
+    out[0]?.classList.add('greyed');      // no hover text, only the ⛔ (Rule 18.46)
+    for (const i of [out[1], ...(out[1].querySelectorAll?.('select, button, input') ?? [])]) if ('disabled' in i) i.disabled = true;
   }
   if (greyedPic(f[0], obj)) {
-    out[0].classList.add('greyed'); out[0].title = 'Pick what it turns on with first (Turns on with is None)';
+    out[0].classList.add('greyed');      // no "how to unlock it" hover text, only the ⛔ (Rule 18.46)
     for (const x of out[1].querySelectorAll?.('select, button, input') ?? []) x.disabled = true;
     if (out[1].matches?.('select, input')) out[1].disabled = true;
   }
@@ -10460,8 +10451,8 @@ function nameChangeRows(key, label, obj) {
 // slider works the item at once, the same as a click on it on its Tab (a Manual Valve with .confirmation asks Done first, Rule 5.15;
 // a Pump turns On or Off, Rule 2.33). It is not part of the Properties: Cancel does not undo it and Save does not save it.
 const STATE_TIPS = {
-  mv: 'Open or Closed now. Slide it to open or close the valve at once, the same as a click on the valve on its Tab. With .confirmation on, it asks you to turn it by hand and press Done first.\n\nIt is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it.',
-  dev: 'On or Off now. Slide it to turn the Device On or Off at once, the same as a click on it on its Tab.\n\nIt is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it.',
+  mv: 'Open or Closed now. Slide it to open or close the valve at once, the same as a click on the valve on its Tab. With .confirmation on, it asks you to turn it by hand and press Done first.\n\nIt is not a setting: 💾 Save and Close do not change it. Only the mouse reaches it.',
+  dev: 'On or Off now. Slide it to turn the Device On or Off at once, the same as a click on it on its Tab.\n\nIt is not a setting: 💾 Save and Close do not change it. Only the mouse reaches it.',
   unsaved: 'Save the layout once (💾 Save layout) so it can be worked from here.',
 };
 function stateRow(label, obj) {
@@ -10753,7 +10744,7 @@ function askDiscard(what = 'this dialog') {
   return new Promise(res => {
     const d = h('dialog', { class: 'askDiscard', 'data-nomenu': '' },
       h('h3', {}, '⚠ Discard your changes?'),
-      h('p', {}, `You changed ${what}. Cancel throws those changes away.`),
+      h('p', {}, `You changed ${what}. Close throws those changes away.`),
       h('div', { class: 'bar' }, h('button', { type: 'button', class: 'danger', onclick: () => d.close('discard') }, '🗑 Discard changes'),
         h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: () => d.close('back') }, '↩ Go back to Save')));
     d.oncancel = ev => { ev.preventDefault(); d.close('back'); };
@@ -14506,8 +14497,44 @@ function freezeDialogTop(d) {
   host.insertBefore(head, kids[0]);
   for (const k of kids.slice(0, kids.indexOf(top) + 1)) head.append(k);
 }
+// Rule 2.54 on every dialog, the Blichmann Model too (OakBarn Brewery, 2026-11-18: "Follow rule 2.54 which Blickmann Model should do
+// regardless so it would be the same"): the buttons sit together in the upper right corner, frozen, always in the same order:
+// Delete · Save (or Keep, ➕ Add ...) · Undo · Close · ✕. Cancel is called Close (it closes without saving and asks first when
+// something was changed), and the boxed ✕ does the same. A dialog without one of the buttons leaves it out; the others keep their
+// order. The Properties and Add boxes (#dlg) have the group in their own markup (index.html); every other dialog with a Cancel or
+// Close button gets it here when it opens. A dialog whose buttons were only at the bottom gets them in a frozen row at the top.
+const CLOSE_RX = /^(✖\s*)?(Cancel|Close)$/;
+function orderDialogButtons(d) {
+  if (d.id === 'dlg' || d._btnOrder) return;
+  const host = d.querySelector(':scope > form') || d;
+  const isClose = x => x.tagName === 'BUTTON' && CLOSE_RX.test(x.textContent.trim());
+  const bars = [...host.querySelectorAll('.bar')].filter(b => !b.closest('.dlgBtnGroup') && [...b.children].some(isClose));
+  if (!bars.length) return;
+  d._btnOrder = true;
+  const groups = bars.map(bar => {
+    const kids = [...bar.children].filter(x => x.tagName === 'BUTTON'), close = kids.find(isClose);
+    const del = kids.find(x => x !== close && /Delete/.test(x.textContent));
+    const save = kids.find(x => x !== close && x !== del && /Save|Keep/.test(x.textContent)) || kids.find(x => x !== close && x !== del && x.classList.contains('primary'));
+    const undo = kids.find(x => x !== close && x !== save && /Undo/.test(x.textContent));
+    close.textContent = 'Close';
+    const x = h('button', { type: 'button', class: 'boxX', title: close.title || 'Close', 'aria-label': 'Close', onclick: ev => { ev.preventDefault(); close.click(); } }, '✕');
+    const g = h('span', { class: 'dlgBtnGroup' }, ...[del, save, undo, close].filter(Boolean), x);
+    if (![...bar.children].some(k => k.classList.contains('spacer'))) bar.append(h('span', { class: 'spacer' }));
+    bar.append(g);
+    return { bar, g };
+  });
+  // the buttons only at the bottom: they go up into a frozen row with the title
+  const topOf = el => { let t = el; while (t.parentElement && t.parentElement !== host) t = t.parentElement; return [...host.children].indexOf(t); };
+  if (groups.every(({ bar }) => topOf(bar) > 1)) {
+    const { bar, g } = groups[groups.length - 1], menu = host.querySelector(':scope > .dlgMenu');
+    const first = [...host.children].find(k => k !== menu), title = first && /^H[1-4]$/.test(first.tagName) ? first : null;
+    const head = h('div', { class: 'frozenHead' }, ...(menu ? [menu] : []), h('div', { class: 'bar' }, ...(title ? [title] : []), h('span', { class: 'spacer' }), g));
+    host.prepend(head); d.classList.add('frozenDlg');
+    if (![...bar.children].some(k => !k.classList.contains('spacer'))) bar.remove();
+  }
+}
 const showModalPlain = HTMLDialogElement.prototype.showModal;
-HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } try { freezeDialogTop(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
+HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } try { orderDialogButtons(this); } catch (e) { console.error(e); } try { freezeDialogTop(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
 // the Menu Bar's own ☰, for every page but the Tabs (the Tabs have theirs on the tab line)
 $('#top .right').prepend(menuButton());
 async function menuEditLayout() {

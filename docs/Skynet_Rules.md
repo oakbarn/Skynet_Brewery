@@ -1044,6 +1044,14 @@ move all the Buttons to the Upper Right and Freeze", "Do it now", "Delete Button
 are the Menu tab's own, at the far right corner where they always were. A screen without one of the buttons leaves it out; the
 others keep their order. Done so far: Default settings, Equipment Profile (its buttons are now only at the top, frozen), Recipe, and the Pump,
 Valve, Tab Background, Mash, Boil and Water Profile tabs.
+*Changed 2026-11-18* (OakBarn Brewery, Dialog Sandbox item 1: "Follow rule 2.54 which Blickmann Model should do regardless so it would
+be the same"): **every dialog** follows this order, the Blichmann Model (the Pump) too: every Properties and Add box, every ⬢ and ⬆
+pop-up and every other dialog. The buttons sit together at the right end of the frozen top row: **Delete · Save · Undo · Close · ✕**.
+In a dialog **Cancel is called Close** (it closes without saving and asks first when something was changed) and the boxed **✕** does
+the same. Save is called **💾 Keep** in a pop-up opened from a dialog and **➕ Add Device** (or Add Widget) in an Add box. A dialog whose
+Save closes it has no Undo (there is no earlier Save to go back to: Close lets the changes go). A dialog that had its buttons only at
+the bottom gets them in a frozen row at the top. The buttons that are not one of these (COPY, Tick all, Convert ...) stay where they
+were. Help 115, 128, 148. Both programs: the BruControl Import's Build page shares the Panel's dialogs.
 2.55 **The purple + Add New button is for Profiles only** (OakBarn Brewery, 2026-11-16: "Need Add New Button to the Right Of the
 Open DDLB on the pump profile with the Purple + Not Frozen but does same as Add New in the DDLB which can stay", "And a Rule: Any
 Profile Like The Pump One gets the Add New Button For now that is only Profiles", "No may not use anywhere else is the rule now and
@@ -5085,7 +5093,7 @@ finished"). Both programs (the BruControl Import's Build page uses the same pop-
 
 18.40 **Blichmann RipTide Dialog 2 #3** (OakBarn Brewery, 2026-11-16, PDF "Blichmann_Riptide_Dialog_2_3", the model, Rule 18.34).
 The Pump Add box (Dialog 2) and Pump Device Properties:
-- **Greyed out Interface and Available Ports**: once they are Confirmed (the Add box) or set (Properties), both Hover Helps start by
+- *Taken out 2026-11-18 (Rule 18.46: a greyed box has no Hover Help, only the ⛔):* **Greyed out Interface and Available Ports**: once they are Confirmed (the Add box) or set (Properties), both Hover Helps start by
   saying the Interface and Port combination is saved and can not be changed ("Hover Help after Uodated and Greyed out need to basically
   explain that the Interface and Port combination are saved, they cannot be changed for both Hover Help").
 - **A double-click on the Tab list before anything is saved** asks nothing: the Add box steps aside, the Tab settings open, and the Add
@@ -5174,6 +5182,8 @@ global update Rule 2.51 waited for. In both programs (the BruControl Import's Bu
 - **Hover Help** not written yet is adapted from the Blichmann RipTide's (Rule 18.42), with pictures, plain words and the French.
 Help 148.
 *Changed (Rule 18.45, 2026-11-18):* the ⛔ shows only while the mouse is on the greyed box or its name ("Only show of Hover of Field").
+*Changed (Rule 18.46, 2026-11-18):* a greyed box has no Hover Help at all, OakBarn Brewery's Rule 18.40 line included; and every dialog's
+buttons follow Rule 2.54 (Delete · Save · Undo · Close · ✕).
 
 18.45 **Panel Update Final 1: the Manual Valve Widget and the Blichmann Model** (OakBarn Brewery, 2026-11-18, PDF "Panel Update Final 1":
 "Fix these on this Dialog and also on the Blickmann Model"; "Add any Pictures needed for Orientation/ Left Right"). Both programs (the
@@ -5222,6 +5232,38 @@ Name that follows the Suggested Name until it is added (no Change Name there). "
 on the Hose Bib dialog as the Blickmann Model": the Hose Bib and Straight Manual Valve dialogs have the lock and No Unlock in the title
 line, then State, 1. Label, Label Visible, Layer Order, 2. Name with Change Name, the Suggested Name, Graphic, Picture, Orientation with
 Left / Right, Hose or Pipe, IP (a Hose Bib), .confirmation, X, Y, Width and Height on one line, and the Widget Type last.
+
+18.46 **A greyed out box shows only the ⛔, and only on hover** (OakBarn Brewery, 2026-11-18, Dialog Sandbox items 2 and 3: "Only when a
+User Hovers. The do not enter icon on hover of any Greyed out field. Rule. With text dialog if requested but only when I say make it a
+Dialog"; "If they are locked, yes"). Both programs (the BruControl Import's Build page shares the Panel's dialogs and Hover Help).
+- A box that can not be changed here (greyed out, locked) shows the red ⛔ Do Not Enter sign while the mouse is on the box or its name
+  (Rules 18.44, 18.45 #7), and **nothing else**: no Hover Help balloon on its name, no tap pop-up, and no hover text on the box.
+- The "why it is greyed" and "how to unlock it" texts are gone: the Rule 18.40 line "The Interface and Port combination is saved ...",
+  "Confirmed: ... ✖ Cancel this Add box and start again", "Autosize to pipe is on: switch it off to set the size", "Pick what it turns
+  on with first", and a Hydrometer's greyed boxes' reasons.
+- The same boxes get it as get the ⛔: a box you type in or pick from. A greyed tick box, switch or slider, and a form shown only to
+  look at (all of it locked, no ⛔), keep their Hover Help.
+- **A text dialog only when OakBarn Brewery says so**: when OakBarn Brewery names a greyed box ("make it a Dialog"), that box gets its
+  own text again. None so far.
+- Once the box can be changed again, its Hover Help comes back.
+Help 148.
+
+18.47 **A dialog brought to the Blichmann Model keeps the Model's layout and order** (OakBarn Brewery, 2026-11-18, Dialog Sandbox item 4:
+"Place in Order of the Blickmann. Rule: When Updating to the Blickmnan Model, use the same layout and order. If subtracting fields or
+adding them, Place at your suggested place but follow the Blickmann Order for any above or below. Use the Model to decide if it gets
+focus and how."). Both programs.
+- **Same layout and order** as the Pump (Rules 18.34-18.40, 18.45): the title line (lock, Visible, Hidden Locked), State, 1. Label,
+  Label Visible, 2. Interface with its Port, 3. Tab, **Layer Order**, 4. Name with Change Name, the Suggested Name, Graphic ...,
+  X Y Width Height on one line, the Type last.
+- **A box the Model does not have** goes where Skynet suggests; **a box the Model has that this dialog does not** is left out. Every
+  box above and below keeps the Model's order.
+- **Focus**: each box gets the focus the Model's box of the same kind gets (Rule 18.38: Enter, the Tab key, the mouse only, or none).
+- **Layer Order** (done now, on the dialogs already in the Model's numbered order): right under the Tab, as on the Pump; reached by the
+  Tab key and the mouse, as on the Pump, and not on the Enter path. A dialog with no Tab box (the Manual Valve, the Hose Bib) has it
+  after Label Visible, where the Tab would be. The older dialogs (the gGlobal Widget, the older Alarm Widget, the Vessel Widget, Pipe)
+  are not changed yet: they wait for the "Recheck dialogs" pass (OakBarn Brewery: "We will do another Recheck dialogs to follow
+  Blickmann Model later").
+Help 148.
 
 ## 19. Vessel Rules
 
@@ -5464,6 +5506,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Dialog Sandbox (PR #485) cleaned up (thread "Apply the Dialog Sandbox decisions"). Rule 2.54 changed: every dialog, the Blichmann Model too, has Delete · Save · Undo · Close · ✕ together at the right of its frozen top row; Cancel is called Close; a boxed ✕ on every dialog. Added Rule 18.46: a greyed out box shows only the ⛔ on hover, with no Hover Help or hover text (the Rule 18.40 Interface line and the "how to unlock" texts are gone) unless OakBarn Brewery names it as a text dialog. Added Rule 18.47: a dialog brought to the Blichmann Model keeps its layout and order (added boxes where suggested, the rest in Model order, the Model decides focus); Layer Order moves under the Tab on every dialog in the Model's numbered order. Rules 18.40 and 18.44 marked. Help 87, 115, 128, 148 (and French). Checked against both programs: the BruControl Import's Build page shares the Panel's dialogs, buttons and Hover Help code, so it changes the same way; its own pages are not dialogs with Cancel and keep their look.
 - 2026-11-18: Rule 3.14 and Rule 1.31 changed (OakBarn Brewery: "wgt_P_SW_Label_TabID is a Process switch"; "A Switch Widget that is a Process subclass"): the Process Widget's type letters are **PSW** instead of PRC, so its name is `wgt_PSW_Label_TabID` (one underscore between the parts, as Rule 3.14 says). No old way is kept: the PRC letters are gone everywhere (before the first Public Production). Help 173 and its French page changed. Checked against both programs: the Panel names a new one wgt_PSW_; the Importer makes each BruControl Script element a Process Widget named wgt_PSW_ (it reuses the Panel's code). (thread "Name Process switches wgt_PSW_")
 - 2026-11-18: Rule 2.9 note (an IP and a hose end are part of their parent): a double-click on a hose end's yellow ring opens the hose's Properties and on an IP the Properties of its Device or Widget; a left click on the ring pops up "Move with Held Right Click" (Rule 5.40). Rule 18.45 changed: State on every On / Off Device's Properties; Change Name and 🏷 Update to Suggested Name on every saved Device and Widget (not on a new Build's Add box); the Hose Bib and Manual Valve dialogs in the Blichmann Model's order. Help 127, 141. Checked against the BruControl Import program: its Build page shares these dialogs; it has no running Tabs, so the double-click on a running Tab is the Panel's only.
 - 2026-11-18: Rule 18.45 #6: a Hose Bib may be Vertical (Left or Right) too, and its IP may be on any of the 8 spots of its box that is not on the wall side. Help 141.

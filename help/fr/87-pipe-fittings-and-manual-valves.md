@@ -38,7 +38,7 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
 - Ses Properties, de haut en bas :
   - **State** : Open ou Closed maintenant, avec un curseur. Faites-le glisser pour ouvrir ou fermer la vanne tout de suite, comme
     un clic sur elle dans son Tab (avec .confirmation, elle vous demande de le faire à la main et d'appuyer sur Done d'abord). Ce
-    n'est pas un réglage : 💾 Save et ✖ Cancel ne le changent pas. Seule la souris l'atteint, pas la touche Tab ni Entrée.
+    n'est pas un réglage : 💾 Save et Close ne le changent pas. Seule la souris l'atteint, pas la touche Tab ni Entrée.
   - **1. Label** (utilisé dans le message « à la main ») et **Label Visible**. Dès que le Label change, **🏷 Update to Suggested
     Name** apparaît à côté de Label Visible : il met le Suggested Name fait avec le nouveau Label dans la case Change Name.
   - **2. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou utilisez

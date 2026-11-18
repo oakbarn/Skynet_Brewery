@@ -4,7 +4,7 @@ Ajouter une **Motorized Ball Valve** (vanne à bille motorisée) se fait comme a
 avec une différence : **une vanne n'a pas de Cover**. (Règle Skynet 18.23)
 
 Chaque fenêtre ici suit le Blichmann Model, comme la pompe : le titre et les boutons restent en haut pendant que le reste
-défile, il n'y a pas de rangée de boutons en bas, et chaque fenêtre ⬢ ou ⬆ a **✖ Cancel** et **💾 Keep** en haut. (Règle Skynet 18.41)
+défile, il n'y a pas de rangée de boutons en bas, et chaque fenêtre ⬢ ou ⬆ a **💾 Keep**, **Close** et **✕** en haut (Rule 2.54). (Règle Skynet 18.41)
 
 ## Ajouter une Motorized Ball Valve {#adding-a-motorized-ball-valve}
 
@@ -71,7 +71,7 @@ Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Règle Skynet 18.42)
 ## Properties, du haut vers le bas {#properties-from-the-top}
 
 1. Le titre est la vanne (**Skynet Motorized Ball Valve** ou **User Defined Motorized Ball Valve**), avec le **cadenas 🔓**,
-   **Visible** et **Hidden Locked** à côté, tous sur une ligne. Puis **Delete**, **Cancel** et **Save**, qui restent en haut.
+   **Visible** et **Hidden Locked** à côté, tous sur une ligne. Puis **Delete · Save · Close · ✕**, qui restent dans le coin en haut à droite (Rule 2.54).
 2. **1. Label ⬆ ⬢** et **Label Visible**. Un Label n'est jamais vide : laissez-le vide et il devient le Name.
 3. **2. Interface** et **Available Ports**, grisés (la carte et la broche auxquelles elle est câblée).
 4. **3. Tab**, **Layer Order** et **4. Name** (le Suggested Name ; vous pouvez taper le vôtre).

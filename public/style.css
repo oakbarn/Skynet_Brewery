@@ -1457,6 +1457,12 @@ body.buildMode:has(dialog[open]) #editBar { opacity: .25; filter: grayscale(1); 
 /* every button together, frozen in the upper right corner, always in the same order (Rule 2.54): Delete · Save · Undo · Close · ✕ */
 .dlgBtns { float: right; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; margin: 0 0 4px 12px; }
 .dlgBtns .paneClose { display: inline-flex; gap: 6px; }
+/* the same group on every dialog, the Blichmann Model too (OakBarn Brewery, 2026-11-18: "Follow rule 2.54"): Delete · Save · Undo ·
+   Close · ✕ together at the right end of the frozen top row */
+.dlgBtnGroup { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; margin-left: auto; }
+.dlgBtnGroup .boxX { width: 30px; height: 30px; padding: 0; font-size: 16px; line-height: 1; border: 2px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; }
+.dlgBtnGroup .boxX:hover { border-color: var(--text, currentColor); }
+.dlgBtnGroup .hidden { display: none; }
 /* Default settings > IP Types (Rule 5.40): a row of tick boxes for each type */
 .ipTicks { display: flex; flex-direction: column; gap: 6px; }
 .ipTickRow b { display: block; font-size: .9em; margin-bottom: 2px; }
