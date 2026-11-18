@@ -34,19 +34,19 @@ Un Tab Profile garde aussi ce avec quoi commence un **nouveau Tab** fait avec lu
 
 Un Valve Profile est la façon dont commence une nouvelle vanne :
 
-- **Graphic** (la vanne telle qu'elle est dessinée) et, facultatif, **Graphic when open** (image quand elle est ouverte). Les vannes Skynet n'ont pas d'images ouvertes : la vanne garde son image et l'**On overlay** (la superposition « allumé ») montre qu'elle est ouverte ([Images Skynet retirées et renommées](129-retired-skynet-pictures)).
-- **Orientation** : **Horizontal** (bouts du tuyau à gauche et à droite), **Vertical** (en haut et en bas), **45 degrees Left** (coins en haut à gauche et en bas à droite) ou **45 degrees Right** (en haut à droite et en bas à gauche). Pour Horizontal et Vertical, choisissez des images dessinées dans ce sens. Pour les 45, choisissez les images **verticales** : le panel les tourne de 45 degrés à gauche ou à droite pour vous. Les 45 sont pour une vanne posée sur un coude à 45 degrés.
+- **Graphic** (la vanne telle qu'elle est dessinée) : une seule image. **Graphic when open** (image quand elle est ouverte) ne s'affiche que sur un profil qui en a déjà une. Les vannes Skynet n'ont pas d'images ouvertes : la vanne garde son image et l'**On overlay** (la superposition « allumé ») montre qu'elle est ouverte ([Images Skynet retirées et renommées](129-retired-skynet-pictures)).
+- **Orientation** : **Horizontal** (bouts du tuyau à gauche et à droite) ou **Vertical** (en haut et en bas). Les 45 ne s'affichent que sur un profil déjà réglé ainsi : **45 degrees Left** (coins en haut à gauche et en bas à droite) ou **45 degrees Right** (en haut à droite et en bas à gauche). Pour Horizontal et Vertical, choisissez des images dessinées dans ce sens. Pour les 45, choisissez les images **verticales** : le panel les tourne de 45 degrés à gauche ou à droite pour vous. Les 45 sont pour une vanne posée sur un coude à 45 degrés.
 - **Overlay** : ce qui s'affiche sur la vanne quand elle est ouverte ([On overlay](58-on-overlay)). Un nouveau Valve Profile commence avec l'Overlay du Valve Profile marqué **Default** (l'éclair si aucun n'est marqué). Une nouvelle vanne prend l'Overlay du Valve Profile choisi dans sa case d'ajout.
 
 Les images de vanne de Skynet sont des fichiers SVG dans `Images/samples`, donc elles restent nettes à toutes les tailles et ne peuvent pas être supprimées (voir [Media (images et sons)](07-media)) :
 
 | Image | Fichier |
 |---|---|
+| Vanne à boisseau motorisée TC 1.5", horizontale (la vanne du 3 Vessel, le premier choix) | Motorized_TC15_Ball_Valve_Horizontal.svg |
+| Vanne à boisseau motorisée TC 1.5", verticale, moteur à droite (la vanne du 3 Vessel, le premier choix) | Motorized_TC15_Ball_Valve_Vertical.svg |
 | Vanne à boisseau motorisée, horizontale | Valve_Motor_Ball_ClosedH.svg |
 | Vanne à boisseau motorisée, verticale, moteur à droite | Valve_Motor_Ball_ClosedV_RC.svg |
 | Vanne à boisseau motorisée, verticale, moteur à gauche | Valve_Motor_Ball_ClosedV_LC.svg |
-| Vanne à boisseau motorisée TC 1.5" (l'ancien dessin), horizontale | Motorized_TC15_Ball_Valve_Horizontal.svg |
-| Vanne à boisseau motorisée TC 1.5" (l'ancien dessin), verticale | Motorized_TC15_Ball_Valve_Vertical.svg |
 | Vanne à boisseau manuelle, horizontale | Valve_Manual_ClosedH.svg |
 | Vanne à boisseau manuelle, verticale, poignée à droite | Valve_Manual_ClosedV_R.svg |
 | Vanne à boisseau manuelle, verticale, poignée à gauche | Valve_Manual_ClosedV_L.svg |

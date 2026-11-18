@@ -84,7 +84,7 @@ assert.throws(() => tabs.save(t1.id, { ...t2, digits: 20 }), /1 to 12/);
   assert.equal(sv.newTabPipe, 12); assert.equal(sv.newTabHose, 8); assert.equal(sv.newTabWidth, 1600); assert.equal(sv.newTabHeight, undefined, 'empty: the screen');
   assert.throws(() => tabs.save(t9.id, { ...t9, newTabPipe: 1 }), /2 to 100/); assert.throws(() => tabs.save(t9.id, { ...t9, newTabWidth: 50 }), /200 to 20000/); tabs.remove(t9.id); }
 const v1 = valves.create('Ball H');
-assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Open picture: the On overlay shows open (2026-11-05)'); assert.match(v1.imageClosed, /Valve_Motor_Ball_Closed/);
+assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Open picture: the On overlay shows open (2026-11-05)'); assert.match(v1.imageClosed, /Motorized_TC15_Ball_Valve_Vertical\.svg$/, 'the 3 Vessel valve picture first (2026-11-18, Rule 18.43)');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
 // the Valve Profile's Overlay (OakBarn Brewery, 2026-11-17: Valve Overlay "On Valve Profile", off Default settings)

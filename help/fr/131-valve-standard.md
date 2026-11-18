@@ -28,7 +28,7 @@ jusqu'au bord de la case, là où est l'IP.
 Pour une **User Defined Motorized Ball Valve**, une **User Defined Proportional Valve**, ou toute vanne avec une image à vous :
 
 - Votre image est **redimensionnée pour remplir la case carrée**, et les IP vont aux mêmes places que ceux d'une vanne Skynet pour son Orientation.
-- Si vous réglez ses **places In et Out** (le ⬢ à côté de Path (closed), ou les cases en %), Skynet **déplace et redimensionne votre image** pour que ces
+- Si vous réglez ses **places In et Out** (le ⬢ à côté de Path, ou les cases en %), Skynet **déplace et redimensionne votre image** pour que ces
   deux places tombent juste sur les IP. Une partie de l'image peut être coupée au bord, ou elle peut paraître un peu décentrée. C'est le prix
   à payer pour que chaque vanne s'aligne de la même façon.
 

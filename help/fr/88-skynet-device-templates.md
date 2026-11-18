@@ -15,8 +15,9 @@ commence Horizontal. Son **Orientation** (dans ses Properties) choisit comment e
 | **Horizontal** | couchée dans un tuyau horizontal |
 | **Vertical Left** | debout dans un tuyau vertical |
 | **Vertical Right** | debout, avec le moteur de l'autre côté (Flip Horizontal activé) |
-| **Front (looking down the pipe)** | vue de face (en regardant dans le tuyau) |
-| **45 degrees** | l'image verticale tournée de 45 degrés |
+
+Une vanne se tient Horizontal, Vertical Left ou Vertical Right : ce sont les trois seules proposées à une nouvelle vanne. **Front (looking down
+the pipe)** et **45 degrees** s'affichent encore sur une vanne déjà posée ainsi, pour qu'elle continue de marcher.
 
 L'image et ses IP suivent l'Orientation : chacune a ses propres places d'IP, donc tourner la vanne déplace aussi ses IP.
 (En coulisses, chaque Orientation est son propre Template Skynet de la même vanne, Règle Skynet 5.17 ; vous n'avez jamais à les choisir.)
@@ -31,7 +32,7 @@ Si quelque chose essaie d'en changer un, le Brain le remet quand la disposition 
 
 - **Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible**, et les réglages de la case de texte.
 - **Interface et Pin**, Invert, One-shot.
-- **Orientation** : Horizontal, Vertical Left, Vertical Right, Front ou 45 degrees. L'image et ses IP suivent.
+- **Orientation** : Horizontal, Vertical Left ou Vertical Right (Front ou 45 degrees seulement sur une vanne déjà posée ainsi). L'image et ses IP suivent.
 - **Flip Horizontal** et **Flip Vertical** : des interrupteurs qui font un miroir de l'image et de ses IP.
 - **Tap water valve** (vanne d'eau du robinet) : désactivé par défaut. Activé, **Tap Water flows** demande dans quel sens va l'eau, toujours du côté robinet vers le côté sortie :
   - sur une vanne verticale : **Top to Bottom** (de haut en bas) ou **Bottom to Top** (de bas en haut)

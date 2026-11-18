@@ -5127,6 +5127,19 @@ rule. Adapt from Blickmann for any Hover Help not found, Do in same style with g
   Valve_Daisy_Chain.png), Available Ports, Tab, Name and Device Type. Help 128.
 - When OakBarn Brewery later writes its own text for a box, that text replaces the adapted one.
 
+18.43 **Valves: the 3 Vessel valve pictures first, one picture, Horizontal or Vertical Left or Right** (OakBarn Brewery, 2026-11-18:
+"the Graphics of the valves the ones used in 3 vessel look much better so make those the first choice. And There are only valves, not
+opened and closed the overlay for on is enough Horizonital or Vetical, Left or Right. for all Valves"; "We will likely get rid of most
+of the Motorized Ball Valve Pictures for the one used on the 3 vessel."). Both programs.
+- **First choice**: Motorized_TC15_Ball_Valve_Horizontal.svg and Motorized_TC15_Ball_Valve_Vertical.svg (the 3 Vessel valves) are the
+  first pictures offered: the Skynet Motorized Ball Valve and KLD20T Horizontal picture, the Add list rows, a new User Defined valve,
+  a new proportional valve, the Default Valve Profile, a valve on a Vessel port, and the top of the valve pictures in the On/Off list.
+- **One picture**: a valve has one picture; the Overlay shows it open. Path (open), Picture when open and Graphic when open are not
+  offered on a new valve or profile. A valve or profile that already has an open picture keeps it and still shows the box (Never Take Away).
+- **Orientation**: Horizontal, Vertical Left or Vertical Right (a User Defined valve: Horizontal or Vertical). Front, Front Elbow and
+  45 degrees are not offered to a new valve; a valve already set that way keeps it and still shows that choice (Never Take Away).
+- No picture is deleted until OakBarn Brewery picks which go. Help 36, 88, 117, 128, 131.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel

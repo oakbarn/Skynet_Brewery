@@ -34,19 +34,19 @@ A Tab Profile also holds what a **new Tab** made with it starts with: **How many
 
 A Valve Profile is how a new valve starts:
 
-- **Graphic** (the valve as drawn) and, optional, **Graphic when open**. Skynet valves have no open pictures: the valve keeps its picture and the **On overlay** shows it is open ([Retired Skynet pictures](129-retired-skynet-pictures)).
-- **Orientation**: **Horizontal** (pipe ends left and right), **Vertical** (top and bottom), **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). For Horizontal and Vertical, pick graphics drawn that way. For the 45s, pick the **vertical** graphics: the panel turns them 45 degrees left or right for you. The 45s are for a valve sitting on a 45 degree elbow.
+- **Graphic** (the valve as drawn): one picture. **Graphic when open** shows only on a profile that already has one. Skynet valves have no open pictures: the valve keeps its picture and the **On overlay** shows it is open ([Retired Skynet pictures](129-retired-skynet-pictures)).
+- **Orientation**: **Horizontal** (pipe ends left and right) or **Vertical** (top and bottom). The 45s show only on a profile already set to one: **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). For Horizontal and Vertical, pick graphics drawn that way. For the 45s, pick the **vertical** graphics: the panel turns them 45 degrees left or right for you. The 45s are for a valve sitting on a 45 degree elbow.
 - **Overlay**: what shows over the valve while it is open ([On overlay](58-on-overlay)). A new Valve Profile starts with the Overlay of the Valve Profile marked **Default** (the Lightning Bolt if none is marked). A new valve takes the Overlay of the Valve Profile picked in its Add box.
 
 Skynet's own valve pictures are SVG files in `Images/samples`, so they stay sharp at any size and can't be deleted (see [Media](07-media)):
 
 | Picture | File |
 |---|---|
+| Motorized TC 1.5" ball valve, horizontal (the 3 Vessel valve, the first choice) | Motorized_TC15_Ball_Valve_Horizontal.svg |
+| Motorized TC 1.5" ball valve, vertical, motor on the right (the 3 Vessel valve, the first choice) | Motorized_TC15_Ball_Valve_Vertical.svg |
 | Motorized ball valve, horizontal | Valve_Motor_Ball_ClosedH.svg |
 | Motorized ball valve, vertical, motor on the right | Valve_Motor_Ball_ClosedV_RC.svg |
 | Motorized ball valve, vertical, motor on the left | Valve_Motor_Ball_ClosedV_LC.svg |
-| Motorized TC 1.5" ball valve (the older drawing), horizontal | Motorized_TC15_Ball_Valve_Horizontal.svg |
-| Motorized TC 1.5" ball valve (the older drawing), vertical | Motorized_TC15_Ball_Valve_Vertical.svg |
 | Manual ball valve, horizontal | Valve_Manual_ClosedH.svg |
 | Manual ball valve, vertical, handle on the right | Valve_Manual_ClosedV_R.svg |
 | Manual ball valve, vertical, handle on the left | Valve_Manual_ClosedV_L.svg |
