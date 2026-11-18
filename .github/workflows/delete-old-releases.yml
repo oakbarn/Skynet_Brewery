@@ -1,0 +1,50 @@
+# Delete old Releases (OakBarn Brewery, 2026-11-18: "ALL, and I mean any and All Copywrite material remove"; rewrite plan
+# option "Go, after Help pictures PR": "rewrite all branches and tags, clean old Releases").
+# The Releases made before the copyright cleanup carry Setup .exe and zip files with pictures that are not Skynet's own.
+# Rewriting the Git history does not touch those files, so this deletes those Releases.
+# It runs ONLY when someone presses Actions > Delete old Releases > Run workflow. It never runs on a merge.
+# It keeps the Release named in "keep_from" and every Release made after it. It deletes only Releases whose tag starts with
+# "PR<number>_" or "Skynet-v." (the Releases the Panel version workflow makes); any other Release is never touched.
+# The tags stay (they now point at the cleaned history); only the Release pages and their downloads go.
+# "dry_run" lists what would be deleted and deletes nothing.
+name: Delete old Releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_from:
+        description: "Keep this Release and every newer one (tag name)"
+        type: string
+        default: PR478_Skynet-v.20261118_01_24
+      dry_run:
+        description: "Only list what would be deleted"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete the Releases older than the one to keep
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEEP: ${{ github.event.inputs.keep_from }}
+          DRY: ${{ github.event.inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          R="repos/$GITHUB_REPOSITORY/releases"
+          CUT=$(gh api "$R/tags/$KEEP" --jq .created_at)
+          [ -n "$CUT" ] || { echo "No Release named $KEEP: nothing deleted."; exit 1; }
+          echo "Keeping $KEEP (made $CUT) and every newer Release."
+          gh api "$R?per_page=100" --paginate \
+            --jq ".[] | select(.created_at < \"$CUT\") | select(.tag_name | test(\"^(PR[0-9]+_|Skynet-v\\\\.)\")) | \"\(.id) \(.tag_name)\"" > old.txt
+          echo "$(wc -l < old.txt) old Releases found."
+          n=0
+          while read -r id tag; do
+            if [ "$DRY" = "true" ]; then echo "would delete $tag"; else gh api -X DELETE "$R/$id" && echo "deleted $tag"; fi
+            n=$((n+1))
+          done < old.txt
+          echo "Done: $n Releases ($([ "$DRY" = "true" ] && echo 'dry run, nothing deleted' || echo 'deleted'))."
