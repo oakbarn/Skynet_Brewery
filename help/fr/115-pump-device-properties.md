@@ -57,7 +57,8 @@ Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre pro
    fixée par Skynet et ne peut pas être changée, donc un dessin de pompe Skynet n'a pas de case Path. Une pompe User garde sa case **Path**, donc sa seule
    image peut être changée. Le Graphic change dès que vous choisissez une autre Orientation ou un autre Cover.
 7. **Orientation** : ![Right et Left](help_pictures/Pump_Right_Left.png)
-   **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent. Changer l'Orientation
+   **Horizontal** est grisé (une pompe est toujours à plat), avec **Left / Right** à côté, le même aspect que le Hose Bib
+   (Règle Skynet 18.49) : **Right** (comme dessinée) ou **Left** (en miroir). Le Graphic ici et la pompe sur le Tab tournent. Changer l'Orientation
    laisse l'Inlet IP et l'Outlet IP où elles sont, donc les tuyaux et les flexibles qui y sont joints ne bougent pas ; le Hose ou
    Pipe dans la pompe est redessiné pour les rejoindre.
 8. **Cover** (aide 111, dessins de pompes Skynet seulement) et **Toggle** sur une ligne. ![No Cover and Red Cover](help_pictures/Pump_Cover.png) Le Toggle est ce qui se passe quand on clique sur la pompe

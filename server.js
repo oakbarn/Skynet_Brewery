@@ -797,6 +797,7 @@ async function route(req, res) {
     { const bad = kindChangeError(store.config.elements, body.elements); if (bad) return fail(res, 400, bad); }
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
+    for (const g of body.graphics ?? []) if (g?.kind === 'ip' && g.fitting === 'manualValve') cleanDatabase(g);      // a Hose Bib's too (Rule 18.49)
     { const bad = body.elements && apiNameListError(body.elements); if (bad) return fail(res, 400, bad); }     // API_Name is Unique (Rule 6.18)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
     if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }

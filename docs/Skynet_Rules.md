@@ -1606,6 +1606,8 @@ it to be turned on by hand, and it shows ON after Done. The BruControl Import wi
   Can, it draws the can's water (Rule 19.8). (thread "Add a manual Sump Pump widget", Help 162 and 201)
 
 
+  *Changed (Rule 18.49, 2026-11-18):* a Hose Bib with .API Read & Control asked for by an outside program or a Voice Command is asked
+  for by hand the same way as a Process line; a Hose Bib set to Push Button is open only while held.
 5.16 **Skynet Templates and Daughter Templates are set and can't be changed by a user.** A user makes
 a **User version** (a User item made from a Skynet Template) that inherits everything from the Template.
 Only some attributes are user settable, and only those show in its Properties; the rest are fixed and
@@ -2020,6 +2022,8 @@ hose outlet; thread "Add hose bib Manual Valve Widget", Help 141).
   Picture on any Manual Valve. Name ManualValve_n; its **Label** starts filled in as **tap_water_n** (Rule 18.15).
 - Autosize to pipe as every Manual Valve (Rule 5.29 does not cover Manual Valves).
   *Changed (Rule 18.45, 2026-11-18):* it is a **Hose Bib**, sized by hand like a Pump, with its own short Hose or Pipe to its one IP.
+  *Changed (Rule 18.49, 2026-11-18):* its one IP may be on any of the **8 spots** of its box, the wall side too, and it has an End
+  Fitting (Outlet IP Fitting, MGH3/4 to start).
 
 5.34 **A Process connects a Quick Disconnect hose, and a person confirms it is there** (Fritz, 2026-11-06: "A process command to put a
 QD Hose in a Vessel with a automatic need for confirmation that the hose is placed (similar to a Manual Valve) or a QD IP. Maybe
@@ -5254,6 +5258,7 @@ line, then State, 1. Label, Label Visible, Layer Order, 2. Name with Change Name
 Left / Right, Hose or Pipe, IP (a Hose Bib), .confirmation, X, Y, Width and Height on one line, and the Widget Type last.
 *Changed (Rule 18.48, 2026-11-18):* both dialogs have 2. Tab after Label Visible (Layer Order under it, 3. Name); the Hose Bib has no
 Picture box and no IP box: its IP spot is set by the pipe or hose joined to it, as on a Pump.
+*Changed (Rule 18.49, 2026-11-18):* #6's "never on the wall side" is gone: a Hose Bib's IP may be on any of the 8 spots.
 
 18.46 **A greyed out box shows only the ⛔, and only on hover** (OakBarn Brewery, 2026-11-18, Dialog Sandbox items 2 and 3: "Only when a
 User Hovers. The do not enter icon on hover of any Greyed out field. Rule. With text dialog if requested but only when I say make it a
@@ -5317,6 +5322,45 @@ BruControl Import's Build page shares the Panel's dialogs).
 **The Model is now two dialogs**: the Blichmann RipTide (a Device) and the Hose Bib Widget (a Widget). A dialog matched to the Model
 (Rules 18.44, 18.47) follows the one of its kind. *Replaces* for the Hose Bib: Rule 18.45 #6's **IP** box and the Picture in its
 dialog (the Straight Manual Valve keeps its Picture list, which can still make it a Hose Bib). Help 87, 141, 148.
+*Changed (Rule 18.49, 2026-11-18):* the Hose Bib may use all 8 spots (the wall side too), and has the Pump's Overlay and an Outlet IP
+Fitting; the Pump's Orientation has the Hose Bib's look.
+
+18.49 **Panel Update Final 3: the Pump and the Hose Bib match each other** (OakBarn Brewery, 2026-11-18, PDF "Panel Update Final 3",
+the Hose Bib Widget dialog marked against the Blichmann RipTide's again: "Fix these on this Dialog. After this dialog is fixed and the
+Blickmannis, they will now be a more comprehensive Model for future matching of Dialogs to the Model."). Both programs (the BruControl
+Import's Build page shares the Panel's dialogs, pipe drawing and End Fittings).
+1. **Title line to the Graphic** ("Good but Graphic update with all 8 IPs if a Hose or Pipe Is connected"): the Hose Bib's IP may be on
+   **any of the 8 spots** of its box, as a Pump's (Rule 5.27); the wall side is no longer left out (Rule 18.45 #6 changed). The pipe or
+   hose joined to it picks the spot (Rule 18.48 #8) and the Graphic shows the inside Hose or Pipe running to it (to a wall side spot:
+   along the bottom, then up the wall side). Its Graphic Hover Help has the picture Hose_Bib_8_IPs.png.
+2. **Orientation on the Pump** ("Have the Hose Bib Look on the Blickmann with the Orientation Greyed out"): the Pump's Orientation shows
+   **Horizontal** greyed out (⛔ on hover, Rule 18.46: a pump is always level) with **Left / Right** (Right, Left) beside it on the same
+   line, the Hose Bib's look. Left / Right works as the Orientation did (Rule 18.19).
+3. **Hose or Pipe** ("Good"): no change.
+4. **The Pump's fields on the Hose Bib** ("Missing so add all those Fields to the Hose Bib. Change Rule for a Tap Water can have the 8
+   IPs and the Type of End. Add FGH and MGH (Female and Male Garden Hose to end types)"):
+   - **Overlay**, after Hose or Pipe, as on the Pump: what is drawn on it while it is open. Empty is the Manual Valve open sign (as
+     before); the Pump's Overlays may be picked (not the tints, which color a pump's own drawing).
+   - **Outlet IP Fitting**: the End Fitting of its one IP (Rule 2.57), **MGH3/4** to start (a household hose bib's male thread). A pipe
+     or hose end joined to it fits it by itself (FGH3/4 on MGH3/4), a Quick Disconnect hose end too.
+   - **FGH and MGH**: a new End Fitting family, **Garden Hose thread**, FGH3/4 (female) and MGH3/4 (male), 3/4" (the garden hose thread
+     size), in every End Fitting list and as tick boxes in Default settings; FGH and MGH fit each other.
+   - OakBarn Brewery's pick, 2026-11-18: "I would say B and Model is only left out. All else yes and they work. You could have manual
+     valve that uses both the Toggle and Push Button. I do not use them for the database, or API, but a users could. In fact, I might
+     use the API for Voice to turn it on or off and get the confirmation."; "My aim is not to restrict a User from the Database or API":
+   - **Cover** with **Toggle** on its line, as on the Pump: a colored cover over the hose bib's body (the Pump's colors; for example a
+     foam faucet cover), under the Overlay. **Toggle**: **On/Off** (one click opens, the next closes, with .confirmation asking Done
+     first) or **Push Button** (open only while it is held down on its Tab, closed when let go; holding it is the confirmation).
+   - **Database and .API** ⬢ on the Overlay line, as on the Pump: its .state may go to the database, and an outside program or a Voice
+     Command may read it (.API Read) or ask for it (.API Read & Control). Asked for from outside, it is asked **by hand**, the same as a
+     Process line (Rule 5.15): the Tab shows "Open it by hand", and it changes when someone turns it and clicks it on its Tab; its .state
+     then gives the confirmation.
+   - **Inlet IP Fitting**: the wall side fitting (the house pipe end, MPT1/2 to start). It has no IP on the Tab (the house plumbing is
+     not drawn), so it is information only.
+   - **Model**: left out.
+   - Once built, the Blichmann RipTide and the Hose Bib Widget are the Model (OakBarn Brewery: "And once done these will become the model").
+5. **.confirmation, X, Y, Width, Height and the Widget Type** ("Good"): no change.
+Help 115, 141, 148.
 
 ## 19. Vessel Rules
 
@@ -5559,6 +5603,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 18.49 (OakBarn Brewery, PDF "Panel Update Final 3"): the Hose Bib's IP may be on any of its 8 spots (the wall side too) and its Graphic follows the joined pipe or hose; the Pump's Orientation shows Horizontal greyed out with Left / Right beside it (the Hose Bib's look); the Hose Bib gets the Pump's Overlay and an Outlet IP Fitting (MGH3/4 to start); new End Fitting family Garden Hose thread, FGH3/4 and MGH3/4. Then (OakBarn Brewery's pick, "B and Model is only left out"): the Hose Bib's Cover with Toggle (On/Off or Push Button), Database and .API (asked for from outside it is asked by hand, as by a Process line, Rule 5.15) and Inlet IP Fitting (information only); no Model. Rules 5.33, 18.45 and 18.48 marked. Help 115, 141, 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs and the End Fittings (lib/store.js uses the same iptype.js); BruControl has no fittings to import.
 - 2026-11-18: Rule 9.20 changed (OakBarn Brewery: "On a Full Install, add question about Back up if previous installtion installed and ask Abort and get Just Update or Install with Backup Yes or Install No Backup"): the Full Setup's warning page on an existing install has two round buttons, 1 Install with no backup (already picked: "I do not generally want a backup for a Full install") and 2 Install and back up my old folders first (the old move to Skynet_Backups); Get the Update Setup and Close and Do Not Install stay. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French), README, install/ReadMe.txt. Both programs: the Importer is in the same Setup; nothing else changes for it.
 
 - 2026-11-18: Added Rule 18.48 (OakBarn Brewery, PDF "Panel Update Final 2": "Fix these on this Dialog"; "Do this now"): the Hose Bib Widget and Straight Manual Valve dialogs get 2. Tab (Layer Order under it, 3. Name); the Hose Bib has no Picture box and no IP box, its IP spot is set by the pipe or hose joined to it (the nearest of its spots, the Pump's way, Rule 5.27); Orientation with Left / Right short as on the Pump, Hose or Pipe under it. The Blichmann RipTide and the Hose Bib Widget dialogs together are the Model. Rules 18.45 and 18.47 marked. Help 87, 141, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs and pipe drawing; it imports no Hose Bib spot, so nothing else changes there.

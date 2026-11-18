@@ -34,7 +34,7 @@ for (const f of ['Manual_Valve_Orientation.png', 'Hose_Bib_IP_Spots.png']) asser
 const rules = fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8');
 assert.match(rules, /^18\.45 \*\*Panel Update Final 1/m);
 // Follow-ups after testing PR #487 (2026-11-18)
-// a Hose Bib may be Vertical (Left / Right); its IP never on the wall side
+// a Hose Bib may be Vertical (Left / Right); its IP on any of the 8 spots since Rule 18.49
 assert.match(app, /const mvOrientOf = g => mvFront\(g\) \? 'h' : \['h', ?'v'\]\.includes\(g\.mvOrient\)/, 'a Hose Bib is not locked to Horizontal');
 assert.match(app, /const hbSpotOk = \(g, k\) =>/);
 // a left click on a QD hose end: the Move with Held Right Click pop-up (after a moment, so a double-click opens the hose instead)

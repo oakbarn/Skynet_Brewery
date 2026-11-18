@@ -59,7 +59,8 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    set by Skynet and cannot be changed, so a Skynet pump drawing has no Path box. A User pump keeps its **Path** box, so its one
    picture can be changed. The Graphic changes as soon as you pick another Orientation or Cover.
 7. **Orientation**: ![Right and Left](help_pictures/Pump_Right_Left.png)
-   **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn. Switching the Orientation
+   **Horizontal** is greyed out (a pump is always level), with **Left / Right** beside it, the same look as the Hose Bib
+   (Skynet Rule 18.49): **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn. Switching the Orientation
    leaves the Inlet IP and the Outlet IP where they are, so the pipes and hoses joined to them stay put; the Hose or Pipe inside
    the pump is drawn again to reach them.
 8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line. ![No Cover and Red Cover](help_pictures/Pump_Cover.png) The Toggle is what happens when the pump is
