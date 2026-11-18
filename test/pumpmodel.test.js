@@ -91,7 +91,7 @@ assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url)
 console.log('pump model tests passed');
 // Blichmann RipTide Dialog 1 focus order (OakBarn Brewery, 2026-11-15, Rule 18.38): Enter only between the Label and the Port, the Tab key
 // cycles the box's own fields, Interface and Tab are never jumped to
-assert.match(app, /const pumpFocus = dd && isPumpDev\(e\);/, 'the Pump Add box');
+assert.match(app, /const pumpFocus = dd && \(isPumpDev\(e\)( \|\| mbv)?\);/, 'the Pump Add box (and the Motorized Ball Valve, Rule 18.41)');
 assert.match(app, /if \(t === lab\) \{ if \(labOk && ps && !ps\.disabled\) ps\.focus\(\); return true; \}/, 'Enter: Label to Port, a blank Label stays');
 assert.match(app, /if \(pumpFocus && !confirmed && body\.contains\(t\)\) return pumpEnter\(t\);/, 'until Confirmed');
 assert.match(app, /&& \(!pumpFocus \|\| confirmed \|\| ev\.target\.dataset\?\.k === 'device'\)\)/, 'only a new Interface goes on by itself');
@@ -112,7 +112,7 @@ assert.match(app, /setWireTips\(dv, CONFIRMED_WIRE_TIP\)/, 'after Confirm, both 
 assert.match(app, /⟪img:help_pictures\/Pump_Cover\.png⟫/); assert.match(app, /⟪img:help_pictures\/Pump_Overlays\.png⟫/);
 for (const f of ['Pump_Cover.png', 'Pump_Overlays.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
 assert.match(app, /const DB_TIPS = \{/); assert.match(app, /pairLbl dbPopLbl tipLbl', 'data-help': DB_TIPS\.line/, 'Database and .API has its own Hover Help');
-assert.match(app, /const profileChoices = kind => \[\.\.\.\(kind === 'pump' && \(S\.pumpProfiles \|\| \[\]\)\.length \? \[\] : \[\['', '\(none\)'\]\]\)/, 'no (none) Pump Profile');
+assert.match(app, /const profileChoices = kind => \[\.\.\.\(\['pump', 'valve'\]\.includes\(kind\) && \(S\[kind \+ 'Profiles'\] \|\| \[\]\)\.length \? \[\] : \[\['', '\(none\)'\]\]\)/, 'no (none) Pump Profile (nor Valve Profile, Rule 18.41)');
 assert.match(app, /if \(\(ovl \|\| \(lit && isPumpDev\(e\)\)\) && img === pic\)/, 'a pump On with Overlay None shows its picture');
 assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.40 \*\*Blichmann RipTide Dialog 2 #3\*\*/m);
 console.log('Dialog 2 #3 tests passed');

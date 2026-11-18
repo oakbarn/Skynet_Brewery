@@ -237,7 +237,7 @@ console.log('templates ok');
   assert.equal(el.signal, '0-5V'); assert.equal(el.rangeHigh, 100); assert.equal(el.imageOn, undefined); assert.match(el.imageOff, /ClosedV_LC/);
   const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
   assert.match(app, /SKY_DEV_ROWS\('digitalOut'\)/, 'the On/Off list has only the on / off Skynet valves');
-  assert.match(app, /'User Defined Proportional Valve 0-100 %/, 'the User Defined Proportional Valve row');
+  assert.match(app, /'➕ New User Defined Proportional Valve 0-100 %/, 'the User Defined Proportional Valve row (➕ New: it makes one, 2026-11-18)');
   assert.ok(!app.includes("'Proportional valve 0-100 % (analog output)'"), 'the old row name is gone (Rule 15.2)');
   assert.match(app, /propValve: \[\['imageOn'.*\.\.\.IP_AT_FIELDS\]/, 'the User Defined Proportional Valve sets its In and Out IPs');
 }

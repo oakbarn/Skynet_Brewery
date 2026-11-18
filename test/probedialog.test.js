@@ -50,7 +50,8 @@ console.log('probedialog tests passed');
   const pwm = freePins({ type: 'pwmOut', device: 'Brewery Mega', name: 'x' }, [], devs);
   assert.ok(pwm.length && pwm.every(p => PWM.includes(p)), 'a PWM output: only PWM pins');
   assert.match(app, /work = \{ label: '', device: e\.device \?\? defaultIface\(devs\)/, 'the Interface has a default');
-  assert.match(app, /\(lab && \(pumpFocus \|\| !String\(lab\.value \?\? ''\)\.trim\(\)\) \? lab : dv && !dv\.disabled/, 'blank Label first (a Pump: always the Label, Rule 18.38), else the Interface');
+  assert.match(app, /\(lab && \(pumpFocus \|\| !filled\) \? lab : dv && !dv\.disabled/, 'blank Label first (a Pump: always the Label, Rule 18.38), else the Interface');
+  assert.match(app, /const filled = !!String\(lab\?\.value \?\? ''\)\.trim\(\)/, 'filled = the Label is typed in');
   console.log('add order tests passed');
 }
 // Fritz, 2026-11-05: no free PWM pin for a true PWM Device: 1. Add Interface, 2. Pseudo PWM (with what it loses)

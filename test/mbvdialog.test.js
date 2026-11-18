@@ -11,7 +11,7 @@ assert.match(app, /\['onoff', 'On\/Off', \[[^\]]*MBV, \.\.\.SKY_DEV_ROWS\('digit
 assert.match(app, /\['valves', 'Valves', \[MBV, \.\.\.SKY_DEV_ROWS\(\)/, 'Valves starts with the Motorized Ball Valve row');
 assert.match(app, /\.filter\(t => !isMbvTpl\(t\.name\)\)/, 'the Skynet Motorized Ball Valve is not a row of its own any more');
 assert.ok(!/const VALVE = \[/.test(app), 'the User Defined row is in the picker now');
-assert.match(app, /const MBV_MODELS = \[\['Skynet Motorized Ball Valve', 'sky'.*\n\s*\['User Defined Motorized Ball Valve/, 'the picker has both valves');
+assert.match(app, /const MBV_MODELS = \[\['Skynet Motorized Ball Valve', 'sky'.*\n(?:\s*\/\/.*\n)*\s*\['➕ New User Defined Motorized Ball Valve/, 'the picker has both valves; the User Defined row says ➕ New (it makes one, OakBarn Brewery 2026-11-18)');
 assert.match(app, /function pickValve\(\) \{ return pickModel\('2\. Pick the valve', MBV_MODELS\); \}/);
 assert.match(app, /if \(pick === 'mbv'\) \{[\s\S]{0,400}pickValve\(\)[\s\S]{0,300}extra = \{ template: MBV_TPL \}/, 'the Skynet pick makes a User version of its Template');
 // the Pump's drill-down, no Cover
@@ -57,4 +57,23 @@ console.log('mbvdialog tests passed');
   assert.match(app, /if \(mbv && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\('mBV'\);/);
   assert.ok(!/isPumpDev\(e\)[^\n]*autoLabel/.test(app), 'no Label auto fill on a Pump');
   console.log('valve label auto fill tests passed');
+}
+// The Motorized Ball Valve brought to the Blichmann Model (OakBarn Brewery, 2026-11-18: "fix all dialogs Now (exception) to the
+// Blickmann Model Standard", Rule 18.41)
+{
+  const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+  const profiles = fs.readFileSync(new URL('../lib/profiles.js', import.meta.url), 'utf8');
+  const server = fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+  assert.match(app, /\['_pv', 'Graphic', 'devpic', null, false, false, \{ tip: T\.vGraphic, cls: 'mbvModel'/, 'the valve\'s Graphic marks the Model dialog');
+  for (const part of ['', ' .dlgHead', ' .dlgBottomBar']) assert.ok(css.includes(`dialog#dlg:has(#dlgBody .mbvModel)${part}`), 'frozen top, no bottom row: ' + (part || 'dialog'));
+  assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\), dialog#dlg:has\(#dlgBody \.mbvModel\) \{ width: min\(680px, 94vw\); \}/, 'as wide as the pump dialog');
+  assert.match(app, /const onModelDialog = \(\) => !!document\.querySelector\('dialog#dlg\[open\] #dlgBody \[data-k="pumpModel"\], dialog#dlg\[open\] #dlgBody \.mbvModel'\)/, 'its ⬢ and ⬆ pop-ups: frozen top with Keep');
+  assert.match(app, /const pumpFocus = dd && \(isPumpDev\(e\) \|\| mbv\)/, 'the Rule 18.38 focus order');
+  assert.match(app, /if \(pumpFocus && mbv && filled && ps && !ps\.disabled && ps\.offsetParent !== null\) ps\.focus\(\)/, 'its Label starts filled in, so the focus starts on the Port');
+  assert.match(app, /\.\.\.\(isPumpDev\(e\) \|\| mbv \? PUMP_XYWH\(after\)/, 'Add box: X, Y, Width, Height on one line');
+  assert.match(app.slice(app.indexOf('function mbvDeviceFields('), app.indexOf('// ---- PWM / Analog out Device Properties')), /\.\.\.PUMP_XYWH\(\)\]/, 'Properties: X, Y, Width, Height on one line');
+  assert.match(profiles, /valve: \{ title: 'Valve Profile'[^\n]*alwaysDefault: true, defaultName: 'Default Valve Profile'/, 'always one Default Valve Profile');
+  assert.match(server, /brewProfiles\.valve\.ensureDefault\(\)/);
+  assert.match(app, /\['pump', 'valve'\]\.includes\(kind\) && \(S\[kind \+ 'Profiles'\] \|\| \[\]\)\.length \? \[\] : \[\['', '\(none\)'\]\]/, 'no (none) Valve Profile');
+  console.log('valve blichmann model tests passed');
 }
