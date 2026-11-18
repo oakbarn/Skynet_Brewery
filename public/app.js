@@ -2160,7 +2160,9 @@ function pickPump() { return pickModel('2. Pick the pump', PUMP_MODELS.map(([t, 
 // Valves do not have covers but every thing else the same."): pick the valve, each row with its picture, as for a pump.
 const MBV_TPL = 'Skynet_Motorized_Ball_Valve_H';
 const MBV_MODELS = [['Skynet Motorized Ball Valve', 'sky', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
-  ['User Defined Motorized Ball Valve: your own picture, you set its In and Out IPs', 'user', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg']];
+  // OakBarn Brewery, 2026-11-18 ("if there are no user defined valves, how can you pick one?"): this row MAKES a new valve, it does not
+  // pick a saved one, so it says ➕ New
+  ['➕ New User Defined Motorized Ball Valve: your own picture, you set its In and Out IPs', 'user', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg']];
 function pickValve() { return pickModel('2. Pick the valve', MBV_MODELS); }
 // Add Heating Element step 2 (Fritz, 2026-11-05: "Same with Heating Element", after the Pump and the Motorized Ball Valve): pick the
 // element, each row with its picture. A Skynet Heating Element has the Skynet element drawing (its Path is set, Rule 5.6); a User
@@ -5190,7 +5192,7 @@ const ADD_MENU = [
     ['Pump (relay output with inlet and outlet IPs for pipes)', 'pump', 'Pump'],
     ['Valve (relay output with an IP at each end)', 'valve', 'Valve'],
     // was "Proportional valve 0-100 % (analog output)" (Fritz, 2026-11-03): the user's own proportional valve, beside the Skynet ones
-    ['User Defined Proportional Valve 0-100 % (analog output): your own picture, you set its In and Out IPs', 'propValve', 'PropValve'],
+    ['➕ New User Defined Proportional Valve 0-100 % (analog output): your own picture, you set its In and Out IPs', 'propValve', 'PropValve'],      // ➕ New: it makes one (OakBarn Brewery, 2026-11-18)
   ]],
   ['Devices: control outputs (switch a pin by themselves)', [
     ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
@@ -5282,7 +5284,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (pick === 'mbv') {      // Motorized Ball Valve (Fritz, 2026-11-05): step 2 picks the valve, then the Add box (the Pump's drill-down)
     if (!TPL) await loadTemplates().catch(() => {});
     const k = await pickValve(); if (!k) return;
-    what = MBV_MODELS.find(m => m[1] === k)[0].replace(/:.*$/, '');
+    what = MBV_MODELS.find(m => m[1] === k)[0].replace(/:.*$/, '').replace(/^➕ New /, '');
     if (k === 'sky') { pick = 'skyDevice'; extra = { template: MBV_TPL }; } else { pick = 'valve'; extra = undefined; }
   }
   let elemVessel = null;          // Vessel Device Template (Fritz, 2026-11-05): choose the Vessel first, then its Heating Element
@@ -5488,7 +5490,7 @@ const DEV_TYPES = () => [
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP, MANUAL_PUMP_ROW, SUMP_BY_HAND_ROW]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
-  ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
+  ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('➕ New User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
     ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')],
     ...MF_ROWS()]],      // Valve Tees and Supply Manifolds (Rule 5.35): also in Elbows, Tees … on the Edit layout bar
   // OakBarn Brewery's markup ("Update Panel", 2026-11-15, Panel Updates Sandbox entries 3 and 4): each row makes ONE Heating Element that
@@ -5500,7 +5502,7 @@ const DEV_TYPES = () => [
   // A Heating Element or a Proportional Valve can be PWM too (OakBarn Brewery, Panel Updates Sandbox entry 1: "A Heater or Valve could
   // also be PWM so add those that can be on this ddlb"; "Yes", 2026-11-17): the same rows as in the Heating Element and Valves lists
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA'), HEAT_ROWS().find(r => r[3].heatMethod === 'pwm'),
-    ...SKY_DEV_ROWS('analogOut'), am('User Defined Proportional Valve')]],
+    ...SKY_DEV_ROWS('analogOut'), am('➕ New User Defined Proportional Valve')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
   ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
@@ -5653,7 +5655,7 @@ const IFACE_PUMP_PARTS = ['The Arduino board this Pump Device is connected to. A
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
   'If you need to add a new Interface, select ➕ Add new Interface in the List Box (Bottom Choice). Create the Interface and Save it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.'];
 const IFACE_PUMP_TIP = IFACE_PUMP_PARTS.join('\n\n');
-const ifaceTip = e => isPumpDev(e) ? IFACE_PUMP_TIP : DEVICE_TIPS.iface;
+const ifaceTip = e => isPumpDev(e) ? IFACE_PUMP_TIP : isMbvDev(e) ? IFACE_VALVE_TIP : DEVICE_TIPS.iface;      // the valve: Rule 18.42
 // the greyed out Interface and Available Ports (Dialog 2 #3, OakBarn Brewery, 2026-11-16: "Hover Help after Updated and Greyed out need
 // to basically explain that the Interface and Port combination are saved, they cannot be changed for both Hover Help"): this line
 // first in both balloons, then the box's own balloon
@@ -5682,7 +5684,7 @@ const TAB_PUMP_TIP = ['The Tab this Device (or a new Widget) goes to when the Mo
 const DEVTYPE_PUMP_TIP = ['Its Device Type: DO@Pump, a Pump (Pump) on a Digital Out, On/Off (DO) port. The General Type comes first, then an @, then the Device Type.\nThe Type is always supplied by Skynet and you cannot change it. All of the Skynet Devices have a set Type.',
   'The same DO@Pump is the third part of the Suggested Name: DO@Pump. It comes from the Device you added and is set for you.\nBM_15_⟦DO@Pump⟧_Red~Pump_BH\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
   NAME_STANDARD].join('\n\n');
-const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : DEVICE_TIPS.tab;
+const tabTip = e => isPumpDev(e) ? TAB_PUMP_TIP : isMbvDev(e) ? TAB_VALVE_TIP : DEVICE_TIPS.tab;
 // The Pump's Name balloon (OakBarn Brewery, 2026-11-12, Blichmann RipTide Dialog 2): his own text (only the spelling fixed), the
 // Suggested Name read part by part with each part in red, and a short Predictive Text note (its words are a link to that Help).
 // The same text is in Help 46, Device names, and Help 115, The Name.
@@ -5694,11 +5696,47 @@ const NAME_PUMP_TIP = ['This is how the Device (or a Widget) is referred to as t
   'From the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).',
   'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
   'In Skynet a name can be changed quite easily. Besides a normal edit Field where you can use your own free form name, there is a Button where all Names can be converted to a Suggested Name, if you have not chosen to use Suggested Name earlier. Important: Clicking the 🏷 Suggested Names > 💾 Convert Button will change all the names to the Suggested Name. Names can still be edited individually (💾 Update to Suggested changes one name). It is highly recommended to use the Skynet Suggested Name as certain features work best as they were set up to use that format. The features still exist, but may be worthless if the Names vary from the Suggested Name Format.'].join('\n\n');
-const nameTip = e => isPumpDev(e) ? NAME_PUMP_TIP : DEVICE_TIPS.name;
+const nameTip = e => isPumpDev(e) ? NAME_PUMP_TIP : isMbvDev(e) ? NAME_VALVE_TIP : DEVICE_TIPS.name;
 // The Pump's Port balloon (OakBarn Brewery, 2026-11-12: "Add this to the Port Hover Help on the Blickman Riptide Dialogs in a similar
 // manner as the Label Hover Help"): the Available Ports balloon, then his Suggested Name example with the Port part marked red
-const portTip = e => isPumpDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Pump_Red~Pump_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).' : DEVICE_TIPS.port;
-const devTypeTip = e => isPumpDev(e) && !isPwmDev(e) ? DEVTYPE_PUMP_TIP : typeTip(e);
+// The Motorized Ball Valve's balloons (OakBarn Brewery, 2026-11-18: "Adapt it"; Rule 18.42: Hover Help not written yet is adapted from
+// the Blichmann RipTide's, in the same style, with pictures and plain words): OakBarn Brewery's Pump text with only the pump parts changed (Red Pump ->
+// Mash Valve, DO@Pump -> DO@Valve_E, the SSR -> a Relay or SSR, the valve's own power) and the valve's own pictures.
+const NAME_STANDARD_VALVE = 'From the above BM_15_DO@Valve_E_Mash~Valve_BH OakBarn Brewmeister knows that the Device Mash Valve is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Valve_E Type (an electric valve), labeled as Mash Valve, and finally on Tab BH (Brew House Tab).\n\n'
+  + 'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.';
+const LABEL_VALVE_TIP = ['⟪b:Label⟫How do you refer to this Valve? Mash Valve, HLT Valve, Fermenter Valve ...? Use your name for the Valve as the Label. OakBarn Brewery Sample Schema has several Valves. When OakBarn is brewing, he might yell out, "Close the Mash Valve" to stop the flow. The Fermenters are in a different Room and when visually full, the Brewmeister yells to "Close the Fermenter Valve" to his comely assistant, who then clicks the Fermenter Valve Closed.',
+  '⟪img:help_pictures/Label_Visible_Switch.png⟫The Label may be shown on the Tab, for example Mash Valve above the Valve Device.⟪img:help_pictures/Mash_Valve_Label.png⟫',
+  'This is the Plain Text Part of the Suggested Name. Spaces become ~.\nBM_15_DO@Valve_E_⟦Mash~Valve⟧_BH',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Valve_E_Mash~Valve_BH OakBarn Brewmeister knows that the Device Mash Valve is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Valve_E Type (an electric valve), labeled as Mash Valve, and finally on Tab BH (Brew House Tab).',
+  'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
+  'The ⬆ opens a 2 Line Label Text Dialog\nThe ⬢ opens a Label Attributes Dialog where you can set its font, size and colors.',
+  COPYRIGHT_MSG + '\n' + SUGGESTED_MSG].join('\n\n');
+const IFACE_VALVE_TIP = ['The Arduino board this Valve Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Mash Valve. The "Brain" cannot supply the power for the Valve (12 V DC, 24 V or 120 VAC) but only a trigger signal. It takes other pieces of Hardware, and not just one. There is a Daisy Chain:⟪img:help_pictures/Valve_Daisy_Chain.png⟫',
+  '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nBrain -> Arduino IO (Port) -> Trigger (Brain says Open the Mash Valve) -> 5 V or 3.3 V signal sent to -> Relay or SSR (Hook the Valve\'s power Here: 12 V DC, 24 V or 120 VAC) -> Valve Gets Power and Opens',
+  'The Arduino must be connected (WiFi, Ethernet, USB) to the Brain and On. It must be wired properly to the Relay or SSR. An electrician wired the Relay or SSR and set up the Mash Valve Circuit. If there is an On/Off switch on the Valve\'s power supply, it must be left On.',
+  'The Interface has IO Pins that provide the Trigger Signal. These are the Ports. The type of trigger signal sent depends on the Brain Control Method and the type of Port selected on the Arduino, as they can vary. For our example the Interface is an Arduino Mega 2560 and the Port chosen is 15. The Method of Control is On/Off (Direct Output or DO). The valve selected is a Skynet Motorized Ball Valve and it is an Open/Closed (On/Off) type of hardware. The Hardware Type is DO@Valve_E: for the Devices in the Brain and the control method is Direct Output. If the State of the Device is true, the power is on (through the Relay or SSR) and the Valve opens, and if Off the Relay no longer sends power and the Valve closes. Similar to a Light Switch.',
+  'When an Interface is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Interface IDs follow Rule 3.2. Our example Interface is: BM: Brewery Mega',
+  'The ID is important as it is Part of the Suggested Name.\n⟦BM⟧_15_DO@Valve_E_Mash~Valve_BH',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Valve_E_Mash~Valve_BH OakBarn Brewmeister knows that the Device Mash Valve is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Valve_E Type (an electric valve), labeled as Mash Valve, and finally on Tab BH (Brew House Tab).',
+  'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices assigned a Port on the BM: Brewery Mega Arduino will be a choice (among all the other BM_ Devices) in the Predictive Text List Box.',
+  'If you need to add a new Interface, select ➕ Add new Interface in the List Box (Bottom Choice). Create the Interface and Save it. You will return to this Dialog. The New Interface will be in the List Box and set as your choice.'].join('\n\n');
+const TAB_VALVE_TIP = ['The Tab this Device (or a new Widget) goes to when the Move to Tab Button is clicked when you are finished building.',
+  'A Normal Tab is like The Bridge on a Star Ship of your design. It is where you set up the controls to open a Worm Hole, destroy a Black Hole, or whatever you can do. You lay out the design so the Captain (Brewmeister) can control the Star Ship (Brewery).\nAnd like a Star Ship, there is an Alternate Bridge and other Compartments of decks.\nThere can be a Navigation Compartment where all the Star Navigators are housed, but the Captain might want to have some of his Controls in that Room, so he can build a Clone of his Worm Hole Control in this room that is connected and acts like the one on the Bridge.',
+  'Besides all the normal Compartments needed on a Star Ship (and you as a Builder decide how many and Names, and what controls or items are available on that Tab), there are also Special Skynet Tabs (like this Build Tab) that you can access but are not used for you to control things, but only a workshop to build something to be placed on a Normal User Tab.',
+  'When a Tab is added to the Brain, it has an ID. The ID is a Skynet required field, and while a suggestion is made, it is a free form Field that you can Edit. Tab IDs follow Rule 3.2. Our example Tab is: BH: Brew House\nThe ID is important as it is Part of the Suggested Name.\nBM_15_DO@Valve_E_Mash~Valve_⟦BH⟧\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  NAME_STANDARD_VALVE,
+  'You always send select Builds like a Vessel Template to the Special Skynet Tab: Templates.\n➕ Add new Tab… makes a new Tab and comes back here and sets it as the default for the Build Tab.'].join('\n\n');
+const DEVTYPE_VALVE_TIP = ['Its Device Type: DO@Valve_E, an electric Valve (Valve_E) on a Digital Out, On/Off (DO) port. The General Type comes first, then an @, then the Device Type.\nThe Type is always supplied by Skynet and you cannot change it. All of the Skynet Devices have a set Type.',
+  'The same DO@Valve_E is the third part of the Suggested Name: DO@Valve_E. It comes from the Device you added and is set for you.\nBM_15_⟦DO@Valve_E⟧_Mash~Valve_BH\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid',
+  NAME_STANDARD_VALVE].join('\n\n');
+const NAME_VALVE_TIP = ['This is how the Device (or a Widget) is referred to as the unique identifier for the Skynet Panel to access and use the Mash Valve you just built.\nIn Skynet, there are some standards such as Prohibited Characters such as :, " and others that could interfere with the Computer\'s Operating System or Skynet\'s own background code. No spaces are allowed in Skynet names.',
+  'Skynet always provides a Suggested Name which is the Skynet preferred naming convention. That convention tells you a lot about the Device (or Widget) just by the name alone.',
+  'Suggested Name Format: INTERFACEid_Port_Type_Label_TABid\nInterfaceid: ⟦BM⟧_15_DO@Valve_E_Mash~Valve_BH\nPort: BM_⟦15⟧_DO@Valve_E_Mash~Valve_BH\nType: BM_15_⟦DO@Valve_E⟧_Mash~Valve_BH\nLabel: BM_15_DO@Valve_E_⟦Mash~Valve⟧_BH\nTABid: BM_15_DO@Valve_E_Mash~Valve_⟦BH⟧',
+  'From the above BM_15_DO@Valve_E_Mash~Valve_BH OakBarn Brewmeister knows that the Device Mash Valve is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Valve_E Type (an electric valve), labeled as Mash Valve, and finally on Tab BH (Brew House Tab).',
+  'And do not worry about such a convoluted name when coding a Process as it will be selectable in a choice in a List Box. You will quickly find it useful. Because of Predictive Text, if you use the Suggested name, type in BM in the List Box and your choices are limited only to those devices on the BM: Brewery Mega Arduino.',
+  'In Skynet a name can be changed quite easily. Besides a normal edit Field where you can use your own free form name, there is a Button where all Names can be converted to a Suggested Name, if you have not chosen to use Suggested Name earlier. Important: Clicking the 🏷 Suggested Names > 💾 Convert Button will change all the names to the Suggested Name. Names can still be edited individually (💾 Update to Suggested changes one name). It is highly recommended to use the Skynet Suggested Name as certain features work best as they were set up to use that format. The features still exist, but may be worthless if the Names vary from the Suggested Name Format.'].join('\n\n');
+const portTip = e => isPumpDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Pump_Red~Pump_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Pump_Red~Pump_BH OakBarn Brewmeister knows that the Device Red Pump is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Pump Type, labeled as Red Pump, and finally on Tab BH (Brew House Tab).' : isMbvDev(e) ? DEVICE_TIPS.port + '\n\nBM_⟦15⟧_DO@Valve_E_Mash~Valve_BH\n\nSuggested Name Format: INTERFACEid_Port_Type_Label_TABid\nFrom the above BM_15_DO@Valve_E_Mash~Valve_BH OakBarn Brewmeister knows that the Device Mash Valve is connected to Interface BM (Brewery Mega {Arduino}), on Port 15, Valve_E Type (an electric valve), labeled as Mash Valve, and finally on Tab BH (Brew House Tab).' : DEVICE_TIPS.port;
+const devTypeTip = e => isPumpDev(e) && !isPwmDev(e) ? DEVTYPE_PUMP_TIP : isMbvDev(e) ? DEVTYPE_VALVE_TIP : typeTip(e);
 // the ➕ Add Device button's first line while it waits for the Port (its balloon then is the Port's own, Rule 18.35)
 const PICK_PORT_WHY = 'Pick the Port first (Available Ports)';
 // The Review step (OakBarn Brewery, 2026-11-12): once the Interface and Port are picked, a Review pop-up shows them greyed out with
@@ -5712,6 +5750,7 @@ function labelTip(o, x = {}) {
   const lab = String(o.label ?? '').trim(), part = parseLabel(lab), sug = (() => { try { return nameSuggestion(o, sugSelf(o)) || ''; } catch { return ''; } })();
   const dev = isDevice(o), pump = dev && isPumpDev(o);
   if (pump) return LABEL_PUMP_TIP;
+  if (dev && isMbvDev(o)) return LABEL_VALVE_TIP;      // Rule 18.42
   const lines = [dev ? `How do you refer to this Device? Use your own name for it as the Label, for example ${lab || 'HLT Element'}.` : `The name shown on the Tab, for example ${lab || 'Strike Volume'}.`,
     '', 'This is the Plain Text Part of the Suggested Name. Spaces become ~.', '', COPYRIGHT_MSG, SUGGESTED_MSG];
   if (sug && part) {
@@ -5874,12 +5913,12 @@ async function newDeviceDialog(e, hint, what) {
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
   const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e), elem = isElemDev(e);
-  const pumpFocus = dd && isPumpDev(e);      // the Blichmann RipTide Dialog 1 focus order (Rule 18.38)
+  const pumpFocus = dd && (isPumpDev(e) || mbv);      // the Blichmann RipTide Dialog 1 focus order (Rule 18.38); the Motorized Ball Valve too (Rule 18.41)
   const profKind = isPumpDev(e) ? 'pump' : e._pickedValve && S.valveProfiles?.length ? 'valve' : null;
   if (profKind === 'pump') applyPumpProfile(e, markedProfile('pump'));       // the Default Pump Profile, before the box shows it
   if (mbv && e.template) e._orient = orientPick(e);
   // the ⬆ and ⬢ in the Add box too (Blichmann PDF, 2026-11-10)
-  const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : T.labelVisible }],
+  const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { up: 2, attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: isPumpDev(e) ? LABEL_VISIBLE_PUMP_TIP : mbv ? T.vLabelVisible : T.labelVisible }],
     ['device', n() + 'Interface', 'dev', 'addnewid', false, false, { tip: ifaceTip(e), ...(pinPort ? { with: [...portF.slice(0, 4), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: pr && isOneWire(e) ? T.pNum : portTip(e) }] } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${shownType({ ...e, typeCode: c })}   ${l}`]), false, false, { tip: typeTip(e) }]] : []),
@@ -5894,7 +5933,7 @@ async function newDeviceDialog(e, hint, what) {
     ...(pr ? [...PROBE_GRAPHIC_FIELDS(e, after), ...PROBE_OWN(e, after)] : []),        // no Cover, Toggle or Overlay on a probe
     ...(pwm ? [...PWM_GRAPHIC_FIELDS(e, after), ...PWM_OVERLAY(e, after), ...PWM_OWN(e, after)] : []),        // PWM / Analog out (Rule 18.25)
     ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
-    ...(isPumpDev(e) ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
+    ...(isPumpDev(e) || mbv ? PUMP_XYWH(after) : [...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }]]),      // a Pump: X, Y, Width and Height on one line
     ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: devTypeTip({ ...e, typeCode: work.typeCode || drillCode(e) }) }]] : [])];
   work.w = e.w; work.h = e.h;
@@ -5973,7 +6012,7 @@ async function newDeviceDialog(e, hint, what) {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
       dlgDetour = true;          // a double-click on a Tab (or other) choice opens its Properties and comes back here (Rule 4.7)
-      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/^➕ New /, '').replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -6042,7 +6081,10 @@ async function newDeviceDialog(e, hint, what) {
       // Fritz, 2026-11-05: a blank Label gets the focus; a Label Skynet filled in is skipped (taken as accepted, still editable) and
       // the focus goes to the Interface, which has its default to accept or change
       { const l = seq(), lab = body.querySelector('[data-k="label"]'), dv = body.querySelector('[data-k="device"]');
-        (lab && (pumpFocus || !String(lab.value ?? '').trim()) ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
+        // the Motorized Ball Valve (Rule 18.41): its Label starts filled in (mBV_1, Rule 18.15), so the focus starts on the next All field, the Port
+        const filled = !!String(lab?.value ?? '').trim(), ps = body.querySelector(`[data-k="${port[0]}"]`);
+        if (pumpFocus && mbv && filled && ps && !ps.disabled && ps.offsetParent !== null) ps.focus();
+        else (lab && (pumpFocus || !filled) ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
       body.oninput = body.onchange = ev => {
         gate();
         if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)
@@ -6497,7 +6539,8 @@ function stackNew(e) {
 const markedProfile = kind => (S[kind + 'Profiles'] || []).find(p => p.isDefault) || null;
 // a Pump Profile list has no (none): one is always the Default (OakBarn Brewery, 2026-11-16, Dialog 2 #3: "We need to create a Default
 // so None Choice goes away")
-const profileChoices = kind => [...(kind === 'pump' && (S.pumpProfiles || []).length ? [] : [['', '(none)']]), ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
+// a Pump or Valve Profile always has a Default, so no (none) (Rules 18.40, 18.41)
+const profileChoices = kind => [...(['pump', 'valve'].includes(kind) && (S[kind + 'Profiles'] || []).length ? [] : [['', '(none)']]), ...(S[kind + 'Profiles'] || []).map(p => [p.id, p.name + (p.isDefault ? '  (Default)' : '')])];
 const PROFILE_PICK_TIP = { pump: 'The Pump Profile this pump starts with: its Orientation, Cover, Inlet and Outlet, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. It starts on the one marked Default (☰ Menu > Pump Profile). Picking another fills the boxes below; you can still change them.',
   valve: 'The Valve Profile this valve starts with: its pictures and Orientation. It starts on the one marked Default (☰ Menu > Valve Profile).' };
 // a Pump Profile into a new pump (or its Add box): only what the profile says; the picture stays the pump picked
@@ -8594,7 +8637,7 @@ const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
 const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS;
-  return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.vGraphic, ...x }],
+  return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.vGraphic, cls: 'mbvModel', ...x }],      // mbvModel: the Blichmann Model look (Rule 18.41)
     ...(it.template ? [['_path', 'Path', 'ro', String(skyOrientPic(it._orient ?? orientPick(it))?.imageOff || it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.vPathSet, cls: 'mbvPath', ...x }],
       ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, with: MBV_TOGGLE(it), ...x }]]
       : [['imageOff', 'Path (closed)', 'gpick', null, false, false, { tip: T.vPath, attr: MBV_IP_POP, ...x }], ['imageOn', 'Path (open)', 'gpick', null, false, false, { tip: T.vPathOpen, ...x }],
@@ -8622,15 +8665,14 @@ function mbvDeviceFields(it, item) {
     else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned: the tap end Needs setting again
   }
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
-    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    // the ⬢ Pin attributes (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
-    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: T.iface, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: T.port }], attr: DEV_PORT_POP }],
-    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
-    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.vLabelVisible }],
+    // the ⬢ Pin attributes; the balloons adapted from the Pump's (Rule 18.42) (Invert, One-shot, Dual Throw: OakBarn Brewery, 2026-11-09, Rule 6.22: a valve with an Open and a Close wire)
+    ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: ifaceTip(it), with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: portTip(it) }], attr: DEV_PORT_POP }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: tabTip(it) }],
+    ['name', '4. Name', 'text', null, false, false, { tip: nameTip(it) }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Valve follows it until you type a name of your own)' : ''), 'note'],
     ...MBV_GRAPHIC_FIELDS(it), ...MBV_TOGGLE_OVERLAY(it), ...MBV_OWN(it),
-    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
-    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+    ...PUMP_XYWH()];      // X, Y, Width and Height on one line, as the Pump (Rule 18.41)
 }
 
 // ---- PWM / Analog out Device Properties (Fritz, 2026-11-05: "PWM Build Dialog", Rule 18.25): the Pump's drill-down (Rules 18.12-18.21).
@@ -9371,6 +9413,7 @@ const DEVICE_TIPS = {
   eHidden: 'Hidden Locked: on = it stays hidden even when Visible is on. A Process: HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.hidden = true. An Integrated Item has none (Rule 2.47).',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'The Label may be shown on the Tab, for example Red Pump above the Pump. On: the Label shows. Off: no Label shows.',
+  vLabelVisible: 'The Label may be shown on the Tab, for example Mash Valve above the Valve Device.⟪img:help_pictures/Mash_Valve_Label.png⟫',      // as the Pump's (Rule 18.42)
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
   // OakBarn Brewery, 2026-11-12 (Hover Help Blichmann RipTide Dialog 1, PORT): his words; Save for PWM (Rule 4.2) kept below them
   port: 'Pick a Port. (Available Port) A Port needs to be chosen from the list before proceeding.\n\nClick the small Gray Down Triangle to expand the List of Available Ports.\n\nAvailable Ports: only the free Ports (pins) on this board that fit this type of Device, for example 22, or A5 = 59. Digital Outputs have the most ports, true PWM Ports are much more limited. Once it is added it is greyed out and no longer changeable.\n\nClick to choose the Port.\n\nA PWM Port marked Save for PWM works, but keep it for a Device that needs PWM.',
@@ -10446,7 +10489,8 @@ async function dbGroupDialog(g, me, cur) {
 // On the model dialog (the Pump Add box and Pump Properties, the Blichmann RipTide, Rule 2.51) every ⬢ and ⬆ pop-up has its title and
 // buttons frozen at the top, no bottom row, and Save says Keep (OakBarn Brewery, 2026-11-14: "On any Dialog Popup on the Blickmann
 // Riptide ... have the Top Cancel and Save Frozen and Bottom one removed. Change Save Button Text To Keep with same Blue back").
-const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"]');
+// the Motorized Ball Valve too (OakBarn Brewery, 2026-11-18: "fix all dialogs Now (exception) to the Blickmann Model Standard", Rule 18.41)
+const onModelDialog = () => !!document.querySelector('dialog#dlg[open] #dlgBody [data-k="pumpModel"], dialog#dlg[open] #dlgBody .mbvModel');
 function layerDialog(title, build, canDelete = false, { bottom = true, model: asModel = false, view = false, saveNow = false } = {}) {
   return new Promise(res => {
     const model = asModel || onModelDialog();      // a heater method's ⬢ is always frozen with Keep (Rule 2.51, OakBarn Brewery, 2026-11-15)
@@ -10737,7 +10781,7 @@ async function editItem(kind, id) {
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: devTypeTip(it) }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.eType }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
-    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];
+    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: devTypeTip(it) }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it) }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);
@@ -16597,6 +16641,8 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
     about: 'The look a new pump starts with: Orientation, Cover, Inlet and Outlet IPs, Hose or Pipe, Overlay and Inlet and Outlet IP Fittings. Its picture comes from the pump you pick. The Pump Add box picks the one marked Default first, and you can pick another there; after that, change the pump in its properties. There is always one Default Pump Profile: Skynet makes the first one (Default Pump Profile: Right, no Cover, Hose, the Default settings Pump Overlay).' } };
 const PROF_DEFAULT_TIP = 'On: a new one\'s Add box picks this profile first. Only one in the list is the Default; turning it on here turns it off on the others.';
 // Dialog 2 #3 (OakBarn Brewery, 2026-11-16): there is always a Default Pump Profile
+// there is always a Default Valve Profile too (OakBarn Brewery, 2026-11-18, Rule 18.41)
+const VALVE_PROF_DEFAULT_TIP = 'On: the User Defined Motorized Ball Valve Add box picks this Valve Profile first. There is always one Default Valve Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Valve Profile, turn its Default On and Save: this one is then no longer the Default.';
 const PUMP_PROF_DEFAULT_TIP = 'On: the Pump Add box picks this Pump Profile first. There is always one Default Pump Profile, so its Default can not be turned Off and it can not be deleted. To change which one is the Default, open another Pump Profile, turn its Default On and Save: this one is then no longer the Default.';
 // the Pump Profile pane brought to the Blichmann model (OakBarn Brewery, 2026-11-16: "while messing with that Dialog bring up to
 // Blickman Model"): Hover Help on every box, a need-to-know note on top (Rule 11.8), title and buttons frozen at the top (Rule 2.51)
@@ -16634,7 +16680,7 @@ function profFields(kind) {
       ['pumpLink', 'Hose or Pipe', 'sel', [['', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: DEVICE_TIPS.pumpLink }], ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: PUMP_PROF_OVERLAY_TIP }],
       ['ipTypeIn', 'Inlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeIn, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }], ['ipTypeOut', 'Outlet IP Fitting', 'sel', [['', '(from the pump)'], ...ipChoices(w.ipTypeOut, ...PUMP_PORTS)], false, false, { tip: IP_TYPE_PICK_TIP }],
       ['notes', 'Notes', 'area', null, false, false, { tip: PROF_NOTES_TIP }]];
-    if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: PROF_DEFAULT_TIP }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
+    if (kind === 'valve') return [['name', 'Name', 'text'], ['isDefault', 'Default', 'bool', null, false, false, { tip: VALVE_PROF_DEFAULT_TIP, ...(w.isDefault && w.id && S.valveProfiles?.find(p => p.id === w.id)?.isDefault ? { disabled: true } : {}) }], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: VALVE_PROF_OVERLAY_TIP }],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];

@@ -198,7 +198,7 @@ try { brewProfiles.water.ensureTap(store.config.brewDefaults?.units); } catch (e
 brewProfiles.pump.seed = () => ({ imageOverlay: brewProfiles.pump.marked()?.imageOverlay || store.config.brewDefaults?.newPumpOverlay || DEFAULT_PUMP_OVERLAY });
 brewProfiles.valve.seed = () => ({ imageOverlay: brewProfiles.valve.marked()?.imageOverlay || store.config.brewDefaults?.newValveOverlay || DEFAULT_VALVE_OVERLAY });
 try { brewProfiles.pump.ensureDefault(); } catch (e) { console.log('Default Pump Profile: ' + e.message); }
-try { brewProfiles.valve.fillOverlay(); } catch (e) { console.log('Valve Profile Overlay: ' + e.message); }
+try { brewProfiles.valve.ensureDefault(); } catch (e) { console.log('Default Valve Profile: ' + e.message); }      // always one Default Valve Profile too (Rule 18.41); it fills the Overlays first
 // a new Tab's pipe and hose pixels, Width and Height moved from ☰ Menu > Default settings into the Tab Profile (OakBarn Brewery,
 // 2026-11-17: "Tab Profile"): the values set there go, once, into the Tab Profile picked for a new Tab (a new "Default Tab Profile"
 // when none is picked, or a copy when it is a Skynet one), so nothing set is lost
