@@ -58,5 +58,5 @@ assert.match(app, /const MV_HEAD = \[\['locked', '', 'lock', null, false, false,
 const hb = app.slice(app.indexOf('const hbWidgetFields = '), app.indexOf('const mvWidgetFields = '));
 const hbo = ["'_mvpv'", "'image'", "'mvOrient'", "'tapLink'", "'tapSpot'", 'MV_CONFIRM', 'MV_XYWH', 'wgtType('].map(k => hb.indexOf(k));
 assert.ok(hbo.every((x, i) => x > 0 && (i === 0 || x > hbo[i - 1])), 'Graphic, Picture, Orientation, Hose or Pipe, IP, .confirmation, X Y W H, Widget Type');
-assert.match(rules, /\*Exception \(OakBarn Brewery, 2026-11-18: "double Clicking on an IP/);
+assert.match(rules, /\*An IP and a hose end are part of their parent\* \(OakBarn Brewery, 2026-11-18: "double Clicking on an IP/);
 console.log('panel update 1 tests passed');

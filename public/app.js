@@ -16246,8 +16246,9 @@ function qdLeftHint(ev) {
 }
 $('#ws').addEventListener('dragstart', ev => { if (ev.target.closest?.('div.qdEnd')) ev.preventDefault(); });      // no browser drag (its own ⛔) on a hose end
 let qdHintWait = null;
-// Double-click outside Edit layout (OakBarn Brewery, 2026-11-18: "double Clicking on an IP of a Device or Widget should also bring Up the
-// Property dialog for the Parent. Double Click on a Yellow Circle of a Hose QD End, bring up the Hose Property dialog"; Rule 2.9):
+// Double-click on a running Tab (OakBarn Brewery, 2026-11-18: "double Clicking on an IP of a Device or Widget should also bring Up the
+// Property dialog for the Parent. Double Click on a Yellow Circle of a Hose QD End, bring up the Hose Property dialog"; Rule 2.9: an IP
+// or a hose end has no dialog of its own, it is part of its parent's Properties):
 // the yellow ring of a hose end opens that hose's Properties; an IP opens the Properties of the Device or Widget it belongs to (a
 // Vessel's IP: the Vessel; a Pipe Fitting or a free IP: its own). A Device or Manual Valve itself keeps its clicks (two clicks, Rule 6.19).
 // In Edit layout a double-click already does this (the dblclick handler above). Admins only: Properties open in Edit layout.
