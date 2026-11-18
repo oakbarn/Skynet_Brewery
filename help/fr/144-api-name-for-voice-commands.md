@@ -7,7 +7,11 @@ Database and .API dans ses Properties). C'est une String (du texte), et c'est le
 
 **Un API_Name doit être unique.** Deux éléments du même Schema ne peuvent pas avoir le même API_Name. Les majuscules et les espaces en trop ne
 comptent pas, donc `Mash Temp`, `mash temp` et `Mash  Temp` sont le même API_Name. Enregistrer un nom déjà utilisé dit quel élément
-l'a, et rien n'est enregistré tant qu'il n'est pas changé.
+l'a, et rien n'est enregistré tant qu'il n'est pas changé. Cela compte chaque Device et chaque Widget, un Hose Bib aussi.
+
+**Chaque commande vocale est unique aussi** (Règle Skynet 6.18). Un élément sans API_Name est appelé par son Label. Quand deux
+éléments ont le même Label (ou qu'un Label est l'API_Name d'un autre élément), un assistant vocal ne pourrait pas les distinguer,
+donc chacun est appelé par son propre Name, qui est toujours unique. Pour lui donner un nom facile à dire, remplissez son API_Name.
 
 Nommez-le comme vous le direz. Par exemple, une pompe dont l'API_Name est **Red Pump** se commande en disant
 **"Turn on Red Pump"**. D'autres : `Hot Liquor`, `Mash Temp`. Les espaces sont permises. Ces caractères sont interdits :
@@ -25,7 +29,7 @@ l'atteindre.
 ## Où il sert {#where-it-is-used}
 
 - **Home Assistant (Alexa, Google Home, Siri)** : l'API_Name est le nom que l'élément reçoit là-bas et sur vos enceintes. Sans
-  API_Name, son Label est utilisé, comme avant. L'élément doit quand même avoir son **.API** activé (Read Only pour le lire, Read & Control pour
+  API_Name, son Label est utilisé, sauf si un autre élément a le même Label (alors son Name). L'élément doit quand même avoir son **.API** activé (Read Only pour le lire, Read & Control pour
   le changer) : l'API_Name n'ouvre rien à lui seul.
 - **L'API web** (`/api/items`) : on peut demander un élément par son Name ou par son API_Name, par exemple
   `/api/items/Red%20Pump` ou `/api/items/Red_Pump` (un `_` dans l'adresse remplace une espace). La liste montre l'

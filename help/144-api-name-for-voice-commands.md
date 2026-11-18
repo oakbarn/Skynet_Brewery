@@ -7,7 +7,11 @@ Database and .API in its Properties). It is a String (text), and it is the name 
 
 **An API_Name must be Unique.** Two items in the same Schema can't have the same API_Name. Capitals and extra spaces don't
 count, so `Mash Temp`, `mash temp` and `Mash  Temp` are the same API_Name. Saving one that is already used says which item
-has it, and nothing is saved until it is changed.
+has it, and nothing is saved until it is changed. This counts every Device and every Widget, a Hose Bib too.
+
+**Every Voice Command is Unique too** (Skynet Rule 6.18). An item with no API_Name is called by its Label. When two items have
+the same Label (or a Label is another item's API_Name), a voice assistant could not tell them apart, so each of them is called by
+its own Name instead, which is always Unique. To give it a name you can say, fill in its API_Name.
 
 Name it the way you will say it. For example, a pump with the API_Name **Red Pump** is switched by saying
 **"Turn on Red Pump"**. Others: `Hot Liquor`, `Mash Temp`. Spaces are fine. These characters are not allowed:
@@ -25,7 +29,7 @@ reach it.
 ## Where it is used
 
 - **Home Assistant (Alexa, Google Home, Siri)**: the API_Name is the name the item gets there and on your speakers. With
-  no API_Name its Label is used, as before. The item must still have its **.API** on (Read Only to read it, Read & Control to
+  no API_Name its Label is used, unless another item has the same Label (then its Name). The item must still have its **.API** on (Read Only to read it, Read & Control to
   change it): the API_Name does not open anything by itself.
 - **The web API** (`/api/items`): an item can be asked for by its Name or by its API_Name, for example
   `/api/items/Red%20Pump` or `/api/items/Red_Pump` (an `_` in the address stands for a space). The list shows each item's

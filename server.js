@@ -33,7 +33,7 @@ import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi.js';
-import { apiNameListError } from './public/apiname.js';
+import { apiNameListError, apiNameItems } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { parseWifiReport, hydroFor, decodeBle, hydroForBle } from './public/hydrometer.js';
@@ -798,7 +798,7 @@ async function route(req, res) {
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
     for (const g of body.graphics ?? []) if (g?.kind === 'ip' && g.fitting === 'manualValve') cleanDatabase(g);      // a Hose Bib's too (Rule 18.49)
-    { const bad = body.elements && apiNameListError(body.elements); if (bad) return fail(res, 400, bad); }     // API_Name is Unique (Rule 6.18)
+    { const bad = (body.elements || body.graphics) && apiNameListError(apiNameItems({ elements: body.elements ?? store.config.elements, graphics: body.graphics ?? store.config.graphics })); if (bad) return fail(res, 400, bad); }     // API_Name is Unique across every Device and Widget, Hose Bibs too (Rule 6.18)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
     if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }
     // only one Override button on each Tab (Fritz, 2026-10-30)

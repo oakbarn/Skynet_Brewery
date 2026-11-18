@@ -21,6 +21,20 @@ export function apiNameProblem(v) {
   return '';
 }
 
+// Every item that can have an API_Name: the Devices and Widgets, and the Hose Bibs (Manual Valve Widgets kept with the drawing,
+// Rule 18.49). A Voice Command must be Unique across all of them (OakBarn Brewery, 2026-11-18: "That could be an issue with any voice
+// command so in the next PR add Voice Command must be Unique"; Rule 6.18).
+export const apiNameItems = cfg => [...(cfg?.elements ?? []), ...(cfg?.graphics ?? []).filter(g => g?.kind === 'ip' && g.fitting === 'manualValve')];
+// What a Voice Command says for each shared item (name -> words): its API_Name, else its Label, else its Name. A Label used by
+// more than one item (or the same as another item's API_Name) can't tell them apart, so each of those is called by its own Name,
+// which is always Unique (Rule 6.18). items: [{ name, apiName, label }]
+export function voiceNames(items) {
+  const said = new Map(), count = new Map();
+  const first = x => cleanApiName(x.apiName) || cleanApiName(x.label) || x.name;
+  for (const x of items ?? []) { const k = apiNameKey(first(x)); count.set(k, (count.get(k) ?? 0) + 1); }
+  for (const x of items ?? []) { const w = first(x); said.set(x.name, cleanApiName(x.apiName) || count.get(apiNameKey(w)) === 1 ? w : x.name); }
+  return said;
+}
 // The other item that already has this API_Name, or null. self is the item being saved (it never clashes with itself).
 export function apiNameOwner(list, v, self) {
   const k = apiNameKey(v);
