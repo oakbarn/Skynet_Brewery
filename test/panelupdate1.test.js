@@ -1,0 +1,36 @@
+// Panel Update Final 1 (OakBarn Brewery, 2026-11-18, the Manual Valve Widget and the Blichmann Model; Rule 18.45, Help 87, 141, 148)
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+const css = fs.readFileSync(new URL('../public/style.css', import.meta.url), 'utf8');
+// #1 State: a slider, mouse only, works the item at once (not a setting)
+const st = app.slice(app.indexOf('function stateRow('), app.indexOf('function mvGraphic('));
+assert.match(st, /tabindex: '-1', 'data-mouse-only': '1'/, 'mouse only');
+assert.match(st, /await toggleManualValve\(obj\.id\)/, 'a Manual Valve: the same as a click on its Tab');
+assert.match(st, /api\('POST', '\/ui\/set', \{ name: obj\.name, prop: 'state', value: want \}\)/, 'a Pump: On or Off at once');
+assert.match(st, /const quiet = ev => ev\.stopPropagation\(\)/, 'not a change to the Properties');
+assert.ok(app.includes("['_state', 'State', 'state', null, false, false, {}],      // On or Off now"), 'on the Pump');
+// #2 and #3 the Change Name box, ✏ Change Name and 🏷 Update to Suggested Name, mouse only
+const nc = app.slice(app.indexOf('function nameChangeRows('), app.indexOf('function stateRow('));
+assert.match(nc, /class: 'chgName', value: obj\[key\] \?\? '', tabindex: '-1', 'data-mouse-only': '1'/, 'starts with the Name now, mouse only');
+assert.match(nc, /'✏ Change Name'/); assert.match(nc, /'🏷 Update to Suggested Name'/);
+assert.match(nc, /String\(lab\.value \?\? ''\) === label0/, 'pops up once the Label is changed');
+assert.match(nc, /\[data-k="hideName"\], \[data-k="labelVisible"\]/, 'on the Label Visible line');
+assert.ok(app.includes("['name', '4. Name', 'namechg'"), 'the Pump (the Blichmann Model)');
+assert.ok(app.includes("if (t.dataset.mouseOnly) return;") && app.includes('x.tabIndex >= 0);'), 'Enter never goes to a mouse-only box');
+// #4 #5 the Graphic, Orientation and Left / Right
+assert.match(app, /\['mvOrient', 'Orientation', 'sel'/); assert.match(app, /with: \['mvSide', 'Left \/ Right', 'sel'/);
+assert.match(app, /const mvTransform = /);
+assert.match(app, /if \(L\.flip\) ends = ends\.map\(\(\[fx, fy\]\) => \[1 - fx, fy\]\)/, 'its ends go with the mirror');
+// #6 Straight and Hose Bib
+assert.match(app, /isTapMv\(item\) \? 'Hose Bib Widget' : 'Manual Valve Widget'/);
+assert.match(app, /const hbWidgetFields = /);
+assert.match(app, /function hbLinkSvg\(g\)/, 'its own inside Hose or Pipe');
+// #7 the ⛔ only on hover
+assert.match(css, /background-size: var\(--dne, 0 0\)/);
+assert.match(css, /dialog :is\(input, select, textarea\):disabled:hover[^{]*\{ --dne: 16px 16px; \}/);
+for (const f of ['Manual_Valve_Orientation.png', 'Hose_Bib_IP_Spots.png']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
+const rules = fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8');
+assert.match(rules, /^18\.45 \*\*Panel Update Final 1/m);
+console.log('panel update 1 tests passed');

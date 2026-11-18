@@ -1725,7 +1725,9 @@ const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round(
 const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
 // always on (OakBarn Brewery, 2026-11-14: "Always Resize pipes (no user Option) ... Why would we want to allow resize off? We already
 // have a pipe size default"): an End Cap (the size of the opening it closes) and a Valve Tee or Supply Manifold too (Rules 5.35, 5.36)
-const autoSized = g => isPipeFit(g) || isMv(g) || isMf(g);
+// Manual Valves come in two kinds (OakBarn Brewery, 2026-11-18: "separate subclasses of Manual Valves: Straight, Hose Bib"; Rule 18.45):
+// a Straight one lines up with its pipes and sizes to them; a Hose Bib (the Tap Water Valve) is sized by hand, like a Pump
+const autoSized = g => isPipeFit(g) || (isMv(g) && !isTapMv(g)) || isMf(g);
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
 // changes with a click on it on its Tab, at any time. A Process line ManualValve_1.state = true does not change it: it puts up
 // "Open it by hand" on the Tab and waits until someone clicks the valve open. While open it shows the open overlay.
@@ -1745,18 +1747,58 @@ const TAP_PIC = 'Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg';
 const isTapMv = g => isMv(g) && g.image === TAP_PIC;
 // the Label a new Tap Water Valve starts with (Rule 18.15): tap_water_n, the next number not used as a Label or Name
 const tapLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('tap_water_' + n)) n++; return 'tap_water_' + n; };
-const mvPic = g => g.image;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
+// Orientation and Left / Right of a Manual Valve Widget (OakBarn Brewery, 2026-11-18, "Panel Update Final 1" #5: "Orientation (Vertical,
+// Horizontal) and Left Right"; Rule 18.45). Horizontal: Right is the picture as drawn, Left is it mirrored. Vertical: the handle points
+// Left or Right. The Manual Butterfly Valve has its own drawings for each (H, V_L, V_R); every other picture is turned or mirrored.
+// A front view (looking down the pipe) has no Orientation; a Tap Water Valve is Horizontal only (it comes out of a wall).
+const MV_BFLY = { h: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg', vl: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg', vr: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg' };
+const isBfly = p => Object.values(MV_BFLY).includes(p);
+const mvFront = g => /Manual_Ball_Valve_Front(?:_Elbow)?_(?:Open|Closed)\.svg$/.test(String(g?.image || ''));
+const mvOrientOf = g => mvFront(g) || isTapMv(g) ? 'h' : ['h', 'v'].includes(g.mvOrient) ? g.mvOrient : /_ClosedV_[LR]\.svg$/.test(String(g.image || '')) ? 'v' : 'h';
+const mvSideOf = g => mvFront(g) ? 'r' : ['l', 'r'].includes(g.mvSide) ? g.mvSide : /_ClosedV_L\.svg$/.test(String(g.image || '')) ? 'l' : 'r';
+function mvLook(g) {
+  const o = mvOrientOf(g), s = mvSideOf(g);
+  if (isBfly(g.image)) return { src: o === 'h' ? MV_BFLY.h : s === 'l' ? MV_BFLY.vl : MV_BFLY.vr, rot: 0, flip: o === 'h' && s === 'l', vert: o === 'v' };
+  return { src: g.image || '', rot: o === 'v' ? (s === 'l' ? -90 : 90) : 0, flip: o === 'h' && s === 'l', vert: false };
+}
+// the turn and mirror of a Manual Valve on its Tab and on its dialog's Graphic (its own Rotate 45 turns too, Rule 5.5)
+const mvTransform = (g, L = mvLook(g)) => { const r = L.rot + (+g.rotate || 0); return `${r ? `rotate(${r}deg) ` : ''}${L.flip ? 'scaleX(-1)' : ''}`.trim(); };
+const mvPic = g => mvLook(g).src;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
+// The Hose Bib (Tap Water Valve) is laid out like a Pump (OakBarn Brewery, 2026-11-18: "treat sizing of a hose bib type valve like a Pump
+// and have integral Hose or Pipe to IP"; "Hose Bibs get their own Dialog and the Internal Pipes or Hose and have the Graphic similar to
+// the Blickmann Model"; Rule 18.45): its box is sized by hand, the hose bib picture sits in its top right three quarters (the wall on the
+// right), and its own short Hose or Pipe runs inside the box from the spout's hose thread to its one IP on the edge of the box. Left
+// mirrors all of it (the wall on the left).
+const HB_PIC = 0.75, HB_SPOUT = [1 - HB_PIC + HB_PIC / 3, HB_PIC * 0.987];
+const HB_SPOTS = { BM: [0.5, 1], BL: [0, 1], BR: [1, 1], LM: [0, 0.5] };
+const HB_SPOT_WORDS = [['BM', 'Bottom Middle'], ['BL', 'Bottom Left'], ['BR', 'Bottom Right'], ['LM', 'Left Middle']];
+const hbSpot = g => HB_SPOTS[g?.tapSpot] ? g.tapSpot : 'BM';
+const hbHose = g => g?.tapLink !== 'pipe';
+// the inside Hose or Pipe from the spout to the IP spot, drawn in a 300 x 300 box (the pump's look, pumpLinkSvg)
+// its IP spot in the picture's own (not mirrored) box: the spot is named as it is seen, so a Left (mirrored) Hose Bib's Bottom Left is on
+// the left of the screen too
+const hbSpotAt = g => { const [x, y] = HB_SPOTS[hbSpot(g)]; return mvLook(g).flip ? [1 - x, y] : [x, y]; };
+function hbLinkSvg(g) {
+  const [sx, sy] = HB_SPOUT, [ex, ey] = hbSpotAt(g), side = ex < 0.5 ? 0.1 : 0.9;
+  const pts = ey < 1 ? [[sx, sy], [sx, 0.88], [side, 0.88], [side, ey], [ex, ey]] : ex === sx ? [[sx, sy], [ex, ey]] : [[sx, sy], [sx, 0.95], [ex, 0.95], [ex, ey]];
+  const d = 'M' + pts.map(([x, y]) => `${Math.round(x * 300)} ${Math.round(y * 300)}`).join(' L');
+  const look = hbHose(g) ? `<path d="${d}" fill="none" stroke="#8a8f94" stroke-width="17" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#f7f7f7" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>`
+    : `<path d="${d}" fill="none" stroke="#5b6168" stroke-width="17"/><path d="${d}" fill="none" stroke="#c9ced4" stroke-width="13"/>`;
+  return `<svg class="hbLink" viewBox="0 0 300 300" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible;pointer-events:none">${look}</svg>`;
+}
 // A Manual Valve Widget has two IPs, one at each pipe end (Fritz, 2026-11-04, Rule 5.24; where they go is Rule 5.20): the center
 // of each ferrule's outer face on the side view, the left and right ends of the plain drawn valve, both at the center of the
 // opening on a front view, and the center of the opening plus the center of the bottom ferrule on a front elbow. A picture
 // Skynet doesn't know (a user's own) has them in the middle of its left and right sides. They turn with the valve (Rotate 45).
 // ends = [end 1, end 2] as parts of the picture's box (the picture fills the box).
 const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]], Front: [[0.5, 0.5], [0.5, 0.5]], Front_Elbow: [[0.5, 0.5], [0.5, 0.99]],
-  tap: [[1 / 3, 0.987]] };       // the Tap Water Valve: the center of its hose thread's outer face (Rule 5.33)
+  vert: [[0.5, 0], [0.5, 1]] };      // vert: a Butterfly Valve's own up and down drawing; a Hose Bib's IP is its spot (HB_SPOTS, Rule 18.45)
 function mvEnds(g) {
   const m = String(g.image || '').match(/Manual_Ball_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);
-  const ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? MV_ENDS.tap : m ? MV_ENDS[m[1]] : MV_ENDS.plain;
-  const x = g.x || 0, y = g.y || 0, w = g.w || 30, hh = g.h || 30, cx = x + w / 2, cy = y + hh / 2, r = (+g.rotate || 0) * Math.PI / 180;
+  const L = mvLook(g);
+  let ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? [hbSpotAt(g)] : m ? MV_ENDS[m[1]] : L.vert ? MV_ENDS.vert : MV_ENDS.plain;      // a Hose Bib: its IP spot (Rule 18.45)
+  if (L.flip) ends = ends.map(([fx, fy]) => [1 - fx, fy]);      // Left: mirrored, so its ends are too (Rule 18.45)
+  const x = g.x || 0, y = g.y || 0, w = g.w || 30, hh = g.h || 30, cx = x + w / 2, cy = y + hh / 2, r = (L.rot + (+g.rotate || 0)) * Math.PI / 180;
   const at = ([fx, fy]) => { const dx = x + fx * w - cx, dy = y + fy * hh - cy; return [Math.round(cx + dx * Math.cos(r) - dy * Math.sin(r)), Math.round(cy + dx * Math.sin(r) + dy * Math.cos(r))]; };
   const nm = g.name || g.label || 'Manual valve';
   if (isTapMv(g)) return [{ id: `eq:${g.id}:out`, label: `${nm} hose outlet`, text: '', circuit: 'a', mv: true, tap: true, c: at(ends[0]) }];
@@ -1894,10 +1936,11 @@ function buildIp(g) {
   const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
   if (isQd(g)) { n.classList.add('has-img', 'qd'); n.style.backgroundImage = `url("${media(g.image || QD_PIC)}")`; }      // Fritz's red star (Rule 5.28)
-  else if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(mvPic(g))}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
+  else if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(isMv(g) ? mvPic(g) : g.image)}")`; const tf = isMv(g) ? mvTransform(g) : +g.rotate ? `rotate(${+g.rotate}deg)` : ''; if (tf) n.style.transform = tf; }
   else if (fit) {
-    n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
+    n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:${isMv(g) ? mvTransform(g) || 'none' : `rotate(${+g.rotate || 0}deg)`}"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
+  if (isTapMv(g)) { n.classList.add('hoseBib'); n.insertAdjacentHTML('beforeend', hbLinkSvg(g)); }      // its picture top right, its inside Hose or Pipe to its IP (Rule 18.45)
   if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(MV_OVERLAY)}")` })); }
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
@@ -5823,7 +5866,8 @@ document.addEventListener('keydown', ev => {
   if (!d || !t.matches('input, select') || ['button', 'submit', 'reset', 'file'].includes(t.type) || !t.closest('#dlgBody')) return;
   ev.preventDefault();
   if (dlgEnterSeq?.(t)) return;
-  const all = [...d.querySelectorAll('#dlgBody input, #dlgBody select, #dlgBody textarea')].filter(x => !x.disabled && x.type !== 'hidden' && x.offsetParent !== null);
+  if (t.dataset.mouseOnly) return;      // a mouse-only box (the Change Name box, Rule 18.45): Enter does nothing there
+  const all = [...d.querySelectorAll('#dlgBody input, #dlgBody select, #dlgBody textarea')].filter(x => !x.disabled && x.type !== 'hidden' && x.offsetParent !== null && x.tabIndex >= 0);      // mouse-only boxes are never jumped to
   const i = all.indexOf(t), ok = [...d.querySelectorAll('button[value="ok"]')].pop();
   (all[i + 1] || ok)?.focus();
 }, true);
@@ -8420,10 +8464,11 @@ const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 function pumpDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['_state', 'State', 'state', null, false, false, {}],      // On or Off now, worked from here too (Panel Update Final 1 #1, Rule 18.45)
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: LABEL_VISIBLE_PUMP_TIP }],
     ['device', '2. Interface', 'dev', 'addnewid', false, false, { set: true, tip: IFACE_PUMP_TIP, with: ['channel', 'Available Ports', 'pinsel', 'digital', false, false, { tip: portTip(it) }] }],
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: tabTip(it) }],
-    ['name', '4. Name', 'text', null, false, false, { tip: nameTip(it) }],
+    ['name', '4. Name', 'namechg', null, false, false, { tip: nameTip(it) }],      // the Name greyed out, the Change Name box and ✏ Change Name below it (Rule 18.45)
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it), ...PUMP_TYPE_FIELDS(it),
     ...PUMP_XYWH()];
@@ -8978,13 +9023,51 @@ const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the 
   ['foreColor', 'Fore color', 'color', null, false, false, { tip: 'The color of its words. The ⬢ beside it sets the Back color, alignment, font and size.', attr: LBL_LOOK_POP }],
   ...wgtPlace(), wgtType('Label')];
 // Manual Valve Widget (Rule 5.24) and the Tap Water Valve (Rule 5.33): turned by hand only
-const mvWidgetFields = it => [['_mvnow', `It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now.`, 'note'],
+// Panel Update Final 1 (OakBarn Brewery, 2026-11-18, Rule 18.45): #1 State is a name and a slider (mouse only) that opens or closes it
+// at once; #2 and #3 the Change Name box and its buttons; #4 the Graphic as on the Blichmann Model; #5 Orientation (Horizontal, Vertical)
+// and Left / Right on its line, both reached by Enter, the Tab key and the mouse; #7 the ⛔ only shows while the mouse is on a greyed box.
+const MV_TIPS = {
+  graphic: 'The Manual Valve as it will be on the Tab, with its Picture, Orientation and Left / Right. While it is open it shows the open overlay.',
+  orient: '⟪img:help_pictures/Manual_Valve_Orientation.png⟫Horizontal: for a level pipe. Vertical: for an up and down pipe.\n\nA front view (looking down the pipe) has no Orientation, and a Tap Water Valve is always Horizontal (it comes out of a wall).',
+  side: 'Horizontal: Right is the picture as drawn, Left is it mirrored (a Tap Water Valve: the wall on the right or on the left). Vertical: the handle points to the Left or to the Right.\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
+};
+const MV_ORIENTS = [['h', 'Horizontal'], ['v', 'Vertical']], MV_SIDES = [['r', 'Right'], ['l', 'Left']];
+const HB_TIPS = {
+  graphic: 'The Hose Bib as it will be on the Tab: its picture, its Left / Right, and its own short Hose or Pipe from the hose thread to its IP. While it is open it shows the open overlay.\n\nThe Picture itself cannot be changed here.',
+  spot: '⟪img:help_pictures/Hose_Bib_IP_Spots.png⟫Where its one IP is on the edge of its box. Its own short Hose or Pipe runs inside the box from the hose thread to it, so the IP stays where it is when the Hose Bib is made bigger or smaller, and the hose or pipe joined to it stays put.\n\nPipes or Hose snap connect to an IP within 10 px.',
+  link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
+  size: 'Its size on the Tab in pixels. A Hose Bib is sized by hand, like a Pump; its inside Hose or Pipe is drawn again to reach its IP.',
+};
+// a Hose Bib's own dialog (Rule 18.45): the Manual Valve's, with its IP spot and Hose or Pipe, and Width and Height of its own
+const hbWidgetFields = (it, pics) => [['_state', 'State', 'state', null, false, false, {}],
   ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
   ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
-  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BH'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).` }],
+  ['name', '2. Name', 'namechg', null, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_TWV_Hose~Bib_BH'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).\n\nIt is changed with the Change Name box below it and ✏ Change Name.` }],
   ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }],
-  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
-  ...FIT_PLACE(it), wgtType(isTapMv(it) ? 'Tap Water Valve' : 'Manual Valve')];
+  ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: HB_TIPS.graphic }],
+  ['image', 'Picture', 'sel', pics, true, false, { tip: 'The Tap Water Valve hose bib: its one IP is at the end of its own short Hose or Pipe and, open, it is a tap water source. Picking a Straight Manual Valve picture makes it a Straight Manual Valve.' }],
+  ['mvOrient', 'Orientation', 'sel', [['h', 'Horizontal']], false, false, { tip: MV_TIPS.orient, disabled: true, with: ['mvSide', 'Left / Right', 'sel', MV_SIDES, false, false, { tip: MV_TIPS.side }] }],
+  ['tapSpot', 'IP', 'sel', HB_SPOT_WORDS, false, false, { tip: HB_TIPS.spot, with: ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }] }],
+  ['x', 'X (Horizontal)', 'num', null, false, false, { tip: WGT_TIPS.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: WGT_TIPS.xy }],
+  ['w', 'Width', 'num', null, false, false, { tip: HB_TIPS.size }], ['h', 'Height', 'num', null, false, false, { tip: HB_TIPS.size }],
+  ...FIT_PLACE(it).filter(f => !['x', 'y', 'w', 'h'].includes(f[0])), wgtType('Hose Bib (Tap Water Valve)', 'A Manual Valve comes in two kinds: Straight (in a pipe line, it sizes itself to its pipes) and Hose Bib (sized by hand like a Pump, with its own Hose or Pipe to its one IP).')];
+const mvWidgetFields = it => {
+  it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
+  if (isTapMv(it)) { it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it, MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr)); }
+  const front = mvFront(it), tap = isTapMv(it);
+  // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
+  const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);
+  return [['_state', 'State', 'state', null, false, false, {}],
+    ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
+    ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
+    ['name', '2. Name', 'namechg', null, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BH'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).\n\nIt is changed with the Change Name box below it and ✏ Change Name.` }],
+    ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }],
+    ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: MV_TIPS.graphic }],
+    ['image', 'Picture', 'sel', pics, true, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
+    ['mvOrient', 'Orientation', 'sel', front ? [['h', 'Front']] : tap ? [['h', 'Horizontal']] : MV_ORIENTS, false, false, { tip: MV_TIPS.orient, ...(front || tap ? { disabled: true } : {}),
+      with: ['mvSide', 'Left / Right', 'sel', front ? [['r', 'None']] : MV_SIDES, false, false, { tip: MV_TIPS.side, ...(front ? { disabled: true } : {}) }] }],
+    ...FIT_PLACE(it), wgtType('Straight Manual Valve', 'A Manual Valve comes in two kinds: Straight (in a pipe line, it sizes itself to its pipes) and Hose Bib (sized by hand like a Pump, with its own Hose or Pipe to its one IP).')];
+};
 // Timer Widget Properties in the Pump's drill-down look (Rule 18.30): no pictures and no background; its look is a Style (Rule 2.24)
 const TIMER_TIPS = {
   label: 'The title bar of the Timer on the Tab. The ⬢ beside it sets its font, size and colors.',
@@ -9529,6 +9612,9 @@ const RGB_ROW_TIP = 'The color as three numbers from 0 to 255 (Red, Green, Blue)
 // Rule 18.36: a box with a Skynet default shows that number in the box (never 'empty = 10' in its label)
 function fillDef(f, el) { if (f[6]?.def === undefined || !el) return; const i = el.matches?.('input') ? el : el.querySelector?.('input'); if (i && i.value === '') i.value = f[6].def; }
 function fieldOne([key, label, kind, opts, rerender], obj) {
+  if (kind === 'namechg') return nameChangeRows(key, label, obj);      // Name, Change Name and ✏ Change Name (Rule 18.45)
+  if (kind === 'state') return stateRow(label, obj);                   // State: a slider that works the item now (Rule 18.45)
+  if (kind === 'mvpic') return mvGraphic(label, obj);                  // a Manual Valve's Graphic (Rule 18.45)
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
@@ -10283,6 +10369,121 @@ function bindForm(body, fields, obj, onChange) {
   return build;
 }
 
+// Panel Update Final 1 (OakBarn Brewery, 2026-11-18, the Manual Valve Widget, "Fix these on this Dialog and also on the Blickmann Model";
+// Rule 18.45). #2: "If Label is Changed Pop Up Button with Update Suggested Name and populates Change Name Field". #3: "Change Name Field
+// that a User can Edit. Fill with Current name on Open Add change name Button". The Name stays greyed out (⛔); the Change Name box below
+// it starts with the Name now and can be typed in; ✏ Change Name checks it and puts it in the Name, kept when the Properties are saved,
+// and every Process that uses the old name follows it (Rule 3.11). Once the Label is changed, 🏷 Update to Suggested Name pops up on the
+// Label Visible line and fills the Change Name box with the Suggested Name. OakBarn Brewery, 2026-11-18: "New buttons associated with Name
+// Change and the Name Change Field only get focus with Mouse, No Tab or Enter."
+const NAMECHG_TIPS = {
+  name: 'The Name now. It is how Skynet and every Process refer to this item, and it is unique. It is changed only with the Change Name box below it and ✏ Change Name.',
+  box: 'Type the new Name here. It starts with the Name now. Press ✏ Change Name to use it: it goes into the Name above and is kept when you press 💾 Save. Every Process that uses the old Name is changed to the new one.\n\nOnly the mouse reaches this box: the Tab key and the Enter key pass it by.',
+  btn: 'Checks the Name typed in the Change Name box and puts it in the Name. It is kept when you press 💾 Save, and every Process that uses the old Name follows it.',
+  sug: 'The Label was changed. Click to put the Suggested Name made from the new Label in the Change Name box. Then press ✏ Change Name to use it.',
+};
+// the original item a Properties box works on (its copy's own name doesn't count as taken)
+const origOf = obj => { const L0 = draft || S.config; return isMv(obj) ? L0.graphics.find(g => g.id === obj.id) || obj : sugSelf(obj); };
+// what is wrong with a typed new name (null when it is fine): Fritz's name rules, unique among every Device and Widget
+function changeNameError(n, obj, body) {
+  if (!n) return 'The Name can\'t be blank.';
+  if (!isMv(obj) && !(obj.type && (S.types || []).includes(obj.type))) return nameCheck(n, obj);
+  const self = origOf(obj), L0 = draft || S.config;      // the Suggested Name of the Label as it is typed now (@ ~ are only in it)
+  const bad = typedNameError(n, { suggestion: changeNameSuggestion(obj, body), was: self.name, what: isDevice(obj) ? 'Device' : 'Widget' }); if (bad) return bad;
+  if ([...L0.elements, ...L0.graphics].some(x => x !== self && !(isMv(obj) && x.id === obj.id) && String(x.name ?? '').toLowerCase() === n.toLowerCase())) return `The name ${n} is already used. Names must be unique.`;
+  return null;
+}
+// the Suggested Name from what the box shows now (a Manual Valve: wgt_MV_Label_TabID or wgt_TWV_..., Rule 3.14)
+function changeNameSuggestion(obj, body) {
+  if (!isMv(obj)) return liveSuggestion(obj, body);
+  const w = { ...obj }; try { readFields(w, body); } catch { }
+  return graphicWidgetName(w, origOf(obj)) || '';
+}
+function nameChangeRows(key, label, obj) {
+  if (!isMv(obj) && !(obj._ref && String(obj[key] ?? '').trim())) return fieldOne([key, label, 'text'], obj);      // not built yet: the Name is typed as before
+  const tipLbl = (t, tip) => { const l = h('label', { class: 'tipLbl', 'data-help': tip }, t); l.addEventListener('click', () => fieldTip(t, tip)); return l; };
+  const cur = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: obj[key] ?? '', disabled: true, class: 'greyed roField lockedName' });
+  const box = h('input', { type: 'text', class: 'chgName', value: obj[key] ?? '', tabindex: '-1', 'data-mouse-only': '1', spellcheck: 'false', autocomplete: 'off' });
+  const btn = h('button', { type: 'button', class: 'nameBtn chgNameBtn', tabindex: '-1', 'data-help': NAMECHG_TIPS.btn, onclick: () => {
+    const n = noSpaces(box.value.trim()), err = n === cur.value ? null : changeNameError(n, obj, box.closest('#dlgBody, .dlgBody, form'));
+    if (err) return toast(err, true);
+    box.value = n; if (n === cur.value) return;
+    cur.value = n;
+    for (const t of ['input', 'change']) cur.dispatchEvent(new Event(t, { bubbles: true }));
+    toast(`The Name will be ${n} when you press 💾 Save`);
+  } }, '✏ Change Name');
+  box.addEventListener('keydown', ev => { if (ev.key === 'Enter') ev.preventDefault(); });
+  // 🏷 Update to Suggested Name pops up once the Label is changed (on the Label Visible line)
+  const label0 = String(obj.label ?? '');
+  const sug = h('button', { type: 'button', class: 'nameBtn sugNameBtn hidden', tabindex: '-1', 'data-help': NAMECHG_TIPS.sug, onclick: () => {
+    const body = sug.closest('#dlgBody, .dlgBody, form');
+    const n = changeNameSuggestion(obj, body); if (!n) return toast('Type a Label first', true);
+    box.value = n; box.focus();
+  } }, '🏷 Update to Suggested Name');
+  setTimeout(() => {
+    const body = cur.closest('#dlgBody, .dlgBody, form'); if (!body) return;
+    const sw = body.querySelector('[data-k="hideName"], [data-k="labelVisible"]')?.closest('label.sw');
+    if (sw) { const wrap = h('div', { class: 'swWithBtn' }); sw.replaceWith(wrap); wrap.append(sw, sug); } else box.parentNode?.append(sug);
+    const lab = body.querySelector('[data-k="label"]');
+    const show = () => sug.classList.toggle('hidden', !lab || String(lab.value ?? '') === label0);
+    lab?.addEventListener('input', show); lab?.addEventListener('change', show); show();
+  }, 0);
+  return [h('label', { class: 'greyed tipLbl', 'data-help': NAMECHG_TIPS.name }, label), cur,
+    tipLbl('Change Name', NAMECHG_TIPS.box), h('span', { class: 'nameRow' }, box, btn)];
+}
+// #1: "State is label and a Slider. Focus only on Mouse No Tab or Enter. Active, User can Change Here as well as the screen": the
+// slider works the item at once, the same as a click on it on its Tab (a Manual Valve with .confirmation asks Done first, Rule 5.15;
+// a Pump turns On or Off, Rule 2.33). It is not part of the Properties: Cancel does not undo it and Save does not save it.
+const STATE_TIPS = {
+  mv: 'Open or Closed now. Slide it to open or close the valve at once, the same as a click on the valve on its Tab. With .confirmation on, it asks you to turn it by hand and press Done first.\n\nIt is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it.',
+  dev: 'On or Off now. Slide it to turn the Device On or Off at once, the same as a click on it on its Tab.\n\nIt is not a setting: 💾 Save and ✖ Cancel do not change it. Only the mouse reaches it.',
+  unsaved: 'Save the layout once (💾 Save layout) so it can be worked from here.',
+};
+function stateRow(label, obj) {
+  const mv = isMv(obj);
+  const liveItem = () => mv ? S.config.graphics.find(g => g.id === obj.id) : S.config.elements.find(e => e.name === obj.name);
+  const now = () => { const it = liveItem(); return mv ? mvOpen(it || obj) : !!S.values[obj.name]?.state; };
+  const ok = !!liveItem()?.name && can('operator');
+  const cb = h('input', { type: 'checkbox', tabindex: '-1', 'data-mouse-only': '1', class: 'stateSw' });
+  const word = h('span', { class: 'stateWord' });
+  const show = () => { word.textContent = mv ? (cb.checked ? 'Open' : 'Closed') : (cb.checked ? 'On' : 'Off'); };
+  cb.checked = now(); show(); cb.disabled = !ok;
+  const quiet = ev => ev.stopPropagation();      // not a change to the Properties (no Cancel warning, no redraw)
+  cb.addEventListener('input', quiet);
+  cb.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') ev.preventDefault(); });
+  cb.addEventListener('change', async ev => {
+    ev.stopPropagation();
+    const want = cb.checked;
+    if (mv) { await toggleManualValve(obj.id); cb.checked = now(); }
+    else try { await api('POST', '/ui/set', { name: obj.name, prop: 'state', value: want }); (S.values[obj.name] ??= {}).state = want; } catch (e) { toast(e.message, true); cb.checked = !want; }
+    show();
+  });
+  const tip = (mv ? STATE_TIPS.mv : STATE_TIPS.dev) + (ok ? '' : '\n\n' + STATE_TIPS.unsaved);
+  const lab = h('label', { class: 'tipLbl', 'data-help': tip }, label); lab.addEventListener('click', () => fieldTip(label, tip));
+  return [lab, h('div', { class: 'stateBox' }, h('label', { class: 'sw' }, cb, h('span', { class: 'swk' })), word)];
+}
+// #4: "Show the Graphic Like the Blickmann Model": the picture as it will be on the Tab, with its Orientation and Left / Right, kept up
+// to date while they are picked, and the open overlay while it is open
+function mvGraphic(label, obj) {
+  const box = h('div', { class: 'devPreview mvPreview' }), pic = h('div', { class: 'mvPv' }), ovl = h('div', { class: 'mvPvOver' });
+  pic.append(ovl); box.append(pic);
+  const draw = () => {
+    const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
+    const w = { ...obj };
+    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink']) if (q(k)) w[k] = q(k).value;
+    const src = mvPic(w), hb = isTapMv(w);
+    pic.style.backgroundImage = src ? `url("${media(src)}")` : '';
+    pic.classList.toggle('hoseBib', hb);      // a Hose Bib: its picture top right and its inside Hose or Pipe to its IP
+    pic.innerHTML = hb ? hbLinkSvg(w) : src ? '' : `<svg viewBox="0 0 30 30"><g class="edge">${FIT_SVG.manualValve}</g><g class="core">${FIT_SVG.manualValve}</g></svg>`;
+    pic.append(ovl);
+    ovl.style.backgroundImage = `url("${media(MV_OVERLAY)}")`;
+    ovl.classList.toggle('hidden', !mvOpen(S.config.graphics.find(g => g.id === obj.id) || obj));
+    pic.style.transform = mvTransform(w) || '';
+  };
+  whileShown(box, () => setTimeout(draw, 0));
+  setTimeout(draw, 0);
+  return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, box)];
+}
 // Locked names (Fritz, 2026-10-27). Once an item is built (saved once: that is when it gets its hidden key) its name is
 // locked. ✏ Change name beside it opens the Name Change pop-up; the new name goes in the box and is kept when these
 // Properties are saved. Every Process that uses the old name follows it when the layout is saved (lib/keys.js, lib/renames.js).
@@ -10960,7 +11161,7 @@ async function editItem(kind, id) {
   // a Heating Element just added from a Method row (OakBarn Brewery's markup: "choosing Duty Cycle one creates a Heating Element Device that
   // first presents the Duty Cycle Attributes"): its Current Method's ⬢ Settings open on top of its Properties
   if (kind === 'el' && item._openMethod) { delete item._openMethod; setTimeout(() => $('#dlgBody .methodPopBtn')?.click(), 50); }
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
     if (r === 'delete') {

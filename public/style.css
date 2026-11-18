@@ -1378,8 +1378,30 @@ dialog .dupBottom { display: none; }
 dialog :is(input, select, textarea):disabled:not([type="checkbox"], [type="radio"], [type="hidden"], [type="color"], [type="range"]):not(fieldset:disabled *),
 #menuPane :is(input, select, textarea):disabled:not([type="checkbox"], [type="radio"], [type="hidden"], [type="color"], [type="range"]):not(fieldset:disabled *) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-size: 16px 16px; background-position: right 6px center; padding-right: 28px;
+  background-repeat: no-repeat; background-size: var(--dne, 0 0); background-position: right 6px center; padding-right: 28px;
 }
+/* ... and only while the mouse is on that box or its name (OakBarn Brewery, 2026-11-18, Panel Update Final 1 #7: "Only show of Hover of
+   Field"; Rule 18.45): a dialog stays clean, and the ⛔ still says why the box can not be changed */
+dialog :is(input, select, textarea):disabled:hover, #menuPane :is(input, select, textarea):disabled:hover,
+dialog label:hover + :is(input, select, textarea):disabled, #menuPane label:hover + :is(input, select, textarea):disabled,
+dialog label:hover + :is(div, span) :is(input, select, textarea):disabled, #menuPane label:hover + :is(div, span) :is(input, select, textarea):disabled,
+dialog .fldPair .pairLbl:hover + :is(input, select, textarea):disabled { --dne: 16px 16px; }
+/* Panel Update Final 1 (Rule 18.45): the State slider with its word, 🏷 Update to Suggested Name beside Label Visible, the Change Name
+   box, and a Manual Valve's Graphic */
+.stateBox, .swWithBtn { display: flex; align-items: center; gap: 10px; }
+.stateBox .stateWord { font-weight: 600; }
+.swWithBtn .sugNameBtn.hidden { display: none; }
+.nameRow .chgName { flex: 1; min-width: 0; }
+.mvPreview { width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; }
+.mvPreview .mvPv { position: relative; width: 116px; height: 116px; background: center / 100% 100% no-repeat; }
+.mvPreview .mvPv svg { width: 100%; height: 100%; }
+.mvPreview .mvPvOver { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; }
+.mvPreview .mvPvOver.hidden { display: none; }
+.mvPreview .mvPv.hoseBib { background-size: 75% 75%; background-position: right top; }
+.mvPreview .mvPv.hoseBib .mvPvOver { inset: 0 0 25% 25%; }
+/* a Hose Bib on its Tab: the picture in the top right three quarters of its box, its own Hose or Pipe below it (Rule 18.45) */
+#ws .gfx.ip.has-img.hoseBib { background-size: 75% 75%; background-position: right top; overflow: visible; }
+#ws .gfx.ip.hoseBib .mvOver { inset: -10% -10% 15% 15%; }
 dialog select:disabled:not(fieldset:disabled *), #menuPane select:disabled:not(fieldset:disabled *) { background-position: right 24px center; padding-right: 44px; }
 /* the ⛔ stays bright red: a greyed box shows its words dim, not the whole box faded (the sign would fade with it) */
 #dlgBody label.greyed + :is(input, select):disabled, #dlgBody label.greyed + .fldPair { opacity: 1; }

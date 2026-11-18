@@ -32,7 +32,26 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
 - C'est un **Confirmation Widget** (2026-11-08, Règle Skynet 1.28, [Widgets de confirmation](162-confirmation-widgets)) : son interrupteur **.confirmation** dans ses Properties est activé. Un clic affiche une fenêtre, **✋ OPEN Kettle drain by hand, then press Done** (ouvrez la vidange de la bouilloire à la main, puis appuyez sur Done) : ouvrez la vraie vanne, puis appuyez sur **Done**, et seulement alors elle se montre ouverte. **Cancel** la laisse comme elle était. Désactivez .confirmation et un clic l'ouvre ou la ferme tout de suite.
 - Tant qu'elle est ouverte, la **superposition ouverte** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, un anneau vert et une coche) est dessinée par-dessus.
 - Elle a **deux IP**, un à chaque bout de tuyau, donc un tuyau se joint de chaque côté (Règle Skynet 5.24, aide 123).
-- Ses Properties : une note avec son nom et son état, **Label** (utilisé dans le message « à la main ») et **Show label**, **.confirmation**, puis **X**, **Y**, **Width**, **Height** et 🔒 Lock.
+- **Deux sortes** (Skynet Rule 18.45) : une Manual Valve **Straight** (droite) est dans une ligne de tuyaux et prend la taille de
+  ses tuyaux, ses deux bouts sur la ligne du tuyau, donc les tuyaux ne bougent pas. Un **Hose Bib** (le Tap Water Valve) a un seul
+  IP, se dimensionne à la main comme une Pump et a sa propre fenêtre (voir la page Tap Water Valve).
+- Ses Properties, de haut en bas :
+  - **State** : Open ou Closed maintenant, avec un curseur. Faites-le glisser pour ouvrir ou fermer la vanne tout de suite, comme
+    un clic sur elle dans son Tab (avec .confirmation, elle vous demande de le faire à la main et d'appuyer sur Done d'abord). Ce
+    n'est pas un réglage : 💾 Save et ✖ Cancel ne le changent pas. Seule la souris l'atteint, pas la touche Tab ni Entrée.
+  - **1. Label** (utilisé dans le message « à la main ») et **Label Visible**. Dès que le Label change, **🏷 Update to Suggested
+    Name** apparaît à côté de Label Visible : il met le Suggested Name fait avec le nouveau Label dans la case Change Name.
+  - **2. Name**, grisé, et dessous la case **Change Name**, qui commence avec le Name actuel. Tapez un nouveau Name (ou utilisez
+    🏷 Update to Suggested Name) et appuyez sur **✏ Change Name** : le nouveau Name va dans le Name et est gardé quand vous appuyez
+    sur 💾 Save, et chaque Process qui utilise l'ancien Name le suit. La case Change Name et ses boutons sont pour la souris seulement.
+  - **.confirmation**.
+  - **Graphic** : la vanne telle qu'elle sera dans le Tab, tenue à jour pendant que vous choisissez.
+  - **Picture**, puis **Orientation** (Horizontal ou Vertical) et **Left / Right** sur sa ligne : Horizontal Right est l'image telle
+    qu'elle est dessinée, Horizontal Left est son miroir ; Vertical Left et Vertical Right tournent la poignée vers la gauche ou la
+    droite. Une vue de face (dans l'axe du tuyau) n'a pas d'Orientation. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux
+    après avoir choisi.
+    ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
+  - **X**, **Y**, **Width**, **Height** (réglés par ses tuyaux, ⛔), **Layer Order**, 🔒 Lock et No Unlock, et le **Widget Type**.
 
 ### Une vanne manuelle dans un Process {#a-manual-valve-in-a-process}
 

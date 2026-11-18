@@ -32,7 +32,25 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
 - It is a **Confirmation Widget** (2026-11-08, Skynet Rule 1.28, [Confirmation Widgets](162-confirmation-widgets)): its **.confirmation** switch in its Properties is on. A click shows a pop-up, **✋ OPEN Kettle drain by hand, then press Done**: open the real valve, then press **Done**, and only then does it show open. **Cancel** leaves it as it was. Switch .confirmation off and a click opens or closes it at once.
 - While it is open, the **open overlay** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, a green ring and a tick) is drawn on top of it.
 - It has **two IPs**, one at each pipe end, so a pipe joins each side of it (Skynet Rule 5.24, Help 123).
-- Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, **.confirmation**, then **X**, **Y**, **Width**, **Height** and 🔒 Lock.
+- **Two kinds** (Skynet Rule 18.45): a **Straight** Manual Valve sits in a pipe line and sizes itself to its pipes, its two ends on
+  the pipe line, so the pipes stay put. A **Hose Bib** (the Tap Water Valve) has one IP, is sized by hand like a Pump and has its own
+  dialog (see the Tap Water Valve page).
+- Its Properties, from the top:
+  - **State**: Open or Closed now, with a slider. Slide it to open or close the valve at once, the same as a click on it on its Tab
+    (with .confirmation on it asks you to do it by hand and press Done first). It is not a setting: 💾 Save and ✖ Cancel do not
+    change it. Only the mouse reaches it, not the Tab key or Enter.
+  - **1. Label** (used in the "by hand" message) and **Label Visible**. Once the Label is changed, **🏷 Update to Suggested Name**
+    pops up beside Label Visible: it puts the Suggested Name made from the new Label in the Change Name box.
+  - **2. Name**, greyed out, and below it the **Change Name** box, which starts with the Name now. Type a new Name (or use 🏷 Update
+    to Suggested Name) and press **✏ Change Name**: the new Name goes into the Name and is kept when you press 💾 Save, and every
+    Process that uses the old Name follows it. The Change Name box and its buttons are for the mouse only.
+  - **.confirmation**.
+  - **Graphic**: the valve as it will be on the Tab, kept up to date while you pick.
+  - **Picture**, then **Orientation** (Horizontal or Vertical) and **Left / Right** on its line: Horizontal Right is the picture as
+    drawn, Horizontal Left is it mirrored; Vertical Left and Vertical Right point the handle to the left or the right. A front view
+    (looking down the pipe) has no Orientation. Its ends (IPs) turn with it, so join the pipes after you pick.
+    ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
+  - **X**, **Y**, **Width**, **Height** (set by its pipes, ⛔), **Layer Order**, 🔒 Lock and No Unlock, and the **Widget Type**.
 
 ### A Manual Valve in a Process
 
