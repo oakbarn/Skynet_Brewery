@@ -15,7 +15,7 @@ C'est un **Template Skynet** (Règle Skynet 5.16), de la même façon que la Sky
   **0 à 100 %**, pas de décimales, ses images et son aspect.
 - **Vous réglez :** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, les réglages de la case de texte, Device Type, l'**Interface**
   et la **Pin** (une broche PWM qui alimente un module PWM vers 0-5 V), l'**Orientation** et les **Flips**.
-- **Orientation** : Horizontal, Vertical Left, Vertical Right ou 45 degrees. L'image et ses IP suivent.
+- **Orientation** : Horizontal, Vertical Left ou Vertical Right (45 degrees seulement sur une vanne déjà posée ainsi). L'image et ses IP suivent.
 
 Son image est celle de la Skynet Motorized Ball Valve pour l'instant (ouverte au-dessus de 0 %, fermée à 0 %).
 
@@ -28,7 +28,7 @@ vanne 24 V 0-10 V ou 4-20 mA). Elle marche de la même façon, mais vous réglez
 
 - **Interface** et **Pin**, **Signal** (0-10 V, 4-20 mA ou 0-5 V), **Value at lowest signal** et **Value at highest signal**
   (0 et 100 pour des %), **Units**, **Decimals**.
-- **Picture when open (above 0 %)** et **Picture when closed (0 %)**, et **Image Path 1, 2, 3** (Règle Skynet 7.10).
+- **Picture** : une seule image ; l'Overlay la montre ouverte (**Picture when open (above 0 %)** ne s'affiche que sur une vanne qui en a déjà une), et **Image Path 1, 2, 3** (Règle Skynet 7.10).
 - **In IP across % / In IP down %** et **Out IP across % / Out IP down %** : où sont ses deux bouts de tuyau sur l'image, en % de
   sa Width (0 = le bord gauche, 100 = le bord droit) et de sa Height (0 = le haut, 100 = le bas). Laissez-les vides et Skynet
   les place pour vous. Ce sont les mêmes que sur la User Defined Motorized Ball Valve (aide 88).

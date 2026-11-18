@@ -7,7 +7,7 @@
     "tapwater": false, "showOnOffText": false, "onText": "OPEN", "offText": "CLOSED"
   },
   "pics": {
-    "h": ["", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg"],
+    "h": ["", "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg"],
     "v": ["", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"]
   },
   "userFields": ["name", "label", "hideName", "workspace", "x", "y", "w", "h", "locked", "visibility", "hidden", "fontSize",

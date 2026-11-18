@@ -89,8 +89,8 @@ The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `Va
 
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
-| Path | greyed out: set by its Skynet Template, follows the Orientation | **Path (closed)** and **Path (open)**: your pictures. The ⬢ beside Path (closed) sets where the In and Out IPs are |
-| Orientation | Horizontal, Vertical Left, Vertical Right, Front, 45 degrees | Horizontal, Vertical, 45 degrees Left, 45 degrees Right |
+| Path | greyed out: set by its Skynet Template, follows the Orientation | **Path**: your picture, one picture (the Overlay shows it open). The ⬢ beside Path sets where the In and Out IPs are. **Path (open)** shows only on a valve that already has an open picture |
+| Orientation | Horizontal, Vertical Left, Vertical Right (Front and 45 degrees show only on a valve that already sits that way) | Horizontal or Vertical (the 45s show only on a valve that already sits that way) |
 | Toggle and Overlay | yours to pick (they start as On/Off and the steady bolt) | yours to pick |
 | Width and Height | its Template's size for each Orientation | 150 x 150 to start |
 

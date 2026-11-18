@@ -15,7 +15,7 @@ It is a **Skynet Template** (Skynet Rule 5.16), the same way as the Skynet Motor
   **0 to 100 %**, no decimals, its pictures and its look.
 - **You set:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, the text box settings, Device Type, the
   **Interface** and **Pin** (a PWM pin feeding a PWM-to-0-5 V module), **Orientation** and the **Flips**.
-- **Orientation**: Horizontal, Vertical Left, Vertical Right or 45 degrees. The picture and its IPs follow.
+- **Orientation**: Horizontal, Vertical Left or Vertical Right (45 degrees only on a valve that already sits that way). The picture and its IPs follow.
 
 Its picture is the Skynet Motorized Ball Valve's for now (open above 0 %, closed at 0 %).
 
@@ -28,7 +28,7 @@ Under the Skynet Proportional Valves is the **User Defined Proportional Valve**,
 
 - **Interface** and **Pin**, **Signal** (0-10 V, 4-20 mA or 0-5 V), **Value at lowest signal** and **Value at highest signal**
   (0 and 100 for %), **Units**, **Decimals**.
-- **Picture when open (above 0 %)** and **Picture when closed (0 %)**, and **Image Path 1, 2, 3** (Skynet Rule 7.10).
+- **Picture**: one picture; the Overlay shows it open (**Picture when open (above 0 %)** shows only on a valve that already has one), and **Image Path 1, 2, 3** (Skynet Rule 7.10).
 - **In IP across % / In IP down %** and **Out IP across % / Out IP down %**: where its two pipe ends are on the picture, in % of
   its Width (0 = the left edge, 100 = the right edge) and Height (0 = the top, 100 = the bottom). Leave them blank and Skynet
   places them for you. They are the same as on the User Defined Motorized Ball Valve (Help 88).

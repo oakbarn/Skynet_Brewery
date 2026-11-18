@@ -15,8 +15,9 @@ starts Horizontal. Its **Orientation** (in its Properties) picks how it stands:
 | **Horizontal** | lying in a horizontal pipe |
 | **Vertical Left** | standing in a vertical pipe |
 | **Vertical Right** | standing, with the motor on the other side (Flip Horizontal on) |
-| **Front (looking down the pipe)** | seen from the front |
-| **45 degrees** | the vertical picture turned 45 degrees |
+
+A valve stands Horizontal, Vertical Left or Vertical Right: those are the only three a new valve is offered. **Front (looking down
+the pipe)** and **45 degrees** still show on a valve that already sits that way, so it keeps working.
 
 The picture and its IPs follow the Orientation: each one has its own IP spots, so turning the valve moves its IPs too.
 (Under the hood each Orientation is its own Skynet Template of the same valve, Skynet Rule 5.17; you never have to pick those.)
@@ -31,7 +32,7 @@ If anything tries to change one of these, the Brain puts it back when the layout
 
 - **Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible**, and the text box settings.
 - **Interface and Pin**, Invert, One-shot.
-- **Orientation**: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The picture and its IPs follow.
+- **Orientation**: Horizontal, Vertical Left or Vertical Right (Front or 45 degrees only on a valve that already sits that way). The picture and its IPs follow.
 - **Flip Horizontal** and **Flip Vertical**: switches that mirror the picture and its IPs.
 - **Tap water valve**: off by default. Switched on, **Tap Water flows** asks which way the water goes, always from the tap side to the Out side:
   - on a vertical valve: **Top to Bottom** or **Bottom to Top**

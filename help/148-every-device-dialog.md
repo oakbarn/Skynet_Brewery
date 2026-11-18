@@ -18,7 +18,7 @@ Rest the mouse on any field name to see what it is for (Help 147).
 
 ## Every dialog, the same way
 
-Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide Pump dialog (Skynet Rule 18.43):
+Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide Pump dialog (Skynet Rule 18.44):
 
 - **The buttons are frozen at the top.** The title and its buttons stay where they are while you scroll, so you never have to
   scroll to the bottom to Save. There is no second row of buttons at the bottom.

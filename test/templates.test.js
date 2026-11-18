@@ -185,7 +185,7 @@ console.log('templates ok');
   assert.equal(el.subtype, 'valve'); assert.equal(el.service, 'room'); assert.equal(el.look, 'normal'); assert.equal(el.background, undefined);
   assert.equal(el.orientation, 'h', 'orientation is the user\'s'); assert.equal(el.w, 50);
   assert.equal(el.imageOn, undefined, 'Skynet valves have no Open picture: the On overlay shows open (Fritz, 2026-11-05)');
-  assert.match(el.imageOff, /Valve_Motor_Ball_ClosedH\.svg$/);
+  assert.match(el.imageOff, /Motorized_TC15_Ball_Valve_Horizontal\.svg$/, 'the 3 Vessel valve picture (2026-11-18, Rule 18.43)');
   assert.match(applyDeviceTemplate({ orientation: 'v' }, VL).imageOff, /ClosedV_LC\.svg$/);
   // Tap water: off by default; the source end sets which end the water leaves by; unset = Needs setting (no tap flow)
   assert.equal(H.props.tapwater, false);

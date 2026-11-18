@@ -28,7 +28,17 @@ assert.match(own, /'vorient', skyOrientChoices\(it\), true, false, \{ tip: T\.vO
 assert.match(own, /with: \[\['closeAll', 'On Close List', 'bool', true[^\]]*\], \['openAll', 'On Open List', 'bool', true/, 'Tap water, On Close List and On Open List on one line');
 assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay, it\), false, false, \{ tip: DEVICE_TIPS\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
 assert.ok(!/'ro'/.test(own.slice(own.indexOf('MBV_TOGGLE_OVERLAY'))) , 'nothing greyed out in Toggle / Overlay');
-assert.match(own, /\['imageOff', 'Path \(closed\)', 'gpick', null, false, false, \{ tip: T\.vPath, attr: MBV_IP_POP/, 'a User Defined valve: its own pictures and IP spots (Rule 5.22)');
+assert.match(own, /\['imageOff', 'Path', 'gpick', null, false, false, \{ tip: T\.vPath, attr: MBV_IP_POP/, 'a User Defined valve: its own picture and IP spots (Rule 5.22)');
+// Rule 18.43 (OakBarn Brewery, 2026-11-18): the 3 Vessel valve pictures first; one picture (the On Overlay shows open); Horizontal,
+// Vertical Left or Right. An old valve keeps its open picture, Front or 45 degrees (Never Take Away).
+assert.match(own, /\.\.\.\(it\.imageOn \? \[\['imageOn', 'Path \(open\)'/, 'Path (open) only on a valve that already has an open picture');
+assert.match(app, /const MBV_ORIENT = v => \[[^\n]*\['h', 'Horizontal'\], \['v', 'Vertical'\],\n  \.\.\.\(v === 'l45'/, 'User Defined: Horizontal or Vertical, the 45s only when already set');
+assert.match(app, /const ORIENT_MAIN = \['H', 'VL', 'VR'\];/, 'Skynet valve: Horizontal, Vertical Left, Vertical Right');
+assert.match(app, /filter\(x => ORIENT_MAIN\.includes\(end\(x\)\) \|\| now\.has\(x\.name\)\)/, 'Front and Front Elbow only when the valve already sits that way');
+assert.match(app, /const MBV_MODELS = \[\['Skynet Motorized Ball Valve', 'sky', 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Horizontal\.svg'\]/, 'the 3 Vessel picture in the Add list');
+assert.match(app, /'➕ New User Defined Motorized Ball Valve[^']*', 'user', 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Vertical\.svg'\]/);
+assert.match(app, /valve: \{ type: 'digitalOut', subtype: 'valve', [^\n]*imageOff: 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Vertical\.svg'/, 'a new valve starts with the 3 Vessel picture');
+assert.match(app, /F\.propValve\.filter\(x => x\[0\] !== 'imageOn' \|\| it\.imageOn\)/, 'proportional valve: one picture');
 assert.match(own, /\['device', '2\. Interface', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port greyed out with Change once added (Rule 18.13)');
 assert.match(app, /if \(isMbvDev\(it\)\) return \[\.\.\.mbvDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro'/, 'Properties: the drill-down, Device Type last');
 // which valves get it
@@ -67,7 +77,7 @@ console.log('mbvdialog tests passed');
   assert.match(app, /\['_pv', 'Graphic', 'devpic', null, false, false, \{ tip: T\.vGraphic, cls: 'mbvModel'/, 'the valve\'s Graphic marks the Model dialog');
   for (const part of ['', ' .dlgHead', ' .dlgBottomBar']) assert.ok(css.includes(`dialog#dlg:has(#dlgBody .mbvModel)${part}`), 'frozen top, no bottom row: ' + (part || 'dialog'));
   assert.match(css, /dialog#dlg:has\(#dlgBody \[data-k="pumpModel"\]\), dialog#dlg:has\(#dlgBody \.mbvModel\) \{ width: min\(680px, 94vw\); \}/, 'as wide as the pump dialog');
-  assert.match(app, /const onModelDialog = \(\) => !!document\.querySelector\('dialog#dlg\[open\]'\)/, 'its ⬢ and ⬆ pop-ups: frozen top with Keep (every dialog now, Rule 18.43)');
+  assert.match(app, /const onModelDialog = \(\) => !!document\.querySelector\('dialog#dlg\[open\]'\)/, 'its ⬢ and ⬆ pop-ups: frozen top with Keep (every dialog now, Rule 18.44)');
   assert.match(app, /const pumpFocus = dd && \(isPumpDev\(e\) \|\| mbv\)/, 'the Rule 18.38 focus order');
   assert.match(app, /if \(pumpFocus && mbv && filled && ps && !ps\.disabled && ps\.offsetParent !== null\) ps\.focus\(\)/, 'its Label starts filled in, so the focus starts on the Port');
   assert.match(app, /\.\.\.\(isPumpDev\(e\) \|\| mbv \? PUMP_XYWH\(after\)/, 'Add box: X, Y, Width, Height on one line');

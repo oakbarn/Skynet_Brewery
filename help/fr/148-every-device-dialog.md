@@ -18,7 +18,7 @@ Posez la souris sur n'importe quel nom de champ pour voir à quoi il sert (aide 
 
 ## Chaque fenêtre, de la même façon {#every-dialog-the-same-way}
 
-Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de la pompe Blichmann RipTide (Règle Skynet 18.43) :
+Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de la pompe Blichmann RipTide (Règle Skynet 18.44) :
 
 - **Les boutons sont figés en haut.** Le titre et ses boutons restent en place pendant que vous faites défiler, donc vous n'avez
   jamais à descendre tout en bas pour enregistrer (Save). Il n'y a pas de deuxième rangée de boutons en bas.

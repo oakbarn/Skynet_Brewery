@@ -1,5 +1,5 @@
 // Every dialog follows the Blichmann Model (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann Model";
-// "I prefer the do not enter icon to the Hover Read on greyed fields"; "Keep Dialogs Clean"; Rule 18.43, Help 148).
+// "I prefer the do not enter icon to the Hover Read on greyed fields"; "Keep Dialogs Clean"; Rule 18.44, Help 148).
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
@@ -36,12 +36,12 @@ assert.match(cf, /pairCls: 'xywh', with: \[short\(four\[1\], 'Y \(Vertical\)'\),
 assert.match(app, /if \(x\.pairCls === 'xywh' && autoSized\(obj\)\)/, 'Autosize to pipe still greys Width and Height');
 // the Rule and the Help
 const rules = fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8');
-assert.match(rules, /^18\.43 \*\*Every dialog follows the Blichmann Model\*\*/m);
+assert.match(rules, /^18\.44 \*\*Every dialog follows the Blichmann Model\*\*/m);
 const help = fs.readFileSync(new URL('../help/148-every-device-dialog.md', import.meta.url), 'utf8');
 assert.match(help, /## Every dialog, the same way/);
 assert.match(help, /⛔ = can not be changed here/);
 console.log('dialogmodel tests passed');
-// every box has Hover Help (Rules 18.42, 18.43): the boxes that had none get FIELD_TIPS, greyed parts go by their name
+// every box has Hover Help (Rules 18.42, 18.44): the boxes that had none get FIELD_TIPS, greyed parts go by their name
 assert.match(app, /const FIELD_TIPS = \{/);
 for (const k of ['name', 'workspace', 'locked', 'backpath', 'foreColor', 'kind', 'sound', 'precision', 'onText', 'volume', 'deadspace', 'flowColor', 'size', 'imageOverlay'])
   assert.match(app, new RegExp(`\\n  ${k}: '`), 'Hover Help for ' + k);

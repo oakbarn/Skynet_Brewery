@@ -1362,7 +1362,7 @@ dialog#dlg:has(#dlgBody .mbvModel) .dlgBottomBar { display: none; }
 /* Tab Settings: a box that gets the focus (the Name after a ⚠) scrolls into view below the frozen top, not under it */
 dialog#dlg:has(#dlgBody [data-k="vSizer"]) { scroll-padding-top: 8em; }
 /* EVERY dialog follows the Blichmann Model (OakBarn Brewery, 2026-11-18: "Start checking ALL Dialogs to conform to the Blickmann
-   Model"; "Keep Dialogs Clean"; Rule 18.43): every Properties and Add box is as wide as the Pump's, its ☰, title and buttons stay
+   Model"; "Keep Dialogs Clean"; Rule 18.44): every Properties and Add box is as wide as the Pump's, its ☰, title and buttons stay
    frozen at the top while the rest scrolls, and the bottom row of buttons is not shown (Rule 2.51, the global update). */
 dialog#dlg { width: min(680px, 94vw); padding-top: 0; scroll-padding-top: 8em; }
 dialog#dlg .dlgHead { position: sticky; top: 0; z-index: 20; background: var(--panel); padding: 1em 1em 0; margin: 0 -1em; border-bottom: 1px solid var(--line); }
