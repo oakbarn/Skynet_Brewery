@@ -6,7 +6,7 @@ These GitHub copies are the main copies (Rule 13.7). This repo is public: privat
 | Document | What it holds |
 |---|---|
 | [Skynet Rules](Skynet_Rules.md) | Every Skynet Rule. Read before building anything. |
-| [Panel Updates Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked until the Blichmann RipTide dialogs and Help are done (Rule 14.4). |
+| [Panel Updates Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Panel_Updates/Panel_Updates.md) | General Skynet Panel updates and ideas, parked and not built until OakBarn Brewery picks them (Rule 14.4). The only copy: the one that was here was merged into it on 2026-11-18. |
 | [Process Updates Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Process_Updates/Process_Updates.md) | Brew Day step, sample Process and Process command ideas, parked until the Skynet Process setup starts (Rule 14.5). |
 | [Dialog Model Learning: Tab Settings](Dialog_Model_Learning/Tab_Settings.md) | The Tab Settings dialog before and after its update to the Blichmann RipTide Dialog 1 model, the reason for each change, and room for OakBarn Brewery's corrections. |
 | [Importer Sandbox](https://github.com/oakbarn/Skynet_Private/blob/main/Sandbox/Importer/Importer_Notes.md) | Notes for the BruControl Importer version only, kept for the Big Merge (Rule 11.3). |
