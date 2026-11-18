@@ -3676,6 +3676,14 @@ Skynet picture, sound and Sample Schema. So the **Skynet Media Setup .exe and th
 and **Sample Schemas zip** stay on every Release for Mac, Linux, Raspberry Pi and by hand; the Media zip is still made new only when
 media changed (Rule 9.21). Both programs (the Importer is in the same Setup; nothing changes there). (Help 183, 184)
 
+9.23 **Only the newest two Releases stay on GitHub** (OakBarn Brewery, 2026-11-18: "we need to clean that every 25"; "Ok if it can
+do that only keep the last one and the new one"). After every merge, once the new Release is made and virus checked, the release
+workflow (.github/workflows/panel-version.yml, job keep-newest) deletes every older Panel version Release, so the Releases page has the
+new one and the one before it. Only published Releases count: a Release the Virus check hid as a Draft (Rule 9.11) is never counted
+or deleted, so the last good one always stays. The **tags stay**, so the Official Skynet check (Rule 9.14) still works for an older
+install; only the Release pages and their downloads go. The Skynet-Sounds Release (Rule 7.20) is never touched. The number kept is
+KEEP in that job. Both programs (the Importer is in the same Setup; nothing changes there). (Help 19)
+
 ## 10. Testing
 
 10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
@@ -5603,6 +5611,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-18: Added Rule 9.23 (OakBarn Brewery: "we need to clean that every 25"; "Ok if it can do that only keep the last one and the new one"): after every merge the release workflow deletes all but the newest two published Panel version Releases; tags, Drafts and the Skynet-Sounds Release stay. .github/workflows/panel-version.yml, Help 19 (and French). Both programs: same Setup, nothing else changes.
 - 2026-11-18: Added Rule 18.49 (OakBarn Brewery, PDF "Panel Update Final 3"): the Hose Bib's IP may be on any of its 8 spots (the wall side too) and its Graphic follows the joined pipe or hose; the Pump's Orientation shows Horizontal greyed out with Left / Right beside it (the Hose Bib's look); the Hose Bib gets the Pump's Overlay and an Outlet IP Fitting (MGH3/4 to start); new End Fitting family Garden Hose thread, FGH3/4 and MGH3/4. Then (OakBarn Brewery's pick, "B and Model is only left out"): the Hose Bib's Cover with Toggle (On/Off or Push Button), Database and .API (asked for from outside it is asked by hand, as by a Process line, Rule 5.15) and Inlet IP Fitting (information only); no Model. Rules 5.33, 18.45 and 18.48 marked. Help 115, 141, 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs and the End Fittings (lib/store.js uses the same iptype.js); BruControl has no fittings to import.
 - 2026-11-18: Rule 9.20 changed (OakBarn Brewery: "On a Full Install, add question about Back up if previous installtion installed and ask Abort and get Just Update or Install with Backup Yes or Install No Backup"): the Full Setup's warning page on an existing install has two round buttons, 1 Install with no backup (already picked: "I do not generally want a backup for a Full install") and 2 Install and back up my old folders first (the old move to Skynet_Backups); Get the Update Setup and Close and Do Not Install stay. install/windows/SkynetBrewer.nsi, Help 19 and 183 (and French), README, install/ReadMe.txt. Both programs: the Importer is in the same Setup; nothing else changes for it.
 
