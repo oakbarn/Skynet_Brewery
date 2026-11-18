@@ -38,6 +38,9 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
 - **The Blichmann order** (Skynet Rule 18.47): a dialog brought to the Model has its boxes in the same order as the
   Pump's: Label, Label Visible, Interface, Tab, **Layer Order** under the Tab, Name ... A box the Pump does not have goes where it
   fits best; everything above and below it keeps the Pump's order.
+- **Two Models now** (Skynet Rule 18.48): the Pump (Blichmann RipTide) dialog for a Device, and the **Hose Bib Widget** dialog for
+  a Widget (2. Tab and Layer Order, one Skynet picture with no Picture box, Orientation and Hose or Pipe laid out as on the Pump,
+  and its IP set by the hose or pipe joined to it, never picked in a box). Together they are the Model other dialogs are matched to.
 - **State, Name and Change Name** (Skynet Rule 18.45): **State** (on every On / Off Device, and a Manual Valve) is a slider that turns the
   item On or Off (a valve: Open or Closed) at once, the same as a click on it on its Tab; it is not a setting, so Save and Close
   do not change it. The **Name** is greyed out; the **Change Name** box below it starts with the Name now, and **✏ Change Name**

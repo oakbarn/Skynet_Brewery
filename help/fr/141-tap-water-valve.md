@@ -19,6 +19,10 @@ Vous pouvez aussi transformer n'importe quelle Manual Valve en robinet : ouvrez 
 L'eau arrive du mur (la plomberie de la maison), donc le robinet n'a **qu'un seul IP**, au bout de son propre petit Hose ou Pipe
 qui part du **filetage pour tuyau en bas du bec** (voir Taille plus bas). Tracez un flexible (ou un tuyau) de là jusqu'où va l'eau, comme votre HLT ou un refroidisseur.
 
+Comme pour une Pump, vous ne choisissez pas où va l'IP (Règle Skynet 18.48) : posez le bout d'un flexible ou d'un tuyau sur le Hose
+Bib ou près de lui, et son IP va au plus proche des 8 endroits du bord de sa boîte (jamais du côté du mur). Une fois un flexible ou
+un tuyau joint, l'IP ne bouge plus.
+
 - **Fermé** : rien ne sort ; tout flexible branché est bloqué.
 - **Ouvert** : c'est une **source d'eau du réseau**. Le débit sort par la sortie sans pompe, et le débit est **bleu eau du réseau**
   (Règle Skynet 5.21 : l'eau du réseau l'emporte sur toutes les autres Flow Colors).
@@ -44,17 +48,19 @@ bord de la boîte. Agrandi ou réduit, le Hose ou Pipe intérieur est redessiné
 
 Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le même ordre que celle de la Pump : le cadenas et
 **No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
-to Suggested Name apparaît dès que le Label change), **Layer Order**, **2. Name** avec la case **Change Name** et **✏ Change Name**,
-le Suggested Name, le **Graphic** (son image avec son Hose ou Pipe intérieur, tenue à jour), **Picture**, **Orientation** (Horizontal
-ou Vertical) avec **Left / Right**, **Hose or Pipe**, **IP**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne,
-et le Widget Type.
+to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
+Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
+**Orientation** avec **Left / Right**, **Hose or Pipe**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
+le Widget Type (Règle Skynet 18.48). Il n'y a pas de case Picture (un Hose Bib a une seule image Skynet) ni de case IP (le flexible
+ou le tuyau que vous joignez la fixe, voir plus haut).
 
 **Orientation** et **Left / Right** : Horizontal Right est l'image telle qu'elle est dessinée (le mur à droite), Horizontal Left
 est son miroir (le mur à gauche). Vertical la tourne pour un robinet sur un tuyau qui monte et descend : Vertical Left tourne la
 poignée vers la gauche (le mur au-dessus), Vertical Right vers la droite (le mur en dessous).
 
-**IP** est l'endroit de son seul IP : un des 8 endroits sur le bord de sa boîte (Bottom Middle, Bottom Left, Bottom Right, Left
-Middle, Right Middle, Top Left, Top Middle, Top Right). L'endroit est nommé tel que vous le voyez, quelles que soient l'Orientation
-et Left / Right, et les endroits du côté du mur ne sont pas proposés (l'eau de la maison arrive de là).
+Son seul IP est sur un des 8 endroits du bord de sa boîte (Bottom Middle, Bottom Left, Bottom Right, Left Middle, Right Middle,
+Top Left, Top Middle, Top Right), jamais du côté du mur (l'eau de la maison arrive de là). Le flexible ou le tuyau joint choisit
+l'endroit. Un endroit reste où vous le voyez quand vous changez l'Orientation ou Left / Right, donc le flexible ou le tuyau ne bouge
+pas ; seul un endroit qui finirait du côté du mur va au premier endroit hors du côté du mur.
 
 ![Hose Bib IP spots](help_pictures/Hose_Bib_IP_Spots.png)

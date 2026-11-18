@@ -38,6 +38,10 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
 - **L'ordre Blichmann** (Règle Skynet 18.47) : une fenêtre mise au Modèle a ses cases dans le même ordre que celle de la
   pompe : Label, Label Visible, Interface, Tab, **Layer Order** sous le Tab, Name ... Une case que la pompe n'a pas va là où elle
   convient le mieux ; tout ce qui est au-dessus et en dessous garde l'ordre de la pompe.
+- **Deux Modèles maintenant** (Règle Skynet 18.48) : la fenêtre de la pompe (Blichmann RipTide) pour un Device, et la fenêtre
+  **Hose Bib Widget** pour un Widget (2. Tab et Layer Order, une seule image Skynet sans case Picture, Orientation et Hose or Pipe
+  disposés comme sur la pompe, et son IP fixé par le flexible ou le tuyau qui y est joint, jamais choisi dans une case). Ensemble,
+  ils sont le Modèle auquel les autres fenêtres sont comparées.
 - **State, Name et Change Name** (Skynet Rule 18.45) : **State** (sur chaque Device On / Off, et une Manual Valve) est un curseur qui met
   l'élément On ou Off (une vanne : Open ou Closed) tout de suite, comme un clic sur lui dans son Tab ; ce n'est pas un réglage, donc
   Save et Close ne le changent pas. Le **Name** est grisé ; la case **Change Name** dessous commence avec le Name actuel, et **✏
