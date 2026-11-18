@@ -51,6 +51,11 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
   Suggested Name** pops up beside Label Visible and fills the Change Name box. The State slider, the Change Name box and its two
   buttons are for the mouse only: the Tab key and Enter pass them by. The Change Name box shows on every Device and Widget once it
   is saved; while you build a new one its Name simply follows the Suggested Name until you add it.
+- **Alarm Widgets** (Skynet Rule 18.50, the "Recheck dialogs" pass): the Basic Skynet Alarm, the User Alarm and the Pre-Hop Alarm
+  follow the Hose Bib's order: the lock and **Hidden Locked** in the title line (Visible is automatic: an Alarm shows while it is On),
+  **1. Label**, **Label Visible**, **2. Tab**, **Layer Order**, **3. Name** with Change Name, then the **Graphic** box, the **Alarm**
+  box and the **Alarm Chain**, X, Y, Width and Height on one line, and the **Widget Type** last. **Database and .API** is the ⬢ on the
+  Active overlay line, as on the Pump's Overlay. Nothing was taken away.
 
 ## A Device built into something
 

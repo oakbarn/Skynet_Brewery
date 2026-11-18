@@ -8221,11 +8221,29 @@ const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures'
 const ALM_PRIORITY_TIP = 'When two Alarms sound at once, the lower Priority plays first: all the 1s before the first 2, and 1 before 1.1 before 1.15 before 1.2. Up to two decimal places, so an Alarm can go in between others without renumbering. Empty = its Kind\'s number (Brew Flow 1, Hop 2, Pre-Hop 3, General 4, Sound only 5). Two with the same Priority play in the order they went On: the first one On is 1a, the next 1b, even when they go On in the same second. A Process: alm_Name.priority = 1.15';
 const ALM_STRING_TIP = 'The text the Alarm shows. Rich Text codes work in it. A Process: alm_Name.string = "Add the Flavor Hops"';
 const ALM_PLAYTIME_TIP = 'How many seconds the Alarm stays On; then it turns itself Off. A click turns it Off sooner. Empty or 0 = it stays On until it is tapped. A Process: alm_Name.playtime = 30';
+// The Alarm Widgets in the Hose Bib Model's order ("Recheck dialogs", OakBarn Brewery 2026-11-18, Rules 18.47, 18.50): the lock and
+// Hidden Locked in the title line (Visible is automatic); 1. Label; Label Visible; 2. Tab; Layer Order; 3. Name with Change Name; the
+// Graphic; its own boxes (Alarm, Alarm Chain); X, Y, Width and Height on one line; the Widget Type last. Database and .API ⬢ sit on the
+// Active overlay line, as on the Pump's Overlay. No field is taken away (Design Rule 1).
+const ALM_VIS_TIP = 'Visible is automatic: the Alarm shows while it is On and hides while it is Off (faint in Edit layout). A click on it turns it Off.';
 function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), pre = it.alarmClass === 'prehop', A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
-  return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
-    ['name', 'Name', 'text', null, false, 'b'],
+  const ovl = (list, kind = 'sel') => ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', kind, list, false, 'b', { dbPop: true }];
+  return [['locked', '', 'lock', null, false, 'b', { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, 'b', { inTitle: true, tip: ALM_VIS_TIP }],
+    ['label', '1. Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Label Visible', 'show', null, false, 'b'],
+    ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
+    ['name', '3. Name', 'text', null, false, 'b'],
     ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : pre ? 'A Pre-Hop Alarm: a text box on a Skynet watermark.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'} = On sounds it.`, 'infonote', 'alarm'],
+    ['_gb', 'Graphic', 'box'],
+    ...(pre ? [['_bg', 'Background: one of three Skynet watermarks. They are set and can\'t be changed; a Process picks one: .background = 1, 2 or 3.', 'note'],
+      ['foreColor', 'Fore color (the text; a Process: .fore)', 'color', null, false, 'b'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color', null, false, 'b'],
+      ['setGraphic', 'Set Graphic (Layer 2, on the watermark; a Process: .skynet_Layer_2)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ovl(almChoices(ALM_ACTIVE_RE))]
+      : basic ? [['_bg', 'Background: a Skynet bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+      ['bell', 'Bell (Basic, or Hop: a line drawing in the Back and Fore colors only)', 'sel', ALM_BELL_LIST, false, 'b'],
+      ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
+      ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ovl(almChoices(ALM_ACTIVE_RE))]
+      : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
+        ovl('overlays', 'gpick'), ['foreColor', 'Fore color (the text; a Process: .fore)', 'color'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color']]),
     ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
     ...(k === 'hop' ? [['timer', 'Sound by itself on this timer', 'elem', null, false, false, { tip: 'Empty: only from a Process.' }], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
     ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss)', 'text', null, false, false, { def: '00:10:00' }]] : []),
@@ -8234,19 +8252,8 @@ function alarmWidgetFields(it) {
     ...(basic ? [] : [['string', 'Text', 'text', null, false, 'b', { up: 4, tip: ALM_STRING_TIP }], ['playTime', 'Play Time', 'num', null, false, false, { tip: ALM_PLAYTIME_TIP }]]),
     ...EMAIL_FIELDS,
     ...ALARM_OUT_FIELDS,      // Alarm Digital Outputs (Rule 7.19)
-    ['_gb', 'Graphic', 'box'],
-    ...(pre ? [['_bg', 'Background: one of three Skynet watermarks. They are set and can\'t be changed; a Process picks one: .background = 1, 2 or 3.', 'note'],
-      ['foreColor', 'Fore color (the text; a Process: .fore)', 'color', null, false, 'b'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color', null, false, 'b'],
-      ['setGraphic', 'Set Graphic (Layer 2, on the watermark; a Process: .skynet_Layer_2)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE)]]
-      : basic ? [['_bg', 'Background: a Skynet bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
-      ['bell', 'Bell (Basic, or Hop: a line drawing in the Back and Fore colors only)', 'sel', ALM_BELL_LIST, false, 'b'],
-      ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
-      ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
-      : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
-        ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['foreColor', 'Fore color (the text; a Process: .fore)', 'color'], ['backColor', 'Back color (behind the text; a Process: .back)', 'color']]),
-    ...chainFields(it),
-    ['_pb', 'Properties', 'box'], ['_vis', 'Visible is automatic: the Alarm shows while it is On and hides while it is Off (faint in Edit layout). A click on it turns it Off.', 'note'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
-    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
+    ...chainFields(it), ['_end', '', 'boxend'],
+    ...wgtPlace(), wgtType(basic ? 'Basic Skynet Alarm' : pre ? 'Pre-Hop Alarm' : 'User Alarm', 'Which Alarm Widget it is. A Widget lives only in the app: it has no Interface or Port (Rule 1.2).')];
 }
 // The Alarm Chain (Rule 7.16, OakBarn Brewery 2026-11-09): one Alarm does the work of many stacked ones. Each step can change the
 // Fore color, Back color, Set Graphic (Layer 2), Active overlay (Layer 1), the sound and (a User Alarm) its picture. Every choice
@@ -11191,7 +11198,7 @@ async function editItem(kind, id) {
     if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
     if (it.type === 'chart') return chartWidgetFields();       // Graph Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
-    if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
+    if (it.type === 'alarm' && it.alarmClass) return alarmWidgetFields(it);      // Database and .API ⬢ on the Active overlay line (Rule 18.50)      // Alarm Widget Properties (Fritz, 2026-11-02)
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve.filter(x => x[0] !== 'imageOn' || it.imageOn) : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isVpDrill(it)) return vpPartFields(it, item);      // a Vessel Device's Heating Element or Probe: the same Properties as one of its own
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)

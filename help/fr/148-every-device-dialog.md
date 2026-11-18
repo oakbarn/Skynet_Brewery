@@ -53,6 +53,11 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
   et ses deux boutons sont pour la souris seulement : la touche Tab et Entrée les passent.
   La case Change Name s'affiche sur chaque Device et Widget une fois enregistré ; pendant que vous en construisez un nouveau, son Name
   suit simplement le Suggested Name jusqu'à ce que vous l'ajoutiez.
+- **Alarm Widgets** (Skynet Rule 18.50, la passe « Recheck dialogs ») : la Basic Skynet Alarm, la User Alarm et la Pre-Hop Alarm
+  suivent l'ordre du Hose Bib : le cadenas et **Hidden Locked** dans la ligne de titre (Visible est automatique : une Alarm s'affiche
+  quand elle est On), **1. Label**, **Label Visible**, **2. Tab**, **Layer Order**, **3. Name** avec Change Name, puis la case
+  **Graphic**, la case **Alarm** et l'**Alarm Chain**, X, Y, Width et Height sur une ligne, et le **Widget Type** en dernier.
+  **Database and .API** est le ⬢ sur la ligne Active overlay, comme sur l'Overlay de la pompe. Rien n'a été retiré.
 
 ## Un Device intégré à quelque chose {#a-device-built-into-something}
 
