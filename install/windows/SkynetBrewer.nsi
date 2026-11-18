@@ -9,8 +9,9 @@
 ; lib\freshstart.js, the same file every installer runs. With 3 or 4 you can still replace one of your folders.
 ; The Full Setup (Rule 9.20) has no choices (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 10): it is always a full
 ; install that OVERWRITES everything. When it finds a Skynet already installed it shows one warning page, with a link to the Update
-; Setup (opens it and closes this one) and Close and Do Not Install. Before it overwrites, your old folders are moved, never
-; deleted, to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>.
+; Setup (opens it and closes this one), Close and Do Not Install, and two ways to install (OakBarn Brewery, 2026-11-18): 1 Install
+; with no backup (the default: old folders deleted for good) or 2 Install and back up my old folders first (moved, never deleted,
+; to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>).
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config and processes samples are in its defaults\ folder; the pictures, sounds and Sample Schemas added since the last Update Setup are in it too, Rule 9.22)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -164,6 +165,9 @@ Var OpenImporter
 Var StopScript
 !ifdef MEDIA_SRC
   Var FullBackup
+  Var RadioBackup
+  Var RadioNoBackup
+  Var FullNoBackup
 !endif
 
 ; ---------------------------------------------------------------- Node.js
@@ -334,10 +338,13 @@ FunctionEnd
 !ifdef MEDIA_SRC
 ; The Full Setup's one warning (OakBarn Brewery, 2026-11-17: "If the Install can see a previous install the one warning is allowed
 ; that explains this is the Full install and will OVERWRITE everything. If Only an Update, get that Update. and then a link to the
-; Update and clicking it closes the install. also a Close and Do Not install Option that closes the installer."). No choices:
-; Install always overwrites ($Choice fresh, the same lib\freshstart.js as Start Fresh), after the old folders are moved to backups.
+; Update and clicking it closes the install. also a Close and Do Not install Option that closes the installer."; 2026-11-18: "Install
+; with Backup Yes or Install No Backup"). The only choice is backup or no backup:
+; Install always overwrites ($Choice fresh, the same lib\freshstart.js as Start Fresh). Choice 1 (no backup, the default: "I do not
+; generally want a backup for a Full install") deletes the old folders for good; choice 2 first moves them to Skynet_Backups.
 Function FullFoundPage
   StrCpy $Choice "keep"
+  StrCpy $FullNoBackup 1
   ${IfNot} ${FileExists} "$INSTDIR\server.js"
     Abort   ; a new install: no warning
   ${EndIf}
@@ -348,18 +355,29 @@ Function FullFoundPage
   ${If} $0 == error
     Abort
   ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 58u "Found in $INSTDIR.$\r$\n$\r$\nThis is the Full install and it will OVERWRITE everything: every Schema, setting, user and password, Process, the brew log, every picture and sound, and the Import folder ($BrewDir\Import). You make the admin account again.$\r$\n$\r$\nYour old folders are first moved to $BrewDir\Skynet_Backups, so nothing is lost by mistake."
+  ${NSD_CreateLabel} 0 0 100% 34u "Found in $INSTDIR.$\r$\nThis is the Full install and it will OVERWRITE everything: every Schema, setting, user and password, Process, the brew log, every picture and sound, and the Import folder ($BrewDir\Import). You make the admin account again."
   Pop $0
-  ${NSD_CreateLabel} 0 62u 100% 10u "Only want an update? Get the Update Setup instead (it keeps everything):"
+
+  ; Back up or not (OakBarn Brewery, 2026-11-18: "Install with Backup Yes or Install No Backup"; "I do not generally want a backup
+  ; for a Full install"). No backup is already picked.
+  ${NSD_CreateRadioButton} 0 36u 100% 10u "&1. Install with no backup"
+  Pop $RadioNoBackup
+  ${NSD_CreateLabel} 12u 46u 96% 10u "Your old folders are deleted for good. They cannot be brought back."
   Pop $0
-  ${NSD_CreateLink} 0 74u 100% 10u "Get the Update Setup (closes this one)"
+  ${NSD_CreateRadioButton} 0 58u 100% 10u "&2. Install and back up my old folders first"
+  Pop $RadioBackup
+  ${NSD_CreateLabel} 12u 68u 96% 17u "Your old folders are moved to $BrewDir\Skynet_Backups\Before_Full_Setup_<date> first, so nothing is lost by mistake."
+  Pop $0
+  ${NSD_Check} $RadioNoBackup
+
+  ${NSD_CreateLabel} 0 88u 100% 10u "Only want an update? Get the Update Setup instead (it keeps everything):"
+  Pop $0
+  ${NSD_CreateLink} 0 98u 100% 10u "Get the Update Setup (closes this one)"
   Pop $0
   ${NSD_OnClick} $0 FullGetUpdate
-  ${NSD_CreateButton} 0 92u 50% 14u "Close and Do Not Install"
+  ${NSD_CreateButton} 0 112u 50% 14u "Close and Do Not Install"
   Pop $0
   ${NSD_OnClick} $0 FullCloseNow
-  ${NSD_CreateLabel} 0 112u 100% 20u "Install: OVERWRITE everything with this Full install."
-  Pop $0
   nsDialogs::Show
 FunctionEnd
 
@@ -376,6 +394,11 @@ FunctionEnd
 
 Function FullFoundLeave
   StrCpy $Choice "fresh"
+  StrCpy $FullNoBackup 0
+  ${NSD_GetState} $RadioNoBackup $0
+  ${If} $0 == ${BST_CHECKED}
+    StrCpy $FullNoBackup 1
+  ${EndIf}
 FunctionEnd
 
 ; Moves (never deletes) your old folders to <Brewing folder>\Skynet_Backups\Before_Full_Setup_<date>, so the overwrite loses nothing
@@ -502,7 +525,11 @@ Section "Skynet Brew Panel" SecMain
     ${OrIf} $Choice == "modified"
       StrCpy $Fresh 1   ; lib\freshstart.js runs once the new program files are in (below)
 !ifdef MEDIA_SRC
-      Call FullBackupOld   ; the Full Setup: old folders moved to Skynet_Backups first
+      ${If} $FullNoBackup == 1
+        DetailPrint "Install with no backup: your old folders are deleted for good."
+      ${Else}
+        Call FullBackupOld   ; the Full Setup: old folders moved to Skynet_Backups first (choice 2)
+      ${EndIf}
 !endif
     ${ElseIf} $Choice == "users"
       Call ResetUsers
