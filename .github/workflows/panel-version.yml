@@ -348,3 +348,35 @@ jobs:
           notes=$(gh release view "$VERSION" --json body --jq .body)
           printf '**VirusTotal** (%s UTC):\n%s\n%s\n' "$(date -u '+%Y-%m-%d %H:%M')" "$LINES" "$notes" > vt_notes.md
           gh release edit "$VERSION" --notes-file vt_notes.md
+
+  # ---- Keep only the newest Releases (Rule 9.23; OakBarn Brewery, 2026-11-18: "we need to clean that every 25";
+  # "Ok if it can do that only keep the last one and the new one"). ----
+  # After the new Release is made and checked, every older Panel version Release is deleted, so the Releases page shows
+  # only the new one and the one before it. KEEP below is that number; change it to keep more.
+  # Only published Releases count: a Release the Virus check turned into a Draft is never counted and never deleted here,
+  # so the last good one always stays. Only tags that start with "PR<number>_" or "Skynet-v." are touched (the Releases this
+  # workflow makes); the Skynet-Sounds Release (Rule 7.20) and any other Release are never touched.
+  # The tags stay: only the Release pages and their downloads go. The panel's Official Skynet check (Rule 9.14) reads
+  # skynet_files.json by tag, so an older install still checks out after its Release page is gone.
+  keep-newest:
+    needs: [stamp, virus-check, virustotal]
+    if: always() && needs.stamp.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      KEEP: 2
+    steps:
+      - name: Delete the older Releases
+        run: |
+          set -euo pipefail
+          R="repos/$GITHUB_REPOSITORY/releases"
+          gh api "$R?per_page=100" --paginate \
+            --jq '.[] | select(.draft | not) | select(.tag_name | test("^(PR[0-9]+_|Skynet-v\\.)")) | "\(.created_at) \(.id) \(.tag_name)"' \
+            | sort -r > all.txt
+          echo "$(wc -l < all.txt) Panel version Releases; keeping the newest $KEEP:"
+          head -n "$KEEP" all.txt | awk '{print "  keep " $3}'
+          tail -n +"$((KEEP+1))" all.txt | while read -r when id tag; do
+            gh api -X DELETE "$R/$id" && echo "  deleted $tag"
+          done

@@ -13,7 +13,7 @@ Le Skynet Brew Panel tourne sous **Windows, Mac, Linux ou sur un Raspberry Pi**.
 
 Chaque méthode a besoin de **Node.js** (gratuit, sur <https://nodejs.org>). Les programmes d'installation l'installent pour vous, ou vous disent comment faire. Sous Windows, `Skynet_Brewer.bat` et `Skynet_First_Install.bat` l'installent aussi tout seuls quand il manque.
 
-**Où le trouver :** <https://github.com/oakbarn/skynet_brewery/releases/latest> a toujours la version la plus récente. Descendez jusqu'à **Assets** et cliquez sur un fichier pour le télécharger. Aucun compte GitHub n'est nécessaire. Les versions plus anciennes sont plus bas dans la liste [Releases](https://github.com/oakbarn/skynet_brewery/releases).
+**Où le trouver :** <https://github.com/oakbarn/skynet_brewery/releases/latest> a toujours la version la plus récente. Descendez jusqu'à **Assets** et cliquez sur un fichier pour le télécharger. Aucun compte GitHub n'est nécessaire. La liste [Releases](https://github.com/oakbarn/skynet_brewery/releases) ne garde que la version la plus récente et celle d'avant.
 
 Chaque version sur cette page est une **mise à jour officielle de Skynet** : une fois installée, Skynet vérifie à chaque démarrage que ses fichiers du programme sont toujours ceux qu'OakBarn Brewery a envoyés, et affiche **✓ Official** sur la Menu Bar. Voir [Mises à jour officielles de Skynet](191-official-skynet-updates).
 
