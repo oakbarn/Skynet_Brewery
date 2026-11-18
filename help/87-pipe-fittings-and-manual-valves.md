@@ -37,7 +37,7 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
   dialog (see the Tap Water Valve page).
 - Its Properties, from the top:
   - **State**: Open or Closed now, with a slider. Slide it to open or close the valve at once, the same as a click on it on its Tab
-    (with .confirmation on it asks you to do it by hand and press Done first). It is not a setting: 💾 Save and ✖ Cancel do not
+    (with .confirmation on it asks you to do it by hand and press Done first). It is not a setting: 💾 Save and Close do not
     change it. Only the mouse reaches it, not the Tab key or Enter.
   - **1. Label** (used in the "by hand" message) and **Label Visible**. Once the Label is changed, **🏷 Update to Suggested Name**
     pops up beside Label Visible: it puts the Suggested Name made from the new Label in the Change Name box.

@@ -4,11 +4,11 @@ Every Device's Properties work the same way as the Pump's (Skynet Rule 18.31). O
 
 ## From the top
 
-1. The title, with the 🔓 lock, **Visible** and **Hidden Locked** beside it. 🗑 Delete, ✖ Cancel and 💾 Save are at the top, frozen: they stay put while the rest scrolls (there is no row of buttons at the bottom).
+1. The title, with the 🔓 lock, **Visible** and **Hidden Locked** beside it. The buttons are together in the upper right corner, frozen, always in the same order: **🗑 Delete · 💾 Save · Close · ✕** (Skynet Rule 2.54). They stay put while the rest scrolls (there is no row of buttons at the bottom).
 2. **1. Label**: the ⬆ opens a bigger box to type in, the ⬢ sets its font, size and colors. **Label Visible** shows or hides it on the Tab.
 3. **2. Interface** with its **Port** (or **Probe #**) on the same line. They are greyed out: they are the wiring, set when the Device
    was added. Where the Device has them, the ⬢ holds **Invert** and **One-shot**.
-4. **3. Tab** and **4. Name**, with the Suggested Name under it.
+4. **3. Tab**, **Layer Order** under it, and **4. Name**, with the Suggested Name under it.
 5. A Device with pictures: the **Graphic**, its **Path**, and the **Overlay** with **Toggle** (outputs) and **Database and .API ⬢**
    on the same line. A Device with no pictures has **Database and .API ⬢** on a line of its own.
 6. Its own settings: only what that kind of Device needs (a PID's Input, Setpoint, Kp ...; a sensor's Signal and Units ...).
@@ -20,18 +20,26 @@ Rest the mouse on any field name to see what it is for (Help 147).
 
 Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide Pump dialog (Skynet Rule 18.44):
 
-- **The buttons are frozen at the top.** The title and its buttons stay where they are while you scroll, so you never have to
-  scroll to the bottom to Save. There is no second row of buttons at the bottom.
+- **The buttons are frozen at the top, in the upper right corner, always in the same order** (Skynet Rule 2.54):
+  **Delete · Save · Undo · Close · ✕**. A dialog leaves out a button it does not have (a Properties box has no Undo, a pop-up says
+  **Keep** in place of Save, an Add box says **➕ Add Device**); the others keep their order, so each button is always in the same
+  place. **Close** (it was Cancel) and the boxed **✕** close without saving, and ask first when you changed something. The title and
+  its buttons stay where they are while you scroll, so you never have to scroll to the bottom to Save. There is no second row of
+  buttons at the bottom.
 - **⛔ = can not be changed here.** A greyed out box shows the red Do Not Enter sign at its right end while the mouse is on the box
   or its name (Skynet Rule 18.45: the dialog stays clean). The box shows what it is, but you can not type in it or pick from it here
-  (for example the Interface and Port once a Device is added, or the Device Type).
+  (for example the Interface and Port once a Device is added, or the Device Type). A greyed out box has **no Hover Help**: the ⛔
+  is all it shows (Skynet Rule 18.46).
   ![A greyed out box with the Do Not Enter sign](help_pictures/Greyed_Do_Not_Enter.png)
-- **Every ⬢ and ⬆ pop-up** has its title, ✖ Cancel and 💾 **Keep** frozen at the top. Keep puts what you set back into the dialog;
+- **Every ⬢ and ⬆ pop-up** has its title and **🗑 Delete · 💾 Keep · Close · ✕** frozen at the top. Keep puts what you set back into the dialog;
   the dialog's own 💾 Save saves it.
 - **Short names.** A field shows a short name; what it is for is in its Hover Help (rest the mouse on the name).
 - **X, Y, Width and Height** sit on one line.
+- **The Blichmann order** (Skynet Rule 18.47): a dialog brought to the Model has its boxes in the same order as the
+  Pump's: Label, Label Visible, Interface, Tab, **Layer Order** under the Tab, Name ... A box the Pump does not have goes where it
+  fits best; everything above and below it keeps the Pump's order.
 - **State, Name and Change Name** (Skynet Rule 18.45): **State** (on every On / Off Device, and a Manual Valve) is a slider that turns the
-  item On or Off (a valve: Open or Closed) at once, the same as a click on it on its Tab; it is not a setting, so Save and Cancel
+  item On or Off (a valve: Open or Closed) at once, the same as a click on it on its Tab; it is not a setting, so Save and Close
   do not change it. The **Name** is greyed out; the **Change Name** box below it starts with the Name now, and **✏ Change Name**
   puts what is typed there in the Name (kept with 💾 Save; every Process follows it). Once the Label is changed, **🏷 Update to
   Suggested Name** pops up beside Label Visible and fills the Change Name box. The State slider, the Change Name box and its two

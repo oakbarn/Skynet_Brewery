@@ -27,7 +27,7 @@ assert.match(css, /#menuPane :is\(input, select, textarea\):disabled/, 'and on t
 assert.ok(css.includes("fill='%23d62828'"), 'a red sign');
 assert.ok(!app.includes("title: 'Not editable'") && !app.includes("title: 'Read only'"), 'no "Read only" hover read');
 assert.ok(!app.includes("i.title = 'Set when it was added: the board and pin it is wired to'"), 'no "Set when it was added" hover read');
-assert.ok(app.includes("const SET_WIRE_TIP = 'The Interface and Port combination is saved"), 'OakBarn Brewery\'s own Hover Help on the greyed Interface stays (Rule 18.40)');
+assert.ok(!app.includes('SET_WIRE_TIP'), 'the Rule 18.40 greyed Interface line is gone (Rule 18.46)');
 // short names, X Y Width Height on one line (cleanFields, so every dialog)
 const cf = app.slice(app.indexOf('function cleanFields('), app.indexOf('function bindForm('));
 assert.match(cf, /\[\^\(\)\]\{14,\}/, 'a ( ) explanation of 14 letters or more goes into the Hover Help');
@@ -52,3 +52,39 @@ const fr = JSON.parse(fs.readFileSync(new URL('../public/hoverhelp-fr.json', imp
 assert.ok(fr['The color of all its text.'], 'and in French');
 assert.ok(fs.existsSync(new URL('../media/help_pictures/Greyed_Do_Not_Enter.png', import.meta.url)), 'the ⛔ picture in Help 148');
 console.log('dialog hover help tests passed');
+
+// Dialog Sandbox cleanup (OakBarn Brewery, 2026-11-18)
+// 1. Rule 2.54 on every dialog: Delete · Save · Close · ✕ together at the right of the frozen top; Cancel is called Close
+const html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+const dlg = html.slice(html.indexOf('<dialog id="dlg">'), html.indexOf('</dialog>', html.indexOf('<dialog id="dlg">')));
+const grp = dlg.slice(dlg.indexOf('dlgBtnGroup'), dlg.indexOf('</span>', dlg.indexOf('dlgBtnGroup')));
+const order = ['dlgDelete', 'value="ok"', 'dlgClose', 'dlgX'].map(k => grp.indexOf(k));
+assert.ok(order.every((v, i) => v > 0 && (i === 0 || v > order[i - 1])), 'Properties: Delete · Save · Close · ✕ in that order');
+assert.ok(!/>Cancel</.test(dlg), 'no Cancel on the Properties box');
+assert.match(app, /cancels = \$\$\('#dlg \.dlgClose'\)/, 'the Add box renames Close only, never the ✕');
+assert.ok(!app.includes("b.textContent = '✖ Cancel'"), 'the Add box says Close');
+const ob = app.slice(app.indexOf('function orderDialogButtons('), app.indexOf('const showModalPlain'));
+assert.match(ob, /\[del, save, undo, close\]\.filter\(Boolean\), x\)/, 'every other dialog: Delete · Save · Undo · Close · ✕');
+assert.match(ob, /close\.textContent = 'Close'/);
+assert.match(ob, /class: 'frozenHead'/, 'buttons only at the bottom go up into a frozen top row');
+assert.match(app, /try \{ orderDialogButtons\(this\); \}/, 'run on every dialog when it opens');
+assert.match(css, /\.dlgBtnGroup \{ display: inline-flex;/);
+const { isCancelButton } = await import('../public/labelguard.js');
+assert.ok(isCancelButton({ dataset: {}, textContent: 'Close' }) && isCancelButton({ dataset: {}, textContent: '✕', classList: { contains: c => c === 'boxX' } }), 'Close and ✕ let the user out (Rule 18.28)');
+// 2 + 3. Rule 18.46: a greyed box shows only the ⛔, no Hover Help and no "how to unlock" text
+const hh = await import('../public/hoverhelp.js');
+const box = (disabled, extra = {}) => ({ matches: q => q === hh.GREY_FIELD || (q === ':disabled' && disabled), closest: () => null, dataset: {}, ...extra });
+const nameOf = b => ({ nextElementSibling: b, matches: q => /label/.test(q), classList: { contains: () => false } });
+assert.ok(hh.greyedName(nameOf(box(true))), 'the name of a greyed box: no balloon');
+assert.ok(!hh.greyedName(nameOf(box(false))), 'the name of an open box keeps its balloon');
+assert.ok(!hh.greyedName(nameOf(box(true, { closest: () => ({}) }))), 'a form shown to look at only keeps its Hover Help');
+assert.ok(!hh.greyedName(nameOf(box(true, { dataset: { greyHelp: '1' } }))), 'a box named as a text dialog keeps its text');
+for (const t of ['Autosize to pipe is on: switch it off', 'Pick what it turns on with first', 'CONFIRMED_WIRE_TIP', "out[0].title = x.grey"]) assert.ok(!app.includes(t), 'gone: ' + t);
+assert.match(app, /if \(ev\.target === out\[0\] && !greyedName\(out\[0\]\)\)/, 'no tap pop-up on a greyed name either');
+// 4. Rule 18.47: Layer Order under the Tab on a dialog in the Blichmann numbered order
+const wl = app.slice(app.indexOf('function withLayer('), app.indexOf('function fieldsFor('));
+assert.match(wl, /\/\^\\d\+\\\. Tab\$\//, 'a numbered Tab (2. Tab, 3. Tab)');
+assert.match(rules, /^18\.46 \*\*A greyed out box shows only the ⛔, and only on hover\*\*/m);
+assert.match(rules, /^18\.47 \*\*A dialog brought to the Blichmann Model keeps the Model's layout and order\*\*/m);
+assert.match(help, /Delete · Save · Undo · Close · ✕/);
+console.log('dialog sandbox cleanup tests passed');

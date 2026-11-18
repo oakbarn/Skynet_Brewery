@@ -32,15 +32,15 @@ L'idée : ce que vous réglez le plus est dans la fenêtre elle-même. Tout le r
 | **⬢** hexagone rouge | Ouvre une **fenêtre Properties** avec plus de réglages pour ce champ |
 | **⬆** flèche rouge vers le haut | Ouvre une **fenêtre String** : une case plus grande pour taper le texte (les codes Rich Text comme `\b` marchent) |
 
-Chaque fenêtre a **✖ Cancel** et **💾 Save** en haut et en bas. Save dans une petite fenêtre met les changements dans la fenêtre principale ;
-rien n'est vraiment enregistré tant que vous n'appuyez pas sur **💾 Save** dans la fenêtre principale. Cancel avec des changements faits demande d'abord.
+Chaque petite fenêtre a **💾 Keep**, **Close** et **✕** figés en haut (Rule 2.54). Keep dans une petite fenêtre met les changements dans la fenêtre principale ;
+rien n'est vraiment enregistré tant que vous n'appuyez pas sur **💾 Save** dans la fenêtre principale. Close avec des changements faits demande d'abord.
 
 ## Du haut vers le bas {#from-the-top}
 
 Seuls ceux-ci appartiennent à une pompe (un dessin de pompe Skynet ou votre propre pompe User) :
 
 1. Le titre est la pompe, par exemple **Blichmann Riptide**, avec le **cadenas 🔓** (verrouille sa place : pas de glisser ni de redimensionnement),
-   **Visible** et **Hidden Locked** à côté. Puis **Delete**, **Cancel** et **Save**. Le titre et ces boutons (pas de ☰ pendant que vous construisez, Rule 2.52) restent
+   **Visible** et **Hidden Locked** à côté. Puis **Delete · Save · Close · ✕** dans le coin en haut à droite (Rule 2.54). Le titre et ces boutons (pas de ☰ pendant que vous construisez, Rule 2.52) restent
    en haut pendant que le reste de la fenêtre défile, donc les boutons sont toujours visibles (il n'y a pas de seconde ligne en bas).
 2. **1. Label ⬆ ⬢** : ce qui s'affiche sur le Tab (voir **Le Label** plus bas). Le ⬆ ouvre une fenêtre de texte de Label à 2 lignes ; le ⬢ ouvre
    la fenêtre **Label Attributes** : Label, Visible, Font Size, Font, Bold, Fore Color, Back Color et Alignment. Font Size, Font,

@@ -34,15 +34,15 @@ The idea: the things you set most are on the dialog itself. Everything else is o
 | **⬢** red hexagon | Pops up a **Properties dialog** with more settings for that field |
 | **⬆** red up arrow | Pops up a **String dialog**: a bigger box to type the text in (Rich Text codes like `\b` work) |
 
-Every pop-up has **✖ Cancel** and **💾 Save** at the top and the bottom. Save in a pop-up puts the changes into the dialog;
-nothing is really saved until you press **💾 Save** on the dialog. Cancel with changes made asks first.
+Every pop-up has **💾 Keep**, **Close** and **✕** frozen at the top (Rule 2.54). Keep in a pop-up puts the changes into the dialog;
+nothing is really saved until you press **💾 Save** on the dialog. Close with changes made asks first.
 
 ## From the top
 
 Only these belong to a Pump (a Skynet pump drawing or your own User pump):
 
 1. The title is the pump, for example **Blichmann Riptide**, with the **🔓 lock** (locks its place: no drag or resize),
-   **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**. The title and these buttons (no ☰ while you build, Rule 2.52) stay
+   **Visible** and **Hidden Locked** beside it. Then **Delete · Save · Close · ✕** in the upper right corner (Rule 2.54). The title and these buttons (no ☰ while you build, Rule 2.52) stay
    at the top while the rest of the box scrolls, so the buttons are always in view (there is no second row at the bottom).
 2. **1. Label ⬆ ⬢**: what shows on the Tab (see **The Label** below). The ⬆ opens a 2 Line Label Text Dialog; the ⬢ opens
    the **Label Attributes** Dialog: Label, Visible, Font Size, Font, Bold, Fore Color, Back Color and Alignment. Font Size, Font,

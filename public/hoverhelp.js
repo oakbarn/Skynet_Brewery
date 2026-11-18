@@ -80,6 +80,22 @@ export function placeBubble(r, box, view) {
 export const FIELD = 'select, option, optgroup, datalist, textarea, input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset])';
 export const helpTarget = t => t?.closest?.(FIELD) ? null : t?.closest?.('[data-help], .tipLbl, dialog [title], [data-hover-titles] [title]') || null;      // the BruControl Import's pages: data-hover-titles on its body
 
+// A greyed out box shows only the ⛔, and only while the mouse is on it or its name: no Hover Help on its name and no hover text on
+// the box (OakBarn Brewery, 2026-11-18: "Only when a User Hovers. The do not enter icon on hover of any Greyed out field. Rule. With
+// text dialog if requested but only when I say make it a Dialog"; "If they are locked, yes"; Rule 18.46). The same boxes that get
+// the ⛔ (style.css): a box that can not be changed, not a tick box, switch or slider, and not a form shown only to look at (a locked
+// fieldset, which has no ⛔ either). A box OakBarn Brewery names as a text dialog gets data-grey-help (none yet).
+export const GREY_FIELD = 'input:not([type=checkbox], [type=radio], [type=hidden], [type=color], [type=range]), select, textarea';
+export const isGreyBox = el => !!el?.matches?.(GREY_FIELD) && el.matches(':disabled') && !el.closest('fieldset:disabled') && !el.dataset?.greyHelp;
+// the box a name belongs to: the box right after it, or the first box in the group right after it (as the ⛔ rule in style.css)
+export function boxOfName(el) {
+  const next = el?.nextElementSibling;
+  if (!next) return null;
+  if (next.matches?.(GREY_FIELD)) return next;
+  return /^(DIV|SPAN)$/.test(next.tagName) && !el.classList?.contains('pairLbl') ? next.querySelector?.(GREY_FIELD) || null : null;
+}
+export const greyedName = el => !!el && (el.matches?.('label, .tipLbl, .pairLbl') ?? false) && isGreyBox(boxOfName(el));
+
 // a balloon's words as page parts: ⟦ ⟧ marks a part in red (the Label part of a Suggested Name, OakBarn Brewery, 2026-11-09), and the
 // ⬢ and ⬆ show red, as the buttons do
 export function helpNodes(text, doc = globalThis.document) {
@@ -272,9 +288,13 @@ function start(doc = globalThis.document) {
   };
   doc.addEventListener('pointerover', ev => {
     if (ev.pointerType && ev.pointerType !== 'mouse') return;       // a finger gets the tap pop-up (Rule 18.16), not a hover
+    // a greyed out box keeps its hover text put away (Rule 18.46); it comes back if the box can be changed again
+    const box = ev.target?.closest?.(GREY_FIELD);
+    if (box && isGreyBox(box) && box.hasAttribute('title')) { box.dataset.greyTitle = box.getAttribute('title'); box.removeAttribute('title'); }
+    else if (box && !box.matches(':disabled') && box.dataset.greyTitle !== undefined) { box.setAttribute('title', box.dataset.greyTitle); delete box.dataset.greyTitle; }
     frenchTitle(ev.target?.closest?.('[title]'));
     if (on && tip.contains(ev.target)) { clearTimeout(later); return; }      // into the balloon, to click a hot spot
-    const el = helpTarget(ev.target);
+    const hit = helpTarget(ev.target), el = greyedName(hit) ? null : hit;      // the name of a greyed box: only its ⛔ (Rule 18.46)
     if (el === on) { clearTimeout(later); return; }
     if (!el && on && reachable()) return;      // on the way to the balloon (hot spots or a scroll bar): it waits a moment (below)
     hide();

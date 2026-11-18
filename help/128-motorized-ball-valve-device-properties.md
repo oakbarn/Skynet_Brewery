@@ -4,7 +4,7 @@ Adding a **Motorized Ball Valve** works the same way as adding a Pump (see [Pump
 with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
 
 Every dialog here follows the Blichmann Model, the same as the Pump: the title and buttons stay at the top while the rest
-scrolls, there is no row of buttons at the bottom, and every ⬢ or ⬆ pop-up has **✖ Cancel** and **💾 Keep** at its top. (Skynet Rule 18.41)
+scrolls, there is no row of buttons at the bottom, and every ⬢ or ⬆ pop-up has **💾 Keep**, **Close** and **✕** at its top (Rule 2.54). (Skynet Rule 18.41)
 
 ## Adding a Motorized Ball Valve
 
@@ -71,7 +71,7 @@ Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Skynet Rule 18.42)
 ## Properties, from the top
 
 1. The title is the valve (**Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve**), with the **🔓 lock**,
-   **Visible** and **Hidden Locked** beside it, all on one line. Then **Delete**, **Cancel** and **Save**, which stay at the top.
+   **Visible** and **Hidden Locked** beside it, all on one line. Then **Delete · Save · Close · ✕**, which stay in the upper right corner (Rule 2.54).
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
 3. **2. Interface** and **Available Ports**, greyed out (the board and pin it is wired to).
 4. **3. Tab**, **Layer Order** and **4. Name** (the Suggested Name; you may type your own).

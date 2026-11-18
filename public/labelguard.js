@@ -19,7 +19,8 @@ const isLabelField = t => t?.dataset?.k === 'label' && !!t.closest?.('dialog[ope
 // Hose that had no label but the Delete button warned it needed one. Have Delete Delete without those types of issues"); its own
 // "are you sure" still comes up
 export const isDeleteButton = b => !!b && (b.dataset?.close === 'delete' || b.value === 'delete' || /^[^\p{L}\p{N}]*delete\b/iu.test(String(b.textContent ?? '').trim()));
-export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || /^[^\p{L}\p{N}]*cancel$/iu.test(String(b.textContent ?? '').trim()));
+// Cancel is called Close on every dialog now, with a boxed ✕ beside it (Rule 2.54, OakBarn Brewery 2026-11-18): all three let the user out
+export const isCancelButton = b => !!b && (b.dataset?.close === 'cancel' || b.value === 'cancel' || b.classList?.contains?.('boxX') || /^[^\p{L}\p{N}]*(cancel|close)$/iu.test(String(b.textContent ?? '').trim()));
 
 // Save, ➕ Add Device, ➕ Add Widget ...: the button that keeps what is in the dialog
 export const isSaveButton = b => !!b && (b.value === 'ok' || b.dataset?.close === 'ok' || /^[^\p{L}\p{N}]*(save|add)\b/iu.test(String(b.textContent ?? '').trim()));
