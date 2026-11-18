@@ -57,6 +57,8 @@ Quand **⚠ Changed** s'affiche, un **Admin** peut cliquer sur **🛠 Repair** d
 
 Pas d'internet ? Relancez le Setup (ou l'installateur) de la même version. Il remet aussi chaque fichier du programme.
 
+**Les anciens fichiers du programme que Skynet n'utilise plus** (laissés par un ancien Setup) sont déplacés d'eux-mêmes dans `backups/retired_files_<date>`, à chaque vérification. Ils ne sont pas comptés comme Added (ajoutés). Skynet le fait en arrière-plan, sans rien demander à l'utilisateur.
+
 ## Pourquoi un fichier peut apparaître comme Changed {#why-a-file-might-show-as-changed}
 
 - Quelqu'un a ouvert un fichier du programme dans un éditeur et l'a enregistré.

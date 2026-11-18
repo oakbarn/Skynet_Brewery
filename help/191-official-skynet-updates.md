@@ -57,6 +57,8 @@ When **⚠ Changed** shows, an **Admin** can click **🛠 Repair** in **☰ Menu
 
 No internet? Run the Setup (or the installer) of the same version again. It puts back every program file too.
 
+**Old program files Skynet no longer uses** (left by an older Setup) are moved to `backups/retired_files_<date>` by themselves, on every check. They are not counted as Added. Skynet does this in the Background and needs no user input.
+
 ## Why a file might show as Changed
 
 - Someone opened a program file in an editor and saved it.

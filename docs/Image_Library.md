@@ -324,7 +324,7 @@ Pictures on the Help pages and in Hover Help, in [media/help_pictures](../media/
 
 ## Removed for copyright (2026-11-17)
 
-Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"). Their Skynet Picture numbers are kept, marked retired (Rule 7.22). Copies are kept privately in the project folder (`private/Removed_Copyright_Images_2026-11-17/`), not on GitHub. **They are still in the repo's Git history** until OakBarn Brewery decides whether to rewrite it.
+Taken out of the public repo (OakBarn Brewery, 2026-11-17: "Every thing with a possible copywrite violation needs to be listed and changed to a Non copywrite version"). Their Skynet Picture numbers are kept, marked retired (Rule 7.22). Copies are kept privately in the project folder (`private/Removed_Copyright_Images_2026-11-17/`), not on GitHub. **They are also gone from the repo's Git history:** on 2026-11-18 (OakBarn Brewery: "ALL, and I mean any and All Copywrite material remove") every branch and tag was rewritten without them, and the 375 Releases made before the cleanup (whose downloads carried them) were deleted. The first clean Release is PR478_Skynet-v.20261118_01_24. Anyone with an older copy of the code should download it again.
 
 | File | Was in | Why, and what replaces it |
 |---|---|---|
