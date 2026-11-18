@@ -3085,6 +3085,11 @@ Alarm Widget a Template", Help 107):
   **Layer 4 Back** (colored by **.back**), **Layer 3 Fore** (the bell, colored by **.fore**; never the text), **Layer 2 Set
   Graphic** (a short list of Skynet pictures, **None first**; a new one starts at **None**, OakBarn Brewery 2026-11-14), **Layer 1 Active overlay** (on top while **.active** is true,
   None first). Back and Fore use the standard color list. Standard Label attributes and the standard Alarm attributes.
+  **Bell** (OakBarn Brewery, 2026-11-17: "rename a Alarm Hop because we will use different fore and back for Flavor and Aroma
+  Hops"): **Basic** (Alarm_Basic*.svg, with its black lines; empty = Basic) or **Hop** (Alarm_Hop*.svg: an original line
+  drawing, bell and sound waves in the Fore and Back colors only, no black lines). The hop is never part of a bell: it is the
+  separate Set Graphic Alarm_Set_Hop_Cone.svg (Layer 2, fixed greens, see-through outside the hop). Alarm Hop replaces
+  AlarmBitter.png (copyright, Rule 9.12).
 - **User Alarm:** its own background picture (Image Path 1), a Set Graphic that is any picture (Layer 2), an Active overlay,
   and **.backcolor** (.back) behind it. Standard Label and Alarm attributes.
 An Alarm made before 2026-11-02 keeps working as before.

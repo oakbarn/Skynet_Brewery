@@ -6,7 +6,7 @@ Process can use the number or the file name, for example `MyAlarm.setgraphic = 1
 
 In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with each picture, ready to print.
 
-199 pictures.
+201 pictures.
 
 | ID | File name | Group |
 |---:|---|---|
@@ -16,8 +16,6 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 4 | Alarm_Basic_Lines.svg | Alarms |
 | 5 | Alarm_Basic.svg | Alarms |
 | 6 | Alarm_Set_Hop.svg | Alarms |
-| 7 | AlarmBitter.png | Alarms |
-| 8 | AlarmBitter.svg | Alarms |
 | 9 | chill_coil.svg | Chillers |
 | 10 | Chiller_Copper_Counterflow.svg | Chillers |
 | 11 | Chiller_Counterflow_Small.svg | Chillers |
@@ -209,11 +207,17 @@ In the panel: Media page > **🔢 Skynet Picture numbers** shows this list with 
 | 226 | Pump_March_815_SS_90_Inlet_Motor.svg | Pumps |
 | 227 | Skynet_Brewery_Main.svg | Miscellaneous |
 | 228 | Burner_Jet_Flame.svg | Other Equipment |
+| 229 | Alarm_Hop_Back.svg | Alarms |
+| 230 | Alarm_Hop_Fore.svg | Alarms |
+| 231 | Alarm_Hop.svg | Alarms |
+| 232 | Alarm_Set_Hop_Cone.svg | Alarms |
 
 ## Retired numbers (never used again)
 
 | ID | File name | Group |
 |---:|---|---|
+| 7 | AlarmBitter.png | Alarms |
+| 8 | AlarmBitter.svg | Alarms |
 | 20 | brewery_main.png | Miscellaneous |
 | 27 | BigMacRElementOff.png | Other Equipment |
 | 29 | BigMacRElementOn.png | Other Equipment |

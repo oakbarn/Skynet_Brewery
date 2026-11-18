@@ -152,7 +152,11 @@
    "label": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
+   "alarmClass": "basic",
+   "bell": "hop",
+   "backColor": "#21b04b",
+   "foreColor": "#c6ef2a",
+   "setGraphic": "Images/Skynet/Alarms/Alarm_Set_Hop_Cone.svg",
    "hideName": true,
    "activeText": ""
   },
