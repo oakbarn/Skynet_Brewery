@@ -19,9 +19,9 @@ assert.equal(processState('Mash', { state: 'error', error: 'x' }).word, 'Stopped
 assert.equal(processButton(processState('Mash', { state: 'running' })), '■ Stop');
 assert.equal(processButton(processState('Mash', { state: 'stopped' })), '▶ Start');
 
-// its name: wgt_PRC_Label_TabID (Rule 3.14); the Widget Type list the other changes count stays as it is
-assert.equal(widgetTypeId({ type: PROCESS_WIDGET_TYPE }), 'PRC');
-assert.equal(suggestWidgetName({ code: widgetTypeId({ type: PROCESS_WIDGET_TYPE }), label: 'Mash~Steps', tab: 'BR' }), 'wgt_PRC_Mash~Steps_BR');
+// its name: wgt_PSW_Label_TabID (Rule 3.14); the Widget Type list the other changes count stays as it is
+assert.equal(widgetTypeId({ type: PROCESS_WIDGET_TYPE }), 'PSW');
+assert.equal(suggestWidgetName({ code: widgetTypeId({ type: PROCESS_WIDGET_TYPE }), label: 'Mash~Steps', tab: 'BR' }), 'wgt_PSW_Mash~Steps_BR');
 assert.ok(!Object.keys(WIDGET_TYPE_IDS).includes(PROCESS_WIDGET_TYPE));
 assert.deepEqual(elementTopic({ type: PROCESS_WIDGET_TYPE }), ['process-widget'], 'right-click Help: Help 173');
 
@@ -35,10 +35,10 @@ assert.ok(ELEMENT_TYPES.includes(PROCESS_WIDGET_TYPE));
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'scrw'));
 fs.mkdirSync(path.join(d, 'scripts'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'wgt_PRC_Mash_BR', type: PROCESS_WIDGET_TYPE, label: 'Mash', process: 'Mash' }] }));
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'wgt_PSW_Mash_BR', type: PROCESS_WIDGET_TYPE, label: 'Mash', process: 'Mash' }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
-assert.equal(store.get('wgt_PRC_Mash_BR').type, PROCESS_WIDGET_TYPE);
-assert.equal(mainProp(store.get('wgt_PRC_Mash_BR')), null, 'it has no value of its own');
+assert.equal(store.get('wgt_PSW_Mash_BR').type, PROCESS_WIDGET_TYPE);
+assert.equal(mainProp(store.get('wgt_PSW_Mash_BR')), null, 'it has no value of its own');
 // what its click does: the Brain's start and stop, and the state it shows comes from the Processes list
 fs.writeFileSync(path.join(d, 'scripts', 'Mash.txt'), 'sleep 30\n');
 const engine = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
@@ -61,7 +61,7 @@ const xml = `<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.org/2001
 const r = importBruControl(xml);
 const mash = r.conv.elements.find(e => e.bru?.id === 's1'), boil = r.conv.elements.find(e => e.bru?.id === 's2');
 assert.equal(mash.type, PROCESS_WIDGET_TYPE); assert.equal(mash.process, 'scrMash'); assert.equal(mash.label, 'Mash Steps');
-assert.match(mash.name, /^wgt_PRC_Mash~Steps_/, 'named the Skynet way (Rule 3.14)');
+assert.match(mash.name, /^wgt_PSW_Mash~Steps_/, 'named the Skynet way (Rule 3.14)');
 assert.equal(mash.bru.variable, 'vV', "BruControl's variable is kept");
 assert.equal(mash.tap, undefined, 'user controlled: one click starts or stops it');
 assert.equal(boil.process, '', 'a Script that is not in the file: no Process yet');
