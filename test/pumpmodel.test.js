@@ -73,7 +73,7 @@ assert.match(app, /const DUAL_HOLD_MS = 500/);
 assert.match(app, /const PUMP_TOGGLE_TIP = \['This is what action is taken when the Pump Image is clicked on the Tab\./);
 assert.match(app, /const PUMP_GRAPHIC_TIP = PUMP_8_IPS_PIC \+ 'The Skynet picture of this Device as it will show on the Tab/);
 assert.match(app, /\.\.\.\(pumpModelOf\(it\) \? \[\] : \[\['imageOff', 'Path', 'gpick'/, 'a Skynet pump drawing has no Path box');
-assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : DEVICE_TIPS\.name;/);
+assert.match(app, /const nameTip = e => isPumpDev\(e\) \? NAME_PUMP_TIP : (isMbvDev\(e\) \? NAME_VALVE_TIP : )?DEVICE_TIPS\.name;/);
 assert.match(app, /Type: BM_15_⟦DO@Pump⟧_Red~Pump_BH/);
 assert.doesNotMatch(app, /only an Admin can change it|It is exactly 2 letters/, 'Rule 3.2 (2026-11-15): a saved ID never changes, not even by an Admin');
 assert.match(app, /Tab IDs follow Rule 3\.2\. Our example Tab is: BH/);

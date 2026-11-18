@@ -77,3 +77,19 @@ console.log('mbvdialog tests passed');
   assert.match(app, /\['pump', 'valve'\]\.includes\(kind\) && \(S\[kind \+ 'Profiles'\] \|\| \[\]\)\.length \? \[\] : \[\['', '\(none\)'\]\]/, 'no (none) Valve Profile');
   console.log('valve blichmann model tests passed');
 }
+// Rule 18.42 (OakBarn Brewery, 2026-11-18: "Adapt it"; "Adapt from Blickmann for any Hover Help not found"): the valve's balloons
+// are the Pump's, with the valve in the examples and its own pictures
+{
+  for (const k of ['LABEL_VALVE_TIP', 'IFACE_VALVE_TIP', 'TAB_VALVE_TIP', 'DEVTYPE_VALVE_TIP', 'NAME_VALVE_TIP', 'NAME_STANDARD_VALVE']) assert.match(app, new RegExp(`const ${k} = `), k);
+  const blk = app.slice(app.indexOf('const NAME_STANDARD_VALVE = '), app.indexOf('const portTip = e =>'));
+  assert.ok(!/Red Pump|DO@Pump|Red~Pump/.test(blk), 'no pump left in the valve balloons');
+  assert.match(blk, /BM_15_DO@Valve_E_Mash~Valve_BH/); assert.match(blk, /help_pictures\/Valve_Daisy_Chain\.png/); assert.match(blk, /help_pictures\/Mash_Valve_Label\.png/);
+  assert.match(app, /const ifaceTip = e => isPumpDev\(e\) \? IFACE_PUMP_TIP : isMbvDev\(e\) \? IFACE_VALVE_TIP/);
+  assert.match(app, /if \(dev && isMbvDev\(o\)\) return LABEL_VALVE_TIP;/);
+  assert.match(app, /\{ set: true, tip: ifaceTip\(it\), with: \['channel', 'Available Ports', 'pinsel', 'digital', false, false, \{ tip: portTip\(it\) \}\], attr: DEV_PORT_POP \}/, 'Properties use them too');
+  for (const f of ['Valve_Daisy_Chain.png', 'Mash_Valve_Label.png', 'Mash_Valve_Label.svg']) assert.ok(fs.existsSync(new URL('../media/help_pictures/' + f, import.meta.url)), f);
+  const lic = fs.readFileSync(new URL('../docs/Media_Licenses.csv', import.meta.url), 'utf8');
+  assert.ok(lic.includes('Valve_Daisy_Chain.png') && lic.includes('Mash_Valve_Label.png'), 'Media_Licenses rows (Rule 9.12)');
+  assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.42 \*\*Hover Help not written yet is adapted/m);
+  console.log('valve balloons (Rule 18.42) ok');
+}

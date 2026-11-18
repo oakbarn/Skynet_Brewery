@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="363" height="180" viewBox="0 0 363 180">
+<!-- Skynet's own drawing (Help picture), made like Red_Pump_Label.svg (2026-11-18, Rule 18.42): the Skynet Motorized Ball Valve (Valve_Motor_Ball_ClosedH.svg) with its Label above it. -->
+<title>Mash Valve: the Label above the valve</title>
+<rect width="363" height="180" fill="#fff"/><rect x="8" y="18" width="197" height="162" fill="#262626"/><svg x="31" y="48" width="150" height="150" viewBox="0 0 300 300" overflow="visible">
+  <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
+  <rect x="0" y="137.5" width="74" height="25" fill="#8a8f96"/>
+  <rect x="226" y="137.5" width="74" height="25" fill="#8a8f96"/>
+  <g transform="translate(73 48.8) scale(1.1)">
+  <!-- Skynet motorized ball valve, closed, horizontal (Fritz's drawing, 2026-11-02): IPs at the center of each ferrule face (0, 0.77) and (1, 0.77); the ring means closed -->
+  <path d="M42 62 Q33.0 78 24 78" fill="none" stroke="#cfcfcf" stroke-width="2.5"/>
+  <rect x="27" y="22" width="86" height="25.2" rx="3" fill="#1d4f9a" stroke="#000" stroke-width="1.5"/>
+  <rect x="34" y="6" width="72" height="56" rx="7" fill="#2f72d0" stroke="#000" stroke-width="2.5"/>
+  <rect x="35.5" y="7.5" width="69" height="12" rx="6" fill="#5b95e6"/>
+  <ellipse cx="61.4" cy="13" rx="9.4" ry="3.5" fill="none" stroke="#d8d8d8" stroke-width="1.5"/>
+  <ellipse cx="81.5" cy="13" rx="6.5" ry="3" fill="#d8d8d8"/>
+  <path d="M37 38.5 H103" stroke="#1d4f9a" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <rect x="64.0" y="25.6" width="12" height="34.7" rx="2" fill="#3d82e3" stroke="#1d4f9a" stroke-width="1"/>
+  <rect x="52" y="60" width="36" height="11" fill="#1d4f9a" stroke="#000" stroke-width="1.5"/>
+  <g fill="#000" stroke="#000" stroke-width="3.2" stroke-linejoin="round">
+    <path d="M12 80 H44 A10 10 0 0 0 54 70 H86 A10 10 0 0 0 96 80 H128 V104 H12 Z"/>
+    <rect x="0" y="-19" width="11" height="38" rx="5" transform="translate(1.50 92.00) rotate(0.00)"/>
+    <rect x="0" y="-19" width="11" height="38" rx="5" transform="translate(138.50 92.00) rotate(180.00)"/>
+  </g>
+  <g fill="#808080">
+    <path d="M12 80 H44 A10 10 0 0 0 54 70 H86 A10 10 0 0 0 96 80 H128 V104 H12 Z"/>
+    <rect x="0" y="-19" width="11" height="38" rx="5" transform="translate(1.50 92.00) rotate(0.00)"/>
+    <rect x="0" y="-19" width="11" height="38" rx="5" transform="translate(138.50 92.00) rotate(180.00)"/>
+  </g>
+  <circle cx="70" cy="92" r="8" fill="#fff" stroke="#111" stroke-width="4"/>
+</g>
+</svg><rect x="27" y="32" width="163" height="30" fill="#000"/><text x="108" y="47" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="15" text-anchor="middle" dominant-baseline="central" fill="#fafafa">Mash Valve</text><polygon points="210,47 232,34 232,42 290,42 290,52 232,52 232,60" fill="none" stroke="#ed1c24" stroke-width="3" stroke-linejoin="miter"/><text x="305" y="52" font-family="'Times New Roman', Times, serif" font-size="16" fill="#000">Label</text></svg>

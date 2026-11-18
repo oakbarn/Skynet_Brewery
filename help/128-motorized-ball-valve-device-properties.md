@@ -34,6 +34,40 @@ scrolls, there is no row of buttons at the bottom, and every ⬢ or ⬆ pop-up h
 4. Press **➕ Add Device**. The valve is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **✅ Finish Build ...** moves it to the Tab you picked. The **Interface** and **Port** are now
    greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
+## The Label
+
+How do you refer to this Valve? Mash Valve, HLT Valve, Fermenter Valve ...? Use your name for the Valve as the Label. OakBarn
+Brewery Sample Schema has several Valves. When OakBarn is brewing, he might yell out, "Close the Mash Valve" to stop the flow. The
+Fermenters are in a different Room and when visually full, the Brewmeister yells to "Close the Fermenter Valve" to his comely
+assistant, who then clicks the Fermenter Valve Closed.
+
+![Label Visible](help_pictures/Label_Visible_Switch.png)
+
+The Label may be shown on the Tab, for example Mash Valve above the Valve Device.
+
+![Mash Valve: the Label above the Valve](help_pictures/Mash_Valve_Label.png)
+
+This is the Plain Text Part of the Suggested Name. Spaces become ~.
+BM_15_DO@Valve_E_**Mash~Valve**_BH
+
+## The Interface
+
+The Arduino board this Valve Device is connected to. An Interface has a Name and an ID. The ID is supplied by you when an
+Interface is connected. The Interface is the part of the Bridge between the "Brain" and your Mash Valve. The "Brain" cannot supply
+the power for the Valve (12 V DC, 24 V or 120 VAC) but only a trigger signal. It takes other pieces of Hardware, and not just one.
+There is a Daisy Chain:
+
+![The Daisy Chain: Brain, Arduino, Relay or SSR, Mash Valve](help_pictures/Valve_Daisy_Chain.png)
+
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
+Brain -> Arduino IO (Port) -> Trigger (Brain says Open the Mash Valve) -> 5 V or 3.3 V signal sent to -> Relay or SSR (Hook the
+Valve's power Here: 12 V DC, 24 V or 120 VAC) -> Valve Gets Power and Opens
+
+The Interface, Available Ports, Tab, Name and Device Type balloons are the Pump's ([Pump Device Properties](115-pump-device-properties)),
+with the valve in the examples: **Mash Valve**, Device Type **DO@Valve_E** (an electric valve on a Digital Out), and the Suggested
+Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Skynet Rule 18.42)
+
 ## Properties, from the top
 
 1. The title is the valve (**Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve**), with the **🔓 lock**,

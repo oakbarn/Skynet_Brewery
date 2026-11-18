@@ -34,6 +34,40 @@ défile, il n'y a pas de rangée de boutons en bas, et chaque fenêtre ⬢ ou �
 4. Appuyez sur **➕ Add Device**. La vanne est faite sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace vers le Tab que vous avez choisi. L'**Interface** et le **Port** sont maintenant
    grisés et fixés : c'est le câblage, ils restent donc tels quels. Pour la câbler à une autre carte ou une autre broche, supprimez-la et ajoutez-la à nouveau. Son Name peut toujours être changé avec **✏ Change name**.
 
+## Le Label {#the-label}
+
+Comment appelez-vous cette vanne ? Mash Valve, HLT Valve, Fermenter Valve ...? Utilisez votre nom pour la vanne comme Label. Le
+Sample Schema d'OakBarn Brewery a plusieurs vannes. Quand OakBarn brasse, il peut crier « Ferme la Mash Valve » pour arrêter le
+débit. Les fermenteurs sont dans une autre pièce et, quand ils sont pleins à vue, le Brewmeister crie « Ferme la Fermenter Valve »
+à sa charmante assistante, qui clique alors la Fermenter Valve sur Closed.
+
+![Label Visible](help_pictures/Label_Visible_Switch.png)
+
+Le Label peut être affiché sur le Tab, par exemple Mash Valve au-dessus du Device de vanne.
+
+![Mash Valve : le Label au-dessus de la vanne](help_pictures/Mash_Valve_Label.png)
+
+C'est la partie en texte simple du Suggested Name. Les espaces deviennent ~.
+BM_15_DO@Valve_E_**Mash~Valve**_BH
+
+## L'Interface {#the-interface}
+
+La carte Arduino à laquelle ce Device Valve est raccordé. Une Interface a un nom et un ID. L'ID est donné par vous quand une
+Interface est raccordée. L'Interface fait partie du pont entre le « Brain » et votre Mash Valve. Le « Brain » ne peut pas fournir
+le courant de la vanne (12 V DC, 24 V ou 120 VAC) mais seulement un signal de déclenchement. Il faut d'autres pièces de matériel,
+et pas une seule. Il y a une chaîne (Daisy Chain) :
+
+![La chaîne : Brain, Arduino, relais ou SSR, Mash Valve](help_pictures/Valve_Daisy_Chain.png)
+
+> **⚠ L'électricité peut tuer. OakBarn Brewery et Skynet ne sont pas électriciens et ne peuvent donner aucun conseil en électricité. Consultez un électricien qualifié.** (Règle 6.20)
+
+Brain -> Arduino IO (Port) -> déclenchement (le Brain dit d'ouvrir la Mash Valve) -> signal de 5 V ou 3,3 V envoyé au -> relais
+ou SSR (branchez ici le courant de la vanne : 12 V DC, 24 V ou 120 VAC) -> la vanne reçoit le courant et s'ouvre
+
+Les bulles Interface, Available Ports, Tab, Name et Device Type sont celles de la pompe ([Properties du Device Pump](115-pump-device-properties)),
+avec la vanne dans les exemples : **Mash Valve**, Device Type **DO@Valve_E** (une vanne électrique sur un Digital Out), et le Suggested
+Name **BM_15_DO@Valve_E_Mash~Valve_BH**. (Règle Skynet 18.42)
+
 ## Properties, du haut vers le bas {#properties-from-the-top}
 
 1. Le titre est la vanne (**Skynet Motorized Ball Valve** ou **User Defined Motorized Ball Valve**), avec le **cadenas 🔓**,
