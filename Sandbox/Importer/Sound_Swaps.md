@@ -28,5 +28,6 @@ The brewer's original files are never moved or deleted.
 | sorry_dave.wav | sounds/Skynet/Skynet_Voice_Not_Safe.mp3 | Waits for the voice clip |
 | heigh-ho-...-heigh-ho.wav | sounds/Skynet/Skynet_Voice_Off_To_Brew.mp3 | Waits for the voice clip |
 | porkypigthatAll.wav | sounds/Skynet/Skynet_Voice_Brew_Day_Done.mp3 | Waits for the voice clip |
-| The copyrighted songs (Media_Licenses.csv, "DO NOT SHIP") | The OakBarn Treblo song named in that row's last column | When the song is uploaded (Rule 7.20) |
-| enthusiasm.wav | Not decided | OakBarn Brewery to say what it is |
+| The copyrighted songs that have a replacement (Media_Licenses.csv, "DO NOT SHIP") | The OakBarn Treblo song named in that row's last column | When the song is uploaded (Rule 7.20) |
+| The 13 copyrighted songs marked "Dropped" in Media_Licenses.csv | None: dropped (OakBarn Brewery 2026-11-18: "copywrite get rid of it"). Never copied into a Skynet sample; the brewer picks another sound | Decided |
+| enthusiasm.wav | None: dropped, copyrighted (OakBarn Brewery 2026-11-18) | Decided |
