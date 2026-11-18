@@ -31,7 +31,7 @@ import { PASTE_WHAT, pastePieces, pastePlan, applyRenames, numberChanges } from 
 import { fileOf, folderOf, joinPath, pickLabel, isSkynetMedia, mediaDefaults, isLink as isWebLink, DEFAULT_WORDS, userFolderError } from './mediapaths.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { TIME_FORMATS, DATETIME_FORMATS, formatChoices, formatTime, formatDateTime } from './timeformat.js';
-import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
+import { cleanApiName, apiNameProblem, apiNameOwner, apiNameItems } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
 import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the Ice Water Can (Rule 19.8)
@@ -12486,7 +12486,7 @@ function dbFromWork(work, self) {
     const n = cleanApiName(work.apiName);
     if (n) {
       const bad = apiNameProblem(n); if (bad) throw new Error(bad);
-      const other = apiNameOwner((editing && draft ? draft : S.config).elements, n, self);
+      const other = apiNameOwner(apiNameItems(editing && draft ? draft : S.config), n, self);      // Devices and Widgets, Hose Bibs too (Rule 6.18)
       if (other) throw new Error(`API_Name "${n}" is already used by ${other.name}: an API_Name must be Unique`);
       work.apiName = n;
     } else delete work.apiName;
