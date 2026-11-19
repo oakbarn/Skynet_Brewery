@@ -35,8 +35,10 @@ and the 4.7K ohm resistor.
 
 ## How it is wired
 
-- **LED:** Mega pin → 220 ohm resistor → LED **long leg** (+). LED **short leg** (−) → **GND** (the blue − row of the
-  breadboard, joined to a Mega GND pin).
+- **LED (On/Off):** **5V** (the red + row of the breadboard, joined to the Mega's 5V pin) → 220 ohm resistor → LED
+  **long leg** (+). LED **short leg** (−) → the Mega pin. Skynet's Mega sketch switches an output **On by pulling the pin
+  LOW**, like most relay boards (`RELAY_ACTIVE_LOW = true`), so wired this way the LED lights when the Device is **On**.
+  (Wired pin → LED → GND, it would light when the Device is Off.)
 - **RGB LED (common cathode):** the **longest leg** → GND. Each of the other three legs (red, green, blue) → its own
   220 ohm resistor → its own **PWM** pin.
 - **Push button:** one leg → the Mega pin, the other leg → GND. No resistor needed: Skynet's Mega code turns on the
@@ -44,7 +46,8 @@ and the 4.7K ohm resistor.
 - **Potentiometer:** outer legs → 5V and GND, middle leg → an analog pin (A0 to A15).
 - **DS18B20 probes (1-Wire):** every probe: red → 5V, black → GND, yellow (data) → **D40** (Skynet's 1-Wire pin). One 4.7K ohm
   resistor between D40 and 5V. In Skynet each probe gets its own probe number (Port 700, 701, 702).
-- **Active buzzer:** + leg (the longer one) → its pin, − leg → GND. No resistor.
+- **Active buzzer:** + leg (the longer one) → **5V**, − leg → its pin (On is LOW, as for the LEDs). No resistor. Pick one
+  rated 30 mA or less.
 
 ## Which pins
 
@@ -61,6 +64,9 @@ and the 4.7K ohm resistor.
 
 Keep these free: **D0 and D1** (the USB talk to the Brain), **D20 and D21** (I2C), **D50 to D53** (SPI, for RTD boards).
 Pick the real pins in Skynet's **Available Ports** list. It shows only the free ones that fit each Device.
+These pins must also be in the pin lists at the top of `firmware/Mega_BrewPanel/Mega_BrewPanel.ino` (OUTPUT_PINS, PWM_PINS,
+INPUT_PINS, ANALOG_PINS) before it is uploaded: only listed pins work. The sketch's own lists fit a smaller set with no
+edits; see [Set up a Raspberry Pi 4 as the Brain](Pi_Brain_Setup_Guide.md), section 8.
 
 ## Do not overload the Mega
 
