@@ -43,8 +43,19 @@ Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one 
 Off too. A Duty cycle % of **0 turns the Element Off**, and **above 0 turns it On** if it was Off, whether you set it here or a
 Process sets it (Skynet Rule 6.19).
 
-While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
-**idle ▸ 152** in Hysteresis.
+**Change the % or the Setpoint right on the Tab.** The Element's display shows what it is doing and, in a green box on the same
+line, the number you set, like the **SV** on a panel controller:
+
+- **Duty Cycle:** the green box is its **Duty cycle %**, for example **60 %** (Off: **idle 60 %**).
+- **Hysteresis, PID, Deadband, Precise:** the green box is its **SV** (the Setpoint) with °F or °C, for example **idle SV 152.0 °F**,
+  **HEAT SV 152.0 °F** or **45 % SV 152.0 °F**.
+- **Direct** and **PWM** have no green box.
+
+**One click on the green box** lets you type a new number in it. Press **Enter** to set it (or click somewhere else after changing it);
+**Esc** puts it back. A new Setpoint never turns the Element On or Off and never changes its method. A new Duty cycle % follows the rule
+above: **0 turns it Off**, **above 0 turns it On**. A click anywhere else on the Element still turns it On or Off. If a Process is
+running, it may set the number again at its next step. The green box does not show in Edit layout, on the Dial or Bar look, or when its
+**Data Display** picks one value.
 
 ## Hysteresis
 

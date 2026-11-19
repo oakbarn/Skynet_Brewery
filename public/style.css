@@ -1536,3 +1536,14 @@ body.eqViewing #ws { pointer-events: none; }
 
 /* Background None on a Widget with no Graphic (Rule 18.50 #2): no panel behind its words */
 .el.noPanel, .el.noPanel .vl, .el.noPanel .nm { background: transparent !important; box-shadow: none !important; border-color: transparent !important; }
+
+/* A Heating Element's SV box (Panel Updates 40): the number a person sets, green like a panel controller's SV, on the same line as what
+   it is doing; one click types a new one in place (app.js svEdit) */
+.el .vl .svStat { margin-right: .45em; }
+.el .vl .svBox { display: inline-flex; align-items: baseline; gap: .3em; padding: 0 .35em; border: 1px solid rgba(61, 220, 90, .55); border-radius: 4px;
+  background: rgba(0, 0, 0, .55); color: #3ddc5a; font-family: var(--mono); font-weight: 600; text-shadow: 0 0 6px rgba(61, 220, 90, .45); cursor: pointer; white-space: nowrap; }
+.el .vl .svBox:hover { border-color: #3ddc5a; }
+.el .vl .svBox .svTag { font-size: .6em; font-family: inherit; opacity: .85; }
+.el .vl .svBox.editing { border-color: #fff; }
+.el .vl .svIn { width: 4.2em; font: inherit; color: inherit; background: transparent; border: none; outline: none; padding: 0; text-align: right; }
+.el.img-missing .vl .svBox { color: #3ddc5a !important; }

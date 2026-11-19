@@ -2877,6 +2877,70 @@ function withLook(e, v) {
 // The name shown on a Device or Widget: its Label, or its Name when the Label is empty. In Edit layout it follows
 // the Properties you just changed (the live value from the Brain only catches up after Save).
 const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
+// ---- A Heating Element's SV box (Panel Updates 40, OakBarn Brewery, 2026-11-19: "Heating Element in Duty Cylce, Click % and User
+// Input"; "with 2 so a Setpoint can be changed on a Tab by a user"). On a running Tab, the number a person sets is shown in its own green
+// box inside the Element's display, on the same line as what it is doing, like the SV of a panel controller (no Visible switch: it is
+// part of the display, OakBarn Brewery, 2026-11-19, item 3). One click on the box lets you type a new one in place (no pop-up, Rule 2.44):
+// Enter (or clicking away after a change) sets it, Esc puts it back.
+// - Duty Cycle: its Duty cycle %. 0 turns the Element Off and above 0 turns it On (Rule 6.19, the Brain does that).
+// - Hysteresis, PID, Deadband, Precise: its Setpoint, with the probe's °F or °C. It never switches the method or turns it On or Off.
+// - Direct and PWM: no box (nothing to hold). A Data Display picked in its Properties, the Dial and Bar looks and Edit layout: no box.
+// A Method Clone shows the box of its own method.
+function heatSv(e0, e, v) {
+  if (editing || e.look === 'dial' || e.look === 'bar') return null;
+  { const dk = v.display || e.display; if (dk && dk !== 'both' && displayChoices(e)) return null; }
+  const k = e0.cloneMethod || (heatMethodKey(v.method) ?? startMethod(e));
+  if (k === 'dutyCycle') return { prop: 'dutycycle', num: Number(v.dutycycle ?? e.dutyCycle ?? 0), unit: '%', k };
+  if (!SP_METHODS.includes(k)) return null;
+  const t = typeof v.target === 'number' ? v.target : Number(e.target);
+  const pe = e.input && S.config.elements.find(x => x.name === e.input);
+  return { prop: 'target', num: Number.isFinite(t) ? t : null, unit: pe?.units || '°F', k, sp: true };
+}
+// what it is doing, without the number its SV box shows
+function svStatus(e, v, on, sv) {
+  if (!on) return e.offText ?? 'OFF';
+  if (sv.k === 'dutyCycle') return '';
+  if (sv.k === 'hysteresis') return v.output ? (e.onText ?? 'ON') : 'idle';
+  return `${fmtVal({ precision: 0 }, v.value)} %`;
+}
+const svFmt = sv => sv.num === null ? '' : fmtVal(sv.sp ? { precision: 1 } : {}, sv.num);      // a Setpoint to 0.1 degree (65.5556 shows 65.6)
+const svText = sv => sv.num === null ? '-' : `${svFmt(sv)}${sv.unit === '%' ? ' %' : ' ' + sv.unit}`;
+function fillSv(vl, text, sv) {
+  const box = h('span', { class: 'svBox' + (sv.sp ? ' sp' : ' dc'), 'data-prop': sv.prop, 'data-num': svFmt(sv),
+    title: sv.sp ? 'SV: the Setpoint. One click to type a new one, then Enter (Esc puts it back).' : 'Duty cycle %. One click to type a new one, then Enter (0 turns it Off, above 0 turns it On).' },
+    ...(sv.sp ? [h('span', { class: 'svTag' }, 'SV')] : []), h('span', { class: 'svNum' }, svText(sv)));
+  const parts = [];
+  if (text) { const st = h('span', { class: 'svStat' }); setRich(st, text); parts.push(st); }
+  vl.replaceChildren(...parts, box);
+}
+// one click on the SV box: type the new number in place
+function svEdit(box) {
+  if (!can('operator')) return toast('Your account is view only', true);
+  const n = box.closest('.el'), vl = box.closest('.vl'), e = n && elByName(n.dataset.name);
+  if (!e || !vl || vl._svEdit) return;
+  const prop = box.dataset.prop, was = box.dataset.num, num = box.querySelector('.svNum');
+  const inp = h('input', { class: 'svIn', value: was, inputmode: 'decimal', enterkeyhint: 'done', size: 5,
+    'aria-label': prop === 'target' ? 'Setpoint' : 'Duty cycle %' });
+  vl._svEdit = true; num.replaceChildren(inp); box.classList.add('editing');
+  let done = false;
+  const finish = async ok => {
+    if (done) return; done = true;
+    const x = parseFloat(String(inp.value).replace(',', '.'));
+    vl._svEdit = false; updateEl(e.name);
+    if (!ok) return;
+    if (!Number.isFinite(x)) return toast('Enter a number', true);
+    if (prop === 'dutycycle' && (x < 0 || x > 100)) return toast('Duty cycle is 0 to 100 %', true);
+    const st = !!S.values[e.name]?.state, inDc = heatMethodKey(S.values[e.name]?.method) === 'dutyCycle';
+    // a Duty cycle % above 0 turns it On (Rule 6.19): an Element set to Ask before changing by hand asks first
+    if (prop === 'dutycycle' && inDc && x > 0 && !st && e.confirm) { if (!(await choose(`${S.values[e.name]?.label ?? e.label ?? e.name}: ON at ${fmtVal({}, x)} %?`, [['ON', true]]))) return; }
+    await setProp(e.name, prop, x);
+  };
+  inp.addEventListener('keydown', ke => { ke.stopPropagation(); if (ke.key === 'Enter') { ke.preventDefault(); finish(true); } else if (ke.key === 'Escape') { ke.preventDefault(); finish(false); } });
+  inp.addEventListener('blur', () => finish(String(inp.value).trim() !== was));
+  for (const t of ['pointerdown', 'click', 'dblclick']) inp.addEventListener(t, ev => ev.stopPropagation());
+  inp.focus(); inp.select();
+}
+
 function fillEl(n, e0) {
   // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
   let v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
@@ -2897,7 +2961,7 @@ function fillEl(n, e0) {
   if (at !== e0 || n._moved) { n._moved = at !== e0; place(n, elGeom(at)); if (hasIps(e0)) placeDevIps(at); }
   setRich(nm, shownName(e0, v));
   const pic = slotImage(e, v);
-  let on = false, img = pic, text = '';
+  let on = false, img = pic, text = '', sv = null;
   switch (e.type) {
     case 'gGlobal':
       switch (vkKind(e)) {
@@ -2925,6 +2989,8 @@ function fillEl(n, e0) {
         const hm = heatMethodKey(v.method);
         text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${fmtVal({}, v.target)}` : `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}`;
       }
+      // its SV box (Panel Updates 40): the number a person sets, one click to type a new one; the box shows it, so the text drops it
+      if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
@@ -3026,6 +3092,8 @@ function fillEl(n, e0) {
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
+  else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
+  else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv);      // a Heating Element's text and its SV box
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
   // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
@@ -3069,7 +3137,7 @@ function fillEl(n, e0) {
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
-  fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? text : null);      // a reading stays on one line (Rule 2.56)
+  if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
@@ -3428,6 +3496,7 @@ let dualWait = null, dualSkipClick = false;
 const dualCancel = () => { if (dualWait) { clearTimeout(dualWait); dualWait = null; } };
 $('#ws').addEventListener('pointerdown', ev => {
   if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
+  if (ev.target.closest('.el .svBox')) return;      // the SV box is typed in, never a press
   const n = ev.target.closest('.el, .vpPart[data-dev], .mfValve[data-dev]'); const e = n && elByName(n.dataset.name || n.dataset.dev);
   if (e && tapAction(e) === 'dual' && can('operator')) {
     dualCancel(); dualSkipClick = false;
@@ -3473,6 +3542,7 @@ $('#ws').addEventListener('click', ev => {
   if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
 
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
+  { const sb = ev.target.closest('.el .svBox'); if (sb) return svEdit(sb); }      // a Heating Element's SV box: type a new one (Panel Updates 40)
   // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
   // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
   const hp = ev.target.closest('.vpPart.vp-element[data-dev]');

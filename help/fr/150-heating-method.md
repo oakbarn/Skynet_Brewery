@@ -44,8 +44,19 @@ Rien dans la fenêtre ne se met en marche avant que vous cliquiez sur **Set + ON
 arrêt. Un Duty cycle % de **0 arrête la résistance**, et **au-dessus de 0 la met en marche** si elle était arrêtée, que vous le régliez ici ou qu'un
 Process le règle (Règle Skynet 6.19).
 
-Tant qu'elle est en marche, la résistance montre ce qu'elle fait : **60 %** en Duty Cycle, **45 % ▸ 152** en PID, Deadband ou Precise, **ON ▸ 152** ou
-**idle ▸ 152** (au repos) en Hysteresis.
+**Changez le % ou le Setpoint directement sur le Tab.** L'affichage de la résistance montre ce qu'elle fait et, dans une case verte sur la
+même ligne, le nombre que vous réglez, comme le **SV** d'un régulateur de tableau :
+
+- **Duty Cycle :** la case verte est son **Duty cycle %**, par exemple **60 %** (à l'arrêt : **idle 60 %**).
+- **Hysteresis, PID, Deadband, Precise :** la case verte est son **SV** (le Setpoint) avec °F ou °C, par exemple **idle SV 152.0 °F**,
+  **HEAT SV 152.0 °F** ou **45 % SV 152.0 °F**.
+- **Direct** et **PWM** n'ont pas de case verte.
+
+**Un clic sur la case verte** permet d'y taper un nouveau nombre. Appuyez sur **Entrée** pour le régler (ou cliquez ailleurs après l'avoir changé) ;
+**Échap** le remet comme avant. Un nouveau Setpoint ne met jamais la résistance en marche ou à l'arrêt et ne change jamais sa méthode. Un nouveau
+Duty cycle % suit la règle ci-dessus : **0 l'arrête**, **au-dessus de 0 la met en marche**. Un clic ailleurs sur la résistance la met toujours en
+marche ou à l'arrêt. Si un Process tourne, il peut régler le nombre de nouveau à son étape suivante. La case verte n'apparaît pas en Edit layout,
+avec l'aspect Dial ou Bar, ni quand son **Data Display** choisit une seule valeur.
 
 ## Hysteresis
 
