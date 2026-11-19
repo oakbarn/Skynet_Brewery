@@ -56,6 +56,10 @@ A **Second Outlet** is a second drain, for example one above the heating element
 
 **All-in-one kettles**: **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** and **Kettle_Foundry_Electric** have the heating element built in, so they only come as electric Templates (see [Skynet Vessels](62-skynet-vessels)). The Brewzilla picture shows its recirculation arm and valve up the left side, and its tap is the Outlet at the bottom middle. None of them has a thermowell, because the panel can't read their own thermometers.
 
+## 📐 My Size: a vessel the shape of yours
+
+Your kettle may be taller or wider than the Skynet picture. Double-click a Vessel Template and press **📐 My Size** (Admins). Type a **Name**, your vessel's **Height** and its **Diameter**, then **OK**. Skynet draws the vessel's picture stretched to that shape, saves it as a picture of your own (an SVG in your User Graphic folder, see [Media](07-media)), and makes a **User Vessel Template** with it, sized by its Diameter. Its pop-up then opens. The Skynet Template is not changed.
+
 ## Equipment Template settings
 
 Chillers, coils and trub filters have the same settings as a vessel, plus how many **Liquid ports** they have to move liquid:
@@ -63,13 +67,17 @@ Chillers, coils and trub filters have the same settings as a vessel, plus how ma
 | Kind | Liquid ports |
 |---|---|
 | Plate chiller | 4: wort in and out, water in and out (the two never mix) |
-| Chilling coil, HERMS coil | **2** (1 in, 1 out) or **4** (2 ins, 2 outs, for example a Chillzilla) |
+| Chilling coil, HERMS coil | **2** (1 in, 1 out) or **4** (2 ins, 2 outs: two circuits that never mix) |
 | Trub filter | 2: in and out |
 | RIMS tube | 2: Wort In and Wort Out |
 
 With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit never flows into the other.
 
 On the Skynet counterflow chillers the plain copper ends are the wort and the brass hose fittings the water. A chiller can be piped either way: to swap them, pick other corners for **Wort In**, **Wort Out**, **Water In** and **Water Out** (on the Template, or on the Tab_Vessel in Edit layout).
+
+**Material**: a HERMS coil, an Immersion chiller (Chilling coil) and a Counterflow chiller have a **Material** dropdown: **As drawn** (the Skynet picture as it is), **Copper** or **Stainless (SS)**. A Counterflow chiller can also be a **Hose** (green, with brass ends). The picture is drawn in that color. It is on the Template, the Add box and the Properties.
+
+**HERMS_Coil_Same_Side** and **Immersion_Chiller_Same_Side** have their In and Out IPs on the same side (Top Left and Bottom Left). Any corner, or Left or Right, can be picked for them.
 
 A **RIMS tube** is part of the piping: wort flows in at one end and out at the other. Its **Heating element** (an Electric Element Device) goes in one end and its **Thermowell** (a Temperature Probe) in the other. Both are picked on the Tab_Vessel. Neither one is an IP, so no liquid flows there. A Mash Tun whose Heat Source is **RIMS** picks its RIMS tube from the Equipment Profile.
 

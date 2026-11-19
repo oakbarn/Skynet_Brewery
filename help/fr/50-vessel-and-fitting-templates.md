@@ -56,6 +56,10 @@ Un **Second Outlet** est une seconde vidange, par exemple au-dessus de la résis
 
 **Bouilloires tout-en-un** : **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** et **Kettle_Foundry_Electric** ont la résistance intégrée, elles n'existent donc qu'en Templates électriques (voir [Cuves Skynet](62-skynet-vessels)). L'image de la Brewzilla montre son bras de recirculation et sa vanne sur le côté gauche, et son robinet est l'Outlet en bas au milieu. Aucune n'a de doigt de gant, car le panel ne peut pas lire leurs propres thermomètres.
 
+## 📐 My Size : une cuve à la forme de la vôtre {#my-size-a-vessel-the-shape-of-yours}
+
+Votre bouilloire peut être plus haute ou plus large que l'image Skynet. Double-cliquez sur un Vessel Template et appuyez sur **📐 My Size** (ma taille, Admins). Tapez un **Name** (nom), la **Height** (hauteur) et le **Diameter** (diamètre) de votre cuve, puis **OK**. Skynet dessine l'image de la cuve étirée à cette forme, l'enregistre comme une image à vous (un SVG dans votre dossier User Graphic, voir [Media](07-media)), et en fait un **User Vessel Template**, dimensionné par son diamètre. Sa fenêtre s'ouvre ensuite. Le Template Skynet n'est pas changé.
+
 ## Réglages d'un Equipment Template {#equipment-template-settings}
 
 Les refroidisseurs, serpentins et filtres à trub ont les mêmes réglages qu'une cuve, plus le nombre de **Liquid ports** (orifices de liquide) pour faire circuler le liquide :
@@ -63,13 +67,17 @@ Les refroidisseurs, serpentins et filtres à trub ont les mêmes réglages qu'un
 | Sorte | Orifices de liquide |
 |---|---|
 | Plate chiller (refroidisseur à plaques) | 4 : entrée et sortie du moût, entrée et sortie de l'eau (les deux ne se mélangent jamais) |
-| Chilling coil, HERMS coil (serpentins) | **2** (1 entrée, 1 sortie) ou **4** (2 entrées, 2 sorties, par exemple un Chillzilla) |
+| Chilling coil, HERMS coil (serpentins) | **2** (1 entrée, 1 sortie) ou **4** (2 entrées, 2 sorties : deux circuits qui ne se mélangent jamais) |
 | Trub filter (filtre à trub) | 2 : entrée et sortie |
 | RIMS tube (tube RIMS) | 2 : Wort In et Wort Out |
 
 Avec 4, le second circuit est **In 2** et **Out 2**. Le liquide d'un circuit ne coule jamais dans l'autre.
 
 Sur les refroidisseurs à contre-courant Skynet, les bouts en cuivre nu sont pour le moût et les raccords de tuyau en laiton pour l'eau. Un refroidisseur peut être raccordé dans les deux sens : pour les inverser, choisissez d'autres coins pour **Wort In**, **Wort Out**, **Water In** et **Water Out** (sur le Template, ou sur le Tab_Vessel en Edit layout).
+
+**Material** (matière) : un HERMS coil, un refroidisseur à immersion (Chilling coil) et un refroidisseur à contre-courant ont une liste **Material** : **As drawn** (l'image Skynet telle quelle), **Copper** (cuivre) ou **Stainless (SS)** (inox). Un refroidisseur à contre-courant peut aussi être un **Hose** (tuyau, vert avec des bouts en laiton). L'image est dessinée dans cette couleur. Elle est sur le Template, la fenêtre Add et les Properties.
+
+**HERMS_Coil_Same_Side** et **Immersion_Chiller_Same_Side** ont leurs IPs In et Out du même côté (Top Left et Bottom Left). N'importe quel coin, ou Left ou Right, peut être choisi pour eux.
 
 Un **tube RIMS** fait partie de la tuyauterie : le moût entre par un bout et sort par l'autre. Sa **résistance** (un Device Electric Element) va dans un bout et son **doigt de gant** (une sonde de température) dans l'autre. Les deux sont choisis sur le Tab_Vessel. Aucun des deux n'est un IP, donc aucun liquide n'y coule. Une cuve d'empâtage dont la Heat Source est **RIMS** prend son tube RIMS dans l'Equipment Profile.
 

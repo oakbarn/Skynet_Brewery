@@ -268,7 +268,7 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 
 ### Chilling coil
 - Picture: Images/Skynet/Chillers/chill_coil.svg, 180 x 180. Types: Immersion coil, Jacketed (glycol).
-- Ports: In, Out (circuit A); In 2, Out 2 (circuit B, for a 4-port coil like the Chillzilla; never mixes with A). Positions: corners and sides.
+- Ports: In, Out (circuit A); In 2, Out 2 (circuit B, for a 4-port coil; never mixes with A). Positions: corners and sides.
 
 ### HERMS coil
 - Picture: Images/Skynet/Other_Equipment/herms_coil.svg, 180 x 180. Types: Stainless 25 ft, Stainless 50 ft, Copper.
@@ -469,7 +469,6 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | Counterflow_Chiller / _Small | Plate chiller, Counterflow, MPT 1/2 | 4 ports |
 | Copper_Counterflow_Chiller | Plate chiller, Counterflow, MPT 1/2 (Fritz's Copper_CounterFlow drawing, 2026-11-02) | 4 IPs on the real port tips, all facing left: Wort In (top, straight through the tee), Water Out (top tee branch), Water In (bottom tee branch), Wort Out (bottom, straight through the tee) |
 | Immersion_Chiller | Chilling coil, 2 ports, MPT 1/2 | In, Out |
-| Chillzilla | Chilling coil, 4 ports, MPT 1/2 | In, Out, In 2, Out 2 |
 | HERMS_Coil | HERMS coil, Stainless 50 ft | Wort In, Wort Out |
 | Trub_Filter | Trub filter, Inline filter | Inlet, Outlet |
 | Hop_Filter_Inline | Trub filter, Hop rocket, MPT 1/2 | Inlet Top, Outlet Bottom Right |

@@ -10,10 +10,15 @@ As soon as **Add new Schema** has made your new Schema and loaded it, the **New 
 ## The pages
 
 1. **About**: the **Name** (already filled in) and **What is it for?**, one line such as *Keg Cleaning* or *Hot Side, 10 gallon*. It shows in the Schema list on the **☰ Menu > 🗂 Schema** tab. You may leave it blank.
-2. **Boards**: the boards (Interfaces) the new Schema has, and the real boards from your other Schemas. Tick each one this Schema uses too. A board that is not here yet can be added later on the **Devices** page (**Add Interface**), see [Interfaces](76-interfaces).
-3. **Tabs**: a box for each Tab, to rename it (for example *Main* to *Brew House*), and **Add a Fermentation Tab**. More Tabs can be added at any time in Edit layout.
-4. **Equipment**: an Equipment Profile for one Tab: **Later**, **Answer the Equipment Profile Interview now** (it opens after Finish and ends on the 🔨 Build Tab, see [The Equipment Profile Interview](196-equipment-profile-interview)), or **Use** a profile you already have.
-5. **Done**: what will be kept. Press **✔ Finish**.
+2. **Boards**: the boards (Interfaces) the new Schema has, and the real boards from your other Schemas. Tick each one this Schema uses too. To add a board no Schema has yet, switch on **➕ Add a New board after Finish**: after **✔ Finish** the **Add Interface** pop-up opens, and after its **Save** the Interfaces page shows the new board. See [Interfaces](76-interfaces).
+3. **Tabs**: a box for each Tab, and **➕ Add New Tab** for another one. In each box:
+   - **Tab name** (for example *Main* to *Brew House*).
+   - **What is it for?**: **Brewing (Brew House)**, **Fermentation**, **Cleaning**, or **Other** (any Tab of your own: you name it in Tab name).
+   - **Level** (Brewing only): how you brew on this Tab, from **Stove Top (Extract)** to **All Grain with Mash Tun (3 Vessels)**. It starts on your **Skynet Brewer Level**, the Level you picked last time (All Grain with Mash Tun the first time).
+   - **Equipment Profile**: **None** (add one later on **☰ Menu > Equipment Profile**), **➕ Create New** (the Equipment Profile Interview opens after Finish, see [The Equipment Profile Interview](196-equipment-profile-interview)), or a profile you already have. Only the profiles for what the Tab is for are listed, and one profile goes on one Tab only.
+   - **Import** (with a profile you have): **Import All** puts the profile's whole Default Layout on the Tab, and the Tab follows the profile. **Import Vessels** puts only its vessels and equipment, with their fittings. **Import Manifold** puts only the valves, fittings and pipes between the vessels. With Vessels or Manifold the Tab keeps its own layout, so the profile is not changed.
+   - **Import Processes**: a tick for each Skynet Process of that kind and Level (a Stove Top has no Mash). Ticked ones are set in **☰ Menu > Brew Process**; an unticked one is left out.
+4. **Done**: what will be kept. Press **✔ Finish**.
 
 **A Skynet Schema Template** or **an Equipment Profile** has already asked about the boards, Tabs and equipment, so they get only **About** and **Done**.
 

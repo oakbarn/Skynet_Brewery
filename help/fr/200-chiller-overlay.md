@@ -10,8 +10,7 @@ Tab avec deux lignes (règle Skynet 5.42) :
 ## place_Chiller = template, vessel {#place-chiller-template-vessel}
 
 - **template** est un Template de refroidisseur : un refroidisseur qui va dans une cuve (un refroidisseur à immersion à 2 IP, In et Out). Skynet a
-  **Immersion_Chiller**. Les refroidisseurs à plaques et à contre-courant, Chillzilla compris (un refroidisseur à contre-courant
-  à 4 IP), restent hors de la cuve sur leurs propres tuyaux, ils ne sont donc pas placés de cette façon.
+  **Immersion_Chiller** et **Immersion_Chiller_Same_Side**. Les refroidisseurs à plaques et à contre-courant (4 IP) restent hors de la cuve sur leurs propres tuyaux, ils ne sont donc pas placés de cette façon.
 - **vessel** est le Name de la cuve où il va (un Label marche aussi quand une seule cuve l'a).
 
 Le refroidisseur est dessiné **par-dessus la cuve**. Deux flexibles sont dessinés avec lui :
@@ -59,8 +58,8 @@ refroidisseur est comme un tuyau (règle 5.41), donc le déplacer ne change pas 
 
 - **De l'eau coule dedans :** un avertissement le dit et il ne bouge pas. Coupez ce qui l'alimente (la Tap Water Valve ou la pompe
   de puisard) ; l'avertissement se ferme tout seul quand plus rien ne coule.
-- **Seul un refroidisseur à immersion** (2 IP, In et Out) se déplace ainsi. Un refroidisseur à plaques ou à contre-courant (un
-  Chillzilla aussi) fait partie du collecteur et reste en place, comme un refroidisseur joint par un tuyau rigide ou verrouillé.
+- **Seul un refroidisseur à immersion** (2 IP, In et Out) se déplace ainsi. Un refroidisseur à plaques ou à contre-courant (4 IP)
+  fait partie du collecteur et reste en place, comme un refroidisseur joint par un tuyau rigide ou verrouillé.
   Une cuve prend un seul refroidisseur.
 - Un clic droit qui ne déplace pas le refroidisseur ouvre cette Aide, comme avant.
 - Les Viewers ne peuvent pas déplacer un refroidisseur ; les Operators et les Admins le peuvent.
