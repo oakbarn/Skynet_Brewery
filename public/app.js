@@ -43,7 +43,7 @@ import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_
 import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
+import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, HOP_MEASURES, hopUnitOf, YEAST_UNITS, yeastUnitOf, YEAST_FORMS, YEAST_TYPES, YEAST_FLOCS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';      // Copy a whole Tab on New tab (Rule 4.8)
@@ -18728,13 +18728,14 @@ const RC_HOP_SW = [['mash', 'Mash Hops'], ['first wort', '1st WORT Hops'], ['sec
 const rcHopOpen = new WeakMap();      // hop -> the dialog's work copy, while its dialog is open and not saved
 function rcHops(pane, rc, u, changed) {
   const hops = rc.ingredients.hops, D = S.config.brewDefaults || {}, op = can('operator');
-  const wt = u.hopUnit, wName = wt === 'oz' ? 'Ounces' : 'Grams';
+  // each hop line has its own unit, oz or g (Rule 17.18); a line saved before with none follows Units
+  const wName = wt => wt === 'oz' ? 'Ounces' : 'Grams';
   const rows = [];
   // the boxes worked out from the others: Calc oz, Drop, IBU, Boil Group. Typing in a box updates them all.
   const refresh = () => {
     const sch = hopSchedule(rc, D), boil = +rc.boilTime || 60;
     rows.forEach(({ hop, i, calc, drop, ibu, grp }) => {
-      calc.value = rcRound(kgTo(hopKgToUse(hop), wt), 2);
+      calc.value = rcRound(kgTo(hopKgToUse(hop), hopUnitOf(hop, u)), 2);
       if (!drop) return;
       drop.value = rcRound(Math.max(0, boil - Math.min(+hop.time || 0, boil)), 0);
       ibu.value = rcRound(hopIbu(rc, hop), 1);
@@ -18751,9 +18752,13 @@ function rcHops(pane, rc, u, changed) {
     b.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0));
     return b;
   };
-  const add = guard(() => { hops.push({ name: '', kg: null, alpha: null, alphaActual: 0, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
+  const add = guard(() => { hops.push({ name: '', kg: null, unit: u.hopUnit, alpha: null, alphaActual: 0, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
   const del = i => guard(() => { if (!confirm(`Delete Hop ${i + 1}${hops[i].name ? ` (${hops[i].name})` : ''}?`)) return; hops.splice(i, 1); changed(); renderMenuPane(); });
+  // oz to g: every hop line in ounces turns to grams (the amount is kept, only its unit changes). Some scales start in grams.
+  const ozLines = hops.filter(x => hopUnitOf(x, u) === 'oz');
+  const toGrams = guard(() => { for (const x of ozLines) x.unit = 'g'; changed(); renderMenuPane(); toast(`${ozLines.length} hop line${ozLines.length === 1 ? '' : 's'} now in grams. Press Save to keep it`); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Hops'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a hop line at the bottom' }, 'Add Hop ', h('b', {}, '+')) : '',
+    op && ozLines.length ? h('button', { onclick: toGrams, title: 'Turns every hop line in ounces into grams. Grams are more accurate, and some scales start in grams' }, 'oz → g') : '',
     h('span', { class: 'hopAAU' }, 'AAU %'), h('span', { class: 'muted' }, 'The square box opens the Outside of Boil Hops dialog')));
   if (!hops.length) pane.append(h('p', { class: 'muted' }, 'No hops yet. Press Add Hop, or IMPORT a recipe on the Recipe tab.'));
   hops.forEach((hop, i) => {
@@ -18765,9 +18770,13 @@ function rcHops(pane, rc, u, changed) {
       if (sq.checked) rcHopOpen.set(hop, { use: null }); else rcHopOpen.delete(hop);
       renderMenuPane();
     };
+    const wt = hopUnitOf(hop, u);
+    const ms = rcInput({ unit: wt }, 'unit', { kind: 'sel', list: Object.entries(HOP_MEASURES), ro: !op, onChange: () => {} });
+    ms.addEventListener('change', () => { hop.unit = ms.value; changed(); renderMenuPane(); });
     line.append(
       rcBox('k', `Hop ${i + 1}`, rcInput(hop, 'name', { kind: 'text', ...c }), { wide: true, field: F(i, 'Name') }),
-      rcBox('g', wName, rcInput(hop, 'kg', { to: v => kgTo(v, wt), from: v => toKg(v, wt), ...c }), { field: F(i, 'Amount'), tip: 'The amount in the recipe' }),
+      rcBox('g', wName(wt), rcInput(hop, 'kg', { d: wt === 'g' ? 1 : 2, to: v => kgTo(v, wt), from: v => toKg(v, wt), ...c }), { field: F(i, 'Amount'), tip: 'The amount in the recipe' }),
+      rcBox('g', 'Unit', ms, { field: F(i, 'Measurement'), tip: 'This hop line\'s own unit, oz or g, whatever Units says. Changing it turns the amount' }),
       rcBox('g', 'Recipe', rcInput(hop, 'alpha', { d: 1, ...c }), { field: F(i, 'AA_Recipe'), tip: 'AAU % of the hop in the recipe' }),
       actualBox(hop, i),
       rcBox('c', `Calc ${wt === 'oz' ? 'Oz' : 'g'}`, r.calc, { field: F(i, 'Calc_Amount'), tip: 'The amount to use with the Actual AAU, to get the IBUs of the recipe' }),
@@ -18977,18 +18986,60 @@ function rcWaters(pane, rc, u, changed) {
 
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
-  const I = rc.ingredients;
-  const list = (rows, empty) => rows.length ? h('ul', { class: 'rcList' }, ...rows.map(r => h('li', {}, r))) : h('p', { class: 'muted' }, empty);
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'mash') { rcMash(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'yeast') { rcYeast(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'waters') { rcWaters(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
-  if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
   pane.append(h('div', { class: 'bar' }, back));
+}
+// ---- The Yeast tab (OakBarn Brewery's Yeast layout, 2026-11-19: "Use it"). One line for each yeast, no limit: Name, Form, Amount, its own
+// Unit (Packs, g, oz or ml, Rule 17.18), Attenuation % and the temperature range. ▸ More opens the rest under the line: Lab,
+// Product ID, Type, Flocculation, Starter (and its size), Times cultured, Manufacture date, Notes. The amount is kept in its own
+// unit, like an Adjunct line; the temperatures in °C and the starter in liters, shown in the Units (Rule 2.59). rcp_Yeast_N_...
+const rcYeastMore = new WeakSet();     // the yeast lines with More open
+function rcYeast(pane, rc, u, changed) {
+  rc.ingredients.yeasts = rc.ingredients.yeasts || [];
+  const Y = rc.ingredients.yeasts, op = can('operator'), c = { onChange: changed, ro: !op }, TT = TU(u.tempUnit);
+  const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
+  // a select-only list; a value from a file that is not in it stays in its own list
+  const sel = (obj, key, list, rerender) => rcInput(obj, key, { kind: 'sel', ro: !op, list: [['', ''], ...list.map(x => [x, x]), ...(list.includes(obj[key]) || !obj[key] ? [] : [[obj[key], obj[key]]])],
+    onChange: () => { changed(); if (rerender) renderMenuPane(); } });
+  const add = guard(() => { Y.push({ name: '', form: 'Dry', amount: 1, unit: 'Packs', attenuation: null, minTempC: null, maxTempC: null, lab: '', productId: '', type: 'Ale', flocculation: '', starter: false, starterL: null, timesCultured: null, mfgDate: '', notes: '' }); changed(); renderMenuPane(); });
+  const del = (y, n) => guard(() => { if (!confirm(`Delete Yeast ${n}${y.name ? ` (${y.name})` : ''}?`)) return; Y.splice(Y.indexOf(y), 1); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Yeast'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a yeast line at the bottom' }, 'Yeast ', h('b', {}, '+')) : ''));
+  if (!Y.length) pane.append(h('p', { class: 'muted' }, 'No yeast yet. Press Yeast +, or IMPORT a recipe on the Recipe tab.'));
+  Y.forEach((y, i) => {
+    const n = i + 1, F = end => `rcp_Yeast_${n}_${end}`, open = rcYeastMore.has(y);
+    const ms = rcInput({ unit: yeastUnitOf(y) }, 'unit', { kind: 'sel', list: Object.entries(YEAST_UNITS), ro: !op, onChange: () => {} });
+    ms.addEventListener('change', () => { y.unit = ms.value; changed(); });
+    const more = h('button', { onclick: () => { if (open) rcYeastMore.delete(y); else rcYeastMore.add(y); renderMenuPane(); }, title: 'Lab, Product ID, Type, Flocculation, Starter, Times cultured, Manufacture date and Notes' }, open ? '▾ More' : '▸ More');
+    pane.append(h('div', { class: 'rcRow hopLine' },
+      rcBox('k', `Yeast ${n}`, rcInput(y, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }),
+      rcBox('g', 'Form', sel(y, 'form', YEAST_FORMS), { field: F('Form') }),
+      rcBox('g', 'Amount', rcInput(y, 'amount', { d: 2, ...c }), { field: F('Amount') }),
+      rcBox('g', 'Unit', ms, { field: F('Measurement'), tip: 'This yeast\'s own unit: Packs, g, oz or ml. Most yeasts come in Packs' }),
+      rcBox('g', 'Attenuation', rcInput(y, 'attenuation', { d: 1, ...c }), { unit: '%', field: F('Attenuation'), tip: 'How much of the sugar the yeast eats' }),
+      rcBox('r', 'Min Temp', rcInput(y, 'minTempC', tmp), { unit: TT, field: F('Min_Temp'), tip: 'The lowest temperature it ferments at' }),
+      rcBox('r', 'Max Temp', rcInput(y, 'maxTempC', tmp), { unit: TT, field: F('Max_Temp'), tip: 'The highest temperature it ferments at' }),
+      more, op ? h('button', { class: 'hopDel', onclick: del(y, n), title: `Delete Yeast ${n}` }, '🗑 Delete') : ''));
+    if (!open) return;
+    const date = h('input', { type: 'date', value: y.mfgDate || '', ...(op ? {} : { disabled: true }) }); date.onchange = () => { y.mfgDate = date.value; changed(); };
+    pane.append(h('div', { class: 'rcRow hopLine' },
+      rcBox('g', 'Lab', rcInput(y, 'lab', { kind: 'text', ...c }), { field: F('Lab') }),
+      rcBox('g', 'Product ID', rcInput(y, 'productId', { kind: 'text', ...c }), { field: F('Product_ID') }),
+      rcBox('g', 'Type', sel(y, 'type', YEAST_TYPES), { field: F('Type') }),
+      rcBox('g', 'Flocculation', sel(y, 'flocculation', YEAST_FLOCS), { field: F('Flocculation'), tip: 'How fast the yeast drops out' }),
+      h('div', { class: 'hopSw', 'data-field': F('Starter'), title: `A yeast starter\nSkynet_Field ${F('Starter')}` }, h('b', {}, 'Starter'), rcSwitch(!!y.starter, on => { if (!op) return; y.starter = on; changed(); renderMenuPane(); })),
+      y.starter ? rcBox('b', 'Starter Size', rcInput(y, 'starterL', { d: 2, to: v => lTo(v, u.volumeUnit), from: v => toL(v, u.volumeUnit), ...c }), { unit: u.volumeUnit, field: F('Starter_Size'), tip: 'Empty is fine' }) : '',
+      rcBox('g', 'Times Cultured', rcInput(y, 'timesCultured', { d: 0, ...c }), { field: F('Times_Cultured') }),
+      rcBox('g', 'Mfg Date', date, { field: F('Mfg_Date'), tip: 'The manufacture date on the pack, for how fresh it is' }),
+      rcBox('g', 'Notes', rcInput(y, 'notes', { kind: 'text', ...c }), { wide: true, field: F('Notes') })));
+  });
 }
 // Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files
 function rcDrops(pane, rc) {
