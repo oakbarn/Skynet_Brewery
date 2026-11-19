@@ -27,7 +27,7 @@ gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer
 start "tm_Whirlpool"           start a timer
 alm_Hops = true                sound an alarm
-wait BK_Temp <= 154            wait for a temperature
+wait BK_Temp <= 68             wait for a temperature (in °C; 154°F works too)
 sleep 1000                     wait 1 second (1000 ms)
 my_Widget.visible = false      hide something on the screen
 if vVCount > 2 && Pump_Red == true
@@ -58,6 +58,21 @@ Every Device and Widget has a **label**: the name shown on the tab (empty = its 
 tm_Delay_W1.label = "1 Minute Delay"
 gGS_Brewery_Top.label = "Mash"
 ```
+
+## Temperatures in a Process
+
+A Process works in **°C**, the same as the Recipe values (`gblV_Desired_Strike` ...), whatever **Settings > Units** says and whatever
+a probe keeps its numbers in (Skynet Rule 2.59). To type a temperature in °F, write it with its degree sign: Skynet turns it into °C.
+
+```
+HLT_Element.setpoint = 66.7      66.7 °C
+HLT_Element.setpoint = 152°F     the same: 152 °F is 66.7 °C
+HLT_Element.onoffset = -1°F      an Offset is a difference: -1 °F is -0.56 °C (no 32)
+wait HLT_Temp >= 150°F           wait until the HLT reaches 150 °F
+```
+
+A plain number hotter than boiling set as a temperature (`HLT_Element.setpoint = 152`) gets one warning when you save, because
+152 °C is hotter than boiling: it was probably meant as `152°F`. A probe kept in °F (an older Schema) is read and set in °C too.
 
 ## Files that are not on the Brain
 
