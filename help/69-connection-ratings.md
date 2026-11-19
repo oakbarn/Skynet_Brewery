@@ -18,6 +18,10 @@ Each board (Interface) on the **Devices** page shows a **connection rating**: ho
 | 2 | Ethernet | **Good** |
 | 2 | WiFi | **Good**, as long as no heating Device is on it |
 
+## Other boards
+
+An Arduino-type board (Uno, Nano, Leonardo, Micro, Due, Grand Central and the others) is rated like the **Arduino Mega**. A board with WiFi built in (GIGA, Nano ESP32, Uno R4 WiFi, Feather M0 WiFi, ESP8266) is rated like the **ESP32**: its built-in WiFi is **Good**, as long as no heating Device is on it.
+
 ## Heating Devices
 
 A heating Device is an electric element, a burner gas valve or igniter, a heat pad, or the output of a PID, Hysteresis or Duty Cycle. You **can** put one on an Ethernet or WiFi board, but the panel warns you when you save it, and that board's **Rating** shows ⚠ with the heating Devices named. On WiFi an ESP32's rating drops to **Poor**. USB is safest.
@@ -30,7 +34,7 @@ The board gets the delay each time it connects, so a change takes effect right a
 
 ## Picking the board
 
-When you add an Interface, pick its **Board** (Arduino Mega, ESP32 or Raspberry Pi) and its **Connection**; the choices follow the Board, and the Connection's Hover Help gives its rating. A board with no Board picked yet shows **(pick the board)**: pick it in the **Board** column or in the Interface pop-up.
+When you add an Interface, pick its **Board** (the Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi; see [Skynet Boards](205-skynet-boards)) and its **Connection**; the choices follow the Board, and the Connection's Hover Help gives its rating. A board with no Board picked yet shows **(pick the board)**: pick it in the **Board** column or in the Interface pop-up.
 
 ## Pin 10 on an Ethernet Mega
 

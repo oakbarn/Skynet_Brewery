@@ -6,6 +6,7 @@
 // Device name (Fritz, 2026-10-23; single _ 2026-11-05; General Type@ 2026-11-11): InterfaceID_Port_GeneralType@TypeID_ParsedLabel_TabID,
 //   e.g. MB_25_DO@Valve_E_Fly~Sparge~In_SP from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
+import { BOARD_INFO, analogPins, analogLabel } from './boards.js';
 import { TYPE_METHOD } from './heatmethod.js';
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is H_Element
@@ -358,7 +359,8 @@ export function rtdPinError(el, devices) {
 export const ETHERNET_PIN = '10';
 export const SD_PIN = '4';
 export const SD_WARNING = 'Pin D4 is the SD card pin of the Ethernet shield. SD Card Not Supported. Never insert an SD Card! (Skynet Rule 6.11)';
-const ethernetMega = d => !!d && boardOf(d) === 'mega' && linkOf(d) === 'ethernet';
+// Every board on an Ethernet shield or module uses D10 for it (2026-11-19, Rule 6.35: Rule 6.10 on every such board, not only the Mega)
+const ethernetMega = d => !!d && !!BOARD_INFO[boardOf(d)]?.shield && linkOf(d) === 'ethernet';
 // A plain message when Interface d is (or is being changed to) an Ethernet Mega and a Device on it uses pin 10, or null
 export function ethernetPinError(d, elements) {
   if (!ethernetMega(d)) return null;
@@ -376,6 +378,9 @@ export function busCheck(el, elements, devices) {
   const mine = el.device ? pinsOn(el) : [], iface = el.device;
   if (P.board === 'pi' && el.device) {
     const bad = piDeviceError(el, mine); if (bad) return { error: bad };
+  }
+  if (P.board !== 'pi' && P.board !== 'mega' && el.device) {
+    const bad = boardDeviceError(el, mine, P); if (bad) return { error: bad };
   }
   if (mine.includes(ETHERNET_PIN) && ethernetMega((devices ?? []).find(d => d.name === iface))) return { error: `Pin D10 on ${iface} is used by its Ethernet shield. Pick another pin (Skynet Rule 6.10).` };
   const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
@@ -415,15 +420,17 @@ const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOu
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 
-// Pin rules by board. ESP32 and other Arduino-type boards use the Mega's rules for now.
+// Pin rules by board (public/boards.js, OakBarn Brewery, 2026-11-19: every standard Arduino board, Rule 6.35). The Mega is the board
+// Skynet plans and wires for ("Plan Skynet for a Mega and the warnings if you use a 3.3v board instead"); its lists are the ones above.
 // Raspberry Pi (firmware/Pi_GPIO, 2026-10-27): GPIO 2-27 by their GPIO (BCM) numbers. The Pi program makes PWM and counts pulses
 // on any pin, so no pin is kept for those. SPI (RTD and thermocouple boards) uses GPIO 7-11, DS18B20 probes GPIO 4, I2C (ADS1115)
 // GPIO 2 and 3. A Pi has no analog pins (use an ADS1115) and can't time stepper motors.
 const PI_PINS = Array.from({ length: 26 }, (_, i) => String(i + 2));
-const PROFILES = {
-  mega: { board: 'mega', pins: MEGA_PINS, pwm: PWM_PINS, counter: COUNTER_PINS, spi: SPI_PINS, onewire: ONEWIRE_PIN, i2c: [], analog: 16, label: p => `D${p}` },
-  pi: { board: 'pi', pins: PI_PINS, pwm: PI_PINS, counter: PI_PINS, spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, label: p => `GPIO${p}` },
-};
+const PROFILES = Object.fromEntries(Object.entries(BOARD_INFO).map(([k, b]) => [k, { ...b, board: k, inputOnly: b.inputOnly || [], avoid: b.avoid || [], usb: b.usb || [] }]));
+Object.assign(PROFILES.mega, { pins: MEGA_PINS, pwm: PWM_PINS, counter: COUNTER_PINS, spi: SPI_PINS, onewire: ONEWIRE_PIN });
+// a list of Ports a board keeps for something (PWM, counters) only when not every Port that can drive an output is in it (on a Pi, an ESP32
+// or a Due every pin counts pulses, so none is kept for that)
+const keepsFew = (P, list) => !(P.pwmAll && list === P.pwm) && !P.pins.filter(p => !P.inputOnly.includes(p)).every(p => list.includes(p));
 export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
 // can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
@@ -432,7 +439,7 @@ export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(S
 // el (the Device being given a Port) is optional: a Device that doesn't need PWM sees a PWM pin as "D5 (Save for PWM)" (Rule 4.2).
 export function pinLabel(p, board, el) {
   p = String(p);
-  if (/^A\d+$/.test(p)) return `A${p.slice(1)} = pin ${54 + +p.slice(1)}`;
+  if (/^A\d+$/.test(p)) return analogLabel(p, pinProfile(board));
   const t = pinTag(p, board, el);
   return pinProfile(board).label(p) + (t ? `  (${t})` : '');
 }
@@ -446,6 +453,34 @@ function piDeviceError(el, mine) {
   if (off !== undefined) return `GPIO${/^\d+$/.test(off) ? off : ' ' + off} is not a pin you can use on a Raspberry Pi. Use GPIO 2 to GPIO 27.`;
   return null;
 }
+// A plain message when a Device can't go on one of these Ports of a board other than the Mega and the Pi, or null (2026-11-19, Rule 6.35):
+// a Port the board doesn't have, or (ESP32) an input-only Port given an output
+export const OUTPUT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'stepper'];
+function boardDeviceError(el, mine, P) {
+  const name = BOARD_INFO[P.board]?.name || P.board, an = analogPins(P);
+  const off = mine.find(p => !/^ADS\d$/.test(p) && !P.pins.includes(p) && !an.some(a => a === p || String(54 + +a.slice(1)) === p));
+  if (off !== undefined) return `${/^\d+$/.test(off) ? P.label(off).replace(/ \(.*$/, '') : off} is not a Port you can use on an ${name}. Pick one from the Port list.`;
+  const ro = OUTPUT_TYPES.includes(el.type) && mine.find(p => P.inputOnly.includes(p));
+  if (ro) return `${P.label(ro)} on an ${name} can only read (an input). Put this output on another Port.`;
+  return null;
+}
+// The 3.3 V warnings (OakBarn Brewery, 2026-11-19: "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead", "Make
+// those Warnings", Rule 6.35). The Mega (5 V) is the board Skynet plans and wires for. A brewery may mix 5 V and 3.3 V boards ("you
+// could have a mixed system of 3.3 and 5v"), so the warning goes by the board this Device is on. One warning, when the Device is put on
+// a Port of a 3.3 V board (Fritz, 2026-11-18: one warning is enough), then the brewer decides.
+export const LOW_VOLT_WARNINGS = {
+  input: '⚠ {0} is a 3.3 V board. Wire this input to 3.3 V, never to 5 V: 5 V on a 3.3 V pin can ruin the board. A switch or float switch goes between the pin and GND (the board\'s own pull-up), or use a level shifter.',
+  analog: '⚠ {0} is a 3.3 V board. A 0-5 V sensor (for example a pressure transducer) puts more than 3.3 V on the pin and can ruin the board. Use a voltage divider, a 3.3 V sensor, or an ADS1115 board.',
+  output: '⚠ {0} is a 3.3 V board. Many 5 V relay modules do not switch from a 3.3 V pin. Use a relay module made for a 3.3 V signal, or an SSR (most switch from 3 to 32 V).\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',      // Rule 6.20: it talks about wiring an SSR
+};
+const ANALOG_SENSORS = ['ntc', 'lm35', 'tmp36'];
+export function lowVoltWarning(el, devices) {
+  const d = (devices ?? []).find(x => x.name === el?.device), b = d && BOARD_INFO[boardOf(d)];
+  if (!b || b.volts >= 5) return '';
+  const kind = el.type === 'digitalIn' ? 'input' : (el.type === 'analogIn' && el.adc !== 'ads1115') || (el.type === 'temperature' && ANALOG_SENSORS.includes(el.sensor)) ? 'analog'
+    : ['digitalOut', 'pwmOut'].includes(el.type) ? 'output' : '';
+  return kind ? LOW_VOLT_WARNINGS[kind].replace('{0}', `${d.name} (${b.name})`) : '';
+}
 // what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
 // For a Device that doesn't need PWM (an On/Off DO, a probe, a pseudo PWM ...) a PWM pin reads "Save for PWM" (OakBarn Brewery,
 // 2026-11-12: "Mark the PWM as Save for PWM for DO that dont need PWM", Rule 4.2), so it is kept for a Device that needs it.
@@ -453,20 +488,21 @@ export const SAVE_FOR_PWM = 'Save for PWM';
 export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''; }
-  const t = [PWM_PINS.includes(p) && (el?.type && !needsPwm(el) ? SAVE_FOR_PWM : 'PWM'), COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
-  if (p === SD_PIN) return t + ', SD card pin';      // Skynet Rule 6.11
-  return t || (SPI_PINS.includes(p) ? 'SPI, for RTD boards' : p === ONEWIRE_PIN ? 'OneWire probes' : p === '0' || p === '1' ? 'USB link' : '');
+  const P = pinProfile(board);
+  const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && (el?.type && !needsPwm(el) ? SAVE_FOR_PWM : 'PWM'), keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ');
+  if (p === SD_PIN && P.board === 'mega') return t + ', SD card pin';      // Skynet Rule 6.11
+  return t || (P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C' : P.usb.includes(p) ? 'USB link' : P.avoid.includes(p) ? 'start-up pin, use last' : '');
 }
 // Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
 // counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
 export function freePins(el, elements, devices, analog) {
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean), P = profileOf(el, devices);
-  const pool = analog ? [...Array(P.analog).keys()].map(i => 'A' + i) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? P.pwm : need.includes('counter') ? P.counter : P.pins;
+  const pool = analog ? analogPins(P) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? P.pwm : need.includes('counter') ? P.counter : P.pins;
   const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
-  const special = (list, p) => list !== P.pins && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
+  const special = (list, p) => keepsFew(P, list) && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
   const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
-  const free = pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
-    .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+  const free = pool.filter(p => !(OUTPUT_TYPES.includes(el.type) && P.inputOnly.includes(p))).filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
+    .map((p, i) => [p, extras(p) + (P.avoid.includes(p) ? 5 : 0), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
   // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,
   // select NON PWM Ports." A Device that needs no true PWM is offered only the pins that can't do it (Rule 4.2); only when none of
   // those is free are the PWM pins offered. (On a Pi every pin does PWM, so nothing is held back.)
@@ -475,7 +511,7 @@ export function freePins(el, elements, devices, analog) {
   return plain.length ? plain : free;
 }
 function pinAdvice(el, mine, others, owPin, eth, P = PROFILES.mega) {
-  const special = (list, p) => list !== P.pins && list.includes(p);
+  const special = (list, p) => keepsFew(P, list) && list.includes(p);
   const kept = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', P.spi.includes(p) && 'spi', p === owPin && 'onewire'].filter(Boolean);
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter', usesSpi(el) && 'spi', isProbe(el) && 'onewire'].filter(Boolean);
   const used = new Set(others.filter(o => o.device === el.device).flatMap(pinsOn));

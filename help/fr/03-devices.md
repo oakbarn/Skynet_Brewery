@@ -12,7 +12,7 @@ Ici, « PLC » veut dire des cartes de loisir : les cartes compatibles Arduino (
 Une carte s'appelle une **Interface**. Sur l'écran **Devices**, sous **Add Interface**, appuyez sur **➕ Add Interface…** :
 
 1. Donnez-lui un **Name**, par exemple `Main Brewery Mega USB`. Son **Interface ID** (`MB`) est proposé à partir du nom ; voir [Interfaces](76-interfaces).
-2. Choisissez la **Board** (Arduino Mega, ESP32 ou Raspberry Pi) et sa **Connection** : les choix suivent la Board (USB, Ethernet ou WiFi). Le Hover Help de la Connection donne la **note de connexion** (connection rating), à quel point ce lien est sûr ; voir [Notes de connexion](69-connection-ratings).
+2. Choisissez la **Board** (l'Arduino Mega, une autre carte Arduino, un ESP32 ou un Raspberry Pi ; voir [Cartes Skynet](205-skynet-boards)) et sa **Connection** : les choix suivent la Board (USB, Ethernet ou WiFi). Le Hover Help de la Connection donne la **note de connexion** (connection rating), à quel point ce lien est sûr ; voir [Notes de connexion](69-connection-ratings).
 3. Pour l'USB, le numéro du **USB Port** : Skynet en propose un libre qu'il a trouvé (Windows : `7` est COM7 ; Pi : `/dev/ttyACM0`). Pour l'Ethernet ou le WiFi, tapez son adresse réseau.
 4. Appuyez sur **Add**. Ensuite **⚙ Change** et **🔌 Test Communication** vérifient que le Brain et la carte se parlent.
 

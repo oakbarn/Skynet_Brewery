@@ -22,7 +22,7 @@ import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFET
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -5916,6 +5916,9 @@ function portError(e, self) {
   if (b?.error) return b.error;
   const pin = pinsOf(e).find(Boolean);
   if (b?.warn && !confirm(b.warn + `\n\nOK = use pin ${pin} anyway.  Cancel = go back and pick another pin.`)) return b.pin ? `Pick another pin, for example pin ${b.pin}.` : 'Pick another pin.';
+  // the 3.3 V warnings (Rule 6.35): once, when the Device is put on a Port of a 3.3 V board (not again for a Device already saved there)
+  const lv = lowVoltWarning(e, S.config.devices), saved = S.config.elements.some(x => x.name === e.name && x.device === e.device && samePin(x.channel, e.channel));
+  if (lv && !saved && !confirm(lv + '\n\nOK = go on.  Cancel = go back.')) return 'Pick another Port or Interface, or change the wiring first.';
   return null;
 }
 // Fritz, 2026-10-27: a name typed instead of the Suggested Name gets this warning first
@@ -13031,8 +13034,10 @@ const NET_HELP_BEFORE = '⟪b:Before you add it⟫Plug the board in, or power it
 const NET_HELP_FIND = '\n⟪b:How to find it⟫Open your router\'s app or its web page and look at its list of connected devices: the board is there with its address. Then, in the router, reserve that address for the board (it may be called a DHCP reservation, a fixed or a static address), so it never changes. Without that, the board can get a new address after a power cut and the Brain can no longer find it.\n';
 const NET_HELP_SAME = '\n⟪b:Windows, Mac, Linux or a Raspberry Pi⟫It is the same on all of them: the address belongs to the board and your router, not to the Brain\'s computer, and nothing more is installed. The Brain only has to be on the same network (the same router) as the board. The Network port below must be the same as the program on the board (Skynet\'s own programs use 4100).';
 const IFACE_TIP = {
-  name: 'An Interface is the board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 or a Raspberry Pi. Give it a Name that means something to you: Hot Side, Fermentation, your brewery name. Skynet suggests its Interface ID from the Name.',
-  board: 'The kind of board this Interface is. Skynet has a program for each board in the list, and sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).',
+  name: 'An Interface is the board (PLC) your Devices are wired to: an Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi. Give it a Name that means something to you: Hot Side, Fermentation, your brewery name. Skynet suggests its Interface ID from the Name.',
+  // OakBarn Brewery, 2026-11-19: "I want all standard Arduino Boards added"; "Plan Skynet for a Mega and the warnings if you use a 3.3v
+  // board instead"; "you could have a mixed system of 3.3 and 5v" (Rule 6.35)
+  board: 'The kind of board this Interface is. Skynet sets the rest from the board: its Connection choices, how fast it talks over USB, and its Ports (IO Pins).\n\nSkynet is planned and wired for the Arduino Mega 2560 (a 5 V board). Every other board in the list can be used too.\n\n⟪b:3.3 V boards⟫Due, GIGA, Nano ESP32, Grand Central, Feather M0, ESP32, ESP8266 and Raspberry Pi are 3.3 V boards. When you put an input, a 0-5 V sensor or a relay on one, Skynet shows one warning. You can mix 5 V and 3.3 V boards: each board is its own Interface.\nMore: Skynet Boards.',
   connection: 'How the board is connected to the Brain. The choices are the ones this board can use. USB is the safest; Ethernet and WiFi depend on your network.',
   usb: 'The number of the USB Port the board is plugged into on the Brain: a number between 1 and 256, used to connect the Arduino to the Brain. Skynet suggests a free one it found. If none is suggested, plug the board in and open this box again.\n\n⟪b:Simulation mode⟫While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over this USB Port. To test the real USB connection: switch the panel to 🔌 Real, ➕ Add this Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.\nMore: USB Port, the technical side.',
   // Network Address (OakBarn Brewery, 2026-11-16, Add Interface markup: "This is always a big stumbling Block for many users who know

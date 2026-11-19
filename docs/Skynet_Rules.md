@@ -2377,7 +2377,10 @@ Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
 
 6.3 **Connection ranking per board** (2026-10-26, PR #108, still open):
 - Arduino Mega: USB best, Ethernet OK (a network failure is a safety risk), WiFi poor. There is no "other
-  Arduino-type board" (OakBarn Brewery, 2026-11-15: "List Boards Only"): the Board list is Arduino Mega, ESP32 and Raspberry Pi.
+  Arduino-type board" (OakBarn Brewery, 2026-11-15: "List Boards Only"): the Board list is every board Skynet names, never "Other"
+  (2026-11-19, Rule 6.35: every standard Arduino board and every BruControl board). Another Arduino-type board is rated like the Mega; a
+  board with WiFi built in is rated like the ESP32.
+  *Replaced:* "the Board list is Arduino Mega, ESP32 and Raspberry Pi." (2026-11-15)
 - ESP32: USB best, Ethernet good, WiFi good **as long as no heating is on a pin**.
 - Heating on Ethernet or WiFi is allowed, with a warning. A lost link turns the board's outputs off
   after a set delay.
@@ -3058,6 +3061,30 @@ method: while its pin is on), the Brain watches its probe about once a second:
 - **Not a UL safety** (OakBarn Brewery, 2026-11-15: "it is not a UL Safety and should not be relied on. Monitor the Burner."): the
   Flame Out's Properties note, its balloon, the burner pop-up and Help 197 say "This is not a UL listed safety and should not be relied on. Always monitor the burner." (the same words
   in the BruControl Import's burner question).
+
+6.35 **Every standard Arduino board; the Mega is the standard; 3.3 V warnings** (OakBarn Brewery, 2026-11-19: "I want all standard
+Arduino Boards added. Brew Control had a lot but no Opta which I have and would like to intergrate"; "I also have a Grandcentral";
+"Plan Skynet for a Mega and the warnings if you use a 3.3v board instead"; "Make those Warnings"; "you could have a mixed system of 3.3
+and 5v I do").
+- **The Board list** (public/boards.js): Arduino Mega 2560, Uno R3, Uno R4 (Minima or WiFi), Nano, Nano Every, Leonardo, Micro, Due,
+  GIGA R1 WiFi, Nano ESP32, Adafruit Grand Central M4, Adafruit Feather M0 (WiFi), ESP32, ESP8266 and Raspberry Pi. No "Other".
+- **The Mega 2560 is the board Skynet plans and wires for**; it is first in the list and its Port lists do not change. Every other
+  board can be used: its own Ports, true PWM Ports, counter Ports, analog Ports (with BruControl's numbers on the Mega and the Grand
+  Central), SPI, OneWire and I2C Ports, and its own Connection choices. A Port a board does not have is refused (the Pi already was,
+  Rule 6.13). ESP32: GPIO 6-11 never offered, GPIO 34-39 inputs only; ESP32 and ESP8266 start-up pins offered last.
+- **Rule 6.10 on every Ethernet shield or module**: D10 is not offered on any board connected by an Ethernet shield or module, not only
+  the Mega (an ESP32 with its own jack has no shield). Rule 6.9 (RTD CS pins) and 6.11 (SD card pin) stay Mega only.
+- **3.3 V warnings, one each, per board**: a Device put on a Port of a 3.3 V board (Due, GIGA, Nano ESP32, Grand Central, Feather M0,
+  ESP32, ESP8266, Raspberry Pi) shows one warning, once, when it is put there: 1 a Digital Input (wire it to 3.3 V, never 5 V), 2 a 0-5 V
+  analog sensor (voltage divider, 3.3 V sensor or ADS1115), 3 a relay output (many 5 V relay modules do not switch from 3.3 V; the
+  electrical warning, Rule 6.20, follows it). Then the brewer decides (one warning is enough). 5 V and 3.3 V boards may be mixed: each
+  board is its own Interface, and the warnings go by the board each Device is on.
+- **The BruControl Import** picks the Board from BruControl's board type for every board in the list (Grand Central, Feather M0,
+  ESP8266, Due, Uno ...); any other is left "(pick the board)".
+- **Firmware**: the Skynet program on the board is written and tested for the Mega. The shared firmware for the other boards (Rule
+  6.12) is written with every board in this list in mind (pin maps, 3.3 V and 5 V, PWM and analog differences). The **Arduino Opta**
+  is not in the list until its program is planned and Fritz agrees (Panel Updates sandbox).
+Help 205 (and French), Help 3, 69, 76.
 
 ## 7. Pictures
 
@@ -5714,6 +5741,7 @@ import.
 
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
+- 2026-11-19: Added Rule 6.35 (OakBarn Brewery: "I want all standard Arduino Boards added"; "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead"; "Make those Warnings"): every standard Arduino board and every BruControl board in the Board list with its own Ports, the Mega the standard, three 3.3 V warnings per board, Rule 6.10 on every Ethernet shield; Rule 6.3 changed (the Board list). Help 205 (new), 3, 69, 76 (and French). Checked against both programs: the BruControl Import now picks the Board from BruControl's board type for every listed board; its Build page shares the Interface pop-up, Port lists and warnings.
 - 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.
 - 2026-11-18: Rule 18.50 applied to the Alarm Widgets (the "Recheck dialogs" pass, part 1): Basic, User and Pre-Hop Alarm dialogs in the Hose Bib's order, Widget Type last, Database and .API ⬢ on the Active overlay line; nothing taken away. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs; no import change.
 - 2026-11-18: Added Rule 18.50 (OakBarn Brewery, PDF "Panel Update Final 4", "Final 4 will just be some guidance Rules"): a guidance Rule for the "Recheck dialogs" pass: a Widget dialog follows the Hose Bib (the Widget half of the Model) the way the Hose Bib was made from the Blichmann; a Widget with no Graphic has no picture attributes and gets a Background, Fore color and Back color; Switch, Pump and like Widgets and the Graphic (Picture) Widget have the Graphic properties, others only with IPs or .confirmation; the Graphic Widget has 3 Backgrounds (.path, .path_2, .path_3), other Widgets one from Skynet with no path, a User Widget one path; no IPs, Hose or Pipe, IP Fittings, Cover or Overlay on a Widget without IPs, except a Switch has an Overlay. No dialog changes now. Checked against both programs: the BruControl Import's Build page shares the dialogs.

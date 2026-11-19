@@ -2,7 +2,7 @@
  "00-tailscale-windows": "7718c563861cc0e1",
  "01-getting-started": "5c355762bc5f9815",
  "02-tabs": "33b2052c17709737",
- "03-devices": "89387217d6d20590",
+ "03-devices": "6696e18e507ca3c9",
  "04-variables": "285856e470f40ab8",
  "05-scripts": "9e1cfc6e4b57fa92",
  "06-log": "5906688b79c6c7d5",
@@ -67,13 +67,13 @@
  "66-add-a-vessel": "baf111d434304e29",
  "67-every-screen-in-the-menu": "8ea2c3d14ab164b0",
  "68-double-click-in-lists": "642e3760a00b99f7",
- "69-connection-ratings": "f6d975613788f359",
+ "69-connection-ratings": "3803956ad8dca1f2",
  "71-cloned-devices": "6efc1e830e70da4a",
  "72-labels": "1a85d2fe140762ec",
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
  "74-picture-widget": "f0d21593f051018d",
  "75-build-tab-add-button": "92478527e0a0781b",
- "76-interfaces": "4ce88a1ebbd79ecd",
+ "76-interfaces": "60c74d1c1cbf5fd3",
  "77-simulator-or-real-boards": "db6004fe0aaf6363",
  "78-raspberry-pi-gpio-pins": "8d331c749ffdbb6c",
  "79-predictive-text": "8e7640adc70723bc",
@@ -197,5 +197,6 @@
  "201-ice-water-can": "bb8f68248492771e",
  "202-new-schema-interview": "f11d0e9ae07d96ad",
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
- "204-set-up-a-pi-brain": "d629e4e76a8ac8b3"
+ "204-set-up-a-pi-brain": "d629e4e76a8ac8b3",
+ "205-skynet-boards": "7ba564f4d940de37"
 }
