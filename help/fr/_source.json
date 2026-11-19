@@ -68,7 +68,6 @@
  "67-every-screen-in-the-menu": "0e9681eb6c5b8005",
  "68-double-click-in-lists": "642e3760a00b99f7",
  "69-connection-ratings": "1dd016158a702e8d",
- "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "71-cloned-devices": "3879e11eb4e91021",
  "72-labels": "1a85d2fe140762ec",
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
@@ -227,7 +226,9 @@
  "230-step-by-step-wire-a-ph-probe": "17fb241c652ae96e",
  "231-step-by-step-wire-an-e-stop": "8de6b5ae8596ae19",
  "232-step-by-step-wire-a-fan-buzzer-or-led": "9956afcaffc81e39",
- "233-step-by-step-wire-switches-and-float-switches": "f660a813a9a85129",
+ "233-step-by-step-wire-switches-and-float-switches": "c5dd8659297efe35",
  "234-1-wire-probes": "6099b8f79b1e2ab1",
+ "235-din-button-on-press": "a8b5b5a37b0960b9",
+ "236-copy-a-whole-tab": "31a20e264fee5ce1",
  "237-pid-auto-tune": "b4e0d90926f3f155"
 }

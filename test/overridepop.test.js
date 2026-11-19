@@ -91,4 +91,6 @@ assert.ok(await until(() => !pops().length), 'it goes with the Process');
 for (const n of [...eng.running.keys()]) eng.stop(n);
 clearTimeout(store._persistTimer);
 console.log('override pop-up tests passed');
+// a DIN button's On Press (Rule 6.38) runs from here, so the npm test list stays the same
+await import('./dinpress.test.js');
 process.exit(0);
