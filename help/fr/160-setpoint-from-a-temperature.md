@@ -12,8 +12,13 @@ qui tient cette température (Règle Skynet 2.43). Cela marche sur :
 
 Sur un Tab en marche, l'affichage de chaque Temperature Probe montre deux lignes, comme un régulateur de tableau (Panel Updates 41) :
 
-- **PV** en haut : ce que la sonde lit maintenant, par exemple **152.3 °F**. Il devient **rouge pendant la chauffe** et **bleu pendant le
-  refroidissement** (quelque chose qui utilise cette sonde chauffe ou refroidit en ce moment) ; au repos ou à l'arrêt, il garde la couleur de l'affichage de la sonde.
+- **PV** en haut : ce que la sonde lit maintenant, par exemple **152.3 °F**. Sa couleur montre où il en est par rapport à la consigne de
+  ce qui utilise la sonde :
+  - **Hysteresis :** **vert** tant que la lecture est à moins de son Offset de la consigne. **PID** et **Precise :** vert à moins d'un
+    demi-degré C (un degré F). **Deadband :** vert dans la Deadband. **Fermentor Control :** vert entre ses Heat et Cool Offsets.
+    En dehors : **bleu** sous la consigne (trop froid), **rouge** au-dessus (trop chaud).
+  - **Duty Cycle**, **Direct** et **PWM :** **rouge** tant qu'une résistance est ON, **bleu** tant qu'un refroidisseur est ON, **gris** à l'arrêt (OFF).
+  - Une sonde que rien n'utilise garde la couleur de son affichage.
 - **SV** dessous, dans une **case verte** : sa **consigne** (Setpoint), par exemple **152.0 °F**.
 
 Chaque ligne garde tous ses chiffres et son °F ou °C ensemble sur une seule ligne, dans l'affichage ; un long nombre rend les deux lignes

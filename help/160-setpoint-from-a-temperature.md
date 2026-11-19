@@ -12,8 +12,13 @@ Element that holds that temperature (Skynet Rule 2.43). This works on:
 
 Every Temperature Probe's display on a running Tab shows two lines, like a panel controller (Panel Updates 41):
 
-- **PV** on top: what the probe reads now, for example **152.3 °F**. It turns **red while heating** and **blue while cooling**
-  (something that uses this probe is putting heat in or taking it out right now); idle or Off, it keeps the probe's own Display color.
+- **PV** on top: what the probe reads now, for example **152.3 °F**. Its color tells you where it is against the Setpoint
+  of what uses the probe:
+  - **Hysteresis:** **Green** while the reading is within its Offset of the Setpoint. **PID** and **Precise:** Green within half a
+    degree C (one degree F). **Deadband:** Green inside the Deadband. **Fermentor Control:** Green between its Heat and Cool Offsets.
+    Outside: **Blue** below the Setpoint (too cold), **Red** above it (too hot).
+  - **Duty Cycle**, **Direct** and **PWM:** **Red** while a heater is ON, **Blue** while a cooler is ON, **Grey** while it is OFF.
+  - A probe nothing uses keeps its own Display color.
 - **SV** under it, in a **green box**: its **Setpoint**, for example **152.0 °F**.
 
 Each line keeps all its digits and its °F or °C together on one line, inside the display; a long number makes both lines smaller

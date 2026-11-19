@@ -2961,31 +2961,43 @@ function probeSv(e0, e, v) {
   const raw = t ? (S.values[t.name]?.target ?? t.target) : (v.setpoint ?? p.setpoint);
   const num = raw === '' || raw === null || raw === undefined || !Number.isFinite(Number(raw)) ? null : Number(raw);
   return { prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
-    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', doing: probeDoing(p) };
+    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', color: v.fault ? '' : probePvColor(p, v.value) };
 }
-// PV red while heating, blue while cooling (OakBarn Brewery, 2026-11-19: "Red when Heating   Blue when cooling"): what uses this
-// probe is really putting heat in or taking it out now. Idle, Off, or nothing uses it: PV keeps the probe's own Display color.
-function probeDoing(p) {
-  let heat = false, cool = false;
-  for (const t of S.config.elements) {
-    if (t.input !== p.name) continue;
-    const x = S.values[t.name] || {};
-    if (isFermentor(t)) { if (x.state && x.doing === 'Heating') heat = true; if (x.state && x.doing === 'Cooling') cool = true; continue; }
-    if (isHeatElem(t)) {
-      if (!x.state) continue;
-      const k = heatMethodKey(x.method) ?? startMethod(t);
-      if (k === 'hysteresis' ? x.output : k === 'dutyCycle' ? +x.dutycycle > 0 : PERCENT_METHODS.includes(k) ? +x.value > 0 : true) heat = true;
-      continue;
-    }
-    // a Cool / Warm Pump (Rule 6.21) and the older Hysteresis, PID and Deadband Devices: + Offset or Reversed cools
-    const old = SP_OLD.includes(t.type);
-    if (!isCoolPump(t) && !old) continue;
-    if (!(old ? x.enabled : x.state)) continue;
-    if (!(t.type === 'hysteresis' ? x.state : isCoolPump(t) && heatMethodKey(x.method) === 'hysteresis' ? x.output : old ? +x.value > 0 : true)) continue;      // what is on now
-    const off = Number(x.onoffset ?? t.onOffset);
-    if (t.reversed || (t.type !== 'pid' && t.type !== 'deadband' && off > 0)) cool = true; else heat = true;
+// PV's color (OakBarn Brewery, 2026-11-19: "If the process is heating and the Temperature is Below the Setpoint , Blue, at Setpoint
+// Between a Hys Green and PID (with smoothing Green) and if above Red. Opposite for Cooling. Dead Band Green in the Band and Blue if
+// Heating and Red If Cooling. Duty Cycle Heating Red if On, Grey If Off, Cooling Blue if On, Grey if Off"). It comes from what uses the
+// probe (the one that is ON, else the first: a Heating Element, Cool / Warm Pump, Fermentor Control or older Hysteresis, PID, Deadband):
+// - Hysteresis: Green while the reading is within its Offset of the Setpoint; PID and Precise: within PV_NEAR; Deadband: within its
+//   Deadband; a Fermentor: between its Heat and Cool Offsets. Outside: Blue below (cold), Red above (hot). Cooling the same way round
+//   (PV_COOL_SWAP false; see the card asked of OakBarn Brewery: true swaps Red and Blue for cooling).
+// - Duty Cycle, Direct, PWM, On/Off: heating Red while ON, cooling Blue while ON, Grey while OFF.
+// Nothing uses the probe (or a FAULT): PV keeps the probe's own Display color.
+const PV_COOL_SWAP = false;
+const PV_NEAR = u => /C/i.test(u || '') ? 0.5 : 1;      // "at Setpoint" for PID and Precise: half a degree C, one degree F
+function probeCtl(p) {
+  const hs = [...heatersOf(p), ...S.config.elements.filter(t => isCoolPump(t) && t.input === p.name)];
+  const on = t => { const x = S.values[t.name] || {}; return SP_OLD.includes(t.type) ? !!x.enabled : !!x.state; };
+  return hs.find(on) || hs[0] || null;
+}
+function probePvColor(p, pv) {
+  const t = probeCtl(p);
+  if (!t) return '';
+  const x = S.values[t.name] || {}, on = SP_OLD.includes(t.type) ? !!x.enabled : !!x.state;
+  const k = isFermentor(t) ? 'ferm' : SP_OLD.includes(t.type) ? t.type : (heatMethodKey(x.method) ?? startMethod(t));
+  const off = Number(x.onoffset ?? t.onOffset) || 0;
+  const cools = isFermentor(t) ? false : isHeatElem(t) ? false : (t.type === 'pid' || t.type === 'deadband') ? !!t.reversed : off > 0;
+  if (!['hysteresis', 'pid', 'precise', 'deadband', 'ferm'].includes(k)) return !on ? 'grey' : cools ? 'blue' : 'red';      // Duty Cycle, Direct, PWM, On/Off
+  const sv = Number(x.target ?? t.target), r = Number(pv);
+  if (!Number.isFinite(sv) || !Number.isFinite(r)) return '';
+  let lo, hi;
+  if (k === 'ferm') { lo = sv + Math.min(0, Number(x.heatoffset ?? t.heatOffset ?? -1)); hi = sv + Math.max(0, Number(x.cooloffset ?? t.coolOffset ?? 1)); }
+  else {
+    const band = k === 'hysteresis' ? Math.abs(off) || PV_NEAR(p.units) : k === 'deadband' ? Math.abs(Number(x.deadbandoffset ?? t.deadbandOffset ?? 0.5)) || PV_NEAR(p.units) : PV_NEAR(p.units);
+    lo = sv - band; hi = sv + band;
   }
-  return heat ? 'heat' : cool ? 'cool' : '';
+  if (r >= lo && r <= hi) return 'green';
+  const cold = r < lo;
+  return (cools && PV_COOL_SWAP) ? (cold ? 'red' : 'blue') : (cold ? 'blue' : 'red');
 }
 // PV over SV, as on a panel controller: each line keeps its digits and °F / °C together, and the two are made smaller together to fit
 function fillPvSv(vl, text, sv) {
@@ -2995,7 +3007,7 @@ function fillPvSv(vl, text, sv) {
     h('span', { class: 'svNum' }, sv.num === null ? `--- ${sv.unit}` : svText(sv)), h('span', { class: 'svTag' }, 'SV'));
   const pv = h('span', { class: 'pvRow', title: 'PV: what the probe reads now' }, h('span', { class: 'pvNum' }), h('span', { class: 'svTag' }, 'PV'));
   setRich(pv.firstChild, text);
-  if (sv.doing) pv.classList.add('pv-' + sv.doing);      // red while heating, blue while cooling
+  if (sv.color) pv.classList.add('pv-' + sv.color);      // Blue below, Green at, Red above the Setpoint; Grey while Off
   vl.replaceChildren(h('span', { class: 'pvsv' }, pv, box));
 }
 function fitPvSv(vl) {
