@@ -5479,8 +5479,10 @@ of the Motorized Ball Valve Pictures for the one used on the 3 vessel."). Both p
   turned or mirrored, and the In and Out IPs follow the look (the In end, left on the picture, is at the bottom when upright). Plain
   Vertical (the picture upright as drawn) and the 45s show only on a valve that already sits that way (Never Take Away). Help 128 has
   a short guide on what picture works best (plain background, straight on, no writing); picture quality is not checked. Both
-  programs (the BruControl Import's Build page shares the dialog). Optional own pictures for a look: waiting on OakBarn Brewery
-  (Rule 7.10 allows at most 3 pictures).
+  programs (the BruControl Import's Build page shares the dialog). **No own picture for a look** (OakBarn Brewery, 2026-11-19: "C.
+  and Regardless These are not backgrounds but Device images without any path available to a user"): the looks are Device images
+  Skynet draws from the one Path. They are not background pictures (Rule 7.10 does not count them), have no path of their own, and
+  the user never sees or sets one.
 - **Unused valve pictures retired** (OakBarn Brewery, 2026-11-18: "Valve pictures: Discard any not used"): pictures no Template, sample
   Schema, default Schema or Skynet feature uses are moved to Delete/ (Help 129): Valve_Motor_Ball_ClosedH, _ClosedV_LC, _ClosedV_RC,
   Valve_Motor_Butterfly_ClosedV_R (Vertical Right flips V_L) and Valve_Manual_ClosedV_L, _ClosedV_R. A picture still used by a
