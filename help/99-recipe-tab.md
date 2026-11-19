@@ -134,7 +134,7 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 **Outside of Boil Hops.** The square box on a line opens a dialog with switches: **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Turn one on and press **Save**: the hop is no longer a Boil Hop, so the dialog stays on its line (in place of Min, Drop, IBU and Boil Group) until you turn the switch off and Save. With no switch on, **Cancel** or **Save** closes the dialog.
 
 - **Secondary Hops** and **DRY Hops**: the date and the days.
-- **Whirlpool**: the temperature, the minutes, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
+- **Whirlpool**: the Whirlpool questions: **Hop Stand**, its **Temperature** and **Time** (they start empty; the Hover Help gives the common numbers, see [The three Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands)), the hop's own **Min**, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
 
 **Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
 

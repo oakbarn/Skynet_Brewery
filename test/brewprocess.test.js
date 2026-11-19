@@ -71,17 +71,21 @@ for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Prob
   }
 }
 // the Hop Stands (Fritz, 2026-11-07; three 2026-11-13): each Whirlpool hop stops the chill at its stand (High, Middle, Low), cooling
-// water off for that stand's time; Hop Rocket ones go through the Hop Infuser; numbers from the Recipe, Boil Profile, Default settings
+// water off for that stand's time; Hop Rocket ones go through the Hop Infuser; numbers from the Recipe, else the Boil Profile, else
+// none (no Defaults, Panel Updates entry 13, 2026-11-19): a stand without its temperature and time is not stopped at, and reads 0
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, pitchTempC: 20, hopStands: { Middle: { tempC: 80, min: 30 } }, ingredients: { hops: [{ use: 'whirlpool', stand: 'Middle', hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
 assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Middle, true); assert.equal(rv.rcp_Hop_Stand_High, false); assert.equal(rv.rcp_Hop_Stand_Low, false);
 assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Middle_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
-assert.equal(rv.rcp_Hop_Stand_High_Temp, 180); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 10); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 68); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 30);
+assert.equal(rv.rcp_Hop_Stand_High_Temp, 0, 'no Defaults'); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 0); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 0);
 rv = recipeValues({ brewDefaults: { units: 'Metric', boilProfile: 'mine', hsHighTempC: 85, hsHighMin: 5 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }, { use: 'whirlpool', stand: 'Low' }], fermentables: [] }, mash: { steps: [] } } },
   { boil: [{ id: 'mine', units: 'Metric', boilTime: 60, hsLowTemp: 22, hsLowMin: 40 }] });
-assert.equal(rv.rcp_Hop_Stand_High, true, 'no stand picked: High'); assert.equal(rv.rcp_Hop_Stand_High_Temp, 85); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 5);
-assert.equal(rv.rcp_Hop_Stand_Middle, false); assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 67.78);
+assert.equal(rv.rcp_Hop_Stand_High, false, 'no stand picked: no stand (no Defaults)'); assert.equal(rv.rcp_Hop_Stand_High_Temp, 0, 'Default settings Hop Stands are not read any more'); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0);
+assert.equal(rv.rcp_Hop_Stand_Middle, false); assert.equal(rv.rcp_Hop_Stand_Middle_Temp, 0);
+assert.equal(rv.rcp_Hop_Stand, true, 'the Low stand stops');
 assert.equal(rv.rcp_Hop_Stand_Low, true); assert.equal(rv.rcp_Hop_Stand_Low_Temp, 22, 'the Boil Profile\'s'); assert.equal(rv.rcp_Hop_Stand_Low_Minutes, 40);
 assert.equal(recipeValues({ brewDefaults: {} }, {}).rcp_Hop_Stand, false, 'no Recipe: no hop stand');
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, hopStands: { High: { tempC: 82, min: null } }, ingredients: { hops: [{ use: 'whirlpool', stand: 'High' }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand_High, false, 'a stand with no time is not stopped at'); assert.equal(rv.rcp_Hop_Stand, false); assert.equal(rv.rcp_Hop_Stand_High_Minutes, 0);
 for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_High_Temp[\s\S]*sleep rcp_Hop_Stand_High_Minutes \* 60000[\s\S]*rcp_Hop_Stand_Middle_Temp[\s\S]*sleep rcp_Hop_Stand_Low_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
 // the premade list (Rule 16.1): Clean is last; Whirlpool and Chill is skipped to start (a Brew Day uses it or Chill)
 assert.deepEqual(MAJOR_STEPS.map(s => s.key), ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Ferment', 'Clean']);

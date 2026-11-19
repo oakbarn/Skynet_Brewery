@@ -134,7 +134,7 @@ Une ligne pour chaque houblon, sans limite. **Add Hop +** met une nouvelle ligne
 **Houblons hors ébullition.** La case carrée d'une ligne ouvre une fenêtre avec des interrupteurs : **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Activez-en un et appuyez sur **Save** : le houblon n'est plus un houblon d'ébullition, donc la fenêtre reste sur sa ligne (à la place de Min, Drop, IBU et Boil Group) jusqu'à ce que vous désactiviez l'interrupteur et enregistriez. Sans interrupteur activé, **Cancel** ou **Save** ferme la fenêtre.
 
 - **Secondary Hops** et **DRY Hops** : la date et les jours.
-- **Whirlpool** : la température, les minutes, et **Hop Rocket** quand le whirlpool passe par un Hop Rocket.
+- **Whirlpool** : les questions Whirlpool : **Hop Stand**, sa **Temperature** et son **Time** (elles commencent vides ; l'aide au survol donne les chiffres courants, voir [Les trois Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands)), les **Min** propres au houblon, et **Hop Rocket** quand le whirlpool passe par un Hop Rocket.
 
 **Ordre.** Avec **Calculate** et avec **Save**, les lignes se mettent en ordre : les houblons d'ébullition par moment d'ajout (un houblon de début d'ébullition d'abord, puis par minutes), puis les houblons Mash, 1st WORT, Secondary, DRY et Whirlpool.
 

@@ -4873,14 +4873,23 @@ explain good in the help what it means and have a User Add"; "Same with Water Pr
 17.14 **Three Hop Stands** (OakBarn Brewery, 2026-11-13: "3 different Hop Stand and Times Hop Stand High with time, Hop Stand Middle with
 Time and Hop Stand Low with Time"; "Middle 154"; "low around Pitch"; "make BOTH temperature AND time user settable"; "AN XML FILE MAY
 HAVE INFO AS AN IMPORT"):
-- **High** 180 °F (82 °C), 10 minutes; **Middle** 154 °F (68 °C), 20 minutes; **Low** the Recipe's pitch temperature (68 °F / 20 °C
-  when none), 30 minutes. Replaces the single Hop stand temperature and time.
-- Temperature and time are set in ☰ Menu > Default settings, in own Boil Profiles and in each Recipe. The Recipe's own come first,
-  then its Boil Profile's, then Default settings.
-- Each Whirlpool hop picks its stand. The chill stops at each stand that has hops, highest first, cooling water off for its time
-  (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (and
-  Middle, Low).
-- An imported recipe's whirlpool temperature and time go to the nearest stand.
+- **No Defaults** (OakBarn Brewery, 2026-11-16, Panel Updates entry 13: "Hop Questions to ask if a Hop is added to a Recipe that is
+  Whirlpool. No Defaults. The help can be with the question and what is common"; built 2026-11-19, "I like your suggestions do it
+  that way"): Skynet fills in no Hop Stand numbers, and ☰ Menu > Default settings has **no Hop Stand boxes**. The common numbers are
+  only in the Hover Help: **High** 170 to 185 °F (most often 180 °F / 82 °C), 10 to 20 minutes; **Middle** 150 to 160 °F (most
+  often 154 °F / 68 °C), 20 to 30 minutes; **Low** about the pitch temperature, 30 minutes or more. Replaces the single Hop stand
+  temperature and time.
+- **The Whirlpool questions:** turning on a hop's Whirlpool switch asks **Hop Stand** (High, Middle, Low), its **Temperature** and its
+  **Time**, all empty unless the Recipe (or its Boil Profile) already has them; each question's Hover Help gives the common numbers.
+  Saving with one empty gives **one warning** ("The chill won't stop for this hop.") and still saves (no restriction).
+- Temperature and time are the Recipe's own (shared by the hops of that stand), else its Boil Profile's (own Boil Profiles keep
+  their boxes: numbers the user typed), else empty.
+- Each Whirlpool hop picks its stand. The chill stops at each stand that has hops **and** its temperature and time, highest first,
+  cooling water off for its time (Skynet Chill, Whirlpool and Chill). A Process: `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`,
+  `rcp_Hop_Stand_High_Minutes` (and Middle, Low); an unanswered Temp or Minutes reads 0.
+- An imported recipe's whirlpool temperature and time go to the stand that temperature fits: **High** 170 °F (77 °C) and above,
+  **Middle** from 140 °F (60 °C), **Low** below. A whirlpool hop with no temperature gets no stand (its questions are asked).
+- Design Rule #1 (Never Take Away): removing the Default settings boxes is allowed because it is before the first Public Production.
 
 17.15 **Saving an imported Recipe** (OakBarn Brewery, 2026-11-13: "saved when user says yes, and then the overwrite question comes up In
 this case Overwrite or add new"): after an import, **Save this Recipe?** (Yes / No). A saved Recipe with the same name asks
@@ -6800,3 +6809,4 @@ import.
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
+- 2026-11-19: Rule 17.14 changed (Panel Updates entry 13, OakBarn Brewery: "No Defaults. The help can be with the question and what is common"; "I like your suggestions do it that way"): no Hop Stand defaults; the 6 Hop Stand boxes left ☰ Menu > Default settings; a Whirlpool hop asks Hop Stand, Temperature and Time (empty, common numbers in the Hover Help, one warning if one is left empty, still saves); an imported whirlpool temperature goes to the stand it fits (High 170 °F+, Middle 140 °F+, Low below). Checked against both programs: the BruControl Import's Build page has no Recipe screens.
