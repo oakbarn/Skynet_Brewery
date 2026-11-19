@@ -1,70 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="Segoe UI, Arial, sans-serif">
   <!-- Skynet drawing (MIT, OakBarn Brewery 2026-11-19): 1-Wire (OneWire) DS18B20 Probes. A general method only, not a wiring plan. -->
-<rect width="960" height="600" fill="#ffffff"/>
+<rect width="960" height="640" fill="#ffffff"/>
 <rect x="30" y="110" width="200" height="230" rx="10" fill="#00878f" stroke="#00565b" stroke-width="2.5"/>
 <text x="130.0" y="134" font-size="16" text-anchor="middle" fill="#fff" font-weight="bold">Arduino Mega 2560</text>
 <text x="130.0" y="154" font-size="13" text-anchor="middle" fill="#fff" font-weight="normal">the standard Skynet board</text>
 <rect x="184" y="178" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
-<text x="207.0" y="195" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">5V</text>
+<text x="207.0" y="195" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">D40</text>
 <circle cx="230" cy="190" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
 <rect x="184" y="222" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
-<text x="207.0" y="239" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">D40</text>
+<text x="207.0" y="239" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
 <circle cx="230" cy="234" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
-<rect x="184" y="266" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
-<text x="207.0" y="283" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
-<circle cx="230" cy="278" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
-<path d="M230 190 L900 190" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M230 234 L900 234" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M230 234 L900 234" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M230 278 L900 278" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="300" y="198" width="70" height="28" fill="#fff"/>
-<rect x="319" y="188.0" width="32" height="48" fill="#fff" stroke="none"/>
-<path d="M335 182.0 L335 192.0 L325 197.0 L345 203.0 L325 209.0 L345 215.0 L325 221.0 L345 227.0 L335 232.0 L335 242.0" fill="none" stroke="#5d4037" stroke-width="3.5" stroke-linejoin="round"/>
-<text x="357" y="217.0" font-size="14" text-anchor="start" fill="#000" font-weight="bold">4.7k ohm</text>
-<path d="M335 190 L335 182.0" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M335 242.0 L335 234" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M335 242.0 L335 234" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="335" cy="190" r="6" fill="#212121"/>
-<circle cx="335" cy="234" r="6" fill="#212121"/>
-<rect x="460" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
-<text x="520.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 1</text>
-<text x="520.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
-<path d="M490 190 L490 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="490" cy="190" r="6" fill="#212121"/>
-<path d="M520 234 L520 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M520 234 L520 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="520" cy="234" r="6" fill="#212121"/>
-<path d="M550 278 L550 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="550" cy="278" r="6" fill="#212121"/>
-<rect x="620" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
-<text x="680.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 2</text>
-<text x="680.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
-<path d="M650 190 L650 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="650" cy="190" r="6" fill="#212121"/>
-<path d="M680 234 L680 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M680 234 L680 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="680" cy="234" r="6" fill="#212121"/>
-<path d="M710 278 L710 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="710" cy="278" r="6" fill="#212121"/>
-<rect x="780" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
-<text x="840.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 3</text>
-<text x="840.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
-<path d="M810 190 L810 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="810" cy="190" r="6" fill="#212121"/>
-<path d="M840 234 L840 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M840 234 L840 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="840" cy="234" r="6" fill="#212121"/>
-<path d="M870 278 L870 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="870" cy="278" r="6" fill="#212121"/>
-<text x="680" y="510" font-size="13" text-anchor="middle" fill="#333" font-weight="normal">red = 5V   ·   yellow (or white) = data   ·   black = GND (check your probe's colors)</text>
-<line x1="30" y1="545" x2="60" y2="545" stroke="#d32f2f" stroke-width="5" stroke-linecap="round"/>
-<text x="68" y="550" font-size="13" text-anchor="start" fill="#333" font-weight="normal">5 V</text>
-<line x1="117.6" y1="545" x2="147.6" y2="545" stroke="#f9a825" stroke-width="5" stroke-linecap="round"/>
-<text x="155.6" y="550" font-size="13" text-anchor="start" fill="#333" font-weight="normal">data (D40)</text>
-<line x1="255.6" y1="545" x2="285.6" y2="545" stroke="#212121" stroke-width="5" stroke-linecap="round"/>
-<text x="293.6" y="550" font-size="13" text-anchor="start" fill="#333" font-weight="normal">GND</text>
+<rect x="30" y="400" width="230" height="120" rx="10" fill="#eceff1" stroke="#333" stroke-width="2.5"/>
+<text x="145.0" y="424" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">5 V DC Power Supply</text>
+<text x="145.0" y="444" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">best: its own supply</text>
+<rect x="212" y="454" width="48" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="236.0" y="471" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">+5 V</text>
+<circle cx="260" cy="466" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="214" y="488" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="237.0" y="505" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">-V</text>
+<circle cx="260" cy="500" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<text x="145" y="545" font-size="12" text-anchor="middle" fill="#555" font-weight="normal">(or the Mega's 5V for a few probes)</text>
+<path d="M260 466 L290 466 L290 140 L930 140" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M260 500 L310 500 L310 234" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="310" cy="234" r="6" fill="#212121"/>
+<path d="M230 190 L930 190" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M230 190 L930 190" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M230 234 L930 234" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="345" y="148" width="70" height="34" fill="#fff"/>
+<rect x="364" y="141.0" width="32" height="48" fill="#fff" stroke="none"/>
+<path d="M380 135.0 L380 145.0 L370 150.0 L390 156.0 L370 162.0 L390 168.0 L370 174.0 L390 180.0 L380 185.0 L380 195.0" fill="none" stroke="#5d4037" stroke-width="3.5" stroke-linejoin="round"/>
+<text x="402" y="170.0" font-size="14" text-anchor="start" fill="#000" font-weight="bold">4.7k ohm pull-up</text>
+<path d="M380 140 L380 135.0" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M380 195.0 L380 190" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M380 195.0 L380 190" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="380" cy="140" r="6" fill="#212121"/>
+<circle cx="380" cy="190" r="6" fill="#212121"/>
+<text x="330" y="262" font-size="12" text-anchor="start" fill="#555" font-weight="normal">one per bus, at the Mega end</text>
+<rect x="500" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
+<text x="560.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 1</text>
+<text x="560.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
+<path d="M530 140 L530 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="530" cy="140" r="6" fill="#212121"/>
+<path d="M560 190 L560 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M560 190 L560 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="560" cy="190" r="6" fill="#212121"/>
+<path d="M590 234 L590 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="590" cy="234" r="6" fill="#212121"/>
+<rect x="650" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
+<text x="710.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 2</text>
+<text x="710.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
+<path d="M680 140 L680 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="680" cy="140" r="6" fill="#212121"/>
+<path d="M710 190 L710 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M710 190 L710 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="710" cy="190" r="6" fill="#212121"/>
+<path d="M740 234 L740 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="740" cy="234" r="6" fill="#212121"/>
+<rect x="800" y="380" width="120" height="100" rx="10" fill="#e3f2fd" stroke="#333" stroke-width="2.5"/>
+<text x="860.0" y="404" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">Probe 3</text>
+<text x="860.0" y="424" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">DS18B20</text>
+<path d="M830 140 L830 380" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="830" cy="140" r="6" fill="#212121"/>
+<path d="M860 190 L860 380" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M860 190 L860 380" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="860" cy="190" r="6" fill="#212121"/>
+<path d="M890 234 L890 380" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="890" cy="234" r="6" fill="#212121"/>
+<text x="710" y="510" font-size="13" text-anchor="middle" fill="#333" font-weight="normal">one cable from probe to probe (daisy chain), short branches</text>
+<text x="710" y="530" font-size="13" text-anchor="middle" fill="#333" font-weight="normal">red = 5 V   ·   yellow (or white) = data   ·   black = GND (check your probe)</text>
+<line x1="30" y1="585" x2="60" y2="585" stroke="#d32f2f" stroke-width="5" stroke-linecap="round"/>
+<text x="68" y="590" font-size="13" text-anchor="start" fill="#333" font-weight="normal">5 V (probes and pull-up)</text>
+<line x1="268.8" y1="585" x2="298.8" y2="585" stroke="#f9a825" stroke-width="5" stroke-linecap="round"/>
+<text x="306.8" y="590" font-size="13" text-anchor="start" fill="#333" font-weight="normal">data (D40)</text>
+<line x1="406.8" y1="585" x2="436.8" y2="585" stroke="#212121" stroke-width="5" stroke-linecap="round"/>
+<text x="444.8" y="590" font-size="13" text-anchor="start" fill="#333" font-weight="normal">GND (all joined)</text>
 <text x="480.0" y="32" font-size="22" text-anchor="middle" fill="#000" font-weight="bold">1-Wire (OneWire) DS18B20 Probes</text>
-<text x="480.0" y="54" font-size="14" text-anchor="middle" fill="#555" font-weight="normal">Every probe on the same 3 wires: 5V, GND and D40, with one 4.7k ohm resistor</text>
-<rect x="0" y="560" width="960" height="40" fill="#fff3f3"/>
-<text x="480.0" y="586" font-size="13.5" text-anchor="middle" fill="#d01818" font-weight="bold">⚠ Electricity can kill. A general method only: it can't know your wiring. Check each part's own data sheet. Consult a Licensed Electrician.</text>
+<text x="480.0" y="54" font-size="14" text-anchor="middle" fill="#555" font-weight="normal">Daisy chained on 3 wires: 5 V, GND and data on D40, one 4.7k ohm pull-up resistor (no parasite mode)</text>
+<rect x="0" y="600" width="960" height="40" fill="#fff3f3"/>
+<text x="480.0" y="626" font-size="13.5" text-anchor="middle" fill="#d01818" font-weight="bold">⚠ Electricity can kill. A general method only: it can't know your wiring. Check each part's own data sheet. Consult a Licensed Electrician.</text>
 </svg>

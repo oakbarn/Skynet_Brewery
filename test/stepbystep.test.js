@@ -66,3 +66,12 @@ for (const [f, pic] of [['209-step-by-step-wire-a-dac', 'DAC'], ['210-step-by-st
 assert.match(read('help/211-step-by-step-wire-an-ssr.md'), /\*\*5V\*\* to the SSR's \*\*3 \(\+\)\*\*[\s\S]*Port \*\*D23\*\* to the SSR's \*\*4 \(-\)\*\*/);
 assert.match(read('firmware/Mega_BrewPanel/Mega_BrewPanel.ino'), /const bool RELAY_ACTIVE_LOW = true;/, 'the Mega turns a Port On by pulling it LOW');
 console.log('stepbystep wiring guides ok');
+// the 1-Wire guide (OakBarn Brewery 2026-11-19: "No Parasite Mode. Best to have external PWR but would work with board power ... The
+// Pull up explained in the Step by step in details")
+{
+  const g = read('help/212-step-by-step-wire-1-wire-probes.md');
+  assert.match(g, /never uses parasite mode/, 'no parasite mode');
+  assert.match(g, /best is its own 5 V DC power supply\.\*\* The Mega's 5V works too/, 'its own supply best, board power works');
+  assert.match(g, /## What the pull-up does[\s\S]*4\.7k ohm is the standard[\s\S]*2\.2k ohm/, 'the pull-up explained');
+}
+console.log('stepbystep 1-Wire ok');

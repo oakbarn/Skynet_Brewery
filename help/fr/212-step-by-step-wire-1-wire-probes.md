@@ -11,23 +11,33 @@ La carte de l'exemple est l'**Arduino Mega 2560**, la carte standard de Skynet. 
 ## Il vous faut {#you-need}
 
 - Le **Port 1-Wire** (Mega : **D40**), partagé par toutes les DS18B20.
-- Une **résistance de 4,7k ohm** pour tout l'ensemble (pas une par sonde).
-- Une ou plusieurs **sondes DS18B20 étanches** (3 fils).
+- Une **résistance de 4,7k ohm** (le **pull-up**) pour tout l'ensemble, pas une par sonde.
+- Une ou plusieurs **sondes DS18B20 étanches** à **3 fils**. Skynet n'utilise jamais le mode parasite (2 fils) : chaque sonde a son propre fil 5 V.
+- **Alimentation des sondes : le mieux est une alimentation 5 V DC à part.** Le 5V du Mega marche aussi pour quelques sondes sur des fils courts.
 - Un bornier à vis ou une petite carte aide à relier les fils.
 
 ![Câbler des sondes DS18B20 en 1-Wire](help_pictures/Step_Wire_OneWire_01_Wiring.svg)
 
-## Étape 1. Tirer trois fils {#step-1-run-three-wires}
+## Ce que fait le pull-up {#what-the-pull-up-does}
 
-Tirez trois fils depuis le Mega : **5V**, **D40** et **GND**. Chaque sonde rejoint ces trois mêmes fils.
+Le fil de données n'a pas de tension à lui. Le Mega et chaque sonde parlent en **tirant le fil de données vers GND** un instant ; rien ne le remonte. La **résistance de pull-up**, du fil de données vers le 5 V, le ramène doucement à 5 V entre ces instants, pour que chaque impulsion ait un front net que le Mega peut lire.
 
-## Étape 2. La résistance de 4,7k ohm {#step-2-the-4-7k-ohm-resistor}
+- **Sans elle**, le Mega ne trouve aucune sonde, ou elles lisent -196 °F (-127 °C).
+- **4,7k ohm est la valeur standard**, et convient à la plupart des brasseries.
+- **Les fils longs ou chargés demandent un pull-up plus fort :** plus d'environ 30 m de câble en tout, ou plus d'environ 10 sondes, ralentissent les fronts. Utilisez alors une résistance de **2,2k ohm**. Ne descendez pas sous 2,2k ohm : les sondes ne pourraient plus tirer le fil vers le bas.
+- **Une par ensemble de sondes**, côté Mega, entre **D40** et **le même 5 V qui alimente les sondes**.
 
-Câblez la **résistance de 4,7k ohm** entre **D40** et **5V**, une seule fois, près du Mega.
+## Étape 1. Alimentation et masse {#step-1-power-and-ground}
 
-## Étape 3. Relier chaque sonde {#step-3-join-each-probe}
+Câblez le **+5 V** de l'alimentation à un bornier pour les fils rouges des sondes, et son **-V** au **GND** du Mega. Toutes les masses doivent être reliées : le -V de l'alimentation, le GND du Mega et le fil noir de chaque sonde. (Avec le 5V du Mega à la place : câblez le **5V** du Mega à ce bornier.)
 
-Câblez le fil **rouge** de chaque sonde au 5V, le **jaune** (ou blanc) à D40, et le **noir** au GND. Certaines sondes ont d'autres couleurs : vérifiez les vôtres.
+## Étape 2. Le fil de données et le pull-up {#step-2-the-data-wire-and-the-pull-up}
+
+Câblez **D40** du Mega à un bornier pour les fils jaunes des sondes. Câblez la **résistance de 4,7k ohm** de ce bornier de données au bornier **+5 V**, une seule fois, près du Mega.
+
+## Étape 3. Chaîner les sondes {#step-3-daisy-chain-the-probes}
+
+Tirez **un seul câble de sonde en sonde** (en chaîne), et reliez chaque sonde par une courte dérivation : **rouge** au 5 V, **jaune** (ou blanc) aux données, **noir** au GND. Certaines sondes ont d'autres couleurs : vérifiez les vôtres. Évitez l'étoile (plusieurs longs câbles partant d'un même point) : elle fait résonner les impulsions.
 
 ## Étape 4. Ajouter chaque sonde dans Skynet {#step-4-add-each-probe-in-skynet}
 
@@ -49,6 +59,8 @@ Dans l'eau glacée, chaque sonde doit lire environ 32 °F (0 °C). Une sonde qui
 
 ## Le côté technique {#the-technical-side}
 
-- De longues longueurs (plus d'environ 30 m en tout) ou beaucoup de sondes peuvent demander un pull-up plus fort (une résistance de 2,2k ohm) ou du câble blindé.
+- Utilisez du câble en paires torsadées (un câble réseau convient : une paire pour données et GND, une pour 5 V et GND) pour les grandes longueurs.
+- Le programme Skynet du Mega lit **un seul** Port 1-Wire. Pour plus de sondes qu'un Port ne porte bien, mettez-les sur une deuxième carte (sa propre Interface).
+- Une alimentation à part est le mieux car une grande longueur fait chuter la tension du fil 5 V, et les sondes lisent alors faux pendant leur conversion.
 - Skynet règle chaque sonde sur ses pas les plus fins (0,0625 °C, environ 0,11 °F).
 - Dans le programme du Mega (`Mega_BrewPanel.ino`), `ONEWIRE_PIN` vaut 40.
