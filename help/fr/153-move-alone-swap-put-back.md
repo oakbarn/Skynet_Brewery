@@ -40,10 +40,11 @@ garde la nouvelle longueur ou forme.
 Le plus rapide est **🔁 Swap places with...** : attrapez l'ancienne pompe, choisissez la nouvelle dans la liste, et la nouvelle pompe est tout de suite sur les tuyaux de l'
 ancienne. L'ancienne pompe va là où était la nouvelle.
 
-Ou à la main : attrapez l'ancienne pompe, choisissez **🔓 Unlock its IPs**, traînez-la ailleurs, puis traînez la nouvelle pompe au même endroit. Quand vous la
-lâchez, chaque bout de tuyau ouvert qui était sur l'**entrée** de l'ancienne pompe se joint à l'entrée de la nouvelle, et la **sortie** à sa sortie (le même bout,
-à moins de 14 pixels de l'endroit où était l'ancien IP). Chaque pompe Skynet a ses IP aux mêmes endroits (le Pump Standard, Règle 5.27), donc deux
-pompes de même taille et de même place s'alignent.
+Ou à la main : attrapez l'ancienne pompe, choisissez **🔓 Unlock its IPs**, traînez-la ailleurs, puis traînez la nouvelle pompe au même endroit. Une pompe sans
+tuyau a toujours des IP libres. Quand vous la lâchez près des bouts de tuyau ouverts (à environ 30 pixels), elle glisse le dernier bout en place, son **entrée** va
+sur l'endroit où était l'entrée de l'ancienne pompe et sa **sortie** là où était l'ancienne sortie (l'un de ses 8 IP, quel que soit le côté de l'ancienne pompe),
+et les tuyaux se joignent à elle. Chaque pompe Skynet a ses IP aux mêmes endroits (le Pump Standard, Règle 5.27), donc deux pompes de même taille
+s'alignent. Une vanne ou une Manual Valve sans tuyau glisse sur ses bouts ouverts de la même façon.
 
 ## ↩ Put back (Ctrl+Z)
 
