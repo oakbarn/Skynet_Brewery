@@ -4085,8 +4085,12 @@ other boards are similar."). Every part that needs more than a bare Port to work
      copied from another drawing, not in the Image Library), with the warning along its foot; the AC side is shown only as a box for
      the electrician;
   4. ends with the Device to add in Skynet, a check that it works, and **The technical side** (the Mega program's pin lists).
-First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B20) probes, a PT100 and a PT1000 probe. Both programs
-(the BruControl Import uses the Panel's Help).
+First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B20) probes, a PT100 and a PT1000 probe. Next 19
+(Help 215-233): a relay board, a contactor, a motorized ball valve, a water solenoid valve, a gas solenoid and igniter, DC pump speed
+(MOSFET), a thermocouple, an LM35 or TMP36, a flow meter, a pressure transducer, a 4-20 mA level transmitter, a 0-10 V sensor, an
+ADS1115, a vessel scale (HX711), a stepper motor, a pH probe, an E-Stop, a fan, buzzer or LED, and switches and float switches. A guide
+for anything on gas puts the gas warning before the electrical warning, on the page and on its drawing. Both programs (the BruControl
+Import uses the Panel's Help).
 
 ## 12. Privacy and sharing
 
@@ -6531,3 +6535,4 @@ import.
 - 2026-11-19: Rule 11.9 guides added (OakBarn Brewery: "Step by Step to add a Device in help", "Step by step add a widget"): Help 207 Step by Step: Add a Device (a Blichmann RipTide on the Brew House Tab of the 3 Vessel sample) and Help 208 Step by Step: Add a Widget (a Hose Bib), each with a picture at every step and a warning at the top that a new item stays on the 🔨 Build Tab until ✅ Finish Build ... > Move to Tab; French in help/fr; linked from the Glossary, Getting started, Devices and Build Tab pages. The Move to Tab note now says the build kept its spot when it goes to the Tab picked for it (it said "the middle", which was wrong). Wording only; both programs (the Importer uses the Panel's Help). Next free Help 209. (thread "Add a step-by-step Add a Device Help page")
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")

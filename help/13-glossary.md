@@ -271,6 +271,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A small board that reads 4 analog signals much more finely than the Arduino can.
 - **What Skynet needs:** I2C (Mega SDA/SCL, Pi GPIO 2 and 3), address 0x48, 3.3 or 5 V. For pH and pressure.
+- **How to wire it:** [Step by Step: Wire an ADS1115](227-step-by-step-wire-an-ads1115)
 - **Suggested parts:** Adafruit ADS1115 board (or a clone)
 - **Where to buy:** *(link coming)* Search Amazon for "ADS1115 module".
 
@@ -278,6 +279,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A heavy-duty relay that switches both hot wires of a 240 V circuit, so the element is truly Off. Also what an E-Stop drops.
 - **What Skynet needs:** **Two-pole** (both hot wires) for 240 V; **30 or 40 A** for a 5500 W element. Coil voltage to match its driver (12 or 24 V DC, or 120 V AC), switched by a Relay Module channel.
+- **How to wire it:** [Step by Step: Wire a Contactor](216-step-by-step-wire-a-contactor)
 - **Suggested parts:** Two-pole definite purpose contactors (30 A or 40 A); DIN-rail 2-pole modular contactors
 - **Where to buy:** *(link coming)* Search Amazon for "2 pole 40A contactor".
 
@@ -338,6 +340,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A big red mushroom button. Pressed, it cuts all the brewery's power by its own wiring.
 - **What Skynet needs:** A **normally closed** contact that drops the Main Contactor's coil, and a second contact (normally open or closed) to a DI Port so Skynet knows (Type ID `EStop`). Twist or pull to reset.
+- **How to wire it:** [Step by Step: Wire an E-Stop](231-step-by-step-wire-an-e-stop)
 - **Suggested parts:** 22 mm red mushroom E-stop button with 1 NC + 1 NO contact blocks
 - **Where to buy:** *(link coming)* Search Amazon for "22mm emergency stop button NC NO".
 
@@ -345,6 +348,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A float that closes a switch when the liquid reaches it (full) or drops away (low).
 - **What Skynet needs:** Stainless, food grade, 2 wires to a DI Port and GND (the board's pull-up is on).
+- **How to wire it:** [Step by Step: Wire Switches and Float Switches](233-step-by-step-wire-switches-and-float-switches)
 - **Suggested parts:** Stainless side-mount or vertical float switches
 - **Where to buy:** *(link coming)* Search Amazon for "stainless float switch".
 
@@ -352,6 +356,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A little wheel in the pipe sends a pulse each time a set amount of liquid passes.
 - **What Skynet needs:** A Counter Port (Mega D2, D3, D18-D21), 5 V supply; stainless and food grade for hot wort (plastic YF-S201 for cold water only); Pulses per unit from its data sheet.
+- **How to wire it:** [Step by Step: Wire a Flow Meter](223-step-by-step-wire-a-flow-meter)
 - **Suggested parts:** Stainless hall-effect flow sensors (1/2" NPT); YF-S201 for cold water
 - **Where to buy:** *(link coming)* Search Amazon for "stainless hall flow sensor 1/2".
 
@@ -359,6 +364,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A solenoid valve made for gas, so the brew controller can turn the burner On and Off.
 - **What Skynet needs:** **Listed for LP gas** (UL or CSA), **normally closed**, rated above the regulator's pressure, 24 V DC (or 24 V AC) coil. See [Flame Out safety](197-flame-out-safety). ⚠ Gas: see the warning at the top of this section.
+- **How to wire it:** [Step by Step: Wire a Gas Solenoid and Igniter](219-step-by-step-wire-a-gas-solenoid-and-igniter)
 - **Suggested parts:** Listed LP gas solenoid valves (ASCO gas shut-off series and similar)
 - **Where to buy:** *(link coming)* Search Amazon for "LP gas solenoid valve 24V listed".
 
@@ -389,6 +395,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Load cells bend a tiny bit under weight; the HX711 board reads that so Skynet can weigh a vessel.
 - **What Skynet needs:** One HX711 per vessel (two Ports: DT and SCK), with four half-bridge cells and a Combinator Board, or one S-type cell sized for the full vessel.
+- **How to wire it:** [Step by Step: Wire a Vessel Scale](228-step-by-step-wire-a-vessel-scale)
 - **Suggested parts:** HX711 boards; 50 kg half-bridge load cell sets of 4 with combinator; S-type load cells
 - **Where to buy:** *(link coming)* Search Amazon for "HX711 load cell kit".
 
@@ -403,6 +410,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Makes a spark (or a hot glowing tip) to light the burner.
 - **What Skynet needs:** 12 V DC spark module or 120 V AC hot surface igniter, switched by a Relay Module channel. Turned off by a Flame Out trip.
+- **How to wire it:** [Step by Step: Wire a Gas Solenoid and Igniter](219-step-by-step-wire-a-gas-solenoid-and-igniter)
 - **Suggested parts:** 12 V pulse spark igniter modules; hot surface igniters for gas burners
 - **Where to buy:** *(link coming)* Search Amazon for "12V spark igniter module".
 
@@ -412,6 +420,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Reads how deep the liquid is and sends it as a current from 4 mA (empty) to 20 mA (full).
 - **What Skynet needs:** 24 V DC loop power and a 250 ohm resistor from the Analog Port to GND (20 mA = 5 V). Rated for the liquid's temperature.
+- **How to wire it:** [Step by Step: Wire a 4-20 mA Level Transmitter](225-step-by-step-wire-a-4-20-ma-level-transmitter)
 - **Suggested parts:** Stainless submersible or hydrostatic level transmitters with a 4-20 mA output
 - **Where to buy:** *(link coming)* Search Amazon for "4-20mA level transmitter stainless".
 
@@ -419,6 +428,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A bigger relay for heavy loads like a compressor motor. Its coil is switched by a Relay Module channel.
 - **What Skynet needs:** Contacts rated for a motor (a horsepower rating, for example 1 HP, or 30 A). Coil 12 V or 24 V DC, or 120 V AC, matching what drives it.
+- **How to wire it:** [Step by Step: Wire a Relay Board](215-step-by-step-wire-a-relay-board)
 - **Suggested parts:** General purpose power relays with an HP rating (8 or 11 pin plug-in relay with a DIN socket, or a 30 A open-frame power relay)
 - **Where to buy:** *(link coming)* Search Amazon for "30A power relay 12V coil".
 
@@ -426,6 +436,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** An electronic switch for DC loads that can also switch very fast, so it can set a DC pump or fan's speed by PWM.
 - **What Skynet needs:** **Logic level** (turns fully on at 3.3 or 5 V), DC load voltage 12 or 24 V, 10 A or more. Ground tied to the Arduino's GND.
+- **How to wire it:** [Step by Step: Wire a DC Pump Speed Control](220-step-by-step-wire-a-dc-pump-speed-control)
 - **Suggested parts:** Logic-level MOSFET driver modules (IRF520 modules are not fully on at 5 V; pick a logic-level or dual-MOSFET module)
 - **Where to buy:** *(link coming)* Search Amazon for "logic level MOSFET module PWM".
 
@@ -433,6 +444,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A ball valve with a small motor on top that opens and closes it when power is switched.
 - **What Skynet needs:** 12 V or 24 V DC; stainless body for wort; the wiring on its label: **one control wire** (one relay) or **Open and Close wires** (two relays, Dual Throw, Rule 6.22). Sellers' wire codes (CR02, CR03, CR05...) differ, so read the label.
+- **How to wire it:** [Step by Step: Wire a Motorized Ball Valve](217-step-by-step-wire-a-motorized-ball-valve)
 - **Suggested parts:** Stainless 3-wire motorized ball valves (US Solid, Tsai Fan types), 1/2" NPT or TC 1.5
 - **Where to buy:** *(link coming)* Search Amazon for "motorized ball valve stainless 12V 3 wire".
 
@@ -468,6 +480,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Reads pressure (or liquid depth by the pressure at the bottom) as a voltage.
 - **What Skynet needs:** 5 V supply from the Arduino, signal 0.5-4.5 V to an Analog Port, stainless, 1/4" NPT, rated for the liquid's temperature. An ADS1115 board gives finer readings.
+- **How to wire it:** [Step by Step: Wire a Pressure Transducer](224-step-by-step-wire-a-pressure-transducer)
 - **Suggested parts:** Stainless 5 V pressure transducers, 0-5 psi or 0-30 psi
 - **Where to buy:** *(link coming)* Search Amazon for "pressure transducer 5V 0.5-4.5V stainless".
 
@@ -487,6 +500,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A small board with one or more relays (a switch moved by a magnet). The board's pin turns the magnet on and the switch clicks closed.
 - **What Skynet needs:** **Coil:** 5 V boards for a Mega; for an ESP32 or Pi pick a board sold as **3.3 V trigger** or **High/Low trigger**. **Opto-isolated** is best. **Contacts:** 10 A at 250 V AC. Many are **On when the pin is LOW**: that is how the Skynet board program already drives every Port (On = LOW), so leave **Invert** Off. Only a board that switches On with HIGH needs **Invert** On in the Pin attributes ⬢.
+- **How to wire it:** [Step by Step: Wire a Relay Board](215-step-by-step-wire-a-relay-board)
 - **Suggested parts:** 1, 2, 4 or 8 channel 5 V opto-isolated relay modules (SRD-05VDC type relays); DIN-rail relay modules
 - **Where to buy:** *(link coming)* Search Amazon for "8 channel 5V relay module opto isolated".
 
@@ -504,6 +518,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A valve opened by an electric magnet. Snaps open or shut. Most need water pressure to work.
 - **What Skynet needs:** **Normally closed**, 12 or 24 V DC, food grade (stainless) for wort, brass for cooling water. A Flyback Diode across the coil if it has none.
+- **How to wire it:** [Step by Step: Wire a Water Solenoid Valve](218-step-by-step-wire-a-water-solenoid-valve)
 - **Suggested parts:** Stainless or brass normally closed 12 V solenoid valves (1/2" NPT)
 - **Where to buy:** *(link coming)* Search Amazon for "12V normally closed solenoid valve stainless".
 
@@ -526,6 +541,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Feeds a stepper motor in small steps so it turns to an exact position.
 - **What Skynet needs:** STEP and DIR pins (ENABLE optional), its own 12-24 V DC supply (never the Arduino's 5 V), set to the motor's current.
+- **How to wire it:** [Step by Step: Wire a Stepper Motor](229-step-by-step-wire-a-stepper-motor)
 - **Suggested parts:** TMC2209, A4988, DRV8825 (small motors); TB6600 or DM542 (NEMA 23)
 - **Where to buy:** *(link coming)* Search Amazon for "TMC2209 stepper driver".
 
@@ -535,6 +551,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A probe for very hot places (a burner's flame, a flue). The board reads its tiny voltage.
 - **What Skynet needs:** MAX31856 for any type (K, J, T ...) or MAX31855 for Type K only; one board per probe; SPI Ports and one CS Port. Thermocouple wire, + and - the right way round.
+- **How to wire it:** [Step by Step: Wire a Thermocouple](221-step-by-step-wire-a-thermocouple)
 - **Suggested parts:** Adafruit MAX31856 or MAX31855 boards; ceramic or Inconel Type K probes
 - **Where to buy:** *(link coming)* Search Amazon for "MAX31856 thermocouple board".
 

@@ -46,7 +46,14 @@ console.log('stepbystep add device/widget ok');
 // Wiring guides (OakBarn Brewery 2026-11-19, Rule 11.15): one Step by Step guide per part that needs more than a bare Port, the
 // electrical warning and "You are responsible for your own safety." first, the Mega as the example, a Skynet drawing (MIT), French too.
 for (const [f, pic] of [['209-step-by-step-wire-a-dac', 'DAC'], ['210-step-by-step-wire-a-10k-ntc-probe', 'NTC'], ['211-step-by-step-wire-an-ssr', 'SSR'],
-  ['212-step-by-step-wire-1-wire-probes', 'OneWire'], ['213-step-by-step-wire-a-pt100-probe', 'PT100'], ['214-step-by-step-wire-a-pt1000-probe', 'PT1000']]) {
+  ['212-step-by-step-wire-1-wire-probes', 'OneWire'], ['213-step-by-step-wire-a-pt100-probe', 'PT100'], ['214-step-by-step-wire-a-pt1000-probe', 'PT1000'],
+  ['215-step-by-step-wire-a-relay-board', 'Relay'], ['216-step-by-step-wire-a-contactor', 'Contactor'], ['217-step-by-step-wire-a-motorized-ball-valve', 'MBV'],
+  ['218-step-by-step-wire-a-water-solenoid-valve', 'Solenoid'], ['219-step-by-step-wire-a-gas-solenoid-and-igniter', 'Gas'], ['220-step-by-step-wire-a-dc-pump-speed-control', 'DCPump'],
+  ['221-step-by-step-wire-a-thermocouple', 'Thermocouple'], ['222-step-by-step-wire-an-lm35-or-tmp36', 'LM35'], ['223-step-by-step-wire-a-flow-meter', 'FlowMeter'],
+  ['224-step-by-step-wire-a-pressure-transducer', 'Pressure'], ['225-step-by-step-wire-a-4-20-ma-level-transmitter', 'Level'], ['226-step-by-step-wire-a-0-10-v-sensor', 'ZeroTen'],
+  ['227-step-by-step-wire-an-ads1115', 'ADS1115'], ['228-step-by-step-wire-a-vessel-scale', 'Scale'], ['229-step-by-step-wire-a-stepper-motor', 'Stepper'],
+  ['230-step-by-step-wire-a-ph-probe', 'pH'], ['231-step-by-step-wire-an-e-stop', 'EStop'], ['232-step-by-step-wire-a-fan-buzzer-or-led', 'FanLED'],
+  ['233-step-by-step-wire-switches-and-float-switches', 'Switch']]) {
   const g = read(`help/${f}.md`), top = g.split('## You need')[0];
   assert.match(g, /^# Step by Step: Wire /, f + ' is a Step by Step wiring guide');
   assert.match(top, /⚠ Electricity can kill\. OakBarn Brewery and Skynet are not electricians and can give no electrical advice\. Consult a Licensed Electrician\./, f + ': Rule 6.20 first');
@@ -65,6 +72,9 @@ for (const [f, pic] of [['209-step-by-step-wire-a-dac', 'DAC'], ['210-step-by-st
 // the SSR guide wires the Mega's active-low Ports the right way round: 5V to the SSR's +, the Port to its -
 assert.match(read('help/211-step-by-step-wire-an-ssr.md'), /\*\*5V\*\* to the SSR's \*\*3 \(\+\)\*\*[\s\S]*Port \*\*D23\*\* to the SSR's \*\*4 \(-\)\*\*/);
 assert.match(read('firmware/Mega_BrewPanel/Mega_BrewPanel.ino'), /const bool RELAY_ACTIVE_LOW = true;/, 'the Mega turns a Port On by pulling it LOW');
+// the gas guide puts the gas warning first, on the page and on its drawing
+assert.match(read('help/219-step-by-step-wire-a-gas-solenoid-and-igniter.md').split('## You need')[0], /⚠ Gas can explode or kill\./, 'the gas guide warns about gas first');
+assert.match(fs.readFileSync(new URL('../media/help_pictures/Step_Wire_Gas_01_Wiring.svg', import.meta.url), 'utf8'), /Gas can explode or kill/);
 console.log('stepbystep wiring guides ok');
 // the 1-Wire guide (OakBarn Brewery 2026-11-19: "No Parasite Mode. Best to have external PWR but would work with board power ... The
 // Pull up explained in the Step by step in details")
