@@ -11,11 +11,11 @@ Along the top:
 
 ## Brew on: the Tab for the Brew
 
-**Brew on** (beside Brew Length) picks the Tab this Recipe is brewed on. It lists the Tabs that have an Equipment Profile, with the profile's name and its Brewhouse Efficiency. The Tab you pick becomes the Tab for the Brew.
+**Brew on** (beside Brew Length) picks the Tab this Recipe is brewed on. It lists the Tabs that have Equipment numbers, with each Tab's Brewhouse Efficiency. The Tab you pick becomes the Tab for the Brew.
 
-A new or imported Recipe starts on the Tab whose Equipment Profile has a Mash Tun or an All In One, or else the first Tab with an Equipment Profile. A Tab that is renamed stays picked.
+A new or imported Recipe starts on the Tab whose equipment has a Mash Tun or an All In One, or else the first Tab with Equipment numbers. A Tab that is renamed stays picked.
 
-The **Expected Gravity** and the gravity points use the **Brewhouse Efficiency of that Tab's Equipment Profile**. It is the only Efficiency in Skynet: there is no overall default, and a Recipe never keeps one of its own. A new Equipment Profile starts at 72 %, and you change it on the profile ([Equipment Profiles](28-schemas-and-equipment-profiles)). With no Tab picked, grains and adjuncts have no gravity points, and the Expected Gravity stays empty.
+The **Expected Gravity** and the gravity points use the **Brewhouse Efficiency of that Tab**. It is the only Efficiency in Skynet: there is no overall default, and a Recipe never keeps one of its own. A new Equipment Profile starts at 72 %, it is copied onto a Tab with the profile, and you change it on the Tab: **⚙ Numbers** on ☰ Menu > Equipment Profile, or Tab Settings ([Equipment Profiles](28-schemas-and-equipment-profiles)). With no Tab picked, grains and adjuncts have no gravity points, and the Expected Gravity stays empty.
 
 ## The Level
 
@@ -146,7 +146,7 @@ A recipe's fermentables are split over two tabs. **Grain** holds the ones of Typ
 
 - **Name**, the weight, **Potential** (the yield, %), **SRM** (the color) and **PPG>SG**, its gravity points (worked out).
 - The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only in Settings > Panel settings: screen, Tabs and alerts.
-- **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the Brewhouse Efficiency of the **Brew on** Tab's Equipment Profile; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length.
+- **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the Brewhouse Efficiency of the **Brew on** Tab; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length.
 - **After Boil** (Fermentable tab only): a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil. Grain is never added after the boil, so the Grain tab has none.
 
 Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
@@ -190,8 +190,8 @@ Note: inside a .bsmx file BeerSmith keeps its own US units: weights in **ounces*
 
 **The file's Efficiency.** A BeerSmith or BeerXML file says what Brewhouse Efficiency its writer brewed at. That number may mean nothing (many brewers never set it), so after the import Skynet asks:
 
-- **Ignore it** (picked to start): your Equipment Profile's Efficiency stays as it is.
-- **Put on** the Brew on Tab: the file's number goes into that Tab's Equipment Profile. Skynet shows the change first ("72 % → 75 %"), and **↩ Undo** puts the old number back for a few seconds after. It changes every Recipe brewed on that Tab.
+- **Ignore it** (picked to start): the Tab's Efficiency stays as it is.
+- **Put on** the Brew on Tab: the file's number goes into that Tab's own Brewhouse Efficiency. Skynet shows the change first ("72 % → 75 %"), and **↩ Undo** puts the old number back for a few seconds after. It changes every Recipe brewed on that Tab.
 
 You can also import from the **Import** page, from Node-RED (POST the file to `/api/import/recipe?file=MyBeer.bsmx`), or from a Process (below).
 

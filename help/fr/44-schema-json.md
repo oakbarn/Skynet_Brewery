@@ -49,7 +49,7 @@ Les images et les sons ne sont pas dans le fichier, seulement leurs noms. Si l'a
 ## Ce qu'il y a dans le fichier {#what-is-in-the-file}
 
 - Les Tabs, Devices, Widgets, images, textes, tuyaux rigides et souples, sondes du Schema et les Processes qu'il lance tout seul (liste autostart).
-- L'équipement et la tuyauterie du Equipment Profile de chaque Tab, pour que le fichier soit complet à lui seul, et le nom du profil de chaque Tab.
+- L'équipement, la tuyauterie et les Equipment numbers de chaque Tab, pour que le fichier soit complet à lui seul.
 - Le nom du Schema, sa version et quand le fichier a été enregistré.
 
 Ce qui n'est **pas** dans le fichier : les connexions et les mots de passe, l'API key, les réglages MQTT, les dossiers media et les autres réglages du panel. Donc le fichier peut être donné à un ami sans risque. Les Processes eux-mêmes (le dossier `processes`) sont partagés par tous les Schemas et ne sont pas dedans non plus.

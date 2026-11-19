@@ -99,7 +99,7 @@ assert.deepEqual(numberChanges(EQUIP_FIELDS, prof, prof), [], 'the same profile:
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eqpaste-'));
 const cfgPath = path.join(dir, 'config', 'brewery.json');
 fs.mkdirSync(path.dirname(cfgPath), { recursive: true });
-fs.writeFileSync(cfgPath, JSON.stringify({ title: 'Brewery', workspaces: [{ ...tab, equipmentProfile: 'hot-side' }, { name: 'Ferm', id: 'FR' }], elements: c.elements.map(e => { const { _key, ...x } = e; return x; }),
+fs.writeFileSync(cfgPath, JSON.stringify({ title: 'Brewery', workspaces: [{ ...tab }, { name: 'Ferm', id: 'FR' }], elements: c.elements.map(e => { const { _key, ...x } = e; return x; }),
   graphics: c.graphics.map(g => { const { _key, ...x } = g; return x; }), devices: [{ name: 'Mega', id: 'MG', connection: 'simulator' }] }));
 const store = new Store(cfgPath, path.join(dir, 'data')); store.load();
 const profiles = new EquipmentProfiles(path.join(dir, 'config', 'equipment'));
@@ -107,13 +107,15 @@ fs.mkdirSync(profiles.dir, { recursive: true });
 fs.writeFileSync(path.join(profiles.dir, 'hot-side.json'), JSON.stringify({ name: 'Hot Side', brewhouseEfficiency: 75 }));
 const schemas = new Schemas(store, { engine: { stopAll() { }, start() { } }, hw: { restart() { } }, profiles });
 schemas.ensure(); store.writeConfig();
+schemas.saveTabAsProfile(tab.name, 'hot-side');      // 💾 Save as a profile (Tab to profile only, Rule 2.62)
 const kept = profiles.get('hot-side');
-assert.deepEqual(kept.hardware.elements.map(e => e.name), ['Probe_1', 'Heat_1', 'Valve_1', 'Pump_1'], 'the profile keeps the Tab\'s hardware on every save');
+assert.deepEqual(kept.hardware.elements.map(e => e.name), ['Probe_1', 'Heat_1', 'Valve_1', 'Pump_1'], 'the profile keeps the hardware of the Tab saved into it');
 assert.ok(kept.graphics.some(g => g.kind === 'pipe' && g.to === 'dev:@sP:in'), 'its pipes point at the slots');
 schemas.fromProfile('Keg Cleaning', 'hot-side');
 const k = store.config;
 assert.equal(k.schema.name, 'Keg Cleaning');
-assert.deepEqual(k.workspaces.filter(w => w.equipmentProfile).map(w => [w.name, w.id, w.equipmentProfile]), [['Hot', 'HT', 'hot-side']], 'its Tab uses the profile (its numbers come too)');
+assert.deepEqual(k.workspaces.filter(w => w.equip).map(w => [w.name, w.id, w.equip.brewhouseEfficiency]), [['Hot', 'HT', 75]], 'its Tab starts from a copy of the profile (its numbers come too)');
+assert.ok(!k.workspaces.some(w => w.equipmentProfile), 'and keeps no link to it (Rule 2.62)');
 assert.deepEqual(k.devices.map(d => d.name), ['Mega'], 'the wired board');
 assert.deepEqual(k.elements.filter(e => e.device).map(e => `${e.name}:${e.channel ?? e.probeIndex}`), ['Probe_1:1', 'Heat_1:8', 'Valve_1:24', 'Pump_1:22'], 'every Device with its Name and Port');
 assert.ok(!k.elements.some(e => e.name === 'gGV_X' || e.name === 'Timer_1'), 'no gGlobals or Timers');

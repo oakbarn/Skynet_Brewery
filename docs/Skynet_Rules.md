@@ -1098,10 +1098,11 @@ loaded the new Schema, a short interview opens: its steps across the top like th
    - for Brewing, a **Level** dropdown from **Stove Top (Extract)** to **All Grain with Mash Tun (3 Vessels)**. It starts on the
      **Skynet Brewer Level**: the Level picked last time (kept in the brewing defaults; All Grain with Mash Tun the first time).
    - an **Equipment Profile** dropdown: None, **➕ Create New** (the Equipment Profile Interview opens after Finish) or a profile
-     the user has, filtered by what the Tab is for (a Fermentation Tab shows the fermenter profiles). One profile is on one Tab only.
-   - **Import**: **Import All** (the whole Default Layout; the Tab follows the profile), **Import Vessels** (its vessels and
-     equipment with their fittings) or **Import Manifold** (the valves, fittings and pipes between the vessels). With Vessels or
-     Manifold the Tab keeps its own layout, so the profile is not changed.
+     the user has, filtered by what the Tab is for (a Fermentation Tab shows the fermenter profiles). Any number of Tabs may start
+     from the same profile (changed 2026-11-19, Rule 2.62; was "One profile is on one Tab only").
+   - **Import**: **Import All** (the whole Default Layout), **Import Vessels** (its vessels and equipment with their fittings) or
+     **Import Manifold** (the valves, fittings and pipes between the vessels). Each one is a copy: the Tab keeps no link to the
+     profile (Rule 2.62; was "Import All: the Tab follows the profile").
    - **Import Processes**: tick marks for the Skynet Processes of that kind and Level (a Stove Top has no Mash). A ticked one is set
      in Brew Process; an unticked one is left out (SKIP).
 4. **Done**: a summary. (The old Equipment page is gone: the Tabs page takes care of it.)
@@ -1159,6 +1160,34 @@ Testers are not programmers, so:
      (Rule 11.5); the forms are not announced to testers until OakBarn Brewery releases them.
 Help 205. **Both programs:** the BruControl Import ships in the same Setup and uses the Panel's Help window, so 🐞 Report is on its
 Help pages too; its own screens have no ☰ Menu > About.
+
+2.62 **Templates and Equipment Profiles are only for placing on a Tab: a Tab keeps ZERO link to them** (OakBarn Brewery, 2026-11-19:
+"A profile is only to import to start a build. Nothing more."; "Once on a Tab, only the tab effects those things on a Tab."; "I want
+ZERO connection after placed on Tab."; and, for every Template: "Templates are only for a Placement on a Tab for Building and nothing
+else associated with a Tab or any of its chilcren (Pumps, Valves....)").
+  1. **Copied, never linked:** an Equipment Profile (➡ Transfer All / Vessels / Manifold, the New Schema Interview's Import, 🗂 New
+     Schema from this profile) and every Template (pump, valve, vessel, fitting, Device, Widget ...) is **copied** onto the Tab. After
+     that nothing on the Tab, and none of its children (vessels, pumps, valves, pipes, IPs, fittings ...), reads from or writes to the
+     profile or Template. A change to the profile never changes a Tab, and a change on a Tab never changes the profile.
+  2. **Any number of Tabs** (in any Schema) can start from the same profile. "One profile is on one Tab only", the Tab that
+     "follows" its profile's Default Layout, saving a Tab into its profile on every Save, a locked profile freezing its Tabs, and
+     **Make it unique** are gone (before the first Public Production, the Old Ways policy).
+  3. **The Tab's own Equipment numbers** (OakBarn Brewery, 2026-11-19, picked "Copied onto the Tab"; "these act like default but can be
+     changed either through the interview or on the Properties dialog anytime"): Brewhouse efficiency, System Loss, Cooling shrinkage,
+     Grain absorption, Hop utilization and the vessel list a Brew Day reads are copied onto the Tab with the profile and are the Tab's
+     own. They are changed in **Edit layout > Tab Settings > Equipment numbers**, with **⚙ Numbers** on the Tab's row of ☰ Menu >
+     Equipment Profile, or by the Equipment Profile Interview. A Recipe's **Brew on** Tab, its Efficiency, 📝 Record a brew and Use the
+     average (Rule 17.13) are all the Tab's.
+  4. **One direction only: 💾 Save as a profile ...** (OakBarn Brewery, 2026-11-19: "Maybe a save of a Tab to Equiment Profile but that
+     direction only") copies a Tab's equipment, pipes, hardware and numbers into a new Equipment Profile or over one picked. No link is
+     kept.
+  5. **The lock is on the Tab:** the **🔒 Locked** switch on a Tab's row (Operators and Admins) locks that Tab, and **lock_Equipment /
+     unlock_Equipment** lock every Tab with equipment: its vessels, IPs, pipes and hoses can't change until unlocked. A profile's own
+     lock only keeps that profile from being changed.
+  6. A Schema saved before this change loses its link when it is loaded: a Tab that showed its profile's drawing keeps a copy of it, and
+     takes a copy of the profile's numbers. Nothing on a Tab is lost (Design Rule 1).
+**Both programs:** the BruControl Import makes no Equipment Profiles; its import onto a Tab that is locked by lock_Equipment is stopped
+with the same message. Help 28 and 188.
 
 ## 3. Names and file names
 
@@ -4681,19 +4710,20 @@ explain good in the help what it means and have a User Add"; "Same with Water Pr
 - **Brewhouse Efficiency is only on an Equipment Profile, never an overall default** (OakBarn Brewery, 2026-11-17: "Never an Overall
   Effincy defauly only on an Equipment profile. A New Equipment profile has effiency set at 72 % but may be changed by a user"):
   there is no Efficiency in Default settings, Settings or a Recipe default. A **new Equipment Profile starts at 72 %**, and the user
-  may change it on that profile. A Recipe's gravity uses the Efficiency of the Equipment Profile of the Tab it is brewed on.
+  may change it on that profile. A Recipe's gravity uses the Efficiency of the Tab it is brewed on: **the Tab's own copy**, made when
+  the profile was copied onto the Tab and changed on the Tab (Rule 2.62, 2026-11-19).
   **Brew on** (OakBarn Brewery, 2026-11-17: "Yes and That becomes the Tab for the Brew"): each Recipe picks the Tab it is brewed on,
-  from the Tabs with an Equipment Profile (kept by the Tab's hidden key, Design Rule 2); it starts on the Tab whose profile has a Mash
-  Tun or All In One, else the first Tab with a profile. With no such Tab, grains and adjuncts have no gravity points. **A file's own
+  from the Tabs with Equipment numbers (kept by the Tab's hidden key, Design Rule 2); it starts on the Tab whose numbers list a Mash
+  Tun or All In One, else the first Tab with numbers. With no such Tab, grains and adjuncts have no gravity points. **A file's own
   Efficiency** (OakBarn Brewery: "That figure could be meaningless as I never set it in Beer Smith. For some user it might be good. So
   User Choice when importing"; "Ignore or Put On Recipe choice Tab"): after a BeerSmith or BeerXML import, **Ignore it** (picked to
-  start) or **Put on** the Brew on Tab's Equipment Profile, after showing "72 % → 75 %", with ↩ Undo (Rule 2.53). Help 99 and 28.
+  start) or **Put on** the Brew on Tab's own numbers (Rule 2.62), after showing "72 % → 75 %", with ↩ Undo (Rule 2.53). Help 99 and 28.
   **Efficiency tracked by Schema** (OakBarn Brewery, 2026-11-17: "Hard to keep track of all those variables, but easy to track the
   Efficiency We should do that"; "Average over 10 brews with same schema."; "Track by schema"): each brew recorded (📝 **Record a
-  brew** on the Equipment Profile: the OG and the volume into the fermenter) is kept **in the Schema** with its Recipe, date, OG,
-  volume, real Efficiency, Brew on Tab (hidden key) and profile. The profile shows this Schema's brews and the **average of the last
-  10**; **Use the average** puts it into the profile's Brewhouse efficiency after showing the change, with ↩ Undo (a shared profile
-  changes for every Schema that uses it; Make it unique first for one Schema). Asking the OG and volume in the Brew Day Process waits
+  brew** under 📈 Efficiency on a Tab's row of ☰ Menu > Equipment Profile: the OG and the volume into the fermenter) is kept **in the
+  Schema** with its Recipe, date, OG, volume, real Efficiency and Brew on Tab (hidden key). **📈 Efficiency** shows that Tab's brews
+  and the **average of the last 10**; **Use the average** puts it into that Tab's Brewhouse efficiency after showing the change, with
+  ↩ Undo (Rule 2.62, 2026-11-19: only that Tab changes; no profile is touched). Asking the OG and volume in the Brew Day Process waits
   in the Process Sandbox (Rule 14.5, entry 7). Help 28.
 - Picking a Boil Profile with its own Boil Off in a Recipe **asks each time** which to use: the Equipment Profile's or the profile's
   own (OakBarn Brewery: "I think 3").
@@ -5812,7 +5842,8 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
      it stops, nothing is added, and a plain note names the board and the Tab and says why (one board is never split by a paste, and
      its ID never changes, Rule 3.2).
    A Port is never given to two Devices (Rule 6.1). A slot another Schema has not given a Port stays in the profile (Design Rule 1); a Device deleted where it was given a Port takes its slot out.
-   **Built (2026-11-17):** the profile keeps its Tab's hardware every time that Tab is saved (no hidden key goes into it). The
+   **Built (2026-11-17):** the profile keeps the hardware of a Tab saved into it with **💾 Save as a profile ...** (no hidden key goes
+   into it; changed 2026-11-19, Rule 2.62: was "every time that Tab is saved"). The
    ➡ Transfer buttons of the Equipment Profile view (below) paste **All**, **Vessels** (each vessel with everything on it) or
    **Manifold** (OakBarn Brewery: "Yes All of the manifold. Just Not the Vessesls") onto the Tab picked beside them; the pieces land on the
    🔨 Build Tab (OakBarn Brewery: "2. Build Tab") and Finish Build > Move to Tab puts them there in the same spots. A pipe end whose
@@ -5837,13 +5868,14 @@ the Default settings (Rule 2.42). **🔨 Build** makes the profile, gives it to 
    **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** with the Tab beside them ("Add Transfer
    to Tab. Since there is room 1 for all 1 for just vessels and 1 for Just Manifold"; one click each, Rule 2.44), then Delete · Save ·
    Undo · Close. Under it the profile's Properties, which go with every Transfer and Paste (OakBarn Brewery: "Equipment Profile
-   Properties are ones transferred like Effenicy"): a Tab with its own profile shows the numbers that change in the Replace list; a Tab
-   with no profile takes this one (keeping its own layout, so the profile's drawing never changes), unless another Tab of the Schema
-   uses it. Beside the Properties: **🧮 Check the volumes**, **📈 Efficiency** (Efficiency on this Schema, Rule 17.13) and **🗂 New Schema
+   Properties are ones transferred like Effenicy"): they are copied onto the Tab as its own numbers, and a Tab that has numbers shows
+   the ones that change in the Replace list (Rule 2.62). Beside the Properties: **🧮 Check the volumes**, **📈 Efficiency** (the
+   Efficiency of the Tab picked beside the ➡ Transfer buttons, Rule 17.13) and **🗂 New Schema
    from this profile ...**. **The old Equipment Profile screen is gone** (OakBarn Brewery, 2026-11-17: "Remove old"; before the first
    Public Production, the Old Ways policy): its form, Equipment list, Paste onto a Tab dialog, Made before Templates list and the
-   Settings button. ☰ Menu > Equipment Profile keeps each Tab's row (its profile, 🔒 Locked, Open, Ports, Make it unique) and the
-   Open list, which opens the profile view.
+   Settings button. ☰ Menu > Equipment Profile keeps each Tab's row (since 2026-11-19, Rule 2.62: its own numbers, ⚙ Numbers,
+   📈 Efficiency, 💾 Save as a profile ..., 🔌 Give ... a Port, and 🔒 when lock_Equipment locked it) and the Open list, which opens the
+   profile view.
    *Replaced (2026-11-17):* "Each pump and motorized valve on the profile's Tab is a slot of the profile ...: its look and place,
    never its Interface, Port or Name. ... A Schema that picks the profile and has no Device for a slot is asked for the Interface;
    each slot gets the next free Port (Tab row: 🔌 Give ... their Ports)" (2026-11-13: "I may have a 3 Vessel 3 Pump Layout that I want
@@ -5928,7 +5960,8 @@ import.
    (asked 2026-10-26)
 6. **RIMS file name "TC1_2":** 1/2 inch or 2 inch TC? The Template still says TC 1.5.
 7. *Answered:* **Equipment Profile:** one per Tab (Hot Side, Fermentation; OakBarn Brewery 2026-10-21). Each Tab picks its own
-   profile; Rule 19.6 builds one with the Equipment Profile Interview.
+   profile; Rule 19.6 builds one with the Equipment Profile Interview. *Changed 2026-11-19 (Rule 2.62):* the profile is only copied
+   onto the Tab to start its build; the Tab keeps no link to it.
 8. ~~**Phones in Edit layout:** add a warning and an "Allow Edit layout on phones" switch (off)?~~
    Answered 2026-11-04: Rule 2.35 run mode.
 9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
@@ -5963,6 +5996,7 @@ import.
 - 2026-11-19: Rule 5.37 extended (OakBarn Brewery: "A Pump with No attached Pipes alwaus have free IPs"; "If that does not work, assign inlet outlet IPs one of the 8 each"): a Device or Manual Valve with no pipes, dropped within 30 pixels of let-go open ends, slides onto them; a pump's Inlet and Outlet go on whichever of its 8 IPs the old pump's Inlet and Outlet were on (a new pump now takes a Left pump's pipes), then they join. Help 153 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's Edit layout code, so it gets the same; no import change. Checked on the 3 Vessel sample (its Left pump replaced by a new Blichmann). (thread "Let a new pump join existing pipes")
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 5.36 A pipe size cascades, Rule 5.40 Auto typed to the join, Rule 2.42 Default Tab 3 note (Panel Updates entry 12; OakBarn Brewery's Hover Help sentences now in Help 155 and the Default settings Hover Help, with French; a hose joined to a pipe keeps today's adapter note, his pick).
+- 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Added Rule 2.61 (OakBarn Brewery: "I will have other testers so an easy way for them to report bugs as well"): 🐞 Report a problem (☰ Menu > About) and 🐞 Report on every Help page open a box with 🐞 A bug and 🌐 The French Help, each on GitHub (new issue forms in .github/ISSUE_TEMPLATE, the French one in English and French) or ✉ Email to support@oakbarnbrewery.com; the version, the page and the browser are filled in. Help 205 (and French); next free Help 206. Checked against both programs: the BruControl Import uses the Panel's Help window, so 🐞 Report is there too.

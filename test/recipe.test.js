@@ -92,20 +92,20 @@ assert.equal(expectedGravity(gr), null, 'no Efficiency, no Expected Gravity'); a
 // the real Efficiency of a brew, back from its OG and the volume into the fermenter (Rule 17.13): 1.060 in 5 gal = 71.8 % (the honey is not mashed; 72 % gives 1.0598, shown as 1.060)
 assert.equal(measuredEfficiency(gr, 1.06, 5 / 0.264172052), 71.8); assert.equal(measuredEfficiency(gr, 1.06, 0), null, 'no volume');
 assert.equal(measuredEfficiency(gr, 0.99, 19), null, 'not a gravity'); assert.equal(measuredEfficiency({ ingredients: { fermentables: [{ type: 'sugar', kg: 1, yieldPct: 75 }] } }, 1.05, 19), null, 'nothing mashed');
-// the average of the last 10 brews with this profile, kept in the Schema (effLog is a Schema key, so each Schema has its own list)
+// the average of the last 10 brews on this Tab (Rule 2.62), kept in the Schema (effLog is a Schema key, so each Schema has its own list)
 {
-  const log = Array.from({ length: 12 }, (_, k) => ({ profile: 'p1', eff: k < 2 ? 50 : 75 })).concat([{ profile: 'p2', eff: 60 }]);
+  const log = Array.from({ length: 12 }, (_, k) => ({ tab: { _key: 'p1' }, eff: k < 2 ? 50 : 75 })).concat([{ tab: { _key: 'p2' }, eff: 60 }]);
   assert.equal(EFF_AVERAGE_OF, 10); assert.deepEqual({ ...averageEfficiency(log, 'p1'), last: undefined }, { avg: 75, count: 10, last: undefined }, 'only the last 10');
   assert.equal(averageEfficiency(log, 'p2').avg, 60); assert.equal(averageEfficiency(log, 'p3'), null); assert.equal(averageEfficiency([], 'p1'), null);
   assert.ok(SCHEMA_KEYS.includes('effLog'));
 }
 assert.equal(expectedGravity({ volumes: gr.volumes, ingredients: { fermentables: [gr.ingredients.fermentables[1]] } }), 1.007, 'sugars only: no Efficiency needed');
 assert.equal(RECIPE_DEFAULTS.efficiency, undefined, 'no overall Efficiency default'); assert.equal('efficiency' in blankRecipe(), false);
-// the Brew on Tab: kept by the Tab's hidden key; the default is the Tab whose profile has a Mash Tun or All In One
+// the Brew on Tab: kept by the Tab's hidden key; the default is the Tab whose own Equipment numbers (copied from a profile, Rule 2.62) list a Mash Tun or All In One
 {
   const prof = { hot: { brewhouseEfficiency: 75, equipment: [{ vtype: 'HLT' }, { vtype: 'Mash Tun' }] }, cold: { brewhouseEfficiency: 60, equipment: [{ vtype: 'Fermenter' }] } };
-  const P = { has: id => id in prof, get: id => prof[id] };
-  const cfg = { workspaces: [{ name: 'Cellar', _key: 'k00000000000000a1', equipmentProfile: 'cold' }, { name: 'Brew House', _key: 'k00000000000000b2', equipmentProfile: 'hot' }, { name: 'Notes', _key: 'k00000000000000c3' }] };
+  const P = { has: () => false, get: () => null };      // no profile is read: the numbers are the Tab's own
+  const cfg = { workspaces: [{ name: 'Cellar', _key: 'k00000000000000a1', equip: prof.cold }, { name: 'Brew House', _key: 'k00000000000000b2', equip: prof.hot }, { name: 'Notes', _key: 'k00000000000000c3' }] };
   const on = defaultBrewOn(cfg, P);
   assert.equal(on._key, 'k00000000000000b2', 'the Tab with a Mash Tun');
   assert.equal(brewOnEfficiency(cfg, P, { brewOn: on }), 75);
@@ -117,7 +117,7 @@ assert.equal(RECIPE_DEFAULTS.efficiency, undefined, 'no overall Efficiency defau
   assert.equal(brewOnFromBrowser('nope', cfg), null);
   assert.deepEqual(cleanRecipe({ brewOn: { _key: 'k00000000000000b2' } }).brewOn, { _key: 'k00000000000000b2' });
   assert.equal(cleanRecipe({ brewOn: { _key: 'name' } }).brewOn, null);
-  assert.equal(defaultBrewOn({ workspaces: [cfg.workspaces[2]] }, P), null, 'no Tab with a profile');
+  assert.equal(defaultBrewOn({ workspaces: [cfg.workspaces[2]] }, P), null, 'no Tab with Equipment numbers');
 }
 assert.equal(recipeField('rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
 assert.equal(readRecipeFile('<RECIPES><RECIPE><NAME>A</NAME><FERMENTABLES><FERMENTABLE><NAME>DME</NAME><TYPE>Dry Extract</TYPE><AMOUNT>1</AMOUNT><ADD_AFTER_BOIL>TRUE</ADD_AFTER_BOIL></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>', 'a.xml').recipe.ingredients.fermentables[0].addAfterBoil, true);

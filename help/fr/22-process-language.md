@@ -252,9 +252,9 @@ Si vous ajoutez une étape au milieu, les numéros qui suivent montent tout seul
 
 Pendant qu'un Process tourne, l'écran Processes montre l'étape où il en est. Pour la montrer sur un Tab, ajoutez un **gGlobal** de type **Step**. Dans ses propriétés, **Shows the steps of** choisit la classe à suivre (Flow si vous ne le changez pas). Il affiche alors, par exemple, `2.00003  Mash in`.
 
-## Verrouiller le Equipment Profile {#lock-the-equipment-profile}
+## Verrouiller l'équipement {#lock-the-equipment}
 
-`lock_Equipment` verrouille les Equipment Profiles de chaque Tab du Schema chargé (en général les profils Hot Side et Fermentation), pour que leurs nombres, leur équipement et leurs tuyaux ne puissent pas être changés. `unlock_Equipment` les déverrouille. Mettez-les sur une ligne à part, par exemple au début et à la fin d'une journée de brassage :
+`lock_Equipment` verrouille l'équipement de chaque Tab du Schema chargé qui a de l'équipement (en général les Tabs Hot Side et Fermentation), pour que ses cuves, IP, tuyaux rigides et souples ne puissent pas être changés. `unlock_Equipment` les déverrouille. Mettez-les sur une ligne à part, par exemple au début et à la fin d'une journée de brassage :
 
 ```
 lock_Equipment
@@ -263,4 +263,4 @@ step "Mash in"
 unlock_Equipment
 ```
 
-La sortie du Process dit quels profils ont été verrouillés. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles). Un `lock_BrewDayRecipe` assorti vient avec la Brew Day Recipe.
+La sortie du Process dit quels Tabs ont été verrouillés. L'interrupteur 🔒 Locked sur la ligne d'un Tab de ☰ Menu > Equipment Profile fait la même chose pour un seul Tab. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles). Un `lock_BrewDayRecipe` assorti vient avec la Brew Day Recipe.
