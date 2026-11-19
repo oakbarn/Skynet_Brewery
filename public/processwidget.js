@@ -34,9 +34,10 @@ export const PROCESS_TIPS = {
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
 };
 
-// A Process got a new name with ✏ Change name (Rule 3.11): every Process Widget that showed it follows (server.js). Returns how many.
+// A Process got a new name with ✏ Change name (Rule 3.11): every Process Widget that showed it, and every Override button set to it
+// (graphics), follows (server.js). Returns how many.
 export function followProcessRename(elements, from, to) {
   let n = 0;
-  for (const el of elements ?? []) if (isProcessWidget(el) && String(el.process ?? '').trim() === from) { el.process = to; n++; }
+  for (const el of elements ?? []) if ((isProcessWidget(el) || el?.kind === 'override') && String(el.process ?? '').trim() === from) { el.process = to; n++; }      // an Override button set to it too (Rule 2.26)
   return n;
 }

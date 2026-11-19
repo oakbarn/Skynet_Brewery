@@ -20,7 +20,7 @@ export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'o
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
 export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'goline', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'send_db', 'dbsend', 'send_db_group', 'start_db_group', 'stop_db_group', 'new', 'play',
-  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'take_reading', 'place_chiller', 'remove_chiller'];
+  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off', 'take_reading', 'place_chiller', 'remove_chiller', 'show_override', 'hide_override'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off', 'null'];      // NULL: the empty value (Rule 1.32)
 export const LOGIC = ['and', 'or', 'not'];
 // gGlobals made in a Process (Rule 1.24): declare is the same as new, and the gGlobal words

@@ -328,6 +328,7 @@ engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
 engine.on('config', () => { store.writeConfig(); broadcast('config', {}); });     // a Process moved a Quick Disconnect hose (Rule 5.34)
+engine.on('overrides', v => broadcast('overrides', v));      // Override pop-ups up now (Rule 2.26)
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
@@ -718,7 +719,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
   if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }
@@ -772,7 +773,13 @@ async function route(req, res) {
   if (p === '/ui/hydrometers/heard' && m === 'GET') return ok(res, hw.hydroHeardList());      // Hardware IDs heard but not claimed (Rule 6.25)
   if (p === '/ui/reading' && m === 'POST') { engine.readingAction(await jsonBody(req), me?.name); return ok(res); }      // take_reading's pop-up (Rule 6.25)
   // the Override button (Fritz, 2026-10-30): every running Process moves on past the wait, sleep or loop that holds it
-  if (p === '/ui/override' && m === 'POST') return ok(res, { processes: engine.override(me.name) });
+  // Each button is set to one Process or to Any (empty); a pop-up names its Process (OakBarn Brewery, 2026-11-19)
+  if (p === '/ui/override' && m === 'POST') {
+    const b = await jsonBody(req);
+    const g = b.id ? (store.config.graphics ?? []).find(x => x?.id === b.id && x.kind === 'override') : null;
+    const process = String(g ? g.process ?? '' : b.process ?? '').trim();
+    return ok(res, { process, processes: engine.override(me.name, process) });
+  }
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
@@ -807,8 +814,7 @@ async function route(req, res) {
     { const bad = (body.elements || body.graphics) && apiNameListError(apiNameItems({ elements: body.elements ?? store.config.elements, graphics: body.graphics ?? store.config.graphics })); if (bad) return fail(res, 400, bad); }     // API_Name is Unique across every Device and Widget, Hose Bibs too (Rule 6.18)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
     if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }
-    // only one Override button on each Tab (Fritz, 2026-10-30)
-    { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
+    // any number of Override buttons on a Tab (Rule 2.26 changed, OakBarn Brewery, 2026-11-19): no check here
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: Rule 3.2, unique (public/naming.js)
@@ -1047,7 +1053,7 @@ async function route(req, res) {
       let i = 1; while (taken.has(`${name}_${i}`.toLowerCase())) i++;
       moved.set(name, `${name}_${i}`); taken.add(`${name}_${i}`.toLowerCase());
     }
-    for (const [a, b] of moved) followProcessRename(got.schema.elements, a, b);
+    for (const [a, b] of moved) { followProcessRename(got.schema.elements, a, b); followProcessRename(got.schema.graphics, a, b); }
     const made = schemas.addFromFile(got.schema, { from: pick || got.source || 'a .json file' });
     for (const p of got.processes) {
       const name = moved.get(p.name) ?? p.name, text = moved.size ? renameInProcess(p.text, moved) : p.text;
@@ -1278,7 +1284,7 @@ async function route(req, res) {
       engine.rename(from, now);
       const auto = store.config.autostart ?? [];
       if (auto.includes(from)) { store.config.autostart = auto.map(n => n === from ? now : n); store.writeConfig(); }
-      if (followProcessRename(store.config.elements, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Process Widgets follow (Rule 1.31)
+      if (followProcessRename(store.config.elements, from, now) + followProcessRename(store.config.graphics, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Process Widgets follow (Rule 1.31)
       return ok(res, { ok: true, processes: renameInProcesses(engine, new Map([[from, now]])) });
     }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }

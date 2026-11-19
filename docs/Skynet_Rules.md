@@ -396,7 +396,7 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
   Device, its reading or its Skynet Dial): **one click opens its SetPoint pop-up** (Rule 2.43).
 - **Something set to a number, not just On or Off** (a variable speed pump or PWM output, a proportional valve, a stepper, a scale,
   a Value Widget, a Timer): one click opens the pop-up where that number is set.
-- **A number shown in a green SV box** (a Heating Element's Duty cycle % or Setpoint, Rule 6.19): one click on the box types a new one
+- **A number shown in a green SV box** (a Heating Element's Duty cycle % or Setpoint, Rule 6.19; a Temperature Probe's SV, Rule 2.43): one click on the box types a new one
   in place; a click on the rest of the item still does what it does.
 - **Something only shown** (a reading with no Setpoint, a Text or Label, a picture that follows nothing): a click does nothing,
   or a short note says why.
@@ -659,11 +659,29 @@ clean window (Rule 2.36) closes; every other page shows "Skynet Brewer is closed
 Brain run as a service (Pi) get **Put the Brain in Standby** instead (Rule 6.32). Closing a browser tab or the panel window never
 stops the Brain. (2026-10-30, thread "Close the command window on exit"; 2026-11-14, thread "Run the Brain in the Background on a PC")
 
-2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
-with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
-next wait runs as normal. **Only one Override button on a Tab**; it can be on several Tabs, each with its own Label (default
-"Override") and look. A user changes only the Label and its style (font, size, bold, fore, back, alignment), **never a background
-picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 96)
+2.26 **The Override button** (Fritz, 2026-10-30; Process setting, any number and the pop-up OakBarn Brewery, 2026-11-19): one press
+lets **its Process** move on, like the Simulator's skip with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it
+sits in (a goto back up, often in an if) is left; the next wait runs as normal. Manual valves still wait for their click or Done.
+- **Processes run side by side and on their own** (OakBarn Brewery, 2026-11-19: "In BruControl I could call the Fire Hose and Manifold
+  Scripts at any time and they ran concurrent with a different script. Totally independent. I had 3 Advance or Override Switches."):
+  every Override button has its **Label** ("an Overide Button needs a Label attribute regarless") and a **Process** setting: **Any**
+  (every running Process; Looper Processes are left alone) or **one Process** by name (only that one moves on, a Looper too when it is
+  the one picked). A rename of the Process is followed (Rule 1.31's way).
+- **Any number of Override buttons on a Tab, and any number for one Process** (OakBarn Brewery, 2026-11-19: "Actually a Process could
+  have more than one anytime."; "Yes more than one per tab and no Process restriction"). A user changes the Label, the Process and the
+  style (font, size, bold, fore, back, alignment), **never a background picture**.
+- **The Override pop-up** ("having it pop up as a skynet widget on demand (Process code or see a wait or loop with and exit and pop up
+  automatically ... a wait for a Time is and easy decision. Over Ride 100% of the time."): a Skynet Override button on top (Rule 18.53)
+  that names its Process; one press moves only that Process on; ✕ hides it on that screen until it comes again.
+  - **By itself** when a Process has been held 3 seconds in a `wait` or `sleep` and **no Override button is set to it or to Any**. A
+    wait for a temperature counts ("it could work for Tempeatures Like a Boil where the User might see it is boiling before it hits
+    the daily Boil Temp and he could override a Wait").
+  - **Never by itself inside a loop** ("a nested if could be issue if waiting for a valve or heater to do something"): a wait or sleep
+    that a goto or goLine further down jumps back above gets no pop-up by itself.
+  - **On demand**: `show_Override` (optional text after it) in a Process brings it up, `hide_Override` takes it away; it also goes
+    when it is pressed or the Process ends.
+*Replaced (2026-11-19):* "one press lets every running Process move on" and "Only one Override button on a Tab".
+(thread "Add an Override button", thread "Let Override target the right Process", Help 96, Help 22)
 
 2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
 postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
@@ -1011,6 +1029,27 @@ allowed method that does. A Tap set by hand (When tapped) still wins. Operators 
 - **BruControl Import:** checked, not changed. Its probes and Heating Elements are the Panel's own, so they get this click in the
   Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
   temperature widgets", Help 160)
+- **PV and SV on every probe's display** (OakBarn Brewery, 2026-11-19, Panel Updates 41: "on 3 we will also need a SetPoint Field
+  associated with the Temperture Probe visible to a users"; "the standard PV and SV can be intergrated into The Display"; "Forget visible
+  option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."). On a running Tab every
+  Temperature Probe's display shows **PV** (its reading) over a **green SV box** (its Setpoint), like a panel controller. **PV's color**
+  (OakBarn Brewery, 2026-11-19: "If the process is heating and the Temperature is Below the Setpoint , Blue, at Setpoint Between a Hys Green
+  and PID (with smoothing Green) and if above Red. Opposite for Cooling. Dead Band Green in the Band and Blue if Heating and Red If Cooling.
+  Duty Cycle Heating Red if On, Grey If Off, Cooling Blue if On, Grey if Off"; it replaced "Red when Heating Blue when cooling" the same
+  day) comes from what uses the probe: Hysteresis Green within its Offset of the Setpoint, PID and Precise within half a degree C (one
+  degree F), Deadband inside its Deadband, a Fermentor between its Heat and Cool Offsets; outside, Blue below and Red above. Duty Cycle,
+  Direct and PWM: Red while a heater is ON, Blue while a cooler is ON, Grey while OFF. A probe nothing uses keeps its own Display color.
+  A cooler is colored the same way (OakBarn Brewery, 2026-11-19, asked whether "Opposite for Cooling" swaps Red and Blue: "Go with A
+  KISS"): Blue is always below the Setpoint, Red always above. Each line keeps
+  its digits and °F or °C on one line inside the display (both made smaller together to fit). **No Visible switch.** One click on the SV
+  box types a new Setpoint in place (no pop-up, Rule 2.44; Enter sets, Esc puts it back); a click on the rest of the probe still opens
+  the SetPoint pop-up above. **One Setpoint, never two:** a probe a Heating Element, a Fermentor Control or an older Hysteresis, PID or
+  Deadband Device holds shows and sets **that one's Setpoint** (two or more: the one that is ON, else the first); `Probe.setpoint` in a
+  Process reads and sets it there too. A probe nothing holds keeps **its own Setpoint**: **Setpoint** in its Properties to start (empty
+  shows ---), `.setpoint` in a Process, for Processes and Alarms. Like a Heating Element's, a Setpoint set on a Tab lasts until the
+  Brain restarts. Not shown in Edit layout, on the Dial or Bar look, or when the value is hidden. Operators and admins only. **Both
+  programs:** the BruControl Import has no running Tabs and BruControl probes have no Setpoint; its probes are the Panel's own, so they
+  get PV and SV in the Panel. Help 160.
 
 2.45 **Time and DateTime formats: pick how a time shows** (OakBarn Brewery, 2026-11-09: BruControl's time Globals become Time or
 DateTime Widgets, with more than one format, and the Importer carries the format over). A **Time Widget** and a **DateTime
@@ -6058,6 +6097,7 @@ import.
 - 2026-11-19: Rule 5.37 extended (OakBarn Brewery: "A Pump with No attached Pipes alwaus have free IPs"; "If that does not work, assign inlet outlet IPs one of the 8 each"): a Device or Manual Valve with no pipes, dropped within 30 pixels of let-go open ends, slides onto them; a pump's Inlet and Outlet go on whichever of its 8 IPs the old pump's Inlet and Outlet were on (a new pump now takes a Left pump's pipes), then they join. Help 153 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's Edit layout code, so it gets the same; no import change. Checked on the 3 Vessel sample (its Left pump replaced by a new Blichmann). (thread "Let a new pump join existing pipes")
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 5.36 A pipe size cascades, Rule 5.40 Auto typed to the join, Rule 2.42 Default Tab 3 note (Panel Updates entry 12; OakBarn Brewery's Hover Help sentences now in Help 155 and the Default settings Hover Help, with French; a hose joined to a pipe keeps today's adapter note, his pick).
+- 2026-11-19: Rule 2.43 and Rule 2.44 changed, Panel Updates 41 (OakBarn Brewery: "the standard PV and SV can be intergrated into The Display"; "Forget visible option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."): every Temperature Probe's display shows PV over a green SV box (PV Blue below, Green at, Red above the Setpoint; Duty Cycle Red / Blue while ON, Grey while OFF), one click on the SV box types a new Setpoint in place; a probe a Heating Element (or Fermentor Control, older Hysteresis, PID, Deadband Device) holds shows and sets that one's Setpoint (one Setpoint), a probe nothing holds keeps its own (.setpoint, a Setpoint row in its Properties). Help 160 (and French). Checked against both programs: the BruControl Import has no running Tabs and BruControl probes have no Setpoint, so nothing changes there.
 - 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
 - 2026-11-19: Rule 2.62 #7 and #8 added, Rule 5.16 changed (OakBarn Brewery: "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Skynet valve keeps its own copy of its Template's fixed attributes and pictures (the Brain puts a sent fixed attribute back to the valve's own, not the Template's); Orientation copies that picture when picked. Pipe fittings keep their own bend, body, size, upright and openings; a Skynet fitting no longer follows its Template's new picture when Edit layout opens. Help 88 (and French). Checked against both programs: the BruControl Import makes no Skynet valve User versions and only names a vessel's Template for the Panel to copy, so nothing changes there.
 - 2026-11-19: Rule 2.62 #9 and #10 added, Rule 2.39 #3 changed (OakBarn Brewery: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab (its color into the Tab's Color, its look into the Tab's own copy) and never linked; Tab Settings' Profile box is now **Copy Profile**, and ☰ Menu > Tab Profile's list of Tabs has **Copy onto it**. A Skynet valve's Properties rows are its own copy. Help 26, 36 and 88 (and French). Checked against both programs: the BruControl Import sets no Tab Profile on a Tab and makes no Skynet valve User versions, so nothing changes there.
@@ -6700,3 +6740,4 @@ import.
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")

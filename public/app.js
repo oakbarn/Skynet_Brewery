@@ -321,7 +321,7 @@ async function load() {
   startupView();
   if (S.importBuild) vbFromHash();      // the BruControl Import's Vessels step: build this vessel
 }
-function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
+function renderAll() { renderValves(S.valves); renderOverrides(S.overrides); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 // Memory and work (OakBarn Brewery, 2026-11-12: "I would rather it not be a memory hog over speed"):
 // - while this browser tab can't be seen (another tab, minimized, a phone asleep) the Tab's pictures, pipes and the Output
@@ -376,6 +376,7 @@ function connect() {
   es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
+  es.addEventListener('overrides', e => renderOverrides(S.overrides = JSON.parse(e.data)));      // Override pop-ups (Rule 2.26)
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
   es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });     // flow colors a Process set (Rule 5.21)
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
@@ -1690,13 +1691,13 @@ function fillText(n, g) {
 }
 
 // The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
-// loop that holds it. One per Tab; it can be on several Tabs, each with its own Label and look. Only the Label and its style
+// loop that holds it. Any number on a Tab, each with its own Label, Process and look (Rule 2.26). Only the Label and its style
 // can be changed (font, size, bold, fore and back color, alignment), never a background picture.
 const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
-const ovrHas = (tab, but) => (draft || S.config).graphics.some(x => x !== but && x.kind === 'override' && x.workspace === tab);
 function fillOverride(n, g) {
   n.classList.add('ovr'); place(n, g);
-  const b = h('button', { type: 'button', class: 'ovrBtn', title: 'Override: every running Process moves on past the wait, sleep or loop that holds it' });
+  const who = String(g.process ?? '').trim();
+  const b = h('button', { type: 'button', class: 'ovrBtn', title: who ? `Override: ${who} moves on past the wait, sleep or loop that holds it` : 'Override: every running Process (Any) moves on past the wait, sleep or loop that holds it' });
   setRich(b, g.label || OVR.label);
   b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
   b.style.fontFamily = tbFontCss(g.font) || g.font || '';
@@ -1704,11 +1705,29 @@ function fillOverride(n, g) {
   const a = (g.align || OVR.align).toLowerCase(); b.style.justifyContent = a === 'left' ? 'flex-start' : a === 'right' ? 'flex-end' : 'center'; b.style.textAlign = a;
   n.replaceChildren(b);
 }
-const pressOverride = guard(async () => {
+// body: { id } of the button pressed (the Brain looks up its Process), or { process } from the Override pop-up
+const pressOverride = guard(async (body = {}) => {
   if (!can('operator')) throw new Error('Only an operator or an admin can press Override');
-  const r = await api('POST', '/ui/override', {});
-  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
+  const r = await api('POST', '/ui/override', body);
+  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : r.process ? `Override: ${r.process} is not running` : 'Override: no Process is running');
 });
+// The Override pop-up (OakBarn Brewery, 2026-11-19, Rule 2.26): a Skynet Override button, on top, for each Process that asks for one
+// (show_Override in the Process) or that waits with no Override button set to it (by itself, after 3 seconds in a wait or sleep
+// outside a loop). Each names its Process; one press moves only that Process on. ✕ hides it on this screen until it pops up again.
+const ovrHidden = new Map();      // Process -> since of the pop-up hidden with ✕
+function renderOverrides(list = []) {
+  for (const [n, t] of ovrHidden) if (!list.some(a => a.process === n && a.since === t)) ovrHidden.delete(n);
+  const show = list.filter(a => ovrHidden.get(a.process) !== a.since);
+  let box = $('#ovrPop');
+  if (!show.length) { box?.remove(); return; }
+  if (!box) { box = h('div', { id: 'ovrPop', class: 'ovrPop', role: 'status' }); document.body.append(box); }
+  box.replaceChildren(...show.map(a => h('div', { class: 'ovrPopRow' },
+    h('div', { class: 'ovrPopWho' }, h('b', {}, a.process), a.text ? ` ${a.text}` : a.how === 'auto' ? ' is waiting' : ''),
+    h('div', { class: 'ovrPopBar' },
+      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, OVR.label)
+        : h('span', { class: 'muted' }, 'An operator or admin can press Override.'),
+      h('button', { type: 'button', class: 'ovrPopX', title: 'Hide it on this screen. It pops up again next time this Process waits.', onclick: () => { ovrHidden.set(a.process, a.since); renderOverrides(S.overrides); } }, '✕')))));
+}
 
 // variable class: gGlobal (the Shared Variable class was removed on 2026-11-07 and 2026-11-09, Rule 1.25; gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => e?.type === 'gGlobal';
@@ -2919,9 +2938,9 @@ function svEdit(box) {
   if (!can('operator')) return toast('Your account is view only', true);
   const n = box.closest('.el'), vl = box.closest('.vl'), e = n && elByName(n.dataset.name);
   if (!e || !vl || vl._svEdit) return;
-  const prop = box.dataset.prop, was = box.dataset.num, num = box.querySelector('.svNum');
+  const prop = box.dataset.prop, was = box.dataset.num, num = box.querySelector('.svNum'), tgt = box.dataset.tgt || e.name;      // a probe's SV box sets the Setpoint of what holds it (Panel Updates 41)
   const inp = h('input', { class: 'svIn', value: was, inputmode: 'decimal', enterkeyhint: 'done', size: 5,
-    'aria-label': prop === 'target' ? 'Setpoint' : 'Duty cycle %' });
+    'aria-label': prop === 'dutycycle' ? 'Duty cycle %' : 'Setpoint' });
   vl._svEdit = true; num.replaceChildren(inp); box.classList.add('editing');
   let done = false;
   const finish = async ok => {
@@ -2934,12 +2953,98 @@ function svEdit(box) {
     const st = !!S.values[e.name]?.state, inDc = heatMethodKey(S.values[e.name]?.method) === 'dutyCycle';
     // a Duty cycle % above 0 turns it On (Rule 6.19): an Element set to Ask before changing by hand asks first
     if (prop === 'dutycycle' && inDc && x > 0 && !st && e.confirm) { if (!(await choose(`${S.values[e.name]?.label ?? e.label ?? e.name}: ON at ${fmtVal({}, x)} %?`, [['ON', true]]))) return; }
-    await setProp(e.name, prop, x);
+    await setProp(tgt, prop, x);
   };
   inp.addEventListener('keydown', ke => { ke.stopPropagation(); if (ke.key === 'Enter') { ke.preventDefault(); finish(true); } else if (ke.key === 'Escape') { ke.preventDefault(); finish(false); } });
   inp.addEventListener('blur', () => finish(String(inp.value).trim() !== was));
   for (const t of ['pointerdown', 'click', 'dblclick']) inp.addEventListener(t, ev => ev.stopPropagation());
   inp.focus(); inp.select();
+}
+
+// ---- A Temperature Probe's PV and SV (Panel Updates 41, OakBarn Brewery, 2026-11-19: "on 3 we will also need a SetPoint Field
+// associated with the Temperture Probe visible to a users"; "the standard PV and SV can be intergrated into The Display"; "Forget visible
+// option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."). On a running Tab every
+// probe's display shows two lines like a panel controller: PV (what it reads) over a green SV box (its Setpoint), each line with its
+// digits and °F or °C on one line, made smaller to fit inside the display. One click on the SV box types a new one in place (no pop-up,
+// Rule 2.44), the same box as a Heating Element's (Panel Updates 40).
+// One Setpoint, never two: a probe a Heating Element (or an older Hysteresis, PID, Deadband Device, or a Fermentor Control) holds shows
+// that one's Setpoint, and typing in its SV box sets it there (two or more: the one that is ON, else the first). A probe nothing holds
+// keeps its own Setpoint (its Properties' Setpoint to start, .setpoint in a Process) for Processes and Alarms to use.
+// No SV box in Edit layout, on the Dial or Bar look, or with its value hidden.
+function probeHolder(p) {
+  const hs = heatersOf(p), on = t => { const x = S.values[t.name] || {}; return isHeatElem(t) || isFermentor(t) ? !!x.state : !!x.enabled; };
+  return hs.find(on) || hs[0] || null;
+}
+function probeSv(e0, e, v) {
+  if (editing || e.look === 'dial' || e.look === 'bar' || (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue)) return null;
+  const p = e0.cloneOf ? (elByName(e0.cloneOf) || e0) : e0, t = probeHolder(p);
+  const raw = t ? (S.values[t.name]?.target ?? t.target) : (v.setpoint ?? p.setpoint);
+  const num = raw === '' || raw === null || raw === undefined || !Number.isFinite(Number(raw)) ? null : Number(raw);
+  return { prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
+    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', color: v.fault ? '' : probePvColor(p, v.value) };
+}
+// PV's color (OakBarn Brewery, 2026-11-19: "If the process is heating and the Temperature is Below the Setpoint , Blue, at Setpoint
+// Between a Hys Green and PID (with smoothing Green) and if above Red. Opposite for Cooling. Dead Band Green in the Band and Blue if
+// Heating and Red If Cooling. Duty Cycle Heating Red if On, Grey If Off, Cooling Blue if On, Grey if Off"). It comes from what uses the
+// probe (the one that is ON, else the first: a Heating Element, Cool / Warm Pump, Fermentor Control or older Hysteresis, PID, Deadband):
+// - Hysteresis: Green while the reading is within its Offset of the Setpoint; PID and Precise: within PV_NEAR; Deadband: within its
+//   Deadband; a Fermentor: between its Heat and Cool Offsets. Outside: Blue below (cold), Red above (hot). Cooling the same way round
+//   (OakBarn Brewery, 2026-11-19, asked whether "Opposite for Cooling" swaps them: "Go with A KISS"; PV_COOL_SWAP true would swap them).
+// - Duty Cycle, Direct, PWM, On/Off: heating Red while ON, cooling Blue while ON, Grey while OFF.
+// Nothing uses the probe (or a FAULT): PV keeps the probe's own Display color.
+const PV_COOL_SWAP = false;
+const PV_NEAR = u => /C/i.test(u || '') ? 0.5 : 1;      // "at Setpoint" for PID and Precise: half a degree C, one degree F
+function probeCtl(p) {
+  const hs = [...heatersOf(p), ...S.config.elements.filter(t => isCoolPump(t) && t.input === p.name)];
+  const on = t => { const x = S.values[t.name] || {}; return SP_OLD.includes(t.type) ? !!x.enabled : !!x.state; };
+  return hs.find(on) || hs[0] || null;
+}
+function probePvColor(p, pv) {
+  const t = probeCtl(p);
+  if (!t) return '';
+  const x = S.values[t.name] || {}, on = SP_OLD.includes(t.type) ? !!x.enabled : !!x.state;
+  const k = isFermentor(t) ? 'ferm' : SP_OLD.includes(t.type) ? t.type : (heatMethodKey(x.method) ?? startMethod(t));
+  const off = Number(x.onoffset ?? t.onOffset) || 0;
+  const cools = isFermentor(t) ? false : isHeatElem(t) ? false : (t.type === 'pid' || t.type === 'deadband') ? !!t.reversed : off > 0;
+  if (!['hysteresis', 'pid', 'precise', 'deadband', 'ferm'].includes(k)) return !on ? 'grey' : cools ? 'blue' : 'red';      // Duty Cycle, Direct, PWM, On/Off
+  const sv = Number(x.target ?? t.target), r = Number(pv);
+  if (!Number.isFinite(sv) || !Number.isFinite(r)) return '';
+  let lo, hi;
+  if (k === 'ferm') { lo = sv + Math.min(0, Number(x.heatoffset ?? t.heatOffset ?? -1)); hi = sv + Math.max(0, Number(x.cooloffset ?? t.coolOffset ?? 1)); }
+  else {
+    const band = k === 'hysteresis' ? Math.abs(off) || PV_NEAR(p.units) : k === 'deadband' ? Math.abs(Number(x.deadbandoffset ?? t.deadbandOffset ?? 0.5)) || PV_NEAR(p.units) : PV_NEAR(p.units);
+    lo = sv - band; hi = sv + band;
+  }
+  if (r >= lo && r <= hi) return 'green';
+  const cold = r < lo;
+  return (cools && PV_COOL_SWAP) ? (cold ? 'red' : 'blue') : (cold ? 'blue' : 'red');
+}
+// PV over SV, as on a panel controller: each line keeps its digits and °F / °C together, and the two are made smaller together to fit
+function fillPvSv(vl, text, sv) {
+  const box = h('span', { class: 'svBox sp pv', 'data-prop': sv.prop, 'data-tgt': sv.tgt, 'data-num': svFmt(sv),
+    title: sv.holder ? `SV: the Setpoint of ${sv.holder}. One click to type a new one, then Enter (Esc puts it back).`
+      : 'SV: this probe\'s own Setpoint (nothing heats or cools to it). One click to type a new one, then Enter (Esc puts it back).' },
+    h('span', { class: 'svNum' }, sv.num === null ? `--- ${sv.unit}` : svText(sv)), h('span', { class: 'svTag' }, 'SV'));
+  const pv = h('span', { class: 'pvRow', title: 'PV: what the probe reads now' }, h('span', { class: 'pvNum' }), h('span', { class: 'svTag' }, 'PV'));
+  setRich(pv.firstChild, text);
+  if (sv.color) pv.classList.add('pv-' + sv.color);      // Blue below, Green at, Red above the Setpoint; Grey while Off
+  vl.replaceChildren(h('span', { class: 'pvsv' }, pv, box));
+}
+function fitPvSv(vl) {
+  const w = vl.querySelector('.pvsv');
+  if (!w) return;
+  if (!vl.isConnected) { if (!vl._fitWait) { vl._fitWait = true; requestAnimationFrame(() => { vl._fitWait = false; if (vl.isConnected) fitPvSv(vl); }); } return; }
+  if (!vl.clientWidth) return;
+  const key = vl.textContent.replace(/\d/g, '0') + '|' + vl.clientWidth + '|' + vl.clientHeight + '|' + vl.style.fontSize;
+  if (key === vl._pvKey && vl._pvPx !== undefined) { w.style.fontSize = vl._pvPx; return; }
+  w.style.fontSize = '';
+  const cs = getComputedStyle(vl), aw = vl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = vl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  let px = parseFloat(getComputedStyle(w).fontSize);
+  for (let i = 0; i < 4 && px > 7 && (w.scrollWidth > aw || w.offsetHeight > ah); i++) {
+    px = Math.max(7, Math.floor(px * Math.min(aw / w.scrollWidth, ah / w.offsetHeight) * 10) / 10 - 0.2);
+    w.style.fontSize = px + 'px';
+  }
+  vl._pvKey = key; vl._pvPx = w.style.fontSize;
 }
 
 function fillEl(n, e0) {
@@ -2994,7 +3099,9 @@ function fillEl(n, e0) {
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
+      break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
@@ -3094,6 +3201,7 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
+  else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
   else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv);      // a Heating Element's text and its SV box
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
@@ -3138,7 +3246,8 @@ function fillEl(n, e0) {
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
-  if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
+  if (sv?.k === 'probe') { if (!vl._svEdit) { fitOneLine(n, vl, null); fitPvSv(vl); } }      // PV and SV each on one line inside the display
+  else if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
@@ -3387,6 +3496,9 @@ function updateEl(name) {
   else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
+  // what holds a probe's temperature changed (its Setpoint, ON / OFF): the probe's SV box shows it (Panel Updates 41)
+  const ip = e?.input && elNamed(e.input);
+  if (ip?.type === 'temperature') for (const pn of $$(`#ws .el[data-name="${CSS.escape(ip.name)}"], #ws .el[data-clone="${CSS.escape(ip.name)}"]`)) { const pe = elNamed(pn.dataset.name); if (pe) fillEl(pn, pe); }
 }
 
 async function setProp(name, prop, value) { try { await api('POST', '/ui/set', { name, prop, value }); } catch (e) { toast(e.message, true); } }
@@ -3542,7 +3654,7 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
 
-  if (ev.target.closest('.gfx.ovr')) return pressOverride();
+  { const o = ev.target.closest('.gfx.ovr'); if (o) return pressOverride({ id: o.dataset.gid }); }
   { const sb = ev.target.closest('.el .svBox'); if (sb) return svEdit(sb); }      // a Heating Element's SV box: type a new one (Panel Updates 40)
   // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
   // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
@@ -6978,11 +7090,10 @@ function addText() {
   { let n = 1; while (draft.graphics.some(x => x.kind === 'text' && x.label === 'Text_' + n)) n++; g.label = 'Text_' + n; }      // a Label from the start (Rule 18.15): its name is wgt_TXT_Text_1 ...
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
-// the Override button: one per Tab, made on the 🔨 Build Tab like every new Widget; its Properties open
+// the Override button: any number on a Tab (Rule 2.26), made on the 🔨 Build Tab like every new Widget; its Properties open
 $('#addOverride').onclick = () => addOverride();
 function addOverride() {
   const tab = toBuild(); if (!tab) return;
-  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Finish Build ... sends it to a Tab.', true);
   const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -6990,7 +7101,6 @@ function addOverride() {
 // the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
 function copyGraphic(g) {
   const tab = toBuild(); if (!tab) return;
-  if (g.kind === 'override' && ovrHas(tab.name, g)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab.', true);
   const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
@@ -7991,8 +8101,6 @@ function moveBuildTo(tab, own = false) {
   const groups = new Map();
   for (const x of items) { const to = dest(x); if (!groups.has(to)) groups.set(to, []); groups.get(to).push(x); }
   for (const [to, list] of groups) {
-    const ovr = list.find(x => x.kind === 'override');
-    if (ovr && ovrHas(to.name, ovr)) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   }
   const kept = new Set();
   for (const [to, list] of groups) {
@@ -8416,7 +8524,7 @@ const F = {
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   // Override button Widget Properties (Fritz, 2026-10-30): the dialog pattern; only the Label and its look, no background picture
-  override: [['_nm', 'One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.', 'infonote', 'override'],
+  override: [['_nm', 'One press and its Process (or Any: every running Process) moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.', 'infonote', 'override'],
     ['_lb', '', 'box'], ['label', 'Label (what the button says on this Tab)', 'text', null, false, 'b'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
     ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
@@ -9263,6 +9371,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
   CAL_ROW(it, x),
   [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
+  ['setpoint', 'Setpoint', 'num', null, false, false, { tip: DEVICE_TIPS.pSetpoint, ...x }],      // its SV (Panel Updates 41)
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
 function probeDeviceFields(it, item) {
@@ -9446,18 +9555,25 @@ function chartWidgetFields() {
     ...NOGFX_LOOK(),
     ...wgtPlace(), wgtType('Graph')];
 }
-// Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
+// Override button (Rule 2.26): one press and the Process it is set to (or Any: every running Process) moves on
 const OVR_TIPS = {
-  label: 'What the button says on this Tab. One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.',
+  label: 'What the button says on this Tab, for example Skip Fire Hose. One press and its Process moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.',
+  process: 'Which Process this button moves on. Any (the usual): every running Process except Loopers. A Process picked: only that one, so a Fire Hose or Manifold Process running beside the Brew is overridden on its own. A Process that waits with no button set to it (or to Any) gets an Override pop-up naming it. If the Process gets a new name, the button follows it.',
   name: 'Made by Skynet from the Label and the Tab (Rule 3.14).',
   color: 'The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.',
 };
+// 4. Process: Any (empty) or one Process, picked from the list as on the Process Widget
+function ovrProcessField(it, tip) {
+  const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
+  return ['process', '4. Process', 'sel', [['', 'Any (every running Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip }];
+}
 function overrideFields(it) {
   const T = OVR_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, tip: T.label }],
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
     ['_nmro', '3. Name', 'ro', it.name || '', false, false, { tip: T.name }],
+    ovrProcessField(it, T.process),
     ...NOGFX_LOOK('color', { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor').map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }),
     ...wgtPlace(), wgtType('Override')];
 }
@@ -10219,6 +10335,7 @@ const DEVICE_TIPS = {
   pType: 'The kind of probe, picked first. The ⬢ beside it has its settings (wires, resistor, thermocouple type ...). To use another kind, delete it and add it again.',
   tpUnits: 'Units the reading shows in (°F or °C), and how many decimals.',
   pOffset: 'Added to every reading, to calibrate the probe (for example -0.4). The Database and .API ⬢ on its line sets what it sends to the database.',
+  pSetpoint: 'The SV this probe starts with, shown in the green SV box under its reading on the Tab (one click there changes it; a Process uses .setpoint). When a Heating Element or Fermentor Control uses this probe, the SV box shows that one\'s Setpoint instead, so there is only one.',
   pCal2: 'For readings right to 0.1 degree (Precise heating). A plain offset moves every reading the same; two points (ice water and boiling water) also fix a probe that is right at one end and off at the other. The ⬢ opens it. The offset is added after it.',
   // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
   pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
@@ -11364,12 +11481,14 @@ const INFO = {
       ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
   override: { title: 'Override Button Widget', properties: [
-    ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
-    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Finish Build ... to another Tab); each has its own Label and look.'],
+    ['One press', ': its Process moves on 100 ms later (Any: every running Process). A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
+    ['Process', ': Any (every running Process but Loopers) or one Process, so Processes running side by side (a Brew, a Fire Hose, a Manifold) are each overridden on their own.'],
+    ['Override pop-up', ': a Process held 3 seconds in a wait or sleep (not inside a loop) with no button set to it (or to Any) gets a pop-up naming it. show_Override in a Process brings it up on demand; hide_Override takes it away.'],
+    ['As many as you like', ': on one Tab or on several (COPY, then Finish Build ...); each has its own Label, Process and look.'],
     ['Label', ' (Override to start), with its font, size, bold, fore color, back color and alignment. Rich Text Embedded Codes work in it.'],
     ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
     attributes: [['none', 'a Process does not use it: a person presses it']],
-    example: 'wait Kettle_Temp >= 152' },
+    example: 'show_Override "Boil is rolling"' },
   dataw: { title: 'Value, Time and DateTime Widgets', properties: [
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
@@ -12044,8 +12163,7 @@ async function editItem(kind, id) {
       if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
       delete work.wrap;                                                         // word wrap is always on
     }
-    if (type === 'override') {      // one on a Tab; an empty Label says Override
-      if (ovrHas(work.workspace, item)) throw new Error(`The ${work.workspace} Tab already has an Override button: only one is allowed on a Tab`);
+    if (type === 'override') {      // as many on a Tab as you like (Rule 2.26 changed 2026-11-19); an empty Label says Override
       if (!String(work.label ?? '').trim()) work.label = OVR.label;
       for (const k of ['image', 'backpath', 'backpath_2', 'backpath_3', 'background']) delete work[k];
     }
