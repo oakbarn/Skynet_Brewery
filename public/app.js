@@ -4791,9 +4791,11 @@ function setEditing(on) {
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
+  // older pipes and fittings get their Skynet names (saved with the next layout save). Before editing turns on: a name needs its Tab
+  // ID (tabIdOf reads L()), and L() is the draft once editing is on, which is not made yet. A graphic with no name stopped Edit layout.
+  if (on) nameAll(S.config.graphics);
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   undoList = []; grabWith.clear(); grabNoAsk = false; updUndoBtn();      // ↩ Put back and the grab pop-up start fresh (Rule 5.37)
-  if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (draft) for (const x of [...draft.elements, ...draft.graphics]) if (x) x._old = 1;      // made before this Edit layout (never saved)
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
