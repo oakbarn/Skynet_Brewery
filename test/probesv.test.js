@@ -46,4 +46,11 @@ assert.match(app, /if \(ip\?\.type === 'temperature'\) for \(const pn of/, 'a He
 assert.match(css, /\.pvsv \.pvRow \{[^}]*white-space: nowrap/, 'PV digits and °F / °C on one line');
 assert.match(css, /\.svBox \{[^}]*white-space: nowrap/, 'SV digits and °F / °C on one line');
 assert.match(app, /\['setpoint', 'Setpoint', 'num', null, false, false, \{ tip: DEVICE_TIPS\.pSetpoint/, 'a Setpoint row in the probe\'s Properties');
+const pd = fn('probeDoing');
+assert.match(pd, /x\.doing === 'Heating'\) heat = true/, 'a Fermentor heating');
+assert.match(pd, /x\.doing === 'Cooling'\) cool = true/, 'a Fermentor cooling');
+assert.match(pd, /t\.reversed \|\| \(t\.type !== 'pid' && t\.type !== 'deadband' && off > 0\)\) cool = true/, '+ Offset or Reversed cools');
+assert.match(fn('fillPvSv'), /pv\.classList\.add\('pv-' \+ sv\.doing\)/, 'PV takes the color');
+assert.match(css, /\.pvRow\.pv-heat \{ color: #ff3b30/, 'red while heating');
+assert.match(css, /\.pvRow\.pv-cool \{ color: #3fa9ff/, 'blue while cooling');
 console.log('probesv.test.js passed');

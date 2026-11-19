@@ -12,7 +12,8 @@ qui tient cette température (Règle Skynet 2.43). Cela marche sur :
 
 Sur un Tab en marche, l'affichage de chaque Temperature Probe montre deux lignes, comme un régulateur de tableau (Panel Updates 41) :
 
-- **PV** en haut : ce que la sonde lit maintenant, par exemple **152.3 °F**.
+- **PV** en haut : ce que la sonde lit maintenant, par exemple **152.3 °F**. Il devient **rouge pendant la chauffe** et **bleu pendant le
+  refroidissement** (quelque chose qui utilise cette sonde chauffe ou refroidit en ce moment) ; au repos ou à l'arrêt, il garde la couleur de l'affichage de la sonde.
 - **SV** dessous, dans une **case verte** : sa **consigne** (Setpoint), par exemple **152.0 °F**.
 
 Chaque ligne garde tous ses chiffres et son °F ou °C ensemble sur une seule ligne, dans l'affichage ; un long nombre rend les deux lignes

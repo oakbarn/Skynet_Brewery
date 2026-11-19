@@ -2961,7 +2961,31 @@ function probeSv(e0, e, v) {
   const raw = t ? (S.values[t.name]?.target ?? t.target) : (v.setpoint ?? p.setpoint);
   const num = raw === '' || raw === null || raw === undefined || !Number.isFinite(Number(raw)) ? null : Number(raw);
   return { prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
-    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '' };
+    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', doing: probeDoing(p) };
+}
+// PV red while heating, blue while cooling (OakBarn Brewery, 2026-11-19: "Red when Heating   Blue when cooling"): what uses this
+// probe is really putting heat in or taking it out now. Idle, Off, or nothing uses it: PV keeps the probe's own Display color.
+function probeDoing(p) {
+  let heat = false, cool = false;
+  for (const t of S.config.elements) {
+    if (t.input !== p.name) continue;
+    const x = S.values[t.name] || {};
+    if (isFermentor(t)) { if (x.state && x.doing === 'Heating') heat = true; if (x.state && x.doing === 'Cooling') cool = true; continue; }
+    if (isHeatElem(t)) {
+      if (!x.state) continue;
+      const k = heatMethodKey(x.method) ?? startMethod(t);
+      if (k === 'hysteresis' ? x.output : k === 'dutyCycle' ? +x.dutycycle > 0 : PERCENT_METHODS.includes(k) ? +x.value > 0 : true) heat = true;
+      continue;
+    }
+    // a Cool / Warm Pump (Rule 6.21) and the older Hysteresis, PID and Deadband Devices: + Offset or Reversed cools
+    const old = SP_OLD.includes(t.type);
+    if (!isCoolPump(t) && !old) continue;
+    if (!(old ? x.enabled : x.state)) continue;
+    if (!(t.type === 'hysteresis' ? x.state : isCoolPump(t) && heatMethodKey(x.method) === 'hysteresis' ? x.output : old ? +x.value > 0 : true)) continue;      // what is on now
+    const off = Number(x.onoffset ?? t.onOffset);
+    if (t.reversed || (t.type !== 'pid' && t.type !== 'deadband' && off > 0)) cool = true; else heat = true;
+  }
+  return heat ? 'heat' : cool ? 'cool' : '';
 }
 // PV over SV, as on a panel controller: each line keeps its digits and °F / °C together, and the two are made smaller together to fit
 function fillPvSv(vl, text, sv) {
@@ -2971,6 +2995,7 @@ function fillPvSv(vl, text, sv) {
     h('span', { class: 'svNum' }, sv.num === null ? `--- ${sv.unit}` : svText(sv)), h('span', { class: 'svTag' }, 'SV'));
   const pv = h('span', { class: 'pvRow', title: 'PV: what the probe reads now' }, h('span', { class: 'pvNum' }), h('span', { class: 'svTag' }, 'PV'));
   setRich(pv.firstChild, text);
+  if (sv.doing) pv.classList.add('pv-' + sv.doing);      // red while heating, blue while cooling
   vl.replaceChildren(h('span', { class: 'pvsv' }, pv, box));
 }
 function fitPvSv(vl) {

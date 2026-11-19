@@ -1555,3 +1555,6 @@ body.eqViewing #ws { pointer-events: none; }
 .el .vl .pvsv .svTag { font-size: .45em; letter-spacing: 0; opacity: .85; font-family: system-ui, sans-serif; font-weight: 700; }
 .el .vl .svBox.pv { font-family: inherit; justify-content: flex-end; font-size: .8em; letter-spacing: inherit; }
 .el .vl .svBox.pv .svTag { font-size: .55em; }
+/* PV red while heating, blue while cooling (Panel Updates 41); idle keeps the probe's own Display color */
+.el .vl .pvsv .pvRow.pv-heat { color: #ff3b30 !important; text-shadow: 0 0 6px rgba(255, 59, 48, .55) !important; }
+.el .vl .pvsv .pvRow.pv-cool { color: #3fa9ff !important; text-shadow: 0 0 6px rgba(63, 169, 255, .55) !important; }
