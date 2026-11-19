@@ -1515,3 +1515,6 @@ body.eqViewing #ws { pointer-events: none; }
 .qdHint { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; background: var(--panel, #222);
   color: var(--text, #eee); border: 2px solid #d62828; box-shadow: 0 4px 14px #0008; font-weight: 600; pointer-events: none; white-space: nowrap; }
 .qdHint .qdHintSign { width: 20px; height: 20px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9.2' fill='%23d62828' stroke='%23fff' stroke-width='1.2'/%3E%3Crect x='4' y='8.2' width='12' height='3.6' rx='.6' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* Background None on a Widget with no Graphic (Rule 18.50 #2): no panel behind its words */
+.el.noPanel, .el.noPanel .vl, .el.noPanel .nm { background: transparent !important; box-shadow: none !important; border-color: transparent !important; }

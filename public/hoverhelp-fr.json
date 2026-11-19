@@ -1518,5 +1518,19 @@
  "Basic Skynet Alarm": "Basic Skynet Alarm",
  "Pre-Hop Alarm": "Pre-Hop Alarm",
  "User Alarm": "User Alarm",
- "Which Alarm Widget it is. A Widget lives only in the app: it has no Interface or Port (Rule 1.2).": "Quel Alarm Widget c'est. Un Widget n'existe que dans l'application : il n'a ni Interface ni Port (Règle 1.2)."
+ "Which Alarm Widget it is. A Widget lives only in the app: it has no Interface or Port (Rule 1.2).": "Quel Alarm Widget c'est. Un Widget n'existe que dans l'application : il n'a ni Interface ni Port (Règle 1.2).",
+ "Device Type: {0}, a Skynet_Integrated_Device. Its heating element, with its thermowell, is built in.": "Device Type : {0}, un Skynet_Integrated_Device. Sa résistance, avec son doigt de gant, est intégrée.",
+ "Shown on the Tab, for example {0}.": "Affiché sur le Tab, par exemple {0}.",
+ "The picture drawn behind its Picture. The Graphic Widget can have 3 Backgrounds (.backpath, .backpath_2, .backpath_3); this picks which one shows, and a Process can pick another with .background = 1, 2 or 3. None: no Background. The ⬢ beside it holds the 3 pictures.": "L'image dessinée derrière sa Picture. Le Graphic Widget peut avoir 3 Backgrounds (.backpath, .backpath_2, .backpath_3) ; ceci choisit celui qui s'affiche, et un Process peut en choisir un autre avec .background = 1, 2 ou 3. None : pas de Background. Le ⬢ à côté contient les 3 images.",
+ "Backgrounds": "Backgrounds",
+ "Its one Skynet Background (there is no picture to pick). Show: its panel is drawn in its Back color, as it always was. None: no panel, so only its words show on the Tab.": "Son unique Background Skynet (il n'y a pas d'image à choisir). Show : son panneau est dessiné dans sa Back color, comme toujours. None : pas de panneau, seuls ses mots s'affichent sur le Tab.",
+ "The color of its words.": "La couleur de ses mots.",
+ "The color of its panel behind its words (when Background is Show). Empty: the Tab Style or the Default tab.": "La couleur de son panneau derrière ses mots (quand Background est Show). Vide : le Tab Style ou le Default tab.",
+ "Drawn on top of it while it is ON (Rule 7.8), for example the Lightning Bolt. None: no overlay. The ⬢ beside it holds Database and .API.": "Dessiné par-dessus quand il est ON (Règle 7.8), par exemple l'éclair. None : pas d'overlay. Le ⬢ à côté contient Database et .API.",
+ "It as it will be on the Tab, with its Picture (or its Skynet drawing) and its Overlay.": "Tel qu'il sera sur le Tab, avec sa Picture (ou son dessin Skynet) et son Overlay.",
+ "The color of its words. The ⬢ beside it sets the alignment, font and size.": "La couleur de ses mots. Le ⬢ à côté règle l'alignement, la police et la taille.",
+ "Vessel / equipment": "Cuve / équipement",
+ "Background pictures": "Images de Background",
+ "Text attributes": "Attributs du texte",
+ "Its one Background picture (Image Path 1). The ⬢ beside it holds Background #, Back Colour and Image Paths 2 and 3 of an older item.": "Son unique image de Background (Image Path 1). Le ⬢ à côté contient Background #, Back Colour et les Image Paths 2 et 3 d'un élément plus ancien."
 }

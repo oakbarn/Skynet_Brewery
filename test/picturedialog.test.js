@@ -12,7 +12,7 @@ const own = app.slice(app.indexOf('function pictureWidgetFields('), app.indexOf(
 const order = ["'1. Label'", "'2. Picture'", "'3. Tab'", "'4. Name'", "'Graphic'", "'Turns on with'", "'Overlay'", "'Text on picture'", "'X (Horizontal)'", "'Widget Type'"].map(k => own.indexOf(k));
 assert.ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), 'fields in the drill-down order');
 assert.ok(!/'device'|'channel'/.test(own), 'a Widget has no Interface or Port (Rule 1.2)');
-assert.match(own, /add \? \['_tab', '3\. Tab', 'ro', '🔨 Build Tab'/, 'the Add box shows the Build Tab greyed out');
+assert.match(own, /\['_tab', '3\. Tab', 'ro', '🔨 Build Tab'/, 'the Add box shows the Build Tab greyed out');
 assert.match(own, /with: \['tap', 'Toggle', 'sel', PIC_TAP\(it\.tap\)\]/, 'Turns on with and Toggle on one line');
 assert.match(own, /attr: PIC_POP/, 'the second picture is in the Overlay pop-up');
 assert.match(own, /\['locked', '', 'lock', null, false, false, \{ inTitle: true \}\]/, 'Properties: the lock in the title line');

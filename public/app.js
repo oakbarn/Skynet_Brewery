@@ -1645,7 +1645,7 @@ function fillText(n, g) {
   n.style.fontSize = (+firstSet(v.size, g.fontSize) || fontPx(T.size) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
   n.style.fontFamily = fnt(v.font, g.font) || T.font || D.font;
   n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
-  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
+  n.style.backgroundColor = g.panelBg === 'none' ? 'transparent' : firstSet(v.backcolor, g.backColor, T.back, D.backColor);      // Background None (Rule 18.50 #2)
   n.style.textAlign = firstSet(v.alignment, g.align, T.align, D.align).toLowerCase();
   n.style.whiteSpace = ''; n.style.overflow = '';
   const parts = [body];
@@ -1672,7 +1672,7 @@ function fillOverride(n, g) {
   setRich(b, g.label || OVR.label);
   b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
   b.style.fontFamily = tbFontCss(g.font) || g.font || '';
-  b.style.color = g.color || OVR.color; b.style.backgroundColor = g.backColor || OVR.backColor;
+  b.style.color = g.color || OVR.color; b.style.backgroundColor = g.panelBg === 'none' ? 'transparent' : g.backColor || OVR.backColor;      // Background None (Rule 18.50 #2)
   const a = (g.align || OVR.align).toLowerCase(); b.style.justifyContent = a === 'left' ? 'flex-start' : a === 'right' ? 'flex-end' : 'center'; b.style.textAlign = a;
   n.replaceChildren(b);
 }
@@ -2739,6 +2739,7 @@ const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
   if (isAlmBasic(e)) e = { ...e, foreColor: '', backColor: '' };      // a Basic Skynet Alarm's Fore and Back color its picture, not its text
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TDo(e), T = TS();
+  n.classList.toggle('noPanel', e.panelBg === 'none');      // Background None: no panel behind its words (Rule 18.50 #2)
   // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
   const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.labelFore), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.valueFore));
   const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.labelBack), vb = firstSet(e.valueBg, e.backColor, T.back, D.valueBack);
@@ -6516,18 +6517,18 @@ function rimsWork(g) {
     tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '',
     ...Object.fromEntries(elSettings(heat?.type || 'pid').map(([k]) => ['el_' + k, heat?.[k]])) };
 }
-function rimsFields(w) {
+function rimsFields(w, add) {      // add: the Add box, numbered as the Model's (1. Label, Label Visible, 2. Interface; Rule 18.47)
   const ow = isOneWire({ type: 'temperature', ...tempKindOf(w.tempKind) });
   // the thermowell is part of the heating element (Fritz, 2026-10-26): its probe is the element's Input
-  return [['iface', '1. Interface', 'dev'],
-    ['_dt', `2. Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element, with its thermowell, is built in.`, 'note'],
+  return [['iface', add ? '2. Interface' : 'Interface', 'dev'],
+    ['_dt', `Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element, with its thermowell, is built in.`, 'note'],
     ['_he', 'Heating element', 'head'],
     ['heatCtl', 'Control', 'sel', HEAT_CTL, true],
-    ['heatPin', '3. Available Ports / Pins: heating element', 'pin', 'rimsHeat'],
+    ['heatPin', 'Available Ports / Pins: heating element', 'pin', 'rimsHeat'],
     ...elSettings(w.heatCtl).map(([k, ...r]) => ['el_' + k, ...r]),
     ['_tw', 'Heating element: its thermowell (the temperature it holds)', 'head'],
     ['tempKind', 'Temperature probe in the thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
-    ow ? ['tempProbe', '3. OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', '3. Available Ports / Pins: thermowell probe', 'pin', 'rimsTemp']];
+    ow ? ['tempProbe', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', 'Available Ports / Pins: thermowell probe', 'pin', 'rimsTemp']];
 }
 // the Available Ports lists of the two pickers: the free pins on the Interface that fit each Device (best first)
 function rimsPinLists(w, g) {
@@ -6548,9 +6549,9 @@ function applyRims(g, w, tab, label) {
   const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
   const none = v => v === undefined || v === null || v === '';
   if (!h0 && !t0 && none(w.iface) && none(w.heatPin) && none(w.tempPin) && none(w.tempProbe)) return;
-  if (none(w.iface)) throw new Error(`1. Pick the Interface the ${intWhat(g)[0]} is wired to`);
-  if (none(w.heatPin)) throw new Error('3. Pick the Port for the heating element');
-  if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? '3. Pick the OneWire probe number of the temperature probe' : '3. Pick the Port for the temperature probe');
+  if (none(w.iface)) throw new Error(`Pick the Interface the ${intWhat(g)[0]} is wired to`);
+  if (none(w.heatPin)) throw new Error('Pick the Port for the heating element');
+  if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? 'Pick the OneWire probe number of the temperature probe' : 'Pick the Port for the temperature probe');
   const base = String(label || intWhat(g)[1]).trim();
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
@@ -6585,21 +6586,23 @@ async function newIntegratedDevice(tname) {
   const t = tplOf('vessel', tname); if (!t) return toast(`The Skynet Template ${tname} is missing`, true);
   const [what, lbl] = intWhat({ template: t.name, vesselType: t.vesselType });
   const w = { ...rimsWork(null), template: t.name, vesselType: t.vesselType, label: lbl };
-  const fields = o => [...rimsFields(o).map(f => f[0] === 'iface' ? [...f.slice(0, 3), 'addnew'] : f), ['label', `Label (shown on the tab, e.g. ${lbl})`, 'text'], ['labelVisible', 'Show label', 'yn', true]];
+  // the Add box in the Model's order (Rule 18.47, "Recheck dialogs" 2026-11-18): 1. Label, Label Visible, 2. Interface, then its parts
+  const fields = o => [['label', '1. Label', 'text', null, false, false, { tip: `Shown on the Tab, for example ${lbl}.` }], ['labelVisible', 'Label Visible', 'yn', true],
+    ...rimsFields(o, true).map(f => f[0] === 'iface' ? [...f.slice(0, 3), 'addnew'] : f)];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
   const addIface = ev => { if (ev.target.dataset?.k === 'iface' && ev.target.value === ADD_IFACE) $('#dlg').close('addIface'); };
-  for (const b of oks) b.textContent = 'Create';
+  for (const b of oks) b.textContent = '➕ Add Device';
   body.addEventListener('change', refresh); body.addEventListener('change', addIface);
   try {
     for (;;) {
       rimsPinLists(w, null);
       const r = await dialog(`New Device: ${what}`, fields, w, false, t.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle']);
-      if (r === 'addIface') { const was = w.iface; try { readFields(w, body); } catch { } w.iface = (await addInterfaceDialog()) || was || ''; for (const b of oks) b.textContent = 'Create'; continue; }
+      if (r === 'addIface') { const was = w.iface; try { readFields(w, body); } catch { } w.iface = (await addInterfaceDialog()) || was || ''; for (const b of oks) b.textContent = '➕ Add Device'; continue; }
       if (r !== 'ok') return;
       const g0 = draft.graphics.length;
       try {
         readFields(w, body);
-        if (!String(w.iface ?? '').trim()) throw new Error(`1. Pick the Interface the ${what} is wired to`);
+        if (!String(w.iface ?? '').trim()) throw new Error(`2. Pick the Interface the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
         // its name comes from its Label (RIMS, RIMS_2 ...): it is one Device, not a bundle (Fritz, 2026-10-26)
         let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
@@ -7386,8 +7389,8 @@ async function addManualPump(pick) {
 function manualPumpFields(it) {
   const T = DEVICE_TIPS;
   return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_MP_Pump~1_BH'}.state = true: a pop-up asks you to turn it on by hand, and the Process waits for Done. It must be unique.` }),
-    ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP }],
     ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it),
+    ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP }],      // after the Overlay, as on the Hose Bib (Rule 18.50)
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }],
     wgtType('Manual Pump', 'A pump plugged into a wall outlet, switched by hand: no Interface or Port turns it (Rule 1.28).')];
@@ -8907,16 +8910,23 @@ const PIC_TIPS = {
   type: 'A Picture Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
 };
 const PIC_POP = { title: 'Picture attributes', fields: [['imageOn', 'Picture when on (a second picture instead of the Overlay, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+// The Graphic Widget's 3 Backgrounds (Rules 7.10, 18.50 #4): .backpath, .backpath_2 and .backpath_3, .background picks which one shows
+const PIC_BG_TIP = 'The picture drawn behind its Picture. The Graphic Widget can have 3 Backgrounds (.backpath, .backpath_2, .backpath_3); this picks which one shows, and a Process can pick another with .background = 1, 2 or 3. None: no Background. The ⬢ beside it holds the 3 pictures.';
+const PIC_BG_POP = { title: 'Backgrounds', fields: [['backpath', 'Background 1', 'gpick', 'pictures'], ['backpath_2', 'Background 2', 'gpick', 'pictures'], ['backpath_3', 'Background 3', 'gpick', 'pictures']] };
 // add: the Add Widget box (the fields after 1-2 wait, as in the Add Device box); otherwise its Properties (the Pump's screen 9)
 function pictureWidgetFields(it, item, add) {
   const T = PIC_TIPS, x = add ? { after: true } : {};
   return [...(add ? [] : [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }]]),
     ['label', '1. Label', 'text', null, false, false, { ...(add ? {} : { up: 2 }), attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['imageOff', '2. Picture', 'gpick', 'pictures', false, false, { tip: T.picture }],
-    add ? ['_tab', '3. Tab', 'ro', '🔨 Build Tab', false, false, { tip: T.tabBuild }] : ['workspace', '3. Tab', 'ws', null, false, false, { tip: T.tab }],
-    ['name', '4. Name', 'text', null, false, false, { tip: T.name, ...x }],
-    add ? ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, x] : ['_sug', `Suggested Name: ${picSuggest(item, it.label)}`, 'note'],
-    ['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic, ...x }],
+    // the Add Widget box keeps its own sequence (Label, Picture, ➕ Add Widget, Rule 18.27); the Properties follow the Hose Bib Model
+    // ("Recheck dialogs", Rule 18.50): 2. Tab, Layer Order, 3. Name, the Graphic, the Picture, the Graphic Widget's 3 Backgrounds (#4)
+    ...(add ? [['imageOff', '2. Picture', 'gpick', 'pictures', false, false, { tip: T.picture }], ['_tab', '3. Tab', 'ro', '🔨 Build Tab', false, false, { tip: T.tabBuild }],
+      ['name', '4. Name', 'text', null, false, false, { tip: T.name, ...x }], ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, x],
+      ['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic, ...x }]]
+      : [['workspace', '2. Tab', 'ws', null, false, false, { tip: T.tab }], ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
+        ['_sug', `Suggested Name: ${picSuggest(item, it.label)}`, 'note'], ['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic }],
+        ['imageOff', 'Picture', 'gpick', 'pictures', false, false, { tip: T.picture }],
+        ['background', 'Background', 'sel', [['', 'None'], ['1', 'Background 1'], ['2', 'Background 2'], ['3', 'Background 3']], false, false, { tip: PIC_BG_TIP, attr: PIC_BG_POP }]]),
     ['follow', 'Turns on with', 'onsrc', null, true, false, { tip: T.follow, with: ['tap', 'Toggle', 'sel', PIC_TAP(it.tap)], ...x }],
     ['imageOverlay', 'Overlay', 'gpick', 'overlays', false, false, { tip: T.overlay, attr: PIC_POP, ...x }],
     ['text', 'Text on picture', 'text', null, false, false, { tip: T.text, up: 2, ...x }],
@@ -8946,7 +8956,7 @@ const DATAW_TIPS = {
 };
 const DATAW_ALIGN = ALIGN_LCR;
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest', 'num', null, false, false, { tip: 'Empty: none.' }], ['max', 'Highest', 'num', null, false, false, { tip: 'Empty: none.' }]] };
-const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
+const DATAW_LOOK_POP = { title: 'Value look', fields: [['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };      // Fore and Back color are on their own lines (Rule 18.50 #2)
 const SHOWAS_TIP = 'How the time shows on the Tab (Rule 2.45). A Process can set any format with .showas, for example wgt_TM_Boil_BH.showas = "mm:ss" or wgt_DT_Clock_BH.showas = "ddd h:mm tt"; "" puts back this pick. Help 176.';
 function dataWidgetFields(it) {
   const cv = isCodeValue(it), dt = dataWDt(it), val = dt === 'value', T = DATAW_TIPS;
@@ -8960,8 +8970,8 @@ function dataWidgetFields(it) {
     ...(dt === 'time' || dt === 'datetime' ? [['showAs', 'Shows as', 'sel', formatChoices(dt === 'time' ? TIME_FORMATS : DATETIME_FORMATS, it.showAs), false, false, { tip: SHOWAS_TIP }]] : []),      // Rule 2.45
     ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
     ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
-    ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
     ...(cv ? [['code', 'Code (runs when the Value is set)', 'area', null, false, false, { tip: T.code }]] : []),
+    ...NOGFX_LOOK('foreColor', { attr: DATAW_LOOK_POP }),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -8982,6 +8992,17 @@ const wgtHead = (tips = {}) => [['locked', '', 'lock', null, false, false, { inT
 const wgtPlace = () => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: WGT_TIPS.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: WGT_TIPS.xy }],
   ['w', 'Width (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }]];
 const wgtType = (word, tip) => ['_wt', 'Widget Type', 'ro', word, false, false, { tip: tip || WGT_TIPS.type }];
+// A Widget with no Graphic (Rule 18.50 #2, "Recheck dialogs" 2026-11-18): no picture attributes; its Background, Fore color and Back
+// color instead, each on its own line, just above X Y Width Height. Its one Background is Skynet's (Rule 18.50 #4, no path box): Show
+// draws its panel in its Back color (as it always has), None leaves it see-through (.panelBg = "none"). A Text or Override keeps its
+// Fore color in .color.
+const NOGFX_TIPS = {
+  bg: 'Its one Skynet Background (there is no picture to pick). Show: its panel is drawn in its Back color, as it always was. None: no panel, so only its words show on the Tab.',
+  fore: 'The color of its words.',
+  back: 'The color of its panel behind its words (when Background is Show). Empty: the Tab Style or the Default tab.',
+};
+const NOGFX_LOOK = (fore = 'foreColor', x = {}) => [['panelBg', 'Background', 'sel', [['', 'Show'], ['none', 'None']], false, false, { tip: NOGFX_TIPS.bg }],
+  [fore, 'Fore color', 'color', null, false, false, { tip: NOGFX_TIPS.fore, ...x }], ['backColor', 'Back color', 'color', null, false, false, { tip: NOGFX_TIPS.back }]];
 // ---- The other Widgets in the Pump's drill-down look (Fritz, 2026-11-06, Rule 18.30). Same order for each: the title line,
 // 1 Label ⬆ ⬢ and Label Visible, 2 Tab, 3 Name, its own fields (extras in ⬢ pop-ups), X, Y, Width, Height, the Widget Type last.
 // Every explanation that was a note on the dialog is in the hover help of a field's name now (Rule 2.38).
@@ -8990,7 +9011,7 @@ const LOOK_FIELDS = (keys = {}) => [['fontSize', 'Font size (px)', 'num', null, 
 // Text Widget (Rule 2.22): its Label has its own keys (label_visible, size_label ...)
 const TEXT_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS],
   ['labelBold', 'Bold', 'bool'], ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES]] };
-const TEXT_LOOK_POP = { title: 'Text look', fields: LOOK_FIELDS() };
+const TEXT_LOOK_POP = { title: 'Text look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor') };      // Back color on its own line (Rule 18.50 #2)
 const TEXT_TIPS = {
   label: 'The small title over the Text on the Tab. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows over the Text. Off: only the Text shows.',
@@ -9005,7 +9026,7 @@ function textWidgetFields() {
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
     ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
     ['text', 'Text', 'text', null, false, false, { up: 30, attr: TEXT_LOOK_POP, tip: T.text }],
-    ['color', 'Fore color', 'color', null, false, false, { tip: T.color }],
+    ...NOGFX_LOOK('color'),
     ...wgtPlace(), wgtType('Text')];
 }
 // Graph Widget (was Chart Widget; OakBarn Brewery, 2026-11-08/09, Rule 1.26): a BruControl Chart's properties, in the Widget drill-down look (Rule 18.30)
@@ -9026,6 +9047,7 @@ function chartWidgetFields() {
     ['ch2Element', 'Channel 2 (right axis)', 'elem', null, false, false, { tip: T.ch(2), attr: CHART_CH_POP(2) }],
     ['spanSeconds', 'Span (seconds)', 'num', null, false, false, { tip: T.span, attr: CHART_GRID_POP }],
     ['refreshInterval', 'Refresh interval (seconds)', 'num', null, false, false, { tip: T.refresh }],
+    ...NOGFX_LOOK(),
     ...wgtPlace(), wgtType('Graph')];
 }
 // Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
@@ -9040,7 +9062,7 @@ function overrideFields(it) {
     ['label', '1. Label', 'text', null, false, false, { up: 2, tip: T.label }],
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
     ['_nmro', '3. Name', 'ro', it.name || '', false, false, { tip: T.name }],
-    ['color', 'Fore color', 'color', null, false, false, { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }],
+    ...NOGFX_LOOK('color', { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor').map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }),
     ...wgtPlace(), wgtType('Override')];
 }
 // Sound Player: plays one sound file; pauses for alarms
@@ -9051,6 +9073,7 @@ const SND_TIPS = {
 };
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
   ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
+  ...NOGFX_LOOK(),
   ...wgtPlace(), wgtType('Sound Player')];
 // Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
 const processWidgetFields = it => {
@@ -9058,24 +9081,33 @@ const processWidgetFields = it => {
   return [...wgtHead(PROCESS_TIPS),
     ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
+    ...NOGFX_LOOK(),
     ...wgtPlace(), wgtType(PROCESS_WIDGET_WORD, PROCESS_TIPS.type)];
 };
 // Boolean Widgets (Semi_Widgets_Devices, Rule 1.20): the Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED
 const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on', 'path']] };
 const SEMI_TEXT_POP = { title: 'Text when off', fields: [['offText', 'Text when off', 'text']] };
+// The Boolean Widgets follow the Hose Bib Model ("Recheck dialogs", Rule 18.50 #3, #5): State (the Switch and the LED, which hold an
+// ON / OFF state), then the Hose Bib's order: Graphic, Picture, Overlay with Database and .API ⬢ on its line, its own boxes, X Y Width
+// Height on one line, the Widget Type last. "A Switch has an Overlay": every Boolean Widget gets one (drawn while it is ON).
+const SEMI_OVERLAY_TIP = 'Drawn on top of it while it is ON (Rule 7.8), for example the Lightning Bolt. None: no overlay. The ⬢ beside it holds Database and .API.';
 const semiWidgetFields = (type, it) => {
   const k = SEMI_KINDS[type], led = type === 'led', bs = boolStyleOf(it), drawn = SWITCH_LOOKS.includes(bs);      // a Slider, Checkbox or Lighted Button is drawn by Skynet
-  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BH'}.state = true. It must be unique.` }),
-    ['deviceControlled', 'Linked Device', 'devctl', null, false, false, { tip: `${k.title}: a ${BOOL_CLASS} (a Widget with an ON / OFF state). With a Linked Device it acts like a Clone of that Device: the two follow each other. ${drawn ? boolStyleTip(bs) : SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
+  const head = wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BH'}.state = true. It must be unique.` });
+  const at = head.filter(f => f[6]?.inTitle).length;
+  return [...head.slice(0, at), ...(['switch', 'led'].includes(type) ? [['_state', 'State', 'state', null, false, false, {}]] : []), ...head.slice(at),
+    ['_spv', 'Graphic', 'semipic', null, false, false, { tip: 'It as it will be on the Tab, with its Picture (or its Skynet drawing) and its Overlay.' }],
     ...(led || drawn ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
+    ['imageOverlay', 'Overlay', 'gpick', 'overlays', false, false, { tip: SEMI_OVERLAY_TIP, dbPop: true }],
+    ['deviceControlled', 'Linked Device', 'devctl', null, false, false, { tip: `${k.title}: a ${BOOL_CLASS} (a Widget with an ON / OFF state). With a Linked Device it acts like a Clone of that Device: the two follow each other. ${drawn ? boolStyleTip(bs) : SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.` }],
     ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
     ...(['switch', 'led'].includes(type) ? [['confirmation', '.confirmation (done by hand, then Done)', 'bool', false, false, false, { tip: CONFIRM_TIP }]] : []),
     ...wgtPlace(), wgtType(`${boolStyleName(bs) || k.title} (a ${BOOL_CLASS})`, `Which ${BOOL_CLASS} it is. Each one is its own Widget, so its look is fixed: a Slider is always a Slider. To have another look, add that one from Boolean ➕.`)];
 };
 // the Label Widget: words on a Tab, nothing else
-const LBL_LOOK_POP = { title: 'Label look', fields: [['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }]] };
+const LBL_LOOK_POP = { title: 'Label look', fields: [['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px)', 'num', null, false, false, { tip: 'Empty: Default.' }]] };
 const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the Tab. The ⬢ beside it sets its font, size and colors.' }),
-  ['foreColor', 'Fore color', 'color', null, false, false, { tip: 'The color of its words. The ⬢ beside it sets the Back color, alignment, font and size.', attr: LBL_LOOK_POP }],
+  ...NOGFX_LOOK('foreColor', { tip: 'The color of its words. The ⬢ beside it sets the alignment, font and size.', attr: LBL_LOOK_POP }),
   ...wgtPlace(), wgtType('Label')];
 // Manual Valve Widget (Rule 5.24) and the Tap Water Valve (Rule 5.33): turned by hand only
 // Panel Update Final 1 (OakBarn Brewery, 2026-11-18, Rule 18.45): #1 State is a name and a slider (mouse only) that opens or closes it
@@ -9172,6 +9204,7 @@ function timerWidgetFields() {
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
     ['timerFormat', 'Digits', 'sel', TIMER_FORMATS, false, false, { tip: T.format }],
     ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
+    ...NOGFX_LOOK(),
     ...wgtPlace()];
 }
 const dataWidgetType = it => ['_wt', 'Widget Type', 'ro', DATA_W[it.type].word, false, false, { tip: DATAW_TIPS.type }];
@@ -9294,6 +9327,81 @@ function genDeviceFields(it, item, f) {
       ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]]),
     typeF];
+}
+
+// ---- The Tab Widgets that are not Devices or Boolean Widgets (a Vessel Widget, a Vessel Device's own box, an IP, a Pipe or Hose, a TC Pipe
+// Fitting, a Tab_Fitting, a Valve Tee or Supply Manifold, equipment) in the Hose Bib Model ("Recheck dialogs", OakBarn Brewery 2026-11-18:
+// "change the existing dialogs in 3 vessel and any templates and other things in skynet so we have a consistant look and flow"; Rules
+// 18.47, 18.50). Nothing is taken away; only the order and the title line change: the lock, No Unlock, Visible and Hidden Locked in the
+// title line; 1. Label (its Label position, colors and size in the ⬢ beside it), Label Visible, 2. Tab, Layer Order, 3. Name; its own
+// boxes as they were; X Y Width Height on one line; the Widget Type last.
+const GFX_TITLE_KEYS = ['locked', 'noUnlock', 'visibility', 'visible', 'hidden'];
+const GFX_LABEL_LOOK = ['labelAlign', 'labelColor', 'labelBg', 'labelSize'];
+const gfxWord = g => g.kind === 'pipe' ? (g.hose ? (g.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : g.kind === 'ip' ? (isIpFit(g) ? `Pipe fitting: ${FITTINGS[g.fitting]}` : 'IP (Initial Point)')
+  : isPlainUnit(g) ? `TC Pipe Fitting: ${String(g.template || '').replace(/_/g, ' ')}` : isMf(g) ? mfInfo(g).what : isBfit(g) ? 'Tab_Fitting'
+  : eqClass(g) && g.vwidget && !g.integrated ? 'Vessel Widget' : eqClass(g) && g.template ? 'Tab_Vessel' : eqClass(g) ? eqClass(g).title : g.kind === 'vessel' ? 'Vessel / equipment' : g.kind;
+function gfxModel(item, list) {
+  if (!Array.isArray(list)) return list;
+  const isF = f => Array.isArray(f) && typeof f[0] === 'string';
+  const take = k => list.find(f => isF(f) && f[0] === k && !['note', 'head', 'box', 'boxend', 'go'].includes(f[2])) || null;
+  const opt = (f, x) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); g[6] = { ...(f[6] || {}), ...x }; return g; };
+  const why = f => { const m = /\(([^()]{8,})\)\s*$/.exec(String(f[1] ?? '')); return f[6]?.tip ? {} : m ? { tip: m[1].charAt(0).toUpperCase() + m[1].slice(1) + (/[.!?]$/.test(m[1]) ? '' : '.') } : {}; };
+  const named = (f, l) => opt([f[0], l, ...f.slice(2, 6)], why(f));
+  const title = GFX_TITLE_KEYS.map(take).filter(Boolean).map(f => f[0] === 'locked' ? ['locked', '', 'lock', null, false, false, { ...(f[6] || {}), inTitle: true }]
+    : f[0] === 'noUnlock' ? opt([f[0], 'No Unlock', ...f.slice(2, 6)], { ...why(f), inTitle: true }) : opt(f, { inTitle: true }));
+  const look = GFX_LABEL_LOOK.map(take).filter(Boolean);
+  const lab = take('label'), lv = take('labelVisible') || take('hideName'), tab = take('workspace'), nm = take('name');
+  const inV = inLayers(item) && !!layerVessel(L(), item);      // its Layer Order right under the Tab (or the Name), as on the Model (Rule 18.47)
+  const layer = take('layer') || (inLayers(item) ? ['layer', inV ? 'Inside Vessel Device Layer' : 'Layer Order', 'num', null, false, false, { tip: inV ? LAYER_TIP_IN_VESSEL : LAYER_TIP }] : null);
+  const used = new Set([lab, lv, tab, nm, take('layer'), ...title.map(t => take(t[0])), ...look].filter(Boolean));
+  const rest = list.filter(f => !used.has(f));
+  const place = ['x', 'y', 'w', 'h'].map(k => rest.find(f => isF(f) && f[0] === k && f[2] === 'num')).filter(Boolean);
+  const own = rest.filter(f => !place.includes(f));
+  const lookPop = look.length ? { title: 'Label look', fields: look.map(f => [f[0], String(f[1]).replace(/ \(.*\)$/, ''), f[2], f[3]]) } : null;
+  return [...title,
+    ...(lab ? [opt(named(lab, '1. Label'), lookPop && !lab[6]?.attr ? { attr: lookPop } : {})] : []),
+    ...(lv ? [named(lv, 'Label Visible')] : []),
+    ...(tab ? [named(tab, '2. Tab')] : []),
+    ...(layer ? [layer] : []),      // under the Tab, or where the Tab would be (Rule 18.47)
+    ...(nm ? [named(nm, '3. Name')] : []),
+    ...(lookPop && !lab ? [['_lk', 'Label look', 'attrhead', null, false, false, { attr: lookPop }]] : []),
+    ...own, ...place, item.integrated === 'device' ? ['_wt', 'Device Type', 'ro', gfxWord(item)] : ['_wt', 'Widget Type', 'ro', gfxWord(item), false, false, { tip: WGT_TIPS.type }]];
+}
+const gfxModelOf = (fields, item) => typeof fields === 'function' ? it => gfxModel(item, fields(it)) : gfxModel(item, fields);
+
+// ---- The older Widget dialogs (the gGlobal Widget, the older Alarm Widget, the Manual vessel and a Clone of a Boolean Widget) in the Hose
+// Bib Model ("Recheck dialogs", OakBarn Brewery 2026-11-18, Rules 18.47, 18.50; "change the existing dialogs ... so we have a consistent
+// look and flow"). Every box they had is kept (Design Rule 1); the look boxes go into ⬢ pop-ups, as on the Pump:
+// - the title line: lock, Visible, Hidden Locked; then 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name with Change Name
+// - its own boxes as they were
+// - with pictures (Rule 18.50 #3, #4): one Background path (Image Path 1), its ⬢ holding Background #, Back Colour and Image Paths 2
+//   and 3; with none (#2): Background (Show / None), Fore color and Back color, the Background's ⬢ holding the picture boxes
+// - Text attributes ⬢ (fonts, colors and alignment of its Name and Value, Look, Digits, Border); Database and .API ⬢
+// - X Y Width Height on one line, the Widget Type last
+const OLDW_PIC_KEYS = ['background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3'];
+const OLDW_TEXT_KEYS = ['hideValue', 'look', 'digits', 'fontSize', 'valueEnlarge', 'align', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'valueColor', 'valueBg', 'nameFont', 'valueFont', 'nameAlign', 'valueAlign', 'border'];
+const OLDW_TOP = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', 'w', 'h', 'locked', 'visibility', 'hidden', 'foreColor', 'backColor', '_tb', 'layer']);
+const oldWidgetWord = it => it.type === 'gGlobal' ? `gGlobal ${S.gKinds?.[it.kind]?.label || it.kind || ''}`.trim() : it.type === 'manual' ? 'Manual vessel' : it.type === 'alarm' ? 'Alarm (older)' : it.cloneId ? `Clone of ${it.cloneOf}` : it.type;
+function oldWidgetModel(it, f) {
+  const get = k => f.find(x => Array.isArray(x) && x[0] === k), dbKeys = new Set(dbFields(it).map(x => x[0]));
+  const pics = f.some(x => Array.isArray(x) && ['imageOff', 'imageOn', 'image'].includes(x[0]));      // a Widget with a Graphic (Rule 18.50 #3)
+  const plain = k => { const x = get(k); return x ? [x[0], x[1], x[2], x[3], false, x[5] ?? false, {}] : null; };
+  const picPop = { title: 'Background pictures', fields: (pics ? ['background', 'bgColor', 'backpath_2', 'backpath_3'] : OLDW_PIC_KEYS).map(plain).filter(Boolean).map(x => [x[0], x[1].replace(/ \(.*\)$/, ''), x[2] === 'imgopen' ? 'gpick' : x[2], x[2] === 'imgopen' ? 'pictures' : x[3]]) };
+  const textPop = { title: 'Text attributes', fields: OLDW_TEXT_KEYS.map(plain).filter(Boolean) };
+  const skip = new Set([...OLDW_TOP, ...OLDW_PIC_KEYS, ...OLDW_TEXT_KEYS, ...dbKeys]);
+  const own = f.filter(x => Array.isArray(x) && !skip.has(x[0]) && !['box', 'boxend'].includes(x[2]));
+  const T = WGT_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['workspace', '2. Tab', 'ws', null, false, false, { tip: T.tab }],
+    ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
+    ...own,
+    ...(pics ? [['backpath', 'Background', 'gpick', 'pictures', false, false, { tip: 'Its one Background picture (Image Path 1). The ⬢ beside it holds Background #, Back Colour and Image Paths 2 and 3 of an older item.', attr: picPop }]]
+      : NOGFX_LOOK('foreColor').map(x => x[0] === 'panelBg' ? [...x.slice(0, 6), { ...x[6], attr: picPop }] : x)),
+    ...(pics ? [['foreColor', 'Fore color', 'color', null, false, false, { tip: NOGFX_TIPS.fore }], ['backColor', 'Back color', 'color', null, false, false, { tip: NOGFX_TIPS.back }]] : []),
+    ['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: textPop }],
+    ...(dbKeys.size ? [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP }]] : []),
+    ...wgtPlace(), wgtType(oldWidgetWord(it))];
 }
 
 // Layer Order (Rule 1.29, OakBarn Brewery 2026-11-09: a Universal Property, "Have Skynet work the same as BruControl"): every Device
@@ -9696,6 +9804,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (kind === 'namechg') return nameChangeRows(key, label, obj);      // Name, Change Name and ✏ Change Name (Rule 18.45)
   if (kind === 'state') return stateRow(label, obj);                   // State: a slider that works the item now (Rule 18.45)
   if (kind === 'mvpic') return mvGraphic(label, obj);                  // a Manual Valve's Graphic (Rule 18.45)
+  if (kind === 'semipic') return semiGraphic(label, obj);              // a Boolean Widget's Graphic (Rule 18.50 #3)
   // every Device and Widget gets the Change Name box, ✏ Change Name and 🏷 Update to Suggested Name (OakBarn Brewery, 2026-11-18: "Double
   // Click on existing has the name change but not the Update if Label Changed and Change Name Field", a Pump made from a Skynet Template);
   // a Tab and the rest keep the ✏ Change name pop-up
@@ -10557,6 +10666,28 @@ function stateRow(label, obj) {
 }
 // #4: "Show the Graphic Like the Blickmann Model": the picture as it will be on the Tab, with its Orientation and Left / Right, kept up
 // to date while they are picked, and the open overlay while it is open
+// A Boolean Widget's Graphic (Rule 18.50 #3): it drawn as on the Tab (its Picture or its Skynet drawing, and its Overlay while ON),
+// kept up to date with the Picture and Overlay boxes
+function semiGraphic(label, obj) {
+  const box = h('div', { class: 'devPreview semiPreview' });
+  const draw = () => {
+    const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
+    const w = { ...obj, visibility: 'visible', hidden: false };      // shown even when it is hidden on its Tab
+    for (const k of ['imageOff', 'imageOverlay']) if (q(k)) w[k] = q(k).value;
+    let n = null; const was = editing; editing = false;
+    try { n = buildEl(w); } catch { n = null; } finally { editing = was; }
+    try { if (n) fillEl(n, w); } catch { }      // in Edit layout fillEl shows the item's own pictures (the boxes above), not the Brain's last ones
+    if (!n) { box.replaceChildren(); return; }
+    n.removeAttribute('data-name'); n.classList.add('pvEl'); n.classList.remove('vhidden');
+    n.querySelector('.nm')?.classList.add('hidden');      // the Label is its own line above; the Graphic is the Widget itself
+    const sc = Math.min(1, 180 / Math.max(+w.w || 110, +w.h || 70));
+    Object.assign(n.style, { position: 'relative', left: '0', top: '0', width: `${(+w.w || 110) * sc}px`, height: `${(+w.h || 70) * sc}px`, pointerEvents: 'none' });
+    box.replaceChildren(n);
+  };
+  whileShown(box, () => setTimeout(draw, 0));
+  setTimeout(draw, 0);
+  return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, box)];
+}
 function mvGraphic(label, obj) {
   const box = h('div', { class: 'devPreview mvPreview' }), pic = h('div', { class: 'mvPv' }), ovl = h('div', { class: 'mvPvOver' });
   pic.append(ovl); box.append(pic);
@@ -11218,7 +11349,8 @@ async function editItem(kind, id) {
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
-    return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
+    const all = [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
+    return isDevice(it) ? all : oldWidgetModel(it, all);      // an older Widget dialog in the Hose Bib Model (Rule 18.50)
   } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const fields1 = fields0 && item.integratedIn ? it => (typeof fields0 === 'function' ? fields0(it) : fields0).filter(f => f[0] !== 'hidden') : fields0;
   // State on every On / Off Device (a Digital Output), first under the title, as on the Pump (Rule 18.45 #1; OakBarn Brewery, 2026-11-18:
@@ -11263,7 +11395,7 @@ async function editItem(kind, id) {
   // a Heating Element just added from a Method row (OakBarn Brewery's markup: "choosing Duty Cycle one creates a Heating Element Device that
   // first presents the Duty Cycle Attributes"): its Current Method's ⬢ Settings open on top of its Properties
   if (kind === 'el' && item._openMethod) { delete item._openMethod; setTimeout(() => $('#dlgBody .methodPopBtn')?.click(), 50); }
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${ALM_CLASS_TITLE[item.alarmClass] ?? 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isVpDrill(item) && item.vpKind === 'element' ? elemTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? (isTapMv(item) ? 'Hose Bib Widget' : 'Manual Valve Widget') : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, withLayer(kind !== 'el' && !isMv(item) && !['text', 'override', 'clone'].includes(type) ? gfxModelOf(fields, item) : fields, item), work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   wsTplOption = false;
   try {
     if (r === 'delete') {

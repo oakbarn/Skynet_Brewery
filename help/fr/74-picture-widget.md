@@ -16,7 +16,7 @@ Puis le reste s'affiche : le **Name** (le Suggested Name **wgt_PIX_Label_TabID**
 
 ## Properties du Widget Picture {#picture-widget-properties}
 
-Double-cliquez sur un Widget Picture pour ouvrir ses Properties. Elles ressemblent à celles d'une pompe : le cadenas 🔓, **Visible** et **Hidden Locked** sur la ligne du titre, puis 1 Label ⬆ ⬢ et Label Visible, 2 Picture, 3 Tab, 4 Name (✏ Change name une fois construit), le Graphic, Turns on with et Toggle, Overlay, Text on picture, X, Y, Width, Height et le Widget Type. Le Label ne peut pas être vide : un Label vide devient le Name quand vous enregistrez.
+Double-cliquez sur un Widget Picture pour ouvrir ses Properties. Elles ressemblent à celles d'une pompe : le cadenas 🔓, **Visible** et **Hidden Locked** sur la ligne du titre, puis 1 Label ⬆ ⬢ et Label Visible, 2 Tab avec Layer Order dessous, 3 Name (✏ Change name une fois construit), le Graphic, la Picture, le **Background** (None ou Background 1, 2 ou 3 ; son ⬢ contient les trois images de Background), Turns on with et Toggle, Overlay, Text on picture, X, Y, Width, Height et le Widget Type (le modèle des Widgets, règle Skynet 18.50). Le Label ne peut pas être vide : un Label vide devient le Name quand vous enregistrez.
 
 **Toggle** est ce que fait un appui sur ce avec quoi il s'allume : **On/Off** l'allume ou l'éteint en un clic, **Push button** le garde allumé seulement tant qu'on appuie, **None** ne fait rien.
 

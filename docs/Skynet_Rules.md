@@ -5406,6 +5406,20 @@ Help 148 is not changed: nothing a user sees changes until a dialog is rechecked
 Hose Bib: the lock and Hidden Locked in the title line (Visible is automatic), 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name
 with Change Name, the Graphic box, the Alarm box, the Alarm Chain, X Y Width Height on one line, the Widget Type last; Database and
 .API ⬢ on the Active overlay line. No field taken away. Help 148. The older Alarm Widget (no Alarm class) waits with the gGlobal Widget.
+*Done (the "Recheck dialogs" pass, part 2, 2026-11-19):* every other dialog in Skynet (the 3 Vessel sample, every Template and
+everything else, OakBarn Brewery: "so we have a consistent look and flow"), with no field taken away:
+- **Switch family** (Switch, Push Button, Pulse Button, LED): State (Switch and LED), the Graphic (it as drawn on its Tab), Picture,
+  **Overlay** (#5) with Database and .API in its ⬢, Linked Device under it.
+- **No Graphic Widgets** (Data / Value, Text, Override, Label, Timer, Graph, Sound Player, Process): **Background** (Show or None, #2),
+  **Fore color** and **Back color** on their own lines; the rest of the look stays in its ⬢.
+- **Older Widgets** (gGlobal Widget, older Alarm, Manual vessel, Clone): the Hose Bib order; their Background picture (#4) with a ⬢
+  for the older Background boxes, text look and Database and .API in ⬢ lines.
+- **Picture Widget** Properties: 2. Tab, 3. Name, Graphic, Picture, **Background** (None, 1, 2 or 3, #3) with its 3 paths in its ⬢.
+- **Drawn things** (Vessels, Vessel Widgets, IPs, Pipes, Hoses, TC and pipe fittings, Tab_Fittings, Manifolds, Equipment, Integrated
+  Devices): the title line, 1. Label (Label look in its ⬢), Label Visible, 2. Tab, Layer Order, 3. Name, X Y Width Height, the Type
+  last (Device Type on an Integrated Device). The RIMS tube and electric kettle Add box: 1. Label, Label Visible, 2. Interface, then
+  its parts, ➕ Add Device. Manual Pump: Confirmation under the Overlay.
+Help 64, 65, 74, 76, 148.
 
 ## 19. Vessel Rules
 
@@ -5648,6 +5662,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.
 - 2026-11-18: Rule 18.50 applied to the Alarm Widgets (the "Recheck dialogs" pass, part 1): Basic, User and Pre-Hop Alarm dialogs in the Hose Bib's order, Widget Type last, Database and .API ⬢ on the Active overlay line; nothing taken away. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs; no import change.
 - 2026-11-18: Added Rule 18.50 (OakBarn Brewery, PDF "Panel Update Final 4", "Final 4 will just be some guidance Rules"): a guidance Rule for the "Recheck dialogs" pass: a Widget dialog follows the Hose Bib (the Widget half of the Model) the way the Hose Bib was made from the Blichmann; a Widget with no Graphic has no picture attributes and gets a Background, Fore color and Back color; Switch, Pump and like Widgets and the Graphic (Picture) Widget have the Graphic properties, others only with IPs or .confirmation; the Graphic Widget has 3 Backgrounds (.path, .path_2, .path_3), other Widgets one from Skynet with no path, a User Widget one path; no IPs, Hose or Pipe, IP Fittings, Cover or Overlay on a Widget without IPs, except a Switch has an Overlay. No dialog changes now. Checked against both programs: the BruControl Import's Build page shares the dialogs.
 - 2026-11-18: Rule 6.18 changed (OakBarn Brewery: "in the next PR add Voice Command must be Unique"): API_Name is Unique across every Device and Widget, Hose Bibs too; a Voice Command falls back to the Label only when no other shared item has it, else to the Name; a Hose Bib with .API on is shared with MQTT and voice. Help 144 (and French). Checked against both programs: the BruControl Import has no MQTT or voice; its Build page uses the same API_Name check.
