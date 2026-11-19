@@ -15,7 +15,7 @@ Rest the mouse on a column name for its Hover Help:
 |---|---|
 | **ID** | The Interface ID: it starts the suggested name of every Device on this Interface (MB_25_DO@Pump_Wort_BH). Interface IDs follow Rule 3.2: once saved, it never changes. |
 | **Name** | The Interface's Name, the one you gave it when you added it: Hot Side, Fermentation, your brewery name. |
-| **Board** | The kind of board: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each. |
+| **Board** | The kind of board: the Arduino Mega (the standard), another Arduino board, an ESP32 or a Raspberry Pi. See [Skynet Boards](206-skynet-boards). |
 | **Mode** | Simulator: the panel pretends to be this board, and nothing goes to a real board. Real: the panel talks to the real board. The panel is switched between them on the Simulator bar. |
 | **Connection** | How the board is connected to the Brain: USB, Ethernet or WiFi. Rest the mouse on it to see its USB Port or Network address. |
 | **Rating** | How safe the Connection is for this board: Best, Good, OK or Poor. USB is the safest; Ethernet and WiFi depend on your network. |
@@ -36,7 +36,7 @@ The pop-up asks (rest the mouse on each name for its Hover Help):
 
 - **Name**: something that means something to you, like *Hot Side*, *Fermentation* or your brewery's name. The Skynet Home Brewery, for example, has 3 Megas: **Main_Brewery_HotSide**, **Valves** and **Fermentor**.
 - **Interface ID**: see below.
-- **Board**: Arduino Mega, ESP32 or Raspberry Pi. Skynet has a program for each of them.
+- **Board**: the Arduino Mega (the standard), another Arduino board, an ESP32 or a Raspberry Pi. A 3.3 V board gets one warning when you put an input, a 0-5 V sensor or a relay on it. See [Skynet Boards](206-skynet-boards).
 - **Connection**: the choices follow the Board. An Arduino Mega: USB, Ethernet (with a W5100 or W5500 Shield) or WiFi (through an ESP32 bridge). An ESP32: USB, Ethernet or WiFi. A Raspberry Pi: Ethernet (or the Brain itself) or WiFi. Its Hover Help shows the connection rating (Help: [Connection ratings](69-connection-ratings)).
 - **USB Port** (a USB board) or **Network address** (Ethernet or WiFi). See [The USB Port, the technical side](#the-usb-port-the-technical-side) and [The Network address](#the-network-address). While the panel is in 🧪 Simulator mode, the Brain does not talk to any board, so nothing goes over the USB Port: to test the real connection, switch to 🔌 Real, add the Interface, then ⚙ Change it on the Devices page and press 🔌 Test Communication.
 - **Board Settings**: **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** and **Diagnostic Logging** (and the **Network Port** for Ethernet or WiFi): see [Board Settings](#board-settings) below.

@@ -1,10 +1,13 @@
+import { BOARD_INFO, BOARD_ORDER } from './boards.js';
+
 // Connection ranking (Fritz, 2026-10-26): how safe each link to the Brain is, by board.
 // USB is safest. Ethernet and WiFi depend on the network.
 // Heating Devices on a network link are allowed with a warning (Fritz, 2026-10-26); the board turns all outputs OFF
 // when it hears nothing from the Brain for the Interface's "lost link" delay (user set, 3 to 600 s, default 10).
 
-// The boards Skynet has a program for (OakBarn Brewery, 2026-11-15, Add Interface markup: "List Boards Only"): no "other" board
-export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['pi', 'Raspberry Pi']];
+// The boards Skynet has a program for (OakBarn Brewery, 2026-11-15, Add Interface markup: "List Boards Only"): no "other" board.
+// Every standard Arduino board and every board BruControl listed (OakBarn Brewery, 2026-11-19, Rule 6.3), from public/boards.js.
+export const BOARDS = BOARD_ORDER.map(b => [b, BOARD_INFO[b].name]);
 // The Connection choices of each board (the same markup: "Connection would be based on Board, like Ethernet (with W5100 Shield)").
 // No Simulator: the Simulator belongs to the panel, not to a board (Rule 10.10). A Raspberry Pi's program talks over the network only.
 const CONNECTIONS = {
@@ -12,6 +15,11 @@ const CONNECTIONS = {
   esp32: [['serial', 'USB'], ['ethernet', 'Ethernet (an ESP32 with an Ethernet port)'], ['esp32', 'WiFi (built in)']],
   pi: [['ethernet', 'Ethernet (or the Brain itself)'], ['esp32', 'WiFi (built in)']],
 };
+for (const b of BOARD_ORDER) {
+  const x = BOARD_INFO[b]; if (CONNECTIONS[b]) continue;
+  CONNECTIONS[b] = [['serial', 'USB'], ...(x.noEthernet ? [] : [['ethernet', x.eth || 'Ethernet (with W5100 or W5500 Shield)']]),
+    ...(x.wifi ? [['esp32', x.wifi]] : x.family === 'wifi' ? [['esp32', 'WiFi (built in)']] : [])];
+}
 export const connChoices = board => CONNECTIONS[board] || CONNECTIONS.mega;
 export const LINK_NAMES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'WiFi', simulator: 'Simulator' };
 
@@ -35,6 +43,9 @@ RANKS.pi = {
   ethernet: ['good', 'Good: depends on the network. If the network fails the Pi turns all outputs OFF after the lost link delay'],
   esp32: ['ok', 'OK: depends on the WiFi. If it drops the Pi turns all outputs OFF after the lost link delay'],
 };
+// The other boards (2026-11-19): an Arduino-type board is rated like a Mega, a board with WiFi built in like an ESP32. Built-in WiFi
+// is not the Mega's ESP32 bridge, so it is Good (Poor with a heating Device on it, as on an ESP32).
+for (const b of BOARD_ORDER) if (!RANKS[b]) RANKS[b] = { serial: RANKS.mega.serial, ethernet: BOARD_INFO[b].family === 'wifi' ? RANKS.esp32.ethernet : RANKS.mega.ethernet, esp32: RANKS.esp32.esp32 };
 const onThisComputer = d => /^(127\.\d+\.\d+\.\d+|localhost|::1)$/i.test(String(d?.host || '').trim());
 
 // An Interface saved before boards were asked: guess from its name (an "ESP..." name is an ESP32, anything else a Mega). A board

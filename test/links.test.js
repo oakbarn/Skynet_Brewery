@@ -6,7 +6,15 @@ import { BOARDS, connChoices, boardOf, linkOf, isHeating, rating, heatingLinkWar
 assert.equal(boardOf({ name: 'Main Brewery Mega USB' }), 'mega', 'an older Interface with no board: a Mega');
 assert.equal(boardOf({ name: 'Garage ESP32' }), 'esp32', 'an "ESP" name is an ESP32');
 assert.equal(boardOf({ name: 'x', board: '' }), '', 'a board the BruControl Import could not tell: not picked yet');
-assert.deepEqual(BOARDS.map(b => b[0]), ['mega', 'esp32', 'pi'], 'boards only, no "other" (OakBarn Brewery, 2026-11-15)');
+assert.deepEqual(BOARDS.map(b => b[0]), ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'esp32', 'esp8266', 'pi'],
+  'every standard Arduino board and every BruControl board, the Mega first, no "other" (OakBarn Brewery, 2026-11-15 and 2026-11-19)');
+assert.ok(!BOARDS.some(b => b[0] === 'other' || b[0] === 'opta'), 'no "other"; the Opta waits for its own program (plan first)');
+assert.deepEqual(connChoices('uno').map(c => c[0]), ['serial', 'ethernet'], 'an Uno: USB or an Ethernet shield');
+assert.deepEqual(connChoices('giga').map(c => c[0]), ['serial', 'ethernet', 'esp32'], 'a GIGA: WiFi built in');
+assert.deepEqual(connChoices('esp8266').map(c => c[0]), ['serial', 'esp32'], 'an ESP8266: USB or WiFi');
+assert.equal(rating({ board: 'grandCentral', connection: 'ethernet' }).level, 'ok', 'an Arduino-type board is rated like a Mega');
+assert.equal(rating({ board: 'giga', connection: 'esp32' }).level, 'good', 'built-in WiFi is not the bridge');
+assert.equal(rating({ board: 'giga', connection: 'esp32' }, true).level, 'poor', 'heating on WiFi is poor on every board');
 assert.deepEqual(connChoices('pi').map(c => c[0]), ['ethernet', 'esp32'], 'a Raspberry Pi talks over the network only');
 assert.match(connChoices('mega')[1][1], /W5100/, 'a Mega on Ethernet: with its shield');
 assert.ok(!['mega', 'esp32', 'pi'].some(b => connChoices(b).some(c => c[0] === 'simulator')), 'no Simulator: it belongs to the panel');

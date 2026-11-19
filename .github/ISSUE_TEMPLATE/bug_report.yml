@@ -1,0 +1,81 @@
+# Report a bug (Rule 2.61). A plain form for testers who are not programmers. The Panel's 🐞 Report a problem
+# (☰ Menu > About, and the Help window) opens it with the version, the screen or Help page and the browser filled in:
+# the ids below (version, where, browser) are the names it fills, so keep them.
+name: 🐞 Report a bug
+description: Something in Skynet did not work, or did something you did not expect.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing Skynet! Tell us what went wrong in your own words. There are no wrong answers, and you do not need to know anything about programs.
+        **Tip:** a picture of the screen helps a lot. Drag it into the "Pictures" box, or paste it there (Ctrl + V, or ⌘ + V on a Mac).
+  - type: textarea
+    id: what
+    attributes:
+      label: What went wrong?
+      description: What did you see? Copy any message that popped up, word for word if you can.
+      placeholder: "Example: I pressed Save on the Pump Profile and nothing happened."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What were you doing?
+      description: The steps just before it went wrong, one per line.
+      placeholder: |
+        1. Opened ☰ Menu > Pump Profile
+        2. Changed the Label to Wort Pump
+        3. Pressed Save
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: "Example: the ✔ Saved box, and the new Label on the Tab."
+    validations:
+      required: false
+  - type: dropdown
+    id: often
+    attributes:
+      label: How often?
+      options:
+        - Every time
+        - Sometimes
+        - Only once
+        - Not sure
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Skynet version
+      description: Filled in for you when you use 🐞 Report a problem in Skynet. Otherwise see ☰ Menu > About > Panel version.
+      placeholder: "PR504_Skynet-v.20261119_02_43"
+    validations:
+      required: false
+  - type: input
+    id: where
+    attributes:
+      label: Screen or Help page
+      description: Where in Skynet it happened.
+      placeholder: "Example: Brew House Tab, or Help page Pumps"
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Computer and browser
+      description: Filled in for you when you use 🐞 Report a problem in Skynet.
+      placeholder: "Example: Windows 11, Edge; or iPhone, Safari"
+    validations:
+      required: false
+  - type: textarea
+    id: pictures
+    attributes:
+      label: Pictures (optional)
+      description: Drag pictures of the screen here, or paste them.
+    validations:
+      required: false
