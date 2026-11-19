@@ -42,3 +42,36 @@ for (const f of ['help/13-glossary.md', 'help/55-build-tab.md', 'help/01-getting
 // Finish Build > Move to Tab to the Tab picked for it: the note says it kept its spot, not "the middle"
 assert.match(app, /went\[0\]\.kept/, 'the Move to Tab note says when the build kept its spot');
 console.log('stepbystep add device/widget ok');
+
+// Wiring guides (OakBarn Brewery 2026-11-19, Rule 11.15): one Step by Step guide per part that needs more than a bare Port, the
+// electrical warning and "You are responsible for your own safety." first, the Mega as the example, a Skynet drawing (MIT), French too.
+for (const [f, pic] of [['209-step-by-step-wire-a-dac', 'DAC'], ['210-step-by-step-wire-a-10k-ntc-probe', 'NTC'], ['211-step-by-step-wire-an-ssr', 'SSR'],
+  ['212-step-by-step-wire-1-wire-probes', 'OneWire'], ['213-step-by-step-wire-a-pt100-probe', 'PT100'], ['214-step-by-step-wire-a-pt1000-probe', 'PT1000']]) {
+  const g = read(`help/${f}.md`), top = g.split('## You need')[0];
+  assert.match(g, /^# Step by Step: Wire /, f + ' is a Step by Step wiring guide');
+  assert.match(top, /⚠ Electricity can kill\. OakBarn Brewery and Skynet are not electricians and can give no electrical advice\. Consult a Licensed Electrician\./, f + ': Rule 6.20 first');
+  assert.match(top, /You are responsible for your own safety\.\*\* This guide shows a simple, very general way .* It cannot know your wiring, your parts or your electrical layout\./, f + ': the safety note first');
+  assert.match(top, /Arduino Mega 2560\*\*, the standard Skynet board\. Other boards are wired the same way/, f + ': the Mega is the example');
+  assert.match(g, /## Other boards/, f + ': other boards');
+  const svg = `help_pictures/Step_Wire_${pic}_01_Wiring.svg`;
+  assert.ok(g.includes(`](${svg})`), f + ' shows its drawing');
+  const s = fs.readFileSync(new URL('../media/' + svg, import.meta.url), 'utf8');
+  assert.match(s, /Skynet drawing \(MIT/, svg + ' is a Skynet drawing'); assert.match(s, /Electricity can kill/, svg + ' carries the warning');
+  assert.match(read('docs/Media_Licenses.csv'), new RegExp(`Step_Wire_${pic}_01_Wiring\\.svg,media/help_pictures,.*MIT`), svg + ' in Media_Licenses.csv');
+  for (const l of [...g.matchAll(/\]\((\d+-[\w-]+)(#[\w-]+)?\)/g)].map(m => m[1])) assert.ok(fs.existsSync(new URL(`../help/${l}.md`, import.meta.url)), 'link ' + l);
+  assert.doesNotMatch(g, /Fritz|BruControl/, 'Rules 11.3 and 11.5');
+  assert.match(read(`help/fr/${f}.md`), /Vous êtes responsable de votre propre sécurité/, f + ' in French (Rule 11.11)');
+}
+// the SSR guide wires the Mega's active-low Ports the right way round: 5V to the SSR's +, the Port to its -
+assert.match(read('help/211-step-by-step-wire-an-ssr.md'), /\*\*5V\*\* to the SSR's \*\*3 \(\+\)\*\*[\s\S]*Port \*\*D23\*\* to the SSR's \*\*4 \(-\)\*\*/);
+assert.match(read('firmware/Mega_BrewPanel/Mega_BrewPanel.ino'), /const bool RELAY_ACTIVE_LOW = true;/, 'the Mega turns a Port On by pulling it LOW');
+console.log('stepbystep wiring guides ok');
+// the 1-Wire guide (OakBarn Brewery 2026-11-19: "No Parasite Mode. Best to have external PWR but would work with board power ... The
+// Pull up explained in the Step by step in details")
+{
+  const g = read('help/212-step-by-step-wire-1-wire-probes.md');
+  assert.match(g, /never uses parasite mode/, 'no parasite mode');
+  assert.match(g, /best is its own 5 V DC power supply\.\*\* The Mega's 5V works too/, 'its own supply best, board power works');
+  assert.match(g, /## What the pull-up does[\s\S]*4\.7k ohm is the standard[\s\S]*2\.2k ohm/, 'the pull-up explained');
+}
+console.log('stepbystep 1-Wire ok');
