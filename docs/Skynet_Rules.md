@@ -1142,6 +1142,24 @@ dialog or Tab it was opened from").
 **Both programs:** the BruControl Import's own pages keep their look; its Build page shares the Panel's ☰ Menu tabs, so Close goes
 back the same way there.
 
+2.61 **🐞 Report a problem: an easy way for testers to report bugs and French Help corrections** (OakBarn Brewery, 2026-11-19:
+"I will have other testers so an easy way for them to report bugs as well"; a French-speaking tester will review the French Help).
+Testers are not programmers, so:
+  1. **One button, two kinds:** **🐞 Report a problem** (☰ Menu > About) and **🐞 Report** on every Help page (next to 🖨 Print, the
+     panel's Help page and the Help window) open one small box: **🐞 A bug** or **🌐 The French Help** (lit up while the Help is read
+     in French). Each has **GitHub** and **✉ Email**.
+  2. **GitHub forms** in the public repo (`.github/ISSUE_TEMPLATE/`): **Report a bug** (plain questions: what went wrong, what you
+     were doing, what you expected, how often, pictures) and **French Help correction** (in English and French: the page, the French
+     now, the better French, why). Both name buttons in English, as on the screen (Rule 11.11). A blank issue is still allowed.
+  3. **Filled in for the tester:** the Skynet version (version.json), the screen or Help page, and the computer and browser in plain
+     words (Windows, Edge). GitHub fills the form's boxes from the address it is opened with.
+  4. **✉ Email for anyone without a GitHub sign-in:** the computer's own mail program opens with the same questions and details, to
+     **support@oakbarnbrewery.com** (as Rule 11.10's broken link). Nothing is sent until the tester presses Send.
+  5. The Brain gives its version to a signed-in browser only (`/auth/status`). No person is named in the forms or Help
+     (Rule 11.5); the forms are not announced to testers until OakBarn Brewery releases them.
+Help 205. **Both programs:** the BruControl Import ships in the same Setup and uses the Panel's Help window, so 🐞 Report is on its
+Help pages too; its own screens have no ☰ Menu > About.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_GeneralType@DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -5712,6 +5730,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 2.61 (OakBarn Brewery: "I will have other testers so an easy way for them to report bugs as well"): 🐞 Report a problem (☰ Menu > About) and 🐞 Report on every Help page open a box with 🐞 A bug and 🌐 The French Help, each on GitHub (new issue forms in .github/ISSUE_TEMPLATE, the French one in English and French) or ✉ Email to support@oakbarnbrewery.com; the version, the page and the browser are filled in. Help 205 (and French); next free Help 206. Checked against both programs: the BruControl Import uses the Panel's Help window, so 🐞 Report is there too.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
 - 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.

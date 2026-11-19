@@ -1121,6 +1121,12 @@ dialog.pumpPick { max-width: 560px; width: calc(100% - 32px); }
 /* a broken Help link (OakBarn Brewery, 2026-11-12, Rule 11.10): the details, then Close or Send */
 dialog.brokenLink { max-width: 520px; }
 .brokenDetails { white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 30vh; overflow: auto; padding: 6px 8px; border: 1px solid rgba(127,127,127,.4); border-radius: 6px; }
+/* 🐞 Report a problem (Rule 2.61) */
+dialog.reportDlg { max-width: 560px; }
+.reportDlg .reportRow { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px; margin: 6px 0; border: 1px solid rgba(127,127,127,.4); border-radius: 6px; }
+.reportDlg .reportRow.here { border-color: var(--accent, #3b82f6); }
+.reportDlg .reportBtns { display: flex; gap: 6px; flex: none; }
+@media (max-width: 480px) { .reportDlg .reportRow { flex-direction: column; align-items: stretch; } }
 /* the Default Interface and Default Tab on the Build Tab's Edit layout bar (Rule 4.4) */
 .buildDefs { display: inline-flex; gap: 8px; align-items: center; }
 .buildDefs select { max-width: 180px; }

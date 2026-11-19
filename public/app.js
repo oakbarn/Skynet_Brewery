@@ -35,6 +35,7 @@ import { cleanApiName, apiNameProblem, apiNameOwner, apiNameItems } from './apin
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { STOVE_GALLONS, stoveAspect, stovePic } from './stovetop.js';      // the Stove Top Vessel (Rule 19.7)
 import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the Ice Water Can (Rule 19.8)
+import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 2.61)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
@@ -15567,6 +15568,7 @@ function renderAboutTab(box) {
     h('dl', { class: 'aboutGrid' },
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
       ...item('Panel version', panelVersionBox()),
+      ...item('Report', h('button', { title: 'Report a bug, or a better French wording for a Help page, on GitHub or by email. Your Skynet version and browser are filled in.', onclick: () => reportDialog({}) }, '🐞 Report a problem')),      // Rule 2.61
       ...(S.importBuild ? [] : item('Official Skynet', officialBox())),
       ...item('Signed in as', `${S.me.name} (${S.me.role})${S.me.role === 'admin' && touchRun() ? ', run mode on this phone or tablet (Rule 2.35)' : ''}`),
       ...item('Schema', schemaSelect()),
