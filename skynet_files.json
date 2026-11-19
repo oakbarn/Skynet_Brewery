@@ -74,7 +74,7 @@
   "lib/modernize.js": "d74b44da28f467f5ef4a14edb51d0ac39e2451fed84d3893ec8bd2d6975f9ae5",
   "lib/mqtt.js": "35b8bd19ec797291b53f730b8e603aa7bd8b2a3de6fd68f453fc98843f915987",
   "lib/namechars.js": "8a38ba4aa07e79d9a3c1e71f1269344391ca8c106e5a48f365ee591ec8f7e7cd",
-  "lib/official.js": "34581d32eb2ca180ffc7bb884d95a02e8a1eac44dd2afc30ef7b2117bfd97d09",
+  "lib/official.js": "99d26deda7026ea0b78786c5c655e7fcb324a7f60eb09cf05451a76758a78b36",
   "lib/patron.js": "ccccd20fd82a3ad3e51bf24414b93eb1bc459d43248d2eafd7497a9e755b4de5",
   "lib/picgroups.js": "f11be56ee333b278410fe8f90c25542e225c6f6473b87587ef6d0e4b3734f49e",
   "lib/pipes.js": "068115bd60109002d709afb6c4427ea504c72da2b460c09d789939ba4075d6f8",
