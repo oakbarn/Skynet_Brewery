@@ -16565,18 +16565,24 @@ function autoSizeUnit(g) {
 // take the size of the fitting whose opening they close. IP fittings and Manual Valves size themselves when drawn (sizeFitting).
 // Something with no pipe on it takes the Default pipe size (☰ Menu > Default settings), a fitting on a vessel opening keeps its size.
 // A pipe's size changed in its Properties: every pipe joined to it takes the new size, through elbows, tees, crosses, couplings,
-// check valves and sight glasses, all the way down the line (OakBarn Brewery, 2026-11-16: "You can change a pipe size individually
-// and the pipe size will cascade to auto size"; Panel Updates entry 12, Rule 5.36). It stops at a Reducer, a valve, a pump, a probe
-// tee, a vessel, a hose and a 🔒 locked pipe; the fittings then take the size of their pipes as always (sizeToPipes).
+// check valves, sight glasses and valves (Motorized, Proportional and Straight Manual Valves), all the way down the line (OakBarn
+// Brewery, 2026-11-16: "You can change a pipe size individually and the pipe size will cascade to auto size"; 2026-11-19: "Should the
+// size carry on through valves, like a manifold that stays one size? Yes"; Panel Updates entry 12, Rule 5.36). It stops at a Reducer,
+// a pump, a probe tee or other inline Device, a Hose Bib, a vessel, a hose and a 🔒 locked pipe; the fittings and valves then take
+// the size of their pipes as always (sizeToPipes).
 const passesSize = id => {
+  const d = /^dev:(.+):(in|out)$/.exec(id || '');
+  if (d) { const e = elNamed(d[1]); return e && (e.subtype === 'valve' || isPropValve(e)) ? [`dev:${d[1]}:${d[2] === 'in' ? 'out' : 'in'}`] : []; }
+  const m = /^eq:(.+):(in|out)$/.exec(id || '');
+  if (m) { const g = draft.graphics.find(x => x.id === m[1]); return isMv(g) && !isTapMv(g) ? [`eq:${m[1]}:${m[2] === 'in' ? 'out' : 'in'}`] : []; }
   const ip = draft.graphics.find(x => x.id === id && x.kind === 'ip'), u = ip?.attachTo && draft.graphics.find(x => x.id === ip.attachTo);
   if (!u || !isPlainUnit(u) || isMf(u) || /Reducer/i.test(u.template || '') || (u.fittings || []).some(f => f.kind === 'reducer')) return [];
   return draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === u.id && x.id !== id).map(x => x.id);
 };
 function cascadePipeSize(p) {
-  const line = pipeLine(p, draft.graphics, passesSize, id => isMv(draft.graphics.find(x => x.id === id))); if (!line.length) return 0;
+  const line = pipeLine(p, draft.graphics, passesSize); if (!line.length) return 0;
   for (const q of line) sameSize(q, p);
-  toast(`Pipe size: ${line.length} joined pipe${line.length > 1 ? 's' : ''} took the new size too (it stops at a Reducer, a valve, a pump, a vessel, a hose or a 🔒 locked pipe).`, false, 6000);
+  toast(`Pipe size: ${line.length} joined pipe${line.length > 1 ? 's' : ''} took the new size too (it goes through valves and stops at a Reducer, a pump, a vessel, a hose or a 🔒 locked pipe).`, false, 6000);
   return line.length;
 }
 function sizeToPipes(wsn) {

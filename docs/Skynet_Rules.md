@@ -2173,10 +2173,11 @@ pipe on Save", Help 87).
   5.27)", and "With no pipe or hose on it, it keeps its size".
 - **A pipe size cascades** (OakBarn Brewery, 2026-11-16, Default Pipe Size Hover Help: "You can change a pipe size individually and the
   pipe size will cascade to auto size"; Panel Updates entry 12, built 2026-11-19): when a pipe's size is changed in its Properties and
-  saved, every pipe joined to it takes the same size: pipes on the same IP, and through an elbow, tee, cross, U, coupling, check valve
-  or Sight Glass to the pipes on its other openings, all the way down the line. It **stops** at a Reducer, a valve (Motorized, Manual,
-  Proportional), a pump, a probe tee or inline Device, a Valve Tee or Supply Manifold, a vessel, a hose (hoses never auto size) and a
-  🔒 locked pipe (it keeps its size). The fittings then size to their pipes as above. Only the size changes; the IP Types stay. A
+  saved, every pipe joined to it takes the same size: pipes on the same IP, and through an elbow, tee, cross, U, coupling, check valve,
+  Sight Glass or **valve** (Motorized, Proportional, Straight Manual Valve; OakBarn Brewery, 2026-11-19: "Should the size carry on
+  through valves, like a manifold that stays one size? Yes") to the pipes on its other side, all the way down the line. It **stops** at
+  a Reducer, a pump, a probe tee or other inline Device, a Hose Bib, a Valve Tee or Supply Manifold, a vessel, a hose (hoses never auto
+  size) and a 🔒 locked pipe (it keeps its size). The fittings then size to their pipes as above. Only the size changes; the IP Types stay. A
   short note says how many pipes changed. Changing it back cascades back the same way. *Was (2026-11-16):* "Nothing cascades along
   the line yet".
 
