@@ -9,7 +9,13 @@ export const EQUIP_FIELDS = [
   ['grainAbsorption', 'Grain absorption', 'gal/lb', 'L/kg', 0.12, 1],
   ['brewhouseEfficiency', 'Brewhouse efficiency', '%', '%', 72, 72],
   ['hopUtilization', 'Hop utilization', '%', '%', 100, 100],
+  // Strike Offset (Panel Updates entry 14, OakBarn Brewery: "Equipment Profile, not recipe"; "15 is to set a default on a tab based on the
+  // Equipment. I have 2 Breweries in esscence. I set one at 10 and the other at 0"): degrees added to the Strike Temperature. A temperature
+  // DIFFERENCE, so °F to °C is x 5/9 with no 32 (kept in °C, Rule 2.59). 0 for an All In One (the grain goes into the vessel that heated the water).
+  ['strikeOffset', 'Strike offset', '°F', '°C', 0, 0],
 ];
+// a temperature difference in °C from a number in the Units given (the Strike offset)
+export const deltaC = (v, units) => !Number.isFinite(+v) || v === '' || v === null ? 0 : units === 'Metric' ? +v : +v * 5 / 9;
 export const UNIT_SYSTEMS = { US: 'US (gallons, pounds, °F)', Metric: 'Metric (liters, kilograms, °C)' };
 export const volUnit = units => units === 'Metric' ? 'L' : 'gal';
 export const tempUnit = units => units === 'Metric' ? '°C' : '°F';

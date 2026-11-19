@@ -9,6 +9,7 @@ import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgTo
 import { ProfileStore } from '../lib/profiles.js';
 import { recipeValues } from '../lib/brewprocess.js';
 import { SCHEMA_KEYS } from '../lib/schemas.js';
+import './strikeoffset.test.js';      // Strike Offset (Panel Updates entry 14), run with the recipe tests
 
 // a small .bsmx as BeerSmith writes it: ounces, fluid ounces, °F; a folder of two recipes
 const hop = (n, oz, use, t, alpha = 10) => `<Hops><F_H_NAME>${n}</F_H_NAME><F_H_ALPHA>${alpha}</F_H_ALPHA><F_H_AMOUNT>${oz}</F_H_AMOUNT><F_H_BOIL_TIME>${t}</F_H_BOIL_TIME><F_H_DRY_HOP_TIME>4</F_H_DRY_HOP_TIME><F_H_USE>${use}</F_H_USE><F_H_FORM>0</F_H_FORM><F_H_IN_RECIPE>1</F_H_IN_RECIPE></Hops>`;

@@ -210,8 +210,9 @@ export function hopIbu(r, h, liters = n(r?.volumes?.batchLiters), boil = n(r?.bo
 }
 // The Calculate button: Total Grain Weight, 1st Mash temperature, IBU, Strike Volume and Temperature and the Sparge Volume.
 // Grain absorption 1.0 L/kg (0.12 gal/lb) unless the Equipment Profile gives one (absorbLkg).
-export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0, eff = null) {
-  const tt = recipeTotals(r, d, mp), first = firstMashStep(r, mp);
+// strikeOffC: the Brew on Tab's Strike offset in °C (Panel Updates entry 14), added to the Strike Temperature; none is 0
+export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0, eff = null, strikeOffC = 0) {
+  const tt = recipeTotals(r, d, mp, strikeOffC), first = firstMashStep(r, mp);
   const pre = n(r?.volumes?.boilLiters);
   const spargeL = pre && tt.strikeL ? Math.max(0, pre - (tt.strikeL - tt.grainKg * absorbLkg)) : null;
   const spargeC = r?.spargeTempC ?? (mp?.spargeTemp !== undefined ? (mp.units === 'Metric' ? n(mp.spargeTemp) : fToC(n(mp.spargeTemp))) : r?.mash?.spargeTempC ?? null);
@@ -219,7 +220,7 @@ export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0, eff = nul
     spargeLiters: spargeL === null ? null : round(spargeL, 2), spargeTempC: spargeC === null ? null : round(spargeC, 1), spargeType: r?.spargeType || mp?.sparge || 'batch',
     spargeMinutes: r?.spargeMinutes ?? (mp?.batchRest ?? null) };
 }
-export function recipeTotals(r, d = {}, mp = null) {
+export function recipeTotals(r, d = {}, mp = null, strikeOffC = 0) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) };
   const f = r?.ingredients?.fermentables || [];
   const grainKg = f.filter(x => !x.type || x.type === 'grain' || x.type === 'adjunct').reduce((a, x) => a + n(x.kg), 0);
@@ -228,7 +229,7 @@ export function recipeTotals(r, d = {}, mp = null) {
   const ratio = n(r?.waterToGrain) || D.waterToGrain, grainT = r?.grainTempC ?? D.grainTempC;
   const first = firstMashStep(r, mp);
   const strikeL = grainKg * ratio;
-  const strikeC = first && grainKg ? (0.41 / ratio) * (n(first.tempC) - n(grainT)) + n(first.tempC) + n(D.strikeOffsetC) : null;
+  const strikeC = first && grainKg ? (0.41 / ratio) * (n(first.tempC) - n(grainT)) + n(first.tempC) + n(D.strikeOffsetC) + n(strikeOffC) : null;
   return { grainKg: round(grainKg, 3), fermentableKg: round(allKg, 3), hopKg: round(hopKg, 4), strikeL: round(strikeL, 2), strikeC: strikeC === null ? null : round(strikeC, 1),
     hops: (r?.ingredients?.hops || []).length, yeasts: (r?.ingredients?.yeasts || []).length, miscs: (r?.ingredients?.miscs || []).length };
 }
