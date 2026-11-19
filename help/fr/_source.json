@@ -1,4 +1,5 @@
 {
+ "238-boil-temperature": "67d55dcac6d50600",
  "00-tailscale-windows": "7718c563861cc0e1",
  "01-getting-started": "326257bbd14831ea",
  "02-tabs": "33b2052c17709737",
@@ -230,6 +231,5 @@
  "234-1-wire-probes": "6099b8f79b1e2ab1",
  "235-din-button-on-press": "a8b5b5a37b0960b9",
  "236-copy-a-whole-tab": "31a20e264fee5ce1",
- "237-pid-auto-tune": "b4e0d90926f3f155",
- "238-boil-temperature": "67d55dcac6d50600"
+ "237-pid-auto-tune": "b4e0d90926f3f155"
 }
