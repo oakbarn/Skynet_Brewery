@@ -2,7 +2,7 @@
 
 A **Skynet Template** is set by Skynet and can't be changed by a user (Skynet Rule 5.16). When you make a Device from one, you get
 your own **User version** of it. It gets a copy of everything in the Template when it is placed. You can set only some of its
-attributes, and only those show in its Properties. Which ones depends on the kind of Device. After it is placed, the Template is
+attributes, and only those show in its Properties. Which ones depends on the kind of Device, and that list is copied onto it too. After it is placed, the Template is
 never read again: a newer or changed Template never changes a Device already on a Tab. Picking another **Orientation** copies that
 Orientation's picture then (Skynet Rule 2.62).
 

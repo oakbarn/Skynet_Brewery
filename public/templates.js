@@ -238,12 +238,16 @@ export function keepDeviceFixed(el, old, t) {
     if (!t) return el;
     applyDeviceTemplate(el, t);
     el.tplFixed = [...deviceFixed(t)];
+    el.tplUser = [...(t.userFields || [])];      // which rows its Properties show: its own copy too (Rule 2.62 #10)
     return el;
   }
   const fixed = Array.isArray(old.tplFixed) ? old.tplFixed : [];
   for (const k of fixed) { if (k in old) el[k] = jsonSafe(old[k]); else if (k !== 'type') delete el[k]; }
   for (const k of ['imageOn', 'imageOff']) { if (old[k] !== undefined) el[k] = old[k]; else delete el[k]; }
   if (fixed.length) el.tplFixed = [...fixed];
+  if (Array.isArray(old.tplUser)) el.tplUser = [...old.tplUser];      // its own Properties rows, never the Template's again
+  else if (t) el.tplUser = [...(t.userFields || [])];                  // saved before Rule 2.62 #10: copied once
+  else delete el.tplUser;
   if (el.subtype === 'valve') { if (el.tapwater) el.tapwaterOut = tapOutFrom(el.tapSource); else { delete el.tapwaterOut; delete el.tapSource; } }
   return el;
 }

@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { Store } from '../lib/store.js';
 import { Schemas, versionName, versionFile } from '../lib/schemas.js';
+import { copyTabProfile, unlinkTabProfile } from '../public/tabprofile.js';
 import { EquipmentProfiles } from '../lib/equipment.js';
 import { brewVolumes } from '../public/brewcalc.js';
 
@@ -239,6 +240,33 @@ delete hw.allOff;
   assert.deepEqual(st2.config.graphics.map(g => g.id).sort(), ['c', 'h', 'k'], 'a Schema that was not loaded keeps every piece it showed');
   assert.ok(!st2.config.workspaces.some(w => w.equipmentProfile), 'and loses its link when loaded');
   clearTimeout(st2._persistTimer);
+}
+
+// Rule 2.62 #9 ("NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab, never linked
+{
+  const P = { id: 'blue', name: 'Blue', bgColor: '#123456', nameColor: 'white', valueType: 'gauge', digits: 4 };
+  const w = copyTabProfile({ name: 'BH', color: '#000000', tabProfile: 'blue' }, P);
+  assert.equal(w.color, '#123456', 'picked now: its color copied in');
+  assert.deepEqual(w.startLook, { nameColor: 'white', valueType: 'gauge', digits: 4 }, 'and its look');
+  assert.equal(w.tabProfile, undefined, 'no link kept');
+  P.bgColor = '#ffffff'; P.nameColor = 'red';
+  assert.equal(w.color, '#123456'); assert.equal(w.startLook.nameColor, 'white', 'a changed profile changes no Tab');
+  assert.equal(copyTabProfile({ name: 'X', color: '#abcdef' }, { name: 'No color' }).color, '#abcdef', 'a profile with no color keeps the Tab\'s');
+  // a Tab saved before: copied once as it showed (its own Color won), then the link goes
+  const find = id => id === 'blue' ? { ...P, bgColor: '#123456' } : null;
+  const old1 = { name: 'A', tabProfile: 'blue' }, old2 = { name: 'B', color: '#00ff00', tabProfile: 'blue' }, old3 = { name: 'C', tabProfile: 'gone' };
+  assert.ok(unlinkTabProfile(old1, find)); assert.equal(old1.color, '#123456'); assert.equal(old1.tabProfile, undefined); assert.equal(old1.startLook.nameColor, 'red');
+  unlinkTabProfile(old2, find); assert.equal(old2.color, '#00ff00', 'its own Color still wins');
+  unlinkTabProfile(old3, find); assert.equal(old3.tabProfile, undefined, 'a deleted profile: the link just goes');
+  assert.equal(unlinkTabProfile({ name: 'D' }, find), false, 'nothing to do');
+  // a layout save never brings a link back, and a Schema loaded unlinks its Tabs
+  schemas.tabLooks = { has: id => id === 'blue', get: () => ({ id: 'blue', bgColor: '#123456', nameColor: 'white' }) };
+  const sent = schemas.keepTabProfiles([{ name: 'Main', tabProfile: 'blue' }]);
+  assert.equal(sent[0].tabProfile, undefined); assert.equal(sent[0].color, '#123456');
+  const c = { workspaces: [{ name: 'T', tabProfile: 'blue' }] };
+  schemas.drawTabs(c);
+  assert.equal(c.workspaces[0].tabProfile, undefined); assert.deepEqual(c.workspaces[0].startLook, { nameColor: 'white' });
+  delete schemas.tabLooks;
 }
 
 // volumes as in BeerSmith

@@ -214,7 +214,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Tab ID**: the short ID (like `SP`) that ends the names of new Devices on a tab; it follows Rule 3.2. See [Interface, Tab and Device names](46-interface-tab-device-names).
 
-**Tab Profile**: a tab's background color and the look (colors, placement, LED / Text / Gauge) new devices and widgets on it start with. See [Tab and Valve Profiles](36-tab-and-valve-profiles).
+**Tab Profile**: a background color and the look (colors, placement, LED / Text / Gauge) new devices and widgets start with, copied onto a tab (never linked). See [Tab and Valve Profiles](36-tab-and-valve-profiles).
 
 **Tab_Vessel, Tab_Fitting**: the copy of a Template on a Tab. Not a Device and not a Widget, but it can hold both. Fully editable. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
 

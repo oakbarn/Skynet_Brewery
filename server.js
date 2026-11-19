@@ -190,6 +190,7 @@ const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipmen
 const schemas = new Schemas(store, { engine, hw, profiles });
 // Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
+schemas.tabLooks = brewProfiles.tab;      // a Tab Profile is only copied onto a Tab, never linked (Rule 2.62 #9)
 // Tap Water (Rule 17.12): every Brain has one; a Recipe or the Default tab with no Water Profile picked uses it
 try { brewProfiles.water.ensureTap(store.config.brewDefaults?.units); } catch (e) { console.log('Tap Water profile: ' + e.message); }
 // the Default Pump Profile (Dialog 2 #3, 2026-11-16): always one marked Default. A new Pump or Valve Profile starts with the Overlay of

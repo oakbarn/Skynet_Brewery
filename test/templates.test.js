@@ -206,6 +206,13 @@ console.log('templates ok');
   const turned = keepDeviceFixed({ ...placed, orientation: 'v' }, placed, newer);
   assert.equal(turned.imageOff, 'newv.svg', 'another Orientation picked: that picture is copied then');
   assert.equal(keepDeviceFixed({ ...placed }, placed, null).service, 'room', 'no Template needed after it is placed');
+  // Rule 2.62 #10: which rows its Properties show is the valve's own copy too
+  assert.deepEqual(placed.tplUser, H.userFields || [], 'placed: its Properties rows copied');
+  const fewer = { ...newer, userFields: [] };
+  assert.deepEqual(keepDeviceFixed({ ...placed, tplUser: ['service'] }, placed, fewer).tplUser, placed.tplUser, 'a changed Template, or a screen, never changes its rows');
+  const before = { ...placed }; delete before.tplUser;
+  assert.deepEqual(keepDeviceFixed({ ...before }, before, H).tplUser, H.userFields || [], 'saved before: copied once');
+  assert.equal(keepDeviceFixed({ ...before }, before, null).tplUser, undefined, 'saved before, no Template: nothing made up');
 }
 
 // One entry per Skynet valve (Fritz, 2026-11-03): the words Master and Daughter are never shown. Each Template's title is
