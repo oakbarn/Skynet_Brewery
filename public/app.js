@@ -320,7 +320,7 @@ async function load() {
   startupView();
   if (S.importBuild) vbFromHash();      // the BruControl Import's Vessels step: build this vessel
 }
-function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
+function renderAll() { renderValves(S.valves); renderOverrides(S.overrides); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 // Memory and work (OakBarn Brewery, 2026-11-12: "I would rather it not be a memory hog over speed"):
 // - while this browser tab can't be seen (another tab, minimized, a phone asleep) the Tab's pictures, pipes and the Output
@@ -375,6 +375,7 @@ function connect() {
   es.addEventListener('flameOut', e => renderFlameOut(JSON.parse(e.data)));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
+  es.addEventListener('overrides', e => renderOverrides(S.overrides = JSON.parse(e.data)));      // Override pop-ups (Rule 2.26)
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
   es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });     // flow colors a Process set (Rule 5.21)
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
@@ -1689,13 +1690,13 @@ function fillText(n, g) {
 }
 
 // The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
-// loop that holds it. One per Tab; it can be on several Tabs, each with its own Label and look. Only the Label and its style
+// loop that holds it. Any number on a Tab, each with its own Label, Process and look (Rule 2.26). Only the Label and its style
 // can be changed (font, size, bold, fore and back color, alignment), never a background picture.
 const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
-const ovrHas = (tab, but) => (draft || S.config).graphics.some(x => x !== but && x.kind === 'override' && x.workspace === tab);
 function fillOverride(n, g) {
   n.classList.add('ovr'); place(n, g);
-  const b = h('button', { type: 'button', class: 'ovrBtn', title: 'Override: every running Process moves on past the wait, sleep or loop that holds it' });
+  const who = String(g.process ?? '').trim();
+  const b = h('button', { type: 'button', class: 'ovrBtn', title: who ? `Override: ${who} moves on past the wait, sleep or loop that holds it` : 'Override: every running Process (Any) moves on past the wait, sleep or loop that holds it' });
   setRich(b, g.label || OVR.label);
   b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
   b.style.fontFamily = tbFontCss(g.font) || g.font || '';
@@ -1703,11 +1704,29 @@ function fillOverride(n, g) {
   const a = (g.align || OVR.align).toLowerCase(); b.style.justifyContent = a === 'left' ? 'flex-start' : a === 'right' ? 'flex-end' : 'center'; b.style.textAlign = a;
   n.replaceChildren(b);
 }
-const pressOverride = guard(async () => {
+// body: { id } of the button pressed (the Brain looks up its Process), or { process } from the Override pop-up
+const pressOverride = guard(async (body = {}) => {
   if (!can('operator')) throw new Error('Only an operator or an admin can press Override');
-  const r = await api('POST', '/ui/override', {});
-  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
+  const r = await api('POST', '/ui/override', body);
+  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : r.process ? `Override: ${r.process} is not running` : 'Override: no Process is running');
 });
+// The Override pop-up (OakBarn Brewery, 2026-11-19, Rule 2.26): a Skynet Override button, on top, for each Process that asks for one
+// (show_Override in the Process) or that waits with no Override button set to it (by itself, after 3 seconds in a wait or sleep
+// outside a loop). Each names its Process; one press moves only that Process on. ✕ hides it on this screen until it pops up again.
+const ovrHidden = new Map();      // Process -> since of the pop-up hidden with ✕
+function renderOverrides(list = []) {
+  for (const [n, t] of ovrHidden) if (!list.some(a => a.process === n && a.since === t)) ovrHidden.delete(n);
+  const show = list.filter(a => ovrHidden.get(a.process) !== a.since);
+  let box = $('#ovrPop');
+  if (!show.length) { box?.remove(); return; }
+  if (!box) { box = h('div', { id: 'ovrPop', class: 'ovrPop', role: 'status' }); document.body.append(box); }
+  box.replaceChildren(...show.map(a => h('div', { class: 'ovrPopRow' },
+    h('div', { class: 'ovrPopWho' }, h('b', {}, a.process), a.text ? ` ${a.text}` : a.how === 'auto' ? ' is waiting' : ''),
+    h('div', { class: 'ovrPopBar' },
+      can('operator') ? h('button', { type: 'button', class: 'ovrBtn', title: `One press: ${a.process} moves on past the wait or sleep that holds it. Only this Process moves on.`, onclick: () => pressOverride({ process: a.process }) }, OVR.label)
+        : h('span', { class: 'muted' }, 'An operator or admin can press Override.'),
+      h('button', { type: 'button', class: 'ovrPopX', title: 'Hide it on this screen. It pops up again next time this Process waits.', onclick: () => { ovrHidden.set(a.process, a.since); renderOverrides(S.overrides); } }, '✕')))));
+}
 
 // variable class: gGlobal (the Shared Variable class was removed on 2026-11-07 and 2026-11-09, Rule 1.25; gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => e?.type === 'gGlobal';
@@ -3541,7 +3560,7 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
 
-  if (ev.target.closest('.gfx.ovr')) return pressOverride();
+  { const o = ev.target.closest('.gfx.ovr'); if (o) return pressOverride({ id: o.dataset.gid }); }
   { const sb = ev.target.closest('.el .svBox'); if (sb) return svEdit(sb); }      // a Heating Element's SV box: type a new one (Panel Updates 40)
   // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
   // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
@@ -6977,11 +6996,10 @@ function addText() {
   { let n = 1; while (draft.graphics.some(x => x.kind === 'text' && x.label === 'Text_' + n)) n++; g.label = 'Text_' + n; }      // a Label from the start (Rule 18.15): its name is wgt_TXT_Text_1 ...
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
-// the Override button: one per Tab, made on the 🔨 Build Tab like every new Widget; its Properties open
+// the Override button: any number on a Tab (Rule 2.26), made on the 🔨 Build Tab like every new Widget; its Properties open
 $('#addOverride').onclick = () => addOverride();
 function addOverride() {
   const tab = toBuild(); if (!tab) return;
-  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Finish Build ... sends it to a Tab.', true);
   const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -6989,7 +7007,6 @@ function addOverride() {
 // the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
 function copyGraphic(g) {
   const tab = toBuild(); if (!tab) return;
-  if (g.kind === 'override' && ovrHas(tab.name, g)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab.', true);
   const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
@@ -7926,8 +7943,6 @@ function moveBuildTo(tab, own = false) {
   const groups = new Map();
   for (const x of items) { const to = dest(x); if (!groups.has(to)) groups.set(to, []); groups.get(to).push(x); }
   for (const [to, list] of groups) {
-    const ovr = list.find(x => x.kind === 'override');
-    if (ovr && ovrHas(to.name, ovr)) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   }
   const kept = new Set();
   for (const [to, list] of groups) {
@@ -8339,7 +8354,7 @@ const F = {
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   // Override button Widget Properties (Fritz, 2026-10-30): the dialog pattern; only the Label and its look, no background picture
-  override: [['_nm', 'One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.', 'infonote', 'override'],
+  override: [['_nm', 'One press and its Process (or Any: every running Process) moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.', 'infonote', 'override'],
     ['_lb', '', 'box'], ['label', 'Label (what the button says on this Tab)', 'text', null, false, 'b'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
     ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
@@ -9369,18 +9384,25 @@ function chartWidgetFields() {
     ...NOGFX_LOOK(),
     ...wgtPlace(), wgtType('Graph')];
 }
-// Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
+// Override button (Rule 2.26): one press and the Process it is set to (or Any: every running Process) moves on
 const OVR_TIPS = {
-  label: 'What the button says on this Tab. One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.',
+  label: 'What the button says on this Tab, for example Skip Fire Hose. One press and its Process moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.',
+  process: 'Which Process this button moves on. Any (the usual): every running Process except Loopers. A Process picked: only that one, so a Fire Hose or Manifold Process running beside the Brew is overridden on its own. A Process that waits with no button set to it (or to Any) gets an Override pop-up naming it. If the Process gets a new name, the button follows it.',
   name: 'Made by Skynet from the Label and the Tab (Rule 3.14).',
   color: 'The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.',
 };
+// 4. Process: Any (empty) or one Process, picked from the list as on the Process Widget
+function ovrProcessField(it, tip) {
+  const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
+  return ['process', '4. Process', 'sel', [['', 'Any (every running Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip }];
+}
 function overrideFields(it) {
   const T = OVR_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, tip: T.label }],
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
     ['_nmro', '3. Name', 'ro', it.name || '', false, false, { tip: T.name }],
+    ovrProcessField(it, T.process),
     ...NOGFX_LOOK('color', { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().filter(f => f[0] !== 'backColor').map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }),
     ...wgtPlace(), wgtType('Override')];
 }
@@ -11287,12 +11309,14 @@ const INFO = {
       ['.width'], ['.height'], ['.layer', 'Layer Order: 1 is on top'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
   override: { title: 'Override Button Widget', properties: [
-    ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
-    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Finish Build ... to another Tab); each has its own Label and look.'],
+    ['One press', ': its Process moves on 100 ms later (Any: every running Process). A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
+    ['Process', ': Any (every running Process but Loopers) or one Process, so Processes running side by side (a Brew, a Fire Hose, a Manifold) are each overridden on their own.'],
+    ['Override pop-up', ': a Process held 3 seconds in a wait or sleep (not inside a loop) with no button set to it (or to Any) gets a pop-up naming it. show_Override in a Process brings it up on demand; hide_Override takes it away.'],
+    ['As many as you like', ': on one Tab or on several (COPY, then Finish Build ...); each has its own Label, Process and look.'],
     ['Label', ' (Override to start), with its font, size, bold, fore color, back color and alignment. Rich Text Embedded Codes work in it.'],
     ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
     attributes: [['none', 'a Process does not use it: a person presses it']],
-    example: 'wait Kettle_Temp >= 152' },
+    example: 'show_Override "Boil is rolling"' },
   dataw: { title: 'Value, Time and DateTime Widgets', properties: [
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
     ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
@@ -11967,8 +11991,7 @@ async function editItem(kind, id) {
       if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
       delete work.wrap;                                                         // word wrap is always on
     }
-    if (type === 'override') {      // one on a Tab; an empty Label says Override
-      if (ovrHas(work.workspace, item)) throw new Error(`The ${work.workspace} Tab already has an Override button: only one is allowed on a Tab`);
+    if (type === 'override') {      // as many on a Tab as you like (Rule 2.26 changed 2026-11-19); an empty Label says Override
       if (!String(work.label ?? '').trim()) work.label = OVR.label;
       for (const k of ['image', 'backpath', 'backpath_2', 'backpath_3', 'background']) delete work[k];
     }

@@ -226,7 +226,6 @@
  "How often the graph is drawn again with the newest readings, in seconds.": "Tous les combien le graphique est redessiné avec les dernières lectures, en secondes.",
  "Channel {0}": "Channel {0}",
  "Grid and time axis": "Grid and time axis",
- "What the button says on this Tab. One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.": "Ce que dit le bouton sur ce Tab. Une pression et chaque Process en cours avance : une attente ou une pause est passée et la boucle où il se trouve est quittée. Un seul par Tab.",
  "Made by Skynet from the Label and the Tab (Rule 3.14).": "Fait par Skynet à partir du Label et du Tab (Règle 3.14).",
  "The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.": "La couleur de ses mots. Le ⬢ à côté règle la police, la taille, la Back color et l'alignement.",
  "Button look": "Button look",
@@ -837,7 +836,6 @@
  "Rich Text Embedded Codes work in the Text and the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color ... (Help > Rich Text Embedded Code)": "Les Rich Text Embedded Codes marchent dans le Text et le Label : \\b gras, \\i italique, \\n nouvelle ligne, \\c{Red} couleur ... (Help > Rich Text Embedded Code)",
  "A Timer Widget counts up or down in hh:mm:ss. Its Name is how a Process uses it: name.attribute = Something.": "Un Timer Widget compte vers le haut ou vers le bas en hh:mm:ss. Son Name est la façon dont un Process l'utilise : name.attribute = Something.",
  "The title bar; never blank.": "La barre de titre ; jamais vide.",
- "One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.": "Une pression et chaque Process en cours avance : une attente (wait ou sleep) est passée et la boucle où elle se trouve est quittée. Un seul par Tab.",
  "What the button says on this Tab.": "Ce que dit le bouton sur ce Tab.",
  "Element or burner output; glows when on.": "Sortie d'élément ou de brûleur ; brille quand elle est allumée.",
  "No drag or resize; X and Y still move it.": "Pas de glisser ni de redimensionner ; X et Y le déplacent encore.",
@@ -1563,5 +1561,12 @@
  "The Tab Profile a new Tab starts with: its background color, the look a new Device or Widget on it starts with, how many pixels its Pipes and Hoses are drawn, and its Width and Height. They are copied onto the new Tab once; the Tab keeps no link to the profile (Rule 2.62). (none): Skynet's own (10, 6 and the size of the screen).": "Le Tab Profile avec lequel commence un nouveau Tab : sa couleur de fond, l'aspect de départ d'un nouveau Device ou Widget placé dessus, combien de pixels font ses tuyaux (Pipes) et tuyaux souples (Hoses), et sa largeur (Width) et sa hauteur (Height). Ils sont copiés une fois sur le nouveau Tab ; le Tab ne garde aucun lien avec le profile (Rule 2.62). (none) : ceux de Skynet (10, 6 et la taille de l'écran).",
  "Copy this Tab Profile's color and look onto this Tab, now. Nothing stays linked.": "Copier maintenant la couleur et l'aspect de ce Tab Profile sur ce Tab. Rien ne reste lié.",
  "SV: the Setpoint. One click to type a new one, then Enter (Esc puts it back).": "SV : la consigne. Un clic pour en taper une nouvelle, puis Entrée (Échap la remet comme avant).",
- "Duty cycle %. One click to type a new one, then Enter (0 turns it Off, above 0 turns it On).": "Duty cycle %. Un clic pour en taper un nouveau, puis Entrée (0 l'éteint, au-dessus de 0 l'allume)."
+ "Duty cycle %. One click to type a new one, then Enter (0 turns it Off, above 0 turns it On).": "Duty cycle %. Un clic pour en taper un nouveau, puis Entrée (0 l'éteint, au-dessus de 0 l'allume).",
+ "Override: {0} moves on past the wait, sleep or loop that holds it": "Override : {0} avance au-delà du wait, du sleep ou de la boucle qui le retient",
+ "Override: every running Process (Any) moves on past the wait, sleep or loop that holds it": "Override : chaque Process qui tourne (Any) avance au-delà du wait, du sleep ou de la boucle qui le retient",
+ "One press: {0} moves on past the wait or sleep that holds it. Only this Process moves on.": "Un appui : {0} avance au-delà du wait ou du sleep qui le retient. Seul ce Process avance.",
+ "Hide it on this screen. It pops up again next time this Process waits.": "La cacher sur cet écran. Elle revient la prochaine fois que ce Process attend.",
+ "One press and its Process (or Any: every running Process) moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.": "Un appui et son Process (ou Any : chaque Process qui tourne) avance : un wait ou un sleep est passé et la boucle où il se trouve est quittée. Un Tab peut en avoir autant que vous voulez.",
+ "What the button says on this Tab, for example Skip Fire Hose. One press and its Process moves on: a wait or sleep is passed and the loop it sits in is left. A Tab may have as many as you like.": "Ce que dit le bouton sur ce Tab, par exemple Skip Fire Hose. Un appui et son Process avance : un wait ou un sleep est passé et la boucle où il se trouve est quittée. Un Tab peut en avoir autant que vous voulez.",
+ "Which Process this button moves on. Any (the usual): every running Process except Loopers. A Process picked: only that one, so a Fire Hose or Manifold Process running beside the Brew is overridden on its own. A Process that waits with no button set to it (or to Any) gets an Override pop-up naming it. If the Process gets a new name, the button follows it.": "Le Process que ce bouton fait avancer. Any (l'habituel) : chaque Process qui tourne sauf les Loopers. Un Process choisi : seulement celui-là, donc un Process Fire Hose ou Manifold qui tourne à côté du brassage est forcé tout seul. Un Process qui attend sans bouton réglé sur lui (ni sur Any) reçoit une fenêtre Override qui le nomme. Si le Process change de nom, le bouton le suit."
 }

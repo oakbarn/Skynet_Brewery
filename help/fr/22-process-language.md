@@ -184,7 +184,7 @@ Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être 
 - **Valeurs :** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Mots de liaison :** `and`, `or`, `not`
 - **Types de variable :** `value`, `string`, `bool`, `time`, `datetime`
-- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`
+- **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Lieux :** `tab`, `workspace`
 - **Skynet Constants :** chaque nom qui commence par `skc_` (voir plus haut)
 
@@ -264,3 +264,17 @@ unlock_Equipment
 ```
 
 La sortie du Process dit quels Tabs ont été verrouillés. L'interrupteur 🔒 Locked sur la ligne d'un Tab de ☰ Menu > Equipment Profile fait la même chose pour un seul Tab. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles). Un `lock_BrewDayRecipe` assorti vient avec la Brew Day Recipe.
+
+## La fenêtre Override : show_Override {#the-override-pop-up-show-override}
+
+Un Process peut faire apparaître sa propre **fenêtre Override** : un bouton Override de Skynet, par-dessus tout, qui nomme ce Process. Un appui fait avancer seulement ce Process, au-delà du wait ou du sleep qui le retient (et hors de la boucle où il se trouve), comme un bouton Override réglé sur lui. Voir [Bouton Override](96-override-button).
+
+```
+show_Override "Press when the boil is rolling"
+wait Kettle_Temp >= skn_Boil_Temp
+hide_Override
+```
+
+- `show_Override` la fait apparaître ; le texte après est facultatif et s'affiche à côté du nom du Process.
+- Elle reste jusqu'à ce qu'on appuie dessus, jusqu'à `hide_Override`, ou jusqu'à la fin du Process.
+- Un `wait` ou un `sleep` simple (pas dans une boucle) reçoit la fenêtre tout seul après 3 secondes quand aucun bouton Override n'est réglé sur ce Process ni sur Any. Un wait **dans une boucle** (un `goto` plus bas revient au-dessus, par exemple un `if` imbriqué qui attend une vanne ou un élément chauffant) n'apparaît jamais tout seul : ajoutez `show_Override` seulement là où avancer est sans danger.

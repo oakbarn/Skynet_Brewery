@@ -659,11 +659,29 @@ clean window (Rule 2.36) closes; every other page shows "Skynet Brewer is closed
 Brain run as a service (Pi) get **Put the Brain in Standby** instead (Rule 6.32). Closing a browser tab or the panel window never
 stops the Brain. (2026-10-30, thread "Close the command window on exit"; 2026-11-14, thread "Run the Brain in the Background on a PC")
 
-2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
-with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
-next wait runs as normal. **Only one Override button on a Tab**; it can be on several Tabs, each with its own Label (default
-"Override") and look. A user changes only the Label and its style (font, size, bold, fore, back, alignment), **never a background
-picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 96)
+2.26 **The Override button** (Fritz, 2026-10-30; Process setting, any number and the pop-up OakBarn Brewery, 2026-11-19): one press
+lets **its Process** move on, like the Simulator's skip with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it
+sits in (a goto back up, often in an if) is left; the next wait runs as normal. Manual valves still wait for their click or Done.
+- **Processes run side by side and on their own** (OakBarn Brewery, 2026-11-19: "In BruControl I could call the Fire Hose and Manifold
+  Scripts at any time and they ran concurrent with a different script. Totally independent. I had 3 Advance or Override Switches."):
+  every Override button has its **Label** ("an Overide Button needs a Label attribute regarless") and a **Process** setting: **Any**
+  (every running Process; Looper Processes are left alone) or **one Process** by name (only that one moves on, a Looper too when it is
+  the one picked). A rename of the Process is followed (Rule 1.31's way).
+- **Any number of Override buttons on a Tab, and any number for one Process** (OakBarn Brewery, 2026-11-19: "Actually a Process could
+  have more than one anytime."; "Yes more than one per tab and no Process restriction"). A user changes the Label, the Process and the
+  style (font, size, bold, fore, back, alignment), **never a background picture**.
+- **The Override pop-up** ("having it pop up as a skynet widget on demand (Process code or see a wait or loop with and exit and pop up
+  automatically ... a wait for a Time is and easy decision. Over Ride 100% of the time."): a Skynet Override button on top (Rule 18.53)
+  that names its Process; one press moves only that Process on; ✕ hides it on that screen until it comes again.
+  - **By itself** when a Process has been held 3 seconds in a `wait` or `sleep` and **no Override button is set to it or to Any**. A
+    wait for a temperature counts ("it could work for Tempeatures Like a Boil where the User might see it is boiling before it hits
+    the daily Boil Temp and he could override a Wait").
+  - **Never by itself inside a loop** ("a nested if could be issue if waiting for a valve or heater to do something"): a wait or sleep
+    that a goto or goLine further down jumps back above gets no pop-up by itself.
+  - **On demand**: `show_Override` (optional text after it) in a Process brings it up, `hide_Override` takes it away; it also goes
+    when it is pressed or the Process ends.
+*Replaced (2026-11-19):* "one press lets every running Process move on" and "Only one Override button on a Tab".
+(thread "Add an Override button", thread "Let Override target the right Process", Help 96, Help 22)
 
 2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
 postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
@@ -6671,3 +6689,4 @@ import.
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
