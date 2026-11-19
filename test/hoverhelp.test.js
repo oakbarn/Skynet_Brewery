@@ -77,6 +77,10 @@ console.log('hoverhelp ok');
   const img = n.find(x => x.tag === 'img');
   if (!img || img.src !== '/media?path=' + encodeURIComponent('help_pictures/Red_Pump_Label.png')) throw new Error('picture');
   if (n.some(x => x.tag === '#text' && /^\n|\n$/.test(x.textContent) && n[n.indexOf(x) + 1]?.tag === 'img')) throw new Error('no empty line beside a picture');
+  // ⟪imgw:⟫ a whole-screen picture, as wide as the balloon (Panel Updates entry 15, the Tab size pictures)
+  const w = hn('Fits:⟪imgw:help_pictures/Tab_1600x900_on_1920x1040_Screen.png⟫Too big:⟪img:help_pictures/Red_Pump_Label.png⟫', doc).filter(x => x.tag === 'img');
+  if (w.length !== 2 || w[0].className !== 'hhPic hhPicWide' || w[1].className !== 'hhPic') throw new Error('wide picture');
+  if (w[0].src !== '/media?path=' + encodeURIComponent('help_pictures/Tab_1600x900_on_1920x1040_Screen.png')) throw new Error('wide picture path');
   console.log('hover help pictures ok');
 }
 // hot spots (Rule 2.49, OakBarn Brewery 2026-11-11): words with their own Help page are links, longer words first, once per topic

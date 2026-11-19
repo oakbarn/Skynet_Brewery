@@ -113,17 +113,18 @@ export function helpNodes(text, doc = globalThis.document) {
     return out;
   }
   // ⟪img:path⟫ is a picture (a path in a media folder, as in Help) and ⟪b:words⟫ a heading in bold (OakBarn Brewery, 2026-11-10: the
-  // Pump Label's balloon has its pictures, the same as the Help page)
-  const pics = String(text ?? '').split(/⟪(img|b):([^⟫]*)⟫/);
+  // Pump Label's balloon has its pictures, the same as the Help page). ⟪imgw:path⟫ is a wide picture, a whole screen, drawn as wide as
+  // the balloon instead of at most 240 px (Panel Updates entry 15, 2026-11-19: the Tab size pictures, where 240 px hides the scroll bars)
+  const pics = String(text ?? '').split(/⟪(imgw|img|b):([^⟫]*)⟫/);
   if (pics.length > 1) {
     for (let i = 0; i < pics.length; i += 3) {
       let t = pics[i] ?? '';
-      if (i > 0 && pics[i - 2] === 'img') t = t.replace(/^\n+/, '');      // a picture is its own block: no empty line beside it
-      if (pics[i + 1] === 'img') t = t.replace(/\n+$/, '');
+      if (i > 0 && pics[i - 2]?.startsWith('img')) t = t.replace(/^\n+/, '');      // a picture is its own block: no empty line beside it
+      if (pics[i + 1]?.startsWith('img')) t = t.replace(/\n+$/, '');
       if (t) out.push(...helpNodes(t, doc));
       if (i + 2 >= pics.length) break;
       if (pics[i + 1] === 'b') { const b = doc.createElement('b'); b.className = 'hhHead'; b.textContent = pics[i + 2]; out.push(b); continue; }
-      const im = doc.createElement('img'); im.className = 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]); out.push(im);
+      const im = doc.createElement('img'); im.className = pics[i + 1] === 'imgw' ? 'hhPic hhPicWide' : 'hhPic'; im.alt = ''; im.src = '/media?path=' + encodeURIComponent(pics[i + 2]); out.push(im);
     }
     return out;
   }
@@ -278,7 +279,7 @@ function start(doc = globalThis.document) {
   const show = el => {
     const text = balloonText(helpOf(el)); if (!text || !el.isConnected) return;
     tip.replaceChildren(...helpNodes(text, doc));
-    tip.classList.toggle('hhWide', text.includes('⟪img:'));      // a balloon with pictures is wider, so it fits on the screen
+    tip.classList.toggle('hhWide', /⟪imgw?:/.test(text));      // a balloon with pictures is wider, so it fits on the screen
     tip.classList.toggle('hhHasLinks', linkify(tip, doc) > 0);      // hot spots: the mouse may go into the balloon to click one
     // inside an open dialog it stays a part of it, so its links can be clicked over a dialog that blocks the rest of the page
     (el.closest('dialog[open]') || doc.body).append(tip);

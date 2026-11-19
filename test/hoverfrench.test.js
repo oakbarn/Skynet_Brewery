@@ -73,7 +73,7 @@ for (const [e, f] of Object.entries(fr)) {
   const why = [];
   if (all(e, /\{\d\}/g) !== all(f, /\{\d\}/g)) why.push('{0} {1}…');
   if (all(e, /[⬢⬆⟦⟧]/g) !== all(f, /[⬢⬆⟦⟧]/g)) why.push('⬢ ⬆ ⟦ ⟧');
-  if (all(e, /⟪img:[^⟫]*⟫/g) !== all(f, /⟪img:[^⟫]*⟫/g)) why.push('pictures');
+  if (all(e, /⟪imgw?:[^⟫]*⟫/g) !== all(f, /⟪imgw?:[^⟫]*⟫/g)) why.push('pictures');
   if (all(e, /⟪b:/g) !== all(f, /⟪b:/g)) why.push('headings');
   if (e.split('\n').filter(l => l.startsWith('⚠')).length !== f.split('\n').filter(l => l.startsWith('⚠')).length) why.push('warning lines');
   if (e.includes(WARN_EN) && !f.includes(WARN_FR)) why.push('the French electrical warning');
