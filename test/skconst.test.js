@@ -57,4 +57,5 @@ const picks = suggest('gGV_N = 2 * Kg', { elements: [] }).list.map(p => p.text);
 assert.ok(picks.includes('skc_Kg_To_Lb') && picks.includes('skc_Lb_To_Kg'), 'typing a unit finds its constants');
 assert.ok(!suggest('skc', { elements: [] }), 'never at the start of a line');
 console.log('skconst tests passed');
-process.exit(0);
+// the Skynet internal Globals (skn_Boil_Temp ...) run from here, so the npm test list is unchanged (no conflict with open PRs)
+await import('./boiltemp.test.js');

@@ -72,7 +72,7 @@ All three are on USB. No Ethernet or WiFi Interfaces are in use.
 | 8 | **Imported network Interfaces keep BruControl's TCP port** (5000 in Fritz's file). | A network board with Skynet firmware listens on 4100, so it would not connect. | The importer sets 4100 (an Importing Norm). | No |
 | 9 | **UniShield / UniFlex terminal names.** | A UniShield owner reads terminal names (like 2:3D), not pin numbers. | A UniShield board profile that shows the terminal next to the pin. | No |
 | 10 | **Where Duty Cycle, Hysteresis and PID run.** BruControl runs them on the board itself ("offloaded to interfaces for speed and communication failure tolerance", BruControl manual p. 5). Skynet runs them on the Brain and switches the pin with `DO` lines. | Same result while the link is up. If the link drops, BruControl's board keeps controlling; Skynet's board turns everything off after the lost link delay (safer, Rule 6.3). | Fritz's call: keep it on the Brain (as now), or move them into the board firmware. | Only if moved |
-| 11 | **No Deadband control Device.** BruControl offers Deadband on D and P ports. | A BruControl Schema with a Deadband port can't be brought over as is. | Add a Deadband control Device (Brain side, like Hysteresis). | No |
+| 11 | ~~No Deadband control Device.~~ **Closed:** Deadband is a Heating Element Method (Rule 6.19), run on the Brain like Hysteresis. | A BruControl Deadband port comes in with its Deadband settings (Deadband offset, Inner band, Drives). | Nothing more. | No |
 
 Already the same as BruControl, nothing to do:
 
@@ -114,8 +114,8 @@ In Fritz's file the Mega's 4 PWM ports are on pins 5, 7, 8 and 9 (all real PWM p
 and PID ports are on 2, 5, 7 and 8.
 
 Skynet already does the same split: true PWM (`PWM` lines) on real PWM pins only, and Duty Cycle, Hysteresis and
-PID-without-PWM as slow on / off switching of any output pin, timed by the Brain (gap 10). Skynet has no **Deadband**
-control yet; a BruControl Deadband port needs one (gap 11). The Grand Central board profile must use its own PWM and
+PID-without-PWM as slow on / off switching of any output pin, timed by the Brain (gap 10). **Deadband** is a
+Heating Element Method, run on the Brain the same way (gap 11, closed). The Grand Central board profile must use its own PWM and
 analog numbering from this table (gap 2).
 
 ## What Skynet will not do

@@ -719,6 +719,8 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .eqCalc { flex: 1 1 280px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
 .eqRow { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--line); }
 .eqWarn { color: var(--warn); margin-top: 6px; }
+/* Settings > Boil temperature: the one warning when the airport's report is not used */
+.btWarn { color: var(--warn); }
 .eqPane { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 10px 0; overflow-x: auto; }
 .eqPane td button { margin: 2px; }
 @media (max-width: 700px) {

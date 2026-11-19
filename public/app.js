@@ -386,6 +386,7 @@ function connect() {
   es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
   es.addEventListener('standby', e => showStandby(JSON.parse(e.data)));      // an Admin put the Brain in Standby (Rule 6.32)
   es.addEventListener('waking', () => { const m = $('.standbyPage .muted'); if (m) m.textContent = 'An Admin is starting the Brain ... this page comes back by itself.'; waitForBrain(); });
+  es.addEventListener('boil', e => renderBoilTemp(JSON.parse(e.data)));
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -402,7 +403,7 @@ function setView(v, here = false) {
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => api('GET', '/ui/boiltemp')).then(renderBoilTemp).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
@@ -14248,6 +14249,43 @@ $('#msTest').onclick = guard(async () => {
   try { const r = await api('POST', '/auth/messaging/test'); $('#msResult').textContent = 'Sent: ' + r.sent.join(', '); }
   catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
 });
+
+// Settings > Boil temperature (Panel Updates entry 16, Rules 1.18 and 2.27): the airport's ICAO code is the only way to pick the
+// weather station. Data is metric (metres, hPa); US Units show feet and inHg.
+const BT_FT = 0.3048, BT_INHG = 33.8638866667;
+const btUS = () => showUnits() !== 'Metric';
+const btTemp = st => btUS() ? `${round1(st.boilC * 9 / 5 + 32)} °F` : `${round1(st.boilC)} °C`;
+const btPressure = hpa => btUS() ? `${(hpa / BT_INHG).toFixed(2)} inHg` : `${round1(hpa)} hPa`;
+function round1(v) { return Math.round(v * 10) / 10; }
+function btLine(st) {
+  if (!st) return '';
+  const src = st.source === 'airport' ? `from ${st.station?.id ?? ''}${st.station?.name ? ' (' + st.station.name + ')' : ''}${st.station?.obs ? ', reported ' + new Date(st.station.obs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}`
+    : st.source === 'typed' ? 'typed in Settings' : 'standard air';
+  return `Water boils at ${btTemp(st)} here now. Air pressure ${btPressure(st.hpa)}, ${src}.${st.note ? ' ⚠ ' + st.note : ''}`;
+}
+let btShown = null;      // the Elevation as shown, so an unchanged box keeps the exact metres
+function renderBoilTemp(st) {
+  if (!st) return;
+  S.boil = st;
+  const set = st.settings ?? {}, us = btUS();
+  $('#btElevUnit').textContent = us ? 'ft' : 'm';
+  $('#btPressUnit').textContent = us ? 'inHg' : 'hPa';
+  if (document.activeElement?.closest?.('#btSave, #btTest, #btAirport, #btElev, #btPress') == null) {
+    $('#btAirport').value = set.airport ?? '';
+    $('#btElev').value = set.elevationM == null ? '' : Math.round(us ? set.elevationM / BT_FT : set.elevationM);
+    $('#btPress').value = set.pressureHpa == null ? '' : (us ? (set.pressureHpa / BT_INHG).toFixed(2) : round1(set.pressureHpa));
+    btShown = { elev: $('#btElev').value, elevM: set.elevationM };
+  }
+  const r = $('#btResult'); r.textContent = btLine(st); r.className = st.note ? 'btWarn' : 'muted';
+}
+async function saveBoilTemp() {
+  const us = btUS(), e = $('#btElev').value.trim(), p = $('#btPress').value.trim();
+  const elevationM = e === '' ? null : btShown && e === btShown.elev ? btShown.elevM : (us ? +e * BT_FT : +e);
+  const pressureHpa = p === '' ? null : (us ? +p * BT_INHG : +p);
+  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressureHpa });
+}
+$('#btSave').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; renderBoilTemp(await saveBoilTemp()); savedPop('Boil temperature saved'); });
+$('#btTest').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; await saveBoilTemp(); renderBoilTemp(await api('POST', '/ui/boiltemp/test')); });
 
 $('#setWarnPaths').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
