@@ -23,7 +23,7 @@ le second Port : ON ouvre la vanne, OFF la ferme.
 4. Tapez le **Dual Throw delay** en millisecondes (1000 = 1 seconde). Vide veut dire 0, les deux basculent en même temps, celui qui s'arrête en premier.
 
 Le second Port appartient maintenant à ce Device : aucun autre Device ne peut l'utiliser (un port d'Interface, un Device, Règle 6.1).
-**Invert** (broche LOW = en marche) inverse les deux Ports.
+**Invert** (il échange On et Off sur le Port) inverse les deux Ports.
 
 ## Bon à savoir {#good-to-know}
 

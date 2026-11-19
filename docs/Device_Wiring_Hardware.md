@@ -86,7 +86,7 @@ with very little current, so it works from every [Interface](#interface). It is 
 | Off is | Truly Off | A tiny leak (a meter can show voltage at the outlet: still unplug before touching) |
 | Heat | None | A little; a Heat Sink above about 5 AMPS (a pump does not need one) |
 | Noise and wear | Clicks; contacts wear slowly | Silent; no wear |
-| Watch for | Many boards are **On when the pin is LOW**: set **Invert** On in the Pin attributes ⬢ | Fake brand SSRs: buy a known brand |
+| Watch for | Many boards are **On when the pin is LOW**: the Skynet board program already drives On = LOW, so leave **Invert** Off (set it only for a board that switches On with HIGH) | Fake brand SSRs: buy a known brand |
 
 Either way the Pump Device in Skynet is the same (`DO@Pump`); only the part in the box changes.
 
@@ -805,7 +805,7 @@ Each part with its Term, what it does in plain words, what Skynet needs, and sug
 
 ### Relay Module
 - **What it does:** A small board with one or more relays (a switch moved by a magnet). The board's pin turns the magnet on and the switch clicks closed.
-- **What Skynet needs:** **Coil:** 5 V boards for a Mega; for an ESP32 or Pi pick a board sold as **3.3 V trigger** or **High/Low trigger**. **Opto-isolated** is best. **Contacts:** 10 A at 250 V AC. Many are **On when the pin is LOW**: set **Invert** On in the Pin attributes ⬢.
+- **What Skynet needs:** **Coil:** 5 V boards for a Mega; for an ESP32 or Pi pick a board sold as **3.3 V trigger** or **High/Low trigger**. **Opto-isolated** is best. **Contacts:** 10 A at 250 V AC. Many are **On when the pin is LOW**: that is how the Skynet board program already drives every Port (On = LOW), so leave **Invert** Off. Only a board that switches On with HIGH needs **Invert** On in the Pin attributes ⬢.
 - **Suggested parts:** 1, 2, 4 or 8 channel 5 V opto-isolated relay modules (SRD-05VDC type relays); DIN-rail relay modules
 - **Where to buy:** *(link coming)* Search Amazon for "8 channel 5V relay module opto isolated".
 - **In the Skynet Help:** [Glossary: Relay Module](../help/13-glossary.md#relay-module)

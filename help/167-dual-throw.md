@@ -23,7 +23,7 @@ the second Port: ON opens the valve, OFF closes it.
 4. Type the **Dual Throw delay** in milliseconds (1000 = 1 second). Empty means 0, both switch at once, the one going off first.
 
 The second Port now belongs to this Device: no other Device can use it (One Interface Port, one Device, Rule 6.1).
-**Invert** (pin LOW = on) inverts both Ports.
+**Invert** (it swaps On and Off at the Port) inverts both Ports.
 
 ## Good to know
 

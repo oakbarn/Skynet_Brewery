@@ -486,7 +486,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 ### Relay Module {#relay-module}
 
 - **Ce qu'il fait :** une petite carte avec un ou plusieurs relais (un interrupteur actionné par un aimant). La broche de la carte allume l'aimant et le contact se ferme avec un clic.
-- **Ce dont Skynet a besoin :** **Bobine :** cartes 5 V pour une Mega ; pour un ESP32 ou un Pi, prenez une carte vendue comme **3.3 V trigger** ou **High/Low trigger**. **Opto-isolée** est le mieux. **Contacts :** 10 A sous 250 V alternatif. Beaucoup sont **On quand la broche est BASSE** : mettez **Invert** sur On dans les attributs de broche ⬢.
+- **Ce dont Skynet a besoin :** **Bobine :** cartes 5 V pour une Mega ; pour un ESP32 ou un Pi, prenez une carte vendue comme **3.3 V trigger** ou **High/Low trigger**. **Opto-isolée** est le mieux. **Contacts :** 10 A sous 250 V alternatif. Beaucoup sont **On quand la broche est BASSE** : c'est déjà ainsi que le programme de la carte Skynet pilote chaque Port (On = LOW), donc laissez **Invert** sur Off. Seule une carte qui s'allume avec HIGH demande **Invert** sur On dans les attributs de broche ⬢.
 - **Pièces suggérées :** modules relais 5 V opto-isolés de 1, 2, 4 ou 8 canaux (relais de type SRD-05VDC) ; modules relais sur rail DIN
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "8 channel 5V relay module opto isolated".
 
