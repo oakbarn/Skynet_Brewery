@@ -4,7 +4,7 @@ All three are Menu tabs (**☰ Menu**): Tab Profile, Valve Profile and Pump Prof
 
 ## Tab Profile
 
-A Tab Profile gives a tab its **background color**, and the **look** a new device or widget on that tab starts with:
+A Tab Profile is copied onto a tab: its **background color**, and the **look** a new device or widget on that tab starts with:
 
 - **Name**: text color, background color and placement (TopLeft ... BottomRight).
 - **Value**: text color, background color and placement.
@@ -17,12 +17,13 @@ Something with an ON / OFF state (a pump, valve, switch) can only be an LED or T
 
 **The look is copied only when the device or widget is made.** After that, change it in its properties (in Edit layout), or from a Process (for example `Pump_1.valueColor = "Red"`, see [The Process language](22-process-language)). Changing the profile later does not change what is already on the tab.
 
-### Give a tab its profile
+### Copy a profile onto a tab
 
-- On the **Tab Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Pick the profile for each one.
-- Or in Edit layout, open **⚙ Tab Settings** and pick it under **Background > Profile**.
+- On the **Tab Profile** Menu tab, the table at the bottom lists the loaded Schema's tabs. Press **Copy onto it** on a tab's row.
+- Or in Edit layout, open **⚙ Tab Settings**, pick it under **Background > Copy Profile** and Save.
+- A new tab gets a copy of the **Tab Profile for a new tab** (see below).
 
-A tab with its own **Background > Color** in Tab Settings keeps that color. Set it to **Default** to use the profile's color.
+The profile's background color goes into the tab's own **Background > Color**, and its look is kept on the tab for the next new device or widget. **It is a copy, not a link** (Skynet Rule 2.62): changing or deleting a Tab Profile later never changes a tab. To give a tab the changed profile, copy it onto the tab again.
 
 ### New Tabs
 

@@ -4,7 +4,7 @@ Les trois sont des onglets de menu (**☰ Menu**) : Tab Profile, Valve Profile e
 
 ## Tab Profile
 
-Un Tab Profile donne à un Tab sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
+Un Tab Profile est copié sur un Tab : sa **couleur de fond**, et l'**apparence** avec laquelle commence un nouveau Device ou Widget sur ce Tab :
 
 - **Name** (nom) : couleur du texte, couleur de fond et placement (TopLeft ... BottomRight).
 - **Value** (valeur) : couleur du texte, couleur de fond et placement.
@@ -17,12 +17,13 @@ Ce qui a un état ON / OFF (une pompe, une vanne, un interrupteur) ne peut être
 
 **L'apparence n'est copiée qu'au moment où le Device ou le Widget est créé.** Ensuite, changez-la dans ses propriétés (dans Edit layout), ou depuis un Process (par exemple `Pump_1.valueColor = "Red"`, voir [Le langage des Processes et les étapes](22-process-language)). Changer le profil plus tard ne change pas ce qui est déjà sur le Tab.
 
-### Donner son profil à un Tab {#give-a-tab-its-profile}
+### Copier un profil sur un Tab {#copy-a-profile-onto-a-tab}
 
-- Sur l'onglet de menu **Tab Profile**, le tableau du bas liste les Tabs du Schema chargé. Choisissez le profil de chacun.
-- Ou dans Edit layout, ouvrez **⚙ Tab Settings** et choisissez-le sous **Background > Profile**.
+- Sur l'onglet de menu **Tab Profile**, le tableau du bas liste les Tabs du Schema chargé. Appuyez sur **Copy onto it** sur la ligne d'un Tab.
+- Ou dans Edit layout, ouvrez **⚙ Tab Settings**, choisissez-le sous **Background > Copy Profile** et faites Save.
+- Un nouveau Tab reçoit une copie du **Tab Profile for a new tab** (voir plus bas).
 
-Un Tab qui a sa propre **Background > Color** dans Tab Settings garde cette couleur. Mettez-la sur **Default** pour utiliser la couleur du profil.
+La couleur de fond du profil va dans la **Background > Color** du Tab lui-même, et son apparence est gardée sur le Tab pour le prochain nouveau Device ou Widget. **C'est une copie, pas un lien** (Règle Skynet 2.62) : changer ou supprimer un Tab Profile plus tard ne change jamais un Tab. Pour donner à un Tab le profil changé, copiez-le de nouveau sur le Tab.
 
 ### New Tabs
 

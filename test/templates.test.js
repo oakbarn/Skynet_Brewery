@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Templates } from '../lib/templates.js';
-import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd, isCapOnly, cleanDevice, applyDeviceTemplate, deviceFixed } from '../public/templates.js';
+import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd, isCapOnly, cleanDevice, applyDeviceTemplate, deviceFixed, keepDeviceFixed } from '../public/templates.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'templates-'));
@@ -195,6 +195,24 @@ console.log('templates ok');
   assert.equal(applyDeviceTemplate({ tapwater: false, tapSource: 'in', tapwaterOut: 'in' }, H).tapwaterOut, undefined);
   // a Template can't make a fixed attribute user settable
   assert.ok(!cleanDevice({ userFields: ['service', 'flipH'] }).userFields.includes('service'));
+  // Rule 2.62: copied from the Template once (placed, or another Orientation picked); after that a save keeps the valve's own fixed
+  // attributes, and a changed Template never changes it
+  const placed = keepDeviceFixed({ name: 'V2', template: H.name, templateCls: 'skynet', orientation: 'h' }, null, H);
+  assert.equal(placed.service, 'room'); assert.ok(placed.tplFixed.includes('service'), 'placed: copied, with its list of fixed attributes');
+  const newer = { ...H, props: { ...H.props, service: 'gas' }, pics: { h: ['', 'new.svg'], v: ['', 'newv.svg'] } };
+  const kept = keepDeviceFixed({ ...placed, service: 'hot', imageOff: 'mine.svg', w: 60 }, placed, newer);
+  assert.equal(kept.service, 'room', 'a screen can\'t change a fixed attribute (Rule 5.16)'); assert.equal(kept.imageOff, placed.imageOff, 'nor its picture');
+  assert.equal(kept.w, 60, 'a user field is the user\'s');
+  const turned = keepDeviceFixed({ ...placed, orientation: 'v' }, placed, newer);
+  assert.equal(turned.imageOff, 'newv.svg', 'another Orientation picked: that picture is copied then');
+  assert.equal(keepDeviceFixed({ ...placed }, placed, null).service, 'room', 'no Template needed after it is placed');
+  // Rule 2.62 #10: which rows its Properties show is the valve's own copy too
+  assert.deepEqual(placed.tplUser, H.userFields || [], 'placed: its Properties rows copied');
+  const fewer = { ...newer, userFields: [] };
+  assert.deepEqual(keepDeviceFixed({ ...placed, tplUser: ['service'] }, placed, fewer).tplUser, placed.tplUser, 'a changed Template, or a screen, never changes its rows');
+  const before = { ...placed }; delete before.tplUser;
+  assert.deepEqual(keepDeviceFixed({ ...before }, before, H).tplUser, H.userFields || [], 'saved before: copied once');
+  assert.equal(keepDeviceFixed({ ...before }, before, null).tplUser, undefined, 'saved before, no Template: nothing made up');
 }
 
 // One entry per Skynet valve (Fritz, 2026-11-03): the words Master and Daughter are never shown. Each Template's title is

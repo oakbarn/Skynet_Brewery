@@ -172,7 +172,7 @@ const MENU_TOPICS = {
   boil: { _: ['mash-and-boil-profiles', 'boil-profile'] },
   recipe: { 'Hop order': ['recipe-tab', 'hop-schedule-and-alerts'], Alerts: ['recipe-tab', 'hop-schedule-and-alerts'], 'Hop alerts': ['recipe-tab', 'hop-schedule-and-alerts'], _: ['recipe-tab'] },
   water: { _: ['recipe-tab', 'water-profile'] },
-  tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-profile'] },
+  tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'copy-a-profile-onto-a-tab'], _: ['tab-and-valve-profiles', 'tab-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   pump: { _: ['tab-and-valve-profiles', 'pump-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },

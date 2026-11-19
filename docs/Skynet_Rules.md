@@ -809,7 +809,7 @@ colors. **This is a change from BruControl** (Fritz: "Again a Change from BruCon
    **Schema**. Every browser shows it, and the sign-in and Help pages start in it.
 3. **A new Tab** starts with the Look's Tab colors: a back color and the Look's Skynet Tab Style (Skynet Office Black, Skynet Dark
    Gray, Skynet White) for its Label and text colors (Fritz: "add some defaults for any new tab Built"). A Tab Style picked on
-   ☰ Menu > Default tab, and a Tab Background Profile's color, win.
+   ☰ Menu > Default tab, and the color of the Tab Profile picked for a new Tab (copied onto it, Rule 2.62 #9), win.
 4. **Use this Look on every Tab** gives every Tab of the Schema the Look's back color and Tab Style; first it keeps each Tab's
    colors, so **Put the Tabs back** restores them (Fritz: "a means to force all tabs in a Schema to the defaults but a way to
    restore if the user did not like the new forced look"). Only the last one can be put back. Pictures and items stay as they are.
@@ -1186,6 +1186,22 @@ else associated with a Tab or any of its chilcren (Pumps, Valves....)").
      lock only keeps that profile from being changed.
   6. A Schema saved before this change loses its link when it is loaded: a Tab that showed its profile's drawing keeps a copy of it, and
      takes a copy of the profile's numbers. Nothing on a Tab is lost (Design Rule 1).
+  7. **Skynet valves and other User versions of a Skynet Device Template** (Rule 5.16) get a copy of the Template's fixed attributes
+     and pictures when placed, with the list of which ones are fixed. A save keeps the valve's own (a screen still can't change them),
+     so a newer or changed Template never changes it. Picking another **Orientation** is the user choosing another Template of the
+     set, so that one's picture is copied then. Which Properties rows it shows is its own copy too (#10).
+  8. **Pipe fittings** keep their own copy of their Template's bend, body thickness, size, upright and openings (`fit`), made the
+     first time Skynet sees the fitting. A Skynet fitting no longer takes its Template's new picture, openings and shape when Edit
+     layout opens (that was Rules 5.6 and 15.2 for fittings placed before 2026-11-02; Rule 2.62 wins).
+  9. **Tab Profiles are copied too** (OakBarn Brewery, 2026-11-19: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile picked
+     for a new Tab (Default settings > Tab Profile for a new tab), with **Copy Profile** in Tab Settings, or with **Copy onto it** on
+     ☰ Menu > Tab Profile copies its background color into the Tab's own **Color** and its look (name and value colors, alignment,
+     value style) into the Tab's own copy, which a new Device or Widget on that Tab starts with. The Tab never names the profile:
+     changing or deleting a Tab Profile changes no Tab. A Tab saved before keeps what it showed (its own Color, else the profile's)
+     and its link goes when the Schema is loaded.
+  10. **A Skynet valve's Properties rows** (which attributes a user can set, Rule 5.16) are copied onto the valve when placed, with
+     its fixed attributes. A Template changed later never adds or takes away a row on a valve already placed. A valve saved before
+     gets its copy once, the first time it is saved after this change.
 **Both programs:** the BruControl Import makes no Equipment Profiles; its import onto a Tab that is locked by lock_Equipment is stopped
 with the same message. Help 28 and 188.
 
@@ -1699,7 +1715,10 @@ Only some attributes are user settable, and only those show in its Properties; t
 not shown. **Which ones depends on the Widget or Device type**: each type has its own list, set per
 Template (a "user can set" tick box on each attribute, Rule 5.18). A user's own Devices and Widgets (not
 made from a Skynet Template) keep the normal Properties. The Brain enforces it: a fixed attribute sent by
-any screen is put back to the Template's value. (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+any screen is put back to the Template's value. (2026-10-28, thread "Lock Skynet Widget Templates and IPs") *Changed 2026-11-19
+(Rule 2.62):* the User version gets a copy when placed, and a fixed attribute sent is put back to the item's own saved value, not
+the Template's: a changed Template never changes an item already on a Tab. Which attributes it lets the user set (its Properties
+rows) is copied onto it too (Rule 2.62 #10).
 
 5.17 **Master and Daughter Templates.** A Master Template can have Daughter Templates for common
 orientations; a Daughter inherits everything from its Master and sets only its orientation and flips.
@@ -5997,6 +6016,8 @@ import.
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 5.36 A pipe size cascades, Rule 5.40 Auto typed to the join, Rule 2.42 Default Tab 3 note (Panel Updates entry 12; OakBarn Brewery's Hover Help sentences now in Help 155 and the Default settings Hover Help, with French; a hose joined to a pipe keeps today's adapter note, his pick).
 - 2026-11-19: Added Rule 2.62 (OakBarn Brewery: "A profile is only to import to start a build. Nothing more."; "I want ZERO connection after placed on Tab."; "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Tab keeps no link to an Equipment Profile or Template. The Tab link, follow the Default Layout, save back on every Save, the locked profile freezing Tabs and Make it unique are gone; the profile numbers are copied onto the Tab (picked "Copied onto the Tab") and changed in Tab Settings or ⚙ Numbers; 💾 Save as a profile ... copies a Tab into a profile, one direction only; lock_Equipment locks the Tab. Rules 2.58, 17.13, 19.6 and question 7 changed to match. Checked against both programs: the BruControl Import has no Equipment Profiles; its import onto a locked Tab is stopped as before.
+- 2026-11-19: Rule 2.62 #7 and #8 added, Rule 5.16 changed (OakBarn Brewery: "Templates are only for a Placement on a Tab for Building and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"): a Skynet valve keeps its own copy of its Template's fixed attributes and pictures (the Brain puts a sent fixed attribute back to the valve's own, not the Template's); Orientation copies that picture when picked. Pipe fittings keep their own bend, body, size, upright and openings; a Skynet fitting no longer follows its Template's new picture when Edit layout opens. Help 88 (and French). Checked against both programs: the BruControl Import makes no Skynet valve User versions and only names a vessel's Template for the Panel to copy, so nothing changes there.
+- 2026-11-19: Rule 2.62 #9 and #10 added, Rule 2.39 #3 changed (OakBarn Brewery: "NO LINK NO Connect Nada 100% Links gone"): a Tab Profile is copied onto a Tab (its color into the Tab's Color, its look into the Tab's own copy) and never linked; Tab Settings' Profile box is now **Copy Profile**, and ☰ Menu > Tab Profile's list of Tabs has **Copy onto it**. A Skynet valve's Properties rows are its own copy. Help 26, 36 and 88 (and French). Checked against both programs: the BruControl Import sets no Tab Profile on a Tab and makes no Skynet valve User versions, so nothing changes there.
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Added Rule 2.61 (OakBarn Brewery: "I will have other testers so an easy way for them to report bugs as well"): 🐞 Report a problem (☰ Menu > About) and 🐞 Report on every Help page open a box with 🐞 A bug and 🌐 The French Help, each on GitHub (new issue forms in .github/ISSUE_TEMPLATE, the French one in English and French) or ✉ Email to support@oakbarnbrewery.com; the version, the page and the browser are filled in. Help 205 (and French); next free Help 206. Checked against both programs: the BruControl Import uses the Panel's Help window, so 🐞 Report is there too.

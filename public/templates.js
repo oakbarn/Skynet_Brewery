@@ -227,6 +227,31 @@ export function applyDeviceTemplate(el, t) {
   return el;
 }
 
+// A User version keeps its own copy (Rule 2.62, OakBarn Brewery, 2026-11-19: "Templates are only for a Placement on a Tab for Building
+// and nothing else associated with a Tab or any of its chilcren (Pumps, Valves....)"). Its fixed attributes are copied from the Template
+// once: when it is placed, or when its Orientation picks another Template of the set (the user's own pick, so the new picture is copied
+// then). After that a save keeps the valve's own fixed attributes (still not changeable from a screen, Rule 5.16), and a changed or
+// newer Template never changes it. old: the item as it was saved (none for a new one); t: its Template now (only read when copying).
+export function keepDeviceFixed(el, old, t) {
+  const copy = !old || old.template !== el.template || old.orientation !== el.orientation || !Array.isArray(old.tplFixed) && !!t;
+  if (copy) {
+    if (!t) return el;
+    applyDeviceTemplate(el, t);
+    el.tplFixed = [...deviceFixed(t)];
+    el.tplUser = [...(t.userFields || [])];      // which rows its Properties show: its own copy too (Rule 2.62 #10)
+    return el;
+  }
+  const fixed = Array.isArray(old.tplFixed) ? old.tplFixed : [];
+  for (const k of fixed) { if (k in old) el[k] = jsonSafe(old[k]); else if (k !== 'type') delete el[k]; }
+  for (const k of ['imageOn', 'imageOff']) { if (old[k] !== undefined) el[k] = old[k]; else delete el[k]; }
+  if (fixed.length) el.tplFixed = [...fixed];
+  if (Array.isArray(old.tplUser)) el.tplUser = [...old.tplUser];      // its own Properties rows, never the Template's again
+  else if (t) el.tplUser = [...(t.userFields || [])];                  // saved before Rule 2.62 #10: copied once
+  else delete el.tplUser;
+  if (el.subtype === 'valve') { if (el.tapwater) el.tapwaterOut = tapOutFrom(el.tapSource); else { delete el.tapwaterOut; delete el.tapSource; } }
+  return el;
+}
+
 // A Chiller Bundle Equipment Template (OakBarn Brewery, 2026-11-17: "use a Normal Build Tab to create a Bundled Immersion Chiller and
 // save to Equipment Templates"; a Rule 4.1 exception): an immersion chiller Template that also keeps the pieces built with it on the
 // Build Tab, its hoses (Quick Disconnect or plain), an Ice Water Can, a Sump Pump (by hand, or a Device on a controlled wall outlet) and
