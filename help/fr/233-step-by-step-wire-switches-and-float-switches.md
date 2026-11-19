@@ -27,6 +27,8 @@ Montez-le pour qu'il se ferme au niveau que vous voulez connaître (la plupart p
 
 Ajoutez-le comme dans [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) : choisissez **Inputs (switches, buttons)** > la ligne qui convient : **Switch (on while closed)**, **Push button ...**, **Toggle button ...** ou **Latching input ...** ; un flotteur est **Float / level switch**, sur le Port **D32**.
 
+Un **bouton-poussoir DIN** peut aussi faire une chose quand on l'appuie (lancer un Process, Advance, ou arrêter toutes les alarmes) : voir [Bouton DIN : À l'appui](235-din-button-on-press).
+
 ## Étape 4. Vérifier {#step-4-check-it}
 
 Fermez le contact : Skynet montre ON. Ouvrez-le : OFF. À l'envers ? Mettez **Invert** sur On dans ses Properties.
