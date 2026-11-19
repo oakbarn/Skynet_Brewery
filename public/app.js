@@ -2918,9 +2918,9 @@ function svEdit(box) {
   if (!can('operator')) return toast('Your account is view only', true);
   const n = box.closest('.el'), vl = box.closest('.vl'), e = n && elByName(n.dataset.name);
   if (!e || !vl || vl._svEdit) return;
-  const prop = box.dataset.prop, was = box.dataset.num, num = box.querySelector('.svNum');
+  const prop = box.dataset.prop, was = box.dataset.num, num = box.querySelector('.svNum'), tgt = box.dataset.tgt || e.name;      // a probe's SV box sets the Setpoint of what holds it (Panel Updates 41)
   const inp = h('input', { class: 'svIn', value: was, inputmode: 'decimal', enterkeyhint: 'done', size: 5,
-    'aria-label': prop === 'target' ? 'Setpoint' : 'Duty cycle %' });
+    'aria-label': prop === 'dutycycle' ? 'Duty cycle %' : 'Setpoint' });
   vl._svEdit = true; num.replaceChildren(inp); box.classList.add('editing');
   let done = false;
   const finish = async ok => {
@@ -2933,12 +2933,98 @@ function svEdit(box) {
     const st = !!S.values[e.name]?.state, inDc = heatMethodKey(S.values[e.name]?.method) === 'dutyCycle';
     // a Duty cycle % above 0 turns it On (Rule 6.19): an Element set to Ask before changing by hand asks first
     if (prop === 'dutycycle' && inDc && x > 0 && !st && e.confirm) { if (!(await choose(`${S.values[e.name]?.label ?? e.label ?? e.name}: ON at ${fmtVal({}, x)} %?`, [['ON', true]]))) return; }
-    await setProp(e.name, prop, x);
+    await setProp(tgt, prop, x);
   };
   inp.addEventListener('keydown', ke => { ke.stopPropagation(); if (ke.key === 'Enter') { ke.preventDefault(); finish(true); } else if (ke.key === 'Escape') { ke.preventDefault(); finish(false); } });
   inp.addEventListener('blur', () => finish(String(inp.value).trim() !== was));
   for (const t of ['pointerdown', 'click', 'dblclick']) inp.addEventListener(t, ev => ev.stopPropagation());
   inp.focus(); inp.select();
+}
+
+// ---- A Temperature Probe's PV and SV (Panel Updates 41, OakBarn Brewery, 2026-11-19: "on 3 we will also need a SetPoint Field
+// associated with the Temperture Probe visible to a users"; "the standard PV and SV can be intergrated into The Display"; "Forget visible
+// option Make part of Digit Display Box. Keep all Digits an Dergee F or C fit on one line Inside the display."). On a running Tab every
+// probe's display shows two lines like a panel controller: PV (what it reads) over a green SV box (its Setpoint), each line with its
+// digits and °F or °C on one line, made smaller to fit inside the display. One click on the SV box types a new one in place (no pop-up,
+// Rule 2.44), the same box as a Heating Element's (Panel Updates 40).
+// One Setpoint, never two: a probe a Heating Element (or an older Hysteresis, PID, Deadband Device, or a Fermentor Control) holds shows
+// that one's Setpoint, and typing in its SV box sets it there (two or more: the one that is ON, else the first). A probe nothing holds
+// keeps its own Setpoint (its Properties' Setpoint to start, .setpoint in a Process) for Processes and Alarms to use.
+// No SV box in Edit layout, on the Dial or Bar look, or with its value hidden.
+function probeHolder(p) {
+  const hs = heatersOf(p), on = t => { const x = S.values[t.name] || {}; return isHeatElem(t) || isFermentor(t) ? !!x.state : !!x.enabled; };
+  return hs.find(on) || hs[0] || null;
+}
+function probeSv(e0, e, v) {
+  if (editing || e.look === 'dial' || e.look === 'bar' || (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue)) return null;
+  const p = e0.cloneOf ? (elByName(e0.cloneOf) || e0) : e0, t = probeHolder(p);
+  const raw = t ? (S.values[t.name]?.target ?? t.target) : (v.setpoint ?? p.setpoint);
+  const num = raw === '' || raw === null || raw === undefined || !Number.isFinite(Number(raw)) ? null : Number(raw);
+  return { prop: t ? 'target' : 'setpoint', tgt: t ? t.name : p.name, num, unit: e.units || '°F', k: 'probe', sp: true,
+    holder: t ? (S.values[t.name]?.label ?? t.label ?? t.name) : '', color: v.fault ? '' : probePvColor(p, v.value) };
+}
+// PV's color (OakBarn Brewery, 2026-11-19: "If the process is heating and the Temperature is Below the Setpoint , Blue, at Setpoint
+// Between a Hys Green and PID (with smoothing Green) and if above Red. Opposite for Cooling. Dead Band Green in the Band and Blue if
+// Heating and Red If Cooling. Duty Cycle Heating Red if On, Grey If Off, Cooling Blue if On, Grey if Off"). It comes from what uses the
+// probe (the one that is ON, else the first: a Heating Element, Cool / Warm Pump, Fermentor Control or older Hysteresis, PID, Deadband):
+// - Hysteresis: Green while the reading is within its Offset of the Setpoint; PID and Precise: within PV_NEAR; Deadband: within its
+//   Deadband; a Fermentor: between its Heat and Cool Offsets. Outside: Blue below (cold), Red above (hot). Cooling the same way round
+//   (OakBarn Brewery, 2026-11-19, asked whether "Opposite for Cooling" swaps them: "Go with A KISS"; PV_COOL_SWAP true would swap them).
+// - Duty Cycle, Direct, PWM, On/Off: heating Red while ON, cooling Blue while ON, Grey while OFF.
+// Nothing uses the probe (or a FAULT): PV keeps the probe's own Display color.
+const PV_COOL_SWAP = false;
+const PV_NEAR = u => /C/i.test(u || '') ? 0.5 : 1;      // "at Setpoint" for PID and Precise: half a degree C, one degree F
+function probeCtl(p) {
+  const hs = [...heatersOf(p), ...S.config.elements.filter(t => isCoolPump(t) && t.input === p.name)];
+  const on = t => { const x = S.values[t.name] || {}; return SP_OLD.includes(t.type) ? !!x.enabled : !!x.state; };
+  return hs.find(on) || hs[0] || null;
+}
+function probePvColor(p, pv) {
+  const t = probeCtl(p);
+  if (!t) return '';
+  const x = S.values[t.name] || {}, on = SP_OLD.includes(t.type) ? !!x.enabled : !!x.state;
+  const k = isFermentor(t) ? 'ferm' : SP_OLD.includes(t.type) ? t.type : (heatMethodKey(x.method) ?? startMethod(t));
+  const off = Number(x.onoffset ?? t.onOffset) || 0;
+  const cools = isFermentor(t) ? false : isHeatElem(t) ? false : (t.type === 'pid' || t.type === 'deadband') ? !!t.reversed : off > 0;
+  if (!['hysteresis', 'pid', 'precise', 'deadband', 'ferm'].includes(k)) return !on ? 'grey' : cools ? 'blue' : 'red';      // Duty Cycle, Direct, PWM, On/Off
+  const sv = Number(x.target ?? t.target), r = Number(pv);
+  if (!Number.isFinite(sv) || !Number.isFinite(r)) return '';
+  let lo, hi;
+  if (k === 'ferm') { lo = sv + Math.min(0, Number(x.heatoffset ?? t.heatOffset ?? -1)); hi = sv + Math.max(0, Number(x.cooloffset ?? t.coolOffset ?? 1)); }
+  else {
+    const band = k === 'hysteresis' ? Math.abs(off) || PV_NEAR(p.units) : k === 'deadband' ? Math.abs(Number(x.deadbandoffset ?? t.deadbandOffset ?? 0.5)) || PV_NEAR(p.units) : PV_NEAR(p.units);
+    lo = sv - band; hi = sv + band;
+  }
+  if (r >= lo && r <= hi) return 'green';
+  const cold = r < lo;
+  return (cools && PV_COOL_SWAP) ? (cold ? 'red' : 'blue') : (cold ? 'blue' : 'red');
+}
+// PV over SV, as on a panel controller: each line keeps its digits and °F / °C together, and the two are made smaller together to fit
+function fillPvSv(vl, text, sv) {
+  const box = h('span', { class: 'svBox sp pv', 'data-prop': sv.prop, 'data-tgt': sv.tgt, 'data-num': svFmt(sv),
+    title: sv.holder ? `SV: the Setpoint of ${sv.holder}. One click to type a new one, then Enter (Esc puts it back).`
+      : 'SV: this probe\'s own Setpoint (nothing heats or cools to it). One click to type a new one, then Enter (Esc puts it back).' },
+    h('span', { class: 'svNum' }, sv.num === null ? `--- ${sv.unit}` : svText(sv)), h('span', { class: 'svTag' }, 'SV'));
+  const pv = h('span', { class: 'pvRow', title: 'PV: what the probe reads now' }, h('span', { class: 'pvNum' }), h('span', { class: 'svTag' }, 'PV'));
+  setRich(pv.firstChild, text);
+  if (sv.color) pv.classList.add('pv-' + sv.color);      // Blue below, Green at, Red above the Setpoint; Grey while Off
+  vl.replaceChildren(h('span', { class: 'pvsv' }, pv, box));
+}
+function fitPvSv(vl) {
+  const w = vl.querySelector('.pvsv');
+  if (!w) return;
+  if (!vl.isConnected) { if (!vl._fitWait) { vl._fitWait = true; requestAnimationFrame(() => { vl._fitWait = false; if (vl.isConnected) fitPvSv(vl); }); } return; }
+  if (!vl.clientWidth) return;
+  const key = vl.textContent.replace(/\d/g, '0') + '|' + vl.clientWidth + '|' + vl.clientHeight + '|' + vl.style.fontSize;
+  if (key === vl._pvKey && vl._pvPx !== undefined) { w.style.fontSize = vl._pvPx; return; }
+  w.style.fontSize = '';
+  const cs = getComputedStyle(vl), aw = vl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = vl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  let px = parseFloat(getComputedStyle(w).fontSize);
+  for (let i = 0; i < 4 && px > 7 && (w.scrollWidth > aw || w.offsetHeight > ah); i++) {
+    px = Math.max(7, Math.floor(px * Math.min(aw / w.scrollWidth, ah / w.offsetHeight) * 10) / 10 - 0.2);
+    w.style.fontSize = px + 'px';
+  }
+  vl._pvKey = key; vl._pvPx = w.style.fontSize;
 }
 
 function fillEl(n, e0) {
@@ -2993,7 +3079,9 @@ function fillEl(n, e0) {
       if (isHeatElem(e) && (sv = heatSv(e0, e, v))) text = svStatus(e, v, on, sv);
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
-    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      if (e.type === 'temperature') sv = probeSv(e0, e, v);      // its PV and SV (Panel Updates 41)
+      break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' + voltsText(e, v.value) : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '') + voltsText(e, v.value); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
@@ -3093,6 +3181,7 @@ function fillEl(n, e0) {
   if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
   else if (vl._svEdit) { /* a new SV or Duty cycle % is being typed in it: left alone until Enter or Esc */ }
+  else if (sv?.k === 'probe') fillPvSv(vl, text, sv);      // a Temperature Probe's PV over its SV (Panel Updates 41)
   else if (sv) fillSv(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text, sv);      // a Heating Element's text and its SV box
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
@@ -3137,7 +3226,8 @@ function fillEl(n, e0) {
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
-  if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
+  if (sv?.k === 'probe') { if (!vl._svEdit) { fitOneLine(n, vl, null); fitPvSv(vl); } }      // PV and SV each on one line inside the display
+  else if (!vl._svEdit) fitOneLine(n, vl, fitsOneLine(e, n, dial || tmLook) ? (sv ? `${vl.textContent}` : text) : null);      // a reading stays on one line (Rule 2.56)
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
   const vf = img ? valveFit(e) : null;
@@ -3386,6 +3476,9 @@ function updateEl(name) {
   else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
+  // what holds a probe's temperature changed (its Setpoint, ON / OFF): the probe's SV box shows it (Panel Updates 41)
+  const ip = e?.input && elNamed(e.input);
+  if (ip?.type === 'temperature') for (const pn of $$(`#ws .el[data-name="${CSS.escape(ip.name)}"], #ws .el[data-clone="${CSS.escape(ip.name)}"]`)) { const pe = elNamed(pn.dataset.name); if (pe) fillEl(pn, pe); }
 }
 
 async function setProp(name, prop, value) { try { await api('POST', '/ui/set', { name, prop, value }); } catch (e) { toast(e.message, true); } }
@@ -9186,6 +9279,7 @@ const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(
   ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
   CAL_ROW(it, x),
   [SMOOTH_FIELD[0], SMOOTH_FIELD[1], 'num', null, false, false, { tip: SMOOTH_TIP, ...x }],
+  ['setpoint', 'Setpoint', 'num', null, false, false, { tip: DEVICE_TIPS.pSetpoint, ...x }],      // its SV (Panel Updates 41)
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial'], ['bar', 'Skynet Bar']];
 function probeDeviceFields(it, item) {
@@ -10142,6 +10236,7 @@ const DEVICE_TIPS = {
   pType: 'The kind of probe, picked first. The ⬢ beside it has its settings (wires, resistor, thermocouple type ...). To use another kind, delete it and add it again.',
   tpUnits: 'Units the reading shows in (°F or °C), and how many decimals.',
   pOffset: 'Added to every reading, to calibrate the probe (for example -0.4). The Database and .API ⬢ on its line sets what it sends to the database.',
+  pSetpoint: 'The SV this probe starts with, shown in the green SV box under its reading on the Tab (one click there changes it; a Process uses .setpoint). When a Heating Element or Fermentor Control uses this probe, the SV box shows that one\'s Setpoint instead, so there is only one.',
   pCal2: 'For readings right to 0.1 degree (Precise heating). A plain offset moves every reading the same; two points (ice water and boiling water) also fix a probe that is right at one end and off at the other. The ⬢ opens it. The offset is added after it.',
   // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
   pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
