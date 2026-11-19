@@ -4329,6 +4329,48 @@ function rejoinLetGo(it) {
   }
   return n;
 }
+// A Pump with no pipes on it always has free IPs (OakBarn Brewery, 2026-11-19: "A Pump with No attached Pipes always have free IPs";
+// "assign inlet outlet IPs one of the 8 each"; Rule 5.37): a new pump put where another one let go of its pipes takes them, whichever
+// side the old one's Inlet and Outlet were on. Dropped with its box near the let-go open ends, it slides the last few pixels so one of
+// its 8 IPs is right on an open end, then its Inlet goes on the spot where the old Inlet was and its Outlet where the old Outlet was
+// (a Hose Bib's one IP the same way, Rule 18.48). Anything else with IPs and no pipes slides the same few pixels onto them. Then
+// rejoinLetGo joins them. Returns true when it moved or changed anything.
+const SNAP_PX = 30;
+function freeIpsTake(it) {
+  if (!it || !draft || grabJoins(it).length) return false;           // only with no pipes on it at all
+  const el = !it.kind, pump = el && spotPump(it), hb = !el && isTapMv(it);
+  if (!el && !isMv(it)) return false;                                  // Devices and Manual Valve Widgets (a vessel or fitting is not moved here)
+  const ends = draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace).flatMap(p => ['from', 'to'].map(k => p[k] && ownCoupling(p[k], p)))
+    .filter(g => g?.wasAt && g.wasEnd);
+  if (!ends.length) return false;
+  const id = end => el ? `dev:${it.name}:${end}` : `eq:${it.id}:${end}`;
+  // every place each end of it could be: a pump's end on any of its 8 spots, a Hose Bib's IP on any of its spots, else where it is
+  const places = end => pump && ['in', 'out'].includes(end) ? Object.keys(PUMP_SPOTS).map(code => ({ code, c: pumpEndAt(it, end, code) }))
+    : hb && end === 'out' ? hbSpots(it).map(([code]) => ({ code, c: hbEndAt(it, code) })) : [{ code: null, c: ipPoint(id(end), it.workspace) }];
+  let best = null;
+  for (const g of ends) for (const q of places(g.wasEnd)) {
+    if (!q.c) continue;
+    const d = Math.hypot(q.c[0] - g.wasAt[0], q.c[1] - g.wasAt[1]);
+    if (d <= SNAP_PX && (!best || d < best.d)) best = { d, dx: g.wasAt[0] - q.c[0], dy: g.wasAt[1] - q.c[1] };
+  }
+  if (!best) return false;
+  it.x = Math.round((+it.x || 0) + best.dx); it.y = Math.round((+it.y || 0) + best.dy);
+  if (pump || hb) {        // each end on the spot where the old one's same end was (never both on one spot)
+    const took = {};
+    for (const g of ends) for (const q of places(g.wasEnd)) {
+      if (q.code === null || took[g.wasEnd] || Object.values(took).includes(q.code) || !q.c || Math.hypot(q.c[0] - g.wasAt[0], q.c[1] - g.wasAt[1]) > 1.5) continue;
+      took[g.wasEnd] = q.code;
+    }
+    if (hb && took.out) it.tapSpot = took.out;
+    if (pump) {
+      const [si, so] = pumpSpotStart(it), cur = pumpSpots(it), want = { in: took.in || cur[0], out: took.out || cur[1] };
+      if (want.in === want.out) want[took.in ? 'out' : 'in'] = Object.keys(PUMP_SPOTS).find(c => c !== want.in && !Object.values(took).includes(c));
+      if (want.in === si) delete it.pumpIn; else it.pumpIn = want.in;
+      if (want.out === so) delete it.pumpOut; else it.pumpOut = want.out;
+    }
+  }
+  return true;
+}
 // a pump or valve can swap places with another of the same kind, on any Tab
 function swapKind(it) {
   if (!it || it.locked) return null;
@@ -4788,7 +4830,7 @@ window.addEventListener('pointerup', () => {
   if (drag?.mode === 'resize' && drag.moved && isSized(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
-  if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)); if (ids.size && rejoinLetGo(drag.item) + rejoinEnds(ids)) renderWs(); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
+  if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)), took = ids.size && freeIpsTake(drag.item), n = ids.size ? rejoinLetGo(drag.item) + rejoinEnds(ids) : 0; if (n || took) renderWs(); if (took && n) toast(`🔗 ${lockName(drag.item)} joined ${n} open pipe end${n > 1 ? 's' : ''} where the last one let go. ↩ Put back (Ctrl+Z) undoes it.`); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];

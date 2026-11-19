@@ -40,10 +40,11 @@ keeps the new length or shape.
 The quickest way is **🔁 Swap places with...**: grab the old pump, pick the new one in the list, and the new pump is on the old
 pump's pipes at once. The old pump goes where the new one was.
 
-Or by hand: grab the old pump, pick **🔓 Unlock its IPs**, drag it away, then drag the new pump onto the same spot. When you drop
-it, each open pipe end that was on the old pump's **inlet** joins the new pump's inlet, and the **outlet** its outlet (the same end,
-within 14 pixels of where the old IP was). Every Skynet pump has its IPs in the same spots (the Pump Standard, Rule 5.27), so two
-pumps of the same size and place line up.
+Or by hand: grab the old pump, pick **🔓 Unlock its IPs**, drag it away, then drag the new pump onto the same spot. A pump with no
+pipes on it always has free IPs. When you drop it close to the open pipe ends (within about 30 pixels), it slides the last bit into
+place, its **inlet** goes on the spot where the old pump's inlet was and its **outlet** where the old outlet was (any of its 8 IPs,
+whichever side the old pump faced), and the pipes join it. Every Skynet pump has its IPs in the same spots (the Pump Standard,
+Rule 5.27), so two pumps of the same size line up. A valve or Manual Valve with no pipes slides onto its open ends the same way.
 
 ## ↩ Put back (Ctrl+Z)
 
