@@ -48,7 +48,7 @@ assert.match(css, /dialog#dlg:has\(#dlgBody \.mSet\) \.dlgBottomBar \{ display: 
   assert.deepEqual(keys('dutyCycle', el), ['methodSpot_dutyCycle', 'dutyCycle', 'interval']);
   assert.deepEqual(keys('hysteresis', el), ['_useLock', 'input', 'target', '_dir', 'onOffset', '_waveO', 'predictive', 'onDelay', '_waveD'], 'the Current Method');
   assert.deepEqual(keys('onoff', el), ['_useLock', '_doNote'], 'Direct: always used, nothing to set');
-  assert.deepEqual(keys('pid', { ...el, methodSpot_pid: true }), ['methodSpot_pid', 'input', 'target', 'kp', 'ki', 'kd', 'maxOutput', 'maxIntegral', 'calcTime', 'outTime', 'reversed', '_portNote'], 'the Port decides PWM: a note, no PWM switch (entry 4)');
+  assert.deepEqual(keys('pid', { ...el, methodSpot_pid: true }), ['methodSpot_pid', 'input', 'target', 'kp', 'ki', 'kd', 'maxOutput', 'maxIntegral', 'calcTime', 'outTime', 'reversed', '_portNote', '_tune'], 'the Port decides PWM: a note, no PWM switch (entry 4); 🎯 Auto-tune last (Rule 6.39)');
   assert.deepEqual(keys('pwm', { ...el, methodSpot_pwm: true }), ['methodSpot_pwm', 'pwmPower', 'outTime', '_portNote'], 'PWM: its Power % (entry 3)');
   assert.deepEqual(f('pid', { ...el, methodSpot_pid: true }).filter(x => x[6]?.def !== undefined).map(x => [x[0], x[6].def]), [['kp', 10], ['ki', 0.1], ['kd', 0], ['maxOutput', 100], ['maxIntegral', 100], ['calcTime', 1], ['outTime', 1]], 'each box shows its Skynet start (Rule 18.36)');
 }

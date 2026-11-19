@@ -152,7 +152,10 @@ key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Pr
 ☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
 **`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
-at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97)
+at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97) **Built 2026-11-19 (Panel Updates
+entry 16, Help 238):** the four `skn_` Globals (read only; `skn_Boil_Temp` in the panel's Units; data kept in °C and hPa).
+The `sk_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
+`wait BK_Temp >= skn_Boil_Temp - 1`.
 
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
 **not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
@@ -683,10 +686,18 @@ sits in (a goto back up, often in an if) is left; the next wait runs as normal. 
 *Replaced (2026-11-19):* "one press lets every running Process move on" and "Only one Override button on a Tab".
 (thread "Add an Override button", thread "Let Override target the right Process", Help 96, Help 22)
 
-2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
-postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
-airport's report (or the weather service, or standard air with a warning when offline), every 30 minutes, and works out
-`skn_Boil_Temp` (Rule 1.18). One place for the Brain, the same for every user; Admins change it. (Fritz, 2026-10-30, Help 97)
+2.27 **Boil temperature** (Settings > Boil temperature (air pressure); was "User Profile"): the airport's **ICAO code** is
+the **one and only way** to pick the weather station (no Postal Code or town lookup; Fritz, 2026-11-19: "The perferred way
+should be ICAO id of airport. WE could make it the only way and explain how to find it with an internet search"), then the
+brewery's **Elevation** (starts as the airport's own height, always changeable) and an optional **typed air pressure**. The
+Brain reads that airport's METAR every 30 minutes, takes its pressure to the Elevation and works out `skn_Boil_Temp`
+(Rule 1.18). Order: typed pressure > the airport's report > standard air at the Elevation. **Test** fetches it now. One
+plain message when the report is not used: "Check your Airport code in Skynet Settings." (not 4 letters, or no report for
+that code), "The Pressure is not available from your Airport code set in Skynet Settings." (no internet, or no report in 3
+hours), "No Airport code in Skynet Settings yet." A code that gets no report is still saved (never stop a user). Only the 4
+letter code leaves the Brain. One place for the Brain, the same for every user; Admins change it. Help 238 says how to find
+the ICAO code and your own Elevation (an internet search, or a phone app such as the iPhone Compass app). (Fritz,
+2026-10-30, Help 97; rebuilt 2026-11-19, Panel Updates entry 16, Help 238)
 
 2.28 **Tab Styles** (Fritz, 2026-10-30): a Tab's Style sets the look of the Devices and Widgets on it, as two separate groups:
 the **Label** (Fore, Back, Font, Font size, Alignment) and **the Device or Widget itself** (Fore, Back, Font, Font size, Alignment). Skynet Styles 🔒
@@ -3388,6 +3399,27 @@ start (it does nothing more than before). The other three:
 - **Both programs:** a BruControl DIN comes in with On Press None (BruControl has no such setting); nothing else changes.
 Help 235 (and French).
 
+6.39 **PID Auto-tune** (OakBarn Brewery, 2026-11-16, Panel Updates Sandbox entry 25: "And you can set up Autotune for the
+Precise?"; started 2026-11-19, "Sure"). A Heating Element's **PID** and **Precise** Settings each have one **🎯 Auto-tune** button
+(they share Kp, Ki and Kd, Rule 6.19, so one tune serves both). It opens a pop-up with the electrical warning (Rule 6.20) and one line
+saying it turns the element On and needs water over the element and the probe in the water (in the pop-up, not a second pop-up: one
+warning), the **Highest temperature** (the Setpoint + 10 °F, 5 °C, to start), **▶ Start**, **■ Stop** and what it is doing now.
+- **How:** a relay auto-tune with a bias, run by the Brain (lib/control.js, public/autotune.js): the element goes up below the Setpoint
+  and down above it (a band of 0.5 °F, 0.3 °C) for 5 swings; the bias moves until heating and resting take about as long. The first
+  swing (the warm-up) is not used, the last 3 are averaged, and the Tyreus-Luyben rules (calm, little overshoot) give Kp, Ki and Kd;
+  the bias it ends on is the Hold output % for Precise. It uses the element's Max output %.
+- **Safety:** it stops, and the element turns Off, above the Highest temperature, after 30 seconds with no probe reading, after
+  3 hours, on ■ Stop, or when the element is turned Off. It never starts with no probe reading or a probe already above the Highest.
+- **Use or Keep old:** done, the element turns Off and the pop-up shows the Old and New numbers side by side; **✔ Use new numbers**
+  saves Kp, Ki, Kd and Hold output % at once, **Keep old** changes nothing. Nothing is changed by itself.
+- **Read only for a Process:** `.autotune` (what it is doing: Warming up to the Setpoint, Swing 2 of 5, Done, Stopped: why),
+  `.autotune_kp`, `.autotune_ki`, `.autotune_kd`, `.autotune_hold` (the last numbers found). Only the Brain sets them.
+- **Admins only** (as the Method Settings). It runs on the Brain, so it goes on with the pop-up closed. Numbers are in the probe's
+  own units (the 3 Vessel sample's probes are °C, Rule 2.59).
+- **Both programs:** the BruControl Import program has no running Brain, so it shows no Auto-tune button; it shares the method
+  dialogs, nothing else changes there.
+Help 237 (and French); Help 156 points to it.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -4893,6 +4925,15 @@ DDLB Include Tablet, Pack"). The **grain weight label** (skn_XML_Grain_WT_Standa
 **Locked** (never typed in) and has **Visible**, On by default ("like any other label except Visible as defaulted to True"; "not user
 editable ... Locked True"). The New User Interview will fill Units in (later).
 
+17.17 **Strike Offset is equipment, set per Tab** (OakBarn Brewery, Panel Updates entry 14: "Equipment Profile, not recipe"; "The Offset is
+equipment related. It is a different number for a particular equipment Profile. The Brewzilla (and all All in Ones is zero)"; 2026-11-19:
+"15 is to set a default on a tab based on the Equipment. I have 2 Breweries in esscence. I set one at 10 and the other at 0"): every
+Equipment Profile has a **Strike offset** number (EQUIP_FIELDS), 0 to start, copied onto a Tab with the other Equipment numbers (Rule 2.62)
+and changed on the Tab any time (⚙ Numbers, Tab Settings). A Recipe's **Calculate** adds the **Brew on** Tab's Strike offset to the Strike
+Temperature; a Tab with none adds 0. It is a temperature **difference**: kept in °C (Rule 2.59), °F to °C is x 5/9 with no 32. It may be
+below 0 (not restricted). Hover Help says 0 for an All In One or a pre-heated Mash Tun. Asking for it again on Brew Day (a confirm and a
+box, for a hot or cold brewery) belongs to the PreBrew Process (Process Updates Sandbox entry 1).
+
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
@@ -6144,6 +6185,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
@@ -6798,6 +6840,8 @@ import.
 - 2026-11-19: Rule 11.9 guides added (OakBarn Brewery: "Step by Step to add a Device in help", "Step by step add a widget"): Help 207 Step by Step: Add a Device (a Blichmann RipTide on the Brew House Tab of the 3 Vessel sample) and Help 208 Step by Step: Add a Widget (a Hose Bib), each with a picture at every step and a warning at the top that a new item stays on the 🔨 Build Tab until ✅ Finish Build ... > Move to Tab; French in help/fr; linked from the Glossary, Getting started, Devices and Build Tab pages. The Move to Tab note now says the build kept its spot when it goes to the Tab picked for it (it said "the middle", which was wrong). Wording only; both programs (the Importer uses the Panel's Help). Next free Help 209. (thread "Add a step-by-step Add a Device Help page")
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rules 1.18 and 2.27 changed (Panel Updates entry 16, OakBarn Brewery: "The perferred way should be ICAO id of airport. WE could make it the only way"): the boil temperature is rebuilt on today's code in Settings > Boil temperature (air pressure): the ICAO code is the only way (no Postal Code), Elevation, typed pressure, Test, three plain messages; the four `skn_` Globals built; `sk_` roles and `wait_boil` not built yet. Help 238 (how to find the ICAO code and your Elevation) and French. Panel only (the BruControl Import program never fetches a report). (thread "Set boil temp from local weather")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
+- 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.

@@ -22,6 +22,7 @@
 //  - Only names are ever offered: never a hidden key (Rule 3.10), and never a Clone, which is not used in Processes (Rule 4.4).
 import { DEVICE_TYPES } from './colorize.js';
 import { SKYNET_CONSTANTS, showConstant } from './skconst.js';
+import { SKN_GLOBALS } from './boilpoint.js';
 import { G_DECLARE } from './gkinds.js';
 import { heatMethodKey, heatMethodCode } from './heatmethod.js';
 
@@ -211,6 +212,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // Skynet Constants (skc_Kg_To_Lb ...) where a value goes, once a letter is typed (all of them would fill the list)
   if (!atStart && w) for (const [n, v, what] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${what}`, n);
+  // Skynet internal Globals (skn_Boil_Temp ...: Settings > Boil temperature, Rule 1.18), read only, where a value goes
+  if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);
   if (!atStart) for (const [k, h] of ANYWHERE) if (afterValue || !['and', 'or'].includes(k)) add(['and', 'or', 'not'].includes(k) ? k + ' ' : k, h, k);

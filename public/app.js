@@ -19,6 +19,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
+import { tuneHighestDefault } from './autotune.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, heatSendsPwm, switchedBy, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
@@ -55,7 +56,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
-import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
+import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -388,6 +389,7 @@ function connect() {
   es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
   es.addEventListener('standby', e => showStandby(JSON.parse(e.data)));      // an Admin put the Brain in Standby (Rule 6.32)
   es.addEventListener('waking', () => { const m = $('.standbyPage .muted'); if (m) m.textContent = 'An Admin is starting the Brain ... this page comes back by itself.'; waitForBrain(); });
+  es.addEventListener('boil', e => renderBoilTemp(JSON.parse(e.data)));
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -404,7 +406,7 @@ function setView(v, here = false) {
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderApproved).then(renderPatron).then(renderMessaging).then(() => api('GET', '/ui/boiltemp')).then(renderBoilTemp).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
   if (v === 'scripts' || v === 'config') placeFind();
   if (v === 'scripts' && consoleStale) renderConsole();
   if (v === 'config') openConfig();
@@ -9206,7 +9208,9 @@ function methodSetFields(k, it) {
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...(k === 'precise' && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note']] : []),
     ...(AUTO_PERCENT_METHODS.includes(k) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, {}]] : []),
-    ...(PERCENT_METHODS.includes(k) ? [portNote(it)] : [])];
+    ...(PERCENT_METHODS.includes(k) ? [portNote(it)] : []),
+    // PID Auto-tune (Rule 6.39): one button in the PID and in the Precise Settings (they share Kp, Ki and Kd); it runs on the Brain
+    ...((k === 'pid' || k === 'precise') && !S.importBuild ? [['_tune', '🎯 Auto-tune', 'go', () => tuneDialog(it.name), false, false, { tip: 'Auto-tune: with water over the element and the probe in the water, Skynet turns the element up and down around the Setpoint a few times, times each swing and works out Kp, Ki and Kd (and the Hold output % for Precise). A kettle takes about 30 to 90 minutes, a RIMS tube a few. You see the new numbers next to the old ones and pick Use or Keep old. PID and Precise share these numbers. Help 237.' }]] : [])];
 }
 // The ⬢ of one method (OakBarn Brewery, 2026-11-15): its dialog on top of the Properties, frozen top with ✖ Cancel and 💾 Keep, no bottom
 // row (Rule 2.51, the model). It works on a copy; Keep puts its settings in the Properties (saved when the Properties are Saved).
@@ -9218,6 +9222,58 @@ async function methodEntry(k, obj) {
   try { readFields(w, body); } catch (e) { return toast(e.message, true); }
   for (const key of methodSetKeys(k)) { if (w[key] === undefined) delete obj[key]; else obj[key] = w[key]; }
   $('#dlgBody')._rebuild?.();
+}
+// PID Auto-tune (OakBarn Brewery, 2026-11-16, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; Rule 6.39, Help 237,
+// public/autotune.js). A pop-up over the Settings: the electrical warning and one question in the dialog (no extra pop-up, Rule 6.20),
+// the Highest temperature, ▶ Start and ■ Stop, what it is doing now, and at the end the new numbers next to the old with ✔ Use new
+// numbers or Keep old. Nothing is changed until Use is pressed. It runs on the Brain, so it goes on with the dialog closed.
+const TUNE_ASK = 'Auto-tune turns this element On. Start it only with water over the element and the Temperature Probe in the water. It stops by itself above the Highest temperature, and ■ Stop stops it any time.';
+const TUNE_ELEC = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
+async function tuneDialog(name) {
+  const el = S.config.elements.find(e => e.name === name);
+  if (!el) return toast('Save this Heating Element first, then Auto-tune it', true);
+  if (!can('admin')) return toast('Only an admin can Auto-tune', true);
+  const probe = el.input && S.config.elements.find(e => e.name === el.input);
+  const c = /c/i.test(String(probe?.units ?? '')) && !/f/i.test(String(probe?.units ?? '')), u = c ? '°C' : '°F';
+  const V = () => S.values[name] || {}, sp = Number(V().target ?? el.target);
+  let timer;
+  await layerDialog(`${el.label || el.name}: Auto-tune`, body => {
+    const hi = h('input', { type: 'number', step: 'any', value: Number.isFinite(sp) ? tuneHighestDefault(sp, c) : '' });
+    const status = h('div', { class: 'full' }), res = h('div', { class: 'full' });
+    const start = h('button', { type: 'button', class: 'primary', onclick: async () => {
+      try { await api('POST', '/ui/autotune', { name, action: 'start', highest: Number(hi.value) }); } catch (e) { return toast(e.message, true); }
+    } }, '▶ Start');
+    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ Stop');
+    const use = async () => {
+      const v = V(), now = S.config.elements.find(e => e.name === name);
+      if (!now) return toast(`${name} is gone: nothing saved`, true);
+      const out = { ...clone(now), kp: v.autotune_kp, ki: v.autotune_ki, kd: v.autotune_kd, holdOutput: v.autotune_hold };
+      try {
+        await saveElements(S.config.elements.map(x => x === now ? out : x));
+        for (const [p, k] of [['kp', 'autotune_kp'], ['ki', 'autotune_ki'], ['kd', 'autotune_kd'], ['holdoutput', 'autotune_hold']]) await setProp(name, p, v[k]);
+        savedPop(`${el.label || el.name}: the Auto-tune numbers`); decide('Using the new numbers.');
+      } catch (e) { toast(e.message, true); }
+    };
+    let shown = null, decided = null;
+    const decide = text => { decided = shown; res.replaceChildren(h('span', { class: 'muted' }, text)); };
+    const show = () => {
+      const v = V(), running = /^(Warming|Swing)/.test(v.autotune ?? '');
+      status.textContent = v.autotune ? `Now: ${v.autotune}` : `Setpoint ${Number.isFinite(sp) ? Math.round(sp * 10) / 10 + ' ' + u : '(type one first)'}. Not started.`;
+      start.disabled = running; stop.disabled = !running; hi.disabled = running;
+      const key = v.autotune === 'Done' ? [v.autotune_kp, v.autotune_ki, v.autotune_kd, v.autotune_hold].join() : '';
+      if (key === shown || key === decided) return;
+      shown = key; res.replaceChildren();
+      if (!key) return;
+      const now = S.config.elements.find(e => e.name === name) || el, row = (w, o, n) => h('tr', {}, h('td', {}, w), h('td', {}, String(o ?? '')), h('td', {}, h('b', {}, String(n))));
+      res.append(h('table', { class: 'tuneTable' }, h('tr', {}, h('th', {}, ''), h('th', {}, 'Old'), h('th', {}, 'New')),
+        row('Kp', now.kp ?? 10, v.autotune_kp), row('Ki', now.ki ?? 0.1, v.autotune_ki), row('Kd', now.kd ?? 0, v.autotune_kd), row('Hold output % (Precise)', now.holdOutput ?? 0, v.autotune_hold)),
+        h('div', { class: 'bar' }, h('button', { type: 'button', class: 'primary', onclick: use }, '✔ Use new numbers'), h('button', { type: 'button', onclick: () => decide('Kept the old numbers.') }, 'Keep old')));
+    };
+    body.append(h('div', { class: 'full tuneWarn' }, TUNE_ELEC), h('p', {}, TUNE_ASK),
+      h('div', { class: 'tuneRow' }, h('label', {}, `Highest temperature (${u})`), hi, start, stop), status, res);
+    show(); timer = setInterval(show, 500);
+  }, false, { view: true });
+  clearInterval(timer);
 }
 // Flame Out safety for gas burners (OakBarn Brewery, 2026-11-14, Rule 6.33, Help 197). A Heating Element on a gas valve has Gas burner
 // switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.
@@ -12439,7 +12495,7 @@ async function editWorkspace() {
   const T = TAB_TIPS, tip = (k, more) => ({ tip: T[k], ...more });
   // the Tab's own Equipment numbers (Rule 2.62, OakBarn Brewery 2026-11-19: they act as defaults and can be changed anytime here)
   const eqUnits = w.equip?.units || S.config.brewDefaults?.units || 'US', eqRows = w.build || w.template ? [] : [['_eqHead', 'Equipment numbers', 'head'],
-    ...EQUIP_FIELDS.map(f => { work['eq_' + f[0]] = w.equip?.[f[0]] ?? ''; return ['eq_' + f[0], `${f[1]} (${unitOf(f, eqUnits)})`, 'num', null, false, false, { tip: TAB_EQ_TIP }]; })];
+    ...EQUIP_FIELDS.map(f => { work['eq_' + f[0]] = w.equip?.[f[0]] ?? ''; return ['eq_' + f[0], `${f[1]} (${unitOf(f, eqUnits)})`, 'num', null, false, false, eqTip(f, TAB_EQ_TIP)]; })];
   const shown = dialog('Tab Settings', [['name', 'Name', 'text', null, false, false, tip('name')],
     idLocked ? ['id', 'Tab ID', 'ro', null, false, false, tip('idSaved')] : ['id', 'Tab ID', 'text', null, false, false, tip('id')],
     ['_bgHead', 'Background', 'head'],
@@ -14324,6 +14380,43 @@ $('#msTest').onclick = guard(async () => {
   try { const r = await api('POST', '/auth/messaging/test'); $('#msResult').textContent = 'Sent: ' + r.sent.join(', '); }
   catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
 });
+
+// Settings > Boil temperature (Panel Updates entry 16, Rules 1.18 and 2.27): the airport's ICAO code is the only way to pick the
+// weather station. Data is metric (metres, hPa); US Units show feet and inHg.
+const BT_FT = 0.3048, BT_INHG = 33.8638866667;
+const btUS = () => showUnits() !== 'Metric';
+const btTemp = st => btUS() ? `${round1(st.boilC * 9 / 5 + 32)} °F` : `${round1(st.boilC)} °C`;
+const btPressure = hpa => btUS() ? `${(hpa / BT_INHG).toFixed(2)} inHg` : `${round1(hpa)} hPa`;
+function round1(v) { return Math.round(v * 10) / 10; }
+function btLine(st) {
+  if (!st) return '';
+  const src = st.source === 'airport' ? `from ${st.station?.id ?? ''}${st.station?.name ? ' (' + st.station.name + ')' : ''}${st.station?.obs ? ', reported ' + new Date(st.station.obs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}`
+    : st.source === 'typed' ? 'typed in Settings' : 'standard air';
+  return `Water boils at ${btTemp(st)} here now. Air pressure ${btPressure(st.hpa)}, ${src}.${st.note ? ' ⚠ ' + st.note : ''}`;
+}
+let btShown = null;      // the Elevation as shown, so an unchanged box keeps the exact metres
+function renderBoilTemp(st) {
+  if (!st) return;
+  S.boil = st;
+  const set = st.settings ?? {}, us = btUS();
+  $('#btElevUnit').textContent = us ? 'ft' : 'm';
+  $('#btPressUnit').textContent = us ? 'inHg' : 'hPa';
+  if (document.activeElement?.closest?.('#btSave, #btTest, #btAirport, #btElev, #btPress') == null) {
+    $('#btAirport').value = set.airport ?? '';
+    $('#btElev').value = set.elevationM == null ? '' : Math.round(us ? set.elevationM / BT_FT : set.elevationM);
+    $('#btPress').value = set.pressureHpa == null ? '' : (us ? (set.pressureHpa / BT_INHG).toFixed(2) : round1(set.pressureHpa));
+    btShown = { elev: $('#btElev').value, elevM: set.elevationM };
+  }
+  const r = $('#btResult'); r.textContent = btLine(st); r.className = st.note ? 'btWarn' : 'muted';
+}
+async function saveBoilTemp() {
+  const us = btUS(), e = $('#btElev').value.trim(), p = $('#btPress').value.trim();
+  const elevationM = e === '' ? null : btShown && e === btShown.elev ? btShown.elevM : (us ? +e * BT_FT : +e);
+  const pressureHpa = p === '' ? null : (us ? +p * BT_INHG : +p);
+  return api('PUT', '/ui/boiltemp', { airport: $('#btAirport').value.trim().toUpperCase(), elevationM, pressureHpa });
+}
+$('#btSave').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; renderBoilTemp(await saveBoilTemp()); savedPop('Boil temperature saved'); });
+$('#btTest').onclick = guard(async () => { $('#btResult').textContent = 'Getting the report...'; await saveBoilTemp(); renderBoilTemp(await api('POST', '/ui/boiltemp/test')); });
 
 $('#setWarnPaths').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
@@ -16413,6 +16506,9 @@ function schemaProfileBox() {
       'Each Tab of the Schema ', h('b', {}, S.schemas.active?.name || ''), ' has its own Equipment numbers (Brewhouse efficiency, losses ...), copied from the profile and changed here.'),
     ...S.config.workspaces.filter(w => !w.build && !w.template).map(tabProfileRow));
 }
+// Strike offset (Panel Updates entry 14, OakBarn Brewery: "I have 2 Breweries in esscence. I set one at 10 and the other at 0")
+const STRIKE_OFF_TIP = 'Degrees added to the Strike Temperature when a Recipe brewed on this Tab presses Calculate, to make up for the heat a cold Mash Tun takes from the Strike Water. 0 for an All In One (the grain goes into the vessel that heated the water) or a pre-heated Mash Tun. It can need changing with the brewery air temperature.';
+const eqTip = (f, tip) => f[0] === 'strikeOffset' ? { tip: STRIKE_OFF_TIP } : tip ? { tip } : {};
 const TAB_EQ_TIP = 'This Tab\'s own Equipment numbers: Brewhouse efficiency, losses, dead space ... They started as the numbers of the profile copied onto it, and a Brew Day uses them. Changing them changes this Tab only.';
 function tabProfileRow(w) {
   const admin = can('admin'), eq = w.equip, waiting = slotsToPort(w).length;
@@ -16437,7 +16533,7 @@ const tabEffOpen = name => { tabEffShown = tabEffShown === name ? null : name; r
 async function tabEquipNumbers(tab) {
   const w = S.config.workspaces.find(x => x.name === tab); if (!w) return;
   const o = { units: S.config.brewDefaults?.units || 'US', ...clone(w.equip || {}) };
-  const fields = [['_n', TAB_EQ_TIP, 'note', null, null, null, { keep: true }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num'])];
+  const fields = [['_n', TAB_EQ_TIP, 'note', null, null, null, { keep: true }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num', null, false, false, eqTip(x)])];
   if (await dialog(`⚙ Equipment numbers of the Tab ${tabTitle(w)}`, fields, o) !== 'ok') return;
   readFields(o);
   for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]]; else delete o[f[0]];
@@ -16582,7 +16678,7 @@ async function eqInterview(pre = {}) {
     () => ['10. And so on', [['recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)], ['chiller', 'Chiller', 'sel', [['none', 'None'], ...Object.entries(CHILLERS)]],
       ['manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)], ['manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)]],
       { recirc: a.recirc, chiller: a.chiller, manifold: a.manifold, manifoldKind: a.manifoldKind }],
-    () => ['11. The numbers', EQUIP_FIELDS.map(f => [f[0], `${f[1]} (${unitOf(f, units)})`, 'num']), { ...a.numbers }],
+    () => ['11. The numbers', EQUIP_FIELDS.map(f => [f[0], `${f[1]} (${unitOf(f, units)})`, 'num', null, false, false, eqTip(f)]), { ...a.numbers }],
     () => { const p = ivProblems(ivFinal(a)); let rows = [];
       try { rows = p.length ? [] : ivDevicesFor(a).map(e => `${e.label}: ${e.name} (Port ${e.channel})`); } catch (e) { p.push(e.message); }
       return ['12. Review', [['_r', p.length ? '⚠ ' + p.join('\n⚠ ') + '\n\nPress ◀ Back to fix it.' : [`Equipment Profile "${a.name}" on the Tab ${ivTab(a)}.`,
@@ -16902,7 +16998,7 @@ function eqViewBar() {
   const del = guard(async () => { await deleteProfile(p.id); if (!S.profiles.some(x => x.id === p.id)) eqViewClose(true); });
   const props = guard(async () => {
     const o = clone(w);
-    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num']), ['notes', 'Notes', 'area']];
+    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num', null, false, false, eqTip(x)]), ['notes', 'Notes', 'area']];
     if (await dialog(`⚙ Properties of "${w.name}"`, fields, o) !== 'ok') return;
     readFields(o);
     for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]];
@@ -18387,6 +18483,8 @@ const rcMashProfile = rc => S.mashProfiles.find(x => x.id === rc.mashProfile) ||
 const rcBrewTabs = () => (S.config.workspaces || []).filter(w => !w.build && !w.template && w._ref && w.equip);
 const rcBrewTab = rc => rcBrewTabs().find(w => w._ref === rc.brewOnRef) || null;
 const rcEff = rc => { const v = +rcBrewTab(rc)?.equip?.brewhouseEfficiency; return Number.isFinite(v) && v > 0 ? v : null; };
+// the Brew on Tab's Strike offset in °C (Panel Updates entry 14: "set a default on a tab based on the Equipment"); no Tab or none set: 0
+const rcStrikeOff = rc => { const e = rcBrewTab(rc)?.equip; return e ? deltaC(e.strikeOffset, e.units) : 0; };
 const tabTitle = w => w.id ? `${w.id}: ${w.name}` : w.name;
 // a short note with ↩ Undo for a few seconds (Rule 2.53)
 function undoNote(text, onUndo, ms = 8000) {
@@ -18605,7 +18703,7 @@ function rcCalculate(rc, changed) {
   }
   rcAAWarn = false;
   sortHops(rc);
-  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc))); changed(); renderMenuPane();
+  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc), rcStrikeOff(rc))); changed(); renderMenuPane();
   toast('Calculated. Press Save to keep it');
 }
 // a warning that has one button, READ, to close it

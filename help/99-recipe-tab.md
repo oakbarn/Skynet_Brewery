@@ -48,7 +48,7 @@ Each box has a colored top that says what kind it is:
 
 Most boxes can be changed. **Style** is a dropdown; **Add new ...** adds a style to it.
 
-Press **Calculate** to work out the Total Grain Weight, the Hop Drops, Warnings and Messages, the 1st Mash temperature, the IBU (from each hop's Actual AAU), and the Strike Volume and Temperature and the Sparge Volume and Temperature, from the Grain Temperature and Grain Ratio. Then press **Save**. An imported recipe comes in already worked out.
+Press **Calculate** to work out the Total Grain Weight, the Hop Drops, Warnings and Messages, the 1st Mash temperature, the IBU (from each hop's Actual AAU), and the Strike Volume and Temperature and the Sparge Volume and Temperature, from the Grain Temperature and Grain Ratio. The Strike Temperature adds the **Brew on** Tab's **Strike offset** ([Equipment Profiles](28-schemas-and-equipment-profiles)). Then press **Save**. An imported recipe comes in already worked out.
 
 The Recipe is kept in kilograms, liters and °C. It shows in the units you pick on the Default tab (see **Recipe defaults** below).
 
@@ -238,7 +238,7 @@ Skynet does not fetch the voice from the web site by itself: free voice sites do
 
 On **☰ Menu > Default**:
 
-- **Water Profile**, **Boil time**, **Water to grain ratio**, **Grain temperature** and **Strike offset**: what a new Recipe starts with. Each can be changed in the Recipe.
+- **Water Profile** and **Water to grain ratio**: what a new Recipe starts with. Each can be changed in the Recipe. The Boil time comes from the Boil Profile, the Grain temperature is 72 °F for planning, and the **Strike offset** belongs to the **Brew on** Tab's equipment ([Equipment Profiles](28-schemas-and-equipment-profiles)).
 - **How amounts show**: grains (lb, kg, oz, g), hops (oz, g), volumes (gal, L, qt), temperatures (°F, °C), water to grain (qt/lb, L/kg) and misc items (as the recipe gives them, metric, or US).
 
 In **Settings > Panel settings: screen, Tabs and alerts**:

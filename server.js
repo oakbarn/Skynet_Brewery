@@ -87,6 +87,7 @@ import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
 import { chillerTemplates, chillerVessels, moveChiller } from './lib/chiller.js';
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
+import { BoilTemp } from './lib/boiltemp.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -171,6 +172,10 @@ sim.apply();
 hw.start();
 const control = new Control(store);
 control.start();
+// The boil temperature here and now (Settings > Boil temperature, Rules 1.18 and 2.27): skn_Boil_Temp for every Process.
+// The BruControl Import program has no running Brain, so it never asks for a weather report.
+const boil = new BoilTemp(DATA, { store });
+if (!IMPORT_BUILD) boil.start();
 hw.onSimStep = t => control.tick(t);                         // a skip ahead runs the controls between simulator steps
 const timerDt = clock.stepper();
 setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow the clock (faster in simulation mode)
@@ -344,6 +349,7 @@ const flame = IMPORT_BUILD ? null : new FlameWatch({ store, notify: list => broa
 flame?.start(() => clock.now());      // the simulator's clock, so a faster simulation counts the minutes faster too
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
+boil.on('status', st => broadcast('boil', st));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
 // add a Set-Cookie line without losing one already set (the device cookie and the sign-in cookie can go together)
 function addCookie(res, line) { const had = res.getHeader('Set-Cookie'); res.setHeader('Set-Cookie', had ? [].concat(had, line) : line); }
@@ -725,6 +731,16 @@ async function route(req, res) {
     return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
+  // PID Auto-tune (Rule 6.39, Help 237): admins start or stop it on a Heating Element; it runs on the Brain (lib/control.js)
+  if (p === '/ui/autotune' && m === 'POST') {
+    if (IMPORT_BUILD) return fail(res, 400, 'Auto-tune runs on the Brain, not in the BruControl Import program');
+    const { name, action, highest } = await jsonBody(req);
+    if (action === 'stop') { control.stopTune(String(name ?? '')); engine.print('system', `${name}: Auto-tune stopped`); return ok(res); }
+    const bad = control.startTune(String(name ?? ''), { highest });
+    if (bad) return fail(res, 400, bad);
+    engine.print('system', `${name}: Auto-tune started (Highest temperature ${highest})`);
+    return ok(res);
+  }
   if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step
@@ -936,6 +952,10 @@ async function route(req, res) {
     engine.start(first, me.name || 'user'); return ok(res);
   }
   // Simulation mode: everyone sees it, admins change it
+  // Settings > Boil temperature: the airport's ICAO code, Elevation and a typed pressure. Everyone sees it, Admins change it.
+  if (p === '/ui/boiltemp' && m === 'GET') return ok(res, boil.status());
+  if (p === '/ui/boiltemp' && m === 'PUT') { try { return ok(res, await boil.save(await jsonBody(req))); } catch (e) { return fail(res, 400, e.message); } }
+  if (p === '/ui/boiltemp/test' && m === 'POST') return ok(res, await boil.refresh());      // Test: fetch the report now
   if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });
   if (p === '/ui/sim' && m === 'PUT') { sim.save(await jsonBody(req)); broadcast('config', {}); return ok(res, sim.status()); }
   const tl = /^\/ui\/sim\/timeline\/([^/]+)$/.exec(p);

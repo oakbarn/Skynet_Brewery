@@ -56,6 +56,7 @@ Les Equipment Profiles se créent sur l'onglet de menu **Equipment Profile**. Vo
 
 - **System Loss (Trub, Chiller Manifold and Hoses)** : ce qui reste en route entre la cuve d'ébullition et le fermenteur (trub, collecteur du refroidisseur et tuyaux).
 - **Cooling shrinkage** (contraction au refroidissement), **Grain absorption** (absorption du grain), **Brewhouse efficiency** (rendement de la brasserie) et **Hop utilization** (utilisation du houblon). Le Brewhouse efficiency est le seul rendement de Skynet : il est copié sur chaque Tab où le profil est copié, et une recette calcule son Expected Gravity avec la copie du Tab **Brew on** ([Le Tab Recipe](99-recipe-tab)).
+- **Strike offset** (écart d'empâtage) : les degrés ajoutés à la Strike Temperature, pour compenser la chaleur qu'une Mash Tun froide prend à l'eau d'empâtage. Il appartient à l'équipement, pas à la recette : **0** pour un All In One (le grain va dans la cuve qui a chauffé l'eau) ou une Mash Tun préchauffée, plus pour une Mash Tun qui part froide. Chaque Tab a sa propre copie, donc deux brasseries peuvent avoir deux nombres (par exemple 10 °F sur l'une et 0 sur l'autre). Le **Calculate** d'une recette ajoute le Strike offset du Tab **Brew on** ; un Tab sans Strike offset ajoute 0. Changez-le sur le Tab quand l'air de la brasserie est beaucoup plus chaud ou plus froid que d'habitude.
 - **Notes**.
 - **Son matériel** : les choses réelles de son Tab (voir **La vue du Equipment Profile** plus bas). Vous les mettez sur le Tab depuis les [Modèles de cuves et de raccords](50-vessel-and-fitting-templates) (**Add to Tab**), l'Interview ou Edit layout, et changez chacun dans ses propriétés sur le Tab.
 
@@ -76,7 +77,7 @@ Certains nombres sont sortis du profil (2026-10-20) :
 
 La case en haut de l'onglet **Equipment Profile** liste chaque Tab du Schema chargé, avec les propres Equipment numbers du Tab. Ils servent de valeurs par défaut du Tab, et vous pouvez les changer à tout moment :
 
-- **⚙ Numbers** (nombres) change le System Loss, le Cooling shrinkage, le Grain absorption, le **Brewhouse efficiency** et le Hop utilization du Tab (Admins). Les mêmes nombres sont dans **Edit layout > Tab Settings > Equipment numbers**.
+- **⚙ Numbers** (nombres) change le System Loss, le Cooling shrinkage, le Grain absorption, le **Brewhouse efficiency**, le Hop utilization et le **Strike offset** du Tab (Admins). Les mêmes nombres sont dans **Edit layout > Tab Settings > Equipment numbers**.
 - **📈 Efficiency** (rendement) montre les brassins de ce Tab (voir **Rendement d'un Tab** plus bas).
 - **🔒 Locked** verrouille l'équipement de ce Tab (voir **Verrouiller l'équipement d'un Tab** plus bas).
 - **💾 Save as a profile ...** (enregistrer comme profil) copie l'équipement, les tuyaux, le matériel et les nombres du Tab dans un nouvel Equipment Profile, ou par-dessus un profil que vous choisissez. Cela ne va que dans ce sens, du Tab vers le profil, et aucun lien n'est gardé.
@@ -134,7 +135,7 @@ La barre du haut reste en place :
 - **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** et **➡ Transfer Manifold to Tab** (tout, les cuves, le collecteur) mettent cette partie du matériel sur le **Tab** choisi à côté, en un clic chacun. Ils collent le profil (voir **Coller un profil** plus bas) : les pièces arrivent sur le 🔨 Build Tab, le même matériel est remplacé après la liste Replace, et **↩ Undo** s'affiche ensuite.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** et **✕ Close**, dans cet ordre.
 
-En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** et Hop utilization. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. À côté :
+En dessous, les **Properties** (propriétés) du profil, les nombres qui vont avec lui sur un Tab : System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency**, Hop utilization et Strike offset. **⚙ Properties** les change (et le Nom, les Unités et les Notes) ; **💾 Save** les garde. À côté :
 
 - **🧮 Check the volumes** et **📈 Efficiency** ouvrent leur case sous la barre (appuyez encore pour la fermer). Voir **Modifier ou supprimer un Equipment Profile** plus haut. **📈 Efficiency** montre le Tab choisi à côté des boutons ➡ Transfer (voir **Rendement d'un Tab** plus haut).
 - **🗂 New Schema from this profile ...** (voir plus bas).
