@@ -16,7 +16,7 @@ Then the rest shows: the **Name** (the Suggested Name **wgt_PIX_Label_TabID**, f
 
 ## Picture Widget Properties
 
-Double-click a Picture Widget to open its Properties. They look like a Pump's: the 🔓 lock, **Visible** and **Hidden Locked** on the title line, then 1 Label ⬆ ⬢ and Label Visible, 2 Picture, 3 Tab, 4 Name (✏ Change name once it is built), the Graphic, Turns on with and Toggle, Overlay, Text on picture, X, Y, Width, Height and the Widget Type. The Label can't be blank: a blank one becomes the Name when you save.
+Double-click a Picture Widget to open its Properties. They look like a Pump's: the 🔓 lock, **Visible** and **Hidden Locked** on the title line, then 1 Label ⬆ ⬢ and Label Visible, 2 Tab with Layer Order under it, 3 Name (✏ Change name once it is built), the Graphic, the Picture, the **Background** (None or Background 1, 2 or 3; its ⬢ holds the three Background pictures), Turns on with and Toggle, Overlay, Text on picture, X, Y, Width, Height and the Widget Type (the Widget Model, Skynet Rule 18.50). The Label can't be blank: a blank one becomes the Name when you save.
 
 **Toggle** is what a tap does to what it turns on with: **On/Off** turns it on or off with one click, **Push button** keeps it on only while held, **None** does nothing.
 

@@ -10,19 +10,20 @@ The RIMS tube has one picture (no choice): TC openings at the top left (wort in)
 
 ### Making a RIMS tube
 
-It is made like any other Device. In **Edit layout**, pick **Devices: Skynet > RIMS tube** in the Add list and press Add. The **New Device: RIMS tube** box asks, in the same order as every Device:
+It is made like any other Device. In **Edit layout**, pick **Devices: Skynet > RIMS tube** in the Add list and press Add. The **New Device: RIMS tube** box asks, in the same order as every Device (the Blichmann Model, Skynet Rule 18.47):
 
-1. **Interface**: the board the RIMS tube is wired to.
-2. **Device Type**: RIMS tube. Pick how the heating element is controlled: **PID**, **Hysteresis**, **Duty Cycle** or **PWM**, and the type of **Temperature probe** in its thermowell.
-3. **Available Ports / Pins**: one for the heating element and one for the temperature probe (a DS18B20 probe takes its OneWire probe number instead). The lists show the free pins on that Interface, best first.
+1. **Label**, with **Label Visible** under it.
+2. **Interface**: the board the RIMS tube is wired to.
+3. **Device Type**: RIMS tube. Pick how the heating element is controlled: **PID**, **Hysteresis**, **Duty Cycle** or **PWM**, and the type of **Temperature probe** in its thermowell.
+4. **Available Ports / Pins**: one for the heating element and one for the temperature probe (a DS18B20 probe takes its OneWire probe number instead). The lists show the free pins on that Interface, best first.
 
-Then type its **Label** and press **Create**. The RIMS tube goes on the 🔨 Build Tab with its two Devices beside it, and its Properties open. The Devices get suggested names as usual, for example `MB_9_PID_RIMS_Heat` and `MB_700_TEMP@1W_RIMS_Temp`.
+Then press **➕ Add Device**. The RIMS tube goes on the 🔨 Build Tab with its two Devices beside it, and its Properties open. The Devices get suggested names as usual, for example `MB_9_PID_RIMS_Heat` and `MB_700_TEMP@1W_RIMS_Temp`.
 
 A **PID** or **Hysteresis** heating element holds the temperature that its own probe reads (its Input is set for you).
 
 ### Its Properties
 
-Double-click the RIMS tube in Edit layout. Besides the usual Name, Label, Show label, Flip, Rotate and place settings it has:
+Double-click the RIMS tube in Edit layout. Its Properties follow the Model: the lock and Visible on the title line, 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, then the Type, its own settings below, Flip and Rotate, X Y Width Height on one line and the **Device Type** last. Its own settings are:
 
 - **Interface**: the board it is wired to.
 - **Heating element**: its **Control** (PID, Hysteresis, Duty Cycle or PWM), its Port, and all of that control's own settings (for a PID: Setpoint, Kp, Ki, Kd, Max output and so on). Change the Control and the settings below it change to match.

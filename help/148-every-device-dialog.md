@@ -51,6 +51,18 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
   Suggested Name** pops up beside Label Visible and fills the Change Name box. The State slider, the Change Name box and its two
   buttons are for the mouse only: the Tab key and Enter pass them by. The Change Name box shows on every Device and Widget once it
   is saved; while you build a new one its Name simply follows the Suggested Name until you add it.
+- **Alarm Widgets** (Skynet Rule 18.50, the "Recheck dialogs" pass): the Basic Skynet Alarm, the User Alarm and the Pre-Hop Alarm
+  follow the Hose Bib's order: the lock and **Hidden Locked** in the title line (Visible is automatic: an Alarm shows while it is On),
+  **1. Label**, **Label Visible**, **2. Tab**, **Layer Order**, **3. Name** with Change Name, then the **Graphic** box, the **Alarm**
+  box and the **Alarm Chain**, X, Y, Width and Height on one line, and the **Widget Type** last. **Database and .API** is the ⬢ on the
+  Active overlay line, as on the Pump's Overlay. Nothing was taken away.
+- **Every other dialog** (the "Recheck dialogs" pass, part 2) now has the same look and flow, with nothing taken away:
+  the **Switch**, **Push Button**, **Pulse Button** and **LED** get the **Graphic** (the Widget as drawn on its Tab) and an **Overlay**
+  whose ⬢ holds Database and .API. A Widget with no picture (Data / Value, Text, Override, Label, Timer, Graph, Sound Player,
+  Process) has **Background** (Show or None), **Fore color** and **Back color** on their own lines. The gGlobal Widget, the older
+  Alarm, the Manual vessel and a Clone, every Vessel, IP, Pipe, Hose, fitting and Manifold, and the RIMS tube and electric kettle
+  follow the same order: 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, their own boxes, X Y Width Height, and the Type last.
+  The Picture Widget gets a **Background** (None, 1, 2 or 3) whose ⬢ holds its 3 pictures.
 
 ## A Device built into something
 

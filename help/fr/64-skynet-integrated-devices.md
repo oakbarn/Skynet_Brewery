@@ -10,19 +10,20 @@ Le tube RIMS a une seule image (pas de choix) : des ouvertures TC en haut à gau
 
 ### Faire un tube RIMS {#making-a-rims-tube}
 
-Il se fait comme tout autre Device. En **Edit layout**, choisissez **Devices: Skynet > RIMS tube** dans la liste Add et appuyez sur Add. La fenêtre **New Device: RIMS tube** demande, dans le même ordre que pour chaque Device :
+Il se fait comme tout autre Device. En **Edit layout**, choisissez **Devices: Skynet > RIMS tube** dans la liste Add et appuyez sur Add. La fenêtre **New Device: RIMS tube** demande, dans le même ordre que pour chaque Device (le modèle Blichmann, règle Skynet 18.47) :
 
-1. **Interface** : la carte à laquelle le tube RIMS est câblé.
-2. **Device Type** : RIMS tube. Choisissez comment la résistance est commandée : **PID**, **Hysteresis**, **Duty Cycle** ou **PWM**, et le type de **sonde de température** dans son doigt de gant.
-3. **Available Ports / Pins** : une pour la résistance et une pour la sonde de température (une sonde DS18B20 prend plutôt son numéro de sonde OneWire). Les listes montrent les broches libres de cette Interface, les meilleures en premier.
+1. **Label**, avec **Label Visible** dessous.
+2. **Interface** : la carte à laquelle le tube RIMS est câblé.
+3. **Device Type** : RIMS tube. Choisissez comment la résistance est commandée : **PID**, **Hysteresis**, **Duty Cycle** ou **PWM**, et le type de **sonde de température** dans son doigt de gant.
+4. **Available Ports / Pins** : une pour la résistance et une pour la sonde de température (une sonde DS18B20 prend plutôt son numéro de sonde OneWire). Les listes montrent les broches libres de cette Interface, les meilleures en premier.
 
-Tapez ensuite son **Label** et appuyez sur **Create**. Le tube RIMS va sur le 🔨 Build Tab avec ses deux Devices à côté, et ses Properties s'ouvrent. Les Devices reçoivent des noms proposés comme d'habitude, par exemple `MB_9_PID_RIMS_Heat` et `MB_700_TEMP@1W_RIMS_Temp`.
+Appuyez ensuite sur **➕ Add Device**. Le tube RIMS va sur le 🔨 Build Tab avec ses deux Devices à côté, et ses Properties s'ouvrent. Les Devices reçoivent des noms proposés comme d'habitude, par exemple `MB_9_PID_RIMS_Heat` et `MB_700_TEMP@1W_RIMS_Temp`.
 
 Une résistance en **PID** ou **Hysteresis** tient la température que lit sa propre sonde (son Input est réglé pour vous).
 
 ### Ses Properties {#its-properties}
 
-Double-cliquez sur le tube RIMS en Edit layout. En plus des réglages habituels Name, Label, Show label, Flip, Rotate et de place, il a :
+Double-cliquez sur le tube RIMS en Edit layout. Ses Properties suivent le modèle : le cadenas et Visible sur la ligne du titre, 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, puis le Type, ses propres réglages dessous, Flip et Rotate, X Y Width Height sur une ligne et le **Device Type** en dernier. Ses propres réglages sont :
 
 - **Interface** : la carte à laquelle il est câblé.
 - **Heating element** : sa **Control** (PID, Hysteresis, Duty Cycle ou PWM), son Port, et tous les réglages propres à cette commande (pour un PID : Setpoint, Kp, Ki, Kd, Max output, etc.). Changez la Control et les réglages en dessous changent en conséquence.
