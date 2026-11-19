@@ -15,7 +15,7 @@ Posez la souris sur le nom d'une colonne pour son Hover Help :
 |---|---|
 | **ID** | L'Interface ID : il commence le nom suggéré de chaque Device sur cette Interface (MB_25_DO@Pump_Wort_BH). Les Interface ID suivent la Rule 3.2 : une fois enregistré, il ne change jamais. |
 | **Name** | Le nom de l'Interface, celui que vous lui avez donné en l'ajoutant : Hot Side, Fermentation, le nom de votre brasserie. |
-| **Board** | Le type de carte : l'Arduino Mega (la norme), une autre carte Arduino, un ESP32 ou un Raspberry Pi. Voir [Cartes Skynet](205-skynet-boards). |
+| **Board** | Le type de carte : l'Arduino Mega (la norme), une autre carte Arduino, un ESP32 ou un Raspberry Pi. Voir [Cartes Skynet](206-skynet-boards). |
 | **Mode** | Simulator : le panel fait semblant d'être cette carte, et rien ne va à une vraie carte. Real : le panel parle à la vraie carte. Le panel passe de l'un à l'autre sur la barre Simulator. |
 | **Connection** | Comment la carte est reliée au Brain : USB, Ethernet ou WiFi. Posez la souris dessus pour voir son USB Port ou son Network address. |
 | **Rating** | À quel point la Connection est sûre pour cette carte : Best, Good, OK ou Poor. L'USB est le plus sûr ; Ethernet et WiFi dépendent de votre réseau. |
@@ -36,7 +36,7 @@ La fenêtre demande (posez la souris sur chaque nom pour son Hover Help) :
 
 - **Name** : quelque chose qui a un sens pour vous, comme *Hot Side*, *Fermentation* ou le nom de votre brasserie. La Skynet Home Brewery, par exemple, a 3 Megas : **Main_Brewery_HotSide**, **Valves** et **Fermentor**.
 - **Interface ID** : voir plus bas.
-- **Board** : l'Arduino Mega (la norme), une autre carte Arduino, un ESP32 ou un Raspberry Pi. Une carte 3,3 V montre un seul avertissement quand vous y mettez une entrée, un capteur 0-5 V ou un relais. Voir [Cartes Skynet](205-skynet-boards).
+- **Board** : l'Arduino Mega (la norme), une autre carte Arduino, un ESP32 ou un Raspberry Pi. Une carte 3,3 V montre un seul avertissement quand vous y mettez une entrée, un capteur 0-5 V ou un relais. Voir [Cartes Skynet](206-skynet-boards).
 - **Connection** : les choix suivent la Board. Un Arduino Mega : USB, Ethernet (avec un Shield W5100 ou W5500) ou WiFi (par un pont ESP32). Un ESP32 : USB, Ethernet ou WiFi. Un Raspberry Pi : Ethernet (ou le Brain lui-même) ou WiFi. Son Hover Help montre la note de connexion (aide : [Notes de connexion](69-connection-ratings)).
 - **USB Port** (une carte USB) ou **Network address** (adresse réseau, Ethernet ou WiFi). Voir [Le USB Port, le côté technique](#the-usb-port-the-technical-side) et [La Network address](#the-network-address). Quand le panel est en mode 🧪 Simulator, le Brain ne parle à aucune carte, donc rien ne passe par le USB Port : pour tester la vraie connexion, passez sur 🔌 Real, ajoutez l'Interface, puis ⚙ changez-la sur la page Devices et appuyez sur 🔌 Test Communication.
 - **Board Settings** : **On**, **🔌 Test Communication**, **Answer Wait**, **Lost Comm** et **Diagnostic Logging** (et le **Network Port** en Ethernet ou WiFi) : voir [Board Settings](#board-settings) plus bas.

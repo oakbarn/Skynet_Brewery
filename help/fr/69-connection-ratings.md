@@ -34,7 +34,7 @@ La carte reçoit le délai à chaque connexion, donc un changement prend effet t
 
 ## Choisir la carte {#picking-the-board}
 
-Quand vous ajoutez une Interface, choisissez sa **Board** (carte : l'Arduino Mega, une autre carte Arduino, un ESP32 ou un Raspberry Pi ; voir [Cartes Skynet](205-skynet-boards)) et sa **Connection** ; les choix suivent la Board, et le Hover Help de la Connection donne sa note. Une carte sans Board choisie montre **(pick the board)** : choisissez-la dans la colonne **Board** ou dans la fenêtre de l'Interface.
+Quand vous ajoutez une Interface, choisissez sa **Board** (carte : l'Arduino Mega, une autre carte Arduino, un ESP32 ou un Raspberry Pi ; voir [Cartes Skynet](206-skynet-boards)) et sa **Connection** ; les choix suivent la Board, et le Hover Help de la Connection donne sa note. Une carte sans Board choisie montre **(pick the board)** : choisissez-la dans la colonne **Board** ou dans la fenêtre de l'Interface.
 
 ## Broche 10 sur un Mega Ethernet {#pin-10-on-an-ethernet-mega}
 

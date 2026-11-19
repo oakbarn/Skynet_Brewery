@@ -34,7 +34,7 @@ The board gets the delay each time it connects, so a change takes effect right a
 
 ## Picking the board
 
-When you add an Interface, pick its **Board** (the Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi; see [Skynet Boards](205-skynet-boards)) and its **Connection**; the choices follow the Board, and the Connection's Hover Help gives its rating. A board with no Board picked yet shows **(pick the board)**: pick it in the **Board** column or in the Interface pop-up.
+When you add an Interface, pick its **Board** (the Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi; see [Skynet Boards](206-skynet-boards)) and its **Connection**; the choices follow the Board, and the Connection's Hover Help gives its rating. A board with no Board picked yet shows **(pick the board)**: pick it in the **Board** column or in the Interface pop-up.
 
 ## Pin 10 on an Ethernet Mega
 

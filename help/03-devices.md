@@ -12,7 +12,7 @@
 A board is called an **Interface**. On the **Devices** screen, under **Add Interface**, press **➕ Add Interface…**:
 
 1. Give it a **Name**, for example `Main Brewery Mega USB`. Its **Interface ID** (`MB`) is suggested from the name; see [Interfaces](76-interfaces).
-2. Pick the **Board** (the Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi; see [Skynet Boards](205-skynet-boards)) and its **Connection**: the choices follow the Board (USB, Ethernet or WiFi). The Connection's Hover Help gives the **connection rating**, how safe that link is; see [Connection ratings](69-connection-ratings).
+2. Pick the **Board** (the Arduino Mega, another Arduino board, an ESP32 or a Raspberry Pi; see [Skynet Boards](206-skynet-boards)) and its **Connection**: the choices follow the Board (USB, Ethernet or WiFi). The Connection's Hover Help gives the **connection rating**, how safe that link is; see [Connection ratings](69-connection-ratings).
 3. For USB, the **USB Port** number: Skynet suggests a free one it found (Windows: `7` is COM7; Pi: `/dev/ttyACM0`). For Ethernet or WiFi, type its network address.
 4. Press **Add**. Then **⚙ Change** and **🔌 Test Communication** check that the Brain and the board are talking.
 
