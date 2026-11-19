@@ -51,7 +51,7 @@ Le port est toujours dans le nom, et le Device Type vient en troisième. Le Devi
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
-Les broches analogiques s'écrivent par leur numéro de broche, A0 = 54 jusqu'à A15 = 69, donc une thermistance 10K appelée *Mash/Tun* sur la broche A0 reçoit `MB_54_TEMP@10KNTC_Mash~Tun_SP`. Vous pouvez toujours taper A0 ou 54 quand vous choisissez la broche. Une sonde DS18B20 n'a pas de partie Port ni Type : son nom commence par son **1-Wire Index**, Interface, circuit et numéro de sonde : `MB1w1_1_HLT_HL` est la sonde 1 du circuit 1-Wire 1 de l'Interface MB. Un Index ne peut appartenir qu'à un seul Device ([1-Wire probes: circuits and Indexes](215-1-wire-probes)).
+Les broches analogiques s'écrivent par leur numéro de broche, A0 = 54 jusqu'à A15 = 69, donc une thermistance 10K appelée *Mash/Tun* sur la broche A0 reçoit `MB_54_TEMP@10KNTC_Mash~Tun_SP`. Vous pouvez toujours taper A0 ou 54 quand vous choisissez la broche. Une sonde DS18B20 n'a pas de partie Port ni Type : son nom commence par son **1-Wire Index**, Interface, circuit et numéro de sonde : `MB1w1_1_HLT_HL` est la sonde 1 du circuit 1-Wire 1 de l'Interface MB. Un Index ne peut appartenir qu'à un seul Device ([1-Wire probes: circuits and Indexes](234-1-wire-probes)).
 
 Comment le Label est transformé en partie du nom (le Label lui-même reste exactement comme vous l'avez tapé) :
 

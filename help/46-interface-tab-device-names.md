@@ -51,7 +51,7 @@ The port is always in the name, and the Device Type comes third. The Device Type
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
-Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. A DS18B20 probe has no Port or Type part: its name starts with its **1-Wire Index**, Interface, circuit and probe number: `MB1w1_1_HLT_HL` is probe 1 on 1-Wire circuit 1 of Interface MB. An Index can belong to one Device only ([1-Wire probes: circuits and Indexes](215-1-wire-probes)).
+Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. A DS18B20 probe has no Port or Type part: its name starts with its **1-Wire Index**, Interface, circuit and probe number: `MB1w1_1_HLT_HL` is probe 1 on 1-Wire circuit 1 of Interface MB. An Index can belong to one Device only ([1-Wire probes: circuits and Indexes](234-1-wire-probes)).
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 

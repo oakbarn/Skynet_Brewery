@@ -2,7 +2,7 @@
  "00-tailscale-windows": "7718c563861cc0e1",
  "01-getting-started": "326257bbd14831ea",
  "02-tabs": "33b2052c17709737",
- "03-devices": "c1aa6b22b633aa3c",
+ "03-devices": "b6fb84ac03afe153",
  "04-variables": "285856e470f40ab8",
  "05-scripts": "9e1cfc6e4b57fa92",
  "06-log": "5906688b79c6c7d5",
@@ -44,7 +44,7 @@
  "43-right-click-help": "77dfc5c0c5c6c84b",
  "44-schema-json": "9499d2ad4dc4f00f",
  "45-phones-and-tablets": "8e372d74e63573d5",
- "46-interface-tab-device-names": "7eb0c81ce412587d",
+ "46-interface-tab-device-names": "9595c7e4e5b3af56",
  "47-panel-version": "2d1980133b861ae1",
  "48-schema-switching-and-cloning": "4aeeab3cc265e3ee",
  "49-text-boxes": "ef29d26161777d94",
@@ -132,7 +132,7 @@
  "135-vessel-sizing": "e6506250f38b2bb6",
  "136-pwm-and-analog-out-device-properties": "20c803ecb113f8ca",
  "137-heating-element-device-properties": "02cf28935c89f4bb",
- "138-temperature-probe-device-properties": "4b67cea32cb3698b",
+ "138-temperature-probe-device-properties": "18f31824070a6858",
  "139-sight-glasses": "038941cb31a557a2",
  "140-label-cannot-be-blank": "42ffd1d8e566246b",
  "141-tap-water-valve": "c2190d1452872881",
@@ -202,5 +202,5 @@
  "206-skynet-boards": "7d80905678ac0213",
  "207-step-by-step-add-a-device": "e2a3363b80202aaa",
  "208-step-by-step-add-a-widget": "9c83b0e5ea17cd90",
- "215-1-wire-probes": "6099b8f79b1e2ab1"
+ "234-1-wire-probes": "6099b8f79b1e2ab1"
 }

@@ -14,7 +14,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    **tP_TC_1** (thermocouple), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (NTC thermistors), **tP_LM35_1**, **tP_TMP36_1**,
    so the cursor starts on the next empty field. You can change the Label, but it can't
    be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the
-   **Interface** (the board) and, on the same line, the **Port**: the **1-Wire Index** for a DS18B20 (a new 1-Wire circuit, or the next Index on one you have: Help 215), or an
+   **Interface** (the board) and, on the same line, the **Port**: the **1-Wire Index** for a DS18B20 (a new 1-Wire circuit, or the next Index on one you have: Help 234), or an
    **Available Port** (the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36), 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic** and **Path** (a Thermowell or probe tee): the Skynet drawing as it will show on the Tab. The Path is set.
