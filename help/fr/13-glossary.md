@@ -28,7 +28,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Brain** (le cerveau) : l'ordinateur principal qui fait tourner Skynet : un Raspberry Pi 4 ou plus récent, ou un ordinateur Windows, Linux ou Mac (un mini PC, un ordinateur de bureau ou un portable). Il garde tous les fichiers de texte, d'images et de Schema et toutes les valeurs enregistrées, pour que le panel soit joignable depuis n'importe quel navigateur. Les cartes (**Interfaces**) s'y branchent par USB ou Ethernet. Voir [Déplacer le Brain](119-move-brain).
 
-**Brewhouse Efficiency** (rendement de la brasserie) : la part du sucre du grain qui arrive vraiment dans le fermenteur, en %. Skynet l'enregistre pour chaque brassin dans le **Equipment Profile** et montre la moyenne des 10 derniers brassins sur ce Schema. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
+**Brewhouse Efficiency** (rendement de la brasserie) : la part du sucre du grain qui arrive vraiment dans le fermenteur, en %. Chaque Tab a le sien, copié de son Equipment Profile. Skynet l'enregistre pour chaque brassin sur un Tab et montre la moyenne des 10 derniers brassins sur ce Tab. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Build Tab (🔨)** (Tab de construction) : le Tab propre où chaque nouveau Device, Widget ou copie de Template est d'abord créé. **✅ Finish Build ...** le déplace vers son Tab. Une construction pas finie est gardée sur le Brain jusqu'à ce que vous la finissiez ou la jetiez. Voir [Build Tab](55-build-tab), et chaque étape en images dans [Pas à pas : ajouter un Device](207-step-by-step-add-a-device).
 
@@ -46,7 +46,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Deadband** (zone morte) : une méthode de chauffe qui monte ou baisse son % par petits pas vers le **Setpoint**, plus douce et plus lente qu'un PID. Voir [Device Deadband](126-deadband-device).
 
-**Default Layout** (disposition par défaut) : les cuves, raccords, IP, tuyaux rigides et souples d'un Tab, gardés dans le Equipment Profile de ce Tab. Le Tab la suit, ou garde sa propre disposition.
+**Default Layout** (disposition par défaut) : les cuves, raccords, IP, tuyaux rigides et souples qu'un Equipment Profile contient. Elle est copiée sur un Tab pour commencer une construction ; le Tab ne garde aucun lien avec elle.
 
 **Default settings** (réglages par défaut) : ce avec quoi commence une **nouvelle** chose. Dans **☰ Menu > Default settings**. Voir [Default settings](155-default-settings).
 
@@ -62,7 +62,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Element** : un mot que Skynet n'utilise pas : une chose sur un Tab est un **Device** (relié à un port d'une carte) ou un **Widget** (dans l'application seulement). La seule exception est un *heating element* (élément chauffant), la vraie pièce dans une cuve.
 
-**Equipment Profile** (profil d'équipement) : les pertes, les cuves et la tuyauterie d'un Tab de brasserie (par exemple le Hot Side, côté chaud, ou la Fermentation), créé sur l'onglet Equipment Profile du ☰ Menu. Chaque Tab peut avoir le sien. N'importe quel Schema peut utiliser n'importe quel profil sur l'un de ses Tabs : propre à un Tab, ou partagé par plusieurs Schemas. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
+**Equipment Profile** (profil d'équipement) : les pertes, les cuves et la tuyauterie de l'équipement d'une brasserie (par exemple le Hot Side, côté chaud, ou la Fermentation), créé sur l'onglet Equipment Profile du ☰ Menu. Il est seulement copié sur un Tab pour commencer une construction ; ensuite le Tab ne garde aucun lien avec lui. N'importe quel Schema peut commencer autant de Tabs que voulu à partir de lui. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Equipment Profile Interview** (questions du profil d'équipement) : quelques questions (combien de cuves, le type et la taille de chacune) qui posent vos cuves sur un Tab pour vous. Voir [Equipment Profile Interview](196-equipment-profile-interview).
 
@@ -180,7 +180,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 ## S {#s}
 
-**Schema** : toute une configuration de brasserie (Tabs, Devices, Widgets, tuyaux, réglages et le Equipment Profile de chaque Tab), gardée dans son propre fichier dans le dossier `config` et choisie dans la liste déroulante Schema en haut. D'autres programmes l'appellent setup ou configuration. Les exemples sont des Schemas tout prêts. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
+**Schema** : toute une configuration de brasserie (Tabs, Devices, Widgets, tuyaux, réglages et les Equipment numbers de chaque Tab), gardée dans son propre fichier dans le dossier `config` et choisie dans la liste déroulante Schema en haut. D'autres programmes l'appellent setup ou configuration. Les exemples sont des Schemas tout prêts. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Semi_Widgets_Devices** : des choses qui n'existent que dans l'application comme un Widget, mais qui sont On ou Off comme un Device : le Manual Valve Widget et les **Boolean Widgets**. Voir [Semi Widgets Devices](112-semi-widgets-devices).
 

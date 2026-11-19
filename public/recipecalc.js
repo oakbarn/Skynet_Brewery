@@ -112,8 +112,9 @@ export function measuredEfficiency(r, og, liters) {
 }
 // the average Efficiency of the last brews (OakBarn Brewery, 2026-11-17: "Average over 10 brews with same schema"; "Track by schema")
 export const EFF_AVERAGE_OF = 10;
-export function averageEfficiency(log = [], profileId) {
-  const last = log.filter(x => x && (!profileId || x.profile === profileId) && n(x.eff) > 0).slice(-EFF_AVERAGE_OF);
+// by Tab (its hidden key on the Brain, its stand-in in the browser): a Tab keeps its own Equipment numbers (Rule 2.62)
+export function averageEfficiency(log = [], tabKey) {
+  const last = log.filter(x => x && (!tabKey || Object.values(x.tab || {})[0] === tabKey) && n(x.eff) > 0).slice(-EFF_AVERAGE_OF);
   return last.length ? { avg: Math.round(last.reduce((a, x) => a + n(x.eff), 0) / last.length * 10) / 10, count: last.length, last } : null;
 }
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };

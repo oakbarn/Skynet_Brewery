@@ -41,7 +41,7 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
-import { Schemas } from './lib/schemas.js';
+import { Schemas, tabLockedMsg } from './lib/schemas.js';
 import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js';
 import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
@@ -452,6 +452,7 @@ function needRole(p, m) {
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/boardtalk') return 'admin';      // Board Talk (Rule 6.27): sending lines to a board is for admins
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
+  if (p === '/ui/tab/lock') return 'operator';      // brewers lock and unlock the equipment on a Tab (Rule 2.62)
   if (p === '/ui/openlink') return 'viewer';
   if (p === '/ui/patron/feature') return 'viewer';      // a Patron's Request a Feature (Rule 12.4): anyone signed in on a Patron Brain
   if (p === '/ui/brokenlink') return 'viewer';      // anyone who can read Help can report a broken link (Rule 11.10)      // an outside link opens in the default browser (anyone who can read Help)
@@ -947,7 +948,7 @@ async function route(req, res) {
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
     const q = url.searchParams;
-    if (q.get('preview') !== '1' && schemas.lockedProfile()) return fail(res, 409, lockedMsgFor(schemas.lockedProfile()));
+    { const lk = q.get('preview') !== '1' && (store.config.workspaces || []).find(w => w.equipLocked); if (lk) return fail(res, 409, tabLockedMsg(lk)); }
     const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
     const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
     const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
@@ -1014,8 +1015,10 @@ async function route(req, res) {
     return ok(res, { ...schemaView(), simulator: !!pretend, wasSim, iface: pretend?.name, real: !!real });
   }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
-  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout, only: b.only }); return ok(res, { ...schemaView(), ...r }); }
-  if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
+  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { only: b.only }); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/tab/equip' && m === 'PUT') { const b = await jsonBody(req); const eq = schemas.setTabEquip(b.tab, b.equip || {}); broadcast('config', {}); return ok(res, { equip: eq }); }      // a Tab's own Equipment numbers (Rule 2.62)
+  if (p === '/ui/tab/lock' && m === 'PUT') { const b = await jsonBody(req); const msg = schemas.lockTab(b.tab, !!b.locked, me?.name || ''); broadcast('config', {}); return ok(res, { ok: true, msg }); }      // 🔒 on a Tab's row (Rule 2.62)
+  if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action, b.id)); }
   // Open a Schema file (Fritz, 2026-11-06): the files the BruControl Importer saved in the Brewing folder's Import subfolder,
   // or a .json file sent from this browser. It becomes a new Schema; its Processes are written. A Process you already have is never
   // written over (OakBarn Brewery, 2026-11-13, Rule 9.17): one with the same name but other text comes in as Name_1 (_2 ...), and the
@@ -1102,14 +1105,14 @@ async function route(req, res) {
   if (p === '/ui/recipe/efficiency' && m === 'POST') {
     const b = await jsonBody(req), rc = currentRecipe(), w = rc && brewOnTab(store.config, rc);
     if (!rc) return fail(res, 400, 'Load or make a Recipe first: the Efficiency is worked out from its grain bill.');
-    if (!w?.equipmentProfile || !profiles.has(w.equipmentProfile)) return fail(res, 400, 'Pick the Recipe\'s Brew on Tab first (a Tab with an Equipment Profile).');
+    if (!w?.equip) return fail(res, 400, 'Pick the Recipe\'s Brew on Tab first (a Tab with Equipment numbers).');
     const eff = measuredEfficiency(rc, b.og, b.liters);
     if (eff === null) return fail(res, 400, 'Skynet could not work out an Efficiency: check the OG (like 1.052), the volume into the fermenter, and that the Recipe has grains with their Potential.');
     const date = /^\d{4}-\d{2}-\d{2}$/.test(b.date ?? '') ? b.date : new Date().toISOString().slice(0, 10);
-    const rec = { id: newKey(), date, recipe: String(rc.name || '').slice(0, 120), og: +b.og, liters: Math.round(+b.liters * 1000) / 1000, eff, tab: { [KEY]: w[KEY] }, profile: w.equipmentProfile, by: me?.name ?? '' };
+    const rec = { id: newKey(), date, recipe: String(rc.name || '').slice(0, 120), og: +b.og, liters: Math.round(+b.liters * 1000) / 1000, eff, tab: { [KEY]: w[KEY] }, by: me?.name ?? '' };
     store.config.effLog = [...(Array.isArray(store.config.effLog) ? store.config.effLog : []), rec];
     store.writeConfig(); broadcast('config', {});
-    return ok(res, { ok: true, eff, average: averageEfficiency(store.config.effLog, w.equipmentProfile) });
+    return ok(res, { ok: true, eff, average: averageEfficiency(store.config.effLog, w[KEY]) });
   }
   const effDel = /^\/ui\/recipe\/efficiency\/(k[0-9a-f]{16})$/.exec(p);
   if (effDel && m === 'DELETE') {      // a brew typed in wrong: taken out of the list (asked first in the panel)
@@ -1152,14 +1155,13 @@ async function route(req, res) {
   if (p === '/ui/equipment' && m === 'GET') return ok(res, profileView());
   if (p === '/ui/equipment' && m === 'POST') {
     const b = await jsonBody(req), made = profiles.create(b.name, b.from);
-    if (b.assign) schemas.setProfile(b.tab, made.id, { layout: b.layout });   // "Make it unique" or "Use it on this Tab": the new one goes on that Tab
+    if (b.assign && b.tab) schemas.saveTabAsProfile(b.tab, made.id);   // 💾 Save this Tab as a new Equipment Profile (Tab to Profile only, Rule 2.62)
     return ok(res, { made: made.id, list: profileView() });
   }
   // the profile's whole drawing and hardware, for 📋 Paste onto a Tab (Rule 19.6 #2); no hidden key goes with it (a paste gets its own)
   sc = /^\/ui\/equipment\/([a-z0-9-]+)\/hardware$/.exec(p);
   if (sc && m === 'GET') {
     if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
-    if (schemas.tabUsing(sc[1])) schemas.mirror();          // the Tab that uses it, as it is now
     const q = profiles.get(sc[1]);
     return ok(res, dropKeys({ graphics: q.graphics || [], hardware: q.hardware || null }));
   }

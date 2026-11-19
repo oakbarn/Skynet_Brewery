@@ -28,7 +28,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Brain**: the main computer that runs Skynet: a Raspberry Pi 4 or newer, or a Windows, Linux or Mac computer (a mini PC, desktop or laptop). It keeps every text, picture and Schema file and every saved value, so the panel can be reached from any browser. The boards (**Interfaces**) connect to it by USB or Ethernet. See [Move the Brain](119-move-brain).
 
-**Brewhouse Efficiency**: how much of the sugar in the grain really ends up in the fermenter, as a %. Skynet records it for each brew on the **Equipment Profile** and shows the average of the last 10 brews on that Schema. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Brewhouse Efficiency**: how much of the sugar in the grain really ends up in the fermenter, as a %. Each Tab has its own, copied from its Equipment Profile. Skynet records it for each brew on a Tab and shows the average of the last 10 brews on that Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Build Tab (🔨)**: the clean Tab where every new Device, Widget or copy of a Template is made first. **✅ Finish Build ...** moves it to its Tab. An unfinished Build is kept on the Brain until you finish it or discard it. See [Build Tab](55-build-tab), and every step with pictures in [Step by Step: Add a Device](207-step-by-step-add-a-device).
 
@@ -46,7 +46,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Deadband**: a heating method that steps its output % up or down toward the **Setpoint**, gentler and slower than a PID. See [Deadband Device](126-deadband-device).
 
-**Default Layout**: the vessels, fittings, IPs, pipes and hoses of one Tab, stored in that Tab's Equipment Profile. The Tab follows it, or keeps its own layout.
+**Default Layout**: the vessels, fittings, IPs, pipes and hoses an Equipment Profile holds. It is copied onto a Tab to start a build; the Tab keeps no link to it.
 
 **Default settings**: what a **new** thing starts with. Found in **☰ Menu > Default settings**. See [Default settings](155-default-settings).
 
@@ -62,7 +62,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Element**: a word Skynet does not use: a thing on a Tab is a **Device** (tied to a port on a board) or a **Widget** (app only). The one exception is a *heating element*, the real part in a kettle.
 
-**Equipment Profile**: the losses, vessels and piping on one Tab of a brewery (for example the Hot Side, or Fermentation), made on the Equipment Profile tab of the ☰ Menu. Each Tab can have its own. Any Schema can use any profile on one of its Tabs: unique to one Tab, or shared by several Schemas. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Equipment Profile**: the losses, vessels and piping of a brewery's equipment (for example the Hot Side, or Fermentation), made on the Equipment Profile tab of the ☰ Menu. It is only copied onto a Tab to start a build; after that the Tab keeps no link to it. Any Schema can start any number of Tabs from it. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Equipment Profile Interview**: a few questions (how many vessels, the type and size of each) that put your vessels on a Tab for you. See [Equipment Profile Interview](196-equipment-profile-interview).
 
@@ -180,7 +180,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 ## S
 
-**Schema**: one whole brewery setup (tabs, Devices, Widgets, pipes, settings and the Equipment Profile of each Tab), kept in its own file in the `config` folder and picked from the Schema dropdown at the top. Other programs call it a setup or configuration. The samples are ready-made Schemas. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Schema**: one whole brewery setup (tabs, Devices, Widgets, pipes, settings and the Equipment numbers of each Tab), kept in its own file in the `config` folder and picked from the Schema dropdown at the top. Other programs call it a setup or configuration. The samples are ready-made Schemas. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Semi_Widgets_Devices**: things that live only in the app like a Widget, but are On or Off like a Device: the Manual Valve Widget and the **Boolean Widgets**. See [Semi Widgets Devices](112-semi-widgets-devices).
 

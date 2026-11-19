@@ -160,7 +160,7 @@ export const ALL_TOPICS = () => [...HOT_SPOTS.map(x => x[1]), ...MENU_ALL(), ...
 // A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
 const MENU_TOPICS = {
   default: { 'Pipes, hoses': ['default-settings', 'pipes-hoses-and-sizes'], 'Default settings': ['default-settings'], Text: ['text-boxes', 'defaults'], 'How amounts show': ['recipe-tab', 'recipe-defaults'], _: ['menu', 'the-default-tab'] },
-  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-each-tab-its-equipment-profile'],
+  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'each-tab-s-equipment-numbers'],
     _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },

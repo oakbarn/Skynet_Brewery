@@ -53,22 +53,28 @@ assert.throws(() => schemas.remove(first), /loaded/);
 const p = profiles.create('10 gallon');
 assert.equal(p.trubChillerLoss, 2); assert.equal(p.units, 'Metric', 'a new profile is kept in metric (Rule 2.59)');
 assert.equal(p.batchSize, undefined, 'batch size belongs to the Recipe now');
+// a profile is only copied onto a Tab to start a build: the Tab keeps no link to it (Rule 2.62)
 schemas.setProfile('Main', p.id);
-assert.equal(store.config.workspaces.find(w => w.name === 'Main').equipmentProfile, p.id, 'the profile belongs to a Tab');
+const mainTab = () => store.config.workspaces.find(w => w.name === 'Main');
+assert.equal(mainTab().equipmentProfile, undefined, 'no link to the profile (Rule 2.62)');
+assert.equal(mainTab().equip.brewhouseEfficiency, p.brewhouseEfficiency, 'the numbers are copied onto the Tab');
+schemas.setTabEquip('Main', { brewhouseEfficiency: 81 });
+assert.equal(mainTab().equip.brewhouseEfficiency, 81, 'changed on the Tab');
+assert.equal(profiles.get(p.id).brewhouseEfficiency, p.brewhouseEfficiency, 'the profile is not changed by the Tab');
+profiles.save(p.id, { ...profiles.get(p.id), brewhouseEfficiency: 60 });
+assert.equal(mainTab().equip.brewhouseEfficiency, 81, 'the Tab is not changed by the profile');
+schemas.setProfile('Mash', p.id);
+assert.equal(store.config.workspaces.find(w => w.name === 'Mash').equip.brewhouseEfficiency, 60, 'any number of Tabs can start from one profile');
 const bz = schemas.list().find(s => s.name === 'BrewZilla').id;
 schemas.load(bz); schemas.setProfile('Equipment', p.id);
-assert.deepEqual(schemas.usedBy(p.id).sort(), ['BrewZilla', 'Oak Barn'], 'shared by two Schemas');
-assert.deepEqual(schemas.usedOn(p.id).map(u => u.schema + '/' + u.tab).sort(), ['BrewZilla/Equipment', 'Oak Barn/Main']);
-assert.throws(() => schemas.setProfile('Main', p.id), /already used on the Tab "Equipment"/, 'one Tab per Schema');
-const own = profiles.create('10 gallon (BrewZilla)', p.id); schemas.setProfile('Equipment', own.id);
-assert.deepEqual(schemas.usedBy(p.id), ['Oak Barn']);
-assert.deepEqual(schemas.usedBy(own.id), ['BrewZilla'], 'unique copy');
+assert.deepEqual(schemas.usedBy(p.id), [], 'no Schema is linked to a profile');
+const own = profiles.create('10 gallon (BrewZilla)', p.id);
 assert.throws(() => profiles.create('10 Gallon'), /already/);
 profiles.save(own.id, { ...own, equipment: [{ vesselType: 'vessel', name: 'Kettle', volume: 15, ports: { outlet: { installed: true, position: 'Center Bottom', standard: 'TC 1.5' } } }] });
 assert.equal(profiles.get(own.id).equipment[0].bundled, true, 'bundled unless switched off');
 assert.throws(() => profiles.save(own.id, { ...own, equipment: [{ vesselType: 'rocket' }] }), /unknown kind/);
 profiles.remove(own.id); schemas.dropProfile(own.id);
-assert.ok(!store.config.workspaces.some(w => w.equipmentProfile === own.id), 'a deleted profile is taken off its Tabs');
+assert.ok(store.config.workspaces.find(w => w.name === 'Equipment').equip, 'a deleted profile leaves the Tab its numbers');
 
 // backups (Rule 9.17): <Schema name>_yyyymmddThhmm.BacUp, never overwritten (a second one in the same minute gets _2), no daily ones;
 // restore puts it back (and backs up first)
@@ -93,90 +99,69 @@ schemas.remove(bz);
 assert.equal(schemas.list().length, 1);
 assert.equal(fs.readdirSync(path.join(dir, 'config', 'schemas', 'deleted')).length, 1);
 
-// the Equipment Profile stores the equipment and piping; every Schema using it shows the same drawing
+// 💾 Save as a profile: the Tab's drawing is copied into the profile, one direction only; the Tab keeps it and no link (Rule 2.62)
 const kettle = { id: 'g1', kind: 'vessel', vesselType: 'vessel', workspace: 'Equipment', name: 'Kettle' };
 const pipe = { id: 'g2', kind: 'pipe', workspace: 'Equipment', points: [[0, 0], [10, 0]] };
 const pic = { id: 'g3', kind: 'image', workspace: 'Main', src: 'x.png' };
 store.saveLayout({ graphics: [kettle, pipe, pic] });
 const shared = profiles.create('Shared rig');
-let r = schemas.setProfile('Equipment', shared.id);
-assert.equal(r.took, true, 'a profile with no drawing takes what is on the tabs');
-assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'equipment and pipes in the profile');
-assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.map(g => g.id), ['g3'], 'the Schema file keeps the rest');
+schemas.saveTabAsProfile('Equipment', shared.id);
+assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'equipment and pipes copied into the profile');
+assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3'], 'the Tab keeps its drawing');
+store.saveLayout({ graphics: [...store.config.graphics, { id: 'g4', kind: 'pipe', workspace: 'Equipment' }] });
+assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'a later change on the Tab never goes into the profile');
 schemas.create('Second', { empty: true });
 assert.equal(store.config.devices.length, 0, 'a new empty Schema: no Interface');
 schemas.setProfile('Equipment', shared.id);
-assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2'], 'a second Schema shows the shared drawing');
-assert.ok(store.config.workspaces.some(w => w.name === 'Equipment'));
-store.saveLayout({ graphics: [...store.config.graphics, { id: 'g4', kind: 'pipe', workspace: 'Equipment' }] });
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2'], 'a copy of the profile goes on the Tab');
+store.saveLayout({ graphics: [...store.config.graphics, { id: 'g5', kind: 'pipe', workspace: 'Equipment' }] });
+const sec = schemas.list().find(s => s.name === 'Second').id;
 schemas.load(first);
-assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3', 'g4'], 'a pipe added in one Schema shows in the other');
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3', 'g4'], 'a pipe added in one Schema never shows in another');
+assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'nor in the profile');
 
-// locks: by hand or lock_Equipment in a Process; layout changes to equipment / pipes are refused while locked
+// locks are on the Tab: lock_Equipment (every Tab with equipment) or 🔒 on one Tab; a profile's own lock only keeps the profile
 assert.match(schemas.lock(true, 'Process Brew_Day'), /locked/);
 assert.throws(() => schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'g4')), /locked/);
 schemas.checkLayout(store.config.graphics.map(g => g.id === 'g3' ? { ...g, x: 50 } : g));   // a picture may still move
-assert.throws(() => profiles.save(shared.id, { ...profiles.get(shared.id), batchSize: 10 }), /locked/);
-assert.throws(() => schemas.setProfile('Equipment', null), /locked/);
+assert.throws(() => schemas.setProfile('Equipment', shared.id), /locked/);
+profiles.save(shared.id, { ...profiles.get(shared.id), notes: 'free' });                     // the profile is not frozen by a Tab
 schemas.lock(false, 'fritz');
 schemas.checkLayout([]);
-const sec = schemas.list().find(s => s.name === 'Second').id;
+schemas.lockTab('Equipment', true, 'fritz');
+assert.throws(() => schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'g4')), /"Equipment" is locked/);
+const kept = schemas.keepTabProfiles(store.config.workspaces.map(w => ({ name: w.name, equipmentProfile: 'x', layoutFromProfile: false })));
+assert.ok(kept.find(w => w.name === 'Equipment').equipLocked && kept.every(w => w.equipmentProfile === undefined && w.layoutFromProfile === undefined), 'a layout save keeps the lock and never a link');
+schemas.lockTab('Equipment', false, 'fritz');
+schemas.checkLayout([]);
+schemas.lockProfile(shared.id, true, 'fritz');
+assert.throws(() => profiles.save(shared.id, { ...profiles.get(shared.id), notes: 'x' }), /locked/);
+schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'g4'));                          // ... and never a Tab
+schemas.lockProfile(shared.id, false, 'fritz');
 schemas.dropProfile(shared.id, profiles.get(shared.id).graphics); profiles.remove(shared.id);
-assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(sec))).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4'], 'a deleted profile leaves its drawing in each Schema');
-assert.ok(!store.config.workspaces.some(w => w.equipmentProfile === shared.id));
+assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(sec))).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g5'], 'a deleted profile changes no Schema');
 
-// Default Layout: a Schema follows its profile's layout, or keeps its own (Fritz: the tabs change only when you choose)
-const rigB = profiles.create('Rig B');
-schemas.setProfile('Equipment', rigB.id);
-assert.deepEqual(profiles.get(rigB.id).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4'], 'a new profile takes the tabs as its Default Layout');
-const rigC = profiles.create('Rig C'); profiles.setDrawing(rigC.id, [{ id: 'c1', kind: 'vessel', workspace: 'Equipment' }], 'Equipment');
-r = schemas.setProfile('Equipment', null); r = schemas.setProfile('Equipment', rigC.id, { layout: 'keep' });
-const eqTab = () => store.config.workspaces.find(w => w.name === 'Equipment');
-assert.equal(eqTab().layoutFromProfile, false);
-assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3', 'g4'], 'keep: the tabs stay as they are');
-store.saveLayout({ graphics: [...store.config.graphics, { id: 'g5', kind: 'pipe', workspace: 'Equipment' }] });
-assert.deepEqual(profiles.get(rigC.id).graphics.map(g => g.id), ['c1'], 'keep: the profile\'s Default Layout is not touched');
-assert.ok(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.some(g => g.id === 'g5'), 'keep: the drawing stays in the Schema file');
-schemas.load(sec); schemas.load(first);
-assert.ok(store.config.graphics.some(g => g.id === 'g5') && !store.config.graphics.some(g => g.id === 'c1'), 'keep survives a reload');
-schemas.layoutAction('Equipment', 'save');
-assert.deepEqual(profiles.get(rigC.id).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4', 'g5'], 'save: the tabs become the Default Layout');
-assert.equal(eqTab().layoutFromProfile, undefined);
-profiles.setDrawing(rigC.id, [{ id: 'c2', kind: 'vessel', workspace: 'Equipment' }], 'Equipment');
-schemas.layoutAction('Equipment', 'use');
-assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['c2', 'g3'], 'use: the Default Layout goes on the tabs, pictures stay');
-schemas.layoutAction('Equipment', 'keep'); assert.equal(eqTab().layoutFromProfile, false);
-assert.throws(() => schemas.layoutAction('Equipment', 'nope'), /Unknown/);
-schemas.layoutAction('Equipment', 'save');
+// ☰ Menu > Default Layout: save a Tab into a profile, or put a profile's copy on a Tab
+const rigC = profiles.create('Rig C'); profiles.setDrawing(rigC.id, [{ id: 'c2', kind: 'vessel', workspace: 'Equipment' }], 'Equipment');
+schemas.layoutAction('Equipment', 'use', rigC.id);
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['c2', 'g3'], 'use: a copy of the drawing goes on the Tab, pictures stay');
+assert.throws(() => schemas.layoutAction('Equipment', 'nope', rigC.id), /Unknown/);
+const rigD = profiles.create('Rig D');
+schemas.layoutAction('Equipment', 'save', rigD.id);
+assert.deepEqual(profiles.get(rigD.id).graphics.map(g => g.id), ['c2'], 'save: the Tab goes into the profile');
 
-// one Equipment Profile per Tab (Fritz, 2026-10-21): a Hot Side Tab and a Fermentation Tab, each with its own list
+// the same profile on a Tab of another Schema whose names are taken: the copy gets new ids and names, nothing clashes
 store.config.workspaces.push({ name: 'Fermentation' }); store.writeConfig();
 const ferm = profiles.create('Fermentation room');
 store.saveLayout({ graphics: [...store.config.graphics, { id: 'f1', kind: 'vessel', vesselType: 'vessel', workspace: 'Fermentation', name: 'FV1' }, { id: 'f2', kind: 'ip', workspace: 'Fermentation', attachTo: 'f1', port: 'outlet' }] });
-schemas.setProfile('Fermentation', ferm.id);
+schemas.saveTabAsProfile('Fermentation', ferm.id);
 assert.deepEqual(profiles.get(ferm.id).graphics.map(g => g.id), ['f1', 'f2'], 'only the Fermentation Tab is in its profile');
-assert.ok(!profiles.get(rigC.id).graphics.some(g => g.workspace === 'Fermentation'), 'the Hot Side profile keeps its own Tab');
-assert.equal(profiles.get(ferm.id).tab, 'Fermentation');
-assert.ok(!JSON.parse(fs.readFileSync(schemas.file(store.config.schema.id))).graphics.some(g => ['f1', 'f2', 'c2'].includes(g.id)), 'both drawings live in their profiles');
-schemas.load(sec); schemas.load(first);
-assert.ok(['c2', 'f1', 'f2'].every(id => store.config.graphics.some(g => g.id === id)), 'both come back on load');
-// a lock on one Tab's profile leaves the other Tab free; lock_Equipment locks them all
-schemas.lockProfile(ferm.id, true, 'fritz');
-assert.throws(() => schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'f2')), /Fermentation/);
-schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'c2'));
-assert.match(schemas.lock(true, 'Process Brew_Day'), /"Rig C", "Fermentation room" locked|"Fermentation room", "Rig C" locked/);
-schemas.lock(false, 'fritz');
-// the same profile on a Tab of another Schema whose names are taken: the copy gets new ids and names, nothing clashes
 const third = schemas.create('Third', { empty: true });
-assert.equal(store.config.devices.length, 0, 'a new empty Schema: no Interface');
 store.saveLayout({ graphics: [{ id: 'f1', kind: 'vessel', vesselType: 'vessel', workspace: 'Main', name: 'FV1' }] });
 schemas.setProfile('Equipment', ferm.id);
 const put = store.config.graphics.filter(g => g.workspace === 'Equipment');
 assert.equal(put.length, 2); assert.ok(put.every(g => g.id !== 'f1') && put[0].name === 'FV1_2', 'new id and name');
 assert.equal(put.find(g => g.kind === 'ip').attachTo, put.find(g => g.kind === 'vessel').id, 'its IP still points at it');
-// the layout save keeps each Tab's profile (it is changed on the ☰ Menu only)
-store.saveLayout({ workspaces: schemas.keepTabProfiles(store.config.workspaces.map(w => ({ name: w.name, id: w.id }))) });
-assert.equal(store.config.workspaces.find(w => w.name === 'Equipment').equipmentProfile, ferm.id);
 schemas.load(first);
 
 // Schema versions: <name>_yyyymmdd_hh_mm, kept under that file name; the version survives a reload and can be restored
@@ -246,15 +231,13 @@ delete hw.allOff;
   const sc2 = new Schemas(st2, { engine, hw, profiles: prof2 });
   sc2.ensure();
   assert.equal(st2.config.equipmentProfile, undefined, 'no Schema-wide profile any more');
-  assert.equal(st2.config.workspaces.find(w => w.name === 'Brewhouse').equipmentProfile, old.id, 'it goes on the Tab with the most equipment');
-  assert.deepEqual(prof2.get(old.id).graphics.map(g => g.id), ['k', 'h'], 'the profile keeps the drawing of that Tab');
-  assert.equal(prof2.get(old.id).tabs, undefined);
-  const mine = JSON.parse(fs.readFileSync(sc2.file('mine')));
-  assert.deepEqual(mine.graphics.map(g => g.id), ['c'], 'the Cellar Tab keeps its equipment, in the Schema itself');
-  const oth = JSON.parse(fs.readFileSync(sc2.file('other')));
-  assert.equal(oth.equipmentProfile, undefined);
-  assert.deepEqual(oth.graphics.map(g => g.id).sort(), ['c', 'h', 'k'], 'a Schema that is not loaded keeps every piece it showed');
-  assert.equal(oth.workspaces.find(w => w.name === 'Brewhouse').equipmentProfile, old.id);
+  const bh = st2.config.workspaces.find(w => w.name === 'Brewhouse');
+  assert.equal(bh.equipmentProfile, undefined, 'no link left (Rule 2.62)');
+  assert.ok(bh.equip, 'the Tab with the most equipment takes a copy of the numbers');
+  assert.deepEqual(st2.config.graphics.map(g => g.id).sort(), ['c', 'h', 'k'], 'every Tab keeps its equipment');
+  sc2.load('other');
+  assert.deepEqual(st2.config.graphics.map(g => g.id).sort(), ['c', 'h', 'k'], 'a Schema that was not loaded keeps every piece it showed');
+  assert.ok(!st2.config.workspaces.some(w => w.equipmentProfile), 'and loses its link when loaded');
   clearTimeout(st2._persistTimer);
 }
 

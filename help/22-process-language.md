@@ -250,9 +250,9 @@ If you add a step in the middle, the numbers after it move up by themselves. Nev
 
 While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **gGlobal** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
 
-## Lock the Equipment Profile
+## Lock the equipment
 
-`lock_Equipment` locks the Equipment Profiles of every Tab of the loaded Schema (usually the Hot Side and Fermentation profiles), so their numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks them again. Put them on a line of their own, for example at the start and end of a brew day:
+`lock_Equipment` locks the equipment on every Tab of the loaded Schema that has equipment (usually the Hot Side and Fermentation Tabs), so its vessels, IPs, pipes and hoses can't be changed. `unlock_Equipment` unlocks them again. Put them on a line of their own, for example at the start and end of a brew day:
 
 ```
 lock_Equipment
@@ -261,4 +261,4 @@ step "Mash in"
 unlock_Equipment
 ```
 
-The Process output says which profiles were locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.
+The Process output says which Tabs were locked. The 🔒 Locked switch on a Tab's row of ☰ Menu > Equipment Profile does the same for one Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.
