@@ -44,7 +44,7 @@ Le côté alternatif du régulateur (l'alimentation GFCI et la résistance) est 
 
 ## Étape 7. Ajouter le Device dans Skynet {#step-7-add-the-device-in-skynet}
 
-Ajoutez un **Heating Element: PWM (0 to 100%)** (Select Device Type : **Heating Element**) sur le Port **D44** de votre Mega, comme dans [Pas à pas : ajouter un Device](207-step-by-step-add-a-device). Un True PWM Port envoie le % en PWM, ce dont le module a besoin.
+Ajoutez un **Heating Element: PWM (0 to 100%)** (Select Device Type : **Heating Element**) sur le Port **D44** de votre Mega, comme dans [Pas à pas : ajouter un Device](207-step-by-step-add-a-device). Cette ligne commence avec son **Hardware Controller** réglé sur **DAC / 0-10 V** : seul un DAC / 0-10 V sur un True PWM Port reçoit le % en PWM, ce dont le module a besoin. Laissez-le sur DAC / 0-10 V.
 
 Pour une vanne proportionnelle ou une commande de vitesse de pompe, choisissez plutôt **Analog output 0-10 V** (Select Device Type : **PWM / Analog out**).
 

@@ -20,7 +20,7 @@ import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTy
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
+import { HEAT_METHODS, heatSendsPwm, switchedBy, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
@@ -5509,7 +5509,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     if (pick === 'valve') e._pickedValve = true;       // its Add box has the Valve Profile dropdown
     const ok = await newDeviceDialog(e, prefix, what); delete e._title; delete e._pickedValve;
     if (!ok) return;
-    if (isHeatElem(e)) e.pwm = pwmPinOk(e);      // the Port picked decides how its % goes out (Rule 6.19)
+    if (isHeatElem(e)) e.pwm = heatSendsPwm(e, pwmPinOk(e));      // its Hardware Controller and Port decide how its % goes out (Rule 6.19)
     if (isHeatElem(e) && startMethod(e) !== 'onoff') e._openMethod = true;      // its Method's settings show first (entry 3 markup)
   }
   if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
@@ -5659,7 +5659,7 @@ const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element
 const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'H_Element'];
 const HEAT_ROWS = () => [['DO On/Off (relay, SSR, contactor)', 'onoff'], ['PWM (0 to 100%)', 'pwm'], ['DutyC (Duty % per Cycle)', 'dutyCycle'],
   ['HYS (Target and Offset)', 'hysteresis'], ['PID (Holds a Set Temperature)', 'pid'], ['Precise (Holds to 0.1 Degree)', 'precise'], ['Deadband (Steps its %)', 'deadband']]
-  .map(([w, k]) => ['Heating Element: ' + w, 'element', 'H_Element', { heatMethod: k }]);
+  .map(([w, k]) => ['Heating Element: ' + w, 'element', 'H_Element', { heatMethod: k, ...(k === 'pwm' ? { switchedBy: 'dac' } : {}) }]);      // the PWM row starts on DAC / 0-10 V (Rule 6.19)
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -8715,13 +8715,15 @@ function heatFields(it, x = {}) {
     ...(m !== 'onoff' ? [DISPLAY_FIELD('heat', { ...x, tip: ELEM_DISPLAY_TIP })] : []),
   ];
 }
-// The Port picked decides how a % reaches the element (OakBarn Brewery, 2026-11-16: "question 4 2 rows"; Rule 6.19): a PWM Port sends it as
-// PWM, a plain Port turns the element fully On for its % of each Output window (a "Pseudo PID"). Each says what to wire to it ("Yes to all
+// The Hardware Controller and the Port decide how a % reaches the element (OakBarn Brewery, 2026-11-16: "question 4 2 rows"; 2026-11-19:
+// "Hardware Controller decides"; Rule 6.19): a DAC / 0-10 V on a PWM Port gets it as PWM; anything else turns the element fully On for its
+// % of each Output window (a "Pseudo PID"), even on a PWM Port, so an SSR on a PWM Port is safe. Each says what to wire to it ("Yes to all
 // recomendations": the PWM wiring note; the Help requirement of 2026-11-15 for a plain Port).
-const PORT_PWM_NOTE = 'PWM Port: Skynet sends the % as PWM. Wire it to a PWM-to-0-10 V module and a 0-10 V power controller, not straight to a zero-cross SSR: the board switches hundreds of times a second and a zero-cross SSR can follow only 120 a second (60 Hz), so the power comes out uneven. Smooth power helps most in a RIMS tube or a still column.';
-const PORT_PLAIN_NOTE = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nPlain Port (a Pseudo PID): Skynet turns the element fully On for its % of each Output window, so it switches On and Off many times a minute. That quickly wears out any mechanical switching device: a mechanical relay, a relay module with mechanical relays (the common Arduino relay boards), a contactor, a motorized or mechanical timer switch. Use a Solid State Relay (SSR).';
-const portNote = it => ['_portNote', !it.device || it.channel === undefined || it.channel === '' ? 'Pick its Port: a PWM Port sends the % as PWM, a plain Port turns it On for its % of each Output window.'
-  : pwmPinOk(it) ? PORT_PWM_NOTE : PORT_PLAIN_NOTE, 'note'];
+const PORT_PWM_NOTE = 'DAC / 0-10 V on a PWM Port: Skynet sends the % as PWM. Wire it to a PWM-to-0-10 V module and a 0-10 V power controller, not straight to a zero-cross SSR: the board switches hundreds of times a second and a zero-cross SSR can follow only 120 a second (60 Hz), so the power comes out uneven. Smooth power helps most in a RIMS tube or a still column.';
+const PORT_PLAIN_NOTE = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nPseudo PID: Skynet turns the element fully On for its % of each Output window, so it switches On and Off many times a minute. That quickly wears out any mechanical switching device: a mechanical relay, a relay module with mechanical relays (the common Arduino relay boards), a contactor, a motorized or mechanical timer switch. Use a Solid State Relay (SSR). Only a Hardware Controller of DAC / 0-10 V on a PWM Port gets PWM.';
+const DAC_PLAIN_NOTE = '⚠ DAC / 0-10 V needs a PWM Port (a Mega: D2-D13 or D44-D46). On this Port Skynet turns the element fully On for its % of each Output window, which a PWM-to-0-10 V module can not use. Pick a PWM Port.';
+const portNote = it => ['_portNote', !it.device || it.channel === undefined || it.channel === '' ? 'Pick its Port: a DAC / 0-10 V on a PWM Port gets the % as PWM; anything else turns it On for its % of each Output window.'
+  : heatSendsPwm(it, pwmPinOk(it)) ? PORT_PWM_NOTE : switchedBy(it) === 'dac' ? DAC_PLAIN_NOTE : PORT_PLAIN_NOTE, 'note'];
 // The keys a method's ⬢ dialog sets: its Use Method switch, the Probe the methods share, and its own settings
 const methodSetKeys = k => ['methodSpot_' + k, ...(NEEDS_PROBE.includes(k) ? ['input'] : []), ...HEAT_SETTINGS[k].map(s => s[1]),
   ...(k === 'hysteresis' ? ['predictive'] : []), ...(AUTO_PERCENT_METHODS.includes(k) ? ['reversed'] : [])];
@@ -9860,7 +9862,7 @@ const DEVICE_TIPS = {
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_TEMP@1W_HLT_BH, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_TEMP@1W_HLT_BH. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  switchedBy: 'Hardware Controller: what turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 1 to 5 °F and an On delay of at least 10 seconds. Picking one sets the On offset and On delay for you: Optical SSR 0.5 and 0 seconds, Contactor 1 and 10 seconds, Mechanical relay 1 and 10 seconds. Nothing else changes. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
+  switchedBy: 'Hardware Controller: what turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 1 to 5 °F and an On delay of at least 10 seconds. DAC / 0-10 V (a PWM-to-0-10 V module and a 0-10 V power controller): the only one that gets PWM, PID, Deadband and Precise as PWM, and only on a PWM Port; every other one gets them the plain-Port way (a Pseudo PID), even on a PWM Port. Its On offset is 0.5 to 3 °F like an Optical SSR. Picking one sets the On offset and On delay for you: Optical SSR 0.5 and 0 seconds, Contactor 1 and 10 seconds, Mechanical relay 1 and 10 seconds, DAC / 0-10 V 0.5 and 0 seconds. Nothing else changes. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
   controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH'),
   elemTog: 'One click turns this Element On or Off at once, the same as one click on it on the Tab (Rule 2.33). On / Off is the Device itself: it is On in whatever method it is in, and Direct is 100 % On. Picking a method never turns it On (Rule 6.19).',
   methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
@@ -11647,7 +11649,7 @@ async function editItem(kind, id) {
     // locks the IP or fitting, and 🔓 Unlock All passes it by
     if (work.noUnlock) work.locked = true; else delete work.noUnlock;
     if (kind === 'el' || isTapMv(item)) dbFromWork(work, item);
-    if (kind === 'el' && isHeatElem({ ...item, ...work })) work.pwm = pwmPinOk({ ...item, ...work });      // the Port picked decides (Rule 6.19)
+    if (kind === 'el' && isHeatElem({ ...item, ...work })) { const w = { ...item, ...work }; work.pwm = heatSendsPwm(w, pwmPinOk(w)); }      // Hardware Controller + Port decide (Rule 6.19)
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
       if (item.onVessel && !work.joined && !isUnit(item)) { delete work.onVessel; delete work.onPort; }

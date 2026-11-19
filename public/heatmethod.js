@@ -158,12 +158,18 @@ export const SWITCHED_BY = [
   ['ssr', 'Optical SSR', 0.5, 3, 0, 0.5, 0],
   ['contactor', 'Contactor', 1, 5, 10, 1, 10],
   ['relay', 'Mechanical relay', 1, 5, 10, 1, 10],
+  // a PWM-to-0-10 V module and a 0-10 V power controller (OakBarn Brewery, 2026-11-19, "Hardware Controller decides"): the only one
+  // that gets a % as PWM, and only on a PWM Port (Rule 6.19). Its Hysteresis is full On / Off, the same range as an Optical SSR.
+  ['dac', 'DAC / 0-10 V', 0.5, 3, 0, 0.5, 0],
 ];
 // [key, word, smallest Offset size, largest Offset size, shortest On delay (s), the Offset size and On delay it gets when picked] (°F)
 // Picking a Hardware Controller sets its On offset and On delay (OakBarn Brewery, 2026-11-10: Optical SSR .5 and 0, Contactor 1 and 10,
 // Mechanical relay 1 and 10)
 export const switchedBy = el => SWITCHED_BY.some(s => s[0] === el?.switchedBy) ? el.switchedBy : 'ssr';
 export const switchedByChoices = () => SWITCHED_BY.map(s => [s[0], s[1]]);
+// Does this Heating Element send its % as PWM? Only when its Hardware Controller is DAC / 0-10 V and its Port can do true PWM
+// (Rule 6.19, OakBarn Brewery, 2026-11-19): an SSR, Contactor or relay on a PWM Port gets the plain-Port way (a Pseudo PID).
+export const heatSendsPwm = (el, pwmPortOk) => switchedBy(el) === 'dac' && !!pwmPortOk;
 const isCelsius = u => /c/i.test(String(u ?? '')) && !/f/i.test(String(u ?? ''));
 // { min, max, delay, u } for this Heating Element; probe = its Temperature Probe (for °C), or null (°F)
 export function heatHysRange(el, probe) {

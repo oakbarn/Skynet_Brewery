@@ -6,7 +6,7 @@ import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /\['heat', 'Heating Element', \[\.\.\.HEAT_ROWS\(\), \['RIMs Tube: \(Skynet Device with Heating Element and Temperature Probe Embedded\)', \.\.\.am\('RIMS tube'\)\.slice\(1\)\],\s*\['Vessel Device Template \(Heating Element and Temperature Probe Embedded\)', \.\.\.VESSEL_ELEMENT\.slice\(1\)\]\]\]/, 'one row per Method, then RIMs Tube and the Vessel Device Template (entry 3)');
-assert.match(app, /'Heating Element: ' \+ w, 'element', 'H_Element', \{ heatMethod: k \}/, 'each row is one Heating Element on its Method');
+assert.match(app, /'Heating Element: ' \+ w, 'element', 'H_Element', \{ heatMethod: k[,} ]/, 'each row is one Heating Element on its Method');
 assert.ok(!/\['heat', 'Heating Element',[^\n]*control outputs/.test(app), 'no separate control Devices for heaters (One Port, One Device)');
 assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'H_Element'\]/);
 assert.match(app, /const ELEM_MODELS = \[\['Skynet Heating Element', 'sky'[^\]]*\], \['User Defined Heating Element/, 'step 2 picks the element');

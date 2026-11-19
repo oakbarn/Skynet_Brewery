@@ -12,6 +12,7 @@ peut tenir le Setpoint de près, pour que la pièce qui commute dure.
 | **Optical SSR** (relais statique, au départ) | -0.5 à -3 °F | n'importe lequel | Pas de pièces mobiles : il peut basculer souvent. |
 | **Contactor** (contacteur) | -1 à -5 °F | au moins 10 secondes | Ses contacts s'usent un peu à chaque fermeture. Des chauffes moins nombreuses et plus longues les font durer. |
 | **Mechanical relay** (relais mécanique) | -1 à -5 °F | au moins 10 secondes | Comme un contacteur. |
+| **DAC / 0-10 V** (un module PWM vers 0-10 V et un variateur de puissance 0-10 V) | -0.5 à -3 °F | n'importe lequel | Le seul qui reçoit PWM, PID, Deadband et Precise en PWM, et seulement sur un port PWM (Help 150). |
 
 Avec une sonde en °C, les nombres sont convertis : un Optical SSR -0.3 à -1.7 °C, un contacteur ou un relais mécanique -0.6 à -2.8 °C.
 

@@ -45,3 +45,24 @@ ctl.tick(13000);
 assert.equal(store.getProp('hC', 'output'), true, 'then heats');
 clearTimeout(store._persistTimer);
 console.log('heat hysteresis range tests passed');
+
+// Hardware Controller decides PWM (OakBarn Brewery, 2026-11-19, Rule 6.19): only DAC / 0-10 V on a PWM Port sends the % as PWM
+{
+  const { heatSendsPwm, switchedByChoices } = await import('../public/heatmethod.js');
+  const { assignIds } = await import('../public/naming.js');
+  assert.ok(switchedByChoices().some(([k, w]) => k === 'dac' && w === 'DAC / 0-10 V'), 'DAC / 0-10 V is a Hardware Controller');
+  assert.equal(heatSendsPwm(he(), true), false, 'an Optical SSR on a PWM Port gets the Pseudo PID (the HLT element on D8)');
+  assert.equal(heatSendsPwm(he({ switchedBy: 'contactor' }), true), false);
+  assert.equal(heatSendsPwm(he({ switchedBy: 'dac' }), true), true, 'a DAC / 0-10 V on a PWM Port gets PWM');
+  assert.equal(heatSendsPwm(he({ switchedBy: 'dac' }), false), false, 'a DAC / 0-10 V on a plain Port does not');
+  assert.equal(heatHysProblem(he({ switchedBy: 'dac', onOffset: -1 }), { units: '°F' }), null, 'its Hysteresis range is an Optical SSR\'s');
+  const c = { devices: [], workspaces: [], elements: [he({ pwm: true }), he({ name: 'hE2' })] };
+  assignIds(c);
+  assert.equal(c.elements[0].switchedBy, 'dac', 'a Heating Element saved sending PWM keeps it, as a DAC / 0-10 V');
+  assert.equal(c.elements[1].switchedBy, undefined, 'one not sending PWM is left alone');
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /e\.pwm = heatSendsPwm\(e, pwmPinOk\(e\)\)/, 'Add sets it from the Hardware Controller and the Port');
+  assert.match(app, /work\.pwm = heatSendsPwm\(w, pwmPinOk\(w\)\)/, 'Properties Save does too');
+  assert.match(app, /k === 'pwm' \? \{ switchedBy: 'dac' \}/, 'the Heating Element: PWM row starts on DAC / 0-10 V');
+  console.log('hardware controller decides PWM ok');
+}
