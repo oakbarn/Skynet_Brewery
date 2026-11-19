@@ -10673,7 +10673,7 @@ function semiGraphic(label, obj) {
   const draw = () => {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const w = { ...obj, visibility: 'visible', hidden: false };      // shown even when it is hidden on its Tab
-    for (const k of ['imageOff', 'imageOverlay']) if (q(k)) w[k] = q(k).value;
+    for (const k of ['imageOff', 'imageOverlay']) if (q(k)) w[k] = String(q(k).value).replace(/[<>"'&]/g, '');      // a picture path only: no HTML characters
     let n = null; const was = editing; editing = false;
     try { n = buildEl(w); } catch { n = null; } finally { editing = was; }
     try { if (n) fillEl(n, w); } catch { }      // in Edit layout fillEl shows the item's own pictures (the boxes above), not the Brain's last ones
