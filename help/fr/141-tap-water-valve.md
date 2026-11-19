@@ -26,7 +26,18 @@ Bib ou près de lui, et son IP va au plus proche des 8 endroits du bord de sa bo
 - **Fermé** : rien ne sort ; tout flexible branché est bloqué.
 - **Ouvert** : c'est une **source d'eau du réseau**. Le débit sort par la sortie sans pompe, et le débit est **bleu eau du réseau**
   (Règle Skynet 5.21 : l'eau du réseau l'emporte sur toutes les autres Flow Colors).
-- Il ne coupe pas un tuyau sur lequel on le pose, car il n'a qu'un IP (une vanne en demande deux pour se placer dans un tuyau, Règle Skynet 5.26).
+- Il ne coupe pas un tuyau sur lequel on le pose : son Inlet et sa sortie pour tuyau ne sont pas en ligne (Règles Skynet 5.26 et 18.52).
+
+## Son IP Inlet : le tuyau d'eau de la maison {#its-inlet-ip-the-house-water-pipe}
+
+Comme une Motorized Valve, il a aussi un **IP Inlet** sur la face extérieure du filetage du côté du mur (Règle Skynet 18.52). Il tourne
+avec l'image, donc en Vertical il est en haut ou en bas (la case **Inlet**). Joignez-y un tuyau pour dessiner le tuyau d'eau de la maison.
+
+- **Rien sur l'Inlet** : la plomberie de la maison n'est pas dessinée, et le Hose Bib a toujours de l'eau (comme avant).
+- **Un tuyau sur l'Inlet, Hose Bib ouvert** : l'eau entre le long de ce tuyau, vers le Hose Bib, en bleu eau du réseau.
+- **Une vanne sur ce tuyau** : elle doit être ouverte aussi. Fermée, il n'y a pas d'eau, donc rien ne coule dans le tuyau de l'Inlet
+  et rien ne sort non plus du flexible. Une vanne ouverte dont l'autre côté n'a rien de joint compte comme l'arrivée d'eau de la maison.
+- **Du côté du flexible** : une vanne fermée au bout du flexible ou du tuyau arrête le débit sur celui-ci, comme sur tout tuyau.
 
 ## L'ouvrir et le fermer {#opening-and-closing-it}
 
@@ -50,14 +61,18 @@ Ses Properties sont la fenêtre **Hose Bib Widget**, avec le même aspect et le 
 **No Unlock** dans la ligne du titre, **State** (un curseur, Open ou Closed maintenant), **1. Label** et **Label Visible** (🏷 Update
 to Suggested Name apparaît dès que le Label change), **2. Tab** avec **Layer Order** dessous, **3. Name** avec la case **Change
 Name** et **✏ Change Name**, le Suggested Name, le **Graphic** (sa seule image Skynet avec son Hose ou Pipe intérieur, tenue à jour),
-**Orientation** avec **Left / Right**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
+**Orientation** avec **Left / Right** et **Inlet**, **Hose or Pipe**, **Cover** avec **Toggle**, **Overlay** avec **Database and .API ⬢**,
 **Inlet IP Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** et **Height** sur une ligne, et
 le Widget Type (Règle Skynet 18.48). Il n'y a pas de case Picture (un Hose Bib a une seule image Skynet) ni de case IP (le flexible
 ou le tuyau que vous joignez la fixe, voir plus haut).
 
-**Orientation** et **Left / Right** : Horizontal Right est l'image telle qu'elle est dessinée (le mur à droite), Horizontal Left
-est son miroir (le mur à gauche). Vertical la tourne pour un robinet sur un tuyau qui monte et descend : Vertical Left tourne la
-poignée vers la gauche (le mur au-dessus), Vertical Right vers la droite (le mur en dessous).
+**Orientation**, **Left / Right** et **Inlet** : un Hose Bib se place comme une Motorized Valve, sa poignée faisant office de
+« moteur » (Règle Skynet 18.52). Horizontal Right est l'image telle qu'elle est dessinée (l'Inlet, le côté du mur, à droite),
+Horizontal Left est son miroir (l'Inlet à gauche) ; la case Inlet est grisée sur Horizontal. Vertical est pour un robinet sur un
+tuyau qui monte et descend : **Inlet** met le côté du mur en haut (**Top**, un tuyau qui vient d'en haut) ou en bas (**Bottom**, un
+tuyau qui vient d'en bas), et **Left / Right** est le côté vers lequel pointe la poignée. Cela donne 4 vues verticales : Inlet Top
+avec la poignée à gauche ou à droite, et Inlet Bottom avec la poignée à gauche ou à droite. Un Hose Bib fait avant la case Inlet
+garde son allure (Vertical Left : Inlet Top ; Vertical Right : Inlet Bottom).
 
 Son seul IP est sur un des 8 endroits du bord de sa boîte (Bottom Middle, Bottom Left, Bottom Right, Left Middle, Right Middle,
 Top Left, Top Middle, Top Right), le côté du mur aussi (Règle Skynet 18.49), comme une Pump. Le flexible ou le tuyau joint choisit
@@ -80,8 +95,8 @@ un programme extérieur ou une commande vocale peut le lire, ou, avec .API Read 
 est demandé **à la main**, comme par une ligne de Process : le Tab affiche « Open it by hand », quelqu'un tourne le vrai robinet et
 clique dessus, et son .state le confirme alors.
 
-**Inlet IP Fitting** : le raccord du côté du mur, là où arrive le tuyau de la maison (MPT1/2 au départ). Il n'a pas d'IP sur le Tab,
-c'est donc une information seulement.
+**Inlet IP Fitting** : le raccord du côté du mur, là où arrive le tuyau de la maison (MPT1/2 au départ), sur son IP Inlet (voir plus
+haut). Le raccord lui-même est une information seulement.
 
 **Outlet IP Fitting** : l'End Fitting de son seul IP (Règles Skynet 2.57 et 18.49). Un robinet de jardin a un filetage mâle de tuyau
 d'arrosage, **MGH3/4**, et c'est ce qu'il a au départ. **FGH3/4** est le filetage femelle de tuyau d'arrosage. Un flexible ou un

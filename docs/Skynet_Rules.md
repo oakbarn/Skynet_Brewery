@@ -2072,6 +2072,8 @@ hose outlet; thread "Add hose bib Manual Valve Widget", Help 141).
   *Changed (Rule 18.45, 2026-11-18):* it is a **Hose Bib**, sized by hand like a Pump, with its own short Hose or Pipe to its one IP.
   *Changed (Rule 18.49, 2026-11-18):* its one IP may be on any of the **8 spots** of its box, the wall side too, and it has an End
   Fitting (Outlet IP Fitting, MGH3/4 to start).
+  *Changed (Rule 18.52, 2026-11-19):* it also has an **Inlet IP** on its wall side's thread; a pipe on it is the house water pipe,
+  and a closed valve on that side stops its water.
 
 5.34 **A Process connects a Quick Disconnect hose, and a person confirms it is there** (Fritz, 2026-11-06: "A process command to put a
 QD Hose in a Vessel with a automatic need for confirmation that the hose is placed (similar to a Manual Valve) or a QD IP. Maybe
@@ -5566,6 +5568,37 @@ Alarm Widgets keep their own Picture and Alarm boxes, Rules 18.27, 18.50) has th
 - **X Y Width Height** on one line, the **Device Type** (or Widget Type) last.
 A row the Model has that a dialog's Device or Widget does not have is left out (Rule 18.47). Help 148.
 
+18.52 **A Hose Bib and the Manual Valves are laid out like a Motorized Valve** (OakBarn Brewery, 2026-11-19, word for word: "The Hose
+Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition.
+Treat the Handle as the "motor". This should be done for Manual Ball Valves and Manual Butterfly valves as well as in a Rael would, the
+can (and will be placed like that, Manual Ball Valves do not need left right as they are the same. A butterfly graphic might be
+different left right, I would need to see if it makes a difference. Vertical Left Right does matter because the handle "motor" can be
+Left or Right.. and besides a Hose bib, a Butterfly valve could have a Different inlet Outlet Top Bottom. Again for a Butterfly valve
+I would Have to see it."). Both programs (the BruControl Import's Build page shares the dialogs).
+1. **Hose Bib**: Orientation, Left / Right and a new **Inlet** box on one line. Horizontal: Left / Right puts the Inlet (the wall
+   side) on the Right (as drawn) or the Left (mirrored); Inlet is greyed out (⛔ on hover, Rule 18.46). Vertical: **Inlet** is **Top**
+   or **Bottom** and **Left / Right** is the side the handle (the "motor") points to, so it has all 4 Vertical looks. A Hose Bib saved
+   before keeps its look: Vertical Left = Inlet Top, Vertical Right = Inlet Bottom. Its one IP, its 8 spots and its inside Hose or Pipe
+   (Rules 18.45, 18.49) are unchanged and go with the picture.
+2. **Manual Ball Valve** (Plain and Side view): it looks the same mirrored, so on Horizontal **Left / Right** is greyed out; its value
+   stays as it was (Design Rule #1, nothing taken away). Vertical: Left / Right is the side the handle points to.
+3. **Manual Butterfly Valve**: the Skynet drawings look the same mirrored and upside down (shown to OakBarn Brewery, 2026-11-19), so it
+   is the same as the Manual Ball Valve: Horizontal Left / Right greyed, Vertical handle Left or Right, no Top / Bottom. If a Butterfly
+   drawing with a one-sided lever is made, an Inlet Top / Bottom like the Hose Bib's can be added.
+4. A User's own picture keeps Left / Right on Horizontal (it may not look the same mirrored).
+5. A turned or mirrored Manual Valve's **Label** stays upright and below it on the Tab (before, it turned with the picture).
+6. **Inlet IP** (OakBarn Brewery, 2026-11-19, "Yes"): a Hose Bib has a second IP, on the outer face of its wall side's pipe thread, that
+   turns with the picture (on Vertical it is at the Top or the Bottom). Its hose outlet IP, 8 spots and inside Hose or Pipe are as
+   before. It never cuts a pipe it is dropped on (Rule 5.26).
+7. **Tap flow** (Panel Updates entry 35, OakBarn Brewery, 2026-11-19, word for word: "A Pipe on the inlet side of a Hose bib has slow
+   when the hose bib is open. A Pipe on the Hose Bib that has a Valve one the other end has to have that valve fot Tap to flow";
+   "Remember I what I said about flow and if another valve is on that side, it must be open?"): with nothing on its Inlet it always
+   has water (the house plumbing is not drawn). With a pipe on its Inlet, open, water flows in along that pipe toward it, tap water
+   Blue (Rule 5.21), as far as a plain IP end, an open end in the air, another source or an open valve whose other side has nothing
+   joined (the house supply). A closed valve on that side means no water: no flow on the Inlet pipe and none out of the hose either.
+   On the hose side a closed valve at the far end stops the flow, as on every pipe.
+Help 141, 87 (and French).
+
 18.53 **Every pop-up is on top** (OakBarn Brewery, 2026-11-19: "On HoseBib Dialog (and Maybe Others) the Change Name Pop Up is at a
 lower layer than the Dialog and not on top so cannot read it. So Popups need to be temporary Layer 1"; "All pop ups should be on
 top"). A pop-up is the short message box (for example "The Name will be ... when you press 💾 Save" or what is wrong with a typed
@@ -5841,6 +5874,7 @@ import.
 ## Change log
 
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
+- 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.

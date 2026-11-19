@@ -16,7 +16,7 @@ assert.ok(fs.existsSync(path.join(ROOT, 'help', '141-tap-water-valve.md')), 'Hel
 const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
 assert.ok(app.includes(`const TAP_PIC = '${PIC}'`), 'the picture is a Manual Valve picture');
 assert.ok(/MV_PICS = [\s\S]*?Tap_Water_Valve_Hose_Bib\.svg/.test(app), 'offered in the Manual Valve Picture list');
-assert.ok(app.includes("const HB_PIC = 0.75, HB_SPOUT = [1 - HB_PIC + HB_PIC / 3, HB_PIC * 0.987];") && app.includes("isTapMv(g) ? [hbSpotAt(g)]"), 'one IP, on its spot at the edge of its box; its inside Hose or Pipe runs to it from the hose thread (Rule 18.45)');
+assert.ok(app.includes("const HB_PIC = 0.75, HB_SPOUT = [1 - HB_PIC + HB_PIC / 3, HB_PIC * 0.987];") && app.includes("isTapMv(g) ? [hbSpotAt(g), HB_INLET]"), 'its outlet IP on its spot at the edge of its box (its inside Hose or Pipe runs to it from the hose thread, Rule 18.45), and its wall Inlet IP (Rule 18.52)');
 assert.ok(app.includes("if (q?.tap) return { key: id, push: true, tap: true }"), 'open, it pushes tap water out');
 assert.ok(app.includes("return 'tap_water_' + n"), 'Label starts as tap_water_n');
 assert.equal((app.match(/addIpFit\('manualValve', 'tap'\)/g) || []).length, 2, 'on the Valves and Semi_Widgets_Devices lists');
