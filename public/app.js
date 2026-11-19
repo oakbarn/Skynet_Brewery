@@ -5816,7 +5816,7 @@ async function owInterview(dev, pick = false) {
     ...(pick && devs.length > 1 ? [['dev', 'Interface', 'sel', devs.map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])]] : []),
     ['pin', 'Pin', 'sel', pins(w.dev).length ? pins(w.dev) : [['', '(no free pin)']]],
     ['power', 'Powered by', 'sel', OW_POWER],
-    ['bits', 'Resolution', 'sel', OW_BITS.map(b => [String(b), b === 12 ? '12-bit (finest, 0.11 °F steps; the default)' : b === 11 ? '11-bit (0.23 °F steps, faster)' : '10-bit (0.45 °F steps, fastest)'])]], w, '➕ Create circuit');
+    ['bits', 'Resolution', 'sel', OW_BITS.map(b => [String(b), b === 12 ? '12-bit (finest)' : b === 11 ? '11-bit (faster)' : '10-bit (fastest)'])]], w, '➕ Create circuit');
   if (!ok) return null;
   const d = owDev(w.dev); if (!d) throw new Error('Pick an Interface');
   if (!w.pin || !owFreePins(w.dev).includes(String(w.pin))) throw new Error(`Pin ${w.pin || '(none)'} is not free on ${w.dev}: pick another pin`);
@@ -6273,7 +6273,7 @@ async function newDeviceDialog(e, hint, what) {
       if (!touched) nameBox.value = last;
       // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
       const free = h('datalist', { id: 'pins-free' }); body.append(free);
-      portSel = body.querySelector(`select[data-k="${port[0]}"]`);
+      portSel = body.querySelector(`select[data-k="${port[0]}"]:not(.owPick)`);      // a DS18B20's 1-Wire Index box fills itself (Rule 6.37)
       { const pe = body.querySelector(`[data-k="${port[0]}"]`); if (pe) Object.assign(pe.dataset, { guard: 'Port', guardAllow: 'label device' }); }      // a blank Port gets the pop-up too (Rule 18.28)
       const fillFree = w => {
         const ps = w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : [];
