@@ -5566,6 +5566,16 @@ Alarm Widgets keep their own Picture and Alarm boxes, Rules 18.27, 18.50) has th
 - **X Y Width Height** on one line, the **Device Type** (or Widget Type) last.
 A row the Model has that a dialog's Device or Widget does not have is left out (Rule 18.47). Help 148.
 
+18.53 **Every pop-up is on top** (OakBarn Brewery, 2026-11-19: "On HoseBib Dialog (and Maybe Others) the Change Name Pop Up is at a
+lower layer than the Dialog and not on top so cannot read it. So Popups need to be temporary Layer 1"; "All pop ups should be on
+top"). A pop-up is the short message box (for example "The Name will be ... when you press 💾 Save" or what is wrong with a typed
+Name), a notice bar (a Brain notice, a Flame Out notice, a Manual Valve's Done bar, the Not Official bar), the Undo note, the Build
+kept on the Brain note, the Sound is off button, the Job pick bar and a Vessel's small pop-up. While it shows it is **Layer 1 over
+everything, every open dialog too**, and its buttons can be clicked; when it goes away nothing under it has changed. A pop-up that is
+a dialog of its own (Discard changes?, Change name on a Tab, a Picker) opens on top of the dialog it came from, as before. The small
+⚠ boxes of Rule 18.28, the Color Picker and Hover Help were already on top and stay as they are. Every new pop-up follows this Rule.
+The technical side: public/ontop.js.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -5830,6 +5840,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
