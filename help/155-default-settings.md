@@ -10,7 +10,7 @@ else can look.
 
 ### Default Pipe Size
 
-Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.
+Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can change a pipe size individually and the pipe size will cascade to auto size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.
 
 IPs snap together and are locked.
 
@@ -20,7 +20,7 @@ Pipes have a flow simulation.
 
 ### IP Type (for Pipes)
 
-The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5)
+The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5) When Pipes are Joined, the IPs are auto typed to the join. Once locked, they stay until unlocked. Generally, it is done automatically after your first pipe join.
 
 ### Default Hose Size
 
@@ -30,11 +30,13 @@ IPs snap together and are locked.
 
 Hoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.
 
+Vessel Devices and Widgets have a large area Quick Disconnect IP at the Top where a Hose can simulate being hooked over the top of the Vessel.
+
 Hoses have a flow simulation.
 
 ### IP Type (for Hoses)
 
-The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.
+The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up. When Hoses are Joined, the IPs are auto typed to the join. Once locked, they stay until unlocked. Generally, it is done automatically after your first hose join.
 
 Each Tab can still change its own **Pipe Size** and **Hose Size** in **Tab Settings**. A Tab made before there was a Hose Size draws its hoses at its Pipe Size, as before. The Pixels boxes are in each **Tab Profile** (see **New Tabs** below).
 

@@ -10,7 +10,7 @@ autres peuvent regarder.
 
 ### Default Pipe Size {#default-pipe-size}
 
-La taille la plus courante des tuyaux à placer sur un nouveau Tab. Les raccords de tuyau sont ajoutés tout seuls et prennent la taille du tuyau qui y est joint. La taille de chaque tuyau peut être changée une fois placé, et tout nouveau tuyau joint à un tuyau d'une autre taille prend la taille de ce tuyau. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau.
+La taille la plus courante des tuyaux à placer sur un nouveau Tab. Les raccords de tuyau sont ajoutés tout seuls et prennent la taille du tuyau qui y est joint. La taille de chaque tuyau peut être changée une fois placé, et tout nouveau tuyau joint à un tuyau d'une autre taille prend la taille de ce tuyau. Vous pouvez changer la taille d'un seul tuyau, et la nouvelle taille passe en cascade aux tuyaux joints, qui prennent cette taille tout seuls. Vous pouvez faire un collecteur qui ressemble en grande partie à celui de votre brasserie. Les tuyaux les plus courants font 1/2 po. Le type d'IP des bouts est donné par le Type d'IP, mais peut être changé sur chaque IP d'un tuyau.
 
 Les IP s'emboîtent et sont verrouillées.
 
@@ -20,7 +20,7 @@ Les tuyaux ont une simulation de débit.
 
 ### IP Type (pour les tuyaux) {#ip-type-for-pipes}
 
-Le raccord par défaut qu'un nouveau tuyau a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau. Une fois placés, les tuyaux gardent leur type de raccord. Les IP de chaque bout d'un tuyau peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux comme la plupart de vos tuyaux sont montés. Pour les tuyaux de brassage, le plus courant est le Tri-Clamp 1,5 po. (TC1.5)
+Le raccord par défaut qu'un nouveau tuyau a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau. Une fois placés, les tuyaux gardent leur type de raccord. Les IP de chaque bout d'un tuyau peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux comme la plupart de vos tuyaux sont montés. Pour les tuyaux de brassage, le plus courant est le Tri-Clamp 1,5 po. (TC1.5) Quand des tuyaux sont joints, les IP prennent toutes seules le type du joint. Une fois verrouillées, elles le gardent jusqu'à ce qu'elles soient déverrouillées. En général, cela se fait tout seul après votre premier joint de tuyau.
 
 ### Default Hose Size {#default-hose-size}
 
@@ -30,11 +30,13 @@ Les IP s'emboîtent et sont verrouillées.
 
 Les tuyaux souples joints par des IP à Raccord rapide peuvent être vite déverrouillés et déplacés, même pendant le brassage.
 
+Les Devices et Widgets de cuve ont en haut une grande IP à Raccord rapide, où un tuyau souple peut être accroché par-dessus le bord de la cuve.
+
 Les tuyaux souples ont une simulation de débit.
 
 ### IP Type (pour les flexibles) {#ip-type-for-hoses}
 
-Le raccord par défaut qu'un nouveau tuyau souple a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau souple. Une fois placés, les tuyaux souples gardent leur type de raccord. Les IP de chaque bout d'un tuyau souple peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux souples comme la plupart de vos tuyaux souples sont montés.
+Le raccord par défaut qu'un nouveau tuyau souple a aux deux bouts : Tri-Clamp, NPT, BSP ou Raccord rapide. Il a la taille du tuyau souple. Une fois placés, les tuyaux souples gardent leur type de raccord. Les IP de chaque bout d'un tuyau souple peuvent être changées une à une. Réglez le type d'IP par défaut des tuyaux souples comme la plupart de vos tuyaux souples sont montés. Quand des tuyaux souples sont joints, les IP prennent toutes seules le type du joint. Une fois verrouillées, elles le gardent jusqu'à ce qu'elles soient déverrouillées. En général, cela se fait tout seul après votre premier joint de tuyau souple.
 
 Chaque Tab peut encore changer sa **Pipe Size** et sa **Hose Size** dans **Tab Settings**. Un Tab fait avant qu'il y ait une Hose Size dessine ses tuyaux souples à sa Pipe Size, comme avant. Les cases Pixels sont dans chaque **Tab Profile** (voir **New Tabs** plus bas).
 
