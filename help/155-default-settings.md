@@ -104,7 +104,7 @@ And if you have been Brewing with your tap water and making Good beer, why rock 
 
 ### Hop Stands
 
-The temperature and time of the three Hop Stands (High, Middle, Low) a new Recipe starts with ([Mash, Boil and Water Profiles](35-mash-and-boil-profiles), Skynet Rule 17.14).
+Not on Default settings any more: there are no Hop Stand defaults. A Recipe asks for the stand, its temperature and its time when a Whirlpool hop is added, with the common numbers in the Hover Help ([Mash, Boil and Water Profiles](35-mash-and-boil-profiles#the-three-hop-stands), Skynet Rule 17.14).
 
 ### Water to Grain Ratio
 

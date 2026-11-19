@@ -375,8 +375,8 @@ export const HOP_FIELDS = [
   ['Boil_Group', 'Hop N Boil Group (0 = not a Boil Hop)', (r, h, u, sch, i) => sch.hopGroups[i] ?? 0],
   ['Days', 'Hop N: Secondary or Dry Hop days', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? n(h.dryDays) : 0],
   ['Date', 'Hop N: Secondary or Dry Hop date (YYYY-MM-DD)', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? h.date ?? '' : ''],
-  ['Hop_Stand', 'Hop N: its Hop Stand (High, Middle or Low; empty = not a Whirlpool hop)', r_h_stand],
-  ['Whirlpool_Temp', 'Hop N: Whirlpool temperature (its Hop Stand\'s)', (r, h, u) => h.use === 'whirlpool' ? cTo(hopStands(r).find(s => s.key === r_h_stand(r, h)).tempC, u.tempUnit) : 0],
+  ['Hop_Stand', 'Hop N: its Hop Stand (High, Middle or Low; empty = not a Whirlpool hop, or no stand picked yet)', r_h_stand],
+  ['Whirlpool_Temp', 'Hop N: Whirlpool temperature (its Hop Stand\'s)', (r, h, u) => { const st = h.use === 'whirlpool' ? hopStands(r).find(s => s.key === r_h_stand(r, h)) : null; return st && st.tempC !== null ? cTo(st.tempC, u.tempUnit) : 0; }],
   ['Hop_Rocket', 'Hop N: Whirlpool through the Hop Rocket (true or false)', (r, h) => h.use === 'whirlpool' && !!h.hopRocket],
 ];
 export const HOP_FIELD = /^rcp_Hop_(\d+)_([A-Za-z_]+)$/;
