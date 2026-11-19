@@ -12,7 +12,7 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 |---|---|---|---|---|---|---|
 | **Arduino Mega 2560** (la norme) | 5 V | D2-D53 | D2-D13, D44-D46 | D2, D3, D18-D21 | A0-A15 (broche 54-69) | USB, shield Ethernet, WiFi par un pont ESP32 |
 | Arduino Uno R3 | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, shield Ethernet |
-| Arduino Uno R4 (Minima ou WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, shield Ethernet, WiFi (R4 WiFi seulement) |
+| Arduino Uno R4 (Minima ou WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D0-D3, D8 | A0-A5 | USB, shield Ethernet, WiFi (R4 WiFi seulement) |
 | Arduino Nano | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A7 | USB, module Ethernet |
 | Arduino Nano Every | 5 V | D0-D13 | D3, D5, D6, D9, D10 | tous les Ports | A0-A7 | USB, module Ethernet |
 | Arduino Leonardo | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A5 | USB, shield Ethernet |
@@ -28,6 +28,7 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 
 - **La liste des Ports ne propose que les Ports que la carte possède.** Un Port que la carte n'a pas est refusé. Sur un ESP32, les GPIO 6-11 sont la mémoire de la carte et ne sont jamais proposés, et les GPIO 34, 35, 36 et 39 ne peuvent que lire (entrées) : une sortie ne peut pas les utiliser.
 - **Les broches de démarrage viennent en dernier.** Sur un ESP32 (GPIO 2, 5, 12, 15) et un ESP8266 (GPIO 0, 2, 15), certains Ports décident de la façon dont la carte démarre. Skynet les propose en dernier.
+- **Uno R4 : 8 mA par Port.** Un Port d'un Uno R4 donne au plus 8 mA (un Uno R3 ou un Mega donne 20 mA). Utilisez un module relais ou un SSR qui a son propre circuit de commande ; ne branchez jamais une bobine de relais nue ou une LED puissante directement sur le Port.
 - **L'Ethernet utilise D10.** Sur toute carte avec un shield ou un module Ethernet, D10 est au shield et n'est pas proposé (Règle 6.10).
 
 ## Cartes 3,3 V {#3-3-v-boards}

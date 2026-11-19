@@ -12,7 +12,7 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 |---|---|---|---|---|---|---|
 | **Arduino Mega 2560** (the standard) | 5 V | D2-D53 | D2-D13, D44-D46 | D2, D3, D18-D21 | A0-A15 (pin 54-69) | USB, Ethernet shield, WiFi through an ESP32 bridge |
 | Arduino Uno R3 | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, Ethernet shield |
-| Arduino Uno R4 (Minima or WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, Ethernet shield, WiFi (R4 WiFi only) |
+| Arduino Uno R4 (Minima or WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D0-D3, D8 | A0-A5 | USB, Ethernet shield, WiFi (R4 WiFi only) |
 | Arduino Nano | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A7 | USB, Ethernet module |
 | Arduino Nano Every | 5 V | D0-D13 | D3, D5, D6, D9, D10 | every Port | A0-A7 | USB, Ethernet module |
 | Arduino Leonardo | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A5 | USB, Ethernet shield |
@@ -28,6 +28,7 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 
 - **The Port list offers only the Ports the board has.** A Port the board does not have is refused. On an ESP32, GPIO 6-11 are the board's own memory and are never offered, and GPIO 34, 35, 36 and 39 can only read (inputs), so an output can't use them.
 - **Start-up pins come last.** On an ESP32 (GPIO 2, 5, 12, 15) and an ESP8266 (GPIO 0, 2, 15) some Ports decide how the board starts. Skynet offers them last.
+- **Uno R4: 8 mA per Port.** A Port of an Uno R4 gives at most 8 mA (an Uno R3 or a Mega gives 20 mA). Use a relay module or an SSR that has its own driver; never wire a bare relay coil or a bright LED straight to the Port.
 - **Ethernet uses D10.** On every board with an Ethernet shield or module, D10 is the shield's and is not offered (Rule 6.10).
 
 ## 3.3 V boards

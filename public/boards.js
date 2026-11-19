@@ -24,7 +24,7 @@ export const BOARD_INFO = {
   mega: { name: 'Arduino Mega 2560', volts: 5, family: 'arduino', shield: true, pins: range(2, 53), pwm: [...range(2, 13), '44', '45', '46'],
     counter: ['2', '3', '18', '19', '20', '21'], spi: ['50', '51', '52'], onewire: '40', i2c: [], analog: 16, a0: 54, usb: ['0', '1'], label: D },
   uno: { name: 'Arduino Uno R3', volts: 5, family: 'arduino', shield: true, ...UNO_SHAPE, analog: 6, a0: 14 },
-  unoR4: { name: 'Arduino Uno R4 (Minima or WiFi)', volts: 5, family: 'arduino', shield: true, wifi: 'WiFi (Uno R4 WiFi only)', ...UNO_SHAPE, pins: range(0, 13), usb: [], analog: 6, a0: 14 },
+  unoR4: { name: 'Arduino Uno R4 (Minima or WiFi)', volts: 5, family: 'arduino', shield: true, wifi: 'WiFi (Uno R4 WiFi only)', ...UNO_SHAPE, pins: range(0, 13), counter: ['0', '1', '2', '3', '8'], usb: [], analog: 6, a0: 14 },      // Arduino's Uno R4 Minima and WiFi pinouts: D0-D3, D8 are interrupts on both, each its own
   nano: { name: 'Arduino Nano', volts: 5, family: 'arduino', shield: true, eth: 'Ethernet (W5500 module, CS on D10)', ...UNO_SHAPE, analog: 8, a0: 14 },
   nanoEvery: { name: 'Arduino Nano Every', volts: 5, family: 'arduino', shield: true, eth: 'Ethernet (W5500 module, CS on D10)', ...UNO_SHAPE, pins: range(0, 13), pwm: ['3', '5', '6', '9', '10'], counter: range(0, 13), usb: [], analog: 8, a0: 14 },
   leonardo: { name: 'Arduino Leonardo', volts: 5, family: 'arduino', shield: true, pins: range(0, 13), pwm: ['3', '5', '6', '9', '10', '11', '13'], counter: ['0', '1', '2', '3', '7'],
