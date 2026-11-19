@@ -5,6 +5,8 @@
 - Un **Device** est relié à un port ou une broche d'une carte (un automate, PLC) : un relais de pompe, une vanne, une sonde de température, un interrupteur à flotteur, un débitmètre, une balance.
 - Un **Widget** n'existe que dans l'application : images, étiquettes, minuteries, alarmes, variables, points IP et raccords de tuyau.
 
+Chaque étape, en images : [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
+
 Ici, « PLC » veut dire des cartes de loisir : les cartes compatibles Arduino (comme la Mega), l'ESP32 et le Raspberry Pi. Elles se branchent par **USB**, par **Ethernet** quand la carte en a, ou par **WiFi** avec un ESP32.
 
 ## Ajouter une carte (Interface) {#adding-a-board-interface}

@@ -5,6 +5,8 @@
 - A **Device** is tied to a port or pin on a board (a PLC): a pump relay, a valve, a temperature probe, a float switch, a flow meter, a scale.
 - A **Widget** lives only in the app: pictures, labels, timers, alarms, variables, IP points and pipe fittings.
 
+Every step, with pictures: [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
+
 "PLC" here means hobby boards: Arduino-compatible boards (such as the Mega), ESP32 and the Raspberry Pi. They connect by **USB**, by **Ethernet** where the board has it, or by **WiFi** through an ESP32.
 
 ## Adding a board (Interface)
