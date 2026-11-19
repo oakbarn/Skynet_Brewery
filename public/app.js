@@ -19,6 +19,7 @@ import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDel
 import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
+import { tuneHighestDefault } from './autotune.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
 import { HEAT_METHODS, heatSendsPwm, switchedBy, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
@@ -9159,7 +9160,9 @@ function methodSetFields(k, it) {
     // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
     ...(k === 'precise' && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note']] : []),
     ...(AUTO_PERCENT_METHODS.includes(k) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, {}]] : []),
-    ...(PERCENT_METHODS.includes(k) ? [portNote(it)] : [])];
+    ...(PERCENT_METHODS.includes(k) ? [portNote(it)] : []),
+    // PID Auto-tune (Rule 6.39): one button in the PID and in the Precise Settings (they share Kp, Ki and Kd); it runs on the Brain
+    ...((k === 'pid' || k === 'precise') && !S.importBuild ? [['_tune', '🎯 Auto-tune', 'go', () => tuneDialog(it.name), false, false, { tip: 'Auto-tune: with water over the element and the probe in the water, Skynet turns the element up and down around the Setpoint a few times, times each swing and works out Kp, Ki and Kd (and the Hold output % for Precise). A kettle takes about 30 to 90 minutes, a RIMS tube a few. You see the new numbers next to the old ones and pick Use or Keep old. PID and Precise share these numbers. Help 237.' }]] : [])];
 }
 // The ⬢ of one method (OakBarn Brewery, 2026-11-15): its dialog on top of the Properties, frozen top with ✖ Cancel and 💾 Keep, no bottom
 // row (Rule 2.51, the model). It works on a copy; Keep puts its settings in the Properties (saved when the Properties are Saved).
@@ -9171,6 +9174,58 @@ async function methodEntry(k, obj) {
   try { readFields(w, body); } catch (e) { return toast(e.message, true); }
   for (const key of methodSetKeys(k)) { if (w[key] === undefined) delete obj[key]; else obj[key] = w[key]; }
   $('#dlgBody')._rebuild?.();
+}
+// PID Auto-tune (OakBarn Brewery, 2026-11-16, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; Rule 6.39, Help 237,
+// public/autotune.js). A pop-up over the Settings: the electrical warning and one question in the dialog (no extra pop-up, Rule 6.20),
+// the Highest temperature, ▶ Start and ■ Stop, what it is doing now, and at the end the new numbers next to the old with ✔ Use new
+// numbers or Keep old. Nothing is changed until Use is pressed. It runs on the Brain, so it goes on with the dialog closed.
+const TUNE_ASK = 'Auto-tune turns this element On. Start it only with water over the element and the Temperature Probe in the water. It stops by itself above the Highest temperature, and ■ Stop stops it any time.';
+const TUNE_ELEC = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
+async function tuneDialog(name) {
+  const el = S.config.elements.find(e => e.name === name);
+  if (!el) return toast('Save this Heating Element first, then Auto-tune it', true);
+  if (!can('admin')) return toast('Only an admin can Auto-tune', true);
+  const probe = el.input && S.config.elements.find(e => e.name === el.input);
+  const c = /c/i.test(String(probe?.units ?? '')) && !/f/i.test(String(probe?.units ?? '')), u = c ? '°C' : '°F';
+  const V = () => S.values[name] || {}, sp = Number(V().target ?? el.target);
+  let timer;
+  await layerDialog(`${el.label || el.name}: Auto-tune`, body => {
+    const hi = h('input', { type: 'number', step: 'any', value: Number.isFinite(sp) ? tuneHighestDefault(sp, c) : '' });
+    const status = h('div', { class: 'full' }), res = h('div', { class: 'full' });
+    const start = h('button', { type: 'button', class: 'primary', onclick: async () => {
+      try { await api('POST', '/ui/autotune', { name, action: 'start', highest: Number(hi.value) }); } catch (e) { return toast(e.message, true); }
+    } }, '▶ Start');
+    const stop = h('button', { type: 'button', class: 'danger', onclick: async () => { try { await api('POST', '/ui/autotune', { name, action: 'stop' }); } catch (e) { toast(e.message, true); } } }, '■ Stop');
+    const use = async () => {
+      const v = V(), now = S.config.elements.find(e => e.name === name);
+      if (!now) return toast(`${name} is gone: nothing saved`, true);
+      const out = { ...clone(now), kp: v.autotune_kp, ki: v.autotune_ki, kd: v.autotune_kd, holdOutput: v.autotune_hold };
+      try {
+        await saveElements(S.config.elements.map(x => x === now ? out : x));
+        for (const [p, k] of [['kp', 'autotune_kp'], ['ki', 'autotune_ki'], ['kd', 'autotune_kd'], ['holdoutput', 'autotune_hold']]) await setProp(name, p, v[k]);
+        savedPop(`${el.label || el.name}: the Auto-tune numbers`); decide('Using the new numbers.');
+      } catch (e) { toast(e.message, true); }
+    };
+    let shown = null, decided = null;
+    const decide = text => { decided = shown; res.replaceChildren(h('span', { class: 'muted' }, text)); };
+    const show = () => {
+      const v = V(), running = /^(Warming|Swing)/.test(v.autotune ?? '');
+      status.textContent = v.autotune ? `Now: ${v.autotune}` : `Setpoint ${Number.isFinite(sp) ? Math.round(sp * 10) / 10 + ' ' + u : '(type one first)'}. Not started.`;
+      start.disabled = running; stop.disabled = !running; hi.disabled = running;
+      const key = v.autotune === 'Done' ? [v.autotune_kp, v.autotune_ki, v.autotune_kd, v.autotune_hold].join() : '';
+      if (key === shown || key === decided) return;
+      shown = key; res.replaceChildren();
+      if (!key) return;
+      const now = S.config.elements.find(e => e.name === name) || el, row = (w, o, n) => h('tr', {}, h('td', {}, w), h('td', {}, String(o ?? '')), h('td', {}, h('b', {}, String(n))));
+      res.append(h('table', { class: 'tuneTable' }, h('tr', {}, h('th', {}, ''), h('th', {}, 'Old'), h('th', {}, 'New')),
+        row('Kp', now.kp ?? 10, v.autotune_kp), row('Ki', now.ki ?? 0.1, v.autotune_ki), row('Kd', now.kd ?? 0, v.autotune_kd), row('Hold output % (Precise)', now.holdOutput ?? 0, v.autotune_hold)),
+        h('div', { class: 'bar' }, h('button', { type: 'button', class: 'primary', onclick: use }, '✔ Use new numbers'), h('button', { type: 'button', onclick: () => decide('Kept the old numbers.') }, 'Keep old')));
+    };
+    body.append(h('div', { class: 'full tuneWarn' }, TUNE_ELEC), h('p', {}, TUNE_ASK),
+      h('div', { class: 'tuneRow' }, h('label', {}, `Highest temperature (${u})`), hi, start, stop), status, res);
+    show(); timer = setInterval(show, 500);
+  }, false, { view: true });
+  clearInterval(timer);
 }
 // Flame Out safety for gas burners (OakBarn Brewery, 2026-11-14, Rule 6.33, Help 197). A Heating Element on a gas valve has Gas burner
 // switched On; a Solenoid Gas Valve is always a gas burner. The gas warning (Rule 6.20) starts the section's balloon, in red.

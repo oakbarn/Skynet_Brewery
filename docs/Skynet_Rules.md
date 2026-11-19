@@ -3366,6 +3366,27 @@ start (it does nothing more than before). The other three:
 - **Both programs:** a BruControl DIN comes in with On Press None (BruControl has no such setting); nothing else changes.
 Help 235 (and French).
 
+6.39 **PID Auto-tune** (OakBarn Brewery, 2026-11-16, Panel Updates Sandbox entry 25: "And you can set up Autotune for the
+Precise?"; started 2026-11-19, "Sure"). A Heating Element's **PID** and **Precise** Settings each have one **🎯 Auto-tune** button
+(they share Kp, Ki and Kd, Rule 6.19, so one tune serves both). It opens a pop-up with the electrical warning (Rule 6.20) and one line
+saying it turns the element On and needs water over the element and the probe in the water (in the pop-up, not a second pop-up: one
+warning), the **Highest temperature** (the Setpoint + 10 °F, 5 °C, to start), **▶ Start**, **■ Stop** and what it is doing now.
+- **How:** a relay auto-tune with a bias, run by the Brain (lib/control.js, public/autotune.js): the element goes up below the Setpoint
+  and down above it (a band of 0.5 °F, 0.3 °C) for 5 swings; the bias moves until heating and resting take about as long. The first
+  swing (the warm-up) is not used, the last 3 are averaged, and the Tyreus-Luyben rules (calm, little overshoot) give Kp, Ki and Kd;
+  the bias it ends on is the Hold output % for Precise. It uses the element's Max output %.
+- **Safety:** it stops, and the element turns Off, above the Highest temperature, after 30 seconds with no probe reading, after
+  3 hours, on ■ Stop, or when the element is turned Off. It never starts with no probe reading or a probe already above the Highest.
+- **Use or Keep old:** done, the element turns Off and the pop-up shows the Old and New numbers side by side; **✔ Use new numbers**
+  saves Kp, Ki, Kd and Hold output % at once, **Keep old** changes nothing. Nothing is changed by itself.
+- **Read only for a Process:** `.autotune` (what it is doing: Warming up to the Setpoint, Swing 2 of 5, Done, Stopped: why),
+  `.autotune_kp`, `.autotune_ki`, `.autotune_kd`, `.autotune_hold` (the last numbers found). Only the Brain sets them.
+- **Admins only** (as the Method Settings). It runs on the Brain, so it goes on with the pop-up closed. Numbers are in the probe's
+  own units (the 3 Vessel sample's probes are °C, Rule 2.59).
+- **Both programs:** the BruControl Import program has no running Brain, so it shows no Auto-tune button; it shares the method
+  dialogs, nothing else changes there.
+Help 237 (and French); Help 156 points to it.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -6122,6 +6143,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
