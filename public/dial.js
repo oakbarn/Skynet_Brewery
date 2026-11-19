@@ -43,7 +43,9 @@ export function dialZone(value, sp, cool = DIAL_DEFAULTS.cool, hot = DIAL_DEFAUL
   const c = Math.max(0, num(cool) ?? DIAL_DEFAULTS.cool), h = Math.max(0, num(hot) ?? DIAL_DEFAULTS.hot);
   return v < s - c ? 'cold' : v > s + h ? 'hot' : 'ok';
 }
-export const dialColors = e => ({ cold: e?.dialColdColor || DIAL_DEFAULTS.coldColor, ok: e?.dialOkColor || DIAL_DEFAULTS.okColor, hot: e?.dialHotColor || DIAL_DEFAULTS.hotColor });
+// a color goes into the picture's fill="...": only a color name, #hex, rgb() or hsl() is used, anything else is the Skynet color
+const safeColor = (c, d) => typeof c === 'string' && /^(#[0-9a-f]{3,8}|[a-z]{3,30}|(rgb|hsl)a?\([\d\s.,%/-]{1,60}\))$/i.test(c.trim()) ? c.trim() : d;
+export const dialColors = e => ({ cold: safeColor(e?.dialColdColor, DIAL_DEFAULTS.coldColor), ok: safeColor(e?.dialOkColor, DIAL_DEFAULTS.okColor), hot: safeColor(e?.dialHotColor, DIAL_DEFAULTS.hotColor) });
 
 // The picture. value: the reading (null = none yet); sp: the Setpoint (null = none); text: what the digits say (FAULT ...)
 export function dialSvg(e = {}, value, sp = null, text = null) {
