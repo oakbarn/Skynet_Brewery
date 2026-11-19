@@ -182,7 +182,7 @@ These words belong to the Process language, so none of them can be the name of a
 - **Values:** `NULL`, `true`, `false`, `on`, `off`, `now`, `visible`, `hidden`, `hiddenlocked`, `countdown`, `countup`, `none`, `custom`, `default`
 - **Joining words:** `and`, `or`, `not`
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
-- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`
+- **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Places:** `tab`, `workspace`
 - **Skynet Constants:** every name that starts with `skc_` (see above)
 
@@ -262,3 +262,17 @@ unlock_Equipment
 ```
 
 The Process output says which Tabs were locked. The 🔒 Locked switch on a Tab's row of ☰ Menu > Equipment Profile does the same for one Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.
+
+## The Override pop-up: show_Override
+
+A Process can bring up its own **Override pop-up**: a Skynet Override button, on top of everything, that names this Process. One press moves only this Process on, past the wait or sleep that holds it (and out of the loop it sits in), the same as an Override button set to it. See [Override button](96-override-button).
+
+```
+show_Override "Press when the boil is rolling"
+wait Kettle_Temp >= skn_Boil_Temp
+hide_Override
+```
+
+- `show_Override` brings it up; the text after it is optional and shows beside the Process name.
+- It stays up until it is pressed, `hide_Override`, or the Process ends.
+- A simple `wait` or `sleep` (not inside a loop) gets the pop-up by itself after 3 seconds when no Override button is set to this Process or to Any. A wait **inside a loop** (a `goto` further down jumps back above it, for example a nested `if` waiting on a valve or a heater) never pops up by itself: add `show_Override` only where moving on is safe.

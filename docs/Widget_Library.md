@@ -212,13 +212,16 @@ Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the readi
 | Cold / OK / Hot color | The reading's color: Blue below the Cooler range, Red above the Hotter range, Green between (names + swatch + Custom) |
 | Decimals | The item's own Decimals, 0 to 2 |
 
-### Override button Widget (`kind: override`, 2026-10-30, Help 96)
-One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Finish Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.
+### Override button Widget (`kind: override`, 2026-10-30, Process setting and pop-up 2026-11-19, Help 96)
+One press: its Process (or **Any**: every running Process but Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Any number on a Tab**, and a Process may have any number of buttons (Rule 2.26 changed 2026-11-19). No background picture, no Process attributes. Operator or Admin to press. A Process with no button set to it (or to Any) gets the **Override pop-up** (on top, naming it) after 3 seconds in a wait or sleep outside a loop, or on demand with `show_Override` / `hide_Override`.
 
 | Setting | Notes |
 |---|---|
-| Label box | Label (empty = Override), Font size, Font, Bold, Fore color, Back color, Alignment. Starting look (for now): bold white Override on red #c0392b, 20 px, centered, 160 x 60 |
-| Properties box | Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
+| 1. Label | What it says (empty = Override); its ⬢ holds Font size, Font, Bold, Alignment. Starting look (for now): bold white Override on red #c0392b, 20 px, centered, 160 x 60 |
+| 2. Tab, 3. Name | Name made by Skynet (wgt_OVR_Label_TabID, Rule 3.14) |
+| 4. Process (`.process`) | Any (empty, the usual) or one Process by name; follows a Process rename |
+| Background, Fore color, Back color | Rule 18.50 #2 |
+| X, Y, Width, Height, Widget Type | |
 
 ### Image block (every dialog with background pictures, 2026-10-29, Help 93)
 Background # (1, 2, 3; 0, blank or other = none), Back Colour, Image Path 1-3 (.backpath, .backpath_2, .backpath_3) each with OPEN (Background Image N pop-up) and a typeable path (not found = blank + warning).
@@ -566,6 +569,7 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-10-29: Text Widget Properties: new dialog pattern (boxes, COPY, orange ? info pop-up), w_Text_N names, Label line, word wrap always on, new Process attributes (thread "Redesign the Text Widget dialog", Help 91).
 - 2026-10-29: Timer Widget Properties with Styles (Skynet Styles locked, User Styles), no pictures; the Image block for dialogs with pictures (Help 92, 93).
 - 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 96).
+- 2026-11-19: Override button: 4. Process (one Process or Any), any number on a Tab, the Override pop-up and show_Override / hide_Override (thread "Let Override target the right Process", Help 96, 22).
 - 2026-10-30: Database and .API settings on every Widget with a value; gKonstant and gAPI variables became one class, gGlobal (prefixes gG). (thread "Send any Device or Widget to a database", Help 98)
 - 2026-11-02: Alarm Widget with two subclasses, Basic Skynet Alarm (four layers: Back, Fore, Set Graphic, Active overlay) and User Alarm, picked when made and never changed; Alarm Widget Properties follow the General Dialog Rules. (thread "Make the Alarm Widget a Template", Help 107)
 - 2026-11-02: Skynet Copper Counterflow Chiller Template (Copper_Counterflow_Chiller, picture Chiller_Copper_Counterflow.svg redrawn from Fritz's file) with 4 IPs on the real port tips (thread "Add copper counterflow chiller Widget", Help 109).
