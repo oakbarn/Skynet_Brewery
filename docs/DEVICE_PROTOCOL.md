@@ -23,6 +23,7 @@ Connections are ranked by board (Help page 69, `public/links.js`). Arduino Mega:
 | `CFG DI <pin> <PULLUP\|NOPULL> <ms>` | Input pull-up on or off, and debounce: a new level must hold this many ms before the board reports it (default 20). |
 | `CFG RTD <cs> <2\|3\|4>` | PT100 / PT1000 probe wires on the MAX31865 board at chip-select pin `cs`. |
 | `CFG TC <cs> <K\|J\|T\|N\|E\|R\|S\|B>` | Thermocouple type on the MAX31856 board at chip-select pin `cs` (MAX31855 boards are K only). |
+| `CFG OW <pin> <9-12>` | One 1-Wire circuit (DS18B20 bus) on this pin, and its resolution in bits: 12 (default, 0.0625 °C steps), 11 or 10 (faster, coarser). Sent once per circuit (Rule 6.37). The pin must be in the sketch's `ONEWIRE_PINS` list. |
 | `CFG FLOW <pin> S` | Raspberry Pi only: count flow meter pulses on this pin (a Mega has its fixed `FLOW_PINS` list instead). |
 | `CFG STEP …`, `GO`, `RUN`, `STOP`, `ZERO`, `HOME`, `EN` | Stepper motors: see **Stepper motors** below. |
 
@@ -41,7 +42,7 @@ After every reconnect the server sends the `CFG` lines and then the state of eve
 | `ADS <ch> <raw>` | ADS1115 16-bit analog board, channel 0-3 (0-32767 = 0-6.144 V). Every second. |
 | `P <pin> <count>` | Flow meter: pulses counted since the device started. Every second. |
 | `W <dt> <raw>` | HX711 load-cell board, by its DT pin: average raw count since the last report. Every second. |
-| `T <romid> <°F>` | OneWire temperature, by the probe's 16-hex-digit ROM id. |
+| `T <romid> <°F> [pin]` | OneWire temperature, by the probe's 16-hex-digit ROM id. Newer firmware adds the 1-Wire pin (circuit) the probe is on; the server reads the probe by its ROM id either way. |
 | `SP <step pin> <steps> <0\|1> <0\|1>` | Stepper position in steps, moving, homed. Every 0.2 s while moving, every second when still. |
 | `SH <step pin> <1\|0>` | Stepper homing finished: 1 = found the switch, 0 = gave up. |
 | `SD <0\|1>` | Ethernet builds only: 1 = an SD card is in the Ethernet shield's slot. SD cards are not supported (Skynet Rule 6.11); the panel warns everyone to remove it. Sent after HELLO and when it changes (checked every 10 s). |

@@ -74,14 +74,15 @@ const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to 
 const uint8_t HX711_DT_PINS[]  = {};                     // HX711 boards: data (DT) pins, e.g. {26, 28}; the panel names a scale by these
 const uint8_t HX711_SCK_PINS[] = {};                     // and their clock (SCK) pins, same order, e.g. {27, 29}
 const uint8_t STEPPER_PINS[]  = {};                     // every pin a stepper uses (STEP, DIR, ENABLE or IN1-IN4, home switch), e.g. {40, 41, 42, 43}; not also in other lists
-const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
+const uint8_t ONEWIRE_PINS[] = {40};                     // one pin per 1-Wire circuit (DS18B20 probes), each with its own 4.7k pull-up to 5V, e.g. {40, 41}
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 unsigned long watchdogMs = 10000;                        // no message for this long -> all outputs OFF (the panel sends CFG WD <s> S)
 
 const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS), N_PWM = sizeof(PWM_PINS), N_AO = sizeof(AO_PINS);
 const uint8_t N_FLOW = sizeof(FLOW_PINS) > 6 ? 6 : sizeof(FLOW_PINS), N_RTD = sizeof(RTD_CS_PINS), N_TC = sizeof(TC_CS_PINS);
-OneWire oneWire(ONEWIRE_PIN);
-DallasTemperature probes(&oneWire);
+const uint8_t N_OW = sizeof(ONEWIRE_PINS) > 6 ? 6 : sizeof(ONEWIRE_PINS);   // up to 6 circuits
+OneWire* oneWire[N_OW > 0 ? N_OW : 1];
+DallasTemperature* probes[N_OW > 0 ? N_OW : 1];
 #if USE_RTD
 Adafruit_MAX31865* rtd[N_RTD > 0 ? N_RTD : 1];
 #endif
@@ -292,6 +293,10 @@ void runMotors() {
 void configure(String kind, int pin, String v) {
   int i;
   if (kind == "WD") { watchdogMs = constrain(pin, 3, 600) * 1000UL; return; }   // CFG WD <seconds> S: the lost link delay
+  if (kind == "OW" && (i = indexOf(ONEWIRE_PINS, N_OW, pin)) >= 0) {   // CFG OW <pin> <9-12 bits>: one 1-Wire circuit's resolution
+    probes[i]->setResolution(constrain(v.toInt(), 9, 12));
+    return;
+  }
 #if USE_STEPPER
   if (kind == "STEP" || kind == "STEP4") { setupMotor(kind == "STEP4", pin, v); return; }
   if (kind == "HOME" && (i = findMotor(pin)) >= 0) {        // CFG HOME <step pin> <switch pin> <flags: 1 = switch reads HIGH when hit, 2 = switch at the + end>
@@ -358,7 +363,7 @@ void handle(String cmd) {
 #if USE_STEPPER
   if (op == "GO" || op == "RUN" || op == "STOP" || op == "ZERO" || op == "HOME" || op == "EN") { motorCommand(op, cmd.substring(s1 + 1)); return; }
 #endif
-  if (op == "CFG") {                                     // CFG <DI|RTD|TC> <pin> <setting>
+  if (op == "CFG") {                                     // CFG <DI|RTD|TC|OW> <pin> <setting>
     int s3 = cmd.indexOf(' ', s2 + 1);
     configure(cmd.substring(s1 + 1, s2), cmd.substring(s2 + 1, s3).toInt(), cmd.substring(s3 + 1));
     return;
@@ -366,16 +371,18 @@ void handle(String cmd) {
   LINK.print("ERR unknown command: "); LINK.println(cmd);
 }
 
-void sendTemps() {
+void sendTemps() {                                       // T <ROM id> <temp F> <1-Wire pin>, one line per probe on every circuit
   DeviceAddress a;
-  uint8_t n = probes.getDeviceCount();
-  for (uint8_t i = 0; i < n; i++) {
-    if (!probes.getAddress(a, i)) continue;
-    float f = probes.getTempF(a);
-    if (f < -100) continue;                               // disconnected probe
-    LINK.print("T ");
-    for (uint8_t b = 0; b < 8; b++) { if (a[b] < 16) LINK.print('0'); LINK.print(a[b], HEX); }
-    LINK.print(' '); LINK.println(f, 2);
+  for (uint8_t c = 0; c < N_OW; c++) {
+    uint8_t n = probes[c]->getDeviceCount();
+    for (uint8_t i = 0; i < n; i++) {
+      if (!probes[c]->getAddress(a, i)) continue;
+      float f = probes[c]->getTempF(a);
+      if (f < -100) continue;                             // disconnected probe
+      LINK.print("T ");
+      for (uint8_t b = 0; b < 8; b++) { if (a[b] < 16) LINK.print('0'); LINK.print(a[b], HEX); }
+      LINK.print(' '); LINK.print(f, 2); LINK.print(' '); LINK.println(ONEWIRE_PINS[c]);
+    }
   }
 }
 
@@ -410,9 +417,13 @@ void setup() {
 #else
   LINK.begin(115200);
 #endif
-  probes.begin();
-  probes.setResolution(12);                               // finest steps, 0.0625 C (0.11 F), for Precise heating; some come set coarser
-  probes.setWaitForConversion(false);                     // do not block while probes convert
+  for (uint8_t c = 0; c < N_OW; c++) {
+    oneWire[c] = new OneWire(ONEWIRE_PINS[c]);
+    probes[c] = new DallasTemperature(oneWire[c]);
+    probes[c]->begin();
+    probes[c]->setResolution(12);                         // finest steps, 0.0625 C (0.11 F), for Precise heating; the panel may send CFG OW <pin> 10 or 11
+    probes[c]->setWaitForConversion(false);               // do not block while probes convert
+  }
   lastRx = millis();
 }
 
@@ -446,6 +457,6 @@ void loop() {
 #if USE_ETHERNET
   if (now - lastSd > 10000) { lastSd = now; checkSd(false); }
 #endif
-  if (!tempRequested && now - lastTemp > 2000) { probes.requestTemperatures(); tempRequested = true; lastTemp = now; }
+  if (!tempRequested && now - lastTemp > 2000) { for (uint8_t c = 0; c < N_OW; c++) probes[c]->requestTemperatures(); tempRequested = true; lastTemp = now; }
   if (tempRequested && now - lastTemp > 800) { sendTemps(); tempRequested = false; }
 }
