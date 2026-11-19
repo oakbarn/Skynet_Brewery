@@ -71,7 +71,7 @@ import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update 
 import { FlameWatch } from './lib/flamewatch.js';      // gas burner Flame Out safety (Rule 6.33)
 import { checkIds, lockedIdError, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
-import { applyDeviceTemplate } from './public/templates.js';
+import { keepDeviceFixed } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
 import { renameInProcesses, renameInProcess, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { cleanUserStyles } from './public/styles.js';
@@ -792,8 +792,12 @@ async function route(req, res) {
     const body = await jsonBody(req, true);
     // each item gets the hidden key of the item it stands for; a copy gets a new one and remembers its first item (lib/keys.js)
     for (const list of ['elements', 'graphics', 'workspaces', 'devices']) if (Array.isArray(body[list])) claimKeys(body[list], store.config[list]);
-    // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to the Template's, whatever was sent
-    for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') applyDeviceTemplate(el, templates.find('device', el.template));
+    // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to its own saved ones, whatever was sent.
+    // The Template is only read to copy it once, when it is placed or its Orientation picks another one of the set (Rule 2.62).
+    for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') {
+      const old = el[KEY] && (store.config.elements || []).find(o => o[KEY] === el[KEY]);
+      keepDeviceFixed(el, old, templates.find('device', el.template));
+    }
     // a gGlobal's Kind is set when it is made and never changes (Fritz, 2026-11-02, public/gkinds.js)
     { const bad = kindChangeError(store.config.elements, body.elements); if (bad) return fail(res, 400, bad); }
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)

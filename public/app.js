@@ -40,7 +40,7 @@ import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, DEVICE_FIXED } from './templates.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
@@ -4990,13 +4990,24 @@ function autoFit(g) {
 const TC_FIT_TPL = { elbow90: 'Elbow_90', elbow45: 'Elbow_45', tee: 'Tee', cross: 'Cross' };
 const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'Priming_Tee', 'Sight_Glass', 'Sight_Glass_Caged', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
 const isTcFit = g => isPlainUnit(g);
-const tcBend = (g, t = tplOf('fitting', g.template)) => { const q = fracPos(t?.bend); return q ? unitPoint(g, q[1], q[2]) : null; };
+// A placed fitting keeps its own copy of what its Template said about its shape (Rule 2.62: "Templates are only for a Placement on a Tab
+// for Building and nothing else"): the bend, how thick its body is drawn, its size and whether it stands upright. g.fit is copied from
+// the Template the first time Skynet sees the fitting and is never read from the Template again.
+const FIT_COPY = ['bend', 'body', 'size', 'upright', 'ipPos'];
+function fitOf(g) {
+  if (!g) return null;
+  if (g.fit) return g.fit;
+  const t = tplOf('fitting', g.template); if (!t) return null;
+  const f = {}; for (const k of FIT_COPY) if (t[k] !== undefined) f[k] = clone(t[k]);
+  g.fit = f; return f;
+}
+const tcBend = (g, t = fitOf(g)) => { const q = fracPos(t?.bend); return q ? unitPoint(g, q[1], q[2]) : null; };
 const tcName = (t, all) => { const k = (t.fittings || []).map(f => f.kind).find(k => k !== 'none'); const p = (t.name === 'Cross' ? 'Cross' : k === 'sightGlass' && t.fittings.some(f => f.caged) ? 'SightGlassCaged' : NAME_PREFIX[k]) || t.name;
   const used = new Set(all.map(x => x.name)); let n = 1; while (used.has(p + '_' + n)) n++; return p + '_' + n; };
 // the unit IP that leaves its bend in direction v (unit vector), if any
 function tcArm(u, v) {
-  const t = tplOf('fitting', u.template), b = tcBend(u, t); if (!b) return null;
-  for (const [k, pos] of Object.entries(t.ipPos || {})) {
+  const t = fitOf(u), b = tcBend(u, t); if (!b) return null;
+  for (const [k, pos] of Object.entries(u.ipPos || t.ipPos || {})) {
     const q = fracPos(pos); if (!q) continue;
     const c = unitPoint(u, q[1], q[2]), dx = c[0] - b[0], dy = c[1] - b[1], l = Math.hypot(dx, dy);
     if (l && (dx * v[0] + dy * v[1]) / l > 0.99) return draft.graphics.find(x => x.kind === 'ip' && x.attachTo === u.id && x.port === k) || null;
@@ -5126,9 +5137,9 @@ function addTcFit(name) {
 // pipe is made shorter and joined to it. Only a fitting with no pipes on it yet, not Locked, in Edit layout. Returns null when it
 // is not on a pipe, else { ok, text } for the message.
 function tcArms(u) {
-  const t = tplOf('fitting', u.template), b = tcBend(u, t); if (!b) return null;
+  const t = fitOf(u), b = tcBend(u, t); if (!b) return null;
   const arms = [];
-  for (const [k, pos] of Object.entries(t.ipPos || {})) {
+  for (const [k, pos] of Object.entries(u.ipPos || t.ipPos || {})) {
     const q = fracPos(pos), ip = q && draft.graphics.find(x => x.kind === 'ip' && x.attachTo === u.id && x.port === k); if (!ip) continue;
     const c = unitPoint(u, q[1], q[2]), dx = c[0] - b[0], dy = c[1] - b[1], l = Math.hypot(dx, dy);
     if (l) arms.push({ id: ip.id, c, v: [dx / l, dy / l] });
@@ -5607,7 +5618,7 @@ function skySet(t) {
 // a new User version: the Template's attributes, then the Add Device box as for any Device
 function skyDevPreset(name) {
   const t = TPL?.device?.find(x => x.name === name);
-  return t ? applyDeviceTemplate({ type: t.type || 'digitalOut', ...clone(t.props || {}), template: t.name, templateCls: 'skynet' }, t) : null;
+  return t ? keepDeviceFixed({ type: t.type || 'digitalOut', ...clone(t.props || {}), template: t.name, templateCls: 'skynet' }, null, t) : null;      // copied once (Rule 2.62)
 }
 // The Close all / Open all valve lists (Rule 6.15): close_all_valves and open_all_valves in a Process, and the Brew Process's
 // PreBrew. On both by default; a tap water valve is always on Close all and never on Open all; a Manual valve is on neither.
@@ -6463,7 +6474,7 @@ async function newDeviceDialog(e, hint, what) {
           if (work.offset !== undefined && work.offset !== '') e.offset = +work.offset;
           if (hasProbePic(e)) { const b = { ...e, w: +work.w || e.w, h: +work.h || e.h, x: Number.isFinite(+work.x) ? +work.x : e.x, y: Number.isFinite(+work.y) ? +work.y : e.y }; turnElBox(b, before); work.w = b.w; work.h = b.h; work.x = b.x; work.y = b.y; }
         }
-        if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
+        if (mbv && e.template) { const was = clone(e); e._orient = work._orient; skyOrientSwitch(e); delete e._orient; keepDeviceFixed(e, was, devTemplate(e)); }     // the Orientation picks its Template and its picture is copied then; otherwise the valve keeps its own (Rules 5.16 and 2.62)
         if (dd) { const d = { ...work }; dbFromWork(d, e); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; if (d.apiName) e.apiName = d.apiName; else delete e.apiName; }
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
@@ -6938,7 +6949,7 @@ function updLockBtn() {
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
 // Properties), or an IP fitting (turn only: its shape is the same flipped).
-const isUprightFit = g => isUnit(g) && !!tplOf('fitting', g.template)?.upright;      // a Priming Tee's valve always points up
+const isUprightFit = g => isUnit(g) && !!fitOf(g)?.upright;      // a Priming Tee's valve always points up
 const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : (isSkyV(g) && isKettle(g)) || isUprightFit(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
 function updTurnBar(item) {
   const k = editing && !previewing ? turnKind(item) : '';
@@ -11909,7 +11920,7 @@ async function editItem(kind, id) {
         delete work._tapFor;
         skyOrientSwitch(work); delete work._orient;
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
-        applyDeviceTemplate(work, devTemplate(work));
+        keepDeviceFixed(work, item, devTemplate(work));      // its own copy; the Template only when the Orientation picks another (Rule 2.62)
       }
       if (work.type === 'alarm' && work.priority !== undefined) {      // Alarm Priority (Rule 7.18): 0 to 99, two decimal places
         if (!(work.priority >= 0 && work.priority <= 99)) throw new Error('Priority is a number from 0 to 99, such as 1, 1.1 or 1.15');
@@ -16701,20 +16712,13 @@ function placeUnitParts(g) {
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
 }
-// A Skynet pipe fitting follows its Template (Rules 5.6 and 15.2): one placed before Fritz's 2026-11-02 drawings takes its
-// Template's new picture, openings and shape when Edit layout opens, and its IPs move onto the new openings (kept with the
-// next Save layout). Returns how many changed.
+// A placed pipe fitting never follows its Template (Rule 2.62, OakBarn Brewery, 2026-11-19: "Templates are only for a Placement on a Tab
+// for Building and nothing else"; before, a Skynet fitting took its Template's new picture, openings and shape when Edit layout opened).
+// When Edit layout opens, each fitting that has no copy of its shape yet gets one (g.fit, kept with the next Save layout). Returns 0:
+// nothing on the Tab changes.
 function refreshSkyFits() {
-  let n = 0;
-  for (const g of draft?.graphics || []) {
-    const t = isUnit(g) && tplOf('fitting', g.template);
-    if (!t || t.cls !== 'skynet' || !t.image || (g.image === t.image && JSON.stringify(g.ipPos || null) === JSON.stringify(t.ipPos || null))) continue;
-    g.image = t.image;
-    if (t.ipPos) g.ipPos = clone(t.ipPos); else delete g.ipPos;
-    if (t.size) { const cy = (g.y || 0) + (g.h || 90) / 2, hh = Math.round((g.w || 90) * t.size[1] / t.size[0]); g.h = hh; g.y = Math.round(cy - hh / 2); }
-    placeUnitParts(g); n++;
-  }
-  return n;
+  for (const g of draft?.graphics || []) if (isUnit(g)) fitOf(g);
+  return 0;
 }
 // Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
 // body is as thick as most of the pipes on it (Rule 5.36) (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
@@ -16724,7 +16728,7 @@ const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
   const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))) || (g.onVessel ? 0 : defaultWidth(g.workspace, g)); if (!pw) return;      // most of its pipes, else the Default pipe size (Rule 5.36)
-  const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90];
+  const t = fitOf(g), [tw, th] = t?.size || [90, 90];
   let w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (isSightGlass(g)) { hh = Math.round(pw / SG_BODY); w = Math.round(hh * sgRatio(g.sgLength)); }       // a Sight Glass: as thick as its pipe, as long as its Length (Rule 5.32)
   if (w === g.w && hh === g.h) return;
@@ -16778,7 +16782,7 @@ const CAP_BOX = 1.5;
 function sizeCap(c) {
   const ip = draft.graphics.find(x => x.id === c.capOn), o = ip?.attachTo && draft.graphics.find(g => g.id === ip.attachTo);
   if (!o || !isUnit(o) || isCap(o) || isMf(o) || /Reducer/.test(o.template || '')) return;
-  const t = tplOf('fitting', o.template), S = Math.round((o.w || 90) * (t?.body || FIT_BODY) * CAP_BOX);
+  const t = fitOf(o), S = Math.round((o.w || 90) * (t?.body || FIT_BODY) * CAP_BOX);
   if (!S || (S === c.w && S === c.h)) return;
   c.w = c.h = S; capOnto(c, ip);
 }

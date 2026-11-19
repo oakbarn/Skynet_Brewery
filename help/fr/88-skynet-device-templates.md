@@ -1,8 +1,10 @@
 # Device Templates Skynet {#skynet-device-templates}
 
 Un **Template Skynet** est fixé par Skynet et ne peut pas être changé par un utilisateur (Règle Skynet 5.16). Quand vous faites un Device à partir de l'un d'eux, vous obtenez
-votre propre **User version** (version de l'utilisateur). Elle hérite de tout du Template. Vous ne pouvez régler que certains de ses attributs, et seuls
-ceux-là s'affichent dans ses Properties. Lesquels dépend de la sorte de Device.
+votre propre **User version** (version de l'utilisateur). Elle reçoit une copie de tout le Template quand elle est posée. Vous ne pouvez régler que
+certains de ses attributs, et seuls ceux-là s'affichent dans ses Properties. Lesquels dépend de la sorte de Device. Une fois posée, le Template
+n'est plus jamais lu : un Template plus récent ou changé ne change jamais un Device déjà sur un Tab. Choisir une autre **Orientation** copie
+l'image de cette Orientation à ce moment-là (Règle Skynet 2.62).
 
 ## Le Device Skynet Motorized Ball Valve {#the-skynet-motorized-ball-valve-device}
 
