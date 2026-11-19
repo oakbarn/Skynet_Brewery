@@ -3,6 +3,7 @@ import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
+import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
@@ -260,7 +261,7 @@ function savedPop(what) {
   t.replaceChildren(h('b', {}, '✔ Saved'), ...(what && what !== 'Saved' ? [h('span', {}, what)] : []));
   t.className = 'show ok'; clearTimeout(t._t); t._t = setTimeout(() => t.className = '', SAVED_MS);
 }
-function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
+function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); raiseOnTop(t); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 // Rule 2.35 (Fritz, 2026-11-04): a phone or tablet is for running the brewery, not for editing or building. On one, an admin
 // works as an operator: the Schema, Processes (Start / Stop) and the buttons on the Tabs work; Edit layout, Properties and the
@@ -14922,7 +14923,7 @@ function menuButton(leave, label = ' Menu') {
 }
 // every dialog gets the ☰ in its top right corner when it opens, except the ones that must be answered first
 // (a manual valve a Process waits on, the recovery code, the first-run sample pick, beer money): those carry data-nomenu
-const dlgSnap = d => JSON.stringify([...d.querySelectorAll('input, select, textarea')].map(i => i.type === 'checkbox' || i.type === 'radio' ? i.checked : i.value));
+const dlgSnap = d => JSON.stringify([...d.querySelectorAll('input, select, textarea')].filter(i => !i.closest('.onTopHost')).map(i => i.type === 'checkbox' || i.type === 'radio' ? i.checked : i.value));
 function addDialogMenu(d) {
   if ('nomenu' in d.dataset) return;
   d._menuSnap = dlgSnap(d);
