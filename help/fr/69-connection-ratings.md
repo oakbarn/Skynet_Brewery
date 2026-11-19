@@ -42,11 +42,11 @@ Le shield Ethernet d'un Arduino Mega utilise la **broche D10** (Règle Skynet 6.
 
 - Sur un Mega en **Ethernet**, aucun Device ne peut utiliser la broche D10. La liste des broches ne la propose pas, et la taper est refusé.
 - Une Interface Mega **ne peut pas passer de l'USB à l'Ethernet** tant qu'un Device est sur la broche D10 (par exemple en la retirant puis en la rajoutant en Ethernet, ou en passant du simulateur à une vraie carte Ethernet). Le panel nomme le Device et vous demande de le déplacer d'abord, **avec son câblage**, sur une autre broche libre. Une fois la broche 10 libre, le changement passe.
-- En USB, la broche D10 est une broche PWM normale.
+- En **USB**, la broche D10 est gardée pour l'Ethernet, mais seulement par un avertissement : la liste des broches la montre à sa place, d'une **autre couleur** avec *Reserved for Ethernet: see Help* à côté, et la choisir montre un seul avertissement : le Mega ne peut plus passer en Ethernet tant que D10 est utilisée. Ensuite, elle est à vous.
 
 ## Cartes SD : non prises en charge {#sd-cards-not-supported}
 
 La broche **D4** est la broche de carte SD du shield Ethernet (Règle Skynet 6.11). **SD Card Not Supported. Never insert an SD Card!** (Carte SD non prise en charge. N'insérez jamais de carte SD !)
 
-- Vous pouvez quand même utiliser D4 pour un Device sur un Mega, mais le panel vous avertit d'abord. Appuyez sur **OK** pour l'utiliser quand même ou sur **Cancel** pour choisir une autre broche. Dans la liste des broches, D4 est marquée **SD card pin**.
+- Vous pouvez quand même utiliser D4 pour un Device sur un Mega (ou toute carte qui prend un shield Ethernet), mais le panel vous avertit d'abord. Appuyez sur **OK** pour l'utiliser quand même ou sur **Cancel** pour choisir une autre broche. Dans la liste des broches, D4 est marquée **SD card pin**.
 - Le sketch Ethernet (firmware 0.5) garde la fente SD éteinte et la vérifie toutes les 10 secondes. Si une carte est dans la fente, chaque panel ouvert affiche **"SD Card Not Supported. Remove the SD Card!"** (retirez la carte SD) et la ligne de la carte sur la page **Devices** l'affiche en rouge jusqu'à ce que la carte soit retirée.

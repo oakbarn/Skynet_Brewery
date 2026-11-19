@@ -359,7 +359,21 @@ export function rtdPinError(el, devices) {
 export const ETHERNET_PIN = '10';
 export const SD_PIN = '4';
 export const SD_WARNING = 'Pin D4 is the SD card pin of the Ethernet shield. SD Card Not Supported. Never insert an SD Card! (Skynet Rule 6.11)';
+// the boards that take an Ethernet shield with an SD card slot (a board with its own Ethernet module words, eth, has no SD card)
+const sdBoard = P => !!P.shield && !P.eth;
+// Nano ESP32: A4-A7 are on the chip's second ADC, which can't read while WiFi is on (OakBarn Brewery, 2026-11-19: yes, one warning)
+export const ADC2_WARNING = '{0} on a Nano ESP32 can\'t read while its WiFi is on (the chip\'s second ADC is shared with WiFi). On WiFi, use A0-A3 for analog sensors, or connect this board by USB.';
+// Leonardo, Micro: the D pin an analog Port is (A6 = D4), else the pin itself
+const onPinOf = (p, P) => { const n = +p - 54; return /^\d+$/.test(p) && n >= 0 && P.aOn?.['A' + n] ? P.aOn['A' + n] : p; };
 // Every board on an Ethernet shield or module uses D10 for it (2026-11-19, Rule 6.35: Rule 6.10 on every such board, not only the Mega)
+// OakBarn Brewery, 2026-11-19: "On a Mega, we want to reserve pin 10 on USB Connection until it is the last one available and if picked
+// Give warning about Ethernet no longer Available as an Option because of PIN 10 being used. The reservation is not a fixed thing but a
+// warning to the User"; then "It can be in order but can it be a Different color on the DDLB?" (Rule 6.10): a Mega not on Ethernet keeps D10
+// in its place in the Port list, in another color with "Reserved for Ethernet: see Help" beside it, and picking it gives one warning.
+export const ETHERNET_PIN_WARNING = 'Pin D10 is the pin an Ethernet shield needs. While a Device uses D10, this Mega can\'t be changed to Ethernet (Skynet Rule 6.10). Pick another pin to keep Ethernet as a choice.';
+export const pinKept = (p, d) => String(p) === ETHERNET_PIN && usbMega(d);
+export const KEPT_FOR_ETHERNET = 'Reserved for Ethernet: see Help';      // OakBarn Brewery, 2026-11-19: "Only pin 10 gets ethernet warning and Reserved for Ethernet: see Help"
+const usbMega = d => !!d && boardOf(d) === 'mega' && linkOf(d) !== 'ethernet';
 const ethernetMega = d => !!d && !!BOARD_INFO[boardOf(d)]?.shield && linkOf(d) === 'ethernet';
 // A plain message when Interface d is (or is being changed to) an Ethernet Mega and a Device on it uses pin 10, or null
 export function ethernetPinError(d, elements) {
@@ -383,6 +397,11 @@ export function busCheck(el, elements, devices) {
     const bad = boardDeviceError(el, mine, P); if (bad) return { error: bad };
   }
   if (mine.includes(ETHERNET_PIN) && ethernetMega((devices ?? []).find(d => d.name === iface))) return { error: `Pin D10 on ${iface} is used by its Ethernet shield. Pick another pin (Skynet Rule 6.10).` };
+  if (P.aOn && iface) {      // Leonardo, Micro: A6-A11 are D4, D6, D8, D9, D10, D12, one pin under two names
+    const phys = new Set(mine.map(p => onPinOf(p, P)));
+    const o = others.find(o => o.device === iface && pinsOn(o).some(p => phys.has(onPinOf(p, P)) && !mine.includes(p)));
+    if (o) return { error: `${o.name} already uses this pin on ${iface} under its other name (A6-A11 are the pins D4, D6, D8, D9, D10, D12). Pick another pin.` };
+  }
   const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
   const onPin = pins => others.find(o => o.device === iface && !usesSpi(o) && pinsOn(o).some(p => pins.includes(p)));
   if (usesSpi(el)) {
@@ -400,8 +419,15 @@ export function busCheck(el, elements, devices) {
     if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
   }
   const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)), P);
-  // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning
-  if (mine.includes(SD_PIN) && iface && boardOf((devices ?? []).find(d => d.name === iface)) === 'mega') return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning. On every board that
+  // takes an Ethernet shield, not only the Mega (OakBarn Brewery, 2026-11-19: yes)
+  const dev = (devices ?? []).find(d => d.name === iface);
+  if (mine.includes(SD_PIN) && iface && sdBoard(P)) return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  const pw = P.pinWarn && mine.map(p => P.pinWarn[p]).find(Boolean);      // ESP32 GPIO16 and GPIO17 (WROVER boards)
+  if (pw) return { warn: pw + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  const a2 = P.wifiAdc2 && linkOf(dev) === 'esp32' && mine.find(p => P.wifiAdc2.some(a => String(54 + +a.slice(1)) === p));
+  if (a2) return { warn: ADC2_WARNING.replace('{0}', 'A' + (+a2 - 54)) + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  if (mine.includes(ETHERNET_PIN) && usbMega((devices ?? []).find(d => d.name === iface))) return { warn: ETHERNET_PIN_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   return adv;
 }
 // Fritz, 2026-10-23: PWM and counter (interrupt) pins are few. A Device that doesn't need what its pin is kept for gets a heads-up
@@ -431,12 +457,16 @@ Object.assign(PROFILES.mega, { pins: MEGA_PINS, pwm: PWM_PINS, counter: COUNTER_
 // a list of Ports a board keeps for something (PWM, counters) only when not every Port that can drive an output is in it (on a Pi, an ESP32
 // or a Due every pin counts pulses, so none is kept for that)
 const keepsFew = (P, list) => !(P.pwmAll && list === P.pwm) && !P.pins.filter(p => !P.inputOnly.includes(p)).every(p => list.includes(p));
+// a true PWM pin of a board that has few of them (shown in its own color in the Port lists; OakBarn Brewery, 2026-11-19: "Different color
+// for PWM Pins"). On a Pi or an ESP32 every pin does PWM, so none is colored.
+// A Pi makes PWM on every pin, but GPIO 12, 13, 18 and 19 have the hardware PWM (OakBarn Brewery, 2026-11-19: mark them too).
+export const isPwmPin = (p, board) => { const P = pinProfile(board); return (keepsFew(P, P.pwm) && P.pwm.includes(String(p))) || !!P.truePwm?.includes(String(p)); };
 export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
 // can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
 export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(String(el?.channel ?? ''));
 // How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins.
-// el (the Device being given a Port) is optional: a Device that doesn't need PWM sees a PWM pin as "D5 (Save for PWM)" (Rule 4.2).
+// el (the Device being given a Port) is optional: every PWM pin reads "D5 (Best for True PWM: see Help)" (Rule 4.2).
 export function pinLabel(p, board, el) {
   p = String(p);
   if (/^A\d+$/.test(p)) return analogLabel(p, pinProfile(board));
@@ -484,14 +514,19 @@ export function lowVoltWarning(el, devices) {
 // what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
 // For a Device that doesn't need PWM (an On/Off DO, a probe, a pseudo PWM ...) a PWM pin reads "Save for PWM" (OakBarn Brewery,
 // 2026-11-12: "Mark the PWM as Save for PWM for DO that dont need PWM", Rule 4.2), so it is kept for a Device that needs it.
-export const SAVE_FOR_PWM = 'Save for PWM';
+export const SAVE_FOR_PWM = 'Best for True PWM';
+// OakBarn Brewery, 2026-11-19: "And on PWM Pins "best for True PWM: See Help"": every PWM pin (for any Device) reads "Best for True PWM:
+// see Help" in place of "PWM" and "Save for PWM" (Rule 4.2 still offers PWM pins to a Device that doesn't need PWM only when no plain pin is free)
+export const PWM_TAG = SAVE_FOR_PWM;
 export function pinTag(p, board, el) {
   p = String(p);
-  if (board === 'pi') { const P = PROFILES.pi; return P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''; }
+  if (board === 'pi') { const P = PROFILES.pi; return [P.truePwm.includes(p) && PWM_TAG + ': see Help', P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''].filter(Boolean).join(', '); }
   const P = pinProfile(board);
-  const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && (el?.type && !needsPwm(el) ? SAVE_FOR_PWM : 'PWM'), keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ');
-  if (p === SD_PIN && P.board === 'mega') return t + ', SD card pin';      // Skynet Rule 6.11
-  return t || (P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C' : P.usb.includes(p) ? 'USB link' : P.avoid.includes(p) ? 'start-up pin, use last' : '');
+  const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && PWM_TAG, keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ')
+    + (keepsFew(P, P.pwm) && P.pwm.includes(p) ? ': see Help' : '');
+  if (p === SD_PIN && sdBoard(P)) return [t, 'SD card pin'].filter(Boolean).join(', ');      // Skynet Rule 6.11, every board that takes an Ethernet shield
+  const weak = P.weakOut?.includes(p) && 'low current, use last for outputs';      // Nano ESP32 D1 (a 499 ohm resistor in its line)
+  return [t, weak].filter(Boolean).join(', ') || (P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C' : P.usb.includes(p) ? 'USB link' : P.avoid.includes(p) ? `${P.avoidWhy?.[p] || 'start-up pin'}, use last` : '');
 }
 // Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
 // counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
@@ -502,7 +537,7 @@ export function freePins(el, elements, devices, analog) {
   const special = (list, p) => keepsFew(P, list) && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
   const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
   const free = pool.filter(p => !(OUTPUT_TYPES.includes(el.type) && P.inputOnly.includes(p))).filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
-    .map((p, i) => [p, extras(p) + (P.avoid.includes(p) ? 5 : 0), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+    .map((p, i) => [p, extras(p) + (P.avoid.includes(p) || (OUTPUT_TYPES.includes(el.type) && P.weakOut?.includes(p)) ? 5 : 0) , i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
   // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,
   // select NON PWM Ports." A Device that needs no true PWM is offered only the pins that can't do it (Rule 4.2); only when none of
   // those is free are the PWM pins offered. (On a Pi every pin does PWM, so nothing is held back.)

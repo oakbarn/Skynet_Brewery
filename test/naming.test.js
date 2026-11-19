@@ -143,7 +143,7 @@ assert.equal(busCheck({ ...pump, channel: 22 }, []), null);
 const plain = ['14', '15', '16', '17', ...Array.from({ length: 32 }, (_, i) => String(22 + i))].filter(p => !['40', '44', '45', '46', '50', '51', '52'].includes(p));
 const full = plain.map((p, i) => ({ name: 'R' + i, type: 'digitalOut', device: 'MEGA', channel: p }));
 assert.equal(busCheck({ ...pump, channel: 5 }, full), null, 'no plain pin left: no heads-up');
-assert.deepEqual([2, 5, 18, 22, 51, 40].map(pinTag), ['PWM + Counter', 'PWM', 'Counter', '', 'SPI, for RTD boards', 'OneWire probes']);
+assert.deepEqual([2, 5, 18, 22, 51, 40].map(pinTag), ['Best for True PWM + Counter: see Help', 'Best for True PWM: see Help', 'Counter', '', 'SPI, for RTD boards', 'OneWire probes']);
 // the Port list in the New Device box: free pins that fit, best first
 assert.deepEqual(freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [pump]).slice(0, 3), ['14', '15', '16'], 'plain pins first');
 assert.ok(!freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [rtd]).includes('51'), 'SPI pins gone while an RTD is there');
@@ -163,7 +163,7 @@ assert.equal(rtdPinError({ ...rtd, channel: 5, device: 'ESP' }, [{ name: 'ESP', 
 const ethMega = [{ name: 'MEGA', board: 'mega', connection: 'ethernet' }], usbMega = [{ name: 'MEGA', board: 'mega', connection: 'serial' }];
 const on10 = { name: 'MB_10_PWM_Fan', type: 'pwmOut', device: 'MEGA', channel: 10 };
 assert.match(busCheck(on10, [], ethMega).error, /Rule 6\.10/, 'no D10 on an Ethernet Mega');
-assert.equal(busCheck(on10, [], usbMega), null, 'D10 is fine on USB');
+assert.match(busCheck(on10, [], usbMega)?.warn ?? '', /can't be changed to Ethernet/, 'D10 on USB: allowed, with one warning (OakBarn Brewery, 2026-11-19)');
 assert.ok(!freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('10'), 'D10 not offered on an Ethernet Mega');
 assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], usbMega).includes('10'));
 assert.match(ethernetPinError(ethMega[0], [on10]), /Move MB_10_PWM_Fan .*Rule 6\.10/, 'USB to Ethernet refused while D10 is used');
@@ -177,18 +177,16 @@ assert.match(busCheck(on4, [], usbMega).warn, /SD Card Not Supported\. Never ins
 assert.match(busCheck(on4, [], ethMega).warn, /SD Card Not Supported/, 'warned, not blocked, on Ethernet too');
 assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('4'));
 assert.equal(busCheck({ ...on4, device: 'ESP' }, [], [{ name: 'ESP', board: 'esp32' }])?.warn?.includes('SD') ?? false, false, 'only a Mega');
-assert.equal(pinTag(4), 'PWM, SD card pin');
-// "Save for PWM" (OakBarn Brewery, 2026-11-12, Rule 4.2): a Device that doesn't need PWM sees a PWM pin marked to keep it for one that does
+assert.equal(pinTag(4), 'Best for True PWM: see Help, SD card pin');
+// "Save for PWM" (OakBarn Brewery, 2026-11-12, Rule 4.2), now "Best for True PWM: see Help" on every PWM pin (2026-11-19)
 {
   const pump = { type: 'digitalOut', subtype: 'pump' }, pwm = { type: 'pwmOut' };
-  assert.equal(pinTag(5, 'mega', pump), 'Save for PWM');
-  assert.equal(pinTag(2, 'mega', pump), 'Save for PWM + Counter');
-  assert.equal(pinTag(5, 'mega', pwm), 'PWM', 'a PWM Device keeps "PWM"');
-  assert.equal(pinTag(5, 'mega', { type: 'digitalOut', subtype: 'pump', pwm: true }), 'PWM', 'a Speed (PWM) Pump needs it');
-  assert.equal(pinTag(5, 'mega', { ...pwm, pseudoPwm: true }), 'Save for PWM', 'pseudo PWM needs no PWM pin');
-  assert.equal(pinTag(4, 'mega', pump), 'Save for PWM, SD card pin');
+  assert.equal(pinTag(5, 'mega', pump), 'Best for True PWM: see Help');
+  assert.equal(pinTag(2, 'mega', pump), 'Best for True PWM + Counter: see Help');
+  assert.equal(pinTag(5, 'mega', pwm), 'Best for True PWM: see Help', 'a PWM Device sees the same words');
+  assert.equal(pinTag(4, 'mega', pump), 'Best for True PWM: see Help, SD card pin');
   assert.equal(pinTag(17, 'pi', pump), '', 'a Pi keeps no pin for PWM');
-  assert.equal(pinLabel(5, 'mega', pump), 'D5  (Save for PWM)');
+  assert.equal(pinLabel(5, 'mega', pump), 'D5  (Best for True PWM: see Help)');
   assert.equal(pinLabel(22, 'mega', pump), 'D22');
 }
 assert.deepEqual(freePins({ name: 'N', type: 'temperature', sensor: 'pt1000', device: 'MEGA' }, [rtd]), RTD_CS_PINS.filter(p => p !== '48'), 'the RTD pin list');
@@ -279,4 +277,48 @@ console.log('naming tests passed');
   assert.equal(lockedIdError(before, [{ name: 'Brew House', id: 'BR', _key: 'k9' }], 'Tab'), '', 'a new Tab (new key) with an old name is a new item');
   assert.equal(lockedIdError(before, [{ name: 'Mash', id: 'MA', _key: 'k3' }], 'Tab'), '', 'a new Tab picks its own');
   assert.match(lockedIdError([{ name: 'Mega', id: 'MB' }], [{ name: 'Mega', id: 'MX' }], 'Interface'), /Interface ID MB of Mega/, 'no keys: found by name');
+}
+
+// Rule 6.10 (OakBarn Brewery, 2026-11-19): D10 on a USB Mega keeps its place in another color, with one warning about Ethernet
+{
+  const { freePins: fp, busCheck: bc } = await import('../public/naming.js');
+  const usb = [{ name: 'M', board: 'mega', connection: 'serial' }];
+  const pw = fp({ type: 'pwmOut', device: 'M', name: '\0new' }, [], usb);
+  assert.ok(pw.indexOf('10') === pw.indexOf('9') + 1, 'D10 keeps its place in number order ("It can be in order")');
+  const { pinKept: pk } = await import('../public/naming.js');
+  assert.ok(pk('10', usb[0]) && !pk('10', { name: 'M', board: 'mega', connection: 'ethernet' }) && !pk('9', usb[0]) && !pk('10', { name: 'U', board: 'uno', connection: 'serial' }), 'only D10, only a Mega not on Ethernet');
+  assert.match(bc({ type: 'digitalOut', device: 'M', channel: '10', name: 'a' }, [], usb)?.warn ?? '', /can't be changed to Ethernet/, 'one warning, not a refusal');
+  assert.match(bc({ type: 'digitalOut', device: 'M', channel: '10', name: 'a' }, [], [{ name: 'M', board: 'mega', connection: 'ethernet' }])?.error ?? '', /Rule 6.10/, 'an Ethernet Mega still refuses D10');
+  const { isPwmPin } = await import('../public/naming.js');
+  assert.ok(isPwmPin('5', 'mega') && isPwmPin('44', 'mega') && !isPwmPin('22', 'mega'), 'the Mega\'s PWM pins get their color');
+  assert.ok(!isPwmPin('17', 'pi') && !isPwmPin('13', 'esp32'), 'every pin does PWM on a Pi or ESP32: none colored');
+  console.log('D10 on a USB Mega tests passed');
+}
+// Rules 6.35 and 6.11 (OakBarn Brewery, 2026-11-19, answers 1-9 after checking every maker's pinout)
+{
+  const n = await import('../public/naming.js'), { BOARD_INFO } = await import('../public/boards.js');
+  const D = [{ name: 'L', board: 'leonardo', connection: 'serial' }, { name: 'N', board: 'nanoEsp32', connection: 'esp32' }, { name: 'NU', board: 'nanoEsp32', connection: 'serial' },
+    { name: 'E', board: 'esp32', connection: 'serial' }, { name: 'U', board: 'uno', connection: 'serial' }, { name: 'NA', board: 'nano', connection: 'serial' }];
+  // 1 Leonardo / Micro A6-A11 = D4, D6, D8, D9, D10, D12: one pin, two names
+  assert.deepEqual(n.freePins({ type: 'analogIn', device: 'L', name: '\0new' }, [], D, true).slice(-6), ['A6', 'A7', 'A8', 'A9', 'A10', 'A11']);
+  assert.match(n.pinLabel('A6', 'leonardo'), /A6 = pin 24, on D4/);
+  const onD4 = [{ name: 'x', type: 'digitalOut', device: 'L', channel: '4' }];
+  assert.ok(!n.freePins({ type: 'analogIn', device: 'L', name: '\0new' }, onD4, D, true).includes('A6'), 'A6 is D4: not offered while D4 is used');
+  assert.ok(!n.freePins({ type: 'digitalOut', device: 'L', name: '\0new' }, [{ name: 'a', type: 'analogIn', device: 'L', channel: 'A7' }], D).includes('6'), 'and the other way round');
+  // 2, 3 Nano ESP32: D1 last for outputs; A4-A7 one warning on WiFi only
+  assert.equal(n.freePins({ type: 'digitalOut', device: 'N', name: '\0new' }, [], D).at(-1), '1');
+  assert.match(n.busCheck({ type: 'analogIn', device: 'N', channel: 'A5', name: 'a' }, [], D)?.warn ?? '', /can't read while its WiFi is on/);
+  assert.equal(n.busCheck({ type: 'analogIn', device: 'NU', channel: 'A5', name: 'a' }, [], D)?.warn, undefined, 'no warning on USB');
+  // 4, 5 Grand Central: 16 counter Ports, PWM on D20 and D21
+  assert.equal(BOARD_INFO.grandCentral.counter.length, 16);
+  assert.ok(BOARD_INFO.grandCentral.pwm.includes('20') && BOARD_INFO.grandCentral.pwm.includes('21'));
+  // 6 ESP32 GPIO16/17: last, one warning
+  assert.match(n.busCheck({ type: 'digitalOut', device: 'E', channel: '17', name: 'a' }, [], D)?.warn ?? '', /WROVER/);
+  assert.match(n.pinLabel('16', 'esp32'), /not on WROVER boards, use last/);
+  // 7 Pi hardware PWM pins colored
+  assert.ok(n.isPwmPin('18', 'pi') && n.isPwmPin('12', 'pi') && !n.isPwmPin('17', 'pi'));
+  // 8 D4 SD card warning on every board that takes a shield (not a W5500 module board)
+  assert.match(n.busCheck({ type: 'digitalOut', device: 'U', channel: '4', name: 'a' }, [], D)?.warn ?? '', /SD Card Not Supported/);
+  assert.equal(n.busCheck({ type: 'digitalOut', device: 'NA', channel: '4', name: 'a' }, [], D)?.warn, undefined);
+  console.log('Board pinout answers tests passed');
 }

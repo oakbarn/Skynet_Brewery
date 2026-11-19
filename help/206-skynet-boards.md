@@ -12,23 +12,30 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 |---|---|---|---|---|---|---|
 | **Arduino Mega 2560** (the standard) | 5 V | D2-D53 | D2-D13, D44-D46 | D2, D3, D18-D21 | A0-A15 (pin 54-69) | USB, Ethernet shield, WiFi through an ESP32 bridge |
 | Arduino Uno R3 | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, Ethernet shield |
-| Arduino Uno R4 (Minima or WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A5 | USB, Ethernet shield, WiFi (R4 WiFi only) |
+| Arduino Uno R4 (Minima or WiFi) | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11 | D0-D3, D8 | A0-A5 | USB, Ethernet shield, WiFi (R4 WiFi only) |
 | Arduino Nano | 5 V | D2-D13 | D3, D5, D6, D9, D10, D11 | D2, D3 | A0-A7 | USB, Ethernet module |
 | Arduino Nano Every | 5 V | D0-D13 | D3, D5, D6, D9, D10 | every Port | A0-A7 | USB, Ethernet module |
-| Arduino Leonardo | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A5 | USB, Ethernet shield |
-| Arduino Micro | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A5 | USB, Ethernet module |
+| Arduino Leonardo | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A11 (A6-A11 are D4, D6, D8, D9, D10, D12) | USB, Ethernet shield |
+| Arduino Micro | 5 V | D0-D13 | D3, D5, D6, D9, D10, D11, D13 | D0-D3, D7 | A0-A11 (A6-A11 are D4, D6, D8, D9, D10, D12) | USB, Ethernet module |
 | Arduino Due | **3.3 V** | D2-D53 | D2-D13 | every Port | A0-A11 | USB, Ethernet shield |
 | Arduino GIGA R1 WiFi | **3.3 V** | D0-D53 | D2-D13 | every Port | A0-A11 | USB, Ethernet shield, WiFi |
 | Arduino Nano ESP32 | **3.3 V** | D0-D13 | every Port | every Port | A0-A7 | USB, WiFi |
-| Adafruit Grand Central M4 | **3.3 V** | D0-D53 | most Ports (Adafruit's list) | D2, D3, D18, D19 | A0-A15 (A0-A7 = pin 67-74, A8-A15 = pin 54-61) | USB, Ethernet shield |
+| Adafruit Grand Central M4 | **3.3 V** | D0-D53 | most Ports (Adafruit's list) | D0-D3, D6, D7, D14-D19, D23, D28, D32, D33 | A0-A15 (A0-A7 = pin 67-74, A8-A15 = pin 54-61) | USB, Ethernet shield |
 | Adafruit Feather M0 (WiFi) | **3.3 V** | D0, D1, D5, D6, D9-D13 | D5, D6, D9-D13 | every Port | A0-A5 | USB, WiFi (Feather M0 WiFi only) |
 | ESP32 | **3.3 V** | GPIO 2, 4, 5, 12-19, 21-23, 25-27, 32-36, 39 | every output Port | every Port | A0, A3-A7 (GPIO 36, 39, 32-35) | USB, Ethernet (ESP32 with a jack), WiFi |
 | ESP8266 (NodeMCU, Wemos D1) | **3.3 V** | GPIO 0, 2, 4, 5, 12-16 | every Port but GPIO16 | every Port but GPIO16 | A0 | USB, WiFi |
-| Raspberry Pi | **3.3 V** | GPIO 2-27 | every Port | every Port | none (use an ADS1115) | Ethernet, WiFi |
+| Raspberry Pi | **3.3 V** | GPIO 2-27 | every Port (hardware PWM: GPIO 12, 13, 18, 19) | every Port | none (use an ADS1115) | Ethernet, WiFi |
 
 - **The Port list offers only the Ports the board has.** A Port the board does not have is refused. On an ESP32, GPIO 6-11 are the board's own memory and are never offered, and GPIO 34, 35, 36 and 39 can only read (inputs), so an output can't use them.
 - **Start-up pins come last.** On an ESP32 (GPIO 2, 5, 12, 15) and an ESP8266 (GPIO 0, 2, 15) some Ports decide how the board starts. Skynet offers them last.
-- **Ethernet uses D10.** On every board with an Ethernet shield or module, D10 is the shield's and is not offered (Rule 6.10).
+- **Uno R4: 8 mA per Port.** A Port of an Uno R4 gives at most 8 mA (an Uno R3 or a Mega gives 20 mA). Use a relay module or an SSR that has its own driver; never wire a bare relay coil or a bright LED straight to the Port.
+- **Ethernet uses D10.** On a board connected by an Ethernet shield or module, D10 is the shield's and is not offered. On a Mega not on Ethernet, D10 is offered in orange with *Reserved for Ethernet: see Help*, and picking it gives one warning (Rule 6.10).
+- **D4 is the SD card pin** of an Ethernet shield. On every board that takes a shield, D4 reads *SD card pin* and picking it gives one warning: **SD Card Not Supported. Never insert an SD Card!** (Rule 6.11)
+- **Leonardo and Micro: A6-A11 are also D4, D6, D8, D9, D10, D12.** One pin, two names: a Device on A6 takes D4, so D4 is no longer offered (and the other way round).
+- **Grand Central: one flow meter per interrupt.** Its 16 counter Ports each have their own interrupt, so every flow meter can run at once.
+- **Nano ESP32:** D1 gives little current (a resistor is in its line), so it is offered last for outputs. A4-A7 can't read while the board's WiFi is on: on WiFi, picking one gives one warning.
+- **ESP32: GPIO16 and GPIO17** are not free on a board with a WROVER module. They are offered last, and picking one gives one warning.
+- **Raspberry Pi:** the Pi makes PWM on every pin, but GPIO 12, 13, 18 and 19 have hardware PWM: they read *Best for True PWM: see Help*, in blue.
 
 ## 3.3 V boards
 

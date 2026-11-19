@@ -116,7 +116,7 @@ Outputs ont le plus de ports, les vrais Ports PWM sont bien plus limités. Une f
 
 Cliquez pour choisir le Port.
 
-Un Port PWM marqué Save for PWM marche, mais gardez-le pour un Device qui a besoin de PWM.
+Un Port PWM marqué **Best for True PWM: see Help** marche, mais gardez-le pour un Device qui a besoin de PWM.
 
 BM_**15**_DO@Pump_Red~Pump_BH
 

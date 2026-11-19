@@ -42,12 +42,12 @@ The Ethernet shield on an Arduino Mega uses **pin D10** (Skynet Rule 6.10). So:
 
 - On a Mega on **Ethernet**, no Device can use pin D10. The pin list doesn't offer it, and typing it in is refused.
 - A Mega Interface **can't be changed from USB to Ethernet** while a Device is on pin D10 (for example by removing it and adding it again as Ethernet, or by switching from the simulator to a real Ethernet board). The panel names the Device and asks you to move it, **and its wiring**, to another free pin first. Once pin 10 is free, the change goes through.
-- On USB, pin D10 is a normal PWM pin.
+- On **USB**, pin D10 is kept for Ethernet, but only as a warning: the pin list shows it in its place, in **another color** with *Reserved for Ethernet: see Help* beside it, and picking it shows one warning that the Mega can no longer be changed to Ethernet while D10 is in use. Then it is yours to use.
 
 ## SD cards: not supported
 
 Pin **D4** is the SD card pin of the Ethernet shield (Skynet Rule 6.11). **SD Card Not Supported. Never insert an SD Card!**
 
-- You can still use D4 for a Device on a Mega, but the panel warns you first. Press **OK** to use it anyway or **Cancel** to pick another pin. In the pin list D4 is tagged **SD card pin**.
+- You can still use D4 for a Device on a Mega (or any board that takes an Ethernet shield), but the panel warns you first. Press **OK** to use it anyway or **Cancel** to pick another pin. In the pin list D4 is tagged **SD card pin**.
 - The Ethernet sketch (firmware 0.5) keeps the SD slot switched off and checks it every 10 seconds. If a card is in the slot, every open panel shows **"SD Card Not Supported. Remove the SD Card!"** and the board's row on the **Devices** page shows it in red until the card is out.
 
