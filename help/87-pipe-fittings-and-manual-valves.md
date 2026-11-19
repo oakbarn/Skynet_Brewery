@@ -49,7 +49,8 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
   - **.confirmation**.
   - **Graphic**: the valve as it will be on the Tab, kept up to date while you pick.
   - **Picture**, then **Orientation** (Horizontal or Vertical) and **Left / Right** on its line: Horizontal Right is the picture as
-    drawn, Horizontal Left is it mirrored; Vertical Left and Vertical Right point the handle to the left or the right. A front view
+    drawn, Horizontal Left is it mirrored; Vertical Left and Vertical Right point the handle to the left or the right. A Skynet
+    Manual Ball or Butterfly Valve looks the same mirrored, so on Horizontal its Left / Right is greyed out (Skynet Rule 18.52). A front view
     (looking down the pipe) has no Orientation. Its ends (IPs) turn with it, so join the pipes after you pick.
     ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
   - **X**, **Y**, **Width**, **Height** (set by its pipes, ⛔), 🔒 Lock and No Unlock, and the **Widget Type**.

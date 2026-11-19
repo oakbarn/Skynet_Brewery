@@ -1780,16 +1780,27 @@ const tapLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name
 // 50% vertical in a Brewery").
 const MV_BFLY = { h: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg', vl: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg', vr: 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg' };
 const isBfly = p => Object.values(MV_BFLY).includes(p);
+// the Skynet Manual Ball and Butterfly Valve drawings look the same mirrored (Rule 18.52): Horizontal Left / Right is greyed for them; a
+// User's own picture may not be, so it keeps Left / Right
+const mvSameBothWays = g => mvOrientOf(g) === 'h' && ['', 'Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', ...Object.values(MV_BFLY)].includes(g?.image || '');
 const mvFront = g => /Manual_Ball_Valve_Front(?:_Elbow)?_(?:Open|Closed)\.svg$/.test(String(g?.image || ''));
 const mvOrientOf = g => mvFront(g) ? 'h' : ['h', 'v'].includes(g.mvOrient) ? g.mvOrient : /_ClosedV_[LR]\.svg$/.test(String(g.image || '')) ? 'v' : 'h';
 const mvSideOf = g => mvFront(g) ? 'r' : ['l', 'r'].includes(g.mvSide) ? g.mvSide : /_ClosedV_L\.svg$/.test(String(g.image || '')) ? 'l' : 'r';
+// A Vertical Hose Bib is laid out like a Vertical Motorized Valve (OakBarn Brewery, 2026-11-19: "The Hose Bib Graphic should be more like a
+// Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the 'motor'";
+// Rule 18.52): its Inlet (the wall side) is at the Top or the Bottom, and Left / Right is the side its handle points to, so it has all 4
+// looks. A Hose Bib saved before has no Inlet: Vertical Left was the wall on top and Vertical Right the wall below, and it keeps that look.
+const MV_INLETS = [['t', 'Top'], ['b', 'Bottom']];
+const mvInletOf = g => ['t', 'b'].includes(g?.mvInlet) ? g.mvInlet : mvSideOf(g) === 'l' ? 't' : 'b';
 function mvLook(g) {
   const o = mvOrientOf(g), s = mvSideOf(g);
-  if (isBfly(g.image)) return { src: o === 'h' ? MV_BFLY.h : s === 'l' ? MV_BFLY.vl : MV_BFLY.vr, rot: 0, flip: o === 'h' && s === 'l', vert: o === 'v' };
-  return { src: g.image || '', rot: o === 'v' ? (s === 'l' ? -90 : 90) : 0, flip: o === 'h' && s === 'l', vert: false };
+  if (isBfly(g.image)) return { src: o === 'h' ? MV_BFLY.h : s === 'l' ? MV_BFLY.vl : MV_BFLY.vr, rot: 0, flip: o === 'h' && s === 'l', flipY: false, vert: o === 'v' };
+  if (isTapMv(g) && o === 'v') { const top = mvInletOf(g) === 't'; return { src: g.image || '', rot: top ? -90 : 90, flip: false, flipY: top !== (s === 'l'), vert: false }; }
+  return { src: g.image || '', rot: o === 'v' ? (s === 'l' ? -90 : 90) : 0, flip: o === 'h' && s === 'l', flipY: false, vert: false };
 }
-// the turn and mirror of a Manual Valve on its Tab and on its dialog's Graphic (its own Rotate 45 turns too, Rule 5.5)
-const mvTransform = (g, L = mvLook(g)) => { const r = L.rot + (+g.rotate || 0); return `${r ? `rotate(${r}deg) ` : ''}${L.flip ? 'scaleX(-1)' : ''}`.trim(); };
+// the turn and mirror of a Manual Valve on its Tab and on its dialog's Graphic (its own Rotate 45 turns too, Rule 5.5). flipY: a Vertical
+// Hose Bib's picture is turned upside down before it is turned, so its handle points the other way with the Inlet in the same place.
+const mvTransform = (g, L = mvLook(g)) => { const r = L.rot + (+g.rotate || 0); return `${r ? `rotate(${r}deg) ` : ''}${L.flip ? 'scaleX(-1)' : ''}${L.flipY ? 'scaleY(-1)' : ''}`.trim(); };
 const mvPic = g => mvLook(g).src;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
 // The Hose Bib (Tap Water Valve) is laid out like a Pump (OakBarn Brewery, 2026-11-18: "treat sizing of a hose bib type valve like a Pump
 // and have integral Hose or Pipe to IP"; "Hose Bibs get their own Dialog and the Internal Pipes or Hose and have the Graphic similar to
@@ -1797,13 +1808,17 @@ const mvPic = g => mvLook(g).src;     // open shows the open overlay on the same
 // right), and its own short Hose or Pipe runs inside the box from the spout's hose thread to its one IP on the edge of the box. Left
 // mirrors all of it (the wall on the left).
 const HB_PIC = 0.75, HB_SPOUT = [1 - HB_PIC + HB_PIC / 3, HB_PIC * 0.987];
+// its Inlet IP: the outer face of the wall side's pipe thread, (296, 167) of the 300 x 300 picture, on the right edge of its box (OakBarn
+// Brewery, 2026-11-19: "more like a Motorized Valve"; "I want the Inlet at the Top or Bottom"; Rule 18.52). It turns with the picture.
+const HB_INLET = [1, HB_PIC * 167 / 300];
 const HB_SPOTS = { BM: [0.5, 1], BL: [0, 1], BR: [1, 1], LM: [0, 0.5], TL: [0, 0], TM: [0.5, 0], TR: [1, 0], RM: [1, 0.5] };
 const HB_SPOT_WORDS = [['BM', 'Bottom Middle'], ['BL', 'Bottom Left'], ['BR', 'Bottom Right'], ['LM', 'Left Middle'], ['RM', 'Right Middle'], ['TL', 'Top Left'], ['TM', 'Top Middle'], ['TR', 'Top Right']];
 // a spot as seen on the Tab -> the same spot in the picture's own box (before it is mirrored or turned, mvLook): the spot is named as it is
 // seen, so Bottom Left is on the bottom left whatever the Orientation and Left / Right
 function hbToPic(g, [X, Y]) {
   const L = mvLook(g);
-  return L.flip ? [1 - X, Y] : L.rot === 90 ? [Y, 1 - X] : L.rot === -90 ? [1 - Y, X] : [X, Y];
+  const [px, py] = L.flip ? [1 - X, Y] : L.rot === 90 ? [Y, 1 - X] : L.rot === -90 ? [1 - Y, X] : [X, Y];
+  return L.flipY ? [px, 1 - py] : [px, py];      // upside down (a Vertical Hose Bib's handle on the other side, Rule 18.52)
 }
 // all 8 spots, the wall side too (OakBarn Brewery, 2026-11-18, Panel Update Final 3 #4: "Change Rule for a Tap Water can have the 8 IPs";
 // Rule 18.49): before, the wall side (the picture's right edge above the bottom) had none
@@ -1836,12 +1851,14 @@ const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]
 function mvEnds(g) {
   const m = String(g.image || '').match(/Manual_Ball_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);
   const L = mvLook(g);
-  let ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? [hbSpotAt(g)] : m ? MV_ENDS[m[1]] : L.vert ? MV_ENDS.vert : MV_ENDS.plain;      // a Hose Bib: its IP spot (Rule 18.45)
+  let ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? [hbSpotAt(g), HB_INLET] : m ? MV_ENDS[m[1]] : L.vert ? MV_ENDS.vert : MV_ENDS.plain;      // a Hose Bib: its IP spot (Rule 18.45)
   if (L.flip) ends = ends.map(([fx, fy]) => [1 - fx, fy]);      // Left: mirrored, so its ends are too (Rule 18.45)
+  if (L.flipY) ends = ends.map(([fx, fy]) => [fx, 1 - fy]);     // upside down before the turn (a Vertical Hose Bib, Rule 18.52)
   const x = g.x || 0, y = g.y || 0, w = g.w || 30, hh = g.h || 30, cx = x + w / 2, cy = y + hh / 2, r = (L.rot + (+g.rotate || 0)) * Math.PI / 180;
   const at = ([fx, fy]) => { const dx = x + fx * w - cx, dy = y + fy * hh - cy; return [Math.round(cx + dx * Math.cos(r) - dy * Math.sin(r)), Math.round(cy + dx * Math.sin(r) + dy * Math.cos(r))]; };
   const nm = g.name || g.label || 'Manual valve';
-  if (isTapMv(g)) return [{ id: `eq:${g.id}:out`, label: `${nm} hose outlet`, text: '', circuit: 'a', mv: true, tap: true, c: at(ends[0]) }];
+  if (isTapMv(g)) return [{ id: `eq:${g.id}:out`, label: `${nm} hose outlet`, text: '', circuit: 'a', mv: true, tap: true, c: at(ends[0]) },
+    { id: `eq:${g.id}:in`, label: `${nm} wall inlet`, text: '', circuit: 'a', mv: true, tapIn: true, c: at(ends[1]) }];      // Rule 18.52
   return ends.map((e, i) => ({ id: `eq:${g.id}:${i ? 'out' : 'in'}`, label: `${nm} end ${i + 1}`, text: '', circuit: 'a', mv: true, c: at(e) }));
 }
 const FIT_SVG = {
@@ -1984,7 +2001,7 @@ function buildIp(g) {
   if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (isTapMv(g) && PUMP_COVER_COLORS[g.mvCover]) n.append(hbCoverDiv(g.mvCover)); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(mvOverPic(g))}")` })); }
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
-  if (g.labelVisible && g.label && !plain) n.append(widgetLabel(g, 'below'));       // a pipe fitting has no label
+  if (g.labelVisible && g.label && !plain) n.append(mvLabelUpright(g, widgetLabel(g, 'below')));       // a pipe fitting has no label
   if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit || !autoSized(g)) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible && !plain) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
@@ -2465,6 +2482,7 @@ function splitPipeFor(it) {
   if (isMf(it)) return tcFitOnPipe(it);         // a Valve Tee or Supply Manifold: its run goes along the pipe, like a tee's (Rule 5.35)
   if (isProbeTee(it)) return probeTeeOnPipe(it) || teeOnHose(it);    // a tee with a Temperature Probe (Rule 5.30)
   const mv = isMv(it);
+  if (mv && isTapMv(it)) return null;      // a Hose Bib never cuts a pipe: its Inlet and hose outlet are not in a line (Rules 5.26, 18.52)
   if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
   const ws = it.workspace, ports = splitPorts(it);
   if (ports.length !== 2) return null;
@@ -3966,6 +3984,7 @@ function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
   if (q?.mv && !mvOpen(L().graphics.find(x => x.id === eqOfIp(id)))) return { closed: true };     // a closed Manual Valve blocks both ends
   if (q?.tap) return { key: id, push: true, tap: true };       // an open Tap Water Valve (Rule 5.33): house water pushes out of its hose outlet
+  if (q?.tapIn) return { key: id, pull: true, tapIn: true };   // its wall Inlet (Rule 18.52): open, house water is drawn in along the pipe on it
   if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
@@ -4090,6 +4109,28 @@ function computeFlow(ws, src = new Map(), grav = null, spouts = null) {    // sp
       for (const { v, p, d } of (outward ? adj : radj).get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
     }
   };
+  // A Hose Bib with a pipe on its wall Inlet (OakBarn Brewery, 2026-11-19: "A Pipe on the inlet side of a Hose bib has flow when the hose
+  // bib is open. A Pipe on the Hose Bib that has a Valve one the other end has to have that valve for Tap to flow"; Rule 18.52): water
+  // reaches it only along an open way to the far end of that pipe, so a closed valve on it stops the Hose Bib's flow out of its hose too.
+  // With nothing on its Inlet the house plumbing is not drawn and it always has water.
+  // A pass node with an IP that has nothing joined (an open valve whose far side is not drawn) is where the house water comes from too.
+  const freeEnd = key => { const m = /^(dev|eq):(.*?)(?::[^:]*)?$/.exec(key); if (!m) return false;
+    const ips = m[1] === 'dev' ? (elNamed(m[2]) ? devIps(elNamed(m[2])) : []) : eqPorts(L().graphics.find(x => x.id === m[2]) || {});
+    return ips.some(q => !pipesOn(q.id, ws).length); };
+  for (const [k, n] of nodes) if (n.tapIn) {
+    n.pull = false;
+    const out = nodes.get(`eq:${eqOfIp(k)}:out`);
+    if (!pipesOn(k, ws).length) continue;       // nothing on its Inlet: the house plumbing is not drawn, it always has water
+    const prev = new Map([[k, null]]), q = [k]; let hit = null;
+    while (q.length && !hit) {
+      const u = q.shift(), m = nodes.get(u);
+      if (u !== k && (m?.end || m?.push || (m?.pass && freeEnd(u)))) { hit = u; break; }
+      for (const { v, p, d } of radj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); q.push(v); }
+    }
+    if (!hit) { if (out) out.push = false; continue; }      // a closed valve on its Inlet side: no water, so no flow out of its hose either
+    if (!out?.push) continue;                              // the Hose Bib is closed: nothing flows in
+    for (let x = hit; prev.get(x); x = prev.get(x).from) { const st = prev.get(x); dir.set(st.p.id, -st.d); src.set(st.p.id, better(src.get(st.p.id), { tap: true })); }
+  }
   for (const [k, n] of nodes) if (n.pull) trace(k, false);      // first what each pump pulls in, so its outlet knows where the flow began
   // a running pump whose inlet sits inside a vessel and has nothing joined to it (a Sump Pump down in an Ice Water Can, Rule 19.8)
   // draws from that vessel: its flow takes the vessel's Out flow color
@@ -9178,7 +9219,7 @@ const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the 
 const MV_TIPS = {
   graphic: 'The Manual Valve as it will be on the Tab, with its Picture, Orientation and Left / Right. While it is open it shows the open overlay.',
   orient: '⟪img:help_pictures/Manual_Valve_Orientation.png⟫Horizontal: for a level pipe. Vertical: for an up and down pipe.\n\nA front view (looking down the pipe) has no Orientation. A Hose Bib may be Horizontal or Vertical.',
-  side: 'Horizontal: Right is the picture as drawn, Left is it mirrored (a Hose Bib: the wall on the right or on the left). Vertical: the handle points to the Left or to the Right (a Hose Bib: turned, the wall above or below).\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
+  side: 'Horizontal: Right is the picture as drawn, Left is it mirrored. A Skynet Manual Ball or Butterfly Valve looks the same both ways, so on Horizontal this box is greyed out. Vertical: the handle points to the Left or to the Right.\n\nIts ends (IPs) go with the picture, so join the pipes after you pick it.',
 };
 const HOSE_BIB_IN = 'MPT1/2';      // the house pipe end a hose bib screws onto: 1/2" male pipe thread to start (Rule 18.49)
 const HB_OVERLAYS = v => [['', 'Manual Valve open (green ring and tick)'], ...OVERLAY_GRAPHICS.filter(([, p]) => !p.startsWith('tint:')).map(([t, p]) => [p, t]),
@@ -9186,11 +9227,13 @@ const HB_OVERLAYS = v => [['', 'Manual Valve open (green ring and tick)'], ...OV
 const MV_ORIENTS = [['h', 'Horizontal'], ['v', 'Vertical']], MV_SIDES = [['r', 'Right'], ['l', 'Left']];
 const HB_TIPS = {
   graphic: '⟪img:help_pictures/Hose_Bib_8_IPs.png⟫The Skynet picture of the Hose Bib as it will be on the Tab, with its Orientation, Left / Right, Overlay and its own short Hose or Pipe from the hose thread to its one IP. The Skynet Picture is set by Skynet and cannot be changed.\n\nIts IP can be on any of the 8 spots on the edge of its box, like a Pump. You do not pick the spot: put a pipe or hose end on or near the Hose Bib and its IP moves to the nearest spot, and the Graphic shows it there. Once a pipe or hose is joined, the IP stays put.',
+  side: 'Horizontal: the Inlet (the wall side, where the house water comes in) is on the Right or on the Left. Vertical: the handle points to the Left or to the Right, like the motor of a Vertical Motorized Valve.\n\nIts IP goes with the picture, so join the pipe or hose after you pick it.',
+  inletSide: 'Vertical only: the Inlet (the wall side, where the house water pipe comes in) is at the Top (a pipe from above) or at the Bottom (a pipe from below). With Left / Right that gives all 4 Vertical looks. Greyed out on Horizontal, where Left / Right sets the Inlet side.',
   link: 'Draws its inside piece from the hose thread to the IP as a Hose or as a Pipe.',
   overlay: 'What is drawn on top of the Hose Bib while it is open. Empty: the Manual Valve open sign (a green ring and a tick). The others are the Pump\'s Overlays.',
   cover: 'A colored cover over the Hose Bib, as a Pump\'s Cover: for example a foam faucet cover that keeps it from freezing, or a color that tells hose bibs apart. None: the plain brass hose bib.',
   toggle: 'What a click on it on its Tab does. On/Off: one click opens it, the next closes it. Push Button: it is open only while it is held down, for topping off a vessel by hand (no Done to press: holding it is the confirmation). With .confirmation on, On/Off asks Done first.',
-  inlet: 'Inlet IP Fitting: the fitting on the wall side, where the house water pipe comes in (MPT1/2 to start). It has no IP on the Tab (the house plumbing is not drawn), so it is information only, for the parts list.',
+  inlet: 'Inlet IP Fitting: the fitting on the wall side, where the house water pipe comes in (MPT1/2 to start). Its Inlet IP is on the Tab: join a pipe to it to draw the house water pipe. Open, water flows in along that pipe; a closed valve on it stops the water, and nothing flows out of the hose either. With nothing joined, the house plumbing is not drawn and it always has water.',
   fitting: 'Outlet IP Fitting: the fitting on the end of its one IP, where the water comes out. A household hose bib has a male garden hose thread, MGH3/4 (the start). FGH3/4 is a female garden hose thread.\n\nA hose or pipe joined to it fits it by itself (an FGH3/4 hose end on an MGH3/4 Hose Bib). The End Fitting is information only.',
   size: 'Its size on the Tab in pixels. A Hose Bib is sized by hand, like a Pump; its inside Hose or Pipe is drawn again to reach its IP.',
 };
@@ -9219,7 +9262,8 @@ const MV_KINDS_TIP = 'A Manual Valve comes in two kinds: Straight (in a pipe lin
 // or hose joined to it, the same as a Pump's (hbSpotHit, takePumpSpots). The spot it is on rides along hidden, so a save keeps it.
 const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: HB_TIPS.graphic }],
-  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: ['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: MV_TIPS.side }] }],
+  ['mvOrient', 'Orientation', 'sel', MV_ORIENTS, true, false, { tip: MV_TIPS.orient, pairCls: 'orientPair', with: [['mvSide', 'Left / Right', 'sel', MV_SIDES, true, false, { tip: HB_TIPS.side }],
+    ['mvInlet', 'Inlet', 'sel', MV_INLETS, true, false, { tip: HB_TIPS.inletSide, ...(mvOrientOf(it) === 'h' ? { disabled: true } : {}) }]] }],      // Rule 18.52
   ['tapLink', 'Hose or Pipe', 'sel', [['hose', 'Hose'], ['pipe', 'Pipe']], false, false, { tip: HB_TIPS.link }],
   // Panel Update Final 3 #4 (OakBarn Brewery, 2026-11-18: "Missing so add all those Fields to the Hose Bib"; "the Type of End. Add FGH
   // and MGH"; Rule 18.49): the Overlay and the End Fitting of its one IP, in the Pump's order
@@ -9231,7 +9275,7 @@ const hbWidgetFields = it => [...MV_TOP(it, 'wgt_TWV_Hose~Bib_BH'),
   MV_CONFIRM, ...MV_XYWH(it, HB_TIPS.size), wgtType('Hose Bib (Tap Water Valve)', MV_KINDS_TIP)];
 const mvWidgetFields = it => {
   it.mvOrient = mvOrientOf(it); it.mvSide = mvSideOf(it);
-  if (isTapMv(it)) { it.ipTypeOut ||= HOSE_BIB_END; it.ipTypeIn ||= HOSE_BIB_IN; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
+  if (isTapMv(it)) { it.mvInlet = mvInletOf(it); it.ipTypeOut ||= HOSE_BIB_END; it.ipTypeIn ||= HOSE_BIB_IN; it.tapSpot = hbSpot(it); it.tapLink = hbHose(it) ? 'hose' : 'pipe'; return hbWidgetFields(it); }
   const front = mvFront(it);
   // the up and down Butterfly picture is the Butterfly with Vertical now: it stays in the list only for a valve that already has it (Never Take Away)
   const pics = MV_PICS.filter(([p]) => p !== MV_BFLY.vr || it.image === MV_BFLY.vr);
@@ -9239,7 +9283,7 @@ const mvWidgetFields = it => {
     ['_mvpv', 'Graphic', 'mvpic', null, false, false, { tip: MV_TIPS.graphic }],
     ['image', 'Picture', 'sel', pics, true, false, { tip: "The Skynet Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
     ['mvOrient', 'Orientation', 'sel', front ? [['h', 'Front']] : MV_ORIENTS, false, false, { tip: MV_TIPS.orient, ...(front ? { disabled: true } : {}),
-      with: ['mvSide', 'Left / Right', 'sel', front ? [['r', 'None']] : MV_SIDES, false, false, { tip: MV_TIPS.side, ...(front ? { disabled: true } : {}) }] }],
+      with: ['mvSide', 'Left / Right', 'sel', front ? [['r', 'None']] : MV_SIDES, false, false, { tip: MV_TIPS.side, ...(front || mvSameBothWays(it) ? { disabled: true } : {}) }] }],
     MV_CONFIRM, ...MV_XYWH(it, 'Its size on the Tab in pixels. A Straight Manual Valve sizes itself to its pipes, so Width and Height are greyed out.'),
     wgtType('Straight Manual Valve', MV_KINDS_TIP)];
 };
@@ -10823,13 +10867,30 @@ function semiGraphic(label, obj) {
   setTimeout(draw, 0);
   return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, box)];
 }
+// a turned or mirrored Manual Valve's Label stays upright and readable under it (a Vertical or Left Hose Bib's Label was turned with the
+// picture): it sits in a box the size of the valve that undoes the turn, so below means below on the Tab
+function mvLabelUpright(g, lb) {
+  const tf = isMv(g) && g.image ? mvTransform(g) : '';
+  if (!tf) return lb;
+  const undo = tf.match(/\w+\([^)]*\)/g).reverse().map(t => t.startsWith('rotate(') ? `rotate(${-parseFloat(t.slice(7))}deg)` : t).join(' ');
+  return h('div', { class: 'mvLblUp', style: `position:absolute;inset:0;pointer-events:none;transform:${undo}` }, lb);
+}
+// greys a box that does nothing for the picked Orientation and Picture, as the Orientation is changed (the ⛔ on hover only, Rule 18.46):
+// a Hose Bib's Inlet is only for Vertical; a Manual Ball or Butterfly Valve looks the same mirrored, so Horizontal Left / Right is greyed
+// (OakBarn Brewery, 2026-11-19: "Manual Ball Valves do not need left right as they are the same"; Rule 18.52). The value stays as it was.
+function mvGreyLive(q, w) {
+  const grey = (k, on) => { const i = q(k); if (!i || i.disabled === on) return; i.disabled = on; i.closest('.fldPair')?.querySelector(`[data-k="${k}"]`)?.previousElementSibling?.classList.toggle('greyed', on); };
+  if (isTapMv(w)) grey('mvInlet', mvOrientOf(w) === 'h');
+  else if (!mvFront(w)) grey('mvSide', mvOrientOf(w) === 'h' && mvSameBothWays(w));
+}
 function mvGraphic(label, obj) {
   const box = h('div', { class: 'devPreview mvPreview' }), pic = h('div', { class: 'mvPv' }), ovl = h('div', { class: 'mvPvOver' });
   pic.append(ovl); box.append(pic);
   const draw = () => {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const w = { ...obj };
-    for (const k of ['image', 'mvOrient', 'mvSide', 'tapSpot', 'tapLink', 'mvOverlay', 'mvCover']) if (q(k)) w[k] = q(k).value;
+    for (const k of ['image', 'mvOrient', 'mvSide', 'mvInlet', 'tapSpot', 'tapLink', 'mvOverlay', 'mvCover']) if (q(k)) w[k] = q(k).value;
+    mvGreyLive(q, w);      // Inlet only on a Vertical Hose Bib; Left / Right greyed where both look the same (Rule 18.52)
     const src = mvPic(w), hb = isTapMv(w);
     pic.style.backgroundImage = src ? `url("${media(src)}")` : '';
     pic.classList.toggle('hoseBib', hb);      // a Hose Bib: its picture top right and its inside Hose or Pipe to its IP

@@ -26,7 +26,18 @@ is joined, the IP stays put, and the Graphic in its dialog shows it there.
 - **Closed**: nothing comes out; any hose on it is blocked.
 - **Open**: it is a **tap water source**. Flow pushes out of the hose outlet with no pump, and the flow is **tap water Blue**
   (Skynet Rule 5.21: tap water wins over every other Flow Color).
-- It does not cut a pipe it is dropped on, because it has only one IP (a valve needs two to sit in a pipe, Skynet Rule 5.26).
+- It does not cut a pipe it is dropped on: its Inlet and its hose outlet are not in a line (Skynet Rules 5.26 and 18.52).
+
+## Its Inlet IP: the house water pipe
+
+Like a Motorized Valve, it also has an **Inlet IP** on the outer face of the wall side's pipe thread (Skynet Rule 18.52). It turns
+with the picture, so on Vertical it is at the Top or the Bottom (the **Inlet** box). Join a pipe to it to draw the house water pipe.
+
+- **Nothing on the Inlet**: the house plumbing is not drawn, and the Hose Bib always has water (as before).
+- **A pipe on the Inlet, Hose Bib open**: water flows in along that pipe, toward the Hose Bib, in tap water Blue.
+- **A valve on that pipe**: it must be open too. With it closed there is no water, so nothing flows in the Inlet pipe and nothing
+  flows out of the hose either. An open valve whose other side has nothing joined counts as the house supply.
+- **On the hose side**: a closed valve at the far end of the hose or pipe stops the flow on it, as it does on every pipe.
 
 ## Opening and closing it
 
@@ -50,13 +61,16 @@ Its Properties are the **Hose Bib Widget** dialog, in the same look and order as
 title line, **State** (a slider, Open or Closed now), **1. Label** and **Label Visible** (🏷 Update to Suggested Name pops up once
 the Label is changed), **2. Tab** with **Layer Order** under it, **3. Name** with the **Change Name** box and **✏ Change Name**, the
 Suggested Name, the **Graphic** (its one Skynet picture with its inside Hose or Pipe, kept up to date), **Orientation** with **Left /
-Right**, **Hose or Pipe**, **Cover** with **Toggle**, **Overlay** with **Database and .API ⬢**, **Inlet IP
+Right** and **Inlet**, **Hose or Pipe**, **Cover** with **Toggle**, **Overlay** with **Database and .API ⬢**, **Inlet IP
 Fitting**, **Outlet IP Fitting**, **.confirmation**, **X**, **Y**, **Width** and **Height** on one line, and the Widget Type (Skynet Rule
 18.48). There is no Picture box (a Hose Bib has one Skynet picture) and no IP box (the hose or pipe you join sets it, see above).
 
-**Orientation** and **Left / Right**: Horizontal Right is the picture as drawn (the wall on the right), Horizontal Left is it
-mirrored (the wall on the left). Vertical turns it for a hose bib on an up and down pipe: Vertical Left points the handle to the
-left (the wall above), Vertical Right points it to the right (the wall below).
+**Orientation**, **Left / Right** and **Inlet**: a Hose Bib is laid out like a Motorized Valve, with its handle as the "motor"
+(Skynet Rule 18.52). Horizontal Right is the picture as drawn (the Inlet, the wall side, on the right), Horizontal Left is it
+mirrored (the Inlet on the left); the Inlet box is greyed out on Horizontal. Vertical is for a hose bib on an up and down pipe:
+**Inlet** puts the wall side at the **Top** (a pipe from above) or the **Bottom** (a pipe from below), and **Left / Right** is the
+side the handle points to. That gives 4 Vertical looks: Inlet Top with the handle Left or Right, and Inlet Bottom with the handle
+Left or Right. A Hose Bib made before the Inlet box keeps its look (Vertical Left: Inlet Top; Vertical Right: Inlet Bottom).
 
 Its one IP is on one of the 8 spots on the edge of its box (Bottom Middle, Bottom Left, Bottom Right, Left Middle, Right Middle,
 Top Left, Top Middle, Top Right), the wall side too (Skynet Rule 18.49), as a Pump has. The joined hose or pipe picks the spot. A
@@ -77,8 +91,8 @@ Button** (open only while you hold it down, for topping off a vessel by hand).
 a Voice Command can read it, or, with .API Read & Control, ask for it. Asked for from outside, it is asked **by hand**, the same as a
 Process line: the Tab shows "Open it by hand", someone turns the real valve and clicks it, and its .state then confirms it.
 
-**Inlet IP Fitting**: the fitting on the wall side, where the house pipe comes in (MPT1/2 to start). It has no IP on the Tab, so it
-is information only.
+**Inlet IP Fitting**: the fitting on the wall side, where the house pipe comes in (MPT1/2 to start), on its Inlet IP (see above). The
+fitting itself is information only.
 
 **Outlet IP Fitting**: the End Fitting of its one IP (Skynet Rules 2.57 and 18.49). A household hose bib has a male garden hose
 thread, **MGH3/4**, and that is what it starts with. **FGH3/4** is the female garden hose thread. A hose or pipe joined to it fits it
