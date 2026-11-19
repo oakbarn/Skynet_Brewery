@@ -4068,6 +4068,24 @@ It says so in English and in the language picked, and closes only with its **Ack
 every screen, Rule 11.11). Picking English shows nothing. A new Help language adds its text to `public/mtnotice.js`
 (test/mtnotice.test.js checks every language in the list has it). Both programs (the BruControl Import uses the Panel's Help).
 
+11.15 **Wiring guides** (OakBarn Brewery, 2026-11-19: "We will also need some step by step with graphic for hooking up Dacs, 10KNTC
+Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes. All come with the electricty Warning and that the User is resposible for
+safety as these are simple methods and are very general in nature and cannot know a Users wiring or electrical outlay"; "Separate
+ones and one for every thing that requires something besides a Pin/Port to work. We can use the Mega as the example and explain that
+other boards are similar."). Every part that needs more than a bare Port to work gets its own Step by Step guide (Rule 11.9), titled
+**Step by Step: Wire ...**. Each guide:
+  1. opens with the electrical warning (Rule 6.20), then **"You are responsible for your own safety."**: the guide shows a simple,
+     very general way to wire the part and cannot know the brewer's wiring, parts or electrical layout; read each part's data sheet;
+     a Licensed Electrician does or checks anything on AC (wall) power;
+  2. uses the **Arduino Mega 2560** as the example and says other boards are wired the same way with other Port names (Help 206),
+     with an **Other boards** part for 3.3 V boards and the Arduino Opta;
+  3. has a **Skynet drawing** of the wiring in place of a screenshot (`media/help_pictures/Step_Wire_<Part>_NN_<What>.svg`, MIT, never
+     copied from another drawing, not in the Image Library), with the warning along its foot; the AC side is shown only as a box for
+     the electrician;
+  4. ends with the Device to add in Skynet, a check that it works, and **The technical side** (the Mega program's pin lists).
+First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B20) probes, a PT100 and a PT1000 probe. Both programs
+(the BruControl Import uses the Panel's Help).
+
 ## 12. Privacy and sharing
 
 12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
@@ -6467,3 +6485,4 @@ import.
 - 2026-11-12: Rule 9.13 (OakBarn Brewery): the 3 Vessel sample always stays in the Skynet Panel and is never moved to the Sample Schemas Setup, which is only for additional samples. Help 184 and the sample_schemas ReadMe say so. Wording only; the code already works this way. (thread "Move Sample Schemas to own Setup")
 - 2026-11-19: Rule 11.9 guides added (OakBarn Brewery: "Step by Step to add a Device in help", "Step by step add a widget"): Help 207 Step by Step: Add a Device (a Blichmann RipTide on the Brew House Tab of the 3 Vessel sample) and Help 208 Step by Step: Add a Widget (a Hose Bib), each with a picture at every step and a warning at the top that a new item stays on the 🔨 Build Tab until ✅ Finish Build ... > Move to Tab; French in help/fr; linked from the Glossary, Getting started, Devices and Build Tab pages. The Move to Tab note now says the build kept its spot when it goes to the Tab picked for it (it said "the middle", which was wrong). Wording only; both programs (the Importer uses the Panel's Help). Next free Help 209. (thread "Add a step-by-step Add a Device Help page")
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
+- 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")

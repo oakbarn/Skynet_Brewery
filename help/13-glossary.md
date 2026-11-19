@@ -202,7 +202,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
 
-**Step by Step**: Help pages that show every step with pictures. They are listed first in the Help. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
+**Step by Step**: Help pages that show every step with pictures. They are listed first in the Help. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget). The wiring guides (a DAC, an SSR, 10K NTC, 1-Wire, PT100 and PT1000 probes) are Step by Step guides too, each with a drawing.
 
 **Suggested Name**: the Name Skynet fills in for a new item from its parts. You may change it before you save.
 
@@ -299,6 +299,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** Turns the board's on/off (digital) signal into a smooth voltage, for example 0 to 10 V, so a heater, valve or pump can be set to any % instead of only On or Off.
 - **What Skynet needs:** Skynet sends a % from a **True PWM Port**, so the DAC it needs is a **PWM to 0-10 V Module** (input 0-5 V PWM from a Mega, or 3.3 V from an ESP32 or Pi; output 0-10 V or 0-5 V, set by a jumper or screw). A separate DAC chip board that talks over I2C (MCP4725, GP8403) is **not** read by the Skynet board program yet. Rule 6.24 lets you match the % to the real volts with a meter.
+- **How to wire it:** [Step by Step: Wire a DAC (0-10 V)](209-step-by-step-wire-a-dac)
 - **Suggested parts:** PWM to 0-10 V converter module (LC-LM358-PWM2V type, 0-5 V or 0-10 V selectable); a DIN-rail PWM to 0-10 V signal converter
 - **Where to buy:** *(link coming)* Search Amazon for "PWM to 0-10V module".
 
@@ -327,6 +328,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** A digital temperature probe. Many share one wire, each with its own number.
 - **What Skynet needs:** Waterproof stainless tip, 3 wires (5 V, GND, data). One 4.7k ohm resistor for the whole set. OneWire Port: Mega D40, Pi GPIO 4.
+- **How to wire it:** [Step by Step: Wire 1-Wire Probes (DS18B20)](212-step-by-step-wire-1-wire-probes)
 - **Suggested parts:** Waterproof DS18B20 probes (1 m to 3 m lead)
 - **Where to buy:** *(link coming)* Search Amazon for "DS18B20 waterproof probe".
 
@@ -445,6 +447,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** The cheapest temperature probe: its resistance changes with heat.
 - **What Skynet needs:** One Analog Port and one resistor the same size as the thermistor (10k ohm for a 10K). Its Beta value (for example 3950 or 3977) goes in its Properties.
+- **How to wire it:** [Step by Step: Wire a 10K NTC Probe](210-step-by-step-wire-a-10k-ntc-probe)
 - **Suggested parts:** 10K NTC Beta 3950 waterproof probes; BCS-462 type 10K probes
 - **Where to buy:** *(link coming)* Search Amazon for "10K NTC thermistor probe waterproof".
 
@@ -452,6 +455,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **In plain words:** A one-wire way (plus power and ground) for many DS18B20 probes to share a single Port. Each probe has its own number.
 - **What Skynet needs:** Mega D40, Pi GPIO 4; one 4.7k ohm Pull-up Resistor for the set.
+- **How to wire it:** [Step by Step: Wire 1-Wire Probes (DS18B20)](212-step-by-step-wire-1-wire-probes)
 
 ### Opto-isolated
 
@@ -492,6 +496,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** The most accurate kind of temperature probe. The MAX31865 board reads it for the Arduino.
 - **What Skynet needs:** One MAX31865 board per probe; its jumpers set for 2, 3 or 4 wires (3 is the start). SPI Ports (Mega D50-D52) and one CS Port (Rule 6.9). PT100 reference resistor 430 ohm, PT1000 4300 ohm.
+- **How to wire it:** [Step by Step: Wire a PT100 Probe](213-step-by-step-wire-a-pt100-probe) and [Step by Step: Wire a PT1000 Probe](214-step-by-step-wire-a-pt1000-probe)
 - **Suggested parts:** Adafruit MAX31865 board (or a clone); 3-wire PT100 probes with a 1/2" NPT fitting
 - **Where to buy:** *(link coming)* Search Amazon for "MAX31865 PT100 board".
 
@@ -513,6 +518,7 @@ The parts and technical words in the wiring lists, in plain words: what each one
 
 - **What it does:** An electronic switch with no moving parts. A small DC signal from the board turns a bigger AC (or DC) load On and Off, silently.
 - **What Skynet needs:** **Input:** about 3 to 32 V DC (works from every Interface). **Output:** AC 24-380 V for AC loads ("DA" type: DC in, AC out), or DC for DC loads ("DD" type). **AMPS:** 5 or 10 A for a pump or heat pad; 25 or 40 A on a Heat Sink for an element. **Zero cross** type for elements.
+- **How to wire it:** [Step by Step: Wire an SSR](211-step-by-step-wire-an-ssr)
 - **Suggested parts:** Auber, Crydom or Omron SSRs (DA type for AC, DD type for DC). Avoid look-alike SSRs with no maker's name.
 - **Where to buy:** *(link coming)* Search Amazon for "SSR 40A DA".
 
