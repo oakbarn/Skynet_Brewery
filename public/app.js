@@ -54,7 +54,7 @@ import { HYDRO_MODELS, HYDRO_MODEL_KEYS, HYDRO_CONNECTIONS, TILT_COLOR_NAMES, GR
 import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
-import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
+import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -12371,7 +12371,7 @@ async function editWorkspace() {
   const T = TAB_TIPS, tip = (k, more) => ({ tip: T[k], ...more });
   // the Tab's own Equipment numbers (Rule 2.62, OakBarn Brewery 2026-11-19: they act as defaults and can be changed anytime here)
   const eqUnits = w.equip?.units || S.config.brewDefaults?.units || 'US', eqRows = w.build || w.template ? [] : [['_eqHead', 'Equipment numbers', 'head'],
-    ...EQUIP_FIELDS.map(f => { work['eq_' + f[0]] = w.equip?.[f[0]] ?? ''; return ['eq_' + f[0], `${f[1]} (${unitOf(f, eqUnits)})`, 'num', null, false, false, { tip: TAB_EQ_TIP }]; })];
+    ...EQUIP_FIELDS.map(f => { work['eq_' + f[0]] = w.equip?.[f[0]] ?? ''; return ['eq_' + f[0], `${f[1]} (${unitOf(f, eqUnits)})`, 'num', null, false, false, eqTip(f, TAB_EQ_TIP)]; })];
   const shown = dialog('Tab Settings', [['name', 'Name', 'text', null, false, false, tip('name')],
     idLocked ? ['id', 'Tab ID', 'ro', null, false, false, tip('idSaved')] : ['id', 'Tab ID', 'text', null, false, false, tip('id')],
     ['_bgHead', 'Background', 'head'],
@@ -16345,6 +16345,9 @@ function schemaProfileBox() {
       'Each Tab of the Schema ', h('b', {}, S.schemas.active?.name || ''), ' has its own Equipment numbers (Brewhouse efficiency, losses ...), copied from the profile and changed here.'),
     ...S.config.workspaces.filter(w => !w.build && !w.template).map(tabProfileRow));
 }
+// Strike offset (Panel Updates entry 14, OakBarn Brewery: "I have 2 Breweries in esscence. I set one at 10 and the other at 0")
+const STRIKE_OFF_TIP = 'Degrees added to the Strike Temperature when a Recipe brewed on this Tab presses Calculate, to make up for the heat a cold Mash Tun takes from the Strike Water. 0 for an All In One (the grain goes into the vessel that heated the water) or a pre-heated Mash Tun. It can need changing with the brewery air temperature.';
+const eqTip = (f, tip) => f[0] === 'strikeOffset' ? { tip: STRIKE_OFF_TIP } : tip ? { tip } : {};
 const TAB_EQ_TIP = 'This Tab\'s own Equipment numbers: Brewhouse efficiency, losses, dead space ... They started as the numbers of the profile copied onto it, and a Brew Day uses them. Changing them changes this Tab only.';
 function tabProfileRow(w) {
   const admin = can('admin'), eq = w.equip, waiting = slotsToPort(w).length;
@@ -16369,7 +16372,7 @@ const tabEffOpen = name => { tabEffShown = tabEffShown === name ? null : name; r
 async function tabEquipNumbers(tab) {
   const w = S.config.workspaces.find(x => x.name === tab); if (!w) return;
   const o = { units: S.config.brewDefaults?.units || 'US', ...clone(w.equip || {}) };
-  const fields = [['_n', TAB_EQ_TIP, 'note', null, null, null, { keep: true }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num'])];
+  const fields = [['_n', TAB_EQ_TIP, 'note', null, null, null, { keep: true }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num', null, false, false, eqTip(x)])];
   if (await dialog(`⚙ Equipment numbers of the Tab ${tabTitle(w)}`, fields, o) !== 'ok') return;
   readFields(o);
   for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]]; else delete o[f[0]];
@@ -16514,7 +16517,7 @@ async function eqInterview(pre = {}) {
     () => ['10. And so on', [['recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)], ['chiller', 'Chiller', 'sel', [['none', 'None'], ...Object.entries(CHILLERS)]],
       ['manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)], ['manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)]],
       { recirc: a.recirc, chiller: a.chiller, manifold: a.manifold, manifoldKind: a.manifoldKind }],
-    () => ['11. The numbers', EQUIP_FIELDS.map(f => [f[0], `${f[1]} (${unitOf(f, units)})`, 'num']), { ...a.numbers }],
+    () => ['11. The numbers', EQUIP_FIELDS.map(f => [f[0], `${f[1]} (${unitOf(f, units)})`, 'num', null, false, false, eqTip(f)]), { ...a.numbers }],
     () => { const p = ivProblems(ivFinal(a)); let rows = [];
       try { rows = p.length ? [] : ivDevicesFor(a).map(e => `${e.label}: ${e.name} (Port ${e.channel})`); } catch (e) { p.push(e.message); }
       return ['12. Review', [['_r', p.length ? '⚠ ' + p.join('\n⚠ ') + '\n\nPress ◀ Back to fix it.' : [`Equipment Profile "${a.name}" on the Tab ${ivTab(a)}.`,
@@ -16834,7 +16837,7 @@ function eqViewBar() {
   const del = guard(async () => { await deleteProfile(p.id); if (!S.profiles.some(x => x.id === p.id)) eqViewClose(true); });
   const props = guard(async () => {
     const o = clone(w);
-    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num']), ['notes', 'Notes', 'area']];
+    const fields = [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }], ...EQUIP_FIELDS.map(x => [x[0], `${x[1]} (${unitOf(x, o.units)})`, 'num', null, false, false, eqTip(x)]), ['notes', 'Notes', 'area']];
     if (await dialog(`⚙ Properties of "${w.name}"`, fields, o) !== 'ok') return;
     readFields(o);
     for (const f of EQUIP_FIELDS) if (o[f[0]] !== '' && o[f[0]] !== undefined) o[f[0]] = +o[f[0]];
@@ -18319,6 +18322,8 @@ const rcMashProfile = rc => S.mashProfiles.find(x => x.id === rc.mashProfile) ||
 const rcBrewTabs = () => (S.config.workspaces || []).filter(w => !w.build && !w.template && w._ref && w.equip);
 const rcBrewTab = rc => rcBrewTabs().find(w => w._ref === rc.brewOnRef) || null;
 const rcEff = rc => { const v = +rcBrewTab(rc)?.equip?.brewhouseEfficiency; return Number.isFinite(v) && v > 0 ? v : null; };
+// the Brew on Tab's Strike offset in °C (Panel Updates entry 14: "set a default on a tab based on the Equipment"); no Tab or none set: 0
+const rcStrikeOff = rc => { const e = rcBrewTab(rc)?.equip; return e ? deltaC(e.strikeOffset, e.units) : 0; };
 const tabTitle = w => w.id ? `${w.id}: ${w.name}` : w.name;
 // a short note with ↩ Undo for a few seconds (Rule 2.53)
 function undoNote(text, onUndo, ms = 8000) {
@@ -18537,7 +18542,7 @@ function rcCalculate(rc, changed) {
   }
   rcAAWarn = false;
   sortHops(rc);
-  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc))); changed(); renderMenuPane();
+  Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc), undefined, rcEff(rc), rcStrikeOff(rc))); changed(); renderMenuPane();
   toast('Calculated. Press Save to keep it');
 }
 // a warning that has one button, READ, to close it

@@ -11,16 +11,18 @@ const r = (v, d) => Math.round(v * 10 ** d) / 10 ** d;
 const isNum = v => v !== '' && v !== null && v !== undefined && Number.isFinite(+v);
 const GAL_L = 3.785411784, IN_CM = 2.54, GALLB_LKG = GAL_L / 0.45359237;      // 1 gal/lb = 8.345 L/kg
 // kept: 4 decimals (so 152 °F comes back as 152 °F); shown: a temperature 1 decimal (decided 2026-11-15), a volume 2, a length 1
-const KEEP = { t: 4, v: 4, l: 4, a: 4 }, SHOW = { t: 1, v: 2, l: 1, a: 3 };
+const KEEP = { t: 4, v: 4, l: 4, a: 4, d: 4 }, SHOW = { t: 1, v: 2, l: 1, a: 3, d: 1 };
 
 export const convTemp = (v, to, d = SHOW.t) => !isNum(v) ? v : r(to === 'Metric' ? (+v - 32) * 5 / 9 : +v * 9 / 5 + 32, d);
 export const convVol = (v, to, d = SHOW.v) => !isNum(v) ? v : r(to === 'Metric' ? +v * GAL_L : +v / GAL_L, d);
 export const convLen = (v, to, d = SHOW.l) => !isNum(v) ? v : r(to === 'Metric' ? +v * IN_CM : +v / IN_CM, d);
 const convAbs = (v, to, d = SHOW.a) => !isNum(v) ? v : r(to === 'Metric' ? +v * GALLB_LKG : +v / GALLB_LKG, d);
+// a temperature difference (the Strike offset): x 5/9 or x 9/5, with no 32
+export const convDelta = (v, to, d = SHOW.d) => !isNum(v) ? v : r(to === 'Metric' ? +v * 5 / 9 : +v * 9 / 5, d);
 
 const unitsOf = p => p?.units === 'Metric' ? 'Metric' : 'US';
 const needs = (p, to) => !!p && unitsOf(p) !== to;
-const CONV = { t: convTemp, v: convVol, l: convLen, a: convAbs };
+const CONV = { t: convTemp, v: convVol, l: convLen, a: convAbs, d: convDelta };
 // one number into the Units "to". o: the kept metric number it was shown from (a box's _shown copy, see forShow): when the shown
 // number was not changed, the kept one comes back exactly, so showing and saving never moves a number (Rule 2.59)
 function one(kind, v, to, P, o) {
@@ -58,7 +60,8 @@ function vessel(g, to, P, o) {
 // an Equipment Profile: its numbers, its Equipment list (in the profile's units) and the Vessels in its drawing (each with its own tag)
 function equipment(p, to, P, o) {
   const own = needs(p, to);
-  const out = own ? { ...p, units: to, trubChillerLoss: one('v', p.trubChillerLoss, to, P, at(o, 'trubChillerLoss')), grainAbsorption: one('a', p.grainAbsorption, to, P, at(o, 'grainAbsorption')) } : { ...p };
+  const out = own ? { ...p, units: to, trubChillerLoss: one('v', p.trubChillerLoss, to, P, at(o, 'trubChillerLoss')), grainAbsorption: one('a', p.grainAbsorption, to, P, at(o, 'grainAbsorption')),
+    ...(p.strikeOffset !== undefined ? { strikeOffset: one('d', p.strikeOffset, to, P, at(o, 'strikeOffset')) } : {}) } : { ...p };
   if (own && Array.isArray(p.equipment)) out.equipment = p.equipment.map((e, i) => sizes(e, to, P, at(at(o, 'equipment'), i)));
   let changed = own;
   if (Array.isArray(p.graphics)) out.graphics = p.graphics.map(g => {
