@@ -1021,7 +1021,8 @@ allowed method that does. A Tap set by hand (When tapped) still wins. Operators 
   day) comes from what uses the probe: Hysteresis Green within its Offset of the Setpoint, PID and Precise within half a degree C (one
   degree F), Deadband inside its Deadband, a Fermentor between its Heat and Cool Offsets; outside, Blue below and Red above. Duty Cycle,
   Direct and PWM: Red while a heater is ON, Blue while a cooler is ON, Grey while OFF. A probe nothing uses keeps its own Display color.
-  *Open:* whether "Opposite for Cooling" swaps Red and Blue for a cooler (built: not swapped, Blue is always below). Each line keeps
+  A cooler is colored the same way (OakBarn Brewery, 2026-11-19, asked whether "Opposite for Cooling" swaps Red and Blue: "Go with A
+  KISS"): Blue is always below the Setpoint, Red always above. Each line keeps
   its digits and °F or °C on one line inside the display (both made smaller together to fit). **No Visible switch.** One click on the SV
   box types a new Setpoint in place (no pop-up, Rule 2.44; Enter sets, Esc puts it back); a click on the rest of the probe still opens
   the SetPoint pop-up above. **One Setpoint, never two:** a probe a Heating Element, a Fermentor Control or an older Hysteresis, PID or

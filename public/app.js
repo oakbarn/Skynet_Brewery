@@ -2969,7 +2969,7 @@ function probeSv(e0, e, v) {
 // probe (the one that is ON, else the first: a Heating Element, Cool / Warm Pump, Fermentor Control or older Hysteresis, PID, Deadband):
 // - Hysteresis: Green while the reading is within its Offset of the Setpoint; PID and Precise: within PV_NEAR; Deadband: within its
 //   Deadband; a Fermentor: between its Heat and Cool Offsets. Outside: Blue below (cold), Red above (hot). Cooling the same way round
-//   (PV_COOL_SWAP false; see the card asked of OakBarn Brewery: true swaps Red and Blue for cooling).
+//   (OakBarn Brewery, 2026-11-19, asked whether "Opposite for Cooling" swaps them: "Go with A KISS"; PV_COOL_SWAP true would swap them).
 // - Duty Cycle, Direct, PWM, On/Off: heating Red while ON, cooling Blue while ON, Grey while OFF.
 // Nothing uses the probe (or a FAULT): PV keeps the probe's own Display color.
 const PV_COOL_SWAP = false;
