@@ -322,3 +322,21 @@ console.log('naming tests passed');
   assert.equal(n.busCheck({ type: 'digitalOut', device: 'NA', channel: '4', name: 'a' }, [], D)?.warn, undefined);
   console.log('Board pinout answers tests passed');
 }
+// Rule 6.36 (OakBarn Brewery, 2026-11-19: "Opta can be built now as well"): Relay 1-4 On/Off only, inputs I1-I8
+{
+  const n = await import('../public/naming.js');
+  const D = [{ name: 'O', board: 'opta', connection: 'ethernet' }];
+  assert.deepEqual(n.freePins({ type: 'digitalOut', device: 'O', name: '\0new' }, [], D), ['R1', 'R2', 'R3', 'R4'], 'outputs: the 4 relays');
+  assert.deepEqual(n.freePins({ type: 'digitalIn', device: 'O', name: '\0new' }, [], D), ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8'], 'inputs: I1-I8');
+  assert.match(n.busCheck({ type: 'pwmOut', device: 'O', channel: 'R1', name: 'a' }, [], D)?.warn ?? '', /D1608S[\s\S]*Licensed Electrician/, 'PWM on a relay: one warning naming the SSR module, like a Mega (OakBarn Brewery)');
+  assert.match(n.busCheck({ type: 'digitalOut', device: 'O', channel: 'R1', name: 'a' }, [], D)?.warn ?? '', /Normally Open[\s\S]*Licensed Electrician/, 'one relay warning with the electrical warning');
+  assert.match(n.busCheck({ type: 'analogIn', device: 'O', channel: 'I3', name: 'a' }, [], D)?.warn ?? '', /0-10 V/);
+  assert.match(n.busCheck({ type: 'temperature', sensor: 'pt100', device: 'O', channel: 'I2', name: 'a' }, [], D)?.warn ?? '', /A0602[\s\S]*transmitter/, 'a probe goes on, with one warning saying what to add');
+  assert.match(n.busCheck({ type: 'temperature', sensor: 'ds18b20', device: 'O', name: 'a' }, [], D)?.warn ?? '', /no OneWire[\s\S]*RS485/);
+  assert.match(n.busCheck({ type: 'temperature', sensor: 'ntc', device: 'O', channel: 'I1', name: 'a' }, [], D)?.warn ?? '', /10K NTC[\s\S]*NTC temperature transmitter/, 'the added circuit by probe type');
+  assert.match(n.busCheck({ type: 'temperature', sensor: 'lm35', device: 'O', channel: 'I1', name: 'a' }, [], D)?.warn ?? '', /5 V supply/);
+  assert.ok(n.freePins({ type: 'temperature', sensor: 'ntc', device: 'O', name: '\0new' }, [], D).includes('I1'));
+  assert.match(n.busCheck({ type: 'digitalIn', device: 'O', channel: 'R1', name: 'a' }, [], D)?.error ?? '', /can't read/, 'only a reading on a relay is refused');
+  assert.match(n.pinLabel('R2', 'opta'), /Relay 2 +\(relay\)/);
+  console.log('Arduino Opta tests passed');
+}

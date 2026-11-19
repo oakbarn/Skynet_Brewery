@@ -17,7 +17,8 @@
 //   family  'arduino' (Mega-like links), 'wifi' (WiFi built in, ESP32-like links), 'pi'
 //   eth     its Ethernet choice's words      noEthernet  no Ethernet choice      wifi  the words of its WiFi choice, when only some have WiFi
 //   shield  an Ethernet connection is an Ethernet shield or module on D10 (Rule 6.10 then covers it)
-//   label   how a Port is shown: D5, GPIO17
+//   label   how a Port is shown: D5, GPIO17, Relay 1
+//   opta    the Arduino Opta: Ports by name (Relay 1-4, I1-I8), relays On/Off (PWM with one warning), inputs digital or 0-10 V (Rule 6.36)
 // Pin numbers are the Arduino ones printed on the board. Where a board's own maker lists PWM or interrupt pins, those are used.
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => String(a + i));
 const D = p => `D${p}`;
@@ -27,6 +28,7 @@ const UNO_SHAPE = { pins: range(2, 13), pwm: ['3', '5', '6', '9', '10', '11'], c
 
 // ESP32 GPIO16 and GPIO17 (Espressif's DevKitC page: "may be unavailable on WROVER-module variants"; OakBarn Brewery, 2026-11-19: "give warning")
 const WROVER = 'GPIO16 and GPIO17 are not free on an ESP32 board with a WROVER module (its extra memory uses them). Use them only on a WROOM board.';
+const OPTA_RELAYS = ['R1', 'R2', 'R3', 'R4'], OPTA_INPUTS = ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8'];
 export const BOARD_INFO = {
   mega: { name: 'Arduino Mega 2560', volts: 5, family: 'arduino', shield: true, pins: range(2, 53), pwm: [...range(2, 13), '44', '45', '46'],
     counter: ['2', '3', '18', '19', '20', '21'], spi: ['50', '51', '52'], onewire: '40', i2c: [], analog: 16, a0: 54, usb: ['0', '1'], label: D },
@@ -56,10 +58,16 @@ export const BOARD_INFO = {
     pwm: ['5', '4', '0', '2', '14', '12', '13', '15'], counter: ['5', '4', '0', '2', '14', '12', '13', '15'], spi: ['12', '13', '14'], onewire: '2', i2c: ['4', '5'], analog: 1,
     pwmAll: true, avoid: ['0', '2', '15'], usb: ['1', '3'],      // pwmAll: its PWM is made by the program on every pin but GPIO16, so no pin is kept for it
     label: p => `GPIO${p}` + ({ 16: ' (D0)', 5: ' (D1)', 4: ' (D2)', 0: ' (D3)', 2: ' (D4)', 14: ' (D5)', 12: ' (D6)', 13: ' (D7)', 15: ' (D8)' }[p] || '') },
+  // Arduino Opta (OakBarn Brewery, 2026-11-19: "Opta can be built now as well"; Panel Updates entry 34, step 1; Arduino's AFX00001/2/3 pinout).
+  // A small PLC on a DIN rail: 4 relays (Normally Open, 250 V AC, 10 A) and 8 inputs I1-I8, each digital or 0-10 V analog. Its Ports go by
+  // name: Relay 1-4 are R1-R4 (the program's D0-D3), the inputs I1-I8 (A0-A7). Ethernet is built in and uses no pin (no D10).
+  opta: { name: 'Arduino Opta', volts: 24, family: 'arduino', opta: true, eth: 'Ethernet (built in)', wifi: 'WiFi (Opta WiFi only)',
+    pins: [...OPTA_RELAYS, ...OPTA_INPUTS], pwm: OPTA_RELAYS, counter: OPTA_INPUTS, spi: [], i2c: [], analog: OPTA_INPUTS, inputOnly: OPTA_INPUTS, usb: [],
+    label: p => (/^R\d$/.test(p) ? `Relay ${p.slice(1)}` : p) },
   pi: { name: 'Raspberry Pi', volts: 3.3, family: 'pi', pins: range(2, 27), pwm: range(2, 27), truePwm: ['12', '13', '18', '19'], counter: range(2, 27), spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, usb: [], label: p => `GPIO${p}` },
 };
 // The Board list, in this order: the Mega first (the board most brewers have), the other Arduino boards, then the ESP and Pi boards
-export const BOARD_ORDER = ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'esp32', 'esp8266', 'pi'];
+export const BOARD_ORDER = ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'opta', 'esp32', 'esp8266', 'pi'];
 // the analog Ports of a board, A0 first ('A0', 'A1' ...)
 export const analogPins = b => Array.isArray(b?.analog) ? b.analog : Array.from({ length: b?.analog || 0 }, (_, i) => 'A' + i);
 // how an analog Port is shown: "A3 = pin 57" on a Mega (BruControl's number), "A3 = GPIO39" on an ESP32, "A3" on a board with no number

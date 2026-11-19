@@ -425,6 +425,16 @@ export function busCheck(el, elements, devices) {
   if (mine.includes(SD_PIN) && iface && sdBoard(P)) return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   const pw = P.pinWarn && mine.map(p => P.pinWarn[p]).find(Boolean);      // ESP32 GPIO16 and GPIO17 (WROVER boards)
   if (pw) return { warn: pw + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  if (P.opta && iface) {      // Rule 6.36: one warning when a Device is put on an Opta (what has to be added, see Help 206)
+    const r = mine.find(p => !P.inputOnly.includes(p)), a = el.type === 'analogIn' && mine.find(p => P.inputOnly.includes(p)), at = P.label(mine[0] ?? 'I1');
+    const k = el.type === 'temperature' ? 'temperature' : el.type === 'stepper' ? 'stepper' : el.type === 'analogIn' && el.adc === 'ads1115' ? 'ads1115'
+      : r && (needsPwm(el) || el.pseudoPwm || (['pid', 'deadband'].includes(el.type) && el.pwm)) ? 'pwm' : '';
+    if (k) { const [what, add] = OPTA_PROBE_CIRCUITS[el.sensor || 'ds18b20'] || OPTA_PROBE_CIRCUITS.ntc;
+      const w = OPTA_WARNINGS[k].replace('{0}', k === 'temperature' && !mine.length ? iface : at).replace('{1}', what).replace('{2}', add);
+      return { warn: k === 'temperature' && ['lm35', 'tmp36'].includes(el.sensor) ? w.replace(/can't be wired straight to an Opta input\. Add: /, 'reads on an Opta input with ') : w }; }
+    if (r) return { warn: OPTA_RELAY_WARNING.replace('{0}', P.label(r)) };
+    if (a) return { warn: OPTA_ANALOG_WARNING.replace('{0}', a) };
+  }
   const a2 = P.wifiAdc2 && linkOf(dev) === 'esp32' && mine.find(p => P.wifiAdc2.some(a => String(54 + +a.slice(1)) === p));
   if (a2) return { warn: ADC2_WARNING.replace('{0}', 'A' + (+a2 - 54)) + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   if (mine.includes(ETHERNET_PIN) && usbMega((devices ?? []).find(d => d.name === iface))) return { warn: ETHERNET_PIN_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
@@ -492,8 +502,40 @@ function boardDeviceError(el, mine, P) {
   if (off !== undefined) return `${/^\d+$/.test(off) ? P.label(off).replace(/ \(.*$/, '') : off} is not a Port you can use on an ${name}. Pick one from the Port list.`;
   const ro = OUTPUT_TYPES.includes(el.type) && mine.find(p => P.inputOnly.includes(p));
   if (ro) return `${P.label(ro)} on an ${name} can only read (an input). Put this output on another Port.`;
+  if (P.opta) return optaDeviceError(el, mine, P);
   return null;
 }
+// Arduino Opta (Rule 6.36, Panel Updates entry 34 step 1). Like a Mega (OakBarn Brewery, 2026-11-19: "Make the Temperature Probes or other
+// Things like heater control just like how a mega does it as you cannot directly attach a probe to any pin and it will work. You need
+// something besides the Mega ... If it requires an expansion Module, then add that in the Help"): every Device can go on it. Only what the
+// Port can't do at all is refused: a relay can't read, an input can't switch (the inputOnly check above). The rest is one warning
+// (OPTA_WARNINGS) saying what has to be added, and Help 206 names the modules.
+function optaDeviceError(el, mine, P) {
+  const relay = mine.find(p => !P.inputOnly.includes(p));
+  if (relay && !OUTPUT_TYPES.includes(el.type)) return `${P.label(relay)} on an Arduino Opta is a relay: it switches, it can't read. Put this Device on an input I1-I8.`;
+  return null;
+}
+const OPTA_ELECTRIC = '\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
+// The added circuit for each Skynet probe type on an Opta (OakBarn Brewery, 2026-11-19: "Do the best for 10KNTC Probes ( and support for all
+// th eprobes on our Skynet Probes. JUst add the addition Cu=ircuits."). The Opta's inputs read 0-10 V, so most probes need a temperature
+// transmitter with a 0-10 V output; its range (for example 0-150 °C) is set on the transmitter.
+export const OPTA_PROBE_CIRCUITS = {
+  ntc: ['10K NTC (or other NTC) probe', 'an NTC temperature transmitter with a 0-10 V output (set it to your NTC: 10K, B 3950), wired to I1-I8.'],
+  pt100: ['PT100 RTD', 'an Opta Analog Expansion (A0602), which reads PT100 probes itself; or a PT100 temperature transmitter with a 0-10 V output, wired to I1-I8.'],
+  pt1000: ['PT1000 RTD', 'a PT1000 temperature transmitter with a 0-10 V output, wired to I1-I8.'],
+  thermocouple: ['thermocouple', 'a thermocouple transmitter for your type (K, J, T ...) with a 0-10 V output, wired to I1-I8.'],
+  lm35: ['LM35', 'nothing but a 5 V supply for the sensor: its output (10 mV per °C) goes straight to I1-I8 (about 0.25 °C per step).'],
+  tmp36: ['TMP36', 'nothing but a 5 V supply for the sensor: its output (10 mV per °C) goes straight to I1-I8 (about 0.25 °C per step).'],
+  ds18b20: ['DS18B20 (OneWire) probe', 'the Opta has no OneWire. Put DS18B20 probes on a Mega (or another board in the list), or swap them for 10K NTC or PT100 probes with a transmitter. A DS18B20-to-RS485 module will work once Skynet has RS485.'],
+};
+export const OPTA_WARNINGS = {
+  temperature: '{0} on an Arduino Opta: a {1} can\'t be wired straight to an Opta input. Add: {2} See Help 206.',
+  pwm: '{0} on an Arduino Opta is a relay: fast PWM or Pseudo PWM wears a relay out. For heater control by PWM, use an SSR driven by an Opta Digital Expansion with solid-state outputs (D1608S), or Duty Cycle / Hysteresis On/Off. See Help 206.' + OPTA_ELECTRIC,
+  stepper: '{0} on an Arduino Opta: a stepper motor needs fast step pulses that a relay can\'t give. Use a stepper driver with its own controller, or put the motor on a Mega. See Help 206.',
+  ads1115: '{0} on an Arduino Opta: the Opta has no I2C pins for an ADS1115. Wire a 0-10 V sensor straight to I1-I8, or use an Opta Analog Expansion (A0602). See Help 206.',
+};
+export const OPTA_ANALOG_WARNING = '{0} on an Arduino Opta reads 0-10 V, not 0-5 V: a 0-5 V sensor reads only half its range. Set the sensor\'s range in this Device to match.';
+export const OPTA_RELAY_WARNING = '{0} on an Arduino Opta is a relay (Normally Open, at most 250 V AC and 10 A). It switches a contactor coil, an SSR, a 24 V valve or a light.\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 // The 3.3 V warnings (OakBarn Brewery, 2026-11-19: "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead", "Make
 // those Warnings", Rule 6.35). The Mega (5 V) is the board Skynet plans and wires for. A brewery may mix 5 V and 3.3 V boards ("you
 // could have a mixed system of 3.3 and 5v"), so the warning goes by the board this Device is on. One warning, when the Device is put on
@@ -522,6 +564,7 @@ export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return [P.truePwm.includes(p) && PWM_TAG + ': see Help', P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''].filter(Boolean).join(', '); }
   const P = pinProfile(board);
+  if (P.opta) return P.inputOnly.includes(p) ? 'input: digital or 0-10 V' : 'relay';      // Rule 6.36
   const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && PWM_TAG, keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ')
     + (keepsFew(P, P.pwm) && P.pwm.includes(p) ? ': see Help' : '');
   if (p === SD_PIN && sdBoard(P)) return [t, 'SD card pin'].filter(Boolean).join(', ');      // Skynet Rule 6.11, every board that takes an Ethernet shield
