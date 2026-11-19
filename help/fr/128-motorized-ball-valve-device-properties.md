@@ -89,9 +89,31 @@ Le Suggested Name suit le format de nommage (Règle 3.1) : Interface ID, Port, `
 
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
-| Path | grisé : fixé par son Template Skynet, suit l'Orientation | **Path** : votre image, une seule image (l'Overlay la montre ouverte). Le ⬢ à côté de Path règle où sont les IP In et Out. **Path (open)** ne s'affiche que sur une vanne qui a déjà une image ouverte |
-| Orientation | Horizontal, Vertical Left, Vertical Right (Front et 45 degrees ne s'affichent que sur une vanne déjà posée ainsi) | Horizontal ou Vertical (les 45 ne s'affichent que sur une vanne déjà posée ainsi) |
+| Path | grisé : fixé par son Template Skynet, suit l'Orientation | **Path** : votre image, une seule image dessinée Horizontal (l'Overlay la montre ouverte). Skynet la tourne et la retourne pour les autres Orientations. Le ⬢ à côté de Path règle où sont les IP In et Out. **Path (open)** ne s'affiche que sur une vanne qui a déjà une image ouverte |
+| Orientation | Horizontal, Vertical Left, Vertical Right (Front et 45 degrees ne s'affichent que sur une vanne déjà posée ainsi) | Horizontal, Horizontal Flipped, Vertical Left, Vertical Right, toutes faites à partir de votre seule image (Vertical simple et les 45 ne s'affichent que sur une vanne déjà posée ainsi) |
 | Toggle et Overlay | à vous de choisir (ils commencent à On/Off et à l'éclair fixe) | à vous de choisir |
 | Width et Height | la taille de son Template pour chaque Orientation | 150 x 150 au départ |
 
 Les réglages que ces fenêtres ne montrent plus (Invert, One-shot, Text when on / off, Flip, Service) sont gardés si une vanne les avait déjà.
+
+## Une image, quatre vues (User Defined) {#one-picture-four-looks-user-defined}
+
+Donnez à la User Defined Motorized Ball Valve **une seule image**, dessinée **Horizontal** : le tuyau de gauche à droite et le
+moteur en haut. Skynet en fait les autres vues, vous n'avez donc jamais besoin d'une deuxième image. (Règle Skynet 18.43)
+
+| Orientation | Ce que Skynet fait de votre image |
+|---|---|
+| **Horizontal** | la montre comme vous l'avez dessinée |
+| **Horizontal Flipped** | la retourne de haut en bas (moteur sous le tuyau) |
+| **Vertical Left** | la tourne de 90 degrés (moteur à gauche) |
+| **Vertical Right** | la tourne de 90 degrés et la retourne de gauche à droite (moteur à droite) |
+
+Le fichier de votre image n'est jamais changé ; il est seulement dessiné tourné ou retourné. Les IP In et Out suivent la vue.
+
+**Quelle image marche le mieux :**
+
+- Un fond uni ou transparent.
+- La vanne vue bien de face par le côté, le tuyau à plat au milieu.
+- Pas d'écriture ni de logo dessus : en la retournant, l'écriture serait à l'envers.
+- N'importe quelle taille : elle est ajustée dans la boîte carrée de la vanne. Utilisez le ⬢ à côté de **Path** pour régler où
+  sont les bouts du tuyau, s'ils ne sont pas au milieu des côtés gauche et droit.
