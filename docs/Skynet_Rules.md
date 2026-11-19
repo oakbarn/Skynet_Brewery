@@ -152,7 +152,10 @@ key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Pr
 ☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
 **`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
-at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97)
+at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97) **Built 2026-11-19 (Panel Updates
+entry 16, Help 238):** the four `skn_` Globals (read only; `skn_Boil_Temp` in the panel's Units; data kept in °C and hPa).
+The `sk_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
+`wait BK_Temp >= skn_Boil_Temp - 1`.
 
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
 **not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
@@ -683,10 +686,18 @@ sits in (a goto back up, often in an if) is left; the next wait runs as normal. 
 *Replaced (2026-11-19):* "one press lets every running Process move on" and "Only one Override button on a Tab".
 (thread "Add an Override button", thread "Let Override target the right Process", Help 96, Help 22)
 
-2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
-postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
-airport's report (or the weather service, or standard air with a warning when offline), every 30 minutes, and works out
-`skn_Boil_Temp` (Rule 1.18). One place for the Brain, the same for every user; Admins change it. (Fritz, 2026-10-30, Help 97)
+2.27 **Boil temperature** (Settings > Boil temperature (air pressure); was "User Profile"): the airport's **ICAO code** is
+the **one and only way** to pick the weather station (no Postal Code or town lookup; Fritz, 2026-11-19: "The perferred way
+should be ICAO id of airport. WE could make it the only way and explain how to find it with an internet search"), then the
+brewery's **Elevation** (starts as the airport's own height, always changeable) and an optional **typed air pressure**. The
+Brain reads that airport's METAR every 30 minutes, takes its pressure to the Elevation and works out `skn_Boil_Temp`
+(Rule 1.18). Order: typed pressure > the airport's report > standard air at the Elevation. **Test** fetches it now. One
+plain message when the report is not used: "Check your Airport code in Skynet Settings." (not 4 letters, or no report for
+that code), "The Pressure is not available from your Airport code set in Skynet Settings." (no internet, or no report in 3
+hours), "No Airport code in Skynet Settings yet." A code that gets no report is still saved (never stop a user). Only the 4
+letter code leaves the Brain. One place for the Brain, the same for every user; Admins change it. Help 238 says how to find
+the ICAO code and your own Elevation (an internet search, or a phone app such as the iPhone Compass app). (Fritz,
+2026-10-30, Help 97; rebuilt 2026-11-19, Panel Updates entry 16, Help 238)
 
 2.28 **Tab Styles** (Fritz, 2026-10-30): a Tab's Style sets the look of the Devices and Widgets on it, as two separate groups:
 the **Label** (Fore, Back, Font, Font size, Alignment) and **the Device or Widget itself** (Fore, Back, Font, Font size, Alignment). Skynet Styles 🔒
@@ -6806,6 +6817,7 @@ import.
 - 2026-11-19: Rule 11.9 guides added (OakBarn Brewery: "Step by Step to add a Device in help", "Step by step add a widget"): Help 207 Step by Step: Add a Device (a Blichmann RipTide on the Brew House Tab of the 3 Vessel sample) and Help 208 Step by Step: Add a Widget (a Hose Bib), each with a picture at every step and a warning at the top that a new item stays on the 🔨 Build Tab until ✅ Finish Build ... > Move to Tab; French in help/fr; linked from the Glossary, Getting started, Devices and Build Tab pages. The Move to Tab note now says the build kept its spot when it goes to the Tab picked for it (it said "the middle", which was wrong). Wording only; both programs (the Importer uses the Panel's Help). Next free Help 209. (thread "Add a step-by-step Add a Device Help page")
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rules 1.18 and 2.27 changed (Panel Updates entry 16, OakBarn Brewery: "The perferred way should be ICAO id of airport. WE could make it the only way"): the boil temperature is rebuilt on today's code in Settings > Boil temperature (air pressure): the ICAO code is the only way (no Postal Code), Elevation, typed pressure, Test, three plain messages; the four `skn_` Globals built; `sk_` roles and `wait_boil` not built yet. Help 238 (how to find the ICAO code and your Elevation) and French. Panel only (the BruControl Import program never fetches a report). (thread "Set boil temp from local weather")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")

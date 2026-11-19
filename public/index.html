@@ -492,6 +492,14 @@
         <label>Twilio phone number <input id="msTwFrom" placeholder="+15551234567"></label>
       </div>
       <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
+      <h3 id="sec-boilTemp">Boil temperature (air pressure)</h3>
+      <p class="muted">Water boils cooler when the air pressure is low. Skynet reads your airport's weather report every 30 minutes and works out <code>skn_Boil_Temp</code> for your Processes. Help: Boil temperature from the air pressure.</p>
+      <div class="form row">
+        <label title="Your airport's 4 letter ICAO code (the code pilots use), for example KORD. It is the only way to pick the weather station. It works only with a correct ICAO code and an internet connection. If it does not work the effect is very small: Skynet uses the typed pressure or standard air. Help: Boil temperature from the air pressure tells how to find your code.">Airport (ICAO) <input id="btAirport" maxlength="4" style="width:6em;text-transform:uppercase" autocomplete="off" spellcheck="false" placeholder="KORD"></label>
+        <label title="The brewery's height above sea level. It starts as the airport's own height; change it when the brewery sits higher or lower than the airport."><span>Elevation (<span id="btElevUnit">ft</span>)</span> <input id="btElev" type="number" step="1" style="width:7em"></label>
+        <label title="Leave empty to use the airport's report. A pressure typed here is used as it is, with no internet."><span>Typed air pressure (<span id="btPressUnit">inHg</span>)</span> <input id="btPress" type="number" step="0.01" style="width:7em"></label>
+      </div>
+      <div class="bar"><button id="btSave" class="primary">Save</button><button id="btTest" title="Fetch the airport's report now and show its pressure and the boil temperature">Test</button><span id="btResult"></span></div>
       <h3 id="sec-panel">Panel settings</h3>
     </div>
     <div class="form admin-only">
