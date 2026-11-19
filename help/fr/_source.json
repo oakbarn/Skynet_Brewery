@@ -20,6 +20,7 @@
  "18-updating": "d5f1fbb2d19177f6",
  "19-installing": "7c8f30ad91b00c6b",
  "20-simulation": "39d826c977dd53a5",
+ "206-skynet-boards": "7ba564f4d940de37",
  "21-alarms-and-sound": "6597f2a00a6445f1",
  "22-process-language": "dc5f188d846e42b1",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
@@ -198,6 +199,5 @@
  "202-new-schema-interview": "f11d0e9ae07d96ad",
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
  "204-set-up-a-pi-brain": "d629e4e76a8ac8b3",
- "205-report-a-problem": "7a9a77fde4452b11",
- "206-skynet-boards": "7ba564f4d940de37"
+ "205-report-a-problem": "7a9a77fde4452b11"
 }
