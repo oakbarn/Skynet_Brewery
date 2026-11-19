@@ -65,6 +65,13 @@ Chaque fenêtre de Skynet, pas seulement celles des Devices, suit la fenêtre de
   Widget, l'ancienne Alarm, le Manual vessel et un Clone, chaque Vessel, IP, Pipe, Hose, raccord et Manifold, et le tube RIMS et la
   bouilloire électrique suivent le même ordre : 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, leurs propres cases, X Y Width
   Height, et le Type en dernier. Le Picture Widget reçoit un **Background** (None, 1, 2 ou 3) dont le ⬢ contient ses 3 images.
+- **Les mêmes lignes aux mêmes places** (règle Skynet 18.51) : chaque Device (PWM, relais, vanne, résistance, sonde de température,
+  entrées, moteurs, densimètres ...) et chaque Widget a maintenant les lignes du modèle dans l'ordre du modèle : la ligne du titre,
+  State, 1. Label, Label Visible, 2. Interface et Available Ports, 3. Tab, Layer Order, 4. Name, le **Graphic**, Orientation, Hose or
+  Pipe, Cover et **Toggle**, **Overlay** avec **Database and .API**, Model, Inlet et Outlet IP Fitting, ses propres réglages, X Y
+  Width Height et le **Device Type** en dernier. Chacun a un Graphic ; un **Path** d'image est dans le ⬢ du Graphic. Un Toggle sans
+  Cover a sa propre ligne à la place du Cover. Sans Overlay, **Database and .API** a sa propre ligne ⬢ à cet endroit. Rien n'a été
+  retiré.
 
 ## Un Device intégré à quelque chose {#a-device-built-into-something}
 

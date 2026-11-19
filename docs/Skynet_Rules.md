@@ -5451,6 +5451,25 @@ everything else, OakBarn Brewery: "so we have a consistent look and flow"), with
   its parts, ➕ Add Device. Manual Pump: Confirmation under the Overlay.
 Help 64, 65, 74, 76, 148.
 
+18.51 **Every dialog uses the Model's rows, in the Model's places** (OakBarn Brewery, 2026-11-19: "How does the PWM look anything like
+the Blickmann Model. Redo all the dialogs to for the Blickman and Hose Bib Model. Same Layout, same fields for the same things"; "We redo
+it and make the Model Work"). The Model wins: a dialog is fitted to the Model, never the Model to a dialog. Both programs. Every Device
+Properties and Add box (the Pump itself is the Model) and every Widget Properties (the Hose Bib is the Model; the Picture Widget and the
+Alarm Widgets keep their own Picture and Alarm boxes, Rules 18.27, 18.50) has these rows, in this order, each in the same place:
+- the title line (lock, Visible, Hidden Locked), **State**, **1. Label** ⬆ ⬢, **Label Visible**, **2. Interface** with **Available
+  Ports** on its line (a Widget: none), **3. Tab** (or 3. Built into), **Layer Order**, **4. Name** with Change Name and the Suggested
+  Name (a Widget: 3. Name), a **Profile**;
+- **Graphic**: every Device and Widget has one: its Skynet drawing (Pump, Valve, Heating Element, Thermowell) or it as it is drawn on
+  its Tab. The Model has no Path or Picture row: a picture Path is in the Graphic's ⬢ (nothing taken away);
+- a Widget's **Background**, **Fore color** and **Back color** (Rule 18.50 #2), then **Orientation**, **Hose or Pipe**, **Cover** with
+  **Toggle** on its line (no Cover: **Toggle** on its own line in the Cover's place; a Toggle no longer rides on the Overlay or the
+  Orientation line);
+- **Overlay** with **Database and .API** ⬢ on its line; with no Overlay, Database and .API is its own ⬢ line in the Overlay's place
+  (no longer on Calibration Offset, Read Only or Running at Start);
+- **Model** ⬢, **Inlet IP Fitting**, **Outlet IP Fitting**, then its own settings, where the Pump has Speed Control;
+- **X Y Width Height** on one line, the **Device Type** (or Widget Type) last.
+A row the Model has that a dialog's Device or Widget does not have is left out (Rule 18.47). Help 148.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -5714,6 +5733,7 @@ import.
 
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
+- 2026-11-19: Added Rule 18.51 (OakBarn Brewery: "Redo all the dialogs to for the Blickman and Hose Bib Model. Same Layout, same fields for the same things"; "We redo it and make the Model Work"): every Device Properties and Add box and every Widget Properties uses the Model's rows in the Model's places; a Graphic on every one, picture Paths in its ⬢, Toggle in the Cover's place, Database and .API on the Overlay line, Device Type last. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change.
 - 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.
 - 2026-11-18: Rule 18.50 applied to the Alarm Widgets (the "Recheck dialogs" pass, part 1): Basic, User and Pre-Hop Alarm dialogs in the Hose Bib's order, Widget Type last, Database and .API ⬢ on the Active overlay line; nothing taken away. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs; no import change.
 - 2026-11-18: Added Rule 18.50 (OakBarn Brewery, PDF "Panel Update Final 4", "Final 4 will just be some guidance Rules"): a guidance Rule for the "Recheck dialogs" pass: a Widget dialog follows the Hose Bib (the Widget half of the Model) the way the Hose Bib was made from the Blichmann; a Widget with no Graphic has no picture attributes and gets a Background, Fore color and Back color; Switch, Pump and like Widgets and the Graphic (Picture) Widget have the Graphic properties, others only with IPs or .confirmation; the Graphic Widget has 3 Backgrounds (.path, .path_2, .path_3), other Widgets one from Skynet with no path, a User Widget one path; no IPs, Hose or Pipe, IP Fittings, Cover or Overlay on a Widget without IPs, except a Switch has an Overlay. No dialog changes now. Checked against both programs: the BruControl Import's Build page shares the dialogs.
