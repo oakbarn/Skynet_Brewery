@@ -18,7 +18,7 @@
 //   eth     its Ethernet choice's words      noEthernet  no Ethernet choice      wifi  the words of its WiFi choice, when only some have WiFi
 //   shield  an Ethernet connection is an Ethernet shield or module on D10 (Rule 6.10 then covers it)
 //   label   how a Port is shown: D5, GPIO17, Relay 1
-//   opta    the Arduino Opta: Ports by name (Relay 1-4, I1-I8), relays never PWM, inputs digital or 0-10 V (Rule 6.36)
+//   opta    the Arduino Opta: Ports by name (Relay 1-4, I1-I8), relays On/Off (PWM with one warning), inputs digital or 0-10 V (Rule 6.36)
 // Pin numbers are the Arduino ones printed on the board. Where a board's own maker lists PWM or interrupt pins, those are used.
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => String(a + i));
 const D = p => `D${p}`;
@@ -62,7 +62,7 @@ export const BOARD_INFO = {
   // A small PLC on a DIN rail: 4 relays (Normally Open, 250 V AC, 10 A) and 8 inputs I1-I8, each digital or 0-10 V analog. Its Ports go by
   // name: Relay 1-4 are R1-R4 (the program's D0-D3), the inputs I1-I8 (A0-A7). Ethernet is built in and uses no pin (no D10).
   opta: { name: 'Arduino Opta', volts: 24, family: 'arduino', opta: true, eth: 'Ethernet (built in)', wifi: 'WiFi (Opta WiFi only)',
-    pins: [...OPTA_RELAYS, ...OPTA_INPUTS], pwm: [], counter: OPTA_INPUTS, spi: [], i2c: [], analog: OPTA_INPUTS, inputOnly: OPTA_INPUTS, usb: [],
+    pins: [...OPTA_RELAYS, ...OPTA_INPUTS], pwm: OPTA_RELAYS, counter: OPTA_INPUTS, spi: [], i2c: [], analog: OPTA_INPUTS, inputOnly: OPTA_INPUTS, usb: [],
     label: p => (/^R\d$/.test(p) ? `Relay ${p.slice(1)}` : p) },
   pi: { name: 'Raspberry Pi', volts: 3.3, family: 'pi', pins: range(2, 27), pwm: range(2, 27), truePwm: ['12', '13', '18', '19'], counter: range(2, 27), spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, usb: [], label: p => `GPIO${p}` },
 };

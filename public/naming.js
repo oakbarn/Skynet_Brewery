@@ -425,8 +425,11 @@ export function busCheck(el, elements, devices) {
   if (mine.includes(SD_PIN) && iface && sdBoard(P)) return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   const pw = P.pinWarn && mine.map(p => P.pinWarn[p]).find(Boolean);      // ESP32 GPIO16 and GPIO17 (WROVER boards)
   if (pw) return { warn: pw + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
-  if (P.opta && mine.length) {      // Rule 6.36: one warning when a Device is put on an Opta Port
-    const r = mine.find(p => !P.inputOnly.includes(p)), a = el.type === 'analogIn' && mine.find(p => P.inputOnly.includes(p));
+  if (P.opta && iface) {      // Rule 6.36: one warning when a Device is put on an Opta (what has to be added, see Help 206)
+    const r = mine.find(p => !P.inputOnly.includes(p)), a = el.type === 'analogIn' && mine.find(p => P.inputOnly.includes(p)), at = P.label(mine[0] ?? 'I1');
+    const k = el.type === 'temperature' ? 'temperature' : el.type === 'stepper' ? 'stepper' : el.type === 'analogIn' && el.adc === 'ads1115' ? 'ads1115'
+      : r && (needsPwm(el) || el.pseudoPwm || (['pid', 'deadband'].includes(el.type) && el.pwm)) ? 'pwm' : '';
+    if (k) return { warn: OPTA_WARNINGS[k].replace('{0}', k === 'temperature' && !mine.length ? iface : at) };
     if (r) return { warn: OPTA_RELAY_WARNING.replace('{0}', P.label(r)) };
     if (a) return { warn: OPTA_ANALOG_WARNING.replace('{0}', a) };
   }
@@ -500,21 +503,23 @@ function boardDeviceError(el, mine, P) {
   if (P.opta) return optaDeviceError(el, mine, P);
   return null;
 }
-// Arduino Opta (Rule 6.36, Panel Updates entry 34 step 1): only the Devices that fit its Ports. A relay switches On and Off: a Digital
-// Out (On/Off), a Duty Cycle, a Hysteresis, or a PID or Deadband without PWM; never PWM or Pseudo PWM (a relay would wear out fast).
-// An input I1-I8 reads: a Digital In, a flow meter (slow pulses), or an Analog In 0-10 V. No OneWire, SPI or I2C on the Opta itself.
-export const OPTA_RELAY_TYPES = ['digitalOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
-export const OPTA_INPUT_TYPES = ['digitalIn', 'flowMeter', 'analogIn'];
+// Arduino Opta (Rule 6.36, Panel Updates entry 34 step 1). Like a Mega (OakBarn Brewery, 2026-11-19: "Make the Temperature Probes or other
+// Things like heater control just like how a mega does it as you cannot directly attach a probe to any pin and it will work. You need
+// something besides the Mega ... If it requires an expansion Module, then add that in the Help"): every Device can go on it. Only what the
+// Port can't do at all is refused: a relay can't read, an input can't switch (the inputOnly check above). The rest is one warning
+// (OPTA_WARNINGS) saying what has to be added, and Help 206 names the modules.
 function optaDeviceError(el, mine, P) {
-  if (el.type === 'temperature' || el.type === 'stepper') return 'An Arduino Opta has no OneWire, SPI or I2C pins for temperature probes, and no step pins for a stepper motor. Put this Device on a Mega or another board.';
-  if (!mine.length) return null;
-  const relay = mine.find(p => !P.inputOnly.includes(p)), input = mine.find(p => P.inputOnly.includes(p));
-  if (relay && !OPTA_RELAY_TYPES.includes(el.type)) return `${P.label(relay)} on an Arduino Opta is a relay: it takes a Digital Out, a Duty Cycle, a Hysteresis, a PID or a Deadband. Put this Device on another board.`;
-  if (relay && (needsPwm(el) || el.pseudoPwm || (['pid', 'deadband'].includes(el.type) && el.pwm))) return `${P.label(relay)} on an Arduino Opta is a relay: it switches On and Off only, never PWM or Pseudo PWM (a relay would wear out fast). Use On/Off, Duty Cycle or Hysteresis, or put this Device on another board.`;
-  if (input && !OPTA_INPUT_TYPES.includes(el.type)) return `${input} on an Arduino Opta is an input: it takes a Digital In, a flow meter or an Analog In 0-10 V. Put this Device on another board.`;
-  if (input && el.type === 'analogIn' && el.adc === 'ads1115') return 'An Arduino Opta has no I2C pins for an ADS1115. Wire the sensor (0-10 V) straight to an input I1-I8.';
+  const relay = mine.find(p => !P.inputOnly.includes(p));
+  if (relay && !OUTPUT_TYPES.includes(el.type)) return `${P.label(relay)} on an Arduino Opta is a relay: it switches, it can't read. Put this Device on an input I1-I8.`;
   return null;
 }
+const OPTA_ELECTRIC = '\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
+export const OPTA_WARNINGS = {
+  temperature: '{0} on an Arduino Opta: a temperature probe can\'t be wired straight to an Opta input. Use a temperature transmitter with a 0-10 V output (DS18B20, PT100, thermocouple or NTC) on I1-I8, or an Opta Analog Expansion (A0602) for PT100 probes. See Help 206.',
+  pwm: '{0} on an Arduino Opta is a relay: fast PWM or Pseudo PWM wears a relay out. For heater control by PWM, use an SSR driven by an Opta Digital Expansion with solid-state outputs (D1608S), or Duty Cycle / Hysteresis On/Off. See Help 206.' + OPTA_ELECTRIC,
+  stepper: '{0} on an Arduino Opta: a stepper motor needs fast step pulses that a relay can\'t give. Use a stepper driver with its own controller, or put the motor on a Mega. See Help 206.',
+  ads1115: '{0} on an Arduino Opta: the Opta has no I2C pins for an ADS1115. Wire a 0-10 V sensor straight to I1-I8, or use an Opta Analog Expansion (A0602). See Help 206.',
+};
 export const OPTA_ANALOG_WARNING = '{0} on an Arduino Opta reads 0-10 V, not 0-5 V: a 0-5 V sensor reads only half its range. Set the sensor\'s range in this Device to match.';
 export const OPTA_RELAY_WARNING = '{0} on an Arduino Opta is a relay (Normally Open, at most 250 V AC and 10 A). It switches a contactor coil, an SSR, a 24 V valve or a light.\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 // The 3.3 V warnings (OakBarn Brewery, 2026-11-19: "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead", "Make
@@ -545,7 +550,7 @@ export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return [P.truePwm.includes(p) && PWM_TAG + ': see Help', P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''].filter(Boolean).join(', '); }
   const P = pinProfile(board);
-  if (P.opta) return P.inputOnly.includes(p) ? 'input: digital or 0-10 V' : 'relay, On/Off only';      // Rule 6.36
+  if (P.opta) return P.inputOnly.includes(p) ? 'input: digital or 0-10 V' : 'relay';      // Rule 6.36
   const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && PWM_TAG, keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ')
     + (keepsFew(P, P.pwm) && P.pwm.includes(p) ? ': see Help' : '');
   if (p === SD_PIN && sdBoard(P)) return [t, 'SD card pin'].filter(Boolean).join(', ');      // Skynet Rule 6.11, every board that takes an Ethernet shield
