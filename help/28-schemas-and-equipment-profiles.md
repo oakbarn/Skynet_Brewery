@@ -56,6 +56,7 @@ Equipment Profiles are made on the **Equipment Profile** Menu tab. See [The ☰ 
 
 - **System Loss (Trub, Chiller Manifold and Hoses)**: what is left behind between the kettle and the fermenter.
 - **Cooling shrinkage**, **Grain absorption**, **Brewhouse efficiency** and **Hop utilization**. The Brewhouse efficiency is the only Efficiency in Skynet: a new profile starts at 72 %, and it is copied onto each Tab the profile is copied onto, and a Recipe works out its Expected Gravity with the **Brew on** Tab's own copy ([The Recipe tab](99-recipe-tab)).
+- **Strike offset**: degrees added to the Strike Temperature, to make up for the heat a cold Mash Tun takes from the Strike Water. It belongs to the equipment, not the recipe: **0** for an All In One (the grain goes into the vessel that heated the water) or a pre-heated Mash Tun, more for a Mash Tun that starts cold. Each Tab gets its own copy, so two breweries can have two numbers (for example 10 °F on one and 0 on the other). A Recipe's **Calculate** adds the **Brew on** Tab's Strike offset; a Tab with none adds 0. Change it on the Tab when the brewery air is much hotter or colder than usual.
 - **Notes**.
 - **Its hardware**: the real world things on its Tab (see **The Equipment Profile view** below). You put them on the Tab from the [Vessel and Fitting Templates](50-vessel-and-fitting-templates) (**Add to Tab**), the Interview or Edit layout, and change each one in its properties on the Tab.
 
@@ -76,7 +77,7 @@ Some numbers moved out of the profile (2026-10-20):
 
 The box at the top of the **Equipment Profile** tab lists every Tab of the loaded Schema, with the Tab's own Equipment numbers. They act as the Tab's defaults, and you can change them any time:
 
-- **⚙ Numbers** changes the Tab's System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** and Hop utilization (Admins). The same numbers are in **Edit layout > Tab Settings > Equipment numbers**.
+- **⚙ Numbers** changes the Tab's System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency**, Hop utilization and **Strike offset** (Admins). The same numbers are in **Edit layout > Tab Settings > Equipment numbers**.
 - **📈 Efficiency** shows the brews on that Tab (see **Efficiency of a Tab** below).
 - **🔒 Locked** locks the equipment on that Tab (see **Lock the equipment on a Tab** below).
 - **💾 Save as a profile ...** copies the Tab's equipment, pipes, hardware and numbers into a new Equipment Profile, or over one you pick. It only goes that way, from the Tab to the profile, and no link is kept.
@@ -134,7 +135,7 @@ The bar on top stays put:
 - **➡ Transfer All to Tab**, **➡ Transfer Vessels to Tab** and **➡ Transfer Manifold to Tab** put that part of the hardware on the **Tab** picked beside them, with one click each. They paste the profile (see **Paste a profile** below): the pieces land on the 🔨 Build Tab, hardware that is the same is replaced after the Replace list, and **↩ Undo** shows after.
 - **🗑 Delete**, **💾 Save**, **↶ Undo** and **✕ Close**, in that order.
 
-Under them are the profile's **Properties**, the numbers that go with it to a Tab: System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency** and Hop utilization. **⚙ Properties** changes them (and the Name, Units and Notes); **💾 Save** keeps them. Beside them:
+Under them are the profile's **Properties**, the numbers that go with it to a Tab: System Loss, Cooling shrinkage, Grain absorption, **Brewhouse efficiency**, Hop utilization and Strike offset. **⚙ Properties** changes them (and the Name, Units and Notes); **💾 Save** keeps them. Beside them:
 
 - **🧮 Check the volumes** and **📈 Efficiency** open their box under the bar (press again to close it). See **Edit or delete an Equipment Profile** above. **📈 Efficiency** shows the Tab picked beside the ➡ Transfer buttons (see **Efficiency of a Tab** above).
 - **🗂 New Schema from this profile ...** (see below).

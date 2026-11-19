@@ -48,7 +48,7 @@ Chaque case a un haut coloré qui dit de quelle sorte elle est :
 
 La plupart des cases peuvent être changées. **Style** est une liste ; **Add new ...** y ajoute un style.
 
-Appuyez sur **Calculate** pour calculer le poids total de grain, les ajouts de houblon, les avertissements et messages, la température du premier palier, les IBU (à partir de l'AAU réelle de chaque houblon), et le volume et la température d'empâtage ainsi que le volume et la température de rinçage, à partir de la température du grain et du rapport eau/grain. Appuyez ensuite sur **Save**. Une recette importée arrive déjà calculée.
+Appuyez sur **Calculate** pour calculer le poids total de grain, les ajouts de houblon, les avertissements et messages, la température du premier palier, les IBU (à partir de l'AAU réelle de chaque houblon), et le volume et la température d'empâtage ainsi que le volume et la température de rinçage, à partir de la température du grain et du rapport eau/grain. La température d'empâtage ajoute le **Strike offset** du Tab **Brew on** ([Profils d'équipement](28-schemas-and-equipment-profiles)). Appuyez ensuite sur **Save**. Une recette importée arrive déjà calculée.
 
 La recette est gardée en kilogrammes, litres et °C. Elle s'affiche dans les unités que vous choisissez sur le Tab Default (voir **Valeurs par défaut de la recette** plus bas).
 
@@ -238,7 +238,7 @@ Skynet ne va pas chercher la voix tout seul sur le site web : les sites de voix 
 
 Dans **☰ Menu > Default** :
 
-- **Water Profile**, **Boil time**, **Water to grain ratio**, **Grain temperature** et **Strike offset** : ce avec quoi commence une nouvelle recette. Chacun peut être changé dans la recette.
+- **Water Profile** et **Water to grain ratio** : ce avec quoi commence une nouvelle recette. Chacun peut être changé dans la recette. Le Boil time vient du Boil Profile, la Grain temperature est 72 °F pour la planification, et le **Strike offset** appartient à l'équipement du Tab **Brew on** ([Profils d'équipement](28-schemas-and-equipment-profiles)).
 - **How amounts show** (comment s'affichent les quantités) : grains (lb, kg, oz, g), houblons (oz, g), volumes (gal, L, qt), températures (°F, °C), eau/grain (qt/lb, L/kg) et éléments divers (comme la recette les donne, métrique, ou US).
 
 Dans **Settings > Panel settings: screen, Tabs and alerts** :

@@ -4892,6 +4892,15 @@ DDLB Include Tablet, Pack"). The **grain weight label** (skn_XML_Grain_WT_Standa
 **Locked** (never typed in) and has **Visible**, On by default ("like any other label except Visible as defaulted to True"; "not user
 editable ... Locked True"). The New User Interview will fill Units in (later).
 
+17.17 **Strike Offset is equipment, set per Tab** (OakBarn Brewery, Panel Updates entry 14: "Equipment Profile, not recipe"; "The Offset is
+equipment related. It is a different number for a particular equipment Profile. The Brewzilla (and all All in Ones is zero)"; 2026-11-19:
+"15 is to set a default on a tab based on the Equipment. I have 2 Breweries in esscence. I set one at 10 and the other at 0"): every
+Equipment Profile has a **Strike offset** number (EQUIP_FIELDS), 0 to start, copied onto a Tab with the other Equipment numbers (Rule 2.62)
+and changed on the Tab any time (⚙ Numbers, Tab Settings). A Recipe's **Calculate** adds the **Brew on** Tab's Strike offset to the Strike
+Temperature; a Tab with none adds 0. It is a temperature **difference**: kept in °C (Rule 2.59), °F to °C is x 5/9 with no 32. It may be
+below 0 (not restricted). Hover Help says 0 for an All In One or a pre-heated Mash Tun. Asking for it again on Brew Day (a confirm and a
+box, for a hot or cold brewery) belongs to the PreBrew Process (Process Updates Sandbox entry 1).
+
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
@@ -6800,3 +6809,4 @@ import.
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
+- 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.
