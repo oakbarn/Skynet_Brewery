@@ -22,7 +22,7 @@ import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFET
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -763,7 +763,7 @@ function vpPinLists(w, g) {
     const taken = Object.keys(vwClassOf(g).ports).filter(x => x !== k && w[x + '_part'] && w[x + '_pin'] !== '' && w[x + '_pin'] !== undefined).map(x => String(w[x + '_pin']));
     const pins = proto && w.vpIface ? freePins({ ...proto, device: w.vpIface, name: '\0new' }, els, S.config.devices, proto.type === 'temperature' && ANALOG_TEMP.includes(proto.sensor)).filter(p => !taken.includes(String(p))) : [];
     $('#pins-vp_' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-vp_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.vpIface }, S.config.devices), proto); return h('option', { value: p, label: t }, t); })));
+    document.body.append(h('datalist', { id: 'pins-vp_' + k }, ...pins.map(p => pinOption(p, boardOfDevice({ device: w.vpIface }, S.config.devices), proto, w.vpIface))));
   }
 }
 // make its parts (or bring them up to date) from vp (its Properties). Nothing changes when something is wrong (the error is thrown).
@@ -1148,6 +1148,11 @@ const MF_KIND_SEL = [['manual', 'Manual'], ['motorized', 'Motorized']];
 const MF_ROTS = [0, 90, 270];
 const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']];
 const mfSetPin = (item, k) => { const e = item && mfEl(item, k, draft.elements); return e && e.valveType !== 'manual' && (e.channel ?? '') !== '' ? e : null; };
+// A Port choice in a Port list (Rule 6.10, OakBarn Brewery, 2026-11-19: "It can be in order but can it be a Different color on the
+// DDLB?"): D10 on a Mega not on Ethernet keeps its place, in another color, with "kept for Ethernet" beside it; the true PWM pins have their own
+// color too ("Different color for PWM Pins"). D10 kept for Ethernet shows the Ethernet color.
+const pinText = (p, b, el, dev) => pinLabel(p, b, el) + (pinKept(p, (S.config.devices || []).find(d => d.name === dev)) ? `  (${KEPT_FOR_ETHERNET})` : '');
+const pinOption = (p, b, el, dev) => { const t = pinText(p, b, el, dev); return h('option', { value: p, label: t, ...(t.endsWith(`(${KEPT_FOR_ETHERNET})`) ? { class: 'pinKept' } : isPwmPin(p, b) ? { class: 'pinPwm' } : {}) }, t); };
 const MF_VALVE = { type: 'digitalOut', subtype: 'valve' };      // a Supply Manifold's motorized valve: On/Off, so a PWM pin reads "Save for PWM"
 const mfIfaceText = n => n ? (ifaceIdOf(n) ? `${ifaceIdOf(n)}: ${n}` : n) : '(none)';
 function mfPortChoices(it, item, k) {
@@ -1155,7 +1160,7 @@ function mfPortChoices(it, item, k) {
   const taken = mfKeys(it).filter(x => x !== k && it[x + '_mfk'] === 'motorized' && (it[x + '_mfpin'] ?? '') !== '').map(x => String(it[x + '_mfpin']));
   const pins = it.mfIface ? freePins({ type: 'digitalOut', subtype: 'valve', device: it.mfIface, name: '\0new' }, els, S.config.devices, false).filter(p => !taken.includes(String(p))) : [];
   const b = boardOfDevice({ device: it.mfIface }, S.config.devices), cur = String(it[k + '_mfpin'] ?? '');
-  return [['', !it.mfIface ? '(Interface first)' : pins.length ? '(pick)' : '(no free Port)'], ...pins.map(p => [String(p), pinLabel(p, b, MF_VALVE)]), ...(cur && !pins.map(String).includes(cur) ? [[cur, pinLabel(cur, b, MF_VALVE)]] : [])];
+  return [['', !it.mfIface ? '(Interface first)' : pins.length ? '(pick)' : '(no free Port)'], ...pins.map(p => [String(p), pinText(p, b, MF_VALVE, it.mfIface)]), ...(cur && !pins.map(String).includes(cur) ? [[cur, pinText(cur, b, MF_VALVE, it.mfIface)]] : [])];
 }
 const mfTypeText = it => 'Fitting with ' + mfKeys(it).map(k => { const m = it[k + '_mfk'] === 'motorized', e = { type: 'digitalOut', subtype: 'valve', valveType: m ? 'electric' : 'manual' }; return `V${mfNum(k)} ${shownType({ ...e, typeCode: defaultCode(e) })}`; }).join(', ');
 function mfDrillFields(it, item, adding) {
@@ -6145,7 +6150,7 @@ async function newDeviceDialog(e, hint, what) {
       { const pe = body.querySelector(`[data-k="${port[0]}"]`); if (pe) Object.assign(pe.dataset, { guard: 'Port', guardAllow: 'label device' }); }      // a blank Port gets the pop-up too (Rule 18.28)
       const fillFree = w => {
         const ps = w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : [];
-        const opt = p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices), { ...e, ...w }); return h('option', { value: p, label: t }, t); };
+        const opt = p => pinOption(p, boardOfDevice(w, S.config.devices), { ...e, ...w }, w.device);
         if (!portSel) return free.replaceChildren(...ps.map(opt));
         const cur = portSel.value || String(w[port[0]] ?? '');
         portSel.replaceChildren(h('option', { value: '' }, !w.device ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(opt), ...(cur && !ps.map(String).includes(cur) ? [opt(cur)] : []));
@@ -6563,7 +6568,7 @@ function rimsPinLists(w, g) {
   lists.rimsTemp = lists.rimsTemp.filter(p => p !== String(w.heatPin ?? ''));
   for (const [k, pins] of Object.entries(lists)) {
     $('#pins-' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.iface }, S.config.devices), protos[k]); return h('option', { value: p, label: t }, t); })));
+    document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => pinOption(p, boardOfDevice({ device: w.iface }, S.config.devices), protos[k], w.iface))));
   }
 }
 // make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Label.
@@ -9984,7 +9989,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
         const dev = input.closest('dialog, form, .dlgBody, body')?.querySelector('[data-k="device"]')?.value ?? obj.device;
         const ps = dev ? freePins({ ...obj, device: dev, name: '\0new' }, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog') : [];
         const own = String(v ?? ''), b = boardOfDevice({ device: dev }, S.config.devices);
-        dl.replaceChildren(...[...(own && !ps.map(String).includes(own) && dev === obj.device ? [own] : []), ...ps].map(p => { const t = pinLabel(p, b, obj); return h('option', { value: p, label: t }, t); }));
+        dl.replaceChildren(...[...(own && !ps.map(String).includes(own) && dev === obj.device ? [own] : []), ...ps].map(p => pinOption(p, b, obj, dev)));
       };
       fill(); input.addEventListener('focus', fill);
       return [h('label', {}, label, dl), input];
@@ -10316,7 +10321,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       const w = { ...obj, device: dev, name: '\0new', ...(dual ? { dualThrowChannel: undefined } : {}) };
       const ps = !dev ? [] : freePins(w, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog').filter(p => !dual || !samePin(p, obj.channel));
       const cur = input.value || String(v ?? ''), b = boardOfDevice(w, S.config.devices);
-      input.replaceChildren(h('option', { value: '' }, dual ? 'None (no second Port)' : !dev ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(p => { const t = pinLabel(p, b, w); return h('option', { value: p, label: t }, t); }),
+      input.replaceChildren(h('option', { value: '' }, dual ? 'None (no second Port)' : !dev ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(p => pinOption(p, b, w, dev)),
         ...(cur && !ps.map(String).includes(cur) ? [h('option', { value: cur, label: pinLabel(cur, b, w) }, pinLabel(cur, b, w))] : []));
       input.value = cur;
     };

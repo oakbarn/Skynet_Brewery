@@ -163,7 +163,7 @@ assert.equal(rtdPinError({ ...rtd, channel: 5, device: 'ESP' }, [{ name: 'ESP', 
 const ethMega = [{ name: 'MEGA', board: 'mega', connection: 'ethernet' }], usbMega = [{ name: 'MEGA', board: 'mega', connection: 'serial' }];
 const on10 = { name: 'MB_10_PWM_Fan', type: 'pwmOut', device: 'MEGA', channel: 10 };
 assert.match(busCheck(on10, [], ethMega).error, /Rule 6\.10/, 'no D10 on an Ethernet Mega');
-assert.equal(busCheck(on10, [], usbMega), null, 'D10 is fine on USB');
+assert.match(busCheck(on10, [], usbMega)?.warn ?? '', /can't be changed to Ethernet/, 'D10 on USB: allowed, with one warning (OakBarn Brewery, 2026-11-19)');
 assert.ok(!freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('10'), 'D10 not offered on an Ethernet Mega');
 assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], usbMega).includes('10'));
 assert.match(ethernetPinError(ethMega[0], [on10]), /Move MB_10_PWM_Fan .*Rule 6\.10/, 'USB to Ethernet refused while D10 is used');
@@ -279,4 +279,20 @@ console.log('naming tests passed');
   assert.equal(lockedIdError(before, [{ name: 'Brew House', id: 'BR', _key: 'k9' }], 'Tab'), '', 'a new Tab (new key) with an old name is a new item');
   assert.equal(lockedIdError(before, [{ name: 'Mash', id: 'MA', _key: 'k3' }], 'Tab'), '', 'a new Tab picks its own');
   assert.match(lockedIdError([{ name: 'Mega', id: 'MB' }], [{ name: 'Mega', id: 'MX' }], 'Interface'), /Interface ID MB of Mega/, 'no keys: found by name');
+}
+
+// Rule 6.10 (OakBarn Brewery, 2026-11-19): D10 on a USB Mega keeps its place in another color, with one warning about Ethernet
+{
+  const { freePins: fp, busCheck: bc } = await import('../public/naming.js');
+  const usb = [{ name: 'M', board: 'mega', connection: 'serial' }];
+  const pw = fp({ type: 'pwmOut', device: 'M', name: '\0new' }, [], usb);
+  assert.ok(pw.indexOf('10') === pw.indexOf('9') + 1, 'D10 keeps its place in number order ("It can be in order")');
+  const { pinKept: pk } = await import('../public/naming.js');
+  assert.ok(pk('10', usb[0]) && !pk('10', { name: 'M', board: 'mega', connection: 'ethernet' }) && !pk('9', usb[0]) && !pk('10', { name: 'U', board: 'uno', connection: 'serial' }), 'only D10, only a Mega not on Ethernet');
+  assert.match(bc({ type: 'digitalOut', device: 'M', channel: '10', name: 'a' }, [], usb)?.warn ?? '', /can't be changed to Ethernet/, 'one warning, not a refusal');
+  assert.match(bc({ type: 'digitalOut', device: 'M', channel: '10', name: 'a' }, [], [{ name: 'M', board: 'mega', connection: 'ethernet' }])?.error ?? '', /Rule 6.10/, 'an Ethernet Mega still refuses D10');
+  const { isPwmPin } = await import('../public/naming.js');
+  assert.ok(isPwmPin('5', 'mega') && isPwmPin('44', 'mega') && !isPwmPin('22', 'mega'), 'the Mega\'s PWM pins get their color');
+  assert.ok(!isPwmPin('17', 'pi') && !isPwmPin('13', 'esp32'), 'every pin does PWM on a Pi or ESP32: none colored');
+  console.log('D10 on a USB Mega tests passed');
 }

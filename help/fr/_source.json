@@ -20,7 +20,6 @@
  "18-updating": "d5f1fbb2d19177f6",
  "19-installing": "7c8f30ad91b00c6b",
  "20-simulation": "39d826c977dd53a5",
- "206-skynet-boards": "7ba564f4d940de37",
  "21-alarms-and-sound": "6597f2a00a6445f1",
  "22-process-language": "dc5f188d846e42b1",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
@@ -45,7 +44,7 @@
  "43-right-click-help": "77dfc5c0c5c6c84b",
  "44-schema-json": "9499d2ad4dc4f00f",
  "45-phones-and-tablets": "8e372d74e63573d5",
- "46-interface-tab-device-names": "0ddc30e25c357db4",
+ "46-interface-tab-device-names": "88a2127574c30972",
  "47-panel-version": "2d1980133b861ae1",
  "48-schema-switching-and-cloning": "4aeeab3cc265e3ee",
  "49-text-boxes": "ef29d26161777d94",
@@ -68,7 +67,7 @@
  "66-add-a-vessel": "baf111d434304e29",
  "67-every-screen-in-the-menu": "8ea2c3d14ab164b0",
  "68-double-click-in-lists": "642e3760a00b99f7",
- "69-connection-ratings": "2b39cc66cb770498",
+ "69-connection-ratings": "e4440e4836e825f8",
  "71-cloned-devices": "6efc1e830e70da4a",
  "72-labels": "1a85d2fe140762ec",
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
@@ -199,5 +198,6 @@
  "202-new-schema-interview": "f11d0e9ae07d96ad",
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
  "204-set-up-a-pi-brain": "d629e4e76a8ac8b3",
- "205-report-a-problem": "7a9a77fde4452b11"
+ "205-report-a-problem": "7a9a77fde4452b11",
+ "206-skynet-boards": "7ba564f4d940de37"
 }

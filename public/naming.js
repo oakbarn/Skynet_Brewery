@@ -360,6 +360,14 @@ export const ETHERNET_PIN = '10';
 export const SD_PIN = '4';
 export const SD_WARNING = 'Pin D4 is the SD card pin of the Ethernet shield. SD Card Not Supported. Never insert an SD Card! (Skynet Rule 6.11)';
 // Every board on an Ethernet shield or module uses D10 for it (2026-11-19, Rule 6.35: Rule 6.10 on every such board, not only the Mega)
+// OakBarn Brewery, 2026-11-19: "On a Mega, we want to reserve pin 10 on USB Connection until it is the last one available and if picked
+// Give warning about Ethernet no longer Available as an Option because of PIN 10 being used. The reservation is not a fixed thing but a
+// warning to the User"; then "It can be in order but can it be a Different color on the DDLB?" (Rule 6.10): a Mega not on Ethernet keeps D10
+// in its place in the Port list, in another color with "kept for Ethernet" beside it, and picking it gives one warning.
+export const ETHERNET_PIN_WARNING = 'Pin D10 is the pin an Ethernet shield needs. While a Device uses D10, this Mega can\'t be changed to Ethernet (Skynet Rule 6.10). Pick another pin to keep Ethernet as a choice.';
+export const pinKept = (p, d) => String(p) === ETHERNET_PIN && usbMega(d);
+export const KEPT_FOR_ETHERNET = 'kept for Ethernet';
+const usbMega = d => !!d && boardOf(d) === 'mega' && linkOf(d) !== 'ethernet';
 const ethernetMega = d => !!d && !!BOARD_INFO[boardOf(d)]?.shield && linkOf(d) === 'ethernet';
 // A plain message when Interface d is (or is being changed to) an Ethernet Mega and a Device on it uses pin 10, or null
 export function ethernetPinError(d, elements) {
@@ -402,6 +410,7 @@ export function busCheck(el, elements, devices) {
   const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)), P);
   // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning
   if (mine.includes(SD_PIN) && iface && boardOf((devices ?? []).find(d => d.name === iface)) === 'mega') return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  if (mine.includes(ETHERNET_PIN) && usbMega((devices ?? []).find(d => d.name === iface))) return { warn: ETHERNET_PIN_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   return adv;
 }
 // Fritz, 2026-10-23: PWM and counter (interrupt) pins are few. A Device that doesn't need what its pin is kept for gets a heads-up
@@ -431,6 +440,9 @@ Object.assign(PROFILES.mega, { pins: MEGA_PINS, pwm: PWM_PINS, counter: COUNTER_
 // a list of Ports a board keeps for something (PWM, counters) only when not every Port that can drive an output is in it (on a Pi, an ESP32
 // or a Due every pin counts pulses, so none is kept for that)
 const keepsFew = (P, list) => !(P.pwmAll && list === P.pwm) && !P.pins.filter(p => !P.inputOnly.includes(p)).every(p => list.includes(p));
+// a true PWM pin of a board that has few of them (shown in its own color in the Port lists; OakBarn Brewery, 2026-11-19: "Different color
+// for PWM Pins"). On a Pi or an ESP32 every pin does PWM, so none is colored.
+export const isPwmPin = (p, board) => { const P = pinProfile(board); return keepsFew(P, P.pwm) && P.pwm.includes(String(p)); };
 export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
 // can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
@@ -502,7 +514,7 @@ export function freePins(el, elements, devices, analog) {
   const special = (list, p) => keepsFew(P, list) && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
   const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
   const free = pool.filter(p => !(OUTPUT_TYPES.includes(el.type) && P.inputOnly.includes(p))).filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
-    .map((p, i) => [p, extras(p) + (P.avoid.includes(p) ? 5 : 0), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+    .map((p, i) => [p, extras(p) + (P.avoid.includes(p) ? 5 : 0) , i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
   // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,
   // select NON PWM Ports." A Device that needs no true PWM is offered only the pins that can't do it (Rule 4.2); only when none of
   // those is free are the PWM pins offered. (On a Pi every pin does PWM, so nothing is held back.)
