@@ -1476,8 +1476,9 @@ Process string, a `print` line, a pop-up), changes how it looks. The one list is
 3.20 **`skn_` starts every Skynet name** (OakBarn Brewery, 2026-11-19: "yes the skn_ as any Skynet thing"; "KISS make them the
 same"). A name Skynet owns, that a Process can read, starts **`skn_`**, lower case like the other starts (`gG`, `wgt_`):
 Skynet internal Globals (`skn_Boil_Temp`, Rule 1.18), probe roles (`skn_Boil_Probe_1`, Rule 1.18, not built yet) and Skynet
-Constants (`skn_const_L_p_Gal`, Rule 1.17). A new kind of Skynet name gets `skn_` plus a word for its kind. Recipe values still
-start `rcp_` (Rule 16.4): moving them to `skn_` is a separate change, after the Recipe PRs now open.
+Constants (`skn_const_L_p_Gal`, Rule 1.17). A group of Skynet names gets **`skn_<group>_`** (OakBarn Brewery, 2026-11-19:
+"they could be skn_rcp_ so I will know what you are taking about"): `skn_const_` for Skynet Constants, `skn_rcp_` for Recipe values.
+Recipe values become `skn_rcp_Strike_Temp` ... (was `rcp_`, Rule 16.4) in their own PR, after the Recipe PR now open (536).
 
 ## 4. Making things: the Build Tab
 
