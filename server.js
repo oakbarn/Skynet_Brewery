@@ -67,6 +67,7 @@ import { Messaging, CARRIERS } from './lib/messaging.js';
 import { watchAlarmEmails } from './lib/alarmemail.js';
 import { cleanTalkLine } from './public/boardtalk.js';      // Board Talk (Rule 6.27)
 import { watchAlarmOutputs } from './lib/alarmoutputs.js';      // Alarm Digital Outputs (Rule 7.19)
+import { watchDinPresses, followPressRename } from './lib/dinpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BrainPower } from './lib/brainpower.js';      // sleep, Windows Update restarts and restarts (Rule 6.31)
 import { FlameWatch } from './lib/flamewatch.js';      // gas burner Flame Out safety (Rule 6.33)
 import { checkIds, lockedIdError, rtdPinError, ethernetPinError, tidyLabel } from './public/naming.js';
@@ -324,6 +325,8 @@ watchAlarmEmails(store, {
 });
 // Alarm Digital Outputs (Rule 7.19): up to 2 Devices go ON and OFF with their Alarm
 watchAlarmOutputs(store, { log: text => { console.log(text); broadcast('print', { script: 'Alarm', text, ts: Date.now() }); } });
+// On Press (OakBarn Brewery, 2026-11-19, Rule 6.38): a DIN push button runs a Process, Advances (Override) or cancels all alarms
+watchDinPresses(store, engine, { log: text => { console.log(text); broadcast('print', { script: 'DIN button', text, ts: Date.now() }); } });
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
@@ -1284,7 +1287,7 @@ async function route(req, res) {
       engine.rename(from, now);
       const auto = store.config.autostart ?? [];
       if (auto.includes(from)) { store.config.autostart = auto.map(n => n === from ? now : n); store.writeConfig(); }
-      if (followProcessRename(store.config.elements, from, now) + followProcessRename(store.config.graphics, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Process Widgets follow (Rule 1.31)
+      if (followProcessRename(store.config.elements, from, now) + followProcessRename(store.config.graphics, from, now) + followPressRename(store.config.elements, from, now)) { store.writeConfig(); broadcast('config', {}); }     // its Process Widgets follow (Rule 1.31)
       return ok(res, { ok: true, processes: renameInProcesses(engine, new Map([[from, now]])) });
     }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }

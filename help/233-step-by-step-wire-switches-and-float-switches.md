@@ -27,6 +27,8 @@ Fit it so it closes at the level you want to know (most can be flipped over to c
 
 Add it as in [Step by Step: Add a Device](207-step-by-step-add-a-device): pick **Inputs (switches, buttons)** > the row that fits: **Switch (on while closed)**, **Push button ...**, **Toggle button ...** or **Latching input ...**; a float is **Float / level switch**, on Port **D32**.
 
+A **DIN push button** can also do one thing when pressed (run a Process, Advance, or cancel all alarms): see [DIN Button: On Press](235-din-button-on-press).
+
 ## Step 4. Check it
 
 Close the switch: Skynet shows ON. Open it: OFF. Backwards? Set **Invert** On in its Properties.

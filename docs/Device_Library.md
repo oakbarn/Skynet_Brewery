@@ -330,6 +330,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
   - Interface, Pin
   - Input type: Switch / push button (ON while closed or held), Toggle, Pulse (one short ON per press), Latch (ON until reset), Counter (counts presses)
   - Pulse ON time (ms, default 100); Pulse lockout before the next press counts (ms, default 3000)
+  - On Press (Rule 6.38): None (default), Run a Process, Advance (Override; only when a Process it is set to waits) or Cancel all alarms; Process (Run: the one it starts; Advance: Any or one)
   - Invert / active low (normally-closed contact)
   - Use the board's pull-up (switch wired to GND): on by default
   - Debounce on the board (ms, default 20)

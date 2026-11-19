@@ -3345,6 +3345,23 @@ Related. You could have two different One Wire circuits on the same Board").
   Interface), named the same way.
 Help 234 (and French).
 
+6.38 **On Press: a DIN push button does one thing** (OakBarn Brewery, 2026-11-19, Panel Updates entry 31: "A Physical DIN push button
+that triggers a Process similar to a Process Widget without writing code ... This would only do One Thing. So not like Override but acts
+like one. I had a Blue LED Push Button Din that Advanced like an Override button can ... If not, push ignored. I had a Red one That
+canceled all alarms. I had a yellow one that did a 20 second firehose."). Every Digital Input Device has an **On Press** row, **None** to
+start (it does nothing more than before). The other three:
+- **Run a Process**: starts the Process picked in its **Process** row and lets it run to its end in the background, as a Process
+  Widget's Start does (Rule 1.31). A press while it runs is ignored; a press never stops it.
+- **Advance (Override)**: an Override button on the wall (Rule 2.26), set to **Any** or one Process. It works only when a Process it is
+  set to is held in a wait or sleep; otherwise the press is ignored. A button set to Advance counts as an Override button for that
+  Process, so no Override pop-up comes up for it by itself.
+- **Cancel all alarms**: every Alarm sounding now is turned Off, as a tap on it does (an Alarm Chain goes on to its next waiting step,
+  Rule 7.16).
+- A press is the input counting up (from the board or the simulator's Simulate: press), so its lockout (Rule 6.7), debounce and on delay
+  count first. What each press did is written in the Console. A Process rename is followed (Rule 1.31's way).
+- **Both programs:** a BruControl DIN comes in with On Press None (BruControl has no such setting); nothing else changes.
+Help 235 (and French).
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -6104,6 +6121,7 @@ import.
 - 2026-11-19: Rule 18.43 extended (OakBarn Brewery, Panel Updates 6: "Can a User Provide a single Image and Skynet create other needed"; "90 degrees to make horizontal vertical"; "Go with A KISS"): a User Defined Motorized Ball Valve's one picture (drawn Horizontal) gives four looks: Horizontal, Horizontal Flipped, Vertical Left (turned 90 degrees) and Vertical Right (turned and mirrored); the Valve Profile offers the same; plain Vertical only where already set. Help 128 (and French) adds a what-picture-works-best guide. Checked against both programs: the BruControl Import's Build page shares the dialog; the Importer's valve list is unchanged. (thread "Build a User Defined ball valve from one picture")
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
+- 2026-11-19: Added Rule 6.38 (OakBarn Brewery, Panel Updates entry 31: a physical DIN push button that does one thing without writing code; "I had a Red one That canceled all alarms. I had a yellow one that did a 20 second firehose."): a Digital Input Device's On Press is None, Run a Process, Advance (Override, only when a Process it is set to waits; otherwise ignored) or Cancel all alarms. Help 235 (and French); Help 233 links to it. Checked against both programs: the BruControl Import is unchanged (its DINs come in with None). (thread "Make physical DIN buttons run Processes")
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Added Rule 4.8 and changed Rules 4.4 and 5.21 (OakBarn Brewery, Panel Updates Sandbox entry 18, Panel Updates order
   item 8): New tab > Copy of a whole Tab; Devices become Clones, pipes and hoses get new background names, the Widgets interview

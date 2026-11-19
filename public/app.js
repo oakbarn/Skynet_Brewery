@@ -39,6 +39,7 @@ import { ICECAN_SIZE, ICECAN_FLOW, iceCanPic } from './icecan.js';      // the I
 import { reportDialog } from './report.js';      // 🐞 Report a problem (Rule 2.61)
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
+import { ON_PRESS, ON_PRESS_TIPS, pressProcessOf, pressNeedsProcess } from './onpress.js';      // a DIN button's On Press (Rule 6.38)
 import { BOARDS, connChoices, connOf, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, keepDeviceFixed, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
@@ -8476,9 +8477,10 @@ const F = {
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap Water flows (a tap water valve only; the choices follow the way it sits)', 'sel', tapOutChoices(it)], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (swaps On and Off)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Device controlled first (None = it only shows its own .state)
   switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
-  digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
+  digitalIn: it => [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
     ['pulse', 'Pulse: ON time per press (ms)', 'num', null, false, false, { def: 100 }], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds)', 'num', null, false, false, { def: 3000 }],
+    ...onPressFields(it),      // On Press (Rule 6.38): a DIN button runs a Process, Advances or cancels all alarms
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms)', 'num', null, false, false, { def: 20 }], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'],
@@ -9581,6 +9583,12 @@ const OVR_TIPS = {
 function ovrProcessField(it, tip) {
   const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
   return ['process', '4. Process', 'sel', [['', 'Any (every running Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip }];
+}
+// On Press (OakBarn Brewery, 2026-11-19, Rule 6.38, Help 235): what one press of a DIN button does; its Process row only when it needs one
+function onPressFields(it) {
+  const names = (S.scripts || []).map(x => x.name), cur = pressProcessOf(it), adv = it?.onPress === 'advance';
+  return [['onPress', 'On Press', 'sel', ON_PRESS, true, false, { tip: ON_PRESS_TIPS.onPress }],
+    ...(pressNeedsProcess(it) ? [['pressProcess', 'Process', 'sel', [['', adv ? 'Any (every running Process)' : '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: ON_PRESS_TIPS.process }]] : [])];
 }
 function overrideFields(it) {
   const T = OVR_TIPS;

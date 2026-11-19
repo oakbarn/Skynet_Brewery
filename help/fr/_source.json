@@ -227,6 +227,7 @@
  "230-step-by-step-wire-a-ph-probe": "17fb241c652ae96e",
  "231-step-by-step-wire-an-e-stop": "8de6b5ae8596ae19",
  "232-step-by-step-wire-a-fan-buzzer-or-led": "9956afcaffc81e39",
- "233-step-by-step-wire-switches-and-float-switches": "f660a813a9a85129",
- "234-1-wire-probes": "6099b8f79b1e2ab1"
+ "233-step-by-step-wire-switches-and-float-switches": "c5dd8659297efe35",
+ "234-1-wire-probes": "6099b8f79b1e2ab1",
+ "235-din-button-on-press": "a8b5b5a37b0960b9"
 }
