@@ -10,6 +10,9 @@
 //   analog  its analog Ports, A0 first        a0      the pin number of A0 shown beside it (BruControl's numbers on a Mega), or none
 //   usb     Ports the USB link uses           inputOnly Ports that can only read (no outputs)
 //   avoid   Ports offered last (start-up pins) strict  a Port not in its lists is refused (ESP boards: some pins are the chip's flash)
+//   avoidWhy why an avoid Port is last ('start-up pin' when not given)   pinWarn  one warning when a Device is put on that Port
+//   weakOut Ports offered last for outputs (little current)              truePwm  the hardware PWM Ports of a board that makes PWM on every Port
+//   aOn     an analog Port that is also a digital Port ({ A6: '4' }: A6 is pin D4)   wifiAdc2 analog Ports that can't read while WiFi is on
 //   pwmAll  PWM is plentiful: no Port is kept for it
 //   family  'arduino' (Mega-like links), 'wifi' (WiFi built in, ESP32-like links), 'pi'
 //   eth     its Ethernet choice's words      noEthernet  no Ethernet choice      wifi  the words of its WiFi choice, when only some have WiFi
@@ -18,8 +21,12 @@
 // Pin numbers are the Arduino ones printed on the board. Where a board's own maker lists PWM or interrupt pins, those are used.
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => String(a + i));
 const D = p => `D${p}`;
+// Leonardo and Micro: A6-A11 are also D4, D6, D8, D9, D10, D12 (Arduino's A000057 and A000053 pinouts; OakBarn Brewery, 2026-11-19: yes)
+const LEO_A = { A6: '4', A7: '6', A8: '8', A9: '9', A10: '10', A11: '12' };
 const UNO_SHAPE = { pins: range(2, 13), pwm: ['3', '5', '6', '9', '10', '11'], counter: ['2', '3'], spi: ['11', '12', '13'], onewire: '8', i2c: [], usb: ['0', '1'], label: D };
 
+// ESP32 GPIO16 and GPIO17 (Espressif's DevKitC page: "may be unavailable on WROVER-module variants"; OakBarn Brewery, 2026-11-19: "give warning")
+const WROVER = 'GPIO16 and GPIO17 are not free on an ESP32 board with a WROVER module (its extra memory uses them). Use them only on a WROOM board.';
 export const BOARD_INFO = {
   mega: { name: 'Arduino Mega 2560', volts: 5, family: 'arduino', shield: true, pins: range(2, 53), pwm: [...range(2, 13), '44', '45', '46'],
     counter: ['2', '3', '18', '19', '20', '21'], spi: ['50', '51', '52'], onewire: '40', i2c: [], analog: 16, a0: 54, usb: ['0', '1'], label: D },
@@ -28,26 +35,28 @@ export const BOARD_INFO = {
   nano: { name: 'Arduino Nano', volts: 5, family: 'arduino', shield: true, eth: 'Ethernet (W5500 module, CS on D10)', ...UNO_SHAPE, analog: 8, a0: 14 },
   nanoEvery: { name: 'Arduino Nano Every', volts: 5, family: 'arduino', shield: true, eth: 'Ethernet (W5500 module, CS on D10)', ...UNO_SHAPE, pins: range(0, 13), pwm: ['3', '5', '6', '9', '10'], counter: range(0, 13), usb: [], analog: 8, a0: 14 },
   leonardo: { name: 'Arduino Leonardo', volts: 5, family: 'arduino', shield: true, pins: range(0, 13), pwm: ['3', '5', '6', '9', '10', '11', '13'], counter: ['0', '1', '2', '3', '7'],
-    spi: [], onewire: '8', i2c: ['2', '3'], analog: 6, a0: 18, usb: [], label: D },
+    spi: [], onewire: '8', i2c: ['2', '3'], analog: 12, a0: 18, aOn: LEO_A, usb: [], label: D },
   micro: { name: 'Arduino Micro', volts: 5, family: 'arduino', shield: true, eth: 'Ethernet (W5500 module, CS on D10)', pins: range(0, 13), pwm: ['3', '5', '6', '9', '10', '11', '13'], counter: ['0', '1', '2', '3', '7'],
-    spi: [], onewire: '8', i2c: ['2', '3'], analog: 6, a0: 18, usb: [], label: D },
+    spi: [], onewire: '8', i2c: ['2', '3'], analog: 12, a0: 18, aOn: LEO_A, usb: [], label: D },
   due: { name: 'Arduino Due', volts: 3.3, family: 'arduino', shield: true, pins: range(2, 53), pwm: range(2, 13), counter: range(2, 53), spi: [], onewire: '40', i2c: ['20', '21'], analog: 12, a0: 54, usb: ['0', '1'], label: D },
   giga: { name: 'Arduino GIGA R1 WiFi', volts: 3.3, family: 'wifi', shield: true, pins: range(0, 53), pwm: range(2, 13), counter: range(0, 53), spi: [], onewire: '40', i2c: ['20', '21'], analog: 12, usb: [], label: D },
-  nanoEsp32: { name: 'Arduino Nano ESP32', volts: 3.3, family: 'wifi', noEthernet: true, pins: range(0, 13), pwm: range(0, 13), counter: range(0, 13), spi: ['11', '12', '13'], onewire: '8', i2c: [], analog: 8, usb: [], label: D },
+  nanoEsp32: { name: 'Arduino Nano ESP32', volts: 3.3, family: 'wifi', noEthernet: true, weakOut: ['1'], wifiAdc2: ['A4', 'A5', 'A6', 'A7'], pins: range(0, 13), pwm: range(0, 13), counter: range(0, 13), spi: ['11', '12', '13'], onewire: '8', i2c: [], analog: 8, usb: [], label: D },
   grandCentral: { name: 'Adafruit Grand Central M4', volts: 3.3, family: 'arduino', shield: true, pins: range(0, 53),
-    pwm: [...range(2, 9), '11', ...range(13, 19), ...range(22, 45), '48', ...range(50, 53)], counter: ['2', '3', '18', '19'], spi: ['50', '51', '52'], onewire: '40', i2c: ['20', '21'],
+    pwm: [...range(2, 9), '11', ...range(13, 45), '48', ...range(50, 53)],
+    counter: ['0', '1', '2', '3', '6', '7', '14', '15', '16', '17', '18', '19', '23', '28', '32', '33'],      // one per interrupt (INT 0-15), so every flow meter has its own spi: ['50', '51', '52'], onewire: '40', i2c: ['20', '21'],
     analog: 16, a0n: i => (i < 8 ? 67 + i : 46 + i), usb: [], label: D },      // BruControl's numbers: A0-A7 = 67-74, A8-A15 = 54-61
   featherM0: { name: 'Adafruit Feather M0 (WiFi)', volts: 3.3, family: 'wifi', pins: ['0', '1', '5', '6', '9', '10', '11', '12', '13'], pwm: ['5', '6', '9', '10', '11', '12', '13'],
     counter: ['0', '1', '5', '6', '9', '10', '11', '12', '13'], spi: [], onewire: '12', i2c: [], analog: 6, usb: [], label: D, wifi: 'WiFi (Feather M0 WiFi only)', noEthernet: true },
   esp32: { name: 'ESP32', volts: 3.3, family: 'wifi', strict: true, pins: ['2', '4', '5', ...range(12, 19), '21', '22', '23', '25', '26', '27', '32', '33', '34', '35', '36', '39'],
     pwm: ['2', '4', '5', ...range(12, 19), '21', '22', '23', '25', '26', '27', '32', '33'], counter: ['2', '4', '5', ...range(12, 19), '21', '22', '23', '25', '26', '27', '32', '33', '34', '35', '36', '39'],
     spi: ['18', '19', '23'], onewire: '4', i2c: ['21', '22'], analog: ['A0', 'A3', 'A4', 'A5', 'A6', 'A7'], aGpio: { A0: 36, A3: 39, A4: 32, A5: 33, A6: 34, A7: 35 },
-    inputOnly: ['34', '35', '36', '39'], avoid: ['2', '5', '12', '15'], usb: ['1', '3'], label: p => `GPIO${p}` },
+    inputOnly: ['34', '35', '36', '39'], avoid: ['2', '5', '12', '15', '16', '17'], usb: ['1', '3'],
+    avoidWhy: { 16: 'not on WROVER boards', 17: 'not on WROVER boards' }, pinWarn: { 16: WROVER, 17: WROVER }, label: p => `GPIO${p}` },
   esp8266: { name: 'ESP8266 (NodeMCU, Wemos D1)', volts: 3.3, family: 'wifi', strict: true, noEthernet: true, pins: ['16', '5', '4', '0', '2', '14', '12', '13', '15'],
     pwm: ['5', '4', '0', '2', '14', '12', '13', '15'], counter: ['5', '4', '0', '2', '14', '12', '13', '15'], spi: ['12', '13', '14'], onewire: '2', i2c: ['4', '5'], analog: 1,
     pwmAll: true, avoid: ['0', '2', '15'], usb: ['1', '3'],      // pwmAll: its PWM is made by the program on every pin but GPIO16, so no pin is kept for it
     label: p => `GPIO${p}` + ({ 16: ' (D0)', 5: ' (D1)', 4: ' (D2)', 0: ' (D3)', 2: ' (D4)', 14: ' (D5)', 12: ' (D6)', 13: ' (D7)', 15: ' (D8)' }[p] || '') },
-  pi: { name: 'Raspberry Pi', volts: 3.3, family: 'pi', pins: range(2, 27), pwm: range(2, 27), counter: range(2, 27), spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, usb: [], label: p => `GPIO${p}` },
+  pi: { name: 'Raspberry Pi', volts: 3.3, family: 'pi', pins: range(2, 27), pwm: range(2, 27), truePwm: ['12', '13', '18', '19'], counter: range(2, 27), spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, usb: [], label: p => `GPIO${p}` },
 };
 // The Board list, in this order: the Mega first (the board most brewers have), the other Arduino boards, then the ESP and Pi boards
 export const BOARD_ORDER = ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'esp32', 'esp8266', 'pi'];
@@ -58,6 +67,7 @@ export function analogLabel(p, b) {
   const n = +String(p).slice(1);
   if (b?.aGpio?.[p] !== undefined) return `${p} = GPIO${b.aGpio[p]}`;
   if (b?.a0n) return `${p} = pin ${b.a0n(n)}`;
+  if (b?.aOn?.[p]) return `${p} = pin ${b.a0 + n}, on D${b.aOn[p]}`;
   return b?.a0 !== undefined ? `${p} = pin ${b.a0 + n}` : p;
 }
 // BruControl's board type names (its Interface "Type") to a Skynet board, for the BruControl Import ('' = not known: the Interface

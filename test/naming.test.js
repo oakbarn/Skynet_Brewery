@@ -294,3 +294,31 @@ console.log('naming tests passed');
   assert.ok(!isPwmPin('17', 'pi') && !isPwmPin('13', 'esp32'), 'every pin does PWM on a Pi or ESP32: none colored');
   console.log('D10 on a USB Mega tests passed');
 }
+// Rules 6.35 and 6.11 (OakBarn Brewery, 2026-11-19, answers 1-9 after checking every maker's pinout)
+{
+  const n = await import('../public/naming.js'), { BOARD_INFO } = await import('../public/boards.js');
+  const D = [{ name: 'L', board: 'leonardo', connection: 'serial' }, { name: 'N', board: 'nanoEsp32', connection: 'esp32' }, { name: 'NU', board: 'nanoEsp32', connection: 'serial' },
+    { name: 'E', board: 'esp32', connection: 'serial' }, { name: 'U', board: 'uno', connection: 'serial' }, { name: 'NA', board: 'nano', connection: 'serial' }];
+  // 1 Leonardo / Micro A6-A11 = D4, D6, D8, D9, D10, D12: one pin, two names
+  assert.deepEqual(n.freePins({ type: 'analogIn', device: 'L', name: '\0new' }, [], D, true).slice(-6), ['A6', 'A7', 'A8', 'A9', 'A10', 'A11']);
+  assert.match(n.pinLabel('A6', 'leonardo'), /A6 = pin 24, on D4/);
+  const onD4 = [{ name: 'x', type: 'digitalOut', device: 'L', channel: '4' }];
+  assert.ok(!n.freePins({ type: 'analogIn', device: 'L', name: '\0new' }, onD4, D, true).includes('A6'), 'A6 is D4: not offered while D4 is used');
+  assert.ok(!n.freePins({ type: 'digitalOut', device: 'L', name: '\0new' }, [{ name: 'a', type: 'analogIn', device: 'L', channel: 'A7' }], D).includes('6'), 'and the other way round');
+  // 2, 3 Nano ESP32: D1 last for outputs; A4-A7 one warning on WiFi only
+  assert.equal(n.freePins({ type: 'digitalOut', device: 'N', name: '\0new' }, [], D).at(-1), '1');
+  assert.match(n.busCheck({ type: 'analogIn', device: 'N', channel: 'A5', name: 'a' }, [], D)?.warn ?? '', /can't read while its WiFi is on/);
+  assert.equal(n.busCheck({ type: 'analogIn', device: 'NU', channel: 'A5', name: 'a' }, [], D)?.warn, undefined, 'no warning on USB');
+  // 4, 5 Grand Central: 16 counter Ports, PWM on D20 and D21
+  assert.equal(BOARD_INFO.grandCentral.counter.length, 16);
+  assert.ok(BOARD_INFO.grandCentral.pwm.includes('20') && BOARD_INFO.grandCentral.pwm.includes('21'));
+  // 6 ESP32 GPIO16/17: last, one warning
+  assert.match(n.busCheck({ type: 'digitalOut', device: 'E', channel: '17', name: 'a' }, [], D)?.warn ?? '', /WROVER/);
+  assert.match(n.pinLabel('16', 'esp32'), /not on WROVER boards, use last/);
+  // 7 Pi hardware PWM pins colored
+  assert.ok(n.isPwmPin('18', 'pi') && n.isPwmPin('12', 'pi') && !n.isPwmPin('17', 'pi'));
+  // 8 D4 SD card warning on every board that takes a shield (not a W5500 module board)
+  assert.match(n.busCheck({ type: 'digitalOut', device: 'U', channel: '4', name: 'a' }, [], D)?.warn ?? '', /SD Card Not Supported/);
+  assert.equal(n.busCheck({ type: 'digitalOut', device: 'NA', channel: '4', name: 'a' }, [], D)?.warn, undefined);
+  console.log('Board pinout answers tests passed');
+}

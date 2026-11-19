@@ -32,7 +32,7 @@ Les broches sont des **numéros GPIO** (aussi appelés numéros BCM), **GPIO 2 �
 | 7, 8, 9, 10, 11 | SPI, pour les cartes RTD (MAX31865) et thermocouple. La sélection de puce (CS) de chaque carte va sur n'importe quelle autre GPIO libre. |
 | 2, 3 | I2C, pour une carte analogique ADS1115 |
 
-Toute autre GPIO peut être une sortie, une sortie PWM, une entrée ou un débitmètre : un Pi n'a pas de broches spéciales PWM ou compteur.
+Toute autre GPIO peut être une sortie, une sortie PWM, une entrée ou un débitmètre : un Pi n'a pas de broches spéciales compteur, et il fait du PWM sur toutes les broches. GPIO 12, 13, 18 et 19 ont aussi le PWM matériel du Pi : elles portent **Best for True PWM: see Help** en bleu dans la liste des broches.
 
 ## Ce qu'un Pi ne peut pas faire {#what-a-pi-can-t-do}
 

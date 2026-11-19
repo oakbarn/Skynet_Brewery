@@ -32,7 +32,7 @@ Pins are **GPIO numbers** (also called BCM numbers), **GPIO 2 to GPIO 27**, not 
 | 7, 8, 9, 10, 11 | SPI, for RTD (MAX31865) and thermocouple boards. Each board's chip-select (CS) goes on any other free GPIO. |
 | 2, 3 | I2C, for an ADS1115 analog board |
 
-Any other GPIO can be an output, a PWM output, an input or a flow meter: a Pi has no special PWM or counter pins.
+Any other GPIO can be an output, a PWM output, an input or a flow meter: a Pi has no special counter pins, and it makes PWM on every pin. GPIO 12, 13, 18 and 19 also have the Pi's hardware PWM, so they read **Best for True PWM: see Help** in blue in the pin list.
 
 ## What a Pi can't do
 

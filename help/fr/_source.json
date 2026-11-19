@@ -67,7 +67,7 @@
  "66-add-a-vessel": "baf111d434304e29",
  "67-every-screen-in-the-menu": "8ea2c3d14ab164b0",
  "68-double-click-in-lists": "642e3760a00b99f7",
- "69-connection-ratings": "c36e1b935b3e04ee",
+ "69-connection-ratings": "1dd016158a702e8d",
  "71-cloned-devices": "6efc1e830e70da4a",
  "72-labels": "1a85d2fe140762ec",
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
@@ -75,7 +75,7 @@
  "75-build-tab-add-button": "92478527e0a0781b",
  "76-interfaces": "5b854b3eb55b5b1e",
  "77-simulator-or-real-boards": "db6004fe0aaf6363",
- "78-raspberry-pi-gpio-pins": "8d331c749ffdbb6c",
+ "78-raspberry-pi-gpio-pins": "4f5487803743cd91",
  "79-predictive-text": "8e7640adc70723bc",
  "80-name-change-and-hidden-keys": "0596c77a87af3260",
  "82-edit-layout-bar": "da779b4eefea175c",
@@ -199,7 +199,7 @@
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
  "204-set-up-a-pi-brain": "d629e4e76a8ac8b3",
  "205-report-a-problem": "7a9a77fde4452b11",
- "206-skynet-boards": "88bddd0563ceded6",
+ "206-skynet-boards": "639e5a334d9ffc54",
  "207-step-by-step-add-a-device": "e2a3363b80202aaa",
  "208-step-by-step-add-a-widget": "9c83b0e5ea17cd90"
 }

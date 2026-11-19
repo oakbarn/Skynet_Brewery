@@ -48,5 +48,5 @@ Le shield Ethernet d'un Arduino Mega utilise la **broche D10** (Règle Skynet 6.
 
 La broche **D4** est la broche de carte SD du shield Ethernet (Règle Skynet 6.11). **SD Card Not Supported. Never insert an SD Card!** (Carte SD non prise en charge. N'insérez jamais de carte SD !)
 
-- Vous pouvez quand même utiliser D4 pour un Device sur un Mega, mais le panel vous avertit d'abord. Appuyez sur **OK** pour l'utiliser quand même ou sur **Cancel** pour choisir une autre broche. Dans la liste des broches, D4 est marquée **SD card pin**.
+- Vous pouvez quand même utiliser D4 pour un Device sur un Mega (ou toute carte qui prend un shield Ethernet), mais le panel vous avertit d'abord. Appuyez sur **OK** pour l'utiliser quand même ou sur **Cancel** pour choisir une autre broche. Dans la liste des broches, D4 est marquée **SD card pin**.
 - Le sketch Ethernet (firmware 0.5) garde la fente SD éteinte et la vérifie toutes les 10 secondes. Si une carte est dans la fente, chaque panel ouvert affiche **"SD Card Not Supported. Remove the SD Card!"** (retirez la carte SD) et la ligne de la carte sur la page **Devices** l'affiche en rouge jusqu'à ce que la carte soit retirée.
