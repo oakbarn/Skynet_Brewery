@@ -12,7 +12,7 @@
  "10-login": "6d86e529fff854fd",
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "eb31d6badc777cf4",
- "13-glossary": "fa30cdd09ebb42a9",
+ "13-glossary": "f79e7a143575f8b9",
  "14-equipment": "6ceda9a20930af3c",
  "15-mqtt-and-voice": "a336dffb7b61bf6a",
  "16-stepper-motors": "7dadcdd2e692713f",
@@ -201,5 +201,11 @@
  "205-report-a-problem": "7a9a77fde4452b11",
  "206-skynet-boards": "639e5a334d9ffc54",
  "207-step-by-step-add-a-device": "e2a3363b80202aaa",
- "208-step-by-step-add-a-widget": "9c83b0e5ea17cd90"
+ "208-step-by-step-add-a-widget": "9c83b0e5ea17cd90",
+ "209-step-by-step-wire-a-dac": "c9e945986d0b4a74",
+ "210-step-by-step-wire-a-10k-ntc-probe": "d2052d267176eee3",
+ "211-step-by-step-wire-an-ssr": "d0312daac2a1154e",
+ "212-step-by-step-wire-1-wire-probes": "2b80b27952bcc5f7",
+ "213-step-by-step-wire-a-pt100-probe": "96d11f289533317a",
+ "214-step-by-step-wire-a-pt1000-probe": "b19f70143b4f9db3"
 }

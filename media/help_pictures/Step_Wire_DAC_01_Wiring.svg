@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="Segoe UI, Arial, sans-serif">
+  <!-- Skynet drawing (MIT, OakBarn Brewery 2026-11-19): DAC: PWM to 0-10 V Module. A general method only, not a wiring plan. -->
+<rect width="960" height="640" fill="#ffffff"/>
+<rect x="30" y="120" width="200" height="220" rx="10" fill="#00878f" stroke="#00565b" stroke-width="2.5"/>
+<text x="130.0" y="144" font-size="16" text-anchor="middle" fill="#fff" font-weight="bold">Arduino Mega 2560</text>
+<text x="130.0" y="164" font-size="13" text-anchor="middle" fill="#fff" font-weight="normal">the standard Skynet board</text>
+<rect x="137" y="188" width="93" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="183.5" y="205" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">D44 (PWM)</text>
+<circle cx="230" cy="200" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="184" y="232" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="207.0" y="249" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
+<circle cx="230" cy="244" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="380" y="100" width="220" height="300" rx="10" fill="#fffde7" stroke="#333" stroke-width="2.5"/>
+<text x="490.0" y="124" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">PWM to 0-10 V</text>
+<text x="490.0" y="144" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">Module (the DAC)</text>
+<rect x="380" y="168" width="66" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="413.0" y="185" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">PWM in</text>
+<circle cx="380" cy="180" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="380" y="212" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="403.0" y="229" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
+<circle cx="380" cy="224" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="380" y="308" width="84" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="422.0" y="325" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">VCC 24 V</text>
+<circle cx="380" cy="320" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="380" y="352" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="403.0" y="369" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
+<circle cx="380" cy="364" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="552" y="168" width="48" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="576.0" y="185" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">VOUT</text>
+<circle cx="600" cy="180" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="554" y="212" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="577.0" y="229" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">GND</text>
+<circle cx="600" cy="224" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="30" y="420" width="220" height="110" rx="10" fill="#eceff1" stroke="#333" stroke-width="2.5"/>
+<text x="140.0" y="444" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">24 V DC Power Supply</text>
+<text x="140.0" y="464" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">(12 or 24 V, as the module says)</text>
+<rect x="204" y="468" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="227.0" y="485" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">+V</text>
+<circle cx="250" cy="480" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="204" y="503" width="46" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="227.0" y="520" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">-V</text>
+<circle cx="250" cy="515" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="690" y="120" width="240" height="200" rx="10" fill="#ffebee" stroke="#333" stroke-width="2.5"/>
+<text x="810.0" y="144" font-size="16" text-anchor="middle" fill="#000" font-weight="bold">0-10 V Power Controller</text>
+<text x="810.0" y="164" font-size="13" text-anchor="middle" fill="#000" font-weight="normal">(SCR / SSVR, on a Heat Sink)</text>
+<rect x="690" y="188" width="84" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="732.0" y="205" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">0-10 V +</text>
+<circle cx="690" cy="200" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="690" y="232" width="84" height="24" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+<text x="732.0" y="249" font-size="13" text-anchor="middle" fill="#000" font-weight="bold">0-10 V -</text>
+<circle cx="690" cy="244" r="5" fill="#9e9e9e" stroke="#333" stroke-width="1.5"/>
+<rect x="690" y="380" width="240" height="150" rx="10" fill="#fff" stroke="#d01818" stroke-width="2.5" stroke-dasharray="8 6"/>
+<text x="810.0" y="404" font-size="16" text-anchor="middle" fill="#d01818" font-weight="bold">⚠ AC side</text>
+<text x="810.0" y="424" font-size="13" text-anchor="middle" fill="#d01818" font-weight="normal">GFCI power, element:</text>
+<text x="810" y="450" font-size="14" text-anchor="middle" fill="#d01818" font-weight="bold">Licensed Electrician</text>
+<text x="810" y="474" font-size="13" text-anchor="middle" fill="#d01818" font-weight="normal">only (not drawn here)</text>
+<path d="M230 200 L300 200 L300 180 L380 180" fill="none" stroke="#8d6e00" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M230 200 L300 200 L300 180 L380 180" fill="none" stroke="#f9a825" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M230 244 L340 244 L340 224 L380 224" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M250 480 L320 480 L320 320 L380 320" fill="none" stroke="#d32f2f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M250 515 L340 515 L340 364 L380 364" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M340 364 L340 244" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="340" cy="364" r="6" fill="#212121"/>
+<circle cx="340" cy="244" r="6" fill="#212121"/>
+<text x="165" y="590" font-size="14" text-anchor="start" fill="#333" font-weight="bold">All GND (-) wires join: Mega GND = module GND = supply -V</text>
+<path d="M600 180 L645 180 L645 200 L690 200" fill="none" stroke="#1565c0" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M600 224 L660 224 L660 244 L690 244" fill="none" stroke="#212121" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M810 320 L810 380" fill="none" stroke="#9e9e9e" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="10 6"/>
+<line x1="30" y1="562" x2="60" y2="562" stroke="#f9a825" stroke-width="5" stroke-linecap="round"/>
+<text x="68" y="567" font-size="13" text-anchor="start" fill="#333" font-weight="normal">PWM signal</text>
+<line x1="168.0" y1="562" x2="198.0" y2="562" stroke="#1565c0" stroke-width="5" stroke-linecap="round"/>
+<text x="206.0" y="567" font-size="13" text-anchor="start" fill="#333" font-weight="normal">0-10 V signal</text>
+<line x1="327.6" y1="562" x2="357.6" y2="562" stroke="#d32f2f" stroke-width="5" stroke-linecap="round"/>
+<text x="365.6" y="567" font-size="13" text-anchor="start" fill="#333" font-weight="normal">+24 V</text>
+<line x1="429.6" y1="562" x2="459.6" y2="562" stroke="#212121" stroke-width="5" stroke-linecap="round"/>
+<text x="467.6" y="567" font-size="13" text-anchor="start" fill="#333" font-weight="normal">GND (-)</text>
+<text x="480.0" y="32" font-size="22" text-anchor="middle" fill="#000" font-weight="bold">DAC: PWM to 0-10 V Module</text>
+<text x="480.0" y="54" font-size="14" text-anchor="middle" fill="#555" font-weight="normal">Mega True PWM Port D44  &gt;  PWM to 0-10 V Module  &gt;  0-10 V Power Controller</text>
+<rect x="0" y="600" width="960" height="40" fill="#fff3f3"/>
+<text x="480.0" y="626" font-size="13.5" text-anchor="middle" fill="#d01818" font-weight="bold">⚠ Electricity can kill. A general method only: it can't know your wiring. Check each part's own data sheet. Consult a Licensed Electrician.</text>
+</svg>

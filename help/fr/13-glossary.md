@@ -202,7 +202,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Step** (étape) : une ligne `step "name"` dans un Process. Les étapes se numérotent toutes seules (1.00000, 1.00001 ...). Voir [Le langage des Processes et les étapes](22-process-language).
 
-**Step by Step** (pas à pas) : des pages d'aide qui montrent chaque étape avec des images. Elles sont en tête de l'aide. Voir [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
+**Step by Step** (pas à pas) : des pages d'aide qui montrent chaque étape avec des images. Elles sont en tête de l'aide. Voir [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget). Les guides de câblage (un DAC, un SSR, les sondes 10K NTC, 1-Wire, PT100 et PT1000) sont aussi des guides pas à pas, chacun avec un dessin.
 
 **Suggested Name** (nom proposé) : le Name que Skynet remplit pour un nouvel élément à partir de ses parties. Vous pouvez le changer avant d'enregistrer.
 
@@ -299,6 +299,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** transforme le signal tout ou rien (numérique) de la carte en une tension continue et lisse, par exemple de 0 à 10 V, pour régler un chauffage, une vanne ou une pompe à n'importe quel %, et pas seulement On ou Off.
 - **Ce dont Skynet a besoin :** Skynet envoie un % depuis un **True PWM Port**, donc le DAC qu'il lui faut est un **module PWM vers 0-10 V** (entrée PWM 0-5 V d'une Mega, ou 3,3 V d'un ESP32 ou d'un Pi ; sortie 0-10 V ou 0-5 V, réglée par un cavalier ou une vis). Une carte DAC séparée qui parle en I2C (MCP4725, GP8403) n'est **pas** encore lue par le programme de la carte Skynet. La Règle 6.24 permet d'accorder le % aux vrais volts avec un multimètre.
+- **Comment le câbler :** [Pas à pas : câbler un DAC (0-10 V)](209-step-by-step-wire-a-dac)
 - **Pièces suggérées :** module convertisseur PWM vers 0-10 V (type LC-LM358-PWM2V, 0-5 V ou 0-10 V au choix) ; un convertisseur de signal PWM vers 0-10 V sur rail DIN
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "PWM to 0-10V module".
 
@@ -327,6 +328,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une sonde de température numérique. Plusieurs partagent un seul fil, chacune avec son propre numéro.
 - **Ce dont Skynet a besoin :** bout inox étanche, 3 fils (5 V, GND, données). Une résistance de 4,7 k ohms pour tout le groupe. Port OneWire : Mega D40, Pi GPIO 4.
+- **Comment le câbler :** [Pas à pas : câbler des sondes 1-Wire (DS18B20)](212-step-by-step-wire-1-wire-probes)
 - **Pièces suggérées :** sondes DS18B20 étanches (câble de 1 m à 3 m)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "DS18B20 waterproof probe".
 
@@ -445,6 +447,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** la sonde de température la moins chère : sa résistance change avec la chaleur.
 - **Ce dont Skynet a besoin :** un port analogique et une résistance de la même valeur que la thermistance (10 k ohms pour une 10K). Sa valeur Beta (par exemple 3950 ou 3977) se met dans ses Properties.
+- **Comment le câbler :** [Pas à pas : câbler une sonde 10K NTC](210-step-by-step-wire-a-10k-ntc-probe)
 - **Pièces suggérées :** sondes NTC 10K Beta 3950 étanches ; sondes 10K de type BCS-462
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "10K NTC thermistor probe waterproof".
 
@@ -452,6 +455,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **En mots simples :** une façon à un seul fil (plus l'alimentation et la masse) pour que plusieurs sondes DS18B20 partagent un seul port. Chaque sonde a son propre numéro.
 - **Ce dont Skynet a besoin :** Mega D40, Pi GPIO 4 ; une Pull-up Resistor de 4,7 k ohms pour le groupe.
+- **Comment le câbler :** [Pas à pas : câbler des sondes 1-Wire (DS18B20)](212-step-by-step-wire-1-wire-probes)
 
 ### Opto-isolated {#opto-isolated}
 
@@ -492,6 +496,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** le type de sonde de température le plus précis. La carte MAX31865 la lit pour l'Arduino.
 - **Ce dont Skynet a besoin :** une carte MAX31865 par sonde ; ses cavaliers réglés pour 2, 3 ou 4 fils (3 pour commencer). Ports SPI (Mega D50-D52) et un CS Port (Règle 6.9). Résistance de référence 430 ohms pour une PT100, 4300 ohms pour une PT1000.
+- **Comment le câbler :** [Pas à pas : câbler une sonde PT100](213-step-by-step-wire-a-pt100-probe) et [Pas à pas : câbler une sonde PT1000](214-step-by-step-wire-a-pt1000-probe)
 - **Pièces suggérées :** carte Adafruit MAX31865 (ou un clone) ; sondes PT100 3 fils avec raccord 1/2" NPT
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "MAX31865 PT100 board".
 
@@ -513,6 +518,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un interrupteur électronique sans pièce mobile. Un petit signal continu de la carte allume et éteint une charge plus grosse en alternatif (ou en continu), sans bruit.
 - **Ce dont Skynet a besoin :** **Entrée :** environ 3 à 32 V continu (marche avec toutes les Interfaces). **Sortie :** 24-380 V alternatif pour les charges alternatives (type « DA » : continu en entrée, alternatif en sortie), ou continu pour les charges continues (type « DD »). **AMPS :** 5 ou 10 A pour une pompe ou un tapis chauffant ; 25 ou 40 A sur un Heat Sink pour un élément. Type **Zero cross** pour les éléments.
+- **Comment le câbler :** [Pas à pas : câbler un SSR](211-step-by-step-wire-an-ssr)
 - **Pièces suggérées :** SSR Auber, Crydom ou Omron (type DA pour l'alternatif, DD pour le continu). Évitez les SSR imités sans nom de fabricant.
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "SSR 40A DA".
 
