@@ -148,6 +148,8 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 ## P
 
+**Pi Brain**: a Raspberry Pi set up as the **Brain**: Skynet installed on it, starting by itself whenever it has power, with the boards on its USB sockets. Every step: [Set Up a Pi Brain](204-set-up-a-pi-brain).
+
 **PID**: a heating method that holds a **Setpoint** by working out its own %. See [One Heating Element, pick how it heats](150-heating-method).
 
 **PLC**: in this project, a hobby board: Arduino-compatible (such as the Mega), ESP32 or Raspberry Pi.
@@ -172,7 +174,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 ## R
 
-**Raspberry Pi**: a small computer that can be the **Brain**: it runs the panel and keeps all its files.
+**Raspberry Pi**: a small computer that can be the **Brain**: it runs the panel and keeps all its files. See [Set Up a Pi Brain](204-set-up-a-pi-brain).
 
 **Recipe**: the grains, hops, yeast and steps of one beer, typed in or brought in from BeerSmith. See [The Recipe tab](99-recipe-tab).
 

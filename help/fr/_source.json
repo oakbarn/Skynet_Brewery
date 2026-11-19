@@ -12,7 +12,7 @@
  "10-login": "6d86e529fff854fd",
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "eb31d6badc777cf4",
- "13-glossary": "1f4133665e53d8a4",
+ "13-glossary": "fcfc603de5507048",
  "14-equipment": "9a17377372b3f676",
  "15-mqtt-and-voice": "a336dffb7b61bf6a",
  "16-stepper-motors": "7dadcdd2e692713f",
@@ -196,5 +196,6 @@
  "200-chiller-overlay": "f4b7229005216dd6",
  "201-ice-water-can": "bb8f68248492771e",
  "202-new-schema-interview": "262ad93eabcb36b9",
- "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d"
+ "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
+ "204-set-up-a-pi-brain": "d629e4e76a8ac8b3"
 }

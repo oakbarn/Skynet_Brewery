@@ -148,6 +148,8 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 ## P {#p}
 
+**Pi Brain** : un Raspberry Pi installé comme **Brain** : Skynet est installé dessus, démarre tout seul dès qu'il a du courant, et les cartes sont sur ses prises USB. Chaque étape : [Installer un Pi Brain](204-set-up-a-pi-brain).
+
 **PID** : une méthode de chauffe qui tient un **Setpoint** en calculant elle-même son %. Voir [Un élément chauffant, choisissez comment il chauffe](150-heating-method).
 
 **PLC** (automate) : dans ce projet, une carte de loisir : compatible Arduino (comme la Mega), ESP32 ou Raspberry Pi.
@@ -172,7 +174,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 ## R {#r}
 
-**Raspberry Pi** : un petit ordinateur qui peut être le **Brain** : il fait tourner le panel et garde tous ses fichiers.
+**Raspberry Pi** : un petit ordinateur qui peut être le **Brain** : il fait tourner le panel et garde tous ses fichiers. Voir [Installer un Pi Brain](204-set-up-a-pi-brain).
 
 **Recipe** (recette) : les grains, houblons, levure et étapes d'une bière, tapés à la main ou importés de BeerSmith. Voir [L'onglet Recipe](99-recipe-tab).
 
