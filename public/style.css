@@ -197,6 +197,10 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
    middle of the screen, on a strong background, then goes on its own. Nothing to click: it never blocks the screen under it. */
 #toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: #1f4e9c; color: #fff; border: 2px solid #fff; padding: 16px 30px; border-radius: 12px; font-size: 1.3em; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 9999; max-width: 80vw; box-shadow: 0 6px 28px rgba(0,0,0,.55); }
 #toast.show { opacity: 1; }
+/* Rule 18.53: every pop-up is on top of every dialog (public/ontop.js makes each a popover). Take away the browser's own popover look
+   (centered, border, white box) so each keeps its own; zero weight, so each pop-up's own rules win. The holder in a dialog takes no room. */
+:where(.vpop, #soundNag, #buildBack, #undoNote, .alertBar, .mvAskBar, #brainNotices, #flameOutBox, .jobPickBar, #toast):where([popover]) { inset: auto; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; overflow: visible; width: auto; height: auto; }
+.onTopHost { display: contents; }
 #toast.ok { background: #1e7a34; }
 #toast b { display: block; font-size: 1.3em; }
 #toast span { display: block; margin-top: 4px; font-size: 0.85em; }
