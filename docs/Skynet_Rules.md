@@ -3138,8 +3138,11 @@ Pins"; Panel Updates entry 34 step 1; Arduino's pinout AFX00001/2/3, Skynet_Priv
   external circuit. If it requires an expansion Module, then add that in the Help"): every Device can go on an Opta. A relay takes any
   output, an input takes any reading; only a reading on a relay is refused (an output on an input already is). Ports read *relay* or
   *input: digital or 0-10 V*.
-- **One warning saying what has to be added** (Rule 6.20 one warning): a temperature probe (a 0-10 V temperature transmitter on I1-I8,
-  or the Opta Analog Expansion A0602 for PT100); PWM or Pseudo PWM on a relay (an SSR on the Opta Digital Expansion D1608S, or On/Off by
+- **One warning saying what has to be added** (Rule 6.20 one warning): a temperature probe, by probe type (OakBarn Brewery, 2026-11-19:
+  "Do the best for 10KNTC Probes ( and support for all th eprobes on our Skynet Probes. JUst add the addition Cu=ircuits."; Help 206
+  table): 10K NTC, PT1000, thermocouple = a 0-10 V transmitter on I1-I8; PT100 = the Opta Analog Expansion A0602 or a transmitter;
+  LM35, TMP36 = only a 5 V supply; DS18B20 = no OneWire on an Opta (keep it on a Mega, swap the probe, or a DS18B20-to-RS485 module once
+  RS485 is built); PWM or Pseudo PWM on a relay (an SSR on the Opta Digital Expansion D1608S, or On/Off by
   Duty Cycle or Hysteresis; with the electrical warning); a stepper (a stepper driver with its own controller); an ADS1115 (no I2C pins:
   0-10 V straight to I1-I8, or the A0602). Otherwise a relay gives one warning (Normally Open, 250 V AC, 10 A, with the electrical
   warning) and an Analog In one 0-10 V warning. Help 206 names the modules.

@@ -37,7 +37,18 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 - **Nano ESP32:** D1 gives little current (a resistor is in its line), so it is offered last for outputs. A4-A7 can't read while the board's WiFi is on: on WiFi, picking one gives one warning.
 - **ESP32: GPIO16 and GPIO17** are not free on a board with a WROVER module. They are offered last, and picking one gives one warning.
 - **Arduino Opta:** a PLC that runs on 24 V. Its Ports go by name: **Relay 1-4** (Normally Open, at most 250 V AC and 10 A) and the inputs **I1-I8** (0-24 V digital or **0-10 V** analog, not 0-5 V). Every Device can go on it, as on a Mega: a relay takes any output and an input takes any reading. Only a reading on a relay is refused (a relay can't read). Like on a Mega, a probe or a heater needs something wired between it and the board, and Skynet gives **one warning** saying what:
-  - **Temperature probes** (DS18B20, PT100, thermocouple, NTC): a temperature transmitter with a 0-10 V output, wired to I1-I8; or, for PT100 probes, an **Opta Analog Expansion (A0602)**.
+  - **Temperature probes:** the Opta's inputs read 0-10 V, so most probes need an added circuit. The warning names it, by probe type:
+
+    | Skynet probe | What to add on an Opta |
+    |---|---|
+    | 10K NTC (or other NTC) | An NTC temperature transmitter with a 0-10 V output (set it to your NTC: 10K, B 3950), wired to I1-I8 |
+    | PT100 RTD | An **Opta Analog Expansion (A0602)**, which reads PT100 probes itself; or a PT100 transmitter with a 0-10 V output, wired to I1-I8 |
+    | PT1000 RTD | A PT1000 transmitter with a 0-10 V output, wired to I1-I8 |
+    | Thermocouple (K, J, T ...) | A thermocouple transmitter for your type with a 0-10 V output, wired to I1-I8 |
+    | LM35, TMP36 | Nothing but a 5 V supply for the sensor: its output goes straight to I1-I8 (about 0.25 °C per step) |
+    | DS18B20 (OneWire) | The Opta has no OneWire: keep DS18B20 probes on a Mega (you can mix boards), or swap them for 10K NTC or PT100 probes with a transmitter. A DS18B20-to-RS485 module will work once Skynet has RS485 |
+
+    Set the transmitter's range (for example 0-150 °C) on the transmitter.
   - **Heater control by PWM or Pseudo PWM:** fast switching wears a relay out. Use an SSR driven by an **Opta Digital Expansion with solid-state outputs (D1608S)**, or run the heater On/Off with Duty Cycle or Hysteresis.
   - **A stepper motor:** a stepper driver with its own controller (a relay can't give step pulses), or put the motor on a Mega.
   - **An ADS1115:** the Opta has no I2C pins for it; wire a 0-10 V sensor straight to I1-I8, or use the A0602.

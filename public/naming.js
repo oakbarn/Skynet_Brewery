@@ -429,7 +429,9 @@ export function busCheck(el, elements, devices) {
     const r = mine.find(p => !P.inputOnly.includes(p)), a = el.type === 'analogIn' && mine.find(p => P.inputOnly.includes(p)), at = P.label(mine[0] ?? 'I1');
     const k = el.type === 'temperature' ? 'temperature' : el.type === 'stepper' ? 'stepper' : el.type === 'analogIn' && el.adc === 'ads1115' ? 'ads1115'
       : r && (needsPwm(el) || el.pseudoPwm || (['pid', 'deadband'].includes(el.type) && el.pwm)) ? 'pwm' : '';
-    if (k) return { warn: OPTA_WARNINGS[k].replace('{0}', k === 'temperature' && !mine.length ? iface : at) };
+    if (k) { const [what, add] = OPTA_PROBE_CIRCUITS[el.sensor || 'ds18b20'] || OPTA_PROBE_CIRCUITS.ntc;
+      const w = OPTA_WARNINGS[k].replace('{0}', k === 'temperature' && !mine.length ? iface : at).replace('{1}', what).replace('{2}', add);
+      return { warn: k === 'temperature' && ['lm35', 'tmp36'].includes(el.sensor) ? w.replace(/can't be wired straight to an Opta input\. Add: /, 'reads on an Opta input with ') : w }; }
     if (r) return { warn: OPTA_RELAY_WARNING.replace('{0}', P.label(r)) };
     if (a) return { warn: OPTA_ANALOG_WARNING.replace('{0}', a) };
   }
@@ -514,8 +516,20 @@ function optaDeviceError(el, mine, P) {
   return null;
 }
 const OPTA_ELECTRIC = '\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
+// The added circuit for each Skynet probe type on an Opta (OakBarn Brewery, 2026-11-19: "Do the best for 10KNTC Probes ( and support for all
+// th eprobes on our Skynet Probes. JUst add the addition Cu=ircuits."). The Opta's inputs read 0-10 V, so most probes need a temperature
+// transmitter with a 0-10 V output; its range (for example 0-150 °C) is set on the transmitter.
+export const OPTA_PROBE_CIRCUITS = {
+  ntc: ['10K NTC (or other NTC) probe', 'an NTC temperature transmitter with a 0-10 V output (set it to your NTC: 10K, B 3950), wired to I1-I8.'],
+  pt100: ['PT100 RTD', 'an Opta Analog Expansion (A0602), which reads PT100 probes itself; or a PT100 temperature transmitter with a 0-10 V output, wired to I1-I8.'],
+  pt1000: ['PT1000 RTD', 'a PT1000 temperature transmitter with a 0-10 V output, wired to I1-I8.'],
+  thermocouple: ['thermocouple', 'a thermocouple transmitter for your type (K, J, T ...) with a 0-10 V output, wired to I1-I8.'],
+  lm35: ['LM35', 'nothing but a 5 V supply for the sensor: its output (10 mV per °C) goes straight to I1-I8 (about 0.25 °C per step).'],
+  tmp36: ['TMP36', 'nothing but a 5 V supply for the sensor: its output (10 mV per °C) goes straight to I1-I8 (about 0.25 °C per step).'],
+  ds18b20: ['DS18B20 (OneWire) probe', 'the Opta has no OneWire. Put DS18B20 probes on a Mega (or another board in the list), or swap them for 10K NTC or PT100 probes with a transmitter. A DS18B20-to-RS485 module will work once Skynet has RS485.'],
+};
 export const OPTA_WARNINGS = {
-  temperature: '{0} on an Arduino Opta: a temperature probe can\'t be wired straight to an Opta input. Use a temperature transmitter with a 0-10 V output (DS18B20, PT100, thermocouple or NTC) on I1-I8, or an Opta Analog Expansion (A0602) for PT100 probes. See Help 206.',
+  temperature: '{0} on an Arduino Opta: a {1} can\'t be wired straight to an Opta input. Add: {2} See Help 206.',
   pwm: '{0} on an Arduino Opta is a relay: fast PWM or Pseudo PWM wears a relay out. For heater control by PWM, use an SSR driven by an Opta Digital Expansion with solid-state outputs (D1608S), or Duty Cycle / Hysteresis On/Off. See Help 206.' + OPTA_ELECTRIC,
   stepper: '{0} on an Arduino Opta: a stepper motor needs fast step pulses that a relay can\'t give. Use a stepper driver with its own controller, or put the motor on a Mega. See Help 206.',
   ads1115: '{0} on an Arduino Opta: the Opta has no I2C pins for an ADS1115. Wire a 0-10 V sensor straight to I1-I8, or use an Opta Analog Expansion (A0602). See Help 206.',

@@ -37,7 +37,18 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 - **Nano ESP32 :** D1 donne peu de courant (une résistance est sur sa ligne), il est donc proposé en dernier pour les sorties. A4-A7 ne peuvent pas lire quand le WiFi de la carte est allumé : en WiFi, en choisir un donne un avertissement.
 - **ESP32 : GPIO16 et GPIO17** ne sont pas libres sur une carte avec un module WROVER. Ils sont proposés en dernier, et en choisir un donne un avertissement.
 - **Arduino Opta :** un automate (PLC) alimenté en 24 V. Ses Ports portent un nom : **Relais 1-4** (normalement ouverts, au plus 250 V CA et 10 A) et les entrées **I1-I8** (numériques 0-24 V ou analogiques **0-10 V**, pas 0-5 V). Tout Device peut y aller, comme sur un Mega : un relais prend toute sortie et une entrée prend toute lecture. Seule une lecture sur un relais est refusée (un relais ne peut pas lire). Comme sur un Mega, une sonde ou un chauffage demande quelque chose câblé entre lui et la carte, et Skynet donne **un avertissement** qui dit quoi :
-  - **Sondes de température** (DS18B20, PT100, thermocouple, NTC) : un transmetteur de température à sortie 0-10 V, câblé sur I1-I8 ; ou, pour les sondes PT100, une **extension analogique Opta (A0602)**.
+  - **Sondes de température :** les entrées de l'Opta lisent 0-10 V, donc la plupart des sondes demandent un circuit ajouté. L'avertissement le nomme, selon le type de sonde :
+
+    | Sonde Skynet | Quoi ajouter sur un Opta |
+    |---|---|
+    | NTC 10K (ou autre NTC) | Un transmetteur de température NTC à sortie 0-10 V (réglé sur votre NTC : 10K, B 3950), câblé sur I1-I8 |
+    | RTD PT100 | Une **extension analogique Opta (A0602)**, qui lit elle-même les sondes PT100 ; ou un transmetteur PT100 à sortie 0-10 V, câblé sur I1-I8 |
+    | RTD PT1000 | Un transmetteur PT1000 à sortie 0-10 V, câblé sur I1-I8 |
+    | Thermocouple (K, J, T ...) | Un transmetteur pour votre type de thermocouple, à sortie 0-10 V, câblé sur I1-I8 |
+    | LM35, TMP36 | Rien qu'une alimentation 5 V pour le capteur : sa sortie va directement sur I1-I8 (environ 0,25 °C par pas) |
+    | DS18B20 (OneWire) | L'Opta n'a pas de OneWire : gardez les sondes DS18B20 sur un Mega (on peut mélanger les cartes), ou remplacez-les par des sondes NTC 10K ou PT100 avec un transmetteur. Un module DS18B20 vers RS485 marchera quand Skynet aura le RS485 |
+
+    Réglez la plage du transmetteur (par exemple 0-150 °C) sur le transmetteur.
   - **Chauffage commandé en PWM ou Pseudo PWM :** une commutation rapide use un relais. Utilisez un SSR piloté par une **extension numérique Opta à sorties statiques (D1608S)**, ou faites marcher le chauffage en Marche/Arrêt avec Cycle de service ou Hystérésis.
   - **Un moteur pas à pas :** un driver pas à pas avec son propre contrôleur (un relais ne peut pas donner les impulsions de pas), ou mettez le moteur sur un Mega.
   - **Un ADS1115 :** l'Opta n'a pas de broches I2C pour lui ; câblez un capteur 0-10 V directement sur I1-I8, ou utilisez l'A0602.
