@@ -18,6 +18,10 @@ Chaque carte (Interface) sur la page **Devices** montre une **note de connexion*
 | 2 | Ethernet | **Good** (bon) |
 | 2 | WiFi | **Good**, tant qu'aucun Device de chauffe n'est dessus |
 
+## Autres cartes {#other-boards}
+
+Une carte de type Arduino (Uno, Nano, Leonardo, Micro, Due, Grand Central et les autres) est notée comme l'**Arduino Mega**. Une carte avec le WiFi intégré (GIGA, Nano ESP32, Uno R4 WiFi, Feather M0 WiFi, ESP8266) est notée comme l'**ESP32** : son WiFi intégré est **Good**, tant qu'aucun Device de chauffe n'y est branché.
+
 ## Devices de chauffe {#heating-devices}
 
 Un Device de chauffe est une résistance électrique, une vanne de gaz ou un allumeur de brûleur, un tapis chauffant, ou la sortie d'un PID, d'une Hysteresis ou d'un Duty Cycle. Vous **pouvez** en mettre un sur une carte Ethernet ou WiFi, mais le panel vous avertit quand vous l'enregistrez, et le **Rating** de cette carte montre ⚠ avec les Devices de chauffe nommés. En WiFi, la note d'un ESP32 tombe à **Poor**. L'USB est le plus sûr.
@@ -30,7 +34,7 @@ La carte reçoit le délai à chaque connexion, donc un changement prend effet t
 
 ## Choisir la carte {#picking-the-board}
 
-Quand vous ajoutez une Interface, choisissez sa **Board** (carte : Arduino Mega, ESP32 ou Raspberry Pi) et sa **Connection** ; les choix suivent la Board, et le Hover Help de la Connection donne sa note. Une carte sans Board choisie montre **(pick the board)** : choisissez-la dans la colonne **Board** ou dans la fenêtre de l'Interface.
+Quand vous ajoutez une Interface, choisissez sa **Board** (carte : l'Arduino Mega, une autre carte Arduino, un ESP32 ou un Raspberry Pi ; voir [Cartes Skynet](206-skynet-boards)) et sa **Connection** ; les choix suivent la Board, et le Hover Help de la Connection donne sa note. Une carte sans Board choisie montre **(pick the board)** : choisissez-la dans la colonne **Board** ou dans la fenêtre de l'Interface.
 
 ## Broche 10 sur un Mega Ethernet {#pin-10-on-an-ethernet-mega}
 
