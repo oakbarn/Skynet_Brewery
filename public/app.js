@@ -5746,7 +5746,10 @@ function portForName(e) {
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
 // and Finish Build ... > Move to Tab adds it, as for a Device
-const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
+// the Type comes from widgetTypeId with the Tap Water Valve test, the same as graphicWidgetName and 🏷 Update to Suggested Name, so a Hose Bib
+// is wgt_TWV_ on every line of its box, never wgt_MV_ on one and wgt_TWV_ on another (OakBarn Brewery, 2026-11-19: "The suggested Skynet
+// Type needs to be consistent and repeatable in every case")
+const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e, isTapMv(e)); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 // A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
 const sugSelf = o => (draft || S.config).elements.find(x => x.name === o.name) || o;

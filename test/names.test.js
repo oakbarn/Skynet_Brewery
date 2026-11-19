@@ -63,5 +63,17 @@ assert.throws(() => fm.target('pictures', 'Bad:Folder/pic.png'), /folder name/);
 assert.equal(fm.target('pictures', 'old.folder/pic.png').use, 'Images/old.folder/pic.png', 'a folder that is on the Brain already is fine');
 assert.equal(fm.target('processes', 'Mash_Steps.txt').use, 'Mash_Steps');
 
+// The suggested Type is the same in every place (OakBarn Brewery, 2026-11-19: "The suggested Skynet Type needs to be consistent and
+// repeatable in every case"): a Hose Bib (Tap Water Valve) is wgt_TWV_ on the Suggested Name line, from 🏷 Update to Suggested Name and
+// after Finish Build, never wgt_MV_ on one of them. Every Widget name is made with the Tap Water Valve test.
+{
+  const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const widgetSuggestion = \(e, self = e\) => \{ const code = widgetTypeId\(e, isTapMv\(e\)\);/, 'the Suggested Name line knows a Hose Bib');
+  assert.match(app, /function graphicWidgetName\(g, self = g\) \{\n  const code = widgetTypeId\(g, isTapMv\(g\)\);/, 'Update to Suggested Name and Finish Build know it too');
+  const { widgetTypeId } = await import('../public/naming.js');
+  assert.equal(widgetTypeId({ fitting: 'manualValve' }, true), 'TWV');
+  assert.equal(widgetTypeId({ fitting: 'manualValve' }), 'MV');
+}
+
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('names tests passed');
