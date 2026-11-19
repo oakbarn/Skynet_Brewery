@@ -363,10 +363,10 @@ export const SD_WARNING = 'Pin D4 is the SD card pin of the Ethernet shield. SD 
 // OakBarn Brewery, 2026-11-19: "On a Mega, we want to reserve pin 10 on USB Connection until it is the last one available and if picked
 // Give warning about Ethernet no longer Available as an Option because of PIN 10 being used. The reservation is not a fixed thing but a
 // warning to the User"; then "It can be in order but can it be a Different color on the DDLB?" (Rule 6.10): a Mega not on Ethernet keeps D10
-// in its place in the Port list, in another color with "kept for Ethernet" beside it, and picking it gives one warning.
+// in its place in the Port list, in another color with "Reserved for Ethernet: see Help" beside it, and picking it gives one warning.
 export const ETHERNET_PIN_WARNING = 'Pin D10 is the pin an Ethernet shield needs. While a Device uses D10, this Mega can\'t be changed to Ethernet (Skynet Rule 6.10). Pick another pin to keep Ethernet as a choice.';
 export const pinKept = (p, d) => String(p) === ETHERNET_PIN && usbMega(d);
-export const KEPT_FOR_ETHERNET = 'kept for Ethernet';
+export const KEPT_FOR_ETHERNET = 'Reserved for Ethernet: see Help';      // OakBarn Brewery, 2026-11-19: "Only pin 10 gets ethernet warning and Reserved for Ethernet: see Help"
 const usbMega = d => !!d && boardOf(d) === 'mega' && linkOf(d) !== 'ethernet';
 const ethernetMega = d => !!d && !!BOARD_INFO[boardOf(d)]?.shield && linkOf(d) === 'ethernet';
 // A plain message when Interface d is (or is being changed to) an Ethernet Mega and a Device on it uses pin 10, or null
@@ -448,7 +448,7 @@ const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => 
 // can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
 export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(String(el?.channel ?? ''));
 // How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins.
-// el (the Device being given a Port) is optional: a Device that doesn't need PWM sees a PWM pin as "D5 (Save for PWM)" (Rule 4.2).
+// el (the Device being given a Port) is optional: every PWM pin reads "D5 (Best for True PWM: see Help)" (Rule 4.2).
 export function pinLabel(p, board, el) {
   p = String(p);
   if (/^A\d+$/.test(p)) return analogLabel(p, pinProfile(board));
@@ -496,12 +496,16 @@ export function lowVoltWarning(el, devices) {
 // what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
 // For a Device that doesn't need PWM (an On/Off DO, a probe, a pseudo PWM ...) a PWM pin reads "Save for PWM" (OakBarn Brewery,
 // 2026-11-12: "Mark the PWM as Save for PWM for DO that dont need PWM", Rule 4.2), so it is kept for a Device that needs it.
-export const SAVE_FOR_PWM = 'Save for PWM';
+export const SAVE_FOR_PWM = 'Best for True PWM';
+// OakBarn Brewery, 2026-11-19: "And on PWM Pins "best for True PWM: See Help"": every PWM pin (for any Device) reads "Best for True PWM:
+// see Help" in place of "PWM" and "Save for PWM" (Rule 4.2 still offers PWM pins to a Device that doesn't need PWM only when no plain pin is free)
+export const PWM_TAG = SAVE_FOR_PWM;
 export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''; }
   const P = pinProfile(board);
-  const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && (el?.type && !needsPwm(el) ? SAVE_FOR_PWM : 'PWM'), keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ');
+  const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && PWM_TAG, keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ')
+    + (keepsFew(P, P.pwm) && P.pwm.includes(p) ? ': see Help' : '');
   if (p === SD_PIN && P.board === 'mega') return t + ', SD card pin';      // Skynet Rule 6.11
   return t || (P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C' : P.usb.includes(p) ? 'USB link' : P.avoid.includes(p) ? 'start-up pin, use last' : '');
 }

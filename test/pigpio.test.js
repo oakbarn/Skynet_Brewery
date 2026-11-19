@@ -24,7 +24,7 @@ assert.match(heatingLinkWarning({ ...heater, device: 'Stand Pi' }, devices), /Wi
 assert.equal(pinOf('GPIO17'), '17');
 assert.equal(pinLabel('17', 'pi'), 'GPIO17');
 assert.equal(pinLabel('9', 'pi'), 'GPIO9  (SPI, for RTD boards)');
-assert.equal(pinLabel('5', 'mega'), 'D5  (PWM)', 'Mega labels unchanged');
+assert.equal(pinLabel('5', 'mega'), 'D5  (Best for True PWM: see Help)', 'Mega PWM pins: "Best for True PWM: see Help" (OakBarn Brewery, 2026-11-19)');
 assert.equal(pinTag('4', 'pi'), 'OneWire probes');
 const relay = { name: 'R', type: 'digitalOut', device: 'Brain Pins', channel: '17' };
 assert.equal(busCheck(relay, [], devices), null, 'a relay on GPIO17 is fine (no PWM / counter pins kept on a Pi)');

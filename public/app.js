@@ -1149,11 +1149,11 @@ const MF_ROTS = [0, 90, 270];
 const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']];
 const mfSetPin = (item, k) => { const e = item && mfEl(item, k, draft.elements); return e && e.valveType !== 'manual' && (e.channel ?? '') !== '' ? e : null; };
 // A Port choice in a Port list (Rule 6.10, OakBarn Brewery, 2026-11-19: "It can be in order but can it be a Different color on the
-// DDLB?"): D10 on a Mega not on Ethernet keeps its place, in another color, with "kept for Ethernet" beside it; the true PWM pins have their own
+// DDLB?"): D10 on a Mega not on Ethernet keeps its place, in another color, with "Reserved for Ethernet: see Help" beside it; the true PWM pins have their own
 // color too ("Different color for PWM Pins"). D10 kept for Ethernet shows the Ethernet color.
 const pinText = (p, b, el, dev) => pinLabel(p, b, el) + (pinKept(p, (S.config.devices || []).find(d => d.name === dev)) ? `  (${KEPT_FOR_ETHERNET})` : '');
 const pinOption = (p, b, el, dev) => { const t = pinText(p, b, el, dev); return h('option', { value: p, label: t, ...(t.endsWith(`(${KEPT_FOR_ETHERNET})`) ? { class: 'pinKept' } : isPwmPin(p, b) ? { class: 'pinPwm' } : {}) }, t); };
-const MF_VALVE = { type: 'digitalOut', subtype: 'valve' };      // a Supply Manifold's motorized valve: On/Off, so a PWM pin reads "Save for PWM"
+const MF_VALVE = { type: 'digitalOut', subtype: 'valve' };      // a Supply Manifold's motorized valve: On/Off, a PWM pin reads "Best for True PWM: see Help"
 const mfIfaceText = n => n ? (ifaceIdOf(n) ? `${ifaceIdOf(n)}: ${n}` : n) : '(none)';
 function mfPortChoices(it, item, k) {
   const own = item ? draft.elements.filter(e => e.integratedIn === item.id && isMfPart(e)) : [], els = draft.elements.filter(e => !own.includes(e));
@@ -9805,8 +9805,8 @@ const DEVICE_TIPS = {
   labelVisible: 'The Label may be shown on the Tab, for example Red Pump above the Pump. On: the Label shows. Off: no Label shows.',
   vLabelVisible: 'The Label may be shown on the Tab, for example Mash Valve above the Valve Device.⟪img:help_pictures/Mash_Valve_Label.png⟫',      // as the Pump's (Rule 18.42)
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
-  // OakBarn Brewery, 2026-11-12 (Hover Help Blichmann RipTide Dialog 1, PORT): his words; Save for PWM (Rule 4.2) kept below them
-  port: 'Pick a Port. (Available Port) A Port needs to be chosen from the list before proceeding.\n\nClick the small Gray Down Triangle to expand the List of Available Ports.\n\nAvailable Ports: only the free Ports (pins) on this board that fit this type of Device, for example 22, or A5 = 59. Digital Outputs have the most ports, true PWM Ports are much more limited. Once it is added it is greyed out and no longer changeable.\n\nClick to choose the Port.\n\nA PWM Port marked Save for PWM works, but keep it for a Device that needs PWM.',
+  // OakBarn Brewery, 2026-11-12 (Hover Help Blichmann RipTide Dialog 1, PORT): his words; Best for True PWM (Rule 4.2, was Save for PWM) kept below them
+  port: 'Pick a Port. (Available Port) A Port needs to be chosen from the list before proceeding.\n\nClick the small Gray Down Triangle to expand the List of Available Ports.\n\nAvailable Ports: only the free Ports (pins) on this board that fit this type of Device, for example 22, or A5 = 59. Digital Outputs have the most ports, true PWM Ports are much more limited. Once it is added it is greyed out and no longer changeable.\n\nClick to choose the Port.\n\nA PWM Port marked Best for True PWM works, but keep it for a Device that needs PWM.',
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
   type: 'Its Device Type: the General Type, an @, then the Device Type, for example DO@Pump, an On/Off Pump (Pump on a Digital Out, DO), or PWM@Pump, a Pump whose speed is set on a PWM port. The same DO@Pump is the third part of the Suggested Name: BM_22_DO@Pump_Pump_BH. A new Device fills it in.',

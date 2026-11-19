@@ -143,7 +143,7 @@ assert.equal(busCheck({ ...pump, channel: 22 }, []), null);
 const plain = ['14', '15', '16', '17', ...Array.from({ length: 32 }, (_, i) => String(22 + i))].filter(p => !['40', '44', '45', '46', '50', '51', '52'].includes(p));
 const full = plain.map((p, i) => ({ name: 'R' + i, type: 'digitalOut', device: 'MEGA', channel: p }));
 assert.equal(busCheck({ ...pump, channel: 5 }, full), null, 'no plain pin left: no heads-up');
-assert.deepEqual([2, 5, 18, 22, 51, 40].map(pinTag), ['PWM + Counter', 'PWM', 'Counter', '', 'SPI, for RTD boards', 'OneWire probes']);
+assert.deepEqual([2, 5, 18, 22, 51, 40].map(pinTag), ['Best for True PWM + Counter: see Help', 'Best for True PWM: see Help', 'Counter', '', 'SPI, for RTD boards', 'OneWire probes']);
 // the Port list in the New Device box: free pins that fit, best first
 assert.deepEqual(freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [pump]).slice(0, 3), ['14', '15', '16'], 'plain pins first');
 assert.ok(!freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [rtd]).includes('51'), 'SPI pins gone while an RTD is there');
@@ -177,18 +177,16 @@ assert.match(busCheck(on4, [], usbMega).warn, /SD Card Not Supported\. Never ins
 assert.match(busCheck(on4, [], ethMega).warn, /SD Card Not Supported/, 'warned, not blocked, on Ethernet too');
 assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('4'));
 assert.equal(busCheck({ ...on4, device: 'ESP' }, [], [{ name: 'ESP', board: 'esp32' }])?.warn?.includes('SD') ?? false, false, 'only a Mega');
-assert.equal(pinTag(4), 'PWM, SD card pin');
-// "Save for PWM" (OakBarn Brewery, 2026-11-12, Rule 4.2): a Device that doesn't need PWM sees a PWM pin marked to keep it for one that does
+assert.equal(pinTag(4), 'Best for True PWM: see Help, SD card pin');
+// "Save for PWM" (OakBarn Brewery, 2026-11-12, Rule 4.2), now "Best for True PWM: see Help" on every PWM pin (2026-11-19)
 {
   const pump = { type: 'digitalOut', subtype: 'pump' }, pwm = { type: 'pwmOut' };
-  assert.equal(pinTag(5, 'mega', pump), 'Save for PWM');
-  assert.equal(pinTag(2, 'mega', pump), 'Save for PWM + Counter');
-  assert.equal(pinTag(5, 'mega', pwm), 'PWM', 'a PWM Device keeps "PWM"');
-  assert.equal(pinTag(5, 'mega', { type: 'digitalOut', subtype: 'pump', pwm: true }), 'PWM', 'a Speed (PWM) Pump needs it');
-  assert.equal(pinTag(5, 'mega', { ...pwm, pseudoPwm: true }), 'Save for PWM', 'pseudo PWM needs no PWM pin');
-  assert.equal(pinTag(4, 'mega', pump), 'Save for PWM, SD card pin');
+  assert.equal(pinTag(5, 'mega', pump), 'Best for True PWM: see Help');
+  assert.equal(pinTag(2, 'mega', pump), 'Best for True PWM + Counter: see Help');
+  assert.equal(pinTag(5, 'mega', pwm), 'Best for True PWM: see Help', 'a PWM Device sees the same words');
+  assert.equal(pinTag(4, 'mega', pump), 'Best for True PWM: see Help, SD card pin');
   assert.equal(pinTag(17, 'pi', pump), '', 'a Pi keeps no pin for PWM');
-  assert.equal(pinLabel(5, 'mega', pump), 'D5  (Save for PWM)');
+  assert.equal(pinLabel(5, 'mega', pump), 'D5  (Best for True PWM: see Help)');
   assert.equal(pinLabel(22, 'mega', pump), 'D22');
 }
 assert.deepEqual(freePins({ name: 'N', type: 'temperature', sensor: 'pt1000', device: 'MEGA' }, [rtd]), RTD_CS_PINS.filter(p => p !== '48'), 'the RTD pin list');
