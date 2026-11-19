@@ -194,7 +194,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Simulator** (simulateur) : une fausse carte, pour tout essayer sans matériel.
 
-**skc_ (Skynet Constants)** (constantes Skynet) : des nombres fixes intégrés à Skynet pour les conversions courantes, comme `skc_Kg_To_Lb`. Personne ne peut les changer. Voir [Constantes Skynet](94-skynet-constants).
+**skc_ (Skynet Constants)** (constantes Skynet) : des nombres fixes intégrés à Skynet pour les conversions courantes, comme `skc_Kg_To_Lb`, chacune aussi avec un nom court comme `L_p_Gal` (litres par gallon). Personne ne peut les changer. Voir [Constantes Skynet](94-skynet-constants).
 
 **skn_, sk_** : les noms `skn_` sont des valeurs que Skynet règle et qu'un Process lit seulement, comme `skn_Boil_Temp`. Les noms `sk_` sont des rôles qui tiennent une sonde de température, comme `sk_Boil_Probe_1`.
 

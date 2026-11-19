@@ -7,6 +7,7 @@ import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
+import { SKYNET_CONSTANT_GROUPS, SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { setRich, NAMED_COLORS, setTempUnitSource } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
@@ -12648,7 +12649,7 @@ function updateAlarms() {
 }
 
 // ---------------------------------------------------------------- scripts
-let curScript = null, dirty = false, problems = [];
+let curScript = null, dirty = false, problems = [], notes = [];
 function renderScripts() { renderScriptList(); }
 // grouped by class: Flow, Sub, Repeat, Looper (lib/scaffold.js); a group can be folded
 let foldedClasses = new Set();
@@ -12709,7 +12710,7 @@ $('#updVersion').onclick = guard(async () => {
 $('#procTab').onclick = () => setView('scripts');
 async function openScript(name) {
   if (dirty && !confirm('Discard unsaved changes?')) return;
-  curScript = name; dirty = false; problems = [];
+  curScript = name; dirty = false; problems = []; notes = [];
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
@@ -12746,8 +12747,9 @@ function updateGutter() {
 function renderProblems() {
   const ul = $('#problems'); ul.innerHTML = '';
   if (problems === null) return;
-  if (!problems.length) { if (curScript) ul.append(h('li', { class: 'ok' }, 'No problems found')); return; }
+  if (!problems.length && !notes.length) { if (curScript) ul.append(h('li', { class: 'ok' }, 'No problems found')); return; }
   for (const p of problems) ul.append(h('li', { onclick: () => gotoLine(p.line) }, `Line ${p.line}: ${p.msg}`));
+  for (const p of notes) ul.append(h('li', { class: 'warn', onclick: () => gotoLine(p.line) }, `⚠ Line ${p.line}: ${p.msg}`));     // warnings: never stop a save
 }
 function gotoLine(l, ta = $('#code')) {
   const lines = ta.value.split('\n');
@@ -13086,6 +13088,31 @@ $('#colorKey').onclick = () => {
   $('#keyDlg').showModal();
 };
 
+// Skynet Constants list (OakBarn Brewery, 2026-11-19, Panel Updates Sandbox entry 28: a viewable list, usable in Processes): every
+// constant with its short name, value and what it does, by group; typing finds by name, unit or words; a click puts the short name
+// (or the skc_ name when it has none) at the cursor in the Process editor
+function renderConstRows() {
+  const box = $('#constRows'), f = $('#constFind').value.trim().toLowerCase(), rows = [];
+  const hit = (...t) => !f || t.join(' ').toLowerCase().includes(f);
+  const put = word => () => {
+    $('#constDlg').close();
+    const ta = $('#code'); if (!curScript || ta.readOnly) return;
+    ta.focus(); ta.setRangeText(word, ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input'));
+  };
+  const fns = SKYNET_FUNCTIONS.filter(([n, , what]) => hit(n, what, 'temperature'));
+  if (fns.length) rows.push(h('div', { class: 'constGroup' }, 'Temperature (functions)'),
+    ...fns.map(([n, , what]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n + '(') }, h('code', {}, n + '(x)'), h('span', {}), h('span', {}, what))));
+  for (const [group, list] of SKYNET_CONSTANT_GROUPS) {
+    const mine = SKYNET_CONSTANTS.filter(c => c[3] === group && hit(c[0], c[4], c[2], group));
+    if (!list.length || !mine.length) continue;
+    rows.push(h('div', { class: 'constGroup' }, group), ...mine.map(([n, v, what, , short]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(short || n) },
+      h('code', {}, short || n), h('span', { class: 'constVal' }, showConstant(v)), h('span', {}, what + (short ? ` (${n})` : '')))));
+  }
+  box.replaceChildren(...(rows.length ? rows : [h('div', { class: 'muted' }, 'No Skynet Constant has those letters')]));
+}
+$('#constList').onclick = () => { $('#constFind').value = ''; renderConstRows(); $('#constDlg').showModal(); $('#constFind').focus(); };
+$('#constFind').oninput = renderConstRows;
+
 // Save to file: the whole Process or the highlighted part, as text or as XML in color; and the Notepad++ colors file
 let lastSel = [0, 0];
 for (const ev of ['select', 'keyup', 'mouseup', 'touchend']) $('#code').addEventListener(ev, () => { const ta = $('#code'); lastSel = [ta.selectionStart, ta.selectionEnd]; });
@@ -13161,7 +13188,7 @@ const saveScript = guard(async () => {
     const pos = r.text.split('\n').slice(0, line - 1).reduce((a, l) => a + l.length + 1, 0);
     ta.setSelectionRange(pos, pos); ta.scrollTop = top;
   }
-  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter(); refreshFind(false);
+  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; notes = r.warnings ?? []; renderProblems(); updateGutter(); refreshFind(false);
   const note = (r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '') + (r.golines ? ` (${r.golines} goLine number(s) moved with their lines)` : '');
   if (problems.length || note) toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length); else savedPop('Saved');
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
@@ -13194,7 +13221,7 @@ $('#addSteps').onclick = guard(async () => {
   ta.value = t.text; dirty = true; updateGutter(); refreshFind(false); $('#scriptName').textContent = curScript + ' (not saved)';
   toast('Steps added: Save to number them');
 });
-$('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
+$('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; notes = r.warnings ?? []; renderProblems(); updateGutter(); });
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
   if (dirty) await saveScript();

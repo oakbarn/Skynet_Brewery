@@ -194,7 +194,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Simulator**: a pretend board, so you can try everything without hardware.
 
-**skc_ (Skynet Constants)**: fixed numbers built into Skynet for common conversions, such as `skc_Kg_To_Lb`. Nobody can change them. See [Skynet Constants](94-skynet-constants).
+**skc_ (Skynet Constants)**: fixed numbers built into Skynet for common conversions, such as `skc_Kg_To_Lb`, each also with a short name such as `L_p_Gal` (liters per gallon). Nobody can change them. See [Skynet Constants](94-skynet-constants).
 
 **skn_, sk_**: `skn_` names are values Skynet sets and a Process only reads, such as `skn_Boil_Temp`. `sk_` names are roles that hold one temperature probe, such as `sk_Boil_Probe_1`.
 

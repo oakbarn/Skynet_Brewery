@@ -21,7 +21,7 @@
 //    and puts the minus or plus in the line: the Offset's sign says where it turns On, Setpoint + Offset (Rule 6.19).
 //  - Only names are ever offered: never a hidden key (Rule 3.10), and never a Clone, which is not used in Processes (Rule 4.4).
 import { DEVICE_TYPES } from './colorize.js';
-import { SKYNET_CONSTANTS, showConstant } from './skconst.js';
+import { SKYNET_CONSTANTS, SKYNET_FUNCTIONS, showConstant } from './skconst.js';
 import { SKN_GLOBALS } from './boilpoint.js';
 import { G_DECLARE } from './gkinds.js';
 import { heatMethodKey, heatMethodCode } from './heatmethod.js';
@@ -211,7 +211,11 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gGlobal, not gGlobal (gGlobal)
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // Skynet Constants (skc_Kg_To_Lb ...) where a value goes, once a letter is typed (all of them would fill the list)
-  if (!atStart && w) for (const [n, v, what] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${what}`, n);
+  if (!atStart && w) for (const [n, v, what, , short] of SKYNET_CONSTANTS) {
+    add(n + nsp, `Skynet Constant ${showConstant(v)}, ${what}`, n);
+    if (short && w.length >= 2) add(short + nsp, `Skynet Constant ${showConstant(v)}, ${what} (short for ${n})`, short);     // L_p_Gal (entry 28), from 2 letters
+  }
+  if (!atStart && w.length >= 2) for (const [n, , what] of SKYNET_FUNCTIONS) add(n + '(', `Skynet temperature: ${what}`, n);      // toF( toC(
   // Skynet internal Globals (skn_Boil_Temp ...: Settings > Boil temperature, Rule 1.18), read only, where a value goes
   if (!atStart && w) for (const [n, what] of SKN_GLOBALS) add(n + nsp, `Skynet internal Global, read only: ${what}`, n);
   // and / or only after a value (if Pump == true an...)

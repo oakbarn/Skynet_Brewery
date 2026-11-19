@@ -707,6 +707,14 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 .editTools select { max-width: 100%; }
 .keyList { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; margin-bottom: 8px; }
 .keyRow { display: contents; }
+/* Skynet Constants list (Process editor, 📐 Constants) */
+.constRows { display: grid; grid-template-columns: auto auto 1fr; gap: 2px 12px; max-height: 60vh; overflow: auto; margin: 8px 0; }
+.constGroup { grid-column: 1 / -1; font-weight: bold; margin-top: 8px; }
+.constRow { display: contents; cursor: pointer; }
+.constRow:hover > * { background: var(--hover, rgba(127, 127, 127, .15)); }
+.constVal { text-align: right; font-variant-numeric: tabular-nums; }
+#constFind { width: 100%; box-sizing: border-box; }
+#problems li.warn { color: var(--warn, #b8860b); }
 .keyCode { font: 13px/1.6 var(--mono); background: var(--panel2); padding: 2px 8px; border-radius: 4px; white-space: pre; }
 .binRow { align-items: center; }
 .binView { max-height: 40vh; overflow: auto; margin: 0; padding: 8px; font: 13px/1.5 var(--mono); background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; white-space: pre; tab-size: 4; }

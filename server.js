@@ -88,6 +88,7 @@ import { chillerTemplates, chillerVessels, moveChiller } from './lib/chiller.js'
 import { followProcessRename } from './public/processwidget.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { BoilTemp } from './lib/boiltemp.js';
+import { reservedClashes } from './public/skconst.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -1556,6 +1557,10 @@ server.listen(PORT, () => {
   console.log(`Config:  ${CONFIG}\nProcesses: ${PROCESSES}\nData:    ${DATA}`);
   pictures.start();
   power?.start();
+  // Reserved words (Panel Updates Sandbox entry 28): an item named like a short Skynet Constant (L_p_Gal), toF or toC, made before that
+  // constant was added, is kept as it is (Rule 3.2) and shown once, as one notice, when the Schema loads
+  { const clash = reservedClashes([...store.els.keys(), ...store.texts.keys()]);
+    if (clash.length && power) power._setNotice({ id: 'reservedWords', text: `${clash.join(', ')} ${clash.length > 1 ? 'are reserved words' : 'is a reserved word'} (Skynet Constants). Your item${clash.length > 1 ? 's keep their' : ' keeps its'} name; a Process reading ${clash[0]} on its own gets the constant, so use ${clash[0]}.value for your item (Help: Skynet Constants).` }); }
   if (STANDBY) console.log('Standby: no board, no Process, no MQTT.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   if (!STANDBY) for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
