@@ -139,34 +139,33 @@ Get and Put, `log Name` in a Process becomes `send_db Name`, and the web API is 
 (`/api/gapi` is gone). (Fritz, 2026-10-30, thread "Send any Device or Widget to a database", Help 4, 98;
 was 2026-10-28, Help 84)
 
-1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, volume,
-pressure, temperature, brewing ratios, length, power, time). Each name starts **`skc_`** and says
-from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
-(`gGV_Lb = gGV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
-variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
-**Short names, built 2026-11-19 (Panel Updates Sandbox entry 28, OakBarn Brewery, 2026-11-17: "take out the skc_ and L_p_Gal is
-good"; "Capitalization should mean nothing"; "OK \"IM\" for imperial"; "toF and toC look good"; "easy to set a warning about reserved
-words"):** every From_To_To constant also has a **short name** with no `skc_`, read as "this many A in one B" (`_p_` = per):
-`L_p_Gal` = `skc_Gal_To_L` = 3.785, `g_p_Oz`, `Lb_p_Kg`, `F_p_C`, `PSI_p_Atm`. A gallon, quart, pint or fl oz is always US; an
-**Imperial** unit has **Im** (`L_p_ImGal` = 4.546). Capitals mean nothing, so no two constants differ only by capitals. A Process
-also has **`toF(x)`** (x × 1.8 + 32) and **`toC(x)`** ((x − 32) ÷ 1.8). The short names, `toF` and `toC` are **reserved words** in
-any capitals: no Device, Widget, gGlobal or `new` variable can take one (the name box says so). An item that already had such a name
-(made before that constant was added) keeps it (Rule 3.2): one notice when the Brain starts, and the Process check warns on each line
-that reads it bare (the bare name reads the constant; `.value` reads the item). A BruControl name that is a reserved word is force
-changed on Import (Importer Sandbox). The list is viewable in the Process editor (**📐 Constants**, click one to put it at the cursor)
-and in Help 94. **Adding constants (OakBarn Brewery, 2026-11-19):** a new Skynet feature that needs a conversion adds it to
-public/skconst.js and Help 94 in the same PR, without asking first.
+1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, fractions and water, volume US and
+Imperial, pressure, temperature, brewing ratios, length, power, time). **Name and Label (OakBarn Brewery, 2026-11-19: "SK_CONST_L_p_G
+with a label Liters per Gallon"; "KISS make them the same"; "yes the skn_ as any Skynet thing"):** each name is **`skn_const_`**
+(Rule 3.20) plus a short code read as "this many A in one B" (`_p_` = per), and each has a plain **Label**: `skn_const_L_p_Gal`,
+Label **Liters per Gallon**, 3.785. A gallon is `Gal`, never `G` (capitals mean nothing, so `G` and `g` for gram would be one
+letter; OakBarn Brewery, 2026-11-17: "Capitalization should mean nothing"). A gallon, quart, pint or fl oz is always US; an
+**Imperial** unit has **Im** (`skn_const_L_p_ImGal` = 4.546; OakBarn Brewery: "OK \"IM\" for imperial"). A Process uses one like
+a number (`gGV_Batch_L = gGV_Batch_Gal * skn_const_L_p_Gal`). Nobody can change them (Rule 3.11), and no Device, Widget or variable
+name can start `skn_const_`. A Process also has **`toF(x)`** (x × 1.8 + 32) and **`toC(x)`** ((x − 32) ÷ 1.8) (OakBarn Brewery,
+2026-11-17: "toF and toC look good"); they work only with ( ) after them, so an item called `toF` is still read by its name and no
+name is refused for them. The list is viewable in the Process editor (**📐 Constants**: Label, value, name; click one to put it at the
+cursor) and in Help 94. **Adding constants (OakBarn Brewery, 2026-11-19):** a new Skynet feature that needs a conversion adds it to
+public/skconst.js and Help 94 in the same PR, without asking first. (Fritz, 2026-10-30, thread "Add Skynet unit conversion
+constants"; names and Labels 2026-11-19, Panel Updates Sandbox entry 28; Help 94)
+- *Replaced 2026-11-19:* the `skc_From_To_To` names (`skc_Kg_To_Lb`), and the short names with no start (`L_p_Gal`) as reserved
+  words. Before the first Public Production, so no old way is kept.
 
-1.18 **Skynet names: `skn_` and `sk_`.** **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
+1.18 **Skynet names: `skn_`** (Rule 3.20). **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
 Process: `skn_Boil_Temp` (the temperature water boils at here and now, in the panel's units), `skn_Boil_Temp_C`,
-`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). **`sk_`** = a **Skynet role** that holds one temperature probe (by its hidden
-key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Probe_1-3`, `sk_Ferment_Probe_1-10`, set on
+`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). A **Skynet role** (`skn_` too; was `sk_` before 2026-11-19) holds one temperature probe (by its hidden
+key, so a rename keeps it): `skn_Boil_Probe_1-3`, `skn_Mash_Probe_1-3`, `skn_HLT_Probe_1-3`, `skn_Ferment_Probe_1-10`, set on
 ☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
-**`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
+**`wait_boil`** waits until `skn_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
 at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97) **Built 2026-11-19 (Panel Updates
 entry 16, Help 238):** the four `skn_` Globals (read only; `skn_Boil_Temp` in the panel's Units; data kept in °C and hPa).
-The `sk_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
+The `skn_` probe roles and `wait_boil` are **not built yet**; until then a Process waits with
 `wait BK_Temp >= skn_Boil_Temp - 1`.
 
 1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
@@ -1473,6 +1472,12 @@ Process string, a `print` line, a pop-up), changes how it looks. The one list is
   `\ohm` Ω, `\+-` ±, `\\` one backslash.
 - **No `\F` or `\C` alone:** a folder path like `C:\Config` must never turn into °Config (Rule 7.23 uses paths everywhere).
 - A code that is not on the list stays as typed. Codes work the same in both programs; the BruControl Import brings in no codes.
+
+3.20 **`skn_` starts every Skynet name** (OakBarn Brewery, 2026-11-19: "yes the skn_ as any Skynet thing"; "KISS make them the
+same"). A name Skynet owns, that a Process can read, starts **`skn_`**, lower case like the other starts (`gG`, `wgt_`):
+Skynet internal Globals (`skn_Boil_Temp`, Rule 1.18), probe roles (`skn_Boil_Probe_1`, Rule 1.18, not built yet) and Skynet
+Constants (`skn_const_L_p_Gal`, Rule 1.17). A new kind of Skynet name gets `skn_` plus a word for its kind. Recipe values still
+start `rcp_` (Rule 16.4): moving them to `skn_` is a separate change, after the Recipe PRs now open.
 
 ## 4. Making things: the Build Tab
 
@@ -6831,7 +6836,7 @@ import.
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rules 1.18 and 2.27 changed (Panel Updates entry 16, OakBarn Brewery: "The perferred way should be ICAO id of airport. WE could make it the only way"): the boil temperature is rebuilt on today's code in Settings > Boil temperature (air pressure): the ICAO code is the only way (no Postal Code), Elevation, typed pressure, Test, three plain messages; the four `skn_` Globals built; `sk_` roles and `wait_boil` not built yet. Help 238 (how to find the ICAO code and your Elevation) and French. Panel only (the BruControl Import program never fetches a report). (thread "Set boil temp from local weather")
 - 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
-- 2026-11-19: Rule 1.17 grows (Panel Updates Sandbox entry 28, built): short Skynet Constant names (`L_p_Gal` ...), Imperial (`Im`), more volume (pint, cup, tbsp, tsp, fl oz), small weights (mg), fractions and water (%, ppm, g/gal), `toF()` and `toC()`, reserved words, the 📐 Constants list in the Process editor, and new features add the constants they need without asking (Help 94, 22, 13).
+- 2026-11-19: Rule 1.17 changed and Rule 3.20 added (Panel Updates Sandbox entry 28, built; OakBarn Brewery: "SK_CONST_L_p_G with a label Liters per Gallon", "yes the skn_ as any Skynet thing"): Skynet Constants are `skn_const_` + a short code (`skn_const_L_p_Gal`) with a plain Label (Liters per Gallon); `skc_` names gone; 57 more (Imperial `Im`, pint, cup, tbsp, tsp, mg, %, ppm, g/gal); `toF()` and `toC()`; the 📐 Constants list; new features add constants without asking. Rule 3.20: `skn_` starts every Skynet name; Rule 1.18 probe roles `sk_` -> `skn_` (Help 94, 22, 13).
 - 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")
 - 2026-11-19: Rule 2.26 changed (OakBarn Brewery: Processes run side by side; "Yes more than one per tab and no Process restriction"): every Override button has a Process setting (one Process or Any), any number on a Tab and per Process, and the Override pop-up (by itself after 3 s in a wait or sleep outside a loop when no button is set to that Process or Any; on demand with the new commands show_Override and hide_Override). Help 96 and 22 updated; no new Help number used. (thread "Let Override target the right Process")
 - 2026-11-19: Added Rule 17.17 Strike Offset (Panel Updates entry 14): a Strike offset in every Equipment Profile and on each Tab, added by the Recipe's Calculate from the Brew on Tab.

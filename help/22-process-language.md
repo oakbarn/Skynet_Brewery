@@ -152,7 +152,7 @@ The change lasts until the panel restarts. To keep a look, set it in the item's 
 
 ## Skynet Constants
 
-Fixed numbers for common conversions are built in, so a Process can write `gGV_Batch_L = gGV_Batch_Gal * L_p_Gal` (liters per gallon) or the long name `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. `toF(x)` and `toC(x)` change a temperature. None can be changed. The full list is in [Skynet Constants](94-skynet-constants), and **📐 Constants** in the Process editor shows it too.
+Fixed numbers for common conversions are built in, so a Process can write `gGV_Batch_L = gGV_Batch_Gal * skn_const_L_p_Gal` (Label: Liters per Gallon). `toF(x)` and `toC(x)` change a temperature. None can be changed. The full list is in [Skynet Constants](94-skynet-constants), and **📐 Constants** in the Process editor shows it too.
 
 ## NULL: the empty value
 
@@ -184,7 +184,7 @@ These words belong to the Process language, so none of them can be the name of a
 - **Kinds of variable:** `value`, `string`, `bool`, `time`, `datetime`
 - **Commands:** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (after a name: `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Places:** `tab`, `workspace`
-- **Skynet Constants:** every name that starts with `skc_`, every short constant name such as `L_p_Gal`, and `toF` and `toC` (see above)
+- **Skynet Constants:** every name that starts with `skn_const_` (see above)
 
 The names Windows keeps for itself (CON, PRN, AUX, NUL, COM1 to COM9, LPT1 to LPT9) can't be names either. See [Allowed names](63-allowed-names).
 

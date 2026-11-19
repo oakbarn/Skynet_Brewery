@@ -13089,8 +13089,8 @@ $('#colorKey').onclick = () => {
 };
 
 // Skynet Constants list (OakBarn Brewery, 2026-11-19, Panel Updates Sandbox entry 28: a viewable list, usable in Processes): every
-// constant with its short name, value and what it does, by group; typing finds by name, unit or words; a click puts the short name
-// (or the skc_ name when it has none) at the cursor in the Process editor
+// constant with its Label ("Liters per Gallon"), name and value, by group; typing finds by Label, name or unit; a click puts the name at
+// the cursor in the Process editor
 function renderConstRows() {
   const box = $('#constRows'), f = $('#constFind').value.trim().toLowerCase(), rows = [];
   const hit = (...t) => !f || t.join(' ').toLowerCase().includes(f);
@@ -13101,12 +13101,12 @@ function renderConstRows() {
   };
   const fns = SKYNET_FUNCTIONS.filter(([n, , what]) => hit(n, what, 'temperature'));
   if (fns.length) rows.push(h('div', { class: 'constGroup' }, 'Temperature (functions)'),
-    ...fns.map(([n, , what]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n + '(') }, h('code', {}, n + '(x)'), h('span', {}), h('span', {}, what))));
-  for (const [group, list] of SKYNET_CONSTANT_GROUPS) {
+    ...fns.map(([n, , what]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n + '(') }, h('span', {}, what), h('span', {}), h('code', {}, n + '(x)'))));
+  for (const [group] of SKYNET_CONSTANT_GROUPS) {
     const mine = SKYNET_CONSTANTS.filter(c => c[3] === group && hit(c[0], c[4], c[2], group));
-    if (!list.length || !mine.length) continue;
-    rows.push(h('div', { class: 'constGroup' }, group), ...mine.map(([n, v, what, , short]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(short || n) },
-      h('code', {}, short || n), h('span', { class: 'constVal' }, showConstant(v)), h('span', {}, what + (short ? ` (${n})` : '')))));
+    if (!mine.length) continue;
+    rows.push(h('div', { class: 'constGroup' }, group), ...mine.map(([n, v, , , label]) => h('div', { class: 'constRow', title: 'Click to put it at the cursor', onclick: put(n) },
+      h('span', {}, label), h('span', { class: 'constVal' }, showConstant(v)), h('code', {}, n))));
   }
   box.replaceChildren(...(rows.length ? rows : [h('div', { class: 'muted' }, 'No Skynet Constant has those letters')]));
 }

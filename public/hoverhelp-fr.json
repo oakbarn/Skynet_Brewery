@@ -401,7 +401,7 @@
  "Text Widget": "Text Widget",
  "Override Button Widget": "Override Button Widget",
  "Click to put it at the cursor": "Cliquez pour la mettre au curseur",
- "Skynet Constants: every built in conversion number, with its short name and value. Click one to put it at the cursor": "Constantes Skynet : chaque nombre de conversion intégré, avec son nom court et sa valeur. Cliquez-en une pour la mettre au curseur",
+ "Skynet Constants: every built in conversion number, with its Label, value and name. Click one to put it at the cursor": "Constantes Skynet : chaque nombre de conversion intégré, avec son Label, sa valeur et son nom. Cliquez-en une pour la mettre au curseur",
  "Value, Time and DateTime Widgets": "Value, Time and DateTime Widgets",
  "Timer Widget": "Timer Widget",
  "More about this (Properties and Attributes)": "Plus sur ceci (Properties et Attributes)",

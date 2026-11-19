@@ -154,7 +154,7 @@ Le changement dure jusqu'au redémarrage du panel. Pour garder une apparence, r�
 
 ## Skynet Constants (constantes Skynet) {#skynet-constants}
 
-Des nombres fixes pour les conversions courantes sont intégrés, pour qu'un Process puisse écrire `gGV_Batch_L = gGV_Batch_Gal * L_p_Gal` (litres par gallon) ou le nom long `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. `toF(x)` et `toC(x)` changent une température. Aucune ne peut être changée. La liste complète est dans [Constantes Skynet](94-skynet-constants), et **📐 Constants** dans l'éditeur de Process la montre aussi.
+Des nombres fixes pour les conversions courantes sont intégrés, pour qu'un Process puisse écrire `gGV_Batch_L = gGV_Batch_Gal * skn_const_L_p_Gal` (Label : Liters per Gallon, litres par gallon). `toF(x)` et `toC(x)` changent une température. Aucune ne peut être changée. La liste complète est dans [Constantes Skynet](94-skynet-constants), et **📐 Constants** dans l'éditeur de Process la montre aussi.
 
 ## NULL : la valeur vide {#null-the-empty-value}
 
@@ -186,7 +186,7 @@ Ces mots appartiennent au langage des Processes, donc aucun d'eux ne peut être 
 - **Types de variable :** `value`, `string`, `bool`, `time`, `datetime`
 - **Commandes :** `if`, `elseif`, `else`, `endif`, `goto`, `goLine`, `sleep`, `wait`, `start`, `stop`, `restart`, `reset`, `print`, `clear`, `show`, `new`, `declare`, `play`, `step`, `ask`, `send_db`, `DBSend` (après un nom : `HLT_PID.setpoint DBSend`), `send_db_group`, `start_db_group`, `stop_db_group`, `lock_equipment`, `unlock_equipment`, `close_all_valves`, `open_all_valves`, `open_valve`, `close_valve`, `all_pumps_off`, `import_recipe`, `start_hop_alerts`, `stop_hop_alerts`, `take_reading`, `place_Chiller`, `remove_Chiller`, `show_Override`, `hide_Override`
 - **Lieux :** `tab`, `workspace`
-- **Skynet Constants :** chaque nom qui commence par `skc_`, chaque nom court de constante comme `L_p_Gal`, et `toF` et `toC` (voir plus haut)
+- **Skynet Constants :** chaque nom qui commence par `skn_const_` (voir plus haut)
 
 Les noms que Windows garde pour lui (CON, PRN, AUX, NUL, COM1 à COM9, LPT1 à LPT9) ne peuvent pas non plus être des noms. Voir [Caractères permis dans les noms](63-allowed-names).
 

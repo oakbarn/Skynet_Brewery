@@ -8,7 +8,7 @@
 //   so a folder or a Process name has no period at all.
 // Older names with < > : " / \ | ? * in them are changed once to a ~ for each (lib/namechars.js, Skynet Rule 15.2).
 
-import { isSkynetConstantName, isReservedConstantWord, reservedWordWhat } from './skconst.js';
+import { isSkynetConstantName } from './skconst.js';
 
 export const FILE_CHARS = '< > : " / \\ | ? *';
 export const BAD_NAME_CHARS = /[<>:"/\\|?*]/;
@@ -65,9 +65,7 @@ export function elementNameError(name, what = 'Device or Widget') {
   }
   if (RESERVED.test(n)) return reservedMsg(n, what);
   if (PROCESS_WORDS.has(n.toLowerCase())) return `"${n}" is a word of the Process language (such as NULL, true, if or wait), so it can't be a ${what} name. Add to it, for example ${n}_1.`;
-  if (isSkynetConstantName(n)) return `The ${what} name "${n}" can't start with skc_: those names are kept for Skynet Constants`;
-  // the short Skynet Constant names (L_p_Gal ...), toF and toC are reserved words, any capitals (Panel Updates Sandbox entry 28)
-  if (isReservedConstantWord(n)) return `"${n}" is a reserved word: ${reservedWordWhat(n)}. A Process reading ${n} would get the constant, so pick another ${what} name, for example ${n}_1.`;
+  if (isSkynetConstantName(n)) return `The ${what} name "${n}" can't start with skn_const_: those names are kept for Skynet Constants`;
   return '';
 }
 

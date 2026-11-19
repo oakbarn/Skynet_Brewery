@@ -15,7 +15,7 @@ import { SKN_GLOBALS } from './boilpoint.js';
 //   com   comments: //, #, ' and /* ... */ (C, C++, C#, JavaScript, Node.js, Python, VB)  green
 //   lab   [labels] and the label after goto                                             slate
 //   attr  the attribute after a dot (my_Widget.visible)                                 gray
-// Skynet Constants (skc_Kg_To_Lb ...) are blue like true, false and now. Node loads it too (tests, tools/notepadpp.js).
+// Skynet Constants (skn_const_L_p_Gal ...) are blue like true, false and now. Node loads it too (tests, tools/notepadpp.js).
 
 export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'op', 'str', 'num', 'com', 'lab', 'attr'];
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
