@@ -1086,17 +1086,29 @@ imformation").
   pipes). **Both programs:** the BruControl Import's Build page shares the Panel's dialogs; BruControl has no fittings to import.
 
 2.58 **The New Schema Interview** (OakBarn Brewery, 2026-11-17: "Adding a New Schema Lands back on the Schema Page. Should land on
-a short interview Page about the New Schema"; "Similar to the Skynet Schema Import"). As soon as Add new Schema has made and loaded
-the new Schema, a short interview opens: its steps across the top like the Skynet BruControl Importer, one page at a time, ◀ Back and
-Next ▶, with Close and ✕ frozen in the upper right (Rule 2.54). The pages: **About** (the Name, and a one-line **What is it for?**
-that shows in the Schema list), **Boards** (tick the real boards from the other Schemas that this one uses too), **Tabs** (rename
-each Tab, and **Add a Fermentation Tab**), **Equipment** (an Equipment Profile for a Tab: Later, the Equipment Profile Interview
-now, or one you already have) and **Done** (a summary). A Skynet Schema Template or an Equipment Profile already asked about the
-boards, Tabs and equipment, so they get About and Done only. **Nothing is changed until ✔ Finish.** Finish, and Close, land on the
-new Schema's first Tab, never back on the Schema page (the Equipment Profile Interview, when picked, then opens and ends on the 🔨
-Build Tab, Rule 4.1). Units are not asked: they are a Panel setting, the same for every Schema. **Both programs:** the BruControl
-Import makes no Schemas with Add new Schema, so nothing changes there. (thread "Open a short interview after adding a Schema",
-Help 202)
+a short interview Page about the New Schema"; "Similar to the Skynet Schema Import"; changed 2026-11-19, PDF "Panel Update 5" #2 and
+#3: "No way to create New"; the Tabs outline; "4. Equipment is taken care of in 3 above"). As soon as Add new Schema has made and
+loaded the new Schema, a short interview opens: its steps across the top like the Skynet BruControl Importer, one page at a time,
+◀ Back and Next ▶, with Close and ✕ frozen in the upper right (Rule 2.54). The pages:
+1. **About**: the Name, and a one-line **What is it for?** that shows in the Schema list.
+2. **Boards**: tick the real boards from the other Schemas that this one uses too, and **➕ Add a New board after Finish** (the Add
+   Interface pop-up opens after Finish, then the Interfaces page, Rule 2.60).
+3. **Tabs**: a box for each Tab, and **➕ Add New Tab** for more. Each Tab has:
+   - its **Name** and **What is it for?**: **Brewing (Brew House)**, **Fermentation**, **Cleaning** or **Other** (the user names it).
+   - for Brewing, a **Level** dropdown from **Stove Top (Extract)** to **All Grain with Mash Tun (3 Vessels)**. It starts on the
+     **Skynet Brewer Level**: the Level picked last time (kept in the brewing defaults; All Grain with Mash Tun the first time).
+   - an **Equipment Profile** dropdown: None, **➕ Create New** (the Equipment Profile Interview opens after Finish) or a profile
+     the user has, filtered by what the Tab is for (a Fermentation Tab shows the fermenter profiles). One profile is on one Tab only.
+   - **Import**: **Import All** (the whole Default Layout; the Tab follows the profile), **Import Vessels** (its vessels and
+     equipment with their fittings) or **Import Manifold** (the valves, fittings and pipes between the vessels). With Vessels or
+     Manifold the Tab keeps its own layout, so the profile is not changed.
+   - **Import Processes**: tick marks for the Skynet Processes of that kind and Level (a Stove Top has no Mash). A ticked one is set
+     in Brew Process; an unticked one is left out (SKIP).
+4. **Done**: a summary. (The old Equipment page is gone: the Tabs page takes care of it.)
+A Skynet Schema Template or an Equipment Profile already asked about the boards, Tabs and equipment, so they get About and Done
+only. **Nothing is changed until ✔ Finish.** Finish, and Close, land on the new Schema's first Tab, never back on the Schema page.
+Units are not asked: they are a Panel setting, the same for every Schema. **Both programs:** the BruControl Import makes no Schemas
+with Add new Schema, so nothing changes there. (thread "Open a short interview after adding a Schema", Help 202)
 
 2.59 **Data is always metric; Units are for showing only** (OakBarn Brewery, 2026-11-17, Panel Updates Sandbox entry 9: "Remember
 that switching units only affects display, not the data which is always metric"; "make sure everything like the defaults are set to
@@ -1118,6 +1130,17 @@ never changes a saved number, so switching back and forth can never drift a numb
   on screen), and the live side of a user's own Schemas (probes, Setpoints, PID, alarms, Processes).
 - **Both programs:** the BruControl Import still makes its Vessels and Profiles in the Units picked; the Panel keeps them in metric
   when they are saved. Its probes stay in the units BruControl had until the live side is done. (Panel Updates Sandbox entry 9)
+
+2.60 **Every page has Close; a Menu tab goes back to where it was opened** (OakBarn Brewery, 2026-11-19, PDF "Panel Update 5" #3:
+"No close Buttons"; #4: "After Save of Add Interface should go to the Interface Board page"; #8: "Close goes back to Schema not the
+dialog or Tab it was opened from").
+1. The Devices (Interface Boards), Globals, Log, Import, Media, Settings and Config pages have **Close** and **✕** frozen in the upper
+   right (Rule 2.54). They go back to the Tab the page was opened from.
+2. **☰ Menu > ➕ Add Interface ...**: after **Save** the Devices page opens on the Interfaces part, so the new board is seen.
+3. A ☰ Menu tab (Templates, Equipment Profile, Schema ...) opened from another Menu tab goes back to that Menu tab on Close; opened
+   from a Tab or a page it goes back to that Tab or page, not always to the Schema tab.
+**Both programs:** the BruControl Import's own pages keep their look; its Build page shares the Panel's ☰ Menu tabs, so Close goes
+back the same way there.
 
 ## 3. Names and file names
 
@@ -5618,6 +5641,26 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - **Both programs:** the BruControl Import's Build page is the Panel's own, so it has it. BruControl has no ice bath, so an import
   never makes one.
 
+19.9 **📐 My Size: a vessel drawn to the user's own Height and Diameter** (OakBarn Brewery, 2026-11-19, PDF "Panel Update 5" #8: "if
+a User Choses a Vessel can we resize proportionally and create an SVG as a User Vessel Template"). In a Vessel Template's settings
+(☰ Menu > Vessel Templates, a plain vessel), **📐 My Size** asks a name, the **Height** and the **Diameter**. Skynet draws that
+vessel's picture stretched to that shape as an SVG of the user's own in the User Graphic folder, makes a **User Vessel Template**
+with it (sized by Diameter, with that Height and Diameter) and opens it. The Skynet Template is not changed. **Both programs:** the
+BruControl Import's Build page shares the ☰ Menu Templates, so it has it; an import makes no templates.
+
+19.10 **Material: Copper, Stainless or Hose** (OakBarn Brewery, 2026-11-19, PDF "Panel Update 5" #9, option B: "i LIKE b"; "After
+fix, the chillzilla is not needed. It is Not a Chillzilla and Chillzilla is brand but other counterflows look very similar";
+"Don't need it. It is a Duplicate of the Imersion in copper").
+1. A HERMS coil, an Immersion chiller and a Counterflow chiller have a **Material** dropdown: **As drawn**, **Copper** or
+   **Stainless (SS)**; a Counterflow chiller also **Hose** (green, with brass ends). The picture is drawn in that color. It is on
+   the Add box, the Properties and the Equipment Template.
+2. New Skynet Equipment Templates **HERMS Coil Same Side** and **Immersion Chiller Same Side**: In and Out IPs on the same side
+   (Top Left and Bottom Left; any corner or Left / Right may be picked). A HERMS coil's In and Out may now be on any corner.
+3. The **Chillzilla** Equipment Template is taken out: Chillzilla is a brand, and it is the Counterflow (Hose) or the Immersion
+   chiller in Copper. Before the first Public Production, so no old way is kept; a Chillzilla already on a Tab stays as it is.
+**Both programs:** the BruControl Import's Build page shares the dialogs and Templates; BruControl has no chillers or coils to
+import.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -5662,6 +5705,7 @@ water from the WORT PLate chiller is used on the lawn"; thread "Add a manual Sum
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
 - 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.
 - 2026-11-18: Rule 18.50 applied to the Alarm Widgets (the "Recheck dialogs" pass, part 1): Basic, User and Pre-Hop Alarm dialogs in the Hose Bib's order, Widget Type last, Database and .API ⬢ on the Active overlay line; nothing taken away. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs; no import change.
 - 2026-11-18: Added Rule 18.50 (OakBarn Brewery, PDF "Panel Update Final 4", "Final 4 will just be some guidance Rules"): a guidance Rule for the "Recheck dialogs" pass: a Widget dialog follows the Hose Bib (the Widget half of the Model) the way the Hose Bib was made from the Blichmann; a Widget with no Graphic has no picture attributes and gets a Background, Fore color and Back color; Switch, Pump and like Widgets and the Graphic (Picture) Widget have the Graphic properties, others only with IPs or .confirmation; the Graphic Widget has 3 Backgrounds (.path, .path_2, .path_3), other Widgets one from Skynet with no path, a User Widget one path; no IPs, Hose or Pipe, IP Fittings, Cover or Overlay on a Widget without IPs, except a Switch has an Overlay. No dialog changes now. Checked against both programs: the BruControl Import's Build page shares the dialogs.

@@ -53,7 +53,7 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 |---|---|---|---|
 | `Chiller_Counterflow.svg` | Skynet counterflow chiller (redrawn from Fritz's CounterFlow_1 photo): a copper coil with Wort In at the Top Left, Water Out at the Top Right, Water In at th... | viewBox 0 0 240 280 (240x280) | Vessel/Equipment Template Counterflow_Chiller |
 | `Chiller_Counterflow_Small.svg` | Skynet small counterflow chiller (redrawn from Fritz's CounterFlow_2 photo): a shorter copper coil with Wort In at the Top Left, Water Out at the Top Right, ... | viewBox 0 0 240 200 (240x200) | Vessel/Equipment Template Counterflow_Chiller_Small |
-| `chill_coil.svg` | Coiled immersion chiller. | viewBox 0 0 180 180 (180x180) | Vessel/Equipment Template Chillzilla; Vessel/Equipment Template Immersion_Chiller; Equipment Widget "Chilling coil" |
+| `chill_coil.svg` | Coiled immersion chiller. | viewBox 0 0 180 180 (180x180) | Vessel/Equipment Template Immersion_Chiller; Equipment Widget "Chilling coil" |
 | `plate_chiller.svg` | Brazed plate chiller, four ports at the corners. | viewBox 0 0 110 200 (110x200) | Vessel/Equipment Template Plate_Chiller; Equipment Widget "Plate chiller" |
 | `Chiller_Copper_Counterflow.svg` | Skynet Copper Counterflow Chiller (redrawn as plain SVG from Fritz's Copper_CounterFlow.svg, 2026-11-02): a copper coil of 8 turns. The 4 ports all face left... | viewBox 0 0 225 245 (225x245) | Template vessel Copper_Counterflow_Chiller; Panel code (app.js); Help 109 |
 

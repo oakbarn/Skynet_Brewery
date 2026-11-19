@@ -647,7 +647,7 @@ const EQ = {
       waterIn: pt('Water In', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Right', circuit: 'water' }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
-    ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
+    ports: { in: pt('In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),      // all 4 corners: In and Out may be on one side (Panel Update 5 #9)
       // a 4 port coil (Chillzilla): a second circuit that never mixes with the first (Fritz, 2026-10-21: 2 ins, 2 outs)
       in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
   herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'Images/Skynet/Other_Equipment/herms_coil.svg', size: [180, 180], tab: 'Equipment',
@@ -1502,6 +1502,25 @@ const customColorName = c => rgbText(c) || c;
 // where it starts Centered: Left, Centered or Right, no Default choice (a saved MiddleCenter shows as Centered)
 const ALIGN_LCR = [['MiddleLeft', 'Left'], ['', 'Centered', 'MiddleCenter'], ['MiddleRight', 'Right']];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
+// Material (Panel Update 5 #9, OakBarn Brewery 2026-11-19, "i LIKE b": "add a Copper or Stainless Attribute to HERMs Coils, Immersion
+// Chillers and Counter-Flow. Counter flow would be a DDLb with Copper SS and Hose then the color would be Green except for the ends as
+// Brass"): the Skynet picture is drawn again in that color; the brass ends keep their color. Empty: as the picture is drawn.
+const hasMaterial = g => ['herms', 'ccoil'].includes(g?.vesselType) || (g?.vesselType === 'pchiller' && /counterflow/i.test(`${g.vtype ?? ''} ${g.image ?? ''}`));
+const MATERIAL_CHOICES = g => [['', 'As drawn'], ['copper', 'Copper'], ['ss', 'Stainless (SS)'], ...(g?.vesselType === 'pchiller' ? [['hose', 'Hose (green, brass ends)']] : [])];
+const MATERIAL_TIP = 'What it is made of: its picture is drawn in that color. Copper, Stainless (SS), or on a Counterflow chiller a Hose (green with brass ends). As drawn: the Skynet picture as it is.';
+const MAT_COPPER = ['#7a3d1e', '#a85a30', '#c87543', '#d98a4a', '#f0b48a'], MAT_SS = ['#5d6670', '#8a939c', '#b4bcc4', '#c9ced3', '#eef1f4'], MAT_HOSE = ['#1e5a2a', '#2e7d3c', '#3f9a4e', '#4caf5a', '#a8dcb0'];
+const matPics = new Map();
+function matPic(src, mat) {
+  if (!mat || !src || !/\.svg$/i.test(src)) return media(src);
+  const k = src + '|' + mat; if (matPics.has(k)) return matPics.get(k) || media(src);
+  matPics.set(k, '');
+  fetch(media(src)).then(r => r.text()).then(t => {
+    const to = { copper: MAT_COPPER, ss: MAT_SS, hose: MAT_HOSE }[mat] || MAT_COPPER;
+    for (const from of [MAT_COPPER, MAT_SS]) if (from !== to) from.forEach((c, i) => { t = t.replace(new RegExp(c, 'gi'), to[i]); });
+    matPics.set(k, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(t)); renderWs();
+  }).catch(() => matPics.set(k, media(src)));
+  return media(src);
+}
 function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'vessel';
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : '') + (g.visibility === 'hidden' || g.hidden === true ? ' vhidden' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
@@ -1515,7 +1534,7 @@ function buildVessel(g) {
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
   else if (!g.image && isIceCan(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${iceCanPic(g.w, g.h)}")`; }     // the Ice Water Can: drawn for its own box (Rule 19.8)
   else if (!g.image && isStove(g)) { n.classList.add('has-img'); n.style.backgroundImage = `url("${stovePic(g.w, g.h, stoveOutType(g))}")`; }     // a Stove Top Vessel: drawn for its own box (Rule 19.7)
-  else if (g.image && !isUnit({ ...g, loose: false })) n.style.backgroundImage = `url("${media(g.image)}")`;     // a Skynet Fitting is drawn once only, by its .bfImg above (not a second time, unturned, behind it)
+  else if (g.image && !isUnit({ ...g, loose: false })) n.style.backgroundImage = `url("${hasMaterial(g) ? matPic(g.image, g.material) : media(g.image)}")`;     // a Skynet Fitting is drawn once only, by its .bfImg above (not a second time, unturned, behind it)
   if (g.vwidget && isSkyV(g)) n.append(...vwParts(g));       // a Vessel Widget draws its Probe and Element, and in Edit layout what is not Placed
   for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
     const p = g.ports?.[k]; if (d.ip || !p?.installed || (g.vwidget && isSkyV(g))) continue;
@@ -7705,7 +7724,7 @@ async function saveBuildTemplate({ name, skynet }) {
       if (!on) throw new Error('A User Bundled vessel Template must be built on a Skynet Vessel Widget: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, build and Bundle it on the Build Tab, then save it here.');
       t.base = on;
     }
-    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'safeVolume', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'sizeMethod', 'diameter', 'vheight']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'safeVolume', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'sizeMethod', 'diameter', 'vheight', 'material']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
     for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
     for (const [k, p] of Object.entries(g.ports || {})) {
@@ -8087,6 +8106,7 @@ const VESSEL_FLOW = it => hasTop(it) ? [['_vf', 'Out flow', 'head'], ['flowColor
 F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'],
   ...(isStove(it) ? stoveSizeFields(it) : []),
   ['image', isStove(it) || isIceCan(it) ? 'Graphic (picture path; empty = drawn by Skynet for its Height and Width)' : 'Graphic (picture path)', 'path'],
+  ...(hasMaterial(it) ? [['material', 'Material', 'sel', MATERIAL_CHOICES(it), false, false, { tip: MATERIAL_TIP }]] : []),
   ...(hasTop(it) && !isKettle(it) ? [['_top', `Hose hang top: its top third is one big IP. A Quick Disconnect hose dropped there hangs over the rim, and a Process line Hose_1.connect = ${it.name || 'its Name'} puts it there (Rules 5.28 and 5.34).`, 'note']] : []),
   // a Stove Top Vessel's one IP is fixed at the center of its bottom: only its IP Type is set (Rule 19.7)
   ...(it.vesselType === 'stoveTopOut' ? [['ipTypeOut', 'Bottom Outlet IP Type', 'sel', ipChoices(it.ipTypeOut), true, false, { tip: STOVE_IP_TIP }]] : []),
@@ -14116,11 +14136,31 @@ async function newSchemaFromProfile(pid, name = '') {
 // Schema page. A Skynet Schema Template or an Equipment Profile already asked about the boards, Tabs and equipment, so they get About
 // and Done only. Units are not asked: they are a Panel setting (Settings > Panel settings), the same for every Schema.
 const NSI_KEEP = { keep: true };       // the interview's notes stay on the page (Rule 11.8: need to know)
-const NSI_STEPS = ['About', 'Boards', 'Tabs', 'Equipment', 'Done'];
+// Panel Update 5 (OakBarn Brewery, 2026-11-19, Rule 2.58): "Equipment is taken care of in 3 above", so the Equipment Profile is asked on
+// the Tabs page, Tab by Tab
+const NSI_STEPS = ['About', 'Boards', 'Tabs', 'Done'];
 const NSI_TIP = {
   name: 'The name you pick it by in the Schema list. Spaces are fine.',
   about: 'One line on what this Schema is for, for example "Keg Cleaning" or "Hot Side, 10 gallon". It shows in the Schema list. You may leave it blank.',
+  newBoard: 'On: after ✔ Finish the Add Interface pop-up opens, so you can add a board (a Mega, an ESP32 ...) that no other Schema has. Then the Interfaces page shows it.',
+  kind: 'What this Tab is for. Brewing (Brew House), Fermentation and Cleaning each offer their own Equipment Profiles and Processes. Other: any Tab of your own; its name is the Tab name above.',
+  level: 'How you brew on this Tab, from a Stove Top to All Grain with a Mash Tun. It picks the Processes offered below (a Stove Top has no mash). It starts on your Skynet Brewer Level, the one you picked last time.',
+  profile: 'The Equipment Profile of this Tab: its vessels, pumps, valves, pipes and numbers. None: none for now (☰ Menu > Equipment Profile later). ➕ Create New: the Equipment Profile Interview opens after ✔ Finish.',
+  import: 'What comes onto the Tab from the Equipment Profile. Import All: the whole Default Layout, and the Tab follows the profile. Import Vessels: only its vessels and equipment, with their fittings. Import Manifold: only the valves, fittings and pipes between them. With Vessels or Manifold the Tab keeps its own layout, so the profile is not changed.',
+  procs: 'Tick the Skynet Processes this Tab brews with. They are set in ☰ Menu > Brew Process, which writes them for your Devices. Untick one to leave it out.',
+  addTab: 'Adds another Tab to this page. Pick what it is for and its name.',
 };
+// what a Tab is for, and its Brewing Level (Panel Update 5 #3)
+const NSI_KINDS = [['brew', 'Brewing (Brew House)'], ['ferment', 'Fermentation'], ['clean', 'Cleaning'], ['other', 'Other (you name it)']];
+const NSI_LEVELS = [['stove', 'Stove Top (Extract)'], ['partial', 'Extract with Partial Grain'], ['biab', 'All Grain, 1 Vessel (BIAB)'], ['two', 'All Grain, 2 Vessels'], ['mashtun', 'All Grain with Mash Tun (3 Vessels)']];
+// the Processes each one is offered (a Brew Process step: its Skynet Process Template), by what the Tab is for and its Level
+const NSI_PROCS = { brew: ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor'], ferment: ['Ferment'], clean: ['Clean'] };
+const NSI_NO_MASH = ['Heat_Strike', 'Strike', 'Mash'];
+const nsiProcs = (kind, level) => kind === 'other' ? Object.values(NSI_PROCS).flat() : (NSI_PROCS[kind] || []).filter(k => kind !== 'brew' || level !== 'stove' || !NSI_NO_MASH.includes(k)).filter(k => kind !== 'brew' || level !== 'partial' || !['Heat_Strike', 'Strike'].includes(k));
+const nsiTpl = (key, level) => ['Heat_Strike', 'Strike', 'Mash'].includes(key) && (level === 'biab' || level === 'two') ? `Skynet_${key}_${level === 'biab' ? 1 : 2}_Vessel` : `Skynet_${key}`;
+const NSI_STEP_WORD = Object.fromEntries([['PreBrew', 'PreBrew'], ['Heat_Strike', 'Heat Strike'], ['Strike', 'Strike'], ['Mash', 'Mash'], ['Boil', 'Boil'], ['Whirlpool_and_Chill', 'Whirlpool and Chill'], ['Chill', 'Chill'], ['Transfer_to_Fermentor', 'Transfer to Fermentor'], ['Ferment', 'Ferment'], ['Clean', 'Clean']]);
+const isFermProfile = p => /ferment/i.test(p?.name || '') || (p?.graphics || []).some(g => /ferment/i.test(`${g.vesselType ?? ''} ${g.vtype ?? ''}`));
+const nsiGuess = n => /ferment/i.test(n) ? 'ferment' : /\bclean|\bcip\b/i.test(n) ? 'clean' : /equip/i.test(n) ? 'other' : 'brew';
 function nsiPage(steps, at, fields, obj, { first = false, last = false } = {}) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody ivBody' }), d = h('dialog', { class: 'miniDlg ivDlg nsiDlg' });
@@ -14132,8 +14172,10 @@ function nsiPage(steps, at, fields, obj, { first = false, last = false } = {}) {
       h('button', { type: 'button', title: 'Stop the interview. The new Schema is kept as it is now; change these later.', onclick: () => close() }, 'Close'),
       h('button', { type: 'button', title: 'Close', onclick: () => close() }, '✕'));
     d.append(bar, h('h3', {}, 'New Schema Interview: ' + steps[at]), strip, body);
-    document.body.append(d); bindForm(body, fields, obj);
+    document.body.append(d);
     const done = r => { try { readFields(obj, body); } catch (e) { if (r === 'next') return toast(e.message, true); } d.close(); d.remove(); res(r); };
+    obj._go = done;      // a button on the page (➕ Add New Tab) ends the page with its own answer
+    bindForm(body, fields, obj);
     const close = () => { if (!confirm('Stop the New Schema Interview? The new Schema is kept. Nothing from these pages is changed.')) return; d.close(); d.remove(); res('close'); };
     d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
     d.showModal();
@@ -14150,48 +14192,73 @@ async function schemaInterview({ short = false } = {}) {
   const idUsed = d => d.id && have.some(x => String(x.id || '').toUpperCase() === String(d.id).toUpperCase());
   const boards = found.filter(d => !have.some(x => x.name.toLowerCase() === d.name.toLowerCase()) && !idUsed(d));
   const tabs = S.config.workspaces.filter(w => !w.build && !isHiddenTab(w));
-  const a = { name: act.name, about: act.about || '', ferment: false, eqHow: 'later', eqTab: '' };
+  const level0 = NSI_LEVELS.some(([k]) => k === S.config.brewDefaults?.brewLevel) ? S.config.brewDefaults.brewLevel : 'mashtun';      // the Skynet Brewer Level
+  const a = { name: act.name, about: act.about || '', newBoard: false, more: 0 };
   boards.forEach((d, i) => { a['b' + i] = false; });
-  tabs.forEach((w, i) => { a['t' + i] = w.name; });
-  const tabNames = () => [...tabs.map((w, i) => String(a['t' + i] ?? w.name).trim()), ...(a.ferment ? ['Fermentation'] : [])];
-  const freeTabs = () => tabNames().filter((n, i) => !(tabs[i]?.equipmentProfile));
+  // each Tab on the page: the ones the Schema has, then the ones ➕ Add New Tab adds (Panel Update 5 #3)
+  const rows = () => [...tabs.map((w, i) => ({ i, w })), ...Array.from({ length: a.more }, (_, j) => ({ i: tabs.length + j, w: null }))];
+  const setRow = ({ i, w }) => {
+    if (a['t' + i] === undefined) a['t' + i] = w ? w.name : '';
+    if (a['k' + i] === undefined) a['k' + i] = w?.purpose || nsiGuess(w?.name || '');
+    if (a['lv' + i] === undefined) a['lv' + i] = w?.brewLevel || level0;
+    if (a['ep' + i] === undefined) a['ep' + i] = w?.equipmentProfile || '';
+    if (a['im' + i] === undefined) a['im' + i] = 'all';
+    for (const k of Object.values(NSI_PROCS).flat()) if (a[`p${i}_${k}`] === undefined) a[`p${i}_${k}`] = true;
+  };
+  tabs.forEach((w, i) => setRow({ i, w }));
+  const tabNames = () => rows().map(({ i }) => String(a['t' + i] ?? '').trim());
   const picked = () => boards.filter((d, i) => a['b' + i]);
-  const eqText = () => a.eqHow === 'later' ? 'later (☰ Menu > Equipment Profile)' : a.eqHow === '@interview' ? `the Equipment Profile Interview for the Tab ${a.eqTab}, right after Finish`
-    : `"${profileName(a.eqHow)}" on the Tab ${a.eqTab}`;
+  const profList = kind => (S.profiles || []).filter(p => kind === 'ferment' ? isFermProfile(p) : kind === 'brew' ? !isFermProfile(p) : true);
+  const tabPage = () => [...rows().flatMap(({ i, w }) => {
+    setRow({ i, w });
+    const kind = a['k' + i], prof = a['ep' + i], list = profList(kind), had = w?.equipmentProfile;
+    const procs = nsiProcs(kind, a['lv' + i]);
+    return [['_tb' + i, `Tab ${i + 1}`, 'box'],
+      ['t' + i, kind === 'other' ? 'Tab name (yours)' : 'Tab name', 'text'],
+      ['k' + i, 'What is it for?', 'sel', NSI_KINDS, true, false, { tip: NSI_TIP.kind }],
+      ...(kind === 'brew' ? [['lv' + i, 'Level', 'sel', NSI_LEVELS, true, false, { tip: NSI_TIP.level }]] : []),
+      had ? ['_ep' + i, `Equipment Profile: "${profileName(had)}" (it has one already)`, 'note', null, null, null, NSI_KEEP]
+        : ['ep' + i, 'Equipment Profile', 'sel', [['', 'None for now'], ['@new', '➕ Create New (the Equipment Profile Interview)'], ...list.filter(p => !tabs.some(x => x.equipmentProfile === p.id)).map(p => [p.id, p.name])], true, false, { tip: NSI_TIP.profile }],
+      ...(!had && prof && prof !== '@new' ? [['im' + i, 'Import', 'sel', [['all', 'Import All'], ['vessels', 'Import Vessels'], ['manifold', 'Import Manifold']], false, false, { tip: NSI_TIP.import }]] : []),
+      ...(procs.length ? [['_ph' + i, 'Import Processes (tick the ones to bring in)', 'note', null, null, null, { tip: NSI_TIP.procs, keep: true }], ...procs.map(k => [`p${i}_${k}`, NSI_STEP_WORD[k], 'bool'])] : []),
+      ['_te' + i, '', 'boxend']];
+  }),
+  ['_add', '➕ Add New Tab', 'go', () => a._go?.('addTab'), false, false, { tip: NSI_TIP.addTab }]];
   const pages = {
     About: () => [['name', 'Name', 'text', null, false, 'b', { tip: NSI_TIP.name }], ['about', 'What is it for?', 'text', null, false, false, { tip: NSI_TIP.about }],
       ['_n', short ? 'Its boards, Tabs and equipment came from what you picked. Next ▶ shows what is left to do.' : 'A few short questions about the new Schema. Next ▶ keeps an answer as it is; nothing is changed until ✔ Finish.', 'note', null, null, null, NSI_KEEP]],
     Boards: () => [['_h', have.length ? `It has ${plural(have.length, 'board')} now: ${have.map(d => (d.id ? d.id + ': ' : '') + d.name).join(', ')}.` : 'It has no board (Interface) yet.', 'note', null, null, null, NSI_KEEP],
       ...(boards.length ? [['_b', 'Tick the boards from your other Schemas that this Schema uses too:', 'note', null, null, null, NSI_KEEP],
         ...boards.map((d, i) => ['b' + i, `${d.id ? d.id + ': ' : ''}${d.name}${d.schema ? '  (in ' + d.schema + ')' : ''}`, 'bool'])]
-        : [['_b', 'There are no other boards in your other Schemas to bring in. Add one later on the Devices page (Add Interface), or try things first in the Simulator (🧪 beside ☰ Menu).', 'note', null, null, null, NSI_KEEP]])],
-    Tabs: () => [...tabs.map((w, i) => ['t' + i, `Tab ${i + 1}${w.equipmentProfile ? ' (uses the Equipment Profile "' + profileName(w.equipmentProfile) + '")' : ''}`, 'text']),
-      ...(tabs.some(w => /ferment/i.test(w.name)) ? [] : [['ferment', 'Add a Fermentation Tab', 'bool']]),
-      ['_n', 'More Tabs can be added at any time in Edit layout (➕ New tab).', 'note', null, null, null, NSI_KEEP]],
-    Equipment: () => {
-      const free = freeTabs(), used = tabs.filter(w => w.equipmentProfile);
-      if (!a.eqTab || !free.includes(a.eqTab)) a.eqTab = free[0] || '';
-      return [...(used.length ? [['_u', used.map(w => `The Tab ${a['t' + tabs.indexOf(w)]} already uses "${profileName(w.equipmentProfile)}".`).join('\n'), 'note', null, null, null, NSI_KEEP]] : []),
-        ...(free.length ? [['eqHow', 'Equipment Profile (the vessels, pumps and valves of a Tab)', 'sel', [['later', 'Later (☰ Menu > Equipment Profile)'], ['@interview', 'Answer the Equipment Profile Interview now'],
-          ...(S.profiles || []).filter(p => !(tabs.some(w => w.equipmentProfile === p.id))).map(p => [p.id, `Use "${p.name}"`])]], ['eqTab', 'For the Tab', 'sel', free.map(n => [n, n])]]
-          : [['_f', 'Every Tab already has an Equipment Profile.', 'note', null, null, null, NSI_KEEP]])];
-    },
+        : [['_b', 'There are no other boards in your other Schemas to bring in.', 'note', null, null, null, NSI_KEEP]]),
+      // Panel Update 5 #2 (OakBarn Brewery, 2026-11-19: "No way to create New")
+      ['newBoard', '➕ Add a new board (Interface)', 'bool', null, false, false, { tip: NSI_TIP.newBoard }]],
+    Tabs: tabPage,
     Done: () => [['_d', [`Schema "${a.name}"${a.about ? ': ' + a.about : ''}.`,
       ...(short ? [] : [
         picked().length ? `Boards brought in: ${picked().map(d => d.name).join(', ')}.` : `Boards: ${have.length ? have.map(d => d.name).join(', ') : 'none yet'}.`,
-        `Tabs: ${tabNames().join(', ')}.`, `Equipment Profile: ${eqText()}.`]),
+        ...(a.newBoard ? ['A new board: the Add Interface pop-up opens after ✔ Finish.'] : []),
+        ...rows().map(({ i, w }) => {
+          const kind = a['k' + i], ep = a['ep' + i], procs = nsiProcs(kind, a['lv' + i]).filter(k => a[`p${i}_${k}`]);
+          return `Tab ${tabNames()[i]}: ${NSI_KINDS.find(x => x[0] === kind)?.[1]}${kind === 'brew' ? ', ' + NSI_LEVELS.find(x => x[0] === a['lv' + i])?.[1] : ''}; Equipment Profile ${w?.equipmentProfile ? `"${profileName(w.equipmentProfile)}"` : ep === '@new' ? 'made new after Finish' : ep ? `"${profileName(ep)}" (${{ all: 'Import All', vessels: 'Import Vessels', manifold: 'Import Manifold' }[a['im' + i]]})` : 'none for now'}; Processes ${procs.length ? procs.map(k => NSI_STEP_WORD[k]).join(', ') : 'none'}.`;
+        })]),
       '✔ Finish keeps these answers and takes you to the new Schema\'s first Tab.'].join('\n'), 'note', null, null, null, NSI_KEEP]],
   };
   const check = step => {      // what stops Next ▶ on a page
     if (step === 'About') { const n = String(a.name ?? '').trim(); if (!n) return 'Give the Schema a name';
       if (S.schemas.list.some(x => x.id !== act.id && x.name.toLowerCase() === n.toLowerCase())) return `There is already a Schema called "${n}"`; }
-    if (step === 'Tabs') { const ns = tabNames(); for (let i = 0; i < ns.length; i++) { const bad = nsiTabError(ns[i], ns.filter((x, k) => k !== i)); if (bad) return bad; } }
+    if (step === 'Tabs') {
+      const ns = tabNames(); for (let i = 0; i < ns.length; i++) { const bad = nsiTabError(ns[i], ns.filter((x, k) => k !== i)); if (bad) return bad; }
+      const eps = rows().map(({ i }) => a['ep' + i]).filter(x => x && x !== '@new' && !tabs.some(w => w.equipmentProfile === x));
+      const twice = eps.find((x, k) => eps.indexOf(x) !== k); if (twice) return `"${profileName(twice)}" is picked for two Tabs. A Schema uses an Equipment Profile on one Tab only.`;
+    }
     return '';
   };
   for (let i = 0; i < steps.length;) {
-    const r = await nsiPage(steps, i, pages[steps[i]](), a, { first: i === 0, last: i === steps.length - 1 });
+    const r = await nsiPage(steps, i, pages[steps[i]], a, { first: i === 0, last: i === steps.length - 1 });
     if (r === 'close') return nsiLand();
     if (r === 'back') { i--; continue; }
+    if (r === 'addTab') { a.more++; continue; }      // the same page again, with one more Tab
     const bad = check(steps[i]); if (bad) { toast(bad, true); continue; }
     if (i === steps.length - 1) break;
     i++;
@@ -14199,32 +14266,48 @@ async function schemaInterview({ short = false } = {}) {
   // ✔ Finish: only now is anything changed
   const name = String(a.name).trim(), about = String(a.about ?? '').trim();
   if (name !== act.name || about !== (act.about || '')) await api('PUT', `/ui/schemas/${act.id}`, { name, about });
+  let newEq = '';
   if (!short) {
     const add = picked().map(({ schema, ...d }) => structuredClone(d));
     if (add.length) await api('PUT', '/ui/layout', { devices: [...have, ...add] });
-    const renamed = tabs.map((w, i) => [w.name, String(a['t' + i]).trim()]).filter(([o, n]) => o !== n);
-    if (renamed.length || a.ferment) {
-      await load(); setEditing(true);
-      if (!draft) toast('Edit layout did not open: change the Tabs in Edit layout (Tab settings)', true);
-      else {
-        for (const [o, n] of renamed) {
-          const w = draft.workspaces.find(x => x.name === o); if (!w) continue;
-          w.name = n; for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === o) x.workspace = n;
-        }
-        if (a.ferment) draft.workspaces.push({ name: 'Fermentation', id: defaultTabId('Fermentation', draft.workspaces.map(w => w.id)), ...newTabSize(), ...tabLook() });
-        await saveLayout({ leave: true });
+    const R = rows(), ns = tabNames();
+    await load(); setEditing(true);
+    if (!draft) toast('Edit layout did not open: change the Tabs in Edit layout (Tab settings)', true);
+    else {
+      for (const { i, w } of R) {
+        let t = w && draft.workspaces.find(x => x.name === w.name);
+        if (w && t && t.name !== ns[i]) { const o = t.name; t.name = ns[i]; for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === o) x.workspace = ns[i]; }
+        if (!w) draft.workspaces.push(t = { name: ns[i], id: defaultTabId(ns[i], draft.workspaces.map(x => x.id)), ...newTabSize(), ...tabLook() });
+        if (!t) continue;
+        t.purpose = a['k' + i];      // what the Tab is for, and its Level (Panel Update 5 #3)
+        if (a['k' + i] === 'brew') t.brewLevel = a['lv' + i]; else delete t.brewLevel;
       }
+      await saveLayout({ leave: true });
     }
     await load();
-    if (a.eqHow !== 'later' && a.eqHow !== '@interview' && a.eqTab) {
-      const drawn = S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === a.eqTab);
-      await api('PUT', '/ui/schema/profile', { tab: a.eqTab, id: a.eqHow, layout: drawn ? 'keep' : 'use' });
-      await load();
+    for (const { i, w } of R) {
+      const ep = a['ep' + i]; if (w?.equipmentProfile || !ep) continue;
+      if (ep === '@new') { newEq ||= ns[i]; continue; }
+      const only = a['im' + i] || 'all', drawn = S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === ns[i]);
+      try { await api('PUT', '/ui/schema/profile', { tab: ns[i], id: ep, layout: only === 'all' && drawn ? 'keep' : 'use', only }); } catch (e) { toast(`Tab ${ns[i]}: ${e.message}`, true); }
     }
+    // Import Processes: a ticked one uses its Skynet Process Template in ☰ Menu > Brew Process; one offered and ticked on no Tab is left out
+    const offered = new Set(), ticked = new Map();
+    for (const { i } of R) for (const k of nsiProcs(a['k' + i], a['lv' + i])) { offered.add(k); if (a[`p${i}_${k}`] && !ticked.has(k)) ticked.set(k, nsiTpl(k, a['lv' + i])); }
+    if (offered.size) {
+      try {
+        const bp = await api('GET', '/ui/brewprocess'), has = (key, n) => (bp.templates || []).some(t => t.step === key && t.name === n);
+        const templates = Object.fromEntries([...offered].map(k => { const n = ticked.get(k); return [k, n ? (has(k, n) ? n : `Skynet_${k}`) : '']; }));
+        await api('PUT', '/ui/brewprocess', { templates });
+      } catch (e) { toast('Brew Process: ' + e.message, true); }
+    }
+    const lv = R.find(({ i }) => a['k' + i] === 'brew'); if (lv) { const d = { ...(S.config.brewDefaults || {}), brewLevel: a['lv' + lv.i] }; await api('PUT', '/ui/settings', { brewDefaults: d }); }
+    await load();
   }
   await nsiLand();
   if (!short) toast(`Schema "${name}" is ready`);      // a Template keeps its own longer note (what is left to do)
-  if (!short && a.eqHow === '@interview' && a.eqTab) return eqInterview({ tab: a.eqTab });     // it ends on the 🔨 Build Tab (Rule 4.1)
+  if (!short && a.newBoard) { const n = await addInterfaceDialog(); if (n) { setView('devices'); showPart($('#sec-interfaces')); } }      // Panel Update 5 #2 and #4
+  if (!short && newEq) return eqInterview({ tab: newEq });     // it ends on the 🔨 Build Tab (Rule 4.1)
 }
 // the new Schema's first Tab, never the Schema page (OakBarn Brewery, 2026-11-17)
 async function nsiLand() {
@@ -14384,7 +14467,7 @@ function menuItems(list, go) {
   // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
   list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
   if (can('admin')) {
-    list.append(item('➕ Add Interface…', guard(() => addInterfaceDialog()), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
+    list.append(item('➕ Add Interface…', guard(async () => { if (await addInterfaceDialog()) { setView('devices'); showPart($('#sec-interfaces')); } }), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
     list.append(item(S.sim?.on ? '🔌 Switch to Real boards' : '🧪 Switch to Simulator', guard(() => setSimulator(!S.sim?.on)), { title: 'Every Interface at once: the simulator (nothing real is switched) or the real boards' }));
   }
   list.append(item('⭐ Request a Feature', guard(requestFeature), { title: 'Ask the OakBarn Brewery team for a new feature (a Patron perk)' }));
@@ -14753,12 +14836,16 @@ async function menuEditLayout() {
   if (menuTab) leaveMenuTab();
   setView('workspace'); setEditing(true);
 }
+const menuBack = {};      // each open Menu tab: where it was opened from (Panel Update 5 #8)
 function openMenuTab(k) {
   if (eqv && !eqViewClose()) return;      // the Equipment Profile view closes first (it asks when its changes are not saved)
   if (editing) return toast('Save or exit Edit layout first', true);
   if (menuTab && menuTab !== k && paneDirty() && !confirm('This Menu tab has changes that are not saved. Leave them?')) return;
   if (menuTab && menuTab !== k) dropDirty(menuTab);
   if (!menuOpen.includes(k)) menuOpen.push(k);
+  // where it was opened from, so its Close goes back there (Panel Update 5 #8, OakBarn Brewery 2026-11-19: "when you close it goes to
+  // Schema always? Should it not go back to what dialog or Tab it was open on?"): the Menu tab before it, or the page or Tab
+  if (menuTab !== k) menuBack[k] = menuTab ? { menu: menuTab } : { view, ws: wsName };
   menuTab = k;
   setView('workspace');
   $('#wsScroll').classList.add('hidden'); $('#menuPane').classList.remove('hidden'); $('#view-workspace').classList.add('menuMode');
@@ -14794,6 +14881,9 @@ function closeMenuTab(k) {
   menuOpen.splice(menuOpen.indexOf(k), 1);
   if (k !== menuTab) return renderMenu();
   dropDirty(k);
+  const back = menuBack[k]; delete menuBack[k];
+  if (back?.menu && menuOpen.includes(back.menu)) return openMenuTab(back.menu);
+  if (back && !back.menu) { leaveMenuTab(); if (back.ws && S.config.workspaces.some(w => w.name === back.ws)) { wsName = back.ws; renderTabs(); renderWs(); } if (back.view && back.view !== 'workspace') setView(back.view); return; }
   const next = menuSorted().map(m => m.key).find(x => menuOpen.includes(x));
   if (next) openMenuTab(next); else leaveMenuTab();
 }
@@ -14821,6 +14911,12 @@ function paneClose(close, tip = 'Close') {
 const closePage = () => setView(view === 'help' && helpFrom && helpFrom !== 'help' ? helpFrom : 'workspace');
 $('#hpTools').append(paneClose(closePage));
 $('#fmClose').append(paneClose(closePage));
+// Close and ✕ on every page of the Menu Bar (Panel Update 5, OakBarn Brewery 2026-11-19: "No close Buttons" on Devices > Interfaces;
+// Rule 2.54): back to the Tabs
+for (const v of ['devices', 'globals', 'log', 'import', 'media', 'settings', 'config']) {
+  const sec = $('#view-' + v); if (!sec || sec.querySelector(':scope > .pageClose')) continue;
+  sec.prepend(h('div', { class: 'pageClose' }, paneClose(closePage)));
+}
 // the Process editor has a Close button and a boxed ✕ too, always working: back to the Tabs (the Build Tab if you came from there).
 // Changes not saved yet stay in the editor, but it asks first so nothing is lost by mistake.
 $('#procClose').append(paneClose(() => {
@@ -16902,6 +16998,7 @@ function vesselTplFields(w) {
     ['vtype', 'Type', 'sel', types, true],
     ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
     ['image', 'Graphic (picture path)', 'path'],
+    ...(hasMaterial(w) ? [['material', 'Material', 'sel', MATERIAL_CHOICES(w), false, false, { tip: MATERIAL_TIP }]] : []),
     ['_s', 'Size', 'head'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), false, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
     ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
       : [['volume', `Size: ${u === 'L' ? 'Liters' : 'Gallons'} (10 gallons to start; a Vessel Widget is drawn to this size)`, 'num'],
@@ -17044,8 +17141,37 @@ function openTemplate(kind, name) {
       setTPL(await api('PUT', `/ui/templates/vessel/${v.name}`, { ...v, ports }));
       toast(`${t.name} is now on the ${FITTING_PORTS[w.port]} of ${v.name}`);
     });
+    // 📐 My Size (Panel Update 5 #8, OakBarn Brewery 2026-11-19: "if a User Choses a Vessel can we resize proportionally and create an
+    // SVG for that user that becomes the Graphic? The User would need to put in Height and Diameter and then it would become a User Vessel
+    // Template and the Open the Dialog"): the vessel's picture drawn to the shape of its Height and Diameter, saved as an SVG of your own in
+    // the User Graphic folder, and a User Vessel Template made with it, opened at once
+    const mySize = guard(async () => {
+      const b0 = current(), metric = (b0.units ?? t.units) === 'Metric', unit = metric ? 'cm' : 'in';
+      const base = `${t.name}_My_Size`, w = { name: [...tplNames(kind), ...taken()].some(n => n.toLowerCase() === base.toLowerCase()) ? copyName(base, [...tplNames(kind), ...taken()]) : base, vheight: t.vheight || '', diameter: t.diameter || '' };
+      const ok = await miniDialog(`📐 My Size: ${t.name}`, [['_n', 'Type your vessel\'s Height and Diameter. Skynet draws this vessel\'s picture to that shape, saves it as a picture of your own (an SVG in your User Graphic folder), and makes a User Vessel Template with it.', 'note'],
+        ['name', 'Template Name (no spaces, use _ instead; it must be unique)', 'text'], ['vheight', `Height (${unit})`, 'num'], ['diameter', `Diameter (${unit})`, 'num']], w, 'Make');
+      if (!ok) return;
+      const name = noSpaces(String(w.name || '').trim()), bad = nameProblem(name); if (bad) throw new Error(bad);
+      if (tplOf(kind, name)) throw new Error(`There is already a ${TEMPLATE_KINDS[kind]} called "${name}"`);
+      const H = +w.vheight, D = +w.diameter; if (!(H > 0 && D > 0)) throw new Error('Type a Height and a Diameter (more than 0)');
+      const src = t.image || vClassOf(t).image; if (!src) throw new Error('This vessel has no picture to draw to your size');
+      const got = await fetch(media(src)), blob = await got.blob();
+      if (!got.ok || !/^image\//.test(blob.type)) throw new Error(`Its picture ${src} could not be read on the Brain`);
+      const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+      const pw = 200, ph = Math.max(20, Math.round(pw * H / D));
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${pw}" height="${ph}" viewBox="0 0 ${pw} ${ph}"><title>${name}: ${H} x ${D} ${unit}</title><image x="0" y="0" width="${pw}" height="${ph}" preserveAspectRatio="none" href="${data}" xlink:href="${data}"/></svg>`;
+      const dir = mediaDefaults(S.config).userGraphic, file = `${name}.svg`;
+      const up = await fetch(`/ui/media/upload?root=0&dir=${encodeURIComponent(dir)}&name=${encodeURIComponent(file)}&overwrite=0`, { method: 'PUT', body: new Blob([svg], { type: 'image/svg+xml' }) });
+      const ur = await up.json().catch(() => ({})); if (!up.ok || ur.ok === false) throw new Error(ur.error || ur.msg || `The picture was not saved (${up.status})`);
+      await api('POST', `/ui/templates/${kind}`, { name, from: t.name, skynet: false });
+      const r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...b0, name, image: `${dir}/${file}`, size: [pw, ph], sizeMethod: 'diameter', vheight: H, diameter: D });
+      setTPL(r); dirty = false; finish();
+      toast(`User Vessel Template "${name}" made with your size`);
+      return openTemplate(kind, name);
+    });
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
+      admin && kind === 'vessel' && (t.vesselType || 'vessel') === 'vessel' ? h('button', { title: 'Your vessel\'s Height and Diameter: its picture drawn to that shape, as a User Vessel Template of your own', onclick: mySize }, '📐 My Size') : '',
       admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Finish Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
       admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Finish Build ... > Move to Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
@@ -17063,6 +17189,11 @@ function openTemplate(kind, name) {
 function renderTemplatesTab(kind, group) { return box => {
   const title = group === 'equip' ? 'Equipment Templates' : kind === 'vessel' ? 'Vessel Templates' : 'Fitting Templates', what = group === 'equip' ? 'Equipment Template' : TEMPLATE_KINDS[kind];
   box.append(h('h3', {}, title));
+  // what each one is (Panel Update 5 #7 and #10, OakBarn Brewery 2026-11-19: "What is the difference Between an Equipment Profile and An
+  // Equipment Template?"; "not clear How to create a User Template. Confusing on How it becomes a Skynet image")
+  box.append(h('p', { class: 'muted tplAbout' }, group === 'equip' ? 'An Equipment Template is one ready-made piece of equipment (a chiller, a HERMS coil, a RIMS tube) that you put on a Tab. An Equipment Profile (its own Menu tab) is a whole Tab\'s brewery: all its vessels, pumps, valves and pipes with the boards, wiring and brewing numbers.'
+    : kind === 'vessel' ? 'A Vessel Template is one ready-made vessel that you put on a Tab. 📐 My Size in a vessel\'s settings makes a User Vessel Template drawn to your own Height and Diameter.'
+    : 'A Skynet Template (Skynet badge) comes with Skynet and can\'t be changed; a User Template is your own. To make one: New Fitting Template ..., or double-click a Skynet one and press Clone. It uses the same Skynet picture; a User Template never becomes a Skynet Template.'));
   if (!TPL) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadTemplates().then(() => renderMenuPane()).catch(e => toast(e.message, true)); return; }
   if (!TPL.locked) box.append(h('p', { class: 'muted' }, 'Skynet is still building its Templates: for now Skynet Templates can be changed here. Once they are locked they can only be cloned.'));
   if (can('admin')) box.append(h('div', { class: 'bar' }, h('button', { onclick: guard(async () => { const n = await newTemplate(kind, { init: group === 'equip' ? { vesselType: 'pchiller', vtype: EQ.pchiller.types[0], liquidPorts: 4 } : null, what }); if (n) { renderMenuPane(); openTemplate(kind, n); } }) }, `New ${what} ...`),
@@ -17096,7 +17227,7 @@ function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
-  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'safeVolume', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'safeVolume', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight', 'material']) if (t[k] !== undefined) g[k] = clone(t[k]);
   if (t.vwidget && g.volume === undefined) g.volume = g.units === 'Metric' ? 37.9 : 10;      // 10 gallons to start (Rule 5.32)
   if (t.vwidget) [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab));      // its size from its Gallons
   for (const [k, d] of Object.entries(C.ports)) {
@@ -17270,6 +17401,8 @@ function vdevDone(it) {
 function renderLayoutTab(box) {
   const c = S.config, admin = can('admin'), w = eqTab();
   box.append(h('h3', {}, 'Default Layout'));
+  // what it does (Panel Update 5 #11, OakBarn Brewery 2026-11-19: "I do not understand this Dialog. What does it do?")
+  box.append(h('p', { class: 'muted' }, 'The Default Layout is the drawing an Equipment Profile carries: where its vessels, fittings, IPs and pipes sit on a Tab. Here you put that drawing on a Tab, or save a Tab\'s drawing into the profile, or keep a Tab\'s own drawing apart from the profile.'));
   const withP = c.workspaces.filter(x => x.equipmentProfile);
   if (!withP.length) return box.append(h('p', { class: 'muted' }, 'No Tab of this Schema has an Equipment Profile yet. Pick or make one on the Equipment Profile tab.'));
   const tabSel = h('select', {}, ...c.workspaces.map(x => h('option', { value: x.name, ...(x === w ? { selected: true } : {}) }, x.name + (x.equipmentProfile ? `  (${profileName(x.equipmentProfile)})` : '  (no profile)'))));

@@ -13,7 +13,7 @@
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "eb31d6badc777cf4",
  "13-glossary": "1f4133665e53d8a4",
- "14-equipment": "9a17377372b3f676",
+ "14-equipment": "6ceda9a20930af3c",
  "15-mqtt-and-voice": "a336dffb7b61bf6a",
  "16-stepper-motors": "7dadcdd2e692713f",
  "17-beer-money": "68a08821a7668a8e",
@@ -48,7 +48,7 @@
  "47-panel-version": "2d1980133b861ae1",
  "48-schema-switching-and-cloning": "4aeeab3cc265e3ee",
  "49-text-boxes": "ef29d26161777d94",
- "50-vessel-and-fitting-templates": "52dd382104e4ce86",
+ "50-vessel-and-fitting-templates": "f96dbc7ab16c582c",
  "51-menu-everywhere": "62f7fc2369f384ea",
  "52-on-and-off-pictures": "50143de773852c2f",
  "53-renaming": "d513177a5e083556",
@@ -193,8 +193,8 @@
  "197-flame-out-safety": "83c45c507d7d7d1d",
  "198-patron": "bb68c2e6f760854d",
  "199-stove-top-vessel": "72d1b1771ce51cc1",
- "200-chiller-overlay": "f4b7229005216dd6",
+ "200-chiller-overlay": "aa43bb6a15ef5c6a",
  "201-ice-water-can": "bb8f68248492771e",
- "202-new-schema-interview": "262ad93eabcb36b9",
+ "202-new-schema-interview": "f11d0e9ae07d96ad",
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d"
 }

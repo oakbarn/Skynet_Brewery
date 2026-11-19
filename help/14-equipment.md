@@ -20,7 +20,7 @@ The same list has **Plate chiller**, **Chilling coil**, **HERMS coil**, **Trub f
 
 ## A Chiller is a pipe
 
-A **Chiller** (Plate chiller, Counterflow chiller, Immersion coil or Chillzilla) works **the same as a pipe, no more, no less**:
+A **Chiller** (Plate chiller, Counterflow chiller or Immersion coil) works **the same as a pipe, no more, no less**:
 
 - It has an **IP at each inlet and outlet**, and nothing else.
 - It has **no On / Off**. Flow simply passes through it.

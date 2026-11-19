@@ -1014,7 +1014,7 @@ async function route(req, res) {
     return ok(res, { ...schemaView(), simulator: !!pretend, wasSim, iface: pretend?.name, real: !!real });
   }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
-  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout, only: b.only }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
   // Open a Schema file (Fritz, 2026-11-06): the files the BruControl Importer saved in the Brewing folder's Import subfolder,
   // or a .json file sent from this browser. It becomes a new Schema; its Processes are written. A Process you already have is never

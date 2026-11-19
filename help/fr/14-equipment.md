@@ -20,7 +20,7 @@ La même liste contient **Plate chiller** (refroidisseur à plaques), **Chilling
 
 ## Un refroidisseur est un tuyau {#a-chiller-is-a-pipe}
 
-Un **refroidisseur** (Plate chiller, Counterflow chiller, Immersion coil ou Chillzilla) marche **exactement comme un tuyau, ni plus, ni moins** :
+Un **refroidisseur** (Plate chiller, Counterflow chiller ou Immersion coil) marche **exactement comme un tuyau, ni plus, ni moins** :
 
 - Il a un **IP à chaque entrée et sortie**, et rien d'autre.
 - Il n'a **ni marche ni arrêt**. L'écoulement le traverse, tout simplement.

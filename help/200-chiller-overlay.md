@@ -10,7 +10,7 @@ let the water out down a drain or outside. Then they take it out again. A Proces
 ## place_Chiller = template, vessel
 
 - **template** is a Chiller Template: a chiller that goes into a vessel (an immersion chiller with 2 IPs, In and Out). Skynet has
-  **Immersion_Chiller**. Plate and counterflow chillers, a Chillzilla included (a counterflow chiller with 4 IPs), sit outside
+  **Immersion_Chiller** and **Immersion_Chiller_Same_Side**. Plate and counterflow chillers (4 IPs) sit outside
   the kettle on their own pipes, so they are not placed this way.
 - **vessel** is the Name of the vessel it goes into (a Label works too when only one vessel has it).
 
@@ -56,7 +56,7 @@ moving it does not change what flows.
 
 - **Water flowing through it:** a warning says so and it does not move. Turn Off what feeds it (the Tap Water Valve or the sump
   pump); the warning closes by itself once nothing flows.
-- **Only an immersion chiller** (2 IPs, In and Out) moves this way. A plate or counterflow chiller (a Chillzilla too) is part of
+- **Only an immersion chiller** (2 IPs, In and Out) moves this way. A plate or counterflow chiller (4 IPs) is part of
   the manifold and stays put, and so does a chiller joined by a rigid pipe or a locked one. A vessel takes one chiller.
 - A right-click that does not move the chiller opens this Help, as before.
 - Viewers can't move a chiller; Operators and Admins can.
