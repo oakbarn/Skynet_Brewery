@@ -24,6 +24,7 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 | Adafruit Feather M0 (WiFi) | **3,3 V** | D0, D1, D5, D6, D9-D13 | D5, D6, D9-D13 | tous les Ports | A0-A5 | USB, WiFi (Feather M0 WiFi seulement) |
 | ESP32 | **3,3 V** | GPIO 2, 4, 5, 12-19, 21-23, 25-27, 32-36, 39 | tous les Ports de sortie | tous les Ports | A0, A3-A7 (GPIO 36, 39, 32-35) | USB, Ethernet (ESP32 avec prise), WiFi |
 | ESP8266 (NodeMCU, Wemos D1) | **3,3 V** | GPIO 0, 2, 4, 5, 12-16 | tous les Ports sauf GPIO16 | tous les Ports sauf GPIO16 | A0 | USB, WiFi |
+| Arduino Opta (Lite, RS485 ou WiFi) | alimentation **24 V** | Relais 1-4, I1-I8 | aucun (relais : Marche/Arrêt seulement) | I1-I8 (impulsions lentes) | I1-I8 (0-10 V) | USB, Ethernet (intégré), WiFi (Opta WiFi seulement) |
 | Raspberry Pi | **3,3 V** | GPIO 2-27 | tous les Ports (PWM matériel : GPIO 12, 13, 18, 19) | tous les Ports | aucun (utilisez un ADS1115) | Ethernet, WiFi |
 
 - **La liste des Ports ne propose que les Ports que la carte possède.** Un Port que la carte n'a pas est refusé. Sur un ESP32, les GPIO 6-11 sont la mémoire de la carte et ne sont jamais proposés, et les GPIO 34, 35, 36 et 39 ne peuvent que lire (entrées) : une sortie ne peut pas les utiliser.
@@ -35,6 +36,7 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 - **Grand Central : un débitmètre par interruption.** Ses 16 Ports compteurs ont chacun leur propre interruption, donc tous les débitmètres peuvent tourner en même temps.
 - **Nano ESP32 :** D1 donne peu de courant (une résistance est sur sa ligne), il est donc proposé en dernier pour les sorties. A4-A7 ne peuvent pas lire quand le WiFi de la carte est allumé : en WiFi, en choisir un donne un avertissement.
 - **ESP32 : GPIO16 et GPIO17** ne sont pas libres sur une carte avec un module WROVER. Ils sont proposés en dernier, et en choisir un donne un avertissement.
+- **Arduino Opta :** un automate (PLC) alimenté en 24 V. Ses Ports portent un nom : **Relais 1-4** (normalement ouverts, au plus 250 V CA et 10 A) et les entrées **I1-I8**. Un relais prend une Sortie numérique, un Cycle de service, une Hystérésis, un PID ou une Zone morte, en Marche/Arrêt seulement : jamais de PWM ni de Pseudo PWM (un relais s'userait vite). Une entrée prend une Entrée numérique (0-24 V), un débitmètre ou une Entrée analogique (**0-10 V**, pas 0-5 V). Il n'a pas de broches OneWire, SPI ni I2C : les sondes de température et les moteurs pas à pas vont sur une autre carte. Mettre un Device sur un relais donne un avertissement, avec l'avertissement électrique ; une Entrée analogique donne un avertissement 0-10 V.
 - **Raspberry Pi :** le Pi fait du PWM sur toutes les broches, mais GPIO 12, 13, 18 et 19 ont le PWM matériel : ils portent *Best for True PWM: see Help*, en bleu.
 
 ## Cartes 3,3 V {#3-3-v-boards}
@@ -51,4 +53,4 @@ Une carte 3,3 V ne doit jamais recevoir 5 V sur un Port : cela peut la détruire
 
 La liste des cartes rend justes les listes de Ports du Panel pour chaque carte. Le programme Skynet sur la carte (son firmware) est écrit et testé pour l'**Arduino Mega 2560**. Le programme des autres cartes est la prochaine étape du plan firmware Skynet : un seul programme partagé, écrit en pensant à chaque carte de cette liste.
 
-L'**Arduino Opta** (un PLC avec sorties relais et entrées 0-10 V) n'est pas encore dans la liste : il lui faut d'abord son propre programme.
+L'**Arduino Opta** est dans la liste pour que vous puissiez dès maintenant prévoir ses Ports. Son propre programme viendra plus tard dans le plan du firmware Skynet (après le Mega et le Grand Central).

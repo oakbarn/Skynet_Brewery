@@ -3103,7 +3103,7 @@ Arduino Boards added. Brew Control had a lot but no Opta which I have and would 
 "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead"; "Make those Warnings"; "you could have a mixed system of 3.3
 and 5v I do").
 - **The Board list** (public/boards.js): Arduino Mega 2560, Uno R3, Uno R4 (Minima or WiFi), Nano, Nano Every, Leonardo, Micro, Due,
-  GIGA R1 WiFi, Nano ESP32, Adafruit Grand Central M4, Adafruit Feather M0 (WiFi), ESP32, ESP8266 and Raspberry Pi. No "Other".
+  GIGA R1 WiFi, Nano ESP32, Adafruit Grand Central M4, Adafruit Feather M0 (WiFi), Arduino Opta (Rule 6.36), ESP32, ESP8266 and Raspberry Pi. No "Other".
 - **The Mega 2560 is the board Skynet plans and wires for**; it is first in the list and its Port lists do not change. Every other
   board can be used: its own Ports, true PWM Ports, counter Ports, analog Ports (with BruControl's numbers on the Mega and the Grand
   Central), SPI, OneWire and I2C Ports, and its own Connection choices. A Port a board does not have is refused (the Pi already was,
@@ -3124,8 +3124,27 @@ and 5v I do").
   ESP8266, Due, Uno ...); any other is left "(pick the board)".
 - **Firmware**: the Skynet program on the board is written and tested for the Mega. The shared firmware for the other boards (Rule
   6.12) is written with every board in this list in mind (pin maps, 3.3 V and 5 V, PWM and analog differences). The **Arduino Opta**
-  is not in the list until its program is planned and Fritz agrees (Panel Updates sandbox).
+  is in the list (Rule 6.36).
+  *Replaced:* "The Arduino Opta is not in the list until its program is planned and Fritz agrees (Panel Updates sandbox)." (2026-11-19)
 Help 206 (and French), Help 3, 69, 76.
+
+6.36 **The Arduino Opta** (OakBarn Brewery, 2026-11-19: "Opta can be built now as well"; "OPta would run anything it can based on the
+Pins"; Panel Updates entry 34 step 1; Arduino's pinout AFX00001/2/3, Skynet_Private Plans/Board_Pinouts/).
+- **In the Board list** (Lite AFX00003, RS485 AFX00001, WiFi AFX00002), after the Feather M0. Its Ports go by name: **Relay 1-4**
+  (R1-R4; D0-D3 on the board, Normally Open, at most 250 V AC and 10 A) and the inputs **I1-I8** (A0-A7 on the board, each 0-24 V
+  digital or 0-10 V analog). It runs on 24 V. No D10 (Ethernet is built in, so no Port is kept for it), no OneWire, SPI or I2C Ports.
+- **A relay** takes a Digital Out, a Duty Cycle, a Hysteresis, a PID or a Deadband, On/Off only: never PWM or Pseudo PWM (a relay
+  wears out fast). Its Port reads *relay, On/Off only*. Putting a Device on a relay gives one warning: what the relay can switch, then
+  the electrical warning (Rule 6.20).
+- **An input** takes a Digital In, a flow meter (slow pulses) or an Analog In; it reads *input: digital or 0-10 V*. An Analog In gives
+  one warning: it reads 0-10 V, not 0-5 V. No ADS1115 (no I2C).
+- **Refused on an Opta:** every temperature Device (DS18B20, RTD, thermocouple, NTC) and the stepper: put them on another board.
+- **Connection:** USB, Ethernet (built in), WiFi (Opta WiFi only); rated like a Mega, WiFi like an ESP32 (Rule 6.3). RS485 and
+  Bluetooth later. Expansion modules (D1608E, D1608S, A0602) later.
+- **Firmware:** the Opta's own program is step 6 of the firmware plan, after the Mega and the Grand Central (OakBarn Brewery, 2026-11-19:
+  "No, I will be testing with a Mega and Grand central").
+- **The BruControl Import:** BruControl has no Opta, so nothing changes there; its Build page shares the Board list and the Port lists.
+Help 206 (and French).
 
 ## 7. Pictures
 
@@ -5809,6 +5828,7 @@ import.
 - 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
 - 2026-11-19: Added Rule 18.51 (OakBarn Brewery: "Redo all the dialogs to for the Blickman and Hose Bib Model. Same Layout, same fields for the same things"; "We redo it and make the Model Work"): every Device Properties and Add box and every Widget Properties uses the Model's rows in the Model's places; a Graphic on every one, picture Paths in its ⬢, Toggle in the Cover's place, Database and .API on the Overlay line, Device Type last. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change.
 - 2026-11-19: Rule 6.10 changed (OakBarn Brewery: "On a Mega, we want to reserve pin 10 on USB Connection until it is the last one available and if picked Give warning about Ethernet no longer Available"): on a Mega not on Ethernet, D10 stays in number order in another color ("Reserved for Ethernet: see Help", only D10) and picking it gives one warning; on an Ethernet Mega it stays refused. PWM pins in their own color ("Different color for PWM Pins") and every PWM pin reads "Best for True PWM: see Help" (Rule 4.2, was "PWM" / "Save for PWM"). Help 115 too. Help 46, 69 (and French). Checked against both programs: the BruControl Import's Build page shares the Port lists and the warning; an imported Device already on D10 is kept as it is.
+- 2026-11-19: Added Rule 6.36 (OakBarn Brewery: "Opta can be built now as well"; Panel Updates entry 34 step 1): the Arduino Opta in the Board list, Relay 1-4 (On/Off only, one warning with the electrical warning) and inputs I1-I8 (digital, flow meter, 0-10 V analog with one warning); no temperature Devices or stepper on it. Rule 6.35 changed (the Board list). Help 206 (and French). Checked against both programs: BruControl has no Opta.
 - 2026-11-19: Rules 6.35 and 6.11 changed (OakBarn Brewery's answers 1-9 after checking every maker's pinout, Skynet_Private Plans/Board_Pinout_Check.md): Leonardo and Micro A6-A11; Grand Central 16 counter Ports and PWM D20, D21; Nano ESP32 D1 last for outputs and an A4-A7 WiFi warning; ESP32 GPIO16, GPIO17 last with a warning; Pi hardware PWM pins marked; the D4 SD card warning on every board that takes an Ethernet shield. Help 69, 78, 206 (and French).
 - 2026-11-19: Rule 6.35 changed (OakBarn Brewery, checking Arduino's Uno R4 pinout: "Uno R4 yes to Both"): Uno R4 counter Ports D0-D3, D8 (D12, D13 left out: D13 has none on the R4 WiFi and D12 shares D1's there); Help 206 (and French) says an Uno R4 Port gives at most 8 mA.
 - 2026-11-19: Added Rule 6.35 (OakBarn Brewery: "I want all standard Arduino Boards added"; "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead"; "Make those Warnings"): every standard Arduino board and every BruControl board in the Board list with its own Ports, the Mega the standard, three 3.3 V warnings per board, Rule 6.10 on every Ethernet shield; Rule 6.3 changed (the Board list). Help 206 (new), 3, 69, 76 (and French). Checked against both programs: the BruControl Import now picks the Board from BruControl's board type for every listed board; its Build page shares the Interface pop-up, Port lists and warnings.

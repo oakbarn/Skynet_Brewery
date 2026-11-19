@@ -24,6 +24,7 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 | Adafruit Feather M0 (WiFi) | **3.3 V** | D0, D1, D5, D6, D9-D13 | D5, D6, D9-D13 | every Port | A0-A5 | USB, WiFi (Feather M0 WiFi only) |
 | ESP32 | **3.3 V** | GPIO 2, 4, 5, 12-19, 21-23, 25-27, 32-36, 39 | every output Port | every Port | A0, A3-A7 (GPIO 36, 39, 32-35) | USB, Ethernet (ESP32 with a jack), WiFi |
 | ESP8266 (NodeMCU, Wemos D1) | **3.3 V** | GPIO 0, 2, 4, 5, 12-16 | every Port but GPIO16 | every Port but GPIO16 | A0 | USB, WiFi |
+| Arduino Opta (Lite, RS485 or WiFi) | **24 V** supply | Relay 1-4, I1-I8 | none (relays: On/Off only) | I1-I8 (slow pulses) | I1-I8 (0-10 V) | USB, Ethernet (built in), WiFi (Opta WiFi only) |
 | Raspberry Pi | **3.3 V** | GPIO 2-27 | every Port (hardware PWM: GPIO 12, 13, 18, 19) | every Port | none (use an ADS1115) | Ethernet, WiFi |
 
 - **The Port list offers only the Ports the board has.** A Port the board does not have is refused. On an ESP32, GPIO 6-11 are the board's own memory and are never offered, and GPIO 34, 35, 36 and 39 can only read (inputs), so an output can't use them.
@@ -35,6 +36,7 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 - **Grand Central: one flow meter per interrupt.** Its 16 counter Ports each have their own interrupt, so every flow meter can run at once.
 - **Nano ESP32:** D1 gives little current (a resistor is in its line), so it is offered last for outputs. A4-A7 can't read while the board's WiFi is on: on WiFi, picking one gives one warning.
 - **ESP32: GPIO16 and GPIO17** are not free on a board with a WROVER module. They are offered last, and picking one gives one warning.
+- **Arduino Opta:** a PLC that runs on 24 V. Its Ports go by name: **Relay 1-4** (Normally Open, at most 250 V AC and 10 A) and the inputs **I1-I8**. A relay takes a Digital Out, a Duty Cycle, a Hysteresis, a PID or a Deadband, On/Off only: never PWM or Pseudo PWM (a relay would wear out fast). An input takes a Digital In (0-24 V), a flow meter or an Analog In (**0-10 V**, not 0-5 V). It has no OneWire, SPI or I2C pins, so temperature probes and steppers go on another board. Putting a Device on a relay gives one warning with the electrical warning; an Analog In gives one 0-10 V warning.
 - **Raspberry Pi:** the Pi makes PWM on every pin, but GPIO 12, 13, 18 and 19 have hardware PWM: they read *Best for True PWM: see Help*, in blue.
 
 ## 3.3 V boards
@@ -51,4 +53,4 @@ A 3.3 V board must never get 5 V on a Port: it can ruin the board. When you put 
 
 The Board list makes the Panel's Port lists right for each board. The Skynet program on the board (its firmware) is written and tested for the **Arduino Mega 2560**. The program for the other boards is the next step of the Skynet firmware plan: one shared program, written with every board in this list in mind.
 
-The **Arduino Opta** (a PLC with relay outputs and 0-10 V inputs) is not in the list yet: it needs its own program first.
+The **Arduino Opta** is in the list so you can plan its Ports now. Its own program comes later in the Skynet firmware plan (after the Mega and the Grand Central).

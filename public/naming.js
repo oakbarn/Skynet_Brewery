@@ -425,6 +425,11 @@ export function busCheck(el, elements, devices) {
   if (mine.includes(SD_PIN) && iface && sdBoard(P)) return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   const pw = P.pinWarn && mine.map(p => P.pinWarn[p]).find(Boolean);      // ESP32 GPIO16 and GPIO17 (WROVER boards)
   if (pw) return { warn: pw + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  if (P.opta && mine.length) {      // Rule 6.36: one warning when a Device is put on an Opta Port
+    const r = mine.find(p => !P.inputOnly.includes(p)), a = el.type === 'analogIn' && mine.find(p => P.inputOnly.includes(p));
+    if (r) return { warn: OPTA_RELAY_WARNING.replace('{0}', P.label(r)) };
+    if (a) return { warn: OPTA_ANALOG_WARNING.replace('{0}', a) };
+  }
   const a2 = P.wifiAdc2 && linkOf(dev) === 'esp32' && mine.find(p => P.wifiAdc2.some(a => String(54 + +a.slice(1)) === p));
   if (a2) return { warn: ADC2_WARNING.replace('{0}', 'A' + (+a2 - 54)) + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   if (mine.includes(ETHERNET_PIN) && usbMega((devices ?? []).find(d => d.name === iface))) return { warn: ETHERNET_PIN_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
@@ -492,8 +497,26 @@ function boardDeviceError(el, mine, P) {
   if (off !== undefined) return `${/^\d+$/.test(off) ? P.label(off).replace(/ \(.*$/, '') : off} is not a Port you can use on an ${name}. Pick one from the Port list.`;
   const ro = OUTPUT_TYPES.includes(el.type) && mine.find(p => P.inputOnly.includes(p));
   if (ro) return `${P.label(ro)} on an ${name} can only read (an input). Put this output on another Port.`;
+  if (P.opta) return optaDeviceError(el, mine, P);
   return null;
 }
+// Arduino Opta (Rule 6.36, Panel Updates entry 34 step 1): only the Devices that fit its Ports. A relay switches On and Off: a Digital
+// Out (On/Off), a Duty Cycle, a Hysteresis, or a PID or Deadband without PWM; never PWM or Pseudo PWM (a relay would wear out fast).
+// An input I1-I8 reads: a Digital In, a flow meter (slow pulses), or an Analog In 0-10 V. No OneWire, SPI or I2C on the Opta itself.
+export const OPTA_RELAY_TYPES = ['digitalOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
+export const OPTA_INPUT_TYPES = ['digitalIn', 'flowMeter', 'analogIn'];
+function optaDeviceError(el, mine, P) {
+  if (el.type === 'temperature' || el.type === 'stepper') return 'An Arduino Opta has no OneWire, SPI or I2C pins for temperature probes, and no step pins for a stepper motor. Put this Device on a Mega or another board.';
+  if (!mine.length) return null;
+  const relay = mine.find(p => !P.inputOnly.includes(p)), input = mine.find(p => P.inputOnly.includes(p));
+  if (relay && !OPTA_RELAY_TYPES.includes(el.type)) return `${P.label(relay)} on an Arduino Opta is a relay: it takes a Digital Out, a Duty Cycle, a Hysteresis, a PID or a Deadband. Put this Device on another board.`;
+  if (relay && (needsPwm(el) || el.pseudoPwm || (['pid', 'deadband'].includes(el.type) && el.pwm))) return `${P.label(relay)} on an Arduino Opta is a relay: it switches On and Off only, never PWM or Pseudo PWM (a relay would wear out fast). Use On/Off, Duty Cycle or Hysteresis, or put this Device on another board.`;
+  if (input && !OPTA_INPUT_TYPES.includes(el.type)) return `${input} on an Arduino Opta is an input: it takes a Digital In, a flow meter or an Analog In 0-10 V. Put this Device on another board.`;
+  if (input && el.type === 'analogIn' && el.adc === 'ads1115') return 'An Arduino Opta has no I2C pins for an ADS1115. Wire the sensor (0-10 V) straight to an input I1-I8.';
+  return null;
+}
+export const OPTA_ANALOG_WARNING = '{0} on an Arduino Opta reads 0-10 V, not 0-5 V: a 0-5 V sensor reads only half its range. Set the sensor\'s range in this Device to match.';
+export const OPTA_RELAY_WARNING = '{0} on an Arduino Opta is a relay (Normally Open, at most 250 V AC and 10 A). It switches a contactor coil, an SSR, a 24 V valve or a light.\n\n⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 // The 3.3 V warnings (OakBarn Brewery, 2026-11-19: "Plan Skynet for a Mega and the warnings if you use a 3.3v board instead", "Make
 // those Warnings", Rule 6.35). The Mega (5 V) is the board Skynet plans and wires for. A brewery may mix 5 V and 3.3 V boards ("you
 // could have a mixed system of 3.3 and 5v"), so the warning goes by the board this Device is on. One warning, when the Device is put on
@@ -522,6 +545,7 @@ export function pinTag(p, board, el) {
   p = String(p);
   if (board === 'pi') { const P = PROFILES.pi; return [P.truePwm.includes(p) && PWM_TAG + ': see Help', P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''].filter(Boolean).join(', '); }
   const P = pinProfile(board);
+  if (P.opta) return P.inputOnly.includes(p) ? 'input: digital or 0-10 V' : 'relay, On/Off only';      // Rule 6.36
   const t = [keepsFew(P, P.pwm) && P.pwm.includes(p) && PWM_TAG, keepsFew(P, P.counter) && P.counter.includes(p) && 'Counter', P.inputOnly.includes(p) && 'input only'].filter(Boolean).join(' + ')
     + (keepsFew(P, P.pwm) && P.pwm.includes(p) ? ': see Help' : '');
   if (p === SD_PIN && sdBoard(P)) return [t, 'SD card pin'].filter(Boolean).join(', ');      // Skynet Rule 6.11, every board that takes an Ethernet shield

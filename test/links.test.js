@@ -6,9 +6,9 @@ import { BOARDS, connChoices, boardOf, linkOf, isHeating, rating, heatingLinkWar
 assert.equal(boardOf({ name: 'Main Brewery Mega USB' }), 'mega', 'an older Interface with no board: a Mega');
 assert.equal(boardOf({ name: 'Garage ESP32' }), 'esp32', 'an "ESP" name is an ESP32');
 assert.equal(boardOf({ name: 'x', board: '' }), '', 'a board the BruControl Import could not tell: not picked yet');
-assert.deepEqual(BOARDS.map(b => b[0]), ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'esp32', 'esp8266', 'pi'],
+assert.deepEqual(BOARDS.map(b => b[0]), ['mega', 'uno', 'unoR4', 'nano', 'nanoEvery', 'leonardo', 'micro', 'due', 'giga', 'nanoEsp32', 'grandCentral', 'featherM0', 'opta', 'esp32', 'esp8266', 'pi'],
   'every standard Arduino board and every BruControl board, the Mega first, no "other" (OakBarn Brewery, 2026-11-15 and 2026-11-19)');
-assert.ok(!BOARDS.some(b => b[0] === 'other' || b[0] === 'opta'), 'no "other"; the Opta waits for its own program (plan first)');
+assert.ok(!BOARDS.some(b => b[0] === 'other'), 'no "other"');
 assert.deepEqual(connChoices('uno').map(c => c[0]), ['serial', 'ethernet'], 'an Uno: USB or an Ethernet shield');
 assert.deepEqual(connChoices('giga').map(c => c[0]), ['serial', 'ethernet', 'esp32'], 'a GIGA: WiFi built in');
 assert.deepEqual(connChoices('esp8266').map(c => c[0]), ['serial', 'esp32'], 'an ESP8266: USB or WiFi');
