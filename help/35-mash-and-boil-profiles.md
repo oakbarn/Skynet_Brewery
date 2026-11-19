@@ -41,7 +41,7 @@ Press **☰ Menu** and pick **Boil Profile**.
 - **Total boil time** in minutes. **0** = No Boil.
 - **Boil off**: how much boils away each hour, in gallons or liters. **Empty** uses the **Equipment Profile's** Boil Off (each brewery boils off differently: a small all-in-one boils off less than a big kettle on a burner). When a Boil Profile has its own Boil Off, picking it in a Recipe asks which one to use: **the Equipment Profile's**, or **the profile's own**. It asks each time.
 - **Ask the kettle volume at the start and end of the boil**: on brew day you are asked how much wort is in the kettle when the boil starts and when it ends. That is how you learn your real Boil Off. It is on in every Skynet Boil Profile.
-- **Hop Stands**: the three Hop Stands (below). Empty: the ones in Default settings.
+- **Hop Stands**: the three Hop Stands (below). Empty: a Recipe using this Boil Profile asks for it when a Whirlpool hop is added.
 
 | Skynet Boil Profile | Minutes | What it is for |
 |---|---|---|
@@ -58,11 +58,20 @@ After the boil the chill stops at each **Hop Stand** that has Whirlpool hops, hi
 
 | Hop Stand | Temperature | Time | What it gives |
 |---|---|---|---|
-| **High** | 180 °F (82 °C) | 10 min | More bitterness and flavor; some aroma is lost. |
-| **Middle** | 154 °F (68 °C) | 20 min | Flavor and aroma, little bitterness. |
-| **Low** | the Recipe's pitch temperature (68 °F / 20 °C when it has none) | 30 min | The most aroma, almost no bitterness. |
+| **High** | 170 to 185 °F (77 to 85 °C), most often 180 °F (82 °C) | 10 to 20 min | More bitterness and flavor; some aroma is lost. |
+| **Middle** | 150 to 160 °F (65 to 71 °C), most often 154 °F (68 °C) | 20 to 30 min | Flavor and aroma, little bitterness. |
+| **Low** | about the pitch temperature, 60 to 70 °F (16 to 21 °C) | 30 min or more | The most aroma, almost no bitterness. |
 
-The temperature and time of each are set in **☰ Menu > Default settings**, in your own **Boil Profiles**, and in each **Recipe** (the Recipe tab). The Recipe's own come first, then its Boil Profile's, then Default settings. Each Whirlpool hop on the **Hops** tab picks its **Hop Stand**. A recipe file (BeerSmith or BeerXML) that gives a whirlpool temperature puts that hop in the nearest stand, with the file's temperature and time.
+These are the **common** numbers. Skynet fills none of them in: there are **no Defaults** (Skynet Rule 17.14).
+
+**The Whirlpool questions.** When you turn on a hop's **Whirlpool** switch on the Recipe's **Hops** tab, Skynet asks:
+- **Hop Stand**: High, Middle or Low.
+- **Temperature**: where the chill stops for that stand.
+- **Time**: how long the cooling water stays off.
+
+They start empty. The Hover Help on each question gives the common numbers above. Hops in the same stand share its Temperature and Time. If you save with one empty you get one warning, "The chill won't stop for this hop.", and it still saves.
+
+The temperature and time of each stand are the **Recipe's** own (the Recipe tab shows all three). A Recipe with none of its own uses its **Boil Profile's**, if you typed them there. A recipe file (BeerSmith or BeerXML) that gives a whirlpool temperature puts that hop in the stand it fits, with the file's temperature and time: **High** at 170 °F (77 °C) and above, **Middle** from 140 °F (60 °C), **Low** below that. A whirlpool hop with no temperature in the file gets no stand, so its questions are asked when you open it.
 
 A Process reads them as `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp` and `rcp_Hop_Stand_High_Minutes` (and the same for Middle and Low). The Skynet **Chill** and **Whirlpool and Chill** Process Templates stop at each one.
 

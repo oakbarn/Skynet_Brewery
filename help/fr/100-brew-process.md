@@ -19,7 +19,7 @@ Une journée de brassage est une liste de **grandes étapes** toutes faites, fai
 
 **Whirlpool and Chill** et **Chill** font le même travail, donc une journée de brassage utilise l'une des deux. Pour faire un whirlpool, choisissez **Skynet_Whirlpool_and_Chill** pour Whirlpool and Chill et **(skip this step)** pour Chill.
 
-**Les Hop Stands (les deux étapes de refroidissement) :** quand la recette a des houblons Whirlpool (d'arôme), le refroidissement s'arrête à chacun des trois **Hop Stands** qui a des houblons, du plus haut au plus bas : **High** (180 °F / 82 °C, 10 minutes), **Middle** (154 °F / 68 °C, 20 minutes) et **Low** (la température d'ensemencement, 30 minutes). À chacun il coupe l'eau de refroidissement, vous fait ajouter les houblons de ce stand et tient pendant sa durée, puis rouvre l'eau de refroidissement. Ensuite il refroidit jusqu'à la température d'ensemencement. Chaque houblon Whirlpool choisit son stand sur l'onglet Hops de la recette ; les températures et durées viennent de la recette, de son Boil Profile ou de ☰ Menu > **Default settings**. Voir [Les trois Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands).
+**Les Hop Stands (les deux étapes de refroidissement) :** quand la recette a des houblons Whirlpool (d'arôme), le refroidissement s'arrête à chacun des trois **Hop Stands** qui a des houblons, du plus haut au plus bas : **High**, **Middle** et **Low**. À chacun il coupe l'eau de refroidissement, vous fait ajouter les houblons de ce stand et tient pendant sa durée, puis rouvre l'eau de refroidissement. Ensuite il refroidit jusqu'à la température d'ensemencement. Chaque houblon Whirlpool choisit son stand sur l'onglet Hops de la recette, avec la température et la durée du stand (pas de valeurs par défaut : la recette, ou son Boil Profile). Un stand sans température ou sans durée n'est pas un arrêt. Voir [Les trois Hop Stands](35-mash-and-boil-profiles#the-three-hop-stands).
 
 **Hop Infuser :** un houblon Whirlpool marqué **Hop Rocket** dans l'onglet Hops de la recette va dans le Hop Infuser au lieu de la bouilloire. Le refroidissement ouvre la **vanne du Hop Infuser** (ou vous demande de mettre l'infuseur dans le circuit), fait passer le moût dedans, et le sort du circuit quand le refroidissement est fini.
 
@@ -70,7 +70,7 @@ Les Templates lisent la recette par des noms qui commencent par **`rcp_`**. Ils 
 | `rcp_Mash_Out_Temp`, `rcp_Sparge_Temp` | mash out (0 = aucun) et eau de rinçage |
 | `rcp_Boil_Time`, `rcp_Boil_Start_Temp` | l'ébullition (hh:mm:ss), et la température où elle compte comme bouillante |
 | `rcp_Whirlpool_Minutes` | combien de temps tourne le whirlpool (0 = aucun) |
-| `rcp_Hop_Stand` | true quand il y a des houblons Whirlpool |
+| `rcp_Hop_Stand` | true quand il y a des houblons Whirlpool dans un Hop Stand qui a sa température et sa durée |
 | `rcp_Hop_Stand_High`, `rcp_Hop_Stand_High_Temp`, `rcp_Hop_Stand_High_Minutes` (et `_Middle_`, `_Low_`) | true quand ce Hop Stand a des houblons Whirlpool ; où le refroidissement s'arrête pour eux et combien de temps il tient |
 | `rcp_Hop_Infuser` | true quand un houblon Whirlpool passe par le Hop Infuser (Hop Rocket) |
 | `rcp_Ferment_Temp` | température de fermentation et d'ensemencement |

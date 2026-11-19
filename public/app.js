@@ -56,7 +56,7 @@ import { VB_FERM, vbFermWant } from './vesselbuilder.js';
 import { VB_TEMPLATE, VB_GENERAL, vbUserType, VB_DRAIN, VB_TANGENTIAL, VB_SPARGE, VB_PROBE_SPOTS, VB_HEAT_SPOTS, VB_HERMS, VB_PICKABLE, vbPicked, vbStart, vbSpotIp, vbRealGallons, vbSizeMethod, vbWant, vbPlaced, vbProblems, VB_PIECE_TPL, VB_OPENING_WORD, vbPieceList, vbOpenings, vbChainClean, vbChainProblems } from './vesselbuilder.js';
 import { forShow, toMetric } from './unitconvert.js';
 import { needsTurn, unitShown, showLetter, tShow, dShow, tBack, boxShow, boxBack } from './tempshow.js';
-import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf } from './brewcalc.js';
+import { EQUIP_FIELDS, deltaC, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType, HOP_STANDS, hopStands, standOf, standReady } from './brewcalc.js';
 import { openLink } from './extlinks.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -15811,21 +15811,23 @@ const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(mo
 // The grain weight label (skn_XML_Grain_WT_Standard_Label; OakBarn Brewery, 2026-11-13: "like any other label except Visible
 // defaulted to True / Fill with US or Metric after answer from user in New Setup"; "not user editable ... Locked True")
 const grainWtLabel = units => units === 'Metric' ? 'Kg' : 'Pounds';
-// Three Hop Stands (public/brewcalc.js HOP_STANDS): temperature and time of each, in Default settings and in a Boil Profile.
-// The boxes show the Skynet numbers (Rule 18.36); Low's temperature empty = the Recipe's pitch temperature.
+// Three Hop Stands (public/brewcalc.js HOP_STANDS): temperature and time of each, in a Boil Profile (not in Default settings since
+// 2026-11-19: "No Defaults"). Empty boxes; the Hover Help gives the common numbers.
+// The Hover Help of every Hop Stand question: what it does and what is common (OakBarn Brewery: "The help can be with the question
+// and what is common"). Common numbers from general homebrew practice.
+const HS_TEMP_TIPS = {
+  High: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: 170 to 185 °F (77 to 85 °C), most often 180 °F (82 °C), for hop flavor with some bitterness.',
+  Middle: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: 150 to 160 °F (65 to 71 °C), most often 154 °F (68 °C), for aroma with little bitterness.',
+  Low: 'The chill stops at this temperature and the Whirlpool hops of this stand go in. Common: about the pitch temperature, 60 to 70 °F (16 to 21 °C), for the most aroma and no bitterness.' };
+const HS_TIME_TIP = 'How long the cooling water stays off with the hops of this stand in. Common: High 10 to 20 minutes, Middle 20 to 30, Low 30 or more.';
+const HS_PICK_TIP = 'Which Hop Stand this hop goes in at. High (about 180 °F / 82 °C): flavor with some bitterness. Middle (about 154 °F / 68 °C): aroma with little bitterness. Low (about the pitch temperature): the most aroma. Hops in the same stand share its temperature and time.';
+const HS_BP_EMPTY = 'Empty: a Recipe using this Boil Profile asks for it when a Whirlpool hop is added.';
+const HS_WARN = 'The chill won\'t stop for this hop.';
 function hopStandFields(units, prefix = '_hs', tempTag = 'Temp') {
   const metric = units === 'Metric', T = metric ? '°C' : '°F';
   return HOP_STANDS.flatMap(([k, label, tempC, min]) => [
-    [`${prefix}${k}${tempTag}`, `Hop Stand ${label} (${T})`, 'num', null, false, false, tempC === null ? { tip: 'Empty: the Recipe\'s pitch temperature (68 °F / 20 °C when it has none).' } : { def: Math.round((metric ? tempC : tempC * 1.8 + 32) * 10) / 10 }],
-    [`hs${k}Min`, `Hop Stand ${label} time (min)`, 'num', null, false, false, { def: min, tip: 'Cooling water off for this long, with the hops of this stand in.' }]]);
-}
-function hopStandsToForm(d, tu) { for (const [k] of HOP_STANDS) if (d[`hs${k}TempC`] !== undefined && d[`hs${k}TempC`] !== null) d[`_hs${k}Temp`] = Math.round(cTo(d[`hs${k}TempC`], tu) * 10) / 10; }
-function hopStandsFromForm(d, tu) {
-  for (const [k, label] of HOP_STANDS) {
-    const v = d[`_hs${k}Temp`]; delete d[`_hs${k}Temp`];
-    if (v === undefined || v === '' || v === null) delete d[`hs${k}TempC`]; else d[`hs${k}TempC`] = Math.round(toC(v, tu) * 1000) / 1000;
-    const m = d[`hs${k}Min`]; if (m === '' || m === null) delete d[`hs${k}Min`]; else if (m !== undefined && !(+m >= 0)) throw new Error(`Hop Stand ${label} time must be 0 or more minutes`);
-  }
+    [`${prefix}${k}${tempTag}`, `Hop Stand ${label} (${T})`, 'num', null, false, false, { tip: HS_TEMP_TIPS[k] }],
+    [`hs${k}Min`, `Hop Stand ${label} time (min)`, 'num', null, false, false, { tip: HS_TIME_TIP }]]);
 }
 // the Labels and Text Boxes boxes' hover help (Rule 2.38; KISS, Rule 11.8: the name is short, the explanation is here)
 const LBL_TIPS = {
@@ -15882,7 +15884,8 @@ function renderDefaultTab(box) {
     ['mashProfile', 'Mash Profile', 'sel', [...pick(S.mashProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.mash }],
     ['boilProfile', 'Boil Profile', 'sel', [...pick(S.boilProfiles, '(none)'), PROF_ADD], false, false, { tip: DEF_TIPS.boil }],
     ['waterProfile', 'Water Profile', 'sel', [...S.waterProfiles.map(x => [x.id, x.name]), PROF_ADD], false, false, { tip: DEF_TIPS.water }],
-    ...hopStandFields(w.units),
+    // the Hop Stand boxes left Default settings (Panel Updates entry 13, OakBarn Brewery: "No Defaults", 2026-11-19, Rule 17.14):
+    // a Whirlpool hop asks for its stand, temperature and time in the Recipe
     ['_w2g', `Water to Grain Ratio (${displayUnits(w).ratioUnit})`, 'num', null, false, false, { tip: DEF_TIPS.w2g }],
     // New Schema from a Skynet Template: not on Default settings any more (OakBarn Brewery, 2026-11-17: "New Schema from Skynet section
     // not needed"): its questions start with Skynet's own answers (public/schemabuild.js NS_DEFAULTS)
@@ -15915,7 +15918,6 @@ function renderDefaultTab(box) {
   const du = displayUnits(d);
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   d._batch = Math.round(lTo(d.batchL, volUnit(d.units)) * 100) / 100;      // kept in liters, shown in Gallons or Liters (Default Tab 3)
-  hopStandsToForm(d, du.tempUnit);
   const f = paneForm(fields, d, () => { }, !admin);
   if (admin) profAddWatch(f.box, { mashProfile: 'mash', boilProfile: 'boil', waterProfile: 'water' });
   const tap = tapWaterSection(admin);
@@ -15929,7 +15931,7 @@ function renderDefaultTab(box) {
     for (const k of ['textVisible', 'nameFont', 'nameFontSize']) delete d[k];      // the one Text part, now Labels and Text Boxes (2026-11-14)
     const su = displayUnits(d);
     if (d._w2g === undefined || d._w2g === '' || d._w2g === null) delete d.waterToGrain; else d.waterToGrain = Math.round(toRatio(d._w2g, su.ratioUnit) * 1000) / 1000;
-    hopStandsFromForm(d, su.tempUnit);
+    for (const [k] of HOP_STANDS) { delete d[`hs${k}TempC`]; delete d[`hs${k}Min`]; }      // no Hop Stand defaults (2026-11-19, Rule 17.14)
     if (d._batch === '' || d._batch === null || d._batch === undefined) d.batchL = null; else if (!(+d._batch > 0)) throw new Error('Batch Size must be more than 0'); else d.batchL = Math.round(toL(+d._batch, volUnit(d.units)) * 1000) / 1000;
     delete d._w2g; delete d._batch; delete d._tabPipe; delete d._tabHose; delete d._grainLabel; delete d.grainLabel;
     for (const k of ['batchSize', 'equipmentProfile', 'efficiency', 'grainTempC', 'strikeOffsetC', 'boilTime']) delete d[k];      // not on this Tab any more (Default Tab 3)
@@ -18331,7 +18333,7 @@ function profFields(kind) {
       ['boilTime', 'Total boil time (minutes)', 'num', null, false, false, { tip: '0 = No Boil.' }],
       ['boilOffRate', `Boil off (${u} per hour)`, 'num', null, false, false, { tip: 'Empty: the Equipment Profile\'s Boil Off. With a number here, picking this profile in a Recipe asks which one to use.' }],
       ['askVolumes', 'Ask the kettle volume at the start and end of the boil', 'yn', true],
-      ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: 'Empty: Default settings.' }]),
+      ['_hs', 'Hop Stands', 'head'], ...hopStandFields(w.units, 'hs', 'Temp').map(f => [...f.slice(0, 6), { tip: f[6].tip + ' ' + HS_BP_EMPTY }]),
       ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { disabled: true, tip: UNITS_SHOWN_TIP }],
       ...Array.from({ length: MASH_STEPS }, (_, i) => [['_s' + i, `Step ${i + 1}${i ? ' (leave empty if not used)' : ''}`, 'head'],
@@ -18628,12 +18630,12 @@ function rcBoilPick(rc, changed) {
 // The three Hop Stands of this Recipe (public/brewcalc.js): each box shows what is used (the Recipe's own, else its Boil Profile's,
 // else Default settings); a change here is the Recipe's own. The Whirlpool hops on the Hops tab each pick a stand.
 function rcHopStandsRow(rc, u, changed) {
-  const stands = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile)), op = can('operator');
+  const stands = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)), op = can('operator');
   const keep = (key, obj) => () => { rc.hopStands = { ...(rc.hopStands || {}), [key]: { tempC: obj.tempC, min: obj.min } }; changed(); };
   return h('div', { class: 'rcRow' }, ...stands.flatMap(st => {
     const o = { tempC: st.tempC, min: st.min }, k = keep(st.key, o);
-    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: 'The chill stops at this temperature and the Whirlpool hops of this stand go in.' }),
-      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: 'Cooling water off for this long.' })];
+    return [rcBox('r', `Hop Stand ${st.label}`, rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ro: !op, onChange: k }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${st.key}_Temp`, tip: HS_TEMP_TIPS[st.key] }),
+      rcBox('g', `${st.label} Minutes`, rcInput(o, 'min', { d: 0, ro: !op, onChange: k }), { unit: 'min', field: `rcp_Hop_Stand_${st.key}_Minutes`, tip: HS_TIME_TIP })];
   }));
 }
 function rcMain(pane, rc, u, changed) {
@@ -18787,7 +18789,7 @@ function rcHops(pane, rc, u, changed) {
         rcBox('c', `Hop ${i + 1} Drop`, r.drop, { field: F(i, 'Drop'), tip: 'Minutes into the boil when it goes in' }),
         rcBox('c', `Hop ${i + 1} IBU`, r.ibu, { field: F(i, 'IBU') }),
         rcBox('c', `Hop ${i + 1} Boil Group`, r.grp, { field: F(i, 'Boil_Group'), tip: 'Hops that go in at the same time are one group (the Drops tab)' }));
-    } else line.append(rcHopDialog(hop, i, u, changed));
+    } else line.append(rcHopDialog(rc, hop, i, u, changed));
     if (op) line.append(h('button', { class: 'hopDel', onclick: del(i), title: `Delete Hop ${i + 1}` }, '🗑 Delete'));
     rows.push(r); pane.append(line);
   });
@@ -18797,7 +18799,7 @@ function rcHops(pane, rc, u, changed) {
     op ? h('div', { class: 'bar' }, h('button', { class: 'rcCalcBtn', onclick: guard(() => rcCalculate(rc, changed)), title: 'Puts the hop lines in order and works out the whole Recipe. Every Actual AAU must be above 0' }, 'Calculate')) : '');
 }
 // the Outside of Boil Hops dialog of one hop line. It works on a copy; Save puts the copy in the hop, Cancel drops it.
-function rcHopDialog(hop, i, u, changed) {
+function rcHopDialog(rc, hop, i, u, changed) {      // rc: the Recipe (was missing: the dialog stopped with "rc is not defined", 2026-11-19)
   const keep = ['use', 'dryDays', 'date', 'wpTempC', 'stand', 'time', 'hopRocket'];
   const work = rcHopOpen.get(hop) ?? Object.fromEntries(keep.map(k => [k, hop[k]]));
   const box = h('div', { class: 'hopDlg' });
@@ -18805,7 +18807,7 @@ function rcHopDialog(hop, i, u, changed) {
   const draw = () => {
     box.replaceChildren();
     rcHopOpen.set(hop, work);
-    const set = (use, on) => { work.use = on ? use : null; if (on && use === 'whirlpool' && work.time == null) work.time = 0; draw(); };
+    const set = (use, on) => { work.use = on ? use : null; draw(); };      // no Defaults: a Whirlpool hop's Min starts empty (2026-11-19)
     const sw = ([use, label]) => h('div', { class: 'hopSw' }, h('b', {}, label), rcSwitch(work.use === use, on => set(use, on)));
     const one = ['secondary', 'dry hop', 'whirlpool'].includes(work.use);
     if (!one) box.append(...RC_HOP_SW.map(sw));
@@ -18815,18 +18817,34 @@ function rcHopDialog(hop, i, u, changed) {
       const date = h('input', { type: 'date', value: work.date || '' }); date.onchange = () => { work.date = date.value; };
       box.append(rcBox('g', what, date, { wide: true, field: F('Date') }), rcBox('g', 'Days', rcInput(work, 'dryDays', { d: 0 }), { field: F('Days') }));
     }
-    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand")
-    const st = hopStands(rc, S.config.brewDefaults || {}, S.boilProfiles.find(x => x.id === rc.boilProfile));
-    if (work.use === 'whirlpool') { work.stand = standOf(work, st); work.wpTempC = null; }
-    if (work.use === 'whirlpool') box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: st.map(x => [x.key, `${x.label}: ${rcRound(cTo(x.tempC, u.tempUnit), 0)} ${TU(u.tempUnit)}, ${x.min} min`]) }), { wide: true, field: F('Hop_Stand'), tip: 'The chill stops at this stand\'s temperature and this hop goes in. Each stand\'s temperature and time are on the Recipe tab.' }),
-      rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min') }),
-      h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
+    // the Hop Stand it goes in at (three Hop Stands, OakBarn Brewery 2026-11-13: "The whirlpool hop line picks a stand").
+    // The Whirlpool questions (Panel Updates entry 13, OakBarn Brewery: "Hop Questions to ask if a Hop is added to a Recipe that is
+    // Whirlpool. No Defaults. The help can be with the question and what is common", built 2026-11-19): which Hop Stand, its
+    // Temperature and its Time. All start empty unless the Recipe (or its Boil Profile) already has them; the Hover Help gives the
+    // common numbers. The stand's Temperature and Time are the Recipe's, shared by every hop in that stand.
+    const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
+    if (work.use === 'whirlpool') {
+      work.stand = standOf(work, st); work.wpTempC = null;
+      work._hs ??= Object.fromEntries(st.map(x => [x.key, { tempC: x.tempC, min: x.min }]));
+      const o = work._hs[work.stand];
+      box.append(rcBox('g', 'Hop Stand', rcInput(work, 'stand', { kind: 'sel', list: [['', ''], ...st.map(x => [x.key, x.label])], onChange: draw }), { field: F('Hop_Stand'), tip: HS_PICK_TIP }),
+        ...(o ? [rcBox('r', 'Temperature', rcInput(o, 'tempC', { d: 0, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit) }), { unit: TU(u.tempUnit), field: `rcp_Hop_Stand_${work.stand}_Temp`, tip: HS_TEMP_TIPS[work.stand] }),
+          rcBox('g', 'Time', rcInput(o, 'min', { d: 0 }), { unit: 'min', field: `rcp_Hop_Stand_${work.stand}_Minutes`, tip: HS_TIME_TIP })] : []),
+        rcBox('g', 'Min', rcInput(work, 'time', { d: 0 }), { field: F('Min'), tip: 'How long this hop steeps in the whirlpool (used for its bitterness). The Hop Stand Time is how long the cooling water stays off.' }),
+        h('div', { class: 'hopSw' }, h('b', {}, 'Hop Rocket'), rcSwitch(!!work.hopRocket, on => { work.hopRocket = on; }, 'Skynet_Field ' + F('Hop_Rocket'))));
+    }
     box.append(h('span', { class: 'spacer' }), h('div', { class: 'hopDlgBtns' },
       h('button', { onclick: () => { rcHopOpen.delete(hop); renderMenuPane(); } }, '✕ Cancel'),
       h('button', { class: 'primary', onclick: () => {
         rcHopOpen.delete(hop);
         if (!work.use) { if (hop.use !== 'boil') { hop.use = 'boil'; changed(); } return renderMenuPane(); }
         for (const k of keep) hop[k] = work[k];
+        if (work.use === 'whirlpool') {
+          // the stand's answers are the Recipe's own (only what was changed here); one warning if one is missing, and it still saves
+          const st = hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile));
+          for (const x of st) { const a = work._hs?.[x.key]; if (a && (a.tempC !== x.tempC || a.min !== x.min)) rc.hopStands = { ...(rc.hopStands || {}), [x.key]: { tempC: a.tempC, min: a.min } }; }
+          if (!standReady(hopStands(rc, null, S.boilProfiles.find(x => x.id === rc.boilProfile)).find(x => x.key === work.stand))) toast(HS_WARN, true);
+        }
         changed(); renderMenuPane();
       } }, '💾 Save')));
   };
