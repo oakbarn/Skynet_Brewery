@@ -3788,6 +3788,13 @@ the rest: "Skip to next event" lead, Auto skip watch time, Pretend readings are 
 the Process timeline, with Save at the top and the bottom. They are not in Settings or on the Default tab. Switching the Simulator on
 or off stays on the 🔌 Real / 🧪 Simulator button and the ☰ Menu (Rule 10.4). (Help 85, 20, 77)
 
+10.11 **When a change touches Schemas, check only the 3 Vessel Sample** (OakBarn Brewery, 2026-11-19, on whether a removed Template
+was on the 3 Vessel Sample: "Only any thing that affect a 3 Vessel Sample. Rule. Check only things that affect the 3 Vessel sample
+and no other schema or tab"). When a change could touch what is already on a Schema (a Template taken out, a renamed item, a new
+setting), Skynet checks and fixes only the **3 Vessel Sample** (samples/configs/three-vessel-one-pump). No other Schema, Schema
+Template or Tab is searched or changed for it. **Both programs:** the BruControl Import has no Sample Schema to check, so nothing
+changes there.
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -5705,6 +5712,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Panel Update 5 (OakBarn Brewery, PDF "Panel Update 5", "Do it now"): Rule 2.58 changed (the New Schema Interview: ➕ Add a New board, the Tabs page with What is it for, Level, Equipment Profile with Create New, Import All / Vessels / Manifold and Import Processes, ➕ Add New Tab; the Equipment page is gone). Added Rule 2.60 (Close on every page; Add Interface goes to the Interfaces page; a Menu tab closes back to where it was opened), Rule 19.9 (📐 My Size) and Rule 19.10 (Material Copper / Stainless / Hose; same-side HERMS Coil and Immersion Chiller Templates; the Chillzilla Template taken out). Notes added on the Equipment, Vessel and Fitting Templates tabs and the Default Layout tab (#7, #10, #11). Help 14, 50, 202 (and French). Checked against both programs: the BruControl Import makes no Schemas with the interview; its Build page shares the ☰ Menu tabs, dialogs and Templates, so Close, My Size and Material work the same there; BruControl has no chillers or coils to import.
 - 2026-11-19: Rule 18.50 applied to every other dialog (the "Recheck dialogs" pass, part 2): Switch family, no Graphic Widgets, older Widgets, Picture Widget, drawn things and Integrated Devices in the Model's order; Background, Fore color and Back color lines; nothing taken away. Help 64, 65, 74, 76, 148 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import changes.
 - 2026-11-18: Rule 18.50 applied to the Alarm Widgets (the "Recheck dialogs" pass, part 1): Basic, User and Pre-Hop Alarm dialogs in the Hose Bib's order, Widget Type last, Database and .API ⬢ on the Active overlay line; nothing taken away. Help 148 (and French). Checked against both programs: the BruControl Import's Build page shares the dialogs; no import change.
