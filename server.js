@@ -271,7 +271,7 @@ if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
 const screens = new Map();       // response -> { ua, ip }: which kind of screen it is (Standby and Close warn about the others, Rule 6.32)
-let pending = {};
+let pending = Object.create(null);   // no prototype: a name or prop such as __proto__ stays a plain key
 // A browser that stops reading (a phone asleep, a laptop lid closed, WiFi gone without a goodbye) would make the Brain keep
 // every update for it in memory. Once more than 2 MB waits for one browser it is let go; it joins again by itself when it
 // wakes up and loads everything fresh.
@@ -284,7 +284,7 @@ function broadcast(type, data) {
   const msg = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
   for (const res of [...clients.keys()]) sse(res, msg);
 }
-function flush() { if (Object.keys(pending).length) { broadcast('values', pending); pending = {}; } }
+function flush() { if (Object.keys(pending).length) { broadcast('values', pending); pending = Object.create(null); } }
 store.on('change', (name, prop, v) => {
   // a Momentary button's short "true" is sent at once so every screen sees the flash
   if (v === false && pending[name]?.[prop] === true) flush();
