@@ -24,6 +24,7 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 | Adafruit Feather M0 (WiFi) | **3,3 V** | D0, D1, D5, D6, D9-D13 | D5, D6, D9-D13 | tous les Ports | A0-A5 | USB, WiFi (Feather M0 WiFi seulement) |
 | ESP32 | **3,3 V** | GPIO 2, 4, 5, 12-19, 21-23, 25-27, 32-36, 39 | tous les Ports de sortie | tous les Ports | A0, A3-A7 (GPIO 36, 39, 32-35) | USB, Ethernet (ESP32 avec prise), WiFi |
 | ESP8266 (NodeMCU, Wemos D1) | **3,3 V** | GPIO 0, 2, 4, 5, 12-16 | tous les Ports sauf GPIO16 | tous les Ports sauf GPIO16 | A0 | USB, WiFi |
+| Arduino Opta (Lite, RS485 ou WiFi) | alimentation **24 V** | Relais 1-4, I1-I8 | Relais 1-4 (un avertissement : voir plus bas) | I1-I8 (impulsions lentes) | I1-I8 (0-10 V) | USB, Ethernet (intégré), WiFi (Opta WiFi seulement) |
 | Raspberry Pi | **3,3 V** | GPIO 2-27 | tous les Ports (PWM matériel : GPIO 12, 13, 18, 19) | tous les Ports | aucun (utilisez un ADS1115) | Ethernet, WiFi |
 
 - **La liste des Ports ne propose que les Ports que la carte possède.** Un Port que la carte n'a pas est refusé. Sur un ESP32, les GPIO 6-11 sont la mémoire de la carte et ne sont jamais proposés, et les GPIO 34, 35, 36 et 39 ne peuvent que lire (entrées) : une sortie ne peut pas les utiliser.
@@ -35,6 +36,24 @@ Une **carte** (une **Interface**) est l'Arduino, l'ESP ou le Raspberry Pi auquel
 - **Grand Central : un débitmètre par interruption.** Ses 16 Ports compteurs ont chacun leur propre interruption, donc tous les débitmètres peuvent tourner en même temps.
 - **Nano ESP32 :** D1 donne peu de courant (une résistance est sur sa ligne), il est donc proposé en dernier pour les sorties. A4-A7 ne peuvent pas lire quand le WiFi de la carte est allumé : en WiFi, en choisir un donne un avertissement.
 - **ESP32 : GPIO16 et GPIO17** ne sont pas libres sur une carte avec un module WROVER. Ils sont proposés en dernier, et en choisir un donne un avertissement.
+- **Arduino Opta :** un automate (PLC) alimenté en 24 V. Ses Ports portent un nom : **Relais 1-4** (normalement ouverts, au plus 250 V CA et 10 A) et les entrées **I1-I8** (numériques 0-24 V ou analogiques **0-10 V**, pas 0-5 V). Tout Device peut y aller, comme sur un Mega : un relais prend toute sortie et une entrée prend toute lecture. Seule une lecture sur un relais est refusée (un relais ne peut pas lire). Comme sur un Mega, une sonde ou un chauffage demande quelque chose câblé entre lui et la carte, et Skynet donne **un avertissement** qui dit quoi :
+  - **Sondes de température :** les entrées de l'Opta lisent 0-10 V, donc la plupart des sondes demandent un circuit ajouté. L'avertissement le nomme, selon le type de sonde :
+
+    | Sonde Skynet | Quoi ajouter sur un Opta |
+    |---|---|
+    | NTC 10K (ou autre NTC) | Un transmetteur de température NTC à sortie 0-10 V (réglé sur votre NTC : 10K, B 3950), câblé sur I1-I8 |
+    | RTD PT100 | Une **extension analogique Opta (A0602)**, qui lit elle-même les sondes PT100 ; ou un transmetteur PT100 à sortie 0-10 V, câblé sur I1-I8 |
+    | RTD PT1000 | Un transmetteur PT1000 à sortie 0-10 V, câblé sur I1-I8 |
+    | Thermocouple (K, J, T ...) | Un transmetteur pour votre type de thermocouple, à sortie 0-10 V, câblé sur I1-I8 |
+    | LM35, TMP36 | Rien qu'une alimentation 5 V pour le capteur : sa sortie va directement sur I1-I8 (environ 0,25 °C par pas) |
+    | DS18B20 (OneWire) | L'Opta n'a pas de OneWire : gardez les sondes DS18B20 sur un Mega (on peut mélanger les cartes), ou remplacez-les par des sondes NTC 10K ou PT100 avec un transmetteur. Un module DS18B20 vers RS485 marchera quand Skynet aura le RS485 |
+
+    Réglez la plage du transmetteur (par exemple 0-150 °C) sur le transmetteur.
+  - **Chauffage commandé en PWM ou Pseudo PWM :** une commutation rapide use un relais. Utilisez un SSR piloté par une **extension numérique Opta à sorties statiques (D1608S)**, ou faites marcher le chauffage en Marche/Arrêt avec Cycle de service ou Hystérésis.
+  - **Un moteur pas à pas :** un driver pas à pas avec son propre contrôleur (un relais ne peut pas donner les impulsions de pas), ou mettez le moteur sur un Mega.
+  - **Un ADS1115 :** l'Opta n'a pas de broches I2C pour lui ; câblez un capteur 0-10 V directement sur I1-I8, ou utilisez l'A0602.
+  - **Un relais** donne un avertissement, avec l'avertissement électrique ; **une Entrée analogique** donne un avertissement 0-10 V.
+  - Les modules d'extension se branchent sur le port latéral de l'Opta. Le programme Opta de Skynet et sa prise en charge des modules d'extension viendront plus tard dans le plan du firmware.
 - **Raspberry Pi :** le Pi fait du PWM sur toutes les broches, mais GPIO 12, 13, 18 et 19 ont le PWM matériel : ils portent *Best for True PWM: see Help*, en bleu.
 
 ## Cartes 3,3 V {#3-3-v-boards}
@@ -51,4 +70,4 @@ Une carte 3,3 V ne doit jamais recevoir 5 V sur un Port : cela peut la détruire
 
 La liste des cartes rend justes les listes de Ports du Panel pour chaque carte. Le programme Skynet sur la carte (son firmware) est écrit et testé pour l'**Arduino Mega 2560**. Le programme des autres cartes est la prochaine étape du plan firmware Skynet : un seul programme partagé, écrit en pensant à chaque carte de cette liste.
 
-L'**Arduino Opta** (un PLC avec sorties relais et entrées 0-10 V) n'est pas encore dans la liste : il lui faut d'abord son propre programme.
+L'**Arduino Opta** est dans la liste pour que vous puissiez dès maintenant prévoir ses Ports. Son propre programme viendra plus tard dans le plan du firmware Skynet (après le Mega et le Grand Central).

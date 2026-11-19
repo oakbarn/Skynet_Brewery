@@ -24,6 +24,7 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 | Adafruit Feather M0 (WiFi) | **3.3 V** | D0, D1, D5, D6, D9-D13 | D5, D6, D9-D13 | every Port | A0-A5 | USB, WiFi (Feather M0 WiFi only) |
 | ESP32 | **3.3 V** | GPIO 2, 4, 5, 12-19, 21-23, 25-27, 32-36, 39 | every output Port | every Port | A0, A3-A7 (GPIO 36, 39, 32-35) | USB, Ethernet (ESP32 with a jack), WiFi |
 | ESP8266 (NodeMCU, Wemos D1) | **3.3 V** | GPIO 0, 2, 4, 5, 12-16 | every Port but GPIO16 | every Port but GPIO16 | A0 | USB, WiFi |
+| Arduino Opta (Lite, RS485 or WiFi) | **24 V** supply | Relay 1-4, I1-I8 | Relay 1-4 (one warning: see below) | I1-I8 (slow pulses) | I1-I8 (0-10 V) | USB, Ethernet (built in), WiFi (Opta WiFi only) |
 | Raspberry Pi | **3.3 V** | GPIO 2-27 | every Port (hardware PWM: GPIO 12, 13, 18, 19) | every Port | none (use an ADS1115) | Ethernet, WiFi |
 
 - **The Port list offers only the Ports the board has.** A Port the board does not have is refused. On an ESP32, GPIO 6-11 are the board's own memory and are never offered, and GPIO 34, 35, 36 and 39 can only read (inputs), so an output can't use them.
@@ -35,6 +36,24 @@ A **board** (an **Interface**) is the Arduino, ESP or Raspberry Pi your Devices 
 - **Grand Central: one flow meter per interrupt.** Its 16 counter Ports each have their own interrupt, so every flow meter can run at once.
 - **Nano ESP32:** D1 gives little current (a resistor is in its line), so it is offered last for outputs. A4-A7 can't read while the board's WiFi is on: on WiFi, picking one gives one warning.
 - **ESP32: GPIO16 and GPIO17** are not free on a board with a WROVER module. They are offered last, and picking one gives one warning.
+- **Arduino Opta:** a PLC that runs on 24 V. Its Ports go by name: **Relay 1-4** (Normally Open, at most 250 V AC and 10 A) and the inputs **I1-I8** (0-24 V digital or **0-10 V** analog, not 0-5 V). Every Device can go on it, as on a Mega: a relay takes any output and an input takes any reading. Only a reading on a relay is refused (a relay can't read). Like on a Mega, a probe or a heater needs something wired between it and the board, and Skynet gives **one warning** saying what:
+  - **Temperature probes:** the Opta's inputs read 0-10 V, so most probes need an added circuit. The warning names it, by probe type:
+
+    | Skynet probe | What to add on an Opta |
+    |---|---|
+    | 10K NTC (or other NTC) | An NTC temperature transmitter with a 0-10 V output (set it to your NTC: 10K, B 3950), wired to I1-I8 |
+    | PT100 RTD | An **Opta Analog Expansion (A0602)**, which reads PT100 probes itself; or a PT100 transmitter with a 0-10 V output, wired to I1-I8 |
+    | PT1000 RTD | A PT1000 transmitter with a 0-10 V output, wired to I1-I8 |
+    | Thermocouple (K, J, T ...) | A thermocouple transmitter for your type with a 0-10 V output, wired to I1-I8 |
+    | LM35, TMP36 | Nothing but a 5 V supply for the sensor: its output goes straight to I1-I8 (about 0.25 °C per step) |
+    | DS18B20 (OneWire) | The Opta has no OneWire: keep DS18B20 probes on a Mega (you can mix boards), or swap them for 10K NTC or PT100 probes with a transmitter. A DS18B20-to-RS485 module will work once Skynet has RS485 |
+
+    Set the transmitter's range (for example 0-150 °C) on the transmitter.
+  - **Heater control by PWM or Pseudo PWM:** fast switching wears a relay out. Use an SSR driven by an **Opta Digital Expansion with solid-state outputs (D1608S)**, or run the heater On/Off with Duty Cycle or Hysteresis.
+  - **A stepper motor:** a stepper driver with its own controller (a relay can't give step pulses), or put the motor on a Mega.
+  - **An ADS1115:** the Opta has no I2C pins for it; wire a 0-10 V sensor straight to I1-I8, or use the A0602.
+  - **A relay** gives one warning with the electrical warning; **an Analog In** gives one 0-10 V warning.
+  - Expansion modules plug into the Opta's side port. Skynet's Opta program and its support for expansion modules come later in the firmware plan.
 - **Raspberry Pi:** the Pi makes PWM on every pin, but GPIO 12, 13, 18 and 19 have hardware PWM: they read *Best for True PWM: see Help*, in blue.
 
 ## 3.3 V boards
@@ -51,4 +70,4 @@ A 3.3 V board must never get 5 V on a Port: it can ruin the board. When you put 
 
 The Board list makes the Panel's Port lists right for each board. The Skynet program on the board (its firmware) is written and tested for the **Arduino Mega 2560**. The program for the other boards is the next step of the Skynet firmware plan: one shared program, written with every board in this list in mind.
 
-The **Arduino Opta** (a PLC with relay outputs and 0-10 V inputs) is not in the list yet: it needs its own program first.
+The **Arduino Opta** is in the list so you can plan its Ports now. Its own program comes later in the Skynet firmware plan (after the Mega and the Grand Central).
