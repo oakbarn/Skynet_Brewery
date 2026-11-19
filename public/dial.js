@@ -58,13 +58,13 @@ export function dialSvg(e = {}, value, sp = null, text = null) {
   const arc = (r, a0, a1) => { const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1); return `M${f(x0)} ${f(y0)}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${f(x1)} ${f(y1)}`; };
   const v = num(value), s = num(sp), zone = dialZone(v, s, e.dialCool, e.dialHot);
   const out = [];
-  if (gs) out.push(`<rect x="-6" y="5" width="212" height="${e.dialShape === 'full' ? 186 : 147}" rx="14" fill="${gs.face}"/>`);      // its color style's face
+  if (gs) out.push(`<rect x="-6" y="5" width="212" height="${e.dialShape === 'full' ? 186 : 147}" rx="14" fill="${esc(gs.face)}"/>`);      // its color style's face
   if (s !== null) {           // the three zones round the Setpoint
     const c = Math.max(0, num(e.dialCool) ?? DIAL_DEFAULTS.cool), h = Math.max(0, num(e.dialHot) ?? DIAL_DEFAULTS.hot);
     const a1 = ang(s - c), a2 = ang(s + h);
-    if (a1 > START) out.push(`<path d="${arc(R, START, a1)}" stroke="${col.cold}" stroke-width="${W}" fill="none"/>`);
-    out.push(`<path d="${arc(R, a1, Math.max(a2, a1 + 0.5))}" stroke="${col.ok}" stroke-width="${W}" fill="none"/>`);
-    if (a2 < END) out.push(`<path d="${arc(R, a2, END)}" stroke="${col.hot}" stroke-width="${W}" fill="none"/>`);
+    if (a1 > START) out.push(`<path d="${arc(R, START, a1)}" stroke="${esc(col.cold)}" stroke-width="${W}" fill="none"/>`);
+    out.push(`<path d="${arc(R, a1, Math.max(a2, a1 + 0.5))}" stroke="${esc(col.ok)}" stroke-width="${W}" fill="none"/>`);
+    if (a2 < END) out.push(`<path d="${arc(R, a2, END)}" stroke="${esc(col.hot)}" stroke-width="${W}" fill="none"/>`);
     const [mx0, my0] = pt(R + W / 2 + 4, ang(s)), [mx1, my1] = pt(R - W / 2 - 3, ang(s));
     out.push(`<line x1="${f(mx0)}" y1="${f(my0)}" x2="${f(mx1)}" y2="${f(my1)}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`);
   } else {                    // no Setpoint: blue, green, yellow, red along the arc
@@ -92,10 +92,10 @@ export function dialSvg(e = {}, value, sp = null, text = null) {
   // the reading, colored by its zone
   const shown = text ?? (v === null ? '--' : v.toFixed(dec)) + (e.units ? String(e.units) : '');
   const full = e.dialShape === 'full', big = full ? 24 : 30;      // Full round: the reading sits inside the ring, a little smaller
-  out.push(`<text x="${cx}" y="${cy + (full ? 48 : 52)}" text-anchor="middle" font-size="${shown.length > 7 ? Math.round(big * 7 / shown.length) : big}" font-weight="700" class="dialVal"${zone ? ` fill="${col[zone]}"` : ' fill="currentColor"'}>${esc(shown)}</text>`);
+  out.push(`<text x="${cx}" y="${cy + (full ? 48 : 52)}" text-anchor="middle" font-size="${shown.length > 7 ? Math.round(big * 7 / shown.length) : big}" font-weight="700" class="dialVal"${zone ? ` fill="${esc(col[zone])}"` : ' fill="currentColor"'}>${esc(shown)}</text>`);
   // the picture is cut close round the drawing (Fritz, 2026-11-08: the Dial takes up most of its box): the side numbers reach
   // past 0 and 200 and the reading ends near 152, so nothing is cut off and no empty edge is kept
-  return `<svg class="dial"${gs ? ` style="color:${gs.ink}"` : ''} viewBox="${full ? '-8 3 216 190' : '-8 3 216 151'}" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
+  return `<svg class="dial"${gs ? ` style="color:${esc(gs.ink)}"` : ''} viewBox="${full ? '-8 3 216 190' : '-8 3 216 151'}" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
 }
 
 // The Skynet Bar (Rule 2.40 point 4): the same Lowest, Highest, ticks, Setpoint zones and colors as the Dial, as a straight bar
@@ -108,7 +108,7 @@ export function barSvg(e = {}, value, sp = null, text = null) {
   const W = side ? 240 : 120, H = side ? 110 : 230, L = side ? 200 : 170;
   const at = t => side ? [20 + L * t, 52] : [44, 190 - L * t];
   const out = [];
-  if (gs) out.push(`<rect x="0" y="0" width="${W}" height="${H}" rx="12" fill="${gs.face}"/>`);
+  if (gs) out.push(`<rect x="0" y="0" width="${W}" height="${H}" rx="12" fill="${esc(gs.face)}"/>`);
   const [x0, y0] = at(0), [, y1] = at(1), T = 16;
   out.push(side ? `<rect x="${x0}" y="${y0 - T / 2}" width="${L}" height="${T}" rx="4" fill="currentColor" fill-opacity=".15"/>` : `<rect x="${x0 - T / 2}" y="${y1}" width="${T}" height="${L}" rx="4" fill="currentColor" fill-opacity=".15"/>`);
   if (v !== null) {
@@ -127,8 +127,8 @@ export function barSvg(e = {}, value, sp = null, text = null) {
     }
   }
   const shown = text ?? (v === null ? '--' : v.toFixed(dec)) + (e.units ? String(e.units) : '');
-  out.push(`<text x="${side ? W / 2 : W / 2}" y="${side ? 30 : 222}" text-anchor="middle" font-size="${side ? 24 : 20}" font-weight="700" class="dialVal"${zone ? ` fill="${col[zone]}"` : ' fill="currentColor"'}>${esc(shown)}</text>`);
-  return `<svg class="dial bar"${gs ? ` style="color:${gs.ink}"` : ''} viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
+  out.push(`<text x="${side ? W / 2 : W / 2}" y="${side ? 30 : 222}" text-anchor="middle" font-size="${side ? 24 : 20}" font-weight="700" class="dialVal"${zone ? ` fill="${esc(col[zone])}"` : ' fill="currentColor"'}>${esc(shown)}</text>`);
+  return `<svg class="dial bar"${gs ? ` style="color:${esc(gs.ink)}"` : ''} viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
 }
 
 // The BruControl Import (Rule 2.40 points 3 and 4): a BruControl gauge's settings as the closest Skynet ones. kind is its DisplayKind
@@ -156,4 +156,4 @@ export function bruGauge(kind, o = {}) {
 function num(x) { if (x === null || x === undefined || x === '' || typeof x === 'boolean') return null; const n = Number(x); return Number.isFinite(n) ? n : null; }
 const f = n => Math.round(n * 100) / 100;
 const round = n => Math.abs(n - Math.round(n)) < 1e-9 ? String(Math.round(n)) : String(Math.round(n * 10) / 10);
-const esc = s => String(s).replace(/[<&"]/g, c => ({ '<': '&lt;', '&': '&amp;', '"': '&quot;' })[c]);
+const esc = s => String(s).replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' })[c]);      // every HTML character (CodeQL)
