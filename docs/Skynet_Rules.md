@@ -1556,7 +1556,8 @@ back where it came from?". Move to Tab places the build in the center of the cho
 (2026-10-22, PR #88)
 
 4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
-a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar; it works on any Tab,
+a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar (and New tab > Copy of a whole Tab, Rule 4.8, which
+makes a Clone of every Device on that Tab, and of the Widgets picked as Clones); it works on any Tab,
 **the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
 already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
 be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). The name is only for reference in its
@@ -1635,6 +1636,30 @@ Properties (a Tab's Tab settings, a Device, a Widget, a vessel, an IP) from a dr
 Edit layout (Build mode, Rule 2.52) stays on the whole time, so nothing on the Build Tab is lost by going to another Tab and back.
 **Save layout and leaving Edit layout never end or lose the Build** (OakBarn Brewery, 2026-11-16): it is kept until ✅ Finish Build
 (Rule 4.1). **Both programs:** the BruControl Import's Build page is the same Edit layout.
+
+4.8 **Copy a whole Tab on New tab** (OakBarn Brewery, 2026-11-16, Panel Updates Sandbox entry 18: "Pipes cannot be moved individually
+to a different tab. It is an all or nothing buy making a copy to put on a differnt new tab as it is the entire tab that would be
+copied"; Panel Updates order item 8: Devices become Clones, a Clone and its parent are the same "who", only another screen image,
+Process commands only to the parent; pipes and hoses new background names; a Widgets interview; "Copy the N Processes?").
+**New tab** on the Edit layout bar first asks **Empty Tab** or **Copy of** one of the Tabs that has something on it; then the new
+Tab's name (its Tab ID by Rule 3.2). The copy puts everything that is on the Tab on the new Tab, in the same places:
+1. **Every Device becomes a Clone** (Rule 4.4) of it. The Clone and its Device are one Device: a Process commands only the Device
+   itself, never the Clone. A Clone already on the Tab becomes another Clone of the same Device (a Method Clone keeps its method).
+2. **Pipes, hoses, IPs, fittings, vessels, pictures and text** are new items joined the same way, with new hidden ids and new
+   names in the background (Pipe_N, Hose_N, Tee_N, HLT_Vessel_2; a Text Widget's name gets the new Tab ID, Rule 3.14). A pipe on a
+   Device's IP ends on its Clone. A setting that points at a Device stays on the Device.
+3. **The Widgets interview** (one question for all of them): **i) Clones** (each Widget shown on the new Tab too, the same Widget),
+   **ii) New Widgets** (each a new Widget of its own: a name that ends with the old Tab ID gets the new one,
+   `wgt_SW_Testing_BH` -> `wgt_SW_Testing_B2`; another name gets the Suggested Name, or `_2`), or **iii) Case by case** (Clone or
+   New Widget asked for each one). A new Widget that pointed at another copied Widget points at its copy.
+4. **Copy the N Processes?** (ii and iii only, asked once, only when a Process uses one of those Widgets): **Yes** copies each such
+   Process as `<Name>_<new Tab ID>` (`_2` ... when taken; a name never written over), with the new Widgets' names in it, and the
+   names of the other Processes copied with it; its Devices stay the same. A copied Widget that starts one of them (a Label's
+   Process, a Process Widget) starts the copy. **No** copies none.
+5. Nothing is made until **Save layout**: leaving Edit layout without saving makes no Tab and no Process copy. The Process copies
+   are written right after the Save, for the copied Tabs that are still there.
+Help 236. *A Rule 4.1 and Rule 4.4 point waiting on OakBarn Brewery:* the copy puts new Widgets straight on the new Tab (not the 🔨
+Build Tab, Rule 4.1) and makes Clones without ⧉ Clone Device (Rule 4.4), and of Widgets too; the Change log says how it was decided.
 
 ## 5. Templates and Integrated items
 
@@ -1842,8 +1867,8 @@ still fills with its ring color. Both programs.
   disappear in the real world.  I cannot see a reason to hide them"). The old "Show when nothing flows" switch was taken out, and
   older Schemas drop it when they load.
 - **No Tab box in the Pipe or Hose dialog** (OakBarn Brewery, 2026-11-16: "Pipes cannot be moved individually to a different tab.  It
-  is an all or nothing"): a pipe or hose stays on the Tab it was drawn on. Copying a whole Tab to a new Tab waits in the Panel Updates
-  Sandbox, entry 18 (Rule 14.4).
+  is an all or nothing"): a pipe or hose stays on the Tab it was drawn on. A whole Tab is copied to a new Tab with New tab >
+  Copy of (Rule 4.8).
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 - **Pipes and hoses start at None and follow the Tab Flow Color** (Fritz, 2026-11-04). The orange (#ffb347) every pipe in the
   sample Schemas had becomes None once in each Schema; a color picked after that is kept.
@@ -6080,6 +6105,10 @@ import.
 - 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 234. Checked against both programs.
 - 2026-11-19: Added Rule 18.53 (OakBarn Brewery: "the Change Name Pop Up is at a lower layer than the Dialog ... So Popups need to be temporary Layer 1"; "All pop ups should be on top"): every pop-up (message box, notice bars, Undo note, Sound is off, Job pick bar, a Vessel's pop-up) shows over every open dialog and can be clicked. Checked against both programs: the BruControl Import's Build page is the Panel's own page, so it gets the same fix; the Importer's own pages show their message only after their question box has closed, so no Importer change.
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
+- 2026-11-19: Added Rule 4.8 and changed Rules 4.4 and 5.21 (OakBarn Brewery, Panel Updates Sandbox entry 18, Panel Updates order
+  item 8): New tab > Copy of a whole Tab; Devices become Clones, pipes and hoses get new background names, the Widgets interview
+  (i Clones, ii New Widgets, iii Case by case), "Copy the N Processes?". Help 236, Help 71. Asked OakBarn Brewery whether this
+  changes Rules 4.1 and 4.4 or is one exception to them.
 - 2026-11-19: Rule 5.37 extended (OakBarn Brewery: "A Pump with No attached Pipes alwaus have free IPs"; "If that does not work, assign inlet outlet IPs one of the 8 each"): a Device or Manual Valve with no pipes, dropped within 30 pixels of let-go open ends, slides onto them; a pump's Inlet and Outlet go on whichever of its 8 IPs the old pump's Inlet and Outlet were on (a new pump now takes a Left pump's pipes), then they join. Help 153 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's Edit layout code, so it gets the same; no import change. Checked on the 3 Vessel sample (its Left pump replaced by a new Blichmann). (thread "Let a new pump join existing pipes")
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 5.36 A pipe size cascades, Rule 5.40 Auto typed to the join, Rule 2.42 Default Tab 3 note (Panel Updates entry 12; OakBarn Brewery's Hover Help sentences now in Help 155 and the Default settings Hover Help, with French; a hose joined to a pipe keeps today's adapter note, his pick).

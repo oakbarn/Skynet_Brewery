@@ -44,6 +44,7 @@ import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS,
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
+import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';      // Copy a whole Tab on New tab (Rule 4.8)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
@@ -7820,11 +7821,75 @@ function makeTab() {
   copyTabProfile(w, tp && tabProfileOf({ tabProfile: tp }));      // its color and look copied once (Rule 2.62 #9)
   draft.workspaces.push(w); return w;
 }
-$('#addWs').onclick = () => {
+$('#addWs').onclick = async () => {
+  // a copy of a whole Tab (Rule 4.8, Panel Updates Sandbox entry 18): asked only when a Tab has something on it to copy
+  const full = draft.workspaces.filter(x => !x.build && tabItems(draft, x.name).length);
+  let from = '';
+  if (full.length) {
+    from = await choose('New tab: start empty, or copy a whole Tab onto it?', [['Empty Tab', ''], ...full.map(x => [`Copy of ${tabTitle(x)}`, x.name])]);
+    if (from === undefined) return;
+  }
   const w = makeTab(); if (!w) return;
+  if (from && !(await copyWholeTab(from, w))) { draft.workspaces = draft.workspaces.filter(x => x !== w); return; }
   wsName = w.name; renderTabs(); renderWs();
-  toast(`Tab ${w.name} added, Tab ID ${w.id}. Change it in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
+  toast(`Tab ${w.name} added, Tab ID ${w.id}${from ? `, a copy of ${from}` : ''}. Change the Tab ID in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
 };
+// Copy a whole Tab (OakBarn Brewery, Panel Updates Sandbox entry 18, Rule 4.8, Help 236): every Device becomes a Clone (the same "who",
+// another picture; a Process commands only the parent), pipes, hoses, IPs, fittings, vessels, pictures and text are new items with new
+// names in the background, and the Widgets become what the user picks: i) Clones, ii) new Widgets, iii) one by one. For ii and iii the
+// Processes that use those Widgets may be copied too, pointed at the new ones (one question); they are written at Save layout.
+async function copyWholeTab(from, w) {
+  const src = draft.workspaces.find(x => x.name === from), fromId = src?.id || '', toId = w.id;
+  const pieces = tabPieces(draft, from, isDevice);
+  const wgts = pieces.widgets.filter(e => !isMfPart(e) && !isAvPart(e));
+  const picks = new Map();
+  if (wgts.length) {
+    const how = await choose(`The ${wgts.length} Widget${wgts.length === 1 ? '' : 's'} on ${from}: what should ${wgts.length === 1 ? 'it' : 'they'} be on ${w.name}?`,
+      [['i) Clones of them (the same Widgets)', 'clone'], ['ii) New Widgets of their own', 'new'], ['iii) Case by case', 'each']]);
+    if (how === undefined) return false;
+    for (const e of wgts) {
+      let m = how;
+      if (how === 'each') { m = await choose(`${e.label || e.name} (${e.name})`, [['Clone', 'clone'], ['New Widget', 'new']]); if (m === undefined) return false; }
+      picks.set(e.name, m);
+    }
+  }
+  const swapTab = n => fromId && toId && String(n).endsWith('_' + fromId) ? String(n).slice(0, -fromId.length) + toId : n;
+  const wName = (n, taken) => { const code = widgetTypeId(n, isTapMv(n)); return code ? uniqueName(suggestWidgetName({ code, label: n.label, tab: toId }), taken, toId) : ''; };
+  const free = (p, taken) => { let i = 1; while (taken(`${p}_${i}`)) i++; return `${p}_${i}`; };
+  const cp = copyTab(draft, from, w.name, isDevice, n => picks.get(n) || 'clone', {
+    newId,
+    cloneName: (p, taken) => cloneName(p, taken),
+    // a name that ends with the old Tab ID keeps its Label part and gets the new Tab ID (wgt_SW_Testing_BH -> wgt_SW_Testing_B2, Rule 3.14)
+    widgetName: (n, taken, old) => old.endsWith('_' + fromId) ? nextFree(swapTab(old), taken) : wName(n, taken) || nextFree(old, taken),
+    graphicName: (n, taken, g) => {
+      if (/^wgt_/.test(g.name) || g.kind === 'text') { const s = g.name.endsWith('_' + fromId) ? nextFree(swapTab(g.name), taken) : wName(n, taken); if (s) return s; }
+      const p = autoPrefix(n); if (p) return free(p, taken);
+      const m = /^([A-Za-z0-9]+)_\d+$/.exec(g.name); if (m && n.kind === 'vessel' && n.vesselType === 'bfit') return free(m[1], taken);
+      return nextFree(swapTab(g.name), taken);
+    } });
+  draft.elements.push(...cp.elements); draft.graphics.push(...cp.graphics);
+  // the Processes that use the Widgets (and drawn items) that got new names: copy them too? (one question)
+  // only the Widgets' names: a vessel, pipe or fitting copy is not what a Process means (HLT_Vessel.<Device> stays on the parent Device)
+  const wNames = new Map([...cp.names].filter(([, to]) => cp.elements.some(e => e.name === to) || cp.graphics.some(g => g.name === to && widgetTypeId(g, isTapMv(g)))));
+  if ([...picks.values()].includes('new') && wNames.size) {
+    try {
+      const all = (await api('GET', '/ui/scripts')).map(x => typeof x === 'string' ? x : x.name).filter(Boolean);
+      const texts = await Promise.all(all.map(async n => [n, await api('GET', '/ui/scripts/' + encodeURIComponent(n)).catch(() => '')]));
+      const uses = processesUsing(texts, wNames.keys());
+      if (uses.length) {
+        const yes = await choose(`Copy the ${uses.length} Process${uses.length === 1 ? '' : 'es'}? ${uses.join(', ')} use${uses.length === 1 ? 's' : ''} the Widgets on ${from}. Each copy uses the new Widgets on ${w.name} instead (the Devices stay the same).`, [['Yes, copy them', true], ['No', false]]);
+        if (yes) {
+          const pending = draft._procCopies || (draft._procCopies = []), names = new Set([...all, ...pending.map(c => c.to)].map(n => n.toLowerCase()));
+          const copies = uses.map(n => { const to = processCopyName(n, toId, x => names.has(x.toLowerCase())); names.add(to.toLowerCase()); return { from: n, to }; });
+          const pm = new Map(copies.map(c => [c.from, c.to]));
+          for (const e of cp.elements) for (const k of Object.keys(e)) if (typeof e[k] === 'string' && k !== 'name' && pm.has(e[k])) e[k] = pm.get(e[k]);      // a Process Widget copied as new starts the copy
+          pending.push({ tab: w.name, copies, map: Object.fromEntries([...wNames, ...pm]) });
+        }
+      }
+    } catch (e) { toast(`The Processes could not be read, so none were copied: ${e.message}`, true); }
+  }
+  return true;
+}
 // ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
 // built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
 async function addTabForDevice() {
@@ -8235,6 +8300,17 @@ function renameNote(r) {
   if (r.otherSchemas?.length) t += ` Note: ${r.otherSchemas.map(o => `Schema ${o.schema} still has ${o.name}`).join('; ')}.`;
   return t;
 }
+// the Processes copied with a copied Tab (Rule 4.8): written right after Save layout, once the new Widgets are saved; a copied Tab
+// taken away before the Save takes its Process copies with it. Returns what Save tells about them.
+async function writeProcCopies() {
+  let procNote = '';
+  const pc = (draft._procCopies || []).filter(x => draft.workspaces.some(w => w.name === x.tab));
+  for (const x of pc) {
+    try { const c = await api('POST', '/ui/scripts/copy', { copies: x.copies, map: x.map }); if (c?.copied?.length) procNote += ` Processes copied for ${x.tab}: ${c.copied.map(k => `${k.from} → ${k.to}`).join(', ')}.`; if (c?.skipped?.length) procNote += ` Not copied (the name is taken): ${c.skipped.join(', ')}.`; }
+    catch (e) { procNote += ` The Processes for ${x.tab} were not copied: ${e.message}.`; }
+  }
+  return procNote;
+}
 // Save layout (Rule 4.1, OakBarn Brewery, 2026-11-16: "I want to add things to an existing Build and leave in Build Mode"): it saves
 // the regular Tabs and never ends the Build. An unfinished Build is kept on the Brain (config.buildDraft, never run) and stays open:
 // you stay in Edit layout on the 🔨 Build Tab. leave: Edit layout closes after the save (the Build is still kept for next time).
@@ -8255,7 +8331,8 @@ const saveLayout = guard(async ({ leave = false } = {}) => {
   const bTab = buildWs()?.name;
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces.filter(w => !w.build), elements: draft.elements.filter(x => !onB.has(x)), graphics: draft.graphics.filter(x => !onB.has(x)), buildDraft: snap, updateVersion: $('#updateVersion').checked });
-  const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
+  const procNote = await writeProcCopies();       // the Processes copied with a copied Tab (Rule 4.8)
+  const note = renameNote(r) + procNote + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
   const kept = snap ? (leave ? ' Your Build is kept: it comes back on the 🔨 Build Tab the next time you open Edit layout.' : ' Your Build stays open on the 🔨 Build Tab: ✅ Finish Build ... when it is done.') : '';
   toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note + kept, false, note || kept ? 9000 : 0);
   editing = false; await load();
