@@ -42,6 +42,7 @@ de la pâte thermique pour qu'elle voie vite un changement.
 5. **Max output %** : une grosse résistance sur une petite colonne dépasse. Limitez-la, par exemple à 40 %.
 
 Setpoint, Kp, Ki, Kd et Max output sont les **mêmes nombres que son PID**, donc passer entre PID et Precise continue sans à-coup.
+**🎯 Auto-tune** dans les Settings PID ou Precise trouve Kp, Ki, Kd et le Hold output % pour vous (Help 237).
 
 ## Étalonner la sonde : deux points {#calibrate-the-probe-two-points}
 

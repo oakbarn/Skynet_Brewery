@@ -722,6 +722,16 @@ async function route(req, res) {
     return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, official, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), overrides: engine.overrideList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, onBrain: onBrainComputer(clientIp(req), req.headers), brainIps: brainIps(), standby: STANDBY, brainNotices: power?.notices ?? [], flameOut: flame?.list() ?? [], simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   // a brewer closed a Brain notice (Rule 6.31): it goes away on every screen
+  // PID Auto-tune (Rule 6.39, Help 237): admins start or stop it on a Heating Element; it runs on the Brain (lib/control.js)
+  if (p === '/ui/autotune' && m === 'POST') {
+    if (IMPORT_BUILD) return fail(res, 400, 'Auto-tune runs on the Brain, not in the BruControl Import program');
+    const { name, action, highest } = await jsonBody(req);
+    if (action === 'stop') { control.stopTune(String(name ?? '')); engine.print('system', `${name}: Auto-tune stopped`); return ok(res); }
+    const bad = control.startTune(String(name ?? ''), { highest });
+    if (bad) return fail(res, 400, bad);
+    engine.print('system', `${name}: Auto-tune started (Highest temperature ${highest})`);
+    return ok(res);
+  }
   if (p === '/ui/flameout/close' && m === 'POST') { flame?.close(String((await jsonBody(req)).id ?? '')); return ok(res); }
   if (p === '/ui/brain/notice' && m === 'POST') { power?.dismiss(String((await jsonBody(req)).id ?? '')); return ok(res); }
   // the Resume button on that notice (Rule 6.31): turns back On what was On and starts each Process again at its step

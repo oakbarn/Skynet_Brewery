@@ -150,7 +150,7 @@
  "153-move-alone-swap-put-back": "8e22e24f7e2b2c4f",
  "154-properties-hotspots": "a7eb990a890c104c",
  "155-default-settings": "edd7d98d3618c6b4",
- "156-precise-heating": "cb8b423fde36ea37",
+ "156-precise-heating": "8fd94eeafd51a4bb",
  "157-schema-templates": "5e9897df31c0bd9a",
  "158-digiboil-and-brewzilla": "795d4373881bd748",
  "159-graph-widget": "323275136ef3ed5f",
@@ -227,5 +227,6 @@
  "231-step-by-step-wire-an-e-stop": "8de6b5ae8596ae19",
  "232-step-by-step-wire-a-fan-buzzer-or-led": "9956afcaffc81e39",
  "233-step-by-step-wire-switches-and-float-switches": "f660a813a9a85129",
- "234-1-wire-probes": "6099b8f79b1e2ab1"
+ "234-1-wire-probes": "6099b8f79b1e2ab1",
+ "237-pid-auto-tune": "b4e0d90926f3f155"
 }

@@ -42,6 +42,7 @@ thermal paste so it sees a change quickly.
 5. **Max output %**: a big element on a small column overshoots. Limit it, for example to 40 %.
 
 Setpoint, Kp, Ki, Kd and Max output are the **same numbers as its PID**, so switching between PID and Precise carries on.
+**🎯 Auto-tune** in the PID or Precise Settings finds Kp, Ki, Kd and the Hold output % for you (Help 237).
 
 ## Calibrate the probe: two points
 
