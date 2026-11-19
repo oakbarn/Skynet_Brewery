@@ -6,6 +6,8 @@ The Build Tab only shows while you are building. It has a dashed orange edge and
 
 ## Start building
 
+Every step, with pictures: [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
+
 1. Press **☰ Menu** and pick **Edit layout**.
 2. Do one of these:
    - Pick a Device in **Add Device** (or a shortcut: **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), a Widget in **Add Widget**, or press **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** or **Elbows, Tees …** (see [Edit layout bar](82-edit-layout-bar)). The Build Tab opens by itself and the new item is made there, **never on a regular Tab**. The Tab you pick in its Add box is remembered: that is where it goes at the end (see **Where it goes** below).

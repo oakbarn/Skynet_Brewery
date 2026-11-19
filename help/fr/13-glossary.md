@@ -30,7 +30,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Brewhouse Efficiency** (rendement de la brasserie) : la part du sucre du grain qui arrive vraiment dans le fermenteur, en %. Skynet l'enregistre pour chaque brassin dans le **Equipment Profile** et montre la moyenne des 10 derniers brassins sur ce Schema. Voir [Schemas et Equipment Profiles](28-schemas-and-equipment-profiles).
 
-**Build Tab (🔨)** (Tab de construction) : le Tab propre où chaque nouveau Device, Widget ou copie de Template est d'abord créé. **✅ Finish Build ...** le déplace vers son Tab. Une construction pas finie est gardée sur le Brain jusqu'à ce que vous la finissiez ou la jetiez. Voir [Build Tab](55-build-tab).
+**Build Tab (🔨)** (Tab de construction) : le Tab propre où chaque nouveau Device, Widget ou copie de Template est d'abord créé. **✅ Finish Build ...** le déplace vers son Tab. Une construction pas finie est gardée sur le Brain jusqu'à ce que vous la finissiez ou la jetiez. Voir [Build Tab](55-build-tab), et chaque étape en images dans [Pas à pas : ajouter un Device](207-step-by-step-add-a-device).
 
 **Bundle** (ensemble) : une cuve verrouillée avec ses IP pour qu'ils bougent comme un seul bloc et ne puissent pas être modifiés tant que vous n'éteignez pas **Bundled**. Voir [Équipement : cuves, refroidisseurs, serpentins et raccords](14-equipment).
 
@@ -50,7 +50,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Default settings** (réglages par défaut) : ce avec quoi commence une **nouvelle** chose. Dans **☰ Menu > Default settings**. Voir [Default settings](155-default-settings).
 
-**Device** : une chose reliée à un port ou une broche d'une carte, comme un relais de pompe ou une sonde. Voir [Devices et cartes](03-devices).
+**Device** : une chose reliée à un port ou une broche d'une carte, comme un relais de pompe ou une sonde. Voir [Devices et cartes](03-devices). Chaque étape, en images : [Pas à pas : ajouter un Device](207-step-by-step-add-a-device).
 
 **Direct** : une méthode de chauffe : l'élément est tout à fait On ou tout à fait Off. Voir [Un élément chauffant, choisissez comment il chauffe](150-heating-method).
 
@@ -202,7 +202,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Step** (étape) : une ligne `step "name"` dans un Process. Les étapes se numérotent toutes seules (1.00000, 1.00001 ...). Voir [Le langage des Processes et les étapes](22-process-language).
 
-**Step by Step** (pas à pas) : des pages d'aide qui montrent chaque étape avec des images. Elles sont en tête de l'aide. Voir [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
+**Step by Step** (pas à pas) : des pages d'aide qui montrent chaque étape avec des images. Elles sont en tête de l'aide. Voir [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
 
 **Suggested Name** (nom proposé) : le Name que Skynet remplit pour un nouvel élément à partir de ses parties. Vous pouvez le changer avant d'enregistrer.
 
@@ -238,7 +238,7 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 ## W {#w}
 
-**Widget** : un élément qui n'existe que dans l'application, relié à aucune carte (images, étiquettes, minuteries, IP, raccords).
+**Widget** : un élément qui n'existe que dans l'application, relié à aucune carte (images, étiquettes, minuteries, IP, raccords). Chaque étape, en images : [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
 
 ## Mots du câblage et du matériel {#wiring-and-hardware-words}
 

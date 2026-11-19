@@ -7639,10 +7639,11 @@ function moveBuildTo(tab, own = false) {
     const ovr = list.find(x => x.kind === 'override');
     if (ovr && ovrHas(to.name, ovr)) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   }
+  const kept = new Set();
   for (const [to, list] of groups) {
     // OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the Position on the Tab it is sent to": a build that goes to
     // the Tab picked for it (the one its watermark shows) keeps its spot; anything else goes to the middle, as before
-    if (!list.some(x => buildToOf(host(x) || x) === to.name)) centerOn(list, to);
+    if (!list.some(x => buildToOf(host(x) || x) === to.name)) centerOn(list, to); else kept.add(to);
     for (const x of list) { x.workspace = to.name; delete x.buildTo; }
     if (vMaster(to)) for (const v of list.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   }
@@ -7659,7 +7660,7 @@ function moveBuildTo(tab, own = false) {
   for (const x of items) if (x.kind !== 'pipe' && !x.integratedIn && !(x.kind === 'ip' && x.attachTo)) freshMoved.add(freshKey(x));      // it glows until clicked
   draft.workspaces = draft.workspaces.filter(w => w !== b);
   wsName = (groups.has(to0) ? to0 : [...groups.keys()][0]).name; sel = null;
-  return [...groups].map(([to, list]) => ({ tab: to.name, n: list.length }));
+  return [...groups].map(([to, list]) => ({ tab: to.name, n: list.length, kept: kept.has(to) }));
 }
 // shift these items as one so the box around them sits in the middle of the Tab (never off its top or left edge)
 function centerOn(items, to) {
@@ -7772,7 +7773,9 @@ async function saveBuild() {
   } else if (r.to === 'tab') {
     const went = moveBuildTo(r.tab), n = went.reduce((a, g) => a + g.n, 0);
     toast(went.length > 1 ? `Moved to their Tabs: ${went.map(g => `${g.n} to ${g.tab}`).join(', ')}. They glow red until clicked. Press Save layout to keep them.`
-      : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
+      : went[0].kept   // the Tab picked for it: it kept its spot from the Build Tab, so the note says so (not "the middle")
+        ? `${n} item${n === 1 ? '' : 's'} moved to the ${went[0].tab} tab, in the same spot as on the Build Tab. ${n === 1 ? 'It glows' : 'They glow'} red until clicked. Press Save layout to keep ${n === 1 ? 'it' : 'them'}.`
+        : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
   } else {
     const made = await saveBuildTemplate(r);
     toast(`Saved as ${made.length > 1 ? 'Templates' : 'a Template'}: ${made.join(', ')}. ☰ Menu > ${r.kind === 'fitting' ? 'Fitting' : 'Vessel or Equipment'} Templates, Add to Tab puts it on a Tab.`, false, 9000);
