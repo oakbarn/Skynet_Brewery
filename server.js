@@ -814,8 +814,7 @@ async function route(req, res) {
     { const bad = (body.elements || body.graphics) && apiNameListError(apiNameItems({ elements: body.elements ?? store.config.elements, graphics: body.graphics ?? store.config.graphics })); if (bad) return fail(res, 400, bad); }     // API_Name is Unique across every Device and Widget, Hose Bibs too (Rule 6.18)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
     if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }
-    // only one Override button on each Tab (Fritz, 2026-10-30)
-    { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
+    // any number of Override buttons on a Tab (Rule 2.26 changed, OakBarn Brewery, 2026-11-19): no check here
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: Rule 3.2, unique (public/naming.js)
