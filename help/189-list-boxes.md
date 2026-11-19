@@ -10,7 +10,7 @@ list of choices opens; click one and it is picked. Skynet uses a list box wherev
 - **Type a letter** to jump to the choice that starts with it. Every choice in a Skynet list starts with its own first
   letter, so one letter is enough: in the HLT element's **Overlay** list, **R** picks **Red Glow**, **O** picks **Orange Glow**.
 - **Type a name quickly** (keys less than about a second apart) to jump to the first choice that starts with those letters:
-  in the HLT element's **Temperature Probe** list, typing **BM_700** jumps to **BM_700_TEMP@1W_HLT_BH**.
+  in the HLT element's **Temperature Probe** list, typing **BM1w1_1** jumps to **BM1w1_1_HLT_BH**.
 - **Up and Down arrows** move one choice at a time. **Enter** or **Tab** keeps it and goes to the next box.
 - The choice picked now has a **Cyan** background when the list is open (Rule 2.34).
 - **➕ Add new ...** at the end of a list makes a new choice. The dialog waits, the new thing is made in its own dialog, then you
@@ -26,10 +26,10 @@ Every list box gets its choices from one of three places:
 | Where the choices come from | Example in the 3 Vessel 1 Pump sample | Can you add to it? |
 |---|---|---|
 | **Built into Skynet** (a fixed list Skynet itself works with) | The HLT element's **Current Method**: Direct, Duty Cycle, Hysteresis, PID ... | No |
-| **Your Schema** (the Devices, Widgets, Tabs and Interfaces you have made) | The HLT element's **Temperature Probe**: BM_700_TEMP@1W_HLT_BH, BM_701_TEMP@1W_Mash_BH, BM_702_TEMP@1W_Kettle_BH | Yes: ➕ Add new ... makes a new one |
+| **Your Schema** (the Devices, Widgets, Tabs and Interfaces you have made) | The HLT element's **Temperature Probe**: BM1w1_1_HLT_BH, BM1w1_2_Mash_BH, BM1w1_3_Kettle_BH | Yes: ➕ Add new ... makes a new one |
 | **A list that grows** (pictures, Styles, units, colors ...) | The Tab list: **BH: Brew House**, then **➕ Add new Tab…** | Yes: what you add stays in the list for next time |
 
-- Names are listed **A to Z**, so BM_700 comes before BM_701.
+- Names are listed **A to Z**, so BM1w1_1 comes before BM1w1_2.
 - Interfaces and Tabs read **ID: Name**, for example **BM: Brewery Mega** and **BH: Brew House** (Rule 18.17).
 - Each choice is **short and in plain English**; what a choice does is in the Hover Help (Rule 2.38).
 
@@ -48,7 +48,7 @@ Every Device name starts with its **Interface ID** (Rule 3.1): `BM_8_DO@H_Elemen
 port 8. So when Suggested Names are used, the first letters of a name tell you which board a Device is on.
 
 - **In the Process editor** (Predictive Text, Help 79), typing **BM_** shows **only** the names that start with BM_, which
-  means only the Devices on the Brewery Mega. Each letter more narrows it again: **BM_70** leaves only the three probes.
+  means only the Devices on the Brewery Mega. Each letter more narrows it again: **BM1w** leaves only the three 1-Wire probes.
 - **In a dialog's list box**, typing **BM_** quickly **jumps** to the first choice that starts with BM_. The other choices
   are still in the list; they are not hidden.
 
@@ -64,7 +64,7 @@ A name you typed yourself (not the Suggested Name) may not start with an Interfa
   (Rule 2.6). For a Device the value is its name; for a built-in list it is a short word or a number.
 - Jumping by typing is done by the browser: one letter (or the same letter again) steps through the choices starting with it;
   letters typed less than about a second apart are searched as one word, matched against the **start** of the choice's text.
-  Where a choice shows a Label first (for example **HLT: BM_700_TEMP@1W_HLT_BH**), type the Label's letters.
+  Where a choice shows a Label first (for example **HLT: BM1w1_1_HLT_BH**), type the Label's letters.
 - The Process editor's list is Skynet's own list box (Help 79). It matches the start of a name, or any part of it after a `_`
   once two letters are typed (`Pump` finds `BM_22_DO@Pump_Pump_BH`). An `_` you type is part of the match, so **BM_** only
   matches names that start with BM_.

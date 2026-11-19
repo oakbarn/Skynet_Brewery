@@ -75,9 +75,12 @@ assert.deepEqual(checkIds([{ name: 'Sparge' }, { name: 'S', id: 'sp' }], 'tab').
 
 assert.equal(hydroPort(1), '200', 'the first hydrometer is virtual port 200, as in BruControl');
 assert.equal(hydroPort(3), '202');
-assert.equal(oneWirePort(1), '700', 'OneWire probe 1 is virtual port 700');
-assert.equal(oneWirePort(100), '799');
+// 1-Wire Index (Rule 6.37): circuit + probe number, BM1w1_2
+assert.equal(oneWirePort(1), '1w1_1', 'probe 1 on circuit 1');
+assert.equal(oneWirePort(2, 3), '1w3_2', 'probe 2 on circuit 3');
 assert.equal(oneWirePort(''), '', 'no probe picked yet');
+assert.equal(suggestName({ iface: 'BM', port: oneWirePort(1, 1), code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM1w1_1_HLT_BH', 'IndexID_Label_Tab, no Port or Type part');
+assert.equal(suggestName({ iface: 'BM', port: oneWirePort(1, 2), code: '1W', type: 'temperature', label: 'Mash Tun', tab: 'BH' }), 'BM1w2_1_Mash~Tun_BH', 'a second circuit on the same Interface');
 
 // Device Type IDs a new Device starts with
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve' }), 'Valve_E', 'Fritz, 2026-11-05: E_L_Vlv is now Valve_E');
@@ -123,7 +126,8 @@ assert.equal(portClash({ name: 'New', type: 'digitalIn', device: 'MEGA', channel
 assert.equal(portClash({ name: 'New', type: 'analogIn', device: 'MEGA', channel: 'A5' }, els).other, 'MB_59_AI_Level_SP');
 assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA2', channel: 25 }, els), null, 'same port on another Interface is fine');
 assert.equal(portClash({ name: 'Probe2', type: 'temperature', device: 'MEGA', probeIndex: 2 }, els), null, 'DS18B20 probes share one wire');
-assert.equal(portClash({ name: 'Probe1b', type: 'temperature', probeIndex: 1 }, els).other, 'Probe1', 'one Device per OneWire probe number');
+assert.equal(portClash({ name: 'Probe1b', type: 'temperature', device: 'MEGA', probeIndex: 1 }, els).other, 'Probe1', 'one Device per 1-Wire Index');
+assert.equal(portClash({ name: 'Probe1c', type: 'temperature', device: 'MEGA', probeIndex: 1, owCircuit: 2 }, els), null, 'the same number on another circuit is another Index');
 assert.equal(portClash({ name: 'Step', type: 'stepper', device: 'MEGA', channel: 30, dirPin: 25 }, els).other, 'MB_25_VlV_Fly_Sparge_SP', 'every stepper pin counts');
 
 // bus pins: SPI 50-52 for RTD / thermocouple boards, the OneWire data pin 40 for DS18B20 probes
@@ -190,13 +194,19 @@ assert.equal(pinTag(4), 'Best for True PWM: see Help, SD card pin');
   assert.equal(pinLabel(22, 'mega', pump), 'D22');
 }
 assert.deepEqual(freePins({ name: 'N', type: 'temperature', sensor: 'pt1000', device: 'MEGA' }, [rtd]), RTD_CS_PINS.filter(p => p !== '48'), 'the RTD pin list');
-const probe = { name: 'MB_700_1W_HLT', type: 'temperature', sensor: 'ds18b20', probeIndex: 1 };
+const probe = { name: 'MB1w1_1_HLT', type: 'temperature', sensor: 'ds18b20', probeIndex: 1 };
 const led = { name: 'MB_40_LED', type: 'digitalOut', device: 'MEGA', channel: 'D40' };
-assert.match(busCheck(led, [probe]).error, /OneWire data pin/, 'a DS18B20 blocks pin 40');
+assert.match(busCheck(led, [probe]).error, /1-Wire circuit's data pin/, 'a DS18B20 blocks pin 40');
 assert.match(busCheck(led, []).warn, /OneWire/);
 assert.match(busCheck(probe, [led]).error, /Move MB_40_LED/);
 assert.equal(busCheck({ ...led, channel: 41 }, [probe, rtd]), null);
 assert.match(busCheck({ ...led, channel: 41 }, [probe], [{ name: 'MEGA', oneWirePin: 41 }]).error, /41/, 'an Interface may set its own OneWire pin');
+{ // two 1-Wire circuits on one Interface (Rule 6.37): each circuit's pin is kept for it
+  const devs = [{ name: 'MEGA', oneWire: [{ n: 1, pin: '40' }, { n: 2, pin: '41' }] }];
+  const p2 = { ...probe, name: 'MB1w2_1_MLT', device: 'MEGA', owCircuit: 2 };
+  assert.match(busCheck({ ...led, channel: 41 }, [p2], devs).error, /41/, 'circuit 2 keeps pin 41');
+  assert.equal(busCheck({ ...led, channel: 42 }, [p2], devs), null);
+}
 
 // the server gives IDs when a Schema loads, and refuses a Tab ID used twice
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'naming-'));
@@ -231,7 +241,7 @@ console.log('naming tests passed');
   const { nameType, typeAtName } = await import('../public/naming.js');
   const { compile } = await import('../lib/engine.js');
   assert.equal(suggestName({ iface: 'BM', port: 22, code: 'Pump', type: 'digitalOut', label: 'Red Pump', tab: 'BH' }), 'BM_22_DO@Pump_Red~Pump_BH');
-  assert.equal(suggestName({ iface: 'BM', port: 700, code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM_700_TEMP@1W_HLT_BH');
+  assert.equal(suggestName({ iface: 'BM', port: '1w1_1', code: '1W', type: 'temperature', label: 'HLT', tab: 'BH' }), 'BM1w1_1_HLT_BH');
   assert.equal(nameType('pwmOut', 'Pump'), 'PWM@Pump'); assert.equal(nameType('hysteresis', 'Hys'), 'Hys', 'the same word is written once');
   assert.equal(nameType('digitalOut', 'DO'), 'DO'); assert.equal(nameType(undefined, 'Pump'), 'Pump', 'no type: the Type ID alone');
   // a Process reads the @ as part of the name, with no quotes

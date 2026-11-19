@@ -51,7 +51,7 @@ The port is always in the name, and the Device Type comes third. The Device Type
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
-Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_TEMP@1W_HLT_HL`. A probe number can belong to one Device only.
+Analog pins are written by their pin number, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_TEMP@10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. A DS18B20 probe has no Port or Type part: its name starts with its **1-Wire Index**, Interface, circuit and probe number: `MB1w1_1_HLT_HL` is probe 1 on 1-Wire circuit 1 of Interface MB. An Index can belong to one Device only ([1-Wire probes: circuits and Indexes](215-1-wire-probes)).
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
@@ -108,11 +108,11 @@ pipes, fittings and Text.
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
 
 - **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_TEMP@RTD_HLT_HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
-- **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
+- **DS18B20 (OneWire) probes** share the data pin of their **1-Wire circuit** (the first one on a Mega is usually **pin 40**). An Interface can have more circuits, each on its own pin. Each probe gets its 1-Wire Index in its name instead (`MB1w1_1`).
 
 What the panel does:
 
-- **Blocked:** once an RTD or thermocouple is on an Interface, pins 50, 51 and 52 on it can't be used by anything else. Once a DS18B20 probe is set up, pin 40 can't be used by anything else.
+- **Blocked:** once an RTD or thermocouple is on an Interface, pins 50, 51 and 52 on it can't be used by anything else. Once a 1-Wire circuit is set up, its pin can't be used by anything else.
 - **Heads up:** if no such probe is there yet and you put something else on pin 50, 51, 52 or 40, the panel asks first. It tells you that while that Device is on the pin, you can't add RTD, thermocouple or DS18B20 probes to that Interface. Press **Cancel** to pick another pin.
 - **Not allowed the other way round either:** if a pump already sits on pin 51, you can't add an RTD to that Interface until you move the pump.
 
@@ -150,7 +150,7 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
-**Virtual ports.** Some Devices have no pin of their own, so they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt_FE`.
+**Virtual ports.** Some Devices have no pin of their own, so they get a virtual port: hydrometers `200`, `201` .... A OneWire probe has its 1-Wire Index (`1w1_1`) instead. A Tilt would be named like `MB_200_Hydro_Red_Tilt_FE`.
 
 ## Thermistors
 

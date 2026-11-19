@@ -144,7 +144,7 @@ export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trun
 // oneWirePort is the part after the Interface ID ('1w1_2'); '' when no probe Index is picked yet.
 export const oneWirePort = (index, circuit = 1) => Number.isInteger(+index) && +index >= 1 && Number.isInteger(+circuit || 1) && (+circuit || 1) >= 1 ? `1w${+circuit || 1}_${+index}` : '';
 export const isOneWirePort = p => /^1w\d+_\d+$/.test(String(p ?? ''));
-export const owCircuitOf = el => Math.max(1, Math.trunc(+el?.owCircuit) || 1);
+export const owCircuitOf = el => Math.max(1, Math.trunc(+(el?.owCircuit ?? el?.circuit)) || 1);      // a Device's owCircuit, or a 1-Wire Index slot's circuit
 // an Interface's 1-Wire circuits: [{ n, pin, power: 'board' | 'ext', bits: 9-12 }]
 export const OW_POWER = [['board', 'Board 5V'], ['ext', 'External supply']];
 export const OW_LIMIT = { board: 6, ext: 12 };      // a soft limit: past it, one warning, never a block (OakBarn Brewery, 2026-11-19: "We do not restrict the excess, but give a warning once exceeded")

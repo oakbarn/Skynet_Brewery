@@ -1167,7 +1167,7 @@ Help pages too; its own screens have no ☰ Menu > About.
 the label part of the name. Make that the rule"), so `_` only ever separates the parts: Label *Mash Tun* gives `Mash~Tun`. A taken name gets _2, _3 ... before the Tab ID.
 **The Type part starts with the General Type and an `@`** (OakBarn Brewery, 2026-11-11: "It is regarding Device Types. a on/off Pump is
 DO:Pump I want the DO: to be in the Suggest Name"; "use @ symbol"): the Device Type shown as `DO: Pump` (Rule 18.18) is `DO@Pump` in the
-name, because a `:` can't be in a name (Rule 3.4). An On/Off Pump is `BM_22_DO@Pump_Pump_BH`, a DS18B20 probe `BM_700_TEMP@1W_HLT_BH`, a
+name, because a `:` can't be in a name (Rule 3.4). An On/Off Pump is `BM_22_DO@Pump_Pump_BH`, a DS18B20 probe `BM1w1_1_HLT_BH`, a
 Heating Element `BM_8_DO@H_Element_HLT~element_BH`. When the General Type and the Type ID are the same word it is written once (`PID`, `Hys`,
 `DO`). A Process reads the `@` as part of the name, with no quotes. Older Schemas (Rule 15.2): once per Schema, a Device named in the
 Suggested Name form gets its General Type@ when the Schema loads; its hidden key stays and every Process and setting that uses it follows.
@@ -1176,6 +1176,14 @@ character and what it does in a name: docs/Special_Characters.md.
 *Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
 (2026-10-23, PR #97)
+*Changed for 1-Wire probes (OakBarn Brewery, 2026-11-19: "If we had an 1 wire Index IP like BM1w1_1 would be for the first 1 wire hooked
+up to the First created On wire using An Interface and Port. The second one on the same circuit would be BM1w1_2. If a Second 1 wire was
+created on the same board it would have probe index as BM1w2_n. Suggest name would be IndexId _Label_Tab"):* a DS18B20 probe is named
+`IndexID_Label_TabID`, its **1-Wire Index ID** (Interface ID + `1w` + circuit number + `_` + probe number, Rule 6.37) then the Label and
+the Tab ID: `BM1w1_1_HLT_BH`. It has no Port and no Type part (the `1w` says what it is), and the pin is not in it ("A user does not really
+care about the PIN"). It starts with the Interface ID, so typing BM in the Process editor lists it ("This would work for predictive text and
+show if BM was typed"). *Replaced:* `BM_700_TEMP@1W_HLT_BH` (virtual port 700 + probe number - 1). Older Schemas: once per Schema, a
+probe in the old form gets the new name when the Schema loads; its hidden key stays and everything that uses it follows (Rule 6.37).
 **A Heating Element's Type ID is `H_Element`** (OakBarn Brewery, 2026-11-11: "Heating Element: DO@H_Element"; was `HE` from Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we
 could Use MB_25_HE_HLT_BR"), e.g. `MB_25_DO@H_Element_HLT_BR` (with its General Type since 2026-11-11), whatever heating method it is using (Rule 6.19); the method is not in its
 name or Label, since it can change while brewing. A Heating Element is wired straight to its port, going to an SSR (or a
@@ -2399,7 +2407,7 @@ Available Ports lists never offer a Port that is assigned, and saving a Device o
 *Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
 one heater). The last one turned on wins and the others turn off."
 
-6.2 **Virtual ports:** OneWire probes 700-799 (one Device per probe); hydrometers 200, 201 and up.
+6.2 **Virtual ports:** hydrometers 200, 201 and up. *Changed 2026-11-19:* OneWire probes no longer have virtual ports 700-799; each has a 1-Wire Index (Rule 6.37).
 Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
 
 6.3 **Connection ranking per board** (2026-10-26, PR #108, still open):
@@ -3156,6 +3164,32 @@ Pins"; Panel Updates entry 34 step 1; Arduino's pinout AFX00001/2/3, Skynet_Priv
   "No, I will be testing with a Mega and Grand central").
 - **The BruControl Import:** BruControl has no Opta, so nothing changes there; its Build page shares the Board list and the Port lists.
 Help 206 (and French).
+
+6.37 **1-Wire circuits and the 1-Wire Index** (OakBarn Brewery, 2026-11-19, Panel Updates entry 37: "A One wire circuit is Board and Pin
+Related. You could have two different One Wire circuits on the same Board").
+- **A circuit** is one data pin on one Interface with its pull-up resistor; an Interface can have several. Each is kept on the Interface:
+  its number, **Pin**, **Powered by** (Board 5V or External supply) and **Resolution** (12-bit by default; 11 or 10-bit per circuit,
+  "C ... yes"). A circuit number is never used again after its circuit is deleted ("Ok about delete and renumbering as it just does not
+  matter"). A circuit's pin can't be used by anything else (Rule 6.9's blocked pins).
+- **The 1-Wire Index** of a DS18B20 probe is its circuit and its number there: Index ID `BM1w1_2` = Interface BM, circuit 1, probe 2.
+  It starts the probe's name (Rule 3.1). The Index holds the probe's ROM id (Devices > 🌡 OneWire Probes), so a probe is replaced by
+  giving its Index the new ROM id.
+- **Adding a probe** ("1. Create an Index for a new One Wire Cicuit 2. Choose an Existing Circuit to add an additional Probe"): the
+  probe's **1-Wire Index** box offers **➕ Create an Index for a new 1-Wire circuit** (a short interview: Pin, Powered by, Resolution;
+  the probe gets Index 1) and every circuit the Interface has, with its next Index (any free Index can be picked). The first 1-Wire probe
+  on an Interface starts with the interview ("the First 1 Wire to a Board sets the first index"). With one circuit, its next Index is
+  already picked. **➕ Add 1-Wire circuit** on the Devices page runs the same interview.
+- **Soft limit, one warning** ("We do not restrict the excess, but give a warning once exceeded"; Rule 6.20 one warning): about 6 probes
+  on Board 5V, about 12 on an External supply. Past it, one warning; the probe is still added.
+- **The boards:** the Mega sketch lists its 1-Wire pins in `ONEWIRE_PINS` (D40 to start) and reads every circuit without waiting; the
+  panel sends `CFG OW <pin> <bits>` for each circuit when the board connects, and the board reports `T <ROM id> <°F> <pin>`
+  (docs/DEVICE_PROTOCOL.md). A Raspberry Pi has one circuit (GPIO 4).
+- **Older Schemas** (once per Schema, Rule 15.2): every DS18B20 probe on the old one-list Probe # goes on circuit 1 of its Interface with
+  the same number, and the Interface gets circuit 1 (its usual 1-Wire pin, Board 5V, 12-bit). The 3 Vessel sample and the default Schema
+  are changed (Rule 15.3).
+- **Both programs:** the BruControl Import puts each BruControl probe on circuit 1 of its Interface (BruControl has one 1-Wire bus per
+  Interface), named the same way.
+Help 215 (and French).
 
 ## 7. Pictures
 
@@ -3955,7 +3989,7 @@ examples in the Hover Help use the Properties and Entries in the Dialog they are
 balloon's example uses the real names and entries of the same dialog in the 3 Vessel 1 Pump sample, so what you read in the balloon is
 what you see in the dialog. First done: the **Heater Properties** of a Vessel Build, with the **HLT element** built into **HLT_Vessel**
 (`BM_8_DO@H_Element_HLT~element_BH`: Brewery Mega Port 8, the Brew House Tab, Hysteresis holding 150 °F with an On offset of 1, its probe
-`BM_700_TEMP@1W_HLT_BH`; in a Process `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH`). A test (test/helpformat.test.js) checks the example still matches
+`BM1w1_1_HLT_BH`; in a Process `HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH`). A test (test/helpformat.test.js) checks the example still matches
 the sample. The other dialogs follow, one at a time.
 
 11.8 **KISS: Keep It Simple, no clutter** (OakBarn Brewery, 2026-11-10: "Label for DDLB and other field 1 to 2 Words. Use Hover Help for
@@ -5863,6 +5897,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Added Rule 6.37 and changed Rules 3.1 and 6.2 (OakBarn Brewery, Panel Updates entry 37: "A One wire circuit is Board and Pin Related"; "BM1w1_1 ... BM1w1_2 ... BM1w2_n. Suggest name would be IndexId _Label_Tab"): 1-Wire circuits per Interface (Pin, Powered by, Resolution), the 1-Wire Index BM1w1_2, a probe starts with ➕ Create an Index for a new 1-Wire circuit or an existing circuit, one warning past about 6 (Board 5V) or 12 (External) probes, the Mega sketch reads several circuits; old Probe # names BM_700_TEMP@1W_HLT_BH become BM1w1_1_HLT_BH once per Schema. Help 215. Checked against both programs.
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.

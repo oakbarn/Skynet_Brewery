@@ -51,7 +51,7 @@ Le port est toujours dans le nom, et le Device Type vient en troisième. Le Devi
 
 `MB_25_PWM@Valve_L_Fly~Sparge_SP`
 
-Les broches analogiques s'écrivent par leur numéro de broche, A0 = 54 jusqu'à A15 = 69, donc une thermistance 10K appelée *Mash/Tun* sur la broche A0 reçoit `MB_54_TEMP@10KNTC_Mash~Tun_SP`. Vous pouvez toujours taper A0 ou 54 quand vous choisissez la broche. Les sondes DS18B20 partagent toutes un seul fil, donc chaque numéro de sonde est un port virtuel de 700 à 799 (sonde 1 = 700, sonde 2 = 701 ...) : `MB_700_TEMP@1W_HLT_HL`. Un numéro de sonde ne peut appartenir qu'à un seul Device.
+Les broches analogiques s'écrivent par leur numéro de broche, A0 = 54 jusqu'à A15 = 69, donc une thermistance 10K appelée *Mash/Tun* sur la broche A0 reçoit `MB_54_TEMP@10KNTC_Mash~Tun_SP`. Vous pouvez toujours taper A0 ou 54 quand vous choisissez la broche. Une sonde DS18B20 n'a pas de partie Port ni Type : son nom commence par son **1-Wire Index**, Interface, circuit et numéro de sonde : `MB1w1_1_HLT_HL` est la sonde 1 du circuit 1-Wire 1 de l'Interface MB. Un Index ne peut appartenir qu'à un seul Device ([1-Wire probes: circuits and Indexes](215-1-wire-probes)).
 
 Comment le Label est transformé en partie du nom (le Label lui-même reste exactement comme vous l'avez tapé) :
 
@@ -108,11 +108,11 @@ les tuyaux, les raccords et les Text.
 Certaines sondes partagent des broches sur la carte. Sur une Arduino Mega avec le sketch Skynet :
 
 - **Les sondes RTD et les thermocouples** (PT100, PT1000, cartes MAX31855 / MAX31856) utilisent toutes les **broches SPI 50, 51 et 52**. Chaque carte a aussi une broche à elle, sa broche de sélection (CS), et c'est le Port dans son nom, par exemple `MB_48_TEMP@RTD_HLT_HL`. Pour un **thermocouple**, la broche CS peut être n'importe quelle broche libre sauf 50, 51 et 52. Pour une **RTD** (PT100 / PT1000, carte MAX31865) sur une Arduino Mega, la broche CS ne peut être **que** **D14-D17, D22-D39, D41-D43, D47-D49 ou D53** (Règle Skynet 6.9). Ces broches ne sont ni des broches PWM, ni de comptage, ni SPI, ni OneWire (40), ni du shield Ethernet (4, 10). La liste des broches de la fenêtre New Device et des Properties de la RTD ne montre que ces broches, et le panel refuse toute autre broche avec un message.
-- **Les sondes DS18B20 (OneWire)** partagent toutes une seule broche de données, la **broche 40**. Chaque sonde reçoit à la place son propre port virtuel 700-799 dans son nom.
+- **Les sondes DS18B20 (OneWire)** partagent la broche de données de leur **circuit 1-Wire** (le premier sur un Mega est d'habitude la **broche 40**). Une Interface peut avoir plus de circuits, chacun sur sa broche. Chaque sonde reçoit à la place son 1-Wire Index dans son nom (`MB1w1_1`).
 
 Ce que fait le panel :
 
-- **Bloqué :** dès qu'une RTD ou un thermocouple est sur une Interface, les broches 50, 51 et 52 ne peuvent plus servir à rien d'autre sur elle. Dès qu'une sonde DS18B20 est configurée, la broche 40 ne peut plus servir à rien d'autre.
+- **Bloqué :** dès qu'une RTD ou un thermocouple est sur une Interface, les broches 50, 51 et 52 ne peuvent plus servir à rien d'autre sur elle. Dès qu'un circuit 1-Wire est configuré, sa broche ne peut plus servir à rien d'autre.
 - **Avertissement :** s'il n'y a pas encore de telle sonde et que vous mettez autre chose sur la broche 50, 51, 52 ou 40, le panel demande d'abord. Il vous dit que tant que ce Device est sur la broche, vous ne pouvez pas ajouter de sondes RTD, de thermocouples ou de sondes DS18B20 à cette Interface. Appuyez sur **Cancel** pour choisir une autre broche.
 - **Pas permis dans l'autre sens non plus :** si une pompe est déjà sur la broche 51, vous ne pouvez pas ajouter de RTD à cette Interface tant que vous n'avez pas déplacé la pompe.
 
@@ -150,7 +150,7 @@ Un **DIN** donne un seul déclenchement par appui, quelle que soit la durée d'a
 
 **Gardés pour plus tard** (Skynet ne sait pas encore les lire) : `DHT11`, `DHT22`, `Hydro` (un Tilt ou tout autre densimètre).
 
-**Les ports virtuels.** Certains Devices n'ont pas de broche à eux, donc ils reçoivent un port virtuel : les densimètres `200`, `201` ..., les sondes OneWire `700` à `799`. Un Tilt s'appellerait par exemple `MB_200_Hydro_Red_Tilt_FE`.
+**Les ports virtuels.** Certains Devices n'ont pas de broche à eux, donc ils reçoivent un port virtuel : les densimètres `200`, `201` .... Une sonde OneWire a plutôt son 1-Wire Index (`1w1_1`). Un Tilt s'appellerait par exemple `MB_200_Hydro_Red_Tilt_FE`.
 
 ## Thermistances {#thermistors}
 

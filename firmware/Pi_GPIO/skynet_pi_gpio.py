@@ -478,6 +478,13 @@ class Board:
                 h[1] += v
                 h[2] += 1
 
+    def cfg_ow(self, pin, bits):
+        if pin != int(self.s['onewire_pin']):
+            return f"ERR 1-Wire on this Pi is GPIO {self.s['onewire_pin']} only (one circuit): pin {pin} not set up"
+        self.ow_bits = max(9, min(12, bits))
+        self.fine = set()                               # write the new resolution to every probe on the next read
+        return None
+
     # ---- DS18B20 probes through the Linux 1-Wire driver (each read takes about 0.75 s, so a thread of their own)
     def read_probes(self):
         found = {}
@@ -492,7 +499,7 @@ class Board:
                     self.fine.add(d)
                     try:
                         with open(os.path.join(d, 'resolution'), 'w') as f:
-                            f.write('12')
+                            f.write(str(getattr(self, 'ow_bits', 12)))
                     except Exception:
                         pass                            # an older kernel has no resolution file (or needs root): left as it is
                 if os.path.exists(os.path.join(d, 'temperature')):
@@ -597,6 +604,8 @@ class Server:
                         r = b.cfg_flow(num(2))
                     elif kind in ('RTD', 'TC'):
                         r = b.cfg_spi(kind, num(2), p[3].upper() if len(p) > 3 else ('3' if kind == 'RTD' else 'K'))
+                    elif kind == 'OW':                  # CFG OW <pin> <bits>: the 1-Wire circuit's resolution (the Pi has one circuit)
+                        r = b.cfg_ow(num(2), num(3) if len(p) > 3 else 12)
                     elif kind in ('STEP', 'STEP4', 'HOME'):
                         r = 'ERR stepper motors can\'t run on a Raspberry Pi\'s own pins: put the motor on a Mega or ESP32'
                     else:

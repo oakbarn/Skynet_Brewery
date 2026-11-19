@@ -14,7 +14,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    **tP_TC_1** (thermocouple), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (NTC thermistors), **tP_LM35_1**, **tP_TMP36_1**,
    so the cursor starts on the next empty field. You can change the Label, but it can't
    be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the
-   **Interface** (the board) and, on the same line, the **Port**: the **Probe #** for a DS18B20 (its OneWire probe number), or an
+   **Interface** (the board) and, on the same line, the **Port**: the **1-Wire Index** for a DS18B20 (a new 1-Wire circuit, or the next Index on one you have: Help 215), or an
    **Available Port** (the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36), 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic** and **Path** (a Thermowell or probe tee): the Skynet drawing as it will show on the Tab. The Path is set.
@@ -25,7 +25,7 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    - **Units** (°F or °C) and **Decimals** on one line.
    - **Display**: how the reading shows on its Tab: a **Number**, **LCD digits**, **LED digits** or the **Skynet Dial**; the ⬢ beside it holds the Dial settings ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)). The reading and its unit always stay on one line (212.0 °F, even 9999.9 °F): when they are wider than the box the digits get smaller to fit, and go back to their own size when the reading is short again (Skynet Rule 2.56).
    - **Calibration offset** (added to every reading) and, on the same line, **Database and .API ⬢** (Help 98).
-   - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**: a DS18B20 probe, 1W, on a Temperature port, TEMP; the same TEMP@1W is in its Suggested Name).
+   - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (for example **TEMP@1W**: a DS18B20 probe, 1W, on a Temperature port, TEMP; a DS18B20's Suggested Name has its 1-Wire Index instead, for example BM1w1_1_HLT_BH).
    **Enter** takes you through Label, Interface, Port, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device** looks faded,
    press it anyway: it tells you what is still missing.
 3. Press **➕ Add Device**. The probe is made on the 🔨 [Build Tab](55-build-tab) and its Properties open; **✅ Finish Build ...** moves it to the Tab you picked. The **Interface** and **Port** are now

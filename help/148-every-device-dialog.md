@@ -6,7 +6,7 @@ Every Device's Properties work the same way as the Pump's (Skynet Rule 18.31). O
 
 1. The title, with the 🔓 lock, **Visible** and **Hidden Locked** beside it. The buttons are together in the upper right corner, frozen, always in the same order: **🗑 Delete · 💾 Save · Close · ✕** (Skynet Rule 2.54). They stay put while the rest scrolls (there is no row of buttons at the bottom).
 2. **1. Label**: the ⬆ opens a bigger box to type in, the ⬢ sets its font, size and colors. **Label Visible** shows or hides it on the Tab.
-3. **2. Interface** with its **Port** (or **Probe #**) on the same line. They are greyed out: they are the wiring, set when the Device
+3. **2. Interface** with its **Port** (or **1-Wire Index**) on the same line. They are greyed out: they are the wiring, set when the Device
    was added. Where the Device has them, the ⬢ holds **Invert** and **One-shot**.
 4. **3. Tab**, **Layer Order** under it, and **4. Name**, with the Suggested Name under it.
 5. A Device with pictures: the **Graphic**, its **Path**, and the **Overlay** with **Toggle** (outputs) and **Database and .API ⬢**

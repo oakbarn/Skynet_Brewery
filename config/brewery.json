@@ -12,7 +12,16 @@
    "realConnection": "serial",
    "port": "/dev/ttyACM0",
    "ambient": 17.8,
-   "lostLinkSec": 10
+   "lostLinkSec": 10,
+   "oneWire": [
+    {
+     "n": 1,
+     "pin": "40",
+     "power": "board",
+     "bits": 12
+    }
+   ],
+   "oneWireLast": 1
   }
  ],
  "workspaces": [
@@ -1346,12 +1355,13 @@
    "kind": "bool"
   },
   {
-   "name": "BM_700_TEMP@1W_HLT_BH",
+   "name": "BM1w1_1_HLT_BH",
    "type": "temperature",
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "sensor": "ds18b20",
    "probeIndex": 1,
+   "owCircuit": 1,
    "label": "HLT",
    "x": 625,
    "y": 80,
@@ -1372,12 +1382,13 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "BM_701_TEMP@1W_Mash_BH",
+   "name": "BM1w1_2_Mash_BH",
    "type": "temperature",
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "sensor": "ds18b20",
    "probeIndex": 2,
+   "owCircuit": 1,
    "label": "Mash",
    "x": 985,
    "y": 80,
@@ -1388,7 +1399,7 @@
    "look": "lcd",
    "sim": {
     "start": 16.7,
-    "follow": "BM_700_TEMP@1W_HLT_BH",
+    "follow": "BM1w1_1_HLT_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
      "BM_24_DO@Valve_E_HLT~out_BH",
@@ -1403,12 +1414,13 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "BM_702_TEMP@1W_Kettle_BH",
+   "name": "BM1w1_3_Kettle_BH",
    "type": "temperature",
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "sensor": "ds18b20",
    "probeIndex": 3,
+   "owCircuit": 1,
    "label": "Kettle",
    "x": 1345,
    "y": 80,
@@ -1422,7 +1434,7 @@
     "heater": "BM_9_DO@H_Element_Kettle~element_BH",
     "heatRate": 0.67,
     "maxTemp": 100,
-    "follow": "BM_701_TEMP@1W_Mash_BH",
+    "follow": "BM1w1_2_Mash_BH",
     "followWhen": [
      "BM_22_DO@Pump_Pump_BH",
      "BM_25_DO@Valve_E_Mash~tun~out_BH",
@@ -1448,7 +1460,7 @@
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "channel": 8,
-   "input": "BM_700_TEMP@1W_HLT_BH",
+   "input": "BM1w1_1_HLT_BH",
    "label": "HLT element",
    "target": 65.5556,
    "onOffset": -0.5556,
@@ -1472,7 +1484,7 @@
    "workspace": "Brew House",
    "device": "Brewery Mega",
    "channel": 9,
-   "input": "BM_702_TEMP@1W_Kettle_BH",
+   "input": "BM1w1_3_Kettle_BH",
    "label": "Kettle element",
    "target": 65.5556,
    "onOffset": -0.5556,

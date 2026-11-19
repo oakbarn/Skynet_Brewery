@@ -83,7 +83,7 @@ What the balloons say:
 | **Current Method** | **Hysteresis**: on below its Setpoint of 150 °F, off at it. |
 | **Hardware Controller** | **Optical SSR**, so its Offset of -1 °F is in range (-0.5 to -3 °F, Rule 6.29). |
 | **Enabled** and **Control Method** | Hysteresis, with Duty Cycle and PID switched on too: four balloons, Direct, Duty Cycle, Hysteresis and PID. |
-| **Temperature Probe** | `BM_700_TEMP@1W_HLT_BH`, the DS18B20 probe built into the same vessel. |
+| **Temperature Probe** | `BM1w1_1_HLT_BH`, the DS18B20 probe built into the same vessel. |
 | **Setpoint** | **150** °F. |
 | **Offset (-)** | **-1**: it turns on at 149 °F (150 - 1) and off at 150 °F. |
 | **On delay** | **0** seconds (an Optical SSR); a Contactor or Mechanical relay needs at least 10. |

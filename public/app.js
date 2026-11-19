@@ -22,7 +22,7 @@ import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFET
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, AUTO_PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD, switchedByChoices, heatHysRange, heatHysProblem, heatDefault } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
-import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
+import { isInstance, instanceFamily, hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, parseLabel, uniqueName, oneWirePort, oneWireCircuits, owCircuitOf, nextOneWireCircuit, OW_POWER, OW_LIMIT, OW_BITS, pinProfile, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, pinKept, KEPT_FOR_ETHERNET, isPwmPin, boardOfDevice, lowVoltWarning, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName, GENERAL_TYPE, TYPE_NAMES, COPYRIGHT_MSG, SUGGESTED_MSG } from './naming.js';
 import { IV_TYPES, IV_MAX, IV_PLAIN, IV_BUILD, vesselChoices, firstPick, vesselLabel, ivStart, ivPump, ivValve, ivManual, ivResize, ivProblems, ivDevices, shortOf } from './eqinterview.js';
 import { explainLine, cleanTalkLine, BOARD_DEFAULTS } from './boardtalk.js';      // Board settings and Board Talk (Rule 6.27)
 import { elementNameError, fileNameError, typedNameError } from './names.js';
@@ -723,7 +723,7 @@ const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHer
 const HERMS_WORDS = { left: 'Left', right: 'Right', crossRL: 'Outlet Right and Inlet Left', crossLR: 'Outlet Left and Inlet Right' };
 const HERMS_PICKS = [['', 'None'], ['left', 'Left: on Left HERMS In and Left HERMS Out'], ['right', 'Right: on Right HERMS In and Right HERMS Out'],
   ['crossRL', 'Outlet Right and Inlet Left (crossed: in at Left HERMS In, out at Right HERMS Out)'], ['crossLR', 'Outlet Left and Inlet Right (crossed: in at Right HERMS In, out at Left HERMS Out)']];
-const VP_KEYS = /_(part|pin|ptk|pidx)$/;
+const VP_KEYS = /_(part|pin|ptk|pidx|pidxCircuit)$/;
 const isVDev = g => !!g?.vdevice && isVW(g);
 const isVPart = e => String(e?.integratedAs || '').startsWith('ip:');
 const vpEl = (g, k, els = L().elements) => els.find(e => e.integratedIn === g.id && e.integratedAs === 'ip:' + k);
@@ -739,7 +739,7 @@ function vpWork(g) {
   for (const [k, d] of Object.entries(vwClassOf(g).ports)) {
     if (!d.vw) continue;
     const e = vpEl(g, k, draft.elements);
-    Object.assign(out, { [k + '_part']: e?.vpKind || '', [k + '_pin']: e?.channel ?? '', [k + '_ptk']: e?.type === 'temperature' ? tempKey(e) : tempKinds()[0][0], [k + '_pidx']: e?.probeIndex ?? '' });
+    Object.assign(out, { [k + '_part']: e?.vpKind || '', [k + '_pin']: e?.channel ?? '', [k + '_ptk']: e?.type === 'temperature' ? tempKey(e) : tempKinds()[0][0], [k + '_pidx']: e?.probeIndex ?? '', [k + '_pidxCircuit']: e?.probeIndex ? owCircuitOf(e) : '' });
     if (e && out.vpIface === undefined) out.vpIface = e.device;
   }
   out.vpIface ??= devs.length === 1 ? devs[0].name : '';
@@ -752,7 +752,7 @@ function vpFields(it, k, d) {
   const kind = it[k + '_part'], probe = kind === 'probe' || kind === 'thermowell', ow = probe && isOneWire(vpProto(kind, it[k + '_ptk']));
   return [[k + '_part', `${d.name}: on this IP`, 'sel', VP_KINDS, true],
     ...(probe ? [[k + '_ptk', `${d.name}: probe type`, 'sel', tempKinds().map(([a, b]) => [a, b]), true]] : []),
-    ...(!kind ? [] : ow ? [[k + '_pidx', `${d.name}: OneWire probe number`, 'probe']] : [[k + '_pin', `${d.name}: Available Ports / Pins`, 'pin', 'vp_' + k]])];
+    ...(!kind ? [] : ow ? [[k + '_pidx', `${d.name}: 1-Wire Index`, 'probe']] : [[k + '_pin', `${d.name}: Available Ports / Pins`, 'pin', 'vp_' + k]])];
 }
 // the Available Ports lists of its parts: the free pins on its Interface that fit each one (two parts can't share a pin)
 function vpPinLists(w, g) {
@@ -779,8 +779,8 @@ function applyVParts(g, vp, tab, label) {
     for (const x of [...TEMP_KEYS, 'wires', 'series', 'subtype']) delete e[x];
     Object.assign(e, clone(proto));
     if (proto.type === 'temperature') { e.units ??= '°F'; e.precision ??= 1; }
-    if (proto.type === 'temperature' && isOneWire(e)) { if (none(vp[k + '_pidx'])) throw new Error(`${d.name}: pick the OneWire probe number`); e.probeIndex = +vp[k + '_pidx']; delete e.channel; }
-    else { if (none(vp[k + '_pin'])) throw new Error(`${d.name}: pick its Port`); e.channel = vp[k + '_pin']; delete e.probeIndex; }
+    if (proto.type === 'temperature' && isOneWire(e)) { if (none(vp[k + '_pidx'])) throw new Error(`${d.name}: pick its 1-Wire Index`); e.probeIndex = +vp[k + '_pidx']; e.owCircuit = owCircuitOf({ owCircuit: vp[k + '_pidxCircuit'] }); delete e.channel; }
+    else { if (none(vp[k + '_pin'])) throw new Error(`${d.name}: pick its Port`); e.channel = vp[k + '_pin']; delete e.probeIndex; delete e.owCircuit; }
     e.label = `${String(label || 'Vessel').trim()} ${g.ports?.[k]?.label || d.name}`;
     e.typeCode = o?.typeCode && o.type === e.type && o.vpKind === kind ? o.typeCode : defaultCode(e);
     e.name = !o || o.name === deviceSuggestion(o, o) ? deviceSuggestion(e, o || e) : o.name;
@@ -792,8 +792,8 @@ function applyVParts(g, vp, tab, label) {
   try {
     for (const [e] of made) {
       const err = portError(e, e); if (err) throw new Error(err);
-      if (isOneWire(e) ? made.some(([m]) => m !== e && isOneWire(m) && m.probeIndex === e.probeIndex) : made.some(([m]) => m !== e && !isOneWire(m) && pinsOf(m).some(p => pinsOf(e).includes(p))))
-        throw new Error(`${e.label} and another part need two different ${isOneWire(e) ? 'OneWire probe numbers' : 'Ports'}`);
+      if (isOneWire(e) ? made.some(([m]) => m !== e && isOneWire(m) && m.probeIndex === e.probeIndex && owCircuitOf(m) === owCircuitOf(e)) : made.some(([m]) => m !== e && !isOneWire(m) && pinsOf(m).some(p => pinsOf(e).includes(p))))
+        throw new Error(`${e.label} and another part need two different ${isOneWire(e) ? '1-Wire Indexes' : 'Ports'}`);
     }
   } finally { draft.elements = all; }
   draft.elements = draft.elements.filter(e => !old.includes(e) || made.some(([, o]) => o === e));
@@ -5781,9 +5781,92 @@ const ifaceIdOf = dev => { const ds = S.config.devices || [], d = ds.find(x => x
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
+// ---- 1-Wire circuits (OakBarn Brewery, 2026-11-19, Rule 6.37): a circuit is one pin on one Interface, and one Interface can have
+// several. Each DS18B20 probe has a 1-Wire Index on its circuit: BM1w1_2 = Interface BM, circuit 1, probe 2. Adding a probe starts with
+// "1. Create an Index for a new One Wire Circuit 2. Choose an Existing Circuit to add an additional Probe" (Fritz). The first 1-Wire
+// probe on an Interface makes its first circuit with a short interview: the pin, how it is powered, its resolution.
+const owDev = name => (S.config.devices || []).find(d => d.name === name);
+const owIndexId = e => `${ifaceIdOf(e.device) || ''}${oneWirePort(e.probeIndex, owCircuitOf(e))}`;
+const owCircuitId = (dev, n) => `${ifaceIdOf(dev) || ''}1w${n}`;
+const owPowerWord = c => (OW_POWER.find(([k]) => k === c?.power) || OW_POWER[0])[1];
+const owLimit = c => OW_LIMIT[c?.power] ?? OW_LIMIT.board;
+const owCircuitText = (dev, c) => `${owCircuitId(dev, c.n)}: pin ${pinLabel(c.pin, boardOf(owDev(dev)))}, ${owPowerWord(c)}, ${+c.bits || 12}-bit`;
+// the probes on a circuit (their Index numbers), not counting the one being edited
+const owUsed = (dev, n, skip) => (draft || S.config).elements.filter(e => e.name !== skip && e.device === dev && isOneWire(e) && owCircuitOf(e) === n && +e.probeIndex >= 1).map(e => +e.probeIndex);
+// one warning past the soft limit (never a block: "We do not restrict the excess, but give a warning once exceeded")
+const owLimitWarn = (dev, c, count) => count > owLimit(c) ? `Heads up: ${count} probes on ${owCircuitId(dev, c.n)}. More than ${owLimit(c)} on ${owPowerWord(c)} may read badly or drop out. It still works if the wiring is good: see Help > 1-Wire probes.` : '';
+// the pins a new circuit can use on this Interface: its usual 1-Wire pin first (a Raspberry Pi has one 1-Wire pin only)
+function owFreePins(dev) {
+  const d = owDev(dev), b = boardOf(d), P = pinProfile(b), els = (draft || S.config).elements, taken = new Set(oneWireCircuits(d).map(c => String(c.pin)));
+  if (b === 'pi') return taken.has(String(P.onewire)) ? [] : [String(P.onewire)];
+  const free = freePins({ type: 'digitalIn', device: dev, name: '\0ow' }, els, S.config.devices, false).map(String).filter(p => !taken.has(p));
+  const usual = String(P.onewire ?? '');
+  const own = usual && !taken.has(usual) && !els.some(e => e.device === dev && !isOneWire(e) && pinsOf(e).map(String).includes(usual)) ? [usual] : [];
+  return [...new Set([...own, ...free])];
+}
+// the 1-Wire interview: a new circuit on an Interface. Saves it on the Interface and returns its number (null when closed).
+async function owInterview(dev, pick = false) {
+  const devs = S.config.devices || [];
+  const w = { dev: dev || devs[0]?.name || '', power: 'board', bits: '12' };
+  if (!w.dev) throw new Error('Add an Interface first: a 1-Wire circuit is a pin on an Interface');
+  const pins = d => owFreePins(d).map(p => [p, pinLabel(p, boardOf(owDev(d)))]);
+  w.pin = pins(w.dev)[0]?.[0] ?? '';
+  const ok = await miniDialog(`New 1-Wire circuit: ${owCircuitId(w.dev, nextOneWireCircuit(owDev(w.dev)))}`, [
+    ['_n', 'A 1-Wire circuit is one data pin with its 4.7k pull-up resistor; its DS18B20 probes all share it. The first probe on it gets Index 1.', 'note'],
+    ...(pick && devs.length > 1 ? [['dev', 'Interface', 'sel', devs.map(d => [d.name, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name])]] : []),
+    ['pin', 'Pin', 'sel', pins(w.dev).length ? pins(w.dev) : [['', '(no free pin)']]],
+    ['power', 'Powered by', 'sel', OW_POWER],
+    ['bits', 'Resolution', 'sel', OW_BITS.map(b => [String(b), b === 12 ? '12-bit (finest, 0.11 °F steps; the default)' : b === 11 ? '11-bit (0.23 °F steps, faster)' : '10-bit (0.45 °F steps, fastest)'])]], w, '➕ Create circuit');
+  if (!ok) return null;
+  const d = owDev(w.dev); if (!d) throw new Error('Pick an Interface');
+  if (!w.pin || !owFreePins(w.dev).includes(String(w.pin))) throw new Error(`Pin ${w.pin || '(none)'} is not free on ${w.dev}: pick another pin`);
+  const n = nextOneWireCircuit(d), c = { n, pin: String(w.pin), power: w.power === 'ext' ? 'ext' : 'board', bits: [10, 11, 12].includes(+w.bits) ? +w.bits : 12 };
+  const list = (S.config.devices || []).map(x => x.name === d.name ? { ...x, oneWire: [...(Array.isArray(x.oneWire) ? x.oneWire : []), c], oneWireLast: n } : x);
+  await api('PUT', '/ui/layout', { devices: list }); S.config.devices = list;
+  toast(`${owCircuitText(w.dev, c)} made`);
+  return { dev: w.dev, n };
+}
+// the 1-Wire Index box of a DS18B20 probe: ➕ Create an Index for a new 1-Wire circuit, or the next (or any free) Index on a circuit it has
+function owPickField(key, obj, v) {
+  const ck = key === 'probeIndex' ? 'owCircuit' : key + 'Circuit';
+  const sel = h('select', { 'data-k': key, 'data-kind': 'owpick', class: 'owPick' }), warn = h('div', { class: 'muted owWarn' });
+  let cur = v === undefined || v === null || v === '' ? '' : `${owCircuitOf({ owCircuit: obj?.[ck] })}_${+v}`, first = !cur;
+  const box = () => sel.closest('dialog, form, .dlgBody, .menuForm, body');
+  const devOf = () => box()?.querySelector('[data-k="device"]')?.value || box()?.querySelector('[data-k="vpIface"]')?.value || obj?.device || '';
+  const fill = () => {
+    const dev = devOf(), circ = oneWireCircuits(owDev(dev)), self = obj?._ref?.name ?? obj?.name;
+    const others = [...(box()?.querySelectorAll('select.owPick') ?? [])].filter(x => x !== sel).map(x => x.value).filter(Boolean);      // the other probes in this same box
+    const opts = [h('option', { value: '' }, circ.length ? '(pick a circuit)' : '(none yet)'), h('option', { value: 'new' }, '➕ Create an Index for a new 1-Wire circuit…')];
+    for (const c of circ) {
+      const used = new Set(owUsed(dev, c.n, self)), slots = (S.config.probes || []).filter(p => (p.device ?? dev) === dev && owCircuitOf(p) === c.n);
+      const top = Math.max(0, ...used, ...slots.map(p => +p.index), ...(cur.startsWith(c.n + '_') ? [+cur.split('_')[1]] : []));
+      const free = []; for (let i = 1; i <= top + 1; i++) if (!used.has(i) && !others.includes(`${c.n}_${i}`)) free.push(i);
+      if (first && circ.length === 1 && !cur) cur = `${c.n}_${free.find(i => !slots.some(p => +p.index === i && p.rom)) ?? free[free.length - 1]}`;      // one circuit: the next Index
+      opts.push(h('optgroup', { label: `${owCircuitText(dev, c)}  (${used.size} probe${used.size === 1 ? '' : 's'})` },
+        ...free.map(i => { const sl = slots.find(p => +p.index === i), val = `${c.n}_${i}`;
+          return h('option', { value: val, ...(val === cur ? { selected: true } : {}) }, `${owCircuitId(dev, c.n)}_${i}${sl?.rom ? '  ' + sl.rom : ''}${sl?.name ? '  ' + sl.name : ''}${i === top + 1 ? '  (next)' : ''}`); })));
+    }
+    if (cur && !opts.some(o => o.querySelector?.(`option[value="${cur}"]`))) opts.push(h('option', { value: cur, selected: true }, `${ifaceIdOf(dev)}1w${cur}`));      // its own Index stays, even on a circuit the Interface lost
+    first = false;
+    sel.replaceChildren(...opts); sel.value = cur;
+    const c = circ.find(x => cur.startsWith(x.n + '_'));
+    warn.textContent = c ? owLimitWarn(dev, c, owUsed(dev, c.n, self).length + 1) : '';
+  };
+  sel.addEventListener('change', guard(async () => {
+    if (sel.value === 'new') {
+      sel.value = cur;
+      const made = await owInterview(devOf());
+      if (made) cur = `${made.n}_1`;
+    } else cur = sel.value;
+    fill(); sel.dispatchEvent(new Event('input', { bubbles: true }));
+  }));
+  setTimeout(() => { fill(); const ds = box()?.querySelectorAll('[data-k="device"], [data-k="vpIface"]'); for (const d of ds ?? []) d.addEventListener('change', () => { cur = ''; first = true; fill(); }); }, 0);
+  fill();
+  return h('span', { class: 'owPickBox' }, sel, warn);
+}
 // the port as written in the name (Fritz: always in it): the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
 function portForName(e) {
-  if (isOneWire(e)) return oneWirePort(e.probeIndex);      // virtual port 700-799 (Fritz, 2026-10-23)
+  if (isOneWire(e)) return oneWirePort(e.probeIndex, owCircuitOf(e));      // its 1-Wire Index: 1w1_2 = circuit 1, probe 2, so the name is BM1w1_2_... (Rule 6.37)
   if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
   const pin = String(e.channel ?? '').split(',')[0].trim(), a = /^A(\d{1,2})$/i.exec(pin);
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
@@ -6065,10 +6148,10 @@ function reviewWire(iface, port, portName = 'Available Ports') {
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   if (e.type === 'hydrometer' && (e.channel === undefined || e.channel === '')) e.channel = hydroPorts({ ...e, device: e.device ?? defaultIface(devs) })[0]?.[0];      // the next free virtual port (Rule 6.2)
-  const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, owCircuit: e.owCircuit, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const pr = isProbeDev(e);      // a Temperature Probe: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26)
   if (pr) for (const k of PROBE_SETTING_KEYS) if (e[k] !== undefined) work[k] = e[k];
-  const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
+  const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', '1-Wire Index', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : e.type === 'hydrometer' ? ['channel', 'Port (virtual: 200, 201 …)', 'sel', hydroPorts(e)]
@@ -6325,7 +6408,7 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'owCircuit', 'typeCode', 'workspace', ...PORT_POP_KEYS, ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
           ...(isPumpDev(e) ? ['cover', 'coverColor', 'pumpIn', 'pumpOut', 'pumpLink', 'ipTypeIn', 'ipTypeOut', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh', 'voltTable'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (profKind === 'valve') e._valveProfile = work.useProfile;        // applied once the box closes (addThing)
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
@@ -6586,7 +6669,7 @@ const intEls = g => ({ heat: draft.elements.find(e => e.integratedIn === g.id &&
 function rimsWork(g) {
   const { heat, temp } = g ? intEls(g) : {}, devs = S.config.devices || [];
   return { iface: heat?.device ?? temp?.device ?? (devs.length === 1 ? devs[0].name : ''), heatCtl: (isHeatElem(heat) ? { onoff: 'pid', dutyCycle: 'dutyCycle', hysteresis: 'hysteresis', pid: 'pid', deadband: 'pid' }[startMethod(heat)] : heat?.type) || 'pid', heatPin: heat?.channel ?? '',
-    tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '',
+    tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '', tempProbeCircuit: temp?.probeIndex ? owCircuitOf(temp) : '',
     ...Object.fromEntries(elSettings(heat?.type || 'pid').map(([k]) => ['el_' + k, heat?.[k]])) };
 }
 function rimsFields(w, add) {      // add: the Add box, numbered as the Model's (1. Label, Label Visible, 2. Interface; Rule 18.47)
@@ -6600,7 +6683,7 @@ function rimsFields(w, add) {      // add: the Add box, numbered as the Model's 
     ...elSettings(w.heatCtl).map(([k, ...r]) => ['el_' + k, ...r]),
     ['_tw', 'Heating element: its thermowell (the temperature it holds)', 'head'],
     ['tempKind', 'Temperature probe in the thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
-    ow ? ['tempProbe', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', 'Available Ports / Pins: thermowell probe', 'pin', 'rimsTemp']];
+    ow ? ['tempProbe', '1-Wire Index: thermowell probe', 'probe'] : ['tempPin', 'Available Ports / Pins: thermowell probe', 'pin', 'rimsTemp']];
 }
 // the Available Ports lists of the two pickers: the free pins on the Interface that fit each Device (best first)
 function rimsPinLists(w, g) {
@@ -6623,7 +6706,7 @@ function applyRims(g, w, tab, label) {
   if (!h0 && !t0 && none(w.iface) && none(w.heatPin) && none(w.tempPin) && none(w.tempProbe)) return;
   if (none(w.iface)) throw new Error(`Pick the Interface the ${intWhat(g)[0]} is wired to`);
   if (none(w.heatPin)) throw new Error('Pick the Port for the heating element');
-  if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? 'Pick the OneWire probe number of the temperature probe' : 'Pick the Port for the temperature probe');
+  if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? 'Pick the 1-Wire Index of the temperature probe' : 'Pick the Port for the temperature probe');
   const base = String(label || intWhat(g)[1]).trim();
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
@@ -6634,7 +6717,7 @@ function applyRims(g, w, tab, label) {
   const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
   Object.assign(temp, clone(tk));
-  if (ow) { temp.probeIndex = +w.tempProbe; delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; }
+  if (ow) { temp.probeIndex = +w.tempProbe; temp.owCircuit = owCircuitOf({ owCircuit: w.tempProbeCircuit }); delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; delete temp.owCircuit; }
   temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.label ??= base + ' Temp';
   // a new one gets the suggested name; one that still has its suggested name follows it (a name typed by hand stays)
   const named = (e, old) => !old || old.name === deviceSuggestion(old, old) ? deviceSuggestion(e, old || e) : old.name;
@@ -8221,7 +8304,7 @@ const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'fun
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
 const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json'], CAL_FIELD, SMOOTH_FIELD];
 const SENSOR_FIELDS = {
-  ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device', 'dev', null, false, false, { tip: 'Empty: any.' }]],
+  ds18b20: [['probeIndex', '1-Wire Index', 'probe'], ['device', 'Device', 'dev', null, false, false, { tip: 'Empty: any.' }]],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm)', 'num', null, false, false, { def: 430 }]],
   pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm)', 'num', null, false, false, { def: 4300 }]],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
@@ -8946,7 +9029,7 @@ const probeShape = e => isProbeTee(e) ? PROBE_TEES[e.probeTee].label : isThermow
 const probeTitle = e => `${probeShape(e)}: ${probeKindName(e)}`;
 const hasProbePic = e => isProbeTee(e) || isThermowell(e);
 // where the probe's pin goes: the OneWire probe number (DS18B20), the chip-select pin (RTD, thermocouple) or the analog pin
-const probePort = e => isOneWire(e) ? ['probeIndex', 'Probe #', 'probe'] : ['channel', 'Available Ports', 'pinsel', ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital'];
+const probePort = e => isOneWire(e) ? ['probeIndex', '1-Wire Index', 'probe'] : ['channel', 'Available Ports', 'pinsel', ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital'];
 // the Probe type ⬢ pop-up: the settings of its kind of probe (not the board or pin: those are on the dialog)
 // Two-point calibration (Fritz, 2026-11-07: precise control "using offsets to get to .1 F or .1 C"): what the probe read in ice
 // water and in boiling water, and what the truth was. lib/sensors.js twoPoint.
@@ -8955,7 +9038,7 @@ const TWO_POINT_FIELDS = [['_c2', 'Put the probe in ice water (stirred, 32 °F /
   ['calHighRead', 'High point: it read', 'num'], ['calHighTrue', 'High point: the truth (boiling water at your altitude)', 'num']];
 const TWO_POINT_KEYS = ['calLowRead', 'calLowTrue', 'calHighRead', 'calHighTrue'];
 const TWO_POINT_POP = { title: 'Two-point calibration', fields: TWO_POINT_FIELDS };
-const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
+const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex', 'owCircuit'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
 const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', 'calibrations', 'avgWeight', ...TWO_POINT_KEYS];
 const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
 const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
@@ -9368,7 +9451,7 @@ function vpSections(it, edit = false) {
     const rows = (e, n, todo) => {
       const k = `_vps_${kind}${n}_`, spot = e ? e.integratedAs.slice(3) : todo || '', v = x => e && x !== undefined && x !== null && x !== '' ? String(x) : '';
       const ro = (key, label, x) => [k + key, label, 'ro', v(x), false, false, e ? {} : { tip: `None: this vessel has no ${word} built in.` }];
-      const port = !e ? '' : e.probeIndex !== undefined && e.probeIndex !== null && e.probeIndex !== '' ? `Probe # ${e.probeIndex}` : pinLabel(e.channel, boardOfDevice(e, S.config.devices));
+      const port = !e ? '' : e.probeIndex !== undefined && e.probeIndex !== null && e.probeIndex !== '' ? owIndexId(e) : pinLabel(e.channel, boardOfDevice(e, S.config.devices));
       if (edit && e) {      // integrated: its Heating Element or Probe can still be changed, or swapped for another (OakBarn Brewery, 2026-11-09)
         const x = `vpx_${spot}_`, ow = e.type === 'temperature' && isOneWire(e);
         const pre = { label: e.label ?? '', device: e.device ?? '', [ow ? 'pidx' : 'channel']: ow ? e.probeIndex ?? '' : e.channel ?? '',
@@ -9397,7 +9480,7 @@ const genTitle = e => isBuiltIn(e) && e.type === 'temperature' ? `${e.vpKind ===
 const isGenDrill = e => isDevice(e) && !e.cloneId && (isBuiltIn(e) || !isDrillDev(e));
 const builtInHost = e => { const g = (draft || S.config).graphics.find(x => x.id === e.integratedIn); return g ? g.label || g.name || g.id : e.integratedIn; };
 // what the Pump's drill-down shows elsewhere or drops (it is in the ⬢ pop-ups): not part of a Device's own set
-const GEN_SHOWN = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', 'w', 'h', 'locked', 'visibility', 'hidden', 'device', 'channel', 'probeIndex',
+const GEN_SHOWN = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', 'w', 'h', 'locked', 'visibility', 'hidden', 'device', 'channel', 'probeIndex', 'owCircuit',
   'imageOff', 'imageOn', 'imageOverlay', 'typeCode', 'background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3', 'look', 'digits', 'fontSize', 'tap',
   'tapTarget', 'confirm', 'foreColor', 'backColor', 'align', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'nameFont', 'nameAlign', 'nameBold',
   'valueColor', 'valueBg', 'valueFont', 'valueAlign', 'border', 'hideValue', '_tb', '_ovn', '_hint', '_sug']);
@@ -9405,7 +9488,7 @@ const GEN_TEXT_POP = { title: 'Text attributes (its Value or On / Off text)', fi
 function genDeviceFields(it, item, f) {
   const T = DEVICE_TIPS, part = isBuiltIn(it), dbKeys = new Set(dbFields(it).map(x => x[0]));
   const portF = f.find(x => x[0] === 'probeIndex') || f.find(x => x[0] === 'channel');
-  const port = !portF ? null : portF[2] === 'pin' ? ['channel', 'Available Ports', 'pinsel', portF[3] === 'analog' ? 'analog' : 'digital'] : [portF[0], portF[0] === 'probeIndex' ? 'Probe #' : 'Port', ...portF.slice(2, 4)];
+  const port = !portF ? null : portF[2] === 'pin' ? ['channel', 'Available Ports', 'pinsel', portF[3] === 'analog' ? 'analog' : 'digital'] : [portF[0], portF[0] === 'probeIndex' ? '1-Wire Index' : 'Port', ...portF.slice(2, 4)];
   const hasIface = f.some(x => x[0] === 'device');
   const pics = !part && f.some(x => x[0] === 'imageOff'), onPic = pics && f.some(x => x[0] === 'imageOn');
   const out = it.type === 'digitalOut' && (!skyDev(it) || f.some(x => x[0] === 'tap'));      // a Skynet Template's Toggle only where it lets you set it (Rule 5.16)
@@ -9855,10 +9938,10 @@ const DEVICE_TIPS = {
   // Inlet IP, Orientation and Hose or Pipe: Blichmann Riptide Dialogs 3 (OakBarn Brewery, 2026-11-14), his text and pictures word for word
   pumpLink: '⟪img:help_pictures/Pump_8_IPs.png⟫Every pump has 8 IPs: the 4 corners of its box and the middle of each side. The pipes and hoses set its Inlet (IN) and Outlet (OUT): draw or drop a pipe or hose end on or near the pump and it joins the nearest of the 8 IPs, and the pump\'s free end moves there. Nothing to pick.\n\nHose or Pipe is what is drawn inside the pump, from its own inlet and outlet to those IPs: a White Hose, or a stainless Pipe. A pipe or hose joined to it sets this too. It is drawn over the pump and its Cover under the On overlay.',
   // Heater Properties hover help (Rule 11.7, OakBarn Brewery 2026-11-10): the examples are the HLT element of the 3 Vessel 1 Pump sample
-  // (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM_700_TEMP@1W_HLT_BH)
+  // (HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH: Brewery Mega Port 8, the Brew House Tab, Hysteresis at 150 °F, On offset 1, probe BM1w1_1_HLT_BH)
   heatMethod: '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.\nHow it heats when it starts: Direct (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19). Example: the HLT element starts in Hysteresis, on below its Setpoint of 150 °F and off at it. A click on another method while brewing, or a Process line such as HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH.method = "PID", changes it. How it is wired matters: an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM_700_TEMP@1W_HLT_BH, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM_700_TEMP@1W_HLT_BH. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  eHeatProbe: 'The Temperature Probe this Heating Element reads to hold its Setpoint (Hysteresis, PID, Deadband and Precise). Example: the HLT element reads BM1w1_1_HLT_BH, the DS18B20 probe built into the same HLT vessel; a Process reads it as HLT_Vessel.BM1w1_1_HLT_BH. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
   switchedBy: 'Hardware Controller: what turns this element on and off. It sets how close its Hysteresis may hold (Rule 6.29). Optical SSR (solid state relay): no moving parts, so it may switch often: On offset 0.5 to 3 °F. Contactor or Mechanical relay: its contacts wear each time they close, so it heats less often and longer: On offset 1 to 5 °F and an On delay of at least 10 seconds. Picking one sets the On offset and On delay for you: Optical SSR 0.5 and 0 seconds, Contactor 1 and 10 seconds, Mechanical relay 1 and 10 seconds. Nothing else changes. With a °C probe the numbers are converted. Example: the HLT element is switched by an Optical SSR, so its On offset of 1 °F is in range.',
   controlMethod: (it, m) => (n => `One click on a balloon makes it the Current Method, here and on the Tab at once: the Current Method turns Red and the others are Yellow. It never turns the Element On (Rule 6.19). A Process changes it too: ${n}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m) ?? 'onoff')}" or ${n}.${heatMethodCode(allowedMethods(it).find(k => k !== m) ?? 'onoff')}.`)(it.name ? builtInProcName(it) : 'HLT_Vessel.BM_8_DO@H_Element_HLT~element_BH'),
   elemTog: 'One click turns this Element On or Off at once, the same as one click on it on the Tab (Rule 2.33). On / Off is the Device itself: it is On in whatever method it is in, and Direct is 100 % On. Picking a method never turns it On (Rule 6.19).',
@@ -9919,7 +10002,7 @@ const DEVICE_TIPS = {
   vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
   vTapEnd: 'Which way the tap water flows through it: always one way, from the tap side to the Out side. Lying flat: Left to Right or Right to Left. Standing up: Top to Bottom or Bottom to Top.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
-  pNum: 'Probe #: the OneWire probe number of this DS18B20 (Devices page > OneWire probes). All DS18B20 probes share one data pin.',
+  pNum: '1-Wire Index: which 1-Wire circuit this DS18B20 is on and its number there. BM1w1_2 = Interface BM, 1-Wire circuit 1, probe 2. Pick ➕ Create an Index for a new 1-Wire circuit for a new circuit (its pin, how it is powered, its resolution), or a circuit you already have to add another probe to it. Its probe (ROM id) is picked on Devices > 🌡 OneWire Probes.',
   tpGraphic: 'The picture of this probe as it will show on the Tab, turned to its Orientation. A Thermowell snaps onto an IP; on a front facing IP it shows from the front. A probe tee cuts a pipe as a tee does (Rule 5.30).',
   tpPath: 'The Skynet drawing of this Thermowell or probe tee. It is set and cannot be changed.',
   pOrient: 'Turn it 90, 180 or 270 degrees clockwise, and flip it. The Graphic here and the probe on the Tab follow, and its IPs too.',
@@ -10074,9 +10157,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     return [h('label', {}, label), input];
   }
   if (kind === 'stpick') return [h('label', {}, label), stepperPick(key, opts, v)];
-  if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
-    ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)),
-    ...(v !== undefined && v !== '' && !(S.config.probes || []).some(p => p.index === Number(v)) ? [h('option', { value: v, selected: true }, `#${v}`)] : []));      // its own probe # stays, even when the Devices page does not list it yet
+  if (kind === 'probe') return [h('label', {}, label), owPickField(key, obj, v)];
   else if (kind === 'vis') {      // Visible as a switch, kept as BruControl's visibility = visible / hidden
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'vis', ...(v === 'hidden' ? {} : { checked: true }) }), h('span', { class: 'swk' }));
   }
@@ -10505,6 +10586,11 @@ function readFields(obj, root = $('#dlgBody')) {
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
     else if (kind === 'num' || kind === 'numsel') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'owpick') {      // a 1-Wire Index: circuit_index (Rule 6.37), kept as the probe's number and its circuit
+      const m = /^(\d+)_(\d+)$/.exec(inp.value), ck = k === 'probeIndex' ? 'owCircuit' : k + 'Circuit';
+      if (m) obj[ck] = +m[1]; else delete obj[ck];
+      v = m ? +m[2] : undefined;
+    }
     else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
@@ -13160,39 +13246,82 @@ function showPane(id) {
 }
 for (const b of document.querySelectorAll('.pageTab')) b.onclick = () => showPane(b.dataset.pane);
 
-// ---- OneWire probe index: numbered slots; elements use the number, the slot holds the probe's ROM id
-const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t }); return m; };
+// ---- 1-Wire Indexes (Rule 6.37): each slot is { device, circuit, index } with the probe's ROM id; elements use the Index
+const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t, pin: d.probePins?.[rom] }); return m; };
+const owSlotKey = p => `${p.device ?? ''}|${owCircuitOf(p)}|${+p.index}`;
+const slotId = p => `${ifaceIdOf(p.device) || ''}${oneWirePort(p.index, owCircuitOf(p))}`;
+const slotUsers = p => S.config.elements.filter(e => isOneWire(e) && e.device === p.device && owCircuitOf(e) === owCircuitOf(p) && Number(e.probeIndex) === +p.index).map(e => e.name);
+// the circuit a probe seen on this pin is on (newer firmware says the pin), else the Interface's first circuit
+const seenCircuit = (dev, pin) => { const cs = oneWireCircuits(owDev(dev)); return (pin && cs.find(c => String(c.pin) === String(pin))) || cs[0]; };
 function renderProbes() {
-  const slots = S.config.probes || [], seen = seenRoms();
-  const usedBy = i => S.config.elements.filter(e => e.type === 'temperature' && Number(e.probeIndex) === i).map(e => e.name).join(', ');
+  const slots = S.config.probes || [], seen = seenRoms(), admin = can('admin');
+  // the circuits
+  const ob = $('#owBody'); ob.innerHTML = '';
+  for (const d of S.config.devices || []) for (const c of oneWireCircuits(d)) {
+    const n = S.config.elements.filter(e => isOneWire(e) && e.device === d.name && owCircuitOf(e) === c.n).length, warn = owLimitWarn(d.name, c, n);
+    const pins = [...new Set([String(c.pin), ...owFreePins(d.name)])];
+    const set = k => guard(async ev => saveCircuit(d.name, c.n, x => { x[k] = k === 'bits' ? +ev.target.value : ev.target.value; }));
+    ob.append(h('tr', {}, h('td', {}, h('b', {}, owCircuitId(d.name, c.n))), h('td', {}, d.name),
+      h('td', {}, h('select', { disabled: !admin, onchange: set('pin') }, ...pins.map(p => h('option', { value: p, ...(p === String(c.pin) ? { selected: true } : {}) }, pinLabel(p, boardOf(d)))))),
+      h('td', {}, h('select', { disabled: !admin, onchange: set('power') }, ...OW_POWER.map(([k, t]) => h('option', { value: k, ...(k === (c.power || 'board') ? { selected: true } : {}) }, t)))),
+      h('td', {}, h('select', { disabled: !admin, onchange: set('bits') }, ...OW_BITS.map(b => h('option', { value: b, ...(b === (+c.bits || 12) ? { selected: true } : {}) }, `${b}-bit`)))),
+      h('td', { ...(warn ? { class: 'warnTxt', title: warn } : {}) }, `${n} (soft limit ${owLimit(c)})${warn ? ' ⚠' : ''}`),
+      h('td', {}, h('button', { class: 'admin-only', title: 'A new 1-Wire Index on this circuit, for a probe you will plug in', onclick: () => newSlot('', d.name, c.n) }, '➕ Index'), ' ',
+        h('button', { class: 'danger admin-only', onclick: guard(async () => {
+          if (n && !confirm(`${owCircuitId(d.name, c.n)} has ${n} probe Device${n === 1 ? '' : 's'} on it. They lose their 1-Wire Index. Delete the circuit anyway?`)) return;
+          await saveCircuit(d.name, c.n, null);
+        }) }, 'Delete'))));
+  }
+  if (!ob.children.length) ob.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No 1-Wire circuit yet. The first DS18B20 probe you add makes one, or press ➕ Add 1-Wire circuit.')));
+  // the Indexes
   const sb = $('#slotBody'); sb.innerHTML = '';
   for (const p of slots) {
-    const roms = [...new Set([p.rom, ...seen.keys()].filter(Boolean))];
-    sb.append(h('tr', {}, h('td', {}, String(p.index)),
-      h('td', {}, h('input', { disabled: !can('admin'), value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => x.index === p.index).name = ev.target.value; }) })),
-      h('td', {}, h('select', { disabled: !can('admin'), onchange: ev => setSlotRom(p.index, ev.target.value) }, h('option', { value: '' }, '(no probe)'),
-        ...roms.map(r => h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (slots.some(x => x.rom === r && x.index !== p.index) ? `  (in #${slots.find(x => x.rom === r).index})` : ''))))),
+    const roms = [...new Set([p.rom, ...seen.keys()].filter(Boolean))], users = slotUsers(p).join(', ');
+    sb.append(h('tr', {}, h('td', {}, h('b', {}, slotId(p))),
+      h('td', {}, h('input', { disabled: !admin, value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => owSlotKey(x) === owSlotKey(p)).name = ev.target.value; }) })),
+      h('td', {}, h('select', { disabled: !admin, onchange: ev => setSlotRom(owSlotKey(p), ev.target.value) }, h('option', { value: '' }, '(no probe)'),
+        ...roms.map(r => { const o = slots.find(x => x.rom === r && owSlotKey(x) !== owSlotKey(p)); return h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (o ? `  (in ${slotId(o)})` : '')); }))),
       h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
-      h('td', {}, usedBy(p.index)),
-      h('td', {}, h('button', { class: 'danger admin-only', onclick: () => { if (usedBy(p.index) && !confirm(`Probe #${p.index} is used by ${usedBy(p.index)}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => x.index === p.index), 1)); } }, 'Remove'))));
+      h('td', {}, users),
+      h('td', {}, h('button', { class: 'danger admin-only', onclick: () => { if (users && !confirm(`${slotId(p)} is used by ${users}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => owSlotKey(x) === owSlotKey(p)), 1)); } }, 'Remove'))));
   }
+  // the probes the boards report
   const pb = $('#probeBody'); pb.innerHTML = '';
-  for (const [rom, { dev, t }] of seen) {
-    const slot = slots.find(x => x.rom === rom);
-    pb.append(h('tr', {}, h('td', {}, dev), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
-      h('td', {}, h('select', { disabled: !can('admin'), onchange: ev => ev.target.value === 'new' ? newSlot(rom) : setSlotRom(+ev.target.value, rom, !ev.target.value) },
-        h('option', { value: '' }, '(no number)'), h('option', { value: 'new' }, '+ new number'),
-        ...slots.map(x => h('option', { value: x.index, ...(slot === x ? { selected: true } : {}) }, `#${x.index} ${x.name || ''}`))))));
+  for (const [rom, { dev, t, pin }] of seen) {
+    const slot = slots.find(x => x.rom === rom), c = seenCircuit(dev, pin);
+    pb.append(h('tr', {}, h('td', {}, dev), h('td', {}, pin ? pinLabel(pin, boardOf(owDev(dev))) : ''), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
+      h('td', {}, h('select', { disabled: !admin, onchange: ev => ev.target.value === 'new' ? (c ? newSlot(rom, dev, c.n) : toast(`${dev} has no 1-Wire circuit yet: press ➕ Add 1-Wire circuit first`, true)) : setSlotRom(ev.target.value, rom, !ev.target.value) },
+        h('option', { value: '' }, '(no Index)'), h('option', { value: 'new' }, c ? `+ new Index on ${owCircuitId(dev, c.n)}` : '+ new Index (add a 1-Wire circuit first)'),
+        ...slots.filter(x => (x.device ?? dev) === dev).map(x => h('option', { value: owSlotKey(x), ...(slot === x ? { selected: true } : {}) }, `${slotId(x)} ${x.name || ''}`))))));
   }
 }
 const saveProbes = guard(async change => {
   const list = clone(S.config.probes || []); change(list);
-  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); savedPop('Probe index saved');
+  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); savedPop('1-Wire Indexes saved');
 });
-// put a ROM id on a slot (taking it off any other slot); clear = take this ROM off every slot
-const setSlotRom = (index, rom, clear) => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; if (!clear) { const s = l.find(x => x.index === index); if (s) s.rom = rom; } });
-const newSlot = rom => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; l.push({ index: Math.max(0, ...l.map(x => x.index)) + 1, name: '', rom: rom || '' }); });
-$('#addSlot').onclick = () => newSlot('');
+// put a ROM id on an Index (taking it off any other); clear = take this ROM off every Index
+const setSlotRom = (key, rom, clear) => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; if (!clear) { const s = l.find(x => owSlotKey(x) === key); if (s) s.rom = rom; } });
+// a new Index on a circuit: the next number after the ones its probes and Indexes have
+const newSlot = (rom, dev, n) => saveProbes(l => {
+  for (const x of l) if (x.rom === rom) x.rom = '';
+  const top = Math.max(0, ...l.filter(x => x.device === dev && owCircuitOf(x) === n).map(x => +x.index), ...S.config.elements.filter(e => isOneWire(e) && e.device === dev && owCircuitOf(e) === n).map(e => +e.probeIndex || 0));
+  l.push({ device: dev, circuit: n, index: top + 1, name: '', rom: rom || '' });
+});
+// change one circuit of an Interface (null = delete it; its number is never used again, Fritz 2026-11-19: "it just does not matter")
+async function saveCircuit(dev, n, change) {
+  const list = (S.config.devices || []).map(x => {
+    if (x.name !== dev) return x;
+    const ow = (x.oneWire || []).map(c => ({ ...c }));
+    const i = ow.findIndex(c => +c.n === n);
+    if (i >= 0) { if (change) change(ow[i]); else ow.splice(i, 1); }
+    if (change && i >= 0 && ow.some((c, j) => j !== i && String(c.pin) === String(ow[i].pin))) throw new Error(`Pin ${ow[i].pin} already has a 1-Wire circuit`);
+    return { ...x, oneWire: ow, oneWireLast: Math.max(+x.oneWireLast || 0, n) };
+  });
+  await api('PUT', '/ui/layout', { devices: list });
+  if (!change) await api('PUT', '/ui/layout', { probes: (S.config.probes || []).filter(p => !(p.device === dev && owCircuitOf(p) === n)) });
+  await load(); renderProbes(); savedPop('1-Wire circuit saved');
+}
+$('#addOwCircuit').onclick = guard(async () => { if (await owInterview('', true)) { await load(); renderProbes(); } });
 // ---- The Interface pop-up (Fritz, 2026-10-27): Add Interface, from the ☰ Menu, the Devices page and "➕ Add new Interface…" in
 // the New Device box (any Tab). The same pop-up changes an Interface's connection (⚙ on the Devices page) and finishes the
 // pretend Mega a Skynet Schema Template makes when there is no real Interface. It explains the Interface ID: it starts every Suggested Device name.
@@ -14859,7 +14988,7 @@ const PAGE_PARTS = {
   scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
   globals: [['gGlobal', '#sec-gglobal']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
-  devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
+  devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['1-Wire circuits', '#sec-owCircuits'], ['1-Wire Indexes', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Approved Devices', '#sec-devices'], ['Sending codes (email and text)', '#sec-sending'],

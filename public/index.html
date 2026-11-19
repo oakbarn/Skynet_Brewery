@@ -292,13 +292,16 @@
     <div class="bar admin-only"><button id="addIfaceBtn" class="primary">➕ Add Interface…</button><span class="muted">opens the Add Interface pop-up (the same one as "➕ Add new Interface…" in the New Device box).</span></div>
     </div>
     <div id="paneOneWire" class="pagePane hidden">
-    <h3 id="sec-probeIndex">OneWire probe index</h3>
-    <p class="muted">Each DS18B20 probe gets a number here, and temperature Devices use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every Device that uses that number follows it, nothing else changes.</p>
-    <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
-    <div class="form row admin-only"><button id="addSlot">Add probe number</button></div>
+    <h3 id="sec-owCircuits">1-Wire circuits</h3>
+    <p class="muted">A 1-Wire circuit is one data pin on an Interface, with its 4.7k pull-up resistor; all its DS18B20 probes share it. An Interface can have several. Each probe has a 1-Wire Index on its circuit: BM1w1_2 = Interface BM, circuit 1, probe 2 (Rule 6.37).</p>
+    <table class="grid"><thead><tr><th>Circuit</th><th>Interface</th><th>Pin</th><th>Powered by</th><th>Resolution</th><th>Probes</th><th></th></tr></thead><tbody id="owBody"></tbody></table>
+    <div class="form row admin-only"><button id="addOwCircuit">➕ Add 1-Wire circuit…</button></div>
+    <h3 id="sec-probeIndex">1-Wire Indexes</h3>
+    <p class="muted">Each DS18B20 probe's Index holds its ROM id, and temperature Devices use the Index. To replace a probe, plug in the new one and pick its ROM id in the Index's row: every Device that uses that Index follows it, nothing else changes.</p>
+    <table class="grid"><thead><tr><th>1-Wire Index</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
     <h3 id="sec-probesSeen">OneWire probes seen</h3>
-    <p class="muted">Every probe the boards report, by its ROM id (not its position on the bus). Give a new probe a number here.</p>
-    <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Probe number</th></tr></thead><tbody id="probeBody"></tbody></table>
+    <p class="muted">Every probe the boards report, by its ROM id (not its position on the circuit). Give a new probe a 1-Wire Index here.</p>
+    <table class="grid"><thead><tr><th>Interface</th><th>Pin</th><th>Probe ROM id</th><th>Reading</th><th>1-Wire Index</th></tr></thead><tbody id="probeBody"></tbody></table>
     </div>
   </section>
 
