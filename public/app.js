@@ -3515,7 +3515,8 @@ async function confirmByHand(t, on) {
 // a Manual Valve opened or closed (here or on another screen): the layout, the edit copy and the Tab follow
 function setMvOpen(name, open) {
   for (const gs of [S.config.graphics, draft?.graphics]) for (const g of gs || []) if (isMv(g) && g.name === name) g.open = !!open;
-  (S.values[name] ??= {}).state = !!open;
+  // a name such as __proto__ never reaches the Object prototype (code scanning: prototype-polluting assignment)
+  if (name !== '__proto__' && name !== 'constructor' && name !== 'prototype') (S.values[name] ??= {}).state = !!open;
   const g = L().graphics.find(x => isMv(x) && x.name === name);
   if (g && g.workspace === curWs()?.name && view === 'workspace') { const n = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (n) n.replaceWith(buildIp(g)); renderPipes(); }
 }
