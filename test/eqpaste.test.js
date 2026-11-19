@@ -66,7 +66,7 @@ assert.deepEqual(man.elements.map(e => e.name), ['Valve_1', 'Pump_1']);
 assert.deepEqual(man.graphics.map(g => g.id).sort(), ['f1', 'p1', 'p2', 'p3']);
 assert.equal(man.graphics.find(g => g.id === 'p1').from, undefined, 'open end'); assert.equal(man.graphics.find(g => g.id === 'p1').to, 'dev:Valve_1:in');
 assert.equal(man.open, 1); assert.deepEqual(man.boards.map(b => b.name), ['Mega']);
-assert.equal(portOf({ device: 'Mega', channel: 8 }), 'Mega|pin|8'); assert.equal(portOf({ device: 'Mega', probeIndex: 2 }), 'Mega|1w|2'); assert.equal(portOf({ type: 'timer' }), null);
+assert.equal(portOf({ device: 'Mega', channel: 8 }), 'Mega|pin|8'); assert.equal(portOf({ device: 'Mega', probeIndex: 2 }), 'Mega|1w1|2'); assert.equal(portOf({ type: 'timer' }), null);
 
 // onto its own Tab: the same hardware is replaced (each new Device stands for the old one, so it keeps its hidden key); Widgets stay
 const browser = JSON.parse(JSON.stringify(c));

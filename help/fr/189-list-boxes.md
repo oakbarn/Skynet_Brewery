@@ -10,7 +10,7 @@ liste de choix s'ouvre ; cliquez sur un choix et il est choisi. Skynet utilise u
 - **Tapez une lettre** pour sauter au choix qui commence par elle. Chaque choix d'une liste Skynet commence par sa propre première
   lettre, donc une lettre suffit : dans la liste **Overlay** de l'HLT element, **R** choisit **Red Glow**, **O** choisit **Orange Glow**.
 - **Tapez un nom vite** (touches à moins d'environ une seconde d'écart) pour sauter au premier choix qui commence par ces lettres :
-  dans la liste **Temperature Probe** de l'HLT element, taper **BM_700** saute à **BM_700_TEMP@1W_HLT_BH**.
+  dans la liste **Temperature Probe** de l'HLT element, taper **BM1w1_1** saute à **BM1w1_1_HLT_BH**.
 - Les **flèches haut et bas** déplacent d'un choix à la fois. **Entrée** ou **Tab** le garde et passe à la case suivante.
 - Le choix actuel a un fond **Cyan** quand la liste est ouverte (Règle 2.34).
 - **➕ Add new ...** à la fin d'une liste crée un nouveau choix. La fenêtre attend, la nouvelle chose est créée dans sa propre fenêtre, puis vous
@@ -26,10 +26,10 @@ Chaque liste déroulante tire ses choix d'un de ces trois endroits :
 | D'où viennent les choix | Exemple dans l'exemple 3 Vessel 1 Pump | Pouvez-vous en ajouter ? |
 |---|---|---|
 | **Intégrés à Skynet** (une liste fixe avec laquelle Skynet lui-même travaille) | La **Current Method** de l'HLT element : Direct, Duty Cycle, Hysteresis, PID ... | Non |
-| **Votre Schema** (les Devices, Widgets, Tabs et Interfaces que vous avez créés) | La **Temperature Probe** de l'HLT element : BM_700_TEMP@1W_HLT_BH, BM_701_TEMP@1W_Mash_BH, BM_702_TEMP@1W_Kettle_BH | Oui : ➕ Add new ... en crée un nouveau |
+| **Votre Schema** (les Devices, Widgets, Tabs et Interfaces que vous avez créés) | La **Temperature Probe** de l'HLT element : BM1w1_1_HLT_BH, BM1w1_2_Mash_BH, BM1w1_3_Kettle_BH | Oui : ➕ Add new ... en crée un nouveau |
 | **Une liste qui grandit** (images, Styles, unités, couleurs ...) | La liste des Tabs : **BH: Brew House**, puis **➕ Add new Tab…** | Oui : ce que vous ajoutez reste dans la liste pour la fois suivante |
 
-- Les noms sont listés **de A à Z**, donc BM_700 vient avant BM_701.
+- Les noms sont listés **de A à Z**, donc BM1w1_1 vient avant BM1w1_2.
 - Les Interfaces et les Tabs se lisent **ID: Name**, par exemple **BM: Brewery Mega** et **BH: Brew House** (Règle 18.17).
 - Chaque choix est **court et en anglais simple** ; ce que fait un choix est dans le Hover Help (Règle 2.38).
 
@@ -48,7 +48,7 @@ Chaque nom de Device commence par son **Interface ID** (Règle 3.1) : `BM_8_DO@H
 port 8. Donc quand les Suggested Names sont utilisés, les premières lettres d'un nom disent sur quelle carte est un Device.
 
 - **Dans l'éditeur de Process** (Predictive Text, aide 79), taper **BM_** montre **seulement** les noms qui commencent par BM_, c'est-à-dire
-  seulement les Devices sur la Brewery Mega. Chaque lettre de plus réduit encore : **BM_70** ne laisse que les trois sondes.
+  seulement les Devices sur la Brewery Mega. Chaque lettre de plus réduit encore : **BM1w** ne laisse que les trois sondes 1-Wire.
 - **Dans la liste déroulante d'une fenêtre**, taper **BM_** vite **saute** au premier choix qui commence par BM_. Les autres choix
   sont toujours dans la liste ; ils ne sont pas cachés.
 
@@ -64,7 +64,7 @@ Un nom que vous avez tapé vous-même (pas le Suggested Name) peut ne pas commen
   (Règle 2.6). Pour un Device, la valeur est son nom ; pour une liste intégrée, c'est un mot court ou un nombre.
 - Sauter en tapant est fait par le navigateur : une lettre (ou la même lettre encore) passe d'un choix à l'autre parmi ceux qui commencent par elle ;
   les lettres tapées à moins d'environ une seconde d'écart sont cherchées comme un seul mot, comparé au **début** du texte du choix.
-  Là où un choix montre d'abord un Label (par exemple **HLT: BM_700_TEMP@1W_HLT_BH**), tapez les lettres du Label.
+  Là où un choix montre d'abord un Label (par exemple **HLT: BM1w1_1_HLT_BH**), tapez les lettres du Label.
 - La liste de l'éditeur de Process est la liste propre à Skynet (aide 79). Elle compare le début d'un nom, ou n'importe quelle partie après un `_`
   une fois deux lettres tapées (`Pump` trouve `BM_22_DO@Pump_Pump_BH`). Un `_` que vous tapez fait partie de la comparaison, donc **BM_** ne
   trouve que les noms qui commencent par BM_.

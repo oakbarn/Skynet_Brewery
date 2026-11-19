@@ -110,7 +110,7 @@ hw._onLine(dev, 'T 28BB000000000009 66'); assert.equal(store.getProp('Old_T', 'v
 store.saveLayout({ probes: [{ index: 1, name: 'HLT probe', rom: '28aa0000000000ff' }, store.config.probes[1]] });
 hw._onLine(dev, 'T 28AA000000000001 99'); assert.equal(store.getProp('HLT_T', 'value'), 150.5, 'old probe no longer feeds slot 1');
 hw._onLine(dev, 'T 28AA0000000000FF 152'); assert.equal(store.getProp('HLT_T', 'value'), 152, 'new probe feeds slot 1');
-assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: '28AA0000000000FF' }, { index: 2, rom: '28AA0000000000FF' }] }), /two OneWire slots/);
+assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: '28AA0000000000FF' }, { index: 2, rom: '28AA0000000000FF' }] }), /on two 1-Wire Indexes/);
 assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: 'xyz' }] }), /16 hex digits/);
 
 // Digital input modes (as BruControl DINs): switch, toggle, latch, counter, with on delay and reset

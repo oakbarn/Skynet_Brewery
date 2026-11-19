@@ -17,9 +17,9 @@ It is made like any other Device. In **Edit layout**, pick **Devices: Skynet > E
 1. **Label** (it starts as Kettle), with **Label Visible** under it.
 2. **Interface**: the board the kettle is wired to.
 3. **Device Type**: electric kettle. Pick how the heating element is controlled: **PID**, **Hysteresis**, **Duty Cycle** or **PWM**, and the type of **Temperature probe** in its thermowell.
-4. **Available Ports / Pins**: one for the heating element and one for the temperature probe (a DS18B20 probe takes its OneWire probe number instead). The lists show the free pins on that Interface, best first.
+4. **Available Ports / Pins**: one for the heating element and one for the temperature probe (a DS18B20 probe takes its 1-Wire Index instead). The lists show the free pins on that Interface, best first.
 
-Then press **➕ Add Device**. The kettle goes on the 🔨 Build Tab with its two Devices beside it, and its Properties open. The Devices get suggested names, for example `MB_9_PID_Kettle_Heat` and `MB_700_TEMP@1W_Kettle_Temp`.
+Then press **➕ Add Device**. The kettle goes on the 🔨 Build Tab with its two Devices beside it, and its Properties open. The Devices get suggested names, for example `MB_9_PID_Kettle_Heat` and `MB1w1_1_Kettle_Temp`.
 
 A **PID** or **Hysteresis** heating element holds the temperature its own probe reads (its Input is set for you).
 

@@ -14,7 +14,7 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
    **tP_TC_1** (thermocouple), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (thermistances NTC), **tP_LM35_1**, **tP_TMP36_1**,
    donc le curseur commence sur le champ vide suivant. Vous pouvez changer le Label, mais il ne peut pas
    être vide. Remplissez dans l'ordre : 1 le **Label** (le ⬢ à côté règle sa police et ses couleurs) et **Label Visible**, 2 l'
-   **Interface** (la carte) et, sur la même ligne, le **Port** : le **Probe #** pour une DS18B20 (son numéro de sonde OneWire), ou un
+   **Interface** (la carte) et, sur la même ligne, le **Port** : le **1-Wire Index** pour une DS18B20 (un nouveau circuit 1-Wire, ou l'Index suivant sur un circuit que vous avez : Help 234), ou un
    **Available Port** (la broche de sélection d'une carte RTD ou thermocouple, la broche analogique d'une NTC, LM35 ou TMP36), 3 le **Tab**.
    Ensuite le **Suggested Name** s'affiche, fait à partir d'eux, avec le reste :
    - **Graphic** et **Path** (un Thermowell ou un té à sonde) : le dessin Skynet tel qu'il s'affichera sur le Tab. Le Path est fixé.
@@ -25,7 +25,7 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
    - **Units** (°F ou °C) et **Decimals** sur une ligne.
    - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits)). La lecture et son unité restent toujours sur une seule ligne (212.0 °F, et même 9999.9 °F) : quand elles sont plus larges que la case, les chiffres rapetissent pour tenir, puis reprennent leur taille quand la lecture redevient courte (Skynet Rule 2.56).
    - **Calibration offset** (ajouté à chaque lecture) et, sur la même ligne, **Database and .API ⬢** (aide 98).
-   - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le même TEMP@1W est dans son Suggested Name).
+   - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le Suggested Name d'une DS18B20 a plutôt son 1-Wire Index, par exemple BM1w1_1_HLT_BH).
    **Entrée** vous fait passer par Label, Interface, Port, Tab, Orientation, puis **➕ Add Device**. Si **➕ Add Device** paraît pâle,
    appuyez quand même : il vous dit ce qui manque encore.
 3. Appuyez sur **➕ Add Device**. La sonde est créée sur le 🔨 [Build Tab](55-build-tab) et ses Properties s'ouvrent ; **✅ Finish Build ...** la déplace sur le Tab choisi. L'**Interface** et le **Port** sont maintenant

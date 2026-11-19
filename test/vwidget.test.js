@@ -59,8 +59,8 @@ assert.ok(read('help/133-vessel-widget.md').includes('TC, NPT or BSP'), 'Help ex
 // their probes and heaters built into the Left and Right Element IPs
 const c = JSON.parse(read('samples/configs/three-vessel-one-pump/config.json'));
 const want = { HLT_Vessel: ['cBottomOutlet', 'lElement', 'rElement'], MLT_Vessel: ['cBottomOutlet', 'lSparge', 'lElement'], BK_Vessel: ['cBottomOutlet', 'lSparge', 'lElement', 'rElement'] };
-const parts = { HLT_Vessel: { lElement: ['BM_700_TEMP@1W_HLT_BH', 'thermowell'], rElement: ['BM_8_DO@H_Element_HLT~element_BH', 'element'] }, MLT_Vessel: { lElement: ['BM_701_TEMP@1W_Mash_BH', 'thermowell'] },
-  BK_Vessel: { lElement: ['BM_702_TEMP@1W_Kettle_BH', 'thermowell'], rElement: ['BM_9_DO@H_Element_Kettle~element_BH', 'element'] } };
+const parts = { HLT_Vessel: { lElement: ['BM1w1_1_HLT_BH', 'thermowell'], rElement: ['BM_8_DO@H_Element_HLT~element_BH', 'element'] }, MLT_Vessel: { lElement: ['BM1w1_2_Mash_BH', 'thermowell'] },
+  BK_Vessel: { lElement: ['BM1w1_3_Kettle_BH', 'thermowell'], rElement: ['BM_9_DO@H_Element_Kettle~element_BH', 'element'] } };
 for (const [n, on] of Object.entries(want)) {
   const v = c.graphics.find(g => g.name === n);
   assert.ok(v?.vwidget && v.vdevice && v.template === 'Skynet_Vessel_Widget', `${n} is a Vessel Device`);

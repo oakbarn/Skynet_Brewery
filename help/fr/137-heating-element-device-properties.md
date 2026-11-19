@@ -83,7 +83,7 @@ Ce que disent les bulles :
 | **Current Method** | **Hysteresis** : en marche sous son Setpoint de 150 °F, arrêtée à celui-ci. |
 | **Hardware Controller** | **Optical SSR**, donc son Offset de -1 °F est dans la plage (-0.5 à -3 °F, Règle 6.29). |
 | **Enabled** et **Control Method** | Hysteresis, avec Duty Cycle et PID activés aussi : quatre bulles, Direct, Duty Cycle, Hysteresis et PID. |
-| **Temperature Probe** | `BM_700_TEMP@1W_HLT_BH`, la sonde DS18B20 intégrée à la même cuve. |
+| **Temperature Probe** | `BM1w1_1_HLT_BH`, la sonde DS18B20 intégrée à la même cuve. |
 | **Setpoint** | **150** °F. |
 | **Offset (-)** | **-1** : elle se met en marche à 149 °F (150 - 1) et s'arrête à 150 °F. |
 | **On delay** | **0** seconde (un Optical SSR) ; un contacteur ou un relais mécanique demande au moins 10. |

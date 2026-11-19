@@ -136,10 +136,22 @@ export const parseLabel = s => [...cleanLabel(s).replace(/\p{Cc}/gu, '')].filter
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). It is the Hydrometer's Port, and in its name (Rule 6.25).
 export const HYDRO_PORT_BASE = 200;
 export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trunc(Number(index) || 1)) - 1);
-// OneWire (DS18B20) probes share one wire, so each probe number is a virtual port 700-799: probe 1 = 700, probe 2 = 701 ...
-// A probe number can be used by one Device only.
-export const ONEWIRE_PORT_BASE = 700;
-export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ? String(ONEWIRE_PORT_BASE + Math.trunc(Number(index)) - 1) : '';
+// 1-Wire circuits (OakBarn Brewery, 2026-11-19, Rule 6.37: "A One wire circuit is Board and Pin Related. You could have two different One
+// Wire circuits on the same Board"; "an 1 wire Index IP like BM1w1_1 would be for the first 1 wire hooked up to the First created On wire
+// using An Interface and Port. The second one on the same circuit would be BM1w1_2. If a Second 1 wire was created on the same board it
+// would have probe index as BM1w2_n"). A circuit is an Interface's 1-Wire pin, numbered 1, 2 ... on that Interface (a number is never used
+// again); each DS18B20 probe on it has its own Index 1, 2 ... The Index ID is the Interface ID, 1w, the circuit and _ the probe: BM1w1_2.
+// oneWirePort is the part after the Interface ID ('1w1_2'); '' when no probe Index is picked yet.
+export const oneWirePort = (index, circuit = 1) => Number.isInteger(+index) && +index >= 1 && Number.isInteger(+circuit || 1) && (+circuit || 1) >= 1 ? `1w${+circuit || 1}_${+index}` : '';
+export const isOneWirePort = p => /^1w\d+_\d+$/.test(String(p ?? ''));
+export const owCircuitOf = el => Math.max(1, Math.trunc(+(el?.owCircuit ?? el?.circuit)) || 1);      // a Device's owCircuit, or a 1-Wire Index slot's circuit
+// an Interface's 1-Wire circuits: [{ n, pin, power: 'board' | 'ext', bits: 9-12 }]
+export const OW_POWER = [['board', 'Board 5V'], ['ext', 'External supply']];
+export const OW_LIMIT = { board: 6, ext: 12 };      // a soft limit: past it, one warning, never a block (OakBarn Brewery, 2026-11-19: "We do not restrict the excess, but give a warning once exceeded")
+export const OW_BITS = [12, 11, 10];
+export const oneWireCircuits = d => (Array.isArray(d?.oneWire) ? d.oneWire : []).filter(c => c && !c.gone && +c.n >= 1);
+// the next circuit number on an Interface: never one used before, even if that circuit was removed (Rule 3.2)
+export const nextOneWireCircuit = d => Math.max(0, +d?.oneWireLast || 0, ...(Array.isArray(d?.oneWire) ? d.oneWire : []).map(c => +c?.n || 0)) + 1;
 
 // Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
 // Names made before keep their double __ before the Tab ID (Rule 3.5).
@@ -147,6 +159,8 @@ export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ?
 // is DO@Pump in its name (BM_22_DO@Pump_Pump_BH) and wherever its Device Type is shown. A colon can't be in a name (Rule 3.4), so @ stands for it.
 // type: the Device's type (digitalOut ...). With no type the Type part is the Device Type ID alone.
 export function suggestName({ iface, port, code, type, label, tab } = {}) {
+  // a 1-Wire probe (Rule 6.37): its Index ID, the Label and the Tab: BM1w1_1_HLT_BH (no Port or Type part: the 1w says what it is)
+  if (isOneWirePort(port)) return [`${String(iface ?? '').trim()}${port}`, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
   return [iface, port, nameType(type, code), parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO@Pump. The Device keeps its type
@@ -313,7 +327,7 @@ const pinKey = p => {
 export function portKeys(el) {
   if (!isDevice(el)) return [];
   if (!el.device && !(el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20'))) return [];
-  if (el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20')) return el.probeIndex ? [`OneWire|${oneWirePort(el.probeIndex) || el.probeIndex}`] : [];
+  if (el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20')) return el.probeIndex ? [`${el.device ?? ''}|${oneWirePort(el.probeIndex, owCircuitOf(el)) || el.probeIndex}`] : [];      // one Device per 1-Wire Index (Rule 6.37)
   if (el.type === 'analogIn' && el.adc === 'ads1115') return el.channel === undefined || el.channel === '' ? [] : [`${el.device}|ADS${el.channel}`];
   const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin]
     : hasDualThrow(el) ? [el.channel, el.dualThrowChannel] : [el.channel];      // Dual Throw (Rule 6.22): its second Port is taken too
@@ -385,12 +399,16 @@ export function ethernetPinError(d, elements) {
 }
 const usesSpi = e => e.type === 'temperature' && ['pt100', 'pt1000', 'thermocouple'].includes(e.sensor);
 const isProbe = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
-const pinsOn = e => portKeys(e).filter(k => !k.startsWith('OneWire|')).map(k => k.split('|')[1]);
+// the data pins of an Interface's 1-Wire circuits (Rule 6.37): its circuits' pins, or the board's usual 1-Wire pin when it has none yet
+export const oneWirePins = (d, P) => { const l = oneWireCircuits(d).map(c => String(c.pin)); return l.length ? l : [String(d?.oneWirePin ?? P?.onewire ?? ONEWIRE_PIN)]; };
+// the data pin of a probe's own circuit
+export const owPinOf = (el, d, P) => String(oneWireCircuits(d).find(c => +c.n === owCircuitOf(el))?.pin ?? d?.oneWirePin ?? P?.onewire ?? ONEWIRE_PIN);
+const pinsOn = e => portKeys(e).filter(k => !isOneWirePort(k.split('|')[1])).map(k => k.split('|')[1]);
 // { error } when this Device takes a pin a bus on its Interface needs, { warn } when it takes a free bus pin, or null
 export function busCheck(el, elements, devices) {
   const others = (elements ?? []).filter(o => o !== el && o.name !== el.name);
   const P = profileOf(el, devices), SPI_PINS = P.spi, bus = SPI_PINS.join(', ');
-  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
+  const dv = (devices ?? []).find(d => d.name === el.device), owPins = oneWirePins(dv, P), owPin = isProbe(el) ? owPinOf(el, dv, P) : owPins[0];
   const mine = el.device ? pinsOn(el) : [], iface = el.device;
   if (P.board === 'pi' && el.device) {
     const bad = piDeviceError(el, mine); if (bad) return { error: bad };
@@ -418,7 +436,8 @@ export function busCheck(el, elements, devices) {
   } else {
     const spi = mine.find(p => SPI_PINS.includes(p));
     if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins ${bus} carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
-    if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
+    const owHit = owPins.find(q => mine.includes(q) && owUsers.some(o => owPinOf(o, dv, P) === q));
+    if (owHit) return { error: `Pin ${owHit} on ${iface} is blocked: it is a 1-Wire circuit's data pin for the DS18B20 probes (${owUsers.filter(o => owPinOf(o, dv, P) === owHit).map(o => o.name).join(', ')}).` };
   }
   const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)), P);
   // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning. On every board that
@@ -578,9 +597,9 @@ export function pinTag(p, board, el) {
 export function freePins(el, elements, devices, analog) {
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean), P = profileOf(el, devices);
   const pool = analog ? analogPins(P) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? P.pwm : need.includes('counter') ? P.counter : P.pins;
-  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
+  const owPins = oneWirePins((devices ?? []).find(d => d.name === el.device), P);
   const special = (list, p) => keepsFew(P, list) && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
-  const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
+  const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || owPins.includes(p) || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
   const free = pool.filter(p => !(OUTPUT_TYPES.includes(el.type) && P.inputOnly.includes(p))).filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
     .map((p, i) => [p, extras(p) + (P.avoid.includes(p) || (OUTPUT_TYPES.includes(el.type) && P.weakOut?.includes(p)) ? 5 : 0) , i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
   // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,

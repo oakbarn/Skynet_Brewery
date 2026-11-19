@@ -5,7 +5,7 @@ An **Interface** is a board (PLC) your Devices are wired to: an Arduino Mega 256
 ## Finding them
 
 - **☰ Menu > 🔌 Interfaces (boards)** opens the Devices page at the Interfaces list.
-- The **Devices** page has two Tabs: **🔌 Interfaces** (every Interface and **Add Interface**) and **🌡 OneWire Probes** (the OneWire probe index and the probes seen, see [Devices and boards](03-devices)).
+- The **Devices** page has two Tabs: **🔌 Interfaces** (every Interface and **Add Interface**) and **🌡 OneWire Probes** (the 1-Wire circuits, the 1-Wire Indexes and the probes seen, see [Devices and boards](03-devices)).
 
 ## The Interfaces list
 

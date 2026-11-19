@@ -58,7 +58,7 @@ choisit ce qui est intégré dans cet IP :
 
 - **Nothing** : un IP ouvert, pour un Pipe, un Hose ou un Fitting
 - **Heating Element**
-- **Temperature Probe** ou **Thermowell with its Temperature Probe** (choisissez le type de sonde, puis son Port ou son numéro de sonde OneWire)
+- **Temperature Probe** ou **Thermowell with its Temperature Probe** (choisissez le type de sonde, puis son Port ou son 1-Wire Index)
 - **Motorized Valve**
 
 Choisissez une fois l'**Interface** (la carte) à laquelle les pièces sont câblées, puis le **Port** de chaque pièce. Une pièce n'est pas un Device séparé : elle fait partie
@@ -102,7 +102,7 @@ La cuve d'eau chaude, la cuve d'empâtage et la cuve d'ébullition de l'exemple 
 its Temperature Probe** intégré dans son IP **Left Element**. La cuve d'eau chaude et la cuve d'ébullition ont leur **Heating Element**
 intégré dans l'IP **Right Element**, et la cuve d'empâtage et la cuve d'ébullition ont leur IP **Left Sparge** placé pour le tuyau d'arrivée en
 haut. Les sondes et les résistances sont les mêmes Devices qu'avant, avec les mêmes Ports. Depuis le 2026-11-08 elles portent les noms Skynet
-(BM_700_TEMP@1W_HLT_BH, BM_8_DO@H_Element_HLT~element_BH, etc., Règle 3.1), et les Processes du jour de brassage utilisent ces noms.
+(BM1w1_1_HLT_BH, BM_8_DO@H_Element_HLT~element_BH, etc., Règle 3.1), et les Processes du jour de brassage utilisent ces noms.
 
 ## Taille {#size}
 
