@@ -271,6 +271,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une petite carte qui lit 4 signaux analogiques bien plus finement que l'Arduino.
 - **Ce dont Skynet a besoin :** I2C (SDA/SCL de la Mega, GPIO 2 et 3 du Pi), adresse 0x48, 3,3 ou 5 V. Pour le pH et la pression.
+- **Comment le câbler :** [Pas à pas : câbler un ADS1115](227-step-by-step-wire-an-ads1115)
 - **Pièces suggérées :** carte Adafruit ADS1115 (ou un clone)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "ADS1115 module".
 
@@ -278,6 +279,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un relais robuste qui coupe les deux fils de phase d'un circuit 240 V, pour que l'élément soit vraiment Off. C'est aussi ce que coupe un E-Stop.
 - **Ce dont Skynet a besoin :** **bipolaire** (les deux phases) pour le 240 V ; **30 ou 40 A** pour un élément de 5500 W. Tension de bobine adaptée à ce qui la commande (12 ou 24 V continu, ou 120 V alternatif), commandée par un canal de Relay Module.
+- **Comment le câbler :** [Pas à pas : câbler un contacteur](216-step-by-step-wire-a-contactor)
 - **Pièces suggérées :** contacteurs bipolaires « definite purpose » (30 A ou 40 A) ; contacteurs modulaires bipolaires sur rail DIN
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "2 pole 40A contactor".
 
@@ -338,6 +340,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un gros bouton champignon rouge. Appuyé, il coupe tout le courant de la brasserie par son propre câblage.
 - **Ce dont Skynet a besoin :** un contact **normalement fermé** qui coupe la bobine du contacteur principal, et un second contact (normalement ouvert ou fermé) vers un port DI pour que Skynet le sache (Type ID `EStop`). On le tourne ou on le tire pour le réarmer.
+- **Comment le câbler :** [Pas à pas : câbler un arrêt d'urgence](231-step-by-step-wire-an-e-stop)
 - **Pièces suggérées :** bouton d'arrêt d'urgence champignon rouge 22 mm avec blocs de contact 1 NC + 1 NO
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "22mm emergency stop button NC NO".
 
@@ -345,6 +348,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un flotteur qui ferme un contact quand le liquide l'atteint (plein) ou s'en éloigne (bas).
 - **Ce dont Skynet a besoin :** inox, qualité alimentaire, 2 fils vers un port DI et le GND (la résistance de rappel de la carte est active).
+- **Comment le câbler :** [Pas à pas : câbler des interrupteurs et des flotteurs](233-step-by-step-wire-switches-and-float-switches)
 - **Pièces suggérées :** interrupteurs à flotteur inox, montage latéral ou vertical
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "stainless float switch".
 
@@ -352,6 +356,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une petite roue dans le tuyau envoie une impulsion chaque fois qu'une quantité donnée de liquide passe.
 - **Ce dont Skynet a besoin :** un Counter Port (Mega D2, D3, D18-D21), alimentation 5 V ; inox et qualité alimentaire pour le moût chaud (le YF-S201 en plastique pour l'eau froide seulement) ; les impulsions par unité sur sa fiche technique.
+- **Comment le câbler :** [Pas à pas : câbler un débitmètre](223-step-by-step-wire-a-flow-meter)
 - **Pièces suggérées :** débitmètres à effet Hall en inox (1/2" NPT) ; YF-S201 pour l'eau froide
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "stainless hall flow sensor 1/2".
 
@@ -359,6 +364,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une électrovanne faite pour le gaz, pour que le contrôleur de brassage allume et éteigne le brûleur.
 - **Ce dont Skynet a besoin :** **homologuée pour le gaz LP** (UL ou CSA), **normalement fermée**, prévue pour plus que la pression du détendeur, bobine 24 V continu (ou 24 V alternatif). Voir [Sécurité Flame Out](197-flame-out-safety). ⚠ Gaz : voir l'avertissement en haut de cette section.
+- **Comment le câbler :** [Pas à pas : câbler une électrovanne gaz et un allumeur](219-step-by-step-wire-a-gas-solenoid-and-igniter)
 - **Pièces suggérées :** électrovannes gaz LP homologuées (série de coupure gaz ASCO et similaires)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "LP gas solenoid valve 24V listed".
 
@@ -389,6 +395,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** les capteurs de force (load cells) plient très légèrement sous le poids ; la carte HX711 le lit pour que Skynet puisse peser une cuve.
 - **Ce dont Skynet a besoin :** un HX711 par cuve (deux ports : DT et SCK), avec quatre capteurs demi-pont et une carte de jonction (Combinator Board), ou un capteur en S calibré pour la cuve pleine.
+- **Comment le câbler :** [Pas à pas : câbler une balance de cuve](228-step-by-step-wire-a-vessel-scale)
 - **Pièces suggérées :** cartes HX711 ; lots de 4 capteurs demi-pont 50 kg avec carte de jonction ; capteurs en S
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "HX711 load cell kit".
 
@@ -403,6 +410,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** fait une étincelle (ou une pointe chauffée au rouge) pour allumer le brûleur.
 - **Ce dont Skynet a besoin :** module d'étincelle 12 V continu ou allumeur à surface chaude 120 V alternatif, commandé par un canal de Relay Module. Éteint par un déclenchement Flame Out.
+- **Comment le câbler :** [Pas à pas : câbler une électrovanne gaz et un allumeur](219-step-by-step-wire-a-gas-solenoid-and-igniter)
 - **Pièces suggérées :** modules d'allumage à étincelles 12 V ; allumeurs à surface chaude pour brûleurs à gaz
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "12V spark igniter module".
 
@@ -412,6 +420,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** lit la profondeur du liquide et l'envoie sous forme de courant, de 4 mA (vide) à 20 mA (plein).
 - **Ce dont Skynet a besoin :** alimentation de boucle 24 V continu et une résistance de 250 ohms du port analogique au GND (20 mA = 5 V). Prévu pour la température du liquide.
+- **Comment le câbler :** [Pas à pas : câbler un transmetteur de niveau 4-20 mA](225-step-by-step-wire-a-4-20-ma-level-transmitter)
 - **Pièces suggérées :** transmetteurs de niveau inox immergés ou hydrostatiques avec sortie 4-20 mA
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "4-20mA level transmitter stainless".
 
@@ -419,6 +428,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un relais plus gros pour les charges lourdes comme un moteur de compresseur. Sa bobine est commandée par un canal de Relay Module.
 - **Ce dont Skynet a besoin :** des contacts prévus pour un moteur (une puissance en chevaux, par exemple 1 HP, ou 30 A). Bobine 12 V ou 24 V continu, ou 120 V alternatif, selon ce qui la commande.
+- **Comment le câbler :** [Pas à pas : câbler une carte relais](215-step-by-step-wire-a-relay-board)
 - **Pièces suggérées :** relais de puissance d'usage général avec une valeur en HP (relais enfichable 8 ou 11 broches sur support DIN, ou relais de puissance ouvert 30 A)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "30A power relay 12V coil".
 
@@ -426,6 +436,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** un interrupteur électronique pour les charges en courant continu qui peut aussi commuter très vite, pour régler la vitesse d'une pompe ou d'un ventilateur DC par PWM.
 - **Ce dont Skynet a besoin :** **niveau logique** (pleinement passant à 3,3 ou 5 V), tension de charge 12 ou 24 V continu, 10 A ou plus. Masse reliée au GND de l'Arduino.
+- **Comment le câbler :** [Pas à pas : câbler une commande de vitesse de pompe DC](220-step-by-step-wire-a-dc-pump-speed-control)
 - **Pièces suggérées :** modules MOSFET à niveau logique (les modules IRF520 ne sont pas pleinement passants à 5 V ; prenez un module à niveau logique ou à double MOSFET)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "logic level MOSFET module PWM".
 
@@ -433,6 +444,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une vanne à boisseau avec un petit moteur dessus qui l'ouvre et la ferme quand le courant est commuté.
 - **Ce dont Skynet a besoin :** 12 V ou 24 V continu ; corps inox pour le moût ; le câblage indiqué sur son étiquette : **un fil de commande** (un relais) ou **un fil Open et un fil Close** (deux relais, Dual Throw, Règle 6.22). Les codes de fils des vendeurs (CR02, CR03, CR05...) diffèrent, donc lisez l'étiquette.
+- **Comment le câbler :** [Pas à pas : câbler une vanne à bille motorisée](217-step-by-step-wire-a-motorized-ball-valve)
 - **Pièces suggérées :** vannes à boisseau motorisées inox 3 fils (types US Solid, Tsai Fan), 1/2" NPT ou TC 1.5
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "motorized ball valve stainless 12V 3 wire".
 
@@ -468,6 +480,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** lit une pression (ou la profondeur du liquide par la pression au fond) sous forme de tension.
 - **Ce dont Skynet a besoin :** alimentation 5 V de l'Arduino, signal 0,5-4,5 V vers un port analogique, inox, 1/4" NPT, prévu pour la température du liquide. Une carte ADS1115 donne des lectures plus fines.
+- **Comment le câbler :** [Pas à pas : câbler un capteur de pression](224-step-by-step-wire-a-pressure-transducer)
 - **Pièces suggérées :** capteurs de pression inox 5 V, 0-5 psi ou 0-30 psi
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "pressure transducer 5V 0.5-4.5V stainless".
 
@@ -486,7 +499,8 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 ### Relay Module {#relay-module}
 
 - **Ce qu'il fait :** une petite carte avec un ou plusieurs relais (un interrupteur actionné par un aimant). La broche de la carte allume l'aimant et le contact se ferme avec un clic.
-- **Ce dont Skynet a besoin :** **Bobine :** cartes 5 V pour une Mega ; pour un ESP32 ou un Pi, prenez une carte vendue comme **3.3 V trigger** ou **High/Low trigger**. **Opto-isolée** est le mieux. **Contacts :** 10 A sous 250 V alternatif. Beaucoup sont **On quand la broche est BASSE** : mettez **Invert** sur On dans les attributs de broche ⬢.
+- **Ce dont Skynet a besoin :** **Bobine :** cartes 5 V pour une Mega ; pour un ESP32 ou un Pi, prenez une carte vendue comme **3.3 V trigger** ou **High/Low trigger**. **Opto-isolée** est le mieux. **Contacts :** 10 A sous 250 V alternatif. Beaucoup sont **On quand la broche est BASSE** : c'est déjà ainsi que le programme de la carte Skynet pilote chaque Port (On = LOW), donc laissez **Invert** sur Off. Seule une carte qui s'allume avec HIGH demande **Invert** sur On dans les attributs de broche ⬢.
+- **Comment le câbler :** [Pas à pas : câbler une carte relais](215-step-by-step-wire-a-relay-board)
 - **Pièces suggérées :** modules relais 5 V opto-isolés de 1, 2, 4 ou 8 canaux (relais de type SRD-05VDC) ; modules relais sur rail DIN
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "8 channel 5V relay module opto isolated".
 
@@ -504,6 +518,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une vanne ouverte par un aimant électrique. Elle s'ouvre ou se ferme d'un coup. La plupart ont besoin de pression d'eau pour fonctionner.
 - **Ce dont Skynet a besoin :** **normalement fermée**, 12 ou 24 V continu, qualité alimentaire (inox) pour le moût, laiton pour l'eau de refroidissement. Une Flyback Diode sur la bobine si elle n'en a pas.
+- **Comment le câbler :** [Pas à pas : câbler une électrovanne à eau](218-step-by-step-wire-a-water-solenoid-valve)
 - **Pièces suggérées :** électrovannes 12 V normalement fermées inox ou laiton (1/2" NPT)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "12V normally closed solenoid valve stainless".
 
@@ -526,6 +541,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** alimente un moteur pas à pas par petits pas pour qu'il tourne jusqu'à une position exacte.
 - **Ce dont Skynet a besoin :** broches STEP et DIR (ENABLE en option), sa propre alimentation 12-24 V continu (jamais le 5 V de l'Arduino), réglé sur le courant du moteur.
+- **Comment le câbler :** [Pas à pas : câbler un moteur pas à pas](229-step-by-step-wire-a-stepper-motor)
 - **Pièces suggérées :** TMC2209, A4988, DRV8825 (petits moteurs) ; TB6600 ou DM542 (NEMA 23)
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "TMC2209 stepper driver".
 
@@ -535,6 +551,7 @@ Les pièces et les mots techniques des listes de câblage, en mots simples : ce 
 
 - **Ce qu'il fait :** une sonde pour les endroits très chauds (la flamme d'un brûleur, un conduit de fumée). La carte lit sa toute petite tension.
 - **Ce dont Skynet a besoin :** MAX31856 pour tous les types (K, J, T ...) ou MAX31855 pour le type K seulement ; une carte par sonde ; ports SPI et un CS Port. Du fil de thermocouple, le + et le - dans le bon sens.
+- **Comment le câbler :** [Pas à pas : câbler un thermocouple](221-step-by-step-wire-a-thermocouple)
 - **Pièces suggérées :** cartes Adafruit MAX31856 ou MAX31855 ; sondes type K céramique ou Inconel
 - **Où acheter :** *(lien à venir)* Cherchez sur Amazon "MAX31856 thermocouple board".
 

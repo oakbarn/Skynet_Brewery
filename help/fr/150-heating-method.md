@@ -26,8 +26,8 @@ Template**. Chaque ligne crée la même résistance chauffante **unique** ; la l
 Après la fenêtre Add, ses Properties s'ouvrent avec les **Settings** de cette méthode par-dessus, pour la régler d'abord. Elle peut
 toujours utiliser les autres méthodes plus tard.
 
-**Le port choisi décide comment un % arrive à la résistance** (un port PWM ou un port simple, voir [Quelle méthode et quel câblage ?](#which-method-and-which-wiring)).
-La ligne **PWM** propose d'abord les ports PWM. Les Settings de chaque méthode montrent une note qui dit sur quel genre de port elle est.
+**Le Hardware Controller et le port décident comment un % arrive à la résistance** (seul un DAC / 0-10 V sur un port PWM reçoit du PWM, voir [Quelle méthode et quel câblage ?](#which-method-and-which-wiring)).
+La ligne **PWM** propose d'abord les ports PWM et commence avec le Hardware Controller **DAC / 0-10 V**. Les Settings de chaque méthode montrent une note qui dit sur quel genre de port elle est.
 
 ## Cliquez dessus pendant le brassage {#click-it-while-brewing}
 
@@ -96,11 +96,12 @@ s'arrête à 150 °F.
 - **Direct** et **Hysteresis** ne font que tout On ou tout Off. N'importe quel port les fait de la même façon.
 - **Duty Cycle** est en marche pendant son % de chaque cycle, un cycle de quelques secondes, donc un port simple le fait.
 - **PWM**, **PID**, **Deadband** et **Precise** travaillent avec un % : PWM utilise le % que vous ou un Process réglez, les autres le
-  calculent d'après la sonde. **Le port choisi décide comment ce % sort :**
-  - **Un port PWM** l'envoie en PWM. Branchez-le à un **module PWM vers 0-10 V et un variateur de puissance 0-10 V**, pas directement à
+  calculent d'après la sonde. **Le Hardware Controller et le port décident comment ce % sort :**
+  - **Hardware Controller DAC / 0-10 V sur un port PWM** l'envoie en PWM. Branchez-le à un **module PWM vers 0-10 V et un variateur de puissance 0-10 V**, pas directement à
     un SSR à passage par zéro : la carte commute des centaines de fois par seconde et un SSR à passage par zéro ne peut suivre que
     120 fois par seconde (60 Hz), donc la puissance sort irrégulière.
-  - **Un port simple** met la résistance tout en marche pendant son % de chaque **Output window** (un « Pseudo PID »). Avec un SSR,
+  - **Tout le reste** (un Optical SSR, un Contactor ou un Mechanical relay, sur n'importe quel port, ou un DAC / 0-10 V sur un port
+    simple) met la résistance tout en marche pendant son % de chaque **Output window** (un « Pseudo PID »), donc un SSR sur un port PWM est sans danger. Avec un SSR,
     c'est le bon choix. Elle s'allume et s'éteint plusieurs fois par minute, ce qui **use vite tout organe de commutation mécanique** :
     un relais mécanique, un module de relais mécaniques (les cartes relais Arduino courantes), un contacteur, une minuterie motorisée
     ou mécanique. Utilisez un **relais statique (SSR)**.
@@ -109,9 +110,9 @@ s'arrête à 150 °F.
 
 | Branché à | Port | Bonnes méthodes | Remarque |
 |---|---|---|---|
-| **SSR à passage par zéro** (relais statique) | Simple | Toutes | Le choix habituel. Pas sur un port PWM rapide. |
+| **SSR à passage par zéro** (relais statique) | N'importe lequel (Hardware Controller Optical SSR) | Toutes | Le choix habituel. Sur un port PWM il reçoit quand même le Pseudo PID, jamais le PWM rapide. |
 | **Contacteur** ou relais mécanique (ils claquent) | Simple | Direct, Hysteresis (ou un long temps de cycle) | S'use s'il commute souvent. |
-| **Variateur de puissance 0-10 V** (par un module PWM vers 0-10 V) | PWM | PWM, PID, Deadband, Precise | Puissance douce de 0 à 100 %. Coûte plus, chauffe plus, fait du bruit électrique. |
+| **Variateur de puissance 0-10 V** (par un module PWM vers 0-10 V) | PWM, Hardware Controller DAC / 0-10 V | PWM, PID, Deadband, Precise | Puissance douce de 0 à 100 %. Coûte plus, chauffe plus, fait du bruit électrique. |
 
 ### Où cela fait une différence {#where-it-makes-a-difference}
 
@@ -281,7 +282,7 @@ Elle est câblée directement à son port, vers un SSR ou un contacteur, ou vers
 Sous **Heating method** : la méthode avec laquelle elle **démarre** et **Method Settings**, une fenêtre ⬢ pour chaque méthode avec
 son interrupteur **Use Method**, la **Temperature Probe** qu'elle lit (Hysteresis, PID, Deadband et Precise) et les réglages de cette
 méthode ([Les réglages de chaque méthode](#each-method-s-settings)). Un PID, un Deadband ou un Precise peut aussi être **Reversed**
-(refroidissement). Le port choisi décide PWM ou port simple. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
+(refroidissement). Le Hardware Controller et le port décident PWM ou la manière d'un port simple. Une résistance intégrée à un Vessel Device, un RIMS tube ou une cuve Integrated a les
 mêmes réglages.
 
 ## Un port d'Interface, un Device {#one-interface-port-one-device}

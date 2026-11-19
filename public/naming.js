@@ -286,6 +286,8 @@ export function assignIds(c) {
     if (e.integratedIn && ['dutyCycle', 'hysteresis', 'pid', 'deadband'].includes(e.type) && (e.vpKind === 'element' || e.integratedAs === 'heat')) {
       e.heatMethod ??= TYPE_METHOD[e.type]; e.type = 'digitalOut'; e.subtype = 'element'; changed = true;
     }
+    // a Heating Element saved sending PWM (before 2026-11-19, when the Port alone decided) is switched by a DAC / 0-10 V (Rule 6.19)
+    if (e.type === 'digitalOut' && e.subtype === 'element' && e.pwm === true && !e.switchedBy) { e.switchedBy = 'dac'; changed = true; }
     // Device Type IDs of PR #61 (PmP, VlV ...) -> the 2026-10-23 list (names are not changed)
     const code = upgradeCode(e);
     if (code && code !== e.typeCode) { e.typeCode = code; changed = true; }

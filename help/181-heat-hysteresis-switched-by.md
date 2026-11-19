@@ -13,6 +13,7 @@ Electrician.
 | **Optical SSR** (solid state relay, the start) | -0.5 to -3 °F | any | No moving parts: it may switch often. |
 | **Contactor** | -1 to -5 °F | at least 10 seconds | Its contacts wear a little each time they close. Fewer, longer heats make them last. |
 | **Mechanical relay** | -1 to -5 °F | at least 10 seconds | The same as a contactor. |
+| **DAC / 0-10 V** (a PWM-to-0-10 V module and a 0-10 V power controller) | -0.5 to -3 °F | any | The only one that gets PWM, PID, Deadband and Precise as PWM, and only on a PWM Port (Help 150). |
 
 With a °C probe the numbers are converted: an Optical SSR -0.3 to -1.7 °C, a Contactor or Mechanical relay -0.6 to -2.8 °C.
 

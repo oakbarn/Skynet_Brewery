@@ -170,7 +170,7 @@ What each ID means:
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
   - Interface, Pin (for example 22, or A5 = 59)
-  - Invert (pin LOW = on): on / off
+  - Invert (swaps On and Off): on / off
   - One-shot time in ms (0 = off); One-shot pulses OFF (off = pulses ON)
   - **Dual Throw** (Rule 6.22, Help 167): a second Port on the same Interface, always the opposite (ON = own Port on, second off; OFF = own Port off, second on), and a delay in ms between them; for a valve with Open and Close wires. In the ⬢ Pin attributes.
   - Pictures and texts when on / off

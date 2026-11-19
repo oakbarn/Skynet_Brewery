@@ -2613,8 +2613,12 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
   values"): its **Power %** (`.power`), set by hand or a Process, goes out while it is ON. The PWM row offers PWM Ports first.
 - **The Port picked decides** how a % reaches the element (OakBarn Brewery, 2026-11-16: "question 4 2 rows"): one PID row and one Precise
   row, no "Pseudo PID" row. On a **PWM Port** the % goes out as PWM; on a **plain Port** the element is fully On for its % of each Output
-  window (the "Pseudo PID"). The Heating Element's PWM switch follows the Port when it is added or its Properties are saved (it is no
-  longer a switch in the method dialogs). Each method's Settings say which: a PWM Port goes to a PWM-to-0-10 V module and a 0-10 V
+  window (the "Pseudo PID"). **Changed (OakBarn Brewery, 2026-11-19, "Hardware Controller decides"):** the % goes out as PWM only when
+  the element's **Hardware Controller** (Rule 6.29) is **DAC / 0-10 V** and its Port is a PWM Port; an Optical SSR, Contactor or
+  Mechanical relay gets the plain-Port way on any Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) never gets
+  fast PWM. A DAC / 0-10 V on a plain Port says it needs a PWM Port. The **Heating Element: PWM** row starts on DAC / 0-10 V. A
+  Heating Element saved sending PWM before this gets DAC / 0-10 V when it loads, so it works as before. The Heating Element's PWM switch
+  follows the Hardware Controller and the Port when it is added or its Properties are saved (it is no longer a switch in the method dialogs). Each method's Settings say which: a PWM Port goes to a PWM-to-0-10 V module and a 0-10 V
   power controller, not straight to a zero-cross SSR; a plain Port quickly wears out any mechanical switching device (mechanical
   relay, relay module, contactor, timer switch), so use an SSR, with the Electrical Warning (Rule 6.20).
 - **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
@@ -2971,6 +2975,7 @@ SSR** (solid state relay, the start), **Contactor** or **Mechanical relay**. Its
 | Optical SSR | -0.5 to -3 °F | any |
 | Contactor | -1 to -5 °F | at least 10 seconds |
 | Mechanical relay | -1 to -5 °F | at least 10 seconds |
+| DAC / 0-10 V | -0.5 to -3 °F | any |
 
 With a °C probe the numbers are converted (-0.3 to -1.7 °C; -0.6 to -2.8 °C). A Contactor's contacts wear each time they close, so it
 heats less often and longer. A Heating Element only heats, so a plus Offset on it is refused (Rule 6.19).
@@ -4119,8 +4124,12 @@ other boards are similar."). Every part that needs more than a bare Port to work
      copied from another drawing, not in the Image Library), with the warning along its foot; the AC side is shown only as a box for
      the electrician;
   4. ends with the Device to add in Skynet, a check that it works, and **The technical side** (the Mega program's pin lists).
-First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B20) probes, a PT100 and a PT1000 probe. Both programs
-(the BruControl Import uses the Panel's Help).
+First six (Help 209-214): a DAC (0-10 V), a 10K NTC probe, an SSR, 1-Wire (DS18B20) probes, a PT100 and a PT1000 probe. Next 19
+(Help 215-233): a relay board, a contactor, a motorized ball valve, a water solenoid valve, a gas solenoid and igniter, DC pump speed
+(MOSFET), a thermocouple, an LM35 or TMP36, a flow meter, a pressure transducer, a 4-20 mA level transmitter, a 0-10 V sensor, an
+ADS1115, a vessel scale (HX711), a stepper motor, a pH probe, an E-Stop, a fan, buzzer or LED, and switches and float switches. A guide
+for anything on gas puts the gas warning before the electrical warning, on the page and on its drawing. Both programs (the BruControl
+Import uses the Panel's Help).
 
 ## 12. Privacy and sharing
 
@@ -6566,3 +6575,5 @@ import.
 - 2026-11-19: Rule 11.9 guides added (OakBarn Brewery: "Step by Step to add a Device in help", "Step by step add a widget"): Help 207 Step by Step: Add a Device (a Blichmann RipTide on the Brew House Tab of the 3 Vessel sample) and Help 208 Step by Step: Add a Widget (a Hose Bib), each with a picture at every step and a warning at the top that a new item stays on the 🔨 Build Tab until ✅ Finish Build ... > Move to Tab; French in help/fr; linked from the Glossary, Getting started, Devices and Build Tab pages. The Move to Tab note now says the build kept its spot when it goes to the Tab picked for it (it said "the middle", which was wrong). Wording only; both programs (the Importer uses the Panel's Help). Next free Help 209. (thread "Add a step-by-step Add a Device Help page")
 - 2026-11-19: Rule 3.14 kept the same everywhere (OakBarn Brewery: "The suggested Skynet Type needs to be consistent and repeatable in every case"): a Hose Bib (Tap Water Valve) showed wgt_MV_ on its Suggested Name line but wgt_TWV_ from 🏷 Update to Suggested Name. The Suggested Name line now uses the same Tap Water Valve test, so it is wgt_TWV_ in every place. Every other Device and Widget already used one way for both. No Rule change. (thread "Add Device and Widget step-by-step Help")
 - 2026-11-19: Rule 11.15 added (OakBarn Brewery: "step by step with graphic for hooking up Dacs, 10KNTC Probes, SSRs, 1 wire circuit, PT100 and PT 1000 Probes"; "Separate ones and one for every thing that requires something besides a Pin/Port"): Step by Step wiring guides, Help 209 DAC, 210 10K NTC, 211 SSR, 212 1-Wire, 213 PT100, 214 PT1000, each with a Skynet drawing, the electrical warning and a "you are responsible for your own safety" note first, the Mega as the example; French in help/fr; linked from the Glossary. Wording and drawings only; both programs. Next free Help 215. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rule 11.15 grows (OakBarn Brewery: "one for every thing that requires something besides a Pin/Port to work"): 19 more wiring guides, Help 215-233 (relay board, contactor, motorized ball valve, water solenoid, gas solenoid and igniter, DC pump speed, thermocouple, LM35/TMP36, flow meter, pressure transducer, 4-20 mA level, 0-10 V sensor, ADS1115, vessel scale, stepper motor, pH probe, E-Stop, fan/buzzer/LED, switches and float switches), each with a Skynet drawing; the gas guide warns about gas first. French in help/fr. Wording and drawings only; both programs. Next free Help 234. (thread "Write step-by-step wiring guides")
+- 2026-11-19: Rules 6.19 and 6.29 changed (OakBarn Brewery picked "Hardware Controller decides"): a new Hardware Controller **DAC / 0-10 V**; a Heating Element sends its % as PWM only with DAC / 0-10 V on a PWM Port, so an SSR on a PWM Port (the 3 Vessel sample's HLT element on D8) gets the Pseudo PID, never fast PWM. The Heating Element: PWM row starts on DAC / 0-10 V; one saved sending PWM gets DAC / 0-10 V when it loads. Help 150, 181, 209 and French. Both programs (the Importer's heaters load the same way). (thread "Write step-by-step wiring guides")

@@ -44,7 +44,7 @@ The power controller's AC side (GFCI power and the heating element) is mains pow
 
 ## Step 7. Add the Device in Skynet
 
-Add a **Heating Element: PWM (0 to 100%)** (Select Device Type: **Heating Element**) on Port **D44** of your Mega, as in [Step by Step: Add a Device](207-step-by-step-add-a-device). A True PWM Port sends the % as PWM, which is what the module needs.
+Add a **Heating Element: PWM (0 to 100%)** (Select Device Type: **Heating Element**) on Port **D44** of your Mega, as in [Step by Step: Add a Device](207-step-by-step-add-a-device). That row starts with its **Hardware Controller** set to **DAC / 0-10 V**: only a DAC / 0-10 V on a True PWM Port gets the % as PWM, which is what the module needs. Leave it on DAC / 0-10 V.
 
 For a proportional valve or a pump speed control, pick **Analog output 0-10 V** (Select Device Type: **PWM / Analog out**) instead.
 

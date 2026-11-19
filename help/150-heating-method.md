@@ -25,8 +25,8 @@ while brewing, with a click or from a Process (Skynet Rule 6.19).
 Template**. Every row makes the same **one** Heating Element; the row only picks the method it starts with. After the Add box, its
 Properties open with that method's **Settings** on top, so you set it up first. It can still use the other methods later.
 
-**The Port you pick decides how a % gets to the element** (a PWM Port or a plain Port, see [Which method and which wiring?](#which-method-and-which-wiring)).
-The **PWM** row offers PWM Ports first. Each method's Settings show a note saying which kind of Port it is on.
+**The Hardware Controller and the Port decide how a % gets to the element** (only a DAC / 0-10 V on a PWM Port gets PWM, see [Which method and which wiring?](#which-method-and-which-wiring)).
+The **PWM** row offers PWM Ports first and starts on Hardware Controller **DAC / 0-10 V**. Each method's Settings show a note saying which kind of Port it is on.
 
 ## Click it while brewing
 
@@ -95,11 +95,12 @@ stops at 150 °F.
 - **Direct** and **Hysteresis** are only full On or Off. Any Port does them the same way.
 - **Duty Cycle** is On for its % of each cycle, a cycle seconds long, so a plain Port does it.
 - **PWM**, **PID**, **Deadband** and **Precise** work with a %: PWM uses the % you or a Process set, the others work it out from the
-  probe. **The Port you pick decides how that % goes out:**
-  - **A PWM Port** sends it as PWM. Wire it to a **PWM-to-0-10 V module and a 0-10 V power controller**, not straight to a zero-cross
+  probe. **The Hardware Controller and the Port decide how that % goes out:**
+  - **Hardware Controller DAC / 0-10 V on a PWM Port** sends it as PWM. Wire it to a **PWM-to-0-10 V module and a 0-10 V power controller**, not straight to a zero-cross
     SSR: the board switches hundreds of times a second and a zero-cross SSR can follow only 120 a second (60 Hz), so the power comes
     out uneven.
-  - **A plain Port** turns the element fully On for its % of each **Output window** (a "Pseudo PID"). With an SSR this is the right
+  - **Anything else** (an Optical SSR, Contactor or Mechanical relay, on any Port, or a DAC / 0-10 V on a plain Port) turns the
+    element fully On for its % of each **Output window** (a "Pseudo PID"), so an SSR on a PWM Port is safe. With an SSR this is the right
     match. It switches On and Off many times a minute, so it **quickly wears out any mechanical switching device**: a mechanical
     relay, a relay module with mechanical relays (the common Arduino relay boards), a contactor, a motorized or mechanical timer
     switch. Use a **Solid State Relay (SSR)**.
@@ -108,9 +109,9 @@ stops at 150 °F.
 
 | Wired to | Port | Good methods | Note |
 |---|---|---|---|
-| **Zero-cross SSR** (solid state relay) | Plain | All of them | The usual choice. Not on a fast PWM Port. |
+| **Zero-cross SSR** (solid state relay) | Any (Hardware Controller Optical SSR) | All of them | The usual choice. On a PWM Port it still gets the Pseudo PID, never fast PWM. |
 | **Contactor** or mechanical relay (they click) | Plain | Direct, Hysteresis (or a long cycle time) | Wears out if switched often. |
-| **0-10 V power controller** (through a PWM-to-0-10 V module) | PWM | PWM, PID, Deadband, Precise | Smooth power from 0 to 100 %. Costs more, runs hotter, makes electrical noise. |
+| **0-10 V power controller** (through a PWM-to-0-10 V module) | PWM, Hardware Controller DAC / 0-10 V | PWM, PID, Deadband, Precise | Smooth power from 0 to 100 %. Costs more, runs hotter, makes electrical noise. |
 
 ### Where it makes a difference
 
@@ -272,7 +273,7 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 
 Under **Heating method**: the method it **starts with** and **Method Settings**, one ⬢ dialog for each method with its
 **Use Method** switch, the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise) and that method's settings
-([Each method's settings](#each-method-s-settings)). A PID, Deadband or Precise can also be **Reversed** (cooling). The Port picked decides PWM or a plain Port. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
+([Each method's settings](#each-method-s-settings)). A PID, Deadband or Precise can also be **Reversed** (cooling). The Hardware Controller and the Port decide PWM or the plain-Port way. A Heating Element built into a Vessel Device, RIMS tube or Integrated kettle has the
 same settings.
 
 ## One Interface Port, one Device
