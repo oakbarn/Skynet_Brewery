@@ -45,3 +45,4 @@ console.log('pump standard ok');
   }
   console.log('three vessel sample pump pipes ok');
 }
+await import('./freeips.test.js');      // a Pump with no pipes always has free IPs (Rule 5.37)
