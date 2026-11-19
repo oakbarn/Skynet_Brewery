@@ -8,6 +8,32 @@ Element that holds that temperature (Skynet Rule 2.43). This works on:
 - a **Probe or Thermowell built into a Vessel Device**, and a Vessel's own Probe spot,
 - a **Picture Widget** that shows a Temperature Probe.
 
+## PV and SV on the probe's display
+
+Every Temperature Probe's display on a running Tab shows two lines, like a panel controller (Panel Updates 41):
+
+- **PV** on top: what the probe reads now, for example **152.3 °F**.
+- **SV** under it, in a **green box**: its **Setpoint**, for example **152.0 °F**.
+
+Each line keeps all its digits and its °F or °C together on one line, inside the display; a long number makes both lines smaller
+to fit. There is no Visible switch: PV and SV are part of the display.
+
+**One click on the green SV box** lets you type a new Setpoint right in it (no pop-up, Rule 2.44). Press **Enter** to set it (or
+click somewhere else after changing it); **Esc** puts it back. A new Setpoint never turns anything On or Off. A click anywhere else
+on the probe still opens the SetPoint pop-up below.
+
+There is only **one Setpoint**:
+
+- A probe that a **Heating Element** (or a Fermentor Control, or an older Hysteresis, PID or Deadband Device) uses as its
+  Temperature Probe shows **that one's Setpoint**. Changing it on the probe changes it on the Heating Element, and the other way
+  round. When two or more use the same probe, the SV is the one that is ON (else the first).
+- A probe that **nothing heats or cools to** keeps **its own Setpoint**. It starts from **Setpoint** in the probe's Properties
+  (empty shows **---**), and a Process reads or sets it with **.setpoint** (for example `Mash_Probe.setpoint = 152`), so a Process
+  or an Alarm can compare the reading with it.
+
+A Setpoint typed on a Tab or set by a Process lasts until the Brain restarts; then it starts again from Properties, the same as a
+Heating Element's. The SV box does not show in Edit layout, on the Dial or Bar look, or when the probe's value is hidden.
+
 ## Which Heating Element
 
 The pop-up belongs to the Heating Element whose **Temperature Probe** (in its Properties) is the probe you clicked. A Vessel's
