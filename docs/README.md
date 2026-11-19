@@ -20,7 +20,7 @@ These GitHub copies are the main copies (Rule 13.7). This repo is public: privat
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |
 | [Media Licenses](Media_Licenses.csv) | A spreadsheet of every picture and sound Skynet ships that is not its own drawing, and the free programs it ships (the Pickr Color Picker): where it came from, its license, and the credit the license asks for. Opens in Excel. |
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
-| [Minimum equipment and limitations](Minimum_Equipment_and_Limitations.md) | The smallest system, how far it grows, and what the panel cannot do yet. |
+| [Minimum equipment and limitations](Minimum_Equipment_and_Limitations.md) | All you need (one computer for the Brain + one Arduino), how far it grows, and what the panel cannot do yet. |
 | [Hardware shopping list](Skynet_Brewery_Shopping_List.md) | What to buy to run the panel, with rough prices. |
 | [DC Brewing Pumps](DC_Brewing_Pumps.md) | 12 V and 24 V pumps brewers use (flow, lift, ports), for adding DC pump types to the Panel. List only, waiting for review. |
 | [Existing Alarms](ExistingAlarms.md) | Every old-style Alarm in the sample Schemas (Name, Schema, Tab), to change to the new Basic format one by one. |

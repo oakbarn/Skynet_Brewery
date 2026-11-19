@@ -1,6 +1,11 @@
 # Minimum equipment and limitations
 
-The smallest Skynet Brewery system is **1 Raspberry Pi + 1 Arduino Mega**. You can grow it up to **3 Megas and 2 ESP32s** on the same Pi. The tables below list each system, how many ports each board gives you, the least you need for each kind of device (pumps, valves, heaters, temperature, weight, flow, hydrometers and more), and what the panel cannot do yet.
+**All you need is one computer to be the Brain and one Arduino.**
+
+- **The Brain:** a Windows PC (Linux or a Mac may also work), or just a Raspberry Pi 4 or newer.
+- **One Arduino:** any Arduino works. It is limited only by how many ports it has. The Arduino Mega has the most, so the tables below use it.
+
+You can grow it up to **3 Megas and 2 ESP32s** on the same Brain. The tables below use a Raspberry Pi and Arduino Megas as the example, and list each system, how many ports each board gives you, the least you need for each kind of device (pumps, valves, heaters, temperature, weight, flow, hydrometers and more), and what the panel cannot do yet.
 
 Without any hardware at all, the panel still runs on a PC with its built-in simulator, so you can build Tabs and Processes before the boards arrive.
 
@@ -8,15 +13,17 @@ Prices are rough US prices (October 2026), not a live price check. Clone boards 
 
 ## How the pieces fit
 
-- The **Raspberry Pi** is the Brain. It runs the panel and holds the Schema, pictures, sounds and Processes. Its own pins are not used yet.
-- An **Arduino Mega** is the controller. Everything that heats, pumps, opens or measures is wired to a Mega. A Mega next to the Pi plugs into it with a USB cable.
+- The **Brain** is a Windows PC (Linux or a Mac may also work) or a **Raspberry Pi**. It runs the panel and holds the Schema, pictures, sounds and Processes. A Pi's own pins are not used yet.
+- An **Arduino** is the controller. Everything that heats, pumps, opens or measures is wired to it. Any Arduino works (Uno, Nano, Mega ...); a smaller one simply has fewer ports. In the panel, pick **Arduino Mega** as the Board for now and use only the pins your board has. An Arduino next to the Brain plugs into it with a USB cable.
 - An **ESP32** is a bridge for a Mega that sits away from the Pi (for example a panel in the brewery while the Pi is in the house). It is wired to that Mega and talks to the Pi over your network. **One ESP32 serves one Mega**, so a system never has more ESP32s than Megas. The ESP32 only passes messages through; its own pins are not used yet.
 
 ## The systems
 
+Shown with a Raspberry Pi as the Brain. A Windows PC as the Brain works the same way: its USB sockets take the place of the Pi's.
+
 | System | Boards | Megas on USB | Megas through an ESP32 | Pi USB sockets used (of 4) |
 |---|---|---|---|---|
-| 1 (minimum) | 1 Pi + 1 Mega | 1 | 0 | 1 |
+| 1 | 1 Pi + 1 Mega | 1 | 0 | 1 |
 | 2 | 1 Pi + 1 Mega + 1 ESP32 | 0 | 1 | 0 |
 | 3 | 1 Pi + 2 Megas | 2 | 0 | 2 |
 | 4 | 1 Pi + 2 Megas + 1 ESP32 | 1 | 1 | 1 |
@@ -146,12 +153,13 @@ So a Tilt does not strictly need an ESP32 when the Pi is the Brain, but an ESP32
 
 | Item | Needed for | Rough price |
 |---|---|---|
-| Raspberry Pi 5, 4 GB (or a Pi 4 with 2 GB or more) | every system, 1 | $60-80 |
-| Official Pi power supply (Pi 5: 27 W USB-C, Pi 4: 15 W USB-C) | every system, 1 | $12-15 |
-| microSD card, 32 GB or bigger, A1 or A2 (SanDisk or Samsung) | every system, 1 | $10-15 |
-| Case with a fan | every system, 1 | $10-15 |
-| Ethernet cable to your router (or use the Pi's WiFi) | every system, 1 | $5-10 |
-| Arduino Mega 2560 (clone or genuine) | 1 per Mega | $20 clone, $50 genuine |
+| The Brain: a Windows PC you already have (Linux or a Mac may also work), or the Pi parts in the next 5 rows | every system, 1 | $0 with your own PC |
+| Raspberry Pi 5, 4 GB (or a Pi 4 with 2 GB or more) | a Pi Brain only | $60-80 |
+| Official Pi power supply (Pi 5: 27 W USB-C, Pi 4: 15 W USB-C) | a Pi Brain only | $12-15 |
+| microSD card, 32 GB or bigger, A1 or A2 (SanDisk or Samsung) | a Pi Brain only | $10-15 |
+| Case with a fan | a Pi Brain only | $10-15 |
+| Ethernet cable to your router (or use the Pi's WiFi) | a Pi Brain only | $5-10 |
+| Arduino Mega 2560 (clone or genuine), or any other Arduino | 1 per Arduino | $20 clone, $50 genuine |
 | USB-A to USB-B data cable, 1-2 m | 1 per Mega on USB | $5-8 |
 | ESP32 with Ethernet (WT32-ETH01 or Olimex ESP32-POE), or an ESP32 DevKit for WiFi | 1 per ESP32 | $15-25 (DevKit about $10) |
 | 1k and 2k resistors (voltage divider) | 1 pair per ESP32 | under $1 |
@@ -161,13 +169,13 @@ So a Tilt does not strictly need an ESP32 when the Pi is the Brain, but an ESP32
 | To get started on the bench: DS18B20 probe + 4.7k resistor, 8-channel relay board + jumper wires | first system | $20-30 |
 | Only for setting up: monitor with micro-HDMI cable, USB keyboard and mouse, microSD card reader | once | (borrow) |
 
-Core cost, without sensors and outputs: about **$120-165 for System 1**, plus about $25-30 for each extra Mega on USB and about $50-65 for each Mega that sits behind an ESP32 (Mega, ESP32, its power supply and cable).
+Core cost, without sensors and outputs: about **$25-30 for System 1 with a Windows PC you already have** (a Mega clone and its USB cable), or about **$120-165 with a Pi as the Brain**; plus about $25-30 for each extra Mega on USB and about $50-65 for each Mega that sits behind an ESP32 (Mega, ESP32, its power supply and cable).
 
-**Free software:** Raspberry Pi OS (64-bit), Node.js 22.13 or newer, Arduino IDE (to load the Mega and ESP32 sketches), Tailscale (optional, for away from home).
+**Free software:** Windows 10 or 11 (64-bit) or Raspberry Pi OS (64-bit), Node.js 22.13 or newer, Arduino IDE (to load the Mega and ESP32 sketches), Tailscale (optional, for away from home).
 
 ## Limitations today
 
-- **The Pi's own pins and the ESP32's own pins are not used yet.** All inputs and outputs go through a Mega. That is why one Mega is required.
+- **The Pi's own pins and the ESP32's own pins are not used yet.** All inputs and outputs go through an Arduino. That is why one Arduino is required.
 - **Not tested on real hardware yet.** Everything has been tested with the simulator and a simulated ESP32, not with a real Mega or ESP32, and the sketches have not been compiled yet. Expect some fixing when the first real board is connected.
 - **Up to 3 Megas and 2 ESP32s** is what this page covers. The panel itself sets no limit on boards; more Megas need a powered USB hub or more ESP32s.
 - **Browsers:** tested in Chrome and Edge. Safari (iPhone, Mac) and Firefox are not fully tested yet.
