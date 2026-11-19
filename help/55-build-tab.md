@@ -6,6 +6,8 @@ The Build Tab only shows while you are building. It has a dashed orange edge and
 
 ## Start building
 
+Every step, with pictures: [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
+
 1. Press **☰ Menu** and pick **Edit layout**.
 2. Do one of these:
    - Pick a Device in **Add Device** (or a shortcut: **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), a Widget in **Add Widget**, or press **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** or **Elbows, Tees …** (see [Edit layout bar](82-edit-layout-bar)). The Build Tab opens by itself and the new item is made there, **never on a regular Tab**. The Tab you pick in its Add box is remembered: that is where it goes at the end (see **Where it goes** below).
@@ -29,9 +31,11 @@ Where you put it on the Build Tab is where it lands on its Tab. The Build Tab is
 
 ### The Watermark
 
-Once the item's Tab is set, a faint drawing of that Tab shows behind everything on the Build Tab, like a watermark: its background picture, a dashed outline with the Label of each thing on it, its pipes, and **Goes to:** and the Tab name at the top left. Line your new item up with it and it lands in the right place. Nothing in the watermark can be clicked.
+A faint copy of the Tab your build goes to shows behind everything on the Build Tab, like a watermark: the Tab as it looks on Brew Day, with every Device, Widget, vessel, picture, text and pipe on it, and **Goes to:** and the Tab name at the top left. Use it to place new things where they belong: line your new item up with it and it lands in the right place. Nothing in the watermark can be clicked.
 
-- Click an item on the Build Tab to see the watermark of the Tab it goes to. With nothing picked, it shows the Tab when every new item goes to the same one.
+- It shows as soon as the Build Tab opens: the Tab in the **Tab** box on the Edit layout bar (your Default Tab, or the Tab you came from).
+- Click an item on the Build Tab to see the watermark of the Tab it goes to.
+- A Build for a Template has no watermark, because a Template goes to no Tab.
 - **🗺 Watermark On** on the Edit layout bar (it shows only on the Build Tab) turns it off; **🗺 Watermark Off** turns it back on. This browser remembers your choice.
 
 ### It glows until you click it

@@ -27,6 +27,12 @@ assert.match(app, /const first = picked\[0\] \|\| b\.from;/, 'Finish Build offer
 assert.match(html, /<button id="buildMark" class="hidden"/, 'the Watermark switch on the Edit layout bar');
 assert.match(app, /localStorage\.setItem\('bp\.buildMark'/, 'the switch is remembered');
 assert.match(css, /#ws \.buildMark \{[^}]*pointer-events: none/, 'the watermark can\'t be clicked');
+// the water paper is the Tab itself (OakBarn Brewery, 2026-11-19: "should not be an equipment profile but the tab with all the widgets")
+assert.match(css, /#ws \.buildMark \* \{ pointer-events: none !important; \}/, 'nothing in the copy can be clicked');
+assert.match(app, /function buildMarkCopy\(to\) \{[\s\S]*?editing = false; previewing = true;[\s\S]*?drawWs\(\);/, 'the Tab is drawn the Brew Day way and copied');
+assert.match(app, /x\.removeAttribute\('data-name'\); x\.removeAttribute\('data-gid'\);/, 'nothing in the copy has a name');
+assert.match(app, /if \(!t && buildFor\(b\) !== 'template'\) t = buildGoesTo\(b\.name\);/, 'it shows as soon as the Build Tab opens (not for a Template)');
+assert.match(app, /if \(!n\.closest\('\.buildMark'\)\) n\.remove\(\);/, 'drawing the Build Tab keeps the copy');
 assert.match(css, /@keyframes freshPulse/, 'a slow red pulse');
 assert.match(css, /#ws \.freshMoved \{ animation: freshPulse 2\.4s/, 'slow');
 assert.match(app, /const n = ev\.target\.closest\('\.freshMoved'\); if \(!n\) return;\s*freshMoved\.delete/, 'a click ends the glow');

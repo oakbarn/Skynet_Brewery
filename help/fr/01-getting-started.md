@@ -35,6 +35,8 @@ Ce que vous voyez dépend de votre rôle. Un **Admin** voit tout ; un **Operator
 ## Tâches courantes {#common-jobs}
 
 - Commencer votre propre Schema de brasserie : [Pas à pas : ajouter un Schema](188-step-by-step-add-a-schema). Chaque guide **Step by Step** (pas à pas) est en haut de la liste des pages d'aide.
+- Ajouter une pompe, une vanne, une sonde ou un autre Device : [Pas à pas : ajouter un Device](207-step-by-step-add-a-device).
+- Ajouter une image, un interrupteur, un robinet ou un autre Widget : [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
 - Changer l'image ou la couleur de fond d'un Tab : [Image et couleur de fond d'un Tab](26-tab-background).
 - Mettre vos propres images et sons sur le Pi : [Media (images et sons)](07-media).
 

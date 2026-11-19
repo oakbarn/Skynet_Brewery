@@ -521,7 +521,7 @@ function runStack(stack) {
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
-  ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => n.remove());
+  ws.querySelectorAll('.el,.gfx,.flowHot,svg.pipeL').forEach(n => { if (!n.closest('.buildMark')) n.remove(); });      // the Watermark keeps its copy (Rule 4.1)
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
@@ -5751,7 +5751,10 @@ function portForName(e) {
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode ?? defaultCode(e), type: e.type, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e)));
 // the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
 // and Finish Build ... > Move to Tab adds it, as for a Device
-const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
+// the Type comes from widgetTypeId with the Tap Water Valve test, the same as graphicWidgetName and 🏷 Update to Suggested Name, so a Hose Bib
+// is wgt_TWV_ on every line of its box, never wgt_MV_ on one and wgt_TWV_ on another (OakBarn Brewery, 2026-11-19: "The suggested Skynet
+// Type needs to be consistent and repeatable in every case")
+const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e, isTapMv(e)); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(nameTab(e)) }), n => nameTaken(n, self), tabIdOf(nameTab(e))) : ''; };
 const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 // A Properties box works on a copy: the item itself (by its name) is the one whose own name doesn't count as taken
 const sugSelf = o => (draft || S.config).elements.find(x => x.name === o.name) || o;
@@ -7549,8 +7552,12 @@ $('#ws').addEventListener('pointerdown', ev => {
   n.classList.toggle('freshMoved', false);
 }, true);
 // "On the Build a shadow background like a water mark diagram of a selected Tab the item is going to only after the Tab attribute is
-// set with the option to turn it off or on on the Menubar of the Build Tab": a faint drawing of that Tab (its picture, outlines of its
-// items with their Labels and its pipes) behind everything on the Build Tab. Nothing in it can be clicked. 🗺 Watermark switches it.
+// set with the option to turn it off or on on the Menubar of the Build Tab": a faint copy of that Tab behind everything on the Build
+// Tab. Nothing in it can be clicked. 🗺 Watermark switches it.
+// The water paper is the Tab itself (OakBarn Brewery, 2026-11-19: "the water paper template on a Build Tab should not be an equipment
+// profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Tab as it looks on
+// Brew Day, with every Device, Widget, vessel, picture and pipe on it, faint. It shows as soon as the Build Tab opens: the Tab the picked
+// item goes to, else the Tab every new item goes to (the Build's Tab box: the Default Tab, else the Tab it came from).
 let buildMarkOn = true;
 try { buildMarkOn = localStorage.getItem('bp.buildMark') !== '0'; } catch { }
 function buildMarkTab() {
@@ -7558,27 +7565,50 @@ function buildMarkTab() {
   const it = sel ? findItem(sel.kind, sel.id) : null;
   let t = it && buildToOf(it);
   if (!t) { const all = [...new Set(buildItems(b).map(buildToOf).filter(Boolean))]; if (all.length === 1) t = all[0]; }
+  if (!t && buildFor(b) !== 'template') t = buildGoesTo(b.name);      // a Template goes to no Tab
   return t ? draft.workspaces.find(w => w.name === t && !w.build) : null;
 }
+// the Tab drawn the way Brew Day draws it, copied: nothing in the copy has a name, so nothing finds it, and it can't be clicked
+let bmCopy = null, bmBusy = false;
+function buildMarkCopy(to) {
+  const ws = $('#ws'), keep = { wsName, editing, previewing, sel };
+  bmBusy = true;
+  try {
+    wsName = to.name; editing = false; previewing = true; sel = null;
+    drawWs();
+    return [...ws.children].filter(n => !n.classList.contains('buildMark')).map(n => {
+      const c = n.cloneNode(true);
+      for (const x of [c, ...c.querySelectorAll('*')]) {
+        x.removeAttribute('data-name'); x.removeAttribute('data-gid');
+        if (!(x.parentNode instanceof SVGElement)) x.removeAttribute('id');       // a picture's own gradients keep theirs
+      }
+      return c;
+    });
+  } finally { ({ wsName, editing, previewing, sel } = keep); bmBusy = false; }
+}
 function drawBuildMark() {
+  if (bmBusy) return;
   const btn = $('#buildMark'), b = editing && curWs()?.build, to = buildMarkTab();
-  if (btn) { btn.classList.toggle('hidden', !b); btn.classList.toggle('on', buildMarkOn); btn.textContent = buildMarkOn ? '🗺 Watermark On' : '🗺 Watermark Off'; btn.title = buildMarkOn ? 'A faint picture of the Tab the picked item goes to is behind the Build Tab. Click to turn it Off.' : 'Click to turn it On: a faint picture of the Tab the picked item goes to shows behind the Build Tab.'; }
+  if (btn) { btn.classList.toggle('hidden', !b); btn.classList.toggle('on', buildMarkOn); btn.textContent = buildMarkOn ? '🗺 Watermark On' : '🗺 Watermark Off'; btn.title = buildMarkOn ? 'A faint copy of the Tab it goes to (every Device and Widget on it) is behind the Build Tab, so you can place new things where they belong. Click to turn it Off.' : 'Click to turn it On: a faint copy of the Tab it goes to (every Device and Widget on it) shows behind the Build Tab.'; }
   const old = $('#ws .buildMark'), drop = () => { if (old) old.replaceWith(); };
   if (!b || !buildMarkOn || !to || previewing) return drop();
-  const sig = to.name + '|' + draft.elements.length + '|' + draft.graphics.length;
+  const mine = o => o.workspace === to.name;
+  const sig = JSON.stringify([to, draft.elements.filter(mine), draft.graphics.filter(mine)]);
   if (old?.dataset.sig === sig) return;
-  const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); return n; };
-  const W = to.width || 1600, H = to.height || 900, svg = mk('svg', { class: 'buildMark', width: W, height: H, 'aria-hidden': 'true' });
-  svg.dataset.sig = sig;
-  if (to.background) svg.append(mk('image', { href: media(to.background), x: 0, y: 0, width: W, height: H, preserveAspectRatio: 'none' }));
-  for (const g of draft.graphics.filter(g => g.workspace === to.name && g.kind === 'pipe' && g.points?.length > 1)) svg.append(mk('polyline', { points: g.points.map(c => c.join(',')).join(' '), class: 'bmPipe' }));
-  for (const o of [...draft.graphics.filter(g => g.workspace === to.name && !['pipe', 'ip'].includes(g.kind)), ...draft.elements.filter(e => e.workspace === to.name && !e.integratedIn)]) {
-    const x = +o.x || 0, y = +o.y || 0, w = +o.w || 120, hh = +o.h || 60;
-    svg.append(mk('rect', { x, y, width: w, height: hh, rx: 4, class: 'bmBox' }));
-    const t = mk('text', { x: x + w / 2, y: y + hh / 2, class: 'bmText' }); t.textContent = o.label || o.name || ''; svg.append(t);
+  if (bmCopy?.sig !== sig) {        // drawn once, after this drawing of the Build Tab is done
+    drop();
+    setTimeout(() => { if (!editing || !curWs()?.build || buildMarkTab() !== to || bmCopy?.sig === sig) return; bmCopy = { sig, nodes: buildMarkCopy(to) }; drawWs(); });
+    return;
   }
-  const t = mk('text', { x: 16, y: 34, class: 'bmTitle' }); t.textContent = `Goes to: ${to.name}`; svg.append(t);
-  drop(); $('#ws').prepend(svg);
+  const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); return n; };
+  const W = to.width || 1600, H = to.height || 900, box = h('div', { class: 'buildMark', 'aria-hidden': 'true' });
+  box.style.width = W + 'px'; box.style.height = H + 'px'; box.dataset.sig = sig;
+  const svg = mk('svg', { class: 'bmBack', width: W, height: H });
+  if (to.background) svg.append(mk('image', { href: media(to.background), x: to.bgW && to.bgH ? to.bgX || 0 : 0, y: to.bgW && to.bgH ? to.bgY || 0 : 0, width: to.bgW && to.bgH ? to.bgW : W, height: to.bgW && to.bgH ? to.bgH : H, preserveAspectRatio: 'none' }));
+  const t = mk('text', { x: 16, y: 34, class: 'bmTitle' }); t.textContent = `Goes to: ${to.name}`;
+  box.append(svg, ...bmCopy.nodes.map(n => n.cloneNode(true)), mk('svg', { class: 'bmFront', width: W, height: H }));
+  box.lastChild.append(t);
+  drop(); $('#ws').prepend(box);
 }
 $('#buildMark').onclick = () => { buildMarkOn = !buildMarkOn; try { localStorage.setItem('bp.buildMark', buildMarkOn ? '1' : '0'); } catch { } drawBuildMark(); };
 // An unfinished Build (Rule 4.1, OakBarn Brewery, 2026-11-16: "Lets do A"): kept on the Brain in the Schema (config.buildDraft), never
@@ -7644,10 +7674,11 @@ function moveBuildTo(tab, own = false) {
     const ovr = list.find(x => x.kind === 'override');
     if (ovr && ovrHas(to.name, ovr)) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   }
+  const kept = new Set();
   for (const [to, list] of groups) {
     // OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the Position on the Tab it is sent to": a build that goes to
     // the Tab picked for it (the one its watermark shows) keeps its spot; anything else goes to the middle, as before
-    if (!list.some(x => buildToOf(host(x) || x) === to.name)) centerOn(list, to);
+    if (!list.some(x => buildToOf(host(x) || x) === to.name)) centerOn(list, to); else kept.add(to);
     for (const x of list) { x.workspace = to.name; delete x.buildTo; }
     if (vMaster(to)) for (const v of list.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   }
@@ -7664,7 +7695,7 @@ function moveBuildTo(tab, own = false) {
   for (const x of items) if (x.kind !== 'pipe' && !x.integratedIn && !(x.kind === 'ip' && x.attachTo)) freshMoved.add(freshKey(x));      // it glows until clicked
   draft.workspaces = draft.workspaces.filter(w => w !== b);
   wsName = (groups.has(to0) ? to0 : [...groups.keys()][0]).name; sel = null;
-  return [...groups].map(([to, list]) => ({ tab: to.name, n: list.length }));
+  return [...groups].map(([to, list]) => ({ tab: to.name, n: list.length, kept: kept.has(to) }));
 }
 // shift these items as one so the box around them sits in the middle of the Tab (never off its top or left edge)
 function centerOn(items, to) {
@@ -7777,7 +7808,9 @@ async function saveBuild() {
   } else if (r.to === 'tab') {
     const went = moveBuildTo(r.tab), n = went.reduce((a, g) => a + g.n, 0);
     toast(went.length > 1 ? `Moved to their Tabs: ${went.map(g => `${g.n} to ${g.tab}`).join(', ')}. They glow red until clicked. Press Save layout to keep them.`
-      : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
+      : went[0].kept   // the Tab picked for it: it kept its spot from the Build Tab, so the note says so (not "the middle")
+        ? `${n} item${n === 1 ? '' : 's'} moved to the ${went[0].tab} tab, in the same spot as on the Build Tab. ${n === 1 ? 'It glows' : 'They glow'} red until clicked. Press Save layout to keep ${n === 1 ? 'it' : 'them'}.`
+        : `${n} item${n === 1 ? '' : 's'} moved to the middle of the ${went[0].tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
   } else {
     const made = await saveBuildTemplate(r);
     toast(`Saved as ${made.length > 1 ? 'Templates' : 'a Template'}: ${made.join(', ')}. ☰ Menu > ${r.kind === 'fitting' ? 'Fitting' : 'Vessel or Equipment'} Templates, Add to Tab puts it on a Tab.`, false, 9000);

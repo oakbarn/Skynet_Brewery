@@ -1,8 +1,8 @@
 {
  "00-tailscale-windows": "7718c563861cc0e1",
- "01-getting-started": "5c355762bc5f9815",
+ "01-getting-started": "326257bbd14831ea",
  "02-tabs": "33b2052c17709737",
- "03-devices": "f8b2bbe812de3cf2",
+ "03-devices": "a70638cf68f9f8b4",
  "04-variables": "285856e470f40ab8",
  "05-scripts": "9e1cfc6e4b57fa92",
  "06-log": "5906688b79c6c7d5",
@@ -12,7 +12,7 @@
  "10-login": "6d86e529fff854fd",
  "11-api": "745e41a2a06152b8",
  "12-editing-help": "eb31d6badc777cf4",
- "13-glossary": "fcfc603de5507048",
+ "13-glossary": "fa30cdd09ebb42a9",
  "14-equipment": "6ceda9a20930af3c",
  "15-mqtt-and-voice": "a336dffb7b61bf6a",
  "16-stepper-motors": "7dadcdd2e692713f",
@@ -20,7 +20,6 @@
  "18-updating": "d5f1fbb2d19177f6",
  "19-installing": "7c8f30ad91b00c6b",
  "20-simulation": "39d826c977dd53a5",
- "206-skynet-boards": "88bddd0563ceded6",
  "21-alarms-and-sound": "6597f2a00a6445f1",
  "22-process-language": "dc5f188d846e42b1",
  "23-restarting-processes": "7cd1dabd5f9bf0c6",
@@ -54,7 +53,7 @@
  "52-on-and-off-pictures": "50143de773852c2f",
  "53-renaming": "d513177a5e083556",
  "54-help-window": "6f2f810906ca84dc",
- "55-build-tab": "fb04aca17856f4fe",
+ "55-build-tab": "3167078afc8f55d6",
  "56-locking": "699d016fd7bee90c",
  "57-picture-groups": "52a2385ec7ee0b27",
  "58-on-overlay": "10871197ae9d640c",
@@ -199,5 +198,8 @@
  "202-new-schema-interview": "f11d0e9ae07d96ad",
  "203-step-by-step-share-a-schema-with-another-brewer": "143a40a62a2ad24d",
  "204-set-up-a-pi-brain": "d629e4e76a8ac8b3",
- "205-report-a-problem": "7a9a77fde4452b11"
+ "205-report-a-problem": "7a9a77fde4452b11",
+ "206-skynet-boards": "88bddd0563ceded6",
+ "207-step-by-step-add-a-device": "e2a3363b80202aaa",
+ "208-step-by-step-add-a-widget": "9c83b0e5ea17cd90"
 }

@@ -6,6 +6,8 @@ Le Build Tab ne s'affiche que pendant que vous construisez. Il a un bord orange 
 
 ## Commencer à construire {#start-building}
 
+Chaque étape, en images : [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
+
 1. Appuyez sur **☰ Menu** et choisissez **Edit layout**.
 2. Faites l'une de ces choses :
    - Choisissez un Device dans **Add Device** (ou un raccourci : **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), un Widget dans **Add Widget**, ou appuyez sur **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** ou **Elbows, Tees …** (voir [Barre Edit layout](82-edit-layout-bar)). Le Build Tab s'ouvre tout seul et le nouvel élément y est fait, **jamais sur un Tab normal**. Le Tab que vous choisissez dans sa fenêtre Add est retenu : c'est là qu'il ira à la fin (voir **Où il va** plus bas).
@@ -29,9 +31,11 @@ Là où vous le mettez sur le Build Tab, c'est là qu'il arrive sur son Tab. Le 
 
 ### Le filigrane {#the-watermark}
 
-Une fois le Tab de l'élément choisi, un dessin pâle de ce Tab s'affiche derrière tout sur le Build Tab, comme un filigrane : son image de fond, un contour en pointillés avec le Label de chaque chose qui s'y trouve, ses tuyaux, et **Goes to:** (va vers) avec le nom du Tab en haut à gauche. Alignez votre nouvel élément dessus et il arrivera au bon endroit. Rien dans le filigrane ne peut être cliqué.
+Une copie pâle du Tab où va votre construction s'affiche derrière tout sur le Build Tab, comme un filigrane : le Tab tel qu'il est le jour de brassage (Brew Day), avec chaque Device, Widget, cuve, image, texte et tuyau qui s'y trouve, et **Goes to:** (va vers) avec le nom du Tab en haut à gauche. Servez-vous-en pour placer les nouvelles choses là où elles vont : alignez votre nouvel élément dessus et il arrivera au bon endroit. Rien dans le filigrane ne peut être cliqué.
 
-- Cliquez sur un élément du Build Tab pour voir le filigrane du Tab où il va. Sans rien de choisi, il montre le Tab quand tous les nouveaux éléments vont dans le même.
+- Il s'affiche dès que le Build Tab s'ouvre : le Tab de la case **Tab** dans la barre Edit layout (votre Tab par défaut, ou le Tab d'où vous venez).
+- Cliquez sur un élément du Build Tab pour voir le filigrane du Tab où il va.
+- Un Build pour un Template n'a pas de filigrane, car un Template ne va dans aucun Tab.
 - **🗺 Watermark On** dans la barre Edit layout (il ne s'affiche que sur le Build Tab) l'éteint ; **🗺 Watermark Off** le rallume. Ce navigateur se souvient de votre choix.
 
 ### Il brille jusqu'à ce que vous cliquiez dessus {#it-glows-until-you-click-it}

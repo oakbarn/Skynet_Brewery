@@ -30,7 +30,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Brewhouse Efficiency**: how much of the sugar in the grain really ends up in the fermenter, as a %. Skynet records it for each brew on the **Equipment Profile** and shows the average of the last 10 brews on that Schema. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
-**Build Tab (🔨)**: the clean Tab where every new Device, Widget or copy of a Template is made first. **✅ Finish Build ...** moves it to its Tab. An unfinished Build is kept on the Brain until you finish it or discard it. See [Build Tab](55-build-tab).
+**Build Tab (🔨)**: the clean Tab where every new Device, Widget or copy of a Template is made first. **✅ Finish Build ...** moves it to its Tab. An unfinished Build is kept on the Brain until you finish it or discard it. See [Build Tab](55-build-tab), and every step with pictures in [Step by Step: Add a Device](207-step-by-step-add-a-device).
 
 **Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
 
@@ -50,7 +50,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Default settings**: what a **new** thing starts with. Found in **☰ Menu > Default settings**. See [Default settings](155-default-settings).
 
-**Device**: a thing tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
+**Device**: a thing tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices). Every step, with pictures: [Step by Step: Add a Device](207-step-by-step-add-a-device).
 
 **Direct**: a heating method: the heater is fully On or fully Off. See [One Heating Element, pick how it heats](150-heating-method).
 
@@ -202,7 +202,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
 
-**Step by Step**: Help pages that show every step with pictures. They are listed first in the Help. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema).
+**Step by Step**: Help pages that show every step with pictures. They are listed first in the Help. See [Step by Step: Add a Schema](188-step-by-step-add-a-schema), [Step by Step: Add a Device](207-step-by-step-add-a-device) and [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
 
 **Suggested Name**: the Name Skynet fills in for a new item from its parts. You may change it before you save.
 
@@ -238,7 +238,7 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 ## W
 
-**Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
+**Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings). Every step, with pictures: [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
 
 ## Wiring and hardware words
 
