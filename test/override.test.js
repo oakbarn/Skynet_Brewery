@@ -85,4 +85,5 @@ eng.stop('late');
 for (const n of [...eng.running.keys()]) eng.stop(n);
 clearTimeout(store._persistTimer);
 console.log('override tests passed');
-process.exit(0);
+// the Process setting and the Override pop-up (Rule 2.26, 2026-11-19) run from here, so the npm test list stays the same
+await import('./overridepop.test.js');
