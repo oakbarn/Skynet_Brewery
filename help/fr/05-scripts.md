@@ -27,7 +27,7 @@ gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer
 start "tm_Whirlpool"           start a timer
 alm_Hops = true                sound an alarm
-wait BK_Temp <= 68             wait for a temperature (in °C; 154°F works too)
+wait BK_Temp <= 154            wait for a temperature (in your Units)
 sleep 1000                     wait 1 second (1000 ms)
 my_Widget.visible = false      hide something on the screen
 if vVCount > 2 && Pump_Red == true
@@ -63,20 +63,22 @@ gGS_Brewery_Top.label = "Mash"
 
 ## Les températures dans un Process {#temperatures-in-a-process}
 
-Un Process travaille en **°C**, comme les valeurs de la Recette (`gblV_Desired_Strike` ...), quel que soit le choix de **Settings > Units**
-et quelles que soient les unités où une sonde garde ses nombres (Skynet Rule 2.59). Pour taper une température en °F, écrivez-la avec
-son signe de degré : Skynet la change en °C.
+Tapez une température dans vos **Settings > Units** : `152` veut dire 152 °F en US et 152 °C en Métrique (Skynet Rule 2.59). À
+l'enregistrement, Skynet la garde en °C avec son signe (`66.6667°C`), pour que le Process dise la même chose si Units change plus tard ;
+quand vous ouvrez le Process, il affiche de nouveau `152` (ou `66.67` en Métrique).
 
 ```
-HLT_Element.setpoint = 66.7      66.7 °C
-HLT_Element.setpoint = 152°F     the same: 152 °F is 66.7 °C
-HLT_Element.onoffset = -1°F      an Offset is a difference: -1 °F is -0.56 °C (no 32)
-wait HLT_Temp >= 150°F           wait until the HLT reaches 150 °F
+HLT_Element.setpoint = 152       152 in your Units
+HLT_Element.onoffset = -1        an Offset is a difference: -1 °F is -0.56 °C (no 32)
+HLT_Element.setpoint += 2        so is a step up or down
+wait HLT_Temp >= 150             wait until the HLT reaches 150
+HLT_Element.setpoint = 66.7°C    a number with its own sign is always that
 ```
 
-Un nombre seul plus chaud que l'ébullition donné comme température (`HLT_Element.setpoint = 152`) reçoit un avertissement à
-l'enregistrement, car 152 °C est plus chaud que l'ébullition : il voulait sans doute dire `152°F`. Une sonde gardée en °F (un ancien
-Schema) se lit et se règle aussi en °C.
+Seul un nombre simple donné à une température, ou comparé avec elle, est converti. Un nombre dans une formule avec une température
+(`HLT_Element.setpoint = Strike + 2`) est gardé tel quel, en °C, et l'enregistrement donne un avertissement : donnez-lui son signe (`2°F`)
+ou calculez-le sur sa propre ligne. Une consigne plus chaude que l'ébullition en °C reçoit aussi un avertissement. Une sonde gardée en °F
+(un ancien Schema) marche de la même façon.
 
 ## Les fichiers qui ne sont pas sur le Brain {#files-that-are-not-on-the-brain}
 
