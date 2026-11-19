@@ -5,7 +5,7 @@ Une **Interface** est une carte (PLC) à laquelle vos Devices sont câblés : un
 ## Les trouver {#finding-them}
 
 - **☰ Menu > 🔌 Interfaces (boards)** ouvre la page Devices à la liste des Interfaces.
-- La page **Devices** a deux onglets : **🔌 Interfaces** (chaque Interface et **Add Interface**) et **🌡 OneWire Probes** (le OneWire probe index et les sondes vues, voir [Devices and boards](03-devices)).
+- La page **Devices** a deux onglets : **🔌 Interfaces** (chaque Interface et **Add Interface**) et **🌡 OneWire Probes** (les 1-Wire circuits, les 1-Wire Indexes et les sondes vues, voir [Devices and boards](03-devices)).
 
 ## La liste des Interfaces {#the-interfaces-list}
 

@@ -14,9 +14,9 @@ const REFS = ['attachTo', 'from', 'to', 'onVessel', 'capOn', 'qdOn', 'chillerOn'
 const clone = x => JSON.parse(JSON.stringify(x ?? null));
 const low = s => String(s ?? '').toLowerCase();
 export const isVesselPiece = g => g?.kind === 'vessel' && (g.vesselType === 'vessel' || !g.vesselType);
-// a Device's Port on its board: the pin (channel) or the 1-Wire probe number; none: it has no Port to clash
+// a Device's Port on its board: the pin (channel) or the 1-Wire Index (circuit and number, Rule 6.37); none: it has no Port to clash
 export const portOf = e => e?.device === undefined || e.device === '' ? null
-  : e.channel !== undefined && e.channel !== '' ? `${e.device}|pin|${e.channel}` : e.probeIndex !== undefined && e.probeIndex !== '' ? `${e.device}|1w|${e.probeIndex}` : null;
+  : e.channel !== undefined && e.channel !== '' ? `${e.device}|pin|${e.channel}` : e.probeIndex !== undefined && e.probeIndex !== '' ? `${e.device}|1w${Math.max(1, Math.trunc(+e.owCircuit) || 1)}|${e.probeIndex}` : null;
 
 // What a paste brings. what: 'both', 'vessels' (each vessel with everything on it: its IPs, fittings, heaters and probes) or 'manifold'
 // (all of the manifold, pumps and valves too, with its pipes and hoses: "All of the manifold. Just Not the Vessels"). A pipe end whose

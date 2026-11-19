@@ -6,7 +6,7 @@ Les Properties de chaque Device marchent comme celles de la pompe (Règle Skynet
 
 1. Le titre, avec le cadenas 🔓, **Visible** et **Hidden Locked** à côté. Les boutons sont ensemble dans le coin en haut à droite, figés, toujours dans le même ordre : **🗑 Delete · 💾 Save · Close · ✕** (Règle Skynet 2.54). Ils restent en place pendant que le reste défile (il n'y a pas de rangée de boutons en bas).
 2. **1. Label** : le ⬆ ouvre une case plus grande pour taper, le ⬢ règle sa police, sa taille et ses couleurs. **Label Visible** l'affiche ou le cache sur le Tab.
-3. **2. Interface** avec son **Port** (ou **Probe #**) sur la même ligne. Ils sont grisés : c'est le câblage, fixé quand le Device
+3. **2. Interface** avec son **Port** (ou **1-Wire Index**) sur la même ligne. Ils sont grisés : c'est le câblage, fixé quand le Device
    a été ajouté. Là où le Device les a, le ⬢ contient **Invert** et **One-shot**.
 4. **3. Tab**, **Layer Order** dessous, et **4. Name**, avec le Suggested Name dessous.
 5. Un Device avec des images : le **Graphic**, son **Path**, et l'**Overlay** avec **Toggle** (sorties) et **Database and .API ⬢**

@@ -36,7 +36,7 @@ Un nouveau Device demande d'abord son **Interface**, son **Port** (seules les br
 
 ## Sondes OneWire (DS18B20) {#onewire-probes-ds18b20}
 
-Les sondes ont leur propre onglet : **Devices > 🌡 OneWire Probes**. Chaque sonde reçoit un **numéro** dans le **OneWire probe index**, et les Devices de température utilisent ce numéro. Les sondes sont reconnues par leur identifiant ROM, pas par leur place sur le fil.
+Les sondes ont leur propre onglet : **Devices > 🌡 OneWire Probes**. Chaque sonde reçoit un **1-Wire Index** sur son circuit 1-Wire (BM1w1_2 = Interface BM, circuit 1, sonde 2), et les Devices de température utilisent cet Index. Voir [1-Wire probes: circuits and Indexes](234-1-wire-probes). Les sondes sont reconnues par leur identifiant ROM, pas par leur place sur le fil.
 
 **Pour remplacer une sonde :** branchez la nouvelle, trouvez-la sous **OneWire probes seen**, et choisissez son identifiant ROM dans la ligne de l'ancienne sonde. Chaque Device qui utilise ce numéro la suit ; rien d'autre ne change.
 

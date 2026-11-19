@@ -27,7 +27,7 @@ Example: `MB_25_DO@Valve_E_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID Valv
 - **Interface ID:** follows Rule 3.2 (for example MB).
 - **Tab ID:** follows Rule 3.2 (for example SP).
 - **Label in the name:** spaces become `~` (2026-11-07, so `_` only separates the parts); the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
-- **Port in the name:** analog pins use BruControl numbers (A0 = 54 ... A15 = 69, so A5 = 59). A OneWire probe uses its virtual port (700+). An ADS1115 channel is ADS0 to ADS3.
+- **Port in the name:** analog pins use BruControl numbers (A0 = 54 ... A15 = 69, so A5 = 59). A OneWire probe has no Port: its name starts with its 1-Wire Index instead (BM1w1_2 = Interface BM, circuit 1, probe 2; Rule 6.37). An ADS1115 channel is ADS0 to ADS3.
 - **Unique:** a name already in use gets `_2`, `_3` ... after the Label. No spaces in Device names.
 - Existing Devices are never renamed by themselves (that would break Processes).
 
@@ -35,7 +35,7 @@ Example: `MB_25_DO@Valve_E_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID Valv
 - **One Interface Port, one Device** (Rule 6.1, Fritz 2026-11-07), of any Device Type. A heater's ways of control are one Heating Element's heating methods (Rule 6.19, 4.1 below).
 - **Older Schemas** made under the old exception (outputs of different Device Types on one port, for example `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR`) keep working: the one turned on or enabled last wins. No new sharing can be made.
 - **Virtual ports** (no real pin):
-  - **OneWire probes (DS18B20): 700 to 799.** Probe number 1 = port 700, probe 2 = 701 ... One Device per probe number.
+  - **OneWire probes (DS18B20):** no virtual port; each has a 1-Wire Index (circuit + number, e.g. 1w1_2). One Device per Index.
   - **Hydrometers (Tilt or any other): 200, 201 ...** The Hydrometer Device's Port (section 4.17, Rule 6.25).
 
 ### Arduino Mega pin rules
@@ -48,7 +48,7 @@ Example: `MB_25_DO@Valve_E_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID Valv
 | D14-D17, D22-D39, D41-D43, D47-D49, D53 | RTD chip-select (CS) pins | The ONLY pins an RTD (PT100 / PT1000, MAX31865) may use for its CS pin on a Mega (Skynet Rule 6.9). Any other pin is refused |
 | D10 | Ethernet shield | On a Mega on Ethernet, no Device may use D10, and a Mega can't change from USB to Ethernet while a Device is on D10 (Skynet Rule 6.10) |
 | D4 | Ethernet shield SD card pin | Allowed, with the warning "SD Card Not Supported. Never insert an SD Card!". An inserted card is reported by the Ethernet sketch and the panel says to remove it (Skynet Rule 6.11) |
-| D40 | OneWire data pin | Shared by every DS18B20 probe. Blocked for anything else once a probe is in use (can be changed per Interface) |
+| D40 | OneWire data pin | The usual pin of the first 1-Wire circuit, shared by its DS18B20 probes. Each circuit's pin is blocked for anything else; an Interface can have more circuits on other pins (Rule 6.37) |
 | A0-A15 (= 54-69) | Analog inputs | Either name works |
 
 - A Device that does not need a PWM or Counter pin gets a heads-up when you put it on one, naming a free plain pin that fits better. You may still use it.
@@ -343,7 +343,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 
 | Add menu entry | Probe type | Type ID | Port |
 |---|---|---|---|
-| DS18B20 (OneWire, waterproof probe) | ds18b20 | 1W | OneWire probe number = virtual port 700-799 |
+| DS18B20 (OneWire, waterproof probe) | ds18b20 | 1W | 1-Wire Index (circuit + number, e.g. BM1w1_2) |
 | PT100 RTD (MAX31865 board) | pt100 | RTD | Chip-select (CS) pin, Mega: only D14-D17, D22-D39, D41-D43, D47-D49, D53 (Rule 6.9); shares SPI 50-52 |
 | PT1000 RTD (MAX31865 board) | pt1000 | RTD | CS pin, Mega: only D14-D17, D22-D39, D41-D43, D47-D49, D53 (Rule 6.9); shares SPI 50-52 |
 | Thermocouple type K (MAX31855 board) | thermocouple | TC | CS pin; shares SPI 50-52 |
@@ -357,7 +357,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 
 - **Settings for every probe:** Calibration offset (added to the reading), Units (°F or °C, new ones start °F), Decimals (starts 1), Simulator settings, Reading now.
 - **Extra settings by probe type:**
-  - **DS18B20:** OneWire probe number (from Devices page > OneWire probe index), Interface (empty = any). The index holds each probe's ROM id; replacing a probe = give the new one the same number.
+  - **DS18B20:** 1-Wire Index (a new 1-Wire circuit, or the next Index on one the Interface has), Interface. The Index holds the probe's ROM id (Devices > 🌡 OneWire Probes); replacing a probe = give its Index the new ROM id.
   - **PT100 / PT1000:** Interface, CS pin (on a Mega only D14-D17, D22-D39, D41-D43, D47-D49 or D53, Rule 6.9; the pin list shows only those), Probe wires (2, 3, 4; new ones 3), Board reference resistor (default 430 for PT100, 4300 for PT1000).
   - **Thermocouple:** Interface, CS pin, Thermocouple type (K, J, T, N, E, R, S, B; MAX31855 boards are K only).
   - **NTC:** Interface, Analog pin, Thermistor ohm at 25 °C, Beta value, Series resistor (ohm), Wiring (toGround, toVcc).
@@ -489,11 +489,11 @@ One item with Devices built into it. What is built in can never be taken out (un
 Both are made the same way:
 1. **Interface**
 2. **Device Type** (RIMS tube or electric kettle): pick the heating element **Control** (PID, Hysteresis, Duty Cycle or PWM) and the **Temperature probe type** in its thermowell (any probe from 4.11)
-3. **Available Ports / Pins:** one for the heating element, one for the probe (a DS18B20 takes its OneWire number instead). The two can't share a pin.
+3. **Available Ports / Pins:** one for the heating element, one for the probe (a DS18B20 takes its 1-Wire Index instead). The two can't share a pin.
 
 Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
-- **Built-in Devices made:** a heating element (PID, Hysteresis, Duty Cycle, or PWM with Kind = element) named `<Label> Heat`, and a Temperature probe named `<Label> Temp`. Example names: `MB_9_PID_RIMS_Heat`, `MB_700_TEMP@1W_RIMS_Temp`.
+- **Built-in Devices made:** a heating element (PID, Hysteresis, Duty Cycle, or PWM with Kind = element) named `<Label> Heat`, and a Temperature probe named `<Label> Temp`. Example names: `MB_9_PID_RIMS_Heat`, `MB1w1_1_RIMS_Temp`.
 - A PID or Hysteresis element always holds the temperature its own probe reads (its Input is set for you).
 - **Properties:** Interface; Heating element: Control, Port and all that control's own settings (for a PID: Setpoint, Kp, Ki, Kd, Max output ...); Heating element's thermowell: probe type and Port. Save and both Devices follow.
 - Put on a Tab from a Template (☰ Menu), it has no Devices yet; set the Interface and Ports in its Properties.
@@ -515,7 +515,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Made by:** placing a Vessel Widget Template (Skynet_Vessel_Widget, or a kettle Template built from it). It goes on the Build Tab as a Vessel Device (Skynet Rule 5.31, one exception to Rule 5.7; Help 133).
 - **Or step by step:** Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds it on the Build Tab (Skynet Rule 19.5, Help 166).
 - **Picture:** the Template's (Skynet_Vessel_Widget.svg: 16 IPs: 15 from the Vessel IP Template drawing, plus Center Back Element).
-- **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
+- **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its 1-Wire Index). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
 - **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_DO@Valve_E_HLT_Right_Sparge_BH`.
 - **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.
 - **HERMS coil:** Left or Right, drawn under that side's HERMS In and Out IPs; the two IPs are the coil's ends.

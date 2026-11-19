@@ -15,9 +15,9 @@ Il se fait comme tout autre Device. En **Edit layout**, choisissez **Devices: Sk
 1. **Label**, avec **Label Visible** dessous.
 2. **Interface** : la carte à laquelle le tube RIMS est câblé.
 3. **Device Type** : RIMS tube. Choisissez comment la résistance est commandée : **PID**, **Hysteresis**, **Duty Cycle** ou **PWM**, et le type de **sonde de température** dans son doigt de gant.
-4. **Available Ports / Pins** : une pour la résistance et une pour la sonde de température (une sonde DS18B20 prend plutôt son numéro de sonde OneWire). Les listes montrent les broches libres de cette Interface, les meilleures en premier.
+4. **Available Ports / Pins** : une pour la résistance et une pour la sonde de température (une sonde DS18B20 prend plutôt son 1-Wire Index). Les listes montrent les broches libres de cette Interface, les meilleures en premier.
 
-Appuyez ensuite sur **➕ Add Device**. Le tube RIMS va sur le 🔨 Build Tab avec ses deux Devices à côté, et ses Properties s'ouvrent. Les Devices reçoivent des noms proposés comme d'habitude, par exemple `MB_9_PID_RIMS_Heat` et `MB_700_TEMP@1W_RIMS_Temp`.
+Appuyez ensuite sur **➕ Add Device**. Le tube RIMS va sur le 🔨 Build Tab avec ses deux Devices à côté, et ses Properties s'ouvrent. Les Devices reçoivent des noms proposés comme d'habitude, par exemple `MB_9_PID_RIMS_Heat` et `MB1w1_1_RIMS_Temp`.
 
 Une résistance en **PID** ou **Hysteresis** tient la température que lit sa propre sonde (son Input est réglé pour vous).
 

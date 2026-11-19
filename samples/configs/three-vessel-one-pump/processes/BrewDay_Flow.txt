@@ -86,12 +86,12 @@ gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait HLT_Vessel.BM_700_TEMP@1W_HLT_BH >= gblV_Desired_Strike
+wait HLT_Vessel.BM1w1_1_HLT_BH >= gblV_Desired_Strike
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew104]
 step 1.00003 "SectionBrew104"
 gblV_Brew_Status = 104
-vSMsg = "HLT at " + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °C. The pump moves the strike water to the mash tun."
+vSMsg = "HLT at " + HLT_Vessel.BM1w1_1_HLT_BH + " °C. The pump moves the strike water to the mash tun."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Start Transfer?"
 gblS_Advance_Label.background = 4
@@ -462,7 +462,7 @@ BM_22_DO@Pump_Pump_BH = true
 [SectionBrew304]
 step 1.00015 "SectionBrew304"
 gblV_Brew_Status = 304
-vSMsg = "Sparge water (" + HLT_Vessel.BM_700_TEMP@1W_HLT_BH + " °C) into the mash tun. Click when the sparge volume is in, then stir."
+vSMsg = "Sparge water (" + HLT_Vessel.BM1w1_1_HLT_BH + " °C) into the mash tun. Click when the sparge volume is in, then stir."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Sparge Water In?"
 gblS_Advance_Label.background = 4
@@ -541,7 +541,7 @@ gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait BK_Vessel.BM_702_TEMP@1W_Kettle_BH >= 99.4
+wait BK_Vessel.BM1w1_3_Kettle_BH >= 99.4
 start "wgt_ALM_Step~alarm_BH"
 [SectionBrew400]
 step 1.00019 "SectionBrew400"
@@ -954,7 +954,7 @@ gblS_Advance_Label = "Wait.  Will Auto Advance"
 gblS_Advance_Label.background = 5
 gblS_Step_Text.background = 5
 wgt_SW_Advance_BH.visible = false
-wait BK_Vessel.BM_702_TEMP@1W_Kettle_BH <= gblV_Pitch_Temp
+wait BK_Vessel.BM1w1_3_Kettle_BH <= gblV_Pitch_Temp
 BM_22_DO@Pump_Pump_BH = false
 BM_24_DO@Valve_E_HLT~out_BH = false
 BM_25_DO@Valve_E_Mash~tun~out_BH = false
@@ -967,7 +967,7 @@ start "wgt_ALM_Step~alarm_BH"
 [SectionBrew600]
 step 1.00024 "SectionBrew600"
 gblV_Brew_Status = 600
-vSMsg = "Chilled to " + BK_Vessel.BM_702_TEMP@1W_Kettle_BH + " °C. Enter the post-boil volume. Hoses and fermenter ready?"
+vSMsg = "Chilled to " + BK_Vessel.BM1w1_3_Kettle_BH + " °C. Enter the post-boil volume. Hoses and fermenter ready?"
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Transfer WORT?"
 gblS_Advance_Label.background = 4

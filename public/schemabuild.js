@@ -76,7 +76,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   // a Device on the Interface: its first free Port that fits (Rule 4.2), and its name InterfaceID_Port_Type_Label_Tab (Rule 3.1)
   const add = (el, ws = tab, wsId = tabId) => {
     el.workspace = ws;
-    if (el.type === 'temperature') { el.probeIndex = ++probeN; el.device = dev.name; }
+    if (el.type === 'temperature') { el.probeIndex = ++probeN; el.owCircuit = 1; el.device = dev.name; }      // 1-Wire circuit 1 of the Interface (Rule 6.37)
     else if (el.device !== undefined) {
       el.device = dev.name;
       // a new Schema never puts two Devices on one Port, not even the ones that may share one (Rule 6.19)
@@ -84,7 +84,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
       if (!free.length) throw new Error(`${dev.name} has no free Port for ${el.label}. Pick fewer Devices or another Interface.`);
       el.channel = free[0];
     }
-    const port = el.type === 'temperature' ? oneWirePort(el.probeIndex) : el.channel ?? '';
+    const port = el.type === 'temperature' ? oneWirePort(el.probeIndex, 1) : el.channel ?? '';
     const code = el.device !== undefined ? defaultCode(el) : '';
     let name = el.device !== undefined ? suggestName({ iface: dev.id, port, code, type: el.type, label: el.label, tab: wsId }) : el.name;
     name = uniqueName(name, isTaken, wsId);
