@@ -50,7 +50,8 @@ Une **Manual Valve** (vanne manuelle) est un Widget spécial : un raccord qu'on 
   - **Graphic** : la vanne telle qu'elle sera dans le Tab, tenue à jour pendant que vous choisissez.
   - **Picture**, puis **Orientation** (Horizontal ou Vertical) et **Left / Right** sur sa ligne : Horizontal Right est l'image telle
     qu'elle est dessinée, Horizontal Left est son miroir ; Vertical Left et Vertical Right tournent la poignée vers la gauche ou la
-    droite. Une vue de face (dans l'axe du tuyau) n'a pas d'Orientation. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux
+    droite. Une Manual Ball Valve ou Butterfly Valve de Skynet est pareille en miroir, donc sur Horizontal sa case Left / Right est
+    grisée (Règle Skynet 18.52). Une vue de face (dans l'axe du tuyau) n'a pas d'Orientation. Ses bouts (IP) tournent avec elle, donc joignez les tuyaux
     après avoir choisi.
     ![Manual Valve Orientation](help_pictures/Manual_Valve_Orientation.png)
   - **X**, **Y**, **Width**, **Height** (réglés par ses tuyaux, ⛔), 🔒 Lock et No Unlock, et le **Widget Type**.
