@@ -73,7 +73,7 @@ import { checkIds, lockedIdError, rtdPinError, ethernetPinError, tidyLabel } fro
 import { elementNameError, checkFileName } from './public/names.js';
 import { keepDeviceFixed } from './public/templates.js';
 import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
-import { renameInProcesses, renameInProcess, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
+import { renameInProcesses, renameInProcess, renameMap, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { cleanUserStyles } from './public/styles.js';
 import { kindChangeError } from './public/gkinds.js';
 import { Patron } from './lib/patron.js';
@@ -1246,6 +1246,23 @@ async function route(req, res) {
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
+  // Copy a whole Tab (Rule 4.8): each Process copied under its new name, with the copied Widgets' new names (and the copied Processes'
+  // names) in it; the Devices stay the same (a Clone is the same Device). A name already taken is skipped, never written over.
+  if (p === '/ui/scripts/copy' && m === 'POST') {
+    const { copies = [], map = {} } = await jsonBody(req), names = renameMap(map), done = [], skipped = [];
+    const vn = (store.config.graphics || []).filter(g => g.vdevice).map(g => g.name);
+    for (const c of Array.isArray(copies) ? copies : []) {
+      const from = cleanName(String(c?.from ?? '')), to = cleanName(String(c?.to ?? ''));
+      if (!from || !to || !engine.exists(from)) continue;
+      if (engine.exists(to)) { skipped.push(to); continue; }
+      checkFileName(to, { ext: false, what: 'Process' });
+      engine.write(to, renameInProcess(engine.read(from), names, [...vn, ...vn.map(n => names.get(n))]));
+      try { engine.setClass(to, engine.classOf(from)); } catch { }
+      done.push({ from, to });
+    }
+    if (done.length) engine.renumber();
+    return ok(res, { copied: done, skipped });
+  }
   s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order|version))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];

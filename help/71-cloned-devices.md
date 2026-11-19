@@ -10,7 +10,7 @@ A Clone is **the same Device**, not a copy. It shows what its parent (the Device
 
 ## Make a Clone
 
-The only way to make a Clone is the **⧉ Clone Device** button on the Edit layout bar (Admins). It works on any Tab, the 🔨 Build Tab too.
+Make a Clone with the **⧉ Clone Device** button on the Edit layout bar (Admins). It works on any Tab, the 🔨 Build Tab too. **New tab** > **Copy of** a Tab also makes a Clone of every Device on it, and of the Widgets you pick ([Copy a Whole Tab](236-copy-a-whole-tab)).
 
 1. Go to the Tab the Clone should be on (or the Build Tab) and press **⧉ Clone Device**.
 2. The list holds the Devices already placed on a Tab (not the ones already on this Tab), grouped by type: Pumps, Valves, Heat, Temperature probes, Other outputs, Motors, Inputs and sensors.

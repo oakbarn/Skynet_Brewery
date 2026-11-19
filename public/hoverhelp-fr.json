@@ -1380,6 +1380,7 @@
  "Tick the boards from your other Schemas that this Schema uses too:": "Cochez les cartes de vos autres Schemas que ce Schema utilise aussi :",
  "There are no other boards in your other Schemas to bring in. Add one later on the Devices page (Add Interface), or try things first in the Simulator (🧪 beside ☰ Menu).": "Vos autres Schemas n'ont pas d'autre carte à apporter. Ajoutez-en une plus tard sur la page Devices (Add Interface), ou essayez d'abord dans le Simulator (🧪 à côté de ☰ Menu).",
  "More Tabs can be added at any time in Edit layout (➕ New tab).": "D'autres Tabs peuvent être ajoutés à tout moment en Edit layout (➕ New tab).",
+ "A new Tab: empty, or a copy of a whole Tab (Help 236)": "Un nouveau Tab : vide, ou une copie d'un Tab entier (Help 236)",
  "The Tab {0} already uses \"{1}\".": "Le Tab {0} utilise déjà \"{1}\".",
  "The vessels, pumps and valves of a Tab.": "Les cuves, pompes et vannes d'un Tab.",
  "Every Tab already has an Equipment Profile.": "Chaque Tab a déjà un Equipment Profile.",
