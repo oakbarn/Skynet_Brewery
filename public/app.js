@@ -6135,7 +6135,7 @@ async function newDeviceDialog(e, hint, what) {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
       dlgDetour = true;          // a double-click on a Tab (or other) choice opens its Properties and comes back here (Rule 4.7)
-      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/^➕ New /, '').replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : elem ? e._title || elemTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/^➕ New /, '').replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, isPumpDev(e) ? fields : deviceModel(e, e, fields), work, false, ['edit-layout-bar', 'add-device']);      // the Add box in the Blichmann's layout too (2026-11-19)
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -9391,6 +9391,78 @@ function gfxModel(item, list) {
     ...(lookPop && !lab ? [['_lk', 'Label look', 'attrhead', null, false, false, { attr: lookPop }]] : []),
     ...own, ...place, item.integrated === 'device' ? ['_wt', 'Device Type', 'ro', gfxWord(item)] : ['_wt', 'Widget Type', 'ro', gfxWord(item), false, false, { tip: WGT_TIPS.type }]];
 }
+// ---- Every Device dialog in the Blichmann RipTide's layout (OakBarn Brewery, 2026-11-19: "Redo all the dialogs to for the Blickman and
+// Hose Bib Model. Same Layout, same fields for the same things"; "We redo it and make the Model Work"; Rules 18.44, 18.47). The Model's
+// rows, in its order, each in the same place on every Device:
+//   title line (lock, Visible, Hidden Locked) · State · 1. Label ⬆ ⬢ · Label Visible · 2. Interface + Available Ports · 3. Tab ·
+//   Layer Order · 4. Name · Change Name · Suggested Name · Profile · Graphic ⬢ · Orientation · Hose or Pipe · Cover + Toggle ·
+//   Overlay + Database and .API ⬢ · Model ⬢ · Inlet / Outlet IP Fitting · its own settings (where the Pump has Speed Control) ·
+//   X Y Width Height on one line · Device Type (greyed) last.
+// A row the Model has that this Device does not is left out (Rule 18.47). Every box it had is kept (Design Rule 1): a picture Path moves into
+// the Graphic's ⬢ (the Model has no Path row), a Toggle without a Cover gets the Cover's place, Database and .API is always on the Overlay
+// line (or on its own ⬢ line when there is no Overlay).
+const DEV_PIC_KEYS = ['imageOff', 'imageOn', 'image', 'imagePath', 'imageOnPath'];
+const isPicRow = f => DEV_PIC_KEYS.includes(f[0]) || /^Path\b/.test(String(f[1] ?? ''));
+const DEV_MODEL_TIPS = {
+  graphic: 'It as it will be on the Tab. The ⬢ beside it holds its picture Paths.', db: 'Its .database and .API names (Rule 5.16).' };
+function deviceModel(it, item, list) {
+  if (!Array.isArray(list)) return list;
+  const isF = f => Array.isArray(f) && typeof f[0] === 'string';
+  const opt = (f, x) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); g[6] = { ...(f[6] || {}), ...x }; if (g[6].with === undefined) delete g[6].with; return g; };
+  const rows = list.filter(isF), used = new Set();
+  const add = rows.some(f => f[6]?.after), aft = add ? { after: true } : {};      // an Add box: the rows it adds show with the rest, once 1-3 are done
+  const take = pred => { const f = rows.find(x => !used.has(x) && pred(x)); if (f) used.add(f); return f || null; };
+  const takeAll = pred => rows.filter(x => !used.has(x) && pred(x)).map(x => (used.add(x), x));
+  const lbl = f => String(f[1] ?? '');
+  // the Toggle goes on the Cover's line (the Model): one riding on another row (Overlay, Orientation) comes off it
+  let tapW = null;
+  const offWith = f => { const w = f?.[6]?.with; if (!w) return f; const ws = Array.isArray(w[0]) ? w : [w], t = ws.find(x => x[0] === 'tap'); if (!t) return f;
+    tapW = t; const rest = ws.filter(x => x !== t); return opt(f, { with: rest.length ? (Array.isArray(w[0]) ? rest : rest[0]) : undefined }); };
+  for (let i = 0; i < rows.length; i++) { const g = offWith(rows[i]); if (g !== rows[i]) { const j = list.indexOf(rows[i]); list = [...list]; list[j] = g; rows[i] = g; } }
+  // Database and .API is on the Overlay line (the Model); with no Overlay it has its own line in the Overlay's place
+  for (let i = 0; i < rows.length; i++) if (rows[i][6]?.dbPop && rows[i][0] !== 'imageOverlay') { const { dbPop, ...x } = rows[i][6]; const g = [...rows[i].slice(0, 6), x]; const j = list.indexOf(rows[i]); list = [...list]; list[j] = g; rows[i] = g; }
+  const title = takeAll(f => f[6]?.inTitle);
+  const state = take(f => f[2] === 'state');
+  const label = take(f => f[0] === 'label'), lv = take(f => f[0] === 'hideName' || f[0] === 'labelVisible');
+  const iface = take(f => f[0] === 'device'), port = iface?.[6]?.with ? null : take(f => f[0] === 'channel');
+  const tab = take(f => f[0] === 'workspace' || /^3\. Built into/.test(lbl(f)));
+  const layer = take(f => f[0] === 'layer' || /Layer$/.test(lbl(f)) || f[0] === 'vdevLayer');
+  const name = take(f => f[0] === 'name'), chg = takeAll(f => f[2] === 'chgname' || /^Change Name$/.test(lbl(f))), sug = take(f => f[0] === '_sug' || f[0] === '_sugNote');
+  const prof = takeAll(f => /Profile$/.test(lbl(f)) && f[2] !== 'head');
+  const gfx = take(f => f[0] === '_pv' || f[0] === '_spv');
+  const pics = takeAll(isPicRow);
+  const look = takeAll(f => ['panelBg', 'foreColor', 'backColor'].includes(f[0]) || f[0] === 'color' && /^Fore color$/i.test(lbl(f)));      // a Widget's Background, Fore and Back color (Rule 18.50 #2): the Cover's place
+  const orient = takeAll(f => f[2] === 'orient' || f[0] === '_or' || f[0] === '_orient' || f[0] === 'orientation');
+  const hose = take(f => f[0] === 'pumpLink' || /^Hose or Pipe/.test(lbl(f)));
+  const cover = take(f => f[0] === 'cover'), tap = cover ? null : take(f => f[0] === 'tap') || tapW;
+  const ovl = take(f => f[0] === 'imageOverlay');
+  const model = take(f => f[0] === 'pumpModel' || /^Model$/.test(lbl(f)));
+  const fits = takeAll(f => ['ipTypeIn', 'ipTypeOut', '_ipTypeIn', '_ipTypeOut'].includes(f[0]));
+  const xy = take(f => f[0] === 'x'), place = xy?.[6]?.with ? [] : takeAll(f => ['y', 'w', 'h'].includes(f[0]) && f[2] === 'num');
+  const wgt = !isDevice(it);
+  const type = take(f => f[0] === 'typeCode' || f[0] === '_dtype' || f[0] === '_wt' || /^(Device|Widget) Type/.test(lbl(f)));
+  const dbHead = take(f => f[0] === '_dbHead');
+  const own = list.filter(f => !isF(f) || !used.has(f));
+  const dbOn = !!ovl?.[6]?.dbPop || !!dbHead;
+  const hasDb = dbFields(it).length > 0;
+  const picPop = pics.length ? { title: 'Pictures', fields: pics.map(f => [f[0], lbl(f).replace(/ \(.*\)$/, '') === 'Path' && pics.length > 1 ? lbl(f) : lbl(f), f[2] === 'path' ? 'gpick' : f[2], f[3], false, f[5] ?? false, { tip: f[6]?.tip }]) } : null;
+  // the Graphic: the Skynet drawing of a Pump, Valve, Heating Element or Thermowell (devpic), else the Device as it is drawn on its Tab
+  const ownPic = ['pump', 'valve'].includes(it.subtype) || it.type === 'temperature' && (it.front || it.backpath) || isHeatElem(it);
+  const gTip = picPop ? DEV_MODEL_TIPS.graphic : gfx?.[6]?.tip || DEVICE_TIPS.graphic;
+  const graphic = gfx && (ownPic || gfx[2] !== 'devpic') ? opt(gfx, picPop && !gfx[6]?.attr ? { attr: picPop } : {})
+    : ['_spv', 'Graphic', ownPic ? 'devpic' : 'semipic', null, false, false, { tip: gTip, ...aft, ...(picPop ? { attr: picPop } : {}) }];
+  const ifaceRow = iface && port ? opt(iface, { with: port }) : iface;
+  const typeRow = type && (wgt || type[2] === 'sel') ? type : type ? ( ['typeCode', 'Device Type', 'ro', type[3] ?? shownType(it), false, false, type[6] || {}]) : wgt ? null : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: typeTip(it), ...aft }];
+  return [...title, ...(state ? [state] : []),
+    ...(label ? [label] : []), ...(lv ? [lv] : []), ...(ifaceRow ? [ifaceRow] : []), ...(tab ? [tab] : []), ...(layer ? [layer] : []),
+    ...(name ? [name] : []), ...chg, ...(sug ? [sug] : []), ...prof,
+    graphic, ...look, ...orient, ...(hose ? [hose] : []),
+    ...(cover ? [cover] : tap ? [opt(tap, {})] : []),
+    ...(ovl ? [dbOn ? ovl : opt(ovl, { dbPop: true })] : hasDb && !dbOn && !add ? [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP, tip: DEV_MODEL_TIPS.db }]] : dbHead ? [dbHead] : []),
+    ...(model ? [model] : []), ...fits, ...own,
+    ...(xy ? [xy] : []), ...place, ...(typeRow ? [typeRow] : [])];
+}
+const deviceModelOf = (fields, item) => typeof fields === 'function' ? it => deviceModel(it, item, fields(it)) : deviceModel(item, item, fields);
 const gfxModelOf = (fields, item) => typeof fields === 'function' ? it => gfxModel(item, fields(it)) : gfxModel(item, fields);
 
 // ---- The older Widget dialogs (the gGlobal Widget, the older Alarm Widget, the Manual vessel and a Clone of a Boolean Widget) in the Hose
@@ -9443,7 +9515,7 @@ function withLayer(fields, item) {
   if (fields.some(f => isF(f, 'layer'))) return fields;
   // a dialog in the Blichmann Model's numbered order (1. Label ... 3. Tab): Layer Order right under the Tab, where the Pump has it
   // (OakBarn Brewery, 2026-11-18: "Place in Order of the Blickmann"; Rule 18.47). The older dialogs keep it after their Size.
-  const numTab = fields.findIndex(f => Array.isArray(f) && ['workspace', '_tab'].includes(f[0]) && /^\d+\. Tab$/.test(String(f[1])));
+  const numTab = fields.findIndex(f => Array.isArray(f) && (['workspace', '_tab'].includes(f[0]) && /^\d+\. Tab$/.test(String(f[1])) || /^\d+\. Built into$/.test(String(f[1]))));      // a built-in part: under 3. Built into
   const at = numTab >= 0 ? numTab : ['h', 'y', 'workspace'].map(k => fields.findIndex(f => isF(f, k))).find(i => i >= 0) ?? -1;
   const { tip, with: _w, set: _s, inTitle, ...same } = (at >= 0 && fields[at][6]) || {};       // the same box or row as its Size
   const inV = !!layerVessel(L(), item);      // inside its Vessel Device only (Rule 1.29)
@@ -10214,6 +10286,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       }
       const w = { ...obj, subtype: 'pump' };
       if (q('imageOff')) w.imageOff = q('imageOff').value;
+      if (!w.imageOff && isHeatElem(obj)) w.imageOff = VP_PICS.element;      // a Heating Element with no picture of its own: the Skynet element drawing
       if (q('cover')) w.cover = q('cover').value;
       if (q('coverColor')) w.coverColor = q('coverColor').value;
       if (q('flipH')) { w.flipH = q('flipH').checked; w.flipV = q('flipV').checked; }
@@ -11379,12 +11452,16 @@ async function editItem(kind, id) {
   const fields1 = fields0 && item.integratedIn ? it => (typeof fields0 === 'function' ? fields0(it) : fields0).filter(f => f[0] !== 'hidden') : fields0;
   // State on every On / Off Device (a Digital Output), first under the title, as on the Pump (Rule 18.45 #1; OakBarn Brewery, 2026-11-18:
   // a Pump made from a Skynet Template had none)
-  const fields = kind === 'el' && item.type === 'digitalOut' && fields1 ? it => {
+  let fields = kind === 'el' && item.type === 'digitalOut' && fields1 ? it => {
     const f = typeof fields1 === 'function' ? fields1(it) : fields1;
     if (!Array.isArray(f) || f.some(x => Array.isArray(x) && x[2] === 'state')) return f;
     const at = f.reduce((n, x, i) => Array.isArray(x) && x[6]?.inTitle ? i + 1 : n, 0);
     return [...f.slice(0, at), ['_state', 'State', 'state', null, false, false, {}], ...f.slice(at)];
   } : fields1;
+  // every Device but the Pump (the Model itself) in the Blichmann RipTide's layout (OakBarn Brewery, 2026-11-19)
+  if (kind === 'el' && isDevice(item) && !isPumpDev(item) && fields) fields = deviceModelOf(fields, item);
+  // every Widget in the Hose Bib's layout the same way (the Picture Widget's Picture and an Alarm's boxes are their own; Rule 18.50)
+  else if (kind === 'el' && !isDevice(item) && !isPicW(item) && !(item.type === 'alarm' && item.alarmClass) && fields) fields = deviceModelOf(fields, item);
   const work = clone(item.kind === 'vessel' ? shownIn('vessel', item) : item), before0 = item.fitting;      // a Vessel's size shown in your Units (Rule 2.59)
   const tplOk = onBuildTab(item) && item.kind === 'vessel' && !item.attachTo;      // a vessel, equipment or Tab_Fitting can go to Templates instead
   const goTo = buildToOf(item) || (tplOk && item.buildTo === TO_TPL ? TO_TPL : '') || (tplOk ? item.workspace : '');      // a new item on the 🔨 Build Tab: its Tab box shows where it goes (Rule 4.1); it stays on the Build Tab

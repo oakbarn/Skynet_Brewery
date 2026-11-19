@@ -1544,6 +1544,8 @@
  "There are no other boards in your other Schemas to bring in.": "Il n'y a pas d'autres cartes dans vos autres Schemas à reprendre.",
  "Type your vessel's Height and Diameter. Skynet draws this vessel's picture to that shape, saves it as a picture of your own (an SVG in your User Graphic folder), and makes a User Vessel Template with it.": "Tapez la hauteur et le diamètre de votre cuve. Skynet dessine l'image de cette cuve à cette forme, l'enregistre comme une image à vous (un SVG dans votre dossier User Graphic) et en fait un User Vessel Template.",
  "Your vessel's Height and Diameter: its picture drawn to that shape, as a User Vessel Template of your own": "La hauteur et le diamètre de votre cuve : son image dessinée à cette forme, comme un User Vessel Template à vous",
+ "It as it will be on the Tab. The ⬢ beside it holds its picture Paths.": "Tel qu'il sera sur le Tab. Le ⬢ à côté contient les Paths de ses images.",
+ "Its .database and .API names (Rule 5.16).": "Ses noms .database et .API (Règle 5.16).",
  "Report a bug, or a better French wording for a Help page, on GitHub or by email. Your Skynet version and browser are filled in.": "Signaler un bug, ou une meilleure traduction pour une page d'aide, sur GitHub ou par e-mail. Votre version de Skynet et votre navigateur sont remplis.",
  "Report a bug, or a better French wording for this Help page": "Signaler un bug, ou une meilleure traduction pour cette page d'aide",
  "Opens the form on GitHub, with the version, the page and the browser filled in. GitHub needs a free sign-in.": "Ouvre le formulaire sur GitHub, avec la version, la page et le navigateur remplis. GitHub demande une connexion gratuite.",

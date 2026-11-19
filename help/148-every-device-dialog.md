@@ -63,6 +63,12 @@ Every dialog in Skynet, not only the Device ones, follows the Blichmann RipTide 
   Alarm, the Manual vessel and a Clone, every Vessel, IP, Pipe, Hose, fitting and Manifold, and the RIMS tube and electric kettle
   follow the same order: 1. Label, Label Visible, 2. Tab, Layer Order, 3. Name, their own boxes, X Y Width Height, and the Type last.
   The Picture Widget gets a **Background** (None, 1, 2 or 3) whose ⬢ holds its 3 pictures.
+- **The same rows in the same places** (Skynet Rule 18.51): every Device (PWM, Relay, Valve, Heating Element, Temperature Probe,
+  inputs, motors, hydrometers ...) and every Widget now has the Model's rows in the Model's order: the title line, State, 1. Label,
+  Label Visible, 2. Interface and Available Ports, 3. Tab, Layer Order, 4. Name, the **Graphic**, Orientation, Hose or Pipe, Cover
+  and **Toggle**, **Overlay** with **Database and .API**, Model, Inlet and Outlet IP Fitting, its own settings, X Y Width Height and
+  the **Device Type** last. Every one has a Graphic; a picture **Path** is in the Graphic's ⬢. A Toggle with no Cover has its own
+  line where the Cover would be. With no Overlay, **Database and .API** has its own ⬢ line there. Nothing was taken away.
 
 ## A Device built into something
 
