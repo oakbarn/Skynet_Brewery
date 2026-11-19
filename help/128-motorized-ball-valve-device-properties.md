@@ -89,9 +89,31 @@ The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `Va
 
 | | Skynet Motorized Ball Valve | User Defined Motorized Ball Valve |
 |---|---|---|
-| Path | greyed out: set by its Skynet Template, follows the Orientation | **Path**: your picture, one picture (the Overlay shows it open). The ⬢ beside Path sets where the In and Out IPs are. **Path (open)** shows only on a valve that already has an open picture |
-| Orientation | Horizontal, Vertical Left, Vertical Right (Front and 45 degrees show only on a valve that already sits that way) | Horizontal or Vertical (the 45s show only on a valve that already sits that way) |
+| Path | greyed out: set by its Skynet Template, follows the Orientation | **Path**: your picture, one picture drawn Horizontal (the Overlay shows it open). Skynet turns and mirrors it for the other Orientations. The ⬢ beside Path sets where the In and Out IPs are. **Path (open)** shows only on a valve that already has an open picture |
+| Orientation | Horizontal, Vertical Left, Vertical Right (Front and 45 degrees show only on a valve that already sits that way) | Horizontal, Horizontal Flipped, Vertical Left, Vertical Right, all made from your one picture (plain Vertical and the 45s show only on a valve that already sits that way) |
 | Toggle and Overlay | yours to pick (they start as On/Off and the steady bolt) | yours to pick |
 | Width and Height | its Template's size for each Orientation | 150 x 150 to start |
 
 Settings these dialogs no longer show (Invert, One-shot, Text when on / off, Flip, Service) are kept if a valve already had them.
+
+## One picture, four looks (User Defined)
+
+Give the User Defined Motorized Ball Valve **one picture**, drawn **Horizontal**: the pipe running left to right and the motor on
+top. Skynet makes the other looks from it, so you never need a second picture. (Skynet Rule 18.43)
+
+| Orientation | What Skynet does with your picture |
+|---|---|
+| **Horizontal** | shows it as you drew it |
+| **Horizontal Flipped** | mirrors it top to bottom (motor below the pipe) |
+| **Vertical Left** | turns it 90 degrees (motor on the left) |
+| **Vertical Right** | turns it 90 degrees and mirrors it left to right (motor on the right) |
+
+Your picture file is never changed; it is only drawn turned or mirrored. The In and Out IPs follow the look.
+
+**What picture works best:**
+
+- A plain or see-through background.
+- The valve seen straight on from the side, the pipe level across the middle.
+- No writing or logo on it: mirroring turns writing backwards.
+- Any size: it is fitted into the valve's square box. Use the ⬢ beside **Path** to set where the pipe ends are, if they are not
+  at the middle of the left and right sides.

@@ -45,6 +45,7 @@ import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS,
 import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, hopKgToUse, hopSchedule, calculateRecipe, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, NEW_RECIPE, AFTER_BOIL_TYPES, FERM_MEASURES, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, mashedFerm, averageEfficiency, EFF_AVERAGE_OF, WATER_FIELDS, fToC, RECIPE_LEVELS, recipeLevel, levelOf, levelShowsTab, levelShowsBox, levelFermTypes } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
+import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';      // Copy a whole Tab on New tab (Rule 4.8)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, nsDefault, startAnswers, planSchema, generalPick } from './schemabuild.js';
@@ -2365,7 +2366,7 @@ function picFlow(path) {
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e), o = e.orientation;
+  const f = pumpSpotFlow(e, picFlow(e.imageOff || e.imageOn)) || userValveStd(e), o = userLook(e) ? userValveKind(e) : e.orientation;      // a look of a user's picture (USER_LOOK) stands as Horizontal or Vertical
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
@@ -2383,12 +2384,21 @@ function picEnds(e) {
 // bottom; 45 degrees: the level spots turned). Where the user has set its In and Out spots, the picture is moved and sized so those
 // spots sit on the IPs (valveFit).
 const isUserValvePic = e => !!e && (e.subtype === 'valve' || e.subtype === 'propValve') && !isInline(e) && !!(e.imageOff || e.imageOn) && !picFlow(e.imageOff || e.imageOn);
-const userValveKind = e => e.orientation === 'v' ? 'v' : e.orientation === 'h' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
-const userValveStd = e => isUserValvePic(e) ? { k: 'U', ...vstd(userValveKind(e)) } : null;
+// One picture, four looks (OakBarn Brewery, 2026-11-19, Panel Updates 6 / sandbox entry 32: "Can a User Provide a single Image and
+// Skynet create other needed ... flip Vertical Flip Left Right Rotate"; "90 degrees to make horizontal vertical"; "Go with A KISS";
+// Rule 18.43): the user's picture is drawn Horizontal (pipe left to right, motor on top) and Skynet makes the other looks from it.
+// Horizontal Flipped mirrors it up and down (motor below); Vertical Left turns it 90 degrees (motor left); Vertical Right is Vertical
+// Left mirrored left and right (motor right). The picture file is never changed; it is only drawn turned or mirrored.
+// turn: degrees (CSS, clockwise is +); sx, sy: the mirror after the turn. The In end (left on the picture) ends at the bottom when upright.
+const USER_LOOK = { hd: { turn: 0, sx: 1, sy: -1 }, vl: { turn: -90, sx: 1, sy: 1 }, vr: { turn: -90, sx: -1, sy: 1 } };
+const userLook = e => e && e.subtype === 'valve' && isUserValvePic(e) ? USER_LOOK[e.orientation] || null : null;
+const USER_LOOK_ENDS = { h: VALVE_STD.h, v: [[0.5, 1], [0.5, 0]] };
+const userValveKind = e => e.orientation === 'v' || e.orientation === 'vl' || e.orientation === 'vr' ? 'v' : e.orientation === 'h' || e.orientation === 'hd' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
+const userValveStd = e => isUserValvePic(e) ? (userLook(e) ? { k: 'U', o: userValveKind(e), w: 300, h: 300, ends: USER_LOOK_ENDS[userValveKind(e)] } : { k: 'U', ...vstd(userValveKind(e)) }) : null;
 // the picture's size and place in its box (in % of the box) so the user's In and Out spots land on the standard IP spots, or null
 function valveFit(e) {
   if (!isUserValvePic(e) || !pctOk(e.ipInX) || !pctOk(e.ipInY) || !pctOk(e.ipOutX) || !pctOk(e.ipOutY)) return null;
-  const a = [+e.ipInX / 100, +e.ipInY / 100], b = [+e.ipOutX / 100, +e.ipOutY / 100], [A, B] = VALVE_STD[userValveKind(e)];
+  const a = [+e.ipInX / 100, +e.ipInY / 100], b = [+e.ipOutX / 100, +e.ipOutY / 100], [A, B] = VALVE_STD[userLook(e) ? 'h' : userValveKind(e)];      // a look: fitted as drawn, then turned
   const d = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d < 0.05) return null;       // both spots on one point: it just fills the box
   const k = Math.hypot(B[0] - A[0], B[1] - A[1]) / d, mx = (A[0] + B[0]) / 2 - k * (a[0] + b[0]) / 2, my = (A[1] + B[1]) / 2 - k * (a[1] + b[1]) / 2;
   const r = v => Math.round(v * 1000) / 10;
@@ -3238,11 +3248,12 @@ function fillEl(n, e0) {
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   // a probe tee or a thermowell turns with its Rotate (Rule 5.30): turned 90 or 270, its picture is as wide as its box is high
   const turn = notFound ? 0 : img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : img ? elRot(e) : 0, flip = img && !notFound && (e.flipH || e.flipV);      // File Not Found is never turned or mirrored (its words stay readable)    // and a Flip Horizontal / Vertical mirrors it
-  n.classList.toggle('turned', !!(turn || flip));
+  const look = img && !notFound ? userLook(e) : null;      // a User Defined valve's look made from its one picture (USER_LOOK)
+  n.classList.toggle('turned', !!(turn || flip || look));
   const side = !!img && turnsEl(e) && elRot(e) % 180 === 90;
   n.classList.toggle('side', side);
   if (side) { const gm = elGeom(e); n.style.setProperty('--picw', (gm.h || 60) + 'px'); n.style.setProperty('--pich', (gm.w || 120) + 'px'); }
-  if (turn || flip) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); n.style.setProperty('--sx', e.flipH ? -1 : 1); n.style.setProperty('--sy', e.flipV ? -1 : 1); }
+  if (turn || flip || look) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', (turn + (look?.turn || 0)) + 'deg'); n.style.setProperty('--sx', (e.flipH ? -1 : 1) * (look?.sx || 1)); n.style.setProperty('--sy', (e.flipV ? -1 : 1) * (look?.sy || 1)); }
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
@@ -4792,9 +4803,11 @@ function setEditing(on) {
   if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
+  // older pipes and fittings get their Skynet names (saved with the next layout save). Before editing turns on: a name needs its Tab
+  // ID (tabIdOf reads L()), and L() is the draft once editing is on, which is not made yet. A graphic with no name stopped Edit layout.
+  if (on) nameAll(S.config.graphics);
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   undoList = []; grabWith.clear(); grabNoAsk = false; updUndoBtn();      // ↩ Put back and the grab pop-up start fresh (Rule 5.37)
-  if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (draft) for (const x of [...draft.elements, ...draft.graphics]) if (x) x._old = 1;      // made before this Edit layout (never saved)
   if (draft && restoreBuild()) setTimeout(buildBackNote, 300);       // an unfinished Build kept on the Brain comes back on its 🔨 Build Tab (Rule 4.1)
@@ -7056,7 +7069,7 @@ function useValveProfile(e, id) {
   if (p.imageOpen) e.imageOn = p.imageOpen;
   if (p.imageClosed) e.imageOff = p.imageClosed;
   e.orientation = p.orientation; delete e.ipIn; delete e.ipOut;
-  if (p.orientation === 'h') [e.w, e.h] = [e.h, e.w];
+  if (p.orientation === 'h' || p.orientation === 'hd') [e.w, e.h] = [e.h, e.w];
   if (p.orientation === 'l45' || p.orientation === 'r45') e.w = e.h = Math.max(e.w, e.h);   // the vertical picture is turned 45 degrees in a square
   if (p.imageOverlay) e.imageOverlay = p.imageOverlay === 'none' ? '' : p.imageOverlay;      // every Valve Profile names its Overlay (2026-11-17)
   return true;
@@ -7809,11 +7822,75 @@ function makeTab() {
   copyTabProfile(w, tp && tabProfileOf({ tabProfile: tp }));      // its color and look copied once (Rule 2.62 #9)
   draft.workspaces.push(w); return w;
 }
-$('#addWs').onclick = () => {
+$('#addWs').onclick = async () => {
+  // a copy of a whole Tab (Rule 4.8, Panel Updates Sandbox entry 18): asked only when a Tab has something on it to copy
+  const full = draft.workspaces.filter(x => !x.build && tabItems(draft, x.name).length);
+  let from = '';
+  if (full.length) {
+    from = await choose('New tab: start empty, or copy a whole Tab onto it?', [['Empty Tab', ''], ...full.map(x => [`Copy of ${tabTitle(x)}`, x.name])]);
+    if (from === undefined) return;
+  }
   const w = makeTab(); if (!w) return;
+  if (from && !(await copyWholeTab(from, w))) { draft.workspaces = draft.workspaces.filter(x => x !== w); return; }
   wsName = w.name; renderTabs(); renderWs();
-  toast(`Tab ${w.name} added, Tab ID ${w.id}. Change it in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
+  toast(`Tab ${w.name} added, Tab ID ${w.id}${from ? `, a copy of ${from}` : ''}. Change the Tab ID in Tab settings before you Save: once saved it never changes (Rule 3.2)`, false, 6000);
 };
+// Copy a whole Tab (OakBarn Brewery, Panel Updates Sandbox entry 18, Rule 4.8, Help 236): every Device becomes a Clone (the same "who",
+// another picture; a Process commands only the parent), pipes, hoses, IPs, fittings, vessels, pictures and text are new items with new
+// names in the background, and the Widgets become what the user picks: i) Clones, ii) new Widgets, iii) one by one. For ii and iii the
+// Processes that use those Widgets may be copied too, pointed at the new ones (one question); they are written at Save layout.
+async function copyWholeTab(from, w) {
+  const src = draft.workspaces.find(x => x.name === from), fromId = src?.id || '', toId = w.id;
+  const pieces = tabPieces(draft, from, isDevice);
+  const wgts = pieces.widgets.filter(e => !isMfPart(e) && !isAvPart(e));
+  const picks = new Map();
+  if (wgts.length) {
+    const how = await choose(`The ${wgts.length} Widget${wgts.length === 1 ? '' : 's'} on ${from}: what should ${wgts.length === 1 ? 'it' : 'they'} be on ${w.name}?`,
+      [['i) Clones of them (the same Widgets)', 'clone'], ['ii) New Widgets of their own', 'new'], ['iii) Case by case', 'each']]);
+    if (how === undefined) return false;
+    for (const e of wgts) {
+      let m = how;
+      if (how === 'each') { m = await choose(`${e.label || e.name} (${e.name})`, [['Clone', 'clone'], ['New Widget', 'new']]); if (m === undefined) return false; }
+      picks.set(e.name, m);
+    }
+  }
+  const swapTab = n => fromId && toId && String(n).endsWith('_' + fromId) ? String(n).slice(0, -fromId.length) + toId : n;
+  const wName = (n, taken) => { const code = widgetTypeId(n, isTapMv(n)); return code ? uniqueName(suggestWidgetName({ code, label: n.label, tab: toId }), taken, toId) : ''; };
+  const free = (p, taken) => { let i = 1; while (taken(`${p}_${i}`)) i++; return `${p}_${i}`; };
+  const cp = copyTab(draft, from, w.name, isDevice, n => picks.get(n) || 'clone', {
+    newId,
+    cloneName: (p, taken) => cloneName(p, taken),
+    // a name that ends with the old Tab ID keeps its Label part and gets the new Tab ID (wgt_SW_Testing_BH -> wgt_SW_Testing_B2, Rule 3.14)
+    widgetName: (n, taken, old) => old.endsWith('_' + fromId) ? nextFree(swapTab(old), taken) : wName(n, taken) || nextFree(old, taken),
+    graphicName: (n, taken, g) => {
+      if (/^wgt_/.test(g.name) || g.kind === 'text') { const s = g.name.endsWith('_' + fromId) ? nextFree(swapTab(g.name), taken) : wName(n, taken); if (s) return s; }
+      const p = autoPrefix(n); if (p) return free(p, taken);
+      const m = /^([A-Za-z0-9]+)_\d+$/.exec(g.name); if (m && n.kind === 'vessel' && n.vesselType === 'bfit') return free(m[1], taken);
+      return nextFree(swapTab(g.name), taken);
+    } });
+  draft.elements.push(...cp.elements); draft.graphics.push(...cp.graphics);
+  // the Processes that use the Widgets (and drawn items) that got new names: copy them too? (one question)
+  // only the Widgets' names: a vessel, pipe or fitting copy is not what a Process means (HLT_Vessel.<Device> stays on the parent Device)
+  const wNames = new Map([...cp.names].filter(([, to]) => cp.elements.some(e => e.name === to) || cp.graphics.some(g => g.name === to && widgetTypeId(g, isTapMv(g)))));
+  if ([...picks.values()].includes('new') && wNames.size) {
+    try {
+      const all = (await api('GET', '/ui/scripts')).map(x => typeof x === 'string' ? x : x.name).filter(Boolean);
+      const texts = await Promise.all(all.map(async n => [n, await api('GET', '/ui/scripts/' + encodeURIComponent(n)).catch(() => '')]));
+      const uses = processesUsing(texts, wNames.keys());
+      if (uses.length) {
+        const yes = await choose(`Copy the ${uses.length} Process${uses.length === 1 ? '' : 'es'}? ${uses.join(', ')} use${uses.length === 1 ? 's' : ''} the Widgets on ${from}. Each copy uses the new Widgets on ${w.name} instead (the Devices stay the same).`, [['Yes, copy them', true], ['No', false]]);
+        if (yes) {
+          const pending = draft._procCopies || (draft._procCopies = []), names = new Set([...all, ...pending.map(c => c.to)].map(n => n.toLowerCase()));
+          const copies = uses.map(n => { const to = processCopyName(n, toId, x => names.has(x.toLowerCase())); names.add(to.toLowerCase()); return { from: n, to }; });
+          const pm = new Map(copies.map(c => [c.from, c.to]));
+          for (const e of cp.elements) for (const k of Object.keys(e)) if (typeof e[k] === 'string' && k !== 'name' && pm.has(e[k])) e[k] = pm.get(e[k]);      // a Process Widget copied as new starts the copy
+          pending.push({ tab: w.name, copies, map: Object.fromEntries([...wNames, ...pm]) });
+        }
+      }
+    } catch (e) { toast(`The Processes could not be read, so none were copied: ${e.message}`, true); }
+  }
+  return true;
+}
 // ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
 // built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
 async function addTabForDevice() {
@@ -8224,6 +8301,17 @@ function renameNote(r) {
   if (r.otherSchemas?.length) t += ` Note: ${r.otherSchemas.map(o => `Schema ${o.schema} still has ${o.name}`).join('; ')}.`;
   return t;
 }
+// the Processes copied with a copied Tab (Rule 4.8): written right after Save layout, once the new Widgets are saved; a copied Tab
+// taken away before the Save takes its Process copies with it. Returns what Save tells about them.
+async function writeProcCopies() {
+  let procNote = '';
+  const pc = (draft._procCopies || []).filter(x => draft.workspaces.some(w => w.name === x.tab));
+  for (const x of pc) {
+    try { const c = await api('POST', '/ui/scripts/copy', { copies: x.copies, map: x.map }); if (c?.copied?.length) procNote += ` Processes copied for ${x.tab}: ${c.copied.map(k => `${k.from} → ${k.to}`).join(', ')}.`; if (c?.skipped?.length) procNote += ` Not copied (the name is taken): ${c.skipped.join(', ')}.`; }
+    catch (e) { procNote += ` The Processes for ${x.tab} were not copied: ${e.message}.`; }
+  }
+  return procNote;
+}
 // Save layout (Rule 4.1, OakBarn Brewery, 2026-11-16: "I want to add things to an existing Build and leave in Build Mode"): it saves
 // the regular Tabs and never ends the Build. An unfinished Build is kept on the Brain (config.buildDraft, never run) and stays open:
 // you stay in Edit layout on the 🔨 Build Tab. leave: Edit layout closes after the save (the Build is still kept for next time).
@@ -8244,7 +8332,8 @@ const saveLayout = guard(async ({ leave = false } = {}) => {
   const bTab = buildWs()?.name;
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces.filter(w => !w.build), elements: draft.elements.filter(x => !onB.has(x)), graphics: draft.graphics.filter(x => !onB.has(x)), buildDraft: snap, updateVersion: $('#updateVersion').checked });
-  const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
+  const procNote = await writeProcCopies();       // the Processes copied with a copied Tab (Rule 4.8)
+  const note = renameNote(r) + procNote + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
   const kept = snap ? (leave ? ' Your Build is kept: it comes back on the 🔨 Build Tab the next time you open Edit layout.' : ' Your Build stays open on the 🔨 Build Tab: ✅ Finish Build ... when it is done.') : '';
   toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note + kept, false, note || kept ? 9000 : 0);
   editing = false; await load();
@@ -9227,7 +9316,10 @@ function autoLabel(type) {
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
 const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : isProbeDev(e) ? probeTitle(e) : isPwmDev(e) ? `${TYPE_TITLE[e.type]} Device Properties` : isElemDev(e) ? elemTitle(e) : mbvTitle(e);
 // OakBarn Brewery, 2026-11-18 (Rule 18.43): Horizontal or Vertical; the 45s show only on a valve that already sits that way (Never Take Away)
-const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'],
+// OakBarn Brewery, 2026-11-19 (Panel Updates 6): four looks from one picture (USER_LOOK). Plain Vertical (the picture as drawn, upright)
+// shows only on a valve that already has it (Never Take Away).
+const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['hd', 'Horizontal Flipped'], ['vl', 'Vertical Left'], ['vr', 'Vertical Right'],
+  ...(v === 'v' ? [['v', 'Vertical (as drawn)']] : []),
   ...(v === 'l45' ? [['l45', '45 degrees Left']] : []), ...(v === 'r45' ? [['r45', '45 degrees Right']] : [])];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
@@ -10294,10 +10386,10 @@ const DEVICE_TIPS = {
   // the Motorized Ball Valve (Fritz, 2026-11-05, Rule 18.23)
   vGraphic: 'The picture of this valve as it will show on the Tab, closed, turned to its Orientation.',
   vPathSet: 'The picture of the Skynet Motorized Ball Valve. It is set by its Skynet Template and follows the Orientation (a User Defined valve has its own paths).',
-  vPath: 'The picture of your valve. One picture is enough: the Overlay shows it is open. The ⬢ beside it sets where its In and Out IPs are on the picture.',
+  vPath: 'The picture of your valve, drawn Horizontal (pipe left to right, motor on top). One picture is enough: Skynet turns and mirrors it for the other Orientations, and the Overlay shows it is open. Works best: a plain or see-through background, the valve seen straight on from the side, no writing on it. The ⬢ beside it sets where its In and Out IPs are on the picture.',
   vPathOpen: 'The picture of your valve when it is open (it may be the same picture: the Overlay shows it is open).',
   vOrient: 'How the valve stands: Horizontal, Vertical Left or Vertical Right. The Graphic here and the valve on the Tab follow, and its IPs too.',
-  vOrientUser: 'Where the two pipe ends of your picture are: Horizontal or Vertical. Its IPs follow.',
+  vOrientUser: 'How the valve stands, made from your one picture: Horizontal (as drawn), Horizontal Flipped (mirrored up and down, motor below), Vertical Left (turned 90 degrees, motor left) or Vertical Right (motor right). Its IPs follow.',
   vToggle: 'What a click on the valve does. Toggle (the start): one click opens or closes it. Push Button: you can hold and the Valve is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A valve always has one of the two (no None). A Process ignores this choice.',
   vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.16); the flashing bolt and others are choices, None for no overlay.',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
@@ -10746,9 +10838,11 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       if (obj.subtype === 'valve') {    // a Motorized Ball Valve (Rule 18.23): no Cover; its Orientation picks the picture, flips and turn
         const o = q('_orient'), sp = o ? skyOrientPic(o.value) : null, w = { imageOff: obj.imageOff, flipH: !!obj.flipH, flipV: !!obj.flipV, rot: 0 };
         if (sp) Object.assign(w, sp);
-        else { if (q('imageOff')) w.imageOff = q('imageOff').value; const or = q('orientation')?.value ?? obj.orientation; w.rot = or === 'l45' ? -45 : or === 'r45' ? 45 : 0; }
+        else { if (q('imageOff')) w.imageOff = q('imageOff').value; const or = q('orientation')?.value ?? obj.orientation; w.rot = or === 'l45' ? -45 : or === 'r45' ? 45 : 0; w.look = USER_LOOK[or]; }
         pic.src = w.imageOff ? media(w.imageOff) : ''; pic.classList.toggle('hidden', !w.imageOff); cov.classList.add('hidden');
-        box.style.transform = `${w.rot ? `rotate(${w.rot}deg) scale(0.72) ` : ''}${w.flipH || w.flipV ? `scale(${w.flipH ? -1 : 1}, ${w.flipV ? -1 : 1})` : ''}`;
+        const lk = w.look, lt = lk ? `scale(${lk.sx}, ${lk.sy})${lk.turn ? ` rotate(${lk.turn}deg)` : ''} ` : '';      // a look made from the one picture (USER_LOOK)
+        box.style.margin = lk?.turn ? '30px 0' : '';
+        box.style.transform = `${lt}${w.rot ? `rotate(${w.rot}deg) scale(0.72) ` : ''}${w.flipH || w.flipV ? `scale(${w.flipH ? -1 : 1}, ${w.flipV ? -1 : 1})` : ''}`;
         const pth = root.querySelector('.mbvPath'); if (pth && sp) pth.value = String(sp.imageOff || '').replace(/^Images\//, '');
         return;
       }
@@ -18080,7 +18174,7 @@ const VALVE_PROF_OVERLAY_TIP = 'The On overlay a new powered valve made with thi
 const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
 const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
 const LED_MODES = { locking: 'Locking (press: ON, press again: OFF)', momentary: 'Momentary (ON only while held)' };
-const ORIENTATIONS = { h: 'Horizontal', v: 'Vertical', l45: '45 degrees Left', r45: '45 degrees Right' };
+const ORIENTATIONS = { h: 'Horizontal', hd: 'Horizontal Flipped', vl: 'Vertical Left', vr: 'Vertical Right', v: 'Vertical', l45: '45 degrees Left', r45: '45 degrees Right' };
 function profFields(kind) {
   return w => {
     const t = tempUnit(w.units), u = volUnit(w.units);
@@ -18107,8 +18201,8 @@ function profFields(kind) {
       // one picture (Rule 18.43): the open picture shows only on a profile that already has one (Never Take Away)
       ...(w.imageOpen ? [['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick']] : []),
       ['imageOverlay', 'Overlay', 'sel', [['none', 'None'], ...OVERLAY_GRAPHICS.map(([n, v]) => [v, n])], false, false, { tip: VALVE_PROF_OVERLAY_TIP }],
-      ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS).filter(([k]) => k === 'h' || k === 'v' || k === w.orientation)],
-      ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
+      ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS).filter(([k]) => ['h', 'hd', 'vl', 'vr'].includes(k) || k === w.orientation)],
+      ['_o', 'Pick a Graphic drawn Horizontal (pipe left to right, motor on top). Skynet makes the other looks from it: Horizontal Flipped (motor below), Vertical Left (turned 90 degrees, motor left) and Vertical Right (motor right). The picture file is never changed.', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'water') {
       const b = blendWater(w);
       return [['name', 'Name', 'text'], ['_i', 'Source water (ppm, from the water report)', 'head'], ...WATER_IONS.map(([k, l]) => [k, l, 'num']), ['ph', 'pH', 'num'],

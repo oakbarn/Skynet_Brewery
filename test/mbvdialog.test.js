@@ -32,7 +32,7 @@ assert.match(own, /\['imageOff', 'Path', 'gpick', null, false, false, \{ tip: T\
 // Rule 18.43 (OakBarn Brewery, 2026-11-18): the 3 Vessel valve pictures first; one picture (the On Overlay shows open); Horizontal,
 // Vertical Left or Right. An old valve keeps its open picture, Front or 45 degrees (Never Take Away).
 assert.match(own, /\.\.\.\(it\.imageOn \? \[\['imageOn', 'Path \(open\)'/, 'Path (open) only on a valve that already has an open picture');
-assert.match(app, /const MBV_ORIENT = v => \[[^\n]*\['h', 'Horizontal'\], \['v', 'Vertical'\],\n  \.\.\.\(v === 'l45'/, 'User Defined: Horizontal or Vertical, the 45s only when already set');
+assert.match(app, /const MBV_ORIENT = v => \[[^\n]*\['h', 'Horizontal'\], \['hd', 'Horizontal Flipped'\], \['vl', 'Vertical Left'\], \['vr', 'Vertical Right'\],\n  \.\.\.\(v === 'v' \? \[\['v', 'Vertical \(as drawn\)'\]\] : \[\]\),\n  \.\.\.\(v === 'l45'/, 'User Defined (Panel Updates 6): four looks from one picture; plain Vertical and the 45s only when already set');
 assert.match(app, /const ORIENT_MAIN = \['H', 'VL', 'VR'\];/, 'Skynet valve: Horizontal, Vertical Left, Vertical Right');
 assert.match(app, /filter\(x => ORIENT_MAIN\.includes\(end\(x\)\) \|\| now\.has\(x\.name\)\)/, 'Front and Front Elbow only when the valve already sits that way');
 assert.match(app, /const MBV_MODELS = \[\['Skynet Motorized Ball Valve', 'sky', 'Images\/Skynet\/Valves\/Motorized_TC15_Ball_Valve_Horizontal\.svg'\]/, 'the 3 Vessel picture in the Add list');
@@ -103,3 +103,6 @@ console.log('mbvdialog tests passed');
   assert.match(fs.readFileSync(new URL('../docs/Skynet_Rules.md', import.meta.url), 'utf8'), /^18\.42 \*\*Hover Help not written yet is adapted/m);
   console.log('valve balloons (Rule 18.42) ok');
 }
+
+// one picture, four looks (Panel Updates 6, Rule 18.43): its own file, run from here so package.json's one-line test list is not touched
+await import('./userlook.test.js');
