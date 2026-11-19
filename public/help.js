@@ -5,6 +5,7 @@ import { watchButtons } from './buttons.js';
 import { LANG_KEY, refreshBalloonLang } from './hoverhelp.js';      // also the buttons' tips of this window in French (Rule 11.11)
 import { brokenLinkPop, forgetHelpIndex } from './brokenlink.js';
 import { showMachineNotice } from './mtnotice.js';         // machine translation notice (Rule 11.14)
+import { reportDialog } from './report.js';                // 🐞 Report a problem (Rule 2.61)
 const $ = s => document.querySelector(s);
 if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
 const el = (tag, attrs = {}, ...kids) => {
@@ -261,6 +262,8 @@ $('#hpLang').addEventListener('change', e => {
 $('#hpPick').addEventListener('change', e => open(e.target.value));
 $('#hpBack').onclick = () => { const n = trail.pop(); if (n) open(n, null, true); };
 $('#hpPrint').onclick = () => window.print();
+// 🐞 Report (Rule 2.61): a bug, or a better French wording for this page; the page is filled in, the French form is lit while French is read
+$('#hpReport').onclick = () => reportDialog({ page: cur || '', where: cur ? `Help page ${cur}${lang === 'en' ? '' : ' (' + lang + ')'}` : 'Help', french: lang === 'fr' });
 $('#hpEdit').onclick = startEdit;
 $('#hpCancel').onclick = () => { if (changed() && !confirm('Throw away your changes to this page?')) return; stopEdit(); };
 $('#hpSave').onclick = async () => {

@@ -538,7 +538,7 @@ async function route(req, res) {
       const d = devices.ask(dev.token, who?.name ?? '', req.headers['user-agent'], ip);
       return send(res, 403, { ok: false, waiting: true, device: d.name, error: `This ${d.name} is waiting for an Admin to approve it. Ask your Admin to open Settings > Approved Devices, then sign in again.` });
     };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, deviceWaiting: !!(dev && devices.on && !devices.allowed(req, dev.token) && devices.find(dev.token)?.state === 'waiting'), setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady(), passwordRules: passwordRulesView() });
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, deviceWaiting: !!(dev && devices.on && !devices.allowed(req, dev.token) && devices.find(dev.token)?.state === 'waiting'), setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady(), passwordRules: passwordRulesView(), version: me ? PANEL_VERSION?.version ?? '' : undefined });      // version: for 🐞 Report a problem (Rule 2.61), signed in only
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');

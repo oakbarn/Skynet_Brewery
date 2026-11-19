@@ -1,0 +1,66 @@
+# French Help corrections (Rule 2.61, Rule 11.11). For a French-speaking tester reviewing help/fr. Written in English and French.
+# The Help window's 🐞 Report a problem opens it with the Help page, the version and the browser filled in: the ids below
+# (page, version, browser) are the names it fills, so keep them.
+name: 🌐 French Help correction / Correction de l'aide en français
+description: A better French wording for a Help page. / Une meilleure traduction pour une page d'aide.
+title: "Français: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **English:** Thank you for checking the French Help! The French was translated by a machine, so your corrections are very welcome. One form can hold several corrections on the same page.
+        The names of buttons, boxes and menus stay in English on purpose, exactly as they are on the screen (for example **Finish Build**), so please leave those in English.
+
+        **Français :** Merci de relire l'aide en français ! Elle a été traduite par une machine, vos corrections sont donc les bienvenues. Un seul formulaire peut contenir plusieurs corrections pour la même page.
+        Les noms des boutons, des cases et des menus restent en anglais exprès, tels qu'ils sont à l'écran (par exemple **Finish Build**) : merci de les laisser en anglais.
+  - type: input
+    id: page
+    attributes:
+      label: Help page / Page d'aide
+      description: Filled in for you from the Help window. / Rempli pour vous depuis la fenêtre d'aide.
+      placeholder: "Example / Exemple : 104-brew-pumps"
+    validations:
+      required: true
+  - type: input
+    id: part
+    attributes:
+      label: Part of the page / Partie de la page
+      description: The heading just above the text (optional). / Le titre juste au-dessus du texte (facultatif).
+    validations:
+      required: false
+  - type: textarea
+    id: now
+    attributes:
+      label: French text now / Texte français actuel
+      description: Copy the sentence as it is now. / Copiez la phrase telle qu'elle est.
+    validations:
+      required: true
+  - type: textarea
+    id: better
+    attributes:
+      label: Better French / Meilleur français
+      description: How it should read. / Comment elle devrait se lire.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why (optional) / Pourquoi (facultatif)
+      description: For example a brewing word French brewers really use. / Par exemple un mot de brassage que les brasseurs français utilisent vraiment.
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Skynet version / Version de Skynet
+      description: Filled in for you. / Rempli pour vous.
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Computer and browser / Ordinateur et navigateur
+      description: Filled in for you. / Rempli pour vous.
+    validations:
+      required: false

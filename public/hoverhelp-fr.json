@@ -1543,5 +1543,9 @@
  "Adds another Tab to this page. Pick what it is for and its name.": "Ajoute un autre Tab à cette page. Choisissez à quoi il sert et son nom.",
  "There are no other boards in your other Schemas to bring in.": "Il n'y a pas d'autres cartes dans vos autres Schemas à reprendre.",
  "Type your vessel's Height and Diameter. Skynet draws this vessel's picture to that shape, saves it as a picture of your own (an SVG in your User Graphic folder), and makes a User Vessel Template with it.": "Tapez la hauteur et le diamètre de votre cuve. Skynet dessine l'image de cette cuve à cette forme, l'enregistre comme une image à vous (un SVG dans votre dossier User Graphic) et en fait un User Vessel Template.",
- "Your vessel's Height and Diameter: its picture drawn to that shape, as a User Vessel Template of your own": "La hauteur et le diamètre de votre cuve : son image dessinée à cette forme, comme un User Vessel Template à vous"
+ "Your vessel's Height and Diameter: its picture drawn to that shape, as a User Vessel Template of your own": "La hauteur et le diamètre de votre cuve : son image dessinée à cette forme, comme un User Vessel Template à vous",
+ "Report a bug, or a better French wording for a Help page, on GitHub or by email. Your Skynet version and browser are filled in.": "Signaler un bug, ou une meilleure traduction pour une page d'aide, sur GitHub ou par e-mail. Votre version de Skynet et votre navigateur sont remplis.",
+ "Report a bug, or a better French wording for this Help page": "Signaler un bug, ou une meilleure traduction pour cette page d'aide",
+ "Opens the form on GitHub, with the version, the page and the browser filled in. GitHub needs a free sign-in.": "Ouvre le formulaire sur GitHub, avec la version, la page et le navigateur remplis. GitHub demande une connexion gratuite.",
+ "Opens your mail program with the details filled in, to {0}. No GitHub sign-in needed.": "Ouvre votre messagerie avec les détails remplis, vers {0}. Pas besoin de connexion GitHub."
 }
