@@ -396,6 +396,8 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
   Device, its reading or its Skynet Dial): **one click opens its SetPoint pop-up** (Rule 2.43).
 - **Something set to a number, not just On or Off** (a variable speed pump or PWM output, a proportional valve, a stepper, a scale,
   a Value Widget, a Timer): one click opens the pop-up where that number is set.
+- **A number shown in a green SV box** (a Heating Element's Duty cycle % or Setpoint, Rule 6.19): one click on the box types a new one
+  in place; a click on the rest of the item still does what it does.
 - **Something only shown** (a reading with no Setpoint, a Text or Label, a picture that follows nothing): a click does nothing,
   or a short note says why.
 - **The same thing does the same in every place:** a Device on its own on a Tab, the same Device built into a Vessel Device, its
@@ -2726,6 +2728,18 @@ off (OakBarn Brewery, 2026-11-09: "On/Off Change to Direct").
 - **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
   turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
   0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
+- **The SV box: change the Duty cycle % or the Setpoint right on the Tab** (OakBarn Brewery, 2026-11-19, Panel Updates 40: "Heating
+  Element in Duty Cylce, Click % and User Input"; "with 2 so a Setpoint can be changed on a Tab by a user"; picked "Show only the %").
+  On a running Tab the Element's display shows what it is doing and, on the same line, a **green box** with the number a person sets,
+  like the SV of a panel controller: in **Duty Cycle** its **Duty cycle %** (only the %, no Setpoint); in **Hysteresis, PID, Deadband
+  and Precise** **SV** and its **Setpoint** with the probe's °F or °C (0.1 degree). Direct and PWM have none. **No Visible switch**: it is
+  part of the display (OakBarn Brewery, 2026-11-19, for item 3: "Forget visible option Make part of Digit Display Box"), all on one line.
+  **One click on the box** types a new number in place (no pop-up, Rule 2.44): Enter sets it (or clicking away after a change), Esc puts
+  it back. A new Setpoint never turns it On or Off and never switches the method; a new Duty cycle % follows the bullet above (an Element
+  set to Ask before changing by hand asks before a % turns it On). A click anywhere else on the Element still turns it On or Off. A
+  Method Clone shows the box of its own method. Not shown in Edit layout, on the Dial or Bar look, or when a Data Display value is
+  picked (the user's own choice wins). Operators and admins only. A Process that runs may set the number again. **Both programs:** the
+  BruControl Import has no running Tabs; its Heating Elements are the Panel's own, so they get the box in the Panel. Help 150.
 - **The Heating method section** (OakBarn Brewery, 2026-11-10, Integrate 5; Method Settings 2026-11-15): **Current Method** (a dropdown
   holding only the methods in use), **Short Label** (a switch) and a red **⬢** that opens the Current Method's own Settings (OakBarn Brewery,
   2026-11-15: "a Icon that pops current properties methods") on one line; then **Method Settings**, a **⬢** button for each method
