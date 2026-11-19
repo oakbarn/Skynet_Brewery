@@ -23,3 +23,22 @@ assert.match(app, /'➕ New Schema'\),/, 'the New Schema button on the Schema ta
 assert.match(app, /if \(v === '__new'\) return addNewSchema\(\);/, 'the Schema dropdown opens the same box');
 assert.match(app, /openHelp\(\['step-by-step-add-a-schema'\]\)/, 'Step by step opens the guide');
 console.log('stepbystep ok');
+
+// Step by Step: Add a Device (Help 207) and Add a Widget (Help 208), OakBarn Brewery 2026-11-19: the step that is easy to miss is
+// ✅ Finish Build ... > Move to Tab (a new Device or Widget stays on the 🔨 Build Tab until then), so each guide says so at the top.
+for (const [f, title, n] of [['help/207-step-by-step-add-a-device.md', 'Add a Device', 12], ['help/208-step-by-step-add-a-widget.md', 'Add a Widget', 11]]) {
+  const g = read(f);
+  assert.match(g, new RegExp(`^# Step by Step: ${title}\\n`), f + ' is a Step by Step guide');
+  assert.match(g.split('## Step 1.')[0], /Finish Build \.\.\. > Move to Tab/, f + ' warns about Finish Build before Step 1');
+  const gp = [...g.matchAll(/!\[[^\]]*\]\((help_pictures\/[^)]+)\)/g)].map(m => m[1]);
+  assert.ok(gp.length >= n, f + ': a picture at each step');
+  for (const p of gp) assert.ok(fs.existsSync(new URL('../media/' + p, import.meta.url)), p + ' is there');
+  for (const l of [...g.matchAll(/\]\((\d+-[\w-]+)(#[\w-]+)?\)/g)].map(m => m[1])) assert.ok(fs.existsSync(new URL(`../help/${l}.md`, import.meta.url)), 'link ' + l);
+  assert.doesNotMatch(g, /Fritz|BruControl/, 'Rules 11.3 and 11.5');
+  assert.ok(fs.existsSync(new URL('../help/fr/' + f.split('/')[1], import.meta.url)), f + ' in French (Rule 11.11)');
+}
+for (const f of ['help/13-glossary.md', 'help/55-build-tab.md', 'help/01-getting-started.md', 'help/03-devices.md'])
+  assert.match(read(f), /207-step-by-step-add-a-device/, f + ' links the Add a Device guide');
+// Finish Build > Move to Tab to the Tab picked for it: the note says it kept its spot, not "the middle"
+assert.match(app, /went\[0\]\.kept/, 'the Move to Tab note says when the build kept its spot');
+console.log('stepbystep add device/widget ok');

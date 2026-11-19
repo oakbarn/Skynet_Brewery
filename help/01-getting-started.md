@@ -35,6 +35,8 @@ What you can see depends on your role. An **Admin** sees everything; an **Operat
 ## Common jobs
 
 - Start your own brewery Schema: [Step by Step: Add a Schema](188-step-by-step-add-a-schema). Every **Step by Step** guide is at the top of the Help page list.
+- Add a pump, valve, probe or other Device: [Step by Step: Add a Device](207-step-by-step-add-a-device).
+- Add a picture, switch, faucet or other Widget: [Step by Step: Add a Widget](208-step-by-step-add-a-widget).
 - Change a tab's background picture or color: [Tab background picture and color](26-tab-background).
 - Put your own pictures and sounds on the Pi: [Media](07-media).
 

@@ -6,6 +6,8 @@ Le Build Tab ne s'affiche que pendant que vous construisez. Il a un bord orange 
 
 ## Commencer à construire {#start-building}
 
+Chaque étape, en images : [Pas à pas : ajouter un Device](207-step-by-step-add-a-device) et [Pas à pas : ajouter un Widget](208-step-by-step-add-a-widget).
+
 1. Appuyez sur **☰ Menu** et choisissez **Edit layout**.
 2. Faites l'une de ces choses :
    - Choisissez un Device dans **Add Device** (ou un raccourci : **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM**), un Widget dans **Add Widget**, ou appuyez sur **Picture ➕**, **Text ➕**, **Vessel**, **Manual Valve ➕**, **Add equipment ➕** ou **Elbows, Tees …** (voir [Barre Edit layout](82-edit-layout-bar)). Le Build Tab s'ouvre tout seul et le nouvel élément y est fait, **jamais sur un Tab normal**. Le Tab que vous choisissez dans sa fenêtre Add est retenu : c'est là qu'il ira à la fin (voir **Où il va** plus bas).
