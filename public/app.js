@@ -1,7 +1,7 @@
 import { addEyes } from './eye.js';
 import { helpLinkOk, preloadHelpIndex } from './brokenlink.js';
 import { addKey } from './genpw.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, inLine, fitFor, splitAt, fitOnPipe, cutPieces, takeNeighbour, pipeLine, sameSize, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { raise as raiseOnTop } from './ontop.js';      // every pop-up on top of every dialog (Rule 18.53)
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, HOT_SPOTS } from './helpmap.js';
@@ -16,7 +16,7 @@ import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from 
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, FRESH_LABEL, FRESH_TEXT, firstSet, placeWith, tbFontCss, lookSnap } from './textbox.js';
 import { loadSnippet, helpNodes, setHelpLinks, linkify, balloonText, setHoverDelay, HOVER_DELAY_MS, HOVER_DELAY_MAX, greyedName } from './hoverhelp.js';
-import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, usedIpTypes, HOSE_BIB_END } from './iptype.js';
+import { IP_SIZES, ipTypePick, defaultIpType, pumpIpType, ipFamily, ipFits, ipTypeChoices, ownerIpType, fitOwnedEnds, joinIpType, usedIpTypes, HOSE_BIB_END } from './iptype.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_SPEEDS, PUMP_PORTS, isTcPort, pumpFacts, factsOf, factLines, powerOf, useOf, isDcPower, powerText, selfPrimeOf } from './pumps.js';
 import { FERM_TYPE, FERM_MODES, FERM_SETTINGS, isFermentor, fermProblems, fermHeatFits, fermCoolFits } from './fermentor.js';
 import { GAS_WARNING, NOT_UL, HELPER_NOTE, BACKUP_NOTE, CUTOFF_NOTE, FLAME_SAFETY, FLAME_DEFAULTS_F, FLAME_DEFAULTS_C, isGasBurner, flameSettings } from './flameout.js';
@@ -4271,6 +4271,7 @@ function rejoinEnds(only = null, one = null, end = null) {
           g.x = (g.x || 0) + e[0] - q.c[0]; g.y = (g.y || 0) + e[1] - q.c[1];
         }
         p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++; takePumpSpots();
+        joinIpType(draft, p, k);      // the end just joined takes the IP Type of the pipe end already there (Rule 5.40)
         break;
       }
     }
@@ -5329,7 +5330,7 @@ function dropPipe(d) {
       pipe.points = pts.map(q => [q[0] + mx, q[1] + my]);
       for (const q of d.carry) if (q.g !== mine) { q.g.x += mx; q.g.y += my; }
       if (mine) draft.graphics = draft.graphics.filter(g => g !== mine);
-      pipe[k] = near.id; takePumpSpots();
+      pipe[k] = near.id; takePumpSpots(); joinIpType(draft, pipe, k);      // auto typed to the join (Rule 5.40)
       return dropPipe({ ...d, carry: d.carry.filter(q => q.g !== mine) });   // the other end may now sit on an IP too
     }
     if (!pipe[k]) pipe[k] = endCoupling(pipe.points, i, j);
@@ -11956,8 +11957,10 @@ async function editItem(kind, id) {
     const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
     if (work.type === 'alarm' && work.alarmClass) chainFromWork(work);      // the boxes back to .chain (Rule 7.16)
     const spotsWas = item.subtype === 'pump' ? String(pumpSpots(item)) : '';
+    const sizeWas = item.kind === 'pipe' && !item.hose ? sizeInches(item) : null;
     if (work.kind === 'vessel') { const m = toMetric.vessel(work); if (m) { Object.keys(work).forEach(k => delete work[k]); Object.assign(work, m); } }      // kept in metric (Rule 2.59)
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (sizeWas !== null && sizeInches(item) !== sizeWas) cascadePipeSize(item);       // the size goes on down the line (Rule 5.36)
     // a pump's Inlet or Outlet put on another of its 8 spots (Rule 5.27): it moves onto its pipes (Rule 5.23) and their ends slide to meet it
     if (spotsWas && String(pumpSpots(item)) !== spotsWas && item.workspace === oldTab) centerOnPipes(draft, item.workspace);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
@@ -15308,11 +15311,11 @@ const STOVE_IP_TIP = 'The connector on its Bottom Outlet IP, with its size (FPT1
 const IP_TYPE_TIP = 'The connector on this end, with its size: Tri-Clamp (TC1.5), pipe thread (FPT female, MPT male), BSP, metric (DN) stainless Quick Disconnect (FMSSQD female, MSSQD male) or Camlock (CAMF female coupler, CAMM male adapter). A new one starts with the Default IP Type in the pipe\'s size, on both ends. ' + IP_TYPE_PICK_TIP;
 // The Default settings Tab's Hover Help: OakBarn Brewery's text, word for word, only the spelling fixed (Default Tab 3, 2026-11-16;
 // Rules 2.37, 11.12). The sentences about things Skynet does not do yet wait in Sandbox/Panel_Updates/Panel_Updates.md until they are built.
-const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5)',
-  hose: 'The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up.' };
+const DEF_IP_TIPS = { pipe: 'The default connector a new pipe has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the pipe. Pipes when placed keep connector type. The Individual IPs on a Pipe end can be changed. Set the Pipe Default IP type for the way most of your Pipes are set up. For Brewing Pipes, the most common are 1.5 Tri Clamp. (TC1.5) When Pipes are Joined, the IPs are auto typed to the join. Once locked, they stay until unlocked. Generally, it is done automatically after your first pipe join.',
+  hose: 'The default connector a new Hose has on both ends: Tri-Clamp, NPT, BSP or Quick Disconnect. It is the size of the hose. Hoses when placed keep connector type. The Individual IPs on a Hose end can be changed. Set the Hose Default IP type for the way most of your hoses are set up. When Hoses are Joined, the IPs are auto typed to the join. Once locked, they stay until unlocked. Generally, it is done automatically after your first hose join.' };
 const DEF_TIPS = {
-  pipe: 'Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.\n\nIPs snap together and are locked.\n\nIPs lock automatically and a Pipe\'s IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.\n\nPipes have a flow simulation.',
-  hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nHoses have a flow simulation.',
+  pipe: 'Common size of the most Pipes to be placed on a new Tab. Pipe Fittings are added automatically and will auto size to the pipe joined. Individual pipe size can be changed when they are placed and any new pipe joined to that different size are auto sized to that pipe size. You can change a pipe size individually and the pipe size will cascade to auto size. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Pipes are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Pipe IP.\n\nIPs snap together and are locked.\n\nIPs lock automatically and a Pipe\'s IPs need to be unlocked to move or resize a Pipe. That can only be done in a Build mode for Pipes.\n\nPipes have a flow simulation.',
+  hose: 'Common size of the hoses to be placed on a new Tab. Individual hose size can be changed when they are placed. Hoses can join Pipes, Fittings and anything with IPs but retain their size unlike a Pipe. There is no auto sizing of Hoses. You can create a manifold that looks like the real world one in your brewery to a large degree. The most common Hoses are 1/2". The end type IPs are set by the IP Type but can be changed individually on a Hose IP.\n\nIPs snap together and are locked.\n\nHoses connected with Quick Disconnect IPs can be quickly unlocked and moved even while brewing.\n\nVessel Devices and Widgets have a large area Quick Disconnect IP at the Top where a Hose can simulate being hooked over the top of the Vessel.\n\nHoses have a flow simulation.',
   px: 'This is simply how Pipes are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 10 is a good starting point. It is for any new Pipes placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
   hosePx: 'This is simply how Hoses are drawn on your screen and do not affect anything other than the "Look". For normal Computer Screen resolutions (set on your computer by you but a default was set by the OS), 6 is a good starting point; Hoses are usually drawn thinner than Pipes. It is for any new Hoses placed and does not affect any already placed, so it is a good idea to set it and forget it or your screen may look like it was drawn by a 3 year old.',
   width: 'This only affects new Tabs added to a Schema. This is how the Tab fits on the screen and if it needs Horizontal Scroll bars as part of your Tab is Off the screen if set too large. It is best to Not have any Scroll bars on a Tab. Changing your Computer Screen Resolution or using a Remote Computer can also affect how the screen is displayed with scroll bars or not. Phones and tablets will fit to size and you have little to no control if using one of those remotely. These should be set for the Computer that you use in your Brewery to follow the Skynet Panel. Or a Computer Screen Resolution set to 1920 x 1040, 1600 x 900 are good starting figures but may need slight adjustments for YOUR computer. The Width only affects a Horizontal Scroll Bar.\n\nThe screen sizing (the Skynet Zoom: Fit screen, Fit width, 50% to 150%) will affect if scroll bars are seen or not. Skynet starts at Fit screen, which draws the whole Tab smaller to fit your screen, so no scroll bars show. Your computer also decides how scroll bars look: Windows shows them; a Mac often hides them until you scroll (System Settings > Appearance); on Linux it depends on the desktop and the browser.',
@@ -16734,6 +16737,27 @@ function autoSizeUnit(g) {
 // no Autosize switch: they always follow their pipe, as when dropped on one, Rule 5.30), and End Caps on Autosize to pipe, which
 // take the size of the fitting whose opening they close. IP fittings and Manual Valves size themselves when drawn (sizeFitting).
 // Something with no pipe on it takes the Default pipe size (☰ Menu > Default settings), a fitting on a vessel opening keeps its size.
+// A pipe's size changed in its Properties: every pipe joined to it takes the new size, through elbows, tees, crosses, couplings,
+// check valves, sight glasses and valves (Motorized, Proportional and Straight Manual Valves), all the way down the line (OakBarn
+// Brewery, 2026-11-16: "You can change a pipe size individually and the pipe size will cascade to auto size"; 2026-11-19: "Should the
+// size carry on through valves, like a manifold that stays one size? Yes"; Panel Updates entry 12, Rule 5.36). It stops at a Reducer,
+// a pump, a probe tee or other inline Device, a Hose Bib, a vessel, a hose and a 🔒 locked pipe; the fittings and valves then take
+// the size of their pipes as always (sizeToPipes).
+const passesSize = id => {
+  const d = /^dev:(.+):(in|out)$/.exec(id || '');
+  if (d) { const e = elNamed(d[1]); return e && (e.subtype === 'valve' || isPropValve(e)) ? [`dev:${d[1]}:${d[2] === 'in' ? 'out' : 'in'}`] : []; }
+  const m = /^eq:(.+):(in|out)$/.exec(id || '');
+  if (m) { const g = draft.graphics.find(x => x.id === m[1]); return isMv(g) && !isTapMv(g) ? [`eq:${m[1]}:${m[2] === 'in' ? 'out' : 'in'}`] : []; }
+  const ip = draft.graphics.find(x => x.id === id && x.kind === 'ip'), u = ip?.attachTo && draft.graphics.find(x => x.id === ip.attachTo);
+  if (!u || !isPlainUnit(u) || isMf(u) || /Reducer/i.test(u.template || '') || (u.fittings || []).some(f => f.kind === 'reducer')) return [];
+  return draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === u.id && x.id !== id).map(x => x.id);
+};
+function cascadePipeSize(p) {
+  const line = pipeLine(p, draft.graphics, passesSize); if (!line.length) return 0;
+  for (const q of line) sameSize(q, p);
+  toast(`Pipe size: ${line.length} joined pipe${line.length > 1 ? 's' : ''} took the new size too (it goes through valves and stops at a Reducer, a pump, a vessel, a hose or a 🔒 locked pipe).`, false, 6000);
+  return line.length;
+}
 function sizeToPipes(wsn) {
   if (!draft) return;
   for (const g of draft.graphics.filter(g => g.workspace === wsn && (isPlainUnit(g) || isMf(g)) && !isCap(g) && autoSized(g))) autoSizeUnit(g);

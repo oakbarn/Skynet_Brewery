@@ -138,3 +138,19 @@ export function fitOwnedEnds(config) {
 }
 // the IP Types used in a Schema (they always stay in the dropdowns, Never Take Away)
 export const usedIpTypes = config => [...new Set([...(config.graphics || []).flatMap(g => [g.ipTypeFrom, g.ipTypeTo, g.ipTypeOut]), ...(config.elements || []).flatMap(e => [e.ipTypeIn, e.ipTypeOut])].filter(isIpCode))];
+// A pipe end joined to an IP where another pipe end already is takes that end's IP Type (OakBarn Brewery, 2026-11-16, IP Type
+// Hover Help: "When Pipes are Joined, the IPs are auto typed to the join. Once locked, they stay until unlocked. Generally, it is
+// done automatically after your first pipe join"; Panel Updates entry 12). The end already there wins; the end just joined follows.
+// Hoses the same with hoses ("When Hoses are Joined, the IPs are auto typed to the join"); a hose's Quick Disconnect end is
+// fitted by fitOwnedEnds. A pipe and a hose do not change each other here (that waits on OakBarn Brewery's choice), and a
+// 🔒 locked pipe keeps its own. Done only when an end is joined, so after that the type stays until the end is let go and joined
+// again, and a type changed by hand in Properties stays. Returns true when the end changed.
+export function joinIpType(config, p, end) {
+  const id = p?.[end], k = end === 'from' ? 'ipTypeFrom' : 'ipTypeTo';
+  if (typeof id !== 'string' || p.locked) return false;
+  if (p.hose && ipFamily(p[k]) === 'qd') return false;
+  const o = (config.graphics || []).find(o => o !== p && o.kind === 'pipe' && !!o.hose === !!p.hose && (o.from === id || o.to === id));
+  const t = o && (o.from === id ? o.ipTypeFrom : o.ipTypeTo);
+  if (!isIpCode(t) || p[k] === t) return false;
+  p[k] = t; return true;
+}

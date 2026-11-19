@@ -254,3 +254,32 @@ export function takeNeighbour(g, nb, id) {
   if (nb.color) g.color = nb.color;
   return g;
 }
+
+// The pipes a size change goes on to (OakBarn Brewery, 2026-11-16, Default Pipe Size Hover Help: "You can change a pipe size
+// individually and the pipe size will cascade to auto size"; Panel Updates entry 12, Rule 5.36). From the pipe that changed it goes
+// to every pipe on the same IP, and through a pipe fitting to the pipes on its other openings (through(id) gives the other IPs the
+// size passes through: none for a Reducer, a valve, a pump, a vessel or anything else), all the way down the line. A hose never
+// takes part (hoses never auto size), and a 🔒 locked pipe keeps its size and stops the cascade. Returns the pipes to change.
+export function pipeLine(start, graphics, through = () => [], stops = () => false) {
+  const pipes = (graphics || []).filter(g => g?.kind === 'pipe' && !g.hose && g.workspace === start.workspace && g !== start);
+  const seen = new Set([start]), out = [], todo = [start];
+  while (todo.length) {
+    const p = todo.pop();
+    for (const id of [p.from, p.to]) {
+      if (typeof id !== 'string' || stops(id)) continue;       // an IP that is a valve (a Manual Valve) holds its own size
+      for (const ip of [id, ...through(id)]) for (const q of pipes) {
+        if (seen.has(q) || (q.from !== ip && q.to !== ip)) continue;
+        seen.add(q); if (q.locked) continue;
+        out.push(q); todo.push(q);
+      }
+    }
+  }
+  return out;
+}
+// give pipe q the size of pipe p (a Custom size with its number and units)
+export function sameSize(q, p) {
+  q.size = p.size;
+  if (p.size === 'custom') { q.sizeCustom = p.sizeCustom; q.sizeUnits = p.sizeUnits; } else delete q.sizeCustom;
+  if (p.sizeUnits) q.sizeUnits = p.sizeUnits;
+  return q;
+}

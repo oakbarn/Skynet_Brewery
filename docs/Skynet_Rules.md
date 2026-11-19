@@ -920,8 +920,8 @@ Help 155).
   - **A new pipe joined to a pipe takes that pipe's size; hoses never auto size** (OakBarn Brewery, 2026-11-16: "No auto sizing of
     Hoses is correct. If they do, they should not. The auto size of pipes is good ... if you are building a Manifold out of pipe in the
     real world, the logical choice is the next pipe is the same size"): a pipe drawn from, or ending on, an IP that a pipe is on starts
-    at that pipe's size (not the Default Pipe Size), and its IP Types follow. A hose always starts at the Default Hose Size. Nothing
-    cascades along the line yet ("may need more work later", Sandbox Panel Updates #12). The size lists are one
+    at that pipe's size (not the Default Pipe Size), and its IP Types follow. A hose always starts at the Default Hose Size. A pipe's
+    size changed in its Properties now **cascades** down the line (Rule 5.36, Panel Updates entry 12). The size lists are one
     line with no "(Skynet default)" ("Single Line and no Skynet Default").
   - **How many Pixels are Pipes and Hoses to be drawn on a Tab?** (was "How thick a 1/2" pipe is drawn on a new Tab"; "This is a Tab
     Default setting even though it relates to Drawing Pipes and Hoses, but can be reset on a Tabs Property. This affects only new Tabs.
@@ -2179,6 +2179,15 @@ pipe on Save", Help 87).
   start at the Default pipe and hose size.
   *Replaced (2026-11-07):* "Pumps are not pipe fittings: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11,
   5.27)", and "With no pipe or hose on it, it keeps its size".
+- **A pipe size cascades** (OakBarn Brewery, 2026-11-16, Default Pipe Size Hover Help: "You can change a pipe size individually and the
+  pipe size will cascade to auto size"; Panel Updates entry 12, built 2026-11-19): when a pipe's size is changed in its Properties and
+  saved, every pipe joined to it takes the same size: pipes on the same IP, and through an elbow, tee, cross, U, coupling, check valve,
+  Sight Glass or **valve** (Motorized, Proportional, Straight Manual Valve; OakBarn Brewery, 2026-11-19: "Should the size carry on
+  through valves, like a manifold that stays one size? Yes") to the pipes on its other side, all the way down the line. It **stops** at
+  a Reducer, a pump, a probe tee or other inline Device, a Hose Bib, a Valve Tee or Supply Manifold, a vessel, a hose (hoses never auto
+  size) and a 🔒 locked pipe (it keeps its size). The fittings then size to their pipes as above. Only the size changes; the IP Types stay. A
+  short note says how many pipes changed. Changing it back cascades back the same way. *Was (2026-11-16):* "Nothing cascades along
+  the line yet".
 
 5.37 **Grab pop-up: move it alone (🔓 Unlock its IPs), Swap places, and ↩ Put back** (Fritz, 2026-11-07: "I tried to replace the
 Pump in the 3 vessel with a Blichmann Pump I added and it was not easy and never succeeded as the pipes followed the old pump. When we
@@ -2281,6 +2290,15 @@ Attributes as to IP Type that are set by the selected Defaults"; "On Both End").
   every setting the pipe had (size, IP Types, color, Flow Color, lock); only its Name, Label and Show label are its own. A new pipe
   drawn on to a pipe (a corner at an elbow) takes that pipe's size, its IP Type at the joint and its color. Skynet does this in the
   Background and needs no user input (Rule 11.13). Checked by test/pipesplit.test.js for every kind of cut.
+- **Auto typed to the join** (OakBarn Brewery, 2026-11-16, IP Type Hover Help: "When Pipes are Joined, the IPs are auto typed to the
+  join. Once locked, they stay until unlocked. Generally, it is done automatically after your first pipe join"; "When Hoses are
+  Joined, the IPs are auto typed to the join"; Panel Updates entry 12, built 2026-11-19): when a pipe end is joined to an IP where
+  another pipe end already is (dragged on, a moved pipe dropped on, or joined again on Save layout), the end just joined takes the IP
+  Type of the end already there; a hose end joined to a hose the same. It happens only at the join, so the type then stays until the
+  end is let go (🔓 Unlock its ends) and joined again, and one changed by hand in Properties stays. A 🔒 locked pipe keeps its own.
+  **A hose joined to a pipe changes neither** (OakBarn Brewery, 2026-11-19, picked "Keep today: adapter note"): the hose's Quick
+  Disconnect end is FMSSQD as above, the pipe keeps its type, and the Adapter note shows (Rule 5.43). So the sentence "when a Hose is
+  joined to a Pipe, the Pipe IP End Type becomes the Hose End IP Type" is not in the Hover Help.
 - **No mismatch:** two pipe ends on the same IP whose types can't be joined directly (another type, or MPT to MPT, FPT to FPT)
   are joined with an adapter, as in the real brewery, so there is no mismatch and no warning ring (OakBarn Brewery, 2026-11-17:
   "There can be no mismatch because an adapter would be used so no need for Orange Ring"). The IP's Properties say **Adapter: ...**
@@ -5944,6 +5962,7 @@ import.
 - 2026-11-19: Added Rule 18.52 (OakBarn Brewery: "The Hose Bib Graphic should be more like a Motorized Valve with the Vertical and Horizontal. I want the Inlet at the Top or Bottom in addition. Treat the Handle as the "motor""): a Hose Bib gets an Inlet box (Top or Bottom on Vertical, greyed on Horizontal), so it has all 4 Vertical looks, and an Inlet IP on its wall thread: a pipe there shows tap flow while it is open, and a closed valve on that side stops its water (entry 35); Manual Ball and Butterfly Valves grey Left / Right on Horizontal (same both ways); a turned Manual Valve's Label stays upright. Panel Updates sandbox entries 33 and 35. Rule 5.33 note. Help 141, 87 (and French). Checked against both programs: the BruControl Import's Build page shares these dialogs; no import change. Checked on the 3 Vessel sample: its one Hose Bib is Horizontal, so it looks the same.
 - 2026-11-19: Rule 5.37 extended (OakBarn Brewery: "A Pump with No attached Pipes alwaus have free IPs"; "If that does not work, assign inlet outlet IPs one of the 8 each"): a Device or Manual Valve with no pipes, dropped within 30 pixels of let-go open ends, slides onto them; a pump's Inlet and Outlet go on whichever of its 8 IPs the old pump's Inlet and Outlet were on (a new pump now takes a Left pump's pipes), then they join. Help 153 (and French). Checked against both programs: the BruControl Import's Build page uses the Panel's Edit layout code, so it gets the same; no import change. Checked on the 3 Vessel sample (its Left pump replaced by a new Blichmann). (thread "Let a new pump join existing pipes")
 - 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
+- 2026-11-19: Rule 5.36 A pipe size cascades, Rule 5.40 Auto typed to the join, Rule 2.42 Default Tab 3 note (Panel Updates entry 12; OakBarn Brewery's Hover Help sentences now in Help 155 and the Default settings Hover Help, with French; a hose joined to a pipe keeps today's adapter note, his pick).
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Added Rule 2.61 (OakBarn Brewery: "I will have other testers so an easy way for them to report bugs as well"): 🐞 Report a problem (☰ Menu > About) and 🐞 Report on every Help page open a box with 🐞 A bug and 🌐 The French Help, each on GitHub (new issue forms in .github/ISSUE_TEMPLATE, the French one in English and French) or ✉ Email to support@oakbarnbrewery.com; the version, the page and the browser are filled in. Help 205 (and French); next free Help 206. Checked against both programs: the BruControl Import uses the Panel's Help window, so 🐞 Report is there too.

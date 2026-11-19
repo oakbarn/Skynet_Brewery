@@ -56,3 +56,6 @@ assert.equal((app.match(/cutPieces\(p, plan\.pieces, idOf, newId\)/g) || []).len
 assert.ok(!/Object\.assign\(clone\(p\), \{ id: newId\(\) \}\) : p/.test(app), 'no other way of cutting a pipe');
 assert.ok(app.includes('takeNeighbour(g, draft.graphics.find('), 'a drawn pipe joined to a pipe takes after it');
 console.log('panel uses them: ok');
+
+// the size cascade and IP Types on a join (Panel Updates entry 12) run with these
+await import('./pipecascade.test.js');
