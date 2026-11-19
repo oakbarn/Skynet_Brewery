@@ -29,9 +29,11 @@ Là où vous le mettez sur le Build Tab, c'est là qu'il arrive sur son Tab. Le 
 
 ### Le filigrane {#the-watermark}
 
-Une fois le Tab de l'élément choisi, un dessin pâle de ce Tab s'affiche derrière tout sur le Build Tab, comme un filigrane : son image de fond, un contour en pointillés avec le Label de chaque chose qui s'y trouve, ses tuyaux, et **Goes to:** (va vers) avec le nom du Tab en haut à gauche. Alignez votre nouvel élément dessus et il arrivera au bon endroit. Rien dans le filigrane ne peut être cliqué.
+Une copie pâle du Tab où va votre construction s'affiche derrière tout sur le Build Tab, comme un filigrane : le Tab tel qu'il est le jour de brassage (Brew Day), avec chaque Device, Widget, cuve, image, texte et tuyau qui s'y trouve, et **Goes to:** (va vers) avec le nom du Tab en haut à gauche. Servez-vous-en pour placer les nouvelles choses là où elles vont : alignez votre nouvel élément dessus et il arrivera au bon endroit. Rien dans le filigrane ne peut être cliqué.
 
-- Cliquez sur un élément du Build Tab pour voir le filigrane du Tab où il va. Sans rien de choisi, il montre le Tab quand tous les nouveaux éléments vont dans le même.
+- Il s'affiche dès que le Build Tab s'ouvre : le Tab de la case **Tab** dans la barre Edit layout (votre Tab par défaut, ou le Tab d'où vous venez).
+- Cliquez sur un élément du Build Tab pour voir le filigrane du Tab où il va.
+- Un Build pour un Template n'a pas de filigrane, car un Template ne va dans aucun Tab.
 - **🗺 Watermark On** dans la barre Edit layout (il ne s'affiche que sur le Build Tab) l'éteint ; **🗺 Watermark Off** le rallume. Ce navigateur se souvient de votre choix.
 
 ### Il brille jusqu'à ce que vous cliquiez dessus {#it-glows-until-you-click-it}

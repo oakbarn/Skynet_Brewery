@@ -1382,12 +1382,17 @@ and the rest go to the Tab picked in Save Build."
 - **Its spot on the Build Tab is its spot on its Tab** (OakBarn Brewery, 2026-11-12: "Moving an Item on the Build Tab will be the
   Position on the Tab it is sent to when the Build is totally complete"): the Build Tab is at least the size of that Tab, and a build
   that goes to the Tab picked for it keeps its X and Y. Sent to any other Tab, it goes to the middle of that Tab, as before (Rule 4.3).
-- **The Watermark** (OakBarn Brewery, 2026-11-12: "On the Build a shadow background like a water mark diagram of a selected Tab the
-  item is going to only after the Tab attribute is set with the option to turn it off or on on the Menubar of the Build Tab"): once
-  the picked item's Tab is set, a faint drawing of that Tab (its background picture, a dashed outline and Label for each of its items,
-  its pipes, and "Goes to: Tab name") shows behind everything on the Build Tab, so the new item can be placed where it belongs.
-  Nothing in it can be clicked. **🗺 Watermark On / Off** on the Edit layout bar (only on the Build Tab) turns it on or off; this
-  browser remembers the choice. With nothing picked it shows the Tab every new item on the Build Tab goes to, when they all go to one.
+- **The Watermark is the Tab itself** (OakBarn Brewery, 2026-11-19: "the water paper template on a Build Tab should not be an
+  equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): a faint copy
+  of the Tab the build goes to, drawn the way Brew Day shows it (its background picture, every Device, Widget, vessel, picture, text
+  and pipe on it, with their Labels), shows behind everything on the Build Tab, with "Goes to: Tab name" at the top left, so new
+  items can be placed where they belong. Nothing in it can be clicked. It shows **as soon as the Build Tab opens**: the Tab the picked
+  item goes to, else the Tab every new item on the Build Tab goes to (the Build's **Tab** box on the Edit layout bar: the Default Tab,
+  else the Tab it came from, Rule 4.6). A Build for a Template has none (a Template goes to no Tab). **🗺 Watermark On / Off** on the
+  Edit layout bar (only on the Build Tab) turns it on or off; this browser remembers the choice.
+  *Replaced (2026-11-19):* "On the Build a shadow background like a water mark diagram of a selected Tab the item is going to only
+  after the Tab attribute is set" (OakBarn Brewery, 2026-11-12): a faint drawing of that Tab (a dashed outline and Label for each of
+  its items, its pipes) that showed only once the picked item's Tab was set.
 - **It glows until clicked** (OakBarn Brewery, 2026-11-12: "when first Moved to a Regular Tab ... we need the Border to glow red with a
   slow pulse so easy to find. As soon as clicked, the Border reverts to normal."): each item Finish Build moves onto a regular Tab has a
   slowly pulsing red glow around it until it is clicked (in Edit layout or on Brew Day). It is never saved; reloading the page ends it.
@@ -5779,6 +5784,7 @@ import.
 - 2026-11-17: Rule 6.19 changed (OakBarn Brewery's markup "Update Panel" and his answers to Panel Updates Sandbox entries 3 and 4, built after "Ok lets get all the decided ones done first"): the Heating Element list has a row for each method, each making one Heating Element that opens on that method's Settings; **PWM** is a new method (`.power`); one PID row and one Precise row, the Port picked decides PWM or a plain Port (the PWM switch follows the Port); the separate Duty Cycle, Hysteresis, PID and Deadband Devices are no longer added (ones already saved keep working); Deadband stays a method. Help 150, 126, 137 (and French), Device Library. Checked against the BruControl Import program: it shares heatmethod.js and the method dialogs, so a joined element can use PWM too; it still builds joined Heating Elements the same way, and a lone BruControl PID or Deadband with Pwm set keeps its PWM switch.
 ## Change log
 
+- 2026-11-19: Rule 4.1 The Watermark changed (OakBarn Brewery: "the water paper template on a Build Tab should not be an equipment profile but the tab with all the widgets. The water paper is to help preplace items (devices and widgets)"): the Watermark is now a faint copy of the whole Tab the build goes to, the way Brew Day shows it (every Device, Widget, vessel, picture, text and pipe), not dashed outlines; it shows as soon as the Build Tab opens (the picked item's Tab, else the Build's Tab box: the Default Tab or the Tab it came from); a Build for a Template has none. Help 55 (and French). Checked against both programs: the BruControl Import's Build page uses the same Build Tab, so it gets the same Watermark; nothing is saved, so no Schema changes. Checked on the 3 Vessel sample (Brew House). (thread "Make Build Tab water paper show a Tab")
 - 2026-11-19: Rule 19.10 #3 fixed (OakBarn Brewery: "504 not officail templates/vessel/Chillzilla.json added"): the Chillzilla Template file is moved to Delete/ (Rule 15.3, it had been deleted) and added to the retired files that the Official Skynet check moves to backups/retired_files_<date> on a Brain an older Setup put it on. Checked against both programs: the BruControl Import ships in the same Setup and is checked by the same Official Skynet check.
 - 2026-11-19: Added Rule 10.11 (OakBarn Brewery: "Check only things that affect the 3 Vessel sample and no other schema or tab"): a change that could touch what is on a Schema is checked and fixed only on the 3 Vessel Sample. Checked against both programs: the BruControl Import has no Sample Schema, so nothing changes there.
 - 2026-11-19: Added Rule 2.61 (OakBarn Brewery: "I will have other testers so an easy way for them to report bugs as well"): 🐞 Report a problem (☰ Menu > About) and 🐞 Report on every Help page open a box with 🐞 A bug and 🌐 The French Help, each on GitHub (new issue forms in .github/ISSUE_TEMPLATE, the French one in English and French) or ✉ Email to support@oakbarnbrewery.com; the version, the page and the browser are filled in. Help 205 (and French); next free Help 206. Checked against both programs: the BruControl Import uses the Panel's Help window, so 🐞 Report is there too.
