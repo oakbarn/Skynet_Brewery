@@ -32,6 +32,24 @@ Sur tout autre écran (et sur un Brain Raspberry Pi), Admins seulement :
 
 Le Brain reste en veille, même après un redémarrage ou une coupure de courant, jusqu'à ce qu'un Admin le relance.
 
+## ☰ Menu > ⏼ Shut down the Brain's computer {#menu-shut-down-the-brain-s-computer}
+
+Éteint l'ordinateur (ou le Raspberry Pi) sur lequel tourne le Brain, pas seulement Skynet (règle Skynet 6.40). Pratique pour un Raspberry Pi sans écran ni clavier : éteignez-le depuis votre téléphone avant de le débrancher. Admins seulement, depuis n'importe quel écran, et aussi depuis la page Standby.
+
+C'est **désactivé** jusqu'à ce qu'un Admin l'active, pour que personne ne se fasse demander « Éteindre le Brain ? » chaque fois qu'un navigateur se ferme : **Settings > Panel settings > The Brain > Shut Down Brain Option**, puis **Save**. Désactivé, le choix n'est pas du tout dans le ☰ Menu.
+
+1. Ouvrez **☰ Menu**. En bas, choisissez **⏼ Shut down the Brain's computer**.
+2. La même boîte avec ses cases à cocher (brassage, autres écrans), et **Back** pour ne rien changer.
+3. Cliquez sur **⏼ Shut down the computer**. Chaque sortie est éteinte, chaque Process s'arrête, le Brain s'arrête, puis l'ordinateur s'éteint. Chaque écran affiche **The Brain's computer is shutting down**.
+
+**Le relancer :** rien sur un écran ne peut allumer un ordinateur. Allumez-le à la main (un Raspberry Pi : débranchez son alimentation et rebranchez-la). Un Brain qui était en veille est toujours en veille quand il démarre.
+
+Pourquoi pas quand le navigateur se ferme ? Un navigateur ne peut pas dire au Brain qu'une fenêtre a été fermée (un téléphone qui perd le WiFi y ressemble), et un brassage ne doit jamais s'arrêter parce qu'une fenêtre a été fermée. C'est donc un choix du ☰ Menu.
+
+- **Windows** : Windows attend 10 secondes, pour que le Brain s'arrête d'abord. Aucun droit d'administrateur n'est nécessaire.
+- **Raspberry Pi et Linux** : l'installateur Skynet permet cette seule commande (éteindre l'ordinateur) sans mot de passe, et rien d'autre. Un Pi installé avant cet ajout affiche **This computer does not let Skynet turn it off** : relancez une fois l'installateur Skynet. Rien ne s'arrête quand il affiche cela.
+- **Mac** : la première fois, macOS peut demander de laisser Skynet contrôler **System Events** : cliquez sur **OK**.
+
 ## Menu Démarrer > Skynet Brewer > Stop the Skynet Brain {#start-menu-skynet-brewer-stop-the-skynet-brain}
 
 Sur un Brain Windows, ceci arrête le Brain qui tourne en arrière-plan, chaque sortie éteinte d'abord, même quand aucune fenêtre du panel n'est ouverte.

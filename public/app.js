@@ -398,7 +398,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
-  es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
+  es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by, d.poweroff); });
   es.addEventListener('standby', e => showStandby(JSON.parse(e.data)));      // an Admin put the Brain in Standby (Rule 6.32)
   es.addEventListener('waking', () => { const m = $('.standbyPage .muted'); if (m) m.textContent = 'An Admin is starting the Brain ... this page comes back by itself.'; waitForBrain(); });
   es.addEventListener('boil', e => renderBoilTemp(JSON.parse(e.data)));
@@ -15578,39 +15578,49 @@ function menuItems(list, go) {
   if (S.me?.role === 'admin' && !S.importBuild) list.append(h('hr'), S.closable && S.onBrain
     ? item('⏻ Close Skynet Panel and the Brain', guard(() => brainStopDialog('close')), { title: 'Turn everything Off, stop the Brain on this computer and close this window' })
     : item('💤 Put the Brain in Standby', guard(() => brainStopDialog('standby')), { title: 'Turn everything Off and let go of the boards. An Admin starts the Brain again from any screen' }));
+  // Rule 6.40 (OakBarn Brewery, 2026-11-20, Panel Update 7): only when an Admin turned on Shut Down Brain Option, so nobody is asked
+  // "shut down the Brain?" every time a browser closes
+  if (S.me?.role === 'admin' && !S.importBuild && S.config?.brewDefaults?.shutDownBrain)
+    list.append(item('⏼ Shut down the Brain\'s computer', guard(() => brainStopDialog('poweroff')), { title: POWEROFF_TIP }));
 }
+const POWEROFF_TIP = 'Turn everything Off, stop the Brain and turn off the computer (or Raspberry Pi) it runs on. Someone has to turn it on again by hand.';
 // ☰ Menu > Close Skynet Panel and the Brain / Put the Brain in Standby (Rule 2.25, Rule 6.32, OakBarn Brewery 2026-11-14: "Give a
 // Warning if others are connected prior to shut down. The Back out above would allow an Admin user to not shut down the Brain").
 // Every warning has its own tick box; the button works only once each is ticked. Back changes nothing.
 async function brainStopDialog(kind) {
   const info = await api('GET', '/ui/screens');
-  const close = kind === 'close';
-  const warn = [close
+  const close = kind === 'close', off = kind === 'poweroff';
+  const warn = [off
+    ? 'Everything is turned Off, every Process stops, the Brain stops and the Brain\'s computer (or Raspberry Pi) turns off.'
+    : close
     ? 'Everything is turned Off, every Process stops and the Brain on this computer stops. This window closes.'
     : 'Everything is turned Off, every Process stops and the Brain lets go of the boards. Every screen shows only "The Brain is in Standby".'];
   if (info.brewing) warn.push('You are brewing. ' + [info.on.length ? 'On now: ' + info.on.join(', ') + '.' : '', info.processes.length ? 'Running: ' + info.processes.join(', ') + '.' : ''].filter(Boolean).join(' '));
   if (info.others.length) warn.push(`${plural(info.others.length, 'other screen')} ${info.others.length === 1 ? 'has' : 'have'} the panel open and will lose it: `
     + info.others.map(o => `${o.name} (${o.device})`).join(', ') + '.');
-  warn.push(close
+  warn.push(off
+    ? 'Nothing can start it again from a screen: someone has to turn the computer on by hand (a Raspberry Pi: unplug and plug in its power).'
+    : close
     ? 'To start it again, double-click Skynet Brewer on this computer.'
     : 'Only an Admin can start the Brain again: sign in on any screen, then click Start on the Standby page.');
+  const title = off ? '⏼ Shut down the Brain\'s computer?' : close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?';
   return new Promise(done => {
     const d = $('#valDlg'); d.innerHTML = '';
-    const go = h('button', { type: 'button', class: 'big danger', disabled: true }, close ? '⏻ Close the panel and the Brain' : '💤 Put the Brain in Standby');
+    const go = h('button', { type: 'button', class: 'big danger', disabled: true }, off ? '⏼ Shut down the computer' : close ? '⏻ Close the panel and the Brain' : '💤 Put the Brain in Standby');
     const back = h('button', { type: 'button', class: 'big primary', onclick: () => { d.close(); done(false); } }, 'Back');
     const ticks = warn.map(() => h('input', { type: 'checkbox' }));
     for (const t of ticks) t.onchange = () => { go.disabled = !ticks.every(x => x.checked); };
     go.onclick = guard(async () => {
       go.disabled = true; d.close();
-      await api('POST', close ? '/ui/close' : '/ui/standby');
-      if (close) showClosed(S.me?.name); else showStandby({ by: S.me?.name, at: Date.now() });
+      await api('POST', off ? '/ui/poweroff' : close ? '/ui/close' : '/ui/standby');
+      if (off || close) showClosed(S.me?.name, off); else showStandby({ by: S.me?.name, at: Date.now() });
       done(true);
     });
     // the Freeze (OakBarn Brewery, 2026-11-14: "Apply the Freeze to any dialog that is updated", Rule 2.51): the title and the buttons
     // stay at the top while the warnings scroll under them, and there is no bottom row
     d.classList.add('frozenDlg');
     d.addEventListener('close', () => d.classList.remove('frozenDlg'), { once: true });
-    d.append(h('div', { class: 'frozenHead' }, h('div', { class: 'vdTitle' }, close ? '⏻ Close Skynet Panel and the Brain?' : '💤 Put the Brain in Standby?'),
+    d.append(h('div', { class: 'frozenHead' }, h('div', { class: 'vdTitle' }, title),
       h('div', { class: 'vdBtns' }, back, go)),
       h('div', { class: 'vdText', style: 'max-width:480px;margin:8px 0 12px' }, ...warn.map((w, i) => h('label', { style: 'display:flex;gap:8px;align-items:flex-start;margin:8px 0' }, ticks[i], h('span', {}, w)))));
     d.oncancel = e => { e.preventDefault(); d.close(); done(false); };
@@ -15636,17 +15646,23 @@ function showStandby(st) {
     h('h2', {}, '💤 The Brain is in Standby'),
     h('p', {}, `${st.by || 'An Admin'} put the Brain in Standby${when ? ' on ' + when : ''}. Everything is Off and no Process runs.`),
     admin ? start : h('p', {}, 'Only an Admin can start it again.'),
-    admin ? '' : signIn, msg));
+    admin ? '' : signIn,
+    admin && S.config?.brewDefaults?.shutDownBrain ? h('button', { type: 'button', class: 'big', title: POWEROFF_TIP, onclick: guard(() => brainStopDialog('poweroff')) }, '⏼ Shut down the Brain\'s computer') : '', msg));
 }
 // After Start: the Brain stops and starts again, then the page loads fresh
 function waitForBrain(tries = 0) {
   setTimeout(() => api('GET', '/ui/state').then(st => { if (st.standby && tries < 60) return waitForBrain(tries + 1); location.reload(); })
     .catch(() => { if (tries < 60) waitForBrain(tries + 1); else location.reload(); }), 1500);
 }
-function showClosed(by) {
-  if ($('.closedPage')) return;      // the page that closed it hears it twice: from its own click and from the Brain
+function showClosed(by, poweroff = false) {
+  if ($('.closedPage:not(.standbyPage)')) return;      // the page that closed it hears it twice: from its own click and from the Brain
   // covers the whole page (the page itself stays, so nothing on it breaks while it closes)
   for (const d of $$('dialog[open]')) d.close();
+  // ☰ Menu > Shut down the Brain's computer (Rule 6.40)
+  if (poweroff) return void document.body.append(h('div', { class: 'closedPage' },
+    h('h2', {}, 'The Brain\'s computer is shutting down'),
+    h('p', {}, by ? by + ' shut down the Brain\'s computer. Everything is Off.' : 'The Brain\'s computer was shut down. Everything is Off.'),
+    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, turn the Brain\'s computer on (a Raspberry Pi: unplug and plug in its power), then reload this page.')));
   document.body.append(h('div', { class: 'closedPage' },
     h('h2', {}, 'Skynet Brewer is closed'),
     h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
@@ -16210,11 +16226,15 @@ function renderDefaultTab(box) {
 // things like the Theme or Pulse button (and anything that affects existing Device, Tabs etc to only be in settings as the are more
 // Settings than defaults. No need to even mention on Default Tab"). They change what is already made, so they are Settings (Rule 2.42).
 // Saved with the Default tab's values (brewDefaults), so nothing is moved on the Brain.
+const SHUTDOWN_OPTION_TIP = 'On: Admins get ☰ Menu > Shut down the Brain\'s computer, which turns everything Off and then turns off the computer (or Raspberry Pi) the Brain runs on. Off: nobody can shut it down from Skynet.';
 const panelSetFields = w => [
     // Units (OakBarn Brewery, 2026-11-16, Default Tab 3: "This is not a default but a Skynet Setting that resides in the Brain";
     // "Units are set by the Skynet Panel Setting and not by Recipe Level Hover Help will be set in the Skynet Settings and not here")
     ['_un', 'Units', 'head'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true, false, { tip: 'US (gallons, pounds, °F) or Metric (liters, kilograms, °C). Every amount, temperature and Recipe shows in it, on every screen. Skynet keeps the numbers the same inside, so changing it only changes how they show.' }],
+    // Shut Down Brain Option (Rule 6.40, OakBarn Brewery, 2026-11-20, Panel Update 7): Off unless an Admin turns it on
+    ['_br', 'The Brain', 'head'],
+    ['shutDownBrain', 'Shut Down Brain Option', 'bool', false, false, false, { tip: SHUTDOWN_OPTION_TIP }],
     ['_ts', 'Tabs', 'head'],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['_m', 'Menu Bar', 'head'],
@@ -16246,7 +16266,7 @@ const panelSetFields = w => [
     ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav, or a web link to an MP3)', 'text', null, false, false, { tip: 'Empty: none.' }],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]]];
-const PANEL_SET_KEYS = ['units', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
+const PANEL_SET_KEYS = ['units', 'shutDownBrain', 'tabStyle', 'hideMenuBar', 'soundOnStart', 'startZoom', 'startFullScreen', 'textLarge', 'hoverDelay', 'pushLockout', 'touchEdit', 'touchMove',
   'grainLabelVisible', 'ppgLabel', 'hopWarnMinutes', 'alertMergeMinutes', 'hopAlertSound', 'speakAlerts', 'voiceName'];
 function renderPanelSettings() {
   const box = $('#panelSet'); if (!box) return;

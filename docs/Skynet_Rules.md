@@ -3526,6 +3526,26 @@ warning), the **Highest temperature** (the Setpoint + 10 °F, 5 °C, to start), 
   dialogs, nothing else changes there.
 Help 237 (and French); Help 156 points to it.
 
+6.40 **Shut down the Brain's computer** (OakBarn Brewery, 2026-11-20, Panel Update 7: "We need a method to shut down a Brain when
+you exit but reserved only for admin users And maybe a Skynet Setting to avoid option until set to Shut Down Brain Option is True in
+settings so no annoying Do you want to shut down the Brain every time an Admin closes the browser"; "Only Admin users are allowed to
+set Skynet Settings").
+1. **Shut Down Brain Option** (Settings > Panel settings > The Brain, a switch): **Off** to start. Only an Admin changes it (every
+   Skynet Setting is Admins only: the Brain refuses a change from anyone else, and the Settings page is greyed for them).
+2. **☰ Menu > ⏼ Shut down the Brain's computer**: shown only to an **Admin**, only when the Option is On; on any screen, and as a
+   button on the Standby page (Rule 6.32). With the Option Off nobody sees it and the Brain refuses it.
+3. It is a ☰ Menu choice, **never asked when a browser closes**: a browser can't tell the Brain a window was closed (a phone that
+   lost WiFi looks the same), and closing a window never stops the Brain (Rule 2.25).
+4. **The same box as Close and Standby** (Rule 2.25): what happens, brewing (what is On, which Processes run), other screens named,
+   one tick box each, **Back** changes nothing. Then the normal stop (every output Off, every Process stopped, a brew written down,
+   Rule 6.31) and the computer turns off. Every screen shows "The Brain's computer is shutting down". Standby stays as it was.
+5. **How** (lib/brainoff.js): Windows `shutdown.exe /s /t 10` (no admin rights); Raspberry Pi and Linux `sudo -n systemctl poweroff`,
+   which the Pi and Linux installers allow without a password and nothing else (/etc/sudoers.d/skynet-brewer-poweroff); Mac System
+   Events "shut down". Checked **before** anything stops: a computer that refuses leaves everything running and says why (Pi: run
+   the installer again once).
+6. **Both programs:** the BruControl Import program controls nothing and never shuts down the computer; nothing changes there.
+Help 95, 9 (and French).
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -6376,6 +6396,7 @@ import.
 
 - 2026-11-20: Rule 2.63 extended (Panel Updates entry 29 Parts 2-4 and question (c), OakBarn Brewery: "KISS"): Change of Board shows the counts and the Devices whose Ports the new board lacks, then Save, with no typed confirmation; the USB Port is a dropdown of the ports on this Brain with 🔄 Look again and a saved port not found shown in red; a Simulator line keeps the real port; the Interface ID balloon gets the Suggested Device Name line; USB Port and Answer Wait balloons reworded (drafts A and B). Help 76 (and French). Checked against the BruControl Import program: its Build page shares the pop-up and gets the same port list. (thread "Make removing an Interface safer")
 - 2026-11-20: Rule 9.12 extended (OakBarn Brewery: "A for font rule", Panel Updates entry 45, Help in a User Language): fonts under the SIL Open Font License 1.1 (OFL) are allowed, with the license file shipped next to them and a row in Media_Licenses.csv.
+- 2026-11-20: Added Rule 6.40 Shut down the Brain's computer (OakBarn Brewery, Panel Update 7: "a method to shut down a Brain when you exit but reserved only for admin users"; "a Skynet Setting ... Shut Down Brain Option"; "Only Admin users are allowed to set Skynet Settings"): Settings > Panel settings > The Brain > Shut Down Brain Option (Off to start); ☰ Menu > ⏼ Shut down the Brain's computer and a Standby page button, Admins only, with the Close and Standby tick box box; Windows, Pi, Linux and Mac; the Pi and Linux installers allow only the poweroff command. Help 95, 9 (and French). Checked against both programs: the BruControl Import is unchanged. (thread "Let admins shut down the Brain")
 - 2026-11-20: Added Rule 2.63 Removing an Interface is safe (OakBarn Brewery, Panel Updates entry 29, Parts 1 and 5, approved "29 ... yes"): the browser's OK box replaced by one Skynet box that lists what uses the Interface, ▶ Move them to another Interface (Port clashes listed, those Devices stay), and one warning with the Interface ID typed to light up 🗑 Delete; a large warning balloon on the Remove button; a Device whose Interface was removed shows ⚠ No Interface. Help 76 (and French). Checked against the BruControl Import program: it has no Interface Remove; nothing changes there. (thread "Make removing an Interface safer")
 - 2026-11-19: Added Rule 6.39 PID Auto-tune (OakBarn Brewery, Panel Updates entry 25: "And you can set up Autotune for the Precise?"; "Sure"): a 🎯 Auto-tune button in the PID and Precise Settings; a relay auto-tune on the Brain finds Kp, Ki, Kd and the Hold output %; Highest temperature, Stop and time limit; Use or Keep old. Help 237 new, Help 156 (and French). Checked against the BruControl Import program: it has no running Brain, so no button there; the shared method dialogs are otherwise unchanged. (thread "Add PID Auto-tune")
 - 2026-11-20: Rules 3.4 and 3.17 (OakBarn Brewery, option A "Yes: ß=ss, æ=ae, ø=o"): in a Suggested Name ß, æ, ø (and œ, đ, ł, þ) are spelled ss, ae, o instead of becoming ~ (public/letters.js), so Labels in German, Danish and Norwegian give Names that read like them; the Tab Vessel, Vessel Widget and Fermentor names now keep accented letters plain too (Café gave Caf). Names already saved never change. Help 63 (and French), docs/Special_Characters.md. Checked against both programs: the BruControl Import uses the same naming code (public/naming.js). (thread "Make all Help picture text translatable")
