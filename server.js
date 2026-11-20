@@ -243,7 +243,7 @@ engine.templates = templates;      // place_Chiller = Immersion_Chiller, BK_Vess
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. skn_rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
-engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list(), eff: brewOnEfficiency(store.config, profiles) });
+engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list(), eff: brewOnEfficiency(store.config, profiles) }, { kept: true });      // a Process reads them in metric (Rule 2.59)
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 // The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
 const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));

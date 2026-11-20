@@ -22,7 +22,8 @@ Une sonde lit une température, donc elle n'a **ni Cover, ni Toggle, ni Overlay*
      Le Graphic et ses IP tournent avec lui.
    - **Probe type**, grisé : la sorte choisie. Le **⬢** à côté contient ses réglages (fils et résistance de référence d'une
      RTD, type de thermocouple, valeurs de la thermistance, tension de la carte, réglages du simulateur).
-   - **Units** (°F ou °C) et **Decimals** sur une ligne.
+   - **Units** (°F ou °C) et **Decimals** sur une ligne. Units est l'unité dans laquelle la sonde garde ses nombres ; une nouvelle sonde commence en °C.
+     Ce que vous voyez et tapez suit toujours ☰ Menu > Settings > Units, donc un brasseur US voit toujours des °F (Skynet Rule 2.59).
    - **Display** : comment la lecture s'affiche sur son Tab : un **Number**, des **LCD digits**, des **LED digits** ou le **Skynet Dial** ; le ⬢ à côté contient les réglages du cadran ([Le cadran Skynet et les chiffres du minuteur](152-skynet-dial-and-timer-digits)). La lecture et son unité restent toujours sur une seule ligne (212.0 °F, et même 9999.9 °F) : quand elles sont plus larges que la case, les chiffres rapetissent pour tenir, puis reprennent leur taille quand la lecture redevient courte (Skynet Rule 2.56).
    - **Calibration offset** (ajouté à chaque lecture) et, sur la même ligne, **Database and .API ⬢** (aide 98).
    - **X**, **Y**, **Width** et **Height**, et le **Device Type** grisé (par exemple **TEMP@1W** : une sonde DS18B20, 1W, sur un port de température, TEMP ; le Suggested Name d'une DS18B20 a plutôt son 1-Wire Index, par exemple BM1w1_1_HLT_BH).

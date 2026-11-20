@@ -56,7 +56,7 @@ Une nouvelle recette n'a pas besoin d'une nouvelle construction : les Processes 
 
 ## Valeurs de la recette {#recipe-values}
 
-Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. Ils sont en lecture seule dans un Process (changez-les dans la recette), et ils sont dans les unités du panel (☰ Menu > Default > Units).
+Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. Ils sont en lecture seule dans un Process (changez-les dans la recette). En coulisse, un Process travaille en métrique : une température est en °C, un volume en litres et un poids en kilogrammes, quel que soit Units (Skynet Rule 2.59) : `{{HLT_Heater}}.setpoint = skn_rcp_Strike_Temp` est juste en US aussi. Dans un message (un texte joint avec `+` dans un `ask`, `print` ou `show`, ou un `print` de la valeur seule), le nombre s'affiche dans vos Units (☰ Menu > Settings > Units) : `"Heat to " + skn_rcp_Strike_Temp + skn_rcp_Temp_Units` donne **Heat to 165.2°F** en US. Un nombre ajouté dans une formule est en °C (`skn_rcp_Boil_Start_Temp + 5` est 5 °C plus chaud). Les ingrédients de la recette dans leur propre unité (les oz ou g d'un houblon, l'Irish Moss ou le Yeast Nutrient en grammes, les Packs d'une levure) ne sont jamais convertis : ils sont seulement à lire.
 
 | Nom | Ce que c'est |
 |---|---|
@@ -74,7 +74,7 @@ Les Templates lisent la recette par des noms qui commencent par **`skn_rcp_`**. 
 | `skn_rcp_Hop_Stand_High`, `skn_rcp_Hop_Stand_High_Temp`, `skn_rcp_Hop_Stand_High_Minutes` (et `_Middle_`, `_Low_`) | true quand ce Hop Stand a des houblons Whirlpool ; où le refroidissement s'arrête pour eux et combien de temps il tient |
 | `skn_rcp_Hop_Infuser` | true quand un houblon Whirlpool passe par le Hop Infuser (Hop Rocket) |
 | `skn_rcp_Ferment_Temp` | température de fermentation et d'ensemencement |
-| `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F ou °C, gal ou L, lb ou kg |
+| `skn_rcp_Temp_Units`, `skn_rcp_Volume_Units`, `skn_rcp_Weight_Units` | °F ou °C, gal ou L, lb ou kg : les mots de vos Units, pour les messages |
 
 Tant qu'aucune recette n'est chargée, les valeurs viennent du Tab **☰ Menu > Default** : son Mash Profile et son Boil Profile. La température d'empâtage est calculée à partir du premier palier (rapport eau/grain 1.5 qt/lb ou 3.1 L/kg, grain à 68 °F ou 20 °C). PreBrew demande toujours d'abord une recette.
 

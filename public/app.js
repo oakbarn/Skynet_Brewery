@@ -5735,7 +5735,7 @@ const ADD_MENU = [
   // the Hydrometer Templates (OakBarn Brewery, 2026-11-09, Rule 6.25, public/hydrometer.js): one Hydrometer Device, its Template picks
   // which of its settings it uses (the rest are greyed out); on a virtual port 200, 201 ...
   ['Devices: hydrometers (Tilt, iSpindel, RAPT Pill ...)', HYDRO_MODEL_KEYS.map(k => [`${HYDRO_MODELS[k].label} hydrometer (${HYDRO_MODELS[k].conns.map(c => HYDRO_CONNECTIONS[c].replace(/[:(].*$/, '').trim()).join(' or ')})`, 'hydrometer', 'Hydro',
-    { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°F', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
+    { model: k, connection: HYDRO_MODELS[k].conns[0], gravityUnits: 'SG', tempUnits: '°C', precision: HYDRO_MODELS[k].decimals, avgWeight: HYDRO_MODELS[k].smooth, ...(HYDRO_MODELS[k].conns[0] === 'bluetooth' ? {} : { api: 'get' }) }])],
   ['Devices: weight', [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
@@ -5761,6 +5761,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (pick === 'thermowell') return newThermowell(extra.length);
   if (pick === 'manual') extra = { ...extra, units: showUnits() === 'Metric' ? '°C' : '°F', volumeUnits: showUnits() === 'Metric' ? 'L' : 'gal' };      // a Manual vessel starts in the Units (Rule 2.59)
   if (pick === 'probeTee') return newProbeTee(extra.tee);
+  if (pick === 'temperature') extra = { units: '°C', ...extra };      // a new probe keeps its numbers in °C; it shows in the Units (Rule 2.59)
   if (pick === 'mbv') {      // Motorized Ball Valve (Fritz, 2026-11-05): step 2 picks the valve, then the Add box (the Pump's drill-down)
     if (!TPL) await loadTemplates().catch(() => {});
     const k = await pickValve(); if (!k) return;
@@ -6873,7 +6874,7 @@ async function newProbeTee(kind) {
   const t = PROBE_TEES[kind]; if (!t) return;
   const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°C', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
@@ -6884,7 +6885,7 @@ async function newThermowell(length) {
   const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
   const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°C', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
   if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
@@ -7028,7 +7029,7 @@ function applyRims(g, w, tab, label) {
   // its Control is the method a Heating Element starts with (Rule 6.19): one Heating Element, not a separate PID or Hysteresis Device
   if (HEAT_CTL_TYPES.includes(heat.type)) { heat.heatMethod = TYPE_METHOD[heat.type]; heat.type = 'digitalOut'; heat.subtype = 'element'; }
   heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.label ??= base + ' Heat';
-  const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
+  const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°C', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
   Object.assign(temp, clone(tk));
   if (ow) { temp.probeIndex = +w.tempProbe; temp.owCircuit = owCircuitOf({ owCircuit: w.tempProbeCircuit }); delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; delete temp.owCircuit; }
