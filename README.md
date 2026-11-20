@@ -54,14 +54,13 @@ The following are the way I build any software, as I have learned to follow them
 13. **Use a back house Meaningless Key to store, fetch and put** (Design Rule #2). That means you can easily change a name and the data will still be retrieved. Years ago, when I was building a PayPhone Accounting Program (for people who provided payphones), the friend I was writing it for told me that a payphone number never changed and we could use it as a key because each was unique. Stupid me. I did not have this rule, and 2 years later, when there was an area code split, half the phones needed to be changed. It was a major rewrite that would not have been necessary if I had had this rule.
 14. **Allow a User to make the Program his own.** Allow the user to decide which things are shown on a screen or not.
 15. **Keep user tasks as simple as possible.** Lead by the nose if possible. Use Predictive Text, but be able to turn it off. If you cannot turn off Predictive Text = Annoying!
-16. **Have an Undo if possible, rather than a warning on Saving.**
+16. **Have an Undo if possible, rather than a warning on Saving.** And nothing is ever written over: in the Skynet Panel a Schema backup is made every time a change is saved, so an earlier version can always be got back.
 
 **From the Skynet Rules** ([docs/Skynet_Rules.md](docs/Skynet_Rules.md) is the full list):
 
 17. **Never Take Away, Only Add** (Design Rule #1). An update adds things; it does not remove what users already have. Together with the Meaningless Key of item 13 (Design Rule #2): "90% of issues with software updates are removed if you follow those rules."
 18. **KISS: Keep It Simple Stupid.** No clutter. Dialogs stay clean, and the explanations go in the Hover Help (Rule 2.38).
 19. **Correct spelling and plain English at all times** (Rule 2.37).
-20. **Nothing is ever written over.** A Schema backup is made every time a change is saved (Rule 9.17), so an earlier version can always be got back.
 
 ## 1. Install and run
 
