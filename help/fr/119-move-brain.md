@@ -46,7 +46,7 @@ Faire le fichier ne change rien sur l'ancien Brain. Gardez l'ancien Brain tel qu
 3. Sous **2. On the NEW Brain**, choisissez le fichier, tapez le **Move password** et cliquez sur **⬆ Bring in the file**. Le panel vérifie
    le fichier et dit d'où il vient et combien de fichiers il contient. Un mauvais mot de passe ou un fichier abîmé est refusé, et rien n'est
    changé.
-4. Cliquez sur **🚚 Move in now** et répondez **OK**. Chaque sortie s'éteint et les Processes qui tournent s'arrêtent. Le panel s'arrête et, en
+4. Cliquez sur **🚚 Move in now**, puis encore sur **🚚 Move in now** dans la boîte Skynet qui demande (Close ne change rien). Chaque sortie s'éteint et les Processes qui tournent s'arrêtent. Le panel s'arrête et, en
    redémarrant, les fichiers de l'ancien Brain prennent la place de ceux du nouveau.
    - Sur un **Pi** (Skynet tourne comme service), il redémarre tout seul après quelques secondes. Rechargez la page après environ 15 secondes.
    - Sur un **ordinateur**, la fenêtre Skynet Brewer se ferme : double-cliquez sur **Skynet Brewer** pour le redémarrer, puis rechargez la page.
@@ -62,9 +62,13 @@ Une carte en USB a un nom de port différent sur chaque sorte de Brain : **COM3*
 cartes sur le nouveau Brain et ouvrez **☰ Menu > Move Brain**. Sous **3. USB ports** :
 
 - Chaque ancien port est listé une fois, avec les Interfaces (et leurs Schemas) qui l'utilisent, et la carte que l'ancien Brain y voyait.
-- **Change to** liste les ports USB que ce Brain voit maintenant. Une carte que l'ancien Brain voyait est **trouvée par son numéro de série et choisie
-  pour vous**. Quand il ne reste qu'une carte, elle est choisie aussi. Vérifiez chacune.
-- **Keep** laisse le port tel quel (pour une carte pas encore branchée). Cliquez sur **🔄 Look again** après en avoir branché une.
+- **Change to** est la même liste USB Port que la fenêtre Interface : les ports USB que ce Brain voit maintenant, avec ce qui est branché et son
+  numéro de série. Sous Windows, un port s'affiche par son numéro (COM3 s'affiche 3). Une carte que l'ancien Brain voyait est **trouvée par son numéro
+  de série et choisie pour vous**. Quand il ne reste qu'une carte, elle est choisie aussi. Vérifiez chacune.
+- L'ancien port est toujours dans la liste. Choisissez-le pour **garder** le port tel quel (pour une carte pas encore branchée). Quand il
+  n'est pas sur ce Brain, il s'affiche en rouge : **⚠ COM3 (not found on this Brain)**.
+- Vous avez branché une carte ? Choisissez **🔄 Look again** en bas de la liste (ou le bouton) : les ports sont relus et ce que vous
+  avez déjà choisi reste choisi.
 - Cliquez sur **💾 Save USB ports**. Chaque Schema qui utilise ce port change tout de suite, et les cartes du Schema chargé se reconnectent.
 
 Vous pouvez utiliser **USB ports** à tout moment, pas seulement après un déménagement, par exemple après avoir branché une carte sur une autre prise USB.

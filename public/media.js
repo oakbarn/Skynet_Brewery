@@ -1,6 +1,7 @@
 // Media page: add pictures and sounds to the Brew Panel computer (Raspberry Pi) from any browser.
 // Looks and works like Windows File Explorer: folder tree on the left, files on the right, address bar, drag to move.
 // PNG / JPG files get their SVG copy automatically (see Settings > Pictures).
+import { skyConfirm } from './skyconfirm.js';      // the one shared Skynet confirm box (Rule 2.64)
 const $ = s => document.querySelector(s);
 const el = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -157,14 +158,14 @@ async function rename(p, name) {
   try { await call('POST', '/ui/media/rename', { root, from: p, to: join(parent(p), to) }); render(); say('Renamed. Elements that used the old name need the new path.'); } catch (e) { say(e.message, true); }
 }
 async function removeMany(paths) {
-  if (!paths.length || !confirm(`Delete these ${paths.length} items from the Brew Panel computer?\n${paths.map(f => f.split('/').pop()).slice(0, 15).join('\n')}${paths.length > 15 ? '\n...' : ''}`)) return;
+  if (!paths.length || !await skyConfirm(`Delete these ${paths.length} items from the Brew Panel computer?\n\n${paths.map(f => f.split('/').pop()).slice(0, 15).join('\n')}${paths.length > 15 ? '\n...' : ''}`, { ok: '🗑 Delete' })) return;
   const errors = []; let done = 0;
   for (const p of paths) { try { await call('POST', '/ui/media/delete', { root, path: p }); done++; } catch (e) { errors.push(`${p.split('/').pop()}: ${e.message}`); } }
   selected.clear(); render();
   if (errors.length) say(`Deleted ${done}. ${errors[0]}${errors.length > 1 ? ` (and ${errors.length - 1} more)` : ''}`, true); else say(`Deleted ${done} items`);
 }
 async function remove(p, name) {
-  if (!confirm(`Delete ${name} from the Brew Panel computer?`)) return;
+  if (!await skyConfirm(`Delete ${name} from the Brew Panel computer?`, { ok: '🗑 Delete' })) return;
   try { await call('POST', '/ui/media/delete', { root, path: p }); render(); say('Deleted ' + name); } catch (e) { say(e.message, true); }
 }
 

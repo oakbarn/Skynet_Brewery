@@ -51,6 +51,7 @@ import { DISPLAY_UNITS, MISC_LINE_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lT
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor } from './flowcolor.js';
 import { copyTabProfile } from './tabprofile.js';      // a Tab Profile is copied onto a Tab, never linked (Rule 2.62 #9)
 import { tabPieces, copyTab, nextFree, processesUsing, processCopyName } from './copytab.js';
+import { skyConfirm } from './skyconfirm.js';      // the one shared Skynet confirm box (Rule 2.64)
 import { ifaceUse, useNames, inUse, moveIface, pinsShown, removeTip, devicesOffBoard } from './ifaceremove.js';      // Removing an Interface safely (Panel Updates entry 29, Rule 2.63)      // Copy a whole Tab on New tab (Rule 4.8)
 import { pipeCrossings, crossBox, CROSS_EDGE } from './pipecross.js';      // a pipe crossing with no joint never looks joined (Rule 5.44)
 import { openColorPicker, hexToRgb, rgbText, rgbNums, parseRgb } from './colorpick.js';      // the Color Picker (Pickr, Rule 2.48)
@@ -8324,7 +8325,7 @@ async function saveBuild() {
   const r = await saveBuildDialog(b); if (!r) return false;
   if (r.to === 'trash') {
     const came = buildItems(b).filter(g => g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
-    if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
+    if (!await skyConfirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''), { ok: '🗑 Throw away' })) return false;
     dropBuild(); await keepBuild(null); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
     const went = moveBuildTo(r.tab), n = went.reduce((a, g) => a + g.n, 0);
@@ -11632,7 +11633,7 @@ function styleEditor(kind, st, from) {
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
     };
     const del = async () => {
-      if (!confirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`)) return;
+      if (!await skyConfirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`, { ok: '🗑 Delete' })) return;
       const all = { ...(S.config.userStyles || {}), [kind]: (S.config.userStyles?.[kind] ?? []).filter(x => x.id !== st.id) };
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = false; d.close(); } catch (e) { err.textContent = e.message; }
     };
@@ -12215,7 +12216,7 @@ async function editItem(kind, id) {
           [[`🗑 Delete the Device and ${kids.length === 1 ? 'its Clone' : 'all ' + kids.length + ' Clones'}`, 'all'], ...kids.map(g => [`Make ${g.name} (on ${tabOf(g)}) the Device`, g.id])]);
         if (pick === undefined) return;
         if (pick !== 'all') { promoteClone(item, kids.find(g => g.id === pick)); sel = null; renderWs(); return; }
-      } else if (!confirm('Delete this item?')) return;
+      } else if (!await skyConfirm('Delete this item?', { ok: '🗑 Delete' })) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else if (item.kind === 'pipe') deletePipe(item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
@@ -12618,7 +12619,7 @@ async function editWorkspace() {
     if (idBox) { nameBox?.removeEventListener('input', followName); idBox.removeEventListener('input', ownId); idBox.removeEventListener('change', upId); }
   }
   if (r === 'delete') {
-    if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
+    if (!await skyConfirm(`Delete tab "${w.name}" and everything on it?`, { ok: '🗑 Delete' })) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
     draft.elements = draft.elements.filter(e => e.workspace !== w.name);
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
@@ -13158,7 +13159,7 @@ $('#faReplace').onclick = guard(async () => {
   const n = todo.reduce((a, r) => a + r.hits.length, 0), repl = $('#faRepl').value;
   if (!n) return;
   if (dirty && todo.some(r => r.name === curScript)) throw new Error(`"${curScript}" has unsaved changes. Save it first, then search again.`);
-  if (!confirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} Process${todo.length === 1 ? '' : 'es'} with "${repl}"?\n\nEach Process is saved straight away.`)) return;
+  if (!await skyConfirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} Process${todo.length === 1 ? '' : 'es'} with "${repl}"?\n\nEach Process is saved straight away.`, { ok: '🔁 Replace' })) return;
   const done = [], changed = [], bad = [];
   for (const r of todo) {
     if (await api('GET', '/ui/scripts/' + encodeURIComponent(r.name)) !== r.text) { changed.push(r.name); continue; }   // edited since the search: leave it alone
@@ -13266,7 +13267,7 @@ async function renderBin() {
     }) }, 'Look'),
     admin ? h('button', { type: 'button', class: 'primary', onclick: guard(() => restoreFromBin(b)) }, 'Restore') : null,
     admin ? h('button', { type: 'button', class: 'danger', onclick: guard(async () => {
-      if (!confirm(`Delete "${b.name}" for good?\n\nIt cannot be brought back after this.`)) return;
+      if (!await skyConfirm(`Delete "${b.name}" for good?\n\nIt cannot be brought back after this.`, { ok: '🗑 Delete for good' })) return;
       await api('DELETE', '/ui/recycle/' + encodeURIComponent(b.id)); toast(`"${b.name}" deleted for good`); $('#binView').classList.add('hidden'); await renderBin();
     }) }, 'Delete for good') : null));
 }
@@ -13375,7 +13376,7 @@ $('#renScript').onclick = guard(async () => {
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
-  if (!curScript || !confirm(`Delete the Process "${curScript}"?\n\nIt goes to the Recycle Bin, where you can restore it.` + (dirty ? '\n\nYour unsaved changes are lost.' : ''))) return;
+  if (!curScript || !await skyConfirm(`Delete the Process "${curScript}"?\n\nIt goes to the Recycle Bin, where you can restore it.` + (dirty ? '\n\nYour unsaved changes are lost.' : ''), { ok: '🗑 Delete' })) return;
   await api('DELETE', '/ui/scripts/' + encodeURIComponent(curScript));
   toast(`"${curScript}" moved to the Recycle Bin`);
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); updateGutter(); refreshFind(false);
@@ -13580,7 +13581,7 @@ async function globalDialog(work, orig) {
   async function cancel() { if (snap() === snap0 || await askDiscard('this gGlobal')) close(); }
   d.oncancel = ev => { ev.preventDefault(); cancel(); };
   async function del() {
-    if (!confirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`)) return;
+    if (!await skyConfirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`, { ok: '🗑 Delete' })) return;
     await saveElements(S.config.elements.filter(x => x !== orig)); close(); toast(`${orig.name} deleted`);
   }
   async function save() {
@@ -13721,7 +13722,7 @@ $('#csvSaveSet').onclick = guard(async () => {
   renderCsvBox(); $('#csvSet').value = name; renderCsvBox(); savedPop('Saved');
 });
 $('#csvDelSet').onclick = guard(async () => {
-  const name = $('#csvSet').value; if (!name || !confirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`)) return;
+  const name = $('#csvSet').value; if (!name || !await skyConfirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`, { ok: '🗑 Delete' })) return;
   await saveCsvSets((S.config.logSets || []).filter(s => s.name !== name)); $('#csvSet').value = ''; renderCsvBox();
 });
 function csvSpan() {
@@ -13834,7 +13835,7 @@ function renderProbes() {
       h('td', { ...(warn ? { class: 'warnTxt', title: warn } : {}) }, `${n} (soft limit ${owLimit(c)})${warn ? ' ⚠' : ''}`),
       h('td', {}, h('button', { class: 'admin-only', title: 'A new 1-Wire Index on this circuit, for a probe you will plug in', onclick: () => newSlot('', d.name, c.n) }, '➕ Index'), ' ',
         h('button', { class: 'danger admin-only', onclick: guard(async () => {
-          if (n && !confirm(`${owCircuitId(d.name, c.n)} has ${n} probe Device${n === 1 ? '' : 's'} on it. They lose their 1-Wire Index. Delete the circuit anyway?`)) return;
+          if (n && !await skyConfirm(`${owCircuitId(d.name, c.n)} has ${n} probe Device${n === 1 ? '' : 's'} on it. They lose their 1-Wire Index. Delete the circuit anyway?`, { ok: '🗑 Delete' })) return;
           await saveCircuit(d.name, c.n, null);
         }) }, 'Delete'))));
   }
@@ -13849,7 +13850,7 @@ function renderProbes() {
         ...roms.map(r => { const o = slots.find(x => x.rom === r && owSlotKey(x) !== owSlotKey(p)); return h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (o ? `  (in ${slotId(o)})` : '')); }))),
       h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
       h('td', {}, users),
-      h('td', {}, h('button', { class: 'danger admin-only', onclick: () => { if (users && !confirm(`${slotId(p)} is used by ${users}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => owSlotKey(x) === owSlotKey(p)), 1)); } }, 'Remove'))));
+      h('td', {}, h('button', { class: 'danger admin-only', onclick: async () => { if (users && !await skyConfirm(`${slotId(p)} is used by ${users}. Remove it anyway?`, { ok: '🗑 Remove' })) return; saveProbes(l => l.splice(l.findIndex(x => owSlotKey(x) === owSlotKey(p)), 1)); } }, 'Remove'))));
   }
   // the probes the boards report
   const pb = $('#probeBody'); pb.innerHTML = '';
@@ -14087,6 +14088,9 @@ function usbPortChoices(ports, cur, win) {
   return [...list, [USB_LOOK, '🔄 Look again']];
 }
 const markPortList = sel => { for (const x of sel.options) x.classList.toggle('portGone', /not found on this Brain/.test(x.textContent)); sel.classList.toggle('portGone', !!sel.selectedOptions[0]?.classList.contains('portGone')); };
+// the Brain Move USB ports page (entry 29 (e)): the same list, and the old port is always in it (red when not on this Brain), so
+// keeping it is always a choice; the serial number shows, as it is how the old Brain's boards are found again
+const brainMovePortChoices = (ports, old, win) => usbPortChoices((ports || []).map(p => ({ ...p, manufacturer: [p.manufacturer, p.serialNumber && 'serial ' + p.serialNumber].filter(Boolean).join(', ') })), comNum(old, win), win);
 const freeUsbPort = (ports, devices, me) => ports.map(p => p.path).find(p => !devices.some(d => d.name !== me && connOf(d) === 'serial' && String(d.port).toUpperCase() === String(p).toUpperCase())) || '';
 
 // Test Communication (OakBarn Brewery, 2026-11-15, Add Interface markup: "Change Pause Communication To Test Communication. Have a
@@ -14376,7 +14380,7 @@ async function bruSend(preview) {
 $('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
 $('#bruImport').onclick = guard(async () => {
   const msg = $('#bruMode').value === 'replace' ? 'Replace your Tabs, Devices and Widgets with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
-  if (!confirm(msg)) return;
+  if (!await skyConfirm(msg, { ok: '⬆ Import', danger: $('#bruMode').value === 'replace' })) return;
   const r = await bruSend(false);
   $('#bruResult').textContent = bruReport(r);
   await load(); toast('BruControl Schema imported');
@@ -14470,7 +14474,7 @@ async function renderUsers() {
       ...S.roles.map(r => h('option', { value: r, ...(r === u.role ? { selected: true } : {}) }, r[0].toUpperCase() + r.slice(1))));
     tb.append(h('tr', {}, h('td', {}, u.name + (u.name === S.me.name ? ' (you)' : '')), h('td', {}, role), h('td', {},
       h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name}\n${S.passwordRules.text}`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
-      h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
+      h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm(`Remove user ${u.name}?`, { ok: '🗑 Remove' })) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
   }
 }
 async function renderRecovery() {
@@ -14493,7 +14497,7 @@ async function renderApproved() {
       ? [h('button', { class: 'primary', onclick: guard(() => put({ state: 'approved' }).then(() => toast(`${d.name} is approved. ${d.user || 'They'} can sign in now.`))) }, 'Approve'), ' ',
         h('button', { class: 'danger', onclick: guard(async () => { await api('DELETE', '/auth/devices/' + d.key); renderApproved(); }) }, 'Refuse')]
       : [h('button', { onclick: guard(async () => { const n = prompt('A name for this device (for example: Brew room tablet)', d.name); if (n) await put({ name: n }); }) }, 'Rename'), ' ',
-        h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`)) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
+        h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm(`Remove ${d.name}${d.thisDevice ? ' (this device: you will be signed out)' : ''}? It signs out at once and must be approved again.`, { ok: '🗑 Remove' })) return; await api('DELETE', '/auth/devices/' + d.key); if (d.thisDevice && !r.brainItself && r.on) location.reload(); else renderApproved(); }) }, 'Remove')];
     tb.append(h('tr', {}, h('td', {}, d.name + (d.thisDevice ? ' (this device)' : '')), h('td', {}, d.user || ''),
       h('td', {}, d.state === 'waiting' ? h('b', { class: 'bad' }, `Waiting since ${when(d.asked)}`) : 'Approved'),
       h('td', {}, when(d.seen || d.approved)), h('td', {}, ...btns)));
@@ -14501,7 +14505,7 @@ async function renderApproved() {
   if (!list.length) tb.append(h('tr', {}, h('td', { colspan: 5, class: 'muted' }, 'No devices yet.')));
 }
 $('#apdOn').onchange = guard(async ev => {
-  if (!ev.target.checked && !confirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.')) { ev.target.checked = true; return; }
+  if (!ev.target.checked && !await skyConfirm('Turn Approved Devices Off? Then a right password alone signs anyone in, from any device.', { ok: 'Turn Off' })) { ev.target.checked = true; return; }
   await api('PUT', '/auth/devices', { on: ev.target.checked });
   toast(ev.target.checked ? 'Approved Devices is On. This device is approved.' : 'Approved Devices is Off');
   renderApproved();
@@ -14526,7 +14530,7 @@ async function renderPatron() {
   const inp = h('input', { placeholder: 'SKYPATRON1....', autocomplete: 'off', spellcheck: 'false', style: 'width:100%' });
   box.append(h('label', {}, 'Patron code (from the email OakBarn Brewery sent you)', inp),
     h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: guard(async () => { await api('PUT', '/ui/patron', { code: inp.value }); toast('Thank you! The Patron perks are unlocked.'); renderPatron(); }) }, 'Save Patron code'),
-      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!confirm('Remove the Patron code from this Brain? The Patron perks lock again.')) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
+      st.hasCode ? h('button', { class: 'danger', onclick: guard(async () => { if (!await skyConfirm('Remove the Patron code from this Brain? The Patron perks lock again.', { ok: '🗑 Remove' })) return; await api('DELETE', '/ui/patron'); renderPatron(); }) }, 'Remove Patron code') : ''),
     h('p', { class: 'muted' }, 'The code holds only the name to show, the level and the end date: never an email address. Patron emails come from OakBarn Brewery, never from your Brain.'));
 }
 // a pop-up with a title, any content, ✖ Close at the top and an optional main button; resolves true when the main button is pressed
@@ -14649,7 +14653,7 @@ $('#setWarnPaths').onchange = guard(async ev => {
   toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
 });
 $('#recNew').onclick = guard(async () => {
-  if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
+  if ($('#recInfo').textContent.startsWith('Made') && !await skyConfirm('Make a new recovery code? The old one stops working.', { ok: '🔑 Make a new code' })) return;
   const r = await api('POST', '/auth/recovery');
   $('#recCode').textContent = r.code; $('#recShow').classList.remove('hidden');
   renderRecovery();
@@ -14873,8 +14877,8 @@ $('#simSave').onclick = $('#simSave2').onclick = guard(async () => {
 // Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
 // (Fritz, 2026-10-27) and the ☰ Menu. Returns false when the admin said no.
 async function setSimulator(on) {
-  if (!confirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
-    : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.')) return false;
+  if (!await skyConfirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
+    : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.', { ok: on ? '🧪 Switch to Simulator' : '🔌 Switch to Real boards' })) return false;
   S.sim = await api('PUT', '/ui/sim', { on });
   await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched. 25× speed and Auto skip are on' : '🔌 Real boards: real hardware is used');
   return true;
@@ -14941,12 +14945,12 @@ function fillSchemaSelect(s) {
 }
 // Processes running now: switching the Schema stops them, so you are warned first (Fritz, 2026-10-21)
 const runningProcs = () => (S.scripts || []).filter(x => x.state === 'running');
-function okToSwitch(toName, what = 'Loading') {
+async function okToSwitch(toName, what = 'Loading') {
   const act = S.schemas.active?.name, run = runningProcs();
   const off = 'Every output is switched off first: digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms.';
-  if (run.length) return confirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
-    `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`);
-  return confirm(`${what} "${toName}"?\n\n${off}\n\nIts Tabs, Devices, Widgets and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`);
+  if (run.length) return skyConfirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
+    `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`, { ok: '▶ Proceed' });
+  return skyConfirm(`${what} "${toName}"?\n\n${off}\n\nIts Tabs, Devices, Widgets and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`, { ok: '▶ Proceed', danger: false });
 }
 // after another Schema is loaded: start fresh on its first tab
 async function afterSchemaSwitch(msg) {
@@ -15145,12 +15149,12 @@ const schemaPicked = guard(async ev => {
         ['_n', 'The loaded Schema cannot be deleted. A deleted Schema is moved to config/schemas/deleted, so it can be got back.', 'note']], w) !== 'ok') return;
       readFields(w);
       const name = others.find(x => x.id === w.id)?.name;
-      if (!confirm(`Delete the Schema "${name}"?`)) return;
+      if (!await skyConfirm(`Delete the Schema "${name}"?`, { ok: '🗑 Delete' })) return;
       await api('DELETE', `/ui/schemas/${w.id}`); await load(); return toast(`Schema "${name}" deleted`);
     }
     if (v === act?.id) return;
     const to = S.schemas.list.find(x => x.id === v);
-    if (!okToSwitch(to.name)) return;
+    if (!await okToSwitch(to.name)) return;
     await api('POST', `/ui/schemas/${v}/load`);
     await afterSchemaSwitch(`Schema "${to.name}" loaded`);
   } finally { back(); }
@@ -15166,7 +15170,7 @@ async function addNewSchema() {
       ...((S.profiles || []).length ? [['profile', 'An Equipment Profile (its hardware, already wired)']] : [])]],
     ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
   readFields(w);
-  if (!okToSwitch(w.name, 'Making and loading')) return;
+  if (!await okToSwitch(w.name, 'Making and loading')) return;
   if (w.start === 'template') return newSchemaFromTemplate(w.name);
   if (w.start === 'profile') return newSchemaFromProfile(null, w.name);
   await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
@@ -15186,7 +15190,7 @@ async function newSchemaFromProfile(pid, name = '') {
       ['_n', FROM_PROFILE_TIP, 'note', null, null, null, { keep: true }], ['_m', 'The new Schema is loaded at once. The Schema you have now is kept just as it is.', 'note']], w) !== 'ok') return;
     readFields(w);
   }
-  if (!okToSwitch(w.name, 'Making and loading')) return;
+  if (!await okToSwitch(w.name, 'Making and loading')) return;
   const p = S.profiles.find(x => x.id === w.prof); if (!p) return toast('Pick an Equipment Profile', true);
   await api('POST', '/ui/schemas', { name: w.name, fromProfile: p.id });
   await afterSchemaSwitch(`Schema "${w.name}" made from "${p.name}" and loaded`);
@@ -15381,7 +15385,7 @@ async function nsiLand() {
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
 async function addSampleSchema(id, name = '') {
   const sm = (samples || []).find(x => x.id === id); if (!sm) return toast('No such sample', true);
-  if (!okToSwitch(name || sm.name, 'Adding the Sample Schema')) return;
+  if (!await okToSwitch(name || sm.name, 'Adding the Sample Schema')) return;
   const r = await api('POST', `/ui/samples/${id}/load`, name ? { name } : undefined);
   await afterSchemaSwitch(`Sample Schema "${r.schema?.name || sm.name}" added and loaded`);
   const bad = (r.problems || []).length;
@@ -15416,7 +15420,7 @@ async function cloneSchema(id) {
   let name = String(w.name || '').trim();
   if (!name) { name = `${from.name} copy`; for (let i = 2; list.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${from.name} copy ${i}`; }
   if (smp) return addSampleSchema(smp.id, name);
-  if (w.load && !okToSwitch(name, 'Loading the clone')) return;
+  if (w.load && !await okToSwitch(name, 'Loading the clone')) return;
   await api('POST', `/ui/schemas/${w.id}/clone`, { name, load: !!w.load });
   if (w.load) return afterSchemaSwitch(`Clone "${name}" made and loaded`);
   S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); if (['schema', 'about'].includes(menuTab)) renderMenuPane();
@@ -15430,7 +15434,7 @@ async function restoreSchema() {
   if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}  (${b.file})`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
-  if (!okToSwitch(act.name, 'Restoring and loading again')) return;
+  if (!await okToSwitch(act.name, 'Restoring and loading again')) return;
   await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file.slice(2), version: w.file.startsWith('v:') });
   await afterSchemaSwitch('Backup restored');
 }
@@ -15629,7 +15633,7 @@ function showClosed(by) {
 }
 // ---- Move Brain (Fritz, 2026-11-03, Rule 9.9, lib/brainmove.js): from a Windows, Linux or Mac computer Brain to a Raspberry Pi
 // (or any new Brain). 1 Make a Brain Move file on the old Brain, 2 bring it in on the new one, 3 fix the USB ports.
-let BM = null;
+let BM = null, bmPicks = {};      // bmPicks: the USB ports picked in step 3, kept through 🔄 Look again
 async function loadBrainMove() { BM = await api('GET', '/ui/brainmove'); }
 function renderBrainMoveTab(box) {
   if (!BM) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadBrainMove().then(() => menuTab === 'brainmove' && renderMenuPane()).catch(e => toast(e.message, true)); return; }
@@ -15672,41 +15676,49 @@ function renderBrainMoveTab(box) {
   });
   go.onclick = guard(async () => {
     const running = (S.scripts || []).filter(s => s.state === 'running').length;
-    if (!confirm('Move in now?\n\nEvery output turns off' + (running ? ` and ${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}` : '')
+    if (!await skyConfirm('Move in now?\n\nEvery output turns off' + (running ? ` and ${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}` : '')
       + '. The panel stops, and as it starts again the old Brain\'s Schemas, settings, Processes, pictures, saved values, logins and brew log take the place of this Brain\'s.'
       + '\n\nThis Brain\'s own files are not deleted: they are kept in backups/before_brain_move_<date>.'
-      + '\n\nAfter the move, sign in with your OLD Brain\'s user name and password.')) return;
+      + '\n\nAfter the move, sign in with your OLD Brain\'s user name and password.', { ok: '🚚 Move in now' })) return;
     const r = await api('POST', '/ui/brainmove/go');
     showMoving(r.service);
   });
-  // 3. USB ports, in every Schema at once
+  // 3. USB ports, in every Schema at once. The same USB Port list as the Interface pop-up (Panel Updates entry 29 (e), Rule 9.9):
+  // on Windows the number alone (COM3 is 3), on a Pi /dev/ttyACM0, with what is plugged in; the old port stays in the list, in red
+  // when it is not on this Brain (Design Rule #1); 🔄 Look again reads the ports again and keeps what was picked
   const portsBox = h('div');
-  const ifs = BM.interfaces, olds = [...new Set(ifs.map(x => x.port))], now = BM.ports.ports || [];
+  const ifs = BM.interfaces, olds = [...new Set(ifs.map(x => x.port))], now = BM.ports.ports || [], win = BM.platform === 'win32';
   if (!olds.length) portsBox.append(h('p', { class: 'muted' }, 'No Interface is on USB in any Schema. Nothing to change.'));
   else {
     const picks = {}, seen = p => BM.last?.usbPorts?.find(x => x.path === p);
+    const lookAgain = () => { BM = null; renderMenuPane(); };
     const tb = h('tbody');
     for (const o of olds) {
-      const users = ifs.filter(x => x.port === o), was = seen(o), here = now.some(x => x.path === o);
-      const sel = h('select', {}, h('option', { value: '' }, here ? `Keep ${o}` : `Keep ${o} (not on this Brain)`),
-        ...now.filter(x => x.path !== o).map(x => h('option', { value: x.path }, x.path + (x.manufacturer ? ` (${x.manufacturer}${x.serialNumber ? ', serial ' + x.serialNumber : ''})` : ''))));
-      sel.value = BM.suggest[o] && BM.suggest[o] !== o ? BM.suggest[o] : '';
+      const users = ifs.filter(x => x.port === o), was = seen(o);
+      const pick = bmPicks[o] ?? (BM.suggest[o] || o);
+      const list = brainMovePortChoices(now, o, win);
+      const sel = h('select', { 'data-old': o }, ...list.map(([v, t]) => h('option', { value: v, ...(v.toUpperCase() === comNum(pick, win).toUpperCase() ? { selected: true } : {}) }, t)));
+      sel.onchange = () => {
+        if (sel.value === USB_LOOK) { sel.value = comNum(bmPicks[o] ?? pick, win); return lookAgain(); }
+        bmPicks[o] = comPath(sel.value, win); markPortList(sel);
+      };
+      setTimeout(() => markPortList(sel), 0);
       picks[o] = sel;
       tb.append(h('tr', {}, h('td', {}, h('b', {}, o), was?.manufacturer ? h('div', { class: 'muted' }, `was ${was.manufacturer}${was.serialNumber ? ', serial ' + was.serialNumber : ''}`) : ''),
         h('td', {}, users.map(u => `${u.interface} (${u.schema})`).join(', ')), h('td', {}, sel)));
     }
     const save = h('button', { class: 'primary' }, '💾 Save USB ports');
     save.onclick = guard(async () => {
-      const map = Object.fromEntries(Object.entries(picks).map(([o, s]) => [o, s.value]).filter(([, v]) => v));
+      const map = Object.fromEntries(Object.entries(picks).map(([o, s]) => [o, s.value === USB_LOOK ? '' : comPath(s.value, win)]).filter(([o, v]) => v && v.toUpperCase() !== o.toUpperCase()));
       const r = await api('POST', '/ui/brainmove/ports', { map });
       toast(r.changed ? `${plural(r.changed, 'Interface')} changed to the new USB port` : 'Nothing changed');
-      BM = null; renderMenuPane();
+      bmPicks = {}; BM = null; renderMenuPane();
     });
     portsBox.append(
       h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'USB port now'), h('th', {}, 'Interfaces (Schema)'), h('th', {}, 'Change to'))), tb),
       !BM.ports.installed ? h('p', { class: 'bad' }, 'USB board support is not installed on this Brain yet, so it can\'t list its ports. Start Skynet Brewer once with the internet on.')
         : !now.length ? h('p', { class: 'muted' }, 'No USB boards are plugged into this Brain right now. Plug them in, then click Look again.') : '',
-      saveBar(h('button', { onclick: () => { BM = null; renderMenuPane(); } }, '🔄 Look again'), save));
+      saveBar(h('button', { onclick: lookAgain }, '🔄 Look again'), save));
   }
   box.append(h('h3', {}, 'Move Brain'), h('div', { class: 'menuNarrow' },
     h('p', {}, 'Moves everything from one Brain to another, for example from a Windows, Linux or Mac computer to a Raspberry Pi: every Schema, panel setting, Process, picture and sound, saved gGlobal values, logins and the brew log. Then the USB ports are changed to the new Brain\'s names (COM3 on Windows is /dev/ttyACM0 on a Pi).'),
@@ -16347,7 +16359,7 @@ function renderSchemaTab(box) {
     h('td', {}, String(x.tabs)), h('td', {}, when(x)),
     h('td', {}, admin && !x.active ? h('button', { onclick: guard(async () => {
       if (editing) return toast('Save or exit Edit layout first', true);
-      if (!okToSwitch(x.name)) return;
+      if (!await okToSwitch(x.name)) return;
       await api('POST', `/ui/schemas/${x.id}/load`); await afterSchemaSwitch(`Schema "${x.name}" loaded`);
     }) }, 'Load') : '',
       admin ? h('button', { title: 'Make a copy of this Schema under a new name', onclick: guard(() => cloneSchema(x.id)) }, 'Create New Copy of Schema') : '')));
@@ -16440,7 +16452,7 @@ function renderBuildTemplateTab(box) {
     setTPL(r); renderMenuPane(); fillAddType(); savedPop(`Saved ${t.name}`);
   });
   const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
-  del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
+  del.onclick = guard(async () => { if (!await skyConfirm(`Delete the Template ${t.name}?`, { ok: '🗑 Delete' })) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
   box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `An Orientation of ${skyFamily(master)}: only what differs from it is kept.`) : ''), head,
     h('h3', {}, 'Attributes'), grid, h('div', { class: 'bar' }, save.cloneNode(true)));
   box.lastChild.firstChild.onclick = save.onclick;
@@ -16609,7 +16621,7 @@ async function editProcessTemplate(st, name, copy) {
     close(); await loadBrewProcess(); renderMenuPane(); toast('User Process Template saved');
   });
   const del = guard(async () => {
-    if (!confirm(`Delete the User Process Template ${t.name}?`)) return;
+    if (!await skyConfirm(`Delete the User Process Template ${t.name}?`, { ok: '🗑 Delete' })) return;
     await api('DELETE', `/ui/brewprocess/template/${st.key}/${t.name}`);
     if (bpWork.templates[st.key] === t.name) { bpWork.templates[st.key] = 'Skynet_' + st.key; await api('PUT', '/ui/brewprocess', bpWork); }
     close(); await loadBrewProcess(); renderMenuPane();
@@ -17018,7 +17030,7 @@ async function ivBuild(a) {
 function openProfile(id) { return eqViewOpen(id); }       // a profile opens as itself (Rule 19.6 #2: the old Equipment Profile screen is gone)
 async function deleteProfile(id) {
   const p = S.profiles.find(x => x.id === id); if (!p) return;
-  if (!confirm(`Delete the Equipment Profile "${p.name}"?\n\nNo Tab is linked to it: the Tabs it was copied onto keep their equipment, pipes and numbers.`)) return;
+  if (!await skyConfirm(`Delete the Equipment Profile "${p.name}"?\n\nNo Tab is linked to it: the Tabs it was copied onto keep their equipment, pipes and numbers.`, { ok: '🗑 Delete' })) return;
   await api('DELETE', `/ui/equipment/${id}`);
   if (eqWork?.id === id) { eqWork = null; eqDirty = false; }
   await load(); toast(`"${p.name}" deleted`);
@@ -18174,7 +18186,7 @@ function openTemplate(kind, name) {
       setTPL(r); dirty = false; toast(`Saved ${r.saved.name}`); finish();
     });
     const del = guard(async () => {
-      if (!confirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`)) return;
+      if (!await skyConfirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`, { ok: '🗑 Delete' })) return;
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
     // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
@@ -18610,7 +18622,7 @@ function renderBrewProfileTab(kind) {
       S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(shownIn(kind, r.saved))); profDirty[kind] = false; renderMenuPane(); savedPop(`${K.title} saved`);
     });
     const del = guard(async () => {
-      if (!confirm(`Delete the ${K.title} "${w.name}"?`)) return;
+      if (!await skyConfirm(`Delete the ${K.title} "${w.name}"?`, { ok: '🗑 Delete' })) return;
       const r = await api('DELETE', `/ui/profiles/${kind}/${w.id}`);
       S[kind + 'Profiles'] = r.list; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); toast(`"${w.name}" deleted`);
     });
@@ -19380,7 +19392,7 @@ $('#cfgCheck').onclick = guard(async () => {
 $('#cfgSave').onclick = guard(async () => {
   const c = await api('POST', '/ui/config/check', $('#cfgCode').value, true);
   if (c.problem) { cfgProblem = c.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + c.problem.line + ': ' + c.problem.msg); }
-  if (!confirm('Save the config file?\n\nRunning Processes are stopped and the boards reconnect. The old file is kept in config/backups.')) return;
+  if (!await skyConfirm('Save the config file?\n\nRunning Processes are stopped and the boards reconnect. The old file is kept in config/backups.', { ok: '💾 Save' })) return;
   const r = await api('PUT', '/ui/config', $('#cfgCode').value, true);
   if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
   cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
@@ -19401,7 +19413,7 @@ $('#cfgBackups').onclick = guard(async () => {
     }) }, 'Open'),
     h('button', { class: 'primary', onclick: guard(async ev => {
       ev.preventDefault();
-      if (!confirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning Processes are stopped and the boards reconnect. The current file is copied to config/backups first.`)) return;
+      if (!await skyConfirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning Processes are stopped and the boards reconnect. The current file is copied to config/backups first.`, { ok: '↩ Put back' })) return;
       const r = await api('POST', `/ui/config/backups/${encodeURIComponent(b.name)}/restore`);
       setCfgText(r.text); $('#cfgBackupDlg').close();
       $('#cfgBackupNote').textContent = `Restored ${b.name}. The file it replaced was copied to config/backups/${r.backup}`;
@@ -19452,7 +19464,7 @@ async function importSchemaFile() {
     if (!f) return;
     body = await f.text();
   } else q += '&file=' + encodeURIComponent(w.pick);
-  if (w.load && !okToSwitch(w.pick, 'Loading the Schema')) return;
+  if (w.load && !await okToSwitch(w.pick, 'Loading the Schema')) return;
   const r = await api('POST', '/ui/schemas/import?' + q, body ?? '', true);
   const p = r.processes;
   const lines = [`Schema "${r.made.name}" added.`,

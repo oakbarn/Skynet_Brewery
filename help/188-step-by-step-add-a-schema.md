@@ -38,7 +38,7 @@ Type a name that means something to you, for example **My Brewery** or **Hot Sid
 | **A copy of** the loaded Schema | You want to try changes without touching the Schema you brew with. Press **Save**, then answer the New Schema Interview (Step 6). |
 | **An Equipment Profile** (shows once you have one) | Your brewery is already built as an Equipment Profile and you want another Schema for it, like Keg Cleaning, with the same boards and Ports already wired. Pick the profile and press **Save**. See [Paste a profile, or start a new Schema from it](28-schemas-and-equipment-profiles#paste-a-profile-or-start-a-new-schema-from-it). |
 
-Press **💾 Save**. Skynet asks if it is OK to load the new Schema: every output is switched off first, and the Schema you had stays just as it is. Press **OK**.
+Press **💾 Save**. Skynet asks if it is OK to load the new Schema: every output is switched off first, and the Schema you had stays just as it is. Press **▶ Proceed**.
 
 Then the **New Schema Interview** opens (Step 6).
 

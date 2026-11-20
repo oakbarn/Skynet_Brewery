@@ -38,7 +38,7 @@ Tapez un nom qui a du sens pour vous, par exemple **My Brewery** ou **Hot Side**
 | **A copy of** du Schema chargé | Vous voulez essayer des changements sans toucher au Schema avec lequel vous brassez. Appuyez sur **Save**, puis répondez à la New Schema Interview (Étape 6). |
 | **An Equipment Profile** (s'affiche dès que vous en avez un) | Votre brasserie est déjà construite comme Equipment Profile et vous voulez un autre Schema pour elle, comme Keg Cleaning, avec les mêmes cartes et Ports déjà câblés. Choisissez le profil et appuyez sur **Save**. Voir [Coller un profil, ou commencer un nouveau Schema à partir de lui](28-schemas-and-equipment-profiles#paste-a-profile-or-start-a-new-schema-from-it). |
 
-Appuyez sur **💾 Save**. Skynet demande s'il peut charger le nouveau Schema : chaque sortie est d'abord arrêtée, et le Schema que vous aviez reste tel quel. Appuyez sur **OK**.
+Appuyez sur **💾 Save**. Skynet demande s'il peut charger le nouveau Schema : chaque sortie est d'abord arrêtée, et le Schema que vous aviez reste tel quel. Appuyez sur **▶ Proceed**.
 
 Puis la **New Schema Interview** s'ouvre (Étape 6).
 
