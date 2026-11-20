@@ -102,6 +102,37 @@ rm -f "$OUT"/Skynet_Sample_Schemas_*.zip
 ( cd "$OUT/stage/samples" && zip -qr -X "../../$SZIP" BrewPanel )
 echo "Built $OUT/$SZIP"
 
+# The Skynet Language Fonts (OakBarn Brewery, 2026-11-20: "if you clone the checked install and only add the font package, the second
+# exe has been checked already"; "lets do no bold and simplified"; Rules 9.12 point 4 and 9.24): Google Noto Sans (SIL Open Font
+# License 1.1) for Chinese (Simplified), Japanese, Korean, Thai and Hindi, Regular only, as WOFF2 web fonts cut into small pieces, so
+# a browser loads only the pieces a page uses. They are NOT in the panel zip or the Setups (the main Setup stays small): they are
+# their own add-only zip and Setup. Fetched from npm (Fontsource) at these exact versions; no internet or npm: they are not made.
+FONT_PACKAGES="noto-sans-sc@5.3.1 noto-sans-jp@5.3.1 noto-sans-kr@5.3.1 noto-sans-thai@5.3.0 noto-sans-devanagari@5.3.0"
+FSTAGE="$OUT/stage/fonts/BrewPanel/fonts"
+FONTS_OK=no
+if [ "${SKYNET_FONTS_BUILD:-yes}" != no ] && command -v npm >/dev/null; then
+  mkdir -p "$FSTAGE"; FTMP="$(mktemp -d)"; FONTS_OK=yes
+  for p in $FONT_PACKAGES; do
+    name="${p%@*}"
+    if ! ( cd "$FTMP" && npm pack -q "@fontsource/$p" >/dev/null 2>&1 ); then FONTS_OK=no; echo "Could not get @fontsource/$p, so the Language Fonts are not made."; break; fi
+    mkdir -p "$FTMP/$name" "$FSTAGE/$name"
+    tar xzf "$FTMP/fontsource-$name-${p#*@}.tgz" -C "$FTMP/$name"
+    cp -p "$FTMP/$name"/package/files/*-400-normal.woff2 "$FSTAGE/$name/"
+    cp -p "$FTMP/$name/package/LICENSE" "$FSTAGE/$name/OFL.txt"
+    # the Brain serves the pieces next to font.css (lib/helplang.js): WOFF2 only, from the same folder
+    sed -E "s#url\(\./files/([^)]+\.woff2)\) format\('woff2'\), url\(\./files/[^)]+\.woff\) format\('woff'\)#url(./\1) format('woff2')#" \
+      "$FTMP/$name/package/400.css" > "$FSTAGE/$name/font.css"
+  done
+  rm -rf "$FTMP"
+  if [ "$FONTS_OK" = yes ]; then
+    cp -p install/Language_Fonts_ReadMe.txt "$FSTAGE/ReadMe.txt"
+    FZIP="Skynet_Language_Fonts_$VERSION.zip"
+    rm -f "$OUT"/Skynet_Language_Fonts_*.zip
+    ( cd "$OUT/stage/fonts" && zip -qr -X "../../$FZIP" BrewPanel )
+    echo "Built $OUT/$FZIP ($(du -sh "$FSTAGE" | cut -f1))"
+  fi
+fi
+
 cp -p install/ReadMe.txt install/windows/Skynet_Brewer.bat install/linux/install-skynet-brewer.sh "install/mac/Install Skynet Brewer.command" "$OUT/"
 # First-time install by hand: one ReadMe and one first-install file per platform
 for d in windows mac linux pi; do mkdir -p "$OUT/First_Install_$d"; done
@@ -133,6 +164,12 @@ if command -v makensis >/dev/null; then
   FEXE="Skynet_Brewer_Full_Setup_$VERSION.exe"
   makensis -V2 -DSRC="$(pwd)/$STAGE" -DMEDIA_SRC="$(pwd)/$MSTAGE/media" -DSAMPLES_SRC="$(pwd)/$SSTAGE/sample_schemas" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$FEXE" "${SIGN[@]}" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$FEXE"
+  # The Skynet Language Fonts Setup (Rule 9.24): add-only, into the fonts folder of the panel. The main Setup is not changed.
+  if [ "$FONTS_OK" = yes ]; then
+    LEXE="Skynet_Language_Fonts_Setup_$VERSION.exe"
+    makensis -V2 -DSRC="$(pwd)/$FSTAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$LEXE" "${SIGN[@]}" install/windows/SkynetLanguageFonts.nsi
+    echo "Built $OUT/$LEXE"
+  fi
   # The Skynet Media Setup and Sample Schemas Setup .exe are retired (OakBarn Brewery, 2026-11-17: "WE could get rid of both the
   # Schema Uodate and the Media updates"; Rule 9.22): the Update Setup brings what is new, the Full Setup has everything. Their
   # scripts (install/windows/SkynetMedia.nsi, SkynetSampleSchemas.nsi) are kept in Delete/. The zips stay for Mac, Linux and Pi.

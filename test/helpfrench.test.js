@@ -74,3 +74,6 @@ console.log(`French Help ok (${list.length} pages)`);
 
 // the words in the Help pictures have their French too (Rule 7.25): test/helppicfrench.test.js, run from here
 await import('./helppicfrench.test.js');
+
+// Help in any language by AI translation (Rule 11.16): test/helplang.test.js, run from here
+await import('./helplang.test.js');

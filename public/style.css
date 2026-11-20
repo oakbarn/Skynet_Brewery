@@ -562,6 +562,15 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .mtNotice p[lang] { margin: 8px 0; }
 .hpLangNote { border-left: 4px solid var(--warn, #c80); padding: 6px 10px; margin: 0 0 12px; background: color-mix(in srgb, var(--warn, #c80) 12%, transparent); border-radius: 4px; }
 .hpMachine { margin-top: 24px; font-size: .9em; }
+/* Help in any language (Rule 11.16): the Help pages and balloons may use the Skynet Language Fonts and the user's own fonts
+   (/fonts/fonts.css sets --helpLangFonts); they come after the screen's own font, so they are used only for letters it lacks */
+#hpPage, #hpList, #hpPick, #hpLang, .hoverHelp, .mtNotice { font-family: var(--font), var(--helpLangFonts, sans-serif); }
+.langDlg { max-width: 640px; }
+.langDlg h4 { margin: 14px 0 4px; }
+.langParts { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.langKeep { width: 100%; box-sizing: border-box; }
+.langKeepList { font-size: .9em; }
+.langProblems { max-height: 220px; overflow: auto; margin: 4px 0 0; padding-left: 18px; font-weight: normal; }
 #hpList { display: flex; flex-direction: column; gap: 2px; }
 #hpList a { display: flex; flex-direction: column; gap: 2px; padding: 6px 9px; border-radius: 6px; color: var(--text); text-decoration: none; border: 1px solid transparent; }
 #hpList a:hover { border-color: var(--line); }

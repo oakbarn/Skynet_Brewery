@@ -13357,6 +13357,7 @@ function safetyRefresh() { safetyWords(); if (curWs()) renderWs(); }
 safetyWords();
 $('#hpLang')?.addEventListener('change', () => setTimeout(safetyRefresh));
 addEventListener('storage', ev => { if (ev.key === LANG_KEY) safetyRefresh(); });
+addEventListener('skynet-userlang', () => safetyRefresh());      // the User Language's Override and Stop words came from the Brain (Rule 11.16)
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
@@ -15458,8 +15459,9 @@ function menuItems(list, go) {
   if (!soundOn) list.append(item('🔊 Turn Sound On', () => setSound(true), { title: 'Sound is off in this browser. Browsers only play sound after you click once: this is that click' }));
   // the Help language from any screen (OakBarn Brewery, 2026-11-13: "Change to French seamless, maybe on hamburger menu as well";
   // Rule 11.11): the same switch as 🌐 in the Help page list (public/help.js), with the machine translation notice (Rule 11.14)
-  { const hl = $('#hpLang'), fr = hl?.value === 'fr';
-    if (hl) list.append(item(fr ? '🌐 Help in English' : '🌐 Help in Français', () => { hl.value = fr ? 'en' : 'fr'; hl.dispatchEvent(new Event('change')); },
+  // with a User Language (Rule 11.16) it goes on to the next of the three: English, Français, then the User Language
+  { const hl = $('#hpLang'), opts = hl ? [...hl.options] : [], next = opts[(hl?.selectedIndex + 1) % (opts.length || 1)];
+    if (hl && next) list.append(item('🌐 Help in ' + next.textContent.replace(/^🌐\s*/, ''), () => { hl.value = next.value; hl.dispatchEvent(new Event('change')); },
       { title: 'The language of the Help pages and of the balloons (Hover Help). The screens, buttons and labels stay English, except the Override and Stop buttons.' })); }
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema

@@ -226,6 +226,8 @@ Chaque mot spécial de Skynet, de A à Z. Choisissez une lettre pour y sauter, o
 
 **Universal Properties** (propriétés universelles) : les propriétés que tout Device et tout Widget possède : Name, Label, position, taille, Layer Order, Visible, Lock et la clé cachée. Voir [Propriétés universelles](114-universal-properties).
 
+**User Language** (langue de l'utilisateur) : une troisième langue d'aide, en plus de l'anglais et du français, qu'un Admin ajoute avec n'importe quelle IA : Skynet enregistre l'aide en fichiers texte, l'IA les traduit, Skynet les reprend. Les mots de brassage comme Strike et Mash restent en anglais, avec leur sens à côté. Voir [L'aide dans n'importe quelle langue](242-help-in-any-language).
+
 ## V {#v}
 
 **Value Widget** (Widget de valeur) : un Widget qui montre un nombre sur un Tab ; un toucher le règle et chaque Process peut le lire. Il y a aussi des Widgets Time et DateTime. Voir [Widgets Value, Time et DateTime](134-value-time-and-datetime-widgets).

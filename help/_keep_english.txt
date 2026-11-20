@@ -1,0 +1,27 @@
+# Keep English: brewing words that are never translated (Rule 11.16, Help 242).
+# One word or phrase per line. A line starting with # is a note. Upper or lower case makes no difference.
+# When the Help goes out for AI translation, each of these is written twice, ⁅Mash⁆ (Mash): the first stays English, the second is
+# translated. When it comes back, Skynet puts the English word back in the first place, so a German page reads "Mash (Maische)".
+# OakBarn Brewery fills in this list. An Admin can add words of their own on their Brain (Help > 🌐 Languages).
+# Override and Stop are not here: those two buttons follow the Help language (Rule 11.11).
+Strike
+Strike Water
+Sparge
+Mash
+Mash In
+Mash Out
+Dough In
+Wort
+Vorlauf
+Lauter
+Whirlpool
+Hop Stand
+Flameout
+Pitch
+Trub
+Grist
+HLT
+MLT
+BK
+RIMS
+HERMS

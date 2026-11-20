@@ -14,6 +14,8 @@ Thumbs.db
 # Old copies of help pages (made on every save in the Help tab)
 help/backups/
 release/
+# The Skynet Language Fonts a Brain got from their own Setup or zip (Rule 9.24): never part of the program
+/fonts/
 # Config Editor backups (made on the Pi while it runs)
 config/backups/
 # Deleted Processes (Recycle Bin on the Pi)

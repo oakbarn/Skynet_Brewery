@@ -63,6 +63,7 @@ import { FileMove, missingMedia, ownMedia } from './lib/filemove.js';
 import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain } from './lib/values.js';
 import { Help } from './lib/help.js';
+import { englishPieces, exportParts, importParts, keepEnglish, ownKeep, saveOwnKeep, userLanguage, userBalloons, userStatus, userFonts, addUserFont, removeUserFont, packageFonts, fontsCss, fontFileName, FONT_TYPES, PART_KB } from './lib/helplang.js';
 import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
@@ -194,7 +195,12 @@ const mediaFiles = new MediaFiles(() => store.mediaRoots());
 const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source: store.config.skynetPictures });   // ☰ Menu > Get Skynet pictures        // Media page: add / rename / delete pictures and sounds
 const musicPack = new MusicPack(() => store._findMedia('sounds'), { source: store.config.musicPack });   // ☰ Menu > Get Music Pack (Rule 9.25)
 const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], processes: PROCESSES, help: HELP }));   // File Move page
-const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
+// the User Language (Rule 11.16, lib/helplang.js): in the data folder, so a Setup never touches it and Move Brain takes it along
+const HELP_USER = path.join(DATA, 'help_user');
+const HELP_BACKUPS = path.join(DATA, 'help_user_backups');
+const FONTS_PKG = path.join(ROOT, 'fonts');            // the add-only Skynet Language Fonts Setup puts its fonts here (Rule 9.24)
+const FONTS_USER = path.join(DATA, 'fonts');           // fonts an Admin added with Add Font to Brain
+const help = new Help(HELP, null, 'en', HELP_USER);                 // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (moved) for (const l of moved.lines) engine.print('system', l);
 const mqtt = new MqttBridge(store, engine);
@@ -372,6 +378,7 @@ const MIME = {
   '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
   '.svg': 'image/svg+xml', '.webp': 'image/webp', '.bmp': 'image/bmp', '.ico': 'image/x-icon',
   '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',
+  ...FONT_TYPES,
 };
 function send(res, code, body, type = 'application/json') {
   const data = type === 'application/json' ? JSON.stringify(body, keyReplacer) : body;     // hidden keys never leave the Brain (lib/keys.js)
@@ -1479,7 +1486,7 @@ async function route(req, res) {
     const use = pictures.pick(f, url.searchParams.get('as'));          // as=original / as=svg for side-by-side previews
     // a Help picture's words in the Help language picked (?lang=fr), with the picture under its words put inside it (Rule 7.25)
     if (isHelpPicture(use) && /\.svg$/i.test(use)) {
-      try { return send(res, 200, helpPictureSvg(use, HELP, url.searchParams.get('lang')), 'image/svg+xml; charset=utf-8'); } catch { }
+      try { return send(res, 200, helpPictureSvg(use, HELP, url.searchParams.get('lang'), HELP_USER), 'image/svg+xml; charset=utf-8'); } catch { }
     }
     return sendFile(req, res, use);
   }
@@ -1540,6 +1547,50 @@ async function route(req, res) {
     if (p === '/ui/media/rename' && m === 'POST') { const from = mediaFiles.resolve(b.root, b.from); mediaFiles.rename(b.root, b.from, b.to); pictures.forget(from); pictures.add(mediaFiles.resolve(b.root, b.to)); return ok(res); }
     if (p === '/ui/media/delete' && m === 'POST') { const f = mediaFiles.resolve(b.root, b.path); mediaFiles.remove(b.root, b.path); pictures.forget(f); return ok(res); }
     return fail(res, 404, 'Unknown media route');
+  }
+  // Help in any language by AI translation (Rule 11.16, lib/helplang.js, Help 242): everyone reads the User Language;
+  // Admins Export the Help for an AI, Import it back, keep the Keep English words and add fonts (needRole: anything but GET is admin)
+  if (p.startsWith('/ui/helplang')) {
+    const enBalloons = () => { try { return Object.keys(JSON.parse(fs.readFileSync(path.join(PUBLIC, 'hoverhelp-fr.json'), 'utf8'))); } catch { return []; } };
+    const picWords = () => { try { return JSON.parse(fs.readFileSync(path.join(HELP, 'fr', '_pictures.json'), 'utf8')); } catch { return {}; } };
+    if (p === '/ui/helplang/info' && m === 'GET') return ok(res, { user: userLanguage(HELP_USER) });
+    if (p === '/ui/helplang/balloons' && m === 'GET') return ok(res, userBalloons(HELP_USER));
+    if (p === '/ui/helplang' && m === 'GET') return ok(res, { user: userStatus(help, HELP_USER, enBalloons()), keep: keepEnglish(HELP, HELP_USER),
+      ownKeep: ownKeep(HELP_USER), fonts: userFonts(FONTS_USER), packageFonts: packageFonts(FONTS_PKG), partKB: PART_KB });
+    if (p === '/ui/helplang/export' && m === 'POST') {
+      const b = await jsonBody(req), lang = userLanguage(HELP_USER);
+      const pieces = englishPieces({ english: help, balloons: enBalloons(), pictureWords: picWords(), userDir: HELP_USER, onlyNew: !!b.onlyNew && !!lang, keep: keepEnglish(HELP, HELP_USER) });
+      if (!pieces.length) return ok(res, { parts: [] });
+      return ok(res, { parts: exportParts(pieces, { keep: keepEnglish(HELP, HELP_USER), name: lang?.name, english: lang?.english, partKB: b.partKB }) });
+    }
+    if (p === '/ui/helplang/import' && m === 'POST') {
+      try {
+        const b = JSON.parse(await readBody(req, 64 * 1024 * 1024) || '{}');
+        const files = (Array.isArray(b.files) ? b.files : []).map(String);
+        if (!files.length) return fail(res, 400, 'Pick the translated files to import');
+        const r = importParts(files, { english: help, balloons: enBalloons(), pictureWords: picWords(), userDir: HELP_USER, backupsDir: HELP_BACKUPS, fontDirs: [FONTS_PKG], keep: keepEnglish(HELP, HELP_USER) });
+        return ok(res, { ok: true, ...r });
+      } catch (e) { return fail(res, 400, e.message); }
+    }
+    if (p === '/ui/helplang/keep' && m === 'PUT') { saveOwnKeep(HELP_USER, await readBody(req, 64 * 1024)); return ok(res, { ok: true, keep: keepEnglish(HELP, HELP_USER) }); }
+    if (p === '/ui/helplang/font' && m === 'PUT') {
+      try { const file = addUserFont(FONTS_USER, url.searchParams.get('name'), await readBody(req, 64 * 1024 * 1024, true)); return ok(res, { ok: true, file, fonts: userFonts(FONTS_USER) }); }
+      catch (e) { return fail(res, 400, e.message); }
+    }
+    const fd = /^\/ui\/helplang\/font\/([^/]+)$/.exec(p);
+    if (fd && m === 'DELETE') {
+      try { removeUserFont(FONTS_USER, HELP_BACKUPS, fd[1]); return ok(res, { ok: true, fonts: userFonts(FONTS_USER) }); }
+      catch (e) { return fail(res, e.code === 404 ? 404 : 400, e.message); }
+    }
+    return fail(res, 404, 'Unknown Help language route');
+  }
+  // the fonts for the Help pages and balloons: the Skynet Language Fonts and the user's own (Rule 9.12 point 4, Rule 9.24)
+  if (p === '/fonts/fonts.css' && m === 'GET') { try { return send(res, 200, fontsCss(FONTS_PKG, FONTS_USER), 'text/css; charset=utf-8'); } catch { return send(res, 200, '', 'text/css; charset=utf-8'); } }
+  const ff = /^\/fonts\/(pkg\/([a-z0-9-]+)|user)\/([^/]+)$/.exec(p);
+  if (ff && m === 'GET') {
+    const file = ff[2] ? (/^[\w.-]+\.(woff2|woff|ttf|otf)$/i.test(ff[3]) ? path.join(FONTS_PKG, ff[2], ff[3]) : '') : (fontFileName(ff[3]) === ff[3] ? path.join(FONTS_USER, ff[3]) : '');
+    if (!file) return fail(res, 404, 'No such font');
+    return sendFile(req, res, file);
   }
   // Help tab: everyone reads, admins edit
   // ?lang=fr: the French Help (Rule 11.11); a page not translated yet comes in English

@@ -226,6 +226,8 @@ Every special word in Skynet, from A to Z. Pick a letter to jump to it, or type 
 
 **Universal Properties**: the Properties every Device and Widget has: Name, Label, Position, Size, Layer Order, Visible, Lock and the hidden key. See [Universal Properties](114-universal-properties).
 
+**User Language**: a third Help language, besides English and Français, that an Admin brings in with any AI: Skynet saves the Help as text files, the AI translates them, Skynet takes them back. Brewing words such as Strike and Mash stay English, with their meaning next to them. See [Help in any language](242-help-in-any-language).
+
 ## V
 
 **Value Widget**: a Widget that shows one number on a Tab; a tap sets it and every Process can read it. There are Time and DateTime Widgets too. See [Value, Time and DateTime Widgets](134-value-time-and-datetime-widgets).
