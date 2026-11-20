@@ -3703,6 +3703,12 @@ Both programs: the BruControl Import's Build page shows it too.
 - **Any Help picture taken from a PNG or a PDF is redrawn** (OakBarn Brewery, 2026-11-15: "Good rule on drawing any pix from a Png
   or pdf"), never cut out and shipped as it is. A picture cut from a markup PDF is only as sharp as it was pasted into the PDF
   (most are 96 dots per inch). The PNG may stay next to the SVG (Rule #1, Never Take Away); the SVG is what shows.
+- **One exception, waiting for OakBarn Brewery's review** (2026-11-19, Panel Updates entry 15, taken as Claude's recommendation while he
+  was away): the two **Tab size pictures** (`help_pictures/Tab_1600x900_on_1920x1040_Screen.png` and `Tab_1920x1040_on_1920x1040_Screen.png`,
+  in the Width and Height of a New Tab Hover Help) are real screenshots of the panel, as he asked ("add some graphics of a tab ...
+  highlighting the scroll bars"), so the words on the Tab are part of the picture. They show how a whole screen looks, not words to read;
+  the explanation is real text in the balloon (English and French), and the pictures add no words of their own (only red marks).
+  A whole-screen picture uses ⟪imgw:path⟫ in Hover Help, drawn as wide as the balloon (⟪img:⟫ stays at most 240 px).
 Skynet does this in the Background and needs no user input (Rule 11.13). Both programs: the BruControl Import makes no traced copies, so it already shows
 the pictures themselves (and the hand-made SVGs). Help 7.
 

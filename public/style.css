@@ -1164,6 +1164,7 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 .hhIcon { color: #e02424; font-weight: 700; }
 .hhPic { display: block; max-width: min(100%, 240px); height: auto; margin: 2px 0; border-radius: 4px; }
 .hoverHelp.hhWide { max-width: min(560px, calc(100vw - 16px)); font-size: 12.5px; }
+.hhPic.hhPicWide { max-width: 100%; }      /* ⟪imgw:⟫ a whole-screen picture, as wide as the balloon (Panel Updates entry 15) */
 .hhHead { display: block; font-size: 1.05em; }
 /* Rule 2.49 (OakBarn Brewery, 2026-11-11): hot spots in Hover Help open the bigger Help page; the balloon can then be reached */
 .hoverHelp.hhHasLinks { pointer-events: auto; }
