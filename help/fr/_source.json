@@ -74,7 +74,7 @@
  "73-double-click-in-pickers": "c2556ec2cd4bd29d",
  "74-picture-widget": "f0d21593f051018d",
  "75-build-tab-add-button": "92478527e0a0781b",
- "76-interfaces": "99e03a958257ce58",
+ "76-interfaces": "7203297d21a18a9b",
  "77-simulator-or-real-boards": "db6004fe0aaf6363",
  "78-raspberry-pi-gpio-pins": "4f5487803743cd91",
  "79-predictive-text": "8e7640adc70723bc",
@@ -235,5 +235,6 @@
  "238-boil-temperature": "65584f93a311b31c",
  "239-fire-hose-and-manifold-sample": "08f3491e659714c6",
  "240-step-by-step-add-a-process": "e2dfa6de709defe4",
- "242-help-in-any-language": "9c253b91948d7158"
+ "242-help-in-any-language": "9c253b91948d7158",
+ "241-live-readings-in-your-units": "1b02efacdefe6b0c"
 }
