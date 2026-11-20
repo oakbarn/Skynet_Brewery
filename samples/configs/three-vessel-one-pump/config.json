@@ -5387,6 +5387,22 @@
    "color": "#e6e6e6",
    "name": "Hose_1",
    "label": "Fire Hose"
+  },
+  {
+   "id": "wa_override",
+   "kind": "override",
+   "workspace": "Water",
+   "x": 1650,
+   "y": 230,
+   "w": 245,
+   "h": 60,
+   "label": "Water Override",
+   "fontSize": 20,
+   "bold": true,
+   "color": "#ffffff",
+   "backColor": "#c0392b",
+   "align": "Center",
+   "process": "utility_FireHose_Manifold_Supply_Water"
   }
  ],
  "autostart": [],

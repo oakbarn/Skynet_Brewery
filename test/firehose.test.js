@@ -71,12 +71,17 @@ assert.equal(store.getProp('gblV_Water_Switch_Status_Water', 'value'), -9999);
 assert.equal(store.getProp('wgt_TMR_Water~elapsed_WA', 'visibility'), 'hidden');
 assert.ok(secs('gblT_Elapsed_Water') >= 19 && secs('gblT_Elapsed_Water') <= 22, 'true run time ' + store.getProp('gblT_Elapsed_Water', 'value'));
 
-// Manifold 3 Minutes: the Override pop-up comes up by itself during the run and shuts the valve off early (Rule 2.26)
+// Manifold 3 Minutes: the Water Tab's own Override button (Rule 16.11: every Tap Water Fill gets one) shuts the valve off early;
+// with a button set to it, no Override pop-up comes by itself (Rule 2.26)
+const ovrBtn = store.config.graphics.find(g => g.kind === 'override' && g.workspace === 'Water');
+assert.equal(ovrBtn?.process, U, 'the Water Override button is set to the Fire Hose and Manifold Process');
+assert.equal(ovrBtn.label, 'Water Override');
 eng.start('Manifold_3_Minutes', 'user');
 assert.ok(await until(() => !!asked())); done();
 assert.ok(await until(() => on(MSV)), 'the Manifold Supply Valve opens');
-assert.ok(await until(() => pops().some(p => p.how === 'auto'), 6000), 'the Override pop-up comes by itself');
-eng.override('Fritz', U);
+await new Promise(r => setTimeout(r, 4000));
+assert.ok(!pops().some(p => p.how === 'auto'), 'no pop-up by itself: the button is there');
+eng.override('Fritz', ovrBtn.process);
 assert.ok(await until(() => !on(MSV) && quiet()), 'Override shuts it off');
 assert.ok(secs('gblT_Elapsed_Water') > 0 && secs('gblT_Elapsed_Water') < 180, 'true run time to the Override ' + store.getProp('gblT_Elapsed_Water', 'value'));
 assert.ok(!store.getProp('wgt_TMR_Water~elapsed_WA', 'running'));

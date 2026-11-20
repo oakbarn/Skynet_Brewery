@@ -7,7 +7,7 @@
 //   - a Process Widget on the Water Tab sets the code and starts this Process (no looper switch);
 //   - "Manifold Set?" is an ask with Done (was the Advance switch and gblVEndlessLoop 799 / 800);
 //   - Set Time is a pop-up that asks for the time into gblT_SetTimer_Water (was a Set Timer slot on his Water workspace);
-//   - the run is one wait; the Override pop-up comes up by itself after 3 seconds (Rule 2.26) and shuts the water off early;
+//   - the run is one wait; the Water Override button (Rule 16.11) shuts the water off early;
 //   - a hidden count-up timer, wgt_TMR_Water~elapsed_WA, keeps the true run time in gblT_Elapsed_Water (for seconds per gallon);
 //   - his screen boxes (gblS_Brewery_Top_2 / _3, Bottom_1 / _3 / _4, the insp_ pictures) are one message box, gblS_Water_Text_1_Water.
 // The code in gblV_Water_Switch_Status_Water:
@@ -235,7 +235,7 @@ if vVPump == 100
 	// Manifold Supply Valve
 	BM_33_DO@Valve_E_Manifold~Supply_WA = true
 endif
-// One wait: the timer reaching 00:00:00 ends it, or Override (its pop-up comes up by itself after 3 seconds) shuts it off early
+// One wait: the timer reaching 00:00:00 ends it, or the Water Override button (Rule 16.11) shuts it off early
 wait wgt_TMR_Water_WA <= 00:00:00
 goto "Exit_Timer_End"
 //................................................................

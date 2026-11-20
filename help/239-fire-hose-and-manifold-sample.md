@@ -31,8 +31,8 @@ and Manifold Process. The button is done at once, so it shows **Stopped** again 
 2. **A 20 second warning.** The **Water delay** timer counts down and the warning sounds, with messages at 10 and 5 seconds.
 3. **The valve opens.** The **Water timer** counts down to 00:00:00, then the valve closes. With a Float button it counts up instead,
    until the float is made.
-4. **Shut it off early** with **Override**. Its pop-up comes up by itself after 3 seconds
-   ([Override button](96-override-button)), or press **FireHose Off**.
+4. **Shut it off early** with the **Water Override** button: one press ends the run and the valve closes
+   ([Override button](96-override-button)). Every tap water fill gets its own Override button. **FireHose Off** stops it too.
 5. **The true run time is kept.** A hidden count-up timer, **Water elapsed**, runs from the valve opening until the time is up, the
    float is made, or Override or FireHose Off ends it. That time goes in the hidden gGlobal `gblT_Elapsed_Water` (True Run Time),
    for seconds per gallon.

@@ -35,8 +35,9 @@ Fire Hose et Manifold. Le bouton a fini tout de suite : il affiche de nouveau **
    secondes.
 3. **La vanne s'ouvre.** Le **Water timer** compte jusqu'à 00:00:00, puis la vanne se ferme. Avec un bouton Float il compte vers le
    haut, jusqu'à ce que le flotteur soit fait.
-4. **Arrêtez-la plus tôt** avec **Override**. Sa fenêtre s'ouvre toute seule après 3 secondes
-   ([Override button](96-override-button)), ou appuyez sur **FireHose Off**.
+4. **Arrêtez-la plus tôt** avec le bouton **Water Override** : un appui finit la marche et la vanne se ferme
+   ([Override button](96-override-button)). Chaque remplissage d'eau du robinet a son propre bouton Override. **FireHose Off**
+   l'arrête aussi.
 5. **Le vrai temps de marche est gardé.** Un minuteur caché qui compte vers le haut, **Water elapsed**, tourne de l'ouverture de la
    vanne jusqu'à la fin du temps, au flotteur fait, ou à Override ou FireHose Off. Ce temps va dans le gGlobal caché
    `gblT_Elapsed_Water` (True Run Time), pour les secondes par gallon.
